@@ -1,0 +1,620 @@
+// prisma/schema.prisma
+// Fgrapher — Social media booking & marketplace for photography/videography
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================================
+// AUTH & USERS
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  firstName     String?
+  lastName      String?
+  username      String?   @unique
+  avatar        String?
+  // Mirrors of firstName+lastName / avatar, required by @auth/prisma-adapter's
+  // default field names for OAuth account creation
+  name          String?
+  image         String?
+  coverImage    String?
+  bio           String?
+  phone         String?
+  location      String?
+  latitude      Float?
+  longitude     Float?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  roles         UserRole[]
+  accounts      Account[]    // OAuth accounts
+  sessions      Session[]
+  profiles      Profile[]
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  sentMessages     Message[]      @relation("sender")
+  receivedMessages Message[]      @relation("receiver")
+  bookingsAsCustomer  Booking[]   @relation("customer")
+  bookingsAsProvider  Booking[]   @relation("provider")
+  reviews        Review[]        @relation("reviewer")
+  receivedReviews Review[]       @relation("reviewed")
+  products       Product[]
+  orders         Order[]
+  following      Follow[]        @relation("follower")
+  followers      Follow[]        @relation("following")
+  notifications  Notification[]
+  savedProfiles  SavedProfile[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================================
+// ROLES & SUBSCRIPTIONS
+// ============================================================================
+
+enum Role {
+  PHOTOGRAPHER
+  VIDEOGRAPHER
+  MAKEUP_ARTIST
+  STUDIO
+  CAMERA_SHOP
+  CUSTOMER
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  role      Role
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription?
+
+  @@unique([userId, role])
+  @@map("user_roles")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+  TRIALING
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userRoleId           String             @unique
+  stripeCustomerId     String?
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  plan                 String?            // e.g., "basic", "pro"
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  userRole UserRole @relation(fields: [userRoleId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+// ============================================================================
+// PROFILES (role-specific data)
+// ============================================================================
+
+enum ProfileCategory {
+  // Photography/Videography styles
+  WEDDING
+  PORTRAIT
+  FASHION
+  COMMERCIAL
+  EVENT
+  PRODUCT
+  FOOD
+  LANDSCAPE
+  STREET
+  DOCUMENTARY
+  MUSIC_VIDEO
+  CORPORATE
+  REAL_ESTATE
+  // Makeup styles
+  BRIDAL
+  EDITORIAL
+  SFX
+  NATURAL
+  GLAM
+  // Studio types
+  INDOOR
+  OUTDOOR
+  ROOFTOP
+  CYCLORAMA
+  GREEN_SCREEN
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String
+  role        Role     // which role this profile belongs to
+  displayName String?
+  description String?  @db.Text
+  website     String?
+  instagram   String?
+  facebook    String?
+  tiktok      String?
+  // Pricing
+  priceMin    Float?
+  priceMax    Float?
+  currency    String   @default("VND")
+  // Studio-specific
+  address     String?
+  area        Float?   // square meters
+  amenities   String[] // e.g., ["wifi", "ac", "parking", "changing_room"]
+  // Camera Shop specific
+  shopName    String?
+  // Meta
+  isPublished Boolean  @default(false)
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories ProfileCategory[]
+  services   Service[]
+  media      ProfileMedia[]
+
+  @@unique([userId, role])
+  @@index([role, isPublished])
+  @@index([userId])
+  @@map("profiles")
+}
+
+model ProfileMedia {
+  id        String   @id @default(cuid())
+  profileId String
+  url       String
+  publicId  String?  // Cloudinary public ID
+  type      MediaType
+  title     String?
+  order     Int      @default(0)
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, order])
+  @@map("profile_media")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+// ============================================================================
+// SERVICES & BOOKING
+// ============================================================================
+
+model Service {
+  id          String  @id @default(cuid())
+  profileId   String
+  name        String
+  description String? @db.Text
+  duration    Int     // minutes
+  price       Float
+  currency    String  @default("VND")
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile  Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([profileId])
+  @@map("services")
+}
+
+model Availability {
+  id          String @id @default(cuid())
+  userId      String
+  dayOfWeek   Int    // 0=Sunday, 6=Saturday
+  startTime   String // "09:00"
+  endTime     String // "17:00"
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, dayOfWeek])
+  @@map("availabilities")
+}
+
+model BlockedDate {
+  id     String   @id @default(cuid())
+  userId String
+  date   DateTime @db.Date
+  reason String?
+
+  @@unique([userId, date])
+  @@map("blocked_dates")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  customerId  String
+  providerId  String
+  serviceId   String?
+  date        DateTime      @db.Date
+  startTime   String        // "10:00"
+  endTime     String?       // "12:00"
+  status      BookingStatus @default(PENDING)
+  notes       String?       @db.Text
+  totalPrice  Float?
+  currency    String        @default("VND")
+  cancelledBy String?       // userId of who cancelled
+  cancelReason String?
+  completedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  customer User            @relation("customer", fields: [customerId], references: [id])
+  provider User           @relation("provider", fields: [providerId], references: [id])
+  service  Service?       @relation(fields: [serviceId], references: [id])
+  review   Review?
+
+  @@index([customerId])
+  @@index([providerId, status])
+  @@index([date])
+  @@map("bookings")
+}
+
+// ============================================================================
+// SOCIAL FEED
+// ============================================================================
+
+model Post {
+  id        String   @id @default(cuid())
+  userId    String
+  caption   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media    PostMedia[]
+  likes    Like[]
+  comments Comment[]
+
+  @@index([userId, createdAt])
+  @@map("posts")
+}
+
+model PostMedia {
+  id       String    @id @default(cuid())
+  postId   String
+  url      String
+  publicId String?   // Cloudinary
+  type     MediaType
+  order    Int       @default(0)
+  width    Int?
+  height   Int?
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, order])
+  @@map("post_media")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("likes")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@map("comments")
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+// ============================================================================
+// MARKETPLACE (Camera Shop)
+// ============================================================================
+
+enum ProductType {
+  SALE
+  RENT
+  BOTH
+}
+
+enum ProductCondition {
+  NEW
+  LIKE_NEW
+  GOOD
+  FAIR
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  userId      String           // shop owner
+  name        String
+  description String?          @db.Text
+  category    String           // camera, lens, lighting, accessory, etc.
+  type        ProductType      @default(SALE)
+  price       Float?           // sale price
+  rentalPrice Float?           // per day
+  currency    String           @default("VND")
+  condition   ProductCondition @default(NEW)
+  stock       Int              @default(1)
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images ProductImage[]
+  orderItems OrderItem[]
+
+  @@index([userId, isActive])
+  @@index([category])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String @id @default(cuid())
+  productId String
+  url       String
+  publicId  String?
+  order     Int    @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, order])
+  @@map("product_images")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  customerId      String
+  status          OrderStatus @default(PENDING)
+  totalPrice      Float
+  currency        String      @default("VND")
+  shippingAddress String?     @db.Text
+  notes           String?
+  stripePaymentId String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  customer User        @relation(fields: [customerId], references: [id])
+  items    OrderItem[]
+
+  @@index([customerId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String    @id @default(cuid())
+  orderId     String
+  productId   String
+  quantity    Int       @default(1)
+  unitPrice   Float
+  type        ProductType // SALE or RENT
+  rentalStart DateTime?
+  rentalEnd   DateTime?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+// ============================================================================
+// MESSAGING
+// ============================================================================
+
+model Conversation {
+  id            String    @id @default(cuid())
+  participantIds String[] // array of user IDs
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  receiverId     String
+  content        String   @db.Text
+  type           String   @default("text") // text, image, booking_link
+  readAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("sender", fields: [senderId], references: [id])
+  receiver     User         @relation("receiver", fields: [receiverId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@index([receiverId, readAt])
+  @@map("messages")
+}
+
+// ============================================================================
+// REVIEWS
+// ============================================================================
+
+model Review {
+  id         String   @id @default(cuid())
+  bookingId  String   @unique
+  reviewerId String
+  reviewedId String   // provider being reviewed
+  rating     Int      // 1-5
+  content    String?  @db.Text
+  response   String?  @db.Text // provider response
+  respondedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  booking  Booking @relation(fields: [bookingId], references: [id])
+  reviewer User    @relation("reviewer", fields: [reviewerId], references: [id])
+  reviewed User    @relation("reviewed", fields: [reviewedId], references: [id])
+
+  @@index([reviewedId, rating])
+  @@map("reviews")
+}
+
+// ============================================================================
+// NOTIFICATIONS & MISC
+// ============================================================================
+
+enum NotificationType {
+  BOOKING_REQUEST
+  BOOKING_CONFIRMED
+  BOOKING_DECLINED
+  BOOKING_CANCELLED
+  NEW_MESSAGE
+  NEW_FOLLOWER
+  NEW_REVIEW
+  NEW_LIKE
+  NEW_COMMENT
+  SUBSCRIPTION_EXPIRING
+  PAYMENT_FAILED
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?            // additional context (bookingId, postId, etc.)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+  @@map("notifications")
+}
+
+model SavedProfile {
+  id        String   @id @default(cuid())
+  userId    String
+  profileId String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, profileId])
+  @@map("saved_profiles")
+}
