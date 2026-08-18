@@ -170,10 +170,11 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 3 — Dashboard (see `docs/guides/phase-3-dashboard.md`). Sidebar shell, overview
-stats, bookings (accept/decline/cancel), portfolio (Cloudinary uploads + drag reorder),
-listings (Camera Shop product CRUD), and settings (profile/account/roles/billing/
-notifications) are done. Phases 0-2 (foundation, landing page, auth) are complete.
+Phase 4 — Public profiles (see `docs/guides/phase-4-profiles.md`). Public profile page
+(cover/avatar, Portfolio/Services/Reviews/Gear tabs, media lightbox), booking sidebar
+with real weekly-availability logic, profile editor additions (services CRUD,
+availability settings), and follow/save/share are done. Phases 0-3 (foundation,
+landing page, auth, dashboard) are complete.
 
 Known gaps carried forward on purpose: Cloudinary and Resend have no live credentials
 in this environment, so uploads/emails no-op or show a graceful inline error rather
@@ -181,6 +182,15 @@ than crashing — wire up real credentials in `.env.local` to exercise those pat
 Bookings/portfolio/listings API routes gate on an active role (`requireAnyRole`), not
 `requirePaidRole`/`requireActiveSubscription` — Phase 7 (Stripe) is what will make
 subscriptions real; switch the gating then.
+
+Known bug, NOT resolved (see the Phase 4 commit message for the full investigation):
+the Follow/Save/Share buttons on `/profile/[username]` don't respond to clicks in this
+dev environment specifically when logged in, despite rendering correctly. Extensively
+isolated to "authenticated session + any async delay before a Client Component
+renders" — reproduces with plain Prisma queries or even a bare `setTimeout`, unrelated
+to this feature's own code. Every other auth-gated interactive feature in the app
+(bookings, portfolio, listings, settings, services, availability) works fine. Needs a
+fresh look with real browser devtools, not headless/CDP testing.
 
 ## Rules
 
