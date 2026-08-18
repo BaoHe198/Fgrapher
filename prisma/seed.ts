@@ -28,6 +28,7 @@ interface ProfileSeed {
 
 interface UserSeed {
   email: string;
+  location: string;
   username: string;
   firstName: string;
   lastName: string;
@@ -103,6 +104,7 @@ const STUDIO_SERVICES: ServiceSeed[] = [
 const USERS: UserSeed[] = [
   {
     email: "photographer@test.com",
+    location: "Ho Chi Minh City",
     username: "alexrivera",
     firstName: "Alex",
     lastName: "Rivera",
@@ -122,6 +124,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "videographer@test.com",
+    location: "Ha Noi",
     username: "jordanlee",
     firstName: "Jordan",
     lastName: "Lee",
@@ -141,6 +144,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "makeup@test.com",
+    location: "Da Nang",
     username: "mayachen",
     firstName: "Maya",
     lastName: "Chen",
@@ -160,6 +164,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "studio@test.com",
+    location: "Ho Chi Minh City",
     username: "taylorbrooks",
     firstName: "Taylor",
     lastName: "Brooks",
@@ -182,6 +187,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "shop@test.com",
+    location: "Ha Noi",
     username: "diazcamera",
     firstName: "Morgan",
     lastName: "Diaz",
@@ -199,6 +205,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "customer@test.com",
+    location: "Ho Chi Minh City",
     username: "caseynguyen",
     firstName: "Casey",
     lastName: "Nguyen",
@@ -206,6 +213,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "multi@test.com",
+    location: "Da Lat",
     username: "jamiekim",
     firstName: "Jamie",
     lastName: "Kim",
@@ -272,6 +280,7 @@ async function main() {
       data: {
         email: seedUser.email,
         username: seedUser.username,
+        location: seedUser.location,
         firstName: seedUser.firstName,
         lastName: seedUser.lastName,
         name: `${seedUser.firstName} ${seedUser.lastName}`,
