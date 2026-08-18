@@ -4,11 +4,26 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Fgrapher brand tokens (docs/design-reference/design-tokens.md) are added
+   throughout this file, alongside the shadcn tokens already here. Additive
+   only: existing components are untouched until explicitly rebuilt against
+   these (phase-1 Step 4).
+
+   Naming rule for the semantic tokens, to avoid colliding with shadcn
+   primary/secondary/card/etc: they keep their full compound name from the
+   design, so the generated utility is the CSS utility prefix plus the token
+   name verbatim, e.g. --bg-surface becomes bg-bg-surface, --text-primary
+   becomes text-text-primary, --border-subtle becomes border-border-subtle.
+   --green-*, --gold-*, --neutral-* are the exception: they are registered
+   under their own name (bg-green-500 etc), which intentionally overrides
+   Tailwind built-in green/neutral palettes. */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -46,6 +61,65 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Fgrapher brand tokens below (see comment above @theme for the naming rule) */
+  --color-green-50: var(--green-50);
+  --color-green-100: var(--green-100);
+  --color-green-200: var(--green-200);
+  --color-green-300: var(--green-300);
+  --color-green-400: var(--green-400);
+  --color-green-500: var(--green-500);
+  --color-green-600: var(--green-600);
+  --color-green-700: var(--green-700);
+  --color-green-800: var(--green-800);
+  --color-green-900: var(--green-900);
+  --color-green-950: var(--green-950);
+  --color-gold-50: var(--gold-50);
+  --color-gold-100: var(--gold-100);
+  --color-gold-200: var(--gold-200);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+  --color-gold-700: var(--gold-700);
+  --color-gold-800: var(--gold-800);
+  --color-gold-900: var(--gold-900);
+  --color-neutral-0: var(--neutral-0);
+  --color-neutral-50: var(--neutral-50);
+  --color-neutral-100: var(--neutral-100);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-800: var(--neutral-800);
+  --color-neutral-900: var(--neutral-900);
+  --color-neutral-950: var(--neutral-950);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-accent: var(--brand-accent);
+  --color-bg-page: var(--bg-page);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-sunken: var(--bg-sunken);
+  --color-bg-inverse: var(--bg-inverse);
+  --color-surface-card: var(--surface-card);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-on-brand: var(--text-on-brand);
+  --color-text-link: var(--text-link);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-focus: var(--border-focus);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
 }
 
 :root {
@@ -81,6 +155,101 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Fgrapher brand — color scales (green/gold are theme-invariant) */
+  --green-50: hsl(168 40% 96%);
+  --green-100: hsl(168 40% 90%);
+  --green-200: hsl(168 38% 80%);
+  --green-300: hsl(168 36% 66%);
+  --green-400: hsl(168 38% 50%);
+  --green-500: hsl(168 45% 36%);
+  --green-600: hsl(168 50% 26%);
+  --green-700: hsl(168 55% 20%);
+  --green-800: hsl(168 58% 15%);
+  --green-900: hsl(168 60% 11%);
+  --green-950: hsl(168 62% 7%);
+  --gold-50: hsl(38 55% 96%);
+  --gold-100: hsl(38 55% 90%);
+  --gold-200: hsl(38 50% 80%);
+  --gold-300: hsl(38 48% 70%);
+  --gold-400: hsl(38 46% 60%);
+  --gold-500: hsl(38 44% 52%);
+  --gold-600: hsl(38 46% 44%);
+  --gold-700: hsl(38 48% 36%);
+  --gold-800: hsl(38 50% 28%);
+  --gold-900: hsl(38 52% 20%);
+  --neutral-0: #ffffff;
+
+  /* Fgrapher brand — light theme (default) */
+  --neutral-50: hsl(30 20% 98%);
+  --neutral-100: hsl(30 15% 95%);
+  --neutral-200: hsl(30 12% 90%);
+  --neutral-300: hsl(30 10% 82%);
+  --neutral-400: hsl(30 8% 68%);
+  --neutral-500: hsl(30 7% 52%);
+  --neutral-600: hsl(30 8% 38%);
+  --neutral-700: hsl(30 10% 28%);
+  --neutral-800: hsl(30 12% 18%);
+  --neutral-900: hsl(30 15% 11%);
+  --neutral-950: hsl(30 18% 7%);
+  --brand-primary: hsl(168 58% 15%);
+  --brand-accent: hsl(38 46% 60%);
+  --bg-page: hsl(30 20% 98%);
+  --bg-surface: #ffffff;
+  --bg-sunken: hsl(30 15% 95%);
+  --bg-inverse: hsl(168 60% 11%);
+  --surface-card: #ffffff;
+  --text-primary: hsl(30 15% 11%);
+  --text-secondary: hsl(30 8% 38%);
+  --text-tertiary: hsl(30 7% 52%);
+  --text-on-brand: #ffffff;
+  --text-link: hsl(168 55% 20%);
+  --border-subtle: hsl(30 12% 90%);
+  --border-default: hsl(30 10% 82%);
+  --border-strong: hsl(30 8% 68%);
+  --border-focus: hsl(38 44% 52%);
+  --success: hsl(168 50% 26%);
+  --success-bg: hsl(168 40% 96%);
+  --warning: hsl(35 90% 48%);
+  --warning-bg: hsl(35 90% 96%);
+  --danger: hsl(6 70% 46%);
+  --danger-bg: hsl(6 70% 96%);
+  --info: hsl(205 65% 45%);
+  --info-bg: hsl(205 65% 96%);
+
+  /* Fgrapher brand — typography (theme-invariant) */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --text-display-2xl: 600 4rem/1.05 var(--font-display);
+  --text-display-xl: 600 3rem/1.08 var(--font-display);
+  --text-display-lg: 600 2.25rem/1.12 var(--font-display);
+  --text-display-md: 600 1.75rem/1.2 var(--font-display);
+  --text-heading-lg: 600 1.5rem/1.3 var(--font-display);
+  --text-heading-md: 600 1.25rem/1.35 var(--font-body);
+  --text-heading-sm: 600 1.0625rem/1.4 var(--font-body);
+  --text-body-lg: 400 1.0625rem/1.55 var(--font-body);
+  --text-body-md: 400 0.9375rem/1.55 var(--font-body);
+  --text-body-sm: 400 0.8125rem/1.5 var(--font-body);
+  --text-caption: 500 0.75rem/1.4 var(--font-body);
+  --text-caption-upper: 600 0.6875rem/1.3 var(--font-body);
+
+  /* Fgrapher brand — radius (theme-invariant). --radius-sm/md/lg/xl are
+     shadcn EXISTING radius scale (used by every current component) —
+     prefixed --fg-radius-* here instead of overwriting them. --radius-none
+     and --radius-pill do not collide with shadcn, so they keep their name. */
+  --radius-none: 0px;
+  --fg-radius-sm: 8px;
+  --fg-radius-md: 12px;
+  --fg-radius-lg: 16px;
+  --fg-radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* Fgrapher brand — shadows (warm-tinted in light, neutral black in dark) */
+  --shadow-sm: 0 1px 2px rgba(18, 16, 10, 0.06);
+  --shadow-md: 0 4px 14px rgba(18, 16, 10, 0.08);
+  --shadow-lg: 0 14px 36px rgba(18, 16, 10, 0.14);
+  --shadow-focus: 0 0 0 3px hsl(38 44% 52% / 0.35);
 }
 
 .dark {
@@ -115,6 +284,93 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Fgrapher brand — dark theme overrides. green/gold scales, typography,
+     and radius are theme-invariant (declared once in :root); neutral scale
+     inverts (50=darkest in light mode, 50=lightest in dark), and every
+     semantic/status/shadow token below has a distinct dark-mode value. */
+  --neutral-50: hsl(30 8% 10%);
+  --neutral-100: hsl(30 8% 14%);
+  --neutral-200: hsl(30 7% 19%);
+  --neutral-300: hsl(30 6% 26%);
+  --neutral-400: hsl(30 6% 38%);
+  --neutral-500: hsl(30 6% 52%);
+  --neutral-600: hsl(30 8% 68%);
+  --neutral-700: hsl(30 10% 80%);
+  --neutral-800: hsl(30 12% 88%);
+  --neutral-900: hsl(30 15% 95%);
+  --neutral-950: hsl(30 18% 98%);
+  --brand-primary: hsl(168 38% 50%);
+  --brand-accent: hsl(38 46% 60%);
+  --bg-page: hsl(30 10% 7%);
+  --bg-surface: hsl(30 9% 11%);
+  --bg-sunken: hsl(30 9% 9%);
+  --bg-inverse: hsl(168 62% 7%);
+  --surface-card: hsl(30 9% 12%);
+  --text-primary: hsl(30 15% 95%);
+  --text-secondary: hsl(30 8% 70%);
+  --text-tertiary: hsl(30 7% 55%);
+  --text-on-brand: hsl(168 62% 7%);
+  --text-link: hsl(38 48% 70%);
+  --border-subtle: hsl(30 6% 20%);
+  --border-default: hsl(30 6% 27%);
+  --border-strong: hsl(30 6% 36%);
+  --border-focus: hsl(38 46% 60%);
+  --success: hsl(168 36% 66%);
+  --success-bg: hsl(168 40% 14%);
+  --warning: hsl(35 85% 62%);
+  --warning-bg: hsl(35 60% 14%);
+  --danger: hsl(6 75% 64%);
+  --danger-bg: hsl(6 50% 15%);
+  --info: hsl(205 70% 65%);
+  --info-bg: hsl(205 50% 15%);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.55);
+}
+
+/*
+ * Fgrapher brand — typography utilities.
+ * Each --text-* token packs weight/size/line-height/family into one `font`
+ * shorthand value, which Tailwind own --text-* theme namespace cannot hold
+ * (it only takes a size, optionally paired with a --text-*--line-height).
+ * @utility exposes them as plain Tailwind classes instead.
+ */
+@utility text-display-2xl {
+  font: var(--text-display-2xl);
+}
+@utility text-display-xl {
+  font: var(--text-display-xl);
+}
+@utility text-display-lg {
+  font: var(--text-display-lg);
+}
+@utility text-display-md {
+  font: var(--text-display-md);
+}
+@utility text-heading-lg {
+  font: var(--text-heading-lg);
+}
+@utility text-heading-md {
+  font: var(--text-heading-md);
+}
+@utility text-heading-sm {
+  font: var(--text-heading-sm);
+}
+@utility text-body-lg {
+  font: var(--text-body-lg);
+}
+@utility text-body-md {
+  font: var(--text-body-md);
+}
+@utility text-body-sm {
+  font: var(--text-body-sm);
+}
+@utility text-caption {
+  font: var(--text-caption);
+}
+@utility text-caption-upper {
+  font: var(--text-caption-upper);
 }
 
 @layer base {

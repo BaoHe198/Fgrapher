@@ -2,3 +2,10 @@ node_modules
 .next
 pnpm-lock.yaml
 prisma/migrations
+
+# generated design export — self-extracting bundle, must stay byte-exact
+docs/design-reference/*.html
+
+# user-authored planning docs — not ours to reformat as a side effect of
+# formatting our own code changes
+docs/guides/*.md

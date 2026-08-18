@@ -9,7 +9,8 @@ Social-media-style booking & marketplace platform for the photography/videograph
 - **Database:** PostgreSQL hosted on Supabase, managed via Prisma ORM (`DATABASE_URL` = pooled connection, `DIRECT_URL` = direct connection for migrations)
 - **Auth:** NextAuth.js v5 (credentials + OAuth), backed by the Supabase Postgres database via the Prisma adapter
 - **Supabase client:** `@supabase/supabase-js` + `@supabase/ssr` are installed for any Supabase-specific features (storage, realtime) used outside of Prisma's ORM layer
-- **Styling:** Tailwind CSS + shadcn/ui
+- **Styling:** Tailwind CSS + shadcn/ui, `next-themes` for dark mode
+- **i18n:** `next-intl`, EN/VI, cookie-based (no `[locale]` URL segment — see `src/i18n/`)
 - **Storage:** Cloudinary (images/videos)
 - **Payments:** Stripe (subscriptions + Connect)
 - **Real-time:** Socket.io (messaging)
@@ -37,9 +38,11 @@ src/
     page.tsx
   components/
     ui/               # shadcn/ui primitives (Button, Card, Dialog...)
-    layout/           # Header, Footer, Sidebar, MobileNav
+    layout/           # Header, Footer, Sidebar, MobileNav, WebNav
+    brand/            # LogoMark, LogoFull
+    sections/         # page-section components (HeroSearch, ...)
     forms/            # reusable form components
-    cards/            # ProfileCard, PostCard, ProductCard, BookingCard
+    cards/            # ProfileCard, ArtistCard, PostCard, ProductCard, BookingCard
     modals/           # booking modal, upload modal, confirm modal
   lib/
     db.ts             # Prisma client singleton
@@ -49,13 +52,19 @@ src/
     utils.ts          # general utilities
     constants.ts      # app-wide constants, enums
     validations/      # Zod schemas per domain
+  i18n/               # next-intl routing/request config + locale server action
+  messages/           # en.json / vi.json translation catalogs
   hooks/              # custom React hooks
   types/              # shared TypeScript types/interfaces
   services/           # server-side business logic (booking, payment, search)
+  proxy.ts            # locale-detection middleware (Next.js 16 "proxy" convention)
 prisma/
   schema.prisma
   migrations/
   seed.ts
+docs/
+  design-reference/   # Claude Design export + extracted design-tokens.md
+  guides/             # phase-by-phase build guides (source of the current plan)
 ```
 
 ### User roles (critical domain concept)
@@ -117,7 +126,7 @@ One user can hold MULTIPLE roles simultaneously. Roles determine UI visibility, 
 
 - Tailwind utility classes, no custom CSS files
 - Use `cn()` helper (from `lib/utils.ts`) for conditional classes
-- Design tokens: follow the shadcn/ui theming system (CSS variables in `globals.css`)
+- Design tokens: brand palette/type scale/component patterns documented in `docs/design-reference/design-tokens.md` (extracted from the Claude design export at `docs/design-reference/Fgrapher Web UI Kit.html`), wired into `src/app/globals.css` as of phase-1 Step 1. Brand color/typography utilities use compound names to avoid colliding with shadcn's own tokens — e.g. `bg-bg-surface`, `text-text-primary`, `text-heading-md`; see the "Implementation" section at the bottom of `design-tokens.md` for the exact mapping. shadcn's own component primitives (`src/components/ui/*`) are being incrementally rebuilt against these brand tokens (Button/Badge/Card done; still shadcn-default elsewhere)
 - Responsive: mobile-first (`base` → `sm` → `md` → `lg`)
 - Dark mode: support via `class` strategy (Tailwind + next-themes)
 - Spacing scale: stick to Tailwind defaults (4, 8, 12, 16, 20, 24...)
@@ -161,7 +170,9 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 0 — Project foundation. Setting up the skeleton, database schema, auth config, and folder structure.
+Phase 1 — Landing page & navigation (see `docs/guides/phase-1-landing-nav.md`). Design
+tokens, brand components, WebNav, shared UI components, landing page, and i18n (EN/VI)
+are done. Phase 0 (project foundation, auth, dashboard skeleton) is complete.
 
 ## Rules
 
