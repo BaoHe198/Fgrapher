@@ -16,6 +16,25 @@ export async function getPublicProfileUser(username: string) {
   });
 }
 
+export async function getProviderForBooking(providerId: string) {
+  return db.user.findUnique({
+    where: { id: providerId, deletedAt: null },
+    select: {
+      id: true,
+      firstName: true,
+      name: true,
+      avatar: true,
+      profiles: {
+        where: { isPublished: true, role: { in: PAID_ROLES } },
+        select: {
+          role: true,
+          services: { where: { isActive: true }, orderBy: { price: "asc" } },
+        },
+      },
+    },
+  });
+}
+
 export async function getProfileReviews(userId: string) {
   return db.review.findMany({
     where: { reviewedId: userId },

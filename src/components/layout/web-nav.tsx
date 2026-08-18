@@ -9,6 +9,7 @@ import { useState, useSyncExternalStore, useTransition } from "react";
 import { useTheme } from "next-themes";
 
 import { LogoFull } from "@/components/brand/logo-full";
+import { NotificationBell } from "@/components/layout/notification-bell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -113,6 +114,7 @@ export function WebNav() {
 
           {isAuthenticated ? (
             <>
+              <NotificationBell />
               <Button
                 variant="secondary"
                 size="sm"
@@ -285,6 +287,13 @@ function MobileNavSheet({
                 {session.user.name}
               </span>
             </div>
+            <Link
+              href="/dashboard/notifications"
+              onClick={() => setOpen(false)}
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
+            >
+              Notifications
+            </Link>
             <Link
               href="/dashboard/profile"
               onClick={() => setOpen(false)}

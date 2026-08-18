@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { db } from "@/lib/db";
 import { getProviderAvailability } from "@/services/availability";
 
 export async function GET(
@@ -8,6 +9,7 @@ export async function GET(
 ) {
   const { providerId } = await params;
   const { searchParams } = new URL(request.url);
+  const serviceId = searchParams.get("serviceId");
 
   // `from`/`to` are plain "YYYY-MM-DD" calendar-date keys (the caller's
   // local "today", not a UTC instant) — anchor to UTC midnight for that
@@ -28,7 +30,14 @@ export async function GET(
       )
     : 7;
 
-  const dates = await getProviderAvailability(providerId, from, days);
+  const service = serviceId
+    ? await db.service.findUnique({ where: { id: serviceId }, select: { duration: true } })
+    : null;
 
-  return NextResponse.json({ data: { dates }, error: null, message: null }, { status: 200 });
+  const dates = await getProviderAvailability(providerId, from, days, service?.duration);
+
+  return NextResponse.json(
+    { data: { dates }, error: null, message: null },
+    { status: 200, headers: { "Cache-Control": "public, max-age=0, s-maxage=60" } },
+  );
 }

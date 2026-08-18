@@ -3,6 +3,7 @@
 import {
   Bookmark,
   Calendar,
+  CalendarDays,
   Image as ImageIcon,
   LayoutDashboard,
   Menu,
@@ -36,7 +37,7 @@ interface NavItem {
 
 export function DashboardSidebar({ className }: { className?: string }) {
   const pathname = usePathname();
-  const { roles, canUpload, canSell, isCustomerOnly } = useUserRoles();
+  const { roles, canUpload, canSell, canReceiveBookings, isCustomerOnly } = useUserRoles();
 
   const items: NavItem[] = [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -45,6 +46,9 @@ export function DashboardSidebar({ className }: { className?: string }) {
       label: isCustomerOnly ? "My bookings" : "Bookings",
       icon: Calendar,
     },
+    ...(canReceiveBookings
+      ? [{ href: "/dashboard/calendar", label: "Calendar", icon: CalendarDays }]
+      : []),
     ...(canUpload
       ? [{ href: "/dashboard/portfolio", label: "Portfolio", icon: ImageIcon }]
       : []),

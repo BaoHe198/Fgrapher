@@ -201,6 +201,14 @@ export default function BookingsPage() {
                       >
                         Decline
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        nativeButton={false}
+                        render={<Link href={`/dashboard/bookings/${booking.id}`} />}
+                      >
+                        Details
+                      </Button>
                     </>
                   ) : null}
 
@@ -210,9 +218,9 @@ export default function BookingsPage() {
                         size="sm"
                         variant="secondary"
                         nativeButton={false}
-                        render={<Link href="/dashboard/messages" />}
+                        render={<Link href={`/dashboard/bookings/${booking.id}`} />}
                       >
-                        Message
+                        Details
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger

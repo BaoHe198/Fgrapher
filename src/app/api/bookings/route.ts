@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { createBookingSchema } from "@/lib/validations/booking";
 import { isProviderRoleSet } from "@/services/dashboard";
-import { listBookings, type BookingTab } from "@/services/bookings";
+import { BookingActionError, createBooking, listBookings, type BookingTab } from "@/services/bookings";
 
 const VALID_TABS: BookingTab[] = ["ALL", "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"];
 
@@ -45,6 +46,49 @@ export async function GET(request: Request) {
 
     return NextResponse.json(
       { data: null, error: "server_error", message: "Failed to load bookings" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const session = await requireAuth();
+    const body = await request.json();
+    const parsed = createBookingSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "validation_error",
+          message: parsed.error.issues[0]?.message ?? "Invalid input",
+        },
+        { status: 400 },
+      );
+    }
+
+    const booking = await createBooking(session.user.id, parsed.data);
+
+    return NextResponse.json(
+      { data: booking, error: null, message: "Booking request sent" },
+      { status: 201 },
+    );
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json(
+        { data: null, error: "unauthorized", message: err.message },
+        { status: err.status },
+      );
+    }
+    if (err instanceof BookingActionError) {
+      return NextResponse.json(
+        { data: null, error: "booking_error", message: err.message },
+        { status: err.status },
+      );
+    }
+
+    return NextResponse.json(
+      { data: null, error: "server_error", message: "Failed to create booking" },
       { status: 500 },
     );
   }

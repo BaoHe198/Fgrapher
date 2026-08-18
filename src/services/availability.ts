@@ -6,6 +6,12 @@ import { db } from "@/lib/db";
 // (getDay/getDate/toISOString-after-local-math), which drift by a day for
 // any server or visitor running ahead of UTC (this app's Vietnamese
 // audience is UTC+7), silently mislabeling which weekday a slot belongs to.
+//
+// Slot instants (for the past-slot and minimum-notice checks) are computed
+// by treating the stored "HH:MM" time string as a UTC wall-clock time, the
+// same simplification already used everywhere else in the app (booking
+// times are displayed as-is, with no timezone conversion) — there's no
+// per-provider timezone field, so "now" is compared in the same frame.
 
 function timeToMinutes(time: string) {
   const [h, m] = time.split(":").map(Number);
@@ -25,6 +31,7 @@ function toDateKey(date: Date) {
 }
 
 const SLOT_MINUTES = 60;
+const MIN_NOTICE_HOURS = 24;
 
 export interface DayAvailability {
   date: string;
@@ -36,6 +43,7 @@ export async function getProviderAvailability(
   providerId: string,
   from: Date,
   days: number,
+  serviceDurationMinutes = SLOT_MINUTES,
 ): Promise<DayAvailability[]> {
   const to = new Date(from);
   to.setUTCDate(to.getUTCDate() + days);
@@ -51,17 +59,26 @@ export async function getProviderAvailability(
         status: { in: ["PENDING", "CONFIRMED"] },
         date: { gte: from, lt: to },
       },
-      select: { date: true, startTime: true },
+      select: { date: true, startTime: true, service: { select: { duration: true } } },
     }),
   ]);
 
   const blockedDateStrings = new Set(blockedDates.map((b) => toDateKey(b.date)));
-  const bookedByDate = new Map<string, Set<string>>();
+
+  // Existing bookings occupy [startMinutes, startMinutes + duration), not
+  // just their exact start slot — a 2-hour booking at 10:00 must also block
+  // the 11:00 slot, or a second client could book an overlapping session.
+  const occupiedByDate = new Map<string, { start: number; end: number }[]>();
   for (const booking of bookings) {
     const key = toDateKey(booking.date);
-    if (!bookedByDate.has(key)) bookedByDate.set(key, new Set());
-    bookedByDate.get(key)!.add(booking.startTime);
+    const start = timeToMinutes(booking.startTime);
+    const duration = booking.service?.duration ?? SLOT_MINUTES;
+    if (!occupiedByDate.has(key)) occupiedByDate.set(key, []);
+    occupiedByDate.get(key)!.push({ start, end: start + duration });
   }
+
+  const now = Date.now();
+  const minNoticeInstant = now + MIN_NOTICE_HOURS * 60 * 60 * 1000;
 
   const result: DayAvailability[] = [];
 
@@ -79,15 +96,18 @@ export async function getProviderAvailability(
       continue;
     }
 
-    const bookedTimes = bookedByDate.get(dateString) ?? new Set();
+    const occupied = occupiedByDate.get(dateString) ?? [];
     const slots: { time: string; available: boolean }[] = [];
 
     for (const window of windows) {
       const start = timeToMinutes(window.startTime);
       const end = timeToMinutes(window.endTime);
-      for (let m = start; m + SLOT_MINUTES <= end; m += SLOT_MINUTES) {
-        const time = minutesToTime(m);
-        slots.push({ time, available: !bookedTimes.has(time) });
+      for (let m = start; m + serviceDurationMinutes <= end; m += SLOT_MINUTES) {
+        const slotEnd = m + serviceDurationMinutes;
+        const overlapsBooking = occupied.some((o) => m < o.end && slotEnd > o.start);
+        const slotInstant = Date.parse(`${dateString}T${minutesToTime(m)}:00.000Z`);
+        const tooSoon = slotInstant < minNoticeInstant;
+        slots.push({ time: minutesToTime(m), available: !overlapsBooking && !tooSoon });
       }
     }
 

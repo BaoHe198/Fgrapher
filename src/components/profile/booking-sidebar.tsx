@@ -58,7 +58,8 @@ export function BookingSidebar({
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/availability/${providerId}?from=${toLocalDateKey(weekStart)}`)
+    const serviceParam = selectedServiceId ? `&serviceId=${selectedServiceId}` : "";
+    fetch(`/api/availability/${providerId}?from=${toLocalDateKey(weekStart)}${serviceParam}`)
       .then((res) => res.json())
       .then((body) => {
         if (!cancelled) {
@@ -71,7 +72,7 @@ export function BookingSidebar({
     return () => {
       cancelled = true;
     };
-  }, [providerId, weekStart]);
+  }, [providerId, weekStart, selectedServiceId]);
 
   const changeWeek = (deltaDays: number) => {
     setIsLoading(true);

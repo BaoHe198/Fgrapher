@@ -327,8 +327,24 @@ model Booking {
   totalPrice  Float?
   currency    String        @default("VND")
   cancelledBy String?       // userId of who cancelled
-  cancelReason String?
+  cancelReason String?      // also used for decline/no-show reason
   completedAt DateTime?
+  reminderSentAt DateTime?  // set once the 24h-out reminder cron has emailed both parties
+
+  locationType     String?  // "PROVIDER" | "CUSTOMER" | "OUTDOOR"
+  locationAddress  String?
+  numberOfPeople   Int?
+  contactPhone     String?
+  referenceImages  String[] @default([])
+
+  // Reschedule proposal — either party can propose a new slot; the other
+  // must accept/decline before it takes effect. Null when no proposal
+  // is pending.
+  rescheduleProposedDate      DateTime? @db.Date
+  rescheduleProposedStartTime String?
+  rescheduleProposedEndTime   String?
+  rescheduleProposedBy        String?
+
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -590,6 +606,9 @@ enum NotificationType {
   BOOKING_CONFIRMED
   BOOKING_DECLINED
   BOOKING_CANCELLED
+  BOOKING_REMINDER
+  BOOKING_RESCHEDULE_PROPOSED
+  BOOKING_COMPLETED
   NEW_MESSAGE
   NEW_FOLLOWER
   NEW_REVIEW
