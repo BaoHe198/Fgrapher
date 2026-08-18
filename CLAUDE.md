@@ -170,9 +170,10 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 1 — Landing page & navigation (see `docs/guides/phase-1-landing-nav.md`). Design
-tokens, brand components, WebNav, shared UI components, landing page, and i18n (EN/VI)
-are done. Phase 0 (project foundation, auth, dashboard skeleton) is complete.
+Phase 2 — Authentication screens (see `docs/guides/phase-2-auth.md`). Login, register
+(with Customer/Creative-pro + paid-role picker), forgot/reset password, route
+protection, and auth-aware WebNav are done. Phases 0 (project foundation) and 1
+(landing page & navigation) are complete.
 
 ## Rules
 
