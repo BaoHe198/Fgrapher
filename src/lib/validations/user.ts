@@ -6,3 +6,9 @@ export const updateRolesSchema = z.object({
 });
 
 export type UpdateRolesInput = z.infer<typeof updateRolesSchema>;
+
+export const updateMeSchema = z.object({
+  acceptingBookings: z.boolean().optional(),
+});
+
+export type UpdateMeInput = z.infer<typeof updateMeSchema>;

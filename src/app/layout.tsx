@@ -13,12 +13,12 @@ import "./globals.css";
 
 const fontBody = Plus_Jakarta_Sans({
   variable: "--font-body",
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
 });
 
 const fontDisplay = Bricolage_Grotesque({
   variable: "--font-display",
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
 });
 
 const fontMono = IBM_Plex_Mono({

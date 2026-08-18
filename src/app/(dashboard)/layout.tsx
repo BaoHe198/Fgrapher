@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { Sidebar } from "@/components/layout/sidebar";
+import { DashboardSidebar, MobileDashboardSidebar } from "@/components/layout/dashboard-sidebar";
+import { WebNav } from "@/components/layout/web-nav";
 import { auth } from "@/lib/auth";
 
 export default async function DashboardLayout({
@@ -14,25 +14,22 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const user = {
-    name: session.user.name ?? session.user.email ?? "",
-    email: session.user.email ?? "",
-    avatar: session.user.avatar,
-  };
-
   return (
-    <div className="flex h-screen overflow-hidden">
-      <aside className="hidden w-64 shrink-0 border-r lg:flex">
-        <Sidebar roles={session.user.roles} user={user} className="w-full" />
-      </aside>
+    <div className="flex min-h-dvh flex-col">
+      <WebNav />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <DashboardHeader roles={session.user.roles} user={user} />
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-            {children}
-          </div>
-        </main>
+      <div className="mx-auto w-full max-w-[1240px] px-4 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-[72px]">
+        <div className="mb-4 lg:hidden">
+          <MobileDashboardSidebar />
+        </div>
+
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[232px_1fr]">
+          <aside className="sticky top-[104px] hidden lg:block">
+            <DashboardSidebar />
+          </aside>
+
+          <div className="min-w-0">{children}</div>
+        </div>
       </div>
     </div>
   );
