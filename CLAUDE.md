@@ -170,10 +170,17 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 2 — Authentication screens (see `docs/guides/phase-2-auth.md`). Login, register
-(with Customer/Creative-pro + paid-role picker), forgot/reset password, route
-protection, and auth-aware WebNav are done. Phases 0 (project foundation) and 1
-(landing page & navigation) are complete.
+Phase 3 — Dashboard (see `docs/guides/phase-3-dashboard.md`). Sidebar shell, overview
+stats, bookings (accept/decline/cancel), portfolio (Cloudinary uploads + drag reorder),
+listings (Camera Shop product CRUD), and settings (profile/account/roles/billing/
+notifications) are done. Phases 0-2 (foundation, landing page, auth) are complete.
+
+Known gaps carried forward on purpose: Cloudinary and Resend have no live credentials
+in this environment, so uploads/emails no-op or show a graceful inline error rather
+than crashing — wire up real credentials in `.env.local` to exercise those paths.
+Bookings/portfolio/listings API routes gate on an active role (`requireAnyRole`), not
+`requirePaidRole`/`requireActiveSubscription` — Phase 7 (Stripe) is what will make
+subscriptions real; switch the gating then.
 
 ## Rules
 
