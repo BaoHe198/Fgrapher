@@ -19,6 +19,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ rol
 
     const profile = await db.profile.findUnique({
       where: { userId_role: { userId: session.user.id, role: role as Role } },
+      include: { services: { orderBy: { createdAt: "asc" } } },
     });
 
     return NextResponse.json({ data: profile, error: null, message: null }, { status: 200 });

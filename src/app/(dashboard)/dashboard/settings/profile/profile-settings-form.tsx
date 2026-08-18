@@ -10,6 +10,18 @@ import { Input } from "@/components/ui/input";
 import { Tag } from "@/components/ui/tag";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
+import { ServicesManager } from "./services-manager";
+
+interface ServiceItem {
+  id: string;
+  name: string;
+  description: string | null;
+  duration: number;
+  price: number;
+  currency: string;
+  isActive: boolean;
+}
+
 interface ProfileFormValues {
   displayName: string;
   description: string;
@@ -72,6 +84,8 @@ function toFormValues(profile: Record<string, unknown> | null): ProfileFormValue
 
 export function ProfileSettingsForm({ role }: { role: Role }) {
   const [values, setValues] = useState<ProfileFormValues>(toFormValues(null));
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [services, setServices] = useState<ServiceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -83,6 +97,8 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       .then((body) => {
         if (!cancelled) {
           setValues(toFormValues(body.data));
+          setProfileId(body.data?.id ?? null);
+          setServices(body.data?.services ?? []);
           setIsLoading(false);
         }
       });
@@ -150,7 +166,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 pb-24">
+    <div className="flex flex-col gap-4">
       <Input
         label="Display name"
         value={values.displayName}
@@ -239,6 +255,10 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         />
       ) : null}
 
+      {role !== "CAMERA_SHOP" && profileId ? (
+        <ServicesManager profileId={profileId} initialServices={services} />
+      ) : null}
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Input
           label="Website"
@@ -262,7 +282,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         />
       </div>
 
-      <div className="sticky bottom-0 -mx-4 flex items-center gap-3 border-t border-border-subtle bg-bg-surface px-4 py-3 sm:mx-0 sm:rounded-[var(--fg-radius-md)] sm:border sm:px-4">
+      <div className="flex items-center gap-3 border-t border-border-subtle pt-4">
         <Button variant="accent" disabled={isSaving} onClick={onSave}>
           {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
           Save changes

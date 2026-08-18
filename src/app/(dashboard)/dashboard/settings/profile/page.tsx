@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { PAID_ROLES } from "@/lib/constants";
+import { PAID_ROLES, PROVIDER_ROLES } from "@/lib/constants";
 
 import { AccountBasicsForm } from "./account-basics-form";
 import { AccountMedia } from "./account-media";
+import { AvailabilitySettings } from "./availability-settings";
 import { RoleProfileSwitcher } from "./role-profile-switcher";
 
 export default async function ProfileSettingsPage() {
@@ -28,6 +29,13 @@ export default async function ProfileSettingsPage() {
         <>
           <div className="h-px bg-border-subtle" />
           <RoleProfileSwitcher roles={providerRoles} />
+        </>
+      ) : null}
+
+      {session.user.roles.some((role) => (PROVIDER_ROLES as string[]).includes(role)) ? (
+        <>
+          <div className="h-px bg-border-subtle" />
+          <AvailabilitySettings />
         </>
       ) : null}
     </div>

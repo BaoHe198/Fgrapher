@@ -1,0 +1,94 @@
+"use client";
+
+import type { MediaType } from "@prisma/client";
+import { useState } from "react";
+
+import { BookingSidebar } from "@/components/profile/booking-sidebar";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+
+import { GearTab } from "./gear-tab";
+import { PortfolioTab } from "./portfolio-tab";
+import { ReviewsTab } from "./reviews-tab";
+import { ServicesTab } from "./services-tab";
+
+interface ProfileInteractiveProps {
+  providerId: string;
+  firstName: string;
+  hasGear: boolean;
+  media: { id: string; url: string; type: MediaType; title: string | null }[];
+  services: { id: string; name: string; description: string | null; duration: number; price: number; currency: string }[];
+  reviews: {
+    id: string;
+    rating: number;
+    content: string | null;
+    response: string | null;
+    createdAt: string;
+    reviewer: { name: string | null; firstName: string | null; avatar: string | null };
+  }[];
+  products: {
+    id: string;
+    name: string;
+    type: "SALE" | "RENT" | "BOTH";
+    price: number | null;
+    rentalPrice: number | null;
+    currency: string;
+    images: { url: string }[];
+  }[];
+}
+
+export function ProfileInteractive({
+  providerId,
+  firstName,
+  hasGear,
+  media,
+  services,
+  reviews,
+  products,
+}: ProfileInteractiveProps) {
+  const [tab, setTab] = useState("portfolio");
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+
+  const onBook = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    document.getElementById("booking-sidebar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_360px]">
+      <div className="min-w-0">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as string)}>
+          <TabsList>
+            <TabsTab value="portfolio">Portfolio</TabsTab>
+            <TabsTab value="services">Services</TabsTab>
+            <TabsTab value="reviews">Reviews</TabsTab>
+            {hasGear ? <TabsTab value="gear">Gear</TabsTab> : null}
+          </TabsList>
+          <TabsPanel value="portfolio" className="mt-6">
+            <PortfolioTab media={media} />
+          </TabsPanel>
+          <TabsPanel value="services" className="mt-6">
+            <ServicesTab services={services} onBook={onBook} />
+          </TabsPanel>
+          <TabsPanel value="reviews" className="mt-6">
+            <ReviewsTab reviews={reviews} />
+          </TabsPanel>
+          {hasGear ? (
+            <TabsPanel value="gear" className="mt-6">
+              <GearTab products={products} />
+            </TabsPanel>
+          ) : null}
+        </Tabs>
+      </div>
+
+      <div id="booking-sidebar">
+        <BookingSidebar
+          providerId={providerId}
+          firstName={firstName}
+          services={services}
+          selectedServiceId={selectedServiceId}
+          onServiceChange={setSelectedServiceId}
+        />
+      </div>
+    </div>
+  );
+}

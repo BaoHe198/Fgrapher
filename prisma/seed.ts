@@ -28,6 +28,7 @@ interface ProfileSeed {
 
 interface UserSeed {
   email: string;
+  username: string;
   firstName: string;
   lastName: string;
   roles: Role[];
@@ -102,6 +103,7 @@ const STUDIO_SERVICES: ServiceSeed[] = [
 const USERS: UserSeed[] = [
   {
     email: "photographer@test.com",
+    username: "alexrivera",
     firstName: "Alex",
     lastName: "Rivera",
     roles: ["PHOTOGRAPHER", "CUSTOMER"],
@@ -120,6 +122,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "videographer@test.com",
+    username: "jordanlee",
     firstName: "Jordan",
     lastName: "Lee",
     roles: ["VIDEOGRAPHER", "CUSTOMER"],
@@ -138,6 +141,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "makeup@test.com",
+    username: "mayachen",
     firstName: "Maya",
     lastName: "Chen",
     roles: ["MAKEUP_ARTIST", "CUSTOMER"],
@@ -156,6 +160,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "studio@test.com",
+    username: "taylorbrooks",
     firstName: "Taylor",
     lastName: "Brooks",
     roles: ["STUDIO", "CUSTOMER"],
@@ -177,6 +182,7 @@ const USERS: UserSeed[] = [
   },
   {
     email: "shop@test.com",
+    username: "diazcamera",
     firstName: "Morgan",
     lastName: "Diaz",
     roles: ["CAMERA_SHOP", "CUSTOMER"],
@@ -193,12 +199,14 @@ const USERS: UserSeed[] = [
   },
   {
     email: "customer@test.com",
+    username: "caseynguyen",
     firstName: "Casey",
     lastName: "Nguyen",
     roles: ["CUSTOMER"],
   },
   {
     email: "multi@test.com",
+    username: "jamiekim",
     firstName: "Jamie",
     lastName: "Kim",
     roles: ["PHOTOGRAPHER", "VIDEOGRAPHER", "CUSTOMER"],
@@ -243,9 +251,13 @@ async function main() {
     // covered by cascade delete — clean it up explicitly before removing users.
     await db.availability.deleteMany({ where: { userId: { in: existingIds } } });
 
-    // Booking.customer/provider have no onDelete: Cascade (a Restrict FK by
-    // default) — delete bookings referencing these seed users first, or the
-    // user delete below fails with a foreign key constraint violation.
+    // Same story for Review -> Booking, and Booking.customer/provider have
+    // no onDelete: Cascade (a Restrict FK by default) — delete reviews then
+    // bookings referencing these seed users first, or the user delete below
+    // fails with a foreign key constraint violation.
+    await db.review.deleteMany({
+      where: { OR: [{ reviewerId: { in: existingIds } }, { reviewedId: { in: existingIds } }] },
+    });
     await db.booking.deleteMany({
       where: { OR: [{ customerId: { in: existingIds } }, { providerId: { in: existingIds } }] },
     });
@@ -259,6 +271,7 @@ async function main() {
     const user = await db.user.create({
       data: {
         email: seedUser.email,
+        username: seedUser.username,
         firstName: seedUser.firstName,
         lastName: seedUser.lastName,
         name: `${seedUser.firstName} ${seedUser.lastName}`,
@@ -402,6 +415,24 @@ async function seedBookings() {
   });
 
   console.log("Seeded 4 bookings for customer@test.com");
+
+  const completedBooking = await db.booking.findFirstOrThrow({
+    where: { providerId: makeupUser.id, customerId: customerUser.id, status: "COMPLETED" },
+  });
+
+  await db.review.create({
+    data: {
+      bookingId: completedBooking.id,
+      reviewerId: customerUser.id,
+      reviewedId: makeupUser.id,
+      rating: 5,
+      content: "Maya made me feel so comfortable and the makeup lasted all day. Highly recommend!",
+      response: "Thank you so much, Casey! It was a pleasure working with you.",
+      respondedAt: new Date(),
+    },
+  });
+
+  console.log("Seeded 1 review for makeup@test.com");
 }
 
 main()

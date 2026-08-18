@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bookmark,
   Calendar,
   Image as ImageIcon,
   LayoutDashboard,
@@ -50,6 +51,7 @@ export function DashboardSidebar({ className }: { className?: string }) {
     ...(canSell
       ? [{ href: "/dashboard/listings", label: "Listings", icon: ShoppingBag }]
       : []),
+    { href: "/saved", label: "Saved", icon: Bookmark },
     { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
