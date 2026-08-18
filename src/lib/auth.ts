@@ -36,7 +36,7 @@ const {
         const user = await db.user.findUnique({
           where: { email: parsed.data.email },
         });
-        if (!user?.passwordHash) return null;
+        if (!user?.passwordHash || user.deletedAt) return null;
 
         const isValid = await bcrypt.compare(
           parsed.data.password,

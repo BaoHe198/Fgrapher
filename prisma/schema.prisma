@@ -36,6 +36,12 @@ model User {
   longitude     Float?
   // Provider-only: whether new booking requests are currently open.
   acceptingBookings Boolean @default(true)
+  // Per-category email/in-app toggles, shaped like
+  // Record<"bookingRequest"|"bookingConfirmed"|"bookingCancelled"|"bookingReminder"
+  //   |"newMessage"|"newFollower"|"newReview"|"productUpdates"|"tips",
+  //   { email: boolean, inApp: boolean }>. No dedicated table since this is a
+  // single settings blob read/written as a whole, never queried by field.
+  notificationPreferences Json?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
