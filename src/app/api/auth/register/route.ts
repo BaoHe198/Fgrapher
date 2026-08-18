@@ -20,7 +20,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const { firstName, lastName, email, password } = parsed.data;
+  const { name, email, password, roles } = parsed.data;
+  const [firstName, ...rest] = name.trim().split(/\s+/);
+  const lastName = rest.join(" ") || null;
 
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {
@@ -42,13 +44,22 @@ export async function POST(request: Request) {
         email,
         firstName,
         lastName,
-        name: `${firstName} ${lastName}`.trim(),
+        name: name.trim(),
         passwordHash,
         // No email-delivery provider is wired up yet (phase 0); treat
         // registrations as verified until a real verification flow exists.
         emailVerified: new Date(),
         roles: {
-          create: { role: "CUSTOMER", active: true },
+          create: [
+            { role: "CUSTOMER", active: true },
+            // Paid roles start inactive until a subscription is created
+            // (Phase 7). De-duped via Set in case the client ever sends
+            // duplicates.
+            ...Array.from(new Set(roles)).map((role) => ({
+              role,
+              active: false,
+            })),
+          ],
         },
       },
     });

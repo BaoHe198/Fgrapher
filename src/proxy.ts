@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 import { LOCALE_COOKIE_NAME, routing } from "@/i18n/routing";
 
@@ -12,9 +13,34 @@ import { LOCALE_COOKIE_NAME, routing } from "@/i18n/routing";
 // rewrite 404s. This does only what's actually needed: detect a locale from
 // Accept-Language on a visitor's first request and persist it as a cookie.
 // src/i18n/request.ts reads that cookie directly; no rewriting involved.
-export default function proxy(request: NextRequest) {
+//
+// Route protection is layered on top here (rather than a separate
+// middleware.ts) using next-auth's getToken, which decodes the session JWT
+// straight from the request cookie — no DB call, safe to run in this
+// runtime, unlike auth() which goes through the Prisma adapter.
+const PROTECTED_PREFIXES = ["/dashboard", "/admin"];
+const AUTH_ONLY_PREFIXES = ["/login", "/register"];
+
+export default async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+
+  if (PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) && !token) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return withLocaleCookie(request, NextResponse.redirect(loginUrl));
+  }
+
+  if (AUTH_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix)) && token) {
+    return withLocaleCookie(request, NextResponse.redirect(new URL("/dashboard", request.url)));
+  }
+
+  return withLocaleCookie(request, NextResponse.next());
+}
+
+function withLocaleCookie(request: NextRequest, response: NextResponse) {
   if (request.cookies.has(LOCALE_COOKIE_NAME)) {
-    return NextResponse.next();
+    return response;
   }
 
   const acceptLanguage = request.headers.get("accept-language") ?? "";
@@ -22,7 +48,6 @@ export default function proxy(request: NextRequest) {
     acceptLanguage.toLowerCase().includes(locale),
   );
 
-  const response = NextResponse.next();
   response.cookies.set(LOCALE_COOKIE_NAME, detected ?? routing.defaultLocale, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,

@@ -8,6 +8,7 @@ import {
 } from "next/font/google";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
 const fontBody = Plus_Jakarta_Sans({
@@ -44,7 +45,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <Toaster>{children}</Toaster>
+            </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

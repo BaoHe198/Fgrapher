@@ -2,7 +2,7 @@
 
 import { Menu, MessageCircle, Moon, ShoppingBag, Sun } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useSyncExternalStore, useTransition } from "react";
@@ -12,6 +12,13 @@ import { LogoFull } from "@/components/brand/logo-full";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -19,9 +26,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useMounted } from "@/hooks/use-mounted";
+import { useUserRoles } from "@/hooks/use-user-roles";
 import { setLocale } from "@/i18n/actions";
 import { routing } from "@/i18n/routing";
-import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
 const WIDE_BREAKPOINT = 1180;
@@ -57,6 +65,7 @@ export function WebNav() {
   const pathname = usePathname();
   const isWide = useIsWide();
   const { data: session } = useSession();
+  const { isAuthenticated } = useUserRoles();
 
   const links = isWide
     ? NAV_LINKS
@@ -102,52 +111,88 @@ export function WebNav() {
           <ThemeToggle />
           <LangToggle />
 
-          <Button
-            variant="ghost"
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/login" />}
-          >
-            {t("signin")}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/dashboard" />}
-          >
-            {t("dashboard")}
-          </Button>
-
-          {session?.user ? (
-            <Avatar className="size-[34px]">
-              {session.user.avatar ? (
-                <AvatarImage
-                  src={session.user.avatar}
-                  alt={session.user.name ?? ""}
-                />
-              ) : null}
-              <AvatarFallback>
-                {session.user.name?.[0]?.toUpperCase() ?? "?"}
-              </AvatarFallback>
-            </Avatar>
-          ) : null}
+          {isAuthenticated ? (
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/dashboard" />}
+              >
+                {t("dashboard")}
+              </Button>
+              <UserMenu session={session} />
+            </>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/login" />}
+              >
+                {t("signin")}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/register" />}
+              >
+                {t("getStarted")}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
       {/* Mobile row (<640px) — logo + hamburger, everything else moves into a Sheet */}
       <div className="flex h-[72px] items-center justify-between px-4 sm:hidden">
         <LogoFull />
-        <MobileNavSheet session={session} />
+        <MobileNavSheet session={session} isAuthenticated={isAuthenticated} />
       </div>
     </header>
   );
 }
 
+function UserMenu({ session }: { session: ReturnType<typeof useSession>["data"] }) {
+  const t = useTranslations("nav");
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-gold-500/20">
+        <Avatar className="size-[34px]">
+          {session?.user?.avatar ? (
+            <AvatarImage src={session.user.avatar} alt={session.user.name ?? ""} />
+          ) : null}
+          <AvatarFallback>{session?.user?.name?.[0]?.toUpperCase() ?? "?"}</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem render={<Link href="/dashboard/profile" />}>
+          {t("profile")}
+        </DropdownMenuItem>
+        <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
+          {t("settings")}
+        </DropdownMenuItem>
+        <DropdownMenuItem render={<Link href="/dashboard/billing" />}>
+          {t("billing")}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/" })}>
+          {t("signout")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function MobileNavSheet({
   session,
+  isAuthenticated,
 }: {
   session: ReturnType<typeof useSession>["data"];
+  isAuthenticated: boolean;
 }) {
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
@@ -194,38 +239,80 @@ function MobileNavSheet({
         </div>
 
         <div className="flex flex-col gap-2 px-4 pb-4">
-          <Button
-            variant="secondary"
-            nativeButton={false}
-            render={<Link href="/login" />}
-          >
-            {t("signin")}
-          </Button>
-          <Button
-            variant="primary"
-            nativeButton={false}
-            render={<Link href="/dashboard" />}
-          >
-            {t("dashboard")}
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              variant="primary"
+              nativeButton={false}
+              render={<Link href="/dashboard" />}
+            >
+              {t("dashboard")}
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                nativeButton={false}
+                render={<Link href="/login" />}
+              >
+                {t("signin")}
+              </Button>
+              <Button
+                variant="primary"
+                nativeButton={false}
+                render={<Link href="/register" />}
+              >
+                {t("getStarted")}
+              </Button>
+            </>
+          )}
         </div>
 
-        {session?.user ? (
-          <div className="flex items-center gap-2.5 border-t border-border-subtle px-4 py-4">
-            <Avatar className="size-[34px]">
-              {session.user.avatar ? (
-                <AvatarImage
-                  src={session.user.avatar}
-                  alt={session.user.name ?? ""}
-                />
-              ) : null}
-              <AvatarFallback>
-                {session.user.name?.[0]?.toUpperCase() ?? "?"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-body-sm text-text-secondary">
-              {session.user.name}
-            </span>
+        {isAuthenticated && session?.user ? (
+          <div className="flex flex-col gap-1 border-t border-border-subtle px-4 py-4">
+            <div className="flex items-center gap-2.5 pb-3">
+              <Avatar className="size-[34px]">
+                {session.user.avatar ? (
+                  <AvatarImage
+                    src={session.user.avatar}
+                    alt={session.user.name ?? ""}
+                  />
+                ) : null}
+                <AvatarFallback>
+                  {session.user.name?.[0]?.toUpperCase() ?? "?"}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-body-sm text-text-secondary">
+                {session.user.name}
+              </span>
+            </div>
+            <Link
+              href="/dashboard/profile"
+              onClick={() => setOpen(false)}
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
+            >
+              {t("profile")}
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              onClick={() => setOpen(false)}
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
+            >
+              {t("settings")}
+            </Link>
+            <Link
+              href="/dashboard/billing"
+              onClick={() => setOpen(false)}
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
+            >
+              {t("billing")}
+            </Link>
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-left text-body-md font-semibold text-danger"
+            >
+              {t("signout")}
+            </button>
           </div>
         ) : null}
       </SheetContent>

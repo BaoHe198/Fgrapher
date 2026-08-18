@@ -6,7 +6,12 @@
     "providers": "Dành cho nhà cung cấp",
     "dashboard": "Bảng điều khiển",
     "signin": "Đăng nhập",
-    "pricing": "Bảng giá"
+    "pricing": "Bảng giá",
+    "getStarted": "Bắt đầu",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt",
+    "billing": "Thanh toán",
+    "signout": "Đăng xuất"
   },
   "role": {
     "Photographer": "Nhiếp ảnh gia",

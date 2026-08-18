@@ -1,0 +1,84 @@
+"use client";
+
+import { Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+
+function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" {...props}>
+      <path
+        fill="#4285F4"
+        d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.87c2.27-2.09 3.58-5.17 3.58-8.82Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A11.998 11.998 0 0 0 12 24Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28V6.61H1.27A11.998 11.998 0 0 0 0 12c0 1.94.46 3.77 1.27 5.39l4-3.11Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.76c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0A11.998 11.998 0 0 0 1.27 6.61l4 3.11C6.22 6.87 8.87 4.76 12 4.76Z"
+      />
+    </svg>
+  );
+}
+
+function AppleIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M16.365 1.43c0 1.14-.462 2.03-1.386 2.85-.924.82-1.897 1.32-2.937 1.24-.13-1.05.32-2.09 1.28-2.95.98-.9 2.05-1.32 3.043-1.14v.01Zm3.933 17.02c-.61 1.42-1.34 2.83-2.44 4.14-1.1 1.29-1.98 1.98-3.28 2-1.24.02-1.65-.79-3.06-.79-1.42 0-1.87.77-3.04.81-1.25.05-2.2-1.35-3.31-2.63C3.02 19.6 1.5 15.85 3 12.99c1.02-2.02 2.86-3.29 4.86-3.32 1.19-.02 2.32.81 3.06.81.74 0 2.1-1 3.55-.85.6.02 2.31.24 3.4 1.83-.09.06-2.03 1.19-2.01 3.55.02 2.83 2.48 3.77 2.51 3.79-.02.06-.4 1.36-1.33 2.66h-.05Z" />
+    </svg>
+  );
+}
+
+interface SocialRowProps {
+  callbackUrl?: string;
+}
+
+function SocialRow({ callbackUrl = "/dashboard" }: SocialRowProps) {
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const onGoogleSignIn = () => {
+    setIsGoogleLoading(true);
+    signIn("google", { callbackUrl });
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border-subtle" />
+        <span className="text-body-sm text-text-tertiary">or</span>
+        <div className="h-px flex-1 bg-border-subtle" />
+      </div>
+
+      <div className="flex gap-2.5">
+        <Button
+          type="button"
+          variant="secondary"
+          className="flex-1"
+          disabled={isGoogleLoading}
+          onClick={onGoogleSignIn}
+        >
+          {isGoogleLoading ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <GoogleIcon className="size-4" />
+          )}
+          Google
+        </Button>
+        <Button type="button" variant="secondary" className="flex-1" disabled title="Coming soon">
+          <AppleIcon className="size-4" />
+          Apple
+        </Button>
+      </div>
+    </>
+  );
+}
+
+export { SocialRow };

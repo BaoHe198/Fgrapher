@@ -1,0 +1,272 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Camera, Loader2, User } from "lucide-react";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import { SocialRow } from "@/components/auth/social-row";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Tag } from "@/components/ui/tag";
+import { PAID_ROLES, ROLE_LABELS, ROLE_MONTHLY_PRICE } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { registerSchema, type ProviderRole, type RegisterInput } from "@/lib/validations/auth";
+
+const PROVIDER_ROLE_OPTIONS = PAID_ROLES as ProviderRole[];
+
+function passwordStrength(password: string) {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+  return score;
+}
+
+function strengthColor(score: number) {
+  if (score <= 1) return "bg-danger";
+  if (score <= 2) return "bg-warning";
+  return "bg-success";
+}
+
+export function RegisterForm() {
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [accountType, setAccountType] = useState<"customer" | "provider">("customer");
+  const [selectedRoles, setSelectedRoles] = useState<Set<ProviderRole>>(new Set());
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: "", email: "", password: "", accountType: "customer", roles: [] },
+  });
+
+  const password = watch("password");
+  const strength = useMemo(() => passwordStrength(password ?? ""), [password]);
+
+  const selectAccountType = (next: "customer" | "provider") => {
+    setAccountType(next);
+    setValue("accountType", next);
+    if (next === "customer") {
+      setSelectedRoles(new Set());
+      setValue("roles", []);
+    }
+  };
+
+  const toggleRole = (role: ProviderRole) => {
+    setSelectedRoles((prev) => {
+      const next = new Set(prev);
+      if (next.has(role)) {
+        next.delete(role);
+      } else {
+        next.add(role);
+      }
+      setValue("roles", Array.from(next));
+      return next;
+    });
+  };
+
+  const onSubmit = async (values: RegisterInput) => {
+    setServerError(null);
+
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    const body = await res.json();
+
+    if (!res.ok) {
+      if (body.error === "email_taken") {
+        setError("email", { message: body.message });
+        return;
+      }
+      setServerError(body.message ?? "Something went wrong. Please try again.");
+      return;
+    }
+
+    const signInResult = await signIn("credentials", {
+      email: values.email,
+      password: values.password,
+      redirect: false,
+    });
+
+    if (signInResult?.error) {
+      router.push("/login");
+      return;
+    }
+
+    router.push("/dashboard");
+  };
+
+  return (
+    <>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-display-md text-text-primary">Create your account</h1>
+        <p className="text-body-md text-text-secondary">
+          Join Fgrapher and start booking or getting booked.
+        </p>
+      </div>
+
+      {serverError ? (
+        <div className="rounded-[var(--fg-radius-md)] bg-danger-bg p-3 text-body-sm text-danger">
+          {serverError}
+        </div>
+      ) : null}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-2">
+          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">I AM A</span>
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              onClick={() => selectAccountType("customer")}
+              className={cn(
+                "flex cursor-pointer flex-col gap-1.5 rounded-[var(--fg-radius-md)] p-3.5 text-left transition-colors duration-150",
+                accountType === "customer"
+                  ? "border border-brand-primary bg-success-bg"
+                  : "border border-border-default bg-bg-surface",
+              )}
+            >
+              <User
+                className={cn(
+                  "size-5",
+                  accountType === "customer" ? "text-brand-primary" : "text-text-tertiary",
+                )}
+              />
+              <span className="text-body-md font-semibold text-text-primary">Customer</span>
+              <span className="text-body-sm text-text-secondary">
+                Book artists and buy gear
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => selectAccountType("provider")}
+              className={cn(
+                "flex cursor-pointer flex-col gap-1.5 rounded-[var(--fg-radius-md)] p-3.5 text-left transition-colors duration-150",
+                accountType === "provider"
+                  ? "border border-brand-primary bg-success-bg"
+                  : "border border-border-default bg-bg-surface",
+              )}
+            >
+              <Camera
+                className={cn(
+                  "size-5",
+                  accountType === "provider" ? "text-brand-primary" : "text-text-tertiary",
+                )}
+              />
+              <span className="text-body-md font-semibold text-text-primary">Creative pro</span>
+              <span className="text-body-sm text-text-secondary">Get booked and sell</span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300 ease-out",
+            accountType === "provider" ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+          )}
+        >
+          <div className="flex flex-col gap-2 overflow-hidden">
+            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+              WHAT DO YOU OFFER?
+            </span>
+            <div className="flex flex-col gap-2.5">
+              {PROVIDER_ROLE_OPTIONS.map((role) => (
+                <div key={role} className="flex items-center justify-between">
+                  <Checkbox
+                    checked={selectedRoles.has(role)}
+                    onCheckedChange={() => toggleRole(role)}
+                    label={ROLE_LABELS[role]}
+                  />
+                  <Tag tabIndex={-1} className="pointer-events-none">
+                    ${ROLE_MONTHLY_PRICE[role]}/mo
+                  </Tag>
+                </div>
+              ))}
+            </div>
+            {errors.roles ? (
+              <p className="text-body-sm text-danger">{errors.roles.message}</p>
+            ) : null}
+            <p className="text-body-sm text-text-tertiary">
+              You can change this later. Customer access is always free.
+            </p>
+          </div>
+        </div>
+
+        <Input
+          label="Full name"
+          placeholder="Ana Reyes"
+          autoComplete="name"
+          error={errors.name?.message}
+          {...register("name")}
+        />
+        <Input
+          label="Email"
+          type="email"
+          placeholder="you@studio.com"
+          autoComplete="email"
+          error={errors.email?.message}
+          {...register("email")}
+        />
+        <div className="flex flex-col gap-1.5">
+          <Input
+            label="Password"
+            type="password"
+            placeholder="At least 8 characters"
+            autoComplete="new-password"
+            error={errors.password?.message}
+            {...register("password")}
+          />
+          <div className="flex gap-1">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <span
+                key={index}
+                className={cn(
+                  "h-1 flex-1 rounded-full bg-border-subtle transition-colors duration-150",
+                  index < strength && strengthColor(strength),
+                )}
+              />
+            ))}
+          </div>
+        </div>
+
+        <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Creating account...
+            </>
+          ) : (
+            "Create account"
+          )}
+        </Button>
+      </form>
+
+      <SocialRow />
+
+      <p className="text-body-sm text-text-tertiary">
+        By signing in you agree to our Terms and Privacy Policy.
+      </p>
+
+      <p className="text-body-md text-text-secondary">
+        Already have an account?{" "}
+        <Link href="/login" className="font-semibold text-text-link hover:underline">
+          Sign in
+        </Link>
+      </p>
+    </>
+  );
+}

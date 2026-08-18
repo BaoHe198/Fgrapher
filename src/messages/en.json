@@ -6,7 +6,12 @@
     "providers": "For providers",
     "dashboard": "Dashboard",
     "signin": "Sign in",
-    "pricing": "Pricing"
+    "pricing": "Pricing",
+    "getStarted": "Get started",
+    "profile": "Profile",
+    "settings": "Settings",
+    "billing": "Billing",
+    "signout": "Sign out"
   },
   "role": {
     "Photographer": "Photographer",
