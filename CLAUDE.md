@@ -170,18 +170,26 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 5 — Browse & search (see `docs/guides/phase-5-browse.md`). `/browse` page with
-role/city/category/price/rating filters (URL-synced, mobile Sheet variant), search API
-(`searchProfiles` service — Prisma `contains` text search + JS-side rating aggregation,
-no raw tsvector/GIN migration or denormalized rating column), a now-functional hero
-search on the landing page, and 5 legal/info pages (about/terms/privacy/help/contact)
-with a working contact form. Phases 0-4 (foundation, landing page, auth, dashboard,
-public profiles) are complete.
+Phase 6 — Booking flow (see `docs/guides/phase-6-booking.md`). `/booking/[providerId]`
+4-step wizard (service → date/time → details → confirm), an availability engine that's
+now duration-aware (a booking blocks its full time span, not just its start slot) and
+enforces a 24h minimum-notice window, a full booking state machine (createBooking with
+a transaction-guarded race-condition check, status transitions including NO_SHOW,
+reschedule propose/accept/decline), in-app + email notifications gated by the existing
+per-category preferences from Phase 3, a notification bell in the nav, a rebuilt booking
+detail page with status-appropriate actions, a provider calendar view, and a daily
+CRON_SECRET-protected reminder job. Phases 0-5 (foundation, landing page, auth,
+dashboard, public profiles, browse & search) are complete.
 
-Scoped out on purpose, both explicitly optional per the phase guide: Step 5
-location/PostGIS "near me" map search, and Step 6 social feed. Also skipped:
-Sentry/analytics/sitemap wiring; seed data is still just 7 profiles (fine for
-exercising filters, too small to meaningfully test pagination).
+Scoped out on purpose: per-user/provider timezone field + date-fns-tz conversion (the
+app has never done per-viewer time conversion anywhere — introducing one only for
+booking would be inconsistent; every stored time is treated as a single shared
+reference frame, matching Phase 4's UTC-anchored approach). Reference-image upload on
+the booking form is deferred (explicitly optional in the guide). The "leave a review"
+CTA on completed bookings is left for Phase 10, which owns review-writing. Email
+templates are plain HTML template functions (matching the existing
+`resetPasswordEmailHtml` pattern) rather than a new react-email dependency. The
+provider calendar is a custom month/agenda grid, not react-big-calendar.
 
 Known gaps carried forward on purpose: Cloudinary and Resend have no live credentials
 in this environment, so uploads/emails no-op or show a graceful inline error rather
