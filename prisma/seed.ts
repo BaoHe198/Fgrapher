@@ -237,14 +237,20 @@ async function main() {
     select: { id: true },
   });
   if (existing.length > 0) {
+    const existingIds = existing.map((u) => u.id);
+
     // Availability has no FK relation to User in the schema, so it isn't
     // covered by cascade delete — clean it up explicitly before removing users.
-    await db.availability.deleteMany({
-      where: { userId: { in: existing.map((u) => u.id) } },
+    await db.availability.deleteMany({ where: { userId: { in: existingIds } } });
+
+    // Booking.customer/provider have no onDelete: Cascade (a Restrict FK by
+    // default) — delete bookings referencing these seed users first, or the
+    // user delete below fails with a foreign key constraint violation.
+    await db.booking.deleteMany({
+      where: { OR: [{ customerId: { in: existingIds } }, { providerId: { in: existingIds } }] },
     });
-    await db.user.deleteMany({
-      where: { id: { in: existing.map((u) => u.id) } },
-    });
+
+    await db.user.deleteMany({ where: { id: { in: existingIds } } });
   }
 
   const passwordHash = await bcrypt.hash(SEED_PASSWORD, 12);
@@ -313,6 +319,89 @@ async function main() {
 
     console.log(`Seeded ${seedUser.email} (${seedUser.roles.join(", ")})`);
   }
+
+  await seedBookings();
+}
+
+async function seedBookings() {
+  const [photographerUser, videographerUser, makeupUser, studioUser, customerUser] =
+    await Promise.all([
+      db.user.findUniqueOrThrow({ where: { email: "photographer@test.com" } }),
+      db.user.findUniqueOrThrow({ where: { email: "videographer@test.com" } }),
+      db.user.findUniqueOrThrow({ where: { email: "makeup@test.com" } }),
+      db.user.findUniqueOrThrow({ where: { email: "studio@test.com" } }),
+      db.user.findUniqueOrThrow({ where: { email: "customer@test.com" } }),
+    ]);
+
+  const [portraitService, highlightReelService, bridalMakeupService, studioHalfDayService] =
+    await Promise.all([
+      db.service.findFirstOrThrow({
+        where: { name: "Portrait Session", profile: { userId: photographerUser.id } },
+      }),
+      db.service.findFirstOrThrow({
+        where: { name: "Event Highlight Reel", profile: { userId: videographerUser.id } },
+      }),
+      db.service.findFirstOrThrow({
+        where: { name: "Bridal Makeup", profile: { userId: makeupUser.id } },
+      }),
+      db.service.findFirstOrThrow({
+        where: { name: "Half-Day Studio Rental", profile: { userId: studioUser.id } },
+      }),
+    ]);
+
+  const inDays = (n: number) => new Date(Date.now() + n * 86_400_000);
+  const agoDays = (n: number) => new Date(Date.now() - n * 86_400_000);
+
+  await db.booking.createMany({
+    data: [
+      {
+        customerId: customerUser.id,
+        providerId: photographerUser.id,
+        serviceId: portraitService.id,
+        date: inDays(5),
+        startTime: "14:00",
+        endTime: "15:00",
+        status: "PENDING",
+        totalPrice: portraitService.price,
+        notes: "Outdoor portrait session, golden hour preferred.",
+      },
+      {
+        customerId: customerUser.id,
+        providerId: videographerUser.id,
+        serviceId: highlightReelService.id,
+        date: inDays(10),
+        startTime: "09:00",
+        endTime: "13:00",
+        status: "CONFIRMED",
+        totalPrice: highlightReelService.price,
+      },
+      {
+        customerId: customerUser.id,
+        providerId: makeupUser.id,
+        serviceId: bridalMakeupService.id,
+        date: agoDays(5),
+        startTime: "07:00",
+        endTime: "08:30",
+        status: "COMPLETED",
+        totalPrice: bridalMakeupService.price,
+        completedAt: agoDays(5),
+      },
+      {
+        customerId: customerUser.id,
+        providerId: studioUser.id,
+        serviceId: studioHalfDayService.id,
+        date: agoDays(3),
+        startTime: "10:00",
+        endTime: "14:00",
+        status: "CANCELLED",
+        totalPrice: studioHalfDayService.price,
+        cancelledBy: customerUser.id,
+        cancelReason: "Schedule conflict",
+      },
+    ],
+  });
+
+  console.log("Seeded 4 bookings for customer@test.com");
 }
 
 main()
