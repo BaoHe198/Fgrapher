@@ -1,4 +1,5 @@
 import type { Role } from "@prisma/client";
+import type { Session } from "next-auth";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -42,6 +43,18 @@ export async function requireActiveSubscription(userId: string, role: Role) {
     throw new AuthError(`Active subscription required for role: ${role}`, 403);
   }
   return subscription;
+}
+
+// Checks the session's already-loaded active roles (no DB call) — for gates
+// like "any paid role", not tied to a specific subscription. Phase 7 (Stripe)
+// hasn't landed yet, so requirePaidRole/requireActiveSubscription would
+// reject every seeded and newly-registered account; use this instead until
+// subscriptions are real.
+export function requireAnyRole(session: Session, roles: Role[]) {
+  const hasRole = session.user.roles.some((role) => roles.includes(role));
+  if (!hasRole) {
+    throw new AuthError(`Missing one of the required roles: ${roles.join(", ")}`, 403);
+  }
 }
 
 export async function requirePaidRole(userId: string) {
