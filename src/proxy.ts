@@ -23,7 +23,16 @@ const AUTH_ONLY_PREFIXES = ["/login", "/register"];
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+    // Without this, getToken defaults to looking for the unprefixed
+    // "authjs.session-token" cookie — but the auth handler sets the
+    // "__Secure-"-prefixed variant whenever the request is HTTPS (i.e. in
+    // every deployed environment), so the lookup silently misses every
+    // real session and every visitor appears logged out at the edge.
+    secureCookie: request.nextUrl.protocol === "https:",
+  });
 
   if (PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) && !token) {
     const loginUrl = new URL("/login", request.url);

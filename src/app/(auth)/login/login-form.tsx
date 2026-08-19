@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/input";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 
 export function LoginForm() {
-  const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [serverError, setServerError] = useState<string | null>(
+    searchParams.get("error") ? "Invalid email or password" : null,
+  );
 
   const {
     register,
@@ -30,18 +32,14 @@ export function LoginForm() {
   const onSubmit = async (values: LoginInput) => {
     setServerError(null);
 
-    const result = await signIn("credentials", {
+    // redirect: true (the default) lets next-auth navigate directly rather than
+    // resolving the client-side promise itself — the latter awaits an internal
+    // session re-fetch that has been observed to hang indefinitely in production.
+    await signIn("credentials", {
       email: values.email,
       password: values.password,
-      redirect: false,
+      callbackUrl: "/dashboard",
     });
-
-    if (result?.error) {
-      setServerError("Invalid email or password");
-      return;
-    }
-
-    router.push("/dashboard");
   };
 
   return (

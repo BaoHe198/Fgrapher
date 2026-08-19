@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Loader2, User } from "lucide-react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -35,7 +34,6 @@ function strengthColor(score: number) {
 }
 
 export function RegisterForm() {
-  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [accountType, setAccountType] = useState<"customer" | "provider">("customer");
   const [selectedRoles, setSelectedRoles] = useState<Set<ProviderRole>>(new Set());
@@ -96,24 +94,19 @@ export function RegisterForm() {
       return;
     }
 
-    const signInResult = await signIn("credentials", {
+    const paidRoles = values.roles.filter((role) => (PAID_ROLES as string[]).includes(role));
+    const callbackUrl =
+      paidRoles.length > 0 ? `/onboarding/billing?roles=${paidRoles.join(",")}` : "/dashboard";
+
+    // redirect: true (the default) lets next-auth navigate directly rather than
+    // resolving the client-side promise itself — the latter awaits an internal
+    // session re-fetch that has been observed to hang indefinitely in production.
+    // On failure this redirects to /login?error=CredentialsSignin.
+    await signIn("credentials", {
       email: values.email,
       password: values.password,
-      redirect: false,
+      callbackUrl,
     });
-
-    if (signInResult?.error) {
-      router.push("/login");
-      return;
-    }
-
-    const paidRoles = values.roles.filter((role) => (PAID_ROLES as string[]).includes(role));
-    if (paidRoles.length > 0) {
-      router.push(`/onboarding/billing?roles=${paidRoles.join(",")}`);
-      return;
-    }
-
-    router.push("/dashboard");
   };
 
   return (
