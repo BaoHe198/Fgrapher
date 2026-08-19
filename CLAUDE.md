@@ -170,33 +170,36 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 6 — Booking flow (see `docs/guides/phase-6-booking.md`). `/booking/[providerId]`
-4-step wizard (service → date/time → details → confirm), an availability engine that's
-now duration-aware (a booking blocks its full time span, not just its start slot) and
-enforces a 24h minimum-notice window, a full booking state machine (createBooking with
-a transaction-guarded race-condition check, status transitions including NO_SHOW,
-reschedule propose/accept/decline), in-app + email notifications gated by the existing
-per-category preferences from Phase 3, a notification bell in the nav, a rebuilt booking
-detail page with status-appropriate actions, a provider calendar view, and a daily
-CRON_SECRET-protected reminder job. Phases 0-5 (foundation, landing page, auth,
-dashboard, public profiles, browse & search) are complete.
+Phase 7 — Subscriptions & payments (see `docs/guides/phase-7-payments.md`). Full Stripe
+integration for the 5 paid roles: `/pricing`, checkout (`/onboarding/billing` →
+Stripe Checkout with a 14-day trial), a 5-event webhook handler
+(`/api/webhooks/stripe`, idempotent via a `WebhookEvent` table), billing settings
+(cancel/resume, Customer Portal handoff, invoice history), a site-wide past-due
+banner, and real subscription-based access control (`requireActiveSubscription`
+now understands TRIALING and a 7-day PAST_DUE grace period; portfolio/products/
+services creation routes and a new `SubscriptionGate` component enforce it).
+Phases 0-6 (foundation, landing page, auth, dashboard, public profiles, browse &
+search, booking flow) are complete.
 
-Scoped out on purpose: per-user/provider timezone field + date-fns-tz conversion (the
-app has never done per-viewer time conversion anywhere — introducing one only for
-booking would be inconsistent; every stored time is treated as a single shared
-reference frame, matching Phase 4's UTC-anchored approach). Reference-image upload on
-the booking form is deferred (explicitly optional in the guide). The "leave a review"
-CTA on completed bookings is left for Phase 10, which owns review-writing. Email
-templates are plain HTML template functions (matching the existing
-`resetPasswordEmailHtml` pattern) rather than a new react-email dependency. The
-provider calendar is a custom month/agenda grid, not react-big-calendar.
+Known limitation, impossible to close in this environment: there is no live Stripe
+account or Stripe CLI here, so checkout/webhook/Customer Portal are code-complete
+and type-checked against the actually-installed Stripe SDK (v22, which restructured
+`current_period_start/end` onto SubscriptionItems — the code follows that, not the
+phase guide's older `apiVersion` assumption) but UNTESTED end-to-end. Everything
+that doesn't require live Stripe was verified working: pricing page, billing
+settings against seeded synthetic ACTIVE subscriptions, the checkout
+not-configured error path staying non-fatal, and the subscription gates actually
+blocking/allowing correctly. Needs a real `STRIPE_SECRET_KEY` + `stripe listen`
+pass before launch — see `scripts/stripe-setup.ts` for creating the Products/Prices.
+
+seed.ts now creates a synthetic ACTIVE Subscription (no real Stripe IDs) for every
+paid-role seed account — required for the new subscription-based gating to not
+lock every seeded/test account out; keep this in mind when adding new seed users
+with paid roles.
 
 Known gaps carried forward on purpose: Cloudinary and Resend have no live credentials
 in this environment, so uploads/emails no-op or show a graceful inline error rather
 than crashing — wire up real credentials in `.env.local` to exercise those paths.
-Bookings/portfolio/listings API routes gate on an active role (`requireAnyRole`), not
-`requirePaidRole`/`requireActiveSubscription` — Phase 7 (Stripe) is what will make
-subscriptions real; switch the gating then.
 
 Known bug, NOT resolved (see the Phase 4 commit message for the full investigation):
 the Follow/Save/Share buttons on `/profile/[username]` don't respond to clicks in this
