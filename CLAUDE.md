@@ -170,23 +170,36 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 10 — Reviews & ratings (see `docs/guides/phase-10-reviews.md`). Built on
-Phase 4's existing Review model (bookingId already unique 1:1, response field
-already there): a StarInput component, a leave-a-review flow (inline prompt on
-COMPLETED bookings → modal, eligibility enforced server-side — one review per
-booking, 30-day window, edit within 7 days), a standalone `/review/[bookingId]`
-page for the email-link flow, provider responses (create + edit within 24h, both
-from the profile's reviews tab and a new `/dashboard/reviews` stats page), rating
-filter chips, and a generic `Report` model + modal (reused as-is from what Phase
-8/messaging also wanted but deferred). avgRating/reviewCount stay computed live
-via aggregation queries rather than denormalized Profile columns, consistent with
-Phase 4/5's existing approach — deliberately did not add the guide's suggested
-`Profile.avgRating/reviewCount/ratingBreakdown` fields, since duplicating a value
-that's already computed live just risks drift. Phases 0-9 (foundation, landing
-page, auth, dashboard, public profiles, browse & search, booking flow, payments,
-messaging, marketplace) are complete.
+Phase 11 — Polish (see `docs/guides/phase-11-polish.md`). This phase is
+inherently open-ended ("polish everything"), so it was deliberately scoped to
+the concrete, finishable pieces — see the Phase 11 commit for the full
+scope-out list (i18n retrofit, Redis caching, dynamic OG images, a real
+Lighthouse/axe-core pass, bundle analysis all deferred). What actually landed:
+error/loading boundaries (root + dashboard — none existed anywhere before
+this), robots.ts/sitemap.ts via Next's native App Router conventions, JSON-LD
+on profile pages (product pages already had it from Phase 9), a skip-to-content
+link wired to a real landmark, and prefers-reduced-motion CSS. Phases 0-10
+(foundation, landing page, auth, dashboard, public profiles, browse & search,
+booking flow, payments, messaging, marketplace, reviews) are complete.
 
-Real bug caught and fixed while building this: the review modal isn't
+Two real bugs caught while doing this pass — worth internalizing as patterns,
+not just fixes:
+1. `next.config.ts` never had `images.remotePatterns` set, so next/image would
+   have 400'd on every Cloudinary-hosted image the moment real Cloudinary
+   credentials were configured. Latent since Phase 1 — never caught because
+   this environment has never had live Cloudinary credentials either, so no
+   image ever actually round-tripped through next/image's optimizer. Fixed
+   now (res.cloudinary.com + Google OAuth avatars allow-listed). General
+   lesson: a config gap that only bites once a *different* missing credential
+   is filled in is exactly the kind of thing that survives a long session
+   undetected — worth an explicit check whenever wiring up real API keys.
+2. Giving the root layout's metadata a `template: "%s — Fgrapher"` doubled the
+   suffix on all 14 pages that already append "— Fgrapher" themselves (e.g.
+   "Browse artists — Fgrapher — Fgrapher"). Caught by an actual page-title
+   assertion across 5 pages post-change, not just a visual check — reverted to
+   a plain fallback title rather than retrofitting every page's title string.
+
+Also fixed (Phase 9/10 follow-through, same session): the review modal isn't
 mounted/unmounted by its Dialog (only visibility toggles), so its
 `useState(initialRating)` only ran once at first render — clicking a *different*
 star on the inline prompt after the modal had already mounted kept showing the
