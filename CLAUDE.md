@@ -170,16 +170,17 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 7 — Subscriptions & payments (see `docs/guides/phase-7-payments.md`). Full Stripe
-integration for the 5 paid roles: `/pricing`, checkout (`/onboarding/billing` →
-Stripe Checkout with a 14-day trial), a 5-event webhook handler
-(`/api/webhooks/stripe`, idempotent via a `WebhookEvent` table), billing settings
-(cancel/resume, Customer Portal handoff, invoice history), a site-wide past-due
-banner, and real subscription-based access control (`requireActiveSubscription`
-now understands TRIALING and a 7-day PAST_DUE grace period; portfolio/products/
-services creation routes and a new `SubscriptionGate` component enforce it).
-Phases 0-6 (foundation, landing page, auth, dashboard, public profiles, browse &
-search, booking flow) are complete.
+Phase 8 — Messaging (see `docs/guides/phase-8-messaging.md`). 1:1 conversations with
+a proper `ConversationParticipant` join table (per-user `lastReadAt`, replacing the
+old `Conversation.participantIds` string array), `/dashboard/messages` chat UI
+(conversation list + bubbles + read receipts + image sharing + booking_link cards),
+"Message" buttons across the app wired to create/open the right conversation, unread
+badges in the nav and dashboard sidebar, and user blocking. Real-time delivery is
+polling-based (chat panel every 4s while open, unread badges every 20s) since this
+environment has no Pusher/Socket.io credentials — see the Phase 8 commit for the
+full list of what that ruled out (typing indicators, presence, quick replies,
+search, rate limiting). Phases 0-7 (foundation, landing page, auth, dashboard,
+public profiles, browse & search, booking flow, payments) are complete.
 
 Known limitation, impossible to close in this environment: there is no live Stripe
 account or Stripe CLI here, so checkout/webhook/Customer Portal are code-complete
