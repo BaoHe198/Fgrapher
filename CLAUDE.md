@@ -170,28 +170,42 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 8 — Messaging (see `docs/guides/phase-8-messaging.md`). 1:1 conversations with
-a proper `ConversationParticipant` join table (per-user `lastReadAt`, replacing the
-old `Conversation.participantIds` string array), `/dashboard/messages` chat UI
-(conversation list + bubbles + read receipts + image sharing + booking_link cards),
-"Message" buttons across the app wired to create/open the right conversation, unread
-badges in the nav and dashboard sidebar, and user blocking. Real-time delivery is
-polling-based (chat panel every 4s while open, unread badges every 20s) since this
-environment has no Pusher/Socket.io credentials — see the Phase 8 commit for the
-full list of what that ruled out (typing indicators, presence, quick replies,
-search, rate limiting). Phases 0-7 (foundation, landing page, auth, dashboard,
-public profiles, browse & search, booking flow, payments) are complete.
+Phase 9 — Marketplace (see `docs/guides/phase-9-marketplace.md`). Built on Phase 3's
+existing Product/Order/OrderItem models: `/shop` browse (type/category/condition/
+price filters) + `/shop/[productId]` detail (gallery, buy/rent modes, rental date
+math), a server-persisted cart (`CartItem` table, drawer + full `/cart` page,
+grouped by shop), single-page checkout handing off to Stripe Checkout (its built-in
+address collection, not a custom form step), and order management for both sides
+(`/dashboard/orders` customer, `/dashboard/shop-orders` shop, sharing one
+role-aware detail page) including a rental deposit refund/deduct flow. Orders are
+created fresh from the live cart inside the `checkout.session.completed` webhook,
+not pre-created at checkout start, so an abandoned checkout never leaves an
+orphaned order. Stripe Connect (splitting payouts to individual shops) is
+deliberately out of scope — no live Connect platform account to onboard shops
+against — so marketplace payments currently settle to the platform account, same
+as Phase 7's subscription payments. Phases 0-8 (foundation, landing page, auth,
+dashboard, public profiles, browse & search, booking flow, payments, messaging)
+are complete.
+
+Real bug caught and fixed while building this: Stripe's zero-decimal currencies
+(VND included) expect the raw amount, not `amount * 100` like USD cents —
+`lib/stripe.ts`'s `toStripeAmount()` handles this now. Also fixed: the reseed
+cleanup block was missing Message/Order (no `onDelete: Cascade` from User), so
+`pnpm db:seed` broke once real messaging/order test data existed — keep this in
+mind when adding models with a User FK; check whether reseed cleanup needs it too.
 
 Known limitation, impossible to close in this environment: there is no live Stripe
-account or Stripe CLI here, so checkout/webhook/Customer Portal are code-complete
-and type-checked against the actually-installed Stripe SDK (v22, which restructured
+account or Stripe CLI here, so checkout/webhook/Customer Portal (both the Phase 7
+subscription flow and the Phase 9 marketplace flow) are code-complete and
+type-checked against the actually-installed Stripe SDK (v22, which restructured
 `current_period_start/end` onto SubscriptionItems — the code follows that, not the
 phase guide's older `apiVersion` assumption) but UNTESTED end-to-end. Everything
 that doesn't require live Stripe was verified working: pricing page, billing
-settings against seeded synthetic ACTIVE subscriptions, the checkout
-not-configured error path staying non-fatal, and the subscription gates actually
-blocking/allowing correctly. Needs a real `STRIPE_SECRET_KEY` + `stripe listen`
-pass before launch — see `scripts/stripe-setup.ts` for creating the Products/Prices.
+settings against seeded synthetic ACTIVE subscriptions, both checkout flows'
+not-configured error path staying non-fatal, the subscription gates actually
+blocking/allowing correctly, and the full shop browse → product detail → cart →
+checkout-page UI loop. Needs a real `STRIPE_SECRET_KEY` + `stripe listen` pass
+before launch — see `scripts/stripe-setup.ts` for creating the Products/Prices.
 
 seed.ts now creates a synthetic ACTIVE Subscription (no real Stripe IDs) for every
 paid-role seed account — required for the new subscription-based gating to not
