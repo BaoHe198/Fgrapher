@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Menu,
   MessageCircle,
+  Package,
   Settings,
   ShoppingBag,
   type LucideIcon,
@@ -56,8 +57,12 @@ export function DashboardSidebar({ className }: { className?: string }) {
       ? [{ href: "/dashboard/portfolio", label: "Portfolio", icon: ImageIcon }]
       : []),
     ...(canSell
-      ? [{ href: "/dashboard/listings", label: "Listings", icon: ShoppingBag }]
+      ? [
+          { href: "/dashboard/listings", label: "Listings", icon: ShoppingBag },
+          { href: "/dashboard/shop-orders", label: "Shop orders", icon: Package },
+        ]
       : []),
+    { href: "/dashboard/orders", label: "My orders", icon: Package },
     { href: "/saved", label: "Saved", icon: Bookmark },
     { href: "/dashboard/messages", label: "Messages", icon: MessageCircle, badge: unreadMessages },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },

@@ -256,3 +256,60 @@ export function receiptEmailHtml({
     ctaUrl: invoiceUrl,
   });
 }
+
+export function orderConfirmationEmailHtml({
+  orderNumber,
+  itemsSummary,
+  totalLabel,
+  orderUrl,
+}: {
+  orderNumber: string;
+  itemsSummary: string;
+  totalLabel: string;
+  orderUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: "Order confirmed!",
+    body: `<p>Order <strong>#${orderNumber}</strong> — ${itemsSummary}</p><p>Total: <strong>${totalLabel}</strong></p>`,
+    ctaLabel: "View order",
+    ctaUrl: orderUrl,
+  });
+}
+
+export function newOrderEmailHtml({
+  orderNumber,
+  customerName,
+  itemsSummary,
+  orderUrl,
+}: {
+  orderNumber: string;
+  customerName: string;
+  itemsSummary: string;
+  orderUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: "New order received",
+    body: `<p><strong>${customerName}</strong> placed order <strong>#${orderNumber}</strong> — ${itemsSummary}</p>`,
+    ctaLabel: "View order",
+    ctaUrl: orderUrl,
+  });
+}
+
+export function orderStatusEmailHtml({
+  orderNumber,
+  statusLabel,
+  detail,
+  orderUrl,
+}: {
+  orderNumber: string;
+  statusLabel: string;
+  detail?: string;
+  orderUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: `Order ${statusLabel}`,
+    body: `<p>Your order <strong>#${orderNumber}</strong> is now <strong>${statusLabel}</strong>.${detail ? ` ${detail}` : ""}</p>`,
+    ctaLabel: "View order",
+    ctaUrl: orderUrl,
+  });
+}

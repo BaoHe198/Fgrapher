@@ -18,6 +18,7 @@ export const productSchema = z
     type: z.enum(["SALE", "RENT", "BOTH"]),
     price: z.number().positive().optional(),
     rentalPrice: z.number().positive().optional(),
+    depositAmount: z.number().min(0).optional(),
     condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR"]),
     stock: z.number().int().min(0),
     isActive: z.boolean(),

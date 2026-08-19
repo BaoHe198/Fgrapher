@@ -9,17 +9,18 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-type FilterTab = "ALL" | "UNREAD" | "BOOKINGS" | "MESSAGES" | "SOCIAL";
+type FilterTab = "ALL" | "UNREAD" | "BOOKINGS" | "ORDERS" | "MESSAGES" | "SOCIAL";
 
 const TABS: { value: FilterTab; label: string }[] = [
   { value: "ALL", label: "All" },
   { value: "UNREAD", label: "Unread" },
   { value: "BOOKINGS", label: "Bookings" },
+  { value: "ORDERS", label: "Orders" },
   { value: "MESSAGES", label: "Messages" },
   { value: "SOCIAL", label: "Social" },
 ];
 
-const TYPE_GROUP: Record<NotificationType, "BOOKINGS" | "MESSAGES" | "SOCIAL" | "OTHER"> = {
+const TYPE_GROUP: Record<NotificationType, "BOOKINGS" | "ORDERS" | "MESSAGES" | "SOCIAL" | "OTHER"> = {
   BOOKING_REQUEST: "BOOKINGS",
   BOOKING_CONFIRMED: "BOOKINGS",
   BOOKING_DECLINED: "BOOKINGS",
@@ -36,6 +37,11 @@ const TYPE_GROUP: Record<NotificationType, "BOOKINGS" | "MESSAGES" | "SOCIAL" | 
   SUBSCRIPTION_EXPIRING: "OTHER",
   SUBSCRIPTION_CANCELLED: "OTHER",
   PAYMENT_FAILED: "OTHER",
+  NEW_ORDER: "ORDERS",
+  ORDER_CONFIRMED: "ORDERS",
+  ORDER_SHIPPED: "ORDERS",
+  ORDER_DELIVERED: "ORDERS",
+  ORDER_CANCELLED: "ORDERS",
 };
 
 function relativeTime(date: string | Date) {
@@ -50,8 +56,9 @@ function relativeTime(date: string | Date) {
 }
 
 function notificationHref(notification: Notification) {
-  const data = notification.data as { bookingId?: string } | null;
+  const data = notification.data as { bookingId?: string; orderId?: string } | null;
   if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
+  if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
   return "/dashboard/notifications";
 }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { constructWebhookEvent, isStripeConfigured } from "@/lib/stripe";
+import { createOrdersFromCheckout } from "@/services/orders";
 import {
   handleCheckoutCompleted,
   handleInvoicePaid,
@@ -47,7 +48,11 @@ export async function POST(request: Request) {
   try {
     switch (event.type) {
       case "checkout.session.completed":
-        await handleCheckoutCompleted(event.data.object);
+        if (event.data.object.metadata?.orderType === "marketplace") {
+          await createOrdersFromCheckout(event.data.object);
+        } else {
+          await handleCheckoutCompleted(event.data.object);
+        }
         break;
       case "customer.subscription.updated":
         await handleSubscriptionUpdated(event.data.object);

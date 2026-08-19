@@ -270,6 +270,17 @@ async function main() {
       where: { OR: [{ customerId: { in: existingIds } }, { providerId: { in: existingIds } }] },
     });
 
+    // Message.sender/receiver and Order.customer/shop are also no-cascade
+    // FKs — clean those up (and their orphaned Conversation rows) too.
+    await db.message.deleteMany({
+      where: { OR: [{ senderId: { in: existingIds } }, { receiverId: { in: existingIds } }] },
+    });
+    await db.conversationParticipant.deleteMany({ where: { userId: { in: existingIds } } });
+    await db.conversation.deleteMany({ where: { participants: { none: {} } } });
+    await db.order.deleteMany({
+      where: { OR: [{ customerId: { in: existingIds } }, { shopId: { in: existingIds } }] },
+    });
+
     await db.user.deleteMany({ where: { id: { in: existingIds } } });
   }
 
@@ -366,6 +377,70 @@ async function main() {
   }
 
   await seedBookings();
+  await seedProducts();
+}
+
+async function seedProducts() {
+  const shop = await db.user.findUniqueOrThrow({ where: { email: "shop@test.com" } });
+
+  const products = [
+    {
+      name: "Sony A7 IV Mirrorless Camera",
+      description: "Full-frame 33MP mirrorless camera body, lightly used, comes with two batteries.",
+      category: "Camera body",
+      type: "SALE" as const,
+      price: 45_000_000,
+      condition: "LIKE_NEW" as const,
+      stock: 2,
+    },
+    {
+      name: "Canon RF 24-70mm f/2.8L Lens",
+      description: "Standard zoom lens, excellent condition, no fungus or scratches.",
+      category: "Lens",
+      type: "SALE" as const,
+      price: 38_000_000,
+      condition: "GOOD" as const,
+      stock: 1,
+    },
+    {
+      name: "Godox AD200 Pro Flash Kit",
+      description: "Portable strobe kit with softbox and stands. Available to rent by the day.",
+      category: "Lighting",
+      type: "RENT" as const,
+      rentalPrice: 350_000,
+      depositAmount: 2_000_000,
+      condition: "GOOD" as const,
+      stock: 3,
+    },
+    {
+      name: "DJI Ronin RS3 Gimbal",
+      description: "3-axis gimbal stabilizer for mirrorless/DSLR cameras. Sale or daily rental.",
+      category: "Support",
+      type: "BOTH" as const,
+      price: 12_000_000,
+      rentalPrice: 500_000,
+      depositAmount: 3_000_000,
+      condition: "NEW" as const,
+      stock: 2,
+    },
+    {
+      name: "Rode Wireless GO II Mic Kit",
+      description: "Compact wireless lapel mic system, two transmitters + receiver.",
+      category: "Audio",
+      type: "SALE" as const,
+      price: 5_500_000,
+      condition: "NEW" as const,
+      stock: 0,
+    },
+  ];
+
+  for (const product of products) {
+    await db.product.create({
+      data: { ...product, userId: shop.id, isActive: true },
+    });
+  }
+
+  console.log(`Seeded ${products.length} products for shop@test.com`);
 }
 
 async function seedBookings() {

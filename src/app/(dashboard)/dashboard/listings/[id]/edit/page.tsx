@@ -37,6 +37,7 @@ export default async function EditProductPage({
           type: product.type,
           price: product.price ?? undefined,
           rentalPrice: product.rentalPrice ?? undefined,
+          depositAmount: product.depositAmount ?? undefined,
           condition: product.condition,
           stock: product.stock,
           isActive: product.isActive,

@@ -9,6 +9,7 @@ import {
   CreditCard,
   Heart,
   MessageCircle,
+  Package,
   Star,
   UserPlus,
 } from "lucide-react";
@@ -41,6 +42,11 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   SUBSCRIPTION_EXPIRING: CreditCard,
   SUBSCRIPTION_CANCELLED: CreditCard,
   PAYMENT_FAILED: CreditCard,
+  NEW_ORDER: Package,
+  ORDER_CONFIRMED: Package,
+  ORDER_SHIPPED: Package,
+  ORDER_DELIVERED: Package,
+  ORDER_CANCELLED: Package,
 };
 
 function relativeTime(date: string | Date) {
@@ -55,8 +61,9 @@ function relativeTime(date: string | Date) {
 }
 
 function notificationHref(notification: Notification) {
-  const data = notification.data as { bookingId?: string } | null;
+  const data = notification.data as { bookingId?: string; orderId?: string } | null;
   if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
+  if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
   return "/dashboard/notifications";
 }
 

@@ -123,13 +123,22 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       ) : null}
 
       {type === "RENT" || type === "BOTH" ? (
-        <Input
-          label="Rental price per day"
-          type="number"
-          step="0.01"
-          error={errors.rentalPrice?.message}
-          {...register("rentalPrice", { valueAsNumber: true })}
-        />
+        <>
+          <Input
+            label="Rental price per day"
+            type="number"
+            step="0.01"
+            error={errors.rentalPrice?.message}
+            {...register("rentalPrice", { valueAsNumber: true })}
+          />
+          <Input
+            label="Deposit (refunded on return)"
+            type="number"
+            step="0.01"
+            error={errors.depositAmount?.message}
+            {...register("depositAmount", { valueAsNumber: true })}
+          />
+        </>
       ) : null}
 
       <Controller

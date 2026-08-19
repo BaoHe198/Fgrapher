@@ -9,6 +9,7 @@ import { useState, useSyncExternalStore, useTransition } from "react";
 import { useTheme } from "next-themes";
 
 import { LogoFull } from "@/components/brand/logo-full";
+import { CartDrawer } from "@/components/cart/cart-drawer";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUnreadMessages } from "@/hooks/use-unread-messages";
@@ -116,7 +117,13 @@ export function WebNav() {
               ) : (
                 <MessageCircle className="size-5 text-text-secondary" />
               )}
-              <ShoppingBag className="size-5 text-text-secondary" />
+              {isAuthenticated ? (
+                <CartDrawer />
+              ) : (
+                <Link href="/shop">
+                  <ShoppingBag className="size-5 text-text-secondary" />
+                </Link>
+              )}
             </>
           ) : null}
 
