@@ -2,6 +2,7 @@ import { Camera } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { SubscriptionGate } from "@/components/subscription-gate";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
@@ -97,11 +98,17 @@ export default async function PortfolioPage({
         </div>
       ) : null}
 
-      <PortfolioGrid
-        key={activeProfile.id}
-        profileId={activeProfile.id}
-        initialMedia={media.map((m) => ({ id: m.id, url: m.url, type: m.type, title: m.title }))}
-      />
+      <SubscriptionGate
+        role={activeProfile.role}
+        fallbackTitle={`Activate your ${ROLE_LABELS[activeProfile.role]} subscription to upload`}
+        fallbackText="Your existing portfolio media stays visible — activate your subscription to add more."
+      >
+        <PortfolioGrid
+          key={activeProfile.id}
+          profileId={activeProfile.id}
+          initialMedia={media.map((m) => ({ id: m.id, url: m.url, type: m.type, title: m.title }))}
+        />
+      </SubscriptionGate>
     </div>
   );
 }

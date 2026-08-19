@@ -1,15 +1,32 @@
-import { CreditCard } from "lucide-react";
+import { redirect } from "next/navigation";
 
-import { Card } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
+import { getBillingOverview } from "@/services/subscription";
 
-export default function BillingSettingsPage() {
+import { BillingSettingsContent } from "./billing-settings-content";
+
+export default async function BillingSettingsPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const userRoles = await getBillingOverview(session.user.id);
+
   return (
-    <Card className="flex flex-col items-center gap-3 py-16 text-center">
-      <CreditCard className="size-12 text-text-tertiary" />
-      <p className="text-body-lg font-semibold text-text-primary">Billing is coming soon</p>
-      <p className="max-w-sm text-body-md text-text-secondary">
-        Subscription management and invoices will live here once payments launch.
-      </p>
-    </Card>
+    <BillingSettingsContent
+      roles={userRoles.map((ur) => ({
+        role: ur.role,
+        active: ur.active,
+        subscription: ur.subscription
+          ? {
+              status: ur.subscription.status,
+              currentPeriodEnd: ur.subscription.currentPeriodEnd?.toISOString() ?? null,
+              cancelAtPeriodEnd: ur.subscription.cancelAtPeriodEnd,
+              graceEndsAt: ur.subscription.graceEndsAt?.toISOString() ?? null,
+            }
+          : null,
+      }))}
+    />
   );
 }

@@ -3,7 +3,6 @@
 import type { Role } from "@prisma/client";
 import {
   Camera,
-  Loader2,
   Palette,
   ShoppingBag,
   User,
@@ -11,8 +10,7 @@ import {
   Building2,
   type LucideIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,20 +28,6 @@ const ROLE_ICONS: Record<Role, LucideIcon> = {
 };
 
 export function RolesSettings({ currentRoles }: { currentRoles: Role[] }) {
-  const router = useRouter();
-  const [pendingRole, setPendingRole] = useState<Role | null>(null);
-
-  const activateRole = async (role: Role) => {
-    setPendingRole(role);
-    await fetch("/api/users/roles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roles: [...currentRoles.filter((r) => r !== "CUSTOMER"), role] }),
-    });
-    setPendingRole(null);
-    router.refresh();
-  };
-
   const activeRoles = currentRoles.filter((r) => r !== "CUSTOMER");
   const availableRoles = PAID_ROLES.filter((r) => !currentRoles.includes(r));
 
@@ -76,7 +60,7 @@ export function RolesSettings({ currentRoles }: { currentRoles: Role[] }) {
                     {ROLE_LABELS[role]}
                   </p>
                   <p className="text-body-sm text-text-secondary">
-                    {formatCurrency(ROLE_MONTHLY_PRICE[role] ?? 0)}/mo
+                    {formatCurrency(ROLE_MONTHLY_PRICE[role] ?? 0, "USD")}/mo
                   </p>
                 </div>
               </div>
@@ -103,7 +87,6 @@ export function RolesSettings({ currentRoles }: { currentRoles: Role[] }) {
           </span>
           {availableRoles.map((role) => {
             const Icon = ROLE_ICONS[role];
-            const isPending = pendingRole === role;
             return (
               <Card key={role} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -113,17 +96,16 @@ export function RolesSettings({ currentRoles }: { currentRoles: Role[] }) {
                       {ROLE_LABELS[role]}
                     </p>
                     <p className="text-body-sm text-text-secondary">
-                      {formatCurrency(ROLE_MONTHLY_PRICE[role] ?? 0)}/mo
+                      {formatCurrency(ROLE_MONTHLY_PRICE[role] ?? 0, "USD")}/mo
                     </p>
                   </div>
                 </div>
                 <Button
                   size="sm"
                   variant="accent"
-                  disabled={isPending}
-                  onClick={() => activateRole(role)}
+                  nativeButton={false}
+                  render={<Link href={`/onboarding/billing?roles=${role}`} />}
                 >
-                  {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
                   Activate
                 </Button>
               </Card>

@@ -6,6 +6,7 @@ import {
   Calendar,
   CalendarCheck,
   CalendarX,
+  CreditCard,
   Heart,
   MessageCircle,
   Star,
@@ -36,8 +37,10 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   NEW_REVIEW: Star,
   NEW_LIKE: Heart,
   NEW_COMMENT: MessageCircle,
-  SUBSCRIPTION_EXPIRING: Bell,
-  PAYMENT_FAILED: Bell,
+  SUBSCRIPTION_ACTIVE: CreditCard,
+  SUBSCRIPTION_EXPIRING: CreditCard,
+  SUBSCRIPTION_CANCELLED: CreditCard,
+  PAYMENT_FAILED: CreditCard,
 };
 
 function relativeTime(date: string | Date) {

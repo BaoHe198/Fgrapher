@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { AuthError, requireActiveSubscription, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { createServiceSchema } from "@/lib/validations/service";
 
@@ -28,6 +28,8 @@ export async function POST(request: Request) {
         { status: 403 },
       );
     }
+
+    await requireActiveSubscription(session.user.id, profile.role);
 
     const service = await db.service.create({ data: parsed.data });
 

@@ -107,6 +107,12 @@ export function RegisterForm() {
       return;
     }
 
+    const paidRoles = values.roles.filter((role) => (PAID_ROLES as string[]).includes(role));
+    if (paidRoles.length > 0) {
+      router.push(`/onboarding/billing?roles=${paidRoles.join(",")}`);
+      return;
+    }
+
     router.push("/dashboard");
   };
 

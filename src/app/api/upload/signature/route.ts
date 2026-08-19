@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 
-import { AuthError, requireAnyRole, requireAuth } from "@/lib/auth-helpers";
+import { AuthError, requireAuth, requirePaidRole } from "@/lib/auth-helpers";
 import { generateUploadSignature, isCloudinaryConfigured } from "@/lib/cloudinary";
-import { PAID_ROLES } from "@/lib/constants";
 
 export async function POST() {
   try {
     const session = await requireAuth();
-    requireAnyRole(session, PAID_ROLES);
+    // This route is shared across portfolio media, product images, and
+    // provider profile photos — it can't know which specific role the
+    // upload is for, so it only checks "some paid role is usable." The
+    // route that actually persists the reference (portfolio/products POST)
+    // does the precise per-role subscription check.
+    await requirePaidRole(session.user.id);
 
     if (!isCloudinaryConfigured()) {
       return NextResponse.json(

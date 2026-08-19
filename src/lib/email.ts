@@ -185,3 +185,74 @@ export function bookingCompletedEmailHtml({
     ctaUrl: bookingUrl,
   });
 }
+
+export function welcomeSubscriptionEmailHtml({
+  roleNames,
+  billingUrl,
+}: {
+  roleNames: string[];
+  billingUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: "Welcome to Fgrapher Pro!",
+    body: `<p>Your <strong>${roleNames.join(", ")}</strong> profile${roleNames.length > 1 ? "s are" : " is"} now live. Your 14-day free trial has started — manage your subscription anytime from billing settings.</p>`,
+    ctaLabel: "View billing",
+    ctaUrl: billingUrl,
+  });
+}
+
+export function paymentFailedEmailHtml({
+  graceEndsLabel,
+  billingUrl,
+}: {
+  graceEndsLabel: string;
+  billingUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: "Your payment didn't go through",
+    body: `<p>We couldn't charge your card for your Fgrapher subscription. Your profile stays live until <strong>${graceEndsLabel}</strong> — update your payment method before then to avoid any interruption.</p>`,
+    ctaLabel: "Update payment method",
+    ctaUrl: billingUrl,
+  });
+}
+
+export function subscriptionCancellingEmailHtml({
+  periodEndLabel,
+  billingUrl,
+}: {
+  periodEndLabel: string;
+  billingUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: "We're sorry to see you go",
+    body: `<p>Your subscription is set to cancel on <strong>${periodEndLabel}</strong>. You'll keep full access until then. Changed your mind?</p>`,
+    ctaLabel: "Resume subscription",
+    ctaUrl: billingUrl,
+  });
+}
+
+export function subscriptionEndedEmailHtml({ billingUrl }: { billingUrl: string }) {
+  return bookingEmailShell({
+    heading: "Your subscription has ended",
+    body: `<p>Your Fgrapher Pro subscription has ended and your profile is no longer visible in search. All your data is kept — reactivate anytime to pick up right where you left off.</p>`,
+    ctaLabel: "Reactivate",
+    ctaUrl: billingUrl,
+  });
+}
+
+export function receiptEmailHtml({
+  amountLabel,
+  periodEndLabel,
+  invoiceUrl,
+}: {
+  amountLabel: string;
+  periodEndLabel: string;
+  invoiceUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: "Payment received",
+    body: `<p>We received your payment of <strong>${amountLabel}</strong>. Your subscription is active through <strong>${periodEndLabel}</strong>.</p>`,
+    ctaLabel: "View receipt",
+    ctaUrl: invoiceUrl,
+  });
+}

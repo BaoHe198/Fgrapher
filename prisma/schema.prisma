@@ -66,6 +66,7 @@ model User {
   followers      Follow[]        @relation("following")
   notifications  Notification[]
   savedProfiles  SavedProfile[]
+  payments       Payment[]
 
   @@map("users")
 }
@@ -150,19 +151,66 @@ model Subscription {
   id                   String             @id @default(cuid())
   userRoleId           String             @unique
   stripeCustomerId     String?
-  stripeSubscriptionId String?            @unique
+  // Not @unique: a single checkout for multiple roles produces one Stripe
+  // Subscription with multiple line items, so several Subscription rows
+  // (one per UserRole) can legitimately share the same Stripe subscription
+  // ID. userRoleId is the actual 1:1 invariant.
+  stripeSubscriptionId     String?
+  // The specific SubscriptionItem this role's price is billed under —
+  // current_period_start/end and price live per-item on Stripe's side, not
+  // on the parent Subscription, since Stripe API 2025-03-31.
+  stripeSubscriptionItemId String? @unique
   stripePriceId        String?
   plan                 String?            // e.g., "basic", "pro"
   status               SubscriptionStatus @default(ACTIVE)
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean            @default(false)
+  // Set when a payment fails (status becomes PAST_DUE) — access stays
+  // fully live until this passes, then the role is deactivated.
+  graceEndsAt          DateTime?
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
   userRole UserRole @relation(fields: [userRoleId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+// Records processed Stripe webhook event IDs so retried deliveries
+// (Stripe resends on timeout/non-2xx) are no-ops instead of double-applying
+// a state change.
+model WebhookEvent {
+  id        String   @id
+  type      String
+  processed Boolean  @default(false)
+  payload   Json
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@map("webhook_events")
+}
+
+enum PaymentStatus {
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  userId          String
+  stripePaymentId String        @unique
+  amount          Float
+  currency        String
+  status          PaymentStatus
+  description     String?
+  createdAt       DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("payments")
 }
 
 // ============================================================================
@@ -614,7 +662,9 @@ enum NotificationType {
   NEW_REVIEW
   NEW_LIKE
   NEW_COMMENT
+  SUBSCRIPTION_ACTIVE
   SUBSCRIPTION_EXPIRING
+  SUBSCRIPTION_CANCELLED
   PAYMENT_FAILED
 }
 

@@ -19,6 +19,7 @@ import {
 } from "@/services/dashboard";
 
 import { AcceptingBookingsToggle } from "./accepting-bookings-toggle";
+import { CheckoutSuccessToast } from "./checkout-success-toast";
 
 function greeting(firstName: string) {
   const hour = new Date().getHours();
@@ -84,6 +85,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <CheckoutSuccessToast />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-display-md text-text-primary">{greeting(firstName)}</h1>
         {isProvider ? <AcceptingBookingsToggle initialValue={user.acceptingBookings} /> : null}

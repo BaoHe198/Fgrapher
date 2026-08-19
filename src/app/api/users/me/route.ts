@@ -8,9 +8,19 @@ import { updateMeSchema } from "@/lib/validations/user";
 export async function GET() {
   try {
     const session = await requireAuth();
-    const user = await db.user.findUnique({ where: { id: session.user.id } });
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      include: { roles: { where: { active: true }, select: { role: true } } },
+    });
 
-    return NextResponse.json({ data: user, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      {
+        data: user && { ...user, roles: user.roles.map((r) => r.role) },
+        error: null,
+        message: null,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(

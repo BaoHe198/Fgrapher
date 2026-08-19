@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { AuthError, requireAnyRole, requireAuth } from "@/lib/auth-helpers";
+import { AuthError, requireActiveSubscription, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { PAID_ROLES } from "@/lib/constants";
 import { createPortfolioMediaSchema } from "@/lib/validations/portfolio";
 
 export async function POST(request: Request) {
   try {
     const session = await requireAuth();
-    requireAnyRole(session, PAID_ROLES);
 
     const body = await request.json();
     const parsed = createPortfolioMediaSchema.safeParse(body);
@@ -30,6 +28,8 @@ export async function POST(request: Request) {
         { status: 403 },
       );
     }
+
+    await requireActiveSubscription(session.user.id, profile.role);
 
     const maxOrder = await db.profileMedia.aggregate({
       where: { profileId: profile.id },

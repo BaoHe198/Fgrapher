@@ -57,6 +57,29 @@ export async function notify({ userId, type, title, message, data, email }: Noti
   }
 }
 
+// Billing/account events (welcome, payment failed, subscription ended) are
+// never preference-gated — same principle as password-reset emails: the
+// user needs to see these regardless of their notification settings.
+export async function notifyCritical({
+  userId,
+  type,
+  title,
+  message,
+  data,
+  email,
+}: NotifyInput) {
+  const user = await db.user.findUnique({ where: { id: userId }, select: { email: true } });
+  if (!user) return;
+
+  await db.notification.create({
+    data: { userId, type, title, message, data: data ?? undefined },
+  });
+
+  if (email) {
+    await sendEmail({ to: user.email, subject: email.subject, html: email.html });
+  }
+}
+
 const NOTIFICATIONS_PAGE_SIZE = 20;
 
 export async function listNotifications({

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { AuthError, requireAnyRole, requireAuth } from "@/lib/auth-helpers";
+import { AuthError, requireActiveSubscription, requireAuth } from "@/lib/auth-helpers";
 import { productSchema } from "@/lib/validations/product";
 import { createProduct, listProducts, type ListingFilter } from "@/services/products";
 
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await requireAuth();
-    requireAnyRole(session, ["CAMERA_SHOP"]);
+    await requireActiveSubscription(session.user.id, "CAMERA_SHOP");
 
     const body = await request.json();
     const parsed = productSchema.safeParse(body);

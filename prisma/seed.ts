@@ -289,13 +289,36 @@ async function main() {
       },
     });
 
-    await db.userRole.createMany({
-      data: seedUser.roles.map((role) => ({
-        userId: user.id,
-        role,
-        active: true,
-      })),
-    });
+    const createdRoles = await Promise.all(
+      seedUser.roles.map((role) =>
+        db.userRole.create({ data: { userId: user.id, role, active: true } }),
+      ),
+    );
+
+    // Synthetic ACTIVE subscriptions for every seeded paid role — there's no
+    // live Stripe account in this environment, so these aren't backed by a
+    // real Stripe subscription (stripeSubscriptionId stays null). Without
+    // this, every access-control check added in Phase 7
+    // (requireActiveSubscription/requirePaidRole) would reject every seeded
+    // account, since a bare UserRole row alone no longer grants access.
+    await Promise.all(
+      createdRoles
+        .filter((ur) => ur.role !== "CUSTOMER")
+        .map((ur) => {
+          const now = new Date();
+          const periodEnd = new Date(now);
+          periodEnd.setDate(periodEnd.getDate() + 30);
+          return db.subscription.create({
+            data: {
+              userRoleId: ur.id,
+              plan: ur.role,
+              status: "ACTIVE",
+              currentPeriodStart: now,
+              currentPeriodEnd: periodEnd,
+            },
+          });
+        }),
+    );
 
     if (seedUser.profiles && seedUser.profiles.length > 0) {
       await db.availability.createMany({
