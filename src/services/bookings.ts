@@ -8,6 +8,7 @@ import {
   bookingReminderEmailHtml,
   bookingRequestEmailHtml,
 } from "@/lib/email";
+import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
 
@@ -204,6 +205,15 @@ export async function createBooking(customerId: string, input: CreateBookingInpu
         bookingUrl: bookingUrlFor(booking.id),
       }),
     },
+  });
+
+  const conversationId = await getOrCreateConversation(booking.customerId, booking.providerId);
+  await sendMessage({
+    conversationId,
+    senderId: booking.customerId,
+    content: `Booking request: ${booking.service?.name ?? "Custom request"} on ${dateLabel(booking.date)} at ${booking.startTime}`,
+    type: "booking_link",
+    bookingId: booking.id,
   });
 
   return booking;

@@ -3,15 +3,21 @@ import { NextResponse } from "next/server";
 import { AuthError, requireAuth, requirePaidRole } from "@/lib/auth-helpers";
 import { generateUploadSignature, isCloudinaryConfigured } from "@/lib/cloudinary";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const session = await requireAuth();
-    // This route is shared across portfolio media, product images, and
-    // provider profile photos — it can't know which specific role the
-    // upload is for, so it only checks "some paid role is usable." The
-    // route that actually persists the reference (portfolio/products POST)
-    // does the precise per-role subscription check.
-    await requirePaidRole(session.user.id);
+
+    // This route is shared across portfolio media, product images,
+    // provider profile photos, and chat image attachments. The first three
+    // are paid-role-only (the route that actually persists the reference
+    // does the precise per-role subscription check); chat images must stay
+    // open to every authenticated user — including CUSTOMER-only accounts
+    // messaging a provider — so only they skip the paid-role pre-check.
+    const body = await request.json().catch(() => ({}));
+    const purpose = body?.purpose === "chat" ? "chat" : "portfolio";
+    if (purpose !== "chat") {
+      await requirePaidRole(session.user.id);
+    }
 
     if (!isCloudinaryConfigured()) {
       return NextResponse.json(
@@ -24,7 +30,7 @@ export async function POST() {
       );
     }
 
-    const data = generateUploadSignature(`fgrapher/portfolio/${session.user.id}`);
+    const data = generateUploadSignature(`fgrapher/${purpose}/${session.user.id}`);
 
     return NextResponse.json({ data, error: null, message: null }, { status: 200 });
   } catch (err) {

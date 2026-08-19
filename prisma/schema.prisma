@@ -67,6 +67,7 @@ model User {
   notifications  Notification[]
   savedProfiles  SavedProfile[]
   payments       Payment[]
+  conversationParticipants ConversationParticipant[]
 
   @@map("users")
 }
@@ -592,14 +593,32 @@ model OrderItem {
 
 model Conversation {
   id            String    @id @default(cuid())
-  participantIds String[] // array of user IDs
   lastMessageAt DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  messages Message[]
+  participants ConversationParticipant[]
+  messages     Message[]
 
   @@map("conversations")
+}
+
+// Per-participant read state (lastReadAt) — the plain participantIds
+// String[] this replaces had no way to track "this user read up to when",
+// which read receipts and unread counts both need.
+model ConversationParticipant {
+  id             String    @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  joinedAt       DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId, conversationId])
+  @@map("conversation_participants")
 }
 
 model Message {
@@ -609,6 +628,8 @@ model Message {
   receiverId     String
   content        String   @db.Text
   type           String   @default("text") // text, image, booking_link
+  mediaUrl       String?
+  bookingId      String?
   readAt         DateTime?
   createdAt      DateTime @default(now())
 
@@ -619,6 +640,17 @@ model Message {
   @@index([conversationId, createdAt])
   @@index([receiverId, readAt])
   @@map("messages")
+}
+
+model BlockedUser {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@map("blocked_users")
 }
 
 // ============================================================================

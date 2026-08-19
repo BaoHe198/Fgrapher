@@ -25,6 +25,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useUnreadMessages } from "@/hooks/use-unread-messages";
 import { useUserRoles } from "@/hooks/use-user-roles";
 import { ROLE_LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -33,11 +34,13 @@ interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
+  badge?: number;
 }
 
 export function DashboardSidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const { roles, canUpload, canSell, canReceiveBookings, isCustomerOnly } = useUserRoles();
+  const unreadMessages = useUnreadMessages();
 
   const items: NavItem[] = [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -56,7 +59,7 @@ export function DashboardSidebar({ className }: { className?: string }) {
       ? [{ href: "/dashboard/listings", label: "Listings", icon: ShoppingBag }]
       : []),
     { href: "/saved", label: "Saved", icon: Bookmark },
-    { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
+    { href: "/dashboard/messages", label: "Messages", icon: MessageCircle, badge: unreadMessages },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
@@ -67,7 +70,7 @@ export function DashboardSidebar({ className }: { className?: string }) {
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      {items.map(({ href, label, icon: Icon }) => {
+      {items.map(({ href, label, icon: Icon, badge }) => {
         const isActive = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
         return (
           <Link
@@ -82,6 +85,11 @@ export function DashboardSidebar({ className }: { className?: string }) {
           >
             <Icon className="size-[18px]" />
             {label}
+            {badge ? (
+              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-xs font-bold text-text-on-brand">
+                {badge}
+              </span>
+            ) : null}
           </Link>
         );
       })}

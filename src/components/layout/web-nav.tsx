@@ -11,6 +11,7 @@ import { useTheme } from "next-themes";
 import { LogoFull } from "@/components/brand/logo-full";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUnreadMessages } from "@/hooks/use-unread-messages";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -67,6 +68,7 @@ export function WebNav() {
   const isWide = useIsWide();
   const { data: session } = useSession();
   const { isAuthenticated } = useUserRoles();
+  const unreadMessages = useUnreadMessages();
 
   const links = isWide
     ? NAV_LINKS
@@ -104,7 +106,16 @@ export function WebNav() {
         <div className="ml-auto flex items-center gap-3">
           {isWide ? (
             <>
-              <MessageCircle className="size-5 text-text-secondary" />
+              {isAuthenticated ? (
+                <Link href="/dashboard/messages" className="relative">
+                  <MessageCircle className="size-5 text-text-secondary" />
+                  {unreadMessages > 0 ? (
+                    <span className="absolute -top-1 -right-1 size-2 rounded-full bg-danger" />
+                  ) : null}
+                </Link>
+              ) : (
+                <MessageCircle className="size-5 text-text-secondary" />
+              )}
               <ShoppingBag className="size-5 text-text-secondary" />
             </>
           ) : null}

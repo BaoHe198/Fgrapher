@@ -240,7 +240,7 @@ export default function BookingDetailPage() {
                 size="sm"
                 variant="secondary"
                 nativeButton={false}
-                render={<Link href="/dashboard/messages" />}
+                render={<Link href={`/dashboard/messages?to=${otherParty.id}`} />}
               >
                 Message
               </Button>
@@ -330,7 +330,7 @@ export default function BookingDetailPage() {
                 <Button
                   variant="secondary"
                   nativeButton={false}
-                  render={<Link href="/dashboard/messages" />}
+                  render={<Link href={`/dashboard/messages?to=${otherParty.id}`} />}
                 >
                   Message
                 </Button>
