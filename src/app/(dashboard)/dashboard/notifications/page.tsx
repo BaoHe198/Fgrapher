@@ -42,6 +42,7 @@ const TYPE_GROUP: Record<NotificationType, "BOOKINGS" | "ORDERS" | "MESSAGES" | 
   ORDER_SHIPPED: "ORDERS",
   ORDER_DELIVERED: "ORDERS",
   ORDER_CANCELLED: "ORDERS",
+  REVIEW_RESPONSE: "SOCIAL",
 };
 
 function relativeTime(date: string | Date) {

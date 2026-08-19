@@ -70,7 +70,7 @@ export function ProfileInteractive({
             <ServicesTab services={services} onBook={onBook} />
           </TabsPanel>
           <TabsPanel value="reviews" className="mt-6">
-            <ReviewsTab reviews={reviews} />
+            <ReviewsTab providerId={providerId} reviews={reviews} />
           </TabsPanel>
           {hasGear ? (
             <TabsPanel value="gear" className="mt-6">

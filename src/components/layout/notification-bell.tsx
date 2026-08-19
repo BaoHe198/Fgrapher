@@ -47,6 +47,7 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   ORDER_SHIPPED: Package,
   ORDER_DELIVERED: Package,
   ORDER_CANCELLED: Package,
+  REVIEW_RESPONSE: Star,
 };
 
 function relativeTime(date: string | Date) {

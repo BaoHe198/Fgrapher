@@ -518,10 +518,24 @@ async function seedBookings() {
         cancelledBy: customerUser.id,
         cancelReason: "Schedule conflict",
       },
+      {
+        // Deliberately left unreviewed — exercises the "leave a review" flow
+        // (the makeup-artist booking below already has a seeded review, so
+        // it can only exercise respond/report, not review creation).
+        customerId: customerUser.id,
+        providerId: photographerUser.id,
+        serviceId: portraitService.id,
+        date: agoDays(10),
+        startTime: "16:00",
+        endTime: "17:00",
+        status: "COMPLETED",
+        totalPrice: portraitService.price,
+        completedAt: agoDays(10),
+      },
     ],
   });
 
-  console.log("Seeded 4 bookings for customer@test.com");
+  console.log("Seeded 5 bookings for customer@test.com");
 
   const completedBooking = await db.booking.findFirstOrThrow({
     where: { providerId: makeupUser.id, customerId: customerUser.id, status: "COMPLETED" },

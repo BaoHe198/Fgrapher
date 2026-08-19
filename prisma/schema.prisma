@@ -694,6 +694,33 @@ model BlockedUser {
   @@map("blocked_users")
 }
 
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+// A generic report — targetType/targetId is a loose reference (not a
+// Prisma relation) since reports can point at several different models
+// (review, user, message, product); admin tooling (Phase 12) resolves it.
+model Report {
+  id          String       @id @default(cuid())
+  reporterId  String
+  targetType  String // "review" | "user" | "message" | "product"
+  targetId    String
+  reason      String
+  description String?      @db.Text
+  status      ReportStatus @default(PENDING)
+  reviewedBy  String?
+  reviewNote  String?
+  createdAt   DateTime     @default(now())
+  resolvedAt  DateTime?
+
+  @@index([status, createdAt])
+  @@map("reports")
+}
+
 // ============================================================================
 // REVIEWS
 // ============================================================================
@@ -744,6 +771,7 @@ enum NotificationType {
   ORDER_SHIPPED
   ORDER_DELIVERED
   ORDER_CANCELLED
+  REVIEW_RESPONSE
 }
 
 model Notification {

@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
+import { ReviewModal } from "@/components/modals/review-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { NativeSelect } from "@/components/ui/native-select";
+import { StarInput } from "@/components/ui/star-input";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
@@ -83,6 +85,8 @@ export default function BookingDetailPage() {
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [acceptOpen, setAcceptOpen] = useState(false);
   const [now] = useState(() => Date.now());
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
 
   const load = () => {
     fetch(`/api/bookings/${params.id}`)
@@ -284,6 +288,21 @@ export default function BookingDetailPage() {
             <Card className="flex flex-col gap-1.5">
               <span className="text-body-sm text-text-tertiary">Notes</span>
               <p className="whitespace-pre-line text-body-md text-text-primary">{booking.notes}</p>
+            </Card>
+          ) : null}
+
+          {booking.status === "COMPLETED" && !viewerIsProvider && !booking.review ? (
+            <Card className="flex flex-col items-center gap-3 text-center">
+              <span className="text-body-lg font-semibold text-text-primary">
+                How was your session with {partyName(otherParty)}?
+              </span>
+              <StarInput
+                value={reviewRating}
+                onChange={(value) => {
+                  setReviewRating(value);
+                  setReviewOpen(true);
+                }}
+              />
             </Card>
           ) : null}
 
@@ -491,6 +510,24 @@ export default function BookingDetailPage() {
           load();
         }}
       />
+
+      {booking.status === "COMPLETED" && !viewerIsProvider ? (
+        <ReviewModal
+          open={reviewOpen}
+          onOpenChange={(open) => {
+            setReviewOpen(open);
+            if (!open) setReviewRating(0);
+          }}
+          bookingId={booking.id}
+          providerName={partyName(otherParty)}
+          serviceName={booking.service?.name}
+          initialRating={reviewRating}
+          onSuccess={() => {
+            setIsLoading(true);
+            load();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

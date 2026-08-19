@@ -11,6 +11,7 @@ import {
   Package,
   Settings,
   ShoppingBag,
+  Star,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -51,7 +52,10 @@ export function DashboardSidebar({ className }: { className?: string }) {
       icon: Calendar,
     },
     ...(canReceiveBookings
-      ? [{ href: "/dashboard/calendar", label: "Calendar", icon: CalendarDays }]
+      ? [
+          { href: "/dashboard/calendar", label: "Calendar", icon: CalendarDays },
+          { href: "/dashboard/reviews", label: "Reviews", icon: Star },
+        ]
       : []),
     ...(canUpload
       ? [{ href: "/dashboard/portfolio", label: "Portfolio", icon: ImageIcon }]

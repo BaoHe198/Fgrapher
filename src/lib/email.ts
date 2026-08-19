@@ -313,3 +313,35 @@ export function orderStatusEmailHtml({
     ctaUrl: orderUrl,
   });
 }
+
+export function newReviewEmailHtml({
+  reviewerName,
+  rating,
+  bookingUrl,
+}: {
+  reviewerName: string;
+  rating: number;
+  bookingUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: "New review",
+    body: `<p><strong>${reviewerName}</strong> left you a <strong>${rating}-star</strong> review.</p>`,
+    ctaLabel: "View & respond",
+    ctaUrl: bookingUrl,
+  });
+}
+
+export function reviewResponseEmailHtml({
+  providerName,
+  bookingUrl,
+}: {
+  providerName: string;
+  bookingUrl: string;
+}) {
+  return bookingEmailShell({
+    heading: "New response to your review",
+    body: `<p><strong>${providerName}</strong> responded to your review.</p>`,
+    ctaLabel: "View response",
+    ctaUrl: bookingUrl,
+  });
+}
