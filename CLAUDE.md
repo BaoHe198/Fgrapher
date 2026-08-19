@@ -170,27 +170,34 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 9 — Marketplace (see `docs/guides/phase-9-marketplace.md`). Built on Phase 3's
-existing Product/Order/OrderItem models: `/shop` browse (type/category/condition/
-price filters) + `/shop/[productId]` detail (gallery, buy/rent modes, rental date
-math), a server-persisted cart (`CartItem` table, drawer + full `/cart` page,
-grouped by shop), single-page checkout handing off to Stripe Checkout (its built-in
-address collection, not a custom form step), and order management for both sides
-(`/dashboard/orders` customer, `/dashboard/shop-orders` shop, sharing one
-role-aware detail page) including a rental deposit refund/deduct flow. Orders are
-created fresh from the live cart inside the `checkout.session.completed` webhook,
-not pre-created at checkout start, so an abandoned checkout never leaves an
-orphaned order. Stripe Connect (splitting payouts to individual shops) is
-deliberately out of scope — no live Connect platform account to onboard shops
-against — so marketplace payments currently settle to the platform account, same
-as Phase 7's subscription payments. Phases 0-8 (foundation, landing page, auth,
-dashboard, public profiles, browse & search, booking flow, payments, messaging)
-are complete.
+Phase 10 — Reviews & ratings (see `docs/guides/phase-10-reviews.md`). Built on
+Phase 4's existing Review model (bookingId already unique 1:1, response field
+already there): a StarInput component, a leave-a-review flow (inline prompt on
+COMPLETED bookings → modal, eligibility enforced server-side — one review per
+booking, 30-day window, edit within 7 days), a standalone `/review/[bookingId]`
+page for the email-link flow, provider responses (create + edit within 24h, both
+from the profile's reviews tab and a new `/dashboard/reviews` stats page), rating
+filter chips, and a generic `Report` model + modal (reused as-is from what Phase
+8/messaging also wanted but deferred). avgRating/reviewCount stay computed live
+via aggregation queries rather than denormalized Profile columns, consistent with
+Phase 4/5's existing approach — deliberately did not add the guide's suggested
+`Profile.avgRating/reviewCount/ratingBreakdown` fields, since duplicating a value
+that's already computed live just risks drift. Phases 0-9 (foundation, landing
+page, auth, dashboard, public profiles, browse & search, booking flow, payments,
+messaging, marketplace) are complete.
 
-Real bug caught and fixed while building this: Stripe's zero-decimal currencies
-(VND included) expect the raw amount, not `amount * 100` like USD cents —
-`lib/stripe.ts`'s `toStripeAmount()` handles this now. Also fixed: the reseed
-cleanup block was missing Message/Order (no `onDelete: Cascade` from User), so
+Real bug caught and fixed while building this: the review modal isn't
+mounted/unmounted by its Dialog (only visibility toggles), so its
+`useState(initialRating)` only ran once at first render — clicking a *different*
+star on the inline prompt after the modal had already mounted kept showing the
+stale rating. Fixed with a `useEffect` that resets local state whenever `open`
+transitions to true; worth remembering for any other modal that seeds its initial
+state from a prop that can change between opens.
+
+Also fixed (Phase 9 follow-through): Stripe's zero-decimal currencies (VND
+included) expect the raw amount, not `amount * 100` like USD cents —
+`lib/stripe.ts`'s `toStripeAmount()` handles this now. And the reseed cleanup
+block was missing Message/Order (no `onDelete: Cascade` from User), so
 `pnpm db:seed` broke once real messaging/order test data existed — keep this in
 mind when adding models with a User FK; check whether reseed cleanup needs it too.
 
