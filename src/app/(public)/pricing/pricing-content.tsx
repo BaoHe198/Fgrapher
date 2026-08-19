@@ -147,6 +147,7 @@ const COMPARISON_MATRIX: Record<Role, boolean[]> = {
   STUDIO: [true, true, true, true, false, false],
   CAMERA_SHOP: [true, false, true, false, false, false],
   CUSTOMER: [false, false, false, false, false, false],
+  ADMIN: [false, false, false, false, false, false],
 };
 
 export function PricingContent() {

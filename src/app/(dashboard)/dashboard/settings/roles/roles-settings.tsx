@@ -25,6 +25,7 @@ const ROLE_ICONS: Record<Role, LucideIcon> = {
   STUDIO: Building2,
   CAMERA_SHOP: ShoppingBag,
   CUSTOMER: User,
+  ADMIN: User,
 };
 
 export function RolesSettings({ currentRoles }: { currentRoles: Role[] }) {

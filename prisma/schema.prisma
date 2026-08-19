@@ -42,6 +42,12 @@ model User {
   //   { email: boolean, inApp: boolean }>. No dedicated table since this is a
   // single settings blob read/written as a whole, never queried by field.
   notificationPreferences Json?
+  // Admin moderation
+  isVerified      Boolean   @default(false)
+  isSuspended     Boolean   @default(false)
+  suspendedReason String?
+  suspendedUntil  DateTime?
+  adminNotes      String?   @db.Text
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
@@ -125,6 +131,9 @@ enum Role {
   STUDIO
   CAMERA_SHOP
   CUSTOMER
+  // Not selectable at registration — granted manually via
+  // scripts/make-admin.ts. No subscription required.
+  ADMIN
 }
 
 model UserRole {
@@ -719,6 +728,23 @@ model Report {
 
   @@index([status, createdAt])
   @@map("reports")
+}
+
+// A loose (non-relational) audit trail of admin actions — targetType/
+// targetId mirrors Report's pattern since admin actions can touch several
+// different models (user, review, product, report...).
+model AdminAction {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  targetType String
+  targetId   String
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId])
+  @@map("admin_actions")
 }
 
 // ============================================================================

@@ -212,6 +212,14 @@ const USERS: UserSeed[] = [
     roles: ["CUSTOMER"],
   },
   {
+    email: "admin@test.com",
+    location: "Ho Chi Minh City",
+    username: "fgrapheradmin",
+    firstName: "Admin",
+    lastName: "User",
+    roles: ["ADMIN", "CUSTOMER"],
+  },
+  {
     email: "multi@test.com",
     location: "Da Lat",
     username: "jamiekim",
@@ -314,7 +322,7 @@ async function main() {
     // account, since a bare UserRole row alone no longer grants access.
     await Promise.all(
       createdRoles
-        .filter((ur) => ur.role !== "CUSTOMER")
+        .filter((ur) => ur.role !== "CUSTOMER" && ur.role !== "ADMIN")
         .map((ur) => {
           const now = new Date();
           const periodEnd = new Date(now);

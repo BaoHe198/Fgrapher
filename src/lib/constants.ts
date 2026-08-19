@@ -33,4 +33,5 @@ export const ROLE_LABELS: Record<Role, string> = {
   STUDIO: "Studio",
   CAMERA_SHOP: "Camera Shop",
   CUSTOMER: "Customer",
+  ADMIN: "Admin",
 };
