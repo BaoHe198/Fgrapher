@@ -343,6 +343,7 @@ export function ChatPanel({
           variant="ghost"
           size="icon"
           disabled={uploading}
+          aria-label="Attach an image"
           onClick={() => fileInputRef.current?.click()}
         >
           {uploading ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
@@ -365,6 +366,7 @@ export function ChatPanel({
           size="icon"
           className="rounded-full"
           disabled={!draft.trim() || sending}
+          aria-label="Send message"
           onClick={() => onSend()}
         >
           {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}

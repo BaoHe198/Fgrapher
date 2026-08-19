@@ -20,7 +20,10 @@ export default async function DashboardLayout({
       <WebNav />
       <PastDueBanner userId={session.user.id} />
 
-      <div className="mx-auto w-full max-w-[1240px] px-4 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-[72px]">
+      <main
+        id="main-content"
+        className="mx-auto w-full max-w-[1240px] px-4 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-[72px]"
+      >
         <div className="mb-4 lg:hidden">
           <MobileDashboardSidebar />
         </div>
@@ -32,7 +35,7 @@ export default async function DashboardLayout({
 
           <div className="min-w-0">{children}</div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

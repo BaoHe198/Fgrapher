@@ -44,6 +44,7 @@ export async function generateMetadata({ params, searchParams }: ProfilePageProp
   return {
     title: `${name} — ${ROLE_LABELS[activeProfile.role]} in ${user.location ?? "Fgrapher"} | Fgrapher`,
     description: bio.slice(0, 155),
+    alternates: { canonical: `/profile/${username}` },
     openGraph: {
       images: user.coverImage ? [user.coverImage] : [],
       type: "profile",
@@ -75,8 +76,30 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
       ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
       : "0.0";
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": activeProfile.role === "STUDIO" ? "LocalBusiness" : "Person",
+    name: displayName,
+    image: user.avatar ?? undefined,
+    description: activeProfile.description ?? undefined,
+    address: user.location ? { "@type": "PostalAddress", addressLocality: user.location } : undefined,
+    ...(reviews.length > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: averageRating,
+            reviewCount: reviews.length,
+          },
+        }
+      : {}),
+  };
+
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="relative h-[280px] w-full">
         {user.coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element

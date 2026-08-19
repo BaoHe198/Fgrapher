@@ -24,6 +24,7 @@ export async function generateMetadata({
   return {
     title: `${result.product.name} — Fgrapher`,
     description: result.product.description ?? undefined,
+    alternates: { canonical: `/shop/${productId}` },
   };
 }
 
