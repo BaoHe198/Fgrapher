@@ -170,79 +170,68 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 ## Current phase
 
-Phase 11 — Polish (see `docs/guides/phase-11-polish.md`). This phase is
-inherently open-ended ("polish everything"), so it was deliberately scoped to
-the concrete, finishable pieces — see the Phase 11 commit for the full
-scope-out list (i18n retrofit, Redis caching, dynamic OG images, a real
-Lighthouse/axe-core pass, bundle analysis all deferred). What actually landed:
-error/loading boundaries (root + dashboard — none existed anywhere before
-this), robots.ts/sitemap.ts via Next's native App Router conventions, JSON-LD
-on profile pages (product pages already had it from Phase 9), a skip-to-content
-link wired to a real landmark, and prefers-reduced-motion CSS. Phases 0-10
-(foundation, landing page, auth, dashboard, public profiles, browse & search,
-booking flow, payments, messaging, marketplace, reviews) are complete.
+Phase 12, part 1 of 2 — Admin panel (see `docs/guides/phase-12-admin-launch.md`).
+ADMIN role (`requireAdmin()` + `scripts/make-admin.ts`), a distinct `(admin)`
+route group (dark top bar, its own sidebar), an overview dashboard (user/
+subscription/booking/GMV metrics, health indicators, recent activity — no
+charts, same reasoning as Phase 9's shop-analytics deferral), user management
+(search/filter, detail page with suspend/verify/soft-delete, all actions logged
+to a new `AdminAction` audit table), and a moderation queue for Phase 10's
+`Report` model. All 12 phases' *code* is now built — Phases 0-11 (foundation,
+landing page, auth, dashboard, public profiles, browse & search, booking flow,
+payments, messaging, marketplace, reviews, polish) plus this admin panel.
 
-Two real bugs caught while doing this pass — worth internalizing as patterns,
-not just fixes:
-1. `next.config.ts` never had `images.remotePatterns` set, so next/image would
-   have 400'd on every Cloudinary-hosted image the moment real Cloudinary
-   credentials were configured. Latent since Phase 1 — never caught because
-   this environment has never had live Cloudinary credentials either, so no
-   image ever actually round-tripped through next/image's optimizer. Fixed
-   now (res.cloudinary.com + Google OAuth avatars allow-listed). General
-   lesson: a config gap that only bites once a *different* missing credential
-   is filled in is exactly the kind of thing that survives a long session
-   undetected — worth an explicit check whenever wiring up real API keys.
-2. Giving the root layout's metadata a `template: "%s — Fgrapher"` doubled the
-   suffix on all 14 pages that already append "— Fgrapher" themselves (e.g.
-   "Browse artists — Fgrapher — Fgrapher"). Caught by an actual page-title
-   assertion across 5 pages post-change, not just a visual check — reverted to
-   a plain fallback title rather than retrofitting every page's title string.
+**What's deliberately NOT done, and can't be done from here — Phase 12's
+Steps 6-8 (production deployment, launch checklist, post-launch ops):** these
+aren't code, they're actions in external systems this environment has no
+access to — a production Supabase project, a Vercel account/domain, Stripe's
+business verification for live mode, a verified Resend sending domain, a
+Sentry project, uptime monitoring. No amount of further autonomous coding
+closes this gap; it needs a human with those accounts. See
+`docs/guides/phase-12-admin-launch.md` Steps 6-8 for the literal checklist
+(env vars to set, DNS records, Stripe live-mode setup, cron config, monitoring)
+when that time comes — nothing here has abbreviated it.
 
-Also fixed (Phase 9/10 follow-through, same session): the review modal isn't
-mounted/unmounted by its Dialog (only visibility toggles), so its
-`useState(initialRating)` only ran once at first render — clicking a *different*
-star on the inline prompt after the modal had already mounted kept showing the
-stale rating. Fixed with a `useEffect` that resets local state whenever `open`
-transitions to true; worth remembering for any other modal that seeds its initial
-state from a prop that can change between opens.
+**Everything that *is* code-complete but genuinely untested end-to-end**,
+because every external integration in this build was developed against
+services with no live credentials in this sandboxed environment:
+- **Stripe** (Phase 7 subscriptions + Phase 9 marketplace): checkout, the
+  5-event webhook, Customer Portal — type-checked against the real installed
+  SDK (v22; note it moved `current_period_start/end` onto SubscriptionItems,
+  which the code follows, not the older guide assumption), not-configured
+  error paths verified non-fatal, but no real payment has ever round-tripped.
+  Needs `STRIPE_SECRET_KEY` + `stripe listen` (`scripts/stripe-setup.ts`
+  creates the Products/Prices first). Stripe Connect (splitting marketplace
+  payouts to individual shops) was never attempted — payments settle to the
+  platform account for now.
+- **Cloudinary**: uploads no-op gracefully; `next.config.ts` now has the
+  `remotePatterns` a real Cloudinary image would need, but that was only
+  caught in Phase 11 because no image had ever actually round-tripped through
+  next/image's optimizer here — worth double-checking image rendering
+  specifically once real credentials land, not just assuming it works because
+  the no-op path was clean.
+- **Resend**: emails no-op gracefully (every email template in the app is
+  written and will send the moment `RESEND_API_KEY` is set — none have been
+  visually proofed in an actual inbox).
+- **Pusher/Socket.io**: never attempted — Phase 8 messaging and the
+  notification bell both use polling instead (chat panel every 4s while open,
+  unread badges every 20s/30s). This is a deliberate architecture choice, not
+  a stub — swapping in real-time delivery later means adding a transport
+  layer, not rewriting the polling call sites.
+- **Redis/Upstash**: no caching layer exists; Phase 11 skipped it entirely.
 
-Also fixed (Phase 9 follow-through): Stripe's zero-decimal currencies (VND
-included) expect the raw amount, not `amount * 100` like USD cents —
-`lib/stripe.ts`'s `toStripeAmount()` handles this now. And the reseed cleanup
-block was missing Message/Order (no `onDelete: Cascade` from User), so
-`pnpm db:seed` broke once real messaging/order test data existed — keep this in
-mind when adding models with a User FK; check whether reseed cleanup needs it too.
+seed.ts creates a synthetic ACTIVE Subscription (no real Stripe IDs) for every
+paid-role seed account, plus one seeded `admin@test.com` (password `Test1234!`,
+same as every other seed account) for exercising `/admin` locally — keep both
+in mind when adding new seed users with paid or admin roles.
 
-Known limitation, impossible to close in this environment: there is no live Stripe
-account or Stripe CLI here, so checkout/webhook/Customer Portal (both the Phase 7
-subscription flow and the Phase 9 marketplace flow) are code-complete and
-type-checked against the actually-installed Stripe SDK (v22, which restructured
-`current_period_start/end` onto SubscriptionItems — the code follows that, not the
-phase guide's older `apiVersion` assumption) but UNTESTED end-to-end. Everything
-that doesn't require live Stripe was verified working: pricing page, billing
-settings against seeded synthetic ACTIVE subscriptions, both checkout flows'
-not-configured error path staying non-fatal, the subscription gates actually
-blocking/allowing correctly, and the full shop browse → product detail → cart →
-checkout-page UI loop. Needs a real `STRIPE_SECRET_KEY` + `stripe listen` pass
-before launch — see `scripts/stripe-setup.ts` for creating the Products/Prices.
-
-seed.ts now creates a synthetic ACTIVE Subscription (no real Stripe IDs) for every
-paid-role seed account — required for the new subscription-based gating to not
-lock every seeded/test account out; keep this in mind when adding new seed users
-with paid roles.
-
-Known gaps carried forward on purpose: Cloudinary and Resend have no live credentials
-in this environment, so uploads/emails no-op or show a graceful inline error rather
-than crashing — wire up real credentials in `.env.local` to exercise those paths.
-
-Known bug, NOT resolved (see the Phase 4 commit message for the full investigation):
-the Follow/Save/Share buttons on `/profile/[username]` don't respond to clicks in this
-dev environment specifically when logged in, despite rendering correctly. Extensively
-isolated to "authenticated session + any async delay before a Client Component
-renders" — reproduces with plain Prisma queries or even a bare `setTimeout`, unrelated
-to this feature's own code. Every other auth-gated interactive feature in the app
-(bookings, portfolio, listings, settings, services, availability) works fine. Needs a
+Known bug, NOT resolved (see the Phase 4 commit message for the full
+investigation): the Follow/Save/Share buttons on `/profile/[username]` don't
+respond to clicks in this dev environment specifically when logged in, despite
+rendering correctly. Extensively isolated to "authenticated session + any
+async delay before a Client Component renders" — reproduces with plain Prisma
+queries or even a bare `setTimeout`, unrelated to this feature's own code.
+Every other auth-gated interactive feature in the app works fine. Needs a
 fresh look with real browser devtools, not headless/CDP testing.
 
 ## Rules
