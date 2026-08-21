@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ROLE_LABELS, ROLE_MONTHLY_PRICE } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { ROLE_LABELS } from "@/lib/constants";
+import { cn, formatCurrency } from "@/lib/utils";
 
 interface Plan {
   role: Role;
@@ -107,11 +107,11 @@ const PLANS: Plan[] = [
 const FAQS = [
   {
     q: "Can I have multiple roles?",
-    a: "Yes — one account can hold several paid roles at once (e.g. Photographer + Studio), each billed as its own subscription.",
+    a: "Yes — one account can hold several paid roles at once (e.g. Photographer + Studio), each billed as its own subscription, all shown together on one profile page.",
   },
   {
     q: "What happens after the free trial?",
-    a: "After 14 days your card is charged the monthly price automatically. You can cancel anytime before the trial ends and you won't be charged.",
+    a: "After 14 days your card is charged automatically at the rate you selected. You can cancel anytime before the trial ends and you won't be charged.",
   },
   {
     q: "Can I cancel anytime?",
@@ -119,15 +119,15 @@ const FAQS = [
   },
   {
     q: "Do you take a commission on bookings?",
-    a: "No — Fgrapher charges a flat monthly subscription per role, not a percentage of your bookings.",
+    a: "No — Fgrapher charges a flat subscription per role, not a percentage of your bookings.",
   },
   {
     q: "What payment methods do you accept?",
-    a: "All major credit and debit cards, processed securely through Stripe.",
+    a: "Credit and debit cards, processed securely through Stripe, plus local Vietnamese payment methods if you enable them in your Stripe settings.",
   },
   {
     q: "Is there a discount for annual billing?",
-    a: "Annual billing (20% off) is coming soon — for now, all plans are billed monthly.",
+    a: "Yes — switch to yearly billing on this page and pay 20% less than the monthly rate, charged once a year.",
   },
 ];
 
@@ -150,7 +150,13 @@ const COMPARISON_MATRIX: Record<Role, boolean[]> = {
   ADMIN: [false, false, false, false, false, false],
 };
 
-export function PricingContent() {
+export function PricingContent({
+  monthlyPrices,
+  yearlyPrices,
+}: {
+  monthlyPrices: Partial<Record<Role, number>>;
+  yearlyPrices: Partial<Record<Role, number>>;
+}) {
   const [yearly, setYearly] = useState(false);
 
   return (
@@ -159,7 +165,7 @@ export function PricingContent() {
         <span className="text-caption-upper tracking-[0.14em] text-gold-300">PRICING</span>
         <h1 className="mt-3 text-display-xl text-gold-50">Plans that grow with your craft</h1>
         <p className="mx-auto mt-3 max-w-[560px] text-body-lg text-green-200">
-          One flat monthly subscription per role — no commission on bookings, ever.
+          One flat subscription per role, billed in VND — no commission on bookings, ever.
         </p>
 
         <div className="mx-auto mt-6 inline-flex overflow-hidden rounded-full border border-border-subtle bg-bg-surface">
@@ -198,8 +204,7 @@ export function PricingContent() {
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
-            const base = ROLE_MONTHLY_PRICE[plan.role] ?? 0;
-            const displayPrice = yearly ? Math.round(base * 0.8) : base;
+            const displayPrice = (yearly ? yearlyPrices : monthlyPrices)[plan.role] ?? 0;
 
             return (
               <Card
@@ -224,8 +229,10 @@ export function PricingContent() {
                     {ROLE_LABELS[plan.role]}
                   </span>
                   <span className="text-display-md text-text-primary">
-                    ${displayPrice}
-                    <span className="text-body-sm font-normal text-text-secondary">/month</span>
+                    {formatCurrency(displayPrice, "VND")}
+                    <span className="text-body-sm font-normal text-text-secondary">
+                      /{yearly ? "year" : "month"}
+                    </span>
                   </span>
                   <span className="text-body-sm text-text-secondary">{plan.description}</span>
                 </div>
@@ -245,7 +252,9 @@ export function PricingContent() {
                   variant={plan.popular ? "accent" : "secondary"}
                   className="w-full"
                   nativeButton={false}
-                  render={<Link href={`/register?role=${plan.role}`} />}
+                  render={
+                    <Link href={`/register?role=${plan.role}${yearly ? "&interval=year" : ""}`} />
+                  }
                 >
                   Start 14-day trial
                 </Button>

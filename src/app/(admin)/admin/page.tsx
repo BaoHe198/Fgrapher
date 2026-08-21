@@ -12,7 +12,7 @@ export default async function AdminOverviewPage() {
 
   const metrics = [
     { label: "Total users", value: stats.totalUsers.toLocaleString(), sub: `${stats.userGrowthPercent >= 0 ? "+" : ""}${stats.userGrowthPercent}% vs last month` },
-    { label: "Active subscriptions", value: stats.activeSubscriptions.toLocaleString(), sub: `${formatCurrency(stats.mrr, "USD")} MRR` },
+    { label: "Active subscriptions", value: stats.activeSubscriptions.toLocaleString(), sub: `${formatCurrency(stats.mrr, "VND")} MRR` },
     { label: "Bookings this month", value: stats.bookingsThisMonth.toLocaleString(), sub: `${stats.completionRate}% completion rate` },
     {
       label: "GMV this month",

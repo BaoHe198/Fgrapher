@@ -19,8 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PAID_ROLES, ROLE_MONTHLY_PRICE } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { PAID_ROLES } from "@/lib/constants";
+import { cn, formatCurrency } from "@/lib/utils";
 
 interface RoleOption {
   role: Role;
@@ -70,7 +70,7 @@ const ROLE_OPTIONS: RoleOption[] = [
 
 const isPaidRole = (role: Role) => (PAID_ROLES as Role[]).includes(role);
 
-export function RoleSelectionForm() {
+export function RoleSelectionForm({ rolePrices }: { rolePrices: Partial<Record<Role, number>> }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<Role>>(new Set(["CUSTOMER"]));
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -131,7 +131,7 @@ export function RoleSelectionForm() {
           const isSelected = selected.has(role);
           const isCustomer = role === "CUSTOMER";
           const paid = isPaidRole(role);
-          const price = ROLE_MONTHLY_PRICE[role];
+          const price = rolePrices[role];
 
           return (
             <Card
@@ -184,7 +184,7 @@ export function RoleSelectionForm() {
                 )}
                 {paid && isSelected && price ? (
                   <span className="text-xs font-medium text-muted-foreground">
-                    ${price}/mo
+                    {formatCurrency(price, "VND")}/mo
                   </span>
                 ) : null}
               </div>

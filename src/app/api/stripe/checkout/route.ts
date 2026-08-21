@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { ROLE_PLANS } from "@/lib/plans";
+import { priceIdForRole } from "@/lib/constants/plans";
 import { createCheckoutSession, getOrCreateCustomer, StripeNotConfiguredError } from "@/lib/stripe";
 import { checkoutSchema } from "@/lib/validations/subscription";
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     const lineItems = parsed.data.roles
-      .map((role) => ROLE_PLANS[role]?.priceId)
+      .map((role) => priceIdForRole(role, parsed.data.interval))
       .filter((priceId): priceId is string => Boolean(priceId))
       .map((priceId) => ({ price: priceId, quantity: 1 }));
 
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       lineItems,
       metadata: { userId: user.id, roles: parsed.data.roles.join(",") },
       successUrl: `${appUrl}/dashboard?checkout=success`,
-      cancelUrl: `${appUrl}/onboarding/billing?checkout=cancelled&roles=${parsed.data.roles.join(",")}`,
+      cancelUrl: `${appUrl}/onboarding/billing?checkout=cancelled&roles=${parsed.data.roles.join(",")}&interval=${parsed.data.interval}`,
     });
 
     return NextResponse.json(

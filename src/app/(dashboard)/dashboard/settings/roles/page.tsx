@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { rolePricesVnd } from "@/lib/constants/plans";
 
 import { RolesSettings } from "./roles-settings";
 
@@ -10,5 +11,5 @@ export default async function RolesSettingsPage() {
     redirect("/login");
   }
 
-  return <RolesSettings currentRoles={session.user.roles} />;
+  return <RolesSettings currentRoles={session.user.roles} rolePrices={rolePricesVnd()} />;
 }

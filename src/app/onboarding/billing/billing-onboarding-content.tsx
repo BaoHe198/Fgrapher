@@ -8,19 +8,25 @@ import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ROLE_LABELS, ROLE_MONTHLY_PRICE } from "@/lib/constants";
+import { ROLE_LABELS } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
 
 export function BillingOnboardingContent({
   roles,
   cancelled,
+  rolePrices,
+  interval,
 }: {
   roles: Role[];
   cancelled: boolean;
+  rolePrices: Partial<Record<Role, number>>;
+  interval: "month" | "year";
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const total = roles.reduce((sum, role) => sum + (ROLE_MONTHLY_PRICE[role] ?? 0), 0);
+  const total = roles.reduce((sum, role) => sum + (rolePrices[role] ?? 0), 0);
+  const suffix = interval === "year" ? "/yr" : "/mo";
   const heading =
     roles.length === 1
       ? `Activate your ${ROLE_LABELS[roles[0]]} profile`
@@ -33,7 +39,7 @@ export function BillingOnboardingContent({
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roles }),
+      body: JSON.stringify({ roles, interval }),
     });
     const body = await res.json();
 
@@ -59,6 +65,11 @@ export function BillingOnboardingContent({
             Start a 14-day free trial — cancel anytime before it ends and you won&apos;t be
             charged.
           </p>
+          {interval === "year" ? (
+            <span className="mx-auto w-fit rounded-full bg-success-bg px-2.5 py-1 text-body-sm font-bold text-success">
+              Billed yearly — save 20%
+            </span>
+          ) : null}
         </div>
 
         {cancelled ? (
@@ -77,18 +88,23 @@ export function BillingOnboardingContent({
             <div key={role} className="flex items-center justify-between px-5 py-3.5">
               <span className="text-body-md text-text-primary">{ROLE_LABELS[role]}</span>
               <span className="text-body-md font-semibold text-text-primary">
-                ${ROLE_MONTHLY_PRICE[role] ?? 0}/mo
+                {formatCurrency(rolePrices[role] ?? 0, "VND")}
+                {suffix}
               </span>
             </div>
           ))}
           <div className="flex items-center justify-between px-5 py-3.5">
             <span className="text-body-md font-semibold text-text-primary">Total</span>
-            <span className="text-heading-md font-bold text-text-primary">${total}/mo</span>
+            <span className="text-heading-md font-bold text-text-primary">
+              {formatCurrency(total, "VND")}
+              {suffix}
+            </span>
           </div>
         </Card>
 
         <p className="text-center text-body-sm text-text-tertiary">
-          Free for 14 days, then ${total}/month
+          Free for 14 days, then {formatCurrency(total, "VND")}
+          {suffix === "/yr" ? "/year" : "/month"}
         </p>
 
         <div className="flex flex-col gap-2.5">

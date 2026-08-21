@@ -9,7 +9,7 @@ import {
   welcomeSubscriptionEmailHtml,
 } from "@/lib/email";
 import { db } from "@/lib/db";
-import { ROLE_PLANS } from "@/lib/plans";
+import { intervalForPriceId, ROLE_PLANS } from "@/lib/constants/plans";
 import { PAID_ROLES } from "@/lib/constants";
 import { notifyCritical } from "@/services/notification";
 import { stripe } from "@/lib/stripe";
@@ -39,17 +39,18 @@ function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus
   }
 }
 
-function priceIdForRole(role: Role) {
-  return ROLE_PLANS[role]?.priceId;
-}
-
-function roleForPriceId(priceId: string): Role | undefined {
-  return (Object.keys(ROLE_PLANS) as Role[]).find((role) => ROLE_PLANS[role]?.priceId === priceId);
+function itemForRole(subscription: Stripe.Subscription, role: Role) {
+  const plan = ROLE_PLANS[role];
+  if (!plan) return undefined;
+  return subscription.items.data.find(
+    (i) => i.price.id === plan.monthlyPriceId || i.price.id === plan.yearlyPriceId,
+  );
 }
 
 // Shared by checkout.session.completed and customer.subscription.updated:
 // re-derives every role's Subscription row from the live Stripe Subscription
-// object, matching each SubscriptionItem to a role by price ID (current
+// object, matching each SubscriptionItem to a role by price ID — a role has
+// two possible prices (monthly/yearly), so this checks both (current
 // period start/end live per-item on Stripe's side, not on the parent
 // subscription, since API 2025-03-31).
 async function syncSubscriptionFromStripe(
@@ -60,8 +61,7 @@ async function syncSubscriptionFromStripe(
   const results = [];
 
   for (const role of roles) {
-    const priceId = priceIdForRole(role);
-    const item = subscription.items.data.find((i) => i.price.id === priceId);
+    const item = itemForRole(subscription, role);
     if (!item) continue;
 
     const userRole = await db.userRole.upsert({
@@ -69,6 +69,8 @@ async function syncSubscriptionFromStripe(
       create: { userId, role, active: true },
       update: { active: true },
     });
+
+    const interval = intervalForPriceId(item.price.id) ?? "month";
 
     const updated = await db.subscription.upsert({
       where: { userRoleId: userRole.id },
@@ -79,6 +81,7 @@ async function syncSubscriptionFromStripe(
         stripeSubscriptionItemId: item.id,
         stripePriceId: item.price.id,
         plan: role,
+        interval,
         status: mapStripeStatus(subscription.status),
         currentPeriodStart: new Date(item.current_period_start * 1000),
         currentPeriodEnd: new Date(item.current_period_end * 1000),
@@ -88,6 +91,7 @@ async function syncSubscriptionFromStripe(
         stripeSubscriptionId: subscription.id,
         stripeSubscriptionItemId: item.id,
         stripePriceId: item.price.id,
+        interval,
         status: mapStripeStatus(subscription.status),
         currentPeriodStart: new Date(item.current_period_start * 1000),
         currentPeriodEnd: new Date(item.current_period_end * 1000),
@@ -293,5 +297,3 @@ export async function getBillingOverview(userId: string) {
 
   return userRoles;
 }
-
-export { roleForPriceId };

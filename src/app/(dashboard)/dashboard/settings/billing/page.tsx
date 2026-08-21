@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { rolePricesVnd } from "@/lib/constants/plans";
 import { getBillingOverview } from "@/services/subscription";
 
 import { BillingSettingsContent } from "./billing-settings-content";
@@ -24,9 +25,12 @@ export default async function BillingSettingsPage() {
               currentPeriodEnd: ur.subscription.currentPeriodEnd?.toISOString() ?? null,
               cancelAtPeriodEnd: ur.subscription.cancelAtPeriodEnd,
               graceEndsAt: ur.subscription.graceEndsAt?.toISOString() ?? null,
+              interval: ur.subscription.interval === "year" ? "year" : "month",
             }
           : null,
       }))}
+      monthlyPrices={rolePricesVnd("month")}
+      yearlyPrices={rolePricesVnd("year")}
     />
   );
 }

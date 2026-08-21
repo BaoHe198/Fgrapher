@@ -1,9 +1,11 @@
-// One-time dev script: creates the 5 paid-role Products + monthly Prices in
-// your Stripe account and prints the Price IDs to paste into .env.local.
+// One-time dev script: creates the 5 paid-role Products + a monthly and a
+// yearly (20% off) Price for each in your Stripe account, and prints the
+// Price IDs to paste into .env.local.
 // Run with: npx tsx --env-file=.env scripts/stripe-setup.ts
 import Stripe from "stripe";
 
-import { ROLE_LABELS, ROLE_MONTHLY_PRICE } from "../src/lib/constants";
+import { ROLE_PLANS } from "../src/lib/constants/plans";
+import { toStripeAmount } from "../src/lib/stripe";
 
 const ROLES = ["PHOTOGRAPHER", "VIDEOGRAPHER", "MAKEUP_ARTIST", "STUDIO", "CAMERA_SHOP"] as const;
 
@@ -17,22 +19,32 @@ async function main() {
   const envLines: string[] = [];
 
   for (const role of ROLES) {
-    const amount = ROLE_MONTHLY_PRICE[role];
-    if (!amount) continue;
+    const plan = ROLE_PLANS[role];
+    if (!plan) continue;
 
     const product = await stripe.products.create({
-      name: `Fgrapher — ${ROLE_LABELS[role]}`,
+      name: `Fgrapher — ${plan.name}`,
     });
 
-    const price = await stripe.prices.create({
+    const monthlyPrice = await stripe.prices.create({
       product: product.id,
-      currency: "usd",
-      unit_amount: amount * 100,
+      currency: plan.currency.toLowerCase(),
+      unit_amount: toStripeAmount(plan.monthly, plan.currency),
       recurring: { interval: "month" },
     });
 
-    console.log(`${ROLE_LABELS[role]}: product=${product.id} price=${price.id}`);
-    envLines.push(`STRIPE_PRICE_${role}=${price.id}`);
+    const yearlyPrice = await stripe.prices.create({
+      product: product.id,
+      currency: plan.currency.toLowerCase(),
+      unit_amount: toStripeAmount(plan.yearly, plan.currency),
+      recurring: { interval: "year" },
+    });
+
+    console.log(
+      `${plan.name}: product=${product.id} monthly=${monthlyPrice.id} yearly=${yearlyPrice.id}`,
+    );
+    envLines.push(`STRIPE_PRICE_${role}_MONTHLY=${monthlyPrice.id}`);
+    envLines.push(`STRIPE_PRICE_${role}_YEARLY=${yearlyPrice.id}`);
   }
 
   console.log("\nAdd these to .env.local:\n");

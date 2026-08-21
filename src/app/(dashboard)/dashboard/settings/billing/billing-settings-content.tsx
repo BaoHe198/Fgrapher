@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ROLE_LABELS, ROLE_MONTHLY_PRICE } from "@/lib/constants";
+import { ROLE_LABELS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
 interface RoleBilling {
@@ -26,6 +26,7 @@ interface RoleBilling {
     currentPeriodEnd: string | null;
     cancelAtPeriodEnd: boolean;
     graceEndsAt: string | null;
+    interval: "month" | "year";
   } | null;
 }
 
@@ -52,7 +53,15 @@ function daysUntil(dateIso: string) {
   return Math.max(0, Math.ceil((new Date(dateIso).getTime() - Date.now()) / 86_400_000));
 }
 
-export function BillingSettingsContent({ roles }: { roles: RoleBilling[] }) {
+export function BillingSettingsContent({
+  roles,
+  monthlyPrices,
+  yearlyPrices,
+}: {
+  roles: RoleBilling[];
+  monthlyPrices: Partial<Record<Role, number>>;
+  yearlyPrices: Partial<Record<Role, number>>;
+}) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [invoicesLoading, setInvoicesLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -72,9 +81,17 @@ export function BillingSettingsContent({ roles }: { roles: RoleBilling[] }) {
   }, []);
 
   const withSubscription = roles.filter((r) => r.subscription);
+  // Yearly subscriptions are normalized to a monthly-equivalent figure so
+  // mixed monthly/yearly roles can still be summed into one meaningful total.
   const totalMonthly = withSubscription
     .filter((r) => r.subscription!.status === "ACTIVE" || r.subscription!.status === "TRIALING")
-    .reduce((sum, r) => sum + (ROLE_MONTHLY_PRICE[r.role] ?? 0), 0);
+    .reduce((sum, r) => {
+      const amount =
+        r.subscription!.interval === "year"
+          ? (yearlyPrices[r.role] ?? 0) / 12
+          : (monthlyPrices[r.role] ?? 0);
+      return sum + amount;
+    }, 0);
 
   const openPortal = async () => {
     setPortalError(null);
@@ -150,7 +167,9 @@ export function BillingSettingsContent({ roles }: { roles: RoleBilling[] }) {
                     {ROLE_LABELS[role]}
                   </span>
                   <span className="text-body-sm text-text-secondary">
-                    {formatCurrency(ROLE_MONTHLY_PRICE[role] ?? 0, "USD")}/mo
+                    {subscription!.interval === "year"
+                      ? `${formatCurrency(yearlyPrices[role] ?? 0, "VND")}/yr`
+                      : `${formatCurrency(monthlyPrices[role] ?? 0, "VND")}/mo`}
                   </span>
                 </div>
                 <Badge variant={status.variant}>{status.label}</Badge>
@@ -197,7 +216,7 @@ export function BillingSettingsContent({ roles }: { roles: RoleBilling[] }) {
         <Card className="flex items-center justify-between">
           <span className="text-body-md font-semibold text-text-primary">Total monthly cost</span>
           <span className="text-heading-md font-bold text-text-primary">
-            {formatCurrency(totalMonthly, "USD")}/mo
+            {formatCurrency(totalMonthly, "VND")}/mo
           </span>
         </Card>
       </div>

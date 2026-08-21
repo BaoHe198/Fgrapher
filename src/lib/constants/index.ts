@@ -8,15 +8,6 @@ export const PAID_ROLES: Role[] = [
   "CAMERA_SHOP",
 ];
 
-// Placeholder starting prices until real Stripe Prices are wired up.
-export const ROLE_MONTHLY_PRICE: Partial<Record<Role, number>> = {
-  PHOTOGRAPHER: 15,
-  VIDEOGRAPHER: 15,
-  MAKEUP_ARTIST: 15,
-  STUDIO: 29,
-  CAMERA_SHOP: 19,
-};
-
 // Roles that get a portfolio + booking-based nav section, as opposed to
 // CAMERA_SHOP's product/order-based section.
 export const PROVIDER_ROLES: Role[] = [

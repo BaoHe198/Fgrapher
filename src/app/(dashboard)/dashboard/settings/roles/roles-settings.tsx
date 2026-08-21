@@ -15,7 +15,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PAID_ROLES, ROLE_LABELS, ROLE_MONTHLY_PRICE } from "@/lib/constants";
+import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
 const ROLE_ICONS: Record<Role, LucideIcon> = {
@@ -28,7 +28,13 @@ const ROLE_ICONS: Record<Role, LucideIcon> = {
   ADMIN: User,
 };
 
-export function RolesSettings({ currentRoles }: { currentRoles: Role[] }) {
+export function RolesSettings({
+  currentRoles,
+  rolePrices,
+}: {
+  currentRoles: Role[];
+  rolePrices: Partial<Record<Role, number>>;
+}) {
   const activeRoles = currentRoles.filter((r) => r !== "CUSTOMER");
   const availableRoles = PAID_ROLES.filter((r) => !currentRoles.includes(r));
 
@@ -61,7 +67,7 @@ export function RolesSettings({ currentRoles }: { currentRoles: Role[] }) {
                     {ROLE_LABELS[role]}
                   </p>
                   <p className="text-body-sm text-text-secondary">
-                    {formatCurrency(ROLE_MONTHLY_PRICE[role] ?? 0, "USD")}/mo
+                    {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo
                   </p>
                 </div>
               </div>
@@ -97,7 +103,7 @@ export function RolesSettings({ currentRoles }: { currentRoles: Role[] }) {
                       {ROLE_LABELS[role]}
                     </p>
                     <p className="text-body-sm text-text-secondary">
-                      {formatCurrency(ROLE_MONTHLY_PRICE[role] ?? 0, "USD")}/mo
+                      {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo
                     </p>
                   </div>
                 </div>

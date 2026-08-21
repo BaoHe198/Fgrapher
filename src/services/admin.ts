@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { ROLE_MONTHLY_PRICE } from "@/lib/constants";
+import { ROLE_PLANS } from "@/lib/constants/plans";
 
 const PAGE_SIZE = 50;
 
@@ -56,7 +56,7 @@ export async function getAdminStats() {
   ]);
 
   const mrr = activeSubscriptions.reduce(
-    (sum, sub) => sum + (ROLE_MONTHLY_PRICE[sub.userRole.role] ?? 0),
+    (sum, sub) => sum + (ROLE_PLANS[sub.userRole.role]?.monthly ?? 0),
     0,
   );
 
