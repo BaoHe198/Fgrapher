@@ -120,12 +120,12 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {result.data.map((profile) => (
                   <ArtistCard
-                    key={profile.id}
+                    key={profile.userId}
                     artist={{
-                      id: profile.id,
+                      id: profile.userId,
                       name: profile.displayName ?? profile.user.name ?? "Unnamed",
                       username: profile.user.username ?? "",
-                      role: ROLE_LABELS[profile.role],
+                      roles: profile.roles.map((role) => ROLE_LABELS[role]),
                       city: profile.user.location ?? "",
                       rating: profile.avgRating > 0 ? profile.avgRating.toFixed(1) : "New",
                       reviews: profile.reviewCount,

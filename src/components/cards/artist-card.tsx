@@ -12,7 +12,7 @@ interface ArtistCardProps {
     id: string;
     name: string;
     username: string;
-    role: string;
+    roles: string[];
     city: string;
     rating: string | number;
     reviews: number;
@@ -48,7 +48,13 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
             <span className="text-heading-sm font-semibold text-text-primary">
               {artist.name}
             </span>
-            <Badge variant="accent">{artist.role}</Badge>
+            <div className="flex flex-wrap justify-end gap-1">
+              {artist.roles.map((role) => (
+                <Badge key={role} variant="accent">
+                  {role}
+                </Badge>
+              ))}
+            </div>
           </div>
 
           <div className="flex items-center gap-1 text-body-sm text-text-secondary">

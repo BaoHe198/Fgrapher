@@ -7,53 +7,10 @@ import { HeroSearch } from "@/components/sections/hero-search";
 import { Button } from "@/components/ui/button";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { SectionHead } from "@/components/ui/section-head";
-
-const FEATURED_ARTISTS = [
-  {
-    id: "1",
-    name: "Ana Reyes",
-    username: "ana-reyes",
-    roleKey: "Photographer",
-    city: "Manila",
-    rating: 4.9,
-    reviews: 128,
-    price: "From $150/session",
-    tint: "green-300",
-  },
-  {
-    id: "2",
-    name: "Leo Cruz",
-    username: "leo-cruz",
-    roleKey: "Videographer",
-    city: "Cebu",
-    rating: 5.0,
-    reviews: 23,
-    price: "From $600/day",
-    tint: "gold-200",
-  },
-  {
-    id: "3",
-    name: "Mika Tan",
-    username: "mika-tan",
-    roleKey: "Make-up Artist",
-    city: "Makati",
-    rating: 4.8,
-    reviews: 64,
-    price: "From $90/look",
-    tint: "neutral-300",
-  },
-  {
-    id: "4",
-    name: "Studio Nine",
-    username: "studio-nine",
-    roleKey: "Studio",
-    city: "Quezon City",
-    rating: 4.7,
-    reviews: 41,
-    price: "From $80/hr",
-    tint: "green-200",
-  },
-] as const;
+import { ROLE_LABELS } from "@/lib/constants";
+import { minMonthlyPrice } from "@/lib/constants/plans";
+import { formatCurrency } from "@/lib/utils";
+import { getFeaturedProfiles } from "@/services/search";
 
 // phase-1 Step 6 invented this 3-step section — there is no corresponding
 // content in the design's real i18n strings (window.FG_STRINGS), so it stays
@@ -84,6 +41,8 @@ export default async function LandingPage() {
     { icon: CalendarCheck, title: t("home.f2t"), description: t("home.f2b") },
     { icon: ShoppingBag, title: t("home.f3t"), description: t("home.f3b") },
   ];
+
+  const featuredProfiles = await getFeaturedProfiles(4);
 
   return (
     <>
@@ -118,21 +77,35 @@ export default async function LandingPage() {
       </section>
 
       {/* SECTION 2 — FEATURED ARTISTS */}
-      <section className="mx-auto max-w-[1240px] px-8 py-[72px] max-md:px-5">
-        <SectionHead
-          title={t("home.featured")}
-          actionLabel={t("home.seeAll")}
-          actionHref="/browse"
-        />
-        <div className="grid grid-cols-4 gap-5 max-lg:grid-cols-2 max-md:grid-cols-1">
-          {FEATURED_ARTISTS.map(({ roleKey, ...artist }) => (
-            <ArtistCard
-              key={artist.id}
-              artist={{ ...artist, role: t(`role.${roleKey}`) }}
-            />
-          ))}
-        </div>
-      </section>
+      {featuredProfiles.length > 0 ? (
+        <section className="mx-auto max-w-[1240px] px-8 py-[72px] max-md:px-5">
+          <SectionHead
+            title={t("home.featured")}
+            actionLabel={t("home.seeAll")}
+            actionHref="/browse"
+          />
+          <div className="grid grid-cols-4 gap-5 max-lg:grid-cols-2 max-md:grid-cols-1">
+            {featuredProfiles.map((profile) => (
+              <ArtistCard
+                key={profile.userId}
+                artist={{
+                  id: profile.userId,
+                  name: profile.displayName ?? profile.user.name ?? "Unnamed",
+                  username: profile.user.username ?? "",
+                  roles: profile.roles.map((role) => ROLE_LABELS[role]),
+                  city: profile.user.location ?? "",
+                  rating: profile.avgRating > 0 ? profile.avgRating.toFixed(1) : "New",
+                  reviews: profile.reviewCount,
+                  price: profile.priceMin
+                    ? `From ${formatCurrency(profile.priceMin)}`
+                    : "Contact for pricing",
+                  coverImage: profile.media[0]?.url,
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {/* SECTION 3 — FEATURES */}
       <section className="border-y border-border-subtle bg-bg-surface">
@@ -177,7 +150,7 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-[1240px] px-8 py-20 text-center max-md:px-5">
           <h2 className="text-display-lg">{t("home.ctaTitle")}</h2>
           <p className="mx-auto max-w-[520px] text-body-lg text-green-200">
-            {t("home.ctaSub")}
+            {t("home.ctaSub", { price: formatCurrency(minMonthlyPrice(), "VND") })}
           </p>
           <div className="mt-6 flex justify-center gap-3">
             <Button

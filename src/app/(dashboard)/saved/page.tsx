@@ -44,7 +44,7 @@ export default async function SavedProfilesPage() {
                 id: profile.id,
                 name: profile.displayName ?? profile.user.name ?? "Unnamed",
                 username: profile.user.username ?? "",
-                role: ROLE_LABELS[profile.role],
+                roles: [ROLE_LABELS[profile.role]],
                 city: profile.address ?? "",
                 rating: "—",
                 reviews: 0,

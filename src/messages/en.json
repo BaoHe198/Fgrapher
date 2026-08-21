@@ -25,7 +25,7 @@
     "title": "Find Your Artist",
     "sub": "Photographers, videographers, make-up artists, studios and camera shops — discovered, booked and paid in one place.",
     "searchPh": "Search artists, studios or gear",
-    "city": "Manila",
+    "city": "Ho Chi Minh City",
     "cta": "Search"
   },
   "home": {
@@ -40,7 +40,7 @@
     "f3t": "Rent or buy",
     "f3b": "Camera shops and studios list gear and space alongside their services.",
     "ctaTitle": "Sell your work where clients already look",
-    "ctaSub": "Provider roles start at $12/month. Customers browse and book for free.",
+    "ctaSub": "Provider roles start at {price}/month. Customers browse and book for free.",
     "ctaBtn": "Become a provider"
   },
   "foot": {
@@ -65,7 +65,7 @@
     "city": "City",
     "budget": "Budget",
     "reset": "Reset filters",
-    "title": "Photographers in Manila",
+    "title": "Photographers near you",
     "results": "results",
     "avail": "Available this week",
     "instant": "Instant book"
@@ -76,7 +76,7 @@
     "reviews": "Reviews",
     "gear": "Gear",
     "about": "About",
-    "bio": "Editorial and wedding photography in Metro Manila. Natural light, minimal retouch. Also runs a small camera shop — rentals available to booked clients.",
+    "bio": "Editorial and wedding photography. Natural light, minimal retouch. Also runs a small camera shop — rentals available to booked clients.",
     "available": "Available",
     "from": "From",
     "perSession": "/session",
@@ -95,7 +95,7 @@
     "fee": "Service fee",
     "total": "Total",
     "confirmTitle": "Confirm booking",
-    "confirmBody": "You're requesting Ana Reyes for Sat {d} Mar, {t}. She has 24 hours to accept.",
+    "confirmBody": "You're requesting this artist for Sat {d} Mar, {t}. They have 24 hours to accept.",
     "back": "Back",
     "confirm": "Confirm",
     "r1": "Fast, calm on set, delivered in 4 days.",
@@ -181,10 +181,10 @@
     "pickRolesD": "You can combine roles, e.g. Photographer + Camera Shop.",
     "terms": "By continuing you agree to the Terms and Privacy Policy.",
     "quote": "Fgrapher put my whole booking flow in one place. Clients find me, book me and pay without leaving the app.",
-    "quoteBy": "Ana Reyes · Photographer, Manila"
+    "quoteBy": "Verified provider on Fgrapher"
   },
   "bk": {
-    "title": "Book Ana Reyes",
+    "title": "Book this artist",
     "step1": "Date & time",
     "step2": "Details",
     "step3": "Payment",

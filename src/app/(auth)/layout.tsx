@@ -31,7 +31,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               &ldquo;Fgrapher put my portfolio in front of the right clients. I book twice as
               many sessions now.&rdquo;
             </p>
-            <span className="text-body-sm text-gold-300">Ana Reyes — Photographer, Manila</span>
+            <span className="text-body-sm text-gold-300">Verified provider on Fgrapher</span>
           </blockquote>
         </div>
       </div>

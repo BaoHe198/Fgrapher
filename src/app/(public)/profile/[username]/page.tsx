@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
@@ -6,12 +7,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { StarRating } from "@/components/ui/star-rating";
+import { Tag } from "@/components/ui/tag";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { db } from "@/lib/db";
 import { ROLE_LABELS } from "@/lib/constants";
 import { getProfileReviews, getPublicProfileUser, getShopProducts, incrementProfileView } from "@/services/public-profile";
 
 import { ProfileInteractive } from "./profile-interactive";
+
+function joinRoleLabels(roles: { role: keyof typeof ROLE_LABELS }[]) {
+  const labels = roles.map((p) => ROLE_LABELS[p.role]);
+  if (labels.length <= 1) return labels[0] ?? "";
+  return `${labels.slice(0, -1).join(", ")} & ${labels[labels.length - 1]}`;
+}
 
 interface ProfilePageProps {
   params: Promise<{ username: string }>;
@@ -42,7 +50,7 @@ export async function generateMetadata({ params, searchParams }: ProfilePageProp
   const bio = activeProfile.description ?? "";
 
   return {
-    title: `${name} — ${ROLE_LABELS[activeProfile.role]} in ${user.location ?? "Fgrapher"} | Fgrapher`,
+    title: `${name} — ${joinRoleLabels(user.profiles)} in ${user.location ?? "Fgrapher"} | Fgrapher`,
     description: bio.slice(0, 155),
     alternates: { canonical: `/profile/${username}` },
     openGraph: {
@@ -123,14 +131,19 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
               <div className="flex flex-col gap-1.5 pb-2">
                 <h1 className="text-display-md text-text-primary">{displayName}</h1>
                 <div className="flex flex-wrap items-center gap-2">
-                  {user.profiles.map((profile, index) => (
-                    <Badge
-                      key={profile.id}
-                      variant={index === 0 ? "accent" : "neutral"}
-                    >
-                      {ROLE_LABELS[profile.role]}
-                    </Badge>
-                  ))}
+                  {user.profiles.length > 1 ? (
+                    user.profiles.map((profile) => (
+                      <Tag
+                        key={profile.id}
+                        selected={profile.role === activeProfile.role}
+                        render={<Link href={`/profile/${username}?role=${profile.role}`} />}
+                      >
+                        {ROLE_LABELS[profile.role]}
+                      </Tag>
+                    ))
+                  ) : (
+                    <Badge variant="accent">{ROLE_LABELS[activeProfile.role]}</Badge>
+                  )}
                   <Badge variant={user.acceptingBookings ? "success" : "warning"}>
                     {user.acceptingBookings ? "Available" : "Booked out"}
                   </Badge>

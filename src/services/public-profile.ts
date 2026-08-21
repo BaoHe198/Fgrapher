@@ -7,6 +7,10 @@ export async function getPublicProfileUser(username: string) {
     include: {
       profiles: {
         where: { isPublished: true, role: { in: PAID_ROLES } },
+        // Role is a Postgres enum, so this sorts by declaration order in
+        // the schema (Photographer, Videographer, ...) — deterministic
+        // tab/title order regardless of which profile was created first.
+        orderBy: { role: "asc" },
         include: {
           media: { orderBy: { order: "asc" } },
           services: { where: { isActive: true } },

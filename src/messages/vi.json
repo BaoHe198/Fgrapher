@@ -40,7 +40,7 @@
     "f3t": "Thuê hoặc mua",
     "f3b": "Cửa hàng máy ảnh và studio đăng thiết bị, mặt bằng cùng với dịch vụ của họ.",
     "ctaTitle": "Bán tác phẩm của bạn ở nơi khách hàng đang tìm",
-    "ctaSub": "Vai trò nhà cung cấp từ $12/tháng. Khách hàng duyệt và đặt lịch miễn phí.",
+    "ctaSub": "Vai trò nhà cung cấp từ {price}/tháng. Khách hàng duyệt và đặt lịch miễn phí.",
     "ctaBtn": "Trở thành nhà cung cấp"
   },
   "foot": {
@@ -95,7 +95,7 @@
     "fee": "Phí dịch vụ",
     "total": "Tổng cộng",
     "confirmTitle": "Xác nhận đặt lịch",
-    "confirmBody": "Bạn đang yêu cầu Ana Reyes vào Thứ 7 ngày {d}/3, {t}. Nghệ sĩ có 24 giờ để xác nhận.",
+    "confirmBody": "Bạn đang yêu cầu nghệ sĩ này vào Thứ 7 ngày {d}/3, {t}. Nghệ sĩ có 24 giờ để xác nhận.",
     "back": "Quay lại",
     "confirm": "Xác nhận",
     "r1": "Làm việc nhanh, điềm tĩnh, giao ảnh sau 4 ngày.",
@@ -181,10 +181,10 @@
     "pickRolesD": "Bạn có thể kết hợp nhiều vai trò, ví dụ Nhiếp ảnh gia + Cửa hàng máy ảnh.",
     "terms": "Khi tiếp tục, bạn đồng ý với Điều khoản và Chính sách bảo mật.",
     "quote": "Fgrapher gom toàn bộ quy trình đặt lịch của tôi về một nơi. Khách tìm thấy tôi, đặt lịch và thanh toán ngay trong ứng dụng.",
-    "quoteBy": "Ana Reyes · Nhiếp ảnh gia, Hà Nội"
+    "quoteBy": "Nhà cung cấp đã xác minh trên Fgrapher"
   },
   "bk": {
-    "title": "Đặt lịch với Ana Reyes",
+    "title": "Đặt lịch với nghệ sĩ này",
     "step1": "Ngày & giờ",
     "step2": "Chi tiết",
     "step3": "Thanh toán",

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Role } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Loader2, User } from "lucide-react";
 import { signIn } from "next-auth/react";
@@ -12,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Tag } from "@/components/ui/tag";
-import { PAID_ROLES, ROLE_LABELS, ROLE_MONTHLY_PRICE } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
+import { cn, formatCurrency } from "@/lib/utils";
 import { registerSchema, type ProviderRole, type RegisterInput } from "@/lib/validations/auth";
 
 const PROVIDER_ROLE_OPTIONS = PAID_ROLES as ProviderRole[];
@@ -33,7 +34,13 @@ function strengthColor(score: number) {
   return "bg-success";
 }
 
-export function RegisterForm() {
+export function RegisterForm({
+  rolePrices,
+  interval,
+}: {
+  rolePrices: Partial<Record<Role, number>>;
+  interval: "month" | "year";
+}) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [accountType, setAccountType] = useState<"customer" | "provider">("customer");
   const [selectedRoles, setSelectedRoles] = useState<Set<ProviderRole>>(new Set());
@@ -96,7 +103,9 @@ export function RegisterForm() {
 
     const paidRoles = values.roles.filter((role) => (PAID_ROLES as string[]).includes(role));
     const callbackUrl =
-      paidRoles.length > 0 ? `/onboarding/billing?roles=${paidRoles.join(",")}` : "/dashboard";
+      paidRoles.length > 0
+        ? `/onboarding/billing?roles=${paidRoles.join(",")}&interval=${interval}`
+        : "/dashboard";
 
     // redirect: true (the default) lets next-auth navigate directly rather than
     // resolving the client-side promise itself — the latter awaits an internal
@@ -191,7 +200,7 @@ export function RegisterForm() {
                     label={ROLE_LABELS[role]}
                   />
                   <Tag tabIndex={-1} className="pointer-events-none">
-                    ${ROLE_MONTHLY_PRICE[role]}/mo
+                    {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo
                   </Tag>
                 </div>
               ))}
@@ -207,7 +216,7 @@ export function RegisterForm() {
 
         <Input
           label="Full name"
-          placeholder="Ana Reyes"
+          placeholder="Jordan Rivera"
           autoComplete="name"
           error={errors.name?.message}
           {...register("name")}
