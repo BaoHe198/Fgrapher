@@ -168,6 +168,20 @@ Required env vars — see `.env.example` for full list:
 
 Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_URL`/`DIRECT_URL` duplicated in both — `.env` for `prisma generate`/`prisma migrate`, `.env.local` for the Next.js app at runtime. Both are gitignored.
 
+### Database environments
+
+Three separate Supabase projects, one database each — no environment shares a database with another:
+
+| Environment | Database | Where configured |
+| --- | --- | --- |
+| Local dev | `fgrapher-dev` (Supabase) | `.env` + `.env.local` (gitignored, on-disk only) |
+| Vercel Preview (every branch/PR deploy) | `fgrapher-dev` (same as local — reused rather than a 4th project, since preview data staying messy/shared with local dev is an acceptable tradeoff at this scale) | Vercel dashboard/CLI, `DATABASE_URL`/`DIRECT_URL` scoped to the **Preview** environment |
+| Vercel Production (`fgrapher.vercel.app` / eventual custom domain) | `fgrapher-prod` (Supabase) | Vercel dashboard/CLI, `DATABASE_URL`/`DIRECT_URL` scoped to the **Production** environment |
+
+Supabase's pooled-connection hostname (`aws-0-<region>.pooler.supabase.com`) is shared infrastructure across every project in a region — dev and prod resolve to the *same host*. The actual project identity lives in the connection string's username (`postgres.<project-ref>`), not the host. `scripts/check-db-safety.mjs` checks the ref, and `pnpm db:reset`/`pnpm db:push` refuse to run against anything not on its explicit allow-list (currently just the dev ref) — see the script for how to extend it if a case genuinely needs to.
+
+**Migration rule: migrations go dev → preview → production, never straight to production.** Run `prisma migrate dev` locally against the dev database first, verify it on a Preview deployment (which shares that same dev database, so this is really just "verify against dev before touching prod"), and only then run `prisma migrate deploy` against production — manually, deliberately, never as part of routine `db:push`/`db:reset` usage, which are dev-only by the guard above.
+
 ## Current phase
 
 Phase 12, part 1 of 2 — Admin panel (see `docs/guides/phase-12-admin-launch.md`).

@@ -5,15 +5,18 @@
   "packageManager": "pnpm@11.22.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
+    "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "predb:push": "node scripts/check-db-safety.mjs",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:studio": "prisma studio",
+    "predb:reset": "node scripts/check-db-safety.mjs",
     "db:reset": "prisma migrate reset"
   },
   "dependencies": {

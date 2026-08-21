@@ -43,3 +43,4 @@ CLAUDE.local.md
 # local dev server tracking (pid/log) from ad-hoc background `pnpm dev` runs
 dev.log
 dev.pid
+.env*
