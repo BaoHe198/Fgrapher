@@ -143,7 +143,8 @@ pnpm format                       # Prettier
 
 # Database
 pnpm db:generate                  # prisma generate
-pnpm db:migrate                   # prisma migrate dev
+pnpm db:migrate:dev               # prisma migrate dev (local only, guarded — see scripts/check-db-safety.mjs)
+pnpm db:migrate:deploy            # prisma migrate deploy (used by CI against staging/production)
 pnpm db:push                      # prisma db push (no migration)
 pnpm db:seed                      # prisma db seed
 pnpm db:studio                    # prisma studio (GUI)
@@ -172,13 +173,13 @@ Note: the Prisma CLI only auto-loads `.env`, not `.env.local`. Keep `DATABASE_UR
 
 Three separate Supabase projects, one database each — no environment shares a database with another:
 
-| Environment | Database | Where configured |
-| --- | --- | --- |
-| Local dev | `fgrapher-dev` (Supabase) | `.env` + `.env.local` (gitignored, on-disk only) |
-| Vercel Preview (every branch/PR deploy) | `fgrapher-dev` (same as local — reused rather than a 4th project, since preview data staying messy/shared with local dev is an acceptable tradeoff at this scale) | Vercel dashboard/CLI, `DATABASE_URL`/`DIRECT_URL` scoped to the **Preview** environment |
-| Vercel Production (`fgrapher.vercel.app` / eventual custom domain) | `fgrapher-prod` (Supabase) | Vercel dashboard/CLI, `DATABASE_URL`/`DIRECT_URL` scoped to the **Production** environment |
+| Environment                                                        | Database                                                                                                                                                          | Where configured                                                                           |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Local dev                                                          | `fgrapher-dev` (Supabase)                                                                                                                                         | `.env` + `.env.local` (gitignored, on-disk only)                                           |
+| Vercel Preview (every branch/PR deploy)                            | `fgrapher-dev` (same as local — reused rather than a 4th project, since preview data staying messy/shared with local dev is an acceptable tradeoff at this scale) | Vercel dashboard/CLI, `DATABASE_URL`/`DIRECT_URL` scoped to the **Preview** environment    |
+| Vercel Production (`fgrapher.vercel.app` / eventual custom domain) | `fgrapher-prod` (Supabase)                                                                                                                                        | Vercel dashboard/CLI, `DATABASE_URL`/`DIRECT_URL` scoped to the **Production** environment |
 
-Supabase's pooled-connection hostname (`aws-0-<region>.pooler.supabase.com`) is shared infrastructure across every project in a region — dev and prod resolve to the *same host*. The actual project identity lives in the connection string's username (`postgres.<project-ref>`), not the host. `scripts/check-db-safety.mjs` checks the ref, and `pnpm db:reset`/`pnpm db:push` refuse to run against anything not on its explicit allow-list (currently just the dev ref) — see the script for how to extend it if a case genuinely needs to.
+Supabase's pooled-connection hostname (`aws-0-<region>.pooler.supabase.com`) is shared infrastructure across every project in a region — dev and prod resolve to the _same host_. The actual project identity lives in the connection string's username (`postgres.<project-ref>`), not the host. `scripts/check-db-safety.mjs` checks the ref, and `pnpm db:reset`/`pnpm db:push` refuse to run against anything not on its explicit allow-list (currently just the dev ref) — see the script for how to extend it if a case genuinely needs to.
 
 **Migration rule: migrations go dev → preview → production, never straight to production.** Run `prisma migrate dev` locally against the dev database first, verify it on a Preview deployment (which shares that same dev database, so this is really just "verify against dev before touching prod"), and only then run `prisma migrate deploy` against production — manually, deliberately, never as part of routine `db:push`/`db:reset` usage, which are dev-only by the guard above.
 
@@ -191,7 +192,7 @@ subscription/booking/GMV metrics, health indicators, recent activity — no
 charts, same reasoning as Phase 9's shop-analytics deferral), user management
 (search/filter, detail page with suspend/verify/soft-delete, all actions logged
 to a new `AdminAction` audit table), and a moderation queue for Phase 10's
-`Report` model. All 12 phases' *code* is now built — Phases 0-11 (foundation,
+`Report` model. All 12 phases' _code_ is now built — Phases 0-11 (foundation,
 landing page, auth, dashboard, public profiles, browse & search, booking flow,
 payments, messaging, marketplace, reviews, polish) plus this admin panel.
 
@@ -206,9 +207,10 @@ closes this gap; it needs a human with those accounts. See
 (env vars to set, DNS records, Stripe live-mode setup, cron config, monitoring)
 when that time comes — nothing here has abbreviated it.
 
-**Everything that *is* code-complete but genuinely untested end-to-end**,
+**Everything that _is_ code-complete but genuinely untested end-to-end**,
 because every external integration in this build was developed against
 services with no live credentials in this sandboxed environment:
+
 - **Stripe** (Phase 7 subscriptions + Phase 9 marketplace): checkout, the
   5-event webhook, Customer Portal — type-checked against the real installed
   SDK (v22; note it moved `current_period_start/end` onto SubscriptionItems,

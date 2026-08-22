@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+// Validates process.env against src/lib/env.ts's schema at config-load
+// time (before the app boots), so a missing required variable fails the
+// build/dev-server startup immediately with a clear message instead of
+// surfacing as a confusing runtime error the first time something reads
+// process.env directly.
+import "./src/lib/env";
+
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {

@@ -1,0 +1,69 @@
+import { z } from "zod";
+
+// Fails loudly at build/startup time rather than silently at request time.
+//
+// Required vs optional here matches how the rest of the app already
+// behaves, not an arbitrary line: DATABASE_URL/DIRECT_URL/NEXTAUTH_* are
+// required because nothing works without them. Every third-party
+// integration (Google OAuth, Cloudinary, Stripe, Resend) is optional here
+// because the app already no-ops gracefully without each of them — see
+// docs/ARCHITECTURE.md §7. Making them required here would break that
+// documented, deliberate behavior for local dev without those credentials.
+const serverSchema = z.object({
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
+  APP_ENV: z
+    .enum(["development", "staging", "production"])
+    .default("development"),
+
+  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  DIRECT_URL: z.string().min(1, "DIRECT_URL is required"),
+  NEXTAUTH_SECRET: z.string().min(1, "NEXTAUTH_SECRET is required"),
+  NEXTAUTH_URL: z.string().min(1, "NEXTAUTH_URL is required"),
+
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  // Dynamic STRIPE_PRICE_<ROLE>_MONTHLY/YEARLY pairs (see
+  // lib/constants/plans.ts) aren't declared individually here — they're
+  // read via bracket notation per-role and are already optional at every
+  // call site (priceIdForRole returns undefined, handled by callers).
+
+  RESEND_API_KEY: z.string().optional(),
+  CRON_SECRET: z.string().optional(),
+  // Staging-only — see lib/email.ts's sendEmail(). Every outbound email
+  // is redirected here instead of the real recipient when APP_ENV is
+  // "staging" and this is set.
+  STAGING_TEST_INBOX: z.string().email().optional(),
+});
+
+const publicSchema = z.object({
+  NEXT_PUBLIC_APP_NAME: z.string().optional(),
+  NEXT_PUBLIC_APP_URL: z.string().optional(),
+  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+});
+
+const fullSchema = serverSchema.merge(publicSchema);
+
+function parseEnv() {
+  const result = fullSchema.safeParse(process.env);
+  if (!result.success) {
+    const missing = result.error.issues.map(
+      (issue) => `  - ${issue.path.join(".")}: ${issue.message}`,
+    );
+    throw new Error(
+      `Invalid/missing environment variables:\n${missing.join("\n")}\n\n` +
+        "Check .env.example for what each variable is and where to get it.",
+    );
+  }
+  return result.data;
+}
+
+export const env = parseEnv();

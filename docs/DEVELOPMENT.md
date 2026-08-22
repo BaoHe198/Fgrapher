@@ -15,6 +15,7 @@ cp .env.example .env.local   # Next.js runtime reads .env.local
 Fill in `.env` and `.env.local` (both need `DATABASE_URL`/`DIRECT_URL`
 duplicated — see the root `CLAUDE.md`'s Environment section for exactly
 why). At minimum for a working dev environment you need:
+
 - `DATABASE_URL` / `DIRECT_URL` — a Supabase Postgres project (see
   `docs/OPERATIONS.md` §5 before ever pointing these at anything but a
   personal/dev project — `scripts/check-db-safety.mjs` will refuse
@@ -27,7 +28,7 @@ local dev — every integration no-ops gracefully without its credentials
 (see `docs/ARCHITECTURE.md` §7).
 
 ```bash
-pnpm db:migrate    # applies every migration in prisma/migrations/
+pnpm db:migrate:dev    # applies every migration in prisma/migrations/
 pnpm db:seed       # creates the seed accounts below
 pnpm dev           # http://localhost:3000
 ```
@@ -39,6 +40,7 @@ Seed accounts (password `Test1234!` for all): `photographer@test.com`,
 testing multi-role behavior).
 
 **Three most common setup failures:**
+
 1. **`DATABASE_URL` works for `prisma migrate` but the app can't connect
    at runtime, or vice versa.** This almost always means `.env` and
    `.env.local` have gone out of sync — the Prisma CLI only reads `.env`;
@@ -77,6 +79,7 @@ testing multi-role behavior).
 ## 3. Common tasks
 
 ### Adding a new page
+
 1. Create `src/app/(group)/your-route/page.tsx` (pick the route group by
    audience — see `docs/ARCHITECTURE.md` §3's folder table).
 2. Server Component by default; fetch data via a `services/*` function
@@ -93,6 +96,7 @@ testing multi-role behavior).
    already uses rather than mixing the two within one page.
 
 ### Adding a new API route
+
 1. Create `src/app/api/your-resource/route.ts`, exporting `GET`/`POST`/
    etc.
 2. `requireAuth()` (or `requireRole`/`requireActiveSubscription`/
@@ -107,6 +111,7 @@ testing multi-role behavior).
    generic 500.
 
 ### Adding a field to an existing model
+
 1. Add the field to `prisma/schema.prisma`.
 2. `npx prisma migrate dev --name descriptive_name` (creates + applies
    the migration, regenerates the client).
@@ -123,12 +128,14 @@ testing multi-role behavior).
 6. Update `prisma/seed.ts` if the field is worth exercising in seed data.
 
 ### Adding a new role
+
 Reference: this is exactly what adding MODEL did (`docs/guides/
 fgrapher-prompts-batch-2.md` §3a). Full checklist lives in
 `.claude/skills/role-permissions/SKILL.md` — follow it verbatim, it's kept
 in sync with what actually broke and needed fixing last time.
 
 ### Adding a new email template
+
 1. Add an HTML-string function to `src/lib/email.ts`, matching the
    existing `bookingEmailShell()`-wrapped pattern (not a new templating
    dependency — see that file's comment on why).
@@ -140,6 +147,7 @@ in sync with what actually broke and needed fixing last time.
    instead, which always sends regardless of preferences.
 
 ### Adding a new notification type
+
 1. Add the value to the `NotificationType` enum in `prisma/schema.prisma`
    and migrate.
 2. Call `notify()` (or `notifyCritical()`) with the new `type` from the
@@ -149,6 +157,7 @@ in sync with what actually broke and needed fixing last time.
    `services/notification.ts`'s `PREFERENCE_KEY`.
 
 ### Adding a translation string
+
 1. Add the key to `src/messages/en.json`.
 2. Add the same key to `src/messages/vi.json` with a real translation —
    don't leave it as an English placeholder, next-intl won't warn you if
@@ -165,7 +174,7 @@ in sync with what actually broke and needed fixing last time.
   see the technical debt register below.
 - **E2E (Playwright):** `e2e/*.spec.ts`, full setup in `e2e/README.md`.
   Short version: spin up a disposable local Postgres, `cp
-  e2e/.env.test.example e2e/.env.test`, `pnpm test:e2e` — this resets and
+e2e/.env.test.example e2e/.env.test`, `pnpm test:e2e` — this resets and
   seeds that database on every run (never point it at dev/prod).
   `pnpm test:e2e:ui` for Playwright's interactive debugger.
 - **Writing a new E2E test:** follow the pattern in an existing spec
@@ -178,7 +187,7 @@ in sync with what actually broke and needed fixing last time.
   messaging, subscription lifecycle, provider onboarding, password
   reset) — a new feature area should get its own spec.
 - **Testing payment flows safely:** never use real Stripe keys in `e2e/
-  .env.test` or local dev unless you mean to. Without `STRIPE_SECRET_KEY`
+.env.test` or local dev unless you mean to. Without `STRIPE_SECRET_KEY`
   set, every Stripe call no-ops via `StripeNotConfiguredError`/
   `isStripeConfigured()` — the E2E suite is written to work with this
   (see `e2e/README.md`'s "Known gaps" section), asserting the app's own
@@ -189,7 +198,7 @@ in sync with what actually broke and needed fixing last time.
   — never live keys in development.
 - **Visual regression:** `pnpm test:visual` — baselines are OS-specific
   (CI runs Linux; a Mac-generated baseline never matches CI). See `e2e/
-  README.md`'s "Visual regression" section for the actual baseline
+README.md`'s "Visual regression" section for the actual baseline
   bootstrap procedure (a manually-triggered CI job, not a local command).
 
 ## 5. Database changes
@@ -210,7 +219,7 @@ in sync with what actually broke and needed fixing last time.
   hand to use `ALTER ... RENAME`): back up first (`docs/OPERATIONS.md`
   §5), and prefer a two-step deploy (stop reading/writing the old
   column in application code first, deploy, confirm nothing broke,
-  *then* drop it in a follow-up migration) over a single migration that
+  _then_ drop it in a follow-up migration) over a single migration that
   breaks compatibility with whatever's still running during the deploy
   window.
 - **Testing a migration against a copy of production data:** no tooling
@@ -232,7 +241,7 @@ in sync with what actually broke and needed fixing last time.
   `new PrismaClient({...})` call temporarily when you need to see actual
   SQL — remember to revert it, this is noisy in normal operation.
 - **Inspecting a Stripe event:** `stripe listen --forward-to
-  localhost:3000/api/webhooks/stripe` for live forwarding during local
+localhost:3000/api/webhooks/stripe` for live forwarding during local
   dev, or `stripe trigger <event-name>` to fire a synthetic one. The
   Stripe Dashboard's Developers → Events log shows the exact payload for
   anything that already fired, live or test mode. `WebhookEvent` rows in
@@ -258,6 +267,7 @@ deployment steps haven't happened). There are no current numbers to
 report, and it would be dishonest to invent them.
 
 **Known, code-confirmed sources of latency** worth keeping in mind:
+
 - Every Supabase Postgres query goes over the network to a real remote
   pooler — round trips of ~1-2.5 seconds were repeatedly observed during
   this project's own development for ordinary reads/writes (e.g., a
@@ -280,7 +290,7 @@ Ranked roughly by how much it should worry you.
 
 1. **Published profiles never actually appear in search — this is not
    theoretical, it's confirmed by reading every call site.** `grep
-   isPublished` across `src/` shows it's read everywhere search/sitemap/
+isPublished` across `src/` shows it's read everywhere search/sitemap/
    the public profile page check it, but **written exactly once** in the
    whole codebase: `services/subscription.ts`'s `handleSubscriptionDeleted`
    sets it to `false` on cancellation. Nothing ever sets it `true` — not
@@ -322,7 +332,7 @@ Ranked roughly by how much it should worry you.
    currently absent per `docs/ARCHITECTURE.md` §7) or an edge-level
    solution.
 5. **Booking cancellation has no minimum-notice rule**, unlike booking
-   *creation*, which requires 24 hours (`docs/FEATURES.md`'s business
+   _creation_, which requires 24 hours (`docs/FEATURES.md`'s business
    rules appendix). Either party can cancel a `PENDING`/`CONFIRMED`
    booking at any time, including minutes before it starts. Confirm
    whether this is intentional.
@@ -374,7 +384,7 @@ up later:
   `UserRole.verificationStatus`); the user-facing ID upload flow was
   deliberately left unbuilt pending a decision on whether to require it
   at launch or start with a lighter check (`docs/guides/
-  fgrapher-prompts-batch-2.md` §3b item 2). Revisit before Model profiles
+fgrapher-prompts-batch-2.md` §3b item 2). Revisit before Model profiles
   are treated as fully safety-vetted.
 - **Deposit-before-contact-details for Model bookings** — schema support
   exists (`Profile.requireDepositBeforeContact`, `Booking.depositPaid`),

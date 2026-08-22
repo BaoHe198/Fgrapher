@@ -8,6 +8,7 @@ import {
 } from "next/font/google";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { EnvironmentBanner } from "@/components/layout/environment-banner";
 import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
@@ -48,6 +49,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <EnvironmentBanner />
         <a
           href="#main-content"
           className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-3 focus-visible:left-3 focus-visible:z-50 focus-visible:rounded-[var(--fg-radius-sm)] focus-visible:bg-brand-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-text-on-brand"

@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+import { env } from "@/lib/env";
+
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 const FROM_ADDRESS = "Fgrapher <noreply@fgrapher.com>";
 
@@ -13,10 +17,28 @@ interface SendEmailInput {
 // No-ops when RESEND_API_KEY isn't configured (e.g. local dev without the
 // provider set up) rather than throwing, so auth flows stay testable without
 // live email credentials.
+//
+// On staging, every email is redirected to a single test inbox rather than
+// the real recipient — real API key, fake destination, so staging can
+// exercise the real Resend integration without ever emailing an actual
+// user. Set STAGING_TEST_INBOX to enable; unset, this falls through to
+// sending nowhere differently (still gated by RESEND_API_KEY above).
 export async function sendEmail({ to, subject, html }: SendEmailInput) {
   if (!resend) return;
 
-  await resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
+  const isStaging = env.APP_ENV === "staging";
+  const testInbox = process.env.STAGING_TEST_INBOX;
+  const recipient = isStaging && testInbox ? testInbox : to;
+
+  await resend.emails.send({
+    from: FROM_ADDRESS,
+    to: recipient,
+    subject:
+      isStaging && testInbox
+        ? `[staging, would go to ${to}] ${subject}`
+        : subject,
+    html,
+  });
 }
 
 export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
@@ -231,7 +253,11 @@ export function subscriptionCancellingEmailHtml({
   });
 }
 
-export function subscriptionEndedEmailHtml({ billingUrl }: { billingUrl: string }) {
+export function subscriptionEndedEmailHtml({
+  billingUrl,
+}: {
+  billingUrl: string;
+}) {
   return bookingEmailShell({
     heading: "Your subscription has ended",
     body: `<p>Your Fgrapher Pro subscription has ended and your profile is no longer visible in search. All your data is kept — reactivate anytime to pick up right where you left off.</p>`,
