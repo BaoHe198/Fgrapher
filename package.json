@@ -17,7 +17,12 @@
     "db:seed": "npx tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "predb:reset": "node scripts/check-db-safety.mjs",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "test:e2e": "dotenv -e e2e/.env.test -- playwright test --project=e2e",
+    "test:e2e:ui": "dotenv -e e2e/.env.test -- playwright test --project=e2e --ui",
+    "test:smoke": "playwright test --project=smoke",
+    "test:visual": "dotenv -e e2e/.env.test -- playwright test --project=visual-light --project=visual-dark",
+    "test:visual:update": "dotenv -e e2e/.env.test -- playwright test --project=visual-light --project=visual-dark --update-snapshots"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
@@ -53,10 +58,12 @@
   },
   "devDependencies": {
     "@auth/core": "0.41.3",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
     "prettier": "^3.9.6",

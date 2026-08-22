@@ -1,0 +1,255 @@
+name: E2E Tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      update_visual_baselines:
+        description: >-
+          Regenerate visual-regression baseline screenshots and upload them
+          as a downloadable artifact (does not commit anything itself —
+          download the artifact and commit the PNGs yourself). Needed at
+          least once before the visual-light/visual-dark checks below can
+          pass at all: Playwright's snapshot filenames embed the OS
+          (…-linux.png), and no baseline generated anywhere other than
+          Linux CI will ever match what this workflow compares against.
+        type: boolean
+        default: false
+
+# Four jobs, not one, because they can't all safely share a database, run
+# on every trigger, or even report status together (see e2e/README.md and
+# e2e/smoke.spec.ts):
+#
+#   e2e                     — the real, destructive suite (creates/mutates
+#                              users, bookings, orders, subscriptions).
+#                              Runs against a disposable Postgres service
+#                              container + a locally built `next start`,
+#                              entirely inside this job. Never touches
+#                              Vercel. PRs only.
+#   visual-regression       — screenshot diffing, kept separate from `e2e`
+#                              so a missing/stale baseline shows up as its
+#                              own clearly-labeled failure instead of
+#                              masking the real functional-test signal on
+#                              the `e2e` job. PRs only.
+#   preview-smoke           — deploys this PR to a real Vercel preview and
+#                              runs only the read-only smoke checks against
+#                              it. Vercel's Preview environment is currently
+#                              configured to use the shared dev database
+#                              (see CLAUDE.md), so nothing destructive is
+#                              allowed to run here. PRs only.
+#   update-visual-baselines — manual-only (workflow_dispatch), see the
+#                              input description above.
+jobs:
+  e2e:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fgrapher_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fgrapher_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/fgrapher_test
+      NEXTAUTH_SECRET: ci-test-secret-not-used-anywhere-real
+      NEXTAUTH_URL: http://localhost:3000
+      AUTH_TRUST_HOST: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run E2E tests
+        run: pnpm exec playwright test --project=e2e
+        env:
+          CI: "true"
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  # Deliberately a separate job from `e2e`, not just a separate step in it:
+  # until baselines are bootstrapped (see e2e/README.md — "Run workflow" ->
+  # update_visual_baselines), this has no baseline to compare against and
+  # will always fail. As its own job, that shows up clearly labeled as
+  # "visual-regression failed", not blended into (and masking the real
+  # signal of) the functional E2E job's pass/fail status.
+  visual-regression:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fgrapher_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fgrapher_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/fgrapher_test
+      NEXTAUTH_SECRET: ci-test-secret-not-used-anywhere-real
+      NEXTAUTH_URL: http://localhost:3000
+      AUTH_TRUST_HOST: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run visual regression
+        run: pnpm exec playwright test --project=visual-light --project=visual-dark
+        env:
+          CI: "true"
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-visual
+          path: playwright-report/
+          retention-days: 14
+
+  preview-smoke:
+    runs-on: ubuntu-latest
+    # Needs VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID as repo secrets
+    # (Settings -> Secrets and variables -> Actions). VERCEL_TOKEN is a
+    # personal/team token from https://vercel.com/account/tokens; the other
+    # two are printed by `vercel link` locally, or visible in
+    # Project Settings -> General on the Vercel dashboard.
+    if: github.event_name == 'pull_request' && vars.VERCEL_PREVIEW_SMOKE_ENABLED == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Deploy preview
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          npx vercel build --token="$VERCEL_TOKEN"
+          url=$(npx vercel deploy --prebuilt --token="$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Run smoke checks against the preview
+        run: pnpm exec playwright test --project=smoke
+        env:
+          BASE_URL: ${{ steps.deploy.outputs.url }}
+          CI: "true"
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-smoke
+          path: playwright-report/
+          retention-days: 14
+
+  update-visual-baselines:
+    if: github.event_name == 'workflow_dispatch' && inputs.update_visual_baselines
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fgrapher_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fgrapher_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/fgrapher_test
+      NEXTAUTH_SECRET: ci-test-secret-not-used-anywhere-real
+      NEXTAUTH_URL: http://localhost:3000
+      AUTH_TRUST_HOST: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: Generate baselines (does not commit)
+        run: pnpm exec playwright test --project=visual-light --project=visual-dark --update-snapshots
+        env:
+          CI: "true"
+
+      - name: Upload baseline PNGs
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines
+          path: e2e/visual/**/*-snapshots/*.png
+          retention-days: 14

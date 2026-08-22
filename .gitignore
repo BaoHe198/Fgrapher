@@ -44,3 +44,15 @@ CLAUDE.local.md
 dev.log
 dev.pid
 .env*
+# ...except committed templates (.env.example was already tracked before
+# the blanket rule above existed, which is why it didn't need this — new
+# ones do).
+!e2e/.env.test.example
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+e2e/visual/**/*-snapshots/*-actual.png
+e2e/visual/**/*-snapshots/*-diff.png
