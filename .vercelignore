@@ -1,0 +1,18 @@
+# Vercel CLI deploys (`vercel`/`vercel --prod`) upload the local working
+# directory, filtered by THIS file — not .gitignore. Discovered the hard
+# way: a past CLI deploy uploaded .env, .env.production, .mcp.json,
+# dev.log, and dev.pid into a Vercel deployment's source tree, none of
+# which were ever in git. Keep this in sync with .gitignore's sensitive
+# entries; better still, deploy via the Git integration (push to a
+# branch) instead of the CLI, which only ever includes what's actually
+# committed.
+.env
+.env.*
+!.env.example
+!e2e/.env.test.example
+.mcp.json
+dev.log
+dev.pid
+node_modules
+.next
+.git
