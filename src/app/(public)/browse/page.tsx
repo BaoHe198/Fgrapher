@@ -1,10 +1,12 @@
-import type { ProfileCategory, Role } from "@prisma/client";
+import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 import { SearchX } from "lucide-react";
 import Link from "next/link";
 
 import { ArtistCard } from "@/components/cards/artist-card";
+import { BrowseFilterProvider } from "@/components/browse/browse-filter-context";
 import { FilterSidebar } from "@/components/browse/filter-sidebar";
 import { MobileFilterSheet } from "@/components/browse/mobile-filter-sheet";
+import { ResultsPane } from "@/components/browse/results-pane";
 import { SearchInput } from "@/components/browse/search-input";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
@@ -36,6 +38,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const sort = (params.sort as SortOption) ?? "rating";
   const page = params.page ? Number(params.page) : 1;
 
+  const experienceLevel = params.experienceLevel?.split(",").filter(Boolean) as
+    | ExperienceLevel[]
+    | undefined;
+
   const result = await searchProfiles({
     q: params.q,
     roles,
@@ -44,6 +50,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
     categories,
     minRating: params.minRating ? Number(params.minRating) : undefined,
+    heightMin: params.heightMin ? Number(params.heightMin) : undefined,
+    heightMax: params.heightMax ? Number(params.heightMax) : undefined,
+    experienceLevel,
+    travelWilling: params.travelWilling === "1",
     sort,
     page,
   });
@@ -65,6 +75,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pt-8 pb-[72px] sm:px-8">
+      <BrowseFilterProvider>
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[268px_1fr]">
         <div className="hidden lg:block">
           <FilterSidebar roleCounts={roleCounts} />
@@ -104,6 +115,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
             </Tag>
           </div>
 
+          <ResultsPane>
           {result.data.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-20 text-center">
               <SearchX className="size-12 text-text-tertiary" />
@@ -176,8 +188,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               ) : null}
             </>
           )}
+          </ResultsPane>
         </div>
       </div>
+      </BrowseFilterProvider>
     </div>
   );
 }
