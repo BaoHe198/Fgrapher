@@ -1,0 +1,79 @@
+name: Migrate production
+
+# Same shape as migrate-staging.yml, but gated: the `production`
+# GitHub Environment (Settings → Environments → production) must exist
+# with a required reviewer configured, or this job just hangs waiting
+# for an approval nobody can give — see the setup note at the bottom of
+# this file. Not created by this workflow; that's a one-time manual step.
+on:
+  push:
+    branches: [master]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production # <-- pauses here for manual approval
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check whether migrations changed
+        id: check
+        run: |
+          if git diff --name-only HEAD^ HEAD -- prisma/migrations | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.check.outputs.changed == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.changed == 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.check.outputs.changed == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Log current migration status before applying
+        if: steps.check.outputs.changed == 'true'
+        run: npx prisma migrate status
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: Apply migrations to production
+        if: steps.check.outputs.changed == 'true'
+        run: pnpm db:migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: On failure, stop and alert clearly
+        if: failure() && steps.check.outputs.changed == 'true'
+        run: |
+          echo "## :rotating_light: Production migration FAILED" >> "$GITHUB_STEP_SUMMARY"
+          echo "Do not re-run this workflow blindly. See docs/MIGRATIONS.md \"Rollback\" section — check _prisma_migrations, consider a PITR restore, and use \`prisma migrate resolve\` before retrying." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+      - name: Summarize
+        if: steps.check.outputs.changed == 'true' && success()
+        run: |
+          echo "## Migrations applied to production" >> "$GITHUB_STEP_SUMMARY"
+          git diff --name-only HEAD^ HEAD -- prisma/migrations | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: No migration changes
+        if: steps.check.outputs.changed == 'false'
+        run: echo "No changes under prisma/migrations/ in this push — skipping." >> "$GITHUB_STEP_SUMMARY"
+
+# One-time manual setup required (not done by this workflow):
+#   GitHub → Settings → Environments → New environment → name it
+#   "production" → Required reviewers → add yourself (and anyone else
+#   who should approve production migrations). Without this, the
+#   `environment: production` line above still works, it just never
+#   pauses for approval — the job runs immediately, which defeats the
+#   purpose. Confirm the environment protection rule is actually saved
+#   before relying on it.

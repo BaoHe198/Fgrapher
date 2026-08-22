@@ -1,0 +1,72 @@
+name: Migrate staging
+
+# Applies new Prisma migrations to the staging database whenever
+# prisma/migrations/ changes on develop. No manual approval — staging is
+# meant to be disposable and safe to break; production requires one
+# (see migrate-production.yml).
+#
+# Ordering caveat: this triggers on the same `push` event Vercel's Git
+# integration does, and typically finishes faster (schema migration vs.
+# full Next.js build+deploy), but GitHub Actions and Vercel are two
+# independent systems — nothing here actually blocks Vercel's deploy on
+# this job's completion. If code in the same push depends on the new
+# schema, treat that as a real (if usually narrow) race window. Closing
+# it for real means either a Vercel deploy hook triggered only after
+# this job succeeds, or disabling Vercel's automatic Git deploys for
+# `develop` in favor of a step at the end of this workflow — a bigger
+# infra decision, not made here.
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # need the previous commit to diff against
+
+      - name: Check whether migrations changed
+        id: check
+        run: |
+          if git diff --name-only HEAD^ HEAD -- prisma/migrations | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.check.outputs.changed == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.changed == 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.check.outputs.changed == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: List pending migrations
+        if: steps.check.outputs.changed == 'true'
+        run: npx prisma migrate status
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+      - name: Apply migrations to staging
+        if: steps.check.outputs.changed == 'true'
+        run: pnpm db:migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+      - name: Summarize
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          echo "## Migrations applied to staging" >> "$GITHUB_STEP_SUMMARY"
+          git diff --name-only HEAD^ HEAD -- prisma/migrations | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: No migration changes
+        if: steps.check.outputs.changed == 'false'
+        run: echo "No changes under prisma/migrations/ in this push — skipping." >> "$GITHUB_STEP_SUMMARY"

@@ -34,6 +34,7 @@
 `admin`, `model`, `ui`, `db`, `i18n`, `test`
 
 Examples from this repo's actual history:
+
 ```
 feat(auth): merge sign-in and sign-up into a single tabbed page
 fix(browse): stop rapid filter clicks from clobbering each other
@@ -69,3 +70,24 @@ against anything not on its explicit allow-list.
 See `docs/MIGRATIONS.md` for the full migration workflow, including how
 to write additive-only migrations and the three-step pattern for
 breaking schema changes.
+
+## CI secrets
+
+Set under GitHub → Settings → Secrets and variables → Actions:
+
+| Secret                    | Used by                                    | Value                                         |
+| ------------------------- | ------------------------------------------ | --------------------------------------------- |
+| `STAGING_DATABASE_URL`    | `.github/workflows/migrate-staging.yml`    | `fgrapher-staging`'s pooled connection string |
+| `PRODUCTION_DATABASE_URL` | `.github/workflows/migrate-production.yml` | `fgrapher-prod`'s pooled connection string    |
+
+`ci.yml` needs no secrets — it builds against placeholder values in
+`.env.ci` (every third-party integration no-ops without real
+credentials, and the build doesn't touch a real database). `test.yml`'s
+`e2e`/`visual-regression` jobs run against a disposable Postgres service
+container, not a secret; its `preview-smoke` job reads whatever the
+Vercel Preview deployment itself is configured with, not a GitHub
+secret.
+
+`migrate-production.yml` also needs a `production` GitHub Environment
+with a required reviewer configured (Settings → Environments) — see
+that workflow file's trailing comment for the exact one-time setup step.

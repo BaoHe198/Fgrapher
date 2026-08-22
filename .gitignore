@@ -48,6 +48,9 @@ dev.pid
 # the blanket rule above existed, which is why it didn't need this — new
 # ones do).
 !e2e/.env.test.example
+# Placeholder-only values for CI's build step (.github/workflows/ci.yml)
+# — no real secrets, safe to commit.
+!.env.ci
 
 # Playwright
 /test-results/

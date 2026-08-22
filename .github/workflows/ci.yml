@@ -1,0 +1,72 @@
+name: CI
+
+# Fast correctness gate — lint, types, schema, and a real production
+# build — on every PR into develop or master. Deliberately separate from
+# test.yml's e2e/visual-regression/preview-smoke jobs (which need a real
+# database and take much longer); this one should stay fast enough to
+# run on every push without becoming the thing people start ignoring.
+on:
+  pull_request:
+    branches: [develop, master]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    # sitemap.xml is statically generated at build time and genuinely
+    # queries the database (src/app/sitemap.ts) — an unreachable/fake
+    # DATABASE_URL fails the build outright, not just that one route, so
+    # this needs a real (if empty and disposable) Postgres, matching the
+    # pattern test.yml's e2e job already uses.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fgrapher_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fgrapher_ci
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/fgrapher_ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Apply migrations to the disposable CI database
+        run: pnpm db:migrate:deploy
+
+      - name: Build
+        # .env.ci covers the non-database required vars (see that file's
+        # own comment for why DATABASE_URL/DIRECT_URL are set above
+        # instead, as job-level env, not in a tracked file).
+        run: |
+          set -a
+          source .env.ci
+          set +a
+          pnpm build
+
+      # No `pnpm test` step: this project has no Vitest/unit-test runner
+      # today (see docs/DEVELOPMENT.md's technical debt register) — add
+      # one here once that exists rather than silently skipping forever.
