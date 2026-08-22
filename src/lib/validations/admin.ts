@@ -12,3 +12,8 @@ export const resolveReportSchema = z.object({
   status: z.enum(["RESOLVED", "DISMISSED", "REVIEWING"]),
   note: z.string().max(1000).optional(),
 });
+
+export const reviewVerificationSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("approve") }),
+  z.object({ action: z.literal("reject"), reason: z.string().min(1) }),
+]);

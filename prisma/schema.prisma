@@ -34,6 +34,10 @@ model User {
   location      String?
   latitude      Float?
   longitude     Float?
+  // Required at registration for the MODEL role (age gate — see
+  // services/age-gate.ts), private, never displayed. Profile pages only
+  // ever show a computed age RANGE, never this value or an exact age.
+  dateOfBirth   DateTime? @db.Date
   // Provider-only: whether new booking requests are currently open.
   acceptingBookings Boolean @default(true)
   // Per-category email/in-app toggles, shaped like
@@ -130,10 +134,24 @@ enum Role {
   MAKEUP_ARTIST
   STUDIO
   CAMERA_SHOP
+  // Booked BY photographers/videographers for shoots — the reverse
+  // direction of the Customer -> Provider flow, same shape as
+  // MAKEUP_ARTIST otherwise (portfolio, services, bookings; no products).
+  MODEL
   CUSTOMER
   // Not selectable at registration — granted manually via
   // scripts/make-admin.ts. No subscription required.
   ADMIN
+}
+
+// Identity verification state for roles that need it (currently MODEL
+// only). UNVERIFIED is the default for every role — most roles never move
+// off it, since only MODEL's onboarding/publish flow reads this field.
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
 }
 
 model UserRole {
@@ -143,6 +161,26 @@ model UserRole {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Identity verification (built for the MODEL role — see
+  // docs/guides/fgrapher-prompts-batch-2.md §3b). The user-facing ID
+  // upload flow is deliberately NOT wired up yet — this is
+  // infrastructure only (schema + admin queue) until a launch decision is
+  // made on enforcement level. verificationIdUrl/PublicId point at a
+  // private (non-public) Cloudinary folder and must be deleted 30 days
+  // after verifiedAt once that flow exists — no such image is ever
+  // uploaded by the current code, so there is nothing to delete yet.
+  verificationStatus         VerificationStatus @default(UNVERIFIED)
+  verificationIdUrl          String?
+  verificationIdPublicId     String?
+  verifiedAt                 DateTime?
+  verifiedBy                 String? // admin userId
+  verificationRejectedReason String?
+  // Content policy acceptance (currently only collected at registration
+  // for the MODEL role) — lives here rather than on Profile because
+  // UserRole exists from the moment of registration; Profile rows are
+  // only created later, lazily, when the user first edits their profile.
+  contentGuidelinesAcceptedAt DateTime?
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscription Subscription?
@@ -260,6 +298,23 @@ enum ProfileCategory {
   ROOFTOP
   CYCLORAMA
   GREEN_SCREEN
+  // Model types
+  FASHION_MODEL
+  COMMERCIAL_MODEL
+  FITNESS_MODEL
+  PORTRAIT_MODEL
+  HAND_FOOT_MODEL
+  PLUS_SIZE
+  PETITE
+  MATURE
+  ALTERNATIVE
+}
+
+enum ExperienceLevel {
+  NEW
+  INTERMEDIATE
+  EXPERIENCED
+  PROFESSIONAL
 }
 
 model Profile {
@@ -282,6 +337,30 @@ model Profile {
   amenities   String[] // e.g., ["wifi", "ac", "parking", "changing_room"]
   // Camera Shop specific
   shopName    String?
+  // Model-specific — all optional, self-reported, only used when role is
+  // MODEL. Never displayed on the profile when unset (no placeholder
+  // dashes — see docs/guides/fgrapher-prompts-batch-2.md §3a).
+  height             Int?             // cm
+  measurements       String?          // free text, stays flexible (e.g. "34-26-36")
+  hairColor          String?
+  eyeColor           String?
+  shoeSize           String?
+  experienceLevel    ExperienceLevel?
+  travelWilling      Boolean          @default(false)
+  agencyRepresented  Boolean          @default(false)
+  agencyName         String?
+  // Safety (currently exercised by the MODEL role's profile editor — see
+  // docs/guides/fgrapher-prompts-batch-2.md §3c; generic, not restricted
+  // to MODEL at the schema level, matching how other role-specific fields
+  // on this model work). Content guidelines acceptance lives on UserRole
+  // instead — see that model's comment for why.
+  hideExactLocation           Boolean   @default(false)
+  // Withholds contactPhone/locationAddress from the other party on a
+  // booking until Booking.depositPaid is set. No Stripe payment flow
+  // exists for bookings today (only for marketplace orders) — until one
+  // is built, depositPaid is a manual flag a provider sets by hand, not
+  // an automatic payment gate. See the Booking field's comment.
+  requireDepositBeforeContact Boolean   @default(false)
   // Meta
   isPublished Boolean  @default(false)
   viewCount   Int      @default(0)
@@ -394,6 +473,9 @@ model Booking {
   cancelReason String?      // also used for decline/no-show reason
   completedAt DateTime?
   reminderSentAt DateTime?  // set once the 24h-out reminder cron has emailed both parties
+  // Manually set by the provider — see Profile.requireDepositBeforeContact.
+  // Not driven by any payment integration yet.
+  depositPaid Boolean       @default(false)
 
   locationType     String?  // "PROVIDER" | "CUSTOMER" | "OUTDOOR"
   locationAddress  String?
@@ -714,23 +796,33 @@ enum ReportStatus {
   DISMISSED
 }
 
+// HIGH is set at creation time for reasons that need immediate attention
+// (currently "Inappropriate content" and "Appears to be a minor" — see
+// REPORT_REASONS in src/lib/constants.ts and services/reports.ts).
+enum ReportPriority {
+  NORMAL
+  HIGH
+}
+
 // A generic report — targetType/targetId is a loose reference (not a
 // Prisma relation) since reports can point at several different models
 // (review, user, message, product); admin tooling (Phase 12) resolves it.
 model Report {
-  id          String       @id @default(cuid())
+  id          String         @id @default(cuid())
   reporterId  String
   targetType  String // "review" | "user" | "message" | "product"
   targetId    String
   reason      String
-  description String?      @db.Text
-  status      ReportStatus @default(PENDING)
+  priority    ReportPriority @default(NORMAL)
+  description String?        @db.Text
+  status      ReportStatus   @default(PENDING)
   reviewedBy  String?
   reviewNote  String?
-  createdAt   DateTime     @default(now())
+  createdAt   DateTime       @default(now())
   resolvedAt  DateTime?
 
   @@index([status, createdAt])
+  @@index([priority, status])
   @@map("reports")
 }
 

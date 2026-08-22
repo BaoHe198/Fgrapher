@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
+import { ReportModal } from "@/components/modals/report-modal";
 import { cn } from "@/lib/utils";
 
 interface ChatMessage {
@@ -117,6 +118,7 @@ export function ChatPanel({
   const [sending, setSending] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -218,6 +220,7 @@ export function ChatPanel({
                 View profile
               </DropdownMenuItem>
             ) : null}
+            <DropdownMenuItem onClick={() => setReportOpen(true)}>Report</DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
               onClick={() => fetch("/api/blocks", {
@@ -230,6 +233,12 @@ export function ChatPanel({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <ReportModal
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          targetType="user"
+          targetId={otherUser.id}
+        />
       </div>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-5">

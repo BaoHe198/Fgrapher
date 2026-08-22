@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { REPORT_REASONS } from "@/lib/constants";
+
 export const createReviewSchema = z.object({
   bookingId: z.string().min(1),
   rating: z.number().int().min(1).max(5),
@@ -18,6 +20,6 @@ export const respondSchema = z.object({
 export const reportSchema = z.object({
   targetType: z.enum(["review", "user", "message", "product"]),
   targetId: z.string().min(1),
-  reason: z.enum(["Spam", "Fake", "Offensive", "Off-topic", "Personal information", "Other"]),
+  reason: z.enum(REPORT_REASONS),
   description: z.string().max(1000).optional(),
 });

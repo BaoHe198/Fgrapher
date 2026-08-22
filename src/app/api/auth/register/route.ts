@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { name, email, password, roles } = parsed.data;
+  const { name, email, password, roles, dateOfBirth, acceptedContentGuidelines } = parsed.data;
   const [firstName, ...rest] = name.trim().split(/\s+/);
   const lastName = rest.join(" ") || null;
 
@@ -39,6 +39,9 @@ export async function POST(request: Request) {
   try {
     const passwordHash = await bcrypt.hash(password, 12);
 
+    const uniqueRoles = Array.from(new Set(roles));
+    const isModel = uniqueRoles.includes("MODEL");
+
     const user = await db.user.create({
       data: {
         email,
@@ -49,15 +52,21 @@ export async function POST(request: Request) {
         // No email-delivery provider is wired up yet (phase 0); treat
         // registrations as verified until a real verification flow exists.
         emailVerified: new Date(),
+        // Age gate (docs/guides/fgrapher-prompts-batch-2.md §3b) — only
+        // collected/required when MODEL is among the selected roles;
+        // registerSchema already enforced >= 18 before this route runs.
+        dateOfBirth: isModel && dateOfBirth ? new Date(dateOfBirth) : undefined,
         roles: {
           create: [
             { role: "CUSTOMER", active: true },
             // Paid roles start inactive until a subscription is created
-            // (Phase 7). De-duped via Set in case the client ever sends
-            // duplicates.
-            ...Array.from(new Set(roles)).map((role) => ({
+            // (Phase 7).
+            ...uniqueRoles.map((role) => ({
               role,
               active: false,
+              ...(role === "MODEL" && acceptedContentGuidelines
+                ? { contentGuidelinesAcceptedAt: new Date() }
+                : {}),
             })),
           ],
         },

@@ -8,6 +8,7 @@ import {
   type LucideIcon,
   Sparkles,
   ShoppingBag,
+  UserRound,
   Video,
 } from "lucide-react";
 import Link from "next/link";
@@ -74,6 +75,20 @@ const PLANS: Plan[] = [
       "Reviews & ratings",
       "Search visibility",
       "Analytics dashboard",
+    ],
+  },
+  {
+    role: "MODEL",
+    icon: UserRound,
+    description: "Get booked for shoots and build your portfolio.",
+    features: [
+      "Public profile with portfolio",
+      "Unlimited portfolio uploads",
+      "Booking calendar & requests",
+      "Direct messaging with photographers",
+      "Reviews & ratings",
+      "Search visibility",
+      "Verified badge",
     ],
   },
   {
@@ -146,6 +161,10 @@ const COMPARISON_MATRIX: Record<Role, boolean[]> = {
   MAKEUP_ARTIST: [true, true, true, true, true, true],
   STUDIO: [true, true, true, true, false, false],
   CAMERA_SHOP: [true, false, true, false, false, false],
+  // Full Model plan card (§3c) still pending — this keeps the comparison
+  // table's type exhaustive in the meantime, same row shape as Make-up
+  // Artist since Model has identical capabilities (see role-permissions).
+  MODEL: [true, true, true, true, true, true],
   CUSTOMER: [false, false, false, false, false, false],
   ADMIN: [false, false, false, false, false, false],
 };
@@ -196,7 +215,7 @@ export function PricingContent({
               Browse, book, and buy. No card required.
             </span>
           </div>
-          <Button variant="secondary" nativeButton={false} render={<Link href="/register" />}>
+          <Button variant="secondary" nativeButton={false} render={<Link href="/login?mode=register" />}>
             Sign up free
           </Button>
         </Card>
@@ -253,7 +272,9 @@ export function PricingContent({
                   className="w-full"
                   nativeButton={false}
                   render={
-                    <Link href={`/register?role=${plan.role}${yearly ? "&interval=year" : ""}`} />
+                    <Link
+                      href={`/login?mode=register&role=${plan.role}${yearly ? "&interval=year" : ""}`}
+                    />
                   }
                 >
                   Start 14-day trial

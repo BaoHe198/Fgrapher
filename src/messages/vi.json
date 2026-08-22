@@ -8,6 +8,7 @@
     "signin": "Đăng nhập",
     "pricing": "Bảng giá",
     "getStarted": "Bắt đầu",
+    "authCta": "Đăng nhập / Đăng ký",
     "profile": "Hồ sơ",
     "settings": "Cài đặt",
     "billing": "Thanh toán",
@@ -18,7 +19,13 @@
     "Videographer": "Quay phim",
     "Make-up Artist": "Chuyên viên trang điểm",
     "Studio": "Studio",
-    "Camera Shop": "Cửa hàng máy ảnh"
+    "Camera Shop": "Cửa hàng máy ảnh",
+    "Model": "Người mẫu"
+  },
+  "model": {
+    "height": "Chiều cao",
+    "experience": "Kinh nghiệm",
+    "travelWilling": "Sẵn sàng di chuyển"
   },
   "hero": {
     "eyebrow": "NỀN TẢNG CHO NGƯỜI SÁNG TẠO HÌNH ẢNH",
@@ -155,6 +162,8 @@
     "empty": "Chọn một cuộc trò chuyện để bắt đầu."
   },
   "auth": {
+    "loginTab": "Đăng nhập",
+    "registerTab": "Đăng ký",
     "loginTitle": "Chào mừng trở lại",
     "loginSub": "Đăng nhập để quản lý lịch đặt và portfolio của bạn.",
     "regTitle": "Tạo tài khoản",

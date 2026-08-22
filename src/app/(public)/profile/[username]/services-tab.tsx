@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 
@@ -21,9 +22,11 @@ function formatDuration(minutes: number) {
 export function ServicesTab({
   services,
   onBook,
+  offersTfp,
 }: {
   services: ServiceItem[];
   onBook: (serviceId: string) => void;
+  offersTfp?: boolean;
 }) {
   if (services.length === 0) {
     return (
@@ -35,6 +38,11 @@ export function ServicesTab({
 
   return (
     <div className="flex flex-col gap-3">
+      {offersTfp ? (
+        <Badge variant="accent" className="w-fit">
+          TFP available
+        </Badge>
+      ) : null}
       {services.map((service) => (
         <div
           key={service.id}
@@ -51,7 +59,7 @@ export function ServicesTab({
           </div>
           <div className="flex items-center gap-3.5">
             <span className="text-heading-sm text-text-primary">
-              {formatCurrency(service.price, service.currency)}
+              {service.price === 0 ? "TFP / Collaboration" : formatCurrency(service.price, service.currency)}
             </span>
             <Button size="sm" variant="secondary" onClick={() => onBook(service.id)}>
               Book

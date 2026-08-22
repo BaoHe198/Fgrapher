@@ -89,6 +89,9 @@ export default function AdminReportsPage() {
             <Card key={report.id} className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
+                  {report.priority === "HIGH" ? (
+                    <Badge variant="destructive">High priority</Badge>
+                  ) : null}
                   <Badge variant="neutral">{report.targetType}</Badge>
                   <span className="text-body-md font-semibold text-text-primary">{report.reason}</span>
                 </div>

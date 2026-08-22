@@ -1,4 +1,4 @@
-import { PrismaClient, type ProfileCategory, type Role } from "@prisma/client";
+import { PrismaClient, type ExperienceLevel, type ProfileCategory, type Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const db = new PrismaClient();
@@ -24,6 +24,13 @@ interface ProfileSeed {
   amenities?: string[];
   shopName?: string;
   services?: ServiceSeed[];
+  height?: number;
+  measurements?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  shoeSize?: string;
+  experienceLevel?: ExperienceLevel;
+  travelWilling?: boolean;
 }
 
 interface UserSeed {
@@ -34,6 +41,7 @@ interface UserSeed {
   lastName: string;
   roles: Role[];
   profiles?: ProfileSeed[];
+  dateOfBirth?: string; // "YYYY-MM-DD" — only meaningful for MODEL role seeds
 }
 
 const PHOTOGRAPHER_SERVICES: ServiceSeed[] = [
@@ -81,6 +89,21 @@ const MAKEUP_SERVICES: ServiceSeed[] = [
     description: "Makeup application for parties, photoshoots, or events.",
     duration: 60,
     price: 1_200_000,
+  },
+];
+
+const MODEL_SERVICES: ServiceSeed[] = [
+  {
+    name: "Hourly Booking",
+    description: "One hour of shoot time, any location within the city.",
+    duration: 60,
+    price: 800_000,
+  },
+  {
+    name: "Half-Day Booking",
+    description: "4-hour booking for editorial or commercial shoots.",
+    duration: 240,
+    price: 2_800_000,
   },
 ];
 
@@ -204,6 +227,34 @@ const USERS: UserSeed[] = [
     ],
   },
   {
+    email: "model@test.com",
+    location: "Ho Chi Minh City",
+    username: "rileyquinn",
+    firstName: "Riley",
+    lastName: "Quinn",
+    roles: ["MODEL", "CUSTOMER"],
+    dateOfBirth: "1998-05-14",
+    profiles: [
+      {
+        role: "MODEL",
+        displayName: "Riley Quinn",
+        description:
+          "Commercial and editorial model, 5 years experience, based in Ho Chi Minh City.",
+        categories: ["COMMERCIAL_MODEL", "FASHION_MODEL"],
+        priceMin: 800_000,
+        priceMax: 2_800_000,
+        services: MODEL_SERVICES,
+        height: 175,
+        measurements: "34-26-36",
+        hairColor: "Black",
+        eyeColor: "Brown",
+        shoeSize: "39",
+        experienceLevel: "EXPERIENCED",
+        travelWilling: true,
+      },
+    ],
+  },
+  {
     email: "customer@test.com",
     location: "Ho Chi Minh City",
     username: "caseynguyen",
@@ -305,12 +356,20 @@ async function main() {
         name: `${seedUser.firstName} ${seedUser.lastName}`,
         passwordHash,
         emailVerified: new Date(),
+        dateOfBirth: seedUser.dateOfBirth ? new Date(`${seedUser.dateOfBirth}T00:00:00.000Z`) : undefined,
       },
     });
 
     const createdRoles = await Promise.all(
       seedUser.roles.map((role) =>
-        db.userRole.create({ data: { userId: user.id, role, active: true } }),
+        db.userRole.create({
+          data: {
+            userId: user.id,
+            role,
+            active: true,
+            ...(role === "MODEL" ? { contentGuidelinesAcceptedAt: new Date() } : {}),
+          },
+        }),
       ),
     );
 
@@ -364,6 +423,13 @@ async function main() {
           area: profileSeed.area,
           amenities: profileSeed.amenities ?? [],
           shopName: profileSeed.shopName,
+          height: profileSeed.height,
+          measurements: profileSeed.measurements,
+          hairColor: profileSeed.hairColor,
+          eyeColor: profileSeed.eyeColor,
+          shoeSize: profileSeed.shoeSize,
+          experienceLevel: profileSeed.experienceLevel,
+          travelWilling: profileSeed.travelWilling ?? false,
           isPublished: true,
         },
       });

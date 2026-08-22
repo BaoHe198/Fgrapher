@@ -8,6 +8,7 @@
     "signin": "Sign in",
     "pricing": "Pricing",
     "getStarted": "Get started",
+    "authCta": "Sign in / Sign up",
     "profile": "Profile",
     "settings": "Settings",
     "billing": "Billing",
@@ -18,7 +19,13 @@
     "Videographer": "Videographer",
     "Make-up Artist": "Make-up Artist",
     "Studio": "Studio",
-    "Camera Shop": "Camera Shop"
+    "Camera Shop": "Camera Shop",
+    "Model": "Model"
+  },
+  "model": {
+    "height": "Height",
+    "experience": "Experience",
+    "travelWilling": "Willing to travel"
   },
   "hero": {
     "eyebrow": "THE PLATFORM FOR VISUAL CREATORS",
@@ -155,6 +162,8 @@
     "empty": "Pick a conversation to start."
   },
   "auth": {
+    "loginTab": "Sign in",
+    "registerTab": "Sign up",
     "loginTitle": "Welcome back",
     "loginSub": "Sign in to manage your bookings and portfolio.",
     "regTitle": "Create your account",

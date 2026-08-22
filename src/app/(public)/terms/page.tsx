@@ -23,6 +23,16 @@ export default function TermsPage() {
         then, any arrangements made through profile contact details are between the client and
         provider directly.
       </p>
+      <h2>Model accounts</h2>
+      <p>
+        The Model role requires a minimum age of 18, verified at registration by date of birth.
+        Model accounts are subject to an identity verification requirement (see the Content
+        Guidelines page) and must accept our content standards before publishing a profile.
+        Violating those standards can result in content removal, suspension, or a permanent ban.
+        Fgrapher acts only as an intermediary connecting models with photographers,
+        videographers, and clients — Fgrapher is not the model&apos;s employer or agency, and is
+        not a party to any booking arrangement between members.
+      </p>
       <h2>Contact</h2>
       <p>Questions about these terms can be sent through the Contact page.</p>
     </SimplePage>

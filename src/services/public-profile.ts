@@ -16,6 +16,10 @@ export async function getPublicProfileUser(username: string) {
           services: { where: { isActive: true } },
         },
       },
+      // Only verificationStatus is actually used publicly (the Verified
+      // badge) — the rest of UserRole (subscription, verification ID
+      // fields) is never read from this query's result on the client side.
+      roles: { select: { role: true, verificationStatus: true } },
     },
   });
 }

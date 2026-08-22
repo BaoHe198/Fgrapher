@@ -40,6 +40,8 @@ export default async function BookingFlowPage({
     })),
   );
 
+  const isModel = provider.profiles.some((profile) => profile.role === "MODEL");
+
   return (
     <BookingWizard
       providerId={provider.id}
@@ -47,6 +49,7 @@ export default async function BookingFlowPage({
       providerAvatar={provider.avatar}
       services={services}
       contactPhoneDefault={customer?.phone ?? ""}
+      isModel={isModel}
     />
   );
 }

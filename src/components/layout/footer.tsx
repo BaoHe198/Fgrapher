@@ -9,6 +9,7 @@ const DISCOVER_ROLES = [
   { role: "MAKEUP_ARTIST", key: "Make-up Artist" },
   { role: "STUDIO", key: "Studio" },
   { role: "CAMERA_SHOP", key: "Camera Shop" },
+  { role: "MODEL", key: "Model" },
 ] as const;
 
 const PROVIDER_LINKS = [

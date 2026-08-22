@@ -226,7 +226,9 @@ export async function listReports({
   const [reports, total] = await Promise.all([
     db.report.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      // HIGH-priority reports (inappropriate content, appears-to-be-a-minor
+      // — see HIGH_PRIORITY_REPORT_REASONS) surface first regardless of age.
+      orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
@@ -246,6 +248,36 @@ export async function listReports({
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
   };
+}
+
+// Identity verification queue (built for MODEL — see
+// docs/guides/fgrapher-prompts-batch-2.md §3b). The user-facing ID upload
+// flow that would move a UserRole to PENDING is deliberately not wired up
+// yet, so this list is expected to be empty until that flow is enabled —
+// the queue itself is real infrastructure, ready for that switch to flip.
+export async function listPendingVerifications() {
+  return db.userRole.findMany({
+    where: { verificationStatus: "PENDING" },
+    include: { user: { select: { id: true, name: true, firstName: true, email: true, avatar: true, dateOfBirth: true } } },
+    orderBy: { updatedAt: "asc" },
+  });
+}
+
+export async function reviewVerification({
+  userRoleId,
+  approve,
+  reason,
+}: {
+  userRoleId: string;
+  approve: boolean;
+  reason?: string;
+}) {
+  return db.userRole.update({
+    where: { id: userRoleId },
+    data: approve
+      ? { verificationStatus: "VERIFIED", verifiedAt: new Date(), verificationRejectedReason: null }
+      : { verificationStatus: "REJECTED", verificationRejectedReason: reason },
+  });
 }
 
 export async function resolveReport({

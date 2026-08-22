@@ -1,13 +1,15 @@
 "use client";
 
-import type { ProfileCategory, Role } from "@prisma/client";
+import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Tag } from "@/components/ui/tag";
+import { CATEGORIES_BY_ROLE, EXPERIENCE_LEVEL_LABELS } from "@/lib/constants";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
 import { ServicesManager } from "./services-manager";
@@ -36,33 +38,18 @@ interface ProfileFormValues {
   area: string;
   amenities: string[];
   shopName: string;
+  height: string;
+  measurements: string;
+  hairColor: string;
+  eyeColor: string;
+  shoeSize: string;
+  experienceLevel: ExperienceLevel | "";
+  travelWilling: boolean;
+  agencyRepresented: boolean;
+  agencyName: string;
+  hideExactLocation: boolean;
+  requireDepositBeforeContact: boolean;
 }
-
-const CATEGORY_OPTIONS: ProfileCategory[] = [
-  "WEDDING",
-  "PORTRAIT",
-  "FASHION",
-  "COMMERCIAL",
-  "EVENT",
-  "PRODUCT",
-  "FOOD",
-  "LANDSCAPE",
-  "STREET",
-  "DOCUMENTARY",
-  "MUSIC_VIDEO",
-  "CORPORATE",
-  "REAL_ESTATE",
-  "BRIDAL",
-  "EDITORIAL",
-  "SFX",
-  "NATURAL",
-  "GLAM",
-  "INDOOR",
-  "OUTDOOR",
-  "ROOFTOP",
-  "CYCLORAMA",
-  "GREEN_SCREEN",
-];
 
 function toFormValues(profile: Record<string, unknown> | null): ProfileFormValues {
   return {
@@ -79,6 +66,17 @@ function toFormValues(profile: Record<string, unknown> | null): ProfileFormValue
     area: profile?.area != null ? String(profile.area) : "",
     amenities: (profile?.amenities as string[]) ?? [],
     shopName: (profile?.shopName as string) ?? "",
+    height: profile?.height != null ? String(profile.height) : "",
+    measurements: (profile?.measurements as string) ?? "",
+    hairColor: (profile?.hairColor as string) ?? "",
+    eyeColor: (profile?.eyeColor as string) ?? "",
+    shoeSize: (profile?.shoeSize as string) ?? "",
+    experienceLevel: (profile?.experienceLevel as ExperienceLevel) ?? "",
+    travelWilling: (profile?.travelWilling as boolean) ?? false,
+    agencyRepresented: (profile?.agencyRepresented as boolean) ?? false,
+    agencyName: (profile?.agencyName as string) ?? "",
+    hideExactLocation: (profile?.hideExactLocation as boolean) ?? false,
+    requireDepositBeforeContact: (profile?.requireDepositBeforeContact as boolean) ?? false,
   };
 }
 
@@ -150,6 +148,21 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         area: values.area ? Number(values.area) : undefined,
         amenities: values.amenities,
         shopName: values.shopName || undefined,
+        height: values.height ? Number(values.height) : undefined,
+        measurements: values.measurements || undefined,
+        hairColor: values.hairColor || undefined,
+        eyeColor: values.eyeColor || undefined,
+        shoeSize: values.shoeSize || undefined,
+        experienceLevel: values.experienceLevel || undefined,
+        // Booleans are sent as-is (never `|| undefined`) — the profile
+        // upsert applies every key it receives, so `undefined` here would
+        // mean "leave unchanged" and an unchecked toggle would never be
+        // able to turn itself back off.
+        travelWilling: values.travelWilling,
+        agencyRepresented: values.agencyRepresented,
+        agencyName: values.agencyName || undefined,
+        hideExactLocation: values.hideExactLocation,
+        requireDepositBeforeContact: values.requireDepositBeforeContact,
       }),
     });
 
@@ -189,7 +202,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       <div className="flex flex-col gap-2">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Categories</span>
         <div className="flex flex-wrap gap-2">
-          {CATEGORY_OPTIONS.map((category) => (
+          {(CATEGORIES_BY_ROLE[role] ?? []).map((category) => (
             <Tag
               key={category}
               selected={values.categories.includes(category)}
@@ -245,6 +258,84 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             </div>
           </div>
         </>
+      ) : null}
+
+      {role === "MODEL" ? (
+        <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
+          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            Model details
+          </span>
+          <p className="text-body-sm text-text-tertiary">
+            All optional and shown publicly on your profile — leave anything blank to hide it.
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Height (cm)"
+              type="number"
+              value={values.height}
+              onChange={(e) => set("height", e.target.value)}
+            />
+            <Input
+              label="Shoe size"
+              value={values.shoeSize}
+              onChange={(e) => set("shoeSize", e.target.value)}
+            />
+            <Input
+              label="Measurements"
+              value={values.measurements}
+              onChange={(e) => set("measurements", e.target.value)}
+            />
+            <NativeSelect
+              label="Experience level"
+              value={values.experienceLevel}
+              onChange={(v) => set("experienceLevel", v as ExperienceLevel | "")}
+              options={[
+                { value: "", label: "Not specified" },
+                ...Object.entries(EXPERIENCE_LEVEL_LABELS).map(([value, label]) => ({ value, label })),
+              ]}
+            />
+            <Input
+              label="Hair color"
+              value={values.hairColor}
+              onChange={(e) => set("hairColor", e.target.value)}
+            />
+            <Input
+              label="Eye color"
+              value={values.eyeColor}
+              onChange={(e) => set("eyeColor", e.target.value)}
+            />
+          </div>
+          <Checkbox
+            checked={values.travelWilling}
+            onCheckedChange={(checked) => set("travelWilling", checked)}
+            label="Willing to travel for shoots"
+          />
+          <Checkbox
+            checked={values.agencyRepresented}
+            onCheckedChange={(checked) => set("agencyRepresented", checked)}
+            label="Represented by an agency"
+          />
+          {values.agencyRepresented ? (
+            <Input
+              label="Agency name"
+              value={values.agencyName}
+              onChange={(e) => set("agencyName", e.target.value)}
+            />
+          ) : null}
+
+          <div className="h-px bg-border-subtle" />
+          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Privacy</span>
+          <Checkbox
+            checked={values.hideExactLocation}
+            onCheckedChange={(checked) => set("hideExactLocation", checked)}
+            label="Show city only — hide exact location"
+          />
+          <Checkbox
+            checked={values.requireDepositBeforeContact}
+            onCheckedChange={(checked) => set("requireDepositBeforeContact", checked)}
+            label="Require a deposit before sharing my contact details"
+          />
+        </div>
       ) : null}
 
       {role === "CAMERA_SHOP" ? (

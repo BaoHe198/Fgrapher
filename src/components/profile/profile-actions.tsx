@@ -1,9 +1,10 @@
 "use client";
 
-import { Bookmark, Check, Link2, Share2 } from "lucide-react";
+import { Bookmark, Check, Flag, Link2, Share2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { startTransition, useEffect, useState } from "react";
 
+import { ReportModal } from "@/components/modals/report-modal";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ export function ProfileActions({
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(initialFollowerCount);
   const [isSaved, setIsSaved] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -163,6 +165,22 @@ export function ProfileActions({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        disabled={!isAuthenticated}
+        onClick={() => setReportOpen(true)}
+        aria-label="Report this profile"
+      >
+        <Flag className="size-4" />
+      </Button>
+      <ReportModal
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        targetType="user"
+        targetId={targetUserId}
+      />
     </div>
   );
 }

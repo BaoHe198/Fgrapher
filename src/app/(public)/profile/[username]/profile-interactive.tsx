@@ -34,6 +34,7 @@ interface ProfileInteractiveProps {
     currency: string;
     images: { url: string }[];
   }[];
+  offersTfp?: boolean;
 }
 
 export function ProfileInteractive({
@@ -44,6 +45,7 @@ export function ProfileInteractive({
   services,
   reviews,
   products,
+  offersTfp,
 }: ProfileInteractiveProps) {
   const [tab, setTab] = useState("portfolio");
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export function ProfileInteractive({
             <PortfolioTab media={media} />
           </TabsPanel>
           <TabsPanel value="services" className="mt-6">
-            <ServicesTab services={services} onBook={onBook} />
+            <ServicesTab services={services} onBook={onBook} offersTfp={offersTfp} />
           </TabsPanel>
           <TabsPanel value="reviews" className="mt-6">
             <ReviewsTab providerId={providerId} reviews={reviews} />

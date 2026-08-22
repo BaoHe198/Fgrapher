@@ -5,6 +5,7 @@ import {
   Camera,
   Palette,
   ShoppingBag,
+  Sparkles,
   User,
   Video,
   Building2,
@@ -24,6 +25,7 @@ const ROLE_ICONS: Record<Role, LucideIcon> = {
   MAKEUP_ARTIST: Palette,
   STUDIO: Building2,
   CAMERA_SHOP: ShoppingBag,
+  MODEL: Sparkles,
   CUSTOMER: User,
   ADMIN: User,
 };

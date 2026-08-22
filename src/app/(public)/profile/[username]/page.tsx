@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -10,7 +11,8 @@ import { StarRating } from "@/components/ui/star-rating";
 import { Tag } from "@/components/ui/tag";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { db } from "@/lib/db";
-import { ROLE_LABELS } from "@/lib/constants";
+import { getAgeRangeLabel } from "@/lib/age-gate";
+import { EXPERIENCE_LEVEL_LABELS, ROLE_LABELS } from "@/lib/constants";
 import { getProfileReviews, getPublicProfileUser, getShopProducts, incrementProfileView } from "@/services/public-profile";
 
 import { ProfileInteractive } from "./profile-interactive";
@@ -79,6 +81,30 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
 
   const displayName = activeProfile.displayName ?? user.name ?? username;
   const firstName = user.firstName ?? displayName.split(" ")[0];
+  const isVerified =
+    user.roles.find((r) => r.role === activeProfile.role)?.verificationStatus === "VERIFIED";
+  // Never expose the exact date of birth beyond this computed range — see
+  // lib/age-gate.ts's comment on why a range, not an age, is public.
+  const ageRangeLabel =
+    activeProfile.role === "MODEL" && user.dateOfBirth ? getAgeRangeLabel(user.dateOfBirth) : null;
+  const modelDetails =
+    activeProfile.role === "MODEL"
+      ? ([
+          activeProfile.height ? { label: "Height", value: `${activeProfile.height} cm` } : null,
+          activeProfile.experienceLevel
+            ? { label: "Experience", value: EXPERIENCE_LEVEL_LABELS[activeProfile.experienceLevel] }
+            : null,
+          activeProfile.travelWilling ? { label: "Travel", value: "Willing to travel" } : null,
+          activeProfile.agencyRepresented
+            ? { label: "Agency", value: activeProfile.agencyName || "Represented" }
+            : null,
+          activeProfile.measurements ? { label: "Measurements", value: activeProfile.measurements } : null,
+          activeProfile.hairColor ? { label: "Hair", value: activeProfile.hairColor } : null,
+          activeProfile.eyeColor ? { label: "Eyes", value: activeProfile.eyeColor } : null,
+          activeProfile.shoeSize ? { label: "Shoe size", value: activeProfile.shoeSize } : null,
+        ].filter(Boolean) as { label: string; value: string }[])
+      : [];
+  const offersTfp = activeProfile.services.some((s) => s.price === 0);
   const averageRating =
     reviews.length > 0
       ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
@@ -147,8 +173,20 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
                   <Badge variant={user.acceptingBookings ? "success" : "warning"}>
                     {user.acceptingBookings ? "Available" : "Booked out"}
                   </Badge>
+                  {isVerified ? <Badge variant="accent">Verified</Badge> : null}
                   <StarRating rating={averageRating} reviews={reviews.length} />
                 </div>
+                {user.location || ageRangeLabel ? (
+                  <div className="flex items-center gap-1.5 text-body-sm text-text-secondary">
+                    {user.location ? (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="size-3.5" />
+                        {user.location}
+                      </span>
+                    ) : null}
+                    {ageRangeLabel ? <span>· Age {ageRangeLabel}</span> : null}
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -166,6 +204,19 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
             </p>
           ) : null}
 
+          {modelDetails.length > 0 ? (
+            <div className="mb-5 grid grid-cols-2 gap-x-8 gap-y-3 rounded-[var(--fg-radius-lg)] bg-surface-card p-5 sm:grid-cols-4">
+              {modelDetails.map((detail) => (
+                <div key={detail.label} className="flex flex-col gap-0.5">
+                  <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+                    {detail.label}
+                  </span>
+                  <span className="text-body-md font-semibold text-text-primary">{detail.value}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
           <ProfileInteractive
             providerId={user.id}
             firstName={firstName}
@@ -174,6 +225,7 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
             services={activeProfile.services}
             reviews={reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }))}
             products={products}
+            offersTfp={offersTfp}
           />
         </div>
       </div>

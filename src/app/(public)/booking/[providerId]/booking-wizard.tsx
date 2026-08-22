@@ -5,15 +5,27 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useMemo, useState } from "react";
 
+import { ModelSafetyNotice } from "@/components/booking/model-safety-notice";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
+
+const SHOOT_TYPE_OPTIONS = [
+  { value: "", label: "Not specified" },
+  { value: "Editorial", label: "Editorial" },
+  { value: "Commercial", label: "Commercial" },
+  { value: "Portfolio building", label: "Portfolio building" },
+  { value: "TFP collaboration", label: "TFP collaboration" },
+  { value: "Event", label: "Event" },
+  { value: "Other", label: "Other" },
+];
 
 interface ServiceOption {
   id: string;
@@ -30,6 +42,7 @@ interface BookingWizardProps {
   providerAvatar: string | null;
   services: ServiceOption[];
   contactPhoneDefault: string;
+  isModel?: boolean;
 }
 
 type LocationType = "PROVIDER" | "CUSTOMER" | "OUTDOOR";
@@ -45,6 +58,14 @@ interface Draft {
   notes: string;
   contactPhone: string;
   agreed: boolean;
+  // Model-booking-specific — see docs/guides/fgrapher-prompts-batch-2.md
+  // §3c item 7. No dedicated Booking columns exist for these; they're
+  // folded into the free-text `notes` field at submit time, the same
+  // pattern already used for `customRequest`.
+  shootType: string;
+  usageRights: string;
+  wardrobeNotes: string;
+  muaProvided: boolean;
 }
 
 const STEPS = ["Service", "Date & time", "Details", "Confirm"] as const;
@@ -61,6 +82,10 @@ function emptyDraft(contactPhoneDefault: string): Draft {
     notes: "",
     contactPhone: contactPhoneDefault,
     agreed: false,
+    shootType: "",
+    usageRights: "",
+    wardrobeNotes: "",
+    muaProvided: false,
   };
 }
 
@@ -83,6 +108,7 @@ export function BookingWizard({
   providerAvatar,
   services,
   contactPhoneDefault,
+  isModel,
 }: BookingWizardProps) {
   const searchParams = useSearchParams();
   const storageKey = `booking-draft-${providerId}`;
@@ -146,6 +172,23 @@ export function BookingWizard({
     setSubmitting(true);
     setSubmitError(null);
 
+    const modelDetailsBlock = isModel
+      ? [
+          draft.shootType ? `Shoot type: ${draft.shootType}` : null,
+          draft.usageRights ? `Usage rights: ${draft.usageRights}` : null,
+          draft.wardrobeNotes ? `Wardrobe/styling: ${draft.wardrobeNotes}` : null,
+          draft.muaProvided ? "Make-up artist provided by customer" : null,
+        ]
+          .filter(Boolean)
+          .join("\n")
+      : "";
+
+    const notesParts = [
+      draft.customRequest ? `Custom request: ${draft.customRequest}` : null,
+      modelDetailsBlock || null,
+      draft.notes || null,
+    ].filter(Boolean);
+
     const res = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -157,9 +200,7 @@ export function BookingWizard({
         locationType: draft.locationType,
         locationAddress: draft.locationAddress || undefined,
         numberOfPeople: draft.numberOfPeople ? Number(draft.numberOfPeople) : undefined,
-        notes: draft.customRequest
-          ? `Custom request: ${draft.customRequest}\n\n${draft.notes}`
-          : draft.notes || undefined,
+        notes: notesParts.length > 0 ? notesParts.join("\n\n") : undefined,
         contactPhone: draft.contactPhone,
       }),
     });
@@ -241,6 +282,11 @@ export function BookingWizard({
             numberOfPeople={draft.numberOfPeople}
             notes={draft.notes}
             contactPhone={draft.contactPhone}
+            isModel={isModel}
+            shootType={draft.shootType}
+            usageRights={draft.usageRights}
+            wardrobeNotes={draft.wardrobeNotes}
+            muaProvided={draft.muaProvided}
             onChange={update}
           />
         ) : null}
@@ -584,6 +630,11 @@ function StepDetails({
   numberOfPeople,
   notes,
   contactPhone,
+  isModel,
+  shootType,
+  usageRights,
+  wardrobeNotes,
+  muaProvided,
   onChange,
 }: {
   providerName: string;
@@ -592,11 +643,54 @@ function StepDetails({
   numberOfPeople: string;
   notes: string;
   contactPhone: string;
+  isModel?: boolean;
+  shootType: string;
+  usageRights: string;
+  wardrobeNotes: string;
+  muaProvided: boolean;
   onChange: <K extends keyof Draft>(key: K, value: Draft[K]) => void;
 }) {
   return (
     <div className="flex flex-col gap-5">
       <h2 className="text-heading-lg text-text-primary">Tell {providerName} about your shoot</h2>
+
+      {isModel ? <ModelSafetyNotice /> : null}
+
+      {isModel ? (
+        <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
+          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            Shoot details
+          </span>
+          <NativeSelect
+            label="Shoot type"
+            value={shootType}
+            onChange={(v) => onChange("shootType", v)}
+            options={SHOOT_TYPE_OPTIONS}
+          />
+          <Input
+            label="Usage rights"
+            placeholder="Where will the images be used?"
+            value={usageRights}
+            onChange={(e) => onChange("usageRights", e.target.value)}
+          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-body-sm font-semibold text-text-primary">
+              Wardrobe / styling notes
+            </label>
+            <Textarea
+              rows={2}
+              value={wardrobeNotes}
+              onChange={(e) => onChange("wardrobeNotes", e.target.value)}
+              placeholder="Outfits, styling direction, anything the model should bring or expect"
+            />
+          </div>
+          <Checkbox
+            checked={muaProvided}
+            onCheckedChange={(checked) => onChange("muaProvided", checked === true)}
+            label="A make-up artist will be provided"
+          />
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-2">
         <span className="text-body-sm font-semibold text-text-primary">Location</span>

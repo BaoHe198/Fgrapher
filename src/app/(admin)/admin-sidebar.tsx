@@ -1,6 +1,6 @@
 "use client";
 
-import { Flag, LayoutDashboard, Users } from "lucide-react";
+import { BadgeCheck, Flag, LayoutDashboard, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -10,6 +10,7 @@ const ITEMS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/reports", label: "Reports", icon: Flag },
+  { href: "/admin/verifications", label: "Verifications", icon: BadgeCheck },
 ];
 
 export function AdminSidebar() {

@@ -15,6 +15,7 @@ const ROLE_TO_ENUM: Record<string, Role> = {
   "Make-up Artist": "MAKEUP_ARTIST",
   Studio: "STUDIO",
   "Camera Shop": "CAMERA_SHOP",
+  Model: "MODEL",
 };
 
 export function HeroSearch() {

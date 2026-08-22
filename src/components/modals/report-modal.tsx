@@ -14,8 +14,9 @@ import {
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { REPORT_REASONS } from "@/lib/constants";
 
-const REASONS = ["Spam", "Fake", "Offensive", "Off-topic", "Personal information", "Other"];
+const REASONS: string[] = [...REPORT_REASONS];
 
 interface ReportModalProps {
   open: boolean;

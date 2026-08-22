@@ -1,4 +1,4 @@
-import type { Prisma, ProfileCategory, Role } from "@prisma/client";
+import type { ExperienceLevel, Prisma, ProfileCategory, Role } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
@@ -16,6 +16,14 @@ export interface SearchParams {
   sort?: SortOption;
   page?: number;
   limit?: number;
+  // Model-specific filters — only meaningful when `roles` is scoped to
+  // exactly ["MODEL"] (the UI only reveals these when a single Model
+  // filter is active, since combining them with other roles would wrongly
+  // exclude every non-Model profile, whose these fields are always null).
+  heightMin?: number;
+  heightMax?: number;
+  experienceLevel?: ExperienceLevel[];
+  travelWilling?: boolean;
 }
 
 const PAGE_SIZE_DEFAULT = 24;
@@ -93,6 +101,18 @@ export async function searchProfiles(params: SearchParams) {
       : {}),
     ...(params.minPrice !== undefined ? { priceMax: { gte: params.minPrice } } : {}),
     ...(params.maxPrice !== undefined ? { priceMin: { lte: params.maxPrice } } : {}),
+    ...(params.heightMin !== undefined || params.heightMax !== undefined
+      ? {
+          height: {
+            ...(params.heightMin !== undefined ? { gte: params.heightMin } : {}),
+            ...(params.heightMax !== undefined ? { lte: params.heightMax } : {}),
+          },
+        }
+      : {}),
+    ...(params.experienceLevel && params.experienceLevel.length > 0
+      ? { experienceLevel: { in: params.experienceLevel } }
+      : {}),
+    ...(params.travelWilling ? { travelWilling: true } : {}),
     ...(params.q
       ? {
           OR: [
