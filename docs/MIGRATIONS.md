@@ -1,10 +1,14 @@
 # Migrations
 
-The rule: migrations are created locally against the dev database,
-committed, applied automatically to staging on merge to `develop`, and
-to production on merge to `master` after manual approval. Never run a
-migration command directly against staging or production — always
-through this pipeline.
+The rule: migrations are created locally against the dev database and
+committed. `develop` and every feature branch's Preview deployment
+already read that same dev database — see `docs/ENVIRONMENTS.md` for
+why there's no separate staging database — so a migration is live for
+review the moment `pnpm db:migrate:dev` applies it locally, no extra
+deploy step involved. Production is the one database that's genuinely
+separate: migrations reach it only via CI on merge to `master`, after a
+required manual approval. Never run a migration command directly
+against production — always through that pipeline.
 
 ## 1. Creating a migration
 
@@ -108,9 +112,12 @@ resolve`.
 Before a migration-containing PR is merged from `develop` into `master`:
 
 - [ ] Reviewed the generated SQL (§1, step 3)
-- [ ] Tested on staging, ideally with a data volume close to production
-      (an index-creation migration that's instant on 50 seed rows can
-      lock a 500k-row production table for minutes)
+- [ ] Tested against `develop`'s Preview deployment (already applied,
+      since it shares the dev database) — but remember dev's seed data
+      volume is nothing like production's; an index-creation migration
+      that's instant on 50 seed rows can lock a 500k-row production
+      table for minutes, so estimate that separately, not from how it
+      felt in dev
 - [ ] A backup was taken (or confirmed recent — check Supabase's backup
       retention window for the production project) immediately before
       the migration runs
