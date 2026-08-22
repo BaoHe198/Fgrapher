@@ -1,23 +1,20 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { rolePricesVnd } from "@/lib/constants/plans";
+interface RegisterRedirectProps {
+  searchParams: Promise<Record<string, string | undefined>>;
+}
 
-import { RegisterForm } from "./register-form";
-
-export const metadata: Metadata = {
-  title: "Create your account — Fgrapher",
-};
-
-export default async function RegisterPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ interval?: string }>;
-}) {
-  const { interval: intervalParam } = await searchParams;
-  const interval = intervalParam === "year" ? "year" : "month";
-
-  // Role checkboxes always show the monthly rate — the chosen interval only
-  // affects what's actually charged, confirmed on the onboarding/billing
-  // screen right before checkout.
-  return <RegisterForm rolePrices={rolePricesVnd("month")} interval={interval} />;
+// /register now lives at /login?mode=register (a single combined auth page
+// with a tab switcher — see auth-tabs.tsx). This route stays real (not
+// deleted) so existing bookmarks/links, and any external links pointing at
+// /register, keep working — it just forwards straight through, carrying
+// every query param (role, interval, callbackUrl, ...) along with it.
+export default async function RegisterRedirectPage({ searchParams }: RegisterRedirectProps) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) query.set(key, value);
+  }
+  query.set("mode", "register");
+  redirect(`/login?${query.toString()}`);
 }

@@ -34,16 +34,35 @@ function strengthColor(score: number) {
   return "bg-success";
 }
 
+interface RegisterFormProps {
+  rolePrices: Partial<Record<Role, number>>;
+  interval: "month" | "year";
+  initialRole?: string;
+  onSwitchToLogin: () => void;
+}
+
 export function RegisterForm({
   rolePrices,
   interval,
-}: {
-  rolePrices: Partial<Record<Role, number>>;
-  interval: "month" | "year";
-}) {
+  initialRole,
+  onSwitchToLogin,
+}: RegisterFormProps) {
+  // e.g. arriving from the pricing page's "Start 14-day trial" on a
+  // specific role's card (/login?mode=register&role=PHOTOGRAPHER) —
+  // pre-select "Creative pro" and that role rather than making the user
+  // redo a choice they already made.
+  const preselectedRole =
+    initialRole && (PAID_ROLES as string[]).includes(initialRole)
+      ? (initialRole as ProviderRole)
+      : null;
+
   const [serverError, setServerError] = useState<string | null>(null);
-  const [accountType, setAccountType] = useState<"customer" | "provider">("customer");
-  const [selectedRoles, setSelectedRoles] = useState<Set<ProviderRole>>(new Set());
+  const [accountType, setAccountType] = useState<"customer" | "provider">(
+    preselectedRole ? "provider" : "customer",
+  );
+  const [selectedRoles, setSelectedRoles] = useState<Set<ProviderRole>>(
+    preselectedRole ? new Set([preselectedRole]) : new Set(),
+  );
 
   const {
     register,
@@ -54,11 +73,18 @@ export function RegisterForm({
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "", accountType: "customer", roles: [] },
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      accountType: preselectedRole ? "provider" : "customer",
+      roles: preselectedRole ? [preselectedRole] : [],
+    },
   });
 
   const password = watch("password");
   const strength = useMemo(() => passwordStrength(password ?? ""), [password]);
+  const isModelSelected = selectedRoles.has("MODEL" as ProviderRole);
 
   const selectAccountType = (next: "customer" | "provider") => {
     setAccountType(next);
@@ -214,6 +240,37 @@ export function RegisterForm({
           </div>
         </div>
 
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300 ease-out",
+            isModelSelected ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+          )}
+        >
+          <div className="flex flex-col gap-3 overflow-hidden">
+            <Input
+              label="Date of birth"
+              type="date"
+              error={errors.dateOfBirth?.message}
+              {...register("dateOfBirth")}
+            />
+            <Checkbox
+              checked={watch("acceptedContentGuidelines") ?? false}
+              onCheckedChange={(checked) => setValue("acceptedContentGuidelines", checked)}
+              label={
+                <>
+                  I confirm I&apos;m 18 or older and agree to the{" "}
+                  <Link href="/guidelines" target="_blank" className="text-text-link hover:underline">
+                    content guidelines
+                  </Link>
+                </>
+              }
+            />
+            {errors.acceptedContentGuidelines ? (
+              <p className="text-body-sm text-danger">{errors.acceptedContentGuidelines.message}</p>
+            ) : null}
+          </div>
+        </div>
+
         <Input
           label="Full name"
           placeholder="Jordan Rivera"
@@ -271,9 +328,13 @@ export function RegisterForm({
 
       <p className="text-body-md text-text-secondary">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-text-link hover:underline">
+        <button
+          type="button"
+          onClick={onSwitchToLogin}
+          className="font-semibold text-text-link hover:underline"
+        >
           Sign in
-        </Link>
+        </button>
       </p>
     </>
   );

@@ -144,24 +144,14 @@ export function WebNav() {
               <UserMenu session={session} />
             </>
           ) : (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                nativeButton={false}
-                render={<Link href="/login" />}
-              >
-                {t("signin")}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                nativeButton={false}
-                render={<Link href="/register" />}
-              >
-                {t("getStarted")}
-              </Button>
-            </>
+            <Button
+              variant="accent"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/login" />}
+            >
+              {t("authCta")}
+            </Button>
           )}
         </div>
       </div>
@@ -268,22 +258,15 @@ function MobileNavSheet({
               {t("dashboard")}
             </Button>
           ) : (
-            <>
-              <Button
-                variant="secondary"
-                nativeButton={false}
-                render={<Link href="/login" />}
-              >
-                {t("signin")}
-              </Button>
-              <Button
-                variant="primary"
-                nativeButton={false}
-                render={<Link href="/register" />}
-              >
-                {t("getStarted")}
-              </Button>
-            </>
+            <Button
+              variant="accent"
+              nativeButton={false}
+              className="w-full"
+              onClick={() => setOpen(false)}
+              render={<Link href="/login" />}
+            >
+              {t("authCta")}
+            </Button>
           )}
         </div>
 

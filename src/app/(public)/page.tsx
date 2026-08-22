@@ -156,7 +156,7 @@ export default async function LandingPage() {
             <Button
               variant="accent"
               nativeButton={false}
-              render={<Link href="/register" />}
+              render={<Link href="/login?mode=register" />}
             >
               {t("home.ctaBtn")}
             </Button>

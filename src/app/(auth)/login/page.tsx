@@ -1,11 +1,37 @@
 import type { Metadata } from "next";
 
-import { LoginForm } from "./login-form";
+import { rolePricesVnd } from "@/lib/constants/plans";
+
+import { AuthTabs } from "./auth-tabs";
 
 export const metadata: Metadata = {
-  title: "Sign in — Fgrapher",
+  title: "Sign in or create an account — Fgrapher",
 };
 
-export default function LoginPage() {
-  return <LoginForm />;
+interface LoginPageProps {
+  searchParams: Promise<{
+    mode?: string;
+    role?: string;
+    interval?: string;
+    callbackUrl?: string;
+    error?: string;
+  }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  const interval = params.interval === "year" ? "year" : "month";
+
+  return (
+    <AuthTabs
+      // Role checkboxes always show the monthly rate — the chosen interval
+      // only affects what's actually charged, confirmed on the
+      // onboarding/billing screen right before checkout.
+      rolePrices={rolePricesVnd("month")}
+      initialRole={params.role}
+      interval={interval}
+      callbackUrl={params.callbackUrl}
+      hasError={Boolean(params.error)}
+    />
+  );
 }

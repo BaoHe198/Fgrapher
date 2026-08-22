@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -14,10 +13,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 
-export function LoginForm() {
-  const searchParams = useSearchParams();
+interface LoginFormProps {
+  callbackUrl?: string;
+  hasError: boolean;
+  onSwitchToRegister: () => void;
+}
+
+export function LoginForm({ callbackUrl, hasError, onSwitchToRegister }: LoginFormProps) {
   const [serverError, setServerError] = useState<string | null>(
-    searchParams.get("error") ? "Invalid email or password" : null,
+    hasError ? "Invalid email or password" : null,
   );
 
   const {
@@ -38,7 +42,7 @@ export function LoginForm() {
     await signIn("credentials", {
       email: values.email,
       password: values.password,
-      callbackUrl: "/dashboard",
+      callbackUrl: callbackUrl || "/dashboard",
     });
   };
 
@@ -105,9 +109,13 @@ export function LoginForm() {
 
       <p className="text-body-md text-text-secondary">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-semibold text-text-link hover:underline">
+        <button
+          type="button"
+          onClick={onSwitchToRegister}
+          className="font-semibold text-text-link hover:underline"
+        >
           Sign up
-        </Link>
+        </button>
       </p>
     </>
   );
