@@ -80,13 +80,13 @@ Set under GitHub → Settings → Secrets and variables → Actions:
 | `STAGING_DATABASE_URL`    | `.github/workflows/migrate-staging.yml`    | `fgrapher-staging`'s pooled connection string |
 | `PRODUCTION_DATABASE_URL` | `.github/workflows/migrate-production.yml` | `fgrapher-prod`'s pooled connection string    |
 
-`ci.yml` needs no secrets — it builds against placeholder values in
-`.env.ci` (every third-party integration no-ops without real
-credentials, and the build doesn't touch a real database). `test.yml`'s
-`e2e`/`visual-regression` jobs run against a disposable Postgres service
-container, not a secret; its `preview-smoke` job reads whatever the
-Vercel Preview deployment itself is configured with, not a GitHub
-secret.
+`ci.yml` needs no secrets — third-party integrations (Stripe/
+Cloudinary/Resend/Google OAuth) no-op without real credentials, and its
+database needs are covered by its own disposable Postgres service
+container, not a secret. `test.yml`'s `e2e`/`visual-regression` jobs
+run against their own disposable Postgres service container too, not a
+secret; its `preview-smoke` job reads whatever the Vercel Preview
+deployment itself is configured with, not a GitHub secret.
 
 `migrate-production.yml` also needs a `production` GitHub Environment
 with a required reviewer configured (Settings → Environments) — see
