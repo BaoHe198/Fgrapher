@@ -20,7 +20,16 @@ export function isCloudinaryConfigured() {
 // by mistake at a call site.
 export function generateUploadSignature(folder: string) {
   const timestamp = Math.round(Date.now() / 1000);
-  const paramsToSign = { timestamp, folder };
+  // fl_strip_profile is an INCOMING transformation — it strips embedded
+  // metadata (EXIF, including GPS coordinates; IPTC; XMP; ICC color
+  // profile) from the asset Cloudinary actually stores, not just a
+  // delivery-time view of it. Required for portfolio uploads (Prompt B5 —
+  // a Model's GPS location leaking through a photo's EXIF is a real
+  // safety risk, not just a privacy nicety) and applied to every upload
+  // through this shared signature, since there's no case where keeping it
+  // would be desirable.
+  const transformation = "fl_strip_profile";
+  const paramsToSign = { timestamp, folder, transformation };
 
   const signature = cloudinary.utils.api_sign_request(
     paramsToSign,
@@ -33,6 +42,7 @@ export function generateUploadSignature(folder: string) {
     apiKey: process.env.CLOUDINARY_API_KEY,
     cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     folder,
+    transformation,
   };
 }
 
@@ -42,6 +52,11 @@ export async function deleteCloudinaryAsset(
 ) {
   await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
 }
+
+// Portfolio image size variants (thumbnail/medium/large) moved to
+// src/lib/media-variants.ts — that file has zero imports so it's safe to
+// use from Client Components, unlike this one (imports the Node-only
+// `cloudinary` SDK at module scope).
 
 // ============================================================================
 // KYC / IDENTITY VERIFICATION (Prompt B3, docs/guides/

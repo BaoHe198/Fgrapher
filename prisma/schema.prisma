@@ -52,6 +52,10 @@ model User {
   suspendedReason         String?
   suspendedUntil          DateTime?
   adminNotes              String?   @db.Text
+  // Incremented each time an upload is AUTO_REJECTED by the content
+  // scanner (see services/moderation.ts) — the 3-strikes policy documented
+  // on /guidelines is enforced against this counter.
+  violationPoints         Int       @default(0)
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
   deletedAt               DateTime?
@@ -496,15 +500,36 @@ model ProfileMedia {
   height    Int?
   createdAt DateTime  @default(now())
 
+  // Content moderation (Prompt B5, docs/guides/
+  // fgrapher-danh-gia-va-prompt-sua-doi.md) — see services/moderation.ts.
+  // New rows default PENDING; the migration that added these columns
+  // backfilled every pre-existing row to APPROVED so already-published
+  // portfolios didn't disappear. rightsConfirmedAt is the timestamp of the
+  // image-rights checkbox required before upload (Điều 32 Bộ luật Dân sự
+  // 2015 — using someone's likeness requires their consent).
+  moderationStatus  ModerationStatus @default(PENDING)
+  moderationNote    String?
+  moderatedBy       String? // admin userId
+  moderatedAt       DateTime?
+  rightsConfirmedAt DateTime?
+
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId, order])
+  @@index([moderationStatus, createdAt])
   @@map("profile_media")
 }
 
 enum MediaType {
   IMAGE
   VIDEO
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  AUTO_REJECTED
 }
 
 // ============================================================================

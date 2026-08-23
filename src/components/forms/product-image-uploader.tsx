@@ -39,7 +39,14 @@ function SortableThumb({
   image: ProductImage;
   onRemove: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: image.url,
   });
 
@@ -76,10 +83,15 @@ function SortableThumb({
   );
 }
 
-export function ProductImageUploader({ images, onChange }: ProductImageUploaderProps) {
+export function ProductImageUploader({
+  images,
+  onChange,
+}: ProductImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
 
   const onDrop = useCallback(
     async (accepted: File[]) => {
@@ -102,6 +114,7 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
         formData.append("timestamp", String(sigBody.data.timestamp));
         formData.append("signature", sigBody.data.signature);
         formData.append("folder", sigBody.data.folder);
+        formData.append("transformation", sigBody.data.transformation);
 
         try {
           const res = await fetch(
@@ -110,7 +123,10 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
           );
           const result = await res.json();
           if (res.ok) {
-            uploaded.push({ url: result.secure_url, publicId: result.public_id });
+            uploaded.push({
+              url: result.secure_url,
+              publicId: result.public_id,
+            });
           }
         } catch {
           setError("One or more uploads failed");
@@ -125,7 +141,11 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "image/jpeg": [".jpg", ".jpeg"], "image/png": [".png"], "image/webp": [".webp"] },
+    accept: {
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
+    },
     multiple: true,
   });
 
@@ -139,14 +159,24 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
 
   return (
     <div className="flex flex-col gap-2.5">
-      <DndContext id="product-images" sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <SortableContext items={images.map((i) => i.url)} strategy={rectSortingStrategy}>
+      <DndContext
+        id="product-images"
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+      >
+        <SortableContext
+          items={images.map((i) => i.url)}
+          strategy={rectSortingStrategy}
+        >
           <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-6">
             {images.map((image) => (
               <SortableThumb
                 key={image.url}
                 image={image}
-                onRemove={() => onChange(images.filter((i) => i.url !== image.url))}
+                onRemove={() =>
+                  onChange(images.filter((i) => i.url !== image.url))
+                }
               />
             ))}
 
@@ -154,7 +184,9 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
               {...getRootProps()}
               className={cn(
                 "flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-[var(--fg-radius-sm)] border-2 border-dashed text-text-tertiary transition-colors duration-150",
-                isDragActive ? "border-brand-primary text-brand-primary" : "border-border-default",
+                isDragActive
+                  ? "border-brand-primary text-brand-primary"
+                  : "border-border-default",
               )}
             >
               <input {...getInputProps()} />

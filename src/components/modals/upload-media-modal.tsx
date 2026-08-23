@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,8 @@ interface UploadedMedia {
   url: string;
   type: "IMAGE" | "VIDEO";
   title: string | null;
+  moderationStatus: string;
+  moderationNote: string | null;
 }
 
 interface UploadMediaModalProps {
@@ -48,46 +51,72 @@ interface UploadMediaModalProps {
 
 function uploadToCloudinary(
   file: File,
-  signature: { cloudName: string; apiKey: string; timestamp: number; signature: string; folder: string },
+  signature: {
+    cloudName: string;
+    apiKey: string;
+    timestamp: number;
+    signature: string;
+    folder: string;
+    transformation: string;
+  },
   onProgress: (percent: number) => void,
 ) {
-  return new Promise<{ secure_url: string; public_id: string; width?: number; height?: number; resource_type: string }>(
-    (resolve, reject) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("api_key", signature.apiKey);
-      formData.append("timestamp", String(signature.timestamp));
-      formData.append("signature", signature.signature);
-      formData.append("folder", signature.folder);
+  return new Promise<{
+    secure_url: string;
+    public_id: string;
+    width?: number;
+    height?: number;
+    resource_type: string;
+  }>((resolve, reject) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", signature.apiKey);
+    formData.append("timestamp", String(signature.timestamp));
+    formData.append("signature", signature.signature);
+    formData.append("folder", signature.folder);
+    formData.append("transformation", signature.transformation);
 
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `https://api.cloudinary.com/v1_1/${signature.cloudName}/auto/upload`);
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          onProgress(Math.round((event.loaded / event.total) * 100));
-        }
-      };
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(JSON.parse(xhr.responseText));
-        } else {
-          reject(new Error("Upload failed"));
-        }
-      };
-      xhr.onerror = () => reject(new Error("Upload failed"));
-      xhr.send(formData);
-    },
-  );
+    const xhr = new XMLHttpRequest();
+    xhr.open(
+      "POST",
+      `https://api.cloudinary.com/v1_1/${signature.cloudName}/auto/upload`,
+    );
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(JSON.parse(xhr.responseText));
+      } else {
+        reject(new Error("Upload failed"));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Upload failed"));
+    xhr.send(formData);
+  });
 }
 
-export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: UploadMediaModalProps) {
+export function UploadMediaModal({
+  open,
+  onOpenChange,
+  profileId,
+  onUploaded,
+}: UploadMediaModalProps) {
   const [files, setFiles] = useState<PendingFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rightsConfirmed, setRightsConfirmed] = useState(false);
 
   const onDrop = useCallback((accepted: File[]) => {
     setFiles((prev) => [
       ...prev,
-      ...accepted.map((file) => ({ file, title: "", progress: 0, status: "pending" as const })),
+      ...accepted.map((file) => ({
+        file,
+        title: "",
+        progress: 0,
+        status: "pending" as const,
+      })),
     ]);
   }, []);
 
@@ -101,7 +130,9 @@ export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: 
       if (file.size > max) {
         return {
           code: "file-too-large",
-          message: isVideo ? "Videos must be under 100MB" : "Images must be under 10MB",
+          message: isVideo
+            ? "Videos must be under 100MB"
+            : "Images must be under 10MB",
         };
       }
       return null;
@@ -117,6 +148,7 @@ export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: 
   };
 
   const uploadAll = async () => {
+    if (!rightsConfirmed) return;
     setIsSubmitting(true);
 
     const sigRes = await fetch("/api/upload/signature", { method: "POST" });
@@ -124,7 +156,11 @@ export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: 
 
     if (!sigRes.ok) {
       setFiles((prev) =>
-        prev.map((f) => ({ ...f, status: "error", error: sigBody.message ?? "Upload unavailable" })),
+        prev.map((f) => ({
+          ...f,
+          status: "error",
+          error: sigBody.message ?? "Upload unavailable",
+        })),
       );
       setIsSubmitting(false);
       return;
@@ -133,12 +169,22 @@ export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: 
     const uploaded: UploadedMedia[] = [];
 
     for (let i = 0; i < files.length; i++) {
-      setFiles((prev) => prev.map((f, idx) => (idx === i ? { ...f, status: "uploading" } : f)));
+      setFiles((prev) =>
+        prev.map((f, idx) => (idx === i ? { ...f, status: "uploading" } : f)),
+      );
 
       try {
-        const result = await uploadToCloudinary(files[i].file, sigBody.data, (percent) => {
-          setFiles((prev) => prev.map((f, idx) => (idx === i ? { ...f, progress: percent } : f)));
-        });
+        const result = await uploadToCloudinary(
+          files[i].file,
+          sigBody.data,
+          (percent) => {
+            setFiles((prev) =>
+              prev.map((f, idx) =>
+                idx === i ? { ...f, progress: percent } : f,
+              ),
+            );
+          },
+        );
 
         const type = result.resource_type === "video" ? "VIDEO" : "IMAGE";
         const saveRes = await fetch("/api/portfolio", {
@@ -152,6 +198,7 @@ export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: 
             title: files[i].title || undefined,
             width: result.width,
             height: result.height,
+            rightsConfirmed,
           }),
         });
         const saveBody = await saveRes.json();
@@ -161,13 +208,19 @@ export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: 
             url: result.secure_url,
             type,
             title: files[i].title || null,
+            moderationStatus: saveBody.data.moderationStatus,
+            moderationNote: saveBody.data.moderationNote,
           });
         }
 
-        setFiles((prev) => prev.map((f, idx) => (idx === i ? { ...f, status: "done" } : f)));
+        setFiles((prev) =>
+          prev.map((f, idx) => (idx === i ? { ...f, status: "done" } : f)),
+        );
       } catch {
         setFiles((prev) =>
-          prev.map((f, idx) => (idx === i ? { ...f, status: "error", error: "Upload failed" } : f)),
+          prev.map((f, idx) =>
+            idx === i ? { ...f, status: "error", error: "Upload failed" } : f,
+          ),
         );
       }
     }
@@ -196,26 +249,37 @@ export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: 
         <div
           {...getRootProps()}
           className={`flex flex-col items-center justify-center gap-2 rounded-[var(--fg-radius-md)] border-2 border-dashed p-8 text-center transition-colors duration-150 ${
-            isDragActive ? "border-brand-primary text-brand-primary" : "border-border-default text-text-tertiary"
+            isDragActive
+              ? "border-brand-primary text-brand-primary"
+              : "border-border-default text-text-tertiary"
           }`}
         >
           <input {...getInputProps()} />
           <UploadCloud className="size-6" />
           <p className="text-body-sm">Drag files here, or click to browse</p>
-          <p className="text-body-sm text-text-tertiary">Images up to 10MB, videos up to 100MB</p>
+          <p className="text-body-sm text-text-tertiary">
+            Images up to 10MB, videos up to 100MB
+          </p>
         </div>
 
         {files.length > 0 ? (
           <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
             {files.map((f, index) => (
-              <div key={index} className="flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] border border-border-default p-2.5">
+              <div
+                key={index}
+                className="flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] border border-border-default p-2.5"
+              >
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate text-body-sm font-semibold text-text-primary">
                       {f.file.name}
                     </span>
                     {f.status === "pending" ? (
-                      <button type="button" onClick={() => removeFile(index)} aria-label="Remove file">
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        aria-label="Remove file"
+                      >
                         <X className="size-3.5 text-text-tertiary" />
                       </button>
                     ) : null}
@@ -240,11 +304,17 @@ export function UploadMediaModal({ open, onOpenChange, profileId, onUploaded }: 
           </div>
         ) : null}
 
+        <Checkbox
+          checked={rightsConfirmed}
+          onCheckedChange={(checked) => setRightsConfirmed(checked === true)}
+          label="I confirm I have the rights to use these images and have the consent of anyone appearing in them"
+        />
+
         <Button
           variant="accent"
           size="lg"
           className="w-full"
-          disabled={files.length === 0 || isSubmitting}
+          disabled={files.length === 0 || isSubmitting || !rightsConfirmed}
           onClick={uploadAll}
         >
           {isSubmitting ? (

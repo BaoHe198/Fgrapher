@@ -40,7 +40,13 @@ interface ChatMessage {
   bookingId: string | null;
   readAt: string | null;
   createdAt: string;
-  booking: { id: string; date: string; startTime: string; status: BookingStatus; service: { name: string } | null } | null;
+  booking: {
+    id: string;
+    date: string;
+    startTime: string;
+    status: BookingStatus;
+    service: { name: string } | null;
+  } | null;
 }
 
 interface ChatPartner {
@@ -51,7 +57,10 @@ interface ChatPartner {
   username: string | null;
 }
 
-const BOOKING_STATUS_VARIANT: Record<BookingStatus, "warning" | "success" | "neutral" | "destructive"> = {
+const BOOKING_STATUS_VARIANT: Record<
+  BookingStatus,
+  "warning" | "success" | "neutral" | "destructive"
+> = {
   PENDING: "warning",
   CONFIRMED: "success",
   COMPLETED: "neutral",
@@ -69,7 +78,9 @@ function dateSeparatorLabel(date: Date) {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const isSameDay = (a: Date, b: Date) =>
-    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
 
   if (isSameDay(date, today)) return "Today";
   if (isSameDay(date, yesterday)) return "Yesterday";
@@ -85,18 +96,23 @@ async function uploadImage(file: File): Promise<string | null> {
   const sigBody = await sigRes.json();
   if (!sigRes.ok) return null;
 
-  const { cloudName, apiKey, timestamp, signature, folder } = sigBody.data;
+  const { cloudName, apiKey, timestamp, signature, folder, transformation } =
+    sigBody.data;
   const formData = new FormData();
   formData.append("file", file);
   formData.append("api_key", apiKey);
   formData.append("timestamp", timestamp);
   formData.append("signature", signature);
   formData.append("folder", folder);
+  formData.append("transformation", transformation);
 
-  const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
-    method: "POST",
-    body: formData,
-  });
+  const uploadRes = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
   const uploadBody = await uploadRes.json();
   return uploadRes.ok ? uploadBody.secure_url : null;
 }
@@ -131,7 +147,9 @@ export function ChatPanel({
       setIsLoading(false);
     });
     if (scrollToBottom) {
-      requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ block: "end" }));
+      requestAnimationFrame(() =>
+        bottomRef.current?.scrollIntoView({ block: "end" }),
+      );
     }
     fetch(`/api/conversations/${conversationId}/read`, { method: "PATCH" });
   };
@@ -146,7 +164,9 @@ export function ChatPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 
-  const onSend = async (overrides?: Partial<{ content: string; type: string; mediaUrl: string }>) => {
+  const onSend = async (
+    overrides?: Partial<{ content: string; type: string; mediaUrl: string }>,
+  ) => {
     const content = overrides?.content ?? draft.trim();
     if (!content && !overrides?.mediaUrl) return;
 
@@ -201,10 +221,16 @@ export function ChatPanel({
           </button>
         ) : null}
         <Avatar className="size-10">
-          {otherUser.avatar ? <AvatarImage src={otherUser.avatar} alt="" /> : null}
-          <AvatarFallback>{partyName(otherUser)[0]?.toUpperCase()}</AvatarFallback>
+          {otherUser.avatar ? (
+            <AvatarImage src={otherUser.avatar} alt="" />
+          ) : null}
+          <AvatarFallback>
+            {partyName(otherUser)[0]?.toUpperCase()}
+          </AvatarFallback>
         </Avatar>
-        <span className="flex-1 text-heading-sm text-text-primary">{partyName(otherUser)}</span>
+        <span className="flex-1 text-heading-sm text-text-primary">
+          {partyName(otherUser)}
+        </span>
 
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -216,18 +242,24 @@ export function ChatPanel({
           />
           <DropdownMenuContent align="end">
             {otherUser.username ? (
-              <DropdownMenuItem render={<Link href={`/profile/${otherUser.username}`} />}>
+              <DropdownMenuItem
+                render={<Link href={`/profile/${otherUser.username}`} />}
+              >
                 View profile
               </DropdownMenuItem>
             ) : null}
-            <DropdownMenuItem onClick={() => setReportOpen(true)}>Report</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setReportOpen(true)}>
+              Report
+            </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
-              onClick={() => fetch("/api/blocks", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: otherUser.id }),
-              })}
+              onClick={() =>
+                fetch("/api/blocks", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ userId: otherUser.id }),
+                })
+              }
             >
               Block
             </DropdownMenuItem>
@@ -249,10 +281,12 @@ export function ChatPanel({
         ) : messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
             <MessageCircle className="size-10 text-text-tertiary" />
-            <p className="text-body-md text-text-secondary">Say hello to start the conversation</p>
+            <p className="text-body-md text-text-secondary">
+              Say hello to start the conversation
+            </p>
             <p className="max-w-xs text-body-sm text-text-tertiary">
-              Stay safe: never share payment details outside Fgrapher. Report anything
-              suspicious.
+              Stay safe: never share payment details outside Fgrapher. Report
+              anything suspicious.
             </p>
           </div>
         ) : (
@@ -273,7 +307,12 @@ export function ChatPanel({
                   </div>
                 ) : null}
 
-                <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>
+                <div
+                  className={cn(
+                    "flex flex-col",
+                    isOwn ? "items-end" : "items-start",
+                  )}
+                >
                   {message.type === "booking_link" && message.booking ? (
                     <Link
                       href={`/dashboard/bookings/${message.booking.id}`}
@@ -286,19 +325,30 @@ export function ChatPanel({
                         </span>
                       </div>
                       <span className="text-body-sm text-text-secondary">
-                        {new Date(message.booking.date).toLocaleDateString("en-US", {
-                          dateStyle: "medium",
-                          timeZone: "UTC",
-                        })}{" "}
+                        {new Date(message.booking.date).toLocaleDateString(
+                          "en-US",
+                          {
+                            dateStyle: "medium",
+                            timeZone: "UTC",
+                          },
+                        )}{" "}
                         · {message.booking.startTime}
                       </span>
-                      <Badge variant={BOOKING_STATUS_VARIANT[message.booking.status]} className="w-fit">
+                      <Badge
+                        variant={BOOKING_STATUS_VARIANT[message.booking.status]}
+                        className="w-fit"
+                      >
                         {message.booking.status}
                       </Badge>
-                      <span className="text-body-sm font-semibold text-brand-primary">View booking</span>
+                      <span className="text-body-sm font-semibold text-brand-primary">
+                        View booking
+                      </span>
                     </Link>
                   ) : message.type === "image" && message.mediaUrl ? (
-                    <button type="button" onClick={() => setLightboxUrl(message.mediaUrl)}>
+                    <button
+                      type="button"
+                      onClick={() => setLightboxUrl(message.mediaUrl)}
+                    >
                       <Image
                         src={message.mediaUrl}
                         alt=""
@@ -322,7 +372,10 @@ export function ChatPanel({
 
                   <div className="mt-1 flex items-center gap-1 text-xs text-text-tertiary">
                     <span>
-                      {date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                      {date.toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
                     </span>
                     {isOwn ? (
                       message.readAt ? (
@@ -355,7 +408,11 @@ export function ChatPanel({
           aria-label="Attach an image"
           onClick={() => fileInputRef.current?.click()}
         >
-          {uploading ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
+          {uploading ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <ImagePlus className="size-4" />
+          )}
         </Button>
         <textarea
           ref={textareaRef}
@@ -378,7 +435,11 @@ export function ChatPanel({
           aria-label="Send message"
           onClick={() => onSend()}
         >
-          {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          {sending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Send className="size-4" />
+          )}
         </Button>
       </div>
 

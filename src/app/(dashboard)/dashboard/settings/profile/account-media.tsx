@@ -15,11 +15,15 @@ async function uploadFile(file: File) {
   formData.append("timestamp", String(sigBody.data.timestamp));
   formData.append("signature", sigBody.data.signature);
   formData.append("folder", sigBody.data.folder);
+  formData.append("transformation", sigBody.data.transformation);
 
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${sigBody.data.cloudName}/auto/upload`, {
-    method: "POST",
-    body: formData,
-  });
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${sigBody.data.cloudName}/auto/upload`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
   const result = await res.json();
   if (!res.ok) throw new Error("Upload failed");
   return result.secure_url as string;
@@ -50,7 +54,9 @@ export function AccountMedia({
       await fetch("/api/users/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(target === "avatar" ? { avatar: url } : { coverImage: url }),
+        body: JSON.stringify(
+          target === "avatar" ? { avatar: url } : { coverImage: url },
+        ),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
@@ -63,7 +69,13 @@ export function AccountMedia({
     <div className="flex flex-col gap-3">
       <div className="relative aspect-3/1 w-full overflow-hidden rounded-[var(--fg-radius-md)] bg-bg-sunken">
         {coverImage ? (
-          <Image src={coverImage} alt="" fill className="object-cover" unoptimized />
+          <Image
+            src={coverImage}
+            alt=""
+            fill
+            className="object-cover"
+            unoptimized
+          />
         ) : null}
         <button
           type="button"
@@ -82,13 +94,23 @@ export function AccountMedia({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], "cover")}
+          onChange={(e) =>
+            e.target.files?.[0] && handleUpload(e.target.files[0], "cover")
+          }
         />
       </div>
 
       <div className="-mt-10 ml-4 flex items-end gap-3">
         <div className="relative size-[104px] shrink-0 overflow-hidden rounded-full border-4 border-bg-surface bg-bg-sunken">
-          {avatar ? <Image src={avatar} alt="" fill className="object-cover" unoptimized /> : null}
+          {avatar ? (
+            <Image
+              src={avatar}
+              alt=""
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          ) : null}
           <button
             type="button"
             onClick={() => avatarInput.current?.click()}
@@ -105,7 +127,9 @@ export function AccountMedia({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], "avatar")}
+            onChange={(e) =>
+              e.target.files?.[0] && handleUpload(e.target.files[0], "avatar")
+            }
           />
         </div>
       </div>

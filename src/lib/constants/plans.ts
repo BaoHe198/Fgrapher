@@ -24,9 +24,22 @@ export interface RolePlan {
   // pricing/billing pages), never from a Client Component.
   monthlyPriceId: string | undefined;
   yearlyPriceId: string | undefined;
+  // Max ProfileMedia rows per profile — enforced in /api/portfolio's POST
+  // handler (Prompt B5, VIỆC 3). A single tier per role today, so this is
+  // uniform, but lives per-plan so a future multi-tier plan can vary it
+  // without touching the enforcement code.
+  maxPortfolioImages: number;
 }
 
-function plan(role: Role, name: string, monthly: number, envPrefix: string): RolePlan {
+const DEFAULT_MAX_PORTFOLIO_IMAGES = 30;
+
+function plan(
+  role: Role,
+  name: string,
+  monthly: number,
+  envPrefix: string,
+  maxPortfolioImages = DEFAULT_MAX_PORTFOLIO_IMAGES,
+): RolePlan {
   return {
     role,
     name,
@@ -35,6 +48,7 @@ function plan(role: Role, name: string, monthly: number, envPrefix: string): Rol
     yearly: Math.round(monthly * 12 * (1 - YEARLY_DISCOUNT)),
     monthlyPriceId: process.env[`STRIPE_PRICE_${envPrefix}_MONTHLY`],
     yearlyPriceId: process.env[`STRIPE_PRICE_${envPrefix}_YEARLY`],
+    maxPortfolioImages,
   };
 }
 
@@ -44,10 +58,30 @@ function plan(role: Role, name: string, monthly: number, envPrefix: string): Rol
 // (see formatCurrency's VND default in lib/utils.ts) — billing subscriptions
 // in USD was the actual inconsistency, not a deliberate split.
 export const ROLE_PLANS: Partial<Record<Role, RolePlan>> = {
-  PHOTOGRAPHER: plan("PHOTOGRAPHER", ROLE_LABELS.PHOTOGRAPHER, 390_000, "PHOTOGRAPHER"),
-  VIDEOGRAPHER: plan("VIDEOGRAPHER", ROLE_LABELS.VIDEOGRAPHER, 390_000, "VIDEOGRAPHER"),
-  MAKEUP_ARTIST: plan("MAKEUP_ARTIST", ROLE_LABELS.MAKEUP_ARTIST, 390_000, "MAKEUP_ARTIST"),
-  CAMERA_SHOP: plan("CAMERA_SHOP", ROLE_LABELS.CAMERA_SHOP, 490_000, "CAMERA_SHOP"),
+  PHOTOGRAPHER: plan(
+    "PHOTOGRAPHER",
+    ROLE_LABELS.PHOTOGRAPHER,
+    390_000,
+    "PHOTOGRAPHER",
+  ),
+  VIDEOGRAPHER: plan(
+    "VIDEOGRAPHER",
+    ROLE_LABELS.VIDEOGRAPHER,
+    390_000,
+    "VIDEOGRAPHER",
+  ),
+  MAKEUP_ARTIST: plan(
+    "MAKEUP_ARTIST",
+    ROLE_LABELS.MAKEUP_ARTIST,
+    390_000,
+    "MAKEUP_ARTIST",
+  ),
+  CAMERA_SHOP: plan(
+    "CAMERA_SHOP",
+    ROLE_LABELS.CAMERA_SHOP,
+    490_000,
+    "CAMERA_SHOP",
+  ),
   STUDIO: plan("STUDIO", ROLE_LABELS.STUDIO, 690_000, "STUDIO"),
   // Priced the same as Make-up Artist per the product decision in
   // docs/guides/fgrapher-prompts-batch-2.md §3a.
@@ -60,7 +94,9 @@ export function priceIdForRole(role: Role, interval: BillingInterval) {
   return interval === "year" ? p.yearlyPriceId : p.monthlyPriceId;
 }
 
-export function intervalForPriceId(priceId: string): BillingInterval | undefined {
+export function intervalForPriceId(
+  priceId: string,
+): BillingInterval | undefined {
   for (const p of Object.values(ROLE_PLANS)) {
     if (p?.monthlyPriceId === priceId) return "month";
     if (p?.yearlyPriceId === priceId) return "year";
@@ -75,8 +111,13 @@ export function minMonthlyPrice() {
 // Plain role -> price map with no Stripe IDs or env access — safe to pass
 // as a prop from a server component down into a Client Component (unlike
 // ROLE_PLANS itself, which must stay server-only).
-export function rolePricesVnd(interval: BillingInterval = "month"): Partial<Record<Role, number>> {
+export function rolePricesVnd(
+  interval: BillingInterval = "month",
+): Partial<Record<Role, number>> {
   return Object.fromEntries(
-    Object.entries(ROLE_PLANS).map(([role, p]) => [role, interval === "year" ? p!.yearly : p!.monthly]),
+    Object.entries(ROLE_PLANS).map(([role, p]) => [
+      role,
+      interval === "year" ? p!.yearly : p!.monthly,
+    ]),
   ) as Partial<Record<Role, number>>;
 }

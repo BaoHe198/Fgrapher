@@ -8,9 +8,18 @@ export const createPortfolioMediaSchema = z.object({
   title: z.string().max(120).optional(),
   width: z.number().int().positive().optional(),
   height: z.number().int().positive().optional(),
+  // Điều 32 Bộ luật Dân sự 2015 — using a person's likeness requires their
+  // consent. Required on every upload, never pre-ticked; the server sets
+  // ProfileMedia.rightsConfirmedAt itself rather than trusting a client
+  // timestamp (see /api/portfolio/route.ts).
+  rightsConfirmed: z.boolean().refine((v) => v === true, {
+    message: "You must confirm you have the rights to use these images",
+  }),
 });
 
-export type CreatePortfolioMediaInput = z.infer<typeof createPortfolioMediaSchema>;
+export type CreatePortfolioMediaInput = z.infer<
+  typeof createPortfolioMediaSchema
+>;
 
 export const reorderPortfolioSchema = z.object({
   order: z.array(z.string().min(1)).min(1),
