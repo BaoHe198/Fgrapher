@@ -1,13 +1,21 @@
 "use client";
 
-import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
-import { Loader2 } from "lucide-react";
+import type {
+  ExperienceLevel,
+  ProfileCategory,
+  Role,
+  VerificationStatus,
+} from "@prisma/client";
+import { Loader2, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Switch } from "@/components/ui/switch";
 import { Tag } from "@/components/ui/tag";
 import { CATEGORIES_BY_ROLE, EXPERIENCE_LEVEL_LABELS } from "@/lib/constants";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
@@ -51,7 +59,9 @@ interface ProfileFormValues {
   requireDepositBeforeContact: boolean;
 }
 
-function toFormValues(profile: Record<string, unknown> | null): ProfileFormValues {
+function toFormValues(
+  profile: Record<string, unknown> | null,
+): ProfileFormValues {
   return {
     displayName: (profile?.displayName as string) ?? "",
     description: (profile?.description as string) ?? "",
@@ -76,7 +86,8 @@ function toFormValues(profile: Record<string, unknown> | null): ProfileFormValue
     agencyRepresented: (profile?.agencyRepresented as boolean) ?? false,
     agencyName: (profile?.agencyName as string) ?? "",
     hideExactLocation: (profile?.hideExactLocation as boolean) ?? false,
-    requireDepositBeforeContact: (profile?.requireDepositBeforeContact as boolean) ?? false,
+    requireDepositBeforeContact:
+      (profile?.requireDepositBeforeContact as boolean) ?? false,
   };
 }
 
@@ -87,6 +98,11 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
+  const [verificationStatus, setVerificationStatus] =
+    useState<VerificationStatus | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -97,6 +113,8 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           setValues(toFormValues(body.data));
           setProfileId(body.data?.id ?? null);
           setServices(body.data?.services ?? []);
+          setIsPublished(Boolean(body.data?.isPublished));
+          setVerificationStatus(body.verificationStatus ?? null);
           setIsLoading(false);
         }
       });
@@ -105,7 +123,27 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
     };
   }, [role]);
 
-  const set = <K extends keyof ProfileFormValues>(key: K, value: ProfileFormValues[K]) => {
+  const togglePublished = async (next: boolean) => {
+    setPublishError(null);
+    setIsPublishing(true);
+    const res = await fetch(`/api/profiles/${role}/publish`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isPublished: next }),
+    });
+    const body = await res.json();
+    setIsPublishing(false);
+    if (!res.ok) {
+      setPublishError(body.message ?? "Something went wrong");
+      return;
+    }
+    setIsPublished(next);
+  };
+
+  const set = <K extends keyof ProfileFormValues>(
+    key: K,
+    value: ProfileFormValues[K],
+  ) => {
     setValues((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -180,6 +218,47 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            {isPublished ? (
+              <ShieldCheck className="size-4 text-success" />
+            ) : null}
+            <span className="text-body-md font-semibold text-text-primary">
+              {isPublished
+                ? "Live — visible in search"
+                : "Draft — not visible in search"}
+            </span>
+            {verificationStatus === "VERIFIED" ? (
+              <Badge variant="success">Verified</Badge>
+            ) : null}
+          </div>
+          <Switch
+            checked={isPublished}
+            disabled={
+              isPublishing ||
+              (!isPublished && verificationStatus !== "VERIFIED")
+            }
+            onChange={togglePublished}
+          />
+        </div>
+        {verificationStatus !== "VERIFIED" ? (
+          <p className="text-body-sm text-text-secondary">
+            You can keep editing this profile as a draft. Once{" "}
+            <Link
+              href={`/onboarding/verification?role=${role}`}
+              className="text-text-link hover:underline"
+            >
+              your identity is verified
+            </Link>
+            , you can publish it to appear in search and receive bookings.
+          </p>
+        ) : null}
+        {publishError ? (
+          <p className="text-body-sm text-danger">{publishError}</p>
+        ) : null}
+      </div>
+
       <Input
         label="Display name"
         value={values.displayName}
@@ -188,8 +267,12 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-body-sm font-semibold text-text-primary">Description</label>
-          <span className="text-body-sm text-text-tertiary">{values.description.length}/1000</span>
+          <label className="text-body-sm font-semibold text-text-primary">
+            Description
+          </label>
+          <span className="text-body-sm text-text-tertiary">
+            {values.description.length}/1000
+          </span>
         </div>
         <textarea
           maxLength={1000}
@@ -200,7 +283,9 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Categories</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          Categories
+        </span>
         <div className="flex flex-wrap gap-2">
           {(CATEGORIES_BY_ROLE[role] ?? []).map((category) => (
             <Tag
@@ -266,7 +351,8 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             Model details
           </span>
           <p className="text-body-sm text-text-tertiary">
-            All optional and shown publicly on your profile — leave anything blank to hide it.
+            All optional and shown publicly on your profile — leave anything
+            blank to hide it.
           </p>
           <div className="grid grid-cols-2 gap-3">
             <Input
@@ -288,10 +374,14 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             <NativeSelect
               label="Experience level"
               value={values.experienceLevel}
-              onChange={(v) => set("experienceLevel", v as ExperienceLevel | "")}
+              onChange={(v) =>
+                set("experienceLevel", v as ExperienceLevel | "")
+              }
               options={[
                 { value: "", label: "Not specified" },
-                ...Object.entries(EXPERIENCE_LEVEL_LABELS).map(([value, label]) => ({ value, label })),
+                ...Object.entries(EXPERIENCE_LEVEL_LABELS).map(
+                  ([value, label]) => ({ value, label }),
+                ),
               ]}
             />
             <Input
@@ -324,7 +414,9 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           ) : null}
 
           <div className="h-px bg-border-subtle" />
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Privacy</span>
+          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            Privacy
+          </span>
           <Checkbox
             checked={values.hideExactLocation}
             onCheckedChange={(checked) => set("hideExactLocation", checked)}
@@ -332,7 +424,9 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           />
           <Checkbox
             checked={values.requireDepositBeforeContact}
-            onCheckedChange={(checked) => set("requireDepositBeforeContact", checked)}
+            onCheckedChange={(checked) =>
+              set("requireDepositBeforeContact", checked)
+            }
             label="Require a deposit before sharing my contact details"
           />
         </div>
@@ -378,7 +472,9 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
           Save changes
         </Button>
-        {saved ? <span className="text-body-sm text-success">Saved</span> : null}
+        {saved ? (
+          <span className="text-body-sm text-success">Saved</span>
+        ) : null}
       </div>
     </div>
   );

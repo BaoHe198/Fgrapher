@@ -5,7 +5,10 @@ import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { updateProfileSchema } from "@/lib/validations/profile";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ role: string }> }) {
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ role: string }> },
+) {
   try {
     const session = await requireAuth();
     const { role } = await params;
@@ -17,12 +20,26 @@ export async function GET(_request: Request, { params }: { params: Promise<{ rol
       );
     }
 
-    const profile = await db.profile.findUnique({
-      where: { userId_role: { userId: session.user.id, role: role as Role } },
-      include: { services: { orderBy: { createdAt: "asc" } } },
-    });
+    const [profile, userRole] = await Promise.all([
+      db.profile.findUnique({
+        where: { userId_role: { userId: session.user.id, role: role as Role } },
+        include: { services: { orderBy: { createdAt: "asc" } } },
+      }),
+      db.userRole.findUnique({
+        where: { userId_role: { userId: session.user.id, role: role as Role } },
+        select: { verificationStatus: true },
+      }),
+    ]);
 
-    return NextResponse.json({ data: profile, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      {
+        data: profile,
+        verificationStatus: userRole?.verificationStatus ?? null,
+        error: null,
+        message: null,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -38,7 +55,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ rol
   }
 }
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ role: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ role: string }> },
+) {
   try {
     const session = await requireAuth();
     const { role } = await params;
@@ -88,7 +108,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ro
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update profile" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to update profile",
+      },
       { status: 500 },
     );
   }

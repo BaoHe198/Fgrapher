@@ -15,11 +15,28 @@ import type { CreateBookingInput } from "@/lib/validations/booking";
 const PAGE_SIZE = 20;
 const MIN_NOTICE_HOURS = 24;
 
-export type BookingTab = "ALL" | "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+export type BookingTab =
+  "ALL" | "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
 
 const BOOKING_INCLUDE = {
-  customer: { select: { id: true, name: true, firstName: true, avatar: true, email: true } },
-  provider: { select: { id: true, name: true, firstName: true, avatar: true, email: true } },
+  customer: {
+    select: {
+      id: true,
+      name: true,
+      firstName: true,
+      avatar: true,
+      email: true,
+    },
+  },
+  provider: {
+    select: {
+      id: true,
+      name: true,
+      firstName: true,
+      avatar: true,
+      email: true,
+    },
+  },
   service: { select: { name: true, duration: true } },
 } as const;
 
@@ -28,7 +45,10 @@ function partyName(party: { firstName: string | null; name: string | null }) {
 }
 
 function dateLabel(date: Date) {
-  return new Date(date).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
+  return new Date(date).toLocaleDateString("en-US", {
+    dateStyle: "long",
+    timeZone: "UTC",
+  });
 }
 
 function bookingUrlFor(bookingId: string) {
@@ -65,7 +85,12 @@ export async function listBookings({
     db.booking.count({ where: { ...where, ...statusFilter } }),
   ]);
 
-  return { bookings, total, page, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
+  return {
+    bookings,
+    total,
+    page,
+    totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+  };
 }
 
 export async function listBookingsForRange({
@@ -93,17 +118,41 @@ export async function getBookingDetail(bookingId: string, userId: string) {
     where: { id: bookingId },
     include: {
       customer: {
-        select: { id: true, name: true, firstName: true, avatar: true, username: true },
+        select: {
+          id: true,
+          name: true,
+          firstName: true,
+          avatar: true,
+          username: true,
+        },
       },
       provider: {
-        select: { id: true, name: true, firstName: true, avatar: true, username: true },
+        select: {
+          id: true,
+          name: true,
+          firstName: true,
+          avatar: true,
+          username: true,
+          // Verified badge (Prompt B3, VIỆC 4) — a booking isn't tied to a
+          // specific provider role (serviceId is optional), so this shows
+          // "verified" if the provider holds ANY verified provider role,
+          // rather than trying to resolve which one this booking is for.
+          roles: {
+            where: { verificationStatus: "VERIFIED" },
+            select: { role: true },
+            take: 1,
+          },
+        },
       },
       service: { select: { name: true, description: true, duration: true } },
       review: { select: { id: true } },
     },
   });
 
-  if (!booking || (booking.customerId !== userId && booking.providerId !== userId)) {
+  if (
+    !booking ||
+    (booking.customerId !== userId && booking.providerId !== userId)
+  ) {
     return null;
   }
 
@@ -120,7 +169,10 @@ export class BookingActionError extends Error {
   }
 }
 
-export async function createBooking(customerId: string, input: CreateBookingInput) {
+export async function createBooking(
+  customerId: string,
+  input: CreateBookingInput,
+) {
   if (input.providerId === customerId) {
     throw new BookingActionError("You can't book yourself", 400);
   }
@@ -142,7 +194,8 @@ export async function createBooking(customerId: string, input: CreateBookingInpu
   }
 
   const duration = service?.duration ?? 60;
-  const startMinutes = Number(input.startTime.slice(0, 2)) * 60 + Number(input.startTime.slice(3));
+  const startMinutes =
+    Number(input.startTime.slice(0, 2)) * 60 + Number(input.startTime.slice(3));
   const endMinutes = startMinutes + duration;
   const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
 
@@ -160,12 +213,16 @@ export async function createBooking(customerId: string, input: CreateBookingInpu
     });
 
     const overlaps = existing.some((b) => {
-      const bStart = Number(b.startTime.slice(0, 2)) * 60 + Number(b.startTime.slice(3));
+      const bStart =
+        Number(b.startTime.slice(0, 2)) * 60 + Number(b.startTime.slice(3));
       const bEnd = bStart + (b.service?.duration ?? 60);
       return startMinutes < bEnd && endMinutes > bStart;
     });
     if (overlaps) {
-      throw new BookingActionError("That time slot was just booked — pick another", 409);
+      throw new BookingActionError(
+        "That time slot was just booked — pick another",
+        409,
+      );
     }
 
     return tx.booking.create({
@@ -207,7 +264,10 @@ export async function createBooking(customerId: string, input: CreateBookingInpu
     },
   });
 
-  const conversationId = await getOrCreateConversation(booking.customerId, booking.providerId);
+  const conversationId = await getOrCreateConversation(
+    booking.customerId,
+    booking.providerId,
+  );
   await sendMessage({
     conversationId,
     senderId: booking.customerId,
@@ -242,19 +302,31 @@ export async function updateBookingStatus({
   const isProvider = booking.providerId === userId;
   const isCustomer = booking.customerId === userId;
   if (!isProvider && !isCustomer) {
-    throw new BookingActionError("You are not a participant in this booking", 403);
+    throw new BookingActionError(
+      "You are not a participant in this booking",
+      403,
+    );
   }
 
   if ((status === "CONFIRMED" || status === "DECLINED") && !isProvider) {
-    throw new BookingActionError("Only the provider can accept or decline a booking", 403);
+    throw new BookingActionError(
+      "Only the provider can accept or decline a booking",
+      403,
+    );
   }
   if ((status === "COMPLETED" || status === "NO_SHOW") && !isProvider) {
-    throw new BookingActionError("Only the provider can report this outcome", 403);
+    throw new BookingActionError(
+      "Only the provider can report this outcome",
+      403,
+    );
   }
 
   const isPastBookingDate = new Date(booking.date).getTime() < Date.now();
   if ((status === "COMPLETED" || status === "NO_SHOW") && !isPastBookingDate) {
-    throw new BookingActionError("Can't report an outcome before the booking date", 400);
+    throw new BookingActionError(
+      "Can't report an outcome before the booking date",
+      400,
+    );
   }
 
   const updated = await db.booking.update({
@@ -286,7 +358,10 @@ export async function updateBookingStatus({
       title: "Booking confirmed",
       message: `${emailArgs.otherPartyName} confirmed ${serviceName} on ${emailArgs.dateLabel}`,
       data: { bookingId: updated.id },
-      email: { subject: "Booking confirmed — Fgrapher", html: bookingConfirmedEmailHtml(emailArgs) },
+      email: {
+        subject: "Booking confirmed — Fgrapher",
+        html: bookingConfirmedEmailHtml(emailArgs),
+      },
     });
   } else if (status === "DECLINED") {
     await notify({
@@ -295,7 +370,10 @@ export async function updateBookingStatus({
       title: "Booking declined",
       message: `${emailArgs.otherPartyName} declined your request for ${serviceName}`,
       data: { bookingId: updated.id },
-      email: { subject: "Booking declined — Fgrapher", html: bookingDeclinedEmailHtml(emailArgs) },
+      email: {
+        subject: "Booking declined — Fgrapher",
+        html: bookingDeclinedEmailHtml(emailArgs),
+      },
     });
   } else if (status === "CANCELLED") {
     await notify({
@@ -304,7 +382,10 @@ export async function updateBookingStatus({
       title: "Booking cancelled",
       message: `${emailArgs.otherPartyName} cancelled ${serviceName} on ${emailArgs.dateLabel}`,
       data: { bookingId: updated.id },
-      email: { subject: "Booking cancelled — Fgrapher", html: bookingCancelledEmailHtml(emailArgs) },
+      email: {
+        subject: "Booking cancelled — Fgrapher",
+        html: bookingCancelledEmailHtml(emailArgs),
+      },
     });
   } else if (status === "COMPLETED") {
     await notify({
@@ -340,16 +421,25 @@ export async function proposeReschedule({
   startTime: string;
   endTime?: string;
 }) {
-  const booking = await db.booking.findUnique({ where: { id: bookingId }, include: BOOKING_INCLUDE });
+  const booking = await db.booking.findUnique({
+    where: { id: bookingId },
+    include: BOOKING_INCLUDE,
+  });
   if (!booking) throw new BookingActionError("Booking not found", 404);
 
   const isProvider = booking.providerId === userId;
   const isCustomer = booking.customerId === userId;
   if (!isProvider && !isCustomer) {
-    throw new BookingActionError("You are not a participant in this booking", 403);
+    throw new BookingActionError(
+      "You are not a participant in this booking",
+      403,
+    );
   }
   if (booking.status !== "PENDING" && booking.status !== "CONFIRMED") {
-    throw new BookingActionError("This booking can no longer be rescheduled", 400);
+    throw new BookingActionError(
+      "This booking can no longer be rescheduled",
+      400,
+    );
   }
 
   const updated = await db.booking.update({
@@ -383,18 +473,30 @@ export async function proposeReschedule({
 export async function sendBookingReminders() {
   const tomorrow = new Date();
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-  const from = new Date(Date.UTC(tomorrow.getUTCFullYear(), tomorrow.getUTCMonth(), tomorrow.getUTCDate()));
+  const from = new Date(
+    Date.UTC(
+      tomorrow.getUTCFullYear(),
+      tomorrow.getUTCMonth(),
+      tomorrow.getUTCDate(),
+    ),
+  );
   const to = new Date(from);
   to.setUTCDate(to.getUTCDate() + 1);
 
   const bookings = await db.booking.findMany({
-    where: { status: "CONFIRMED", date: { gte: from, lt: to }, reminderSentAt: null },
+    where: {
+      status: "CONFIRMED",
+      date: { gte: from, lt: to },
+      reminderSentAt: null,
+    },
     include: BOOKING_INCLUDE,
   });
 
   for (const booking of bookings) {
     const args = (recipientIsProvider: boolean) => ({
-      otherPartyName: partyName(recipientIsProvider ? booking.customer : booking.provider),
+      otherPartyName: partyName(
+        recipientIsProvider ? booking.customer : booking.provider,
+      ),
       serviceName: booking.service?.name ?? "a session",
       dateLabel: dateLabel(booking.date),
       timeLabel: booking.startTime,
@@ -424,7 +526,10 @@ export async function sendBookingReminders() {
       },
     });
 
-    await db.booking.update({ where: { id: booking.id }, data: { reminderSentAt: new Date() } });
+    await db.booking.update({
+      where: { id: booking.id },
+      data: { reminderSentAt: new Date() },
+    });
   }
 
   return bookings.length;
@@ -439,7 +544,10 @@ export async function respondToReschedule({
   userId: string;
   accept: boolean;
 }) {
-  const booking = await db.booking.findUnique({ where: { id: bookingId }, include: BOOKING_INCLUDE });
+  const booking = await db.booking.findUnique({
+    where: { id: bookingId },
+    include: BOOKING_INCLUDE,
+  });
   if (!booking) throw new BookingActionError("Booking not found", 404);
   if (!booking.rescheduleProposedBy) {
     throw new BookingActionError("No pending reschedule proposal", 400);
@@ -451,7 +559,10 @@ export async function respondToReschedule({
   const isProvider = booking.providerId === userId;
   const isCustomer = booking.customerId === userId;
   if (!isProvider && !isCustomer) {
-    throw new BookingActionError("You are not a participant in this booking", 403);
+    throw new BookingActionError(
+      "You are not a participant in this booking",
+      403,
+    );
   }
 
   const updated = await db.booking.update({
@@ -475,7 +586,10 @@ export async function respondToReschedule({
     include: BOOKING_INCLUDE,
   });
 
-  const proposer = booking.rescheduleProposedBy === booking.providerId ? updated.provider : updated.customer;
+  const proposer =
+    booking.rescheduleProposedBy === booking.providerId
+      ? updated.provider
+      : updated.customer;
   await notify({
     userId: proposer.id,
     type: accept ? "BOOKING_CONFIRMED" : "BOOKING_DECLINED",

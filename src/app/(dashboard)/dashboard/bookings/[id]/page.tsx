@@ -25,7 +25,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
-type Party = Pick<User, "id" | "name" | "firstName" | "avatar" | "username">;
+type Party = Pick<User, "id" | "name" | "firstName" | "avatar" | "username"> & {
+  roles?: { role: string }[];
+};
 type BookingDetail = Booking & {
   customer: Party;
   provider: Party;
@@ -63,7 +65,10 @@ function partyName(party: Party) {
 }
 
 function formatDate(date: string | Date) {
-  return new Date(date).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
+  return new Date(date).toLocaleDateString("en-US", {
+    dateStyle: "long",
+    timeZone: "UTC",
+  });
 }
 
 export default function BookingDetailPage() {
@@ -143,7 +148,9 @@ export default function BookingDetailPage() {
   if (notFoundError) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <p className="text-body-lg font-semibold text-text-primary">Booking not found</p>
+        <p className="text-body-lg font-semibold text-text-primary">
+          Booking not found
+        </p>
         <Button
           variant="secondary"
           nativeButton={false}
@@ -167,7 +174,8 @@ export default function BookingDetailPage() {
   const otherParty = viewerIsProvider ? booking.customer : booking.provider;
   const status = STATUS_BADGE[booking.status];
   const isPast = new Date(booking.date).getTime() < now;
-  const withinCancellationWindow = new Date(booking.date).getTime() - now < 24 * 60 * 60 * 1000;
+  const withinCancellationWindow =
+    new Date(booking.date).getTime() - now < 24 * 60 * 60 * 1000;
   const hasReschedulePending = Boolean(booking.rescheduleProposedBy);
   const proposedByMe = booking.rescheduleProposedBy === session?.user?.id;
 
@@ -197,14 +205,25 @@ export default function BookingDetailPage() {
               : "New time proposed"}
           </span>
           <span className="text-body-sm text-text-secondary">
-            {formatDate(booking.rescheduleProposedDate!)} at {booking.rescheduleProposedStartTime}
+            {formatDate(booking.rescheduleProposedDate!)} at{" "}
+            {booking.rescheduleProposedStartTime}
           </span>
           {!proposedByMe ? (
             <div className="flex gap-2">
-              <Button size="sm" variant="accent" disabled={busy} onClick={() => respondReschedule(true)}>
+              <Button
+                size="sm"
+                variant="accent"
+                disabled={busy}
+                onClick={() => respondReschedule(true)}
+              >
                 Accept new time
               </Button>
-              <Button size="sm" variant="ghost" disabled={busy} onClick={() => respondReschedule(false)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={busy}
+                onClick={() => respondReschedule(false)}
+              >
                 Keep original time
               </Button>
             </div>
@@ -217,12 +236,19 @@ export default function BookingDetailPage() {
           <Card className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <Avatar className="size-11">
-                {otherParty.avatar ? <AvatarImage src={otherParty.avatar} alt="" /> : null}
-                <AvatarFallback>{partyName(otherParty)[0]?.toUpperCase()}</AvatarFallback>
+                {otherParty.avatar ? (
+                  <AvatarImage src={otherParty.avatar} alt="" />
+                ) : null}
+                <AvatarFallback>
+                  {partyName(otherParty)[0]?.toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-body-md font-semibold text-text-primary">
+                <span className="flex items-center gap-1.5 text-body-md font-semibold text-text-primary">
                   {partyName(otherParty)}
+                  {!viewerIsProvider && (otherParty.roles?.length ?? 0) > 0 ? (
+                    <Badge variant="accent">Verified</Badge>
+                  ) : null}
                 </span>
                 <span className="text-body-sm text-text-secondary">
                   {viewerIsProvider ? "Client" : "Provider"}
@@ -244,35 +270,57 @@ export default function BookingDetailPage() {
                 size="sm"
                 variant="secondary"
                 nativeButton={false}
-                render={<Link href={`/dashboard/messages?to=${otherParty.id}`} />}
+                render={
+                  <Link href={`/dashboard/messages?to=${otherParty.id}`} />
+                }
               >
                 Message
               </Button>
             </div>
           </Card>
 
-          <Card className="flex flex-col divide-y divide-border-subtle" padding={false}>
+          <Card
+            className="flex flex-col divide-y divide-border-subtle"
+            padding={false}
+          >
             {[
               ["Service", booking.service?.name ?? "Custom request"],
               ["Date", formatDate(booking.date)],
               [
                 "Time",
-                booking.endTime ? `${booking.startTime} – ${booking.endTime}` : booking.startTime,
+                booking.endTime
+                  ? `${booking.startTime} – ${booking.endTime}`
+                  : booking.startTime,
               ],
-              ["Duration", booking.service ? `${booking.service.duration} min` : "—"],
+              [
+                "Duration",
+                booking.service ? `${booking.service.duration} min` : "—",
+              ],
               [
                 "Location",
-                booking.locationType ? LOCATION_LABEL[booking.locationType] : "—",
+                booking.locationType
+                  ? LOCATION_LABEL[booking.locationType]
+                  : "—",
               ],
-              ["People", booking.numberOfPeople ? String(booking.numberOfPeople) : "—"],
+              [
+                "People",
+                booking.numberOfPeople ? String(booking.numberOfPeople) : "—",
+              ],
               [
                 "Total",
-                booking.totalPrice ? formatCurrency(booking.totalPrice, booking.currency) : "—",
+                booking.totalPrice
+                  ? formatCurrency(booking.totalPrice, booking.currency)
+                  : "—",
               ],
             ].map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between px-5 py-3.5">
+              <div
+                key={label}
+                className="flex items-center justify-between px-5 py-3.5"
+              >
                 <span className="text-body-sm text-text-tertiary">{label}</span>
-                <span className="text-body-md font-semibold text-text-primary">{value}</span>
+                <span className="text-body-md font-semibold text-text-primary">
+                  {value}
+                </span>
               </div>
             ))}
           </Card>
@@ -280,18 +328,24 @@ export default function BookingDetailPage() {
           {booking.locationAddress ? (
             <Card className="flex items-start gap-2">
               <MapPin className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
-              <span className="text-body-md text-text-primary">{booking.locationAddress}</span>
+              <span className="text-body-md text-text-primary">
+                {booking.locationAddress}
+              </span>
             </Card>
           ) : null}
 
           {booking.notes ? (
             <Card className="flex flex-col gap-1.5">
               <span className="text-body-sm text-text-tertiary">Notes</span>
-              <p className="whitespace-pre-line text-body-md text-text-primary">{booking.notes}</p>
+              <p className="whitespace-pre-line text-body-md text-text-primary">
+                {booking.notes}
+              </p>
             </Card>
           ) : null}
 
-          {booking.status === "COMPLETED" && !viewerIsProvider && !booking.review ? (
+          {booking.status === "COMPLETED" &&
+          !viewerIsProvider &&
+          !booking.review ? (
             <Card className="flex flex-col items-center gap-3 text-center">
               <span className="text-body-lg font-semibold text-text-primary">
                 How was your session with {partyName(otherParty)}?
@@ -311,7 +365,9 @@ export default function BookingDetailPage() {
             <TimelineRow label="Request created" date={booking.createdAt} />
             {booking.status === "CANCELLED" || booking.status === "DECLINED" ? (
               <TimelineRow
-                label={booking.status === "CANCELLED" ? "Cancelled" : "Declined"}
+                label={
+                  booking.status === "CANCELLED" ? "Cancelled" : "Declined"
+                }
                 date={booking.updatedAt}
                 detail={booking.cancelReason}
               />
@@ -326,20 +382,36 @@ export default function BookingDetailPage() {
           <Card className="flex flex-col gap-2.5">
             {booking.status === "PENDING" && viewerIsProvider ? (
               <>
-                <Button variant="accent" disabled={busy} onClick={() => setAcceptOpen(true)}>
+                <Button
+                  variant="accent"
+                  disabled={busy}
+                  onClick={() => setAcceptOpen(true)}
+                >
                   Accept
                 </Button>
-                <Button variant="ghost" disabled={busy} onClick={() => setDeclineOpen(true)}>
+                <Button
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => setDeclineOpen(true)}
+                >
                   Decline
                 </Button>
-                <Button variant="secondary" disabled={busy} onClick={() => setRescheduleOpen(true)}>
+                <Button
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => setRescheduleOpen(true)}
+                >
                   Propose new time
                 </Button>
               </>
             ) : null}
 
             {booking.status === "PENDING" && !viewerIsProvider ? (
-              <Button variant="ghost" disabled={busy} onClick={() => setCancelOpen(true)}>
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={() => setCancelOpen(true)}
+              >
                 Cancel request
               </Button>
             ) : null}
@@ -349,22 +421,40 @@ export default function BookingDetailPage() {
                 <Button
                   variant="secondary"
                   nativeButton={false}
-                  render={<Link href={`/dashboard/messages?to=${otherParty.id}`} />}
+                  render={
+                    <Link href={`/dashboard/messages?to=${otherParty.id}`} />
+                  }
                 >
                   Message
                 </Button>
-                <Button variant="secondary" disabled={busy} onClick={() => setRescheduleOpen(true)}>
+                <Button
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => setRescheduleOpen(true)}
+                >
                   Reschedule
                 </Button>
-                <Button variant="ghost" disabled={busy} onClick={() => setCancelOpen(true)}>
+                <Button
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => setCancelOpen(true)}
+                >
                   Cancel
                 </Button>
                 {viewerIsProvider && isPast ? (
                   <>
-                    <Button variant="accent" disabled={busy} onClick={() => updateStatus("COMPLETED")}>
+                    <Button
+                      variant="accent"
+                      disabled={busy}
+                      onClick={() => updateStatus("COMPLETED")}
+                    >
                       Mark completed
                     </Button>
-                    <Button variant="ghost" disabled={busy} onClick={() => updateStatus("NO_SHOW")}>
+                    <Button
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() => updateStatus("NO_SHOW")}
+                    >
                       Report no-show
                     </Button>
                   </>
@@ -372,9 +462,13 @@ export default function BookingDetailPage() {
               </>
             ) : null}
 
-            {booking.status === "COMPLETED" || booking.status === "CANCELLED" || booking.status === "DECLINED" || booking.status === "NO_SHOW" ? (
+            {booking.status === "COMPLETED" ||
+            booking.status === "CANCELLED" ||
+            booking.status === "DECLINED" ||
+            booking.status === "NO_SHOW" ? (
               <p className="text-body-sm text-text-secondary">
-                This booking is {status.label.toLowerCase()} — no further action needed.
+                This booking is {status.label.toLowerCase()} — no further action
+                needed.
               </p>
             ) : null}
           </Card>
@@ -388,12 +482,14 @@ export default function BookingDetailPage() {
             </Card>
           ) : null}
 
-          {withinCancellationWindow && !isPast && (booking.status === "PENDING" || booking.status === "CONFIRMED") ? (
+          {withinCancellationWindow &&
+          !isPast &&
+          (booking.status === "PENDING" || booking.status === "CONFIRMED") ? (
             <Card className="flex items-start gap-2 border border-warning/40 bg-warning-bg">
               <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
               <span className="text-body-sm text-text-primary">
-                Less than 24 hours until this booking — cancelling now may be subject to a fee once
-                payments are enabled.
+                Less than 24 hours until this booking — cancelling now may be
+                subject to a fee once payments are enabled.
               </span>
             </Card>
           ) : null}
@@ -406,14 +502,18 @@ export default function BookingDetailPage() {
             <DialogTitle>Confirm this booking?</DialogTitle>
           </DialogHeader>
           <p className="text-body-md text-text-secondary">
-            {partyName(booking.customer)} will be notified and the slot will be locked in for{" "}
-            {formatDate(booking.date)} at {booking.startTime}.
+            {partyName(booking.customer)} will be notified and the slot will be
+            locked in for {formatDate(booking.date)} at {booking.startTime}.
           </p>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAcceptOpen(false)}>
               Cancel
             </Button>
-            <Button variant="accent" disabled={busy} onClick={() => updateStatus("CONFIRMED")}>
+            <Button
+              variant="accent"
+              disabled={busy}
+              onClick={() => updateStatus("CONFIRMED")}
+            >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
               Confirm booking
             </Button>
@@ -450,7 +550,9 @@ export default function BookingDetailPage() {
               onClick={() =>
                 updateStatus(
                   "DECLINED",
-                  declineMessage ? `${declineReason} — ${declineMessage}` : declineReason,
+                  declineMessage
+                    ? `${declineReason} — ${declineMessage}`
+                    : declineReason,
                 )
               }
             >
@@ -471,8 +573,8 @@ export default function BookingDetailPage() {
               <div className="flex items-start gap-2 rounded-[var(--fg-radius-md)] bg-warning-bg p-3">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
                 <span className="text-body-sm text-text-primary">
-                  This is within 24 hours of the booking — the cancellation policy may apply once
-                  payments are enabled.
+                  This is within 24 hours of the booking — the cancellation
+                  policy may apply once payments are enabled.
                 </span>
               </div>
             ) : null}
@@ -490,7 +592,9 @@ export default function BookingDetailPage() {
             <Button
               variant="destructive"
               disabled={busy}
-              onClick={() => updateStatus("CANCELLED", cancelReason || undefined)}
+              onClick={() =>
+                updateStatus("CANCELLED", cancelReason || undefined)
+              }
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
               Cancel booking
@@ -543,11 +647,18 @@ function TimelineRow({
 }) {
   return (
     <div className="flex flex-col gap-0.5 border-l-2 border-border-subtle pl-3">
-      <span className="text-body-sm font-semibold text-text-primary">{label}</span>
-      <span className="text-body-sm text-text-tertiary">
-        {new Date(date).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+      <span className="text-body-sm font-semibold text-text-primary">
+        {label}
       </span>
-      {detail ? <span className="text-body-sm text-text-secondary">{detail}</span> : null}
+      <span className="text-body-sm text-text-tertiary">
+        {new Date(date).toLocaleString("en-US", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })}
+      </span>
+      {detail ? (
+        <span className="text-body-sm text-text-secondary">{detail}</span>
+      ) : null}
     </div>
   );
 }
@@ -596,7 +707,9 @@ function RescheduleDialog({
     if (!date || !time) return;
     setBusy(true);
     const endMinutes =
-      Number(time.slice(0, 2)) * 60 + Number(time.slice(3)) + (serviceDuration ?? 60);
+      Number(time.slice(0, 2)) * 60 +
+      Number(time.slice(3)) +
+      (serviceDuration ?? 60);
     const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
     await fetch(`/api/bookings/${params.id}/reschedule`, {
       method: "POST",
@@ -640,7 +753,10 @@ function RescheduleDialog({
                     }`}
                   >
                     <span className="text-text-tertiary">
-                      {d.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })}
+                      {d.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        timeZone: "UTC",
+                      })}
                     </span>
                     <span className="font-semibold">{d.getUTCDate()}</span>
                   </button>
@@ -674,7 +790,11 @@ function RescheduleDialog({
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button variant="accent" disabled={!date || !time || busy} onClick={onSubmit}>
+          <Button
+            variant="accent"
+            disabled={!date || !time || busy}
+            onClick={onSubmit}
+          >
             {busy ? <Loader2 className="size-4 animate-spin" /> : null}
             Send proposal
           </Button>
