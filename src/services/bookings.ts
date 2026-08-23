@@ -14,6 +14,13 @@ import type { CreateBookingInput } from "@/lib/validations/booking";
 
 const PAGE_SIZE = 20;
 const MIN_NOTICE_HOURS = 24;
+// Prompt B7, VIỆC 2 — a PENDING request the provider never responds to
+// auto-expires 48h after it was made (see BOOKING_EXPIRY_HOURS's use in
+// createBooking and the hourly /api/cron/expire-bookings cron).
+const BOOKING_EXPIRY_HOURS = 48;
+// Prompt B7, VIỆC 4 — anti-spam: caps how many requests one customer can
+// have simultaneously awaiting a response, checked in createBooking.
+const MAX_PENDING_BOOKINGS_PER_USER = 5;
 
 export type BookingTab =
   "ALL" | "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
@@ -69,7 +76,11 @@ export async function listBookings({
   const where = isProvider ? { providerId: userId } : { customerId: userId };
   const statusFilter =
     tab === "CANCELLED"
-      ? { status: { in: ["CANCELLED", "DECLINED"] as BookingStatus[] } }
+      ? {
+          status: {
+            in: ["CANCELLED", "DECLINED", "EXPIRED"] as BookingStatus[],
+          },
+        }
       : tab !== "ALL"
         ? { status: tab }
         : {};
@@ -113,6 +124,12 @@ export async function listBookingsForRange({
   });
 }
 
+const VERIFIED_ROLE_SELECT = {
+  where: { verificationStatus: "VERIFIED" as const },
+  select: { role: true },
+  take: 1,
+};
+
 export async function getBookingDetail(bookingId: string, userId: string) {
   const booking = await db.booking.findUnique({
     where: { id: bookingId },
@@ -124,6 +141,11 @@ export async function getBookingDetail(bookingId: string, userId: string) {
           firstName: true,
           avatar: true,
           username: true,
+          // Crew-hire (Prompt B7, VIỆC 1): the "customer" on a child
+          // booking is itself a provider (e.g. a Photographer hiring a
+          // Model) — show their verified badge too, not just the
+          // provider's.
+          roles: VERIFIED_ROLE_SELECT,
         },
       },
       provider: {
@@ -137,15 +159,33 @@ export async function getBookingDetail(bookingId: string, userId: string) {
           // specific provider role (serviceId is optional), so this shows
           // "verified" if the provider holds ANY verified provider role,
           // rather than trying to resolve which one this booking is for.
-          roles: {
-            where: { verificationStatus: "VERIFIED" },
-            select: { role: true },
-            take: 1,
-          },
+          roles: VERIFIED_ROLE_SELECT,
         },
       },
       service: { select: { name: true, description: true, duration: true } },
       review: { select: { id: true } },
+      // Crew-hire (Prompt B7, VIỆC 1) — shown on the detail page so
+      // either side can see the relationship. parentBooking's own
+      // customer (the end client) is deliberately not exposed here to
+      // the child booking's provider — only what job it's for.
+      parentBooking: {
+        select: {
+          id: true,
+          status: true,
+          date: true,
+          service: { select: { name: true } },
+        },
+      },
+      childBookings: {
+        select: {
+          id: true,
+          status: true,
+          date: true,
+          providerId: true,
+          recipientRole: true,
+          provider: { select: { firstName: true, name: true } },
+        },
+      },
     },
   });
 
@@ -156,7 +196,35 @@ export async function getBookingDetail(bookingId: string, userId: string) {
     return null;
   }
 
-  return booking;
+  // Anti-spam/safety (Prompt B7, VIỆC 4) — the provider only sees the
+  // customer's contactPhone/locationAddress once they've actually
+  // accepted the request; the customer always sees their own info back
+  // (they typed it). Deliberately not gated on depositPaid — there's no
+  // payment flow behind bookings, so requireDepositBeforeContact never
+  // had a real trigger; this replaces that with the booking's own status.
+  const viewerIsProvider = booking.providerId === userId;
+  const contactInfoVisible = !viewerIsProvider || booking.status !== "PENDING";
+
+  // First-time-pair safety notice (Prompt B7, VIỆC 4) — checked
+  // regardless of who was customer/provider in the prior booking(s), so
+  // two people who've worked together before (in either direction) don't
+  // see the notice again.
+  const priorBookingCount = await db.booking.count({
+    where: {
+      id: { not: booking.id },
+      OR: [
+        { customerId: booking.customerId, providerId: booking.providerId },
+        { customerId: booking.providerId, providerId: booking.customerId },
+      ],
+    },
+  });
+
+  return {
+    ...booking,
+    contactPhone: contactInfoVisible ? booking.contactPhone : null,
+    locationAddress: contactInfoVisible ? booking.locationAddress : null,
+    isFirstBookingBetweenParties: priorBookingCount === 0,
+  };
 }
 
 export class BookingActionError extends Error {
@@ -186,12 +254,54 @@ export async function createBooking(
     );
   }
 
+  // Anti-spam (Prompt B7, VIỆC 4) — checked at the service layer, not
+  // just the UI, same principle as every other server-side validation in
+  // this app.
+  const pendingCount = await db.booking.count({
+    where: { customerId, status: "PENDING" },
+  });
+  if (pendingCount >= MAX_PENDING_BOOKINGS_PER_USER) {
+    throw new BookingActionError(
+      `You already have ${MAX_PENDING_BOOKINGS_PER_USER} pending requests — wait for a response before sending more`,
+      400,
+    );
+  }
+
   const service = input.serviceId
-    ? await db.service.findUnique({ where: { id: input.serviceId } })
+    ? await db.service.findUnique({
+        where: { id: input.serviceId },
+        include: { profile: { select: { role: true } } },
+      })
     : null;
   if (input.serviceId && !service) {
     throw new BookingActionError("Service not found", 404);
   }
+
+  // Crew-hire (Prompt B7, VIỆC 1) — "Gắn vào đơn khách hàng": the
+  // requester (a Photographer/Videographer) attaches this booking to one
+  // of their own CONFIRMED bookings-as-provider (the end-client job this
+  // crew hire is for). Deliberately NOT auto-derived — the requester
+  // picks it explicitly, since they may be working multiple jobs at once.
+  if (input.parentBookingId) {
+    const parent = await db.booking.findUnique({
+      where: { id: input.parentBookingId },
+    });
+    if (
+      !parent ||
+      parent.providerId !== customerId ||
+      parent.status !== "CONFIRMED"
+    ) {
+      throw new BookingActionError(
+        "Invalid parent booking — must be one of your own confirmed bookings",
+        400,
+      );
+    }
+  }
+
+  const provider = await db.user.findUnique({
+    where: { id: input.providerId },
+    select: { location: true },
+  });
 
   const duration = service?.duration ?? 60;
   const startMinutes =
@@ -225,6 +335,9 @@ export async function createBooking(
       );
     }
 
+    // No BookingStatusHistory row here — that table records transitions
+    // (see transitionBooking below), and creation isn't one; the row's
+    // own createdAt is the "requested" timestamp.
     return tx.booking.create({
       data: {
         customerId,
@@ -241,6 +354,11 @@ export async function createBooking(
         referenceImages: input.referenceImages ?? [],
         totalPrice: service?.price,
         currency: service?.currency ?? "VND",
+        expiresAt: new Date(Date.now() + BOOKING_EXPIRY_HOURS * 60 * 60 * 1000),
+        provinceCode: provider?.location ?? undefined,
+        parentBookingId: input.parentBookingId,
+        requesterRole: input.requesterRole ?? "CUSTOMER",
+        recipientRole: service?.profile.role,
       },
       include: BOOKING_INCLUDE,
     });
@@ -279,128 +397,214 @@ export async function createBooking(
   return booking;
 }
 
-export async function updateBookingStatus({
+// Prompt B7, VIỆC 3 — the single source of truth for which status moves
+// are legal. Every other terminal status (DECLINED/CANCELLED/COMPLETED/
+// NO_SHOW/EXPIRED) has no outgoing transitions.
+const VALID_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
+  PENDING: ["CONFIRMED", "DECLINED", "EXPIRED", "CANCELLED"],
+  CONFIRMED: ["COMPLETED", "CANCELLED", "NO_SHOW"],
+  DECLINED: [],
+  COMPLETED: [],
+  CANCELLED: [],
+  NO_SHOW: [],
+  EXPIRED: [],
+};
+
+// Prompt B7, VIỆC 3 — the ONLY function that ever writes Booking.status.
+// createBooking's initial PENDING insert is the one exception (that's a
+// creation, not a transition). actorId is null exclusively for the
+// system/cron-triggered EXPIRED transition (see expireBookings below) —
+// every human-triggered call must pass a real userId.
+export async function transitionBooking({
   bookingId,
-  userId,
-  status,
-  cancelReason,
+  toStatus,
+  actorId,
+  note,
 }: {
   bookingId: string;
-  userId: string;
-  status: "CONFIRMED" | "DECLINED" | "CANCELLED" | "COMPLETED" | "NO_SHOW";
-  cancelReason?: string;
+  toStatus: BookingStatus;
+  actorId: string | null;
+  note?: string;
 }) {
   const booking = await db.booking.findUnique({
     where: { id: bookingId },
-    include: BOOKING_INCLUDE,
+    include: {
+      ...BOOKING_INCLUDE,
+      childBookings: { select: { id: true, providerId: true } },
+    },
   });
-
   if (!booking) {
     throw new BookingActionError("Booking not found", 404);
   }
 
-  const isProvider = booking.providerId === userId;
-  const isCustomer = booking.customerId === userId;
-  if (!isProvider && !isCustomer) {
+  const allowed = VALID_TRANSITIONS[booking.status] ?? [];
+  if (!allowed.includes(toStatus)) {
     throw new BookingActionError(
-      "You are not a participant in this booking",
-      403,
-    );
-  }
-
-  if ((status === "CONFIRMED" || status === "DECLINED") && !isProvider) {
-    throw new BookingActionError(
-      "Only the provider can accept or decline a booking",
-      403,
-    );
-  }
-  if ((status === "COMPLETED" || status === "NO_SHOW") && !isProvider) {
-    throw new BookingActionError(
-      "Only the provider can report this outcome",
-      403,
-    );
-  }
-
-  const isPastBookingDate = new Date(booking.date).getTime() < Date.now();
-  if ((status === "COMPLETED" || status === "NO_SHOW") && !isPastBookingDate) {
-    throw new BookingActionError(
-      "Can't report an outcome before the booking date",
+      `A ${booking.status} booking can't move to ${toStatus}`,
       400,
     );
   }
 
-  const updated = await db.booking.update({
-    where: { id: bookingId },
-    data: {
-      status,
-      ...(status === "CANCELLED" ? { cancelledBy: userId, cancelReason } : {}),
-      ...(status === "DECLINED" ? { cancelReason } : {}),
-      ...(status === "COMPLETED" ? { completedAt: new Date() } : {}),
-    },
-    include: BOOKING_INCLUDE,
-  });
+  const isProvider = booking.providerId === actorId;
+  const isCustomer = booking.customerId === actorId;
 
-  const recipient = isProvider ? updated.customer : updated.provider;
-  const actor = isProvider ? updated.provider : updated.customer;
-  const serviceName = updated.service?.name ?? "a session";
-  const emailArgs = {
-    otherPartyName: partyName(actor),
-    serviceName,
-    dateLabel: dateLabel(updated.date),
-    timeLabel: updated.startTime,
-    bookingUrl: bookingUrlFor(updated.id),
-  };
+  if (actorId === null) {
+    if (toStatus !== "EXPIRED") {
+      throw new BookingActionError(
+        "The system actor can only expire bookings",
+        403,
+      );
+    }
+  } else {
+    if (toStatus === "EXPIRED") {
+      throw new BookingActionError(
+        "This transition can only be made automatically",
+        403,
+      );
+    }
+    if (!isProvider && !isCustomer) {
+      throw new BookingActionError(
+        "You are not a participant in this booking",
+        403,
+      );
+    }
+    if ((toStatus === "CONFIRMED" || toStatus === "DECLINED") && !isProvider) {
+      throw new BookingActionError(
+        "Only the provider can accept or decline a booking",
+        403,
+      );
+    }
+    if ((toStatus === "COMPLETED" || toStatus === "NO_SHOW") && !isProvider) {
+      throw new BookingActionError(
+        "Only the provider can report this outcome",
+        403,
+      );
+    }
+    const isPastBookingDate = new Date(booking.date).getTime() < Date.now();
+    if (
+      (toStatus === "COMPLETED" || toStatus === "NO_SHOW") &&
+      !isPastBookingDate
+    ) {
+      throw new BookingActionError(
+        "Can't report an outcome before the booking date",
+        400,
+      );
+    }
+  }
 
-  if (status === "CONFIRMED") {
-    await notify({
-      userId: recipient.id,
-      type: "BOOKING_CONFIRMED",
-      title: "Booking confirmed",
-      message: `${emailArgs.otherPartyName} confirmed ${serviceName} on ${emailArgs.dateLabel}`,
-      data: { bookingId: updated.id },
-      email: {
-        subject: "Booking confirmed — Fgrapher",
-        html: bookingConfirmedEmailHtml(emailArgs),
+  const fromStatus = booking.status;
+  const [updated] = await db.$transaction([
+    db.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: toStatus,
+        ...(toStatus === "CANCELLED"
+          ? { cancelledBy: actorId, cancelReason: note }
+          : {}),
+        ...(toStatus === "DECLINED" ? { cancelReason: note } : {}),
+        ...(toStatus === "COMPLETED" ? { completedAt: new Date() } : {}),
       },
-    });
-  } else if (status === "DECLINED") {
+      include: BOOKING_INCLUDE,
+    }),
+    db.bookingStatusHistory.create({
+      data: { bookingId, fromStatus, toStatus, actorId, note },
+    }),
+  ]);
+
+  if (actorId !== null) {
+    const recipient = isProvider ? updated.customer : updated.provider;
+    const actor = isProvider ? updated.provider : updated.customer;
+    const serviceName = updated.service?.name ?? "a session";
+    const emailArgs = {
+      otherPartyName: partyName(actor),
+      serviceName,
+      dateLabel: dateLabel(updated.date),
+      timeLabel: updated.startTime,
+      bookingUrl: bookingUrlFor(updated.id),
+    };
+
+    if (toStatus === "CONFIRMED") {
+      await notify({
+        userId: recipient.id,
+        type: "BOOKING_CONFIRMED",
+        title: "Booking confirmed",
+        message: `${emailArgs.otherPartyName} confirmed ${serviceName} on ${emailArgs.dateLabel}`,
+        data: { bookingId: updated.id },
+        email: {
+          subject: "Booking confirmed — Fgrapher",
+          html: bookingConfirmedEmailHtml(emailArgs),
+        },
+      });
+    } else if (toStatus === "DECLINED") {
+      await notify({
+        userId: recipient.id,
+        type: "BOOKING_DECLINED",
+        title: "Booking declined",
+        message: `${emailArgs.otherPartyName} declined your request for ${serviceName}`,
+        data: { bookingId: updated.id },
+        email: {
+          subject: "Booking declined — Fgrapher",
+          html: bookingDeclinedEmailHtml(emailArgs),
+        },
+      });
+    } else if (toStatus === "CANCELLED") {
+      await notify({
+        userId: recipient.id,
+        type: "BOOKING_CANCELLED",
+        title: "Booking cancelled",
+        message: `${emailArgs.otherPartyName} cancelled ${serviceName} on ${emailArgs.dateLabel}`,
+        data: { bookingId: updated.id },
+        email: {
+          subject: "Booking cancelled — Fgrapher",
+          html: bookingCancelledEmailHtml(emailArgs),
+        },
+      });
+
+      // Crew-hire (Prompt B7, VIỆC 1) — cancelling a parent booking does
+      // NOT cascade to its children. The MUA/Model/Studio already held
+      // that slot; auto-cancelling would cost them the job through no
+      // fault of their own. Only the child's provider is notified, so
+      // they can decide for themselves whether to also cancel.
+      for (const child of booking.childBookings) {
+        await notify({
+          userId: child.providerId,
+          type: "BOOKING_CANCELLED",
+          title: "Related job cancelled",
+          message: `The client booking this job was attached to was cancelled. Your booking is unaffected — you can decide whether to cancel it too.`,
+          data: { bookingId: child.id, relatedBookingId: updated.id },
+        });
+      }
+    } else if (toStatus === "COMPLETED") {
+      await notify({
+        userId: recipient.id,
+        type: "BOOKING_COMPLETED",
+        title: "Booking completed",
+        message: `Your ${serviceName} session is marked complete — leave a review`,
+        data: { bookingId: updated.id },
+      });
+    } else if (toStatus === "NO_SHOW") {
+      await notify({
+        userId: recipient.id,
+        type: "BOOKING_CANCELLED",
+        title: "Marked as no-show",
+        message: `Your ${serviceName} booking was marked as a no-show`,
+        data: { bookingId: updated.id },
+      });
+    }
+  } else if (toStatus === "EXPIRED") {
+    // System-triggered — notify both parties, not just "the other one".
     await notify({
-      userId: recipient.id,
-      type: "BOOKING_DECLINED",
-      title: "Booking declined",
-      message: `${emailArgs.otherPartyName} declined your request for ${serviceName}`,
-      data: { bookingId: updated.id },
-      email: {
-        subject: "Booking declined — Fgrapher",
-        html: bookingDeclinedEmailHtml(emailArgs),
-      },
-    });
-  } else if (status === "CANCELLED") {
-    await notify({
-      userId: recipient.id,
+      userId: updated.customerId,
       type: "BOOKING_CANCELLED",
-      title: "Booking cancelled",
-      message: `${emailArgs.otherPartyName} cancelled ${serviceName} on ${emailArgs.dateLabel}`,
-      data: { bookingId: updated.id },
-      email: {
-        subject: "Booking cancelled — Fgrapher",
-        html: bookingCancelledEmailHtml(emailArgs),
-      },
-    });
-  } else if (status === "COMPLETED") {
-    await notify({
-      userId: recipient.id,
-      type: "BOOKING_COMPLETED",
-      title: "Booking completed",
-      message: `Your ${serviceName} session is marked complete — leave a review`,
+      title: "Booking request expired",
+      message: `Your request for ${updated.service?.name ?? "a session"} with ${partyName(updated.provider)} expired without a response`,
       data: { bookingId: updated.id },
     });
-  } else if (status === "NO_SHOW") {
     await notify({
-      userId: recipient.id,
+      userId: updated.providerId,
       type: "BOOKING_CANCELLED",
-      title: "Marked as no-show",
-      message: `Your ${serviceName} booking was marked as a no-show`,
+      title: "Booking request expired",
+      message: `A request from ${partyName(updated.customer)} for ${updated.service?.name ?? "a session"} expired`,
       data: { bookingId: updated.id },
     });
   }
@@ -533,6 +737,28 @@ export async function sendBookingReminders() {
   }
 
   return bookings.length;
+}
+
+// Prompt B7, VIỆC 2 — called hourly by /api/cron/expire-bookings. Moves
+// every PENDING booking past its expiresAt to EXPIRED through
+// transitionBooking (system actor), so the transition still gets state-
+// machine validation, a BookingStatusHistory row, and notifications to
+// both parties, same as any other status change.
+export async function expireBookings() {
+  const due = await db.booking.findMany({
+    where: { status: "PENDING", expiresAt: { lt: new Date() } },
+    select: { id: true },
+  });
+
+  for (const booking of due) {
+    await transitionBooking({
+      bookingId: booking.id,
+      toStatus: "EXPIRED",
+      actorId: null,
+    });
+  }
+
+  return due.length;
 }
 
 export async function respondToReschedule({

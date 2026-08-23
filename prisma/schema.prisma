@@ -586,6 +586,10 @@ enum BookingStatus {
   COMPLETED
   CANCELLED
   NO_SHOW
+  // Prompt B7, VIỆC 2 — a PENDING booking the provider never responded to.
+  // Set by the hourly /api/cron/expire-bookings cron, never by a user
+  // action. Terminal, same as DECLINED/CANCELLED/NO_SHOW.
+  EXPIRED
 }
 
 model Booking {
@@ -607,12 +611,38 @@ model Booking {
   // Manually set by the provider — see Profile.requireDepositBeforeContact.
   // Not driven by any payment integration yet.
   depositPaid    Boolean       @default(false)
+  // Prompt B7, VIỆC 2 — createdAt + 48h, set at creation. The hourly cron
+  // moves any still-PENDING booking past this to EXPIRED.
+  expiresAt      DateTime?
 
   locationType    String? // "PROVIDER" | "CUSTOMER" | "OUTDOOR"
   locationAddress String?
   numberOfPeople  Int?
   contactPhone    String?
   referenceImages String[] @default([])
+  // Prompt B7, VIỆC 4 — copied from the provider's Profile (or the booking
+  // form) at creation time. Plain string, not a foreign key: Vietnam's
+  // administrative-province model (Prompt B4) hasn't been built yet, and
+  // CLAUDE.md forbids hardcoding a province list in the meantime. Free-
+  // text today, intended to line up with a real Province.code once B4
+  // lands.
+  provinceCode    String?
+
+  // Crew-hire bookings (Prompt B7, VIỆC 1) — e.g. a Photographer books a
+  // Model/Make-up Artist/Studio and attaches it to one of their own
+  // ACCEPTED customer bookings. requesterRole/recipientRole are nullable
+  // (not required, despite the source prompt's literal spec) because
+  // backfilling them accurately for bookings that predate this field
+  // would require guessing which of a multi-role provider's roles applied
+  // to a specific past booking — every booking going forward always sets
+  // both. IMPORTANT: cancelling a parent booking does NOT cascade to
+  // cancel its children — see services/bookings.ts's transitionBooking,
+  // which only notifies the child's provider so they can decide for
+  // themselves; the MUA/Model/Studio already held that slot and
+  // auto-cancelling would cost them the job through no fault of their own.
+  parentBookingId String?
+  requesterRole   Role?
+  recipientRole   Role?
 
   // Reschedule proposal — either party can propose a new slot; the other
   // must accept/decline before it takes effect. Null when no proposal
@@ -625,15 +655,39 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  customer User     @relation("customer", fields: [customerId], references: [id])
-  provider User     @relation("provider", fields: [providerId], references: [id])
-  service  Service? @relation(fields: [serviceId], references: [id])
-  review   Review?
+  customer      User                   @relation("customer", fields: [customerId], references: [id])
+  provider      User                   @relation("provider", fields: [providerId], references: [id])
+  service       Service?               @relation(fields: [serviceId], references: [id])
+  review        Review?
+  parentBooking Booking?               @relation("crewHire", fields: [parentBookingId], references: [id])
+  childBookings Booking[]              @relation("crewHire")
+  statusHistory BookingStatusHistory[]
 
   @@index([customerId])
   @@index([providerId, status])
   @@index([date])
+  @@index([parentBookingId])
+  @@index([status, expiresAt])
   @@map("bookings")
+}
+
+// Prompt B7, VIỆC 3 — every status change made through
+// services/bookings.ts's transitionBooking() (the ONLY place Booking.
+// status is ever written) appends one row here. actorId is nullable for
+// system-triggered transitions (the expire-bookings cron).
+model BookingStatusHistory {
+  id         String        @id @default(cuid())
+  bookingId  String
+  fromStatus BookingStatus
+  toStatus   BookingStatus
+  actorId    String?
+  note       String?
+  createdAt  DateTime      @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId, createdAt])
+  @@map("booking_status_history")
 }
 
 // ============================================================================

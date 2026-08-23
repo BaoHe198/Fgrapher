@@ -67,6 +67,7 @@ const BOOKING_STATUS_VARIANT: Record<
   CANCELLED: "destructive",
   DECLINED: "destructive",
   NO_SHOW: "destructive",
+  EXPIRED: "neutral",
 };
 
 function partyName(user: ChatPartner) {

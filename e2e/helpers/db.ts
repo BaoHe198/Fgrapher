@@ -86,7 +86,12 @@ export async function createPublishedProfile(opts: {
   description?: string;
   priceMin?: number;
   priceMax?: number;
-  services?: { name: string; description: string; duration: number; price: number }[];
+  services?: {
+    name: string;
+    description: string;
+    duration: number;
+    price: number;
+  }[];
 }) {
   // There's no UI path that sets Profile.isPublished (see e2e/README.md) —
   // this fixture stands in for what a real admin/ops process would do.
@@ -177,6 +182,46 @@ export async function seedPastConfirmedBooking(opts: {
   });
 }
 
+// Seeds a booking directly in whatever status/date the caller needs,
+// bypassing the wizard's own rules (>=24h notice, real availability) so
+// transitionBooking() tests can start from an arbitrary state instead of
+// re-deriving it through the UI every time. daysFromNow negative = past
+// (needed for the "can't complete/no-show a future booking" and
+// "can mark complete/no-show a past one" checks).
+export async function seedBooking(opts: {
+  customerId: string;
+  providerId: string;
+  serviceId?: string;
+  status?:
+    | "PENDING"
+    | "CONFIRMED"
+    | "DECLINED"
+    | "COMPLETED"
+    | "CANCELLED"
+    | "NO_SHOW"
+    | "EXPIRED";
+  daysFromNow?: number;
+  expiresAt?: Date;
+}) {
+  const date = new Date(Date.now() + (opts.daysFromNow ?? 5) * 86_400_000);
+  return db.booking.create({
+    data: {
+      customerId: opts.customerId,
+      providerId: opts.providerId,
+      serviceId: opts.serviceId,
+      date,
+      startTime: "14:00",
+      endTime: "16:00",
+      status: opts.status ?? "PENDING",
+      locationType: "PROVIDER",
+      contactPhone: "0900000000",
+      totalPrice: 1_000_000,
+      currency: "VND",
+      expiresAt: opts.expiresAt,
+    },
+  });
+}
+
 // Order rows are only ever created by the Stripe checkout.session.completed
 // webhook (see e2e/README.md) — there is no direct-create path in the app
 // at all, so fulfillment tests seed one directly rather than driving a real
@@ -198,7 +243,14 @@ export async function seedPendingOrder(opts: {
       totalPrice: opts.unitPrice * quantity,
       currency: "VND",
       items: {
-        create: [{ productId: opts.productId, quantity, unitPrice: opts.unitPrice, type: "SALE" }],
+        create: [
+          {
+            productId: opts.productId,
+            quantity,
+            unitPrice: opts.unitPrice,
+            type: "SALE",
+          },
+        ],
       },
     },
     include: { items: true },

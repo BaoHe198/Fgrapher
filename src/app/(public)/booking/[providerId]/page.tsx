@@ -23,7 +23,10 @@ export default async function BookingFlowPage({
 
   const [provider, customer] = await Promise.all([
     getProviderForBooking(providerId),
-    db.user.findUnique({ where: { id: session.user.id }, select: { phone: true } }),
+    db.user.findUnique({
+      where: { id: session.user.id },
+      select: { phone: true },
+    }),
   ]);
   if (!provider) {
     notFound();
@@ -42,6 +45,25 @@ export default async function BookingFlowPage({
 
   const isModel = provider.profiles.some((profile) => profile.role === "MODEL");
 
+  // Crew-hire (Prompt B7, VIỆC 1) — only offered when the requester holds
+  // PHOTOGRAPHER/VIDEOGRAPHER and is booking someone who offers MUA/
+  // Model/Studio, matching BOOKABLE_ROLES_BY_ROLE's "who can book whom"
+  // table for those two roles.
+  const CREW_HIRE_REQUESTER_ROLES = ["PHOTOGRAPHER", "VIDEOGRAPHER"] as const;
+  const CREW_HIRE_RECIPIENT_ROLES = [
+    "MAKEUP_ARTIST",
+    "MODEL",
+    "STUDIO",
+  ] as const;
+  const requesterCrewRole = session.user.roles.find((role) =>
+    (CREW_HIRE_REQUESTER_ROLES as readonly string[]).includes(role),
+  );
+  const canCrewHire =
+    Boolean(requesterCrewRole) &&
+    provider.profiles.some((profile) =>
+      (CREW_HIRE_RECIPIENT_ROLES as readonly string[]).includes(profile.role),
+    );
+
   return (
     <BookingWizard
       providerId={provider.id}
@@ -50,6 +72,7 @@ export default async function BookingFlowPage({
       services={services}
       contactPhoneDefault={customer?.phone ?? ""}
       isModel={isModel}
+      requesterCrewRole={canCrewHire ? (requesterCrewRole ?? null) : null}
     />
   );
 }

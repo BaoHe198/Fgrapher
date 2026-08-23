@@ -33,6 +33,23 @@ type BookingDetail = Booking & {
   provider: Party;
   service: Pick<Service, "name" | "description" | "duration"> | null;
   review: { id: string } | null;
+  // Crew-hire (Prompt B7, VIỆC 1).
+  parentBooking: {
+    id: string;
+    status: BookingStatus;
+    date: string;
+    service: { name: string } | null;
+  } | null;
+  childBookings: {
+    id: string;
+    status: BookingStatus;
+    date: string;
+    providerId: string;
+    recipientRole: string | null;
+    provider: { firstName: string | null; name: string | null };
+  }[];
+  // Anti-spam/safety (Prompt B7, VIỆC 4).
+  isFirstBookingBetweenParties: boolean;
 };
 
 const STATUS_BADGE: Record<
@@ -45,6 +62,7 @@ const STATUS_BADGE: Record<
   CANCELLED: { label: "Cancelled", variant: "destructive" },
   DECLINED: { label: "Declined", variant: "destructive" },
   NO_SHOW: { label: "No-show", variant: "destructive" },
+  EXPIRED: { label: "Expired", variant: "neutral" },
 };
 
 const LOCATION_LABEL: Record<string, string> = {
@@ -197,6 +215,58 @@ export default function BookingDetailPage() {
         </span>
       </div>
 
+      {booking.isFirstBookingBetweenParties && booking.status === "PENDING" ? (
+        <Card className="flex flex-col gap-1.5 border border-warning bg-warning-bg">
+          <span className="flex items-center gap-1.5 text-body-md font-semibold text-text-primary">
+            <AlertTriangle className="size-4" />
+            First time working with {partyName(otherParty)}?
+          </span>
+          <p className="text-body-sm text-text-secondary">
+            For your first session together, meet in a public place if possible
+            and let a friend or family member know your schedule and location.
+          </p>
+        </Card>
+      ) : null}
+
+      {booking.parentBooking ? (
+        <Card className="flex items-center justify-between gap-2">
+          <span className="text-body-sm text-text-secondary">
+            Part of a crew for{" "}
+            <Link
+              href={`/dashboard/bookings/${booking.parentBooking.id}`}
+              className="font-semibold text-text-link hover:underline"
+            >
+              {booking.parentBooking.service?.name ?? "a client booking"} on{" "}
+              {formatDate(booking.parentBooking.date)}
+            </Link>
+          </span>
+          <Badge variant="neutral">{booking.parentBooking.status}</Badge>
+        </Card>
+      ) : null}
+
+      {booking.childBookings.length > 0 ? (
+        <Card className="flex flex-col gap-2">
+          <span className="text-body-sm font-semibold text-text-primary">
+            Crew booked for this job
+          </span>
+          {booking.childBookings.map((child) => (
+            <div
+              key={child.id}
+              className="flex items-center justify-between gap-2"
+            >
+              <Link
+                href={`/dashboard/bookings/${child.id}`}
+                className="text-body-sm text-text-link hover:underline"
+              >
+                {child.provider.firstName ?? child.provider.name ?? "Unknown"}
+                {child.recipientRole ? ` — ${child.recipientRole}` : ""}
+              </Link>
+              <Badge variant="neutral">{child.status}</Badge>
+            </div>
+          ))}
+        </Card>
+      ) : null}
+
       {hasReschedulePending ? (
         <Card className="flex flex-col gap-2 border border-brand-primary bg-success-bg">
           <span className="text-body-md font-semibold text-text-primary">
@@ -246,7 +316,7 @@ export default function BookingDetailPage() {
               <div className="flex flex-col">
                 <span className="flex items-center gap-1.5 text-body-md font-semibold text-text-primary">
                   {partyName(otherParty)}
-                  {!viewerIsProvider && (otherParty.roles?.length ?? 0) > 0 ? (
+                  {(otherParty.roles?.length ?? 0) > 0 ? (
                     <Badge variant="accent">Verified</Badge>
                   ) : null}
                 </span>

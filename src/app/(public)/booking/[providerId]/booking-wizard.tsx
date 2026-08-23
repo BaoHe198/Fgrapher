@@ -43,6 +43,16 @@ interface BookingWizardProps {
   services: ServiceOption[];
   contactPhoneDefault: string;
   isModel?: boolean;
+  // Crew-hire (Prompt B7, VIỆC 1) — non-null only when the viewer holds
+  // PHOTOGRAPHER/VIDEOGRAPHER and this provider offers MUA/Model/Studio.
+  requesterCrewRole?: string | null;
+}
+
+interface ParentBookingOption {
+  id: string;
+  date: string;
+  startTime: string;
+  service: { name: string } | null;
 }
 
 type LocationType = "PROVIDER" | "CUSTOMER" | "OUTDOOR";
@@ -109,16 +119,31 @@ export function BookingWizard({
   services,
   contactPhoneDefault,
   isModel,
+  requesterCrewRole,
 }: BookingWizardProps) {
   const searchParams = useSearchParams();
   const storageKey = `booking-draft-${providerId}`;
 
   const [step, setStep] = useState(0);
-  const [draft, setDraft] = useState<Draft>(() => emptyDraft(contactPhoneDefault));
+  const [draft, setDraft] = useState<Draft>(() =>
+    emptyDraft(contactPhoneDefault),
+  );
   const [hydrated, setHydrated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  // Crew-hire (Prompt B7, VIỆC 1) — "Gắn vào đơn khách hàng".
+  const [parentBookingOptions, setParentBookingOptions] = useState<
+    ParentBookingOption[]
+  >([]);
+  const [parentBookingId, setParentBookingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!requesterCrewRole) return;
+    fetch("/api/bookings?status=CONFIRMED")
+      .then((res) => res.json())
+      .then((body) => setParentBookingOptions(body.data ?? []));
+  }, [requesterCrewRole]);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(storageKey);
@@ -148,18 +173,22 @@ export function BookingWizard({
     setDraft((prev) => ({ ...prev, [key]: value }));
   };
 
-  const selectedService = services.find((s) => s.id === draft.serviceId) ?? null;
+  const selectedService =
+    services.find((s) => s.id === draft.serviceId) ?? null;
 
   const canContinue = useMemo(() => {
     switch (step) {
       case 0:
-        return services.length === 0 ? draft.customRequest.trim().length > 0 : !!draft.serviceId;
+        return services.length === 0
+          ? draft.customRequest.trim().length > 0
+          : !!draft.serviceId;
       case 1:
         return !!draft.date && !!draft.time;
       case 2:
         return (
           draft.contactPhone.trim().length > 0 &&
-          (draft.locationType === "PROVIDER" || draft.locationAddress.trim().length > 0)
+          (draft.locationType === "PROVIDER" ||
+            draft.locationAddress.trim().length > 0)
         );
       case 3:
         return draft.agreed;
@@ -176,7 +205,9 @@ export function BookingWizard({
       ? [
           draft.shootType ? `Shoot type: ${draft.shootType}` : null,
           draft.usageRights ? `Usage rights: ${draft.usageRights}` : null,
-          draft.wardrobeNotes ? `Wardrobe/styling: ${draft.wardrobeNotes}` : null,
+          draft.wardrobeNotes
+            ? `Wardrobe/styling: ${draft.wardrobeNotes}`
+            : null,
           draft.muaProvided ? "Make-up artist provided by customer" : null,
         ]
           .filter(Boolean)
@@ -199,9 +230,13 @@ export function BookingWizard({
         startTime: draft.time,
         locationType: draft.locationType,
         locationAddress: draft.locationAddress || undefined,
-        numberOfPeople: draft.numberOfPeople ? Number(draft.numberOfPeople) : undefined,
+        numberOfPeople: draft.numberOfPeople
+          ? Number(draft.numberOfPeople)
+          : undefined,
         notes: notesParts.length > 0 ? notesParts.join("\n\n") : undefined,
         contactPhone: draft.contactPhone,
+        parentBookingId: parentBookingId ?? undefined,
+        requesterRole: parentBookingId ? requesterCrewRole : undefined,
       }),
     });
 
@@ -224,10 +259,12 @@ export function BookingWizard({
           <div className="flex size-16 items-center justify-center rounded-full bg-success-bg">
             <Check className="size-8 text-success" />
           </div>
-          <h2 className="text-heading-lg text-text-primary">Booking request sent!</h2>
+          <h2 className="text-heading-lg text-text-primary">
+            Booking request sent!
+          </h2>
           <p className="max-w-md text-body-md text-text-secondary">
-            {providerName} will respond within 24 hours. We&apos;ll email you as soon as they
-            confirm.
+            {providerName} will respond within 24 hours. We&apos;ll email you as
+            soon as they confirm.
           </p>
           <div className="flex gap-3">
             <Button
@@ -237,7 +274,11 @@ export function BookingWizard({
             >
               View my bookings
             </Button>
-            <Button variant="ghost" nativeButton={false} render={<Link href="/browse" />}>
+            <Button
+              variant="ghost"
+              nativeButton={false}
+              render={<Link href="/browse" />}
+            >
               Browse more artists
             </Button>
           </div>
@@ -288,6 +329,9 @@ export function BookingWizard({
             wardrobeNotes={draft.wardrobeNotes}
             muaProvided={draft.muaProvided}
             onChange={update}
+            parentBookingOptions={requesterCrewRole ? parentBookingOptions : []}
+            parentBookingId={parentBookingId}
+            onParentBookingChange={setParentBookingId}
           />
         ) : null}
 
@@ -316,17 +360,29 @@ export function BookingWizard({
       </Card>
 
       <div className="mt-5 flex items-center justify-between">
-        <Button variant="ghost" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>
+        <Button
+          variant="ghost"
+          disabled={step === 0}
+          onClick={() => setStep((s) => s - 1)}
+        >
           <ChevronLeft className="size-4" />
           Back
         </Button>
         {step < STEPS.length - 1 ? (
-          <Button variant="accent" disabled={!canContinue} onClick={() => setStep((s) => s + 1)}>
+          <Button
+            variant="accent"
+            disabled={!canContinue}
+            onClick={() => setStep((s) => s + 1)}
+          >
             Continue
             <ChevronRight className="size-4" />
           </Button>
         ) : (
-          <Button variant="accent" disabled={!canContinue || submitting} onClick={onSubmit}>
+          <Button
+            variant="accent"
+            disabled={!canContinue || submitting}
+            onClick={onSubmit}
+          >
             {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
             Send booking request
           </Button>
@@ -360,7 +416,9 @@ function ProgressIndicator({ step }: { step: number }) {
               <span
                 className={cn(
                   "text-body-sm font-semibold whitespace-nowrap",
-                  isActive || isDone ? "text-text-primary" : "text-text-tertiary",
+                  isActive || isDone
+                    ? "text-text-primary"
+                    : "text-text-tertiary",
                 )}
               >
                 {label}
@@ -368,7 +426,10 @@ function ProgressIndicator({ step }: { step: number }) {
             </div>
             {index < STEPS.length - 1 ? (
               <div
-                className={cn("mx-2 h-px flex-1", isDone ? "bg-brand-primary" : "bg-bg-sunken")}
+                className={cn(
+                  "mx-2 h-px flex-1",
+                  isDone ? "bg-brand-primary" : "bg-bg-sunken",
+                )}
               />
             ) : null}
           </div>
@@ -424,7 +485,9 @@ function StepService({
                 )}
               >
                 <div className="flex flex-col gap-1">
-                  <span className="text-heading-sm text-text-primary">{service.name}</span>
+                  <span className="text-heading-sm text-text-primary">
+                    {service.name}
+                  </span>
                   {service.description ? (
                     <span className="text-body-sm text-text-secondary">
                       {service.description}
@@ -473,7 +536,9 @@ function StepDateTime({
   useEffect(() => {
     let cancelled = false;
     startTransition(() => setIsLoading(true));
-    const serviceParam = selectedServiceId ? `&serviceId=${selectedServiceId}` : "";
+    const serviceParam = selectedServiceId
+      ? `&serviceId=${selectedServiceId}`
+      : "";
     fetch(
       `/api/availability/${providerId}?from=${toLocalDateKey(weekStart)}&to=${toLocalDateKey(
         new Date(weekStart.getTime() + 27 * 86_400_000),
@@ -506,18 +571,29 @@ function StepDateTime({
             <button
               type="button"
               aria-label="Previous"
-              onClick={() => setWeekStart((prev) => new Date(prev.getTime() - 28 * 86_400_000))}
+              onClick={() =>
+                setWeekStart(
+                  (prev) => new Date(prev.getTime() - 28 * 86_400_000),
+                )
+              }
               className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
             >
               <ChevronLeft className="size-4" />
             </button>
             <span className="text-body-md font-semibold text-text-primary">
-              {weekStart.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              {weekStart.toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric",
+              })}
             </span>
             <button
               type="button"
               aria-label="Next"
-              onClick={() => setWeekStart((prev) => new Date(prev.getTime() + 28 * 86_400_000))}
+              onClick={() =>
+                setWeekStart(
+                  (prev) => new Date(prev.getTime() + 28 * 86_400_000),
+                )
+              }
               className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
             >
               <ChevronRight className="size-4" />
@@ -550,7 +626,10 @@ function StepDateTime({
                     )}
                   >
                     <span className="text-text-tertiary">
-                      {d.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })}
+                      {d.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        timeZone: "UTC",
+                      })}
                     </span>
                     <span className="font-semibold">{d.getUTCDate()}</span>
                     {!day.busy && day.slots.some((s) => s.available) ? (
@@ -568,7 +647,9 @@ function StepDateTime({
 
         <div className="flex flex-col gap-2">
           {!date ? (
-            <p className="text-body-sm text-text-secondary">Select a date to see open times.</p>
+            <p className="text-body-sm text-text-secondary">
+              Select a date to see open times.
+            </p>
           ) : (
             <>
               <span className="text-body-sm font-semibold text-text-primary">
@@ -580,13 +661,16 @@ function StepDateTime({
                 })}
               </span>
               {duration ? (
-                <span className="text-body-sm text-text-tertiary">Session: {duration} min</span>
+                <span className="text-body-sm text-text-tertiary">
+                  Session: {duration} min
+                </span>
               ) : null}
               {isLoading ? (
                 <div className="flex justify-center py-4">
                   <Loader2 className="size-4 animate-spin text-text-tertiary" />
                 </div>
-              ) : activeDay && activeDay.slots.filter((s) => s.available).length > 0 ? (
+              ) : activeDay &&
+                activeDay.slots.filter((s) => s.available).length > 0 ? (
                 <div className="flex flex-col gap-2">
                   {activeDay.slots
                     .filter((s) => s.available)
@@ -636,6 +720,9 @@ function StepDetails({
   wardrobeNotes,
   muaProvided,
   onChange,
+  parentBookingOptions,
+  parentBookingId,
+  onParentBookingChange,
 }: {
   providerName: string;
   locationType: LocationType;
@@ -649,12 +736,46 @@ function StepDetails({
   wardrobeNotes: string;
   muaProvided: boolean;
   onChange: <K extends keyof Draft>(key: K, value: Draft[K]) => void;
+  parentBookingOptions: ParentBookingOption[];
+  parentBookingId: string | null;
+  onParentBookingChange: (id: string | null) => void;
 }) {
   return (
     <div className="flex flex-col gap-5">
-      <h2 className="text-heading-lg text-text-primary">Tell {providerName} about your shoot</h2>
+      <h2 className="text-heading-lg text-text-primary">
+        Tell {providerName} about your shoot
+      </h2>
 
       {isModel ? <ModelSafetyNotice /> : null}
+
+      {parentBookingOptions.length > 0 ? (
+        <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
+          <Checkbox
+            checked={parentBookingId !== null}
+            onCheckedChange={(checked) =>
+              onParentBookingChange(
+                checked === true ? parentBookingOptions[0].id : null,
+              )
+            }
+            label="Attach this to one of my confirmed client jobs"
+          />
+          {parentBookingId !== null ? (
+            <NativeSelect
+              label="Client job"
+              value={parentBookingId}
+              onChange={(v) => onParentBookingChange(v)}
+              options={parentBookingOptions.map((option) => ({
+                value: option.id,
+                label: `${new Date(option.date).toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "short",
+                  timeZone: "UTC",
+                })} ${option.startTime} — ${option.service?.name ?? "Custom request"}`,
+              }))}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       {isModel ? (
         <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
@@ -686,14 +807,18 @@ function StepDetails({
           </div>
           <Checkbox
             checked={muaProvided}
-            onCheckedChange={(checked) => onChange("muaProvided", checked === true)}
+            onCheckedChange={(checked) =>
+              onChange("muaProvided", checked === true)
+            }
             label="A make-up artist will be provided"
           />
         </div>
       ) : null}
 
       <div className="flex flex-col gap-2">
-        <span className="text-body-sm font-semibold text-text-primary">Location</span>
+        <span className="text-body-sm font-semibold text-text-primary">
+          Location
+        </span>
         <div className="flex flex-col gap-2">
           <Radio
             name="locationType"
@@ -734,7 +859,9 @@ function StepDetails({
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold text-text-primary">Notes</label>
+        <label className="text-body-sm font-semibold text-text-primary">
+          Notes
+        </label>
         <Textarea
           rows={4}
           maxLength={1000}
@@ -804,7 +931,9 @@ function StepReview({
     ["Duration", service ? `${service.duration} min` : "—"],
     [
       "Location",
-      locationType === "PROVIDER" ? LOCATION_LABEL.PROVIDER : locationAddress || LOCATION_LABEL[locationType],
+      locationType === "PROVIDER"
+        ? LOCATION_LABEL.PROVIDER
+        : locationAddress || LOCATION_LABEL[locationType],
     ],
     ["People", numberOfPeople || "1"],
   ];
@@ -818,14 +947,18 @@ function StepReview({
           {providerAvatar ? <AvatarImage src={providerAvatar} alt="" /> : null}
           <AvatarFallback>{providerName[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
-        <span className="text-body-md font-semibold text-text-primary">{providerName}</span>
+        <span className="text-body-md font-semibold text-text-primary">
+          {providerName}
+        </span>
       </div>
 
       <div className="flex flex-col divide-y divide-border-subtle border-y border-border-subtle">
         {rows.map(([label, value]) => (
           <div key={label} className="flex justify-between py-2.5">
             <span className="text-body-sm text-text-tertiary">{label}</span>
-            <span className="text-body-md font-semibold text-text-primary">{value}</span>
+            <span className="text-body-md font-semibold text-text-primary">
+              {value}
+            </span>
           </div>
         ))}
       </div>
@@ -834,7 +967,9 @@ function StepReview({
         <div className="flex flex-col divide-y divide-border-subtle border-b border-border-subtle">
           <div className="flex justify-between py-2.5 text-body-md">
             <span className="text-text-secondary">Service price</span>
-            <span className="text-text-primary">{formatCurrency(service.price, service.currency)}</span>
+            <span className="text-text-primary">
+              {formatCurrency(service.price, service.currency)}
+            </span>
           </div>
           <div className="flex justify-between py-2.5 text-heading-md font-bold text-text-primary">
             <span>Total</span>
@@ -851,8 +986,8 @@ function StepReview({
       ) : null}
 
       <div className="rounded-[var(--fg-radius-md)] bg-bg-sunken p-4 text-body-sm text-text-secondary">
-        Free cancellation up to 48 hours before your session. Cancelling within 24 hours may be
-        subject to a fee once payments are enabled.
+        Free cancellation up to 48 hours before your session. Cancelling within
+        24 hours may be subject to a fee once payments are enabled.
       </div>
 
       <Checkbox

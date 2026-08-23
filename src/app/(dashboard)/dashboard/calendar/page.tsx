@@ -23,15 +23,20 @@ const STATUS_DOT: Record<BookingStatus, string> = {
   CANCELLED: "bg-danger",
   DECLINED: "bg-danger",
   NO_SHOW: "bg-danger",
+  EXPIRED: "bg-text-tertiary",
 };
 
-const STATUS_BADGE_VARIANT: Record<BookingStatus, "warning" | "success" | "neutral" | "destructive"> = {
+const STATUS_BADGE_VARIANT: Record<
+  BookingStatus,
+  "warning" | "success" | "neutral" | "destructive"
+> = {
   PENDING: "warning",
   CONFIRMED: "success",
   COMPLETED: "neutral",
   CANCELLED: "destructive",
   DECLINED: "destructive",
   NO_SHOW: "destructive",
+  EXPIRED: "neutral",
 };
 
 function partyName(party: BookingParty) {
@@ -71,7 +76,9 @@ export default function CalendarPage() {
     byDate.get(key)!.push(booking);
   }
 
-  const firstOfMonth = new Date(Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth(), 1));
+  const firstOfMonth = new Date(
+    Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth(), 1),
+  );
   const startWeekday = firstOfMonth.getUTCDay();
   const daysInMonth = new Date(
     Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth() + 1, 0),
@@ -79,15 +86,28 @@ export default function CalendarPage() {
 
   const cells: (Date | null)[] = [
     ...Array.from({ length: startWeekday }, () => null),
-    ...Array.from({ length: daysInMonth }, (_, i) =>
-      new Date(Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth(), i + 1)),
+    ...Array.from(
+      { length: daysInMonth },
+      (_, i) =>
+        new Date(
+          Date.UTC(
+            monthCursor.getUTCFullYear(),
+            monthCursor.getUTCMonth(),
+            i + 1,
+          ),
+        ),
     ),
   ];
 
   const todayKey = dateKey(new Date());
 
   const changeMonth = (delta: number) => {
-    setMonthCursor((prev) => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + delta, 1)));
+    setMonthCursor(
+      (prev) =>
+        new Date(
+          Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + delta, 1),
+        ),
+    );
   };
 
   return (
@@ -102,7 +122,9 @@ export default function CalendarPage() {
               onClick={() => setView(v)}
               className={cn(
                 "px-4 py-1.5 text-body-sm font-semibold",
-                view === v ? "bg-brand-primary text-text-on-brand" : "text-text-secondary",
+                view === v
+                  ? "bg-brand-primary text-text-on-brand"
+                  : "text-text-secondary",
               )}
             >
               {v === "MONTH" ? "Month" : "Agenda"}
@@ -121,7 +143,11 @@ export default function CalendarPage() {
           <ChevronLeft className="size-4" />
         </button>
         <span className="text-heading-sm text-text-primary">
-          {monthCursor.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })}
+          {monthCursor.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+            timeZone: "UTC",
+          })}
         </span>
         <button
           type="button"
@@ -148,7 +174,13 @@ export default function CalendarPage() {
           </div>
           <div className="grid grid-cols-7">
             {cells.map((date, i) => {
-              if (!date) return <div key={`empty-${i}`} className="min-h-[96px] border-b border-r border-border-subtle" />;
+              if (!date)
+                return (
+                  <div
+                    key={`empty-${i}`}
+                    className="min-h-[96px] border-b border-r border-border-subtle"
+                  />
+                );
               const key = dateKey(date);
               const dayBookings = byDate.get(key) ?? [];
               return (
@@ -169,7 +201,12 @@ export default function CalendarPage() {
                         href={`/dashboard/bookings/${b.id}`}
                         className="flex items-center gap-1 truncate rounded-[4px] bg-bg-sunken px-1 py-0.5 text-body-sm text-text-secondary hover:bg-bg-surface"
                       >
-                        <span className={cn("size-1.5 shrink-0 rounded-full", STATUS_DOT[b.status])} />
+                        <span
+                          className={cn(
+                            "size-1.5 shrink-0 rounded-full",
+                            STATUS_DOT[b.status],
+                          )}
+                        />
                         <span className="truncate">
                           {b.startTime} {partyName(b.customer)}
                         </span>
@@ -201,7 +238,8 @@ export default function CalendarPage() {
               >
                 <div className="flex flex-col">
                   <span className="text-body-md font-semibold text-text-primary">
-                    {partyName(b.customer)} · {b.service?.name ?? "Custom request"}
+                    {partyName(b.customer)} ·{" "}
+                    {b.service?.name ?? "Custom request"}
                   </span>
                   <span className="text-body-sm text-text-secondary">
                     {new Date(b.date).toLocaleDateString("en-US", {
@@ -213,7 +251,9 @@ export default function CalendarPage() {
                     · {b.startTime}
                   </span>
                 </div>
-                <Badge variant={STATUS_BADGE_VARIANT[b.status]}>{b.status}</Badge>
+                <Badge variant={STATUS_BADGE_VARIANT[b.status]}>
+                  {b.status}
+                </Badge>
               </Link>
             ))
           )}

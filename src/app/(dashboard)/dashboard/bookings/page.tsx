@@ -35,13 +35,17 @@ const TABS: { value: BookingTab; label: string }[] = [
   { value: "CANCELLED", label: "Cancelled" },
 ];
 
-const STATUS_BADGE: Record<BookingStatus, { label: string; variant: "warning" | "success" | "neutral" | "destructive" }> = {
+const STATUS_BADGE: Record<
+  BookingStatus,
+  { label: string; variant: "warning" | "success" | "neutral" | "destructive" }
+> = {
   PENDING: { label: "Pending", variant: "warning" },
   CONFIRMED: { label: "Confirmed", variant: "success" },
   COMPLETED: { label: "Completed", variant: "neutral" },
   CANCELLED: { label: "Cancelled", variant: "destructive" },
   DECLINED: { label: "Declined", variant: "destructive" },
   NO_SHOW: { label: "No-show", variant: "destructive" },
+  EXPIRED: { label: "Expired", variant: "neutral" },
 };
 
 function formatWhen(date: string | Date, startTime: string) {
@@ -92,7 +96,10 @@ export default function BookingsPage() {
     setPage(next);
   };
 
-  const updateStatus = async (id: string, status: "CONFIRMED" | "DECLINED" | "CANCELLED" | "COMPLETED") => {
+  const updateStatus = async (
+    id: string,
+    status: "CONFIRMED" | "DECLINED" | "CANCELLED" | "COMPLETED",
+  ) => {
     setActionId(id);
     await fetch(`/api/bookings/${id}`, {
       method: "PATCH",
@@ -110,7 +117,10 @@ export default function BookingsPage() {
         {isCustomerOnly ? "My bookings" : "Bookings"}
       </h1>
 
-      <Tabs value={tab} onValueChange={(value) => changeTab(value as BookingTab)}>
+      <Tabs
+        value={tab}
+        onValueChange={(value) => changeTab(value as BookingTab)}
+      >
         <TabsList>
           {TABS.map((t) => (
             <TabsTab key={t.value} value={t.value}>
@@ -130,7 +140,9 @@ export default function BookingsPage() {
       ) : bookings.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Calendar className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">No bookings yet</p>
+          <p className="text-body-lg font-semibold text-text-primary">
+            No bookings yet
+          </p>
           <p className="text-body-md text-text-secondary">
             When clients book you, they&apos;ll appear here.
           </p>
@@ -168,17 +180,27 @@ export default function BookingsPage() {
               >
                 <div className="flex items-center gap-2">
                   <Avatar className="size-7">
-                    {party.avatar ? <AvatarImage src={party.avatar} alt="" /> : null}
-                    <AvatarFallback>{partyName(party)[0]?.toUpperCase()}</AvatarFallback>
+                    {party.avatar ? (
+                      <AvatarImage src={party.avatar} alt="" />
+                    ) : null}
+                    <AvatarFallback>
+                      {partyName(party)[0]?.toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
-                  <span className="font-semibold text-text-primary">{partyName(party)}</span>
+                  <span className="font-semibold text-text-primary">
+                    {partyName(party)}
+                  </span>
                 </div>
-                <span className="text-text-secondary">{booking.service?.name ?? "—"}</span>
+                <span className="text-text-secondary">
+                  {booking.service?.name ?? "—"}
+                </span>
                 <span className="text-text-secondary">
                   {formatWhen(booking.date, booking.startTime)}
                 </span>
                 <span className="font-semibold text-text-primary">
-                  {booking.totalPrice ? formatCurrency(booking.totalPrice, booking.currency) : "—"}
+                  {booking.totalPrice
+                    ? formatCurrency(booking.totalPrice, booking.currency)
+                    : "—"}
                 </span>
                 <Badge variant={status.variant}>{status.label}</Badge>
 
@@ -205,7 +227,9 @@ export default function BookingsPage() {
                         size="sm"
                         variant="secondary"
                         nativeButton={false}
-                        render={<Link href={`/dashboard/bookings/${booking.id}`} />}
+                        render={
+                          <Link href={`/dashboard/bookings/${booking.id}`} />
+                        }
                       >
                         Details
                       </Button>
@@ -218,7 +242,9 @@ export default function BookingsPage() {
                         size="sm"
                         variant="secondary"
                         nativeButton={false}
-                        render={<Link href={`/dashboard/bookings/${booking.id}`} />}
+                        render={
+                          <Link href={`/dashboard/bookings/${booking.id}`} />
+                        }
                       >
                         Details
                       </Button>
@@ -232,13 +258,17 @@ export default function BookingsPage() {
                         />
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => updateStatus(booking.id, "COMPLETED")}
+                            onClick={() =>
+                              updateStatus(booking.id, "COMPLETED")
+                            }
                           >
                             Mark complete
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             variant="destructive"
-                            onClick={() => updateStatus(booking.id, "CANCELLED")}
+                            onClick={() =>
+                              updateStatus(booking.id, "CANCELLED")
+                            }
                           >
                             Cancel
                           </DropdownMenuItem>
@@ -253,11 +283,14 @@ export default function BookingsPage() {
                         size="sm"
                         variant="secondary"
                         nativeButton={false}
-                        render={<Link href={`/dashboard/bookings/${booking.id}`} />}
+                        render={
+                          <Link href={`/dashboard/bookings/${booking.id}`} />
+                        }
                       >
                         View details
                       </Button>
-                      {(booking.status === "PENDING" || booking.status === "CONFIRMED") &&
+                      {(booking.status === "PENDING" ||
+                        booking.status === "CONFIRMED") &&
                       new Date(booking.date) > new Date() ? (
                         <Button
                           size="sm"
