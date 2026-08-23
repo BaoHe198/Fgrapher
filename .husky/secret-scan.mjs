@@ -4,7 +4,7 @@
 // scanner — it's a last-line-of-defense catch for the obvious cases,
 // not a replacement for keeping real secrets out of the repo entirely
 // (see .gitignore).
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
 const PATTERNS = [
   { name: "Stripe live secret key", re: /sk_live_[A-Za-z0-9]+/ },
@@ -14,7 +14,7 @@ const PATTERNS = [
   { name: "Postgres connection string in DATABASE_URL", re: /DATABASE_URL\s*=\s*.?postgres/ },
 ];
 
-const stagedFiles = execSync("git diff --cached --name-only --diff-filter=ACM")
+const stagedFiles = execFileSync("git", ["diff", "--cached", "--name-only", "--diff-filter=ACM"])
   .toString()
   .split("\n")
   .filter(Boolean)
@@ -26,7 +26,12 @@ let found = false;
 for (const file of stagedFiles) {
   let content;
   try {
-    content = execSync(`git show :${JSON.stringify(file).slice(1, -1)}`, {
+    // execFileSync passes args straight to the process, no shell
+    // involved — a plain execSync template string breaks (and used to
+    // silently skip the file via the catch below!) on any path
+    // containing shell metacharacters, which Next.js route-group/
+    // dynamic-segment paths always do: (admin), [id].
+    content = execFileSync("git", ["show", `:${file}`], {
       maxBuffer: 1024 * 1024 * 20,
     }).toString();
   } catch {
