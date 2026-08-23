@@ -11,6 +11,7 @@ const TABS = [
   { href: "/dashboard/settings/roles", label: "Roles" },
   { href: "/dashboard/settings/billing", label: "Billing" },
   { href: "/dashboard/settings/notifications", label: "Notifications" },
+  { href: "/dashboard/settings/data", label: "Data & Privacy" },
 ];
 
 export function SettingsNav() {
