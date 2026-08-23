@@ -18,7 +18,12 @@ import {
 
 import { useBrowseFilterNavigation } from "./browse-filter-context";
 
-const EXPERIENCE_LEVELS: ExperienceLevel[] = ["NEW", "INTERMEDIATE", "EXPERIENCED", "PROFESSIONAL"];
+const EXPERIENCE_LEVELS: ExperienceLevel[] = [
+  "NEW",
+  "INTERMEDIATE",
+  "EXPERIENCED",
+  "PROFESSIONAL",
+];
 
 const CITIES = [
   "Hồ Chí Minh",
@@ -75,17 +80,21 @@ interface FilterState {
 
 function filterStateFromParams(searchParams: URLSearchParams): FilterState {
   return {
-    roles: (searchParams.get("roles")?.split(",").filter(Boolean) ?? []) as Role[],
+    roles: (searchParams.get("roles")?.split(",").filter(Boolean) ??
+      []) as Role[],
     sort: searchParams.get("sort") ?? "rating",
     city: searchParams.get("city") ?? "",
     minPrice: searchParams.get("minPrice") ?? "",
     maxPrice: searchParams.get("maxPrice") ?? "",
     minRating: searchParams.get("minRating") ?? "",
-    categories: (searchParams.get("categories")?.split(",").filter(Boolean) ?? []) as ProfileCategory[],
+    categories: (searchParams.get("categories")?.split(",").filter(Boolean) ??
+      []) as ProfileCategory[],
     heightMin: searchParams.get("heightMin") ?? "",
     heightMax: searchParams.get("heightMax") ?? "",
-    experienceLevel: (searchParams.get("experienceLevel")?.split(",").filter(Boolean) ??
-      []) as ExperienceLevel[],
+    experienceLevel: (searchParams
+      .get("experienceLevel")
+      ?.split(",")
+      .filter(Boolean) ?? []) as ExperienceLevel[],
     travelWilling: searchParams.get("travelWilling") === "1",
   };
 }
@@ -102,7 +111,8 @@ function filterStateToQuery(filters: FilterState): string {
   // them from the URL entirely otherwise so switching roles doesn't leave
   // a stale, invisible filter narrowing results.
   if (filters.roles.length === 1) {
-    if (filters.categories.length > 0) params.set("categories", filters.categories.join(","));
+    if (filters.categories.length > 0)
+      params.set("categories", filters.categories.join(","));
     if (filters.roles[0] === "MODEL") {
       if (filters.heightMin) params.set("heightMin", filters.heightMin);
       if (filters.heightMax) params.set("heightMax", filters.heightMax);
@@ -116,15 +126,24 @@ function filterStateToQuery(filters: FilterState): string {
 
 interface FilterSidebarProps {
   roleCounts: Record<string, number>;
+  marketplaceEnabled: boolean;
 }
 
-export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
+export function FilterSidebar({
+  roleCounts,
+  marketplaceEnabled,
+}: FilterSidebarProps) {
   const router = useRouter();
+  const roleFilterOptions = marketplaceEnabled
+    ? PAID_ROLES
+    : PAID_ROLES.filter((role) => role !== "CAMERA_SHOP");
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const runNavigation = useBrowseFilterNavigation();
 
-  const [filters, setFilters] = useState<FilterState>(() => filterStateFromParams(searchParams));
+  const [filters, setFilters] = useState<FilterState>(() =>
+    filterStateFromParams(searchParams),
+  );
   // Mirrors `filters` synchronously (state updates are batched/async, this
   // isn't) so a click reads the freshest local intent even if it fires
   // before React has re-rendered from the previous click. Written only in
@@ -159,7 +178,9 @@ export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
       const query = filterStateToQuery(next);
       lastPushedRef.current = query;
       runNavigation(() => {
-        router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+        router.push(query ? `${pathname}?${query}` : pathname, {
+          scroll: false,
+        });
       });
     };
 
@@ -176,14 +197,23 @@ export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
 
   const toggleRole = (role: Role) => {
     const current = filtersRef.current.roles;
-    const roles = current.includes(role) ? current.filter((r) => r !== role) : [...current, role];
+    const roles = current.includes(role)
+      ? current.filter((r) => r !== role)
+      : [...current, role];
     // Role-specific filters (style, height, experience, travel) stop
     // applying once more than one role is selected — clear them so they
     // don't linger as invisible state that silently narrows results.
     applyFilters(
       roles.length === 1
         ? { roles }
-        : { roles, categories: [], heightMin: "", heightMax: "", experienceLevel: [], travelWilling: false },
+        : {
+            roles,
+            categories: [],
+            heightMin: "",
+            heightMax: "",
+            experienceLevel: [],
+            travelWilling: false,
+          },
     );
   };
 
@@ -233,14 +263,18 @@ export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
 
   const budget = `${filters.minPrice}-${filters.maxPrice}`.replace(/^-$/, "");
   const singleRole = filters.roles.length === 1 ? filters.roles[0] : null;
-  const styleCategories = singleRole ? (CATEGORIES_BY_ROLE[singleRole] ?? []) : [];
+  const styleCategories = singleRole
+    ? (CATEGORIES_BY_ROLE[singleRole] ?? [])
+    : [];
 
   return (
     <div className="sticky top-[104px] flex flex-col gap-[22px] rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-sm)]">
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Role</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          Role
+        </span>
         <div className="flex flex-col gap-2.5">
-          {PAID_ROLES.map((role) => (
+          {roleFilterOptions.map((role) => (
             <Checkbox
               key={role}
               checked={filters.roles.includes(role)}
@@ -255,7 +289,9 @@ export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
         <>
           <div className="h-px bg-border-subtle" />
           <div className="flex flex-col gap-2.5">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Style</span>
+            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+              Style
+            </span>
             <div className="flex flex-col gap-2.5">
               {styleCategories.map((category) => (
                 <Checkbox
@@ -274,7 +310,9 @@ export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
         <>
           <div className="h-px bg-border-subtle" />
           <div className="flex flex-col gap-2.5">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Height (cm)</span>
+            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+              Height (cm)
+            </span>
             <div className="flex gap-2">
               <input
                 type="number"
@@ -311,7 +349,9 @@ export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
 
           <Checkbox
             checked={filters.travelWilling}
-            onCheckedChange={(checked) => applyFilters({ travelWilling: checked })}
+            onCheckedChange={(checked) =>
+              applyFilters({ travelWilling: checked })
+            }
             label="Willing to travel"
           />
         </>
@@ -320,7 +360,9 @@ export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Sort by</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          Sort by
+        </span>
         <div className="flex flex-col gap-2.5">
           {SORT_OPTIONS.map((option) => (
             <Radio
@@ -340,15 +382,25 @@ export function FilterSidebar({ roleCounts }: FilterSidebarProps) {
         label="City"
         value={filters.city}
         onChange={(value) => applyFilters({ city: value })}
-        options={[{ value: "", label: "All cities" }, ...CITIES.map((c) => ({ value: c, label: c }))]}
+        options={[
+          { value: "", label: "All cities" },
+          ...CITIES.map((c) => ({ value: c, label: c })),
+        ]}
       />
 
-      <NativeSelect label="Budget" value={budget} onChange={onBudgetChange} options={BUDGET_OPTIONS} />
+      <NativeSelect
+        label="Budget"
+        value={budget}
+        onChange={onBudgetChange}
+        options={BUDGET_OPTIONS}
+      />
 
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Rating</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          Rating
+        </span>
         <div className="flex flex-col gap-2.5">
           {RATING_OPTIONS.map((option) => (
             <Radio

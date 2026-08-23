@@ -17,15 +17,24 @@ interface AuthTabsProps {
   interval: "month" | "year";
   callbackUrl?: string;
   hasError: boolean;
+  marketplaceEnabled: boolean;
 }
 
-export function AuthTabs({ rolePrices, initialRole, interval, callbackUrl, hasError }: AuthTabsProps) {
+export function AuthTabs({
+  rolePrices,
+  initialRole,
+  interval,
+  callbackUrl,
+  hasError,
+  marketplaceEnabled,
+}: AuthTabsProps) {
   const t = useTranslations("auth");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const mode: Mode = searchParams.get("mode") === "register" ? "register" : "login";
+  const mode: Mode =
+    searchParams.get("mode") === "register" ? "register" : "login";
 
   // Switching tabs never navigates — it only rewrites the `mode` query
   // param (so it's linkable/refresh-safe) and keeps every other param
@@ -40,7 +49,9 @@ export function AuthTabs({ rolePrices, initialRole, interval, callbackUrl, hasEr
       params.set("mode", "register");
     }
     const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
   };
 
   return (
@@ -64,6 +75,7 @@ export function AuthTabs({ rolePrices, initialRole, interval, callbackUrl, hasEr
           interval={interval}
           initialRole={initialRole}
           onSwitchToLogin={() => setMode("login")}
+          marketplaceEnabled={marketplaceEnabled}
         />
       </TabsPanel>
     </Tabs>

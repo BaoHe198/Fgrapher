@@ -1,15 +1,27 @@
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { features } from "@/lib/features";
 import { addToCartSchema } from "@/lib/validations/marketplace";
 import { addToCart, CartError, getCart } from "@/services/marketplace";
 
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function GET() {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const items = await getCart(session.user.id);
 
-    return NextResponse.json({ data: items, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data: items, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -26,6 +38,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const body = await request.json();
@@ -46,11 +65,18 @@ export async function POST(request: Request) {
       productId: parsed.data.productId,
       quantity: parsed.data.quantity,
       type: parsed.data.type,
-      rentalStart: parsed.data.rentalStart ? new Date(parsed.data.rentalStart) : undefined,
-      rentalEnd: parsed.data.rentalEnd ? new Date(parsed.data.rentalEnd) : undefined,
+      rentalStart: parsed.data.rentalStart
+        ? new Date(parsed.data.rentalStart)
+        : undefined,
+      rentalEnd: parsed.data.rentalEnd
+        ? new Date(parsed.data.rentalEnd)
+        : undefined,
     });
 
-    return NextResponse.json({ data: item, error: null, message: "Added to cart" }, { status: 201 });
+    return NextResponse.json(
+      { data: item, error: null, message: "Added to cart" },
+      { status: 201 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(

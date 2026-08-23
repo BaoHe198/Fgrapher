@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { RoleSelectionForm } from "@/components/forms/role-selection-form";
 import { auth } from "@/lib/auth";
 import { rolePricesVnd } from "@/lib/constants/plans";
+import { features } from "@/lib/features";
 
 export default async function OnboardingRolesPage() {
   const session = await auth();
@@ -23,7 +24,10 @@ export default async function OnboardingRolesPage() {
           </p>
         </div>
 
-        <RoleSelectionForm rolePrices={rolePricesVnd()} />
+        <RoleSelectionForm
+          rolePrices={rolePricesVnd()}
+          marketplaceEnabled={features.marketplaceEnabled}
+        />
       </div>
     </div>
   );

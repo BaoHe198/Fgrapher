@@ -1,18 +1,31 @@
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { features } from "@/lib/features";
 import { StripeNotConfiguredError } from "@/lib/stripe";
 import { checkoutSchema } from "@/lib/validations/marketplace";
 import { createCheckoutSessionForCart, OrderError } from "@/services/orders";
 
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function POST(request: Request) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const body = await request.json();
     const parsed = checkoutSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "deliveryMethod is required" },
+        {
+          data: null,
+          error: "validation_error",
+          message: "deliveryMethod is required",
+        },
         { status: 400 },
       );
     }
@@ -47,7 +60,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to start checkout" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to start checkout",
+      },
       { status: 500 },
     );
   }

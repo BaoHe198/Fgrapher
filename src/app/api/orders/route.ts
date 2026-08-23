@@ -2,6 +2,7 @@ import type { OrderStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { features } from "@/lib/features";
 import { listOrders } from "@/services/orders";
 
 const VALID_STATUSES: OrderStatus[] = [
@@ -13,7 +14,15 @@ const VALID_STATUSES: OrderStatus[] = [
   "RETURNED",
 ];
 
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function GET(request: Request) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -25,7 +34,12 @@ export async function GET(request: Request) {
       : undefined;
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
 
-    const result = await listOrders({ userId: session.user.id, role, status, page });
+    const result = await listOrders({
+      userId: session.user.id,
+      role,
+      status,
+      page,
+    });
 
     return NextResponse.json(
       {

@@ -20,6 +20,7 @@ interface ProfileActionsProps {
   profileId: string;
   initialFollowerCount: number;
   shareUrl: string;
+  socialFeedEnabled: boolean;
 }
 
 export function ProfileActions({
@@ -27,6 +28,7 @@ export function ProfileActions({
   profileId,
   initialFollowerCount,
   shareUrl,
+  socialFeedEnabled,
 }: ProfileActionsProps) {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && Boolean(session?.user);
@@ -69,7 +71,9 @@ export function ProfileActions({
         body: JSON.stringify({ userId: targetUserId }),
       }).catch(() => {});
     } else {
-      await fetch(`/api/follows?userId=${targetUserId}`, { method: "DELETE" }).catch(() => {});
+      await fetch(`/api/follows?userId=${targetUserId}`, {
+        method: "DELETE",
+      }).catch(() => {});
     }
   };
 
@@ -85,7 +89,9 @@ export function ProfileActions({
         body: JSON.stringify({ profileId }),
       }).catch(() => {});
     } else {
-      await fetch(`/api/saved-profiles?profileId=${profileId}`, { method: "DELETE" }).catch(() => {});
+      await fetch(`/api/saved-profiles?profileId=${profileId}`, {
+        method: "DELETE",
+      }).catch(() => {});
     }
   };
 
@@ -96,16 +102,22 @@ export function ProfileActions({
 
   return (
     <div className="flex items-center gap-2">
-      <Button
-        variant={isFollowing ? "ghost" : "secondary"}
-        size="sm"
-        disabled={!isAuthenticated}
-        onClick={toggleFollow}
-      >
-        {isFollowing ? <Check className="size-4" /> : null}
-        {isFollowing ? "Following" : "Follow"}
-      </Button>
-      <span className="text-body-sm text-text-tertiary">{followerCount} followers</span>
+      {socialFeedEnabled ? (
+        <>
+          <Button
+            variant={isFollowing ? "ghost" : "secondary"}
+            size="sm"
+            disabled={!isAuthenticated}
+            onClick={toggleFollow}
+          >
+            {isFollowing ? <Check className="size-4" /> : null}
+            {isFollowing ? "Following" : "Follow"}
+          </Button>
+          <span className="text-body-sm text-text-tertiary">
+            {followerCount} followers
+          </span>
+        </>
+      ) : null}
 
       <Button
         variant="ghost"

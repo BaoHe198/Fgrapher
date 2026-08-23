@@ -21,7 +21,10 @@ import {
   type RegisterInput,
 } from "@/lib/validations/auth";
 
-const PROVIDER_ROLE_OPTIONS = PAID_ROLES as ProviderRole[];
+// CAMERA_SHOP is filtered out per-instance below when MARKETPLACE_ENABLED
+// is off — kept in PAID_ROLES/the Role enum itself so existing data (and
+// re-enabling the flag) never breaks.
+const ALL_PROVIDER_ROLE_OPTIONS = PAID_ROLES as ProviderRole[];
 
 function passwordStrength(password: string) {
   let score = 0;
@@ -43,6 +46,7 @@ interface RegisterFormProps {
   interval: "month" | "year";
   initialRole?: string;
   onSwitchToLogin: () => void;
+  marketplaceEnabled: boolean;
 }
 
 export function RegisterForm({
@@ -50,13 +54,17 @@ export function RegisterForm({
   interval,
   initialRole,
   onSwitchToLogin,
+  marketplaceEnabled,
 }: RegisterFormProps) {
+  const PROVIDER_ROLE_OPTIONS = marketplaceEnabled
+    ? ALL_PROVIDER_ROLE_OPTIONS
+    : ALL_PROVIDER_ROLE_OPTIONS.filter((role) => role !== "CAMERA_SHOP");
   // e.g. arriving from the pricing page's "Start 14-day trial" on a
   // specific role's card (/login?mode=register&role=PHOTOGRAPHER) —
   // pre-select "Creative pro" and that role rather than making the user
   // redo a choice they already made.
   const preselectedRole =
-    initialRole && (PAID_ROLES as string[]).includes(initialRole)
+    initialRole && (PROVIDER_ROLE_OPTIONS as string[]).includes(initialRole)
       ? (initialRole as ProviderRole)
       : null;
 

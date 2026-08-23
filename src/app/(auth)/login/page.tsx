@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { features } from "@/lib/features";
 import { rolePricesVnd } from "@/lib/constants/plans";
 
 import { AuthTabs } from "./auth-tabs";
@@ -32,6 +33,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       interval={interval}
       callbackUrl={params.callbackUrl}
       hasError={Boolean(params.error)}
+      marketplaceEnabled={features.marketplaceEnabled}
     />
   );
 }

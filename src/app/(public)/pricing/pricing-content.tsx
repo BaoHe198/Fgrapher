@@ -173,12 +173,17 @@ export function PricingContent({
   monthlyPrices,
   yearlyPrices,
   billingEnabled,
+  marketplaceEnabled,
 }: {
   monthlyPrices: Partial<Record<Role, number>>;
   yearlyPrices: Partial<Record<Role, number>>;
   billingEnabled: boolean;
+  marketplaceEnabled: boolean;
 }) {
   const [yearly, setYearly] = useState(false);
+  const plans = marketplaceEnabled
+    ? PLANS
+    : PLANS.filter((plan) => plan.role !== "CAMERA_SHOP");
 
   return (
     <div className="flex flex-col">
@@ -240,7 +245,7 @@ export function PricingContent({
         </Card>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {PLANS.map((plan) => {
+          {plans.map((plan) => {
             const Icon = plan.icon;
             const displayPrice =
               (yearly ? yearlyPrices : monthlyPrices)[plan.role] ?? 0;
@@ -321,7 +326,7 @@ export function PricingContent({
                 <th className="px-5 py-3 text-left text-text-tertiary">
                   Feature
                 </th>
-                {PLANS.map((plan) => (
+                {plans.map((plan) => (
                   <th
                     key={plan.role}
                     className="px-3 py-3 text-center text-text-primary"
@@ -338,7 +343,7 @@ export function PricingContent({
                   className="border-b border-border-subtle last:border-b-0"
                 >
                   <td className="px-5 py-3 text-text-secondary">{feature}</td>
-                  {PLANS.map((plan) => (
+                  {plans.map((plan) => (
                     <td key={plan.role} className="px-3 py-3 text-center">
                       {COMPARISON_MATRIX[plan.role][i] ? (
                         <Check className="mx-auto size-4 text-success" />

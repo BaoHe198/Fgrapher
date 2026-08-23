@@ -21,8 +21,39 @@ import { LOCALE_COOKIE_NAME, routing } from "@/i18n/routing";
 const PROTECTED_PREFIXES = ["/dashboard", "/admin"];
 const AUTH_ONLY_PREFIXES = ["/login", "/register"];
 
+// Read directly from process.env rather than lib/env.ts/lib/features.ts —
+// this file already reads NEXTAUTH_SECRET the same way, deliberately
+// keeping this Edge-runtime file's env footprint minimal rather than
+// pulling in the full validated server schema (DATABASE_URL etc.).
+const MARKETPLACE_ENABLED = process.env.MARKETPLACE_ENABLED === "true";
+
+// /dashboard/listings, /dashboard/listings/new, etc. (prefix match) —
+// every dashboard route this covers already has its own page-level
+// notFound() call too, but that alone doesn't produce a real HTTP 404:
+// (dashboard)/loading.tsx wraps every page under it in an implicit
+// Suspense boundary, which commits the response to 200 before the page's
+// notFound() ever runs (see node_modules/next/dist/docs/01-app/02-guides/
+// streaming.md's "HTTP contract" section — this Next.js version's docs
+// explicitly recommend gating in proxy for exactly this reason). /shop,
+// /cart, /checkout don't need to be listed here — the (public) route
+// group has no loading.tsx sibling, so their own notFound() calls already
+// produce a real 404 status.
+const MARKETPLACE_DASHBOARD_PREFIXES = [
+  "/dashboard/listings",
+  "/dashboard/orders",
+  "/dashboard/shop-orders",
+];
+
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (
+    !MARKETPLACE_ENABLED &&
+    MARKETPLACE_DASHBOARD_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  ) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
@@ -34,14 +65,23 @@ export default async function proxy(request: NextRequest) {
     secureCookie: request.nextUrl.protocol === "https:",
   });
 
-  if (PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) && !token) {
+  if (
+    PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) &&
+    !token
+  ) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return withLocaleCookie(request, NextResponse.redirect(loginUrl));
   }
 
-  if (AUTH_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix)) && token) {
-    return withLocaleCookie(request, NextResponse.redirect(new URL("/dashboard", request.url)));
+  if (
+    AUTH_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix)) &&
+    token
+  ) {
+    return withLocaleCookie(
+      request,
+      NextResponse.redirect(new URL("/dashboard", request.url)),
+    );
   }
 
   return withLocaleCookie(request, NextResponse.next());

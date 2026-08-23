@@ -70,8 +70,17 @@ const ROLE_OPTIONS: RoleOption[] = [
 
 const isPaidRole = (role: Role) => (PAID_ROLES as Role[]).includes(role);
 
-export function RoleSelectionForm({ rolePrices }: { rolePrices: Partial<Record<Role, number>> }) {
+export function RoleSelectionForm({
+  rolePrices,
+  marketplaceEnabled,
+}: {
+  rolePrices: Partial<Record<Role, number>>;
+  marketplaceEnabled: boolean;
+}) {
   const router = useRouter();
+  const roleOptions = marketplaceEnabled
+    ? ROLE_OPTIONS
+    : ROLE_OPTIONS.filter((option) => option.role !== "CAMERA_SHOP");
   const [selected, setSelected] = useState<Set<Role>>(new Set(["CUSTOMER"]));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -127,7 +136,7 @@ export function RoleSelectionForm({ rolePrices }: { rolePrices: Partial<Record<R
       ) : null}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {ROLE_OPTIONS.map(({ role, label, description, icon: Icon }) => {
+        {roleOptions.map(({ role, label, description, icon: Icon }) => {
           const isSelected = selected.has(role);
           const isCustomer = role === "CUSTOMER";
           const paid = isPaidRole(role);

@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
 
 import type { ProductCondition } from "@prisma/client";
+import { features } from "@/lib/features";
 import { searchProducts } from "@/services/marketplace";
 
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function GET(request: Request) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   const { searchParams } = new URL(request.url);
 
   const type = searchParams.get("type");

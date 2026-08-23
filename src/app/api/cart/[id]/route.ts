@@ -1,10 +1,26 @@
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { features } from "@/lib/features";
 import { updateCartItemSchema } from "@/lib/validations/marketplace";
-import { CartError, removeCartItem, updateCartItemQuantity } from "@/services/marketplace";
+import {
+  CartError,
+  removeCartItem,
+  updateCartItemQuantity,
+} from "@/services/marketplace";
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -17,9 +33,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       );
     }
 
-    const item = await updateCartItemQuantity(id, session.user.id, parsed.data.quantity);
+    const item = await updateCartItemQuantity(
+      id,
+      session.user.id,
+      parsed.data.quantity,
+    );
 
-    return NextResponse.json({ data: item, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data: item, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -35,20 +58,37 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update cart item" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to update cart item",
+      },
       { status: 500 },
     );
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { id } = await params;
 
     await removeCartItem(id, session.user.id);
 
-    return NextResponse.json({ data: null, error: null, message: "Removed" }, { status: 200 });
+    return NextResponse.json(
+      { data: null, error: null, message: "Removed" },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -58,7 +98,11 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to remove cart item" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to remove cart item",
+      },
       { status: 500 },
     );
   }

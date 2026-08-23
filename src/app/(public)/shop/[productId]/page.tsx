@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { StarRating } from "@/components/ui/star-rating";
+import { features } from "@/lib/features";
 import { getProductDetail } from "@/services/marketplace";
 
 import { ProductGallery } from "./product-gallery";
@@ -18,6 +19,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ productId: string }>;
 }): Promise<Metadata> {
+  if (!features.marketplaceEnabled) return { title: "Not found — Fgrapher" };
+
   const { productId } = await params;
   const result = await getProductDetail(productId);
   if (!result) return { title: "Product not found — Fgrapher" };
@@ -33,12 +36,20 @@ export default async function ProductDetailPage({
 }: {
   params: Promise<{ productId: string }>;
 }) {
+  if (!features.marketplaceEnabled) {
+    notFound();
+  }
+
   const { productId } = await params;
   const result = await getProductDetail(productId);
   if (!result) notFound();
 
   const { product, related, shopRating, shopReviewCount } = result;
-  const shopName = product.user.profiles[0]?.shopName ?? product.user.firstName ?? product.user.name ?? "Shop";
+  const shopName =
+    product.user.profiles[0]?.shopName ??
+    product.user.firstName ??
+    product.user.name ??
+    "Shop";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -50,13 +61,19 @@ export default async function ProductDetailPage({
       "@type": "Offer",
       price: product.price ?? product.rentalPrice ?? undefined,
       priceCurrency: product.currency,
-      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      availability:
+        product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
     },
   };
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.1fr_400px] lg:gap-12">
         <div className="flex flex-col gap-8">
@@ -74,11 +91,15 @@ export default async function ProductDetailPage({
           <Card className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <Avatar className="size-11">
-                {product.user.avatar ? <AvatarImage src={product.user.avatar} alt="" /> : null}
+                {product.user.avatar ? (
+                  <AvatarImage src={product.user.avatar} alt="" />
+                ) : null}
                 <AvatarFallback>{shopName[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-body-md font-semibold text-text-primary">{shopName}</span>
+                <span className="text-body-md font-semibold text-text-primary">
+                  {shopName}
+                </span>
                 <StarRating
                   rating={shopRating > 0 ? shopRating.toFixed(1) : "New"}
                   reviews={shopReviewCount}
@@ -100,7 +121,9 @@ export default async function ProductDetailPage({
                 size="sm"
                 variant="secondary"
                 nativeButton={false}
-                render={<Link href={`/dashboard/messages?to=${product.user.id}`} />}
+                render={
+                  <Link href={`/dashboard/messages?to=${product.user.id}`} />
+                }
               >
                 Message
               </Button>
@@ -133,7 +156,13 @@ export default async function ProductDetailPage({
             {related.map((p) => (
               <ProductCard
                 key={p.id}
-                product={{ ...p, user: { name: product.user.name, firstName: product.user.firstName } }}
+                product={{
+                  ...p,
+                  user: {
+                    name: product.user.name,
+                    firstName: product.user.firstName,
+                  },
+                }}
               />
             ))}
           </div>

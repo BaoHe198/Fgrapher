@@ -1,12 +1,29 @@
 import { NextResponse } from "next/server";
 
-import { AuthError, requireActiveSubscription, requireAuth } from "@/lib/auth-helpers";
+import {
+  AuthError,
+  requireActiveSubscription,
+  requireAuth,
+} from "@/lib/auth-helpers";
+import { features } from "@/lib/features";
 import { productSchema } from "@/lib/validations/product";
-import { createProduct, listProducts, type ListingFilter } from "@/services/products";
+import {
+  createProduct,
+  listProducts,
+  type ListingFilter,
+} from "@/services/products";
 
 const VALID_FILTERS: ListingFilter[] = ["ALL", "SALE", "RENT", "OUT_OF_STOCK"];
 
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function GET(request: Request) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -17,7 +34,10 @@ export async function GET(request: Request) {
 
     const products = await listProducts({ userId: session.user.id, filter });
 
-    return NextResponse.json({ data: products, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data: products, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -34,6 +54,13 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     await requireActiveSubscription(session.user.id, "CAMERA_SHOP");
@@ -66,7 +93,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to create product" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to create product",
+      },
       { status: 500 },
     );
   }

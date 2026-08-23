@@ -1,9 +1,11 @@
 import { SearchX } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/cards/product-card";
 import { ShopFilters } from "@/components/shop/shop-filters";
 import { Button } from "@/components/ui/button";
+import { features } from "@/lib/features";
 import { searchProducts } from "@/services/marketplace";
 
 interface ShopPageProps {
@@ -13,15 +15,21 @@ interface ShopPageProps {
 export const metadata = { title: "Camera gear — Fgrapher" };
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
+  if (!features.marketplaceEnabled) {
+    notFound();
+  }
+
   const params = await searchParams;
 
-  const type = params.type === "SALE" || params.type === "RENT" ? params.type : undefined;
+  const type =
+    params.type === "SALE" || params.type === "RENT" ? params.type : undefined;
   const category = params.category?.split(",").filter(Boolean);
   const condition = params.condition?.split(",").filter(Boolean) as
-    | ("NEW" | "LIKE_NEW" | "GOOD" | "FAIR")[]
-    | undefined;
+    ("NEW" | "LIKE_NEW" | "GOOD" | "FAIR")[] | undefined;
   const sort =
-    params.sort === "price_asc" || params.sort === "price_desc" ? params.sort : "newest";
+    params.sort === "price_asc" || params.sort === "price_desc"
+      ? params.sort
+      : "newest";
   const page = params.page ? Number(params.page) : 1;
 
   const result = await searchProducts({
@@ -40,7 +48,11 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   );
 
   const sortLabel =
-    sort === "price_asc" ? "Price: low to high" : sort === "price_desc" ? "Price: high to low" : "Newest";
+    sort === "price_asc"
+      ? "Price: low to high"
+      : sort === "price_desc"
+        ? "Price: high to low"
+        : "Newest";
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pt-8 pb-[72px] sm:px-8">
@@ -60,9 +72,18 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           {result.data.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-20 text-center">
               <SearchX className="size-12 text-text-tertiary" />
-              <p className="text-body-lg font-semibold text-text-primary">No gear found</p>
-              <p className="text-body-md text-text-secondary">Try adjusting your filters.</p>
-              <Button variant="secondary" size="sm" nativeButton={false} render={<Link href="/shop" />}>
+              <p className="text-body-lg font-semibold text-text-primary">
+                No gear found
+              </p>
+              <p className="text-body-md text-text-secondary">
+                Try adjusting your filters.
+              </p>
+              <Button
+                variant="secondary"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/shop" />}
+              >
                 Clear all filters
               </Button>
             </div>

@@ -1,15 +1,20 @@
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
+import { features } from "@/lib/features";
 
 import { ListingsList } from "./listings-list";
 
 export default async function ListingsPage() {
+  if (!features.marketplaceEnabled) {
+    notFound();
+  }
+
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
@@ -39,7 +44,11 @@ export default async function ListingsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <SectionHead title="Listings" actionLabel="Add product" actionHref="/dashboard/listings/new" />
+      <SectionHead
+        title="Listings"
+        actionLabel="Add product"
+        actionHref="/dashboard/listings/new"
+      />
       <ListingsList />
     </div>
   );

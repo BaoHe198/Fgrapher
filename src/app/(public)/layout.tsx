@@ -1,5 +1,6 @@
 import { Footer } from "@/components/layout/footer";
 import { WebNav } from "@/components/layout/web-nav";
+import { features } from "@/lib/features";
 
 export default function PublicLayout({
   children,
@@ -8,7 +9,7 @@ export default function PublicLayout({
 }) {
   return (
     <div className="flex min-h-full flex-col">
-      <WebNav />
+      <WebNav marketplaceEnabled={features.marketplaceEnabled} />
       <main id="main-content" className="flex-1">
         {children}
       </main>

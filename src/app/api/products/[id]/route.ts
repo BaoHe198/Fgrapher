@@ -2,10 +2,22 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 import { productSchema } from "@/lib/validations/product";
 import { deleteProduct, updateProduct } from "@/services/products";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   const { id } = await params;
   const product = await db.product.findUnique({
     where: { id },
@@ -19,10 +31,23 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     );
   }
 
-  return NextResponse.json({ data: product, error: null, message: null }, { status: 200 });
+  return NextResponse.json(
+    { data: product, error: null, message: null },
+    { status: 200 },
+  );
 }
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -61,13 +86,27 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update product" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to update product",
+      },
       { status: 500 },
     );
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -93,7 +132,11 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to delete product" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to delete product",
+      },
       { status: 500 },
     );
   }

@@ -1,4 +1,10 @@
-import { Bookmark, Calendar, MessageCircle, ShoppingBag, Star } from "lucide-react";
+import {
+  Bookmark,
+  Calendar,
+  MessageCircle,
+  ShoppingBag,
+  Star,
+} from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -8,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
 import {
   getCustomerStats,
@@ -23,11 +30,16 @@ import { CheckoutSuccessToast } from "./checkout-success-toast";
 
 function greeting(firstName: string) {
   const hour = new Date().getHours();
-  const timeOfDay = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const timeOfDay =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   return `${timeOfDay}, ${firstName}`;
 }
 
-const ACTIVITY_ICONS = { booking: Calendar, message: MessageCircle, review: Star } as const;
+const ACTIVITY_ICONS = {
+  booking: Calendar,
+  message: MessageCircle,
+  review: Star,
+} as const;
 
 function providerStatCards(stats: ProviderStats) {
   return [
@@ -43,7 +55,10 @@ function customerStatCards(stats: CustomerStats) {
     { label: "Upcoming bookings", value: String(stats.upcomingBookings) },
     { label: "Saved artists", value: String(stats.savedArtists) },
     { label: "Messages", value: String(stats.messages) },
-    { label: "Orders", value: String(stats.orders) },
+    // Hidden while MARKETPLACE_ENABLED=false.
+    ...(features.marketplaceEnabled
+      ? [{ label: "Orders", value: String(stats.orders) }]
+      : []),
   ];
 }
 
@@ -74,9 +89,17 @@ export default async function DashboardPage() {
 
   const hasIncompleteProfile =
     nonCustomerRoles.length > 0 &&
-    !nonCustomerRoles.every((role) => user.profiles.some((profile) => profile.role === role));
+    !nonCustomerRoles.every((role) =>
+      user.profiles.some((profile) => profile.role === role),
+    );
 
-  const completionFields = [user.avatar, user.bio, user.phone, user.location, user.username];
+  const completionFields = [
+    user.avatar,
+    user.bio,
+    user.phone,
+    user.location,
+    user.username,
+  ];
   const completion = Math.round(
     (completionFields.filter(Boolean).length / completionFields.length) * 100,
   );
@@ -85,17 +108,32 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <CheckoutSuccessToast />
+      {/* Subscription checkout redirect toast (?checkout=success) — not
+          marketplace-related despite the filename; dormant while
+          BILLING_ENABLED=false since that Checkout route itself 404s. */}
+      {features.billingEnabled ? <CheckoutSuccessToast /> : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-display-md text-text-primary">{greeting(firstName)}</h1>
-        {isProvider ? <AcceptingBookingsToggle initialValue={user.acceptingBookings} /> : null}
+        <h1 className="text-display-md text-text-primary">
+          {greeting(firstName)}
+        </h1>
+        {isProvider ? (
+          <AcceptingBookingsToggle initialValue={user.acceptingBookings} />
+        ) : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${
+          statCards.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
+        }`}
+      >
         {statCards.map((stat) => (
           <Card key={stat.label} className="flex flex-col gap-1.5">
-            <span className="text-body-sm text-text-secondary">{stat.label}</span>
-            <span className="text-display-md text-text-primary">{stat.value}</span>
+            <span className="text-body-sm text-text-secondary">
+              {stat.label}
+            </span>
+            <span className="text-display-md text-text-primary">
+              {stat.value}
+            </span>
           </Card>
         ))}
       </div>
@@ -106,7 +144,9 @@ export default async function DashboardPage() {
             <span className="text-body-md font-semibold text-text-primary">
               Complete your profile
             </span>
-            <span className="text-body-sm text-text-secondary">{completion}%</span>
+            <span className="text-body-sm text-text-secondary">
+              {completion}%
+            </span>
           </div>
           <Progress value={completion} />
           <Button
@@ -130,24 +170,36 @@ export default async function DashboardPage() {
             ) : (
               <Bookmark className="size-10 text-text-tertiary" />
             )}
-            <p className="text-body-md font-semibold text-text-primary">No activity yet</p>
+            <p className="text-body-md font-semibold text-text-primary">
+              No activity yet
+            </p>
             <Button
               variant="secondary"
               size="sm"
               nativeButton={false}
-              render={<Link href={isProvider ? "/dashboard/portfolio" : "/browse"} />}
+              render={
+                <Link href={isProvider ? "/dashboard/portfolio" : "/browse"} />
+              }
             >
               {isProvider ? "Build your portfolio" : "Browse artists"}
             </Button>
           </Card>
         ) : (
-          <Card padding={false} className="flex flex-col divide-y divide-border-subtle">
+          <Card
+            padding={false}
+            className="flex flex-col divide-y divide-border-subtle"
+          >
             {activity.map((item) => {
               const Icon = ACTIVITY_ICONS[item.type];
               return (
-                <div key={item.id} className="flex items-center gap-3 px-5 py-3.5">
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 px-5 py-3.5"
+                >
                   <Icon className="size-4 shrink-0 text-text-tertiary" />
-                  <span className="flex-1 text-body-md text-text-primary">{item.text}</span>
+                  <span className="flex-1 text-body-md text-text-primary">
+                    {item.text}
+                  </span>
                   <span className="text-body-sm text-text-tertiary">
                     {formatRelativeTime(item.timestamp)}
                   </span>

@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { LogoFull } from "@/components/brand/logo-full";
+import { features } from "@/lib/features";
 
 const DISCOVER_ROLES = [
   { role: "PHOTOGRAPHER", key: "Photographer" },
@@ -28,6 +29,12 @@ const COMPANY_LINKS = [
 
 export function Footer() {
   const t = useTranslations();
+  const discoverRoles = features.marketplaceEnabled
+    ? DISCOVER_ROLES
+    : DISCOVER_ROLES.filter((r) => r.role !== "CAMERA_SHOP");
+  const providerLinks = features.marketplaceEnabled
+    ? PROVIDER_LINKS
+    : PROVIDER_LINKS.filter((link) => link.labelKey !== "sell");
 
   return (
     <footer className="border-t border-border-subtle bg-bg-surface">
@@ -44,7 +51,7 @@ export function Footer() {
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
               {t("foot.discover")}
             </span>
-            {DISCOVER_ROLES.map(({ role, key }) => (
+            {discoverRoles.map(({ role, key }) => (
               <Link
                 key={role}
                 href={`/browse?role=${role}`}
@@ -59,7 +66,7 @@ export function Footer() {
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
               {t("foot.providers")}
             </span>
-            {PROVIDER_LINKS.map((link) => (
+            {providerLinks.map((link) => (
               <Link
                 key={link.labelKey}
                 href={link.href}

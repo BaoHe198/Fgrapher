@@ -38,7 +38,8 @@ import { cn } from "@/lib/utils";
 const WIDE_BREAKPOINT = 1180;
 
 // Keys are relative to the "nav" namespace — both WebNav and MobileNavSheet
-// scope their t() with useTranslations("nav").
+// scope their t() with useTranslations("nav"). The "shop" entry is spliced
+// out below when MARKETPLACE_ENABLED is off.
 const NAV_LINKS = [
   { href: "/browse", labelKey: "browse" as const, alwaysVisible: true },
   {
@@ -63,7 +64,11 @@ function useIsWide() {
   );
 }
 
-export function WebNav() {
+export function WebNav({
+  marketplaceEnabled,
+}: {
+  marketplaceEnabled: boolean;
+}) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const isWide = useIsWide();
@@ -71,9 +76,12 @@ export function WebNav() {
   const { isAuthenticated } = useUserRoles();
   const unreadMessages = useUnreadMessages();
 
-  const links = isWide
+  const navLinks = marketplaceEnabled
     ? NAV_LINKS
-    : NAV_LINKS.filter((link) => link.alwaysVisible);
+    : NAV_LINKS.filter((link) => link.href !== "/shop");
+  const links = isWide
+    ? navLinks
+    : navLinks.filter((link) => link.alwaysVisible);
 
   return (
     <header
@@ -117,13 +125,15 @@ export function WebNav() {
               ) : (
                 <MessageCircle className="size-5 text-text-secondary" />
               )}
-              {isAuthenticated ? (
-                <CartDrawer />
-              ) : (
-                <Link href="/shop">
-                  <ShoppingBag className="size-5 text-text-secondary" />
-                </Link>
-              )}
+              {marketplaceEnabled ? (
+                isAuthenticated ? (
+                  <CartDrawer />
+                ) : (
+                  <Link href="/shop">
+                    <ShoppingBag className="size-5 text-text-secondary" />
+                  </Link>
+                )
+              ) : null}
             </>
           ) : null}
 
@@ -159,13 +169,21 @@ export function WebNav() {
       {/* Mobile row (<640px) — logo + hamburger, everything else moves into a Sheet */}
       <div className="flex h-[72px] items-center justify-between px-4 sm:hidden">
         <LogoFull />
-        <MobileNavSheet session={session} isAuthenticated={isAuthenticated} />
+        <MobileNavSheet
+          session={session}
+          isAuthenticated={isAuthenticated}
+          marketplaceEnabled={marketplaceEnabled}
+        />
       </div>
     </header>
   );
 }
 
-function UserMenu({ session }: { session: ReturnType<typeof useSession>["data"] }) {
+function UserMenu({
+  session,
+}: {
+  session: ReturnType<typeof useSession>["data"];
+}) {
   const t = useTranslations("nav");
 
   return (
@@ -173,9 +191,14 @@ function UserMenu({ session }: { session: ReturnType<typeof useSession>["data"] 
       <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-gold-500/20">
         <Avatar className="size-[34px]">
           {session?.user?.avatar ? (
-            <AvatarImage src={session.user.avatar} alt={session.user.name ?? ""} />
+            <AvatarImage
+              src={session.user.avatar}
+              alt={session.user.name ?? ""}
+            />
           ) : null}
-          <AvatarFallback>{session?.user?.name?.[0]?.toUpperCase() ?? "?"}</AvatarFallback>
+          <AvatarFallback>
+            {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -189,7 +212,10 @@ function UserMenu({ session }: { session: ReturnType<typeof useSession>["data"] 
           {t("billing")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/" })}>
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => signOut({ callbackUrl: "/" })}
+        >
           {t("signout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -200,13 +226,18 @@ function UserMenu({ session }: { session: ReturnType<typeof useSession>["data"] 
 function MobileNavSheet({
   session,
   isAuthenticated,
+  marketplaceEnabled,
 }: {
   session: ReturnType<typeof useSession>["data"];
   isAuthenticated: boolean;
+  marketplaceEnabled: boolean;
 }) {
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const navLinks = marketplaceEnabled
+    ? NAV_LINKS
+    : NAV_LINKS.filter((link) => link.href !== "/shop");
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -225,7 +256,7 @@ function MobileNavSheet({
         </SheetHeader>
 
         <nav className="flex flex-col gap-1 p-4">
-          {NAV_LINKS.map((link) => {
+          {navLinks.map((link) => {
             const isActive = pathname === link.href.split("?")[0];
             return (
               <Link

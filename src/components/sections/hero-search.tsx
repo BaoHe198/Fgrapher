@@ -18,12 +18,19 @@ const ROLE_TO_ENUM: Record<string, Role> = {
   Model: "MODEL",
 };
 
-export function HeroSearch() {
+export function HeroSearch({
+  marketplaceEnabled,
+}: {
+  marketplaceEnabled: boolean;
+}) {
   const t = useTranslations();
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
+  const roleKeys = Object.keys(ROLE_TO_ENUM).filter(
+    (roleKey) => marketplaceEnabled || ROLE_TO_ENUM[roleKey] !== "CAMERA_SHOP",
+  );
 
   const onSearch = () => {
     const params = new URLSearchParams();
@@ -61,11 +68,13 @@ export function HeroSearch() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {Object.keys(ROLE_TO_ENUM).map((roleKey) => (
+        {roleKeys.map((roleKey) => (
           <Tag
             key={roleKey}
             selected={selectedRole === roleKey}
-            onClick={() => setSelectedRole((prev) => (prev === roleKey ? null : roleKey))}
+            onClick={() =>
+              setSelectedRole((prev) => (prev === roleKey ? null : roleKey))
+            }
           >
             {t(`role.${roleKey}`)}
           </Tag>

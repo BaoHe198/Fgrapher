@@ -1,7 +1,14 @@
+import { notFound } from "next/navigation";
+
 import { ProductForm } from "@/components/forms/product-form";
 import { SubscriptionGate } from "@/components/subscription-gate";
+import { features } from "@/lib/features";
 
 export default function NewProductPage() {
+  if (!features.marketplaceEnabled) {
+    notFound();
+  }
+
   return (
     <div className="flex max-w-xl flex-col gap-5">
       <h1 className="text-display-md text-text-primary">Add product</h1>

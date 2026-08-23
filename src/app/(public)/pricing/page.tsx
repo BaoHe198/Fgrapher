@@ -13,6 +13,7 @@ export default function PricingPage() {
       monthlyPrices={rolePricesVnd("month")}
       yearlyPrices={rolePricesVnd("year")}
       billingEnabled={features.billingEnabled}
+      marketplaceEnabled={features.marketplaceEnabled}
     />
   );
 }

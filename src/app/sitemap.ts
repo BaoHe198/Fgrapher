@@ -2,11 +2,11 @@ import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
+import { features } from "@/lib/features";
 
 const STATIC_ROUTES = [
   "",
   "/browse",
-  "/shop",
   "/pricing",
   "/about",
   "/help",
@@ -20,16 +20,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const [profiles, products] = await Promise.all([
     db.profile.findMany({
-      where: { isPublished: true, role: { in: PAID_ROLES }, user: { username: { not: null } } },
+      where: {
+        isPublished: true,
+        role: { in: PAID_ROLES },
+        user: { username: { not: null } },
+      },
       select: { updatedAt: true, user: { select: { username: true } } },
     }),
-    db.product.findMany({
-      where: { isActive: true, deletedAt: null },
-      select: { id: true, updatedAt: true },
-    }),
+    // Marketplace product pages 404 while MARKETPLACE_ENABLED=false —
+    // listing them here would tell search engines about URLs that don't
+    // resolve.
+    features.marketplaceEnabled
+      ? db.product.findMany({
+          where: { isActive: true, deletedAt: null },
+          select: { id: true, updatedAt: true },
+        })
+      : Promise.resolve([]),
   ]);
 
-  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((path) => ({
+  const staticRoutes = features.marketplaceEnabled
+    ? [...STATIC_ROUTES, "/shop"]
+    : STATIC_ROUTES;
+  const staticEntries: MetadataRoute.Sitemap = staticRoutes.map((path) => ({
     url: `${baseUrl}${path}`,
     changeFrequency: path === "" ? "daily" : "weekly",
     priority: path === "" ? 1 : 0.7,

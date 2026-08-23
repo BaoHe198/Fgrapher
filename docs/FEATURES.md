@@ -6,6 +6,23 @@ before the Model role is added (see `docs/guides/fgrapher-prompts-batch-2.md`
 for why this document is deliberately generated at this point in the
 build).
 
+## Feature flags — what's live right now
+
+Three flags in `src/lib/env.ts`/`src/lib/features.ts`, all default `false`.
+Code behind a disabled flag is **not deleted** — it's exactly what's
+described below, kept dormant. See `docs/MVP_SCOPE.md` and CLAUDE.md's
+"Ràng buộc bắt buộc" for the full reasoning.
+
+| Flag                  | Status  | Why off                                                                                                                                                                                                                                                                                                                            |
+| --------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BILLING_ENABLED`     | **off** | Stripe doesn't support Vietnam-registered merchant accounts. Plans are assigned manually (§2).                                                                                                                                                                                                                                     |
+| `MARKETPLACE_ENABLED` | **off** | Out of MVP scope — see `docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md` Prompt B6. `/shop`, `/cart`, `/checkout`, listings/orders dashboard pages, and every `products`/`shop-products`/`cart`/`orders` API route return 404; the Camera Shop role is hidden from registration, `/browse`, pricing, and the landing page (§9). |
+| `SOCIAL_FEED_ENABLED` | **off** | Out of MVP scope, same source. Hides the Follow button/count and 404s `/api/follows*`; `Post`/`Like`/`Comment` were never wired to any UI or API to begin with, flag or no flag (§9a).                                                                                                                                             |
+
+Flipping a flag back to `true` (env var, not code) re-enables everything
+described in this document for that feature — nothing needs to be
+un-commented or rebuilt.
+
 ## 1. Accounts and roles
 
 **Who can use it:** everyone.
@@ -98,13 +115,31 @@ in search, though the UI encourages filling it in.
 `ProfileMedia` rows (images or videos) attach to a `Profile`, uploaded
 directly from the browser to Cloudinary via a short-lived signed upload
 (`/api/upload/signature`, `lib/cloudinary.ts`) — the app server never
-proxies the file bytes. **No enforced upload count cap exists in the
-code** — this matches the "Unlimited photo/video uploads" line on the
-pricing page (`pricing-content.tsx`); it is a real product decision, not an
-oversight. Ordering is drag-and-drop (`@dnd-kit`, `/api/portfolio/reorder`,
-persisted as each row's `order` integer). Deletion removes the DB row; the
-Cloudinary asset is removed via `deleteCloudinaryAsset` using the stored
-`publicId`.
+proxies the file bytes. The upload signature bakes in an incoming
+`fl_strip_profile` transformation, so EXIF/GPS metadata is stripped from
+the stored asset itself, not just the delivered view of it. Upload is
+capped per role's `maxPortfolioImages` (`lib/constants/plans.ts`, 30
+today for every role) — the pricing page's "Unlimited uploads" copy
+predates this and should be corrected. A rights-confirmation checkbox
+("I confirm I have the rights to use these images...") is required on
+every upload, unticked by default; the server stamps
+`rightsConfirmedAt` itself. Ordering is drag-and-drop (`@dnd-kit`,
+`/api/portfolio/reorder`, persisted as each row's `order` integer).
+Deletion removes the DB row; the Cloudinary asset is removed via
+`deleteCloudinaryAsset` using the stored `publicId`.
+
+**Moderation:** every upload starts `moderationStatus: PENDING` and is
+run through `services/moderation.ts`'s `contentScanner` (currently
+`MockScanner`, which always defers to human review — swap the one
+`contentScanner` assignment to plug in a real scanner later). Only
+`APPROVED` media is ever returned to public viewers (`public-profile.ts`,
+`search.ts`); the owner's own dashboard view is unfiltered and shows a
+Pending/Rejected badge. A profile can't be published (`isPublished:
+true`) without at least one `APPROVED` photo, on top of the identity-
+verification requirement (§3). Admins review the queue at
+`/admin/moderation` (bulk approve/reject, keyboard shortcuts, 24h SLA
+badge); a scanner-flagged (`AUTO_REJECTED`) upload adds a strike to
+`User.violationPoints`, auto-suspending the account at 3 strikes.
 
 ## 5. Search and discovery
 
@@ -221,6 +256,13 @@ A}`) — either party blocking stops messages both ways, not just from the
 
 ## 9. Marketplace (Camera Shop)
 
+**⚠️ Currently hidden (`MARKETPLACE_ENABLED=false`, see the flags table
+above):** every page and API route this section describes returns
+404/not-found, the Camera Shop role is unselectable at registration and
+filtered out of `/browse`, pricing, the landing page, and site
+navigation. Everything below describes the real, fully-built flow as it
+exists in code — just dormant, not deleted.
+
 **Who can use it:** Camera Shop role lists/manages; any authenticated user
 buys/rents.
 
@@ -249,6 +291,25 @@ FromCheckout` groups cart items by `product.userId`) — this is also
   `DepositStatus` (`HELD` → `REFUNDED` or `DEDUCTED`), set explicitly by
   the shop via `markRentalReturned` — there is no automatic
   deposit-refund trigger; a shop must mark a rental returned.
+
+## 9a. Social feed (Follow)
+
+**⚠️ Currently hidden (`SOCIAL_FEED_ENABLED=false`, see the flags table
+above):** `/api/follows` and `/api/follows/status`'s follow lookup 404/
+no-op; the Follow button and follower count are hidden from
+`ProfileActions` on public profiles.
+
+Of the four social-feed models in the schema (`Post`, `Like`, `Comment`,
+`Follow`), only `Follow` was ever actually wired to a UI or API —
+`Post`/`Like`/`Comment` have zero application code touching them (no
+routes, no service functions), independent of this flag. Following is a
+simple one-directional `Follow` row (`followerId`/`followingId`) with no
+notification currently sent on follow (the `NEW_FOLLOWER` `NotificationType`
+and its `newFollower` preference key exist but nothing calls `notify()`
+with that type). `/api/follows/status` also serves the **unrelated,
+always-on** "Save profile" bookmark state (`SavedProfile` — a different,
+in-scope feature) in the same response, so that endpoint itself is never
+404'd wholesale — only the follow half of it goes inert.
 
 ## 10. Reviews
 
@@ -322,18 +383,22 @@ selectable at registration, granted only via `scripts/make-admin.ts`.
 
 Extracted from code, not assumption. Cross-checked for duplication.
 
-| Rule                                      | Value                                    | Source                                                                                                                                                                                                                                                                                                                    |
-| ----------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Minimum booking notice                    | 24 hours                                 | `services/bookings.ts` `MIN_NOTICE_HOURS`, independently re-declared (same value) in `services/availability.ts` `MIN_NOTICE_HOURS` — **duplicated in two places with the same value today; a future change to one and not the other would silently desync booking creation from the availability calendar it's based on** |
-| Booking cancellation notice               | **none enforced**                        | `updateBookingStatus` allows `CANCELLED` from `PENDING`/`CONFIRMED` with no time-based check — flagged because most booking platforms have one; confirm this is intentional                                                                                                                                               |
-| Review submission window                  | 30 days after booking completion         | `services/reviews.ts` `REVIEW_WINDOW_DAYS`                                                                                                                                                                                                                                                                                |
-| Review edit window                        | 7 days after posting                     | `services/reviews.ts` `EDIT_WINDOW_DAYS`                                                                                                                                                                                                                                                                                  |
-| Review response edit window               | 24 hours after posting the response      | `services/reviews.ts` `RESPONSE_EDIT_WINDOW_HOURS` — same numeric value as the booking-notice rule above but an unrelated concept; not a real duplicate, flagged only so the two aren't confused when grepping for "24"                                                                                                   |
-| Subscription trial length                 | 14 days                                  | `lib/stripe.ts` `createCheckoutSession` (`trial_period_days: 14`)                                                                                                                                                                                                                                                         |
-| Subscription payment-failure grace period | 7 days                                   | `services/subscription.ts` `GRACE_PERIOD_DAYS`                                                                                                                                                                                                                                                                            |
-| Yearly billing discount                   | 20% off (monthly × 12 × 0.8)             | `lib/constants/plans.ts` `YEARLY_DISCOUNT`                                                                                                                                                                                                                                                                                |
-| Portfolio upload limit                    | none enforced                            | matches the "Unlimited uploads" pricing copy — intentional                                                                                                                                                                                                                                                                |
-| Booking reference-image attachments       | max 5                                    | `lib/validations/booking.ts` (`referenceImages: z.array(...).max(5)`)                                                                                                                                                                                                                                                     |
-| Marketplace cart line quantity            | max 99                                   | `lib/validations/marketplace.ts`                                                                                                                                                                                                                                                                                          |
-| API rate limiting                         | **none exists anywhere in the codebase** | no rate-limit library/middleware found — every route is only gated by auth, not request volume                                                                                                                                                                                                                            |
-| Booking availability slot granularity     | 60 minutes                               | `services/availability.ts` `SLOT_MINUTES`                                                                                                                                                                                                                                                                                 |
+| Rule                                       | Value                                    | Source                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Minimum booking notice                     | 24 hours                                 | `services/bookings.ts` `MIN_NOTICE_HOURS`, independently re-declared (same value) in `services/availability.ts` `MIN_NOTICE_HOURS` — **duplicated in two places with the same value today; a future change to one and not the other would silently desync booking creation from the availability calendar it's based on** |
+| Booking cancellation notice                | **none enforced**                        | `updateBookingStatus` allows `CANCELLED` from `PENDING`/`CONFIRMED` with no time-based check — flagged because most booking platforms have one; confirm this is intentional                                                                                                                                               |
+| Review submission window                   | 30 days after booking completion         | `services/reviews.ts` `REVIEW_WINDOW_DAYS`                                                                                                                                                                                                                                                                                |
+| Review edit window                         | 7 days after posting                     | `services/reviews.ts` `EDIT_WINDOW_DAYS`                                                                                                                                                                                                                                                                                  |
+| Review response edit window                | 24 hours after posting the response      | `services/reviews.ts` `RESPONSE_EDIT_WINDOW_HOURS` — same numeric value as the booking-notice rule above but an unrelated concept; not a real duplicate, flagged only so the two aren't confused when grepping for "24"                                                                                                   |
+| Subscription trial length                  | 14 days                                  | `lib/stripe.ts` `createCheckoutSession` (`trial_period_days: 14`)                                                                                                                                                                                                                                                         |
+| Subscription payment-failure grace period  | 7 days                                   | `services/subscription.ts` `GRACE_PERIOD_DAYS`                                                                                                                                                                                                                                                                            |
+| Yearly billing discount                    | 20% off (monthly × 12 × 0.8)             | `lib/constants/plans.ts` `YEARLY_DISCOUNT`                                                                                                                                                                                                                                                                                |
+| Portfolio upload limit                     | 30 per role                              | `lib/constants/plans.ts` `maxPortfolioImages` — pricing page's "Unlimited uploads" copy is now stale, not yet corrected                                                                                                                                                                                                   |
+| Media moderation SLA (admin review target) | 24 hours                                 | `lib/constants/index.ts` `MEDIA_MODERATION_SLA_HOURS`                                                                                                                                                                                                                                                                     |
+| Content-violation auto-suspend threshold   | 3 strikes                                | `services/moderation.ts` `SUSPENSION_THRESHOLD`                                                                                                                                                                                                                                                                           |
+| KYC document retention after approval      | 90 days, then purged                     | `services/admin.ts` `KYC_PURGE_AFTER_DAYS`, cron `/api/cron/purge-kyc-documents`                                                                                                                                                                                                                                          |
+| Data-request (export/deletion) SLA         | 30 days                                  | `lib/constants/index.ts` `DATA_REQUEST_SLA_DAYS`                                                                                                                                                                                                                                                                          |
+| Booking reference-image attachments        | max 5                                    | `lib/validations/booking.ts` (`referenceImages: z.array(...).max(5)`)                                                                                                                                                                                                                                                     |
+| Marketplace cart line quantity             | max 99                                   | `lib/validations/marketplace.ts`                                                                                                                                                                                                                                                                                          |
+| API rate limiting                          | **none exists anywhere in the codebase** | no rate-limit library/middleware found — every route is only gated by auth, not request volume                                                                                                                                                                                                                            |
+| Booking availability slot granularity      | 60 minutes                               | `services/availability.ts` `SLOT_MINUTES`                                                                                                                                                                                                                                                                                 |

@@ -13,14 +13,23 @@ import { login } from "./helpers/auth";
 // message, same as the subscribe flow), and the fulfillment lifecycle on a
 // directly-seeded PENDING order standing in for what a completed payment
 // would have produced.
-test("customer reaches the Stripe checkout handoff for a product", async ({ page }) => {
+test("customer reaches the Stripe checkout handoff for a product", async ({
+  page,
+}) => {
+  test.skip(
+    process.env.MARKETPLACE_ENABLED !== "true",
+    "Marketplace is hidden behind MARKETPLACE_ENABLED (default false) — see CLAUDE.md's MVP-scope section.",
+  );
+
   const customer = await createUser({
     email: `buyer.${Date.now()}@e2e.test`,
     username: `buyer${Date.now()}`,
     firstName: "Buy",
     lastName: "Er",
   });
-  const product = await db.product.findFirstOrThrow({ where: { name: "Fixture Mirrorless Camera" } });
+  const product = await db.product.findFirstOrThrow({
+    where: { name: "Fixture Mirrorless Camera" },
+  });
 
   await login(page, customer.email, TEST_PASSWORD);
   await page.goto(`/shop/${product.id}`);
@@ -31,22 +40,38 @@ test("customer reaches the Stripe checkout handoff for a product", async ({ page
 
   await expect(page).toHaveURL(/\/checkout/, { timeout: 10_000 });
   await page.getByRole("radio", { name: "Ship to me" }).check();
-  await page.getByRole("checkbox", { name: "I agree to the terms of sale/rental" }).check();
+  await page
+    .getByRole("checkbox", { name: "I agree to the terms of sale/rental" })
+    .check();
   await page.getByRole("button", { name: "Continue to payment" }).click();
-  await expect(page.getByText("Payments aren't set up in this environment yet.")).toBeVisible({
+  await expect(
+    page.getByText("Payments aren't set up in this environment yet."),
+  ).toBeVisible({
     timeout: 10_000,
   });
 });
 
-test("shop fulfills a seeded order through to delivered", async ({ page, browser }) => {
+test("shop fulfills a seeded order through to delivered", async ({
+  page,
+  browser,
+}) => {
+  test.skip(
+    process.env.MARKETPLACE_ENABLED !== "true",
+    "Marketplace is hidden behind MARKETPLACE_ENABLED (default false) — see CLAUDE.md's MVP-scope section.",
+  );
+
   const customer = await createUser({
     email: `orderowner.${Date.now()}@e2e.test`,
     username: `orderowner${Date.now()}`,
     firstName: "Order",
     lastName: "Owner",
   });
-  const shop = await db.user.findUniqueOrThrow({ where: { username: "fixtureshop" } });
-  const product = await db.product.findFirstOrThrow({ where: { name: "Fixture Mirrorless Camera" } });
+  const shop = await db.user.findUniqueOrThrow({
+    where: { username: "fixtureshop" },
+  });
+  const product = await db.product.findFirstOrThrow({
+    where: { name: "Fixture Mirrorless Camera" },
+  });
 
   const order = await seedPendingOrder({
     customerId: customer.id,
@@ -70,14 +95,19 @@ test("shop fulfills a seeded order through to delivered", async ({ page, browser
   await page.getByRole("button", { name: "Mark as shipped" }).click();
   await page.getByLabel("Carrier").fill("GHTK");
   await page.getByLabel("Tracking number").fill("E2E123456");
-  await page.getByRole("dialog").getByRole("button", { name: "Mark as shipped" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Mark as shipped" })
+    .click();
   await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10_000 });
   await expect(statusBadge).toHaveText("Shipped", { timeout: 10_000 });
 
   await page.getByRole("button", { name: "Mark as delivered" }).click();
   await expect(statusBadge).toHaveText("Delivered", { timeout: 10_000 });
 
-  const finalOrder = await db.order.findUniqueOrThrow({ where: { id: order.id } });
+  const finalOrder = await db.order.findUniqueOrThrow({
+    where: { id: order.id },
+  });
   expect(finalOrder.status).toBe("DELIVERED");
   expect(finalOrder.trackingCarrier).toBe("GHTK");
   expect(finalOrder.trackingNumber).toBe("E2E123456");
@@ -86,8 +116,11 @@ test("shop fulfills a seeded order through to delivered", async ({ page, browser
   const customerPage = await customerContext.newPage();
   await login(customerPage, customer.email, TEST_PASSWORD);
   await customerPage.goto(`/dashboard/orders/${order.id}`);
-  await expect(customerPage.locator('[data-slot="badge"]').first()).toHaveText("Delivered", {
-    timeout: 10_000,
-  });
+  await expect(customerPage.locator('[data-slot="badge"]').first()).toHaveText(
+    "Delivered",
+    {
+      timeout: 10_000,
+    },
+  );
   await customerContext.close();
 });

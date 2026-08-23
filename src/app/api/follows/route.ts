@@ -3,10 +3,19 @@ import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 
 const followSchema = z.object({ userId: z.string().min(1) });
 
+// Dormant while SOCIAL_FEED_ENABLED=false — see CLAUDE.md.
 export async function POST(request: Request) {
+  if (!features.socialFeedEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const body = await request.json();
@@ -19,20 +28,30 @@ export async function POST(request: Request) {
     }
     if (parsed.data.userId === session.user.id) {
       return NextResponse.json(
-        { data: null, error: "invalid_target", message: "You cannot follow yourself" },
+        {
+          data: null,
+          error: "invalid_target",
+          message: "You cannot follow yourself",
+        },
         { status: 400 },
       );
     }
 
     await db.follow.upsert({
       where: {
-        followerId_followingId: { followerId: session.user.id, followingId: parsed.data.userId },
+        followerId_followingId: {
+          followerId: session.user.id,
+          followingId: parsed.data.userId,
+        },
       },
       create: { followerId: session.user.id, followingId: parsed.data.userId },
       update: {},
     });
 
-    return NextResponse.json({ data: null, error: null, message: "Followed" }, { status: 201 });
+    return NextResponse.json(
+      { data: null, error: null, message: "Followed" },
+      { status: 201 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -48,6 +67,13 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  if (!features.socialFeedEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -63,7 +89,10 @@ export async function DELETE(request: Request) {
       where: { followerId: session.user.id, followingId: userId },
     });
 
-    return NextResponse.json({ data: null, error: null, message: "Unfollowed" }, { status: 200 });
+    return NextResponse.json(
+      { data: null, error: null, message: "Unfollowed" },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ProductForm } from "@/components/forms/product-form";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 import type { PRODUCT_CATEGORIES } from "@/lib/validations/product";
 
 export default async function EditProductPage({
@@ -10,6 +11,10 @@ export default async function EditProductPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  if (!features.marketplaceEnabled) {
+    notFound();
+  }
+
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
@@ -41,7 +46,10 @@ export default async function EditProductPage({
           condition: product.condition,
           stock: product.stock,
           isActive: product.isActive,
-          images: product.images.map((img) => ({ url: img.url, publicId: img.publicId ?? undefined })),
+          images: product.images.map((img) => ({
+            url: img.url,
+            publicId: img.publicId ?? undefined,
+          })),
         }}
       />
     </div>

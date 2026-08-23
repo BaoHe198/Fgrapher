@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { features } from "@/lib/features";
 import { getOrderDetail } from "@/services/orders";
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -16,7 +28,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       );
     }
 
-    return NextResponse.json({ data: order, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data: order, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(

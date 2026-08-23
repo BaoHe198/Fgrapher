@@ -18,9 +18,11 @@ import { FilterSidebar } from "./filter-sidebar";
 export function MobileFilterSheet({
   roleCounts,
   activeCount,
+  marketplaceEnabled,
 }: {
   roleCounts: Record<string, number>;
   activeCount: number;
+  marketplaceEnabled: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -41,7 +43,10 @@ export function MobileFilterSheet({
           <SheetDescription>Browse filters</SheetDescription>
         </SheetHeader>
         <div className="p-4">
-          <FilterSidebar roleCounts={roleCounts} />
+          <FilterSidebar
+            roleCounts={roleCounts}
+            marketplaceEnabled={marketplaceEnabled}
+          />
         </div>
       </SheetContent>
     </Sheet>

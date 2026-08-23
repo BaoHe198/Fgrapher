@@ -13,7 +13,13 @@ import { ProfileActions } from "@/components/profile/profile-actions";
 import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
 import { EXPERIENCE_LEVEL_LABELS, ROLE_LABELS } from "@/lib/constants";
-import { getProfileReviews, getPublicProfileUser, getShopProducts, incrementProfileView } from "@/services/public-profile";
+import { features } from "@/lib/features";
+import {
+  getProfileReviews,
+  getPublicProfileUser,
+  getShopProducts,
+  incrementProfileView,
+} from "@/services/public-profile";
 
 import { ProfileInteractive } from "./profile-interactive";
 
@@ -41,13 +47,17 @@ const loadProfile = cache(async (username: string) => {
   return user;
 });
 
-export async function generateMetadata({ params, searchParams }: ProfilePageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: ProfilePageProps): Promise<Metadata> {
   const { username } = await params;
   const user = await loadProfile(username);
   if (!user) return {};
 
   const { role: roleParam } = await searchParams;
-  const activeProfile = user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
+  const activeProfile =
+    user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
   const name = activeProfile.displayName ?? user.name ?? username;
   const bio = activeProfile.description ?? "";
 
@@ -62,7 +72,10 @@ export async function generateMetadata({ params, searchParams }: ProfilePageProp
   };
 }
 
-export default async function PublicProfilePage({ params, searchParams }: ProfilePageProps) {
+export default async function PublicProfilePage({
+  params,
+  searchParams,
+}: ProfilePageProps) {
   const { username } = await params;
   const user = await loadProfile(username);
   if (!user) {
@@ -70,44 +83,72 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
   }
 
   const { role: roleParam } = await searchParams;
-  const activeProfile = user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
+  const activeProfile =
+    user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
   incrementProfileView(activeProfile.id);
 
   const [reviews, products, followerCount] = await Promise.all([
     getProfileReviews(user.id),
-    getShopProducts(user.id),
-    db.follow.count({ where: { followingId: user.id } }),
+    features.marketplaceEnabled
+      ? getShopProducts(user.id)
+      : Promise.resolve([]),
+    features.socialFeedEnabled
+      ? db.follow.count({ where: { followingId: user.id } })
+      : Promise.resolve(0),
   ]);
 
   const displayName = activeProfile.displayName ?? user.name ?? username;
   const firstName = user.firstName ?? displayName.split(" ")[0];
   const isVerified =
-    user.roles.find((r) => r.role === activeProfile.role)?.verificationStatus === "VERIFIED";
+    user.roles.find((r) => r.role === activeProfile.role)
+      ?.verificationStatus === "VERIFIED";
   // Never expose the exact date of birth beyond this computed range — see
   // lib/age-gate.ts's comment on why a range, not an age, is public.
   const ageRangeLabel =
-    activeProfile.role === "MODEL" && user.dateOfBirth ? getAgeRangeLabel(user.dateOfBirth) : null;
+    activeProfile.role === "MODEL" && user.dateOfBirth
+      ? getAgeRangeLabel(user.dateOfBirth)
+      : null;
   const modelDetails =
     activeProfile.role === "MODEL"
       ? ([
-          activeProfile.height ? { label: "Height", value: `${activeProfile.height} cm` } : null,
+          activeProfile.height
+            ? { label: "Height", value: `${activeProfile.height} cm` }
+            : null,
           activeProfile.experienceLevel
-            ? { label: "Experience", value: EXPERIENCE_LEVEL_LABELS[activeProfile.experienceLevel] }
+            ? {
+                label: "Experience",
+                value: EXPERIENCE_LEVEL_LABELS[activeProfile.experienceLevel],
+              }
             : null,
-          activeProfile.travelWilling ? { label: "Travel", value: "Willing to travel" } : null,
+          activeProfile.travelWilling
+            ? { label: "Travel", value: "Willing to travel" }
+            : null,
           activeProfile.agencyRepresented
-            ? { label: "Agency", value: activeProfile.agencyName || "Represented" }
+            ? {
+                label: "Agency",
+                value: activeProfile.agencyName || "Represented",
+              }
             : null,
-          activeProfile.measurements ? { label: "Measurements", value: activeProfile.measurements } : null,
-          activeProfile.hairColor ? { label: "Hair", value: activeProfile.hairColor } : null,
-          activeProfile.eyeColor ? { label: "Eyes", value: activeProfile.eyeColor } : null,
-          activeProfile.shoeSize ? { label: "Shoe size", value: activeProfile.shoeSize } : null,
+          activeProfile.measurements
+            ? { label: "Measurements", value: activeProfile.measurements }
+            : null,
+          activeProfile.hairColor
+            ? { label: "Hair", value: activeProfile.hairColor }
+            : null,
+          activeProfile.eyeColor
+            ? { label: "Eyes", value: activeProfile.eyeColor }
+            : null,
+          activeProfile.shoeSize
+            ? { label: "Shoe size", value: activeProfile.shoeSize }
+            : null,
         ].filter(Boolean) as { label: string; value: string }[])
       : [];
   const offersTfp = activeProfile.services.some((s) => s.price === 0);
   const averageRating =
     reviews.length > 0
-      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      ? (
+          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        ).toFixed(1)
       : "0.0";
 
   const jsonLd = {
@@ -116,7 +157,9 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
     name: displayName,
     image: user.avatar ?? undefined,
     description: activeProfile.description ?? undefined,
-    address: user.location ? { "@type": "PostalAddress", addressLocality: user.location } : undefined,
+    address: user.location
+      ? { "@type": "PostalAddress", addressLocality: user.location }
+      : undefined,
     ...(reviews.length > 0
       ? {
           aggregateRating: {
@@ -137,7 +180,11 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
       <div className="relative h-[280px] w-full">
         {user.coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={user.coverImage} alt="" className="size-full object-cover" />
+          <img
+            src={user.coverImage}
+            alt=""
+            className="size-full object-cover"
+          />
         ) : (
           <MediaPlaceholder tint="green-300" height="100%" />
         )}
@@ -148,29 +195,41 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
           <div className="flex flex-wrap items-end justify-between gap-[18px]">
             <div className="flex items-end gap-[18px]">
               <Avatar className="size-[104px] border-4 border-bg-surface">
-                {user.avatar ? <AvatarImage src={user.avatar} alt={displayName} /> : null}
+                {user.avatar ? (
+                  <AvatarImage src={user.avatar} alt={displayName} />
+                ) : null}
                 <AvatarFallback className="text-heading-lg">
                   {displayName[0]?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
 
               <div className="flex flex-col gap-1.5 pb-2">
-                <h1 className="text-display-md text-text-primary">{displayName}</h1>
+                <h1 className="text-display-md text-text-primary">
+                  {displayName}
+                </h1>
                 <div className="flex flex-wrap items-center gap-2">
                   {user.profiles.length > 1 ? (
                     user.profiles.map((profile) => (
                       <Tag
                         key={profile.id}
                         selected={profile.role === activeProfile.role}
-                        render={<Link href={`/profile/${username}?role=${profile.role}`} />}
+                        render={
+                          <Link
+                            href={`/profile/${username}?role=${profile.role}`}
+                          />
+                        }
                       >
                         {ROLE_LABELS[profile.role]}
                       </Tag>
                     ))
                   ) : (
-                    <Badge variant="accent">{ROLE_LABELS[activeProfile.role]}</Badge>
+                    <Badge variant="accent">
+                      {ROLE_LABELS[activeProfile.role]}
+                    </Badge>
                   )}
-                  <Badge variant={user.acceptingBookings ? "success" : "warning"}>
+                  <Badge
+                    variant={user.acceptingBookings ? "success" : "warning"}
+                  >
                     {user.acceptingBookings ? "Available" : "Booked out"}
                   </Badge>
                   {isVerified ? <Badge variant="accent">Verified</Badge> : null}
@@ -195,6 +254,7 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
               profileId={activeProfile.id}
               initialFollowerCount={followerCount}
               shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/profile/${username}`}
+              socialFeedEnabled={features.socialFeedEnabled}
             />
           </div>
 
@@ -211,7 +271,9 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
                   <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
                     {detail.label}
                   </span>
-                  <span className="text-body-md font-semibold text-text-primary">{detail.value}</span>
+                  <span className="text-body-md font-semibold text-text-primary">
+                    {detail.value}
+                  </span>
                 </div>
               ))}
             </div>
@@ -220,10 +282,16 @@ export default async function PublicProfilePage({ params, searchParams }: Profil
           <ProfileInteractive
             providerId={user.id}
             firstName={firstName}
-            hasGear={user.profiles.some((p) => p.role === "CAMERA_SHOP")}
+            hasGear={
+              features.marketplaceEnabled &&
+              user.profiles.some((p) => p.role === "CAMERA_SHOP")
+            }
             media={activeProfile.media}
             services={activeProfile.services}
-            reviews={reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }))}
+            reviews={reviews.map((r) => ({
+              ...r,
+              createdAt: r.createdAt.toISOString(),
+            }))}
             products={products}
             offersTfp={offersTfp}
           />

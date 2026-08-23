@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { features } from "@/lib/features";
 import { returnRentalSchema } from "@/lib/validations/marketplace";
 import { markRentalReturned, OrderError } from "@/services/orders";
 
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+// Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!features.marketplaceEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -24,7 +36,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       parsed.data.note,
     );
 
-    return NextResponse.json({ data: order, error: null, message: "Rental returned" }, { status: 200 });
+    return NextResponse.json(
+      { data: order, error: null, message: "Rental returned" },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -40,7 +55,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to mark rental returned" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to mark rental returned",
+      },
       { status: 500 },
     );
   }

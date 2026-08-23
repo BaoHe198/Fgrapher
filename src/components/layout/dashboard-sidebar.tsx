@@ -39,9 +39,16 @@ interface NavItem {
   badge?: number;
 }
 
-export function DashboardSidebar({ className }: { className?: string }) {
+export function DashboardSidebar({
+  className,
+  marketplaceEnabled,
+}: {
+  className?: string;
+  marketplaceEnabled: boolean;
+}) {
   const pathname = usePathname();
-  const { roles, canUpload, canSell, canReceiveBookings, isCustomerOnly } = useUserRoles();
+  const { roles, canUpload, canSell, canReceiveBookings, isCustomerOnly } =
+    useUserRoles();
   const unreadMessages = useUnreadMessages();
 
   const items: NavItem[] = [
@@ -53,22 +60,37 @@ export function DashboardSidebar({ className }: { className?: string }) {
     },
     ...(canReceiveBookings
       ? [
-          { href: "/dashboard/calendar", label: "Calendar", icon: CalendarDays },
+          {
+            href: "/dashboard/calendar",
+            label: "Calendar",
+            icon: CalendarDays,
+          },
           { href: "/dashboard/reviews", label: "Reviews", icon: Star },
         ]
       : []),
     ...(canUpload
       ? [{ href: "/dashboard/portfolio", label: "Portfolio", icon: ImageIcon }]
       : []),
-    ...(canSell
+    ...(marketplaceEnabled && canSell
       ? [
           { href: "/dashboard/listings", label: "Listings", icon: ShoppingBag },
-          { href: "/dashboard/shop-orders", label: "Shop orders", icon: Package },
+          {
+            href: "/dashboard/shop-orders",
+            label: "Shop orders",
+            icon: Package,
+          },
         ]
       : []),
-    { href: "/dashboard/orders", label: "My orders", icon: Package },
+    ...(marketplaceEnabled
+      ? [{ href: "/dashboard/orders", label: "My orders", icon: Package }]
+      : []),
     { href: "/saved", label: "Saved", icon: Bookmark },
-    { href: "/dashboard/messages", label: "Messages", icon: MessageCircle, badge: unreadMessages },
+    {
+      href: "/dashboard/messages",
+      label: "Messages",
+      icon: MessageCircle,
+      badge: unreadMessages,
+    },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
@@ -80,7 +102,8 @@ export function DashboardSidebar({ className }: { className?: string }) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
       {items.map(({ href, label, icon: Icon, badge }) => {
-        const isActive = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+        const isActive =
+          href === "/dashboard" ? pathname === href : pathname.startsWith(href);
         return (
           <Link
             key={href}
@@ -119,7 +142,11 @@ export function DashboardSidebar({ className }: { className?: string }) {
   );
 }
 
-export function MobileDashboardSidebar() {
+export function MobileDashboardSidebar({
+  marketplaceEnabled,
+}: {
+  marketplaceEnabled: boolean;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -138,7 +165,7 @@ export function MobileDashboardSidebar() {
           <SheetDescription>Dashboard navigation</SheetDescription>
         </SheetHeader>
         <div className="p-4" onClick={() => setOpen(false)}>
-          <DashboardSidebar />
+          <DashboardSidebar marketplaceEnabled={marketplaceEnabled} />
         </div>
       </SheetContent>
     </Sheet>

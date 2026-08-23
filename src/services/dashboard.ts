@@ -2,6 +2,7 @@ import type { Role } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
+import { features } from "@/lib/features";
 
 export interface ProviderStats {
   pending: number;
@@ -18,7 +19,9 @@ export interface CustomerStats {
 }
 
 export function isProviderRoleSet(roles: Role[]) {
-  return roles.some((role) => PROVIDER_ROLES.includes(role) || role === "CAMERA_SHOP");
+  return roles.some(
+    (role) => PROVIDER_ROLES.includes(role) || role === "CAMERA_SHOP",
+  );
 }
 
 export async function getProviderStats(userId: string): Promise<ProviderStats> {
@@ -29,10 +32,18 @@ export async function getProviderStats(userId: string): Promise<ProviderStats> {
   const [pending, confirmed, completedThisMonth, profiles] = await Promise.all([
     db.booking.count({ where: { providerId: userId, status: "PENDING" } }),
     db.booking.count({
-      where: { providerId: userId, status: "CONFIRMED", date: { gte: startOfMonth } },
+      where: {
+        providerId: userId,
+        status: "CONFIRMED",
+        date: { gte: startOfMonth },
+      },
     }),
     db.booking.findMany({
-      where: { providerId: userId, status: "COMPLETED", completedAt: { gte: startOfMonth } },
+      where: {
+        providerId: userId,
+        status: "COMPLETED",
+        completedAt: { gte: startOfMonth },
+      },
       select: { totalPrice: true },
     }),
     db.profile.findMany({ where: { userId }, select: { viewCount: true } }),
@@ -41,7 +52,10 @@ export async function getProviderStats(userId: string): Promise<ProviderStats> {
   return {
     pending,
     confirmed,
-    earnings: completedThisMonth.reduce((sum, b) => sum + (b.totalPrice ?? 0), 0),
+    earnings: completedThisMonth.reduce(
+      (sum, b) => sum + (b.totalPrice ?? 0),
+      0,
+    ),
     views: profiles.reduce((sum, p) => sum + p.viewCount, 0),
   };
 }
@@ -57,10 +71,19 @@ export async function getCustomerStats(userId: string): Promise<CustomerStats> {
     }),
     db.savedProfile.count({ where: { userId } }),
     db.message.count({ where: { receiverId: userId, readAt: null } }),
-    db.order.count({ where: { customerId: userId } }),
+    // Skipped while MARKETPLACE_ENABLED=false — the dashboard doesn't show
+    // this card at all in that case (see dashboard/page.tsx).
+    features.marketplaceEnabled
+      ? db.order.count({ where: { customerId: userId } })
+      : Promise.resolve(0),
   ]);
 
-  return { upcomingBookings: upcoming, savedArtists, messages: unreadMessages, orders };
+  return {
+    upcomingBookings: upcoming,
+    savedArtists,
+    messages: unreadMessages,
+    orders,
+  };
 }
 
 export interface RecentActivityItem {
@@ -74,7 +97,9 @@ export async function getRecentActivity(
   userId: string,
   isProvider: boolean,
 ): Promise<RecentActivityItem[]> {
-  const bookingWhere = isProvider ? { providerId: userId } : { customerId: userId };
+  const bookingWhere = isProvider
+    ? { providerId: userId }
+    : { customerId: userId };
 
   const [bookings, messages, reviews] = await Promise.all([
     db.booking.findMany({
@@ -125,5 +150,7 @@ export async function getRecentActivity(
     })),
   ];
 
-  return items.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 5);
+  return items
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    .slice(0, 5);
 }
