@@ -5,6 +5,7 @@ import { PAID_ROLES } from "@/lib/constants";
 
 export class ProfileNotVerifiedError extends Error {}
 export class ProfileNotFoundError extends Error {}
+export class ProfileHasNoApprovedMediaError extends Error {}
 
 // The single write path for Profile.isPublished (Prompt B3, VIỆC 4) —
 // every other read site (search.ts, sitemap.ts, this file's own queries
@@ -37,6 +38,18 @@ export async function setProfilePublished(
     );
   }
 
+  if (isPublished) {
+    const approvedMedia = await db.profileMedia.findFirst({
+      where: { profileId: profile.id, moderationStatus: "APPROVED" },
+      select: { id: true },
+    });
+    if (!approvedMedia) {
+      throw new ProfileHasNoApprovedMediaError(
+        "Upload at least one approved portfolio photo before publishing",
+      );
+    }
+  }
+
   return db.profile.update({
     where: { id: profile.id },
     data: { isPublished },
@@ -54,7 +67,14 @@ export async function getPublicProfileUser(username: string) {
         // tab/title order regardless of which profile was created first.
         orderBy: { role: "asc" },
         include: {
-          media: { orderBy: { order: "asc" } },
+          // Prompt B5, VIỆC 5 — public viewers only ever see moderated,
+          // approved media. The owner's own view (dashboard/portfolio)
+          // reads directly via db.profileMedia.findMany with no filter,
+          // deliberately not through this function.
+          media: {
+            where: { moderationStatus: "APPROVED" },
+            orderBy: { order: "asc" },
+          },
           services: { where: { isActive: true } },
         },
       },

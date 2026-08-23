@@ -32,8 +32,8 @@ export default async function PortfolioPage({
           Portfolio is for creative pros
         </p>
         <p className="max-w-sm text-body-md text-text-secondary">
-          Add a paid role — Photographer, Videographer, Make-up Artist, Studio, or Camera
-          Shop — to showcase your work.
+          Add a paid role — Photographer, Videographer, Make-up Artist, Studio,
+          or Camera Shop — to showcase your work.
         </p>
         <Button
           variant="secondary"
@@ -56,7 +56,9 @@ export default async function PortfolioPage({
     return (
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <Camera className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold text-text-primary">Set up your profile first</p>
+        <p className="text-body-lg font-semibold text-text-primary">
+          Set up your profile first
+        </p>
         <p className="max-w-sm text-body-md text-text-secondary">
           Create your provider profile before uploading portfolio media.
         </p>
@@ -73,7 +75,8 @@ export default async function PortfolioPage({
   }
 
   const { profile: profileParam } = await searchParams;
-  const activeProfile = profiles.find((p) => p.role === profileParam) ?? profiles[0];
+  const activeProfile =
+    profiles.find((p) => p.role === profileParam) ?? profiles[0];
 
   const media = await db.profileMedia.findMany({
     where: { profileId: activeProfile.id },
@@ -106,7 +109,14 @@ export default async function PortfolioPage({
         <PortfolioGrid
           key={activeProfile.id}
           profileId={activeProfile.id}
-          initialMedia={media.map((m) => ({ id: m.id, url: m.url, type: m.type, title: m.title }))}
+          initialMedia={media.map((m) => ({
+            id: m.id,
+            url: m.url,
+            type: m.type,
+            title: m.title,
+            moderationStatus: m.moderationStatus,
+            moderationNote: m.moderationNote,
+          }))}
         />
       </SubscriptionGate>
     </div>

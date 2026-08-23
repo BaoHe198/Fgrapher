@@ -1,9 +1,15 @@
-import type { ExperienceLevel, Prisma, ProfileCategory, Role } from "@prisma/client";
+import type {
+  ExperienceLevel,
+  Prisma,
+  ProfileCategory,
+  Role,
+} from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
 
-export type SortOption = "rating" | "price_asc" | "price_desc" | "newest" | "reviews";
+export type SortOption =
+  "rating" | "price_asc" | "price_desc" | "newest" | "reviews";
 
 export interface SearchParams {
   q?: string;
@@ -29,11 +35,27 @@ export interface SearchParams {
 const PAGE_SIZE_DEFAULT = 24;
 
 const PROVIDER_INCLUDE = {
-  user: { select: { id: true, name: true, username: true, avatar: true, location: true } },
-  media: { orderBy: { order: "asc" as const }, take: 3 },
+  user: {
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      avatar: true,
+      location: true,
+    },
+  },
+  // Prompt B5, VIỆC 5 — public search must never surface unmoderated
+  // media, same rule as public-profile.ts's getPublicProfileUser.
+  media: {
+    where: { moderationStatus: "APPROVED" as const },
+    orderBy: { order: "asc" as const },
+    take: 3,
+  },
 };
 
-type ProviderProfile = Prisma.ProfileGetPayload<{ include: typeof PROVIDER_INCLUDE }>;
+type ProviderProfile = Prisma.ProfileGetPayload<{
+  include: typeof PROVIDER_INCLUDE;
+}>;
 
 /**
  * One provider (User) can hold several published Profile rows, one per role
@@ -43,7 +65,10 @@ type ProviderProfile = Prisma.ProfileGetPayload<{ include: typeof PROVIDER_INCLU
  * userId before pagination/sorting, using the lowest priceMin across roles
  * and the union of media/role badges.
  */
-function groupProfilesByUser(profiles: ProviderProfile[], statsByUser: Map<string, { avg: number; count: number }>) {
+function groupProfilesByUser(
+  profiles: ProviderProfile[],
+  statsByUser: Map<string, { avg: number; count: number }>,
+) {
   const byUser = new Map<string, ProviderProfile[]>();
   for (const profile of profiles) {
     const existing = byUser.get(profile.userId);
@@ -61,9 +86,15 @@ function groupProfilesByUser(profiles: ProviderProfile[], statsByUser: Map<strin
     const userProfiles = [...rawUserProfiles].sort(
       (a, b) => PAID_ROLES.indexOf(a.role) - PAID_ROLES.indexOf(b.role),
     );
-    const stats = statsByUser.get(userProfiles[0].userId) ?? { avg: 0, count: 0 };
+    const stats = statsByUser.get(userProfiles[0].userId) ?? {
+      avg: 0,
+      count: 0,
+    };
     const priceMin = userProfiles.reduce<number | null>(
-      (min, p) => (p.priceMin != null && (min === null || p.priceMin < min) ? p.priceMin : min),
+      (min, p) =>
+        p.priceMin != null && (min === null || p.priceMin < min)
+          ? p.priceMin
+          : min,
       null,
     );
     const createdAt = userProfiles.reduce(
@@ -94,18 +125,34 @@ export async function searchProfiles(params: SearchParams) {
 
   const where = {
     isPublished: true,
-    role: { in: params.roles && params.roles.length > 0 ? params.roles : PAID_ROLES },
-    ...(params.city ? { user: { location: { equals: params.city, mode: "insensitive" as const } } } : {}),
+    role: {
+      in: params.roles && params.roles.length > 0 ? params.roles : PAID_ROLES,
+    },
+    ...(params.city
+      ? {
+          user: {
+            location: { equals: params.city, mode: "insensitive" as const },
+          },
+        }
+      : {}),
     ...(params.categories && params.categories.length > 0
       ? { categories: { hasSome: params.categories } }
       : {}),
-    ...(params.minPrice !== undefined ? { priceMax: { gte: params.minPrice } } : {}),
-    ...(params.maxPrice !== undefined ? { priceMin: { lte: params.maxPrice } } : {}),
+    ...(params.minPrice !== undefined
+      ? { priceMax: { gte: params.minPrice } }
+      : {}),
+    ...(params.maxPrice !== undefined
+      ? { priceMin: { lte: params.maxPrice } }
+      : {}),
     ...(params.heightMin !== undefined || params.heightMax !== undefined
       ? {
           height: {
-            ...(params.heightMin !== undefined ? { gte: params.heightMin } : {}),
-            ...(params.heightMax !== undefined ? { lte: params.heightMax } : {}),
+            ...(params.heightMin !== undefined
+              ? { gte: params.heightMin }
+              : {}),
+            ...(params.heightMax !== undefined
+              ? { lte: params.heightMax }
+              : {}),
           },
         }
       : {}),
@@ -116,10 +163,18 @@ export async function searchProfiles(params: SearchParams) {
     ...(params.q
       ? {
           OR: [
-            { displayName: { contains: params.q, mode: "insensitive" as const } },
-            { description: { contains: params.q, mode: "insensitive" as const } },
+            {
+              displayName: { contains: params.q, mode: "insensitive" as const },
+            },
+            {
+              description: { contains: params.q, mode: "insensitive" as const },
+            },
             { shopName: { contains: params.q, mode: "insensitive" as const } },
-            { user: { name: { contains: params.q, mode: "insensitive" as const } } },
+            {
+              user: {
+                name: { contains: params.q, mode: "insensitive" as const },
+              },
+            },
           ],
         }
       : {}),
@@ -129,12 +184,19 @@ export async function searchProfiles(params: SearchParams) {
   // (role included) — find those first, then pull in the rest of that
   // user's published profiles so the card can show every active role, not
   // just the one that happened to match.
-  const matches = await db.profile.findMany({ where, select: { userId: true } });
+  const matches = await db.profile.findMany({
+    where,
+    select: { userId: true },
+  });
   const matchedUserIds = Array.from(new Set(matches.map((m) => m.userId)));
 
   const profiles = matchedUserIds.length
     ? await db.profile.findMany({
-        where: { isPublished: true, role: { in: PAID_ROLES }, userId: { in: matchedUserIds } },
+        where: {
+          isPublished: true,
+          role: { in: PAID_ROLES },
+          userId: { in: matchedUserIds },
+        },
         include: PROVIDER_INCLUDE,
       })
     : [];
@@ -149,7 +211,10 @@ export async function searchProfiles(params: SearchParams) {
     _count: { rating: true },
   });
   const statsByUser = new Map(
-    reviewStats.map((s) => [s.reviewedId, { avg: s._avg.rating ?? 0, count: s._count.rating }]),
+    reviewStats.map((s) => [
+      s.reviewedId,
+      { avg: s._avg.rating ?? 0, count: s._count.rating },
+    ]),
   );
 
   let results = groupProfilesByUser(profiles, statsByUser);
@@ -182,7 +247,10 @@ export async function searchProfiles(params: SearchParams) {
       select: { role: true, userId: true },
     }),
     db.user.findMany({
-      where: { location: { not: null }, profiles: { some: { isPublished: true } } },
+      where: {
+        location: { not: null },
+        profiles: { some: { isPublished: true } },
+      },
       select: { location: true },
       distinct: ["location"],
     }),
@@ -205,8 +273,13 @@ export async function searchProfiles(params: SearchParams) {
     page,
     totalPages: Math.max(1, Math.ceil(effectiveTotal / limit)),
     facets: {
-      roles: PAID_ROLES.map((role) => ({ role, count: usersByRole.get(role)?.size ?? 0 })),
-      cities: cityRows.map((c) => c.location).filter((c): c is string => Boolean(c)),
+      roles: PAID_ROLES.map((role) => ({
+        role,
+        count: usersByRole.get(role)?.size ?? 0,
+      })),
+      cities: cityRows
+        .map((c) => c.location)
+        .filter((c): c is string => Boolean(c)),
     },
   };
 }
@@ -229,12 +302,18 @@ export async function getFeaturedProfiles(limit = 4) {
   });
 
   const statsByUser = new Map(
-    rated.map((r) => [r.reviewedId, { avg: r._avg.rating ?? 0, count: r._count.rating }]),
+    rated.map((r) => [
+      r.reviewedId,
+      { avg: r._avg.rating ?? 0, count: r._count.rating },
+    ]),
   );
 
   const ratedProfiles = rated.length
     ? await db.profile.findMany({
-        where: { isPublished: true, userId: { in: rated.map((r) => r.reviewedId) } },
+        where: {
+          isPublished: true,
+          userId: { in: rated.map((r) => r.reviewedId) },
+        },
         include: PROVIDER_INCLUDE,
       })
     : [];

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import {
+  ProfileHasNoApprovedMediaError,
   ProfileNotFoundError,
   ProfileNotVerifiedError,
   setProfilePublished,
@@ -74,6 +75,12 @@ export async function PATCH(
       return NextResponse.json(
         { data: null, error: "not_found", message: err.message },
         { status: 404 },
+      );
+    }
+    if (err instanceof ProfileHasNoApprovedMediaError) {
+      return NextResponse.json(
+        { data: null, error: "no_approved_media", message: err.message },
+        { status: 403 },
       );
     }
 

@@ -36,3 +36,15 @@ export const processDataRequestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("complete") }),
   z.object({ action: z.literal("reject"), note: z.string().min(1) }),
 ]);
+
+export const moderateMediaSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("approve"),
+    mediaIds: z.array(z.string().min(1)).min(1),
+  }),
+  z.object({
+    action: z.literal("reject"),
+    mediaIds: z.array(z.string().min(1)).min(1),
+    reason: z.string().min(1),
+  }),
+]);

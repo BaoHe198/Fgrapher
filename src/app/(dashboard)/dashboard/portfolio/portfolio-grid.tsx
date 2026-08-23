@@ -21,6 +21,8 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { UploadMediaModal } from "@/components/modals/upload-media-modal";
+import { Badge } from "@/components/ui/badge";
+import { buildMediaVariants } from "@/lib/media-variants";
 import { cn } from "@/lib/utils";
 
 interface MediaItem {
@@ -28,15 +30,39 @@ interface MediaItem {
   url: string;
   type: MediaType;
   title: string | null;
+  moderationStatus: string;
+  moderationNote: string | null;
 }
+
+const MODERATION_BADGE: Record<
+  string,
+  { label: string; variant: "warning" | "destructive" } | undefined
+> = {
+  PENDING: { label: "Pending review", variant: "warning" },
+  REJECTED: { label: "Rejected", variant: "destructive" },
+  AUTO_REJECTED: { label: "Rejected", variant: "destructive" },
+};
 
 interface PortfolioGridProps {
   profileId: string;
   initialMedia: MediaItem[];
 }
 
-function SortableMediaTile({ item, onDelete }: { item: MediaItem; onDelete: (id: string) => void }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+function SortableMediaTile({
+  item,
+  onDelete,
+}: {
+  item: MediaItem;
+  onDelete: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: item.id,
   });
 
@@ -52,8 +78,23 @@ function SortableMediaTile({ item, onDelete }: { item: MediaItem; onDelete: (id:
       {item.type === "VIDEO" ? (
         <video src={item.url} className="size-full object-cover" muted />
       ) : (
-        <Image src={item.url} alt={item.title ?? ""} fill className="object-cover" unoptimized />
+        <Image
+          src={buildMediaVariants(item.url).thumbnail}
+          alt={item.title ?? ""}
+          fill
+          className="object-cover"
+          unoptimized
+        />
       )}
+
+      {MODERATION_BADGE[item.moderationStatus] ? (
+        <Badge
+          variant={MODERATION_BADGE[item.moderationStatus]!.variant}
+          className="absolute top-2 left-2"
+        >
+          {MODERATION_BADGE[item.moderationStatus]!.label}
+        </Badge>
+      ) : null}
 
       <div className="absolute inset-0 flex flex-col justify-between bg-black/50 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
         <div className="flex justify-between p-2">
@@ -77,6 +118,8 @@ function SortableMediaTile({ item, onDelete }: { item: MediaItem; onDelete: (id:
         </div>
         {item.title ? (
           <p className="p-2 text-body-sm text-white">{item.title}</p>
+        ) : item.moderationNote && item.moderationStatus !== "APPROVED" ? (
+          <p className="p-2 text-body-sm text-white">{item.moderationNote}</p>
         ) : null}
       </div>
     </div>
@@ -86,7 +129,9 @@ function SortableMediaTile({ item, onDelete }: { item: MediaItem; onDelete: (id:
 export function PortfolioGrid({ profileId, initialMedia }: PortfolioGridProps) {
   const [media, setMedia] = useState(initialMedia);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
 
   const onDelete = async (id: string) => {
     setMedia((prev) => prev.filter((m) => m.id !== id));
@@ -121,10 +166,17 @@ export function PortfolioGrid({ profileId, initialMedia }: PortfolioGridProps) {
         collisionDetection={closestCenter}
         onDragEnd={onDragEnd}
       >
-        <SortableContext items={media.map((m) => m.id)} strategy={rectSortingStrategy}>
+        <SortableContext
+          items={media.map((m) => m.id)}
+          strategy={rectSortingStrategy}
+        >
           <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4">
             {media.map((item) => (
-              <SortableMediaTile key={item.id} item={item} onDelete={onDelete} />
+              <SortableMediaTile
+                key={item.id}
+                item={item}
+                onDelete={onDelete}
+              />
             ))}
 
             <button

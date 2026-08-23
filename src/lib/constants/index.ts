@@ -22,6 +22,21 @@ export const KYC_REJECTION_REASONS = [
   "Khác",
 ] as const;
 
+// Hours before a PENDING ProfileMedia row is flagged overdue on
+// /admin/moderation — the SLA target from Prompt B5's VIỆC 6.
+export const MEDIA_MODERATION_SLA_HOURS = 24;
+
+// Preset options shown on /admin/moderation's reject flow, mirroring
+// KYC_REJECTION_REASONS' pattern for the identity-verification queue.
+export const MEDIA_REJECTION_REASONS = [
+  "Ảnh khỏa thân hoặc khiêu dâm",
+  "Ảnh phô bày cơ thể mang tính gợi dục",
+  "Nghi ngờ người trong ảnh dưới 18 tuổi",
+  "Không có bằng chứng về quyền sử dụng ảnh",
+  "Ảnh chất lượng thấp / không liên quan đến dịch vụ",
+  "Khác",
+] as const;
+
 export const PAID_ROLES: Role[] = [
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",

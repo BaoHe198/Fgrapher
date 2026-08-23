@@ -9,6 +9,11 @@ import { db } from "@/lib/db";
 import { ROLE_PLANS } from "@/lib/constants/plans";
 import { logAudit, processDeletion } from "@/services/compliance";
 
+// Larger than the other admin list pages' PAGE_SIZE (50) — moderation
+// review is a visual grid of small tiles, not a text list, so more fit
+// on screen at once.
+const MODERATION_PAGE_SIZE = 60;
+
 const PAGE_SIZE = 50;
 
 function startOfMonth() {
@@ -585,4 +590,71 @@ export async function getConsentStats() {
       };
     }),
   );
+}
+
+// Content moderation (Prompt B5, docs/guides/
+// fgrapher-danh-gia-va-prompt-sua-doi.md).
+export async function listPendingMedia() {
+  return db.profileMedia.findMany({
+    where: { moderationStatus: "PENDING" },
+    include: {
+      profile: {
+        select: {
+          id: true,
+          role: true,
+          displayName: true,
+          user: {
+            select: { id: true, name: true, firstName: true, email: true },
+          },
+        },
+      },
+    },
+    // Oldest first — surfaces anything approaching/past the 24h SLA badge
+    // shown on /admin/moderation.
+    orderBy: { createdAt: "asc" },
+    take: MODERATION_PAGE_SIZE,
+  });
+}
+
+// Bulk-capable — a single approve/reject can cover many tiles at once
+// (the admin page's "select all" / multi-select). Logs one AuditLog entry
+// per affected media row (VIỆC 6's "Ghi ModerationAction + AuditLog cho
+// mọi thao tác" — the AdminAction side is logged by the route handler,
+// same convention as every other admin mutation in this file).
+export async function moderateMedia({
+  mediaIds,
+  adminId,
+  action,
+  reason,
+}: {
+  mediaIds: string[];
+  adminId: string;
+  action: "approve" | "reject";
+  reason?: string;
+}) {
+  const status = action === "approve" ? "APPROVED" : "REJECTED";
+
+  await db.profileMedia.updateMany({
+    where: { id: { in: mediaIds } },
+    data: {
+      moderationStatus: status,
+      moderationNote: action === "reject" ? reason : null,
+      moderatedBy: adminId,
+      moderatedAt: new Date(),
+    },
+  });
+
+  await Promise.all(
+    mediaIds.map((mediaId) =>
+      logAudit({
+        actorId: adminId,
+        action: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
+        targetType: "profile_media",
+        targetId: mediaId,
+        metadata: reason ? { reason } : undefined,
+      }),
+    ),
+  );
+
+  return mediaIds.length;
 }

@@ -3,6 +3,7 @@
 import {
   BadgeCheck,
   Flag,
+  Image as ImageIcon,
   LayoutDashboard,
   ShieldCheck,
   Users,
@@ -17,6 +18,7 @@ const ITEMS = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/reports", label: "Reports", icon: Flag },
   { href: "/admin/verifications", label: "Verifications", icon: BadgeCheck },
+  { href: "/admin/moderation", label: "Moderation", icon: ImageIcon },
   { href: "/admin/compliance", label: "Compliance", icon: ShieldCheck },
 ];
 
