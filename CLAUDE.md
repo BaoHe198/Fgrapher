@@ -2,6 +2,74 @@
 
 Social-media-style booking & marketplace platform for the photography/videography industry.
 
+## Phạm vi MVP & Ràng buộc bắt buộc
+
+> Phần này bằng tiếng Việt có chủ đích — giữ nguyên văn theo bản gốc
+> `docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md` (23/08/2026) để không
+> mất sắc thái khi liên quan tới luật. Đây là ràng buộc **override** mọi
+> phần khác của file này khi có xung đột (ví dụ: Stack ghi "Payments: Stripe"
+> ở dưới — điều đó mô tả code hiện có, không có nghĩa là đang bật; xem
+> `BILLING_ENABLED` bên dưới). Toàn bộ quyết định pháp lý/kinh doanh trong
+> mục này (tắt Stripe theo Hướng A) đã được xác nhận bởi chủ dự án.
+
+### Bối cảnh
+
+Fgrapher là nền tảng TMĐT trung gian kết nối khách hàng với nhà cung cấp
+dịch vụ nhiếp ảnh. Thị trường: **toàn quốc Việt Nam**. Chưa có người dùng
+thật. Đang thu hẹp phạm vi về MVP theo kế hoạch trong
+`docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md`.
+
+### Trong phạm vi MVP
+
+Vai trò: `CUSTOMER`, `PHOTOGRAPHER`, `VIDEOGRAPHER`, `MAKEUP_ARTIST`,
+`MODEL`, `STUDIO`, `ADMIN`.
+Tính năng: hồ sơ + portfolio, tìm kiếm toàn quốc theo tỉnh, lịch + đặt
+lịch, nhắn tin, đánh giá, thông báo, quản trị, tuân thủ dữ liệu cá nhân.
+
+### Ngoài phạm vi MVP (ẩn sau feature flag, KHÔNG xóa code)
+
+- `CAMERA_SHOP` và toàn bộ marketplace bán/cho thuê gear (`Product`,
+  `Order`, `Cart`, checkout, `/shop`)
+- Mạng xã hội (`Post`, `Like`, `Comment`, `Follow`)
+- Mọi thanh toán trực tuyến, kể cả thuê bao
+- Giao ảnh/video cho khách qua nền tảng
+
+### Ràng buộc bắt buộc
+
+1. **Stripe KHÔNG dùng được**: Stripe không mở tài khoản cho doanh nghiệp
+   đăng ký tại Việt Nam. Không viết thêm code Stripe. Code Stripe hiện có
+   giữ lại nhưng vô hiệu hóa sau feature flag (`BILLING_ENABLED=false`).
+2. Không tích hợp bất kỳ cổng thanh toán nào ở giai đoạn này. Gói thuê
+   bao gán thủ công qua trang admin.
+3. **KHÔNG** có danh mục hoặc nhãn nội dung nude/sexy/boudoir. Không
+   thêm vào `ProfileCategory`. Đây là yêu cầu pháp lý.
+4. Mọi tài khoản phải từ 18 tuổi. Áp dụng cho **mọi** vai trò, không
+   riêng `MODEL`.
+5. Provider phải qua xác minh danh tính trước khi hồ sơ được công khai —
+   áp dụng cho **mọi** vai trò provider, không riêng `MODEL`.
+6. Đồng ý xử lý dữ liệu cá nhân phải tách riêng từng mục đích, lưu bằng
+   chứng có timestamp + phiên bản chính sách + IP. Cấm checkbox gộp, cấm
+   tick sẵn.
+7. Ảnh giấy tờ tùy thân lưu ở thư mục riêng không công khai, mọi lượt
+   truy cập ghi `AuditLog`, tự xóa sau 90 ngày.
+8. Ảnh portfolio phải qua kiểm duyệt trước khi hiển thị công khai.
+9. Không hardcode danh sách tỉnh/thành trong code hay component.
+10. Toàn bộ giao diện tiếng Việt. Tiền VND định dạng `"1.500.000₫"`.
+    Ngày `dd/MM/yyyy`. Múi giờ `Asia/Ho_Chi_Minh`.
+
+**Về pháp lý**: các con số luật (122/2025, 91/2025, NĐ 356/2025, Điều 32
+BLDS 2015) trích từ tài liệu nguồn, **chưa được luật sư xác nhận**. Code
+tuân thủ trong repo này là hạ tầng sẵn sàng theo đặc tả kỹ thuật, không
+phải sự đảm bảo tuân thủ pháp luật thật — xem `docs/MVP_SCOPE.md` và
+Phần C của tài liệu nguồn cho danh sách việc cần luật sư/nhân sự thật.
+
+### Nguyên tắc sửa code (mở rộng phần Rules ở cuối file)
+
+- Ưu tiên tận dụng code hiện có. Chỉ đề xuất viết lại module khi thực sự
+  cần, và phải giải thích lý do trước khi làm.
+- Mọi migration phải reversible, đặt tên rõ nghĩa.
+- Sau mỗi thay đổi schema, cập nhật `docs/` tương ứng.
+
 ## Stack
 
 - **Framework:** Next.js 14+ (App Router, `src/` directory)
