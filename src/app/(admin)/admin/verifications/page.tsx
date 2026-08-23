@@ -6,22 +6,47 @@ import { startTransition, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { KYC_REJECTION_REASONS } from "@/lib/constants";
 
 interface VerificationRow {
   id: string;
   role: string;
   verificationStatus: string;
-  updatedAt: string;
-  user: { id: string; name: string | null; firstName: string | null; email: string; dateOfBirth: string | null };
+  createdAt: string;
+  user: {
+    id: string;
+    name: string | null;
+    firstName: string | null;
+    email: string;
+    dateOfBirth: string | null;
+  };
+}
+
+const IMAGE_KINDS: { kind: "front" | "back" | "selfie"; label: string }[] = [
+  { kind: "front", label: "ID front" },
+  { kind: "back", label: "ID back" },
+  { kind: "selfie", label: "Selfie" },
+];
+
+function waitingLabel(createdAt: string) {
+  const days = Math.floor(
+    (Date.now() - new Date(createdAt).getTime()) / 86_400_000,
+  );
+  if (days <= 0) return "Submitted today";
+  if (days === 1) return "Waiting 1 day";
+  return `Waiting ${days} days`;
 }
 
 export default function AdminVerificationsPage() {
   const [rows, setRows] = useState<VerificationRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [reasonPreset, setReasonPreset] = useState<Record<string, string>>({});
+  const [reasonNote, setReasonNote] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [loadingImage, setLoadingImage] = useState<string | null>(null);
 
   const load = () => {
     startTransition(() => setIsLoading(true));
@@ -39,13 +64,45 @@ export default function AdminVerificationsPage() {
     load();
   }, []);
 
+  const viewImage = async (
+    userRoleId: string,
+    kind: "front" | "back" | "selfie",
+  ) => {
+    setLoadingImage(`${userRoleId}-${kind}`);
+    const res = await fetch(
+      `/api/admin/verifications/${userRoleId}/image?kind=${kind}`,
+    );
+    const body = await res.json();
+    setLoadingImage(null);
+    if (!res.ok) {
+      toast.add({
+        title: body.message ?? "Failed to load document",
+        type: "error",
+      });
+      return;
+    }
+    window.open(body.data.url, "_blank", "noopener,noreferrer");
+  };
+
   const review = async (id: string, action: "approve" | "reject") => {
+    if (action === "reject" && !reasonPreset[id]) {
+      toast.add({ title: "Select a rejection reason", type: "error" });
+      return;
+    }
+
     setBusyId(id);
     await fetch(`/api/admin/verifications/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(
-        action === "approve" ? { action } : { action, reason: reasons[id] || "Not specified" },
+        action === "approve"
+          ? { action }
+          : {
+              action,
+              reason: reasonNote[id]?.trim()
+                ? `${reasonPreset[id]} — ${reasonNote[id].trim()}`
+                : reasonPreset[id],
+            },
       ),
     });
     setBusyId(null);
@@ -56,11 +113,12 @@ export default function AdminVerificationsPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="text-display-md text-text-primary">Identity verification</h1>
+        <h1 className="text-display-md text-text-primary">
+          Identity verification
+        </h1>
         <p className="text-body-md text-text-secondary">
-          Pending ID verification requests — currently only used by the Model role. The
-          user-facing ID upload flow isn&apos;t enabled yet, so this queue is expected to be
-          empty until it is.
+          Every provider role must be verified before its profile can go live
+          (Luật Thương mại điện tử 122/2025). Sorted oldest submission first.
         </p>
       </div>
 
@@ -71,7 +129,9 @@ export default function AdminVerificationsPage() {
       ) : rows.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <BadgeCheck className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">Nothing pending</p>
+          <p className="text-body-lg font-semibold text-text-primary">
+            Nothing pending
+          </p>
         </Card>
       ) : (
         <div className="flex flex-col gap-4">
@@ -85,16 +145,56 @@ export default function AdminVerificationsPage() {
                   </span>
                 </div>
                 <span className="text-body-sm text-text-tertiary">
-                  Submitted {new Date(row.updatedAt).toLocaleDateString("en-US", { dateStyle: "medium" })}
+                  {waitingLabel(row.createdAt)}
                 </span>
               </div>
-              <p className="text-body-sm text-text-secondary">{row.user.email}</p>
+              <p className="text-body-sm text-text-secondary">
+                {row.user.email}
+              </p>
 
-              <Input
-                placeholder="Rejection reason (required if rejecting)"
-                value={reasons[row.id] ?? ""}
-                onChange={(e) => setReasons((prev) => ({ ...prev, [row.id]: e.target.value }))}
-              />
+              <div className="flex flex-wrap gap-2">
+                {IMAGE_KINDS.map(({ kind, label }) => (
+                  <Button
+                    key={kind}
+                    size="sm"
+                    variant="secondary"
+                    disabled={loadingImage === `${row.id}-${kind}`}
+                    onClick={() => viewImage(row.id, kind)}
+                  >
+                    {loadingImage === `${row.id}-${kind}` ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : null}
+                    View {label}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <NativeSelect
+                  value={reasonPreset[row.id] ?? ""}
+                  onChange={(value) =>
+                    setReasonPreset((prev) => ({ ...prev, [row.id]: value }))
+                  }
+                  options={[
+                    { value: "", label: "Rejection reason (if rejecting)" },
+                    ...KYC_REJECTION_REASONS.map((r) => ({
+                      value: r,
+                      label: r,
+                    })),
+                  ]}
+                />
+                <Textarea
+                  placeholder="Note (optional)"
+                  rows={1}
+                  value={reasonNote[row.id] ?? ""}
+                  onChange={(e) =>
+                    setReasonNote((prev) => ({
+                      ...prev,
+                      [row.id]: e.target.value,
+                    }))
+                  }
+                />
+              </div>
               <div className="flex gap-2">
                 <Button
                   size="sm"

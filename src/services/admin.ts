@@ -4,9 +4,10 @@ import type {
   DataRequestType,
 } from "@prisma/client";
 
+import { generateKycSignedUrl } from "@/lib/cloudinary";
 import { db } from "@/lib/db";
 import { ROLE_PLANS } from "@/lib/constants/plans";
-import { processDeletion } from "@/services/compliance";
+import { logAudit, processDeletion } from "@/services/compliance";
 
 const PAGE_SIZE = 50;
 
@@ -297,8 +298,9 @@ export async function listReports({
 // Identity verification queue (built for MODEL — see
 // docs/guides/fgrapher-prompts-batch-2.md §3b). The user-facing ID upload
 // flow that would move a UserRole to PENDING is deliberately not wired up
-// yet, so this list is expected to be empty until that flow is enabled —
-// the queue itself is real infrastructure, ready for that switch to flip.
+// Expanded to every provider role in Prompt B3 (was MODEL-only) — the
+// user-facing upload flow now exists (see services/verification.ts), so
+// this queue is expected to actually fill up.
 export async function listPendingVerifications() {
   return db.userRole.findMany({
     where: { verificationStatus: "PENDING" },
@@ -314,16 +316,22 @@ export async function listPendingVerifications() {
         },
       },
     },
-    orderBy: { updatedAt: "asc" },
+    // Oldest submission first — matches the @@index([verificationStatus,
+    // createdAt]) added for exactly this query.
+    orderBy: { createdAt: "asc" },
   });
 }
 
+const KYC_PURGE_AFTER_DAYS = 90;
+
 export async function reviewVerification({
   userRoleId,
+  adminId,
   approve,
   reason,
 }: {
   userRoleId: string;
+  adminId: string;
   approve: boolean;
   reason?: string;
 }) {
@@ -333,10 +341,63 @@ export async function reviewVerification({
       ? {
           verificationStatus: "VERIFIED",
           verifiedAt: new Date(),
+          verifiedBy: adminId,
           verificationRejectedReason: null,
+          purgeAfter: new Date(Date.now() + KYC_PURGE_AFTER_DAYS * 86_400_000),
         }
       : { verificationStatus: "REJECTED", verificationRejectedReason: reason },
   });
+}
+
+const KYC_IMAGE_FIELD = {
+  front: { url: "verificationIdUrl", publicId: "verificationIdPublicId" },
+  back: {
+    url: "verificationIdBackUrl",
+    publicId: "verificationIdBackPublicId",
+  },
+  selfie: {
+    url: "verificationSelfieUrl",
+    publicId: "verificationSelfiePublicId",
+  },
+} as const;
+
+export type KycImageKind = keyof typeof KYC_IMAGE_FIELD;
+
+// Mints a 5-minute signed URL for ONE KYC image and logs the view —
+// VIỆC 3's "mọi lượt sinh signed URL ghi AuditLog" requirement. Never
+// returns the raw stored URL (that column is never a real public URL to
+// begin with — see prisma/schema.prisma's UserRole comment).
+export async function getKycImageUrl({
+  userRoleId,
+  kind,
+  adminId,
+  ipAddress,
+}: {
+  userRoleId: string;
+  kind: KycImageKind;
+  adminId: string;
+  ipAddress?: string;
+}) {
+  const userRole = await db.userRole.findUniqueOrThrow({
+    where: { id: userRoleId },
+  });
+  const publicId = userRole[KYC_IMAGE_FIELD[kind].publicId];
+  if (!publicId) {
+    throw new Error(`No ${kind} image on file for this verification`);
+  }
+
+  const url = generateKycSignedUrl(publicId);
+
+  await logAudit({
+    actorId: adminId,
+    action: "VIEW_KYC_DOCUMENT",
+    targetType: "user",
+    targetId: userRole.userId,
+    metadata: { kind, userRoleId },
+    ipAddress,
+  });
+
+  return url;
 }
 
 export async function resolveReport({

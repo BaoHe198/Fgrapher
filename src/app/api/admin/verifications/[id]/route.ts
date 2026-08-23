@@ -5,7 +5,10 @@ import { AuthError } from "@/lib/auth-helpers";
 import { reviewVerificationSchema } from "@/lib/validations/admin";
 import { reviewVerification } from "@/services/admin";
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await requireAdmin();
     const { id } = await params;
@@ -20,6 +23,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     const userRole = await reviewVerification({
       userRoleId: id,
+      adminId: session.user.id,
       approve: parsed.data.action === "approve",
       reason: parsed.data.action === "reject" ? parsed.data.reason : undefined,
     });
@@ -45,7 +49,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update verification" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to update verification",
+      },
       { status: 500 },
     );
   }

@@ -10,6 +10,18 @@ export const CURRENT_POLICY_VERSION = "2026-08-23-v1";
 // requestedAt + this many days, not stored on the row itself.
 export const DATA_REQUEST_SLA_DAYS = 30;
 
+// Preset options shown on /admin/verifications' reject flow — the admin
+// picks one (plus an optional free-text note), combined client-side into
+// the single string stored in UserRole.verificationRejectedReason.
+export const KYC_REJECTION_REASONS = [
+  "Ảnh mờ hoặc không đọc được",
+  "Giấy tờ hết hạn",
+  "Thông tin không khớp với hồ sơ",
+  "Ảnh selfie không cầm giấy tờ rõ ràng",
+  "Nghi ngờ ảnh đã bị chỉnh sửa",
+  "Khác",
+] as const;
+
 export const PAID_ROLES: Role[] = [
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",
