@@ -16,30 +16,30 @@ datasource db {
 // ============================================================================
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  emailVerified DateTime?
-  passwordHash  String?
-  firstName     String?
-  lastName      String?
-  username      String?   @unique
-  avatar        String?
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  emailVerified           DateTime?
+  passwordHash            String?
+  firstName               String?
+  lastName                String?
+  username                String?   @unique
+  avatar                  String?
   // Mirrors of firstName+lastName / avatar, required by @auth/prisma-adapter's
   // default field names for OAuth account creation
-  name          String?
-  image         String?
-  coverImage    String?
-  bio           String?
-  phone         String?
-  location      String?
-  latitude      Float?
-  longitude     Float?
+  name                    String?
+  image                   String?
+  coverImage              String?
+  bio                     String?
+  phone                   String?
+  location                String?
+  latitude                Float?
+  longitude               Float?
   // Required at registration for the MODEL role (age gate — see
   // services/age-gate.ts), private, never displayed. Profile pages only
   // ever show a computed age RANGE, never this value or an exact age.
-  dateOfBirth   DateTime? @db.Date
+  dateOfBirth             DateTime? @db.Date
   // Provider-only: whether new booking requests are currently open.
-  acceptingBookings Boolean @default(true)
+  acceptingBookings       Boolean   @default(true)
   // Per-category email/in-app toggles, shaped like
   // Record<"bookingRequest"|"bookingConfirmed"|"bookingCancelled"|"bookingReminder"
   //   |"newMessage"|"newFollower"|"newReview"|"productUpdates"|"tips",
@@ -47,41 +47,41 @@ model User {
   // single settings blob read/written as a whole, never queried by field.
   notificationPreferences Json?
   // Admin moderation
-  isVerified      Boolean   @default(false)
-  isSuspended     Boolean   @default(false)
-  suspendedReason String?
-  suspendedUntil  DateTime?
-  adminNotes      String?   @db.Text
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  isVerified              Boolean   @default(false)
+  isSuspended             Boolean   @default(false)
+  suspendedReason         String?
+  suspendedUntil          DateTime?
+  adminNotes              String?   @db.Text
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  deletedAt               DateTime?
 
   // Relations
-  roles         UserRole[]
-  accounts      Account[]    // OAuth accounts
-  sessions      Session[]
-  profiles      Profile[]
-  posts         Post[]
-  comments      Comment[]
-  likes         Like[]
-  sentMessages     Message[]      @relation("sender")
-  receivedMessages Message[]      @relation("receiver")
-  bookingsAsCustomer  Booking[]   @relation("customer")
-  bookingsAsProvider  Booking[]   @relation("provider")
-  reviews        Review[]        @relation("reviewer")
-  receivedReviews Review[]       @relation("reviewed")
-  products       Product[]
-  orders         Order[]
-  shopOrders     Order[]         @relation("shopOrders")
-  cartItems      CartItem[]
-  following      Follow[]        @relation("follower")
-  followers      Follow[]        @relation("following")
-  notifications  Notification[]
-  savedProfiles  SavedProfile[]
-  payments       Payment[]
+  roles                    UserRole[]
+  accounts                 Account[] // OAuth accounts
+  sessions                 Session[]
+  profiles                 Profile[]
+  posts                    Post[]
+  comments                 Comment[]
+  likes                    Like[]
+  sentMessages             Message[]                 @relation("sender")
+  receivedMessages         Message[]                 @relation("receiver")
+  bookingsAsCustomer       Booking[]                 @relation("customer")
+  bookingsAsProvider       Booking[]                 @relation("provider")
+  reviews                  Review[]                  @relation("reviewer")
+  receivedReviews          Review[]                  @relation("reviewed")
+  products                 Product[]
+  orders                   Order[]
+  shopOrders               Order[]                   @relation("shopOrders")
+  cartItems                CartItem[]
+  following                Follow[]                  @relation("follower")
+  followers                Follow[]                  @relation("following")
+  notifications            Notification[]
+  savedProfiles            SavedProfile[]
+  payments                 Payment[]
   conversationParticipants ConversationParticipant[]
-  consentRecords ConsentRecord[]
-  dataRequests   DataRequest[]
+  consentRecords           ConsentRecord[]
+  dataRequests             DataRequest[]
 
   @@map("users")
 }
@@ -138,6 +138,10 @@ enum ConsentPurpose {
   SERVICE // required to use the service at all — never optional
   MARKETING
   ANALYTICS
+  // Required specifically to submit KYC/ID-verification documents (Prompt
+  // B3) — separate from SERVICE because it covers a more sensitive class
+  // of data (a government ID) that the rest of the app never touches.
+  IDENTITY_VERIFICATION
 }
 
 // Every grant/revoke creates a NEW row — never updated in place — so the
@@ -194,11 +198,11 @@ enum DataRequestStatus {
 }
 
 model DataRequest {
-  id          String             @id @default(cuid())
+  id          String            @id @default(cuid())
   userId      String
   type        DataRequestType
-  status      DataRequestStatus  @default(PENDING)
-  requestedAt DateTime           @default(now())
+  status      DataRequestStatus @default(PENDING)
+  requestedAt DateTime          @default(now())
   completedAt DateTime?
   resultUrl   String?
   note        String?
@@ -248,20 +252,33 @@ model UserRole {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Identity verification (built for the MODEL role — see
-  // docs/guides/fgrapher-prompts-batch-2.md §3b). The user-facing ID
-  // upload flow is deliberately NOT wired up yet — this is
-  // infrastructure only (schema + admin queue) until a launch decision is
-  // made on enforcement level. verificationIdUrl/PublicId point at a
-  // private (non-public) Cloudinary folder and must be deleted 30 days
-  // after verifiedAt once that flow exists — no such image is ever
-  // uploaded by the current code, so there is nothing to delete yet.
-  verificationStatus         VerificationStatus @default(UNVERIFIED)
-  verificationIdUrl          String?
-  verificationIdPublicId     String?
-  verifiedAt                 DateTime?
-  verifiedBy                 String? // admin userId
-  verificationRejectedReason String?
+  // Identity verification — required for every provider role as of
+  // Prompt B3 (docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md), not
+  // just MODEL, per Luật Thương mại điện tử 122/2025's seller-verification
+  // requirement. The three images live in a Cloudinary folder completely
+  // separate from portfolio media, uploaded with delivery type
+  // "authenticated" (see lib/cloudinary.ts's generateKycUploadSignature) —
+  // *IdUrl/*SelfieUrl below are never public URLs, only Cloudinary
+  // public_ids used to mint short-lived signed URLs on demand for admins
+  // (see generateKycSignedUrl). idNumberHash stores only a SHA-256 hash of
+  // the ID number (for duplicate detection) — the plaintext number is
+  // never persisted anywhere. purgeAfter drives the daily cron
+  // (/api/cron/purge-kyc-documents) that deletes the images 90 days after
+  // verifiedAt; verificationStatus/verifiedAt/verifiedBy/idNumberHash are
+  // kept forever as the audit trail even after the images themselves are
+  // purged.
+  verificationStatus          VerificationStatus @default(UNVERIFIED)
+  verificationIdUrl           String?
+  verificationIdPublicId      String?
+  verificationIdBackUrl       String?
+  verificationIdBackPublicId  String?
+  verificationSelfieUrl       String?
+  verificationSelfiePublicId  String?
+  idNumberHash                String?
+  purgeAfter                  DateTime?
+  verifiedAt                  DateTime?
+  verifiedBy                  String? // admin userId
+  verificationRejectedReason  String?
   // Content policy acceptance (currently only collected at registration
   // for the MODEL role) — lives here rather than on Profile because
   // UserRole exists from the moment of registration; Profile rows are
@@ -272,6 +289,9 @@ model UserRole {
   subscription Subscription?
 
   @@unique([userId, role])
+  // Powers the admin verification queue's sort/filter (oldest PENDING
+  // first) without a full table scan.
+  @@index([verificationStatus, createdAt])
   @@map("user_roles")
 }
 
@@ -284,9 +304,9 @@ enum SubscriptionStatus {
 }
 
 model Subscription {
-  id                   String             @id @default(cuid())
-  userRoleId           String             @unique
-  stripeCustomerId     String?
+  id                       String             @id @default(cuid())
+  userRoleId               String             @unique
+  stripeCustomerId         String?
   // Not @unique: a single checkout for multiple roles produces one Stripe
   // Subscription with multiple line items, so several Subscription rows
   // (one per UserRole) can legitimately share the same Stripe subscription
@@ -295,22 +315,22 @@ model Subscription {
   // The specific SubscriptionItem this role's price is billed under —
   // current_period_start/end and price live per-item on Stripe's side, not
   // on the parent Subscription, since Stripe API 2025-03-31.
-  stripeSubscriptionItemId String? @unique
-  stripePriceId        String?
-  plan                 String?            // e.g., "basic", "pro"
+  stripeSubscriptionItemId String?            @unique
+  stripePriceId            String?
+  plan                     String? // e.g., "basic", "pro"
   // "month" or "year" — mirrors the synced SubscriptionItem's Price
   // recurring.interval, since a role's monthly and yearly prices are
   // separate Stripe Price objects (see ROLE_PLANS).
-  interval             String             @default("month")
-  status               SubscriptionStatus @default(ACTIVE)
-  currentPeriodStart   DateTime?
-  currentPeriodEnd     DateTime?
-  cancelAtPeriodEnd    Boolean            @default(false)
+  interval                 String             @default("month")
+  status                   SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart       DateTime?
+  currentPeriodEnd         DateTime?
+  cancelAtPeriodEnd        Boolean            @default(false)
   // Set when a payment fails (status becomes PAST_DUE) — access stays
   // fully live until this passes, then the role is deactivated.
-  graceEndsAt          DateTime?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  graceEndsAt              DateTime?
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
 
   userRole UserRole @relation(fields: [userRoleId], references: [id], onDelete: Cascade)
 
@@ -404,54 +424,54 @@ enum ExperienceLevel {
 }
 
 model Profile {
-  id          String   @id @default(cuid())
-  userId      String
-  role        Role     // which role this profile belongs to
-  displayName String?
-  description String?  @db.Text
-  website     String?
-  instagram   String?
-  facebook    String?
-  tiktok      String?
+  id                          String           @id @default(cuid())
+  userId                      String
+  role                        Role // which role this profile belongs to
+  displayName                 String?
+  description                 String?          @db.Text
+  website                     String?
+  instagram                   String?
+  facebook                    String?
+  tiktok                      String?
   // Pricing
-  priceMin    Float?
-  priceMax    Float?
-  currency    String   @default("VND")
+  priceMin                    Float?
+  priceMax                    Float?
+  currency                    String           @default("VND")
   // Studio-specific
-  address     String?
-  area        Float?   // square meters
-  amenities   String[] // e.g., ["wifi", "ac", "parking", "changing_room"]
+  address                     String?
+  area                        Float? // square meters
+  amenities                   String[] // e.g., ["wifi", "ac", "parking", "changing_room"]
   // Camera Shop specific
-  shopName    String?
+  shopName                    String?
   // Model-specific — all optional, self-reported, only used when role is
   // MODEL. Never displayed on the profile when unset (no placeholder
   // dashes — see docs/guides/fgrapher-prompts-batch-2.md §3a).
-  height             Int?             // cm
-  measurements       String?          // free text, stays flexible (e.g. "34-26-36")
-  hairColor          String?
-  eyeColor           String?
-  shoeSize           String?
-  experienceLevel    ExperienceLevel?
-  travelWilling      Boolean          @default(false)
-  agencyRepresented  Boolean          @default(false)
-  agencyName         String?
+  height                      Int? // cm
+  measurements                String? // free text, stays flexible (e.g. "34-26-36")
+  hairColor                   String?
+  eyeColor                    String?
+  shoeSize                    String?
+  experienceLevel             ExperienceLevel?
+  travelWilling               Boolean          @default(false)
+  agencyRepresented           Boolean          @default(false)
+  agencyName                  String?
   // Safety (currently exercised by the MODEL role's profile editor — see
   // docs/guides/fgrapher-prompts-batch-2.md §3c; generic, not restricted
   // to MODEL at the schema level, matching how other role-specific fields
   // on this model work). Content guidelines acceptance lives on UserRole
   // instead — see that model's comment for why.
-  hideExactLocation           Boolean   @default(false)
+  hideExactLocation           Boolean          @default(false)
   // Withholds contactPhone/locationAddress from the other party on a
   // booking until Booking.depositPaid is set. No Stripe payment flow
   // exists for bookings today (only for marketplace orders) — until one
   // is built, depositPaid is a manual flag a provider sets by hand, not
   // an automatic payment gate. See the Booking field's comment.
-  requireDepositBeforeContact Boolean   @default(false)
+  requireDepositBeforeContact Boolean          @default(false)
   // Meta
-  isPublished Boolean  @default(false)
-  viewCount   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isPublished                 Boolean          @default(false)
+  viewCount                   Int              @default(0)
+  createdAt                   DateTime         @default(now())
+  updatedAt                   DateTime         @updatedAt
 
   user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   categories ProfileCategory[]
@@ -465,16 +485,16 @@ model Profile {
 }
 
 model ProfileMedia {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   profileId String
   url       String
-  publicId  String?  // Cloudinary public ID
+  publicId  String? // Cloudinary public ID
   type      MediaType
   title     String?
-  order     Int      @default(0)
+  order     Int       @default(0)
   width     Int?
   height    Int?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
@@ -492,14 +512,14 @@ enum MediaType {
 // ============================================================================
 
 model Service {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   profileId   String
   name        String
-  description String? @db.Text
-  duration    Int     // minutes
+  description String?  @db.Text
+  duration    Int // minutes
   price       Float
-  currency    String  @default("VND")
-  isActive    Boolean @default(true)
+  currency    String   @default("VND")
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -511,14 +531,14 @@ model Service {
 }
 
 model Availability {
-  id          String @id @default(cuid())
-  userId      String
-  dayOfWeek   Int    // 0=Sunday, 6=Saturday
-  startTime   String // "09:00"
-  endTime     String // "17:00"
-  isActive    Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  dayOfWeek Int // 0=Sunday, 6=Saturday
+  startTime String // "09:00"
+  endTime   String // "17:00"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, dayOfWeek])
   @@map("availabilities")
@@ -544,30 +564,30 @@ enum BookingStatus {
 }
 
 model Booking {
-  id          String        @id @default(cuid())
-  customerId  String
-  providerId  String
-  serviceId   String?
-  date        DateTime      @db.Date
-  startTime   String        // "10:00"
-  endTime     String?       // "12:00"
-  status      BookingStatus @default(PENDING)
-  notes       String?       @db.Text
-  totalPrice  Float?
-  currency    String        @default("VND")
-  cancelledBy String?       // userId of who cancelled
-  cancelReason String?      // also used for decline/no-show reason
-  completedAt DateTime?
-  reminderSentAt DateTime?  // set once the 24h-out reminder cron has emailed both parties
+  id             String        @id @default(cuid())
+  customerId     String
+  providerId     String
+  serviceId      String?
+  date           DateTime      @db.Date
+  startTime      String // "10:00"
+  endTime        String? // "12:00"
+  status         BookingStatus @default(PENDING)
+  notes          String?       @db.Text
+  totalPrice     Float?
+  currency       String        @default("VND")
+  cancelledBy    String? // userId of who cancelled
+  cancelReason   String? // also used for decline/no-show reason
+  completedAt    DateTime?
+  reminderSentAt DateTime? // set once the 24h-out reminder cron has emailed both parties
   // Manually set by the provider — see Profile.requireDepositBeforeContact.
   // Not driven by any payment integration yet.
-  depositPaid Boolean       @default(false)
+  depositPaid    Boolean       @default(false)
 
-  locationType     String?  // "PROVIDER" | "CUSTOMER" | "OUTDOOR"
-  locationAddress  String?
-  numberOfPeople   Int?
-  contactPhone     String?
-  referenceImages  String[] @default([])
+  locationType    String? // "PROVIDER" | "CUSTOMER" | "OUTDOOR"
+  locationAddress String?
+  numberOfPeople  Int?
+  contactPhone    String?
+  referenceImages String[] @default([])
 
   // Reschedule proposal — either party can propose a new slot; the other
   // must accept/decline before it takes effect. Null when no proposal
@@ -577,12 +597,12 @@ model Booking {
   rescheduleProposedEndTime   String?
   rescheduleProposedBy        String?
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  customer User            @relation("customer", fields: [customerId], references: [id])
-  provider User           @relation("provider", fields: [providerId], references: [id])
-  service  Service?       @relation(fields: [serviceId], references: [id])
+  customer User     @relation("customer", fields: [customerId], references: [id])
+  provider User     @relation("provider", fields: [providerId], references: [id])
+  service  Service? @relation(fields: [serviceId], references: [id])
   review   Review?
 
   @@index([customerId])
@@ -596,11 +616,11 @@ model Booking {
 // ============================================================================
 
 model Post {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  caption   String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  caption   String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -616,7 +636,7 @@ model PostMedia {
   id       String    @id @default(cuid())
   postId   String
   url      String
-  publicId String?   // Cloudinary
+  publicId String? // Cloudinary
   type     MediaType
   order    Int       @default(0)
   width    Int?
@@ -642,12 +662,12 @@ model Like {
 }
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   postId    String
-  content   String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  content   String    @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -688,25 +708,25 @@ enum ProductCondition {
 }
 
 model Product {
-  id          String           @id @default(cuid())
-  userId      String           // shop owner
-  name        String
-  description String?          @db.Text
-  category    String           // camera, lens, lighting, accessory, etc.
-  type        ProductType      @default(SALE)
-  price       Float?           // sale price
-  rentalPrice Float?           // per day
-  depositAmount Float?         // rental deposit, refunded on return
-  currency    String           @default("VND")
-  condition   ProductCondition @default(NEW)
-  stock       Int              @default(1)
-  isActive    Boolean          @default(true)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  deletedAt   DateTime?
+  id            String           @id @default(cuid())
+  userId        String // shop owner
+  name          String
+  description   String?          @db.Text
+  category      String // camera, lens, lighting, accessory, etc.
+  type          ProductType      @default(SALE)
+  price         Float? // sale price
+  rentalPrice   Float? // per day
+  depositAmount Float? // rental deposit, refunded on return
+  currency      String           @default("VND")
+  condition     ProductCondition @default(NEW)
+  stock         Int              @default(1)
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
 
-  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images ProductImage[]
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images     ProductImage[]
   orderItems OrderItem[]
   cartItems  CartItem[]
 
@@ -716,11 +736,11 @@ model Product {
 }
 
 model ProductImage {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   productId String
   url       String
   publicId  String?
-  order     Int    @default(0)
+  order     Int     @default(0)
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -754,7 +774,7 @@ model Order {
   status          OrderStatus @default(PENDING)
   totalPrice      Float
   currency        String      @default("VND")
-  deliveryMethod  String?     // SHIP | PICKUP
+  deliveryMethod  String? // SHIP | PICKUP
   shippingAddress String?     @db.Text
   trackingNumber  String?
   trackingCarrier String?
@@ -774,16 +794,16 @@ model Order {
 }
 
 model OrderItem {
-  id             String         @id @default(cuid())
-  orderId        String
-  productId      String
-  quantity       Int            @default(1)
-  unitPrice      Float
-  type           ProductType // SALE or RENT
-  rentalStart    DateTime?
-  rentalEnd      DateTime?
-  depositAmount  Float?
-  depositStatus  DepositStatus?
+  id            String         @id @default(cuid())
+  orderId       String
+  productId     String
+  quantity      Int            @default(1)
+  unitPrice     Float
+  type          ProductType // SALE or RENT
+  rentalStart   DateTime?
+  rentalEnd     DateTime?
+  depositAmount Float?
+  depositStatus DepositStatus?
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
@@ -844,16 +864,16 @@ model ConversationParticipant {
 }
 
 model Message {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   conversationId String
   senderId       String
   receiverId     String
-  content        String   @db.Text
-  type           String   @default("text") // text, image, booking_link
+  content        String    @db.Text
+  type           String    @default("text") // text, image, booking_link
   mediaUrl       String?
   bookingId      String?
   readAt         DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime  @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("sender", fields: [senderId], references: [id])
@@ -934,16 +954,16 @@ model AdminAction {
 // ============================================================================
 
 model Review {
-  id         String   @id @default(cuid())
-  bookingId  String   @unique
-  reviewerId String
-  reviewedId String   // provider being reviewed
-  rating     Int      // 1-5
-  content    String?  @db.Text
-  response   String?  @db.Text // provider response
+  id          String    @id @default(cuid())
+  bookingId   String    @unique
+  reviewerId  String
+  reviewedId  String // provider being reviewed
+  rating      Int // 1-5
+  content     String?   @db.Text
+  response    String?   @db.Text // provider response
   respondedAt DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   booking  Booking @relation(fields: [bookingId], references: [id])
   reviewer User    @relation("reviewer", fields: [reviewerId], references: [id])
@@ -988,7 +1008,7 @@ model Notification {
   type      NotificationType
   title     String
   message   String
-  data      Json?            // additional context (bookingId, postId, etc.)
+  data      Json? // additional context (bookingId, postId, etc.)
   readAt    DateTime?
   createdAt DateTime         @default(now())
 

@@ -17,6 +17,7 @@ test("registration records exactly 3 ConsentRecord rows, one per purpose", async
   await page.getByLabel("Full name").fill("Consent Tester");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(TEST_PASSWORD);
+  await page.getByLabel("Date of birth").fill("1995-01-01"); // age gate applies to every role as of Prompt B3
   // Only the mandatory SERVICE checkbox is checked — MARKETING and
   // ANALYTICS are deliberately left unticked to prove neither blocks
   // registration (registerSchema only refines on consentService).

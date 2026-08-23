@@ -64,7 +64,6 @@ export async function POST(request: Request) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     const uniqueRoles = Array.from(new Set(roles));
-    const isModel = uniqueRoles.includes("MODEL");
 
     const user = await db.user.create({
       data: {
@@ -76,10 +75,9 @@ export async function POST(request: Request) {
         // No email-delivery provider is wired up yet (phase 0); treat
         // registrations as verified until a real verification flow exists.
         emailVerified: new Date(),
-        // Age gate (docs/guides/fgrapher-prompts-batch-2.md §3b) — only
-        // collected/required when MODEL is among the selected roles;
-        // registerSchema already enforced >= 18 before this route runs.
-        dateOfBirth: isModel && dateOfBirth ? new Date(dateOfBirth) : undefined,
+        // Age gate (Prompt B3) — required for every account; registerSchema
+        // already enforced >= 18 before this route runs.
+        dateOfBirth: new Date(dateOfBirth),
         roles: {
           create: [
             { role: "CUSTOMER", active: true },

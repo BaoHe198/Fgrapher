@@ -1,16 +1,21 @@
-const MIN_MODEL_AGE = 18;
+// Applies to every registration as of Prompt B3 (docs/guides/
+// fgrapher-danh-gia-va-prompt-sua-doi.md) — was MODEL-only before.
+const MIN_REGISTRATION_AGE = 18;
 
 export function calculateAge(dateOfBirth: Date, at: Date = new Date()): number {
   let age = at.getFullYear() - dateOfBirth.getFullYear();
   const monthDiff = at.getMonth() - dateOfBirth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && at.getDate() < dateOfBirth.getDate())) {
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && at.getDate() < dateOfBirth.getDate())
+  ) {
     age--;
   }
   return age;
 }
 
 export function isAtLeast18(dateOfBirth: Date): boolean {
-  return calculateAge(dateOfBirth) >= MIN_MODEL_AGE;
+  return calculateAge(dateOfBirth) >= MIN_REGISTRATION_AGE;
 }
 
 // Buckets an exact age into a public-facing range — profile pages must

@@ -37,6 +37,7 @@ test("provider registers, activates a role, builds a profile, and appears in sea
   await page.getByLabel("Full name").fill("Provider Persona");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(TEST_PASSWORD);
+  await page.getByLabel("Date of birth").fill("1995-01-01"); // age gate applies to every role as of Prompt B3
   await page.getByRole("button", { name: "Creative pro" }).click();
   await page.getByRole("checkbox", { name: "Photographer" }).check();
   await page

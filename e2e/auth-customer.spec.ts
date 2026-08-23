@@ -19,6 +19,7 @@ test("customer registers, is auto-verified, browses, and views a profile", async
   await page.getByLabel("Full name").fill("Casey Customer");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(TEST_PASSWORD);
+  await page.getByLabel("Date of birth").fill("1995-01-01"); // age gate applies to every role as of Prompt B3
   // "Customer" is the default selected account type — no click needed, but
   // assert it's actually selected so this test fails if that default ever
   // changes silently.

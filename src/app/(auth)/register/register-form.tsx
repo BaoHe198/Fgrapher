@@ -271,12 +271,6 @@ export function RegisterForm({
           )}
         >
           <div className="flex flex-col gap-3 overflow-hidden">
-            <Input
-              label="Date of birth"
-              type="date"
-              error={errors.dateOfBirth?.message}
-              {...register("dateOfBirth")}
-            />
             <Checkbox
               checked={watch("acceptedContentGuidelines") ?? false}
               onCheckedChange={(checked) =>
@@ -317,6 +311,12 @@ export function RegisterForm({
           autoComplete="email"
           error={errors.email?.message}
           {...register("email")}
+        />
+        <Input
+          label="Date of birth"
+          type="date"
+          error={errors.dateOfBirth?.message}
+          {...register("dateOfBirth")}
         />
         <div className="flex flex-col gap-1.5">
           <Input

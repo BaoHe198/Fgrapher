@@ -33,11 +33,12 @@ export const registerSchema = z
       .regex(/[0-9]/, "Password must contain at least one number"),
     accountType: z.enum(["customer", "provider"]),
     roles: z.array(z.enum(PAID_ROLE_VALUES)),
-    // Age gate (docs/guides/fgrapher-prompts-batch-2.md §3b) — required
-    // only when MODEL is selected. Stored privately on User; never
-    // returned to the client or displayed, only used to compute a public
-    // age range (see lib/age-gate.ts's getAgeRangeLabel).
-    dateOfBirth: z.string().optional(),
+    // Age gate (Prompt B3, docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md)
+    // — required for EVERY account as of B3, not just MODEL (was optional
+    // before). Stored privately on User; never returned to the client or
+    // displayed, only used to compute a public age range (see
+    // lib/age-gate.ts's getAgeRangeLabel).
+    dateOfBirth: z.string().min(1, "Date of birth is required"),
     // Content guidelines acceptance (§3b item 3) — required only when
     // MODEL is selected.
     acceptedContentGuidelines: z.boolean().optional(),
@@ -58,23 +59,10 @@ export const registerSchema = z
     message: "You must agree to data processing to create an account",
     path: ["consentService"],
   })
-  .refine(
-    (data) => !data.roles.includes("MODEL") || Boolean(data.dateOfBirth),
-    {
-      message: "Date of birth is required for the Model role",
-      path: ["dateOfBirth"],
-    },
-  )
-  .refine(
-    (data) =>
-      !data.roles.includes("MODEL") ||
-      !data.dateOfBirth ||
-      isAtLeast18(new Date(data.dateOfBirth)),
-    {
-      message: "You must be at least 18 to register as a Model",
-      path: ["dateOfBirth"],
-    },
-  )
+  .refine((data) => isAtLeast18(new Date(data.dateOfBirth)), {
+    message: "You must be at least 18 years old to create a Fgrapher account",
+    path: ["dateOfBirth"],
+  })
   .refine(
     (data) =>
       !data.roles.includes("MODEL") || data.acceptedContentGuidelines === true,
