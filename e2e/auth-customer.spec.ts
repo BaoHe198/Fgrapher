@@ -10,7 +10,9 @@ import { db, TEST_PASSWORD } from "./helpers/db";
 // This test asserts that's actually what happens rather than silently
 // assuming it, so it'll fail loudly the day a real verification flow
 // replaces this shortcut.
-test("customer registers, is auto-verified, browses, and views a profile", async ({ page }) => {
+test("customer registers, is auto-verified, browses, and views a profile", async ({
+  page,
+}) => {
   const email = `customer.e2e.${Date.now()}@e2e.test`;
 
   await page.goto("/register");
@@ -21,6 +23,11 @@ test("customer registers, is auto-verified, browses, and views a profile", async
   // assert it's actually selected so this test fails if that default ever
   // changes silently.
   await expect(page.getByRole("button", { name: "Customer" })).toBeVisible();
+  await page
+    .getByRole("checkbox", {
+      name: /Tôi đồng ý cho Fgrapher xử lý dữ liệu cá nhân/,
+    })
+    .check();
 
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
@@ -35,6 +42,10 @@ test("customer registers, is auto-verified, browses, and views a profile", async
 
   await page.getByText("Fixture Provider Photography").click();
   await expect(page).toHaveURL(/\/profile\/fixtureprovider/);
-  await expect(page.getByRole("heading", { name: "Fixture Provider Photography" })).toBeVisible();
-  await expect(page.locator('[data-slot="badge"]', { hasText: "Photographer" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Fixture Provider Photography" }),
+  ).toBeVisible();
+  await expect(
+    page.locator('[data-slot="badge"]', { hasText: "Photographer" }),
+  ).toBeVisible();
 });

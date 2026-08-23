@@ -164,6 +164,7 @@ export function DataSettingsContent({
             </span>
           </div>
           <Switch
+            aria-label="Thông tin khuyến mại"
             checked={consent.MARKETING}
             onChange={(value) => toggleConsent("MARKETING", value)}
           />
@@ -179,6 +180,7 @@ export function DataSettingsContent({
             </span>
           </div>
           <Switch
+            aria-label="Phân tích hành vi sử dụng"
             checked={consent.ANALYTICS}
             onChange={(value) => toggleConsent("ANALYTICS", value)}
           />

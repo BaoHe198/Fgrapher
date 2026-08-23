@@ -41,6 +41,25 @@ export async function sendEmail({ to, subject, html }: SendEmailInput) {
   });
 }
 
+// Every other export in this file is transactional — booking status
+// changes, password resets, orders, reviews, subscription billing events
+// — tied to a specific transaction the recipient is a party to, so none
+// of them require ConsentPurpose.MARKETING (see services/compliance.ts).
+// Promotional content (product updates, tips, newsletters) must go
+// through this wrapper instead of calling sendEmail directly, so the
+// consent check can't be silently skipped by a future call site. The
+// caller resolves hasConsent(userId, "MARKETING") itself — this file
+// stays a thin transport and doesn't reach into the services layer.
+export async function sendMarketingEmail({
+  to,
+  subject,
+  html,
+  hasMarketingConsent,
+}: SendEmailInput & { hasMarketingConsent: boolean }) {
+  if (!hasMarketingConsent) return;
+  await sendEmail({ to, subject, html });
+}
+
 export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
   return `
     <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
