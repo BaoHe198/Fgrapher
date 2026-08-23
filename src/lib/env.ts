@@ -20,7 +20,11 @@ const serverSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   DIRECT_URL: z.string().min(1, "DIRECT_URL is required"),
   NEXTAUTH_SECRET: z.string().min(1, "NEXTAUTH_SECRET is required"),
-  NEXTAUTH_URL: z.string().min(1, "NEXTAUTH_URL is required"),
+  // Deliberately optional, unlike the other three: on Vercel Preview this
+  // is meant to be left unset (see docs/ENVIRONMENTS.md) so NextAuth
+  // infers the URL per-deployment from VERCEL_URL, since every Preview
+  // build gets its own unique URL that can't be hardcoded in one env var.
+  NEXTAUTH_URL: z.string().optional(),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
