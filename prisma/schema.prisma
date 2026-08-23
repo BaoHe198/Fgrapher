@@ -80,6 +80,8 @@ model User {
   savedProfiles  SavedProfile[]
   payments       Payment[]
   conversationParticipants ConversationParticipant[]
+  consentRecords ConsentRecord[]
+  dataRequests   DataRequest[]
 
   @@map("users")
 }
@@ -122,6 +124,90 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+// ============================================================================
+// COMPLIANCE (Luật Bảo vệ dữ liệu cá nhân 91/2025, Nghị định 356/2025) —
+// see docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md Prompt B2 and
+// CLAUDE.md's "Ràng buộc bắt buộc". This is infrastructure built to the
+// technical spec in that source document — NOT confirmed by a lawyer to
+// satisfy the real law. See docs/MVP_SCOPE.md.
+// ============================================================================
+
+enum ConsentPurpose {
+  SERVICE // required to use the service at all — never optional
+  MARKETING
+  ANALYTICS
+}
+
+// Every grant/revoke creates a NEW row — never updated in place — so the
+// full consent history for a user/purpose is always reconstructable
+// (who granted what, when, under which policy version, revoked when).
+model ConsentRecord {
+  id            String         @id @default(cuid())
+  userId        String
+  purpose       ConsentPurpose
+  policyVersion String
+  granted       Boolean
+  grantedAt     DateTime?
+  revokedAt     DateTime?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@map("consent_records")
+}
+
+// Loose targetType/targetId reference (not a Prisma relation) — matches
+// the existing Report/AdminAction pattern in this schema, since an
+// audited action can target several different model types. actorId is
+// nullable for system/cron-triggered entries that have no human actor.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  targetType String
+  targetId   String
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+  @@map("audit_logs")
+}
+
+enum DataRequestType {
+  EXPORT
+  DELETION
+}
+
+enum DataRequestStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+model DataRequest {
+  id          String             @id @default(cuid())
+  userId      String
+  type        DataRequestType
+  status      DataRequestStatus  @default(PENDING)
+  requestedAt DateTime           @default(now())
+  completedAt DateTime?
+  resultUrl   String?
+  note        String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([status, requestedAt])
+  @@map("data_requests")
 }
 
 // ============================================================================

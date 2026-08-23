@@ -41,22 +41,47 @@ export const registerSchema = z
     // Content guidelines acceptance (§3b item 3) — required only when
     // MODEL is selected.
     acceptedContentGuidelines: z.boolean().optional(),
+    // Personal-data consent (Prompt B2, docs/guides/
+    // fgrapher-danh-gia-va-prompt-sua-doi.md) — three SEPARATE choices,
+    // never pre-ticked, never gated together. consentService is the only
+    // one required to register at all; the other two are genuinely
+    // optional and must not block registration either way.
+    consentService: z.boolean(),
+    consentMarketing: z.boolean(),
+    consentAnalytics: z.boolean(),
   })
   .refine((data) => data.accountType !== "provider" || data.roles.length > 0, {
     message: "Select at least one role",
     path: ["roles"],
   })
-  .refine((data) => !data.roles.includes("MODEL") || Boolean(data.dateOfBirth), {
-    message: "Date of birth is required for the Model role",
-    path: ["dateOfBirth"],
+  .refine((data) => data.consentService === true, {
+    message: "You must agree to data processing to create an account",
+    path: ["consentService"],
   })
   .refine(
-    (data) => !data.roles.includes("MODEL") || !data.dateOfBirth || isAtLeast18(new Date(data.dateOfBirth)),
-    { message: "You must be at least 18 to register as a Model", path: ["dateOfBirth"] },
+    (data) => !data.roles.includes("MODEL") || Boolean(data.dateOfBirth),
+    {
+      message: "Date of birth is required for the Model role",
+      path: ["dateOfBirth"],
+    },
   )
-  .refine((data) => !data.roles.includes("MODEL") || data.acceptedContentGuidelines === true, {
-    message: "You must accept the content guidelines to register as a Model",
-    path: ["acceptedContentGuidelines"],
-  });
+  .refine(
+    (data) =>
+      !data.roles.includes("MODEL") ||
+      !data.dateOfBirth ||
+      isAtLeast18(new Date(data.dateOfBirth)),
+    {
+      message: "You must be at least 18 to register as a Model",
+      path: ["dateOfBirth"],
+    },
+  )
+  .refine(
+    (data) =>
+      !data.roles.includes("MODEL") || data.acceptedContentGuidelines === true,
+    {
+      message: "You must accept the content guidelines to register as a Model",
+      path: ["acceptedContentGuidelines"],
+    },
+  );
 
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -15,7 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Tag } from "@/components/ui/tag";
 import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
 import { cn, formatCurrency } from "@/lib/utils";
-import { registerSchema, type ProviderRole, type RegisterInput } from "@/lib/validations/auth";
+import {
+  registerSchema,
+  type ProviderRole,
+  type RegisterInput,
+} from "@/lib/validations/auth";
 
 const PROVIDER_ROLE_OPTIONS = PAID_ROLES as ProviderRole[];
 
@@ -79,6 +83,10 @@ export function RegisterForm({
       password: "",
       accountType: preselectedRole ? "provider" : "customer",
       roles: preselectedRole ? [preselectedRole] : [],
+      // Never pre-ticked — each is its own separate, explicit choice.
+      consentService: false,
+      consentMarketing: false,
+      consentAnalytics: false,
     },
   });
 
@@ -127,7 +135,9 @@ export function RegisterForm({
       return;
     }
 
-    const paidRoles = values.roles.filter((role) => (PAID_ROLES as string[]).includes(role));
+    const paidRoles = values.roles.filter((role) =>
+      (PAID_ROLES as string[]).includes(role),
+    );
     const callbackUrl =
       paidRoles.length > 0
         ? `/onboarding/billing?roles=${paidRoles.join(",")}&interval=${interval}`
@@ -147,7 +157,9 @@ export function RegisterForm({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="text-display-md text-text-primary">Create your account</h1>
+        <h1 className="text-display-md text-text-primary">
+          Create your account
+        </h1>
         <p className="text-body-md text-text-secondary">
           Join Fgrapher and start booking or getting booked.
         </p>
@@ -161,7 +173,9 @@ export function RegisterForm({
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
         <div className="flex flex-col gap-2">
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">I AM A</span>
+          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            I AM A
+          </span>
           <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
@@ -176,10 +190,14 @@ export function RegisterForm({
               <User
                 className={cn(
                   "size-5",
-                  accountType === "customer" ? "text-brand-primary" : "text-text-tertiary",
+                  accountType === "customer"
+                    ? "text-brand-primary"
+                    : "text-text-tertiary",
                 )}
               />
-              <span className="text-body-md font-semibold text-text-primary">Customer</span>
+              <span className="text-body-md font-semibold text-text-primary">
+                Customer
+              </span>
               <span className="text-body-sm text-text-secondary">
                 Book artists and buy gear
               </span>
@@ -198,11 +216,17 @@ export function RegisterForm({
               <Camera
                 className={cn(
                   "size-5",
-                  accountType === "provider" ? "text-brand-primary" : "text-text-tertiary",
+                  accountType === "provider"
+                    ? "text-brand-primary"
+                    : "text-text-tertiary",
                 )}
               />
-              <span className="text-body-md font-semibold text-text-primary">Creative pro</span>
-              <span className="text-body-sm text-text-secondary">Get booked and sell</span>
+              <span className="text-body-md font-semibold text-text-primary">
+                Creative pro
+              </span>
+              <span className="text-body-sm text-text-secondary">
+                Get booked and sell
+              </span>
             </button>
           </div>
         </div>
@@ -255,18 +279,26 @@ export function RegisterForm({
             />
             <Checkbox
               checked={watch("acceptedContentGuidelines") ?? false}
-              onCheckedChange={(checked) => setValue("acceptedContentGuidelines", checked)}
+              onCheckedChange={(checked) =>
+                setValue("acceptedContentGuidelines", checked)
+              }
               label={
                 <>
                   I confirm I&apos;m 18 or older and agree to the{" "}
-                  <Link href="/guidelines" target="_blank" className="text-text-link hover:underline">
+                  <Link
+                    href="/guidelines"
+                    target="_blank"
+                    className="text-text-link hover:underline"
+                  >
                     content guidelines
                   </Link>
                 </>
               }
             />
             {errors.acceptedContentGuidelines ? (
-              <p className="text-body-sm text-danger">{errors.acceptedContentGuidelines.message}</p>
+              <p className="text-body-sm text-danger">
+                {errors.acceptedContentGuidelines.message}
+              </p>
             ) : null}
           </div>
         </div>
@@ -308,7 +340,47 @@ export function RegisterForm({
           </div>
         </div>
 
-        <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmitting}>
+        <div className="flex flex-col gap-2.5 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
+          <Checkbox
+            checked={watch("consentService") ?? false}
+            onCheckedChange={(checked) =>
+              setValue("consentService", checked === true)
+            }
+            label={
+              <>
+                Tôi đồng ý cho Fgrapher xử lý dữ liệu cá nhân của tôi để cung
+                cấp dịch vụ (bắt buộc)
+              </>
+            }
+          />
+          {errors.consentService ? (
+            <p className="text-body-sm text-danger">
+              {errors.consentService.message}
+            </p>
+          ) : null}
+          <Checkbox
+            checked={watch("consentMarketing") ?? false}
+            onCheckedChange={(checked) =>
+              setValue("consentMarketing", checked === true)
+            }
+            label="Tôi đồng ý nhận thông tin khuyến mại, tin tức qua email (tùy chọn)"
+          />
+          <Checkbox
+            checked={watch("consentAnalytics") ?? false}
+            onCheckedChange={(checked) =>
+              setValue("consentAnalytics", checked === true)
+            }
+            label="Tôi đồng ý cho Fgrapher phân tích hành vi sử dụng để cải thiện dịch vụ (tùy chọn)"
+          />
+        </div>
+
+        <Button
+          type="submit"
+          variant="accent"
+          size="lg"
+          className="w-full"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="size-4 animate-spin" />
