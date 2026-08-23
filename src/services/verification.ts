@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import type { Role } from "@prisma/client";
 
+import { deleteKycAsset, isCloudinaryConfigured } from "@/lib/cloudinary";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { logAudit, recordConsent } from "@/services/compliance";
@@ -90,4 +91,69 @@ export async function submitVerification({
   });
 
   return updated;
+}
+
+// Daily cron (see /api/cron/purge-kyc-documents) — deletes the three KYC
+// images from Cloudinary and nulls their URL/publicId columns 90 days
+// after approval (UserRole.purgeAfter, set by services/admin.ts's
+// reviewVerification). verificationStatus/verifiedAt/verifiedBy/
+// idNumberHash are deliberately left untouched — they're the permanent
+// audit trail that a verification happened, independent of whether the
+// source images still exist.
+export async function purgeExpiredKycDocuments() {
+  // Unlike the upload/signed-URL helpers (pure local signature math),
+  // cloudinary.uploader.destroy() throws synchronously without
+  // credentials — no-op the whole run rather than nulling out DB columns
+  // for images that were never actually deleted from anywhere.
+  if (!isCloudinaryConfigured()) return 0;
+
+  const due = await db.userRole.findMany({
+    where: {
+      purgeAfter: { lt: new Date() },
+      verificationIdUrl: { not: null },
+    },
+    select: {
+      id: true,
+      userId: true,
+      verificationIdPublicId: true,
+      verificationIdBackPublicId: true,
+      verificationSelfiePublicId: true,
+    },
+  });
+
+  for (const row of due) {
+    await Promise.all(
+      [
+        row.verificationIdPublicId,
+        row.verificationIdBackPublicId,
+        row.verificationSelfiePublicId,
+      ]
+        .filter((publicId): publicId is string => Boolean(publicId))
+        .map((publicId) => deleteKycAsset(publicId)),
+    );
+
+    await db.userRole.update({
+      where: { id: row.id },
+      data: {
+        verificationIdUrl: null,
+        verificationIdPublicId: null,
+        verificationIdBackUrl: null,
+        verificationIdBackPublicId: null,
+        verificationSelfieUrl: null,
+        verificationSelfiePublicId: null,
+        purgeAfter: null,
+      },
+    });
+
+    // No human actor — a system/cron action, matching AuditLog's nullable
+    // actorId design for exactly this case.
+    await logAudit({
+      action: "KYC_DOCUMENTS_PURGED",
+      targetType: "user_role",
+      targetId: row.id,
+      metadata: { userId: row.userId },
+    });
+  }
+
+  return due.length;
 }
