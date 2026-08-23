@@ -6,6 +6,10 @@ import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 // which said X; the policy now says Y"). See services/compliance.ts.
 export const CURRENT_POLICY_VERSION = "2026-08-23-v1";
 
+// Deadline shown on /admin/compliance's DataRequest queue — computed as
+// requestedAt + this many days, not stored on the row itself.
+export const DATA_REQUEST_SLA_DAYS = 30;
+
 export const PAID_ROLES: Role[] = [
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",

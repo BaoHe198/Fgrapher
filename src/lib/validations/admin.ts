@@ -31,3 +31,8 @@ export const reviewVerificationSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("approve") }),
   z.object({ action: z.literal("reject"), reason: z.string().min(1) }),
 ]);
+
+export const processDataRequestSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("complete") }),
+  z.object({ action: z.literal("reject"), note: z.string().min(1) }),
+]);
