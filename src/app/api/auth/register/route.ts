@@ -2,7 +2,9 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 import { registerSchema } from "@/lib/validations/auth";
+import { assignFreePlan } from "@/services/subscription";
 import { Prisma } from "@prisma/client";
 
 export async function POST(request: Request) {
@@ -20,7 +22,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const { name, email, password, roles, dateOfBirth, acceptedContentGuidelines } = parsed.data;
+  const {
+    name,
+    email,
+    password,
+    roles,
+    dateOfBirth,
+    acceptedContentGuidelines,
+  } = parsed.data;
   const [firstName, ...rest] = name.trim().split(/\s+/);
   const lastName = rest.join(" ") || null;
 
@@ -59,8 +68,10 @@ export async function POST(request: Request) {
         roles: {
           create: [
             { role: "CUSTOMER", active: true },
-            // Paid roles start inactive until a subscription is created
-            // (Phase 7).
+            // Paid roles start inactive until a subscription is created —
+            // either by Stripe Checkout completing (BILLING_ENABLED=true)
+            // or, while billing is disabled, immediately below via
+            // assignFreePlan.
             ...uniqueRoles.map((role) => ({
               role,
               active: false,
@@ -72,6 +83,16 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    // BILLING_ENABLED=false (Stripe can't take a Vietnam-registered
+    // merchant account — see CLAUDE.md): every paid role gets a free
+    // 12-month plan immediately instead of being routed through Stripe
+    // Checkout. onboarding/billing redirects straight past its own step
+    // when this flag is off, so this is the only place that activates
+    // these roles in that case.
+    if (!features.billingEnabled && uniqueRoles.length > 0) {
+      await assignFreePlan(user.id, uniqueRoles);
+    }
 
     return NextResponse.json(
       {

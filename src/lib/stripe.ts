@@ -1,5 +1,15 @@
 import Stripe from "stripe";
 
+// Dormant while BILLING_ENABLED=false (src/lib/features.ts) — Stripe
+// can't take a merchant account for a Vietnam-registered business, see
+// CLAUDE.md's "Ràng buộc bắt buộc" #1. Every call site in
+// src/app/api/stripe/*, src/app/api/webhooks/stripe, and
+// services/subscription.ts's Stripe-syncing functions is gated behind
+// that flag and returns 404 without reaching this file. Kept, not
+// deleted, in case the business situation changes (e.g. incorporating
+// abroad) — re-enable by setting BILLING_ENABLED=true and configuring
+// real Stripe credentials; no code changes needed to turn it back on.
+//
 // No-ops gracefully when STRIPE_SECRET_KEY isn't configured (this
 // environment has no live Stripe credentials), matching the pattern
 // already used for Cloudinary/Resend — callers check isStripeConfigured()
@@ -24,13 +34,21 @@ function requireStripe() {
   return stripe;
 }
 
-export async function getOrCreateCustomer(userId: string, email: string, name?: string | null) {
+export async function getOrCreateCustomer(
+  userId: string,
+  email: string,
+  name?: string | null,
+) {
   const client = requireStripe();
 
   const existing = await client.customers.list({ email, limit: 1 });
   if (existing.data[0]) return existing.data[0];
 
-  return client.customers.create({ email, name: name ?? undefined, metadata: { userId } });
+  return client.customers.create({
+    email,
+    name: name ?? undefined,
+    metadata: { userId },
+  });
 }
 
 export async function createCheckoutSession({
@@ -63,7 +81,15 @@ export async function createCheckoutSession({
 // Stripe's zero-decimal currencies (VND included) expect the amount as-is,
 // not multiplied by 100 like USD/EUR cents — getting this wrong overcharges
 // VND customers 100x.
-const ZERO_DECIMAL_CURRENCIES = new Set(["vnd", "jpy", "krw", "clp", "vuv", "xof", "xaf"]);
+const ZERO_DECIMAL_CURRENCIES = new Set([
+  "vnd",
+  "jpy",
+  "krw",
+  "clp",
+  "vuv",
+  "xof",
+  "xaf",
+]);
 
 export function toStripeAmount(amount: number, currency: string) {
   return ZERO_DECIMAL_CURRENCIES.has(currency.toLowerCase())
@@ -80,7 +106,12 @@ export async function createOrderCheckoutSession({
   collectShippingAddress,
 }: {
   customerEmail: string;
-  lineItems: { name: string; amount: number; currency: string; quantity: number }[];
+  lineItems: {
+    name: string;
+    amount: number;
+    currency: string;
+    quantity: number;
+  }[];
   metadata: Record<string, string>;
   successUrl: string;
   cancelUrl: string;
@@ -113,20 +144,33 @@ export async function refundPayment(paymentIntentId: string) {
   return client.refunds.create({ payment_intent: paymentIntentId });
 }
 
-export async function createPortalSession(customerId: string, returnUrl: string) {
+export async function createPortalSession(
+  customerId: string,
+  returnUrl: string,
+) {
   const client = requireStripe();
-  return client.billingPortal.sessions.create({ customer: customerId, return_url: returnUrl });
+  return client.billingPortal.sessions.create({
+    customer: customerId,
+    return_url: returnUrl,
+  });
 }
 
-export async function cancelSubscription(subscriptionId: string, immediately: boolean) {
+export async function cancelSubscription(
+  subscriptionId: string,
+  immediately: boolean,
+) {
   const client = requireStripe();
   if (immediately) return client.subscriptions.cancel(subscriptionId);
-  return client.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
+  return client.subscriptions.update(subscriptionId, {
+    cancel_at_period_end: true,
+  });
 }
 
 export async function resumeSubscription(subscriptionId: string) {
   const client = requireStripe();
-  return client.subscriptions.update(subscriptionId, { cancel_at_period_end: false });
+  return client.subscriptions.update(subscriptionId, {
+    cancel_at_period_end: false,
+  });
 }
 
 export function constructWebhookEvent(rawBody: string, signature: string) {

@@ -20,7 +20,9 @@ function billingUrl() {
   return `${process.env.NEXTAUTH_URL ?? ""}/dashboard/settings/billing`;
 }
 
-function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
+function mapStripeStatus(
+  status: Stripe.Subscription.Status,
+): SubscriptionStatus {
   switch (status) {
     case "trialing":
       return "TRIALING";
@@ -43,7 +45,8 @@ function itemForRole(subscription: Stripe.Subscription, role: Role) {
   const plan = ROLE_PLANS[role];
   if (!plan) return undefined;
   return subscription.items.data.find(
-    (i) => i.price.id === plan.monthlyPriceId || i.price.id === plan.yearlyPriceId,
+    (i) =>
+      i.price.id === plan.monthlyPriceId || i.price.id === plan.yearlyPriceId,
   );
 }
 
@@ -76,7 +79,10 @@ async function syncSubscriptionFromStripe(
       where: { userRoleId: userRole.id },
       create: {
         userRoleId: userRole.id,
-        stripeCustomerId: typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id,
+        stripeCustomerId:
+          typeof subscription.customer === "string"
+            ? subscription.customer
+            : subscription.customer.id,
         stripeSubscriptionId: subscription.id,
         stripeSubscriptionItemId: item.id,
         stripePriceId: item.price.id,
@@ -96,7 +102,10 @@ async function syncSubscriptionFromStripe(
         currentPeriodStart: new Date(item.current_period_start * 1000),
         currentPeriodEnd: new Date(item.current_period_end * 1000),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        graceEndsAt: mapStripeStatus(subscription.status) === "PAST_DUE" ? undefined : null,
+        graceEndsAt:
+          mapStripeStatus(subscription.status) === "PAST_DUE"
+            ? undefined
+            : null,
       },
     });
 
@@ -106,7 +115,9 @@ async function syncSubscriptionFromStripe(
   return results;
 }
 
-export async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+export async function handleCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+) {
   if (!stripe) return;
 
   const userId = session.metadata?.userId;
@@ -115,12 +126,21 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session) 
 
   const roles = rolesParam.split(",") as Role[];
   const subscriptionId =
-    typeof session.subscription === "string" ? session.subscription : session.subscription.id;
-  const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId, {
-    expand: ["items.data.price"],
-  });
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription.id;
+  const stripeSubscription = await stripe.subscriptions.retrieve(
+    subscriptionId,
+    {
+      expand: ["items.data.price"],
+    },
+  );
 
-  const results = await syncSubscriptionFromStripe(userId, stripeSubscription, roles);
+  const results = await syncSubscriptionFromStripe(
+    userId,
+    stripeSubscription,
+    roles,
+  );
   if (results.length === 0) return;
 
   await notifyCritical({
@@ -138,7 +158,9 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session) 
   });
 }
 
-export async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+export async function handleSubscriptionUpdated(
+  subscription: Stripe.Subscription,
+) {
   const existing = await db.subscription.findMany({
     where: { stripeSubscriptionId: subscription.id },
     include: { userRole: true },
@@ -157,11 +179,14 @@ export async function handleSubscriptionUpdated(subscription: Stripe.Subscriptio
       userId,
       type: "SUBSCRIPTION_EXPIRING",
       title: "Subscription cancelling",
-      message: "Your subscription is set to cancel at the end of the current period.",
+      message:
+        "Your subscription is set to cancel at the end of the current period.",
       email: {
         subject: "We're sorry to see you go — Fgrapher",
         html: subscriptionCancellingEmailHtml({
-          periodEndLabel: periodEnd ? periodEnd.toDateString() : "the end of the period",
+          periodEndLabel: periodEnd
+            ? periodEnd.toDateString()
+            : "the end of the period",
           billingUrl: billingUrl(),
         }),
       },
@@ -173,7 +198,8 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
   if (!stripe) return;
 
   const subscriptionRef = invoice.parent?.subscription_details?.subscription;
-  const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
+  const subscriptionId =
+    typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
   if (!subscriptionId) return;
 
   const existing = await db.subscription.findMany({
@@ -182,9 +208,12 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
   });
   if (existing.length === 0) return;
 
-  const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId, {
-    expand: ["items.data.price"],
-  });
+  const stripeSubscription = await stripe.subscriptions.retrieve(
+    subscriptionId,
+    {
+      expand: ["items.data.price"],
+    },
+  );
   const userId = existing[0].userRole.userId;
   const roles = existing.map((s) => s.userRole.role);
   await syncSubscriptionFromStripe(userId, stripeSubscription, roles);
@@ -196,7 +225,11 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
       amount: invoice.amount_paid / 100,
       currency: invoice.currency.toUpperCase(),
       status: "SUCCEEDED",
-      description: invoice.lines.data.map((l) => l.description).filter(Boolean).join(", ") || "Fgrapher subscription",
+      description:
+        invoice.lines.data
+          .map((l) => l.description)
+          .filter(Boolean)
+          .join(", ") || "Fgrapher subscription",
     },
   });
 
@@ -219,7 +252,8 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
 export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   const subscriptionRef = invoice.parent?.subscription_details?.subscription;
-  const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
+  const subscriptionId =
+    typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
   if (!subscriptionId) return;
 
   const existing = await db.subscription.findMany({
@@ -252,7 +286,9 @@ export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   });
 }
 
-export async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+export async function handleSubscriptionDeleted(
+  subscription: Stripe.Subscription,
+) {
   const existing = await db.subscription.findMany({
     where: { stripeSubscriptionId: subscription.id },
     include: { userRole: true },
@@ -280,12 +316,76 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
     userId,
     type: "SUBSCRIPTION_CANCELLED",
     title: "Subscription ended",
-    message: "Your subscription has ended and your profile is no longer visible in search.",
+    message:
+      "Your subscription has ended and your profile is no longer visible in search.",
     email: {
       subject: "Your subscription has ended — Fgrapher",
       html: subscriptionEndedEmailHtml({ billingUrl: billingUrl() }),
     },
   });
+}
+
+// ---------------------------------------------------------------------
+// Manual plan assignment — used while BILLING_ENABLED=false (Stripe
+// can't take a Vietnam-registered merchant account, see CLAUDE.md).
+// Bypasses Stripe entirely: creates/activates a UserRole and an ACTIVE
+// Subscription with no stripeCustomerId/stripeSubscriptionId. Callers
+// are responsible for their own logAdminAction() call when this is
+// triggered by an admin (matching the pattern used elsewhere in this
+// codebase — see services/admin.ts) — assignFreePlan below is the one
+// exception, since it's system-triggered at registration, not an admin
+// choice.
+// ---------------------------------------------------------------------
+
+export async function assignManualPlan({
+  userId,
+  role,
+  plan,
+  expiresAt,
+}: {
+  userId: string;
+  role: Role;
+  plan: string;
+  expiresAt: Date;
+}) {
+  const userRole = await db.userRole.upsert({
+    where: { userId_role: { userId, role } },
+    create: { userId, role, active: true },
+    update: { active: true },
+  });
+
+  return db.subscription.upsert({
+    where: { userRoleId: userRole.id },
+    create: {
+      userRoleId: userRole.id,
+      plan,
+      status: "ACTIVE",
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: expiresAt,
+    },
+    update: {
+      plan,
+      status: "ACTIVE",
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: expiresAt,
+      cancelAtPeriodEnd: false,
+    },
+  });
+}
+
+const FREE_PLAN_DEFAULT_MONTHS = 12;
+
+// Called from /api/auth/register when BILLING_ENABLED=false — every new
+// paid-role signup gets a free plan immediately instead of being routed
+// through Stripe Checkout.
+export async function assignFreePlan(userId: string, roles: Role[]) {
+  const expiresAt = new Date();
+  expiresAt.setMonth(expiresAt.getMonth() + FREE_PLAN_DEFAULT_MONTHS);
+  return Promise.all(
+    roles.map((role) =>
+      assignManualPlan({ userId, role, plan: "FREE", expiresAt }),
+    ),
+  );
 }
 
 export async function getBillingOverview(userId: string) {

@@ -37,6 +37,19 @@ upload media, list services, or receive bookings. Every other role is paid
 **Who can use it:** anyone selecting a paid role at registration, or adding
 one later from `/dashboard/settings/roles`.
 
+**⚠️ Currently disabled (`BILLING_ENABLED=false`, see CLAUDE.md and
+`docs/MVP_SCOPE.md`):** Stripe can't take a merchant account for a
+Vietnam-registered business. Everything below this line describes the
+Stripe-backed flow as it exists in code, kept dormant behind the flag —
+none of it is live today. What actually happens instead: every paid role
+selected at registration gets a free 12-month plan immediately
+(`services/subscription.ts`'s `assignFreePlan`, called from
+`/api/auth/register`), and admins can assign/extend a plan manually from
+`/admin/users/[id]` (`assignManualPlan`) — no payment ever collected. The
+`/onboarding/billing` step and `/dashboard/settings/billing`'s Stripe UI
+are replaced with a simple "currently free" message while the flag is
+off.
+
 - **Trial:** every new paid-role checkout starts a 14-day free trial
   (`trial_period_days: 14`, `lib/stripe.ts`'s `createCheckoutSession`).
 - **Billing cycle:** monthly or yearly, chosen at checkout. Yearly is
@@ -203,7 +216,7 @@ via `/api/conversations`.
 - **Blocking:** `BlockedUser` is a one-directional row
   (`@@unique([blockerId, blockedId])`) but message-sending checks both
   directions (`{blockerId: A, blockedId: B} OR {blockerId: B, blockedId:
-  A}`) — either party blocking stops messages both ways, not just from the
+A}`) — either party blocking stops messages both ways, not just from the
   blocker.
 
 ## 9. Marketplace (Camera Shop)
@@ -221,7 +234,7 @@ buys/rents.
   capped at 99 per line (`marketplace.ts` validation).
 - **Checkout:** one Stripe Checkout session per cart, but **orders are
   split one-per-shop** even from a single multi-shop cart (`createOrders
-  FromCheckout` groups cart items by `product.userId`) — this is also
+FromCheckout` groups cart items by `product.userId`) — this is also
   exactly what Stripe Connect (payout splitting) would have required, so
   the data model is already correct for that even though payments
   currently settle to the platform account (see `docs/ARCHITECTURE.md`
@@ -309,18 +322,18 @@ selectable at registration, granted only via `scripts/make-admin.ts`.
 
 Extracted from code, not assumption. Cross-checked for duplication.
 
-| Rule | Value | Source |
-|---|---|---|
-| Minimum booking notice | 24 hours | `services/bookings.ts` `MIN_NOTICE_HOURS`, independently re-declared (same value) in `services/availability.ts` `MIN_NOTICE_HOURS` — **duplicated in two places with the same value today; a future change to one and not the other would silently desync booking creation from the availability calendar it's based on** |
-| Booking cancellation notice | **none enforced** | `updateBookingStatus` allows `CANCELLED` from `PENDING`/`CONFIRMED` with no time-based check — flagged because most booking platforms have one; confirm this is intentional |
-| Review submission window | 30 days after booking completion | `services/reviews.ts` `REVIEW_WINDOW_DAYS` |
-| Review edit window | 7 days after posting | `services/reviews.ts` `EDIT_WINDOW_DAYS` |
-| Review response edit window | 24 hours after posting the response | `services/reviews.ts` `RESPONSE_EDIT_WINDOW_HOURS` — same numeric value as the booking-notice rule above but an unrelated concept; not a real duplicate, flagged only so the two aren't confused when grepping for "24" |
-| Subscription trial length | 14 days | `lib/stripe.ts` `createCheckoutSession` (`trial_period_days: 14`) |
-| Subscription payment-failure grace period | 7 days | `services/subscription.ts` `GRACE_PERIOD_DAYS` |
-| Yearly billing discount | 20% off (monthly × 12 × 0.8) | `lib/constants/plans.ts` `YEARLY_DISCOUNT` |
-| Portfolio upload limit | none enforced | matches the "Unlimited uploads" pricing copy — intentional |
-| Booking reference-image attachments | max 5 | `lib/validations/booking.ts` (`referenceImages: z.array(...).max(5)`) |
-| Marketplace cart line quantity | max 99 | `lib/validations/marketplace.ts` |
-| API rate limiting | **none exists anywhere in the codebase** | no rate-limit library/middleware found — every route is only gated by auth, not request volume |
-| Booking availability slot granularity | 60 minutes | `services/availability.ts` `SLOT_MINUTES` |
+| Rule                                      | Value                                    | Source                                                                                                                                                                                                                                                                                                                    |
+| ----------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Minimum booking notice                    | 24 hours                                 | `services/bookings.ts` `MIN_NOTICE_HOURS`, independently re-declared (same value) in `services/availability.ts` `MIN_NOTICE_HOURS` — **duplicated in two places with the same value today; a future change to one and not the other would silently desync booking creation from the availability calendar it's based on** |
+| Booking cancellation notice               | **none enforced**                        | `updateBookingStatus` allows `CANCELLED` from `PENDING`/`CONFIRMED` with no time-based check — flagged because most booking platforms have one; confirm this is intentional                                                                                                                                               |
+| Review submission window                  | 30 days after booking completion         | `services/reviews.ts` `REVIEW_WINDOW_DAYS`                                                                                                                                                                                                                                                                                |
+| Review edit window                        | 7 days after posting                     | `services/reviews.ts` `EDIT_WINDOW_DAYS`                                                                                                                                                                                                                                                                                  |
+| Review response edit window               | 24 hours after posting the response      | `services/reviews.ts` `RESPONSE_EDIT_WINDOW_HOURS` — same numeric value as the booking-notice rule above but an unrelated concept; not a real duplicate, flagged only so the two aren't confused when grepping for "24"                                                                                                   |
+| Subscription trial length                 | 14 days                                  | `lib/stripe.ts` `createCheckoutSession` (`trial_period_days: 14`)                                                                                                                                                                                                                                                         |
+| Subscription payment-failure grace period | 7 days                                   | `services/subscription.ts` `GRACE_PERIOD_DAYS`                                                                                                                                                                                                                                                                            |
+| Yearly billing discount                   | 20% off (monthly × 12 × 0.8)             | `lib/constants/plans.ts` `YEARLY_DISCOUNT`                                                                                                                                                                                                                                                                                |
+| Portfolio upload limit                    | none enforced                            | matches the "Unlimited uploads" pricing copy — intentional                                                                                                                                                                                                                                                                |
+| Booking reference-image attachments       | max 5                                    | `lib/validations/booking.ts` (`referenceImages: z.array(...).max(5)`)                                                                                                                                                                                                                                                     |
+| Marketplace cart line quantity            | max 99                                   | `lib/validations/marketplace.ts`                                                                                                                                                                                                                                                                                          |
+| API rate limiting                         | **none exists anywhere in the codebase** | no rate-limit library/middleware found — every route is only gated by auth, not request volume                                                                                                                                                                                                                            |
+| Booking availability slot granularity     | 60 minutes                               | `services/availability.ts` `SLOT_MINUTES`                                                                                                                                                                                                                                                                                 |

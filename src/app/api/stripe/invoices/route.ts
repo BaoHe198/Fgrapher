@@ -2,23 +2,41 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 import { isStripeConfigured, stripe } from "@/lib/stripe";
 
+// Dormant while BILLING_ENABLED=false — see CLAUDE.md.
 export async function GET() {
+  if (!features.billingEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
 
     if (!isStripeConfigured() || !stripe) {
-      return NextResponse.json({ data: [], error: null, message: null }, { status: 200 });
+      return NextResponse.json(
+        { data: [], error: null, message: null },
+        { status: 200 },
+      );
     }
 
     const subscription = await db.subscription.findFirst({
-      where: { userRole: { userId: session.user.id }, stripeCustomerId: { not: null } },
+      where: {
+        userRole: { userId: session.user.id },
+        stripeCustomerId: { not: null },
+      },
       orderBy: { createdAt: "desc" },
     });
 
     if (!subscription?.stripeCustomerId) {
-      return NextResponse.json({ data: [], error: null, message: null }, { status: 200 });
+      return NextResponse.json(
+        { data: [], error: null, message: null },
+        { status: 200 },
+      );
     }
 
     const invoices = await stripe.invoices.list({
@@ -30,8 +48,10 @@ export async function GET() {
       id: invoice.id,
       date: invoice.created * 1000,
       description:
-        invoice.lines.data.map((l) => l.description).filter(Boolean).join(", ") ||
-        "Fgrapher subscription",
+        invoice.lines.data
+          .map((l) => l.description)
+          .filter(Boolean)
+          .join(", ") || "Fgrapher subscription",
       amount: invoice.amount_paid / 100,
       currency: invoice.currency.toUpperCase(),
       status: invoice.status,
@@ -39,7 +59,10 @@ export async function GET() {
       pdfUrl: invoice.invoice_pdf,
     }));
 
-    return NextResponse.json({ data, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(

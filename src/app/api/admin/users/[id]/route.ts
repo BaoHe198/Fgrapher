@@ -11,8 +11,12 @@ import {
   updateAdminNotes,
   verifyUser,
 } from "@/services/admin";
+import { assignManualPlan } from "@/services/subscription";
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     await requireAdmin();
     const { id } = await params;
@@ -25,7 +29,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       );
     }
 
-    return NextResponse.json({ data: user, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data: user, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -41,7 +48,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await requireAdmin();
     const { id } = await params;
@@ -75,6 +85,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       case "notes":
         user = await updateAdminNotes(id, parsed.data.notes);
         break;
+      case "assign_plan":
+        await assignManualPlan({
+          userId: id,
+          role: parsed.data.role,
+          plan: parsed.data.plan,
+          expiresAt: new Date(parsed.data.expiresAt),
+        });
+        user = await getAdminUserDetail(id);
+        break;
     }
 
     await logAdminAction({
@@ -85,7 +104,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       details: parsed.data,
     });
 
-    return NextResponse.json({ data: user, error: null, message: "Updated" }, { status: 200 });
+    return NextResponse.json(
+      { data: user, error: null, message: "Updated" },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(

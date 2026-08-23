@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+// Env vars are always strings — z.coerce.boolean() is a common trap here
+// because it treats ANY non-empty string as true, including the literal
+// text "false". This only ever accepts the exact strings "true"/"false"
+// (defaulting to false when unset), so a typo'd value fails the build
+// loudly instead of silently turning a flag on.
+const booleanFlag = (defaultValue: "true" | "false") =>
+  z
+    .enum(["true", "false"])
+    .default(defaultValue)
+    .transform((v) => v === "true");
+
 // Fails loudly at build/startup time rather than silently at request time.
 //
 // Required vs optional here matches how the rest of the app already
@@ -45,6 +56,15 @@ const serverSchema = z.object({
   // is redirected here instead of the real recipient when APP_ENV is
   // "staging" and this is set.
   STAGING_TEST_INBOX: z.string().email().optional(),
+
+  // Feature flags — see lib/features.ts and docs/MVP_SCOPE.md. All
+  // default OFF: Stripe can't take a Vietnam-registered merchant
+  // account (CLAUDE.md's "Ràng buộc bắt buộc" #1), and marketplace/
+  // social feed are out of MVP scope, per
+  // docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md.
+  BILLING_ENABLED: booleanFlag("false"),
+  MARKETPLACE_ENABLED: booleanFlag("false"),
+  SOCIAL_FEED_ENABLED: booleanFlag("false"),
 });
 
 const publicSchema = z.object({

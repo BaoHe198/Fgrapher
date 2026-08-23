@@ -1,6 +1,13 @@
 "use client";
 
-import type { BookingStatus, Role, Subscription, SubscriptionStatus, User, UserRole } from "@prisma/client";
+import type {
+  BookingStatus,
+  Role,
+  Subscription,
+  SubscriptionStatus,
+  User,
+  UserRole,
+} from "@prisma/client";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -16,10 +23,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { ROLE_LABELS } from "@/lib/constants";
+import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
+
+function defaultExpiryDate() {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 12);
+  return d.toISOString().slice(0, 10);
+}
 
 type UserDetail = User & {
   roles: (UserRole & { subscription: Subscription | null })[];
@@ -27,7 +42,10 @@ type UserDetail = User & {
   bookingsAsProvider: { id: string; status: BookingStatus }[];
 };
 
-const SUB_STATUS_VARIANT: Record<SubscriptionStatus, "warning" | "success" | "neutral" | "destructive"> = {
+const SUB_STATUS_VARIANT: Record<
+  SubscriptionStatus,
+  "warning" | "success" | "neutral" | "destructive"
+> = {
   ACTIVE: "success",
   TRIALING: "success",
   PAST_DUE: "warning",
@@ -43,6 +61,10 @@ export default function AdminUserDetailPage() {
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [suspendReason, setSuspendReason] = useState("");
   const [notes, setNotes] = useState("");
+  const [planRole, setPlanRole] = useState<Role>(PAID_ROLES[0]);
+  const [planName, setPlanName] = useState("FREE");
+  const [planExpiresAt, setPlanExpiresAt] = useState(defaultExpiryDate());
+  const [planNote, setPlanNote] = useState("");
 
   const load = () => {
     fetch(`/api/admin/users/${params.id}`)
@@ -77,6 +99,17 @@ export default function AdminUserDetailPage() {
     load();
   };
 
+  const assignPlan = async () => {
+    if (!planName.trim() || !planExpiresAt) return;
+    await runAction("assign_plan", {
+      role: planRole,
+      plan: planName.trim(),
+      expiresAt: new Date(planExpiresAt).toISOString(),
+      note: planNote.trim() || undefined,
+    });
+    setPlanNote("");
+  };
+
   if (isLoading || !user) {
     return (
       <div className="flex justify-center py-16">
@@ -86,34 +119,60 @@ export default function AdminUserDetailPage() {
   }
 
   const bookingsTotal = user.bookingsAsProvider.length;
-  const completed = user.bookingsAsProvider.filter((b) => b.status === "COMPLETED").length;
-  const cancelled = user.bookingsAsProvider.filter((b) => b.status === "CANCELLED" || b.status === "DECLINED").length;
+  const completed = user.bookingsAsProvider.filter(
+    (b) => b.status === "COMPLETED",
+  ).length;
+  const cancelled = user.bookingsAsProvider.filter(
+    (b) => b.status === "CANCELLED" || b.status === "DECLINED",
+  ).length;
 
   return (
     <div className="flex flex-col gap-5">
-      <Link href="/admin/users" className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary">
+      <Link
+        href="/admin/users"
+        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary"
+      >
         <ArrowLeft className="size-4" />
         Back to users
       </Link>
 
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-display-md text-text-primary">{user.firstName ?? user.name ?? user.email}</h1>
-        {user.isSuspended ? <Badge variant="destructive">Suspended</Badge> : null}
+        <h1 className="text-display-md text-text-primary">
+          {user.firstName ?? user.name ?? user.email}
+        </h1>
+        {user.isSuspended ? (
+          <Badge variant="destructive">Suspended</Badge>
+        ) : null}
         {user.isVerified ? <Badge variant="success">Verified</Badge> : null}
       </div>
 
       <div className="flex flex-wrap gap-2">
         {user.isSuspended ? (
-          <Button size="sm" variant="secondary" disabled={busy} onClick={() => runAction("unsuspend")}>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={busy}
+            onClick={() => runAction("unsuspend")}
+          >
             Unsuspend
           </Button>
         ) : (
-          <Button size="sm" variant="destructive" disabled={busy} onClick={() => setSuspendOpen(true)}>
+          <Button
+            size="sm"
+            variant="destructive"
+            disabled={busy}
+            onClick={() => setSuspendOpen(true)}
+          >
             Suspend
           </Button>
         )}
         {!user.isVerified ? (
-          <Button size="sm" variant="secondary" disabled={busy} onClick={() => runAction("verify")}>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={busy}
+            onClick={() => runAction("verify")}
+          >
             Verify account
           </Button>
         ) : null}
@@ -122,7 +181,11 @@ export default function AdminUserDetailPage() {
           variant="ghost"
           disabled={busy}
           onClick={() => {
-            if (confirm("Soft-delete this account? This can be reversed in the database if needed.")) {
+            if (
+              confirm(
+                "Soft-delete this account? This can be reversed in the database if needed.",
+              )
+            ) {
               runAction("delete");
             }
           }}
@@ -140,23 +203,44 @@ export default function AdminUserDetailPage() {
 
         <TabsPanel value="overview" className="mt-4">
           <div className="flex flex-col gap-4">
-            <Card padding={false} className="flex flex-col divide-y divide-border-subtle">
+            <Card
+              padding={false}
+              className="flex flex-col divide-y divide-border-subtle"
+            >
               {[
                 ["Email", user.email],
                 ["Username", user.username ?? "—"],
                 ["Location", user.location ?? "—"],
-                ["Joined", new Date(user.createdAt).toLocaleDateString("en-US", { dateStyle: "long" })],
+                [
+                  "Joined",
+                  new Date(user.createdAt).toLocaleDateString("en-US", {
+                    dateStyle: "long",
+                  }),
+                ],
               ].map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between px-5 py-3">
-                  <span className="text-body-sm text-text-tertiary">{label}</span>
-                  <span className="text-body-md text-text-primary">{value}</span>
+                <div
+                  key={label}
+                  className="flex items-center justify-between px-5 py-3"
+                >
+                  <span className="text-body-sm text-text-tertiary">
+                    {label}
+                  </span>
+                  <span className="text-body-md text-text-primary">
+                    {value}
+                  </span>
                 </div>
               ))}
             </Card>
 
             <Card className="flex flex-col gap-2">
-              <span className="text-body-sm font-semibold text-text-primary">Admin notes (internal only)</span>
-              <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <span className="text-body-sm font-semibold text-text-primary">
+                Admin notes (internal only)
+              </span>
+              <Textarea
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
               <Button
                 size="sm"
                 variant="secondary"
@@ -171,6 +255,49 @@ export default function AdminUserDetailPage() {
         </TabsPanel>
 
         <TabsPanel value="billing" className="mt-4">
+          <Card className="mb-4 flex flex-col gap-3">
+            <span className="text-body-sm font-semibold text-text-primary">
+              Gán gói thủ công (billing đang tắt — xem CLAUDE.md)
+            </span>
+            <div className="grid grid-cols-2 gap-3">
+              <NativeSelect
+                label="Vai trò"
+                value={planRole}
+                onChange={(v) => setPlanRole(v as Role)}
+                options={PAID_ROLES.map((role) => ({
+                  value: role,
+                  label: ROLE_LABELS[role],
+                }))}
+              />
+              <Input
+                label="Tên gói"
+                value={planName}
+                onChange={(e) => setPlanName(e.target.value)}
+              />
+              <Input
+                label="Hết hạn"
+                type="date"
+                value={planExpiresAt}
+                onChange={(e) => setPlanExpiresAt(e.target.value)}
+              />
+            </div>
+            <Textarea
+              placeholder="Ghi chú lý do (lưu vào nhật ký AdminAction)"
+              rows={2}
+              value={planNote}
+              onChange={(e) => setPlanNote(e.target.value)}
+            />
+            <Button
+              size="sm"
+              variant="accent"
+              className="w-fit"
+              disabled={busy || !planName.trim() || !planExpiresAt}
+              onClick={assignPlan}
+            >
+              Lưu gói
+            </Button>
+          </Card>
+
           <div className="flex flex-col gap-3">
             {user.roles.length === 0 ? (
               <p className="text-body-sm text-text-secondary">No roles</p>
@@ -186,7 +313,9 @@ export default function AdminUserDetailPage() {
                     </span>
                   </div>
                   {ur.subscription ? (
-                    <Badge variant={SUB_STATUS_VARIANT[ur.subscription.status]}>{ur.subscription.status}</Badge>
+                    <Badge variant={SUB_STATUS_VARIANT[ur.subscription.status]}>
+                      {ur.subscription.status}
+                    </Badge>
                   ) : (
                     <Badge variant="neutral">No subscription</Badge>
                   )}
@@ -199,24 +328,39 @@ export default function AdminUserDetailPage() {
         <TabsPanel value="bookings" className="mt-4">
           <div className="grid grid-cols-3 gap-4">
             <Card className="flex flex-col gap-1">
-              <span className="text-body-sm text-text-tertiary">As provider</span>
-              <span className="text-heading-lg text-text-primary">{bookingsTotal}</span>
-            </Card>
-            <Card className="flex flex-col gap-1">
-              <span className="text-body-sm text-text-tertiary">Completion rate</span>
+              <span className="text-body-sm text-text-tertiary">
+                As provider
+              </span>
               <span className="text-heading-lg text-text-primary">
-                {bookingsTotal > 0 ? Math.round((completed / bookingsTotal) * 100) : 0}%
+                {bookingsTotal}
               </span>
             </Card>
             <Card className="flex flex-col gap-1">
-              <span className="text-body-sm text-text-tertiary">Cancellation rate</span>
+              <span className="text-body-sm text-text-tertiary">
+                Completion rate
+              </span>
               <span className="text-heading-lg text-text-primary">
-                {bookingsTotal > 0 ? Math.round((cancelled / bookingsTotal) * 100) : 0}%
+                {bookingsTotal > 0
+                  ? Math.round((completed / bookingsTotal) * 100)
+                  : 0}
+                %
+              </span>
+            </Card>
+            <Card className="flex flex-col gap-1">
+              <span className="text-body-sm text-text-tertiary">
+                Cancellation rate
+              </span>
+              <span className="text-heading-lg text-text-primary">
+                {bookingsTotal > 0
+                  ? Math.round((cancelled / bookingsTotal) * 100)
+                  : 0}
+                %
               </span>
             </Card>
           </div>
           <p className="mt-3 text-body-sm text-text-secondary">
-            {user.bookingsAsCustomer.length} bookings as customer, {bookingsTotal} as provider.
+            {user.bookingsAsCustomer.length} bookings as customer,{" "}
+            {bookingsTotal} as provider.
           </p>
         </TabsPanel>
       </Tabs>

@@ -3,11 +3,20 @@ import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 import { resumeSubscription, StripeNotConfiguredError } from "@/lib/stripe";
 
 const bodySchema = z.object({ role: z.string() });
 
+// Dormant while BILLING_ENABLED=false — see CLAUDE.md.
 export async function POST(request: Request) {
+  if (!features.billingEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
     const body = await request.json();
@@ -20,13 +29,22 @@ export async function POST(request: Request) {
     }
 
     const userRole = await db.userRole.findUnique({
-      where: { userId_role: { userId: session.user.id, role: parsed.data.role as never } },
+      where: {
+        userId_role: {
+          userId: session.user.id,
+          role: parsed.data.role as never,
+        },
+      },
       include: { subscription: true },
     });
 
     if (!userRole?.subscription?.stripeSubscriptionId) {
       return NextResponse.json(
-        { data: null, error: "not_found", message: "No subscription for this role" },
+        {
+          data: null,
+          error: "not_found",
+          message: "No subscription for this role",
+        },
         { status: 404 },
       );
     }
@@ -52,7 +70,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to resume subscription" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to resume subscription",
+      },
       { status: 500 },
     );
   }

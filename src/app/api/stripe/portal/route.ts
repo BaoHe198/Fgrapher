@@ -2,14 +2,29 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 import { createPortalSession, StripeNotConfiguredError } from "@/lib/stripe";
 
+// Dormant while BILLING_ENABLED=false (Stripe can't take a Vietnam-
+// registered merchant account — see CLAUDE.md). 404, not 500: a
+// disabled route should look like it doesn't exist, not like it's
+// broken or leak whether Stripe is configured behind it.
 export async function POST() {
+  if (!features.billingEnabled) {
+    return NextResponse.json(
+      { data: null, error: "not_found", message: "Not found" },
+      { status: 404 },
+    );
+  }
+
   try {
     const session = await requireAuth();
 
     const subscription = await db.subscription.findFirst({
-      where: { userRole: { userId: session.user.id }, stripeCustomerId: { not: null } },
+      where: {
+        userRole: { userId: session.user.id },
+        stripeCustomerId: { not: null },
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -45,7 +60,11 @@ export async function POST() {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to open billing portal" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to open billing portal",
+      },
       { status: 500 },
     );
   }
