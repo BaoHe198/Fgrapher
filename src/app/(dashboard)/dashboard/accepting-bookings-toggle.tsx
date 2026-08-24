@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Switch } from "@/components/ui/switch";
@@ -10,7 +9,6 @@ export function AcceptingBookingsToggle({
 }: {
   initialValue: boolean;
 }) {
-  const t = useTranslations("dashboardCore.acceptingBookingsToggle");
   const [checked, setChecked] = useState(initialValue);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -32,7 +30,7 @@ export function AcceptingBookingsToggle({
 
   return (
     <Switch
-      label={t("label")}
+      label="Accepting bookings"
       checked={checked}
       onChange={onChange}
       disabled={isSaving}

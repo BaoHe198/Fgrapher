@@ -1,26 +1,21 @@
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { ProductForm } from "@/components/forms/product-form";
 import { SubscriptionGate } from "@/components/subscription-gate";
 import { features } from "@/lib/features";
 
-export default async function NewProductPage() {
+export default function NewProductPage() {
   if (!features.marketplaceEnabled) {
     notFound();
   }
 
-  const t = await getTranslations("dashboardCore.listings");
-
   return (
     <div className="flex max-w-xl flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">
-        {t("addProductTitle")}
-      </h1>
+      <h1 className="text-display-md text-text-primary">Add product</h1>
       <SubscriptionGate
         role="CAMERA_SHOP"
-        fallbackTitle={t("gate.fallbackTitle")}
-        fallbackText={t("gate.fallbackText")}
+        fallbackTitle="Camera Shop subscription required"
+        fallbackText="Activate your Camera Shop subscription to list products."
       >
         <ProductForm />
       </SubscriptionGate>

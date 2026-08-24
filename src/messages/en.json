@@ -260,5 +260,105 @@
     "faq2a": "Nothing. Browsing, messaging and booking are free for Customer accounts.",
     "faq3": "Can I cancel?",
     "faq3a": "Cancel any time. Your profile stays visible until the end of the paid period."
+  },
+  "uiKit": {
+    "condition": {
+      "new": "New",
+      "likeNew": "Like new",
+      "good": "Good",
+      "fair": "Fair"
+    },
+    "socialRow": {
+      "orDivider": "or",
+      "appleComingSoon": "Coming soon"
+    },
+    "productCard": {
+      "rentalBadge": "Rental",
+      "saleAndRentalBadge": "Sale & Rental",
+      "forSaleBadge": "For sale",
+      "outOfStock": "Out of stock",
+      "perDay": "/day",
+      "shopFallback": "Shop"
+    },
+    "productForm": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Canon EOS R5",
+      "descriptionLabel": "Description",
+      "categoryLabel": "Category",
+      "typeLabel": "Type",
+      "saleOption": "For sale",
+      "rentOption": "For rent",
+      "bothOption": "Both",
+      "salePriceLabel": "Sale price",
+      "rentalPriceLabel": "Rental price per day",
+      "depositLabel": "Deposit (refunded on return)",
+      "conditionLabel": "Condition",
+      "stockLabel": "Stock quantity",
+      "imagesLabel": "Images",
+      "activeLabel": "Active",
+      "saveButton": "Save product",
+      "cancelButton": "Cancel",
+      "genericError": "Something went wrong. Please try again."
+    },
+    "productImageUploader": {
+      "reorder": "Reorder",
+      "remove": "Remove",
+      "uploadUnavailable": "Upload unavailable",
+      "uploadFailed": "One or more uploads failed"
+    },
+    "roleSelectionForm": {
+      "roles": {
+        "photographer": {
+          "label": "Photographer",
+          "description": "Showcase your portfolio and get booked"
+        },
+        "videographer": {
+          "label": "Videographer",
+          "description": "Share your reel and find clients"
+        },
+        "makeupArtist": {
+          "label": "Make-up Artist",
+          "description": "Get booked for shoots and events"
+        },
+        "studio": {
+          "label": "Studio for Rent",
+          "description": "List your space for creatives"
+        },
+        "cameraShop": {
+          "label": "Camera Shop",
+          "description": "Rent or sell your equipment"
+        },
+        "customer": {
+          "label": "Customer",
+          "description": "Find and book creative talent"
+        }
+      },
+      "defaultBadge": "Default",
+      "subscriptionRequiredBadge": "Subscription required",
+      "perMonth": "/mo",
+      "selectRole": "Select {role}",
+      "genericError": "Something went wrong. Please try again.",
+      "continueButton": "Continue"
+    },
+    "dialog": {
+      "closeSr": "Close",
+      "closeButton": "Close"
+    },
+    "sheet": {
+      "closeSr": "Close"
+    },
+    "toast": {
+      "closeAriaLabel": "Close toast"
+    },
+    "starInput": {
+      "labels": {
+        "poor": "Poor",
+        "fair": "Fair",
+        "good": "Good",
+        "veryGood": "Very good",
+        "excellent": "Excellent"
+      },
+      "starAriaLabel": "{count} star"
+    }
   }
 }

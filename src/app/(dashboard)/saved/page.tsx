@@ -1,5 +1,4 @@
 import { Bookmark } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { ArtistCard } from "@/components/cards/artist-card";
@@ -28,19 +27,19 @@ export default async function SavedProfilesPage() {
     },
   });
 
-  const t = await getTranslations("dashboardCore.saved");
-
   return (
     <div className="flex flex-col gap-5">
-      <SectionHead title={t("title")} />
+      <SectionHead title="Saved artists" />
 
       {profiles.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <Bookmark className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            {t("empty.title")}
+            No saved artists yet
           </p>
-          <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
+          <p className="text-body-md text-text-secondary">
+            Tap the bookmark icon on a profile to save it here.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -49,7 +48,7 @@ export default async function SavedProfilesPage() {
               key={profile.id}
               artist={{
                 id: profile.id,
-                name: profile.displayName ?? profile.user.name ?? t("unnamed"),
+                name: profile.displayName ?? profile.user.name ?? "Unnamed",
                 username: profile.user.username ?? "",
                 roles: [ROLE_LABELS[profile.role]],
                 city: profile.address ?? "",

@@ -2,7 +2,6 @@
 
 import type { Notification, NotificationType } from "@prisma/client";
 import { Bell, Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
 
@@ -13,13 +12,13 @@ import { cn } from "@/lib/utils";
 type FilterTab =
   "ALL" | "UNREAD" | "BOOKINGS" | "ORDERS" | "MESSAGES" | "SOCIAL";
 
-const TAB_VALUES: FilterTab[] = [
-  "ALL",
-  "UNREAD",
-  "BOOKINGS",
-  "ORDERS",
-  "MESSAGES",
-  "SOCIAL",
+const TABS: { value: FilterTab; label: string }[] = [
+  { value: "ALL", label: "All" },
+  { value: "UNREAD", label: "Unread" },
+  { value: "BOOKINGS", label: "Bookings" },
+  { value: "ORDERS", label: "Orders" },
+  { value: "MESSAGES", label: "Messages" },
+  { value: "SOCIAL", label: "Social" },
 ];
 
 const TYPE_GROUP: Record<
@@ -50,18 +49,15 @@ const TYPE_GROUP: Record<
   REVIEW_RESPONSE: "SOCIAL",
 };
 
-function relativeTime(
-  date: string | Date,
-  t: (key: string, values?: Record<string, number>) => string,
-) {
+function relativeTime(date: string | Date) {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return t("justNow");
+  if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return t("minutesAgo", { minutes });
+  if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return t("hoursAgo", { hours });
+  if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
-  return t("daysAgo", { days });
+  return `${days}d ago`;
 }
 
 function notificationHref(notification: Notification) {
@@ -75,14 +71,7 @@ function notificationHref(notification: Notification) {
 }
 
 export default function NotificationsPage() {
-  const t = useTranslations("dashboardCore.notifications");
   const router = useRouter();
-  const TABS: { value: FilterTab; label: string }[] = TAB_VALUES.map(
-    (value) => ({
-      value,
-      label: t(`tabs.${value}`),
-    }),
-  );
   const [tab, setTab] = useState<FilterTab>("ALL");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,7 +108,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+      <h1 className="text-display-md text-text-primary">Notifications</h1>
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as FilterTab)}>
         <TabsList>
@@ -142,9 +131,11 @@ export default function NotificationsPage() {
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Bell className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            {t("empty.title")}
+            No notifications
           </p>
-          <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
+          <p className="text-body-md text-text-secondary">
+            You&apos;re all caught up.
+          </p>
         </Card>
       ) : (
         <Card padding={false}>
@@ -165,7 +156,7 @@ export default function NotificationsPage() {
                 {notification.message}
               </span>
               <span className="text-body-sm text-text-tertiary">
-                {relativeTime(notification.createdAt, t)}
+                {relativeTime(notification.createdAt)}
               </span>
             </button>
           ))}

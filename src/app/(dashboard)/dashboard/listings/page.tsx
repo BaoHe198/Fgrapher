@@ -1,5 +1,4 @@
 import { ShoppingBag } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -21,17 +20,15 @@ export default async function ListingsPage() {
     redirect("/login");
   }
 
-  const t = await getTranslations("dashboardCore.listings");
-
   if (!session.user.roles.includes("CAMERA_SHOP")) {
     return (
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <ShoppingBag className="size-12 text-text-tertiary" />
         <p className="text-body-lg font-semibold text-text-primary">
-          {t("roleRequired.title")}
+          Listings need the Camera Shop role
         </p>
         <p className="max-w-sm text-body-md text-text-secondary">
-          {t("roleRequired.body")}
+          Add the Camera Shop role to sell or rent out gear on Fgrapher.
         </p>
         <Button
           variant="secondary"
@@ -39,7 +36,7 @@ export default async function ListingsPage() {
           nativeButton={false}
           render={<Link href="/dashboard/settings/roles" />}
         >
-          {t("roleRequired.cta")}
+          Add a role
         </Button>
       </Card>
     );
@@ -48,8 +45,8 @@ export default async function ListingsPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHead
-        title={t("pageTitle")}
-        actionLabel={t("addProduct")}
+        title="Listings"
+        actionLabel="Add product"
         actionHref="/dashboard/listings/new"
       />
       <ListingsList />
