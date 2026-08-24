@@ -384,7 +384,7 @@ export function FilterSidebar({
         onChange={(value) => applyFilters({ city: value })}
         options={[
           { value: "", label: t("allCities") },
-          ...provinces.map((p) => ({ value: p.name, label: p.name })),
+          ...provinces.map((p) => ({ value: p.code, label: p.name })),
         ]}
       />
 

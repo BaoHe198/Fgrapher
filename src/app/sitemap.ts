@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
-import { PAID_ROLES } from "@/lib/constants";
+import { PAID_ROLES, ROLE_SLUGS } from "@/lib/constants";
 import { features } from "@/lib/features";
 
 const STATIC_ROUTES = [
@@ -18,7 +18,7 @@ const STATIC_ROUTES = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
-  const [profiles, products] = await Promise.all([
+  const [profiles, products, provinces] = await Promise.all([
     db.profile.findMany({
       where: {
         isPublished: true,
@@ -36,6 +36,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           select: { id: true, updatedAt: true },
         })
       : Promise.resolve([]),
+    // Prompt B4, VIỆC 5 — every (role, province) landing page.
+    db.province.findMany({ select: { code: true } }),
   ]);
 
   const staticRoutes = features.marketplaceEnabled
@@ -63,5 +65,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...profileEntries, ...productEntries];
+  const roleSlugs = Object.entries(ROLE_SLUGS).filter(
+    ([role]) => role !== "CAMERA_SHOP" || features.marketplaceEnabled,
+  );
+  const landingEntries: MetadataRoute.Sitemap = roleSlugs.flatMap(
+    ([, roleSlug]) =>
+      provinces.map((province) => ({
+        url: `${baseUrl}/${roleSlug}/${province.code}`,
+        changeFrequency: "weekly" as const,
+        priority: 0.75,
+      })),
+  );
+
+  return [
+    ...staticEntries,
+    ...profileEntries,
+    ...productEntries,
+    ...landingEntries,
+  ];
 }

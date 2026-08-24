@@ -815,6 +815,10 @@
       "invalidInput": "Dữ liệu không hợp lệ",
       "messageSent": "Đã gửi tin nhắn"
     },
+    "waitlist": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "added": "Đã ghi nhận — chúng tôi sẽ báo khi có nhà cung cấp phù hợp"
+    },
     "conversations": {
       "messagesLoadFailed": "Không thể tải tin nhắn",
       "markedRead": "Đã đánh dấu đã đọc",
@@ -1209,6 +1213,19 @@
         "wardLabel": "Phường/xã",
         "wardNotSelected": "Chưa chọn"
       },
+      "location": {
+        "title": "Khu vực hoạt động",
+        "provinceLabel": "Tỉnh/thành chính",
+        "provinceNotSelected": "Chưa chọn",
+        "wardLabel": "Phường/xã",
+        "wardNotSelected": "Chưa chọn",
+        "wardHelperNoProvince": "Chọn tỉnh/thành trước",
+        "nationwideLabel": "Nhận job toàn quốc",
+        "nationwideHelper": "Hồ sơ sẽ xuất hiện trong kết quả tìm kiếm ở mọi tỉnh/thành, kèm nhãn \"Nhận job toàn quốc\"",
+        "extraAreasLabel": "Tỉnh/thành phục vụ thêm (tùy chọn)",
+        "extraAreasHelper": "Ngoài tỉnh/thành chính ở trên, chọn thêm các tỉnh/thành khác bạn cũng nhận job",
+        "studioRequiredNote": "Studio bắt buộc có địa chỉ, tỉnh/thành, và phường/xã cụ thể trước khi công khai hồ sơ"
+      },
       "media": {
         "coverButton": "Ảnh bìa",
         "uploadUnavailable": "Chức năng tải lên hiện không khả dụng",
@@ -1508,7 +1525,28 @@
       "contactForPricing": "Liên hệ để biết giá",
       "showingResults": "Hiển thị {shown} trên {total} kết quả",
       "previous": "Trước",
-      "loadMore": "Xem thêm"
+      "loadMore": "Xem thêm",
+      "nationwideSection": {
+        "heading": "Nhà cung cấp nhận job toàn quốc"
+      },
+      "nationwideBadge": "Nhận job toàn quốc",
+      "waitlist": {
+        "prompt": "Thông báo cho tôi khi có nhà cung cấp ở khu vực này",
+        "emailPlaceholder": "Email của bạn",
+        "submit": "Đăng ký",
+        "roleRequired": "Chọn một vai trò ở trên trước để đăng ký cho tỉnh/thành này"
+      }
+    },
+    "roleProvinceLanding": {
+      "metaTitle": "{role} tại {province} | Fgrapher",
+      "metaDescription": "Tìm và đặt lịch {role} uy tín tại {province}. Xem portfolio, bảng giá, và đánh giá trên Fgrapher.",
+      "heading": "{role} tại {province}",
+      "intro": "Khám phá các {role} đang hoạt động tại {province}, so sánh portfolio và bảng giá, đặt lịch trực tiếp trên Fgrapher.",
+      "empty": {
+        "heading": "Chưa có {role} nào tại {province}",
+        "body": "Đăng ký để được báo ngay khi có nhà cung cấp mới, hoặc khám phá toàn bộ nhà cung cấp trên toàn quốc.",
+        "browseAll": "Xem tất cả nhà cung cấp"
+      }
     },
     "cart": {
       "heading": "Giỏ hàng của bạn",

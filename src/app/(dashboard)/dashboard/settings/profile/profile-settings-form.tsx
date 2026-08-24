@@ -9,7 +9,7 @@ import type {
 import { Loader2, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,18 @@ interface ServiceItem {
   price: number;
   currency: string;
   isActive: boolean;
+}
+
+interface ProvinceOption {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface WardOption {
+  id: string;
+  name: string;
+  provinceId: string;
 }
 
 interface ProfileFormValues {
@@ -58,6 +70,9 @@ interface ProfileFormValues {
   agencyName: string;
   hideExactLocation: boolean;
   requireDepositBeforeContact: boolean;
+  provinceId: string;
+  wardId: string;
+  servesNationwide: boolean;
 }
 
 function toFormValues(
@@ -89,10 +104,14 @@ function toFormValues(
     hideExactLocation: (profile?.hideExactLocation as boolean) ?? false,
     requireDepositBeforeContact:
       (profile?.requireDepositBeforeContact as boolean) ?? false,
+    provinceId: (profile?.provinceId as string) ?? "",
+    wardId: (profile?.wardId as string) ?? "",
+    servesNationwide: (profile?.servesNationwide as boolean) ?? false,
   };
 }
 
 export function ProfileSettingsForm({ role }: { role: Role }) {
+  const t = useTranslations("dashboardSettings.profile.location");
   const categoryT = useTranslations("profileCategory");
   const experienceLevelT = useTranslations("experienceLevel");
   const [values, setValues] = useState<ProfileFormValues>(toFormValues(null));
@@ -106,6 +125,9 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
     useState<VerificationStatus | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
+  const [wards, setWards] = useState<WardOption[]>([]);
+  const [extraProvinceIds, setExtraProvinceIds] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,6 +138,11 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           setValues(toFormValues(body.data));
           setProfileId(body.data?.id ?? null);
           setServices(body.data?.services ?? []);
+          setExtraProvinceIds(
+            ((body.data?.serviceAreas as { provinceId: string }[]) ?? []).map(
+              (a) => a.provinceId,
+            ),
+          );
           setIsPublished(Boolean(body.data?.isPublished));
           setVerificationStatus(body.verificationStatus ?? null);
           setIsLoading(false);
@@ -125,6 +152,31 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       cancelled = true;
     };
   }, [role]);
+
+  // Real Province/Ward rows (Prompt B4), not a hardcoded list (CLAUDE.md
+  // mục 9) — today this is just Thành phố Hồ Chí Minh until more
+  // provinces' real data is seeded (see prisma/data/provinces-registry.ts).
+  useEffect(() => {
+    fetch("/api/geography/provinces")
+      .then((res) => res.json())
+      .then((body) => startTransition(() => setProvinces(body.data ?? [])));
+  }, []);
+
+  const selectedProvinceCode = provinces.find(
+    (p) => p.id === values.provinceId,
+  )?.code;
+
+  useEffect(() => {
+    if (!selectedProvinceCode) {
+      startTransition(() => setWards([]));
+      return;
+    }
+    fetch(
+      `/api/geography/wards?provinceCode=${encodeURIComponent(selectedProvinceCode)}`,
+    )
+      .then((res) => res.json())
+      .then((body) => startTransition(() => setWards(body.data ?? [])));
+  }, [selectedProvinceCode]);
 
   const togglePublished = async (next: boolean) => {
     setPublishError(null);
@@ -172,43 +224,65 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
     setIsSaving(true);
     setSaved(false);
 
-    await fetch(`/api/profiles/${role}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        displayName: values.displayName || undefined,
-        description: values.description || undefined,
-        website: values.website || undefined,
-        instagram: values.instagram || undefined,
-        facebook: values.facebook || undefined,
-        tiktok: values.tiktok || undefined,
-        priceMin: values.priceMin ? Number(values.priceMin) : undefined,
-        priceMax: values.priceMax ? Number(values.priceMax) : undefined,
-        categories: values.categories,
-        address: values.address || undefined,
-        area: values.area ? Number(values.area) : undefined,
-        amenities: values.amenities,
-        shopName: values.shopName || undefined,
-        height: values.height ? Number(values.height) : undefined,
-        measurements: values.measurements || undefined,
-        hairColor: values.hairColor || undefined,
-        eyeColor: values.eyeColor || undefined,
-        shoeSize: values.shoeSize || undefined,
-        experienceLevel: values.experienceLevel || undefined,
-        // Booleans are sent as-is (never `|| undefined`) — the profile
-        // upsert applies every key it receives, so `undefined` here would
-        // mean "leave unchanged" and an unchecked toggle would never be
-        // able to turn itself back off.
-        travelWilling: values.travelWilling,
-        agencyRepresented: values.agencyRepresented,
-        agencyName: values.agencyName || undefined,
-        hideExactLocation: values.hideExactLocation,
-        requireDepositBeforeContact: values.requireDepositBeforeContact,
+    await Promise.all([
+      fetch(`/api/profiles/${role}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: values.displayName || undefined,
+          description: values.description || undefined,
+          website: values.website || undefined,
+          instagram: values.instagram || undefined,
+          facebook: values.facebook || undefined,
+          tiktok: values.tiktok || undefined,
+          priceMin: values.priceMin ? Number(values.priceMin) : undefined,
+          priceMax: values.priceMax ? Number(values.priceMax) : undefined,
+          categories: values.categories,
+          address: values.address || undefined,
+          area: values.area ? Number(values.area) : undefined,
+          amenities: values.amenities,
+          shopName: values.shopName || undefined,
+          height: values.height ? Number(values.height) : undefined,
+          measurements: values.measurements || undefined,
+          hairColor: values.hairColor || undefined,
+          eyeColor: values.eyeColor || undefined,
+          shoeSize: values.shoeSize || undefined,
+          experienceLevel: values.experienceLevel || undefined,
+          // Booleans are sent as-is (never `|| undefined`) — the profile
+          // upsert applies every key it receives, so `undefined` here would
+          // mean "leave unchanged" and an unchecked toggle would never be
+          // able to turn itself back off.
+          travelWilling: values.travelWilling,
+          agencyRepresented: values.agencyRepresented,
+          agencyName: values.agencyName || undefined,
+          hideExactLocation: values.hideExactLocation,
+          requireDepositBeforeContact: values.requireDepositBeforeContact,
+          // `|| null`, not `|| undefined` — unlike the free-text fields
+          // above, clearing the province/ward select must actually clear
+          // the stored value (undefined would mean "leave unchanged" and
+          // a cleared dropdown could never unset it).
+          provinceId: values.provinceId || null,
+          wardId: values.wardId || null,
+          servesNationwide: values.servesNationwide,
+        }),
       }),
-    });
+      fetch(`/api/profiles/${role}/service-areas`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provinceIds: extraProvinceIds }),
+      }),
+    ]);
 
     setIsSaving(false);
     setSaved(true);
+  };
+
+  const toggleExtraProvince = (provinceId: string) => {
+    setExtraProvinceIds((prev) =>
+      prev.includes(provinceId)
+        ? prev.filter((id) => id !== provinceId)
+        : [...prev, provinceId],
+    );
   };
 
   if (isLoading) {
@@ -315,6 +389,79 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           value={values.priceMax}
           onChange={(e) => set("priceMax", e.target.value)}
         />
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          {t("title")}
+        </span>
+        {role === "STUDIO" ? (
+          <p className="text-body-sm text-text-tertiary">
+            {t("studioRequiredNote")}
+          </p>
+        ) : null}
+        <div className="grid grid-cols-2 gap-3">
+          <NativeSelect
+            label={t("provinceLabel")}
+            value={values.provinceId}
+            onChange={(value) => {
+              set("provinceId", value);
+              set("wardId", "");
+            }}
+            options={[
+              { value: "", label: t("provinceNotSelected") },
+              ...provinces.map((p) => ({ value: p.id, label: p.name })),
+            ]}
+          />
+          <NativeSelect
+            label={t("wardLabel")}
+            value={values.wardId}
+            onChange={(value) => set("wardId", value)}
+            disabled={!values.provinceId}
+            options={[
+              {
+                value: "",
+                label: values.provinceId
+                  ? t("wardNotSelected")
+                  : t("wardHelperNoProvince"),
+              },
+              ...wards.map((w) => ({ value: w.id, label: w.name })),
+            ]}
+          />
+        </div>
+
+        <Switch
+          label={t("nationwideLabel")}
+          checked={values.servesNationwide}
+          onChange={(next) => set("servesNationwide", next)}
+        />
+        <p className="text-body-sm text-text-tertiary">
+          {t("nationwideHelper")}
+        </p>
+
+        {provinces.length > 1 ? (
+          <div className="flex flex-col gap-2">
+            <span className="text-body-sm font-semibold text-text-primary">
+              {t("extraAreasLabel")}
+            </span>
+            <p className="text-body-sm text-text-tertiary">
+              {t("extraAreasHelper")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {provinces
+                .filter((p) => p.id !== values.provinceId)
+                .map((p) => (
+                  <Tag
+                    key={p.id}
+                    selected={extraProvinceIds.includes(p.id)}
+                    onClick={() => toggleExtraProvince(p.id)}
+                  >
+                    {p.name}
+                  </Tag>
+                ))}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {role === "STUDIO" ? (

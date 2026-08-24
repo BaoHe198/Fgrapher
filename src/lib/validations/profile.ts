@@ -36,9 +36,25 @@ export const updateProfileSchema = z.object({
   agencyName: z.string().max(120).optional(),
   hideExactLocation: z.boolean().optional(),
   requireDepositBeforeContact: z.boolean().optional(),
+  // Prompt B4, VIỆC 3 — provinceId/wardId nullable via z.string().nullable()
+  // rather than .optional(): the API route's "undefined means leave
+  // unchanged" convention (see profile-settings-form.tsx's onSave comment)
+  // still needs a way to explicitly clear a previously-set province/ward,
+  // e.g. switching to "phục vụ toàn quốc" only.
+  provinceId: z.string().nullable().optional(),
+  wardId: z.string().nullable().optional(),
+  servesNationwide: z.boolean().optional(),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+// Extra service-area provinces (Prompt B4 VIỆC 3) — not a scalar Profile
+// column (ProfileServiceArea is a separate join table), so kept as its own
+// schema and handled specially by the API route rather than folded into
+// updateProfileSchema's generic upsert.
+export const updateServiceAreasSchema = z.object({
+  provinceIds: z.array(z.string()),
+});
 
 // Translated variant — see validations/auth.ts's getLoginSchema comment.
 // Namespace "libServices.validation.profile".
@@ -68,5 +84,8 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     agencyName: z.string().max(120).optional(),
     hideExactLocation: z.boolean().optional(),
     requireDepositBeforeContact: z.boolean().optional(),
+    provinceId: z.string().nullable().optional(),
+    wardId: z.string().nullable().optional(),
+    servesNationwide: z.boolean().optional(),
   });
 }

@@ -9,6 +9,7 @@ import { FilterSidebar } from "@/components/browse/filter-sidebar";
 import { MobileFilterSheet } from "@/components/browse/mobile-filter-sheet";
 import { ResultsPane } from "@/components/browse/results-pane";
 import { SearchInput } from "@/components/browse/search-input";
+import { WaitlistForm } from "@/components/browse/waitlist-form";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
 import { features } from "@/lib/features";
@@ -75,10 +76,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   ].filter(Boolean).length;
 
   const heading =
-    roles && roles.length === 1 && params.city
+    roles && roles.length === 1 && result.province
       ? t("headingWithRoleCity", {
           role: roleT(roles[0]),
-          city: params.city,
+          city: result.province.name,
         })
       : t("headingDefault");
 
@@ -155,6 +156,18 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   >
                     {t("clearFilters")}
                   </Button>
+                  {result.province ? (
+                    roles && roles.length === 1 ? (
+                      <WaitlistForm
+                        provinceId={result.province.id}
+                        role={roles[0]}
+                      />
+                    ) : (
+                      <p className="text-body-sm text-text-tertiary">
+                        {t("waitlist.roleRequired")}
+                      </p>
+                    )
+                  ) : null}
                 </div>
               ) : (
                 <>
@@ -228,6 +241,43 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   ) : null}
                 </>
               )}
+
+              {result.nationwide.length > 0 ? (
+                <div className="mt-10 flex flex-col gap-4 border-t border-border-subtle pt-8">
+                  <h2 className="text-heading-md text-text-primary">
+                    {t("nationwideSection.heading")}
+                  </h2>
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    {result.nationwide.map((profile) => (
+                      <ArtistCard
+                        key={profile.userId}
+                        artist={{
+                          id: profile.userId,
+                          name:
+                            profile.displayName ??
+                            profile.user.name ??
+                            t("unnamed"),
+                          username: profile.user.username ?? "",
+                          roles: profile.roles.map((role) => roleT(role)),
+                          city: profile.user.location ?? "",
+                          rating:
+                            profile.avgRating > 0
+                              ? profile.avgRating.toFixed(1)
+                              : t("newBadge"),
+                          reviews: profile.reviewCount,
+                          price: profile.priceMin
+                            ? t("priceFrom", {
+                                price: formatCurrency(profile.priceMin),
+                              })
+                            : t("contactForPricing"),
+                          coverImage: profile.media[0]?.url,
+                          nationwideLabel: t("nationwideBadge"),
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </ResultsPane>
           </div>
         </div>

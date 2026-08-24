@@ -23,7 +23,10 @@ export async function GET(
     const [profile, userRole] = await Promise.all([
       db.profile.findUnique({
         where: { userId_role: { userId: session.user.id, role: role as Role } },
-        include: { services: { orderBy: { createdAt: "asc" } } },
+        include: {
+          services: { orderBy: { createdAt: "asc" } },
+          serviceAreas: { select: { provinceId: true } },
+        },
       }),
       db.userRole.findUnique({
         where: { userId_role: { userId: session.user.id, role: role as Role } },

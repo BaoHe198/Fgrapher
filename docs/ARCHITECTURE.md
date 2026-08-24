@@ -33,32 +33,32 @@ Socket.io being listed in the intended stack — see the note in §7.
 
 ## 2. Tech stack
 
-| Dependency | Version | Used for | Config |
-|---|---|---|---|
-| Next.js | 16.3.1 | App Router framework, RSC, route handlers | `next.config.ts` |
-| React | 19.2.8 | UI | — |
-| TypeScript | ^5 | Strict-mode typing across the app | `tsconfig.json` |
-| Prisma | ^6.19.3 | ORM + migrations against Supabase Postgres | `prisma/schema.prisma` |
-| `@prisma/client` | ^6.19.3 | Generated DB client, singleton at `src/lib/db.ts` | — |
-| NextAuth.js | 5.0.0-beta.32 | Auth (credentials + Google OAuth), JWT sessions | `src/lib/auth.ts` |
-| `@auth/prisma-adapter` | ^2.11.3 | Persists OAuth accounts/sessions via Prisma | `src/lib/auth.ts` |
-| `@supabase/supabase-js`, `@supabase/ssr` | ^2.112.3 / ^0.12.4 | Installed for Supabase-specific features outside the Prisma layer; not currently used for any live feature | — |
-| Tailwind CSS | ^4 | Styling | `src/app/globals.css` (v4 CSS-first config, no `tailwind.config.ts`) |
-| shadcn/ui | ^4.18.0 (CLI) | Base component primitives, incrementally rebuilt against brand tokens | `src/components/ui/` |
-| `@base-ui/react` | ^1.7.0 | Unstyled primitives (Tabs, etc.) styled to match the design system | `src/components/ui/tabs.tsx` and similar |
-| next-intl | ^4.13.7 | i18n (EN/VI), cookie-based, no `[locale]` segment | `src/i18n/` |
-| next-themes | ^0.4.6 | Dark mode via `class` strategy | `src/app/layout.tsx` |
-| Cloudinary SDK | ^2.10.0 | Signed direct-to-Cloudinary uploads | `src/lib/cloudinary.ts` |
-| Stripe SDK | ^22.5.0 | Subscriptions (14-day trial) + marketplace one-off payments | `src/lib/stripe.ts` |
-| `@stripe/stripe-js` | ^9.13.0 | Client-side Stripe Checkout redirect | — |
-| Resend | ^6.20.0 | Transactional email (no-ops without `RESEND_API_KEY`) | `src/lib/email.ts` |
-| react-hook-form + `@hookform/resolvers` | ^7.85.0 / ^5.8.0 | Form state + Zod validation binding | per-form components |
-| Zod | ^4.4.3 | Schema validation, single source of truth for input types | `src/lib/validations/` |
-| bcryptjs | ^3.0.3 | Password hashing for credentials auth | `src/lib/auth.ts` |
-| `@dnd-kit/*` | ^6.3.1 / ^10.0.0 / ^3.2.2 | Drag-to-reorder (portfolio media) | `src/components/**/reorder*` |
-| react-dropzone | ^20.1.0 | Upload dropzones | upload components |
-| react-day-picker, date-fns | ^10.0.1 / ^4.4.0 | Calendar UI + date math | booking/availability components |
-| Playwright | ^1.62.1 (dev) | E2E, smoke, and visual-regression tests | `e2e/`, `playwright.config.ts` |
+| Dependency                               | Version                   | Used for                                                                                                   | Config                                                               |
+| ---------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Next.js                                  | 16.3.1                    | App Router framework, RSC, route handlers                                                                  | `next.config.ts`                                                     |
+| React                                    | 19.2.8                    | UI                                                                                                         | —                                                                    |
+| TypeScript                               | ^5                        | Strict-mode typing across the app                                                                          | `tsconfig.json`                                                      |
+| Prisma                                   | ^6.19.3                   | ORM + migrations against Supabase Postgres                                                                 | `prisma/schema.prisma`                                               |
+| `@prisma/client`                         | ^6.19.3                   | Generated DB client, singleton at `src/lib/db.ts`                                                          | —                                                                    |
+| NextAuth.js                              | 5.0.0-beta.32             | Auth (credentials + Google OAuth), JWT sessions                                                            | `src/lib/auth.ts`                                                    |
+| `@auth/prisma-adapter`                   | ^2.11.3                   | Persists OAuth accounts/sessions via Prisma                                                                | `src/lib/auth.ts`                                                    |
+| `@supabase/supabase-js`, `@supabase/ssr` | ^2.112.3 / ^0.12.4        | Installed for Supabase-specific features outside the Prisma layer; not currently used for any live feature | —                                                                    |
+| Tailwind CSS                             | ^4                        | Styling                                                                                                    | `src/app/globals.css` (v4 CSS-first config, no `tailwind.config.ts`) |
+| shadcn/ui                                | ^4.18.0 (CLI)             | Base component primitives, incrementally rebuilt against brand tokens                                      | `src/components/ui/`                                                 |
+| `@base-ui/react`                         | ^1.7.0                    | Unstyled primitives (Tabs, etc.) styled to match the design system                                         | `src/components/ui/tabs.tsx` and similar                             |
+| next-intl                                | ^4.13.7                   | i18n (EN/VI), cookie-based, no `[locale]` segment                                                          | `src/i18n/`                                                          |
+| next-themes                              | ^0.4.6                    | Dark mode via `class` strategy                                                                             | `src/app/layout.tsx`                                                 |
+| Cloudinary SDK                           | ^2.10.0                   | Signed direct-to-Cloudinary uploads                                                                        | `src/lib/cloudinary.ts`                                              |
+| Stripe SDK                               | ^22.5.0                   | Subscriptions (14-day trial) + marketplace one-off payments                                                | `src/lib/stripe.ts`                                                  |
+| `@stripe/stripe-js`                      | ^9.13.0                   | Client-side Stripe Checkout redirect                                                                       | —                                                                    |
+| Resend                                   | ^6.20.0                   | Transactional email (no-ops without `RESEND_API_KEY`)                                                      | `src/lib/email.ts`                                                   |
+| react-hook-form + `@hookform/resolvers`  | ^7.85.0 / ^5.8.0          | Form state + Zod validation binding                                                                        | per-form components                                                  |
+| Zod                                      | ^4.4.3                    | Schema validation, single source of truth for input types                                                  | `src/lib/validations/`                                               |
+| bcryptjs                                 | ^3.0.3                    | Password hashing for credentials auth                                                                      | `src/lib/auth.ts`                                                    |
+| `@dnd-kit/*`                             | ^6.3.1 / ^10.0.0 / ^3.2.2 | Drag-to-reorder (portfolio media)                                                                          | `src/components/**/reorder*`                                         |
+| react-dropzone                           | ^20.1.0                   | Upload dropzones                                                                                           | upload components                                                    |
+| react-day-picker, date-fns               | ^10.0.1 / ^4.4.0          | Calendar UI + date math                                                                                    | booking/availability components                                      |
+| Playwright                               | ^1.62.1 (dev)             | E2E, smoke, and visual-regression tests                                                                    | `e2e/`, `playwright.config.ts`                                       |
 
 No `test`/Vitest setup exists despite the root `CLAUDE.md` documenting
 `pnpm test # vitest` — see §9 Technical debt.
@@ -122,7 +122,7 @@ UI-only logic (formatting, conditional classes) stays in the component or
 
 ## 4. Data model
 
-33 models across `prisma/schema.prisma` (833 lines). Full ER diagram below;
+41 models across `prisma/schema.prisma` (1235 lines). Full ER diagram below;
 grouped by domain in the tables that follow it.
 
 ```mermaid
@@ -141,6 +141,12 @@ erDiagram
     Profile ||--o{ ProfileMedia : "has"
     Profile ||--o{ Service : "offers"
     Profile }o--o{ ProfileCategory : "tagged"
+    Profile }o--o| Province : "based in"
+    Profile }o--o| Ward : "based in"
+    Profile ||--o{ ProfileServiceArea : "also serves"
+    ProfileServiceArea }o--|| Province : "references"
+    Province ||--o{ Ward : "has"
+    Province ||--o{ WaitlistEntry : "requested for"
     Service ||--o{ Booking : "booked as"
     Booking ||--o| Review : "reviewed once"
     Post ||--o{ PostMedia : "has"
@@ -170,22 +176,25 @@ multiple `Profile` rows back onto one card per person for search results.
 
 ### Core tables
 
-| Model | Key fields | Purpose | Indexes |
-|---|---|---|---|
-| `User` | `email` (unique), `passwordHash?`, `username?` (unique), `deletedAt?` (soft delete), `acceptingBookings`, `notificationPreferences` (Json), `isSuspended`/`isVerified` (admin moderation) | One row per person, regardless of role count | — |
-| `UserRole` | `userId`, `role` (enum), `active` | One row per activated role | `@@unique([userId, role])` |
-| `Subscription` | `userRoleId` (unique), `stripeSubscriptionItemId` (unique), `status`, `graceEndsAt` | Billing state for one role | — |
-| `Profile` | `userId`, `role`, `priceMin/Max`, `isPublished`, studio/shop-specific fields | Public role-specific page content | `@@unique([userId, role])`, `[role, isPublished]` |
-| `ProfileMedia` | `profileId`, `url`, `publicId` (Cloudinary), `type`, `order` | Portfolio images/videos | `[profileId, order]` |
-| `Service` | `profileId`, `price`, `duration` | A bookable offering under a profile | `[profileId]` |
-| `Booking` | `customerId`, `providerId`, `serviceId?`, `date`, `status`, reschedule-proposal fields | One booking request/engagement | `[customerId]`, `[providerId, status]`, `[date]` |
-| `Review` | `bookingId` (unique — one review per booking), `rating` 1-5, `response?` | Customer review + optional provider reply | `[reviewedId, rating]` |
-| `Product` / `ProductImage` | shop-owned listing, `type` SALE/RENT/BOTH | Camera Shop marketplace listings | `[userId, isActive]`, `[category]` |
-| `Order` / `OrderItem` | `shopId` — every order is split to one shop even from a multi-shop cart | Marketplace purchase/rental | `[customerId]`, `[shopId, status]` |
-| `Conversation` / `ConversationParticipant` / `Message` | per-participant `lastReadAt` for read receipts/unread counts | Messaging | `[userId, conversationId]`, `[conversationId, createdAt]` |
-| `Notification` | `type` (23-value enum), `data` (Json context) | In-app + email trigger record | `[userId, readAt, createdAt]` |
-| `Report` / `AdminAction` | `targetType`/`targetId` loose reference (not a Prisma relation — points at several model types) | Moderation queue / admin audit trail | `[status, createdAt]`, `[adminId, createdAt]` |
-| `WebhookEvent` | `id` = Stripe event ID | Idempotency guard for retried Stripe webhooks | — |
+| Model                                                  | Key fields                                                                                                                                                                                | Purpose                                                                                                                                                                                                                             | Indexes                                                                                                        |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `User`                                                 | `email` (unique), `passwordHash?`, `username?` (unique), `deletedAt?` (soft delete), `acceptingBookings`, `notificationPreferences` (Json), `isSuspended`/`isVerified` (admin moderation) | One row per person, regardless of role count                                                                                                                                                                                        | —                                                                                                              |
+| `UserRole`                                             | `userId`, `role` (enum), `active`                                                                                                                                                         | One row per activated role                                                                                                                                                                                                          | `@@unique([userId, role])`                                                                                     |
+| `Subscription`                                         | `userRoleId` (unique), `stripeSubscriptionItemId` (unique), `status`, `graceEndsAt`                                                                                                       | Billing state for one role                                                                                                                                                                                                          | —                                                                                                              |
+| `Profile`                                              | `userId`, `role`, `priceMin/Max`, `isPublished`, `provinceId?`/`wardId?` (business location), `servesNationwide`, studio/shop-specific fields                                             | Public role-specific page content                                                                                                                                                                                                   | `@@unique([userId, role])`, `[role, isPublished]`, `[role, isPublished, provinceId]`, `[provinceId, priceMin]` |
+| `ProfileMedia`                                         | `profileId`, `url`, `publicId` (Cloudinary), `type`, `order`                                                                                                                              | Portfolio images/videos                                                                                                                                                                                                             | `[profileId, order]`                                                                                           |
+| `Service`                                              | `profileId`, `price`, `duration`                                                                                                                                                          | A bookable offering under a profile                                                                                                                                                                                                 | `[profileId]`                                                                                                  |
+| `Province` / `Ward`                                    | `code` (slug, not an asserted GSO code), `name`                                                                                                                                           | Real Vietnam administrative geography (Prompt B4) — currently only Thành phố Hồ Chí Minh's 168 wards are seeded (`prisma/data/hcmc-wards.ts`); more provinces are added via `prisma/data/provinces-registry.ts` as they're supplied | `[provinceId]` (Ward)                                                                                          |
+| `ProfileServiceArea`                                   | `profileId`, `provinceId`, `isPrimary`                                                                                                                                                    | Extra provinces a profile takes bookings in, beyond its primary `Profile.provinceId`                                                                                                                                                | `@@id([profileId, provinceId])`, `[provinceId]`                                                                |
+| `WaitlistEntry`                                        | `email`, `provinceId`, `role`                                                                                                                                                             | "Notify me" capture from `/browse`'s empty state when a province+role search is thin                                                                                                                                                | `[provinceId, role]`                                                                                           |
+| `Booking`                                              | `customerId`, `providerId`, `serviceId?`, `date`, `status`, `provinceId?` (provider's province at creation time), reschedule-proposal fields                                              | One booking request/engagement                                                                                                                                                                                                      | `[customerId]`, `[providerId, status]`, `[date]`                                                               |
+| `Review`                                               | `bookingId` (unique — one review per booking), `rating` 1-5, `response?`                                                                                                                  | Customer review + optional provider reply                                                                                                                                                                                           | `[reviewedId, rating]`                                                                                         |
+| `Product` / `ProductImage`                             | shop-owned listing, `type` SALE/RENT/BOTH                                                                                                                                                 | Camera Shop marketplace listings                                                                                                                                                                                                    | `[userId, isActive]`, `[category]`                                                                             |
+| `Order` / `OrderItem`                                  | `shopId` — every order is split to one shop even from a multi-shop cart                                                                                                                   | Marketplace purchase/rental                                                                                                                                                                                                         | `[customerId]`, `[shopId, status]`                                                                             |
+| `Conversation` / `ConversationParticipant` / `Message` | per-participant `lastReadAt` for read receipts/unread counts                                                                                                                              | Messaging                                                                                                                                                                                                                           | `[userId, conversationId]`, `[conversationId, createdAt]`                                                      |
+| `Notification`                                         | `type` (23-value enum), `data` (Json context)                                                                                                                                             | In-app + email trigger record                                                                                                                                                                                                       | `[userId, readAt, createdAt]`                                                                                  |
+| `Report` / `AdminAction`                               | `targetType`/`targetId` loose reference (not a Prisma relation — points at several model types)                                                                                           | Moderation queue / admin audit trail                                                                                                                                                                                                | `[status, createdAt]`, `[adminId, createdAt]`                                                                  |
+| `WebhookEvent`                                         | `id` = Stripe event ID                                                                                                                                                                    | Idempotency guard for retried Stripe webhooks                                                                                                                                                                                       | —                                                                                                              |
 
 Every table has `id` (cuid), and every table that represents user-generated
 content that should survive deletion requests has `createdAt`/`updatedAt`
@@ -198,7 +207,7 @@ for a deletion request.
 Concrete trace of one request, file by file:
 
 1. **`src/proxy.ts`** runs first (Next's "proxy" convention — see the
-   `CLAUDE.md` root note that this is *not* the Next.js you know). `/browse`
+   `CLAUDE.md` root note that this is _not_ the Next.js you know). `/browse`
    isn't in `PROTECTED_PREFIXES` or `AUTH_ONLY_PREFIXES`, so it only decodes
    the JWT via `getToken()` (no DB call) to set the locale cookie and passes
    through.
@@ -208,16 +217,24 @@ Concrete trace of one request, file by file:
    internal HTTP call to `/api/search`; that route exists separately for any
    client-side consumer, but Server Components call the service function in
    the same process.
-4. `searchProfiles()` issues three sequential/parallel Prisma queries against
-   Supabase Postgres through the pooled `DATABASE_URL` connection: (a) find
-   matching `Profile` rows by filter, (b) pull every published profile for
-   those matched users (so a multi-role person's card shows all their
-   roles), (c) `groupBy` on `Review` for rating aggregates. Role-count and
-   city facets are fetched in parallel via `Promise.all`. Nothing here is
-   cached — every request hits Supabase fresh. This is also why filter
-   clicks on `/browse` measurably take over a second in this environment
-   (remote Supabase pooler round-trip); see the fix and its context in
-   `src/components/browse/filter-sidebar.tsx`.
+4. `searchProfiles()` resolves `params.city` (a `Province.code`, populated
+   from the real `/api/geography/provinces` list — never a hardcoded city
+   name) to a `Province` row, then issues the shared match → hydrate → rate
+   → sort pipeline (`resolveProviderCards()`) against Supabase Postgres
+   through the pooled `DATABASE_URL` connection: (a) find matching `Profile`
+   rows, filtered by `provinceId` OR a `ProfileServiceArea` row when a
+   province is active, (b) pull every published profile for those matched
+   users (so a multi-role person's card shows all their roles), (c)
+   `groupBy` on `Review` for rating aggregates. When a province filter is
+   active and the result is thin (< 5), the same pipeline runs a second time
+   for `servesNationwide: true` profiles, excluding anyone already in the
+   primary result, and returns them as a separate `nationwide` array —
+   `page.tsx` renders that as its own section, never merged into the main
+   grid (Prompt B4 VIỆC 4). Role counts are fetched in parallel via
+   `Promise.all`. Nothing here is cached — every request hits Supabase
+   fresh. This is also why filter clicks on `/browse` measurably take over a
+   second in this environment (remote Supabase pooler round-trip); see the
+   fix and its context in `src/components/browse/filter-sidebar.tsx`.
 5. Results stream back into `page.tsx`, which renders `ArtistCard`s.
    `FilterSidebar` and `MobileFilterSheet` (Client Components) render
    alongside it, reading/writing the same `searchParams` via
@@ -259,14 +276,14 @@ Concrete trace of one request, file by file:
       still inside `graceEndsAt`).
     - `requireAnyRole(session, roles)` — session-only (no DB call), for
       fast "any paid role" gates.
-    - `requirePaidRole(userId)` — "does this user have *any* paid role with
+    - `requirePaidRole(userId)` — "does this user have _any_ paid role with
       a usable subscription."
     - `requireAdmin()` (`src/lib/admin.ts`) — `requireAuth()` plus an
       active `ADMIN` `UserRole` check. Pair every admin mutation with
       `logAdminAction()` to write an `AdminAction` audit row.
   - `AuthError` carries its intended HTTP status (401 or 403); every route
     handler catches it and maps it straight to `NextResponse.json(...,
-    {status: err.status})` — see §9 for the exact response shape.
+{status: err.status})` — see §9 for the exact response shape.
 - **Admin is not selectable at registration** — it's granted via
   `scripts/make-admin.ts` only, and `/admin` is protected by `proxy.ts` like
   `/dashboard`, but the actual ADMIN role check happens page-side via
@@ -274,13 +291,13 @@ Concrete trace of one request, file by file:
 
 ## 7. External integrations
 
-| Integration | What it does | Files | Env vars | If it goes down |
-|---|---|---|---|---|
-| **Supabase Postgres** | Primary datastore, via Prisma | `src/lib/db.ts`, `prisma/schema.prisma` | `DATABASE_URL` (pooled, app runtime), `DIRECT_URL` (direct, migrations only) | Total outage — every page and route depends on it |
-| **Cloudinary** | Portfolio/product/message image & video storage, signed direct-from-browser uploads | `src/lib/cloudinary.ts`, `src/app/api/upload/signature/route.ts` | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Uploads no-op gracefully (`isCloudinaryConfigured()` gate); existing images keep rendering |
-| **Stripe** | Subscription billing (14-day trial, monthly/yearly) + marketplace one-off checkout, Customer Portal, refunds | `src/lib/stripe.ts`, `src/app/api/stripe/*`, `src/app/api/webhooks/stripe/route.ts`, `src/lib/constants/plans.ts` | `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_<ROLE>_MONTHLY/YEARLY` (10 vars, one pair per paid role) | All Stripe-touching calls throw `StripeNotConfiguredError`/no-op via `isStripeConfigured()`; new signups can't start a paid trial |
-| **Resend** | Transactional email — every notification type has an HTML template in `src/lib/email.ts` | `src/lib/email.ts` | `RESEND_API_KEY` | `sendEmail()` silently no-ops; in-app notifications still fire |
-| **Realtime layer (polling, not Socket.io)** | Chat panel polls every **4s** while open; conversation list polls every **15s**; notification bell polls every **30s** | `src/components/chat/chat-panel.tsx`, `src/app/(dashboard)/dashboard/messages/page.tsx`, `src/components/layout/notification-bell.tsx` | none | Messages/notifications just appear up to one poll interval late, never lost |
+| Integration                                 | What it does                                                                                                           | Files                                                                                                                                  | Env vars                                                                                                                                                   | If it goes down                                                                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Supabase Postgres**                       | Primary datastore, via Prisma                                                                                          | `src/lib/db.ts`, `prisma/schema.prisma`                                                                                                | `DATABASE_URL` (pooled, app runtime), `DIRECT_URL` (direct, migrations only)                                                                               | Total outage — every page and route depends on it                                                                                 |
+| **Cloudinary**                              | Portfolio/product/message image & video storage, signed direct-from-browser uploads                                    | `src/lib/cloudinary.ts`, `src/app/api/upload/signature/route.ts`                                                                       | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`                                                                         | Uploads no-op gracefully (`isCloudinaryConfigured()` gate); existing images keep rendering                                        |
+| **Stripe**                                  | Subscription billing (14-day trial, monthly/yearly) + marketplace one-off checkout, Customer Portal, refunds           | `src/lib/stripe.ts`, `src/app/api/stripe/*`, `src/app/api/webhooks/stripe/route.ts`, `src/lib/constants/plans.ts`                      | `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_<ROLE>_MONTHLY/YEARLY` (10 vars, one pair per paid role) | All Stripe-touching calls throw `StripeNotConfiguredError`/no-op via `isStripeConfigured()`; new signups can't start a paid trial |
+| **Resend**                                  | Transactional email — every notification type has an HTML template in `src/lib/email.ts`                               | `src/lib/email.ts`                                                                                                                     | `RESEND_API_KEY`                                                                                                                                           | `sendEmail()` silently no-ops; in-app notifications still fire                                                                    |
+| **Realtime layer (polling, not Socket.io)** | Chat panel polls every **4s** while open; conversation list polls every **15s**; notification bell polls every **30s** | `src/components/chat/chat-panel.tsx`, `src/app/(dashboard)/dashboard/messages/page.tsx`, `src/components/layout/notification-bell.tsx` | none                                                                                                                                                       | Messages/notifications just appear up to one poll interval late, never lost                                                       |
 
 The Stripe webhook (`/api/webhooks/stripe`) handles 5 event types:
 `checkout.session.completed`, `customer.subscription.updated`,
@@ -296,12 +313,12 @@ yet.
 
 ## 8. Environments
 
-| | Dev | Preview | Production |
-|---|---|---|---|
-| Database | Supabase project (dev branch/instance) | Same or a Supabase preview branch, per deploy setup | Production Supabase project |
-| Deploy | `pnpm dev`, localhost:3000 | Vercel preview deployment per PR/branch | Vercel production deployment |
-| Stripe | Test mode keys, `stripe listen` for local webhook forwarding | Test mode | Live mode (requires Stripe business verification — not done yet, see root `CLAUDE.md` "Current phase") |
-| Env files | `.env` (Prisma CLI only reads this) + `.env.local` (Next.js runtime) — `DATABASE_URL`/`DIRECT_URL` must be duplicated in both | Vercel project env vars | Vercel project env vars, production scope |
+|           | Dev                                                                                                                           | Preview                                             | Production                                                                                             |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Database  | Supabase project (dev branch/instance)                                                                                        | Same or a Supabase preview branch, per deploy setup | Production Supabase project                                                                            |
+| Deploy    | `pnpm dev`, localhost:3000                                                                                                    | Vercel preview deployment per PR/branch             | Vercel production deployment                                                                           |
+| Stripe    | Test mode keys, `stripe listen` for local webhook forwarding                                                                  | Test mode                                           | Live mode (requires Stripe business verification — not done yet, see root `CLAUDE.md` "Current phase") |
+| Env files | `.env` (Prisma CLI only reads this) + `.env.local` (Next.js runtime) — `DATABASE_URL`/`DIRECT_URL` must be duplicated in both | Vercel project env vars                             | Vercel project env vars, production scope                                                              |
 
 **Rollback**: revert the Vercel deployment to the previous build (Vercel
 dashboard or `vercel rollback`). Database migrations are not automatically

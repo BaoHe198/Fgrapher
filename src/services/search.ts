@@ -113,35 +113,29 @@ function groupProfilesByUser(
       avgRating: stats.avg,
       reviewCount: stats.count,
       createdAt,
+      // Prompt B4 VIỆC 4 — true if ANY of this person's matching profiles
+      // takes bookings nationwide, so the browse card can show the badge
+      // regardless of which specific role/profile matched the search.
+      servesNationwide: userProfiles.some((p) => p.servesNationwide),
     };
   });
 }
 
 export type ProviderCard = ReturnType<typeof groupProfilesByUser>[number];
 
-export async function searchProfiles(params: SearchParams) {
-  const page = Math.max(1, params.page ?? 1);
-  const limit = params.limit ?? PAGE_SIZE_DEFAULT;
+// Nationwide-serving providers shown as a supplementary section under a
+// thin province-scoped result — not paginated, just a small backfill list.
+const NATIONWIDE_SECTION_SIZE = 6;
+// Only shown when the province-scoped result is this thin (Prompt B4
+// VIỆC 4's "kết quả chính < 5").
+const NATIONWIDE_SECTION_THRESHOLD = 5;
 
-  const where = {
+function buildBaseWhere(params: SearchParams): Prisma.ProfileWhereInput {
+  return {
     isPublished: true,
     role: {
       in: params.roles && params.roles.length > 0 ? params.roles : PAID_ROLES,
     },
-    // `contains`, not `equals` — the city filter now sends a real Province
-    // name (Prompt B4/B8), but User.location is free text that, for a
-    // ward-assigned user, reads like "Phường Bến Thành, Thành phố Hồ Chí
-    // Minh" rather than the bare province name. An exact match would never
-    // hit once a user has a real ward (see services/geography.ts). Once
-    // every provider has a wardId this should become `user: { ward: {
-    // province: { code } } }` instead of string matching.
-    ...(params.city
-      ? {
-          user: {
-            location: { contains: params.city, mode: "insensitive" as const },
-          },
-        }
-      : {}),
     ...(params.categories && params.categories.length > 0
       ? { categories: { hasSome: params.categories } }
       : {}),
@@ -186,7 +180,20 @@ export async function searchProfiles(params: SearchParams) {
         }
       : {}),
   };
+}
 
+/**
+ * Runs one `where` clause through the shared match -> hydrate -> rate ->
+ * sort pipeline. Used for both the primary (province-scoped or unscoped)
+ * result set and the nationwide backfill section, which differ only in
+ * their `where` clause and how many rows the caller keeps.
+ */
+async function resolveProviderCards(
+  where: Prisma.ProfileWhereInput,
+  sort: SortOption | undefined,
+  minRating: number | undefined,
+  excludeUserIds?: string[],
+) {
   // A user matches if ANY of their profiles satisfies the filters above
   // (role included) — find those first, then pull in the rest of that
   // user's published profiles so the card can show every active role, not
@@ -195,7 +202,10 @@ export async function searchProfiles(params: SearchParams) {
     where,
     select: { userId: true },
   });
-  const matchedUserIds = Array.from(new Set(matches.map((m) => m.userId)));
+  const excludeSet = new Set(excludeUserIds ?? []);
+  const matchedUserIds = Array.from(
+    new Set(matches.map((m) => m.userId).filter((id) => !excludeSet.has(id))),
+  );
 
   const profiles = matchedUserIds.length
     ? await db.profile.findMany({
@@ -211,12 +221,14 @@ export async function searchProfiles(params: SearchParams) {
   // Rating/review count aren't denormalized columns (see Step 3's note on
   // avoiding a trigger-maintained column at this scale) — Review.reviewedId
   // points at the User, so this is naturally already per-person, not per-role.
-  const reviewStats = await db.review.groupBy({
-    by: ["reviewedId"],
-    where: { reviewedId: { in: matchedUserIds } },
-    _avg: { rating: true },
-    _count: { rating: true },
-  });
+  const reviewStats = matchedUserIds.length
+    ? await db.review.groupBy({
+        by: ["reviewedId"],
+        where: { reviewedId: { in: matchedUserIds } },
+        _avg: { rating: true },
+        _count: { rating: true },
+      })
+    : [];
   const statsByUser = new Map(
     reviewStats.map((s) => [
       s.reviewedId,
@@ -226,12 +238,12 @@ export async function searchProfiles(params: SearchParams) {
 
   let results = groupProfilesByUser(profiles, statsByUser);
 
-  if (params.minRating !== undefined) {
-    results = results.filter((r) => r.avgRating >= params.minRating!);
+  if (minRating !== undefined) {
+    results = results.filter((r) => r.avgRating >= minRating);
   }
 
-  results = results.sort((a, b) => {
-    switch (params.sort) {
+  return results.sort((a, b) => {
+    switch (sort) {
       case "price_asc":
         return (a.priceMin ?? Infinity) - (b.priceMin ?? Infinity);
       case "price_desc":
@@ -244,24 +256,64 @@ export async function searchProfiles(params: SearchParams) {
         return b.avgRating - a.avgRating;
     }
   });
+}
+
+export async function searchProfiles(params: SearchParams) {
+  const page = Math.max(1, params.page ?? 1);
+  const limit = params.limit ?? PAGE_SIZE_DEFAULT;
+
+  // `city` carries a Province.code (Prompt B4) — the browse filter's
+  // dropdown is populated straight from services/geography.ts's real
+  // Province rows, not a hardcoded list (CLAUDE.md mục 9).
+  const province = params.city
+    ? await db.province.findUnique({ where: { code: params.city } })
+    : null;
+
+  const baseWhere = buildBaseWhere(params);
+  const primaryWhere: Prisma.ProfileWhereInput = province
+    ? {
+        AND: [
+          baseWhere,
+          {
+            OR: [
+              { provinceId: province.id },
+              { serviceAreas: { some: { provinceId: province.id } } },
+            ],
+          },
+        ],
+      }
+    : baseWhere;
+
+  const results = await resolveProviderCards(
+    primaryWhere,
+    params.sort,
+    params.minRating,
+  );
 
   const effectiveTotal = results.length;
   const paginated = results.slice((page - 1) * limit, page * limit);
 
-  const [roleRows, cityRows] = await Promise.all([
-    db.profile.findMany({
-      where: { isPublished: true, role: { in: PAID_ROLES } },
-      select: { role: true, userId: true },
-    }),
-    db.user.findMany({
-      where: {
-        location: { not: null },
-        profiles: { some: { isPublished: true } },
-      },
-      select: { location: true },
-      distinct: ["location"],
-    }),
-  ]);
+  // Prompt B4 VIỆC 4 — "xử lý mật độ không đều": when a province filter is
+  // active and the scoped result is thin, backfill with nationwide-serving
+  // providers in a clearly separate section (never merged into `data`).
+  let nationwide: ProviderCard[] = [];
+  if (province && effectiveTotal < NATIONWIDE_SECTION_THRESHOLD) {
+    const nationwideWhere: Prisma.ProfileWhereInput = {
+      AND: [baseWhere, { servesNationwide: true }],
+    };
+    const nationwideResults = await resolveProviderCards(
+      nationwideWhere,
+      params.sort,
+      params.minRating,
+      results.map((r) => r.userId),
+    );
+    nationwide = nationwideResults.slice(0, NATIONWIDE_SECTION_SIZE);
+  }
+
+  const roleRows = await db.profile.findMany({
+    where: { isPublished: true, role: { in: PAID_ROLES } },
+    select: { role: true, userId: true },
+  });
 
   // Count unique providers per role, not profile rows — a role's Profile
   // rows already map 1:1 to users for that role (Profile has a
@@ -276,17 +328,19 @@ export async function searchProfiles(params: SearchParams) {
 
   return {
     data: paginated,
+    nationwide,
     total: effectiveTotal,
     page,
     totalPages: Math.max(1, Math.ceil(effectiveTotal / limit)),
+    // Resolved from params.city (a Province.code) — callers use this to
+    // display the real province name and, for the empty-state waitlist
+    // form, its id (Prompt B4 VIỆC 4).
+    province: province ? { id: province.id, name: province.name } : null,
     facets: {
       roles: PAID_ROLES.map((role) => ({
         role,
         count: usersByRole.get(role)?.size ?? 0,
       })),
-      cities: cityRows
-        .map((c) => c.location)
-        .filter((c): c is string => Boolean(c)),
     },
   };
 }

@@ -346,8 +346,25 @@ export async function createBooking(
 
   const provider = await db.user.findUnique({
     where: { id: input.providerId },
-    select: { location: true },
+    select: {
+      location: true,
+      ward: { select: { provinceId: true } },
+      // Matching Profile row's provinceId (Prompt B4) is the more precise
+      // source — a provider's business location can differ from their
+      // personal account ward. Falls back to the account's own ward below
+      // when the profile hasn't set one (Prompt B4 VIỆC 3 onboarding not
+      // yet completed for that profile).
+      profiles: {
+        where: service?.profile.role ? { role: service.profile.role } : {},
+        select: { provinceId: true },
+        take: 1,
+      },
+    },
   });
+  const providerProvinceId =
+    provider?.profiles[0]?.provinceId ??
+    provider?.ward?.provinceId ??
+    undefined;
 
   const duration = service?.duration ?? 60;
   const startMinutes =
@@ -401,7 +418,7 @@ export async function createBooking(
         totalPrice: service?.price,
         currency: service?.currency ?? "VND",
         expiresAt: new Date(Date.now() + BOOKING_EXPIRY_HOURS * 60 * 60 * 1000),
-        provinceCode: provider?.location ?? undefined,
+        provinceId: providerProvinceId,
         parentBookingId: input.parentBookingId,
         requesterRole: input.requesterRole ?? "CUSTOMER",
         recipientRole: service?.profile.role,

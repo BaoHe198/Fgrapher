@@ -815,6 +815,10 @@
       "invalidInput": "Invalid input",
       "messageSent": "Message sent"
     },
+    "waitlist": {
+      "invalidInput": "Invalid input",
+      "added": "Got it — we'll let you know when a provider is available here"
+    },
     "conversations": {
       "messagesLoadFailed": "Failed to load messages",
       "markedRead": "Marked as read",
@@ -1209,6 +1213,19 @@
         "wardLabel": "Ward",
         "wardNotSelected": "Not selected"
       },
+      "location": {
+        "title": "Service area",
+        "provinceLabel": "Main province",
+        "provinceNotSelected": "Not selected",
+        "wardLabel": "Ward",
+        "wardNotSelected": "Not selected",
+        "wardHelperNoProvince": "Choose a province first",
+        "nationwideLabel": "Accept nationwide bookings",
+        "nationwideHelper": "Your profile will show up in every province's search results, labeled \"Accepts nationwide bookings\"",
+        "extraAreasLabel": "Additional provinces served (optional)",
+        "extraAreasHelper": "Besides your main province above, pick other provinces you also take bookings in",
+        "studioRequiredNote": "A specific address, province, and ward are required before publishing a studio profile"
+      },
       "media": {
         "coverButton": "Cover",
         "uploadUnavailable": "Upload unavailable",
@@ -1508,7 +1525,28 @@
       "contactForPricing": "Contact for pricing",
       "showingResults": "Showing {shown} of {total} results",
       "previous": "Previous",
-      "loadMore": "Load more"
+      "loadMore": "Load more",
+      "nationwideSection": {
+        "heading": "Providers who accept nationwide bookings"
+      },
+      "nationwideBadge": "Accepts nationwide bookings",
+      "waitlist": {
+        "prompt": "Notify me when a provider is available in this area",
+        "emailPlaceholder": "Your email",
+        "submit": "Notify me",
+        "roleRequired": "Select a role above first to sign up for this province"
+      }
+    },
+    "roleProvinceLanding": {
+      "metaTitle": "{role}s in {province} | Fgrapher",
+      "metaDescription": "Find and book trusted {role}s in {province}. Browse portfolios, prices, and reviews on Fgrapher.",
+      "heading": "{role}s in {province}",
+      "intro": "Browse {role}s based in {province}, compare portfolios and prices, and book directly on Fgrapher.",
+      "empty": {
+        "heading": "No {role}s in {province} yet",
+        "body": "Be the first to know when one joins, or browse all providers nationwide.",
+        "browseAll": "Browse all providers"
+      }
     },
     "cart": {
       "heading": "Your cart",

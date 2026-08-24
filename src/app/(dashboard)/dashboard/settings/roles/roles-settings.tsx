@@ -111,7 +111,7 @@ export function RolesSettings({
                     size="sm"
                     variant="secondary"
                     nativeButton={false}
-                    render={<a href="/dashboard/settings/billing" />}
+                    render={<Link href="/dashboard/settings/billing" />}
                   >
                     Manage
                   </Button>

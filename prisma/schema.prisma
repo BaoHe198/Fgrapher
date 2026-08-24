@@ -127,7 +127,11 @@ model Province {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  wards Ward[]
+  wards           Ward[]
+  profiles        Profile[]
+  serviceAreas    ProfileServiceArea[]
+  bookings        Booking[]
+  waitlistEntries WaitlistEntry[]
 
   @@map("provinces")
 }
@@ -142,8 +146,9 @@ model Ward {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  province Province @relation(fields: [provinceId], references: [id])
+  province Province  @relation(fields: [provinceId], references: [id])
   users    User[]
+  profiles Profile[]
 
   @@unique([provinceId, code])
   @@index([provinceId])
@@ -507,6 +512,21 @@ model Profile {
   amenities                   String[] // e.g., ["wifi", "ac", "parking", "changing_room"]
   // Camera Shop specific
   shopName                    String?
+  // Địa giới hành chính (Prompt B4) — where this specific role/profile is
+  // based, distinct from User.wardId (the person's personal/account
+  // location). A photographer could live in one province but run their
+  // studio profile out of another. Nullable: existing profiles predate
+  // this field and the onboarding flow (Prompt B4 VIỆC 3) that sets it.
+  provinceId                  String?
+  wardId                      String?
+  // Provider explicitly takes bookings from anywhere in the country (e.g.
+  // a videographer who flies to weddings nationwide), independent of
+  // provinceId/wardId which is about where they're physically based.
+  // Distinct from travelWilling above, which is MODEL-only and means "will
+  // travel to a shoot location" (a much shorter-range, per-gig concept) —
+  // this flag instead controls whether the profile appears in every
+  // province's search results (services/search.ts), not just its own.
+  servesNationwide            Boolean          @default(false)
   // Model-specific — all optional, self-reported, only used when role is
   // MODEL. Never displayed on the profile when unset (no placeholder
   // dashes — see docs/guides/fgrapher-prompts-batch-2.md §3a).
@@ -537,15 +557,59 @@ model Profile {
   createdAt                   DateTime         @default(now())
   updatedAt                   DateTime         @updatedAt
 
-  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categories ProfileCategory[]
-  services   Service[]
-  media      ProfileMedia[]
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  province     Province?            @relation(fields: [provinceId], references: [id])
+  ward         Ward?                @relation(fields: [wardId], references: [id])
+  categories   ProfileCategory[]
+  services     Service[]
+  media        ProfileMedia[]
+  serviceAreas ProfileServiceArea[]
 
   @@unique([userId, role])
   @@index([role, isPublished])
   @@index([userId])
+  // Prompt B4 VIỆC 6 — common browse-filter combinations.
+  @@index([role, isPublished, provinceId])
+  @@index([provinceId, priceMin])
   @@map("profiles")
+}
+
+// Prompt B4 VIỆC 1 — a provider can additionally serve provinces beyond
+// where they're based (Profile.provinceId is the primary one; rows here
+// are the extra ones they opted into during onboarding/settings).
+// isPrimary duplicates Profile.provinceId as a ProfileServiceArea row when
+// true, so "which provinces does this profile show up in" is always a
+// single query over this table rather than a union with Profile.provinceId.
+model ProfileServiceArea {
+  profileId  String
+  provinceId String
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  profile  Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  province Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, provinceId])
+  @@index([provinceId])
+  @@map("profile_service_areas")
+}
+
+// Prompt B4 VIỆC 4 — "báo tôi khi có nhà cung cấp ở khu vực này": captured
+// when a search in a province+role combination comes up empty/thin. No
+// notification delivery exists yet (Resend is no-op — see CLAUDE.md's
+// "Current phase" section); rows just accumulate for now as a signal of
+// unmet demand per province, to review manually via `pnpm db:studio`.
+model WaitlistEntry {
+  id         String   @id @default(cuid())
+  email      String
+  provinceId String
+  role       Role
+  createdAt  DateTime @default(now())
+
+  province Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+
+  @@index([provinceId, role])
+  @@map("waitlist_entries")
 }
 
 model ProfileMedia {
@@ -680,13 +744,13 @@ model Booking {
   numberOfPeople  Int?
   contactPhone    String?
   referenceImages String[] @default([])
-  // Prompt B7, VIỆC 4 — copied from the provider's Profile (or the booking
-  // form) at creation time. Plain string, not a foreign key: Vietnam's
-  // administrative-province model (Prompt B4) hasn't been built yet, and
-  // CLAUDE.md forbids hardcoding a province list in the meantime. Free-
-  // text today, intended to line up with a real Province.code once B4
-  // lands.
-  provinceCode    String?
+  // Prompt B7, VIỆC 4 / Prompt B4 — the provider's Profile.provinceId at
+  // booking-creation time (falling back to their personal User.wardId's
+  // province if the profile hasn't set one yet — see services/bookings.ts).
+  // Was a free-text string before Prompt B4 built the real Province model;
+  // now a proper FK. Write-only today — nothing reads this yet, kept for
+  // future province-scoped booking analytics/admin filtering.
+  provinceId      String?
 
   // Crew-hire bookings (Prompt B7, VIỆC 1) — e.g. a Photographer books a
   // Model/Make-up Artist/Studio and attaches it to one of their own
@@ -718,6 +782,7 @@ model Booking {
   customer      User                   @relation("customer", fields: [customerId], references: [id])
   provider      User                   @relation("provider", fields: [providerId], references: [id])
   service       Service?               @relation(fields: [serviceId], references: [id])
+  province      Province?              @relation(fields: [provinceId], references: [id])
   review        Review?
   parentBooking Booking?               @relation("crewHire", fields: [parentBookingId], references: [id])
   childBookings Booking[]              @relation("crewHire")

@@ -19,6 +19,10 @@ interface ArtistCardProps {
     price: string;
     coverImage?: string;
     tint?: string;
+    // Prompt B4 VIỆC 4 — set only by the browse page's nationwide backfill
+    // section, so those cards carry a visible "accepts nationwide
+    // bookings" label distinguishing them from a province-matched result.
+    nationwideLabel?: string;
   };
   onClick?: () => void;
 }
@@ -61,6 +65,12 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
             <MapPin className="size-3.5" />
             {artist.city}
           </div>
+
+          {artist.nationwideLabel ? (
+            <Badge variant="neutral" className="w-fit">
+              {artist.nationwideLabel}
+            </Badge>
+          ) : null}
 
           <StarRating rating={artist.rating} reviews={artist.reviews} />
 

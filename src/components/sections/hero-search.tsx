@@ -4,7 +4,7 @@ import type { Role } from "@prisma/client";
 import { MapPin, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
@@ -18,6 +18,11 @@ const HERO_ROLES: Role[] = [
   "MODEL",
 ];
 
+interface ProvinceOption {
+  code: string;
+  name: string;
+}
+
 export function HeroSearch({
   marketplaceEnabled,
 }: {
@@ -28,14 +33,29 @@ export function HeroSearch({
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
+  const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
   const roleOptions = HERO_ROLES.filter(
     (role) => marketplaceEnabled || role !== "CAMERA_SHOP",
   );
 
+  // Real Province rows (Prompt B4), not a hardcoded list (CLAUDE.md mục 9)
+  // — used to resolve the free-text city field below to a Province.code
+  // for /browse's real province filter (services/search.ts).
+  useEffect(() => {
+    fetch("/api/geography/provinces")
+      .then((res) => res.json())
+      .then((body) => startTransition(() => setProvinces(body.data ?? [])));
+  }, []);
+
   const onSearch = () => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
-    if (city) params.set("city", city);
+    if (city) {
+      const match = provinces.find((p) =>
+        p.name.toLowerCase().includes(city.trim().toLowerCase()),
+      );
+      if (match) params.set("city", match.code);
+    }
     if (selectedRole) params.set("roles", selectedRole);
     router.push(`/browse?${params.toString()}`);
   };

@@ -85,6 +85,24 @@ export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Admin",
 };
 
+// Prompt B4, VIỆC 5 — kebab-case URL slugs for the /[roleSlug]/[provinceSlug]
+// SEO landing pages (see src/app/(public)/[roleSlug]/[provinceSlug]).
+// PAID_ROLES-scoped (excludes CUSTOMER/ADMIN, which have no public landing
+// page). CAMERA_SHOP's slug exists but the route itself only statically
+// generates it when MARKETPLACE_ENABLED.
+export const ROLE_SLUGS: Partial<Record<Role, string>> = {
+  PHOTOGRAPHER: "photographer",
+  VIDEOGRAPHER: "videographer",
+  MAKEUP_ARTIST: "makeup-artist",
+  STUDIO: "studio",
+  CAMERA_SHOP: "camera-shop",
+  MODEL: "model",
+};
+
+export const SLUG_TO_ROLE: Partial<Record<string, Role>> = Object.fromEntries(
+  Object.entries(ROLE_SLUGS).map(([role, slug]) => [slug, role as Role]),
+);
+
 // Shared with report-modal.tsx and lib/validations/review.ts's
 // reportSchema. "Inappropriate content" and "Appears to be a minor" are
 // routed to a high-priority admin queue — see HIGH_PRIORITY_REPORT_REASONS

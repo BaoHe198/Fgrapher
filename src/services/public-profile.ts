@@ -6,6 +6,7 @@ import { PAID_ROLES } from "@/lib/constants";
 export class ProfileNotVerifiedError extends Error {}
 export class ProfileNotFoundError extends Error {}
 export class ProfileHasNoApprovedMediaError extends Error {}
+export class ProfileMissingLocationError extends Error {}
 
 // The single write path for Profile.isPublished (Prompt B3, VIỆC 4) —
 // every other read site (search.ts, sitemap.ts, this file's own queries
@@ -46,6 +47,20 @@ export async function setProfilePublished(
     if (!approvedMedia) {
       throw new ProfileHasNoApprovedMediaError(
         "Upload at least one approved portfolio photo before publishing",
+      );
+    }
+  }
+
+  // Prompt B4, VIỆC 3 — a Studio's whole value proposition is "come shoot
+  // here," so unlike other roles (where provinceId is a nice-to-have for
+  // search filtering), a Studio without a specific address + province +
+  // ward is unusable for customers deciding whether to book. Other roles
+  // stay optional here — search.ts still works for them without it (falls
+  // back to the free-text city filter).
+  if (isPublished && role === "STUDIO") {
+    if (!profile.address || !profile.provinceId || !profile.wardId) {
+      throw new ProfileMissingLocationError(
+        "Add a specific address, province, and ward before publishing a studio profile",
       );
     }
   }

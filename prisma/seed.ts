@@ -6,7 +6,7 @@ import {
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-import { HCMC_PROVINCE, HCMC_WARDS } from "./data/hcmc-wards";
+import { PROVINCE_REGISTRY } from "./data/provinces-registry";
 
 const db = new PrismaClient();
 
@@ -335,28 +335,37 @@ const USERS: UserSeed[] = [
 
 const WEEKDAYS = [1, 2, 3, 4, 5]; // Mon-Fri (0=Sunday, 6=Saturday)
 
-// Prompt B4/B8 — real administrative geography (see prisma/data/hcmc-wards.ts
-// for provenance). Upsert-based and idempotent, unlike the delete-then-
-// recreate USERS seeding below, since Ward rows may already be referenced by
-// real (non-seed) User rows by the time this is re-run in dev.
+// Prompt B4/B8 — real administrative geography, one entry per province in
+// PROVINCE_REGISTRY (see prisma/data/provinces-registry.ts for how to add
+// more once the project owner supplies data for provinces beyond HCMC).
+// Upsert-based and idempotent, unlike the delete-then-recreate USERS
+// seeding below, since Ward rows may already be referenced by real
+// (non-seed) User rows by the time this is re-run in dev.
 async function seedGeography() {
-  const province = await db.province.upsert({
-    where: { code: HCMC_PROVINCE.code },
-    create: HCMC_PROVINCE,
-    update: { name: HCMC_PROVINCE.name },
-  });
+  let wardCount = 0;
 
-  for (const [index, name] of HCMC_WARDS.entries()) {
-    const code = String(index + 1).padStart(3, "0");
-    await db.ward.upsert({
-      where: { provinceId_code: { provinceId: province.id, code } },
-      create: { provinceId: province.id, code, name },
-      update: { name },
+  for (const { province: provinceData, wards } of PROVINCE_REGISTRY) {
+    const province = await db.province.upsert({
+      where: { code: provinceData.code },
+      create: provinceData,
+      update: { name: provinceData.name },
     });
+
+    for (const [index, name] of wards.entries()) {
+      const code = String(index + 1).padStart(3, "0");
+      await db.ward.upsert({
+        where: { provinceId_code: { provinceId: province.id, code } },
+        create: { provinceId: province.id, code, name },
+        update: { name },
+      });
+    }
+
+    wardCount += wards.length;
+    console.log(`Seeded province ${province.name} (${wards.length} wards)`);
   }
 
   console.log(
-    `Seeded 1 province (${province.name}) and ${HCMC_WARDS.length} wards`,
+    `Seeded ${PROVINCE_REGISTRY.length} province(s) and ${wardCount} wards total`,
   );
 }
 
