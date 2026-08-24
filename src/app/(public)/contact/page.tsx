@@ -4,11 +4,14 @@ import { SimplePage } from "@/components/sections/simple-page";
 
 import { ContactForm } from "./contact-form";
 
-export const metadata: Metadata = { title: "Contact — Fgrapher" };
+export const metadata: Metadata = { title: "Liên hệ — Fgrapher" };
 
 export default function ContactPage() {
   return (
-    <SimplePage title="Contact us" subtitle="Have a question or found a bug? Send us a message.">
+    <SimplePage
+      title="Liên hệ với chúng tôi"
+      subtitle="Có câu hỏi hoặc phát hiện lỗi? Gửi tin nhắn cho chúng tôi."
+    >
       <ContactForm />
     </SimplePage>
   );

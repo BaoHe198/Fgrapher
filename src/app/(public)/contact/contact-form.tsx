@@ -29,7 +29,7 @@ export function ContactForm() {
 
     if (!res.ok) {
       const body = await res.json();
-      setError(body.message ?? "Something went wrong. Please try again.");
+      setError(body.message ?? "Đã xảy ra lỗi. Vui lòng thử lại.");
       return;
     }
 
@@ -40,8 +40,12 @@ export function ContactForm() {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
         <CheckCircle className="size-10 text-brand-primary" />
-        <p className="text-body-lg font-semibold text-text-primary">Message sent</p>
-        <p className="text-body-md text-text-secondary">We&apos;ll get back to you soon.</p>
+        <p className="text-body-lg font-semibold text-text-primary">
+          Đã gửi tin nhắn
+        </p>
+        <p className="text-body-md text-text-secondary">
+          Chúng tôi sẽ phản hồi bạn sớm nhất có thể.
+        </p>
       </div>
     );
   }
@@ -53,7 +57,12 @@ export function ContactForm() {
           {error}
         </div>
       ) : null}
-      <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+      <Input
+        label="Họ và tên"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
       <Input
         label="Email"
         type="email"
@@ -62,7 +71,9 @@ export function ContactForm() {
         required
       />
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold text-text-primary">Message</label>
+        <label className="text-body-sm font-semibold text-text-primary">
+          Nội dung
+        </label>
         <textarea
           required
           minLength={10}
@@ -73,7 +84,7 @@ export function ContactForm() {
       </div>
       <Button type="submit" variant="accent" size="lg" disabled={isSubmitting}>
         {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-        Send message
+        Gửi tin nhắn
       </Button>
     </form>
   );

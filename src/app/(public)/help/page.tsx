@@ -2,30 +2,33 @@ import type { Metadata } from "next";
 
 import { SimplePage } from "@/components/sections/simple-page";
 
-export const metadata: Metadata = { title: "Help Center — Fgrapher" };
+export const metadata: Metadata = { title: "Trung tâm hỗ trợ — Fgrapher" };
 
 const FAQS = [
   {
-    q: "How do I become a provider?",
-    a: "Sign up as a Creative pro and pick the roles that fit you — Photographer, Videographer, Make-up Artist, Studio, or Camera Shop. You can add or change roles anytime from Settings.",
+    q: "Làm sao để trở thành nhà cung cấp?",
+    a: "Đăng ký và chọn vai trò phù hợp với bạn — Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm, Studio, hoặc Cửa hàng máy ảnh. Bạn có thể thêm hoặc đổi vai trò bất cứ lúc nào trong phần Cài đặt.",
   },
   {
-    q: "How do bookings work?",
-    a: "Clients pick a service and an open time slot on a provider's profile and request a booking. Providers can accept or decline requests from their dashboard.",
+    q: "Đặt lịch hoạt động như thế nào?",
+    a: "Khách hàng chọn một dịch vụ và một khung giờ trống trên hồ sơ nhà cung cấp rồi gửi yêu cầu đặt lịch. Nhà cung cấp có thể chấp nhận hoặc từ chối yêu cầu ngay trong bảng điều khiển của mình.",
   },
   {
-    q: "Is Fgrapher free to use?",
-    a: "Browsing and booking is free for clients. Customer access is always free; paid roles unlock provider features like portfolios and listings.",
+    q: "Fgrapher có miễn phí không?",
+    a: "Duyệt và đặt lịch hoàn toàn miễn phí với khách hàng. Vai trò nhà cung cấp hiện được gán gói thủ công qua đội ngũ Fgrapher — tính năng đăng ký gói tự động qua thanh toán trực tuyến chưa được mở tại giai đoạn này.",
   },
   {
-    q: "How do I contact support?",
-    a: "Use the Contact page and we'll get back to you as soon as we can.",
+    q: "Làm sao để liên hệ hỗ trợ?",
+    a: "Dùng trang Liên hệ, đội ngũ Fgrapher sẽ phản hồi sớm nhất có thể.",
   },
 ];
 
 export default function HelpPage() {
   return (
-    <SimplePage title="Help Center" subtitle="Answers to common questions.">
+    <SimplePage
+      title="Trung tâm hỗ trợ"
+      subtitle="Giải đáp các câu hỏi thường gặp."
+    >
       <div className="flex flex-col gap-6">
         {FAQS.map((item) => (
           <div key={item.q} className="flex flex-col gap-1.5">
