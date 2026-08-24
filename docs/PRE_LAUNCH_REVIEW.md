@@ -11,6 +11,14 @@ không suy đoán từ tài liệu.
 tiên) — vì mức độ nguy hiểm không thể chờ đến khi hoàn tất báo cáo mới sửa.
 Phần còn lại của tài liệu này giữ đúng tinh thần "chỉ báo cáo" của prompt gốc.
 
+**Cập nhật sau rà soát**: 10 trong số 13 mục đánh số dưới đây (gồm cả mục
+NGHIÊM TRỌNG #4) đã được vá trong các commit tiếp theo cùng phiên — mỗi mục
+được đánh dấu **[ĐÃ VÁ]** kèm commit và cách đã kiểm thử. Còn lại thật sự mở:
+mục #5 (quét 21 file dùng `toLocaleDateString` + 3 map nhãn tiếng Anh — khối
+lượng lớn, cần một đợt riêng) và 2 việc trong mục THẤP cần quyết định của
+con người (chủ đích hiển thị email, thuật ngữ `ALTERNATIVE` cần luật sư xác
+nhận) chứ không phải lỗi code.
+
 ---
 
 ## Đã vá ngay trong lúc rà soát (không chờ)
@@ -68,7 +76,7 @@ secret ở staging/production giờ bị coi là lỗi cấu hình, không phả
 
 ## NGHIÊM TRỌNG — cần xử lý trước khi ra mắt thật
 
-### 4. Tài khoản đăng ký qua Google OAuth bỏ qua hoàn toàn ràng buộc 18+ và ghi nhận đồng ý
+### 4. [ĐÃ VÁ] Tài khoản đăng ký qua Google OAuth bỏ qua hoàn toàn ràng buộc 18+ và ghi nhận đồng ý
 
 Đăng ký bằng email/mật khẩu thực thi đúng ở server (`registerSchema` +
 `isAtLeast18`, `src/lib/validations/auth.ts`, `src/lib/age-gate.ts`) — không
@@ -87,10 +95,20 @@ nào** — không có bằng chứng đồng ý xử lý dữ liệu cá nhân (
 thị tuổi) nên lỗi này không gây crash — có lẽ vì vậy chưa bị phát hiện trước
 đây.
 
-**Việc cần làm**: thêm bước bắt buộc ngay sau lần đăng nhập OAuth đầu tiên
-— thu thập ngày sinh (chặn nếu <18) và 3 checkbox đồng ý riêng biệt, trước
-khi cho vào dashboard. Đây là một tính năng cần xây mới, không phải một dòng
-sửa.
+**Đã sửa**: `src/app/onboarding/complete-profile` thu thập ngày sinh (chặn
+nếu <18 qua `completeProfileSchema`) và 3 checkbox đồng ý riêng biệt, gắn vào
+`(dashboard)/layout.tsx` — mọi trang dashboard đều chuyển hướng đến đây nếu
+`dateOfBirth` còn null. Tài khoản đăng ký bằng mật khẩu luôn có `dateOfBirth`
+từ lúc đăng ký nên không bị ảnh hưởng. Cố ý KHÔNG gắn vào `requireAuth()`
+toàn cục — làm vậy sẽ chặn ngay lập tức mọi tài khoản seed/test hiện có (hầu
+hết đều có `dateOfBirth: null` trước khi vá) — nên đã cập nhật
+`prisma/seed.ts` để cả 9 tài khoản seed đều có ngày sinh thật, giữ quy trình
+test/dev không bị gián đoạn. Đã kiểm thử bằng trình duyệt thật (Playwright):
+tài khoản không có `dateOfBirth` bị chuyển hướng đến trang onboarding khi
+đăng nhập VÀ khi cố vào `/dashboard` trực tiếp; sau khi hoàn tất form, cả 3
+dòng `ConsentRecord` (kể cả 2 mục tùy chọn bị từ chối) và `dateOfBirth` được
+ghi đúng, chuyển vào dashboard thật; tài khoản seed bình thường vào thẳng
+dashboard không qua bước này. Commit `1dd0041`.
 
 _Nguồn: `docs/_prelaunch-audit-compliance.md` mục 4 và 6._
 
@@ -124,7 +142,7 @@ lớn — khuyến nghị dành một đợt làm việc riêng, không lẫn v�
 
 _Nguồn: `docs/_prelaunch-audit-compliance.md` mục 10._
 
-### 6. Booking `contactPhone`/`locationAddress` bị lộ không nhất quán giữa các route anh em
+### 6. [ĐÃ VÁ] Booking `contactPhone`/`locationAddress` bị lộ không nhất quán giữa các route anh em
 
 `getBookingDetail` che đúng `contactPhone`/`locationAddress` cho đến khi
 provider chấp nhận booking (đúng logic chống spam). Nhưng `listBookings` và
@@ -136,13 +154,16 @@ nhưng là một khoảng trống thật: provider xem được số điện tho
 khách qua trang danh sách/lịch dù booking còn `PENDING`, trong khi trang chi
 tiết của đúng booking đó lại che đi.
 
-**Việc cần làm**: áp cùng logic `contactInfoVisible` cho `listBookings`/
-`listBookingsForRange`, hoặc bọc chung vào một hàm redaction dùng lại ở cả
-3 nơi.
+**Đã sửa**: gộp logic redaction vào hàm dùng chung `redactContactInfo()`
+trong `services/bookings.ts`, áp dụng cho cả `listBookings` và
+`listBookingsForRange`. Đã kiểm thử qua curl: booking `PENDING` mới tạo trả
+về `contactPhone`/`locationAddress` là `null` qua cả 2 endpoint (list và
+calendar), hiển thị đúng sau khi `CONFIRMED`, khách hàng luôn thấy thông tin
+của chính mình. Commit `987d97d`.
 
 _Nguồn: `docs/_prelaunch-audit-compliance.md` mục "Sensitive Data Leaks" (phone, locationAddress)._
 
-### 7. N+1 query ở danh sách hội thoại
+### 7. [ĐÃ VÁ] N+1 query ở danh sách hội thoại
 
 `listConversations` (`src/services/messaging.ts:37-63`) chạy một
 `db.message.count()` riêng cho từng hội thoại trong `.map()` — trang
@@ -150,13 +171,17 @@ _Nguồn: `docs/_prelaunch-audit-compliance.md` mục "Sensitive Data Leaks" (ph
 gộp thành một `db.message.groupBy({ by: ["conversationId"], ... })` sau khi
 đã lấy trang hội thoại, rồi join trong bộ nhớ.
 
+**Đã sửa**: đúng như đề xuất — một `groupBy` cho cả trang thay vì N lần
+`count()`. Đã kiểm thử qua curl (gửi tin nhắn, tải danh sách hội thoại,
+`unreadCount` đúng). Commit `987d97d`.
+
 _Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 1.1 Finding A._
 
 ---
 
 ## TRUNG BÌNH
 
-### 8. Rủi ro kiến trúc: `getPublicProfileUser` không có `select` tường minh
+### 8. [ĐÃ VÁ] Rủi ro kiến trúc: `getPublicProfileUser` không có `select` tường minh
 
 Query dùng `include` không kèm `select` ở cấp `User` — Prisma trả về **mọi**
 cột scalar, bao gồm `dateOfBirth`, `phone`, `email`, và **`passwordHash`**.
@@ -167,12 +192,13 @@ thận. Một lần sửa sau này vô tình spread `user` vào prop của Clien
 Component sẽ rò rỉ cả 4 trường nhạy cảm trên ra payload trang, kể cả
 `passwordHash`.
 
-**Việc cần làm**: thêm `select` tường minh vào `getPublicProfileUser` ngay
-cả khi chưa có lỗ hổng thật — đây là việc phòng ngừa rẻ, nên làm sớm.
+**Đã sửa**: thêm `select` tường minh liệt kê đúng các field trang hồ sơ công
+khai thực sự dùng — `tsc` xác nhận không thiếu field nào (nếu thiếu sẽ báo
+lỗi biên dịch ngay tại chỗ dùng). Commit `987d97d`.
 
 _Nguồn: `docs/_prelaunch-audit-compliance.md` mục "Sensitive Data Leaks" (dateOfBirth)._
 
-### 9. Ảnh giấy tờ tùy thân của hồ sơ bị từ chối không bao giờ tự xóa
+### 9. [ĐÃ VÁ] Ảnh giấy tờ tùy thân của hồ sơ bị từ chối không bao giờ tự xóa
 
 `purgeAfter` chỉ được set ở nhánh **duyệt** của `reviewVerification`
 (`services/admin.ts:329-347`) — nhánh từ chối chỉ set `verificationStatus:
@@ -182,12 +208,15 @@ selfie) vĩnh viễn — trái với yêu cầu tự xóa sau 90 ngày, và đâ
 hợp nhạy cảm hơn (giấy tờ bị từ chối/bỏ dở, không còn lý do nghiệp vụ để
 tồn tại).
 
-**Việc cần làm**: set `purgeAfter` ở cả nhánh từ chối (và cân nhắc cho cả
-`PENDING` quá hạn một khoảng thời gian).
+**Đã sửa**: nhánh từ chối giờ cũng set `purgeAfter` (cùng 90 ngày). Đồng thời
+set ngay tại `submitVerification` (lúc nộp hồ sơ) để phủ luôn trường hợp
+không bao giờ được admin xem xét (kẹt `PENDING`) — `reviewVerification` sau
+đó ghi đè bằng mốc mới khi admin thực sự duyệt/từ chối. Gộp hằng số
+`KYC_PURGE_AFTER_DAYS` về `lib/constants`. Commit `987d97d`.
 
 _Nguồn: `docs/_prelaunch-audit-compliance.md` mục 7._
 
-### 10. Danh sách thành phố hardcode ở bộ lọc browse
+### 10. [ĐÃ VÁ] Danh sách thành phố hardcode ở bộ lọc browse
 
 `src/components/browse/filter-sidebar.tsx:29-38` định nghĩa cứng 8 thành
 phố (`CITIES = ["Hồ Chí Minh", "Hà Nội", ...]`), dùng thật trong dropdown
@@ -195,24 +224,29 @@ lọc — không phải dead code. Vi phạm trực tiếp ràng buộc #9, và 
 quán với `account-basics-form.tsx` (form chỉnh hồ sơ) vốn đã dùng đúng
 `Province`/`Ward` từ DB (`services/geography.ts`).
 
-**Việc cần làm**: thay `CITIES` bằng dữ liệu thật từ `/api/geography/wards`
-(hiện chỉ có TP.HCM — xem phần "Đã hoàn thành B8" bên dưới về phạm vi HCMC).
+**Đã sửa**: thay bằng `GET /api/geography/provinces` mới (cùng cách
+`account-basics-form.tsx` đã dùng cho ward), hiện trả về đúng 1 tỉnh/thành
+đã seed (TP.HCM). `services/search.ts`'s bộ lọc `city` đổi từ khớp chính xác
+(`equals`) sang `contains`, vì `User.location` của người dùng có ward giờ
+đọc như "Phường Bến Thành, Thành phố Hồ Chí Minh" chứ không phải tên tỉnh
+trần trụi — khớp chính xác sẽ không bao giờ trúng. Đã kiểm thử qua curl.
+Commit `987d97d`.
 
 _Nguồn: `docs/_prelaunch-audit-compliance.md` mục 9._
 
-### 11. Thiếu index cho các cột lọc thường dùng ở trang quản trị
+### 11. [ĐÃ VÁ] Thiếu index cho các cột lọc thường dùng ở trang quản trị
 
 `User.isSuspended`/`isVerified`/`deletedAt` không có `@@index` dù
 `getAdminOverview` và `listUsers` lọc theo các cột này trên mỗi lần tải
 dashboard admin. Vô hại với dữ liệu seed nhỏ, sẽ thành full scan khi dữ liệu
 thật lớn lên.
 
-**Việc cần làm**: thêm tối thiểu `@@index([deletedAt])`, cân nhắc thêm
-`@@index([isSuspended])`.
+**Đã sửa**: thêm cả `@@index([deletedAt])` và `@@index([isSuspended])`,
+migration thuần cộng thêm (additive), đã apply vào DB dev. Commit `987d97d`.
 
 _Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 1.2._
 
-### 12. Logic tính giá thuê lặp lại độc lập ở 4 nơi, không có nguồn chung
+### 12. [ĐÃ VÁ] Logic tính giá thuê lặp lại độc lập ở 4 nơi, không có nguồn chung
 
 Công thức `Math.max(1, Math.round((end-start)/86_400_000))` (số ngày thuê)
 tồn tại độc lập ở `services/orders.ts`, `cart-utils.ts`,
@@ -223,18 +257,30 @@ số `MIN_NOTICE_HOURS = 24` (thời hạn tối thiểu trước khi đặt/h�
 tiếp trong `dashboard/bookings/[id]/page.tsx`). Nếu quy tắc nghiệp vụ thay
 đổi, cần sửa ở nhiều nơi và không có gì đảm bảo đồng bộ.
 
-**Việc cần làm**: gộp thành `calculateRentalDays()` dùng chung (đề xuất
-`src/lib/pricing.ts` hoặc trong `services/`), và export `MIN_NOTICE_HOURS`
-từ một nơi duy nhất.
+**Đã sửa**: thêm `src/lib/pricing.ts`'s `calculateRentalDays()` dùng chung
+cho cả 4 nơi (mỗi nơi vẫn tự quyết định floor/fallback riêng — panel xem
+trước giá cố ý floor 0 thay vì 1, khác với đơn hàng thật — chỉ phần công
+thức làm tròn được gộp chung). `MIN_NOTICE_HOURS` chuyển về
+`lib/constants`, dùng ở cả 3 nơi. Đã kiểm thử: `calculateRentalDays` cho
+kết quả đúng với vài khoảng ngày đã biết; curl xác nhận đặt lịch cùng ngày
+vẫn bị từ chối với cùng thông báo "cần trước ít nhất 24 giờ" như trước khi
+gộp. Commit `ee518a0`.
 
 _Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 2.4._
 
-### 13. Ảnh bìa hồ sơ công khai dùng `<img>` thô, không qua `next/image`
+### 13. [ĐÃ VÁ] Ảnh bìa hồ sơ công khai dùng `<img>` thô, không qua `next/image`
 
 `profile/[username]/page.tsx:183` — trang công khai, lượt truy cập cao,
 ảnh lớn nhất trong 4 vị trí dùng `<img>` thô (3 vị trí còn lại ở
 dashboard/admin, ít quan trọng hơn). Đều có `eslint-disable` chủ đích, không
 phải sai sót, nhưng vẫn là tối ưu còn bỏ ngỏ.
+
+**Đã sửa**: chuyển cả 4 vị trí (ảnh bìa hồ sơ, gear tab, listings dashboard,
+hàng đợi kiểm duyệt admin) sang `next/image` với `fill` — cả 4 đều là
+container kích thước cố định nên đây là chuyển đổi an toàn, gỡ luôn 4 dòng
+`eslint-disable`. Build + tải thử trang xác nhận không lỗi; chưa thể xác
+nhận việc render ảnh thật vì Cloudinary chưa có credential thật trong môi
+trường này (như mọi phần liên quan ảnh khác trong dự án). Commit `4919e4c`.
 
 _Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 1.3._
 
@@ -242,28 +288,26 @@ _Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 1.3._
 
 ## THẤP
 
-- **`/admin` không có trong `robots.ts` disallow list** — không rò rỉ dữ
-  liệu (trang vẫn yêu cầu đăng nhập) nhưng có thể bị crawl/index sự tồn tại
-  của route. Sửa một dòng. (`docs/_prelaunch-audit-compliance.md` mục email/sitemap)
+- **[ĐÃ VÁ] `/admin` không có trong `robots.ts` disallow list** — thêm vào
+  danh sách disallow. Commit `987d97d`. (`docs/_prelaunch-audit-compliance.md` mục email/sitemap)
 - **Email khách hàng hiển thị cho provider ngay từ khi booking còn PENDING**
-  (khác với phone/address, không bị che) — không rõ đây là chủ đích (email
-  là kênh liên hệ mức độ nhạy cảm thấp hơn) hay bỏ sót tương tự mục 6, không
-  có comment giải thích như phần che phone/address có. Cần xác nhận chủ đích
-  sản phẩm. (`docs/_prelaunch-audit-compliance.md` mục email)
-- **Nhãn `ALTERNATIVE` trong `ProfileCategory`** — thuật ngữ hợp lệ trong
-  ngành người mẫu (phong cách alt/goth) nhưng đủ mơ hồ để luật sư nên xác
-  nhận không bị hiểu như một cách né ràng buộc #3. (`docs/_prelaunch-audit-compliance.md` mục 3)
-- **8 chỗ tắt `react-hooks/exhaustive-deps` không có comment giải thích** —
-  nhiều khả năng đều là pattern "chỉ fetch một lần khi mount" hợp lệ (khớp
-  với ghi chú house-style đã có), nhưng chưa đọc từng effect để xác nhận
-  không phải bug đóng gói cũ (stale closure). Danh sách đầy đủ trong
-  `docs/_prelaunch-audit-perf-debt.md` mục 2.2.
+  (khác với phone/address, không bị che) — CHƯA sửa, cần quyết định sản
+  phẩm trước (đây có phải chủ đích hay không), không phải lỗi code đơn
+  thuần. (`docs/_prelaunch-audit-compliance.md` mục email)
+- **Nhãn `ALTERNATIVE` trong `ProfileCategory`** — CHƯA sửa, cần luật sư xác
+  nhận, không phải việc code có thể tự quyết định. (`docs/_prelaunch-audit-compliance.md` mục 3)
+- **[ĐÃ VÁ/ĐÃ XÁC MINH] 8 chỗ tắt `react-hooks/exhaustive-deps`** — đã đọc
+  đầy đủ từng effect body của cả 8: 7 chỗ là pattern "fetch khi một param/
+  filter cụ thể đổi" hợp lệ, 1 chỗ (booking-wizard.tsx) là hydrate-một-lần-
+  khi-mount hợp lệ. Không tìm thấy bug đóng gói cũ (stale closure) nào. Đã
+  thêm comment giải thích cho cả 8, không đổi hành vi. Commit `11b0bba`.
 - **`past-due-banner.tsx` truy vấn DB trực tiếp từ Server Component** thay
-  vì gọi qua `services/subscription.ts` — vi phạm nhẹ quy ước kiến trúc, quy
-  mô nhỏ, không phải bug. (`docs/_prelaunch-audit-perf-debt.md` mục 2.4 #5)
-- Vài index thứ yếu đáng cân nhắc nhưng không cấp bách:
-  `Message.senderId`, `Subscription.stripeCustomerId` (đang ngủ đông vì
-  `BILLING_ENABLED=false`). (`docs/_prelaunch-audit-perf-debt.md` mục 1.2)
+  vì gọi qua `services/subscription.ts` — CHƯA sửa, vi phạm nhẹ quy ước
+  kiến trúc, quy mô nhỏ, không phải bug, để lại cho một đợt dọn dẹp sau.
+  (`docs/_prelaunch-audit-perf-debt.md` mục 2.4 #5)
+- Vài index thứ yếu đáng cân nhắc nhưng không cấp bách — CHƯA sửa, không
+  cấp bách: `Message.senderId`, `Subscription.stripeCustomerId` (đang ngủ
+  đông vì `BILLING_ENABLED=false`). (`docs/_prelaunch-audit-perf-debt.md` mục 1.2)
 
 ---
 
