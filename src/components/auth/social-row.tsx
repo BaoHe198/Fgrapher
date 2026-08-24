@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ interface SocialRowProps {
 }
 
 function SocialRow({ callbackUrl = "/dashboard" }: SocialRowProps) {
+  const t = useTranslations("uiKit.socialRow");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const onGoogleSignIn = () => {
@@ -53,7 +55,9 @@ function SocialRow({ callbackUrl = "/dashboard" }: SocialRowProps) {
     <>
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border-subtle" />
-        <span className="text-body-sm text-text-tertiary">or</span>
+        <span className="text-body-sm text-text-tertiary">
+          {t("orDivider")}
+        </span>
         <div className="h-px flex-1 bg-border-subtle" />
       </div>
 
@@ -72,7 +76,13 @@ function SocialRow({ callbackUrl = "/dashboard" }: SocialRowProps) {
           )}
           Google
         </Button>
-        <Button type="button" variant="secondary" className="flex-1" disabled title="Coming soon">
+        <Button
+          type="button"
+          variant="secondary"
+          className="flex-1"
+          disabled
+          title={t("appleComingSoon")}
+        >
           <AppleIcon className="size-4" />
           Apple
         </Button>

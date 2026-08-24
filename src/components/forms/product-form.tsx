@@ -2,24 +2,25 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { ProductImageUploader, type ProductImage } from "@/components/forms/product-image-uploader";
+import {
+  ProductImageUploader,
+  type ProductImage,
+} from "@/components/forms/product-image-uploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { Switch } from "@/components/ui/switch";
-import { PRODUCT_CATEGORIES, productSchema, type ProductInput } from "@/lib/validations/product";
-
-const CONDITION_OPTIONS = [
-  { value: "NEW", label: "New" },
-  { value: "LIKE_NEW", label: "Like new" },
-  { value: "GOOD", label: "Good" },
-  { value: "FAIR", label: "Fair" },
-];
+import {
+  PRODUCT_CATEGORIES,
+  productSchema,
+  type ProductInput,
+} from "@/lib/validations/product";
 
 interface ProductFormProps {
   productId?: string;
@@ -27,8 +28,17 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ productId, defaultValues }: ProductFormProps) {
+  const t = useTranslations("uiKit.productForm");
+  const tCondition = useTranslations("uiKit.condition");
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+
+  const CONDITION_OPTIONS = [
+    { value: "NEW", label: tCondition("new") },
+    { value: "LIKE_NEW", label: tCondition("likeNew") },
+    { value: "GOOD", label: tCondition("good") },
+    { value: "FAIR", label: tCondition("fair") },
+  ];
 
   const {
     register,
@@ -56,15 +66,18 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
   const onSubmit = async (values: ProductInput) => {
     setServerError(null);
 
-    const res = await fetch(productId ? `/api/products/${productId}` : "/api/products", {
-      method: productId ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    const res = await fetch(
+      productId ? `/api/products/${productId}` : "/api/products",
+      {
+        method: productId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      },
+    );
 
     if (!res.ok) {
       const body = await res.json();
-      setServerError(body.message ?? "Something went wrong. Please try again.");
+      setServerError(body.message ?? t("genericError"));
       return;
     }
 
@@ -80,10 +93,17 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
         </div>
       ) : null}
 
-      <Input label="Name" placeholder="Canon EOS R5" error={errors.name?.message} {...register("name")} />
+      <Input
+        label={t("nameLabel")}
+        placeholder={t("namePlaceholder")}
+        error={errors.name?.message}
+        {...register("name")}
+      />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold text-text-primary">Description</label>
+        <label className="text-body-sm font-semibold text-text-primary">
+          {t("descriptionLabel")}
+        </label>
         <textarea
           className="min-h-24 w-full rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none focus:border-border-focus focus:ring-2 focus:ring-gold-500/20"
           {...register("description")}
@@ -95,7 +115,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
         name="category"
         render={({ field }) => (
           <NativeSelect
-            label="Category"
+            label={t("categoryLabel")}
             options={PRODUCT_CATEGORIES.map((c) => ({ value: c, label: c }))}
             value={field.value}
             onChange={field.onChange}
@@ -104,17 +124,34 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       />
 
       <div className="flex flex-col gap-2">
-        <span className="text-body-sm font-semibold text-text-primary">Type</span>
+        <span className="text-body-sm font-semibold text-text-primary">
+          {t("typeLabel")}
+        </span>
         <div className="flex gap-4">
-          <Radio label="For sale" value="SALE" {...register("type")} checked={type === "SALE"} />
-          <Radio label="For rent" value="RENT" {...register("type")} checked={type === "RENT"} />
-          <Radio label="Both" value="BOTH" {...register("type")} checked={type === "BOTH"} />
+          <Radio
+            label={t("saleOption")}
+            value="SALE"
+            {...register("type")}
+            checked={type === "SALE"}
+          />
+          <Radio
+            label={t("rentOption")}
+            value="RENT"
+            {...register("type")}
+            checked={type === "RENT"}
+          />
+          <Radio
+            label={t("bothOption")}
+            value="BOTH"
+            {...register("type")}
+            checked={type === "BOTH"}
+          />
         </div>
       </div>
 
       {type === "SALE" || type === "BOTH" ? (
         <Input
-          label="Sale price"
+          label={t("salePriceLabel")}
           type="number"
           step="0.01"
           error={errors.price?.message}
@@ -125,14 +162,14 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       {type === "RENT" || type === "BOTH" ? (
         <>
           <Input
-            label="Rental price per day"
+            label={t("rentalPriceLabel")}
             type="number"
             step="0.01"
             error={errors.rentalPrice?.message}
             {...register("rentalPrice", { valueAsNumber: true })}
           />
           <Input
-            label="Deposit (refunded on return)"
+            label={t("depositLabel")}
             type="number"
             step="0.01"
             error={errors.depositAmount?.message}
@@ -146,7 +183,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
         name="condition"
         render={({ field }) => (
           <NativeSelect
-            label="Condition"
+            label={t("conditionLabel")}
             options={CONDITION_OPTIONS}
             value={field.value}
             onChange={field.onChange}
@@ -155,14 +192,16 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       />
 
       <Input
-        label="Stock quantity"
+        label={t("stockLabel")}
         type="number"
         error={errors.stock?.message}
         {...register("stock", { valueAsNumber: true })}
       />
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-body-sm font-semibold text-text-primary">Images</span>
+        <span className="text-body-sm font-semibold text-text-primary">
+          {t("imagesLabel")}
+        </span>
         <Controller
           control={control}
           name="images"
@@ -179,21 +218,25 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
         control={control}
         name="isActive"
         render={({ field }) => (
-          <Switch label="Active" checked={field.value} onChange={field.onChange} />
+          <Switch
+            label={t("activeLabel")}
+            checked={field.value}
+            onChange={field.onChange}
+          />
         )}
       />
 
       <div className="flex gap-2.5">
         <Button type="submit" variant="accent" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-          Save product
+          {t("saveButton")}
         </Button>
         <Button
           type="button"
           variant="ghost"
           onClick={() => router.push("/dashboard/listings")}
         >
-          Cancel
+          {t("cancelButton")}
         </Button>
       </div>
     </form>

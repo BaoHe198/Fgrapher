@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -27,12 +27,16 @@ interface AccountSettingsFormProps {
   initialPhone: string | null;
 }
 
-export function AccountSettingsForm({ initialEmail, initialPhone }: AccountSettingsFormProps) {
+export function AccountSettingsForm({
+  initialEmail,
+  initialPhone,
+}: AccountSettingsFormProps) {
   const router = useRouter();
   const mounted = useMounted();
   const locale = useLocale();
   const { theme, setTheme } = useTheme();
   const [, startTransition] = useTransition();
+  const t = useTranslations("dashboardSettings.account");
 
   const [email, setEmail] = useState(initialEmail);
   const [phone, setPhone] = useState(initialPhone ?? "");
@@ -55,13 +59,13 @@ export function AccountSettingsForm({ initialEmail, initialPhone }: AccountSetti
       body: JSON.stringify({ email, phone }),
     });
     setSavingBasics(false);
-    toast.add({ title: "Account updated", type: "success" });
+    toast.add({ title: t("toastAccountUpdated"), type: "success" });
   };
 
   const changePassword = async () => {
     setPasswordError(null);
     if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match");
+      setPasswordError(t("passwordMismatch"));
       return;
     }
 
@@ -75,14 +79,14 @@ export function AccountSettingsForm({ initialEmail, initialPhone }: AccountSetti
     setIsChangingPassword(false);
 
     if (!res.ok) {
-      setPasswordError(body.message ?? "Something went wrong");
+      setPasswordError(body.message ?? t("genericError"));
       return;
     }
 
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-    toast.add({ title: "Password updated", type: "success" });
+    toast.add({ title: t("toastPasswordUpdated"), type: "success" });
   };
 
   const deleteAccount = async () => {
@@ -94,37 +98,54 @@ export function AccountSettingsForm({ initialEmail, initialPhone }: AccountSetti
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Input label="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        <Button variant="secondary" size="sm" className="self-start" disabled={savingBasics} onClick={saveBasics}>
+        <Input
+          label={t("emailLabel")}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Input
+          label={t("phoneLabel")}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+        <Button
+          variant="secondary"
+          size="sm"
+          className="self-start"
+          disabled={savingBasics}
+          onClick={saveBasics}
+        >
           {savingBasics ? <Loader2 className="size-4 animate-spin" /> : null}
-          Save
+          {t("save")}
         </Button>
       </div>
 
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-4">
-        <span className="text-body-md font-semibold text-text-primary">Change password</span>
+        <span className="text-body-md font-semibold text-text-primary">
+          {t("changePasswordTitle")}
+        </span>
         {passwordError ? (
           <div className="rounded-[var(--fg-radius-md)] bg-danger-bg p-3 text-body-sm text-danger">
             {passwordError}
           </div>
         ) : null}
         <Input
-          label="Current password"
+          label={t("currentPasswordLabel")}
           type="password"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
         />
         <Input
-          label="New password"
+          label={t("newPasswordLabel")}
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
         />
         <Input
-          label="Confirm new password"
+          label={t("confirmPasswordLabel")}
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
@@ -136,8 +157,10 @@ export function AccountSettingsForm({ initialEmail, initialPhone }: AccountSetti
           disabled={isChangingPassword || !currentPassword || !newPassword}
           onClick={changePassword}
         >
-          {isChangingPassword ? <Loader2 className="size-4 animate-spin" /> : null}
-          Update password
+          {isChangingPassword ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : null}
+          {t("updatePassword")}
         </Button>
       </div>
 
@@ -145,21 +168,26 @@ export function AccountSettingsForm({ initialEmail, initialPhone }: AccountSetti
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <NativeSelect
-          label="Language"
+          label={t("languageLabel")}
           value={locale}
-          options={routing.locales.map((code) => ({ value: code, label: code.toUpperCase() }))}
-          onChange={(value) => startTransition(async () => {
-            await setLocale(value as (typeof routing.locales)[number]);
-            router.refresh();
-          })}
+          options={routing.locales.map((code) => ({
+            value: code,
+            label: code.toUpperCase(),
+          }))}
+          onChange={(value) =>
+            startTransition(async () => {
+              await setLocale(value as (typeof routing.locales)[number]);
+              router.refresh();
+            })
+          }
         />
         <NativeSelect
-          label="Theme"
+          label={t("themeLabel")}
           value={mounted ? (theme ?? "system") : "system"}
           options={[
-            { value: "light", label: "Light" },
-            { value: "dark", label: "Dark" },
-            { value: "system", label: "System" },
+            { value: "light", label: t("themeLight") },
+            { value: "dark", label: t("themeDark") },
+            { value: "system", label: t("themeSystem") },
           ]}
           onChange={(value) => setTheme(value)}
         />
@@ -168,30 +196,42 @@ export function AccountSettingsForm({ initialEmail, initialPhone }: AccountSetti
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-danger p-4">
-        <span className="text-body-md font-semibold text-danger">Danger zone</span>
+        <span className="text-body-md font-semibold text-danger">
+          {t("dangerZoneTitle")}
+        </span>
         <p className="text-body-sm text-text-secondary">
-          Deleting your account is permanent. This cannot be undone.
+          {t("dangerZoneDesc")}
         </p>
-        <Button variant="destructive" size="sm" className="self-start" onClick={() => setDeleteOpen(true)}>
-          Delete account
+        <Button
+          variant="destructive"
+          size="sm"
+          className="self-start"
+          onClick={() => setDeleteOpen(true)}
+        >
+          {t("deleteAccount")}
         </Button>
 
         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Delete your account?</DialogTitle>
+              <DialogTitle>{t("deleteDialogTitle")}</DialogTitle>
             </DialogHeader>
             <p className="text-body-sm text-text-secondary">
-              This will permanently deactivate your Fgrapher account. This action cannot be
-              undone.
+              {t("deleteDialogBody")}
             </p>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-                Cancel
+                {t("cancel")}
               </Button>
-              <Button variant="destructive" disabled={isDeleting} onClick={deleteAccount}>
-                {isDeleting ? <Loader2 className="size-4 animate-spin" /> : null}
-                Delete account
+              <Button
+                variant="destructive"
+                disabled={isDeleting}
+                onClick={deleteAccount}
+              >
+                {isDeleting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : null}
+                {t("deleteAccount")}
               </Button>
             </DialogFooter>
           </DialogContent>

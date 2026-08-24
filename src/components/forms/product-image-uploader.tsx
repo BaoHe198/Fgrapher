@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Loader2, Upload, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -39,6 +40,7 @@ function SortableThumb({
   image: ProductImage;
   onRemove: () => void;
 }) {
+  const t = useTranslations("uiKit.productImageUploader");
   const {
     attributes,
     listeners,
@@ -66,7 +68,7 @@ function SortableThumb({
           {...attributes}
           {...listeners}
           className="flex size-6 cursor-grab items-center justify-center rounded-full bg-white/20 text-white"
-          aria-label="Reorder"
+          aria-label={t("reorder")}
         >
           <GripVertical className="size-3.5" />
         </button>
@@ -74,7 +76,7 @@ function SortableThumb({
           type="button"
           onClick={onRemove}
           className="flex size-6 items-center justify-center rounded-full bg-white/20 text-white"
-          aria-label="Remove"
+          aria-label={t("remove")}
         >
           <X className="size-3.5" />
         </button>
@@ -87,6 +89,7 @@ export function ProductImageUploader({
   images,
   onChange,
 }: ProductImageUploaderProps) {
+  const t = useTranslations("uiKit.productImageUploader");
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sensors = useSensors(
@@ -101,7 +104,7 @@ export function ProductImageUploader({
       const sigRes = await fetch("/api/upload/signature", { method: "POST" });
       const sigBody = await sigRes.json();
       if (!sigRes.ok) {
-        setError(sigBody.message ?? "Upload unavailable");
+        setError(sigBody.message ?? t("uploadUnavailable"));
         setIsUploading(false);
         return;
       }
@@ -129,14 +132,14 @@ export function ProductImageUploader({
             });
           }
         } catch {
-          setError("One or more uploads failed");
+          setError(t("uploadFailed"));
         }
       }
 
       onChange([...images, ...uploaded]);
       setIsUploading(false);
     },
-    [images, onChange],
+    [images, onChange, t],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

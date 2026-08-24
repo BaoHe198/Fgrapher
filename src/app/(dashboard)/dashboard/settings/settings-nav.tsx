@@ -1,21 +1,23 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { href: "/dashboard/settings/profile", label: "Profile" },
-  { href: "/dashboard/settings/account", label: "Account" },
-  { href: "/dashboard/settings/roles", label: "Roles" },
-  { href: "/dashboard/settings/billing", label: "Billing" },
-  { href: "/dashboard/settings/notifications", label: "Notifications" },
-  { href: "/dashboard/settings/data", label: "Data & Privacy" },
-];
+  { href: "/dashboard/settings/profile", key: "profile" },
+  { href: "/dashboard/settings/account", key: "account" },
+  { href: "/dashboard/settings/roles", key: "roles" },
+  { href: "/dashboard/settings/billing", key: "billing" },
+  { href: "/dashboard/settings/notifications", key: "notifications" },
+  { href: "/dashboard/settings/data", key: "data" },
+] as const;
 
 export function SettingsNav() {
   const pathname = usePathname();
+  const t = useTranslations("dashboardSettings.nav");
 
   return (
     <div className="flex gap-1 overflow-x-auto border-b border-border-subtle">
@@ -32,7 +34,7 @@ export function SettingsNav() {
                 : "border-transparent text-text-secondary",
             )}
           >
-            {tab.label}
+            {t(tab.key)}
           </Link>
         );
       })}

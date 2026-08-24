@@ -17,6 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Upload, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -34,13 +35,13 @@ interface MediaItem {
   moderationNote: string | null;
 }
 
-const MODERATION_BADGE: Record<
+const MODERATION_BADGE_VARIANT: Record<
   string,
-  { label: string; variant: "warning" | "destructive" } | undefined
+  "warning" | "destructive" | undefined
 > = {
-  PENDING: { label: "Pending review", variant: "warning" },
-  REJECTED: { label: "Rejected", variant: "destructive" },
-  AUTO_REJECTED: { label: "Rejected", variant: "destructive" },
+  PENDING: "warning",
+  REJECTED: "destructive",
+  AUTO_REJECTED: "destructive",
 };
 
 interface PortfolioGridProps {
@@ -51,9 +52,11 @@ interface PortfolioGridProps {
 function SortableMediaTile({
   item,
   onDelete,
+  t,
 }: {
   item: MediaItem;
   onDelete: (id: string) => void;
+  t: ReturnType<typeof useTranslations>;
 }) {
   const {
     attributes,
@@ -87,12 +90,14 @@ function SortableMediaTile({
         />
       )}
 
-      {MODERATION_BADGE[item.moderationStatus] ? (
+      {MODERATION_BADGE_VARIANT[item.moderationStatus] ? (
         <Badge
-          variant={MODERATION_BADGE[item.moderationStatus]!.variant}
+          variant={MODERATION_BADGE_VARIANT[item.moderationStatus]!}
           className="absolute top-2 left-2"
         >
-          {MODERATION_BADGE[item.moderationStatus]!.label}
+          {item.moderationStatus === "PENDING"
+            ? t("moderation.pending")
+            : t("moderation.rejected")}
         </Badge>
       ) : null}
 
@@ -103,7 +108,7 @@ function SortableMediaTile({
             {...attributes}
             {...listeners}
             className="flex size-7 cursor-grab items-center justify-center rounded-full bg-white/20 text-white"
-            aria-label="Reorder"
+            aria-label={t("reorder")}
           >
             <GripVertical className="size-4" />
           </button>
@@ -111,7 +116,7 @@ function SortableMediaTile({
             type="button"
             onClick={() => onDelete(item.id)}
             className="flex size-7 items-center justify-center rounded-full bg-white/20 text-white"
-            aria-label="Delete"
+            aria-label={t("delete")}
           >
             <X className="size-4" />
           </button>
@@ -127,6 +132,7 @@ function SortableMediaTile({
 }
 
 export function PortfolioGrid({ profileId, initialMedia }: PortfolioGridProps) {
+  const t = useTranslations("dashboardCore.portfolioGrid");
   const [media, setMedia] = useState(initialMedia);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const sensors = useSensors(
@@ -157,7 +163,7 @@ export function PortfolioGrid({ profileId, initialMedia }: PortfolioGridProps) {
   return (
     <>
       <p className="text-body-sm text-text-secondary">
-        {media.length} item{media.length === 1 ? "" : "s"} · Drag to reorder
+        {t("itemCount", { count: media.length })} · {t("dragToReorder")}
       </p>
 
       <DndContext
@@ -176,6 +182,7 @@ export function PortfolioGrid({ profileId, initialMedia }: PortfolioGridProps) {
                 key={item.id}
                 item={item}
                 onDelete={onDelete}
+                t={t}
               />
             ))}
 
@@ -185,7 +192,7 @@ export function PortfolioGrid({ profileId, initialMedia }: PortfolioGridProps) {
               className="flex aspect-4/3 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-default text-text-tertiary transition-colors duration-150 hover:border-brand-primary hover:text-brand-primary"
             >
               <Upload className="size-[22px]" />
-              <span className="text-body-sm">Upload</span>
+              <span className="text-body-sm">{t("upload")}</span>
             </button>
           </div>
         </SortableContext>

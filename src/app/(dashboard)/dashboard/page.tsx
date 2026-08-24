@@ -5,6 +5,7 @@ import {
   ShoppingBag,
   Star,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -28,11 +29,13 @@ import {
 import { AcceptingBookingsToggle } from "./accepting-bookings-toggle";
 import { CheckoutSuccessToast } from "./checkout-success-toast";
 
-function greeting(firstName: string) {
+function greeting(
+  firstName: string,
+  t: Awaited<ReturnType<typeof getTranslations<"dashboardCore.home">>>,
+) {
   const hour = new Date().getHours();
-  const timeOfDay =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  return `${timeOfDay}, ${firstName}`;
+  const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+  return t(`greeting.${timeOfDay}`, { name: firstName });
 }
 
 const ACTIVITY_ICONS = {
@@ -41,23 +44,32 @@ const ACTIVITY_ICONS = {
   review: Star,
 } as const;
 
-function providerStatCards(stats: ProviderStats) {
+function providerStatCards(
+  stats: ProviderStats,
+  t: Awaited<ReturnType<typeof getTranslations<"dashboardCore.home">>>,
+) {
   return [
-    { label: "Pending requests", value: String(stats.pending) },
-    { label: "Confirmed", value: String(stats.confirmed) },
-    { label: "Earnings", value: formatCurrency(stats.earnings) },
-    { label: "Profile views", value: String(stats.views) },
+    { label: t("stats.pendingRequests"), value: String(stats.pending) },
+    { label: t("stats.confirmed"), value: String(stats.confirmed) },
+    { label: t("stats.earnings"), value: formatCurrency(stats.earnings) },
+    { label: t("stats.profileViews"), value: String(stats.views) },
   ];
 }
 
-function customerStatCards(stats: CustomerStats) {
+function customerStatCards(
+  stats: CustomerStats,
+  t: Awaited<ReturnType<typeof getTranslations<"dashboardCore.home">>>,
+) {
   return [
-    { label: "Upcoming bookings", value: String(stats.upcomingBookings) },
-    { label: "Saved artists", value: String(stats.savedArtists) },
-    { label: "Messages", value: String(stats.messages) },
+    {
+      label: t("stats.upcomingBookings"),
+      value: String(stats.upcomingBookings),
+    },
+    { label: t("stats.savedArtists"), value: String(stats.savedArtists) },
+    { label: t("stats.messages"), value: String(stats.messages) },
     // Hidden while MARKETPLACE_ENABLED=false.
     ...(features.marketplaceEnabled
-      ? [{ label: "Orders", value: String(stats.orders) }]
+      ? [{ label: t("stats.orders"), value: String(stats.orders) }]
       : []),
   ];
 }
@@ -80,11 +92,13 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const t = await getTranslations("dashboardCore.home");
+
   const [activity, statCards] = await Promise.all([
     getRecentActivity(user.id, isProvider),
     isProvider
-      ? getProviderStats(user.id).then(providerStatCards)
-      : getCustomerStats(user.id).then(customerStatCards),
+      ? getProviderStats(user.id).then((stats) => providerStatCards(stats, t))
+      : getCustomerStats(user.id).then((stats) => customerStatCards(stats, t)),
   ]);
 
   const hasIncompleteProfile =
@@ -114,7 +128,7 @@ export default async function DashboardPage() {
       {features.billingEnabled ? <CheckoutSuccessToast /> : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-display-md text-text-primary">
-          {greeting(firstName)}
+          {greeting(firstName, t)}
         </h1>
         {isProvider ? (
           <AcceptingBookingsToggle initialValue={user.acceptingBookings} />

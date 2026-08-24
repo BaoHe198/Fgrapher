@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { extendTailwindMerge } from "tailwind-merge";
 
+import { formatDate, formatVND } from "@/lib/format";
+
 // Fgrapher brand tokens (docs/design-reference/design-tokens.md) reuse the
 // "text-" prefix for two different things: color utilities (text-brand-primary,
 // text-text-primary, text-green-500, ...) and the @utility typography classes
@@ -73,23 +75,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency = "VND") {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: currency === "VND" ? 0 : 2,
-  }).format(amount);
+// `currency` is kept only for call-site compatibility (every Prisma model
+// with a currency column defaults to "VND" and CLAUDE.md scopes this MVP to
+// Vietnam only, so there's never a real non-VND amount to format) — prefer
+// calling formatVND directly from lib/format.ts in new code.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- kept for signature compatibility, see comment above
+export function formatCurrency(amount: number, _currency = "VND") {
+  return formatVND(amount);
 }
 
 export function formatRelativeTime(date: Date) {
   const diffMs = Date.now() - date.getTime();
   const diffMinutes = Math.round(diffMs / 60_000);
 
-  if (diffMinutes < 1) return "just now";
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffMinutes < 1) return "vừa xong";
+  if (diffMinutes < 60) return `${diffMinutes} phút trước`;
   const diffHours = Math.round(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return `${diffHours} giờ trước`;
   const diffDays = Math.round(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (diffDays < 7) return `${diffDays} ngày trước`;
+  return formatDate(date);
 }
