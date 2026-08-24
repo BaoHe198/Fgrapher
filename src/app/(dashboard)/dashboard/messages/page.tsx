@@ -62,6 +62,10 @@ export default function MessagesPage() {
     }
 
     if (c) startTransition(() => setSelectedId(c));
+    // Only searchParams is a real trigger here (startedRef guards the `to`
+    // branch from firing twice) — router and loadConversations are stable/
+    // re-created every render but including them wouldn't change when this
+    // actually re-runs, only cause needless extra runs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 

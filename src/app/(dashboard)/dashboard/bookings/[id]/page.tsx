@@ -131,6 +131,9 @@ export default function BookingDetailPage() {
 
   useEffect(() => {
     load();
+    // `load` is a fresh closure every render but only truly depends on
+    // params.id — re-fetches exactly when navigating to a different
+    // booking, not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 

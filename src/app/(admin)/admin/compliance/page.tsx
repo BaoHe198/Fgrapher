@@ -86,6 +86,9 @@ function DataRequestsPanel() {
 
   useEffect(() => {
     load();
+    // `load` is a fresh closure every render but only truly depends on
+    // type/status, both already listed — re-fetches exactly when a filter
+    // changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, status]);
 

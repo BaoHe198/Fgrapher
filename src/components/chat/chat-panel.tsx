@@ -167,6 +167,9 @@ export function ChatPanel({
     // the pragmatic stand-in while a conversation is open.
     const interval = setInterval(() => load(false), 4000);
     return () => clearInterval(interval);
+    // `load` is a fresh closure every render but only truly depends on
+    // conversationId, already listed — switching conversations reloads and
+    // restarts the polling interval for the new one.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 

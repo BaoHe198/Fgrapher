@@ -169,6 +169,9 @@ export function BookingWizard({
       }
       setHydrated(true);
     });
+    // Deliberately run once on mount only — re-running on searchParams/
+    // storageKey change would re-hydrate and clobber whatever the user has
+    // already typed into the draft.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

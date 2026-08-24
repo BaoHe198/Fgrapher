@@ -21,7 +21,11 @@ interface ReviewModalProps {
   bookingId: string;
   providerName: string;
   serviceName?: string;
-  existingReview?: { id: string; rating: number; content: string | null } | null;
+  existingReview?: {
+    id: string;
+    rating: number;
+    content: string | null;
+  } | null;
   initialRating?: number;
   onSuccess?: () => void;
 }
@@ -57,6 +61,11 @@ export function ReviewModal({
         setError(null);
       });
     }
+    // existingReview/initialRating deliberately omitted — this only needs
+    // to reset when the dialog transitions closed->open (per the comment
+    // above), and the callback is redefined every render anyway, so it
+    // reads whatever those props currently are at the moment `open`
+    // actually flips, not a stale value from an earlier render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -93,7 +102,10 @@ export function ReviewModal({
       return;
     }
 
-    toast.add({ title: isEdit ? "Review updated" : "Review posted", type: "success" });
+    toast.add({
+      title: isEdit ? "Review updated" : "Review posted",
+      type: "success",
+    });
     onOpenChange(false);
     onSuccess?.();
   };
@@ -103,12 +115,16 @@ export function ReviewModal({
       <DialogContent className="max-w-[520px]">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit your review" : `How was your session with ${providerName}?`}
+            {isEdit
+              ? "Edit your review"
+              : `How was your session with ${providerName}?`}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
-          {serviceName ? <p className="text-body-sm text-text-secondary">{serviceName}</p> : null}
+          {serviceName ? (
+            <p className="text-body-sm text-text-secondary">{serviceName}</p>
+          ) : null}
 
           <StarInput value={rating} onChange={setRating} size={40} showLabel />
 

@@ -57,6 +57,8 @@ export default function AdminReportsPage() {
 
   useEffect(() => {
     load();
+    // `load` is a fresh closure every render but only truly depends on
+    // tab, already listed — re-fetches exactly when the filter tab changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 

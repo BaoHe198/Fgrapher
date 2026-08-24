@@ -80,6 +80,8 @@ export function OrderDetailContent() {
 
   useEffect(() => {
     load();
+    // `load` is a fresh closure every render but only truly depends on
+    // params.id — re-fetches exactly when navigating to a different order.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
