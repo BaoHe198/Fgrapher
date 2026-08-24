@@ -3,7 +3,7 @@
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,16 +26,11 @@ const EXPERIENCE_LEVELS: ExperienceLevel[] = [
   "PROFESSIONAL",
 ];
 
-const CITIES = [
-  "Hồ Chí Minh",
-  "Hà Nội",
-  "Đà Nẵng",
-  "Nha Trang",
-  "Hội An",
-  "Đà Lạt",
-  "Cần Thơ",
-  "Hải Phòng",
-];
+interface ProvinceOption {
+  id: string;
+  code: string;
+  name: string;
+}
 
 // Labels for these three option lists are resolved inside the component via
 // useTranslations, since module scope has no access to the hook.
@@ -146,6 +141,15 @@ export function FilterSidebar({
   const [filters, setFilters] = useState<FilterState>(() =>
     filterStateFromParams(searchParams),
   );
+  // Real Province rows, not a hardcoded list (CLAUDE.md mục 9) — today
+  // this is just Thành phố Hồ Chí Minh until more provinces' real ward
+  // data is seeded (see prisma/data/hcmc-wards.ts).
+  const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
+  useEffect(() => {
+    fetch("/api/geography/provinces")
+      .then((res) => res.json())
+      .then((body) => startTransition(() => setProvinces(body.data ?? [])));
+  }, []);
   // Mirrors `filters` synchronously (state updates are batched/async, this
   // isn't) so a click reads the freshest local intent even if it fires
   // before React has re-rendered from the previous click. Written only in
@@ -386,7 +390,7 @@ export function FilterSidebar({
         onChange={(value) => applyFilters({ city: value })}
         options={[
           { value: "", label: t("allCities") },
-          ...CITIES.map((c) => ({ value: c, label: c })),
+          ...provinces.map((p) => ({ value: p.name, label: p.name })),
         ]}
       />
 

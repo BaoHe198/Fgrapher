@@ -10,6 +10,15 @@ export const CURRENT_POLICY_VERSION = "2026-08-23-v1";
 // requestedAt + this many days, not stored on the row itself.
 export const DATA_REQUEST_SLA_DAYS = 30;
 
+// CLAUDE.md rule 7 — ID document images auto-delete after 90 days,
+// regardless of whether the verification was approved, rejected, or never
+// reviewed at all. Set on UserRole.purgeAfter at both submission time
+// (services/verification.ts's submitVerification, covering the
+// never-reviewed case) and review time (services/admin.ts's
+// reviewVerification, both branches — approval resets the clock rather
+// than purging a just-verified provider's documents immediately).
+export const KYC_PURGE_AFTER_DAYS = 90;
+
 // Preset options shown on /admin/verifications' reject flow — the admin
 // picks one (plus an optional free-text note), combined client-side into
 // the single string stored in UserRole.verificationRejectedReason.

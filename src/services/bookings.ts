@@ -73,6 +73,29 @@ function partyName(party: { firstName: string | null; name: string | null }) {
   return party.firstName ?? party.name ?? "there";
 }
 
+// Anti-spam/safety (Prompt B7, VIỆC 4) — same rule getBookingDetail applies:
+// a provider only sees the customer's contactPhone/locationAddress once
+// they've accepted the request. BOOKING_INCLUDE has no top-level `select`
+// on Booking, so it returns those two columns unfiltered regardless of
+// status — every list-shaped read (listBookings, listBookingsForRange)
+// must run its rows through this before returning, the same way
+// getBookingDetail already does for the single-booking read, or a provider
+// can see a PENDING booking's contact info through the list/calendar view
+// even though the detail page for that exact booking would redact it.
+function redactContactInfo<
+  T extends {
+    providerId: string;
+    status: BookingStatus;
+    contactPhone: string | null;
+    locationAddress: string | null;
+  },
+>(booking: T, viewerId: string): T {
+  const viewerIsProvider = booking.providerId === viewerId;
+  const contactInfoVisible = !viewerIsProvider || booking.status !== "PENDING";
+  if (contactInfoVisible) return booking;
+  return { ...booking, contactPhone: null, locationAddress: null };
+}
+
 function dateLabel(date: Date) {
   return new Date(date).toLocaleDateString("en-US", {
     dateStyle: "long",
@@ -119,7 +142,7 @@ export async function listBookings({
   ]);
 
   return {
-    bookings,
+    bookings: bookings.map((b) => redactContactInfo(b, userId)),
     total,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
@@ -135,7 +158,7 @@ export async function listBookingsForRange({
   from: Date;
   to: Date;
 }) {
-  return db.booking.findMany({
+  const bookings = await db.booking.findMany({
     where: {
       providerId,
       status: { in: ["PENDING", "CONFIRMED", "COMPLETED", "NO_SHOW"] },
@@ -144,6 +167,9 @@ export async function listBookingsForRange({
     orderBy: { date: "asc" },
     include: BOOKING_INCLUDE,
   });
+  // Only ever called with the viewing provider's own id (see the calendar
+  // route), so that's the viewer for redaction purposes too.
+  return bookings.map((b) => redactContactInfo(b, providerId));
 }
 
 const VERIFIED_ROLE_SELECT = {

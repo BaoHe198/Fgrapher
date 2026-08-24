@@ -128,10 +128,17 @@ export async function searchProfiles(params: SearchParams) {
     role: {
       in: params.roles && params.roles.length > 0 ? params.roles : PAID_ROLES,
     },
+    // `contains`, not `equals` — the city filter now sends a real Province
+    // name (Prompt B4/B8), but User.location is free text that, for a
+    // ward-assigned user, reads like "Phường Bến Thành, Thành phố Hồ Chí
+    // Minh" rather than the bare province name. An exact match would never
+    // hit once a user has a real ward (see services/geography.ts). Once
+    // every provider has a wardId this should become `user: { ward: {
+    // province: { code } } }` instead of string matching.
     ...(params.city
       ? {
           user: {
-            location: { equals: params.city, mode: "insensitive" as const },
+            location: { contains: params.city, mode: "insensitive" as const },
           },
         }
       : {}),

@@ -50,27 +50,36 @@ export async function listConversations(userId: string, page = 1) {
     take: PAGE_SIZE,
   });
 
-  const results = await Promise.all(
-    participantRows.map(async (row) => {
-      const other = row.conversation.participants.find((p) => p.userId !== userId)?.user;
-      const lastMessage = row.conversation.messages[0] ?? null;
-      const unreadCount = await db.message.count({
-        where: {
-          conversationId: row.conversationId,
-          receiverId: userId,
-          readAt: null,
-        },
-      });
-
-      return {
-        id: row.conversation.id,
-        otherUser: other ?? null,
-        lastMessage,
-        lastMessageAt: row.conversation.lastMessageAt,
-        unreadCount,
-      };
-    }),
+  // One batched groupBy for the whole page instead of a per-conversation
+  // db.message.count() in the loop below — this list is polled from
+  // /dashboard/messages, so avoiding N+1 here matters more than most reads.
+  const unreadRows = await db.message.groupBy({
+    by: ["conversationId"],
+    where: {
+      conversationId: { in: participantRows.map((row) => row.conversationId) },
+      receiverId: userId,
+      readAt: null,
+    },
+    _count: true,
+  });
+  const unreadByConversation = new Map(
+    unreadRows.map((r) => [r.conversationId, r._count]),
   );
+
+  const results = participantRows.map((row) => {
+    const other = row.conversation.participants.find(
+      (p) => p.userId !== userId,
+    )?.user;
+    const lastMessage = row.conversation.messages[0] ?? null;
+
+    return {
+      id: row.conversation.id,
+      otherUser: other ?? null,
+      lastMessage,
+      lastMessageAt: row.conversation.lastMessageAt,
+      unreadCount: unreadByConversation.get(row.conversationId) ?? 0,
+    };
+  });
 
   return results.filter((r) => r.otherUser !== null);
 }
@@ -83,12 +92,17 @@ export async function getUnreadConversationCount(userId: string) {
   return rows.length;
 }
 
-export async function getOrCreateConversation(userId: string, otherUserId: string) {
+export async function getOrCreateConversation(
+  userId: string,
+  otherUserId: string,
+) {
   if (userId === otherUserId) {
     throw new MessagingError("You can't message yourself", 400);
   }
 
-  const otherUser = await db.user.findUnique({ where: { id: otherUserId, deletedAt: null } });
+  const otherUser = await db.user.findUnique({
+    where: { id: otherUserId, deletedAt: null },
+  });
   if (!otherUser) {
     throw new MessagingError("User not found", 404);
   }
@@ -149,11 +163,19 @@ export async function listMessages({
   // Message.bookingId is a loose scalar reference (no formal Prisma
   // relation to Booking, to avoid coupling the two models together) — so
   // booking_link summaries are fetched separately and merged in.
-  const bookingIds = messages.map((m) => m.bookingId).filter((id): id is string => Boolean(id));
+  const bookingIds = messages
+    .map((m) => m.bookingId)
+    .filter((id): id is string => Boolean(id));
   const bookings = bookingIds.length
     ? await db.booking.findMany({
         where: { id: { in: bookingIds } },
-        select: { id: true, date: true, startTime: true, status: true, service: { select: { name: true } } },
+        select: {
+          id: true,
+          date: true,
+          startTime: true,
+          status: true,
+          service: { select: { name: true } },
+        },
       })
     : [];
   const bookingById = new Map(bookings.map((b) => [b.id, b]));
@@ -187,8 +209,11 @@ export async function sendMessage({
   });
   if (!conversation) throw new MessagingError("Conversation not found", 404);
 
-  const receiverId = conversation.participants.find((p) => p.userId !== senderId)?.userId;
-  if (!receiverId) throw new MessagingError("Conversation has no other participant", 400);
+  const receiverId = conversation.participants.find(
+    (p) => p.userId !== senderId,
+  )?.userId;
+  if (!receiverId)
+    throw new MessagingError("Conversation has no other participant", 400);
 
   if (await isBlocked(senderId, receiverId)) {
     throw new MessagingError("You can't message this user", 403);
@@ -196,13 +221,27 @@ export async function sendMessage({
 
   const [message] = await db.$transaction([
     db.message.create({
-      data: { conversationId, senderId, receiverId, content, type, mediaUrl, bookingId },
+      data: {
+        conversationId,
+        senderId,
+        receiverId,
+        content,
+        type,
+        mediaUrl,
+        bookingId,
+      },
       include: { sender: { select: PARTY_SELECT } },
     }),
-    db.conversation.update({ where: { id: conversationId }, data: { lastMessageAt: new Date() } }),
+    db.conversation.update({
+      where: { id: conversationId },
+      data: { lastMessageAt: new Date() },
+    }),
   ]);
 
-  const sender = await db.user.findUnique({ where: { id: senderId }, select: PARTY_SELECT });
+  const sender = await db.user.findUnique({
+    where: { id: senderId },
+    select: PARTY_SELECT,
+  });
 
   // No live real-time transport in this environment (Pusher/Socket.io need
   // credentials this project doesn't have) — the chat panel polls for new
@@ -219,7 +258,10 @@ export async function sendMessage({
   return message;
 }
 
-export async function markConversationRead(conversationId: string, userId: string) {
+export async function markConversationRead(
+  conversationId: string,
+  userId: string,
+) {
   await requireParticipant(conversationId, userId);
 
   await db.$transaction([
@@ -234,8 +276,13 @@ export async function markConversationRead(conversationId: string, userId: strin
   ]);
 }
 
-export async function blockUser(blockerId: string, blockedId: string, reason?: string) {
-  if (blockerId === blockedId) throw new MessagingError("You can't block yourself", 400);
+export async function blockUser(
+  blockerId: string,
+  blockedId: string,
+  reason?: string,
+) {
+  if (blockerId === blockedId)
+    throw new MessagingError("You can't block yourself", 400);
   await db.blockedUser.upsert({
     where: { blockerId_blockedId: { blockerId, blockedId } },
     create: { blockerId, blockedId, reason },

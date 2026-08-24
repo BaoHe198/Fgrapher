@@ -98,6 +98,11 @@ model User {
   dataRequests             DataRequest[]
 
   @@index([wardId])
+  // Both filtered on every admin dashboard load (getAdminOverview) and by
+  // /admin/users' list/search — no index meant a sequential scan on both,
+  // invisible on seed data but not at real scale.
+  @@index([deletedAt])
+  @@index([isSuspended])
   @@map("users")
 }
 

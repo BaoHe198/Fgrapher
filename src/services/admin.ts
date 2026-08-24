@@ -6,6 +6,7 @@ import type {
 
 import { generateKycSignedUrl } from "@/lib/cloudinary";
 import { db } from "@/lib/db";
+import { KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
 import { ROLE_PLANS } from "@/lib/constants/plans";
 import { logAudit, processDeletion } from "@/services/compliance";
 
@@ -327,8 +328,6 @@ export async function listPendingVerifications() {
   });
 }
 
-const KYC_PURGE_AFTER_DAYS = 90;
-
 export async function reviewVerification({
   userRoleId,
   adminId,
@@ -350,7 +349,17 @@ export async function reviewVerification({
           verificationRejectedReason: null,
           purgeAfter: new Date(Date.now() + KYC_PURGE_AFTER_DAYS * 86_400_000),
         }
-      : { verificationStatus: "REJECTED", verificationRejectedReason: reason },
+      : {
+          verificationStatus: "REJECTED",
+          verificationRejectedReason: reason,
+          // A rejected submission's documents are arguably more sensitive
+          // to leave lying around than an approved one (no ongoing business
+          // reason to hold them at all) — this used to only ever get set on
+          // approval, so a rejected UserRole's KYC images never hit the
+          // purge cron and sat indefinitely (CLAUDE.md rule 7 requires
+          // auto-delete after 90 days regardless of outcome).
+          purgeAfter: new Date(Date.now() + KYC_PURGE_AFTER_DAYS * 86_400_000),
+        },
   });
 }
 

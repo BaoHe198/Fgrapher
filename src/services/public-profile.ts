@@ -59,7 +59,24 @@ export async function setProfilePublished(
 export async function getPublicProfileUser(username: string) {
   return db.user.findUnique({
     where: { username, deletedAt: null },
-    include: {
+    // Explicit select, not include — this is a *public* read, and an
+    // unfiltered include on User returns every scalar column (email,
+    // phone, passwordHash...) to the caller. Nothing downstream spreads
+    // the raw object into a Client Component prop today, but that's the
+    // caller being careful, not this query — list every field the public
+    // profile page actually uses (src/app/(public)/profile/[username]/
+    // page.tsx) so a future edit can't silently leak the rest.
+    select: {
+      id: true,
+      name: true,
+      firstName: true,
+      avatar: true,
+      coverImage: true,
+      location: true,
+      acceptingBookings: true,
+      // Never rendered directly — only ever passed through
+      // getAgeRangeLabel() to compute a bucketed range, MODEL role only.
+      dateOfBirth: true,
       profiles: {
         where: { isPublished: true, role: { in: PAID_ROLES } },
         // Role is a Postgres enum, so this sorts by declaration order in

@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import type { Role } from "@prisma/client";
 
 import { deleteKycAsset, isCloudinaryConfigured } from "@/lib/cloudinary";
-import { CURRENT_POLICY_VERSION } from "@/lib/constants";
+import { CURRENT_POLICY_VERSION, KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { logAudit, recordConsent } from "@/services/compliance";
 
@@ -70,6 +70,13 @@ export async function submitVerification({
       verificationSelfiePublicId: selfiePublicId,
       idNumberHash: hashIdNumber(idNumber),
       verificationRejectedReason: null,
+      // Set here too, not just on review (services/admin.ts's
+      // reviewVerification) — a submission an admin never gets to (stuck
+      // PENDING) still needs to hit the 90-day auto-delete cron.
+      // reviewVerification overwrites this with a fresh window on
+      // approval/rejection, so this is only ever the effective deadline
+      // for the never-reviewed case.
+      purgeAfter: new Date(Date.now() + KYC_PURGE_AFTER_DAYS * 86_400_000),
     },
   });
 
