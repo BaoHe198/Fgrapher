@@ -149,17 +149,20 @@ tiếng Anh cũ (`"Photographer"`) — namespace cũ tồn tại sẵn nhưng ch
 `useTranslations`/`getTranslations` (Client/Server Component tương ứng).
 Khi xác minh, phát hiện thêm 2 file có bản sao độc lập của map vai trò
 (`hero-search.tsx`'s `ROLE_TO_ENUM`, `footer.tsx`'s `DISCOVER_ROLES`) tự gọi
-`t(\`role.${key}\`)`với khóa nhãn tiếng Anh cũ — việc đổi cấu trúc namespace`role`làm lộ ra hai chỗ này (test SSR thấy chữ`role.Photographer`thô);
-đã sửa cả hai để lặp trực tiếp theo enum`Role`. `RolePlan.name`
-(`lib/constants/plans.ts`) bị xóa vì nơi dùng duy nhất (`services/subscription.ts`'s
-email chào mừng subscription) đã chuyển sang dịch qua `next-intl`;
-`scripts/stripe-setup.ts`(script CLI dev, không có ngữ cảnh next-intl, tên
-sản phẩm Stripe không thuộc phạm vi ràng buộc UI tiếng Việt) tiếp tục dùng`ROLE_LABELS` trực tiếp.
+`t()` với khóa nhãn tiếng Anh cũ (kiểu `role.Photographer`) — việc đổi cấu
+trúc namespace `role` làm lộ ra hai chỗ này (test SSR thấy đúng chữ đó rò rỉ
+thô ra HTML); đã sửa cả hai để lặp trực tiếp theo enum `Role`. `RolePlan.name`
+(`lib/constants/plans.ts`) bị xóa vì nơi dùng duy nhất
+(`services/subscription.ts`'s email chào mừng subscription) đã chuyển sang
+dịch qua `next-intl`; `scripts/stripe-setup.ts` (script CLI dev, không có
+ngữ cảnh next-intl, tên sản phẩm Stripe không thuộc phạm vi ràng buộc UI
+tiếng Việt) tiếp tục dùng `ROLE_LABELS` trực tiếp.
 
 Đã kiểm thử: `tsc --noEmit`/`pnpm lint`/`pnpm build` sạch; curl qua SSR trên
 trang chủ, browse, pricing, register, và các trang dashboard/admin (đăng
 nhập qua session thật) xác nhận nhãn tiếng Việt hiển thị đúng và không còn
 khóa dịch thô (`role.`/`profileCategory.`/`experienceLevel.`) rò rỉ ra HTML.
+Commit `733761f`.
 
 _Nguồn: `docs/_prelaunch-audit-compliance.md` mục 10._
 
