@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
+import { calculateRentalDays } from "@/lib/pricing";
 import { formatCurrency } from "@/lib/utils";
 
 const CONDITION_LABEL: Record<ProductCondition, string> = {
@@ -44,21 +45,22 @@ export function ProductPurchasePanel({
   shopLocation: string | null;
 }) {
   const router = useRouter();
-  const [mode, setMode] = useState<"SALE" | "RENT">(product.type === "RENT" ? "RENT" : "SALE");
+  const [mode, setMode] = useState<"SALE" | "RENT">(
+    product.type === "RENT" ? "RENT" : "SALE",
+  );
   const [quantity, setQuantity] = useState(1);
   const [rentalStart, setRentalStart] = useState("");
   const [rentalEnd, setRentalEnd] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Floor of 0, not 1 — before both dates are picked (or if they're equal)
+  // this is a live pre-purchase preview, and should show ₫0 rather than
+  // charge for a day the user hasn't actually selected yet. The real order
+  // (services/orders.ts) floors at 1, as it must once a purchase is real.
   const rentalDays =
     rentalStart && rentalEnd
-      ? Math.max(
-          0,
-          Math.round(
-            (new Date(rentalEnd).getTime() - new Date(rentalStart).getTime()) / 86_400_000,
-          ),
-        )
+      ? Math.max(0, calculateRentalDays(rentalStart, rentalEnd))
       : 0;
   const rentalSubtotal = rentalDays * (product.rentalPrice ?? 0);
   const saleTotal = (product.price ?? 0) * quantity;
@@ -100,8 +102,12 @@ export function ProductPurchasePanel({
   return (
     <Card className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
-        {product.type !== "RENT" ? <Badge variant="neutral">For sale</Badge> : null}
-        {product.type !== "SALE" ? <Badge variant="accent">Rental</Badge> : null}
+        {product.type !== "RENT" ? (
+          <Badge variant="neutral">For sale</Badge>
+        ) : null}
+        {product.type !== "SALE" ? (
+          <Badge variant="accent">Rental</Badge>
+        ) : null}
       </div>
 
       <h1 className="text-display-sm text-text-primary">{product.name}</h1>
@@ -117,7 +123,9 @@ export function ProductPurchasePanel({
               type="button"
               onClick={() => setMode(m)}
               className={`px-4 py-1.5 text-body-sm font-bold ${
-                mode === m ? "bg-brand-primary text-text-on-brand" : "text-text-secondary"
+                mode === m
+                  ? "bg-brand-primary text-text-on-brand"
+                  : "text-text-secondary"
               }`}
             >
               {m === "SALE" ? "Buy" : "Rent"}
@@ -150,7 +158,9 @@ export function ProductPurchasePanel({
             >
               −
             </button>
-            <span className="w-6 text-center text-body-md font-semibold">{quantity}</span>
+            <span className="w-6 text-center text-body-md font-semibold">
+              {quantity}
+            </span>
             <button
               type="button"
               onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
@@ -216,7 +226,8 @@ export function ProductPurchasePanel({
             <div className="flex flex-col gap-1.5 border-t border-border-subtle pt-3 text-body-sm">
               <div className="flex justify-between">
                 <span className="text-text-secondary">
-                  {rentalDays} days × {formatCurrency(product.rentalPrice ?? 0, product.currency)}
+                  {rentalDays} days ×{" "}
+                  {formatCurrency(product.rentalPrice ?? 0, product.currency)}
                 </span>
                 <span className="text-text-primary">
                   {formatCurrency(rentalSubtotal, product.currency)}
@@ -234,7 +245,12 @@ export function ProductPurchasePanel({
               ) : null}
               <div className="flex justify-between text-heading-sm font-bold text-text-primary">
                 <span>Total</span>
-                <span>{formatCurrency(rentalSubtotal + (product.depositAmount ?? 0), product.currency)}</span>
+                <span>
+                  {formatCurrency(
+                    rentalSubtotal + (product.depositAmount ?? 0),
+                    product.currency,
+                  )}
+                </span>
               </div>
             </div>
           ) : null}
@@ -260,7 +276,9 @@ export function ProductPurchasePanel({
         </span>
         <span className="flex items-center gap-2">
           <Truck className="size-4" />
-          {shopLocation ? `Ships from ${shopLocation}` : "Shipping or pickup available"}
+          {shopLocation
+            ? `Ships from ${shopLocation}`
+            : "Shipping or pickup available"}
         </span>
         <span className="flex items-center gap-2">
           <RotateCcw className="size-4" /> 7-day return policy

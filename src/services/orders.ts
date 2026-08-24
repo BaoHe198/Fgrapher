@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type Stripe from "stripe";
 
 import { db } from "@/lib/db";
+import { calculateRentalDays } from "@/lib/pricing";
 import {
   newOrderEmailHtml,
   orderConfirmationEmailHtml,
@@ -133,13 +134,7 @@ export async function createOrdersFromCheckout(
           : (item.product.price ?? 0);
       const days =
         item.type === "RENT" && item.rentalStart && item.rentalEnd
-          ? Math.max(
-              1,
-              Math.round(
-                (item.rentalEnd.getTime() - item.rentalStart.getTime()) /
-                  86_400_000,
-              ),
-            )
+          ? Math.max(1, calculateRentalDays(item.rentalStart, item.rentalEnd))
           : 1;
       const lineTotal =
         (item.type === "RENT" ? unitPrice * days : unitPrice) * item.quantity;

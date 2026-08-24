@@ -22,6 +22,7 @@ import {
 import { NativeSelect } from "@/components/ui/native-select";
 import { StarInput } from "@/components/ui/star-input";
 import { Textarea } from "@/components/ui/textarea";
+import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
@@ -193,7 +194,7 @@ export default function BookingDetailPage() {
   const status = STATUS_BADGE[booking.status];
   const isPast = new Date(booking.date).getTime() < now;
   const withinCancellationWindow =
-    new Date(booking.date).getTime() - now < 24 * 60 * 60 * 1000;
+    new Date(booking.date).getTime() - now < MIN_NOTICE_HOURS * 60 * 60 * 1000;
   const hasReschedulePending = Boolean(booking.rescheduleProposedBy);
   const proposedByMe = booking.rescheduleProposedBy === session?.user?.id;
 

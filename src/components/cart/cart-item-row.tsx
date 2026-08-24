@@ -7,7 +7,7 @@ import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import type { CartItemWithProduct } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
 
-import { itemLineTotal } from "./cart-utils";
+import { itemLineTotal, itemRentalDays } from "./cart-utils";
 
 export function CartItemRow({
   item,
@@ -21,14 +21,7 @@ export function CartItemRow({
   const t = useTranslations("sharedComponents.cartItemRow");
   const days =
     item.type === "RENT" && item.rentalStart && item.rentalEnd
-      ? Math.max(
-          1,
-          Math.round(
-            (new Date(item.rentalEnd).getTime() -
-              new Date(item.rentalStart).getTime()) /
-              86_400_000,
-          ),
-        )
+      ? itemRentalDays(item)
       : null;
 
   return (

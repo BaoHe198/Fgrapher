@@ -10,6 +10,15 @@ export const CURRENT_POLICY_VERSION = "2026-08-23-v1";
 // requestedAt + this many days, not stored on the row itself.
 export const DATA_REQUEST_SLA_DAYS = 30;
 
+// Minimum lead time for a booking request. Used both to reject a
+// too-soon createBooking call server-side (services/bookings.ts) and to
+// mark a slot unavailable in the first place (services/availability.ts) —
+// previously each file defined its own identical `const
+// MIN_NOTICE_HOURS = 24`, plus a third hardcoded copy
+// (`dashboard/bookings/[id]/page.tsx`'s within-24h cancellation warning)
+// that carried the same number with no shared source.
+export const MIN_NOTICE_HOURS = 24;
+
 // CLAUDE.md rule 7 — ID document images auto-delete after 90 days,
 // regardless of whether the verification was approved, rejected, or never
 // reviewed at all. Set on UserRole.purgeAfter at both submission time

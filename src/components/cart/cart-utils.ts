@@ -1,4 +1,5 @@
 import type { CartItemWithProduct } from "@/hooks/use-cart";
+import { calculateRentalDays } from "@/lib/pricing";
 
 // `fallbackShopName` is a caller-supplied, already-translated string — this
 // is a plain utility (no React/next-intl hook access), so the caller
@@ -28,20 +29,20 @@ export function groupByShop(
   }));
 }
 
+// Exported (not just used internally by itemLineTotal) so callers that
+// need the day count for display — e.g. cart-item-row.tsx's "N days"
+// label — use this instead of re-deriving it themselves.
+export function itemRentalDays(item: CartItemWithProduct) {
+  return item.rentalStart && item.rentalEnd
+    ? Math.max(1, calculateRentalDays(item.rentalStart, item.rentalEnd))
+    : 1;
+}
+
 export function itemLineTotal(item: CartItemWithProduct) {
   if (item.type === "RENT") {
-    const days =
-      item.rentalStart && item.rentalEnd
-        ? Math.max(
-            1,
-            Math.round(
-              (new Date(item.rentalEnd).getTime() -
-                new Date(item.rentalStart).getTime()) /
-                86_400_000,
-            ),
-          )
-        : 1;
-    return (item.product.rentalPrice ?? 0) * days * item.quantity;
+    return (
+      (item.product.rentalPrice ?? 0) * itemRentalDays(item) * item.quantity
+    );
   }
   return (item.product.price ?? 0) * item.quantity;
 }

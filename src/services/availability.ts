@@ -1,3 +1,4 @@
+import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { db } from "@/lib/db";
 
 // This module treats every date as a UTC-anchored calendar date (matching
@@ -31,7 +32,6 @@ function toDateKey(date: Date) {
 }
 
 const SLOT_MINUTES = 60;
-const MIN_NOTICE_HOURS = 24;
 
 export interface DayAvailability {
   date: string;
@@ -59,11 +59,17 @@ export async function getProviderAvailability(
         status: { in: ["PENDING", "CONFIRMED"] },
         date: { gte: from, lt: to },
       },
-      select: { date: true, startTime: true, service: { select: { duration: true } } },
+      select: {
+        date: true,
+        startTime: true,
+        service: { select: { duration: true } },
+      },
     }),
   ]);
 
-  const blockedDateStrings = new Set(blockedDates.map((b) => toDateKey(b.date)));
+  const blockedDateStrings = new Set(
+    blockedDates.map((b) => toDateKey(b.date)),
+  );
 
   // Existing bookings occupy [startMinutes, startMinutes + duration), not
   // just their exact start slot — a 2-hour booking at 10:00 must also block
@@ -102,16 +108,31 @@ export async function getProviderAvailability(
     for (const window of windows) {
       const start = timeToMinutes(window.startTime);
       const end = timeToMinutes(window.endTime);
-      for (let m = start; m + serviceDurationMinutes <= end; m += SLOT_MINUTES) {
+      for (
+        let m = start;
+        m + serviceDurationMinutes <= end;
+        m += SLOT_MINUTES
+      ) {
         const slotEnd = m + serviceDurationMinutes;
-        const overlapsBooking = occupied.some((o) => m < o.end && slotEnd > o.start);
-        const slotInstant = Date.parse(`${dateString}T${minutesToTime(m)}:00.000Z`);
+        const overlapsBooking = occupied.some(
+          (o) => m < o.end && slotEnd > o.start,
+        );
+        const slotInstant = Date.parse(
+          `${dateString}T${minutesToTime(m)}:00.000Z`,
+        );
         const tooSoon = slotInstant < minNoticeInstant;
-        slots.push({ time: minutesToTime(m), available: !overlapsBooking && !tooSoon });
+        slots.push({
+          time: minutesToTime(m),
+          available: !overlapsBooking && !tooSoon,
+        });
       }
     }
 
-    result.push({ date: dateString, busy: slots.every((s) => !s.available), slots });
+    result.push({
+      date: dateString,
+      busy: slots.every((s) => !s.available),
+      slots,
+    });
   }
 
   return result;

@@ -1,6 +1,7 @@
 import type { BookingStatus } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
+import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
   bookingCancelledEmailHtml,
@@ -35,7 +36,6 @@ function getEmailT(locale?: "vi") {
 }
 
 const PAGE_SIZE = 20;
-const MIN_NOTICE_HOURS = 24;
 // Prompt B7, VIỆC 2 — a PENDING request the provider never responds to
 // auto-expires 48h after it was made (see BOOKING_EXPIRY_HOURS's use in
 // createBooking and the hourly /api/cron/expire-bookings cron).
