@@ -37,6 +37,22 @@ export async function POST(request: Request) {
     consentMarketing,
     consentAnalytics,
   } = parsed.data;
+
+  // registerSchema's role list can't read the runtime feature flag (it's
+  // built at module scope), so CAMERA_SHOP is checked here instead — the
+  // registration UI already hides it while MARKETPLACE_ENABLED=false (see
+  // CLAUDE.md), but a direct API call could otherwise still create an
+  // active-looking CAMERA_SHOP role and a publishable, searchable profile.
+  if (!features.marketplaceEnabled && roles.includes("CAMERA_SHOP")) {
+    return NextResponse.json(
+      {
+        data: null,
+        error: "validation_error",
+        message: t("cameraShopUnavailable"),
+      },
+      { status: 400 },
+    );
+  }
   const [firstName, ...rest] = name.trim().split(/\s+/);
   const lastName = rest.join(" ") || null;
 

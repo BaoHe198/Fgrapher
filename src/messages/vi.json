@@ -718,7 +718,8 @@
       "accountCreated": "Đã tạo tài khoản",
       "accountCreateFailed": "Không thể tạo tài khoản",
       "resetLinkInvalid": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
-      "passwordUpdated": "Đã cập nhật mật khẩu"
+      "passwordUpdated": "Đã cập nhật mật khẩu",
+      "cameraShopUnavailable": "Vai trò Cửa hàng máy ảnh chưa khả dụng"
     },
     "availability": {
       "loadFailed": "Không thể tải lịch làm việc",

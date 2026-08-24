@@ -31,6 +31,28 @@ export async function requireAuth() {
   return session;
 }
 
+// Every /api/cron/** route calls this first. The three call sites used to
+// each inline `if (process.env.CRON_SECRET && authHeader !== ...)` — which
+// fails OPEN (skips the check entirely) whenever CRON_SECRET is unset, so
+// a misconfigured deployment (the var never set on Vercel) would leave
+// every cron route, including the one that deletes KYC documents, publicly
+// callable with no credential at all. This fails CLOSED instead outside
+// local development: an unset secret in staging/production is treated as
+// a misconfiguration, not an invitation.
+export function requireCronSecret(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  const secret = process.env.CRON_SECRET;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === "development") return;
+    throw new AuthError("CRON_SECRET is not configured", 401);
+  }
+
+  if (authHeader !== `Bearer ${secret}`) {
+    throw new AuthError("Unauthorized", 401);
+  }
+}
+
 export async function requireRole(userId: string, role: Role) {
   const userRole = await db.userRole.findUnique({
     where: { userId_role: { userId, role } },

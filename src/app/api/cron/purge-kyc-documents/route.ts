@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 
+import { AuthError, requireCronSecret } from "@/lib/auth-helpers";
 import { purgeExpiredKycDocuments } from "@/services/verification";
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (
-    process.env.CRON_SECRET &&
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
-    return NextResponse.json(
-      { data: null, error: "unauthorized", message: null },
-      { status: 401 },
-    );
+  try {
+    requireCronSecret(request);
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json(
+        { data: null, error: "unauthorized", message: err.message },
+        { status: err.status },
+      );
+    }
+    throw err;
   }
 
   const purgedCount = await purgeExpiredKycDocuments();

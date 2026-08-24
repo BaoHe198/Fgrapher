@@ -23,8 +23,14 @@ export function getLoginSchema(t: (key: string) => string) {
 }
 
 // Kept in sync with PAID_ROLES in @/lib/constants — hardcoded here (rather
-// than derived) since zod needs a literal tuple for z.enum.
-const PAID_ROLE_VALUES = [
+// than derived) since zod needs a literal tuple for z.enum. Exported so
+// every other schema that needs to restrict a `roles` field to
+// self-assignable values (e.g. updateRolesSchema in ./user) uses this same
+// list instead of a second copy that could drift, or worse, the raw Role
+// enum — which includes ADMIN and would let a user self-grant admin via
+// the API (see the fix to updateRolesSchema for the incident this guards
+// against).
+export const PAID_ROLE_VALUES = [
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",
   "MAKEUP_ARTIST",

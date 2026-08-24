@@ -1,8 +1,15 @@
-import { Role } from "@prisma/client";
 import { z } from "zod";
 
+import { PAID_ROLE_VALUES } from "@/lib/validations/auth";
+
+// PAID_ROLE_VALUES, not the raw Prisma Role enum — this schema gates a
+// self-service endpoint (POST /api/users/roles) that lets a user grant
+// themselves whatever roles pass validation here. The full Role enum
+// includes ADMIN and CUSTOMER; CUSTOMER is force-added server-side
+// regardless of input (see the route), and ADMIN must never be
+// self-assignable — only PAID_ROLE_VALUES' six provider roles are.
 export const updateRolesSchema = z.object({
-  roles: z.array(z.enum(Role)).min(1, "Select at least one role"),
+  roles: z.array(z.enum(PAID_ROLE_VALUES)).min(1, "Select at least one role"),
 });
 
 export type UpdateRolesInput = z.infer<typeof updateRolesSchema>;
@@ -82,7 +89,7 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 // Namespace "libServices.validation.user".
 export function getUpdateRolesSchema(t: (key: string) => string) {
   return z.object({
-    roles: z.array(z.enum(Role)).min(1, t("roleRequired")),
+    roles: z.array(z.enum(PAID_ROLE_VALUES)).min(1, t("roleRequired")),
   });
 }
 

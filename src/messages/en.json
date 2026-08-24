@@ -718,7 +718,8 @@
       "accountCreated": "Account created",
       "accountCreateFailed": "Failed to create account",
       "resetLinkInvalid": "This reset link is invalid or has expired",
-      "passwordUpdated": "Password updated"
+      "passwordUpdated": "Password updated",
+      "cameraShopUnavailable": "Camera Shop is not available yet"
     },
     "availability": {
       "loadFailed": "Failed to load availability",
