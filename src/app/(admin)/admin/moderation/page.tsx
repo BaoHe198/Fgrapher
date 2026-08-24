@@ -2,6 +2,7 @@
 
 import { Check, ImageOff, Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import {
   startTransition,
   useCallback,
@@ -226,11 +227,12 @@ export default function AdminModerationPage() {
                         muted
                       />
                     ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={buildMediaVariants(item.url).thumbnail}
                         alt=""
-                        className="size-full object-cover"
+                        fill
+                        sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                        className="object-cover"
                       />
                     )}
                     {overdue ? (

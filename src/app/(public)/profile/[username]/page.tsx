@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MapPin } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -179,11 +180,13 @@ export default async function PublicProfilePage({
       />
       <div className="relative h-[280px] w-full">
         {user.coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={user.coverImage}
             alt=""
-            className="size-full object-cover"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
         ) : (
           <MediaPlaceholder tint="green-300" height="100%" />

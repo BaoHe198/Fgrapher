@@ -2,6 +2,7 @@
 
 import { Loader2, MoreHorizontal, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useCallback, useEffect, useState } from "react";
 
@@ -140,13 +141,14 @@ export function ListingsList() {
                 key={product.id}
                 className="flex items-center gap-4 border-b border-border-subtle px-5 py-4 last:border-b-0"
               >
-                <div className="size-16 shrink-0 overflow-hidden rounded-lg">
+                <div className="relative size-16 shrink-0 overflow-hidden rounded-lg">
                   {product.images[0] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={product.images[0].url}
                       alt=""
-                      className="size-full object-cover"
+                      fill
+                      sizes="64px"
+                      className="object-cover"
                     />
                   ) : (
                     <MediaPlaceholder tint="neutral-300" height="100%" />

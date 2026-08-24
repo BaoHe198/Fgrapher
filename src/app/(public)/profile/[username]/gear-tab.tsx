@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,9 @@ interface ProductItem {
 export function GearTab({ products }: { products: ProductItem[] }) {
   if (products.length === 0) {
     return (
-      <p className="py-12 text-center text-body-md text-text-secondary">No gear listed yet</p>
+      <p className="py-12 text-center text-body-md text-text-secondary">
+        No gear listed yet
+      </p>
     );
   }
 
@@ -30,10 +33,15 @@ export function GearTab({ products }: { products: ProductItem[] }) {
             href={`/shop/${product.id}`}
             className="overflow-hidden rounded-[var(--fg-radius-md)] bg-surface-card shadow-[var(--shadow-sm)]"
           >
-            <div className="h-[120px] w-full">
+            <div className="relative h-[120px] w-full">
               {product.images[0] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={product.images[0].url} alt="" className="size-full object-cover" />
+                <Image
+                  src={product.images[0].url}
+                  alt=""
+                  fill
+                  sizes="(min-width: 640px) 33vw, 50vw"
+                  className="object-cover"
+                />
               ) : (
                 <MediaPlaceholder tint="neutral-300" height="100%" />
               )}
@@ -42,7 +50,9 @@ export function GearTab({ products }: { products: ProductItem[] }) {
               <Badge variant={product.type === "RENT" ? "accent" : "neutral"}>
                 {product.type === "RENT" ? "Rental" : "For sale"}
               </Badge>
-              <span className="text-heading-sm text-text-primary">{product.name}</span>
+              <span className="text-heading-sm text-text-primary">
+                {product.name}
+              </span>
               <span className="text-body-md font-semibold text-text-primary">
                 {product.type === "RENT"
                   ? `${formatCurrency(product.rentalPrice ?? 0, product.currency)}/day`
@@ -53,7 +63,10 @@ export function GearTab({ products }: { products: ProductItem[] }) {
         ))}
       </div>
 
-      <Link href="/shop" className="self-center text-body-md font-semibold text-text-link">
+      <Link
+        href="/shop"
+        className="self-center text-body-md font-semibold text-text-link"
+      >
         View all gear
       </Link>
     </div>
