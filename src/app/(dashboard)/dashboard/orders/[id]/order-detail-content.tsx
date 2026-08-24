@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { formatDate } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 
 type Party = Pick<User, "id" | "name" | "firstName" | "avatar" | "email">;
@@ -185,18 +186,8 @@ export function OrderDetailContent() {
                   {item.type === "RENT" ? (
                     <span className="text-body-sm text-text-secondary">
                       {t("rentalLabel")}{" "}
-                      {item.rentalStart
-                        ? new Date(item.rentalStart).toLocaleDateString(
-                            "en-US",
-                            { timeZone: "UTC" },
-                          )
-                        : ""}{" "}
-                      –{" "}
-                      {item.rentalEnd
-                        ? new Date(item.rentalEnd).toLocaleDateString("en-US", {
-                            timeZone: "UTC",
-                          })
-                        : ""}
+                      {item.rentalStart ? formatDate(item.rentalStart) : ""} –{" "}
+                      {item.rentalEnd ? formatDate(item.rentalEnd) : ""}
                       {item.depositAmount
                         ? ` · ${t("depositLabel", { amount: formatCurrency(item.depositAmount, order.currency), status: item.depositStatus ?? "HELD" })}`
                         : ""}

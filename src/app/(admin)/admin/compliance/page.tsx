@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { DATA_REQUEST_SLA_DAYS } from "@/lib/constants";
+import { formatDate, formatDateTime } from "@/lib/format";
 
 interface DataRequestRow {
   id: string;
@@ -51,8 +52,6 @@ interface ConsentStat {
   revoked: number;
   total: number;
 }
-
-const DATE_OPTS: Intl.DateTimeFormatOptions = { dateStyle: "medium" };
 
 function deadlineFor(requestedAt: string) {
   return new Date(
@@ -198,12 +197,7 @@ function DataRequestsPanel() {
                 </div>
                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-body-sm text-text-secondary">
                   <span>
-                    {t("requested", {
-                      date: new Date(r.requestedAt).toLocaleDateString(
-                        "en-US",
-                        DATE_OPTS,
-                      ),
-                    })}
+                    {t("requested", { date: formatDate(r.requestedAt) })}
                   </span>
                   {r.status === "PENDING" || r.status === "PROCESSING" ? (
                     <span
@@ -211,19 +205,12 @@ function DataRequestsPanel() {
                         isOverdue ? "font-semibold text-danger" : undefined
                       }
                     >
-                      {t("deadline", {
-                        date: deadline.toLocaleDateString("en-US", DATE_OPTS),
-                      })}
+                      {t("deadline", { date: formatDate(deadline) })}
                       {isOverdue ? t("overdueSuffix") : ""}
                     </span>
                   ) : r.completedAt ? (
                     <span>
-                      {t("completed", {
-                        date: new Date(r.completedAt).toLocaleDateString(
-                          "en-US",
-                          DATE_OPTS,
-                        ),
-                      })}
+                      {t("completed", { date: formatDate(r.completedAt) })}
                     </span>
                   ) : null}
                 </div>
@@ -356,10 +343,7 @@ function AuditLogPanel() {
                   className="border-b border-border-subtle last:border-b-0"
                 >
                   <td className="px-5 py-3 text-text-secondary">
-                    {new Date(log.createdAt).toLocaleString("en-US", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
+                    {formatDateTime(log.createdAt)}
                   </td>
                   <td className="px-3 py-3 text-text-secondary">
                     {log.actor?.firstName ??

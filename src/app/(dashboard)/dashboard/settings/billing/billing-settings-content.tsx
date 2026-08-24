@@ -16,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ROLE_LABELS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
 interface RoleBilling {
@@ -73,6 +72,7 @@ export function BillingSettingsContent({
   yearlyPrices: Partial<Record<Role, number>>;
 }) {
   const t = useTranslations("dashboardSettings.billing");
+  const roleT = useTranslations("role");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [invoicesLoading, setInvoicesLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -185,7 +185,7 @@ export function BillingSettingsContent({
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-body-md font-semibold text-text-primary">
-                    {ROLE_LABELS[role]}
+                    {roleT(role)}
                   </span>
                   <span className="text-body-sm text-text-secondary">
                     {subscription!.interval === "year"
@@ -346,7 +346,7 @@ export function BillingSettingsContent({
           <DialogHeader>
             <DialogTitle>
               {t("cancelDialogTitle", {
-                role: cancelTarget ? ROLE_LABELS[cancelTarget] : "",
+                role: cancelTarget ? roleT(cancelTarget) : "",
               })}
             </DialogTitle>
           </DialogHeader>

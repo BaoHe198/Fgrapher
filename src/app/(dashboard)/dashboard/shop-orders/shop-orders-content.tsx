@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+import { formatDate } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 
 type OrderRow = Order & {
@@ -139,9 +140,7 @@ export function ShopOrdersContent() {
                   {formatCurrency(order.totalPrice, order.currency)}
                 </span>
                 <span className="text-text-secondary">
-                  {new Date(order.createdAt).toLocaleDateString("en-US", {
-                    dateStyle: "medium",
-                  })}
+                  {formatDate(order.createdAt)}
                 </span>
                 <Badge variant={variant}>{t(`status.${order.status}`)}</Badge>
                 <Button

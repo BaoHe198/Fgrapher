@@ -1,14 +1,11 @@
 import type { Role } from "@prisma/client";
 
-import { ROLE_LABELS } from "./index";
-
 export type BillingInterval = "month" | "year";
 
 const YEARLY_DISCOUNT = 0.2;
 
 export interface RolePlan {
   role: Role;
-  name: string;
   currency: "VND";
   // VND, whole currency units — VND is a zero-decimal currency (see
   // toStripeAmount in lib/stripe.ts), so these are the exact amounts
@@ -35,14 +32,12 @@ const DEFAULT_MAX_PORTFOLIO_IMAGES = 30;
 
 function plan(
   role: Role,
-  name: string,
   monthly: number,
   envPrefix: string,
   maxPortfolioImages = DEFAULT_MAX_PORTFOLIO_IMAGES,
 ): RolePlan {
   return {
     role,
-    name,
     currency: "VND",
     monthly,
     yearly: Math.round(monthly * 12 * (1 - YEARLY_DISCOUNT)),
@@ -58,34 +53,14 @@ function plan(
 // (see formatCurrency's VND default in lib/utils.ts) — billing subscriptions
 // in USD was the actual inconsistency, not a deliberate split.
 export const ROLE_PLANS: Partial<Record<Role, RolePlan>> = {
-  PHOTOGRAPHER: plan(
-    "PHOTOGRAPHER",
-    ROLE_LABELS.PHOTOGRAPHER,
-    390_000,
-    "PHOTOGRAPHER",
-  ),
-  VIDEOGRAPHER: plan(
-    "VIDEOGRAPHER",
-    ROLE_LABELS.VIDEOGRAPHER,
-    390_000,
-    "VIDEOGRAPHER",
-  ),
-  MAKEUP_ARTIST: plan(
-    "MAKEUP_ARTIST",
-    ROLE_LABELS.MAKEUP_ARTIST,
-    390_000,
-    "MAKEUP_ARTIST",
-  ),
-  CAMERA_SHOP: plan(
-    "CAMERA_SHOP",
-    ROLE_LABELS.CAMERA_SHOP,
-    490_000,
-    "CAMERA_SHOP",
-  ),
-  STUDIO: plan("STUDIO", ROLE_LABELS.STUDIO, 690_000, "STUDIO"),
+  PHOTOGRAPHER: plan("PHOTOGRAPHER", 390_000, "PHOTOGRAPHER"),
+  VIDEOGRAPHER: plan("VIDEOGRAPHER", 390_000, "VIDEOGRAPHER"),
+  MAKEUP_ARTIST: plan("MAKEUP_ARTIST", 390_000, "MAKEUP_ARTIST"),
+  CAMERA_SHOP: plan("CAMERA_SHOP", 490_000, "CAMERA_SHOP"),
+  STUDIO: plan("STUDIO", 690_000, "STUDIO"),
   // Priced the same as Make-up Artist per the product decision in
   // docs/guides/fgrapher-prompts-batch-2.md §3a.
-  MODEL: plan("MODEL", ROLE_LABELS.MODEL, 390_000, "MODEL"),
+  MODEL: plan("MODEL", 390_000, "MODEL"),
 };
 
 export function priceIdForRole(role: Role, interval: BillingInterval) {

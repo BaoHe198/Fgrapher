@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import type { CartItemWithProduct } from "@/hooks/use-cart";
+import { formatDate } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 
 import { itemLineTotal, itemRentalDays } from "./cart-utils";
@@ -57,13 +58,7 @@ export function CartItemRow({
         </Badge>
         {item.type === "RENT" && item.rentalStart && item.rentalEnd ? (
           <p className="mt-1 text-body-sm text-text-secondary">
-            {new Date(item.rentalStart).toLocaleDateString("en-US", {
-              timeZone: "UTC",
-            })}{" "}
-            –{" "}
-            {new Date(item.rentalEnd).toLocaleDateString("en-US", {
-              timeZone: "UTC",
-            })}
+            {formatDate(item.rentalStart)} – {formatDate(item.rentalEnd)}
           </p>
         ) : null}
       </div>

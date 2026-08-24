@@ -7,6 +7,7 @@ import type {
   VerificationStatus,
 } from "@prisma/client";
 import { Loader2, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -17,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { Tag } from "@/components/ui/tag";
-import { CATEGORIES_BY_ROLE, EXPERIENCE_LEVEL_LABELS } from "@/lib/constants";
+import { CATEGORIES_BY_ROLE, EXPERIENCE_LEVELS } from "@/lib/constants";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
 import { ServicesManager } from "./services-manager";
@@ -92,6 +93,8 @@ function toFormValues(
 }
 
 export function ProfileSettingsForm({ role }: { role: Role }) {
+  const categoryT = useTranslations("profileCategory");
+  const experienceLevelT = useTranslations("experienceLevel");
   const [values, setValues] = useState<ProfileFormValues>(toFormValues(null));
   const [profileId, setProfileId] = useState<string | null>(null);
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -293,7 +296,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
               selected={values.categories.includes(category)}
               onClick={() => toggleCategory(category)}
             >
-              {category.replace(/_/g, " ").toLowerCase()}
+              {categoryT(category)}
             </Tag>
           ))}
         </div>
@@ -379,9 +382,10 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
               }
               options={[
                 { value: "", label: "Not specified" },
-                ...Object.entries(EXPERIENCE_LEVEL_LABELS).map(
-                  ([value, label]) => ({ value, label }),
-                ),
+                ...EXPERIENCE_LEVELS.map((level) => ({
+                  value: level,
+                  label: experienceLevelT(level),
+                })),
               ]}
             />
             <Input

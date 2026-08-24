@@ -2,6 +2,7 @@
 
 import type { Role, VerificationStatus } from "@prisma/client";
 import { Loader2, ShieldCheck, UploadCloud } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { ROLE_LABELS } from "@/lib/constants";
 
 interface KycSignature {
   cloudName: string;
@@ -98,6 +98,7 @@ export function VerificationForm({
   rejectedReason: string | null;
 }) {
   const router = useRouter();
+  const roleT = useTranslations("role");
   const [fullName, setFullName] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [idFront, setIdFront] = useState<File | null>(null);
@@ -113,7 +114,7 @@ export function VerificationForm({
       <StatusScreen
         icon={<Loader2 className="size-8 animate-spin text-brand-primary" />}
         title="Your submission is under review"
-        description={`We're reviewing the ID documents you submitted for ${ROLE_LABELS[role]}. This usually takes 1-2 business days.`}
+        description={`We're reviewing the ID documents you submitted for ${roleT(role)}. This usually takes 1-2 business days.`}
       />
     );
   }
@@ -123,7 +124,7 @@ export function VerificationForm({
       <StatusScreen
         icon={<ShieldCheck className="size-8 text-success" />}
         title="You're verified"
-        description={`Your identity has been verified for ${ROLE_LABELS[role]}.`}
+        description={`Your identity has been verified for ${roleT(role)}.`}
       />
     );
   }
@@ -133,7 +134,7 @@ export function VerificationForm({
       <StatusScreen
         icon={<Loader2 className="size-8 animate-spin text-brand-primary" />}
         title="Submitted for review"
-        description={`We're reviewing the ID documents you submitted for ${ROLE_LABELS[role]}. This usually takes 1-2 business days.`}
+        description={`We're reviewing the ID documents you submitted for ${roleT(role)}. This usually takes 1-2 business days.`}
       />
     );
   }
@@ -207,8 +208,8 @@ export function VerificationForm({
           Verify your identity
         </h1>
         <p className="text-body-md text-text-secondary">
-          Required to activate your {ROLE_LABELS[role]} profile — this is a
-          one-time check.
+          Required to activate your {roleT(role)} profile — this is a one-time
+          check.
         </p>
       </div>
 

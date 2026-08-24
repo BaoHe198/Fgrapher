@@ -11,7 +11,6 @@ import { ResultsPane } from "@/components/browse/results-pane";
 import { SearchInput } from "@/components/browse/search-input";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
-import { ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { formatCurrency } from "@/lib/utils";
 import { searchProfiles, type SortOption } from "@/services/search";
@@ -27,6 +26,7 @@ export async function generateMetadata() {
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const t = await getTranslations("publicPages.browse");
+  const roleT = await getTranslations("role");
   const SORT_LABELS: Record<string, string> = {
     rating: t("sortLabels.rating"),
     price_asc: t("sortLabels.priceAsc"),
@@ -77,7 +77,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const heading =
     roles && roles.length === 1 && params.city
       ? t("headingWithRoleCity", {
-          role: ROLE_LABELS[roles[0]],
+          role: roleT(roles[0]),
           city: params.city,
         })
       : t("headingDefault");
@@ -169,7 +169,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                             profile.user.name ??
                             t("unnamed"),
                           username: profile.user.username ?? "",
-                          roles: profile.roles.map((role) => ROLE_LABELS[role]),
+                          roles: profile.roles.map((role) => roleT(role)),
                           city: profile.user.location ?? "",
                           rating:
                             profile.avgRating > 0

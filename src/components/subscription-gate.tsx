@@ -1,12 +1,12 @@
 import type { Role } from "@prisma/client";
 import { Lock } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ROLE_LABELS } from "@/lib/constants";
 
 async function hasUsableSubscription(userId: string, role: Role) {
   const userRole = await db.userRole.findUnique({
@@ -35,9 +35,13 @@ export async function SubscriptionGate({
   fallbackText?: string;
 }) {
   const session = await auth();
-  const usable = session?.user ? await hasUsableSubscription(session.user.id, role) : false;
+  const usable = session?.user
+    ? await hasUsableSubscription(session.user.id, role)
+    : false;
 
   if (usable) return <>{children}</>;
+
+  const roleT = await getTranslations("role");
 
   return (
     <Card className="flex flex-col items-center gap-3 py-16 text-center">
@@ -45,11 +49,11 @@ export async function SubscriptionGate({
         <Lock className="size-5 text-warning" />
       </div>
       <p className="text-body-lg font-semibold text-text-primary">
-        {fallbackTitle ?? `Activate your ${ROLE_LABELS[role]} subscription`}
+        {fallbackTitle ?? `Activate your ${roleT(role)} subscription`}
       </p>
       <p className="max-w-sm text-body-md text-text-secondary">
         {fallbackText ??
-          `An active ${ROLE_LABELS[role]} subscription is required to use this feature.`}
+          `An active ${roleT(role)} subscription is required to use this feature.`}
       </p>
       <Button
         variant="accent"

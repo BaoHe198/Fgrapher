@@ -4,14 +4,23 @@
 // Run with: npx tsx --env-file=.env scripts/stripe-setup.ts
 import Stripe from "stripe";
 
+import { ROLE_LABELS } from "../src/lib/constants";
 import { ROLE_PLANS } from "../src/lib/constants/plans";
 import { toStripeAmount } from "../src/lib/stripe";
 
-const ROLES = ["PHOTOGRAPHER", "VIDEOGRAPHER", "MAKEUP_ARTIST", "STUDIO", "CAMERA_SHOP"] as const;
+const ROLES = [
+  "PHOTOGRAPHER",
+  "VIDEOGRAPHER",
+  "MAKEUP_ARTIST",
+  "STUDIO",
+  "CAMERA_SHOP",
+] as const;
 
 async function main() {
   if (!process.env.STRIPE_SECRET_KEY) {
-    console.error("STRIPE_SECRET_KEY is not set — add it to .env before running this script.");
+    console.error(
+      "STRIPE_SECRET_KEY is not set — add it to .env before running this script.",
+    );
     process.exit(1);
   }
 
@@ -23,7 +32,7 @@ async function main() {
     if (!plan) continue;
 
     const product = await stripe.products.create({
-      name: `Fgrapher — ${plan.name}`,
+      name: `Fgrapher — ${ROLE_LABELS[role]}`,
     });
 
     const monthlyPrice = await stripe.prices.create({
@@ -41,7 +50,7 @@ async function main() {
     });
 
     console.log(
-      `${plan.name}: product=${product.id} monthly=${monthlyPrice.id} yearly=${yearlyPrice.id}`,
+      `${ROLE_LABELS[role]}: product=${product.id} monthly=${monthlyPrice.id} yearly=${yearlyPrice.id}`,
     );
     envLines.push(`STRIPE_PRICE_${role}_MONTHLY=${monthlyPrice.id}`);
     envLines.push(`STRIPE_PRICE_${role}_YEARLY=${yearlyPrice.id}`);

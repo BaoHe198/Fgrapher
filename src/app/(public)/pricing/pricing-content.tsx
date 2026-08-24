@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ROLE_LABELS } from "@/lib/constants";
 import { cn, formatCurrency } from "@/lib/utils";
 
 interface Plan {
@@ -111,6 +110,7 @@ export function PricingContent({
   marketplaceEnabled: boolean;
 }) {
   const t = useTranslations("publicPages.pricing");
+  const roleT = useTranslations("role");
   const [yearly, setYearly] = useState(false);
   const plans = marketplaceEnabled
     ? PLANS
@@ -202,7 +202,7 @@ export function PricingContent({
 
                 <div className="flex flex-col gap-1">
                   <span className="text-heading-lg text-text-primary">
-                    {ROLE_LABELS[plan.role]}
+                    {roleT(plan.role)}
                   </span>
                   <span className="text-display-md text-text-primary">
                     {formatCurrency(displayPrice, "VND")}
@@ -263,7 +263,7 @@ export function PricingContent({
                     key={plan.role}
                     className="px-3 py-3 text-center text-text-primary"
                   >
-                    {ROLE_LABELS[plan.role]}
+                    {roleT(plan.role)}
                   </th>
                 ))}
               </tr>

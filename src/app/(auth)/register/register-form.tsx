@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Tag } from "@/components/ui/tag";
-import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
+import { PAID_ROLES } from "@/lib/constants";
 import { cn, formatCurrency } from "@/lib/utils";
 import {
   registerSchema,
@@ -58,6 +58,7 @@ export function RegisterForm({
   marketplaceEnabled,
 }: RegisterFormProps) {
   const t = useTranslations("accountFlows.register");
+  const roleT = useTranslations("role");
   const PROVIDER_ROLE_OPTIONS = marketplaceEnabled
     ? ALL_PROVIDER_ROLE_OPTIONS
     : ALL_PROVIDER_ROLE_OPTIONS.filter((role) => role !== "CAMERA_SHOP");
@@ -253,7 +254,7 @@ export function RegisterForm({
                   <Checkbox
                     checked={selectedRoles.has(role)}
                     onCheckedChange={() => toggleRole(role)}
-                    label={ROLE_LABELS[role]}
+                    label={roleT(role)}
                   />
                   <Tag tabIndex={-1} className="pointer-events-none">
                     {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo

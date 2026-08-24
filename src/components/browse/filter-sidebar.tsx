@@ -11,20 +11,11 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import {
   CATEGORIES_BY_ROLE,
-  CATEGORY_LABELS,
-  EXPERIENCE_LEVEL_LABELS,
+  EXPERIENCE_LEVELS,
   PAID_ROLES,
-  ROLE_LABELS,
 } from "@/lib/constants";
 
 import { useBrowseFilterNavigation } from "./browse-filter-context";
-
-const EXPERIENCE_LEVELS: ExperienceLevel[] = [
-  "NEW",
-  "INTERMEDIATE",
-  "EXPERIENCED",
-  "PROFESSIONAL",
-];
 
 interface ProvinceOption {
   id: string;
@@ -111,6 +102,9 @@ export function FilterSidebar({
   marketplaceEnabled,
 }: FilterSidebarProps) {
   const t = useTranslations("sharedComponents.filterSidebar");
+  const roleT = useTranslations("role");
+  const categoryT = useTranslations("profileCategory");
+  const experienceLevelT = useTranslations("experienceLevel");
   const BUDGET_OPTIONS = [
     { value: "", label: t("budgetAny") },
     { value: "0-2000000", label: t("budgetUnder2m") },
@@ -285,7 +279,7 @@ export function FilterSidebar({
               key={role}
               checked={filters.roles.includes(role)}
               onCheckedChange={() => toggleRole(role)}
-              label={`${ROLE_LABELS[role]} (${roleCounts[role] ?? 0})`}
+              label={`${roleT(role)} (${roleCounts[role] ?? 0})`}
             />
           ))}
         </div>
@@ -304,7 +298,7 @@ export function FilterSidebar({
                   key={category}
                   checked={filters.categories.includes(category)}
                   onCheckedChange={() => toggleCategory(category)}
-                  label={CATEGORY_LABELS[category]}
+                  label={categoryT(category)}
                 />
               ))}
             </div>
@@ -347,7 +341,7 @@ export function FilterSidebar({
                   key={level}
                   checked={filters.experienceLevel.includes(level)}
                   onCheckedChange={() => toggleExperienceLevel(level)}
-                  label={EXPERIENCE_LEVEL_LABELS[level]}
+                  label={experienceLevelT(level)}
                 />
               ))}
             </div>

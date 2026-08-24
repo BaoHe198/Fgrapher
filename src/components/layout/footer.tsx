@@ -5,12 +5,12 @@ import { LogoFull } from "@/components/brand/logo-full";
 import { features } from "@/lib/features";
 
 const DISCOVER_ROLES = [
-  { role: "PHOTOGRAPHER", key: "Photographer" },
-  { role: "VIDEOGRAPHER", key: "Videographer" },
-  { role: "MAKEUP_ARTIST", key: "Make-up Artist" },
-  { role: "STUDIO", key: "Studio" },
-  { role: "CAMERA_SHOP", key: "Camera Shop" },
-  { role: "MODEL", key: "Model" },
+  "PHOTOGRAPHER",
+  "VIDEOGRAPHER",
+  "MAKEUP_ARTIST",
+  "STUDIO",
+  "CAMERA_SHOP",
+  "MODEL",
 ] as const;
 
 const PROVIDER_LINKS = [
@@ -31,7 +31,7 @@ export function Footer() {
   const t = useTranslations();
   const discoverRoles = features.marketplaceEnabled
     ? DISCOVER_ROLES
-    : DISCOVER_ROLES.filter((r) => r.role !== "CAMERA_SHOP");
+    : DISCOVER_ROLES.filter((role) => role !== "CAMERA_SHOP");
   const providerLinks = features.marketplaceEnabled
     ? PROVIDER_LINKS
     : PROVIDER_LINKS.filter((link) => link.labelKey !== "sell");
@@ -51,13 +51,13 @@ export function Footer() {
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
               {t("foot.discover")}
             </span>
-            {discoverRoles.map(({ role, key }) => (
+            {discoverRoles.map((role) => (
               <Link
                 key={role}
                 href={`/browse?role=${role}`}
                 className="text-body-sm text-text-secondary hover:text-text-primary"
               >
-                {t(`role.${key}`)}
+                {t(`role.${role}`)}
               </Link>
             ))}
           </div>

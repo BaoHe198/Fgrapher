@@ -9,14 +9,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
 
-const ROLE_TO_ENUM: Record<string, Role> = {
-  Photographer: "PHOTOGRAPHER",
-  Videographer: "VIDEOGRAPHER",
-  "Make-up Artist": "MAKEUP_ARTIST",
-  Studio: "STUDIO",
-  "Camera Shop": "CAMERA_SHOP",
-  Model: "MODEL",
-};
+const HERO_ROLES: Role[] = [
+  "PHOTOGRAPHER",
+  "VIDEOGRAPHER",
+  "MAKEUP_ARTIST",
+  "STUDIO",
+  "CAMERA_SHOP",
+  "MODEL",
+];
 
 export function HeroSearch({
   marketplaceEnabled,
@@ -25,18 +25,18 @@ export function HeroSearch({
 }) {
   const t = useTranslations();
   const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
-  const roleKeys = Object.keys(ROLE_TO_ENUM).filter(
-    (roleKey) => marketplaceEnabled || ROLE_TO_ENUM[roleKey] !== "CAMERA_SHOP",
+  const roleOptions = HERO_ROLES.filter(
+    (role) => marketplaceEnabled || role !== "CAMERA_SHOP",
   );
 
   const onSearch = () => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
     if (city) params.set("city", city);
-    if (selectedRole) params.set("roles", ROLE_TO_ENUM[selectedRole]);
+    if (selectedRole) params.set("roles", selectedRole);
     router.push(`/browse?${params.toString()}`);
   };
 
@@ -68,15 +68,15 @@ export function HeroSearch({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {roleKeys.map((roleKey) => (
+        {roleOptions.map((role) => (
           <Tag
-            key={roleKey}
-            selected={selectedRole === roleKey}
+            key={role}
+            selected={selectedRole === role}
             onClick={() =>
-              setSelectedRole((prev) => (prev === roleKey ? null : roleKey))
+              setSelectedRole((prev) => (prev === role ? null : role))
             }
           >
-            {t(`role.${roleKey}`)}
+            {t(`role.${role}`)}
           </Tag>
         ))}
       </div>

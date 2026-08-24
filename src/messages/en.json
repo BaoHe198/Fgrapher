@@ -15,12 +15,54 @@
     "signout": "Sign out"
   },
   "role": {
-    "Photographer": "Photographer",
-    "Videographer": "Videographer",
-    "Make-up Artist": "Make-up Artist",
-    "Studio": "Studio",
-    "Camera Shop": "Camera Shop",
-    "Model": "Model"
+    "PHOTOGRAPHER": "Photographer",
+    "VIDEOGRAPHER": "Videographer",
+    "MAKEUP_ARTIST": "Make-up Artist",
+    "STUDIO": "Studio",
+    "CAMERA_SHOP": "Camera Shop",
+    "MODEL": "Model",
+    "CUSTOMER": "Customer",
+    "ADMIN": "Admin"
+  },
+  "profileCategory": {
+    "WEDDING": "Wedding",
+    "PORTRAIT": "Portrait",
+    "FASHION": "Fashion",
+    "COMMERCIAL": "Commercial",
+    "EVENT": "Event",
+    "PRODUCT": "Product",
+    "FOOD": "Food",
+    "LANDSCAPE": "Landscape",
+    "STREET": "Street",
+    "DOCUMENTARY": "Documentary",
+    "MUSIC_VIDEO": "Music video",
+    "CORPORATE": "Corporate",
+    "REAL_ESTATE": "Real estate",
+    "BRIDAL": "Bridal",
+    "EDITORIAL": "Editorial",
+    "SFX": "SFX",
+    "NATURAL": "Natural",
+    "GLAM": "Glam",
+    "INDOOR": "Indoor",
+    "OUTDOOR": "Outdoor",
+    "ROOFTOP": "Rooftop",
+    "CYCLORAMA": "Cyclorama",
+    "GREEN_SCREEN": "Green screen",
+    "FASHION_MODEL": "Fashion",
+    "COMMERCIAL_MODEL": "Commercial",
+    "FITNESS_MODEL": "Fitness",
+    "PORTRAIT_MODEL": "Portrait",
+    "HAND_FOOT_MODEL": "Hand & foot",
+    "PLUS_SIZE": "Plus size",
+    "PETITE": "Petite",
+    "MATURE": "Mature",
+    "ALTERNATIVE": "Alternative"
+  },
+  "experienceLevel": {
+    "NEW": "New",
+    "INTERMEDIATE": "Intermediate",
+    "EXPERIENCED": "Experienced",
+    "PROFESSIONAL": "Professional"
   },
   "model": {
     "height": "Height",
@@ -829,7 +871,7 @@
         "body": "Tap the bookmark icon on a profile to save it here."
       },
       "unnamed": "Unnamed",
-      "priceFrom": "From ₫{amount}"
+      "priceFrom": "From {amount}"
     },
     "notifications": {
       "title": "Notifications",

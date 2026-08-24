@@ -6,6 +6,7 @@ import { startTransition, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { formatMonthYear, formatWeekdayShort } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
@@ -58,8 +59,12 @@ export function BookingSidebar({
 
   useEffect(() => {
     let cancelled = false;
-    const serviceParam = selectedServiceId ? `&serviceId=${selectedServiceId}` : "";
-    fetch(`/api/availability/${providerId}?from=${toLocalDateKey(weekStart)}${serviceParam}`)
+    const serviceParam = selectedServiceId
+      ? `&serviceId=${selectedServiceId}`
+      : "";
+    fetch(
+      `/api/availability/${providerId}?from=${toLocalDateKey(weekStart)}${serviceParam}`,
+    )
       .then((res) => res.json())
       .then((body) => {
         if (!cancelled) {
@@ -88,7 +93,8 @@ export function BookingSidebar({
   const selectedService = services.find((s) => s.id === selectedServiceId);
   const activeDay = days.find((d) => d.date === selectedDate);
   const today = toLocalDateKey(new Date());
-  const minPrice = services.length > 0 ? Math.min(...services.map((s) => s.price)) : null;
+  const minPrice =
+    services.length > 0 ? Math.min(...services.map((s) => s.price)) : null;
 
   const onBookNow = () => {
     const params = new URLSearchParams();
@@ -137,7 +143,7 @@ export function BookingSidebar({
             <ChevronLeft className="size-4" />
           </button>
           <span className="text-body-sm font-semibold text-text-primary">
-            {weekStart.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+            {formatMonthYear(weekStart)}
           </span>
           <button
             type="button"
@@ -177,10 +183,14 @@ export function BookingSidebar({
                   }`}
                 >
                   <span className="text-body-sm text-text-tertiary">
-                    {date.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })}
+                    {formatWeekdayShort(date)}
                   </span>
-                  <span className="text-body-md font-semibold">{date.getUTCDate()}</span>
-                  {day.busy ? <span className="size-1 rounded-full bg-text-tertiary" /> : null}
+                  <span className="text-body-md font-semibold">
+                    {date.getUTCDate()}
+                  </span>
+                  {day.busy ? (
+                    <span className="size-1 rounded-full bg-text-tertiary" />
+                  ) : null}
                 </button>
               );
             })}
@@ -194,7 +204,9 @@ export function BookingSidebar({
             Available times
           </span>
           {activeDay.slots.filter((s) => s.available).length === 0 ? (
-            <p className="text-body-sm text-text-secondary">No times available on this date</p>
+            <p className="text-body-sm text-text-secondary">
+              No times available on this date
+            </p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {activeDay.slots
@@ -237,7 +249,12 @@ export function BookingSidebar({
           {selectedService ? (
             <div className="flex justify-between text-heading-sm font-bold">
               <span>Total</span>
-              <span>{formatCurrency(selectedService.price, selectedService.currency)}</span>
+              <span>
+                {formatCurrency(
+                  selectedService.price,
+                  selectedService.currency,
+                )}
+              </span>
             </div>
           ) : null}
         </div>

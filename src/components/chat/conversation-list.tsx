@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { formatDayMonth } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export interface ConversationSummary {
@@ -47,10 +48,7 @@ function relativeTime(
   const days = Math.floor(hours / 24);
   if (days === 1) return labels.yesterday;
   if (days < 7) return `${days}d`;
-  return new Date(dateIso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
+  return formatDayMonth(dateIso);
 }
 
 function previewText(

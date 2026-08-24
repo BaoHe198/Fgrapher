@@ -23,6 +23,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { StarInput } from "@/components/ui/star-input";
 import { Textarea } from "@/components/ui/textarea";
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
+import { formatDate, formatDateTime, formatWeekdayShort } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
@@ -81,13 +82,6 @@ const DECLINE_REASONS = [
 
 function partyName(party: Party) {
   return party.firstName ?? party.name ?? "Unknown";
-}
-
-function formatDate(date: string | Date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    dateStyle: "long",
-    timeZone: "UTC",
-  });
 }
 
 export default function BookingDetailPage() {
@@ -725,10 +719,7 @@ function TimelineRow({
         {label}
       </span>
       <span className="text-body-sm text-text-tertiary">
-        {new Date(date).toLocaleString("en-US", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        })}
+        {formatDateTime(date)}
       </span>
       {detail ? (
         <span className="text-body-sm text-text-secondary">{detail}</span>
@@ -827,10 +818,7 @@ function RescheduleDialog({
                     }`}
                   >
                     <span className="text-text-tertiary">
-                      {d.toLocaleDateString("en-US", {
-                        weekday: "short",
-                        timeZone: "UTC",
-                      })}
+                      {formatWeekdayShort(d)}
                     </span>
                     <span className="font-semibold">{d.getUTCDate()}</span>
                   </button>

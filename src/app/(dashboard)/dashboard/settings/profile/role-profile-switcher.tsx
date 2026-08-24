@@ -1,14 +1,15 @@
 "use client";
 
 import type { Role } from "@prisma/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Tag } from "@/components/ui/tag";
-import { ROLE_LABELS } from "@/lib/constants";
 
 import { ProfileSettingsForm } from "./profile-settings-form";
 
 export function RoleProfileSwitcher({ roles }: { roles: Role[] }) {
+  const roleT = useTranslations("role");
   const [active, setActive] = useState(roles[0]);
 
   return (
@@ -16,8 +17,12 @@ export function RoleProfileSwitcher({ roles }: { roles: Role[] }) {
       {roles.length > 1 ? (
         <div className="flex flex-wrap gap-2">
           {roles.map((role) => (
-            <Tag key={role} selected={role === active} onClick={() => setActive(role)}>
-              {ROLE_LABELS[role]}
+            <Tag
+              key={role}
+              selected={role === active}
+              onClick={() => setActive(role)}
+            >
+              {roleT(role)}
             </Tag>
           ))}
         </div>

@@ -15,6 +15,12 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  formatDateLong,
+  formatDayMonth,
+  formatMonthYear,
+  formatWeekdayShort,
+} from "@/lib/format";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
@@ -606,10 +612,7 @@ function StepDateTime({
               <ChevronLeft className="size-4" />
             </button>
             <span className="text-body-md font-semibold text-text-primary">
-              {weekStart.toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
-              })}
+              {formatMonthYear(weekStart)}
             </span>
             <button
               type="button"
@@ -651,10 +654,7 @@ function StepDateTime({
                     )}
                   >
                     <span className="text-text-tertiary">
-                      {d.toLocaleDateString("en-US", {
-                        weekday: "short",
-                        timeZone: "UTC",
-                      })}
+                      {formatWeekdayShort(d)}
                     </span>
                     <span className="font-semibold">{d.getUTCDate()}</span>
                     {!day.busy && day.slots.some((s) => s.available) ? (
@@ -678,12 +678,7 @@ function StepDateTime({
           ) : (
             <>
               <span className="text-body-sm font-semibold text-text-primary">
-                {new Date(date).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  timeZone: "UTC",
-                })}
+                {formatDateLong(date)}
               </span>
               {duration ? (
                 <span className="text-body-sm text-text-tertiary">
@@ -794,11 +789,7 @@ function StepDetails({
               onChange={(v) => onParentBookingChange(v)}
               options={parentBookingOptions.map((option) => ({
                 value: option.id,
-                label: `${new Date(option.date).toLocaleDateString("en-US", {
-                  day: "numeric",
-                  month: "short",
-                  timeZone: "UTC",
-                })} ${option.startTime} — ${option.service?.name ?? t("stepDetails.customRequestOption")}`,
+                label: `${formatDayMonth(option.date)} ${option.startTime} — ${option.service?.name ?? t("stepDetails.customRequestOption")}`,
               }))}
             />
           ) : null}
@@ -957,17 +948,7 @@ function StepReview({
       service?.name ??
         (customRequest ? t("stepDetails.customRequestOption") : "—"),
     ],
-    [
-      t("stepReview.rowDate"),
-      date
-        ? new Date(date).toLocaleDateString("en-US", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            timeZone: "UTC",
-          })
-        : "—",
-    ],
+    [t("stepReview.rowDate"), date ? formatDateLong(date) : "—"],
     [t("stepReview.rowTime"), time ?? "—"],
     [
       t("stepReview.rowDuration"),

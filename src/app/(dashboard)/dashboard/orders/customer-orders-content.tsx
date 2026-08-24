@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+import { formatDate } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 
 type OrderRow = Order & {
@@ -111,9 +112,7 @@ export function CustomerOrdersContent() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-body-md font-semibold text-text-primary">
                     {t("orderNumber", { id: order.id.slice(-8) })} ·{" "}
-                    {new Date(order.createdAt).toLocaleDateString("en-US", {
-                      dateStyle: "medium",
-                    })}
+                    {formatDate(order.createdAt)}
                   </span>
                   <Badge variant={variant}>{t(`status.${order.status}`)}</Badge>
                 </div>

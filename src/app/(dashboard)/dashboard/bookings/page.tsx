@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import { formatWeekdayDayMonth } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 import type { BookingTab } from "@/services/bookings";
 
@@ -49,13 +50,7 @@ const STATUS_BADGE: Record<
 };
 
 function formatWhen(date: string | Date, startTime: string) {
-  const d = new Date(date);
-  const formatted = d.toLocaleDateString("en-US", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-  return `${formatted} · ${startTime}`;
+  return `${formatWeekdayDayMonth(date)} · ${startTime}`;
 }
 
 function partyName(party: BookingParty) {

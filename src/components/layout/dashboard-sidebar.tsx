@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/sheet";
 import { useUnreadMessages } from "@/hooks/use-unread-messages";
 import { useUserRoles } from "@/hooks/use-user-roles";
-import { ROLE_LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -48,6 +47,7 @@ export function DashboardSidebar({
   marketplaceEnabled: boolean;
 }) {
   const t = useTranslations("sharedComponents.dashboardSidebar");
+  const roleT = useTranslations("role");
   const pathname = usePathname();
   const { roles, canUpload, canSell, canReceiveBookings, isCustomerOnly } =
     useUserRoles();
@@ -108,7 +108,7 @@ export function DashboardSidebar({
 
   const nonCustomerRole = roles.find((role) => role !== "CUSTOMER");
   const planName = nonCustomerRole
-    ? t("planPro", { role: ROLE_LABELS[nonCustomerRole] })
+    ? t("planPro", { role: roleT(nonCustomerRole) })
     : t("planFree");
 
   return (

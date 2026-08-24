@@ -9,7 +9,6 @@ import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ROLE_LABELS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
 export function BillingOnboardingContent({
@@ -24,6 +23,7 @@ export function BillingOnboardingContent({
   interval: "month" | "year";
 }) {
   const t = useTranslations("accountFlows.onboarding.billing");
+  const roleT = useTranslations("role");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +32,7 @@ export function BillingOnboardingContent({
     interval === "year" ? `/${t("yearAbbrev")}` : `/${t("monthAbbrev")}`;
   const heading =
     roles.length === 1
-      ? t("headingSingle", { role: ROLE_LABELS[roles[0]] })
+      ? t("headingSingle", { role: roleT(roles[0]) })
       : t("headingPlural", { count: roles.length });
 
   const onStartTrial = async () => {
@@ -93,7 +93,7 @@ export function BillingOnboardingContent({
               className="flex items-center justify-between px-5 py-3.5"
             >
               <span className="text-body-md text-text-primary">
-                {ROLE_LABELS[role]}
+                {roleT(role)}
               </span>
               <span className="text-body-md font-semibold text-text-primary">
                 {formatCurrency(rolePrices[role] ?? 0, "VND")}

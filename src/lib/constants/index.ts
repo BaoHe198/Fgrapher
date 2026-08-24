@@ -188,6 +188,16 @@ export const EXPERIENCE_LEVEL_LABELS: Record<ExperienceLevel, string> = {
   PROFESSIONAL: "Professional",
 };
 
+// Canonical ExperienceLevel enum order for building select options — pairs
+// with the "experienceLevel" next-intl namespace (t(level)) rather than
+// EXPERIENCE_LEVEL_LABELS, which stays English-only and unused in UI now.
+export const EXPERIENCE_LEVELS: ExperienceLevel[] = [
+  "NEW",
+  "INTERMEDIATE",
+  "EXPERIENCED",
+  "PROFESSIONAL",
+];
+
 // Roles a given role can send booking requests to. MODEL only appears as a
 // value (it receives bookings, never initiates them) — see the "who can
 // book whom" table in .claude/skills/role-permissions/SKILL.md.

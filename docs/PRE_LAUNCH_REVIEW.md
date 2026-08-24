@@ -11,13 +11,12 @@ không suy đoán từ tài liệu.
 tiên) — vì mức độ nguy hiểm không thể chờ đến khi hoàn tất báo cáo mới sửa.
 Phần còn lại của tài liệu này giữ đúng tinh thần "chỉ báo cáo" của prompt gốc.
 
-**Cập nhật sau rà soát**: 10 trong số 13 mục đánh số dưới đây (gồm cả mục
-NGHIÊM TRỌNG #4) đã được vá trong các commit tiếp theo cùng phiên — mỗi mục
-được đánh dấu **[ĐÃ VÁ]** kèm commit và cách đã kiểm thử. Còn lại thật sự mở:
-mục #5 (quét 21 file dùng `toLocaleDateString` + 3 map nhãn tiếng Anh — khối
-lượng lớn, cần một đợt riêng) và 2 việc trong mục THẤP cần quyết định của
-con người (chủ đích hiển thị email, thuật ngữ `ALTERNATIVE` cần luật sư xác
-nhận) chứ không phải lỗi code.
+**Cập nhật sau rà soát**: 11 trong số 13 mục đánh số dưới đây (gồm cả mục
+NGHIÊM TRỌNG #4 và mục #5) đã được vá trong các commit tiếp theo cùng phiên
+— mỗi mục được đánh dấu **[ĐÃ VÁ]** kèm commit và cách đã kiểm thử. Còn lại
+thật sự mở: 2 việc trong mục THẤP cần quyết định của con người (chủ đích
+hiển thị email, thuật ngữ `ALTERNATIVE` cần luật sư xác nhận) chứ không phải
+lỗi code.
 
 ---
 
@@ -116,7 +115,7 @@ _Nguồn: `docs/_prelaunch-audit-compliance.md` mục 4 và 6._
 
 ## CAO — nên xử lý trước khi ra mắt
 
-### 5. Vi phạm diện rộng ràng buộc #10 (tiếng Việt/VND/dd-MM-yyyy)
+### 5. [ĐÃ VÁ] Vi phạm diện rộng ràng buộc #10 (tiếng Việt/VND/dd-MM-yyyy)
 
 Hai vấn đề tách biệt:
 
@@ -136,9 +135,31 @@ next-intl — dùng ở 20 file bao gồm trang chủ, browse, hồ sơ công kh
 `filter-sidebar.tsx` khẳng định các nhãn này "resolved via useTranslations"
 — agent đã xác minh đây là comment sai, code thực tế không làm vậy.
 
-Đây là phần việc cơ học (đổi từng lời gọi sang `formatDate`/`formatDateTime`
-từ `lib/format.ts`, và route 3 map nhãn qua `next-intl`) nhưng khối lượng
-lớn — khuyến nghị dành một đợt làm việc riêng, không lẫn vào các phần khác.
+**Đã sửa (a)**: toàn bộ 21 file chuyển sang gọi `formatDate`/`formatDateTime`/
+`formatTime`/`formatMonthYear`/`formatWeekdayShort`/`formatDayMonth`/
+`formatWeekdayDayMonth` từ `lib/format.ts`; thêm mới `formatDayMonthLong`
+cho phân cách ngày trong khung chat. `services/bookings.ts`'s `dateLabel`
+cũng đã chuyển, vá luôn rò rỉ tiếng Anh trong email xác nhận đặt lịch.
+
+**Đã sửa (b)**: thêm 2 namespace mới vào `messages/{vi,en}.json`
+(`profileCategory`, `experienceLevel`) và cấu trúc lại namespace `role` có
+sẵn để khóa theo giá trị enum (`PHOTOGRAPHER`...) thay vì theo chuỗi nhãn
+tiếng Anh cũ (`"Photographer"`) — namespace cũ tồn tại sẵn nhưng chưa từng
+được gọi ở đâu. 20 file tiêu thụ 3 map nhãn được chuyển sang
+`useTranslations`/`getTranslations` (Client/Server Component tương ứng).
+Khi xác minh, phát hiện thêm 2 file có bản sao độc lập của map vai trò
+(`hero-search.tsx`'s `ROLE_TO_ENUM`, `footer.tsx`'s `DISCOVER_ROLES`) tự gọi
+`t(\`role.${key}\`)`với khóa nhãn tiếng Anh cũ — việc đổi cấu trúc namespace`role`làm lộ ra hai chỗ này (test SSR thấy chữ`role.Photographer`thô);
+đã sửa cả hai để lặp trực tiếp theo enum`Role`. `RolePlan.name`
+(`lib/constants/plans.ts`) bị xóa vì nơi dùng duy nhất (`services/subscription.ts`'s
+email chào mừng subscription) đã chuyển sang dịch qua `next-intl`;
+`scripts/stripe-setup.ts`(script CLI dev, không có ngữ cảnh next-intl, tên
+sản phẩm Stripe không thuộc phạm vi ràng buộc UI tiếng Việt) tiếp tục dùng`ROLE_LABELS` trực tiếp.
+
+Đã kiểm thử: `tsc --noEmit`/`pnpm lint`/`pnpm build` sạch; curl qua SSR trên
+trang chủ, browse, pricing, register, và các trang dashboard/admin (đăng
+nhập qua session thật) xác nhận nhãn tiếng Việt hiển thị đúng và không còn
+khóa dịch thô (`role.`/`profileCategory.`/`experienceLevel.`) rò rỉ ra HTML.
 
 _Nguồn: `docs/_prelaunch-audit-compliance.md` mục 10._
 

@@ -15,12 +15,54 @@
     "signout": "Đăng xuất"
   },
   "role": {
-    "Photographer": "Nhiếp ảnh gia",
-    "Videographer": "Quay phim",
-    "Make-up Artist": "Chuyên viên trang điểm",
-    "Studio": "Studio",
-    "Camera Shop": "Cửa hàng máy ảnh",
-    "Model": "Người mẫu"
+    "PHOTOGRAPHER": "Nhiếp ảnh gia",
+    "VIDEOGRAPHER": "Quay phim",
+    "MAKEUP_ARTIST": "Chuyên viên trang điểm",
+    "STUDIO": "Studio",
+    "CAMERA_SHOP": "Cửa hàng máy ảnh",
+    "MODEL": "Người mẫu",
+    "CUSTOMER": "Khách hàng",
+    "ADMIN": "Quản trị viên"
+  },
+  "profileCategory": {
+    "WEDDING": "Cưới",
+    "PORTRAIT": "Chân dung",
+    "FASHION": "Thời trang",
+    "COMMERCIAL": "Thương mại",
+    "EVENT": "Sự kiện",
+    "PRODUCT": "Sản phẩm",
+    "FOOD": "Ẩm thực",
+    "LANDSCAPE": "Phong cảnh",
+    "STREET": "Đường phố",
+    "DOCUMENTARY": "Tài liệu",
+    "MUSIC_VIDEO": "MV ca nhạc",
+    "CORPORATE": "Doanh nghiệp",
+    "REAL_ESTATE": "Bất động sản",
+    "BRIDAL": "Cô dâu",
+    "EDITORIAL": "Ảnh biên tập",
+    "SFX": "Hiệu ứng đặc biệt",
+    "NATURAL": "Tự nhiên",
+    "GLAM": "Trang điểm dạ tiệc",
+    "INDOOR": "Trong nhà",
+    "OUTDOOR": "Ngoài trời",
+    "ROOFTOP": "Sân thượng",
+    "CYCLORAMA": "Phông cyclorama",
+    "GREEN_SCREEN": "Phông xanh",
+    "FASHION_MODEL": "Người mẫu thời trang",
+    "COMMERCIAL_MODEL": "Người mẫu thương mại",
+    "FITNESS_MODEL": "Người mẫu thể hình",
+    "PORTRAIT_MODEL": "Người mẫu chân dung",
+    "HAND_FOOT_MODEL": "Người mẫu tay & chân",
+    "PLUS_SIZE": "Ngoại cỡ",
+    "PETITE": "Dáng nhỏ nhắn",
+    "MATURE": "Trung niên",
+    "ALTERNATIVE": "Phong cách khác"
+  },
+  "experienceLevel": {
+    "NEW": "Mới bắt đầu",
+    "INTERMEDIATE": "Trung cấp",
+    "EXPERIENCED": "Có kinh nghiệm",
+    "PROFESSIONAL": "Chuyên nghiệp"
   },
   "model": {
     "height": "Chiều cao",
@@ -829,7 +871,7 @@
         "body": "Nhấn biểu tượng bookmark trên một hồ sơ để lưu vào đây."
       },
       "unnamed": "Chưa đặt tên",
-      "priceFrom": "Từ ₫{amount}"
+      "priceFrom": "Từ {amount}"
     },
     "notifications": {
       "title": "Thông báo",

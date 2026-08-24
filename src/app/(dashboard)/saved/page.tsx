@@ -6,7 +6,7 @@ import { ArtistCard } from "@/components/cards/artist-card";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ROLE_LABELS } from "@/lib/constants";
+import { formatVND } from "@/lib/format";
 
 export default async function SavedProfilesPage() {
   const session = await auth();
@@ -29,6 +29,7 @@ export default async function SavedProfilesPage() {
   });
 
   const t = await getTranslations("dashboardCore.saved");
+  const roleT = await getTranslations("role");
 
   return (
     <div className="flex flex-col gap-5">
@@ -51,14 +52,12 @@ export default async function SavedProfilesPage() {
                 id: profile.id,
                 name: profile.displayName ?? profile.user.name ?? t("unnamed"),
                 username: profile.user.username ?? "",
-                roles: [ROLE_LABELS[profile.role]],
+                roles: [roleT(profile.role)],
                 city: profile.address ?? "",
                 rating: "—",
                 reviews: 0,
                 price: profile.priceMin
-                  ? t("priceFrom", {
-                      amount: profile.priceMin.toLocaleString(),
-                    })
+                  ? t("priceFrom", { amount: formatVND(profile.priceMin) })
                   : "",
               }}
             />

@@ -10,12 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { ROLE_LABELS } from "@/lib/constants";
+import { formatDate } from "@/lib/format";
 
 type AdminUserRow = User & { roles: Pick<UserRole, "role">[] };
 
 export default function AdminUsersPage() {
   const t = useTranslations("accountFlows.admin.users");
+  const roleT = useTranslations("role");
   const ROLE_OPTIONS = [
     { value: "", label: t("allRoles") },
     ...(
@@ -28,7 +29,7 @@ export default function AdminUsersPage() {
         "CUSTOMER",
         "ADMIN",
       ] as Role[]
-    ).map((r) => ({ value: r, label: ROLE_LABELS[r] })),
+    ).map((r) => ({ value: r, label: roleT(r) })),
   ];
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
@@ -109,13 +110,10 @@ export default function AdminUsersPage() {
                     {user.email}
                   </td>
                   <td className="px-3 py-3 text-text-secondary">
-                    {user.roles.map((r) => ROLE_LABELS[r.role]).join(", ") ||
-                      "—"}
+                    {user.roles.map((r) => roleT(r.role)).join(", ") || "—"}
                   </td>
                   <td className="px-3 py-3 text-text-secondary">
-                    {new Date(user.createdAt).toLocaleDateString("en-US", {
-                      dateStyle: "medium",
-                    })}
+                    {formatDate(user.createdAt)}
                   </td>
                   <td className="px-3 py-3">
                     {user.isSuspended ? (

@@ -29,6 +29,10 @@ function getEmailT() {
   return getTranslations({ locale: "vi", namespace: "libServices.email" });
 }
 
+function getRoleT() {
+  return getTranslations({ locale: "vi", namespace: "role" });
+}
+
 function mapStripeStatus(
   status: Stripe.Subscription.Status,
 ): SubscriptionStatus {
@@ -152,6 +156,8 @@ export async function handleCheckoutCompleted(
   );
   if (results.length === 0) return;
 
+  const roleT = await getRoleT();
+
   await notifyCritical({
     userId,
     type: "SUBSCRIPTION_ACTIVE",
@@ -161,7 +167,7 @@ export async function handleCheckoutCompleted(
       subject: "Welcome to Fgrapher Pro!",
       html: welcomeSubscriptionEmailHtml({
         t: await getEmailT(),
-        roleNames: results.map((r) => ROLE_PLANS[r.role]?.name ?? r.role),
+        roleNames: results.map((r) => roleT(r.role)),
         billingUrl: billingUrl(),
       }),
     },

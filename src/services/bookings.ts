@@ -10,6 +10,7 @@ import {
   bookingReminderEmailHtml,
   bookingRequestEmailHtml,
 } from "@/lib/email";
+import { formatDate } from "@/lib/format";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
@@ -97,10 +98,7 @@ function redactContactInfo<
 }
 
 function dateLabel(date: Date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    dateStyle: "long",
-    timeZone: "UTC",
-  });
+  return formatDate(date);
 }
 
 function bookingUrlFor(bookingId: string) {

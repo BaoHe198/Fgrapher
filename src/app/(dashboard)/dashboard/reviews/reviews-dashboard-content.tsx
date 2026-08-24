@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+import { formatDate } from "@/lib/format";
 
 interface ReviewRow {
   id: string;
@@ -148,9 +149,7 @@ export function ReviewsDashboardContent({
                       className="[&>span:last-child]:hidden"
                     />
                     <span className="text-body-sm text-text-tertiary">
-                      {new Date(review.createdAt).toLocaleDateString("en-US", {
-                        dateStyle: "medium",
-                      })}
+                      {formatDate(review.createdAt)}
                     </span>
                   </div>
                 </div>

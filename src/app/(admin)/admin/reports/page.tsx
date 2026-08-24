@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { formatDate } from "@/lib/format";
 
 type ReportRow = Report & {
   reporter: {
@@ -120,9 +121,7 @@ export default function AdminReportsPage() {
                   </span>
                 </div>
                 <span className="text-body-sm text-text-tertiary">
-                  {new Date(report.createdAt).toLocaleDateString("en-US", {
-                    dateStyle: "medium",
-                  })}
+                  {formatDate(report.createdAt)}
                 </span>
               </div>
               <p className="text-body-sm text-text-secondary">

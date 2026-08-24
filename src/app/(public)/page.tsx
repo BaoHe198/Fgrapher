@@ -7,7 +7,6 @@ import { HeroSearch } from "@/components/sections/hero-search";
 import { Button } from "@/components/ui/button";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { SectionHead } from "@/components/ui/section-head";
-import { ROLE_LABELS } from "@/lib/constants";
 import { minMonthlyPrice } from "@/lib/constants/plans";
 import { features } from "@/lib/features";
 import { formatCurrency } from "@/lib/utils";
@@ -95,7 +94,7 @@ export default async function LandingPage() {
                     profile.user.name ??
                     tLanding("unnamed"),
                   username: profile.user.username ?? "",
-                  roles: profile.roles.map((role) => ROLE_LABELS[role]),
+                  roles: profile.roles.map((role) => t(`role.${role}`)),
                   city: profile.user.location ?? "",
                   rating:
                     profile.avgRating > 0

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MapPin } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,7 +14,7 @@ import { Tag } from "@/components/ui/tag";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
-import { EXPERIENCE_LEVEL_LABELS, ROLE_LABELS } from "@/lib/constants";
+import type { ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import {
   getProfileReviews,
@@ -24,8 +25,11 @@ import {
 
 import { ProfileInteractive } from "./profile-interactive";
 
-function joinRoleLabels(roles: { role: keyof typeof ROLE_LABELS }[]) {
-  const labels = roles.map((p) => ROLE_LABELS[p.role]);
+function joinRoleLabels(
+  roles: { role: keyof typeof ROLE_LABELS }[],
+  roleT: (role: string) => string,
+) {
+  const labels = roles.map((p) => roleT(p.role));
   if (labels.length <= 1) return labels[0] ?? "";
   return `${labels.slice(0, -1).join(", ")} & ${labels[labels.length - 1]}`;
 }
@@ -61,9 +65,10 @@ export async function generateMetadata({
     user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
   const name = activeProfile.displayName ?? user.name ?? username;
   const bio = activeProfile.description ?? "";
+  const roleT = await getTranslations("role");
 
   return {
-    title: `${name} — ${joinRoleLabels(user.profiles)} in ${user.location ?? "Fgrapher"} | Fgrapher`,
+    title: `${name} — ${joinRoleLabels(user.profiles, roleT)} in ${user.location ?? "Fgrapher"} | Fgrapher`,
     description: bio.slice(0, 155),
     alternates: { canonical: `/profile/${username}` },
     openGraph: {
@@ -82,6 +87,11 @@ export default async function PublicProfilePage({
   if (!user) {
     notFound();
   }
+
+  const [roleT, experienceLevelT] = await Promise.all([
+    getTranslations("role"),
+    getTranslations("experienceLevel"),
+  ]);
 
   const { role: roleParam } = await searchParams;
   const activeProfile =
@@ -118,7 +128,7 @@ export default async function PublicProfilePage({
           activeProfile.experienceLevel
             ? {
                 label: "Experience",
-                value: EXPERIENCE_LEVEL_LABELS[activeProfile.experienceLevel],
+                value: experienceLevelT(activeProfile.experienceLevel),
               }
             : null,
           activeProfile.travelWilling
@@ -222,13 +232,11 @@ export default async function PublicProfilePage({
                           />
                         }
                       >
-                        {ROLE_LABELS[profile.role]}
+                        {roleT(profile.role)}
                       </Tag>
                     ))
                   ) : (
-                    <Badge variant="accent">
-                      {ROLE_LABELS[activeProfile.role]}
-                    </Badge>
+                    <Badge variant="accent">{roleT(activeProfile.role)}</Badge>
                   )}
                   <Badge
                     variant={user.acceptingBookings ? "success" : "warning"}

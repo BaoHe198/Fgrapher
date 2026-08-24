@@ -29,7 +29,8 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
+import { PAID_ROLES } from "@/lib/constants";
+import { formatDate } from "@/lib/format";
 
 function defaultExpiryDate() {
   const d = new Date();
@@ -56,6 +57,7 @@ const SUB_STATUS_VARIANT: Record<
 
 export default function AdminUserDetailPage() {
   const t = useTranslations("accountFlows.admin.userDetail");
+  const roleT = useTranslations("role");
   const params = useParams<{ id: string }>();
   const [user, setUser] = useState<UserDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -213,12 +215,7 @@ export default function AdminUserDetailPage() {
                 [t("fields.email"), user.email],
                 [t("fields.username"), user.username ?? "—"],
                 [t("fields.location"), user.location ?? "—"],
-                [
-                  t("fields.joined"),
-                  new Date(user.createdAt).toLocaleDateString("en-US", {
-                    dateStyle: "long",
-                  }),
-                ],
+                [t("fields.joined"), formatDate(user.createdAt)],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -268,7 +265,7 @@ export default function AdminUserDetailPage() {
                 onChange={(v) => setPlanRole(v as Role)}
                 options={PAID_ROLES.map((role) => ({
                   value: role,
-                  label: ROLE_LABELS[role],
+                  label: roleT(role),
                 }))}
               />
               <Input
@@ -308,7 +305,7 @@ export default function AdminUserDetailPage() {
                 <Card key={ur.id} className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-body-md font-semibold text-text-primary">
-                      {ROLE_LABELS[ur.role as Role]}
+                      {roleT(ur.role)}
                     </span>
                     <span className="text-body-sm text-text-secondary">
                       {ur.active ? t("activeRole") : t("inactiveRole")}

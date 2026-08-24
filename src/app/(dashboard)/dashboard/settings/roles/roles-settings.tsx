@@ -11,12 +11,13 @@ import {
   Building2,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
+import { PAID_ROLES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
 interface VerificationInfo {
@@ -55,6 +56,7 @@ export function RolesSettings({
   rolePrices: Partial<Record<Role, number>>;
   verifications: VerificationInfo[];
 }) {
+  const roleT = useTranslations("role");
   const activeRoles = currentRoles.filter((r) => r !== "CUSTOMER");
   const availableRoles = PAID_ROLES.filter((r) => !currentRoles.includes(r));
   const verificationByRole = new Map(verifications.map((v) => [v.role, v]));
@@ -96,7 +98,7 @@ export function RolesSettings({
                   <Icon className="size-5 text-text-tertiary" />
                   <div>
                     <p className="text-body-md font-semibold text-text-primary">
-                      {ROLE_LABELS[role]}
+                      {roleT(role)}
                     </p>
                     <p className="text-body-sm text-text-secondary">
                       {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo
@@ -161,7 +163,7 @@ export function RolesSettings({
                   <Icon className="size-5 text-text-tertiary" />
                   <div>
                     <p className="text-body-md font-semibold text-text-primary">
-                      {ROLE_LABELS[role]}
+                      {roleT(role)}
                     </p>
                     <p className="text-body-sm text-text-secondary">
                       {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo

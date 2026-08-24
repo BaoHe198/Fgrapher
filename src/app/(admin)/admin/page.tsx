@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { Card } from "@/components/ui/card";
+import { formatDateTime, formatNumber } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 import { getAdminStats, getRecentActivity } from "@/services/admin";
 
@@ -22,7 +23,7 @@ export default async function AdminOverviewPage() {
   const metrics = [
     {
       label: t("totalUsers"),
-      value: stats.totalUsers.toLocaleString(),
+      value: formatNumber(stats.totalUsers),
       sub: t("totalUsersSub", {
         sign: stats.userGrowthPercent >= 0 ? "+" : "",
         percent: stats.userGrowthPercent,
@@ -30,14 +31,14 @@ export default async function AdminOverviewPage() {
     },
     {
       label: t("activeSubscriptions"),
-      value: stats.activeSubscriptions.toLocaleString(),
+      value: formatNumber(stats.activeSubscriptions),
       sub: t("activeSubscriptionsSub", {
         mrr: formatCurrency(stats.mrr, "VND"),
       }),
     },
     {
       label: t("bookingsThisMonth"),
-      value: stats.bookingsThisMonth.toLocaleString(),
+      value: formatNumber(stats.bookingsThisMonth),
       sub: t("bookingsThisMonthSub", { rate: stats.completionRate }),
     },
     {
@@ -125,10 +126,7 @@ export default async function AdminOverviewPage() {
                   {event.label}
                 </span>
                 <span className="text-body-sm text-text-tertiary">
-                  {new Date(event.timestamp).toLocaleString("en-US", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
+                  {formatDateTime(event.timestamp)}
                 </span>
               </div>
             ))

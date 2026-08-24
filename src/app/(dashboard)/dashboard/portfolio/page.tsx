@@ -10,7 +10,7 @@ import { SectionHead } from "@/components/ui/section-head";
 import { Tag } from "@/components/ui/tag";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
+import { PAID_ROLES } from "@/lib/constants";
 
 import { PortfolioGrid } from "./portfolio-grid";
 
@@ -20,6 +20,7 @@ export default async function PortfolioPage({
   searchParams: Promise<{ profile?: string }>;
 }) {
   const t = await getTranslations("dashboardCore.portfolio");
+  const roleT = await getTranslations("role");
 
   const session = await auth();
   if (!session?.user) {
@@ -97,7 +98,7 @@ export default async function PortfolioPage({
               selected={p.id === activeProfile.id}
               render={<Link href={`/dashboard/portfolio?profile=${p.role}`} />}
             >
-              {ROLE_LABELS[p.role]}
+              {roleT(p.role)}
             </Tag>
           ))}
         </div>
@@ -106,7 +107,7 @@ export default async function PortfolioPage({
       <SubscriptionGate
         role={activeProfile.role}
         fallbackTitle={t("gate.fallbackTitle", {
-          role: ROLE_LABELS[activeProfile.role],
+          role: roleT(activeProfile.role),
         })}
         fallbackText={t("gate.fallbackText")}
       >

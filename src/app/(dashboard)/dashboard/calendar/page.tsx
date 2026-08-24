@@ -7,6 +7,7 @@ import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { formatMonthYear, formatWeekdayDayMonth } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type BookingParty = Pick<User, "firstName" | "name">;
@@ -143,11 +144,7 @@ export default function CalendarPage() {
           <ChevronLeft className="size-4" />
         </button>
         <span className="text-heading-sm text-text-primary">
-          {monthCursor.toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
-            timeZone: "UTC",
-          })}
+          {formatMonthYear(monthCursor)}
         </span>
         <button
           type="button"
@@ -242,13 +239,7 @@ export default function CalendarPage() {
                     {b.service?.name ?? "Custom request"}
                   </span>
                   <span className="text-body-sm text-text-secondary">
-                    {new Date(b.date).toLocaleDateString("en-US", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      timeZone: "UTC",
-                    })}{" "}
-                    · {b.startTime}
+                    {formatWeekdayDayMonth(b.date)} · {b.startTime}
                   </span>
                 </div>
                 <Badge variant={STATUS_BADGE_VARIANT[b.status]}>

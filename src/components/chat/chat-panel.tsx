@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ReportModal } from "@/components/modals/report-modal";
+import { formatDate, formatDayMonthLong, formatTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface ChatMessage {
@@ -89,7 +90,7 @@ function dateSeparatorLabel(
 
   if (isSameDay(date, today)) return labels.today;
   if (isSameDay(date, yesterday)) return labels.yesterday;
-  return date.toLocaleDateString("en-US", { day: "numeric", month: "long" });
+  return formatDayMonthLong(date);
 }
 
 async function uploadImage(file: File): Promise<string | null> {
@@ -336,14 +337,8 @@ export function ChatPanel({
                         </span>
                       </div>
                       <span className="text-body-sm text-text-secondary">
-                        {new Date(message.booking.date).toLocaleDateString(
-                          "en-US",
-                          {
-                            dateStyle: "medium",
-                            timeZone: "UTC",
-                          },
-                        )}{" "}
-                        · {message.booking.startTime}
+                        {formatDate(message.booking.date)} ·{" "}
+                        {message.booking.startTime}
                       </span>
                       <Badge
                         variant={BOOKING_STATUS_VARIANT[message.booking.status]}
@@ -382,12 +377,7 @@ export function ChatPanel({
                   )}
 
                   <div className="mt-1 flex items-center gap-1 text-xs text-text-tertiary">
-                    <span>
-                      {date.toLocaleTimeString("en-US", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                    <span>{formatTime(date)}</span>
                     {isOwn ? (
                       message.readAt ? (
                         <CheckCheck className="size-3.5 text-gold-400" />

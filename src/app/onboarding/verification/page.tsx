@@ -1,8 +1,9 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
-import { PAID_ROLES, ROLE_LABELS } from "@/lib/constants";
+import { PAID_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 
 import { VerificationForm } from "./verification-form";
@@ -24,6 +25,7 @@ export default async function OnboardingVerificationPage({
     redirect("/login");
   }
 
+  const roleT = await getTranslations("role");
   const { role: roleParam } = await searchParams;
 
   const roles = await db.userRole.findMany({
@@ -77,7 +79,7 @@ export default async function OnboardingVerificationPage({
               className="flex items-center justify-between rounded-[var(--fg-radius-md)] border border-border-default p-4 hover:bg-bg-sunken"
             >
               <span className="text-body-md font-semibold text-text-primary">
-                {ROLE_LABELS[r.role]}
+                {roleT(r.role)}
               </span>
               <span className="text-body-sm text-text-secondary">
                 {STATUS_LABELS[r.verificationStatus]}
