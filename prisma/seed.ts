@@ -43,6 +43,10 @@ interface ProfileSeed {
 interface UserSeed {
   email: string;
   location: string;
+  // Prompt B4/B8 — name from prisma/data/hcmc-wards.ts, resolved to a real
+  // Ward id in main() once seedGeography() has run. HCMC-only for now, so
+  // every seed user lives here rather than a fabricated non-HCMC address.
+  wardName: string;
   username: string;
   firstName: string;
   lastName: string;
@@ -53,15 +57,15 @@ interface UserSeed {
 
 const PHOTOGRAPHER_SERVICES: ServiceSeed[] = [
   {
-    name: "Wedding Photography Package",
-    description: "Full-day coverage, two shooters, edited digital gallery.",
+    name: "Gói chụp ảnh cưới trọn gói",
+    description: "Trọn ngày, hai thợ chụp, album ảnh kỹ thuật số đã chỉnh sửa.",
     duration: 480,
     price: 15_000_000,
   },
   {
-    name: "Portrait Session",
+    name: "Buổi chụp ảnh chân dung",
     description:
-      "One-hour studio or outdoor portrait session, 20 edited photos.",
+      "Chụp một tiếng tại studio hoặc ngoại cảnh, 20 ảnh đã chỉnh sửa.",
     duration: 60,
     price: 2_000_000,
   },
@@ -69,16 +73,15 @@ const PHOTOGRAPHER_SERVICES: ServiceSeed[] = [
 
 const VIDEOGRAPHER_SERVICES: ServiceSeed[] = [
   {
-    name: "Wedding Videography Package",
+    name: "Gói quay phim cưới trọn gói",
     description:
-      "Full-day coverage with a same-day teaser and full highlight film.",
+      "Trọn ngày, có clip teaser trong ngày và phim highlight đầy đủ.",
     duration: 480,
     price: 20_000_000,
   },
   {
-    name: "Event Highlight Reel",
-    description:
-      "Half-day event coverage edited into a 3-5 minute highlight reel.",
+    name: "Video highlight sự kiện",
+    description: "Quay nửa ngày sự kiện, dựng thành video highlight 3-5 phút.",
     duration: 240,
     price: 8_000_000,
   },
@@ -86,14 +89,14 @@ const VIDEOGRAPHER_SERVICES: ServiceSeed[] = [
 
 const MAKEUP_SERVICES: ServiceSeed[] = [
   {
-    name: "Bridal Makeup",
-    description: "Trial session plus wedding-day makeup application.",
+    name: "Trang điểm cô dâu",
+    description: "Trang điểm thử trước và trang điểm chính ngày cưới.",
     duration: 90,
     price: 2_500_000,
   },
   {
-    name: "Event Makeup",
-    description: "Makeup application for parties, photoshoots, or events.",
+    name: "Trang điểm sự kiện",
+    description: "Trang điểm cho tiệc, chụp ảnh hoặc sự kiện.",
     duration: 60,
     price: 1_200_000,
   },
@@ -101,14 +104,14 @@ const MAKEUP_SERVICES: ServiceSeed[] = [
 
 const MODEL_SERVICES: ServiceSeed[] = [
   {
-    name: "Hourly Booking",
-    description: "One hour of shoot time, any location within the city.",
+    name: "Đặt lịch theo giờ",
+    description: "Một tiếng chụp, tại bất kỳ địa điểm nào trong thành phố.",
     duration: 60,
     price: 800_000,
   },
   {
-    name: "Half-Day Booking",
-    description: "4-hour booking for editorial or commercial shoots.",
+    name: "Đặt lịch nửa ngày",
+    description: "Buổi chụp 4 tiếng cho editorial hoặc thương mại.",
     duration: 240,
     price: 2_800_000,
   },
@@ -116,16 +119,14 @@ const MODEL_SERVICES: ServiceSeed[] = [
 
 const STUDIO_SERVICES: ServiceSeed[] = [
   {
-    name: "Half-Day Studio Rental",
-    description:
-      "4-hour rental, cyclorama wall and basic lighting kit included.",
+    name: "Thuê studio nửa ngày",
+    description: "Thuê 4 tiếng, kèm phông cyclorama và bộ đèn cơ bản.",
     duration: 240,
     price: 1_500_000,
   },
   {
-    name: "Full-Day Studio Rental",
-    description:
-      "8-hour rental, cyclorama wall and basic lighting kit included.",
+    name: "Thuê studio trọn ngày",
+    description: "Thuê 8 tiếng, kèm phông cyclorama và bộ đèn cơ bản.",
     duration: 480,
     price: 2_800_000,
   },
@@ -134,17 +135,18 @@ const STUDIO_SERVICES: ServiceSeed[] = [
 const USERS: UserSeed[] = [
   {
     email: "photographer@test.com",
-    location: "Ho Chi Minh City",
-    username: "alexrivera",
-    firstName: "Alex",
-    lastName: "Rivera",
+    location: "Phường Bến Thành, Thành phố Hồ Chí Minh",
+    wardName: "Phường Bến Thành",
+    username: "minhanhnguyen",
+    firstName: "Minh Anh",
+    lastName: "Nguyễn",
     roles: ["PHOTOGRAPHER", "CUSTOMER"],
     profiles: [
       {
         role: "PHOTOGRAPHER",
-        displayName: "Alex Rivera Photography",
+        displayName: "Minh Anh Nhiếp Ảnh",
         description:
-          "Wedding and portrait photographer with 8 years of experience capturing candid, timeless moments.",
+          "Nhiếp ảnh gia cưới và chân dung với 8 năm kinh nghiệm, chuyên ghi lại những khoảnh khắc tự nhiên và trường tồn.",
         categories: ["WEDDING", "PORTRAIT"],
         priceMin: 2_000_000,
         priceMax: 15_000_000,
@@ -154,17 +156,18 @@ const USERS: UserSeed[] = [
   },
   {
     email: "videographer@test.com",
-    location: "Ha Noi",
-    username: "jordanlee",
-    firstName: "Jordan",
-    lastName: "Lee",
+    location: "Phường Thủ Đức, Thành phố Hồ Chí Minh",
+    wardName: "Phường Thủ Đức",
+    username: "quochungtran",
+    firstName: "Quốc Hùng",
+    lastName: "Trần",
     roles: ["VIDEOGRAPHER", "CUSTOMER"],
     profiles: [
       {
         role: "VIDEOGRAPHER",
-        displayName: "Jordan Lee Films",
+        displayName: "Quốc Hùng Films",
         description:
-          "Cinematic wedding and event videographer specializing in documentary-style storytelling.",
+          "Quay phim cưới và sự kiện theo phong cách điện ảnh, chuyên kể chuyện bằng hình ảnh tài liệu.",
         categories: ["WEDDING", "EVENT", "MUSIC_VIDEO"],
         priceMin: 5_000_000,
         priceMax: 25_000_000,
@@ -174,17 +177,18 @@ const USERS: UserSeed[] = [
   },
   {
     email: "makeup@test.com",
-    location: "Da Nang",
-    username: "mayachen",
-    firstName: "Maya",
-    lastName: "Chen",
+    location: "Phường Gia Định, Thành phố Hồ Chí Minh",
+    wardName: "Phường Gia Định",
+    username: "maihuongle",
+    firstName: "Mai Hương",
+    lastName: "Lê Thị",
     roles: ["MAKEUP_ARTIST", "CUSTOMER"],
     profiles: [
       {
         role: "MAKEUP_ARTIST",
-        displayName: "Maya Chen Makeup",
+        displayName: "Mai Hương Makeup",
         description:
-          "Bridal and editorial makeup artist known for natural, glowing looks.",
+          "Chuyên viên trang điểm cô dâu và editorial, nổi tiếng với phong cách tự nhiên, rạng rỡ.",
         categories: ["BRIDAL", "NATURAL", "GLAM"],
         priceMin: 1_000_000,
         priceMax: 5_000_000,
@@ -194,21 +198,22 @@ const USERS: UserSeed[] = [
   },
   {
     email: "studio@test.com",
-    location: "Ho Chi Minh City",
-    username: "taylorbrooks",
-    firstName: "Taylor",
-    lastName: "Brooks",
+    location: "Phường Bến Thành, Thành phố Hồ Chí Minh",
+    wardName: "Phường Bến Thành",
+    username: "ducthinhpham",
+    firstName: "Đức Thịnh",
+    lastName: "Phạm",
     roles: ["STUDIO", "CUSTOMER"],
     profiles: [
       {
         role: "STUDIO",
-        displayName: "Brooks Creative Studio",
+        displayName: "Đức Thịnh Creative Studio",
         description:
-          "Bright, versatile studio space with a cyclorama wall and natural light, perfect for photo and video shoots.",
+          "Không gian studio sáng, linh hoạt với phông cyclorama và ánh sáng tự nhiên, phù hợp cho chụp ảnh và quay video.",
         categories: ["INDOOR", "CYCLORAMA", "GREEN_SCREEN"],
         priceMin: 500_000,
         priceMax: 2_800_000,
-        address: "123 Nguyen Hue, District 1, Ho Chi Minh City",
+        address: "123 Nguyễn Huệ, Phường Bến Thành, Thành phố Hồ Chí Minh",
         area: 120,
         amenities: ["wifi", "ac", "parking", "changing_room"],
         services: STUDIO_SERVICES,
@@ -217,44 +222,46 @@ const USERS: UserSeed[] = [
   },
   {
     email: "shop@test.com",
-    location: "Ha Noi",
-    username: "diazcamera",
-    firstName: "Morgan",
-    lastName: "Diaz",
+    location: "Phường Tân Bình, Thành phố Hồ Chí Minh",
+    wardName: "Phường Tân Bình",
+    username: "vanlonghoang",
+    firstName: "Văn Long",
+    lastName: "Hoàng",
     roles: ["CAMERA_SHOP", "CUSTOMER"],
     profiles: [
       {
         role: "CAMERA_SHOP",
-        displayName: "Diaz Camera Co.",
-        shopName: "Diaz Camera Co.",
+        displayName: "Văn Long Camera",
+        shopName: "Văn Long Camera",
         description:
-          "Camera and lighting equipment rental and sales — trusted by pros since 2015.",
+          "Cho thuê và bán thiết bị máy ảnh, đèn chiếu sáng — được các nhiếp ảnh gia chuyên nghiệp tin dùng từ 2015.",
         // Camera shops sell via Product listings, not bookable Services.
       },
     ],
   },
   {
     email: "model@test.com",
-    location: "Ho Chi Minh City",
-    username: "rileyquinn",
-    firstName: "Riley",
-    lastName: "Quinn",
+    location: "Phường An Phú, Thành phố Hồ Chí Minh",
+    wardName: "Phường An Phú",
+    username: "ngoclinhdo",
+    firstName: "Ngọc Linh",
+    lastName: "Đỗ",
     roles: ["MODEL", "CUSTOMER"],
     dateOfBirth: "1998-05-14",
     profiles: [
       {
         role: "MODEL",
-        displayName: "Riley Quinn",
+        displayName: "Ngọc Linh",
         description:
-          "Commercial and editorial model, 5 years experience, based in Ho Chi Minh City.",
+          "Người mẫu thương mại và editorial, 5 năm kinh nghiệm, hoạt động tại Thành phố Hồ Chí Minh.",
         categories: ["COMMERCIAL_MODEL", "FASHION_MODEL"],
         priceMin: 800_000,
         priceMax: 2_800_000,
         services: MODEL_SERVICES,
         height: 175,
         measurements: "34-26-36",
-        hairColor: "Black",
-        eyeColor: "Brown",
+        hairColor: "Đen",
+        eyeColor: "Nâu",
         shoeSize: "39",
         experienceLevel: "EXPERIENCED",
         travelWilling: true,
@@ -263,33 +270,36 @@ const USERS: UserSeed[] = [
   },
   {
     email: "customer@test.com",
-    location: "Ho Chi Minh City",
-    username: "caseynguyen",
-    firstName: "Casey",
-    lastName: "Nguyen",
+    location: "Phường Bến Thành, Thành phố Hồ Chí Minh",
+    wardName: "Phường Bến Thành",
+    username: "giabaonguyen",
+    firstName: "Gia Bảo",
+    lastName: "Nguyễn",
     roles: ["CUSTOMER"],
   },
   {
     email: "admin@test.com",
-    location: "Ho Chi Minh City",
+    location: "Phường Bến Thành, Thành phố Hồ Chí Minh",
+    wardName: "Phường Bến Thành",
     username: "fgrapheradmin",
-    firstName: "Admin",
-    lastName: "User",
+    firstName: "Thị Ngọc Anh",
+    lastName: "Vũ",
     roles: ["ADMIN", "CUSTOMER"],
   },
   {
     email: "multi@test.com",
-    location: "Da Lat",
-    username: "jamiekim",
-    firstName: "Jamie",
-    lastName: "Kim",
+    location: "Phường Phú Nhuận, Thành phố Hồ Chí Minh",
+    wardName: "Phường Phú Nhuận",
+    username: "thanhtungbui",
+    firstName: "Thanh Tùng",
+    lastName: "Bùi",
     roles: ["PHOTOGRAPHER", "VIDEOGRAPHER", "CUSTOMER"],
     profiles: [
       {
         role: "PHOTOGRAPHER",
-        displayName: "Jamie Kim Photography",
+        displayName: "Thanh Tùng Photography",
         description:
-          "Freelance photographer covering weddings, events, and portraits.",
+          "Nhiếp ảnh gia tự do, nhận chụp cưới, sự kiện và chân dung.",
         categories: ["WEDDING", "PORTRAIT", "EVENT"],
         priceMin: 1_500_000,
         priceMax: 10_000_000,
@@ -297,9 +307,9 @@ const USERS: UserSeed[] = [
       },
       {
         role: "VIDEOGRAPHER",
-        displayName: "Jamie Kim Films",
+        displayName: "Thanh Tùng Films",
         description:
-          "Same-day edit videography for weddings and corporate events.",
+          "Dựng video trong ngày cho tiệc cưới và sự kiện doanh nghiệp.",
         categories: ["WEDDING", "CORPORATE"],
         priceMin: 4_000_000,
         priceMax: 18_000_000,
@@ -338,6 +348,9 @@ async function seedGeography() {
 
 async function main() {
   await seedGeography();
+
+  const wards = await db.ward.findMany({ select: { id: true, name: true } });
+  const wardIdByName = new Map(wards.map((w) => [w.name, w.id]));
 
   const emails = USERS.map((u) => u.email);
 
@@ -404,14 +417,26 @@ async function main() {
   const passwordHash = await bcrypt.hash(SEED_PASSWORD, 12);
 
   for (const seedUser of USERS) {
+    const wardId = wardIdByName.get(seedUser.wardName);
+    if (!wardId) {
+      throw new Error(
+        `Seed user ${seedUser.email} references unknown wardName "${seedUser.wardName}" — check prisma/data/hcmc-wards.ts`,
+      );
+    }
+
     const user = await db.user.create({
       data: {
         email: seedUser.email,
         username: seedUser.username,
         location: seedUser.location,
+        wardId,
         firstName: seedUser.firstName,
         lastName: seedUser.lastName,
-        name: `${seedUser.firstName} ${seedUser.lastName}`,
+        // Vietnamese naming order is family name first (Họ Tên) — the
+        // reverse of the firstName/lastName field order, which stays as-is
+        // since `firstName` is what greeting() etc. use as the informal
+        // given name to address someone by.
+        name: `${seedUser.lastName} ${seedUser.firstName}`,
         passwordHash,
         emailVerified: new Date(),
         dateOfBirth: seedUser.dateOfBirth
@@ -525,8 +550,8 @@ async function seedProducts() {
     {
       name: "Sony A7 IV Mirrorless Camera",
       description:
-        "Full-frame 33MP mirrorless camera body, lightly used, comes with two batteries.",
-      category: "Camera body",
+        "Thân máy mirrorless full-frame 33MP, đã qua sử dụng nhẹ, tặng kèm hai pin.",
+      category: "Thân máy",
       type: "SALE" as const,
       price: 45_000_000,
       condition: "LIKE_NEW" as const,
@@ -535,8 +560,8 @@ async function seedProducts() {
     {
       name: "Canon RF 24-70mm f/2.8L Lens",
       description:
-        "Standard zoom lens, excellent condition, no fungus or scratches.",
-      category: "Lens",
+        "Ống kính zoom tiêu chuẩn, tình trạng rất tốt, không mốc không trầy.",
+      category: "Ống kính",
       type: "SALE" as const,
       price: 38_000_000,
       condition: "GOOD" as const,
@@ -545,8 +570,8 @@ async function seedProducts() {
     {
       name: "Godox AD200 Pro Flash Kit",
       description:
-        "Portable strobe kit with softbox and stands. Available to rent by the day.",
-      category: "Lighting",
+        "Bộ đèn flash di động kèm softbox và chân đèn. Có cho thuê theo ngày.",
+      category: "Ánh sáng",
       type: "RENT" as const,
       rentalPrice: 350_000,
       depositAmount: 2_000_000,
@@ -556,8 +581,8 @@ async function seedProducts() {
     {
       name: "DJI Ronin RS3 Gimbal",
       description:
-        "3-axis gimbal stabilizer for mirrorless/DSLR cameras. Sale or daily rental.",
-      category: "Support",
+        "Gimbal chống rung 3 trục cho máy ảnh mirrorless/DSLR. Bán hoặc cho thuê theo ngày.",
+      category: "Phụ kiện hỗ trợ",
       type: "BOTH" as const,
       price: 12_000_000,
       rentalPrice: 500_000,
@@ -568,8 +593,8 @@ async function seedProducts() {
     {
       name: "Rode Wireless GO II Mic Kit",
       description:
-        "Compact wireless lapel mic system, two transmitters + receiver.",
-      category: "Audio",
+        "Bộ micro không dây cài áo nhỏ gọn, hai máy phát và một máy thu.",
+      category: "Âm thanh",
       type: "SALE" as const,
       price: 5_500_000,
       condition: "NEW" as const,
@@ -609,22 +634,22 @@ async function seedBookings() {
   ] = await Promise.all([
     db.service.findFirstOrThrow({
       where: {
-        name: "Portrait Session",
+        name: "Buổi chụp ảnh chân dung",
         profile: { userId: photographerUser.id },
       },
     }),
     db.service.findFirstOrThrow({
       where: {
-        name: "Event Highlight Reel",
+        name: "Video highlight sự kiện",
         profile: { userId: videographerUser.id },
       },
     }),
     db.service.findFirstOrThrow({
-      where: { name: "Bridal Makeup", profile: { userId: makeupUser.id } },
+      where: { name: "Trang điểm cô dâu", profile: { userId: makeupUser.id } },
     }),
     db.service.findFirstOrThrow({
       where: {
-        name: "Half-Day Studio Rental",
+        name: "Thuê studio nửa ngày",
         profile: { userId: studioUser.id },
       },
     }),
@@ -644,7 +669,7 @@ async function seedBookings() {
         endTime: "15:00",
         status: "PENDING",
         totalPrice: portraitService.price,
-        notes: "Outdoor portrait session, golden hour preferred.",
+        notes: "Chụp ngoại cảnh, ưu tiên khung giờ hoàng hôn.",
       },
       {
         customerId: customerUser.id,
@@ -677,7 +702,7 @@ async function seedBookings() {
         status: "CANCELLED",
         totalPrice: studioHalfDayService.price,
         cancelledBy: customerUser.id,
-        cancelReason: "Schedule conflict",
+        cancelReason: "Trùng lịch",
       },
       {
         // Deliberately left unreviewed — exercises the "leave a review" flow
@@ -713,8 +738,8 @@ async function seedBookings() {
       reviewedId: makeupUser.id,
       rating: 5,
       content:
-        "Maya made me feel so comfortable and the makeup lasted all day. Highly recommend!",
-      response: "Thank you so much, Casey! It was a pleasure working with you.",
+        "Chị Mai Hương làm mình cảm thấy rất thoải mái, lớp trang điểm giữ được cả ngày. Rất đáng để đặt lại!",
+      response: "Cảm ơn Gia Bảo rất nhiều! Rất vui khi được làm việc cùng bạn.",
       respondedAt: new Date(),
     },
   });
