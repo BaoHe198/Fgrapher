@@ -1,5 +1,12 @@
-import { PrismaClient, type ExperienceLevel, type ProfileCategory, type Role } from "@prisma/client";
+import {
+  PrismaClient,
+  type ExperienceLevel,
+  type ProfileCategory,
+  type Role,
+} from "@prisma/client";
 import bcrypt from "bcryptjs";
+
+import { HCMC_PROVINCE, HCMC_WARDS } from "./data/hcmc-wards";
 
 const db = new PrismaClient();
 
@@ -304,7 +311,34 @@ const USERS: UserSeed[] = [
 
 const WEEKDAYS = [1, 2, 3, 4, 5]; // Mon-Fri (0=Sunday, 6=Saturday)
 
+// Prompt B4/B8 — real administrative geography (see prisma/data/hcmc-wards.ts
+// for provenance). Upsert-based and idempotent, unlike the delete-then-
+// recreate USERS seeding below, since Ward rows may already be referenced by
+// real (non-seed) User rows by the time this is re-run in dev.
+async function seedGeography() {
+  const province = await db.province.upsert({
+    where: { code: HCMC_PROVINCE.code },
+    create: HCMC_PROVINCE,
+    update: { name: HCMC_PROVINCE.name },
+  });
+
+  for (const [index, name] of HCMC_WARDS.entries()) {
+    const code = String(index + 1).padStart(3, "0");
+    await db.ward.upsert({
+      where: { provinceId_code: { provinceId: province.id, code } },
+      create: { provinceId: province.id, code, name },
+      update: { name },
+    });
+  }
+
+  console.log(
+    `Seeded 1 province (${province.name}) and ${HCMC_WARDS.length} wards`,
+  );
+}
+
 async function main() {
+  await seedGeography();
+
   const emails = USERS.map((u) => u.email);
 
   const existing = await db.user.findMany({
@@ -316,28 +350,52 @@ async function main() {
 
     // Availability has no FK relation to User in the schema, so it isn't
     // covered by cascade delete — clean it up explicitly before removing users.
-    await db.availability.deleteMany({ where: { userId: { in: existingIds } } });
+    await db.availability.deleteMany({
+      where: { userId: { in: existingIds } },
+    });
 
     // Same story for Review -> Booking, and Booking.customer/provider have
     // no onDelete: Cascade (a Restrict FK by default) — delete reviews then
     // bookings referencing these seed users first, or the user delete below
     // fails with a foreign key constraint violation.
     await db.review.deleteMany({
-      where: { OR: [{ reviewerId: { in: existingIds } }, { reviewedId: { in: existingIds } }] },
+      where: {
+        OR: [
+          { reviewerId: { in: existingIds } },
+          { reviewedId: { in: existingIds } },
+        ],
+      },
     });
     await db.booking.deleteMany({
-      where: { OR: [{ customerId: { in: existingIds } }, { providerId: { in: existingIds } }] },
+      where: {
+        OR: [
+          { customerId: { in: existingIds } },
+          { providerId: { in: existingIds } },
+        ],
+      },
     });
 
     // Message.sender/receiver and Order.customer/shop are also no-cascade
     // FKs — clean those up (and their orphaned Conversation rows) too.
     await db.message.deleteMany({
-      where: { OR: [{ senderId: { in: existingIds } }, { receiverId: { in: existingIds } }] },
+      where: {
+        OR: [
+          { senderId: { in: existingIds } },
+          { receiverId: { in: existingIds } },
+        ],
+      },
     });
-    await db.conversationParticipant.deleteMany({ where: { userId: { in: existingIds } } });
+    await db.conversationParticipant.deleteMany({
+      where: { userId: { in: existingIds } },
+    });
     await db.conversation.deleteMany({ where: { participants: { none: {} } } });
     await db.order.deleteMany({
-      where: { OR: [{ customerId: { in: existingIds } }, { shopId: { in: existingIds } }] },
+      where: {
+        OR: [
+          { customerId: { in: existingIds } },
+          { shopId: { in: existingIds } },
+        ],
+      },
     });
 
     await db.user.deleteMany({ where: { id: { in: existingIds } } });
@@ -356,7 +414,9 @@ async function main() {
         name: `${seedUser.firstName} ${seedUser.lastName}`,
         passwordHash,
         emailVerified: new Date(),
-        dateOfBirth: seedUser.dateOfBirth ? new Date(`${seedUser.dateOfBirth}T00:00:00.000Z`) : undefined,
+        dateOfBirth: seedUser.dateOfBirth
+          ? new Date(`${seedUser.dateOfBirth}T00:00:00.000Z`)
+          : undefined,
       },
     });
 
@@ -367,7 +427,9 @@ async function main() {
             userId: user.id,
             role,
             active: true,
-            ...(role === "MODEL" ? { contentGuidelinesAcceptedAt: new Date() } : {}),
+            ...(role === "MODEL"
+              ? { contentGuidelinesAcceptedAt: new Date() }
+              : {}),
           },
         }),
       ),
@@ -455,12 +517,15 @@ async function main() {
 }
 
 async function seedProducts() {
-  const shop = await db.user.findUniqueOrThrow({ where: { email: "shop@test.com" } });
+  const shop = await db.user.findUniqueOrThrow({
+    where: { email: "shop@test.com" },
+  });
 
   const products = [
     {
       name: "Sony A7 IV Mirrorless Camera",
-      description: "Full-frame 33MP mirrorless camera body, lightly used, comes with two batteries.",
+      description:
+        "Full-frame 33MP mirrorless camera body, lightly used, comes with two batteries.",
       category: "Camera body",
       type: "SALE" as const,
       price: 45_000_000,
@@ -469,7 +534,8 @@ async function seedProducts() {
     },
     {
       name: "Canon RF 24-70mm f/2.8L Lens",
-      description: "Standard zoom lens, excellent condition, no fungus or scratches.",
+      description:
+        "Standard zoom lens, excellent condition, no fungus or scratches.",
       category: "Lens",
       type: "SALE" as const,
       price: 38_000_000,
@@ -478,7 +544,8 @@ async function seedProducts() {
     },
     {
       name: "Godox AD200 Pro Flash Kit",
-      description: "Portable strobe kit with softbox and stands. Available to rent by the day.",
+      description:
+        "Portable strobe kit with softbox and stands. Available to rent by the day.",
       category: "Lighting",
       type: "RENT" as const,
       rentalPrice: 350_000,
@@ -488,7 +555,8 @@ async function seedProducts() {
     },
     {
       name: "DJI Ronin RS3 Gimbal",
-      description: "3-axis gimbal stabilizer for mirrorless/DSLR cameras. Sale or daily rental.",
+      description:
+        "3-axis gimbal stabilizer for mirrorless/DSLR cameras. Sale or daily rental.",
       category: "Support",
       type: "BOTH" as const,
       price: 12_000_000,
@@ -499,7 +567,8 @@ async function seedProducts() {
     },
     {
       name: "Rode Wireless GO II Mic Kit",
-      description: "Compact wireless lapel mic system, two transmitters + receiver.",
+      description:
+        "Compact wireless lapel mic system, two transmitters + receiver.",
       category: "Audio",
       type: "SALE" as const,
       price: 5_500_000,
@@ -518,30 +587,48 @@ async function seedProducts() {
 }
 
 async function seedBookings() {
-  const [photographerUser, videographerUser, makeupUser, studioUser, customerUser] =
-    await Promise.all([
-      db.user.findUniqueOrThrow({ where: { email: "photographer@test.com" } }),
-      db.user.findUniqueOrThrow({ where: { email: "videographer@test.com" } }),
-      db.user.findUniqueOrThrow({ where: { email: "makeup@test.com" } }),
-      db.user.findUniqueOrThrow({ where: { email: "studio@test.com" } }),
-      db.user.findUniqueOrThrow({ where: { email: "customer@test.com" } }),
-    ]);
+  const [
+    photographerUser,
+    videographerUser,
+    makeupUser,
+    studioUser,
+    customerUser,
+  ] = await Promise.all([
+    db.user.findUniqueOrThrow({ where: { email: "photographer@test.com" } }),
+    db.user.findUniqueOrThrow({ where: { email: "videographer@test.com" } }),
+    db.user.findUniqueOrThrow({ where: { email: "makeup@test.com" } }),
+    db.user.findUniqueOrThrow({ where: { email: "studio@test.com" } }),
+    db.user.findUniqueOrThrow({ where: { email: "customer@test.com" } }),
+  ]);
 
-  const [portraitService, highlightReelService, bridalMakeupService, studioHalfDayService] =
-    await Promise.all([
-      db.service.findFirstOrThrow({
-        where: { name: "Portrait Session", profile: { userId: photographerUser.id } },
-      }),
-      db.service.findFirstOrThrow({
-        where: { name: "Event Highlight Reel", profile: { userId: videographerUser.id } },
-      }),
-      db.service.findFirstOrThrow({
-        where: { name: "Bridal Makeup", profile: { userId: makeupUser.id } },
-      }),
-      db.service.findFirstOrThrow({
-        where: { name: "Half-Day Studio Rental", profile: { userId: studioUser.id } },
-      }),
-    ]);
+  const [
+    portraitService,
+    highlightReelService,
+    bridalMakeupService,
+    studioHalfDayService,
+  ] = await Promise.all([
+    db.service.findFirstOrThrow({
+      where: {
+        name: "Portrait Session",
+        profile: { userId: photographerUser.id },
+      },
+    }),
+    db.service.findFirstOrThrow({
+      where: {
+        name: "Event Highlight Reel",
+        profile: { userId: videographerUser.id },
+      },
+    }),
+    db.service.findFirstOrThrow({
+      where: { name: "Bridal Makeup", profile: { userId: makeupUser.id } },
+    }),
+    db.service.findFirstOrThrow({
+      where: {
+        name: "Half-Day Studio Rental",
+        profile: { userId: studioUser.id },
+      },
+    }),
+  ]);
 
   const inDays = (n: number) => new Date(Date.now() + n * 86_400_000);
   const agoDays = (n: number) => new Date(Date.now() - n * 86_400_000);
@@ -612,7 +699,11 @@ async function seedBookings() {
   console.log("Seeded 5 bookings for customer@test.com");
 
   const completedBooking = await db.booking.findFirstOrThrow({
-    where: { providerId: makeupUser.id, customerId: customerUser.id, status: "COMPLETED" },
+    where: {
+      providerId: makeupUser.id,
+      customerId: customerUser.id,
+      status: "COMPLETED",
+    },
   });
 
   await db.review.create({
@@ -621,7 +712,8 @@ async function seedBookings() {
       reviewerId: customerUser.id,
       reviewedId: makeupUser.id,
       rating: 5,
-      content: "Maya made me feel so comfortable and the makeup lasted all day. Highly recommend!",
+      content:
+        "Maya made me feel so comfortable and the makeup lasted all day. Highly recommend!",
       response: "Thank you so much, Casey! It was a pleasure working with you.",
       respondedAt: new Date(),
     },

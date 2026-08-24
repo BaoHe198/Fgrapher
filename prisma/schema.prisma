@@ -31,9 +31,18 @@ model User {
   coverImage              String?
   bio                     String?
   phone                   String?
+  // Free-text display location — kept for backward compatibility with
+  // existing rows and as a fallback while wardId coverage is still
+  // HCMC-only (Prompt B8/B4). Prefer wardId for anything that needs real
+  // filtering/sorting; location is display-only going forward.
   location                String?
   latitude                Float?
   longitude               Float?
+  // Prompt B4/B8 — real administrative ward, sourced from the Ward table
+  // (never hardcoded, per CLAUDE.md mục 9). Nullable: coverage starts with
+  // Hồ Chí Minh's 168 wards only, so most non-HCMC users won't have one
+  // yet, and existing rows predate this field entirely.
+  wardId                  String?
   // Required at registration for the MODEL role (age gate — see
   // services/age-gate.ts), private, never displayed. Profile pages only
   // ever show a computed age RANGE, never this value or an exact age.
@@ -61,6 +70,7 @@ model User {
   deletedAt               DateTime?
 
   // Relations
+  ward                     Ward?                     @relation(fields: [wardId], references: [id])
   roles                    UserRole[]
   accounts                 Account[] // OAuth accounts
   sessions                 Session[]
@@ -87,7 +97,52 @@ model User {
   consentRecords           ConsentRecord[]
   dataRequests             DataRequest[]
 
+  @@index([wardId])
   @@map("users")
+}
+
+// ============================================================================
+// GEOGRAPHY (Prompt B4/B8) — real Vietnamese administrative units, never
+// hardcoded in application code (CLAUDE.md mục 9). Seeded from
+// prisma/data/hcmc-wards.ts, sourced verbatim from the post-2025-merger
+// ward list the project owner supplied — coverage starts with Hồ Chí Minh
+// only; other provinces are added the same way once their real ward data
+// is available. Two-level (Province -> Ward) even though only one Province
+// row exists today, so adding the next province is a seed change, not a
+// schema change.
+// ============================================================================
+
+model Province {
+  id        String   @id @default(cuid())
+  // Slug, not an asserted GSO numeric code — the 2025 merger reassigned/
+  // retired those and this project has no confirmed authoritative mapping
+  // for the new boundaries yet.
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wards Ward[]
+
+  @@map("provinces")
+}
+
+model Ward {
+  id         String   @id @default(cuid())
+  provinceId String
+  // Zero-padded sequence number from the source list (e.g. "001"), unique
+  // within its province — not an official GSO ward code (see Province.code).
+  code       String
+  name       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  province Province @relation(fields: [provinceId], references: [id])
+  users    User[]
+
+  @@unique([provinceId, code])
+  @@index([provinceId])
+  @@map("wards")
 }
 
 model Account {

@@ -4,23 +4,51 @@ import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { startTransition, useEffect, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
+
+interface WardOption {
+  id: string;
+  name: string;
+}
 
 export function AccountBasicsForm({
   initialUsername,
   initialBio,
+  initialWardId,
 }: {
   initialUsername: string | null;
   initialBio: string | null;
+  initialWardId: string | null;
 }) {
   const [username, setUsername] = useState(initialUsername ?? "");
   const [bio, setBio] = useState(initialBio ?? "");
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">(
-    "idle",
-  );
+  const [wardId, setWardId] = useState(initialWardId ?? "");
+  const [wards, setWards] = useState<WardOption[]>([]);
+
+  useEffect(() => {
+    // HCMC-only today (see prisma/data/hcmc-wards.ts) — no provinceCode
+    // filter needed until a second province is seeded.
+    fetch("/api/geography/wards")
+      .then((res) => res.json())
+      .then((body) => startTransition(() => setWards(body.data ?? [])));
+  }, []);
+
+  const saveWard = async (value: string) => {
+    startTransition(() => setWardId(value));
+    await fetch("/api/users/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wardId: value || null }),
+    });
+  };
+  const [usernameStatus, setUsernameStatus] = useState<
+    "idle" | "checking" | "available" | "taken"
+  >("idle");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const isUnchangedOrTooShort = username === (initialUsername ?? "") || username.length < 3;
+    const isUnchangedOrTooShort =
+      username === (initialUsername ?? "") || username.length < 3;
 
     startTransition(() => {
       setUsernameStatus(isUnchangedOrTooShort ? "idle" : "checking");
@@ -31,7 +59,9 @@ export function AccountBasicsForm({
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      const res = await fetch(`/api/users/username-available?value=${encodeURIComponent(username)}`);
+      const res = await fetch(
+        `/api/users/username-available?value=${encodeURIComponent(username)}`,
+      );
       const body = await res.json();
       startTransition(() => {
         setUsernameStatus(body.data?.available ? "available" : "taken");
@@ -63,7 +93,9 @@ export function AccountBasicsForm({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold text-text-primary">Username</label>
+        <label className="text-body-sm font-semibold text-text-primary">
+          Username
+        </label>
         <div className="flex items-center gap-2">
           <Input
             value={username}
@@ -86,8 +118,12 @@ export function AccountBasicsForm({
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-body-sm font-semibold text-text-primary">Bio</label>
-          <span className="text-body-sm text-text-tertiary">{bio.length}/500</span>
+          <label className="text-body-sm font-semibold text-text-primary">
+            Bio
+          </label>
+          <span className="text-body-sm text-text-tertiary">
+            {bio.length}/500
+          </span>
         </div>
         <textarea
           maxLength={500}
@@ -97,6 +133,16 @@ export function AccountBasicsForm({
           onBlur={(e) => saveBio(e.target.value)}
         />
       </div>
+
+      <NativeSelect
+        label="Phường/xã"
+        value={wardId}
+        onChange={saveWard}
+        options={[
+          { value: "", label: "Chưa chọn" },
+          ...wards.map((ward) => ({ value: ward.id, label: ward.name })),
+        ]}
+      />
     </div>
   );
 }

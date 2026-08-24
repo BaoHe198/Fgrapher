@@ -53,9 +53,36 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const { wardId, ...rest } = parsed.data;
+    let locationUpdate: { location?: string } = {};
+    if (wardId !== undefined) {
+      if (wardId === null) {
+        locationUpdate = { location: undefined };
+      } else {
+        const ward = await db.ward.findUnique({
+          where: { id: wardId },
+          select: { name: true, province: { select: { name: true } } },
+        });
+        if (!ward) {
+          return NextResponse.json(
+            {
+              data: null,
+              error: "validation_error",
+              message: "That ward does not exist",
+            },
+            { status: 400 },
+          );
+        }
+        // Keeps the existing free-text `location` in sync for every
+        // display site that still reads it directly, rather than needing
+        // a wardId join everywhere at once (see User.wardId's schema comment).
+        locationUpdate = { location: `${ward.name}, ${ward.province.name}` };
+      }
+    }
+
     const user = await db.user.update({
       where: { id: session.user.id },
-      data: parsed.data,
+      data: { ...rest, wardId, ...locationUpdate },
     });
 
     return NextResponse.json(
@@ -76,13 +103,21 @@ export async function PATCH(request: Request) {
     ) {
       const field = (err.meta?.target as string[] | undefined)?.[0] ?? "value";
       return NextResponse.json(
-        { data: null, error: "conflict", message: `This ${field} is already taken` },
+        {
+          data: null,
+          error: "conflict",
+          message: `This ${field} is already taken`,
+        },
         { status: 409 },
       );
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update account" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to update account",
+      },
       { status: 500 },
     );
   }
@@ -110,7 +145,11 @@ export async function DELETE() {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to delete account" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to delete account",
+      },
       { status: 500 },
     );
   }

@@ -7,7 +7,10 @@ export const updateRolesSchema = z.object({
 
 export type UpdateRolesInput = z.infer<typeof updateRolesSchema>;
 
-const notificationChannelsSchema = z.object({ email: z.boolean(), inApp: z.boolean() });
+const notificationChannelsSchema = z.object({
+  email: z.boolean(),
+  inApp: z.boolean(),
+});
 
 export const NOTIFICATION_KEYS = [
   "bookingRequest",
@@ -22,13 +25,17 @@ export const NOTIFICATION_KEYS = [
 ] as const;
 
 export const notificationPreferencesSchema = z.object(
-  Object.fromEntries(NOTIFICATION_KEYS.map((key) => [key, notificationChannelsSchema])) as Record<
+  Object.fromEntries(
+    NOTIFICATION_KEYS.map((key) => [key, notificationChannelsSchema]),
+  ) as Record<
     (typeof NOTIFICATION_KEYS)[number],
     typeof notificationChannelsSchema
   >,
 );
 
-export type NotificationPreferences = z.infer<typeof notificationPreferencesSchema>;
+export type NotificationPreferences = z.infer<
+  typeof notificationPreferencesSchema
+>;
 
 export const updateMeSchema = z.object({
   acceptingBookings: z.boolean().optional(),
@@ -45,6 +52,10 @@ export const updateMeSchema = z.object({
   name: z.string().min(2).optional(),
   phone: z.string().max(30).optional(),
   location: z.string().max(120).optional(),
+  // Prompt B4/B8 — real Ward row id (see services/geography.ts). Nullable
+  // so a user can explicitly clear it; existence is checked server-side in
+  // the route, not here, since Zod has no DB access.
+  wardId: z.string().min(1).nullable().optional(),
   email: z.string().email().optional(),
 });
 

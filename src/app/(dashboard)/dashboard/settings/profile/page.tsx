@@ -15,15 +15,24 @@ export default async function ProfileSettingsPage() {
     redirect("/login");
   }
 
-  const user = await db.user.findUniqueOrThrow({ where: { id: session.user.id } });
+  const user = await db.user.findUniqueOrThrow({
+    where: { id: session.user.id },
+  });
   const providerRoles = session.user.roles.filter((role) =>
     (PAID_ROLES as string[]).includes(role),
   );
 
   return (
     <div className="flex flex-col gap-6">
-      <AccountMedia initialAvatar={user.avatar} initialCoverImage={user.coverImage} />
-      <AccountBasicsForm initialUsername={user.username} initialBio={user.bio} />
+      <AccountMedia
+        initialAvatar={user.avatar}
+        initialCoverImage={user.coverImage}
+      />
+      <AccountBasicsForm
+        initialUsername={user.username}
+        initialBio={user.bio}
+        initialWardId={user.wardId}
+      />
 
       {providerRoles.length > 0 ? (
         <>
@@ -32,7 +41,9 @@ export default async function ProfileSettingsPage() {
         </>
       ) : null}
 
-      {session.user.roles.some((role) => (PROVIDER_ROLES as string[]).includes(role)) ? (
+      {session.user.roles.some((role) =>
+        (PROVIDER_ROLES as string[]).includes(role),
+      ) ? (
         <>
           <div className="h-px bg-border-subtle" />
           <AvailabilitySettings />
