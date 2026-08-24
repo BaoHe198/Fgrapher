@@ -52,7 +52,13 @@ interface UserSeed {
   lastName: string;
   roles: Role[];
   profiles?: ProfileSeed[];
-  dateOfBirth?: string; // "YYYY-MM-DD" — only meaningful for MODEL role seeds
+  // "YYYY-MM-DD" — required for every seed user, not just MODEL, matching
+  // CLAUDE.md rule 4 (every account 18+, every role). Also load-bearing
+  // for (dashboard)/layout.tsx's onboarding gate: a null dateOfBirth is
+  // read as "this is a Google OAuth account that never completed
+  // /onboarding/complete-profile" — every seed account needs a real value
+  // here or it would get redirected there on every dashboard visit.
+  dateOfBirth: string;
 }
 
 const PHOTOGRAPHER_SERVICES: ServiceSeed[] = [
@@ -140,6 +146,7 @@ const USERS: UserSeed[] = [
     username: "minhanhnguyen",
     firstName: "Minh Anh",
     lastName: "Nguyễn",
+    dateOfBirth: "1994-03-12",
     roles: ["PHOTOGRAPHER", "CUSTOMER"],
     profiles: [
       {
@@ -161,6 +168,7 @@ const USERS: UserSeed[] = [
     username: "quochungtran",
     firstName: "Quốc Hùng",
     lastName: "Trần",
+    dateOfBirth: "1990-07-22",
     roles: ["VIDEOGRAPHER", "CUSTOMER"],
     profiles: [
       {
@@ -182,6 +190,7 @@ const USERS: UserSeed[] = [
     username: "maihuongle",
     firstName: "Mai Hương",
     lastName: "Lê Thị",
+    dateOfBirth: "1996-11-05",
     roles: ["MAKEUP_ARTIST", "CUSTOMER"],
     profiles: [
       {
@@ -203,6 +212,7 @@ const USERS: UserSeed[] = [
     username: "ducthinhpham",
     firstName: "Đức Thịnh",
     lastName: "Phạm",
+    dateOfBirth: "1988-01-30",
     roles: ["STUDIO", "CUSTOMER"],
     profiles: [
       {
@@ -227,6 +237,7 @@ const USERS: UserSeed[] = [
     username: "vanlonghoang",
     firstName: "Văn Long",
     lastName: "Hoàng",
+    dateOfBirth: "1985-09-18",
     roles: ["CAMERA_SHOP", "CUSTOMER"],
     profiles: [
       {
@@ -275,6 +286,7 @@ const USERS: UserSeed[] = [
     username: "giabaonguyen",
     firstName: "Gia Bảo",
     lastName: "Nguyễn",
+    dateOfBirth: "1999-04-08",
     roles: ["CUSTOMER"],
   },
   {
@@ -284,6 +296,7 @@ const USERS: UserSeed[] = [
     username: "fgrapheradmin",
     firstName: "Thị Ngọc Anh",
     lastName: "Vũ",
+    dateOfBirth: "1992-06-15",
     roles: ["ADMIN", "CUSTOMER"],
   },
   {
@@ -293,6 +306,7 @@ const USERS: UserSeed[] = [
     username: "thanhtungbui",
     firstName: "Thanh Tùng",
     lastName: "Bùi",
+    dateOfBirth: "1993-12-01",
     roles: ["PHOTOGRAPHER", "VIDEOGRAPHER", "CUSTOMER"],
     profiles: [
       {
@@ -439,9 +453,7 @@ async function main() {
         name: `${seedUser.lastName} ${seedUser.firstName}`,
         passwordHash,
         emailVerified: new Date(),
-        dateOfBirth: seedUser.dateOfBirth
-          ? new Date(`${seedUser.dateOfBirth}T00:00:00.000Z`)
-          : undefined,
+        dateOfBirth: new Date(`${seedUser.dateOfBirth}T00:00:00.000Z`),
       },
     });
 

@@ -7,6 +7,7 @@ import {
 import { PastDueBanner } from "@/components/layout/past-due-banner";
 import { WebNav } from "@/components/layout/web-nav";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 
 export default async function DashboardLayout({
@@ -17,6 +18,19 @@ export default async function DashboardLayout({
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
+  }
+
+  // Google OAuth signups skip /api/auth/register entirely, so they never
+  // hit its age-gate (CLAUDE.md rule 4) or its 3 ConsentRecord writes
+  // (rule 6) — a credentials account always has dateOfBirth set at
+  // registration, so its absence here is specifically the OAuth gap, not
+  // a false positive. See src/app/onboarding/complete-profile/.
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { dateOfBirth: true },
+  });
+  if (!user?.dateOfBirth) {
+    redirect("/onboarding/complete-profile");
   }
 
   return (

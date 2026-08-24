@@ -93,6 +93,29 @@ export const registerSchema = z
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
+// Google OAuth signups skip registerSchema entirely (NextAuth's
+// PrismaAdapter creates the User row directly from the OAuth profile) —
+// this is the equivalent age-gate + consent step for that path, collected
+// on first dashboard visit instead of at signup. See
+// src/app/onboarding/complete-profile/ and (dashboard)/layout.tsx's gate.
+export const completeProfileSchema = z
+  .object({
+    dateOfBirth: z.string().min(1, "Date of birth is required"),
+    consentService: z.boolean(),
+    consentMarketing: z.boolean(),
+    consentAnalytics: z.boolean(),
+  })
+  .refine((data) => data.consentService === true, {
+    message: "You must agree to data processing to continue",
+    path: ["consentService"],
+  })
+  .refine((data) => isAtLeast18(new Date(data.dateOfBirth)), {
+    message: "You must be at least 18 years old to use Fgrapher",
+    path: ["dateOfBirth"],
+  });
+
+export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
+
 // Translated variant of registerSchema — see getLoginSchema's comment above
 // for why this is a factory rather than a bare schema. Namespace
 // "libServices.validation.auth".
