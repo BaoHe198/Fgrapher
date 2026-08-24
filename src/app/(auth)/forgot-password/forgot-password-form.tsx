@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -10,15 +11,16 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email("Enter a valid email address"),
-});
-
-type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+type ForgotPasswordInput = { email: string };
 
 export function ForgotPasswordForm() {
+  const t = useTranslations("accountFlows.forgotPassword");
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSent, setIsSent] = useState(false);
+
+  const forgotPasswordSchema = z.object({
+    email: z.string().email(t("emailInvalid")),
+  });
 
   const {
     register,
@@ -40,7 +42,7 @@ export function ForgotPasswordForm() {
 
     if (!res.ok) {
       const body = await res.json();
-      setServerError(body.message ?? "Something went wrong. Please try again.");
+      setServerError(body.message ?? t("genericError"));
       return;
     }
 
@@ -51,12 +53,17 @@ export function ForgotPasswordForm() {
     return (
       <div className="flex flex-col items-center gap-3 text-center">
         <CheckCircle className="size-10 text-brand-primary" />
-        <h1 className="text-display-md text-text-primary">Check your inbox</h1>
+        <h1 className="text-display-md text-text-primary">
+          {t("checkInboxTitle")}
+        </h1>
         <p className="text-body-md text-text-secondary">
-          If an account exists for that email, we&apos;ve sent a link to reset your password.
+          {t("checkInboxBody")}
         </p>
-        <Link href="/login" className="text-body-sm font-semibold text-text-link hover:underline">
-          Back to sign in
+        <Link
+          href="/login"
+          className="text-body-sm font-semibold text-text-link hover:underline"
+        >
+          {t("backToSignIn")}
         </Link>
       </div>
     );
@@ -65,10 +72,8 @@ export function ForgotPasswordForm() {
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="text-display-md text-text-primary">Reset your password</h1>
-        <p className="text-body-md text-text-secondary">
-          Enter your email and we&apos;ll send you a reset link.
-        </p>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+        <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
       </div>
 
       {serverError ? (
@@ -79,7 +84,7 @@ export function ForgotPasswordForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
         <Input
-          label="Email"
+          label={t("emailLabel")}
           type="email"
           placeholder="you@studio.com"
           autoComplete="email"
@@ -87,14 +92,27 @@ export function ForgotPasswordForm() {
           {...register("email")}
         />
 
-        <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : "Send reset link"}
+        <Button
+          type="submit"
+          variant="accent"
+          size="lg"
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            t("submit")
+          )}
         </Button>
       </form>
 
       <p className="text-body-md text-text-secondary">
-        <Link href="/login" className="font-semibold text-text-link hover:underline">
-          Back to sign in
+        <Link
+          href="/login"
+          className="font-semibold text-text-link hover:underline"
+        >
+          {t("backToSignIn")}
         </Link>
       </p>
     </>

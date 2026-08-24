@@ -13,6 +13,7 @@ import {
   Star,
   UserPlus,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
@@ -50,25 +51,37 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   REVIEW_RESPONSE: Star,
 };
 
-function relativeTime(date: string | Date) {
+function relativeTime(
+  date: string | Date,
+  labels: {
+    justNow: string;
+    minutesAgo: (n: number) => string;
+    hoursAgo: (n: number) => string;
+    daysAgo: (n: number) => string;
+  },
+) {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return labels.justNow;
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return labels.minutesAgo(minutes);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return labels.hoursAgo(hours);
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return labels.daysAgo(days);
 }
 
 function notificationHref(notification: Notification) {
-  const data = notification.data as { bookingId?: string; orderId?: string } | null;
+  const data = notification.data as {
+    bookingId?: string;
+    orderId?: string;
+  } | null;
   if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
   if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
   return "/dashboard/notifications";
 }
 
 export function NotificationBell() {
+  const t = useTranslations("sharedComponents.notificationBell");
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -101,7 +114,9 @@ export function NotificationBell() {
   const onClickNotification = async (notification: Notification) => {
     setIsOpen(false);
     if (!notification.readAt) {
-      await fetch(`/api/notifications/${notification.id}/read`, { method: "PATCH" });
+      await fetch(`/api/notifications/${notification.id}/read`, {
+        method: "PATCH",
+      });
       startTransition(() => {
         setUnreadCount((c) => Math.max(0, c - 1));
       });
@@ -113,7 +128,9 @@ export function NotificationBell() {
     await fetch("/api/notifications/read-all", { method: "POST" });
     startTransition(() => {
       setUnreadCount(0);
-      setNotifications((prev) => prev.map((n) => ({ ...n, readAt: n.readAt ?? new Date() })));
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, readAt: n.readAt ?? new Date() })),
+      );
     });
   };
 
@@ -128,20 +145,22 @@ export function NotificationBell() {
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             ) : null}
-            <span className="sr-only">Notifications</span>
+            <span className="sr-only">{t("title")}</span>
           </Button>
         }
       />
       <DropdownMenuContent align="end" className="w-[340px] p-0">
         <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
-          <span className="text-body-md font-semibold text-text-primary">Notifications</span>
+          <span className="text-body-md font-semibold text-text-primary">
+            {t("title")}
+          </span>
           {unreadCount > 0 ? (
             <button
               type="button"
               onClick={onMarkAllRead}
               className="text-body-sm font-semibold text-brand-primary"
             >
-              Mark all as read
+              {t("markAllRead")}
             </button>
           ) : null}
         </div>
@@ -149,7 +168,7 @@ export function NotificationBell() {
         <div className="max-h-[360px] overflow-y-auto">
           {notifications.length === 0 ? (
             <p className="px-4 py-8 text-center text-body-sm text-text-secondary">
-              No notifications yet
+              {t("emptyState")}
             </p>
           ) : (
             notifications.map((notification) => {
@@ -175,7 +194,12 @@ export function NotificationBell() {
                       {notification.message}
                     </span>
                     <span className="text-body-sm text-text-tertiary">
-                      {relativeTime(notification.createdAt)}
+                      {relativeTime(notification.createdAt, {
+                        justNow: t("justNow"),
+                        minutesAgo: (n) => t("minutesAgo", { count: n }),
+                        hoursAgo: (n) => t("hoursAgo", { count: n }),
+                        daysAgo: (n) => t("daysAgo", { count: n }),
+                      })}
                     </span>
                   </div>
                 </button>
@@ -189,7 +213,7 @@ export function NotificationBell() {
           onClick={() => setIsOpen(false)}
           className="block border-t border-border-subtle px-4 py-3 text-center text-body-sm font-semibold text-brand-primary"
         >
-          View all
+          {t("viewAll")}
         </Link>
       </DropdownMenuContent>
     </DropdownMenu>

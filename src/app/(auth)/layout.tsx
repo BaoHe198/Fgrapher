@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { LogoFull } from "@/components/brand/logo-full";
@@ -7,7 +8,8 @@ interface AuthLayoutProps {
   children: ReactNode;
 }
 
-export default function AuthLayout({ children }: AuthLayoutProps) {
+export default async function AuthLayout({ children }: AuthLayoutProps) {
+  const t = await getTranslations("accountFlows.authLayout");
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="flex h-[72px] items-center border-b border-border-subtle px-8">
@@ -16,7 +18,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       <div className="grid min-h-[calc(100vh-72px)] lg:grid-cols-2">
         <div className="flex items-center justify-center px-5 py-10 sm:px-8 sm:py-14">
-          <div className="flex w-full max-w-[400px] flex-col gap-[22px]">{children}</div>
+          <div className="flex w-full max-w-[400px] flex-col gap-[22px]">
+            {children}
+          </div>
         </div>
 
         <div className="relative hidden items-end bg-green-900 p-10 lg:flex">
@@ -28,10 +32,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </div>
           <blockquote className="relative flex max-w-[440px] flex-col gap-3">
             <p className="text-heading-lg text-gold-50">
-              &ldquo;Fgrapher put my portfolio in front of the right clients. I book twice as
-              many sessions now.&rdquo;
+              &ldquo;{t("quote")}&rdquo;
             </p>
-            <span className="text-body-sm text-gold-300">Verified provider on Fgrapher</span>
+            <span className="text-body-sm text-gold-300">{t("quoteBy")}</span>
           </blockquote>
         </div>
       </div>

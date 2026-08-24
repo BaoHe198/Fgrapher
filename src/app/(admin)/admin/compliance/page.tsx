@@ -2,6 +2,7 @@
 
 import type { DataRequestStatus, DataRequestType } from "@prisma/client";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +61,7 @@ function deadlineFor(requestedAt: string) {
 }
 
 function DataRequestsPanel() {
+  const t = useTranslations("accountFlows.admin.compliance.dataRequests");
   const [type, setType] = useState("");
   const [status, setStatus] = useState("");
   const [requests, setRequests] = useState<DataRequestRow[]>([]);
@@ -90,7 +92,7 @@ function DataRequestsPanel() {
   const process = async (id: string, action: "complete" | "reject") => {
     if (action === "reject" && !notes[id]?.trim()) {
       toast.add({
-        title: "A note is required to reject a request",
+        title: t("noteRequiredToast"),
         type: "error",
       });
       return;
@@ -105,10 +107,10 @@ function DataRequestsPanel() {
     });
     setBusyId(null);
     if (!res.ok) {
-      toast.add({ title: "Failed to update request", type: "error" });
+      toast.add({ title: t("updateFailedToast"), type: "error" });
       return;
     }
-    toast.add({ title: "Request updated", type: "success" });
+    toast.add({ title: t("updatedToast"), type: "success" });
     load();
   };
 
@@ -119,9 +121,9 @@ function DataRequestsPanel() {
           value={type}
           onChange={setType}
           options={[
-            { value: "", label: "All types" },
-            { value: "EXPORT", label: "Export" },
-            { value: "DELETION", label: "Deletion" },
+            { value: "", label: t("typeFilter.all") },
+            { value: "EXPORT", label: t("typeFilter.export") },
+            { value: "DELETION", label: t("typeFilter.deletion") },
           ]}
           className="w-44"
         />
@@ -129,11 +131,11 @@ function DataRequestsPanel() {
           value={status}
           onChange={setStatus}
           options={[
-            { value: "", label: "All statuses" },
-            { value: "PENDING", label: "Pending" },
-            { value: "PROCESSING", label: "Processing" },
-            { value: "COMPLETED", label: "Completed" },
-            { value: "REJECTED", label: "Rejected" },
+            { value: "", label: t("statusFilter.all") },
+            { value: "PENDING", label: t("statusFilter.pending") },
+            { value: "PROCESSING", label: t("statusFilter.processing") },
+            { value: "COMPLETED", label: t("statusFilter.completed") },
+            { value: "REJECTED", label: t("statusFilter.rejected") },
           ]}
           className="w-44"
         />
@@ -145,7 +147,7 @@ function DataRequestsPanel() {
         </div>
       ) : requests.length === 0 ? (
         <Card className="py-16 text-center text-body-sm text-text-secondary">
-          No data requests
+          {t("empty")}
         </Card>
       ) : (
         <div className="flex flex-col gap-3">
@@ -173,7 +175,7 @@ function DataRequestsPanel() {
                       {r.user?.firstName ??
                         r.user?.name ??
                         r.user?.email ??
-                        "Unknown user"}
+                        t("unknownUser")}
                     </span>
                     <span className="text-body-sm text-text-tertiary">
                       {r.user?.email}
@@ -193,11 +195,12 @@ function DataRequestsPanel() {
                 </div>
                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-body-sm text-text-secondary">
                   <span>
-                    Requested{" "}
-                    {new Date(r.requestedAt).toLocaleDateString(
-                      "en-US",
-                      DATE_OPTS,
-                    )}
+                    {t("requested", {
+                      date: new Date(r.requestedAt).toLocaleDateString(
+                        "en-US",
+                        DATE_OPTS,
+                      ),
+                    })}
                   </span>
                   {r.status === "PENDING" || r.status === "PROCESSING" ? (
                     <span
@@ -205,16 +208,19 @@ function DataRequestsPanel() {
                         isOverdue ? "font-semibold text-danger" : undefined
                       }
                     >
-                      Deadline {deadline.toLocaleDateString("en-US", DATE_OPTS)}
-                      {isOverdue ? " — overdue" : ""}
+                      {t("deadline", {
+                        date: deadline.toLocaleDateString("en-US", DATE_OPTS),
+                      })}
+                      {isOverdue ? t("overdueSuffix") : ""}
                     </span>
                   ) : r.completedAt ? (
                     <span>
-                      Completed{" "}
-                      {new Date(r.completedAt).toLocaleDateString(
-                        "en-US",
-                        DATE_OPTS,
-                      )}
+                      {t("completed", {
+                        date: new Date(r.completedAt).toLocaleDateString(
+                          "en-US",
+                          DATE_OPTS,
+                        ),
+                      })}
                     </span>
                   ) : null}
                 </div>
@@ -225,7 +231,7 @@ function DataRequestsPanel() {
                 {actionable ? (
                   <>
                     <Textarea
-                      placeholder="Rejection note (required to reject)"
+                      placeholder={t("rejectNotePlaceholder")}
                       rows={2}
                       value={notes[r.id] ?? ""}
                       onChange={(e) =>
@@ -245,7 +251,7 @@ function DataRequestsPanel() {
                         {busyId === r.id ? (
                           <Loader2 className="size-4 animate-spin" />
                         ) : null}
-                        Process deletion
+                        {t("processDeletion")}
                       </Button>
                       <Button
                         size="sm"
@@ -253,7 +259,7 @@ function DataRequestsPanel() {
                         disabled={busyId === r.id}
                         onClick={() => process(r.id, "reject")}
                       >
-                        Reject
+                        {t("rejectBtn")}
                       </Button>
                     </div>
                   </>
@@ -268,6 +274,7 @@ function DataRequestsPanel() {
 }
 
 function AuditLogPanel() {
+  const t = useTranslations("accountFlows.admin.compliance.auditLog");
   const [actorId, setActorId] = useState("");
   const [action, setAction] = useState("");
   const [from, setFrom] = useState("");
@@ -301,13 +308,13 @@ function AuditLogPanel() {
         <Input
           value={actorId}
           onChange={(e) => setActorId(e.target.value)}
-          placeholder="Actor user ID"
+          placeholder={t("actorIdPlaceholder")}
           className="w-56"
         />
         <Input
           value={action}
           onChange={(e) => setAction(e.target.value)}
-          placeholder="Action contains…"
+          placeholder={t("actionPlaceholder")}
           className="w-56"
         />
         <Input
@@ -333,10 +340,10 @@ function AuditLogPanel() {
           <table className="w-full min-w-[760px] border-collapse text-body-sm">
             <thead>
               <tr className="border-b border-border-subtle text-left text-text-tertiary">
-                <th className="px-5 py-3">When</th>
-                <th className="px-3 py-3">Actor</th>
-                <th className="px-3 py-3">Action</th>
-                <th className="px-3 py-3">Target</th>
+                <th className="px-5 py-3">{t("colWhen")}</th>
+                <th className="px-3 py-3">{t("colActor")}</th>
+                <th className="px-3 py-3">{t("colAction")}</th>
+                <th className="px-3 py-3">{t("colTarget")}</th>
               </tr>
             </thead>
             <tbody>
@@ -356,7 +363,7 @@ function AuditLogPanel() {
                       log.actor?.name ??
                       log.actor?.email ??
                       log.actorId ??
-                      "System"}
+                      t("systemActor")}
                   </td>
                   <td className="px-3 py-3 font-semibold text-text-primary">
                     {log.action}
@@ -371,7 +378,7 @@ function AuditLogPanel() {
           </table>
           {logs.length === 0 ? (
             <p className="px-5 py-8 text-center text-body-sm text-text-secondary">
-              No audit log entries
+              {t("empty")}
             </p>
           ) : null}
         </Card>
@@ -380,13 +387,13 @@ function AuditLogPanel() {
   );
 }
 
-const PURPOSE_LABELS: Record<ConsentStat["purpose"], string> = {
-  SERVICE: "Service (mandatory)",
-  MARKETING: "Marketing",
-  ANALYTICS: "Analytics",
-};
-
 function ConsentStatsPanel() {
+  const t = useTranslations("accountFlows.admin.compliance.consent");
+  const PURPOSE_LABELS: Record<ConsentStat["purpose"], string> = {
+    SERVICE: t("purposeService"),
+    MARKETING: t("purposeMarketing"),
+    ANALYTICS: t("purposeAnalytics"),
+  };
   const [stats, setStats] = useState<ConsentStat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -420,7 +427,11 @@ function ConsentStatsPanel() {
             {stat.granted}
           </span>
           <span className="text-body-sm text-text-secondary">
-            granted, {stat.revoked} not granted ({stat.total} users total)
+            {t("grantedSuffix")}{" "}
+            {t("notGrantedSummary", {
+              revoked: stat.revoked,
+              total: stat.total,
+            })}
           </span>
         </Card>
       ))}
@@ -429,15 +440,16 @@ function ConsentStatsPanel() {
 }
 
 export default function AdminCompliancePage() {
+  const t = useTranslations("accountFlows.admin.compliance");
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">Compliance</h1>
+      <h1 className="text-display-md text-text-primary">{t("title")}</h1>
 
       <Tabs defaultValue="requests">
         <TabsList>
-          <TabsTab value="requests">Data requests</TabsTab>
-          <TabsTab value="audit">Audit log</TabsTab>
-          <TabsTab value="consent">Consent stats</TabsTab>
+          <TabsTab value="requests">{t("tabs.requests")}</TabsTab>
+          <TabsTab value="audit">{t("tabs.audit")}</TabsTab>
+          <TabsTab value="consent">{t("tabs.consent")}</TabsTab>
         </TabsList>
         <TabsPanel value="requests">
           <DataRequestsPanel />

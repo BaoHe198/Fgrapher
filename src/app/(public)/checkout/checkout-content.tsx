@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { CartItemRow } from "@/components/cart/cart-item-row";
@@ -13,6 +14,7 @@ import { useCart } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
 
 export function CheckoutContent() {
+  const t = useTranslations("publicPages.checkout");
   const { items, isLoading, updateQuantity, removeItem } = useCart();
   const groups = groupByShop(items);
   const totals = cartTotals(items);
@@ -38,8 +40,8 @@ export function CheckoutContent() {
     if (!res.ok || !body.data?.url) {
       setError(
         body.error === "not_configured"
-          ? "Payments aren't set up in this environment yet."
-          : (body.message ?? "Something went wrong. Please try again."),
+          ? t("paymentsNotConfigured")
+          : (body.message ?? t("genericError")),
       );
       return;
     }
@@ -59,7 +61,7 @@ export function CheckoutContent() {
     return (
       <div className="mx-auto max-w-xl px-6 py-24 text-center">
         <p className="text-body-lg font-semibold text-text-primary">
-          Your cart is empty
+          {t("emptyCart")}
         </p>
       </div>
     );
@@ -67,39 +69,38 @@ export function CheckoutContent() {
 
   return (
     <div className="mx-auto max-w-[900px] px-4 py-10 sm:px-8">
-      <h1 className="mb-6 text-display-md text-text-primary">Checkout</h1>
+      <h1 className="mb-6 text-display-md text-text-primary">{t("heading")}</h1>
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-6">
           <Card className="flex flex-col gap-3">
             <h2 className="text-heading-md text-text-primary">
-              Delivery method
+              {t("deliveryMethod.heading")}
             </h2>
             <Radio
-              label="Ship to me"
+              label={t("deliveryMethod.shipToMe")}
               checked={deliveryMethod === "SHIP"}
               onChange={() => setDeliveryMethod("SHIP")}
             />
             <Radio
-              label="Pick up at shop"
+              label={t("deliveryMethod.pickupAtShop")}
               checked={deliveryMethod === "PICKUP"}
               onChange={() => setDeliveryMethod("PICKUP")}
             />
             {deliveryMethod === "SHIP" ? (
               <p className="text-body-sm text-text-tertiary">
-                You&apos;ll enter your shipping address on the next step.
+                {t("deliveryMethod.shipNote")}
               </p>
             ) : (
               <p className="text-body-sm text-text-tertiary">
-                Contact the shop after your order is confirmed to arrange
-                pickup.
+                {t("deliveryMethod.pickupNote")}
               </p>
             )}
           </Card>
 
           <div className="flex flex-col gap-4">
             <h2 className="text-heading-md text-text-primary">
-              Review your order
+              {t("reviewOrder")}
             </h2>
             {groups.map((group) => (
               <Card key={group.shopId} className="flex flex-col gap-4">
@@ -121,33 +122,31 @@ export function CheckoutContent() {
           <Checkbox
             checked={agreed}
             onCheckedChange={(checked) => setAgreed(checked === true)}
-            label="I agree to the terms of sale/rental"
+            label={t("agreeTerms")}
           />
         </div>
 
         <Card className="sticky top-[104px] flex flex-col gap-3">
           <span className="text-heading-sm text-text-primary">
-            Order summary
+            {t("orderSummary")}
           </span>
           <div className="flex justify-between text-body-md">
-            <span className="text-text-secondary">Subtotal</span>
+            <span className="text-text-secondary">{t("subtotal")}</span>
             <span className="font-semibold text-text-primary">
               {formatCurrency(totals.subtotal)}
             </span>
           </div>
           {totals.deposits > 0 ? (
             <div className="flex justify-between text-body-sm">
-              <span className="text-text-secondary">Deposits</span>
+              <span className="text-text-secondary">{t("deposits")}</span>
               <span className="text-text-primary">
                 {formatCurrency(totals.deposits)}
               </span>
             </div>
           ) : null}
-          <p className="text-body-sm text-text-tertiary">
-            Shipping calculated at checkout
-          </p>
+          <p className="text-body-sm text-text-tertiary">{t("shippingNote")}</p>
           <div className="flex justify-between border-t border-border-subtle pt-3 text-heading-sm font-bold text-text-primary">
-            <span>Total</span>
+            <span>{t("total")}</span>
             <span>{formatCurrency(totals.total)}</span>
           </div>
 
@@ -161,7 +160,7 @@ export function CheckoutContent() {
             onClick={onCheckout}
           >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            Continue to payment
+            {t("continueToPayment")}
           </Button>
         </Card>
       </div>

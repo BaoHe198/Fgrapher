@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
@@ -7,9 +8,10 @@ import { addToCart, CartError, getCart } from "@/services/marketplace";
 
 // Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function GET() {
+  const t = await getTranslations("apiMessages.cart");
   if (!features.marketplaceEnabled) {
     return NextResponse.json(
-      { data: null, error: "not_found", message: "Not found" },
+      { data: null, error: "not_found", message: t("notFound") },
       { status: 404 },
     );
   }
@@ -31,16 +33,17 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load cart" },
+      { data: null, error: "server_error", message: t("loadFailed") },
       { status: 500 },
     );
   }
 }
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.cart");
   if (!features.marketplaceEnabled) {
     return NextResponse.json(
-      { data: null, error: "not_found", message: "Not found" },
+      { data: null, error: "not_found", message: t("notFound") },
       { status: 404 },
     );
   }
@@ -54,7 +57,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -74,7 +77,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { data: item, error: null, message: "Added to cart" },
+      { data: item, error: null, message: t("added") },
       { status: 201 },
     );
   } catch (err) {
@@ -92,7 +95,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to add to cart" },
+      { data: null, error: "server_error", message: t("addFailed") },
       { status: 500 },
     );
   }

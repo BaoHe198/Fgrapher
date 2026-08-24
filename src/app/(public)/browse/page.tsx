@@ -1,5 +1,6 @@
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 import { SearchX } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { ArtistCard } from "@/components/cards/artist-card";
@@ -19,19 +20,21 @@ interface BrowsePageProps {
   searchParams: Promise<Record<string, string | undefined>>;
 }
 
-const SORT_LABELS: Record<string, string> = {
-  rating: "Top rated",
-  price_asc: "Price: low to high",
-  price_desc: "Price: high to low",
-  newest: "Newest",
-  reviews: "Most reviewed",
-};
-
-export const metadata = {
-  title: "Browse artists — Fgrapher",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("publicPages.browse");
+  return { title: t("pageTitle") };
+}
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
+  const t = await getTranslations("publicPages.browse");
+  const SORT_LABELS: Record<string, string> = {
+    rating: t("sortLabels.rating"),
+    price_asc: t("sortLabels.priceAsc"),
+    price_desc: t("sortLabels.priceDesc"),
+    newest: t("sortLabels.newest"),
+    reviews: t("sortLabels.reviews"),
+  };
+
   const params = await searchParams;
 
   const roles = params.roles?.split(",").filter(Boolean) as Role[] | undefined;
@@ -73,8 +76,11 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   const heading =
     roles && roles.length === 1 && params.city
-      ? `${ROLE_LABELS[roles[0]]}s in ${params.city}`
-      : "Browse artists";
+      ? t("headingWithRoleCity", {
+          role: ROLE_LABELS[roles[0]],
+          city: params.city,
+        })
+      : t("headingDefault");
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pt-8 pb-[72px] sm:px-8">
@@ -92,7 +98,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               <div>
                 <h1 className="text-display-md text-text-primary">{heading}</h1>
                 <p className="text-body-md text-text-secondary">
-                  {result.total} results · {SORT_LABELS[sort]}
+                  {t("resultsCount", {
+                    count: result.total,
+                    sort: SORT_LABELS[sort],
+                  })}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -112,19 +121,19 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 selected={params.availableNow === "1"}
                 render={<Link href="?availableNow=1" />}
               >
-                Available now
+                {t("filterAvailableNow")}
               </Tag>
               <Tag
                 selected={params.instantBook === "1"}
                 render={<Link href="?instantBook=1" />}
               >
-                Instant book
+                {t("filterInstantBook")}
               </Tag>
               <Tag
                 selected={sort === "rating"}
                 render={<Link href="?sort=rating" />}
               >
-                Top rated
+                {t("filterTopRated")}
               </Tag>
             </div>
 
@@ -133,10 +142,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 <div className="flex flex-col items-center gap-3 py-20 text-center">
                   <SearchX className="size-12 text-text-tertiary" />
                   <p className="text-body-lg font-semibold text-text-primary">
-                    No artists found
+                    {t("noResults.heading")}
                   </p>
                   <p className="text-body-md text-text-secondary">
-                    Try adjusting your filters or searching a different city.
+                    {t("noResults.body")}
                   </p>
                   <Button
                     variant="secondary"
@@ -144,7 +153,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                     nativeButton={false}
                     render={<Link href="/browse" />}
                   >
-                    Clear all filters
+                    {t("clearFilters")}
                   </Button>
                 </div>
               ) : (
@@ -158,18 +167,20 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                           name:
                             profile.displayName ??
                             profile.user.name ??
-                            "Unnamed",
+                            t("unnamed"),
                           username: profile.user.username ?? "",
                           roles: profile.roles.map((role) => ROLE_LABELS[role]),
                           city: profile.user.location ?? "",
                           rating:
                             profile.avgRating > 0
                               ? profile.avgRating.toFixed(1)
-                              : "New",
+                              : t("newBadge"),
                           reviews: profile.reviewCount,
                           price: profile.priceMin
-                            ? `From ${formatCurrency(profile.priceMin)}`
-                            : "Contact for pricing",
+                            ? t("priceFrom", {
+                                price: formatCurrency(profile.priceMin),
+                              })
+                            : t("contactForPricing"),
                           coverImage: profile.media[0]?.url,
                         }}
                       />
@@ -177,7 +188,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   </div>
 
                   <p className="mt-6 text-center text-body-sm text-text-tertiary">
-                    Showing {result.data.length} of {result.total} results
+                    {t("showingResults", {
+                      shown: result.data.length,
+                      total: result.total,
+                    })}
                   </p>
 
                   {result.totalPages > 1 ? (
@@ -193,7 +207,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                             />
                           }
                         >
-                          Previous
+                          {t("previous")}
                         </Button>
                       ) : null}
                       {page < result.totalPages ? (
@@ -207,7 +221,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                             />
                           }
                         >
-                          Load more
+                          {t("loadMore")}
                         </Button>
                       ) : null}
                     </div>

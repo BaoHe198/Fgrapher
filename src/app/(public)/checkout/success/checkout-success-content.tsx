@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -16,6 +17,7 @@ interface OrderSummary {
 }
 
 export function CheckoutSuccessContent() {
+  const t = useTranslations("publicPages.checkoutSuccess");
   const [orders, setOrders] = useState<OrderSummary[] | null>(null);
   const [attempts, setAttempts] = useState(0);
 
@@ -46,27 +48,26 @@ export function CheckoutSuccessContent() {
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="size-10 animate-spin text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            Setting up your order...
+            {t("settingUp")}
           </p>
-          <p className="text-body-md text-text-secondary">
-            This only takes a moment.
-          </p>
+          <p className="text-body-md text-text-secondary">{t("momentNote")}</p>
         </div>
       ) : (
         <Card className="flex flex-col items-center gap-4 py-12">
           <CheckCircle className="size-16 text-success" />
           <h1 className="text-display-sm text-text-primary">
-            Order confirmed!
+            {t("orderConfirmed")}
           </h1>
           {orders.map((order) => (
             <div key={order.id} className="text-body-md text-text-secondary">
-              Order #{order.id.slice(-8)} —{" "}
-              {order.items.map((i) => i.product.name).join(", ")}
+              {t("orderLine", {
+                orderId: order.id.slice(-8),
+                items: order.items.map((i) => i.product.name).join(", "),
+              })}
             </div>
           ))}
           <p className="text-body-sm text-text-tertiary">
-            The shop will confirm your order shortly. You&apos;ll get an email
-            with updates.
+            {t("shopWillConfirm")}
           </p>
           <div className="flex gap-3">
             <Button
@@ -74,14 +75,14 @@ export function CheckoutSuccessContent() {
               nativeButton={false}
               render={<Link href={`/dashboard/orders/${orders[0].id}`} />}
             >
-              View order
+              {t("viewOrder")}
             </Button>
             <Button
               variant="ghost"
               nativeButton={false}
               render={<Link href="/shop" />}
             >
-              Continue shopping
+              {t("continueShopping")}
             </Button>
           </div>
         </Card>

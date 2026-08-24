@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
@@ -18,14 +19,14 @@ export default async function BillingSettingsPage() {
   // buttons that would just 404 against the disabled /api/stripe/*
   // routes).
   if (!features.billingEnabled) {
+    const t = await getTranslations("dashboardSettings.billing");
     return (
       <div className="rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card p-8 text-center">
         <h1 className="text-heading-lg text-text-primary">
-          Hiện tại Fgrapher đang miễn phí cho toàn bộ nhà cung cấp dịch vụ
+          {t("disabledTitle")}
         </h1>
         <p className="mt-2 text-body-md text-text-secondary">
-          Chúng tôi sẽ thông báo trước ít nhất 30 ngày trước khi bắt đầu thu
-          phí. Không cần làm gì thêm ở trang này.
+          {t("disabledBody")}
         </p>
       </div>
     );

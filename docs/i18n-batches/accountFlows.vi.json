@@ -1,0 +1,325 @@
+{
+  "accountFlows": {
+    "authLayout": {
+      "quote": "Fgrapher đưa portfolio của tôi đến đúng khách hàng. Giờ tôi nhận được gấp đôi số lượt đặt lịch.",
+      "quoteBy": "Nhà cung cấp đã xác minh trên Fgrapher"
+    },
+    "login": {
+      "metaTitle": "Đăng nhập hoặc tạo tài khoản — Fgrapher",
+      "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập để quản lý lịch đặt và portfolio của bạn.",
+      "emailLabel": "Email",
+      "passwordLabel": "Mật khẩu",
+      "rememberMe": "Duy trì đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "submit": "Đăng nhập",
+      "submitting": "Đang đăng nhập...",
+      "terms": "Khi đăng nhập, bạn đồng ý với Điều khoản và Chính sách bảo mật.",
+      "noAccount": "Chưa có tài khoản?",
+      "signUp": "Đăng ký"
+    },
+    "register": {
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "title": "Tạo tài khoản",
+      "subtitle": "Tham gia Fgrapher để bắt đầu đặt lịch hoặc nhận đặt lịch.",
+      "iAmA": "TÔI LÀ",
+      "customerLabel": "Khách hàng",
+      "customerDesc": "Đặt lịch nghệ sĩ và mua thiết bị",
+      "providerLabel": "Nhà sáng tạo chuyên nghiệp",
+      "providerDesc": "Nhận đặt lịch và bán hàng",
+      "whatDoYouOffer": "BẠN CUNG CẤP DỊCH VỤ GÌ?",
+      "changeLaterNote": "Bạn có thể thay đổi sau. Quyền truy cập của khách hàng luôn miễn phí.",
+      "contentGuidelinesConfirm": "Tôi xác nhận đã đủ 18 tuổi trở lên và đồng ý với ",
+      "contentGuidelinesLink": "quy tắc nội dung",
+      "fullNameLabel": "Họ và tên",
+      "fullNamePlaceholder": "Nguyễn Văn A",
+      "emailLabel": "Email",
+      "dobLabel": "Ngày sinh",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "Tối thiểu 8 ký tự",
+      "submitting": "Đang tạo tài khoản...",
+      "submit": "Tạo tài khoản",
+      "terms": "Khi đăng ký, bạn đồng ý với Điều khoản và Chính sách bảo mật.",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "signIn": "Đăng nhập"
+    },
+    "forgotPassword": {
+      "metaTitle": "Đặt lại mật khẩu — Fgrapher",
+      "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "checkInboxTitle": "Kiểm tra hộp thư của bạn",
+      "checkInboxBody": "Nếu email này có tài khoản, chúng tôi đã gửi liên kết đặt lại mật khẩu tới đó.",
+      "backToSignIn": "Quay lại đăng nhập",
+      "title": "Đặt lại mật khẩu",
+      "subtitle": "Nhập email của bạn và chúng tôi sẽ gửi liên kết đặt lại mật khẩu.",
+      "emailLabel": "Email",
+      "submit": "Gửi liên kết đặt lại"
+    },
+    "resetPassword": {
+      "metaTitle": "Đặt mật khẩu mới — Fgrapher",
+      "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự",
+      "confirmRequired": "Vui lòng xác nhận mật khẩu",
+      "passwordsMismatch": "Mật khẩu xác nhận không khớp",
+      "invalidLink": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "updatedToastTitle": "Đã cập nhật mật khẩu",
+      "updatedToastDesc": "Bạn có thể đăng nhập bằng mật khẩu mới ngay bây giờ.",
+      "title": "Đặt mật khẩu mới",
+      "newPasswordLabel": "Mật khẩu mới",
+      "confirmPasswordLabel": "Xác nhận mật khẩu",
+      "passwordPlaceholder": "Tối thiểu 8 ký tự",
+      "submit": "Cập nhật mật khẩu"
+    },
+    "onboarding": {
+      "billing": {
+        "headingSingle": "Kích hoạt hồ sơ {role} của bạn",
+        "headingPlural": "Kích hoạt {count} hồ sơ của bạn",
+        "subtitle": "Bắt đầu dùng thử miễn phí 14 ngày — hủy bất cứ lúc nào trước khi kết thúc và bạn sẽ không bị tính phí.",
+        "billedYearlyBadge": "Thanh toán theo năm — tiết kiệm 20%",
+        "checkoutCancelled": "Đã hủy thanh toán — không có khoản phí nào được tính.",
+        "notConfiguredError": "Thanh toán chưa được thiết lập trong môi trường này — vai trò của bạn sẽ tạm thời chưa kích hoạt. Trong lúc chờ, bạn vẫn có thể khám phá các phần khác của bảng điều khiển.",
+        "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+        "total": "Tổng cộng",
+        "freeTrialNote": "Miễn phí trong 14 ngày, sau đó {amount}",
+        "startTrial": "Bắt đầu dùng thử miễn phí",
+        "skipForNow": "Bỏ qua bây giờ",
+        "monthAbbrev": "tháng",
+        "yearAbbrev": "năm"
+      },
+      "roles": {
+        "title": "Bạn sẽ sử dụng Fgrapher như thế nào?",
+        "subtitle": "Chọn mọi vai trò phù hợp với bạn — bạn luôn có thể thêm sau. Vai trò khách hàng luôn được bao gồm mặc định để bạn có thể đặt lịch và duyệt xem."
+      },
+      "verification": {
+        "statusNotStarted": "Chưa bắt đầu",
+        "statusPending": "Đang xem xét",
+        "statusVerified": "Đã xác minh",
+        "statusRejected": "Cần gửi lại",
+        "noRoleTitle": "Chưa có vai trò nhà cung cấp",
+        "noRoleBody": "Thêm vai trò nhà cung cấp trước, sau đó quay lại đây để xác minh danh tính.",
+        "manageRoles": "Quản lý vai trò",
+        "chooseRoleTitle": "Xác minh danh tính",
+        "chooseRoleSubtitle": "Chọn vai trò bạn muốn xác minh.",
+        "form": {
+          "underReviewTitle": "Hồ sơ của bạn đang được xem xét",
+          "underReviewDesc": "Chúng tôi đang xem xét giấy tờ bạn đã gửi cho vai trò {role}. Quá trình này thường mất 1-2 ngày làm việc.",
+          "verifiedTitle": "Bạn đã được xác minh",
+          "verifiedDesc": "Danh tính của bạn đã được xác minh cho vai trò {role}.",
+          "submittedTitle": "Đã gửi để xem xét",
+          "tapToSelectPhoto": "Chạm để chọn ảnh",
+          "title": "Xác minh danh tính",
+          "subtitle": "Bắt buộc để kích hoạt hồ sơ {role} — đây là bước kiểm tra một lần duy nhất.",
+          "rejectedNotice": "Hồ sơ trước đó của bạn đã bị từ chối: {reason}. Bạn có thể gửi lại bên dưới.",
+          "whyWeAskLabel": "Vì sao chúng tôi yêu cầu:",
+          "whyWeAskBody": "Luật Thương mại điện tử Việt Nam (122/2025) yêu cầu các nền tảng thương mại điện tử xác minh danh tính của mọi người bán trước khi họ có thể đăng dịch vụ.",
+          "whoCanSeeLabel": "Ai có thể xem:",
+          "whoCanSeeBody": "Chỉ quản trị viên Fgrapher, chỉ thông qua liên kết có thời hạn ngắn được tạo ngay khi họ xem xét hồ sơ của bạn — mọi lượt xem đều được ghi lại.",
+          "howLongLabel": "Thời gian lưu trữ:",
+          "howLongBody": "Ảnh giấy tờ của bạn sẽ bị xóa vĩnh viễn sau 90 ngày kể từ khi được duyệt. Chúng tôi chỉ lưu lại bản ghi phê duyệt, không lưu ảnh.",
+          "fullLegalNameLabel": "Họ và tên đầy đủ (theo giấy tờ)",
+          "idNumberLabel": "Số giấy tờ (CCCD/CMND)",
+          "idNumberPlaceholder": "9 hoặc 12 chữ số",
+          "idFrontLabel": "Mặt trước giấy tờ",
+          "idBackLabel": "Mặt sau giấy tờ",
+          "selfieLabel": "Ảnh chân dung cầm giấy tờ",
+          "consentLabel": "Tôi đồng ý cho Fgrapher xử lý giấy tờ và ảnh của tôi để xác minh danh tính",
+          "uploadsUnavailable": "Hiện chưa thể tải lên giấy tờ",
+          "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+          "uploadFailed": "Tải lên thất bại. Vui lòng kiểm tra kết nối mạng và thử lại.",
+          "submit": "Gửi để xem xét",
+          "doLater": "Để sau",
+          "backToDashboard": "Quay lại bảng điều khiển"
+        }
+      }
+    },
+    "admin": {
+      "layout": {
+        "badge": "Quản trị",
+        "subtitle": "Công cụ nội bộ Fgrapher",
+        "exitAdmin": "Thoát chế độ quản trị"
+      },
+      "sidebar": {
+        "overview": "Tổng quan",
+        "users": "Người dùng",
+        "reports": "Báo cáo",
+        "verifications": "Xác minh",
+        "moderation": "Kiểm duyệt",
+        "compliance": "Tuân thủ dữ liệu"
+      },
+      "overview": {
+        "metaTitle": "Tổng quan quản trị — Fgrapher",
+        "title": "Tổng quan",
+        "totalUsers": "Tổng người dùng",
+        "totalUsersSub": "{sign}{percent}% so với tháng trước",
+        "activeSubscriptions": "Gói đang hoạt động",
+        "activeSubscriptionsSub": "{mrr} MRR",
+        "bookingsThisMonth": "Lượt đặt lịch tháng này",
+        "bookingsThisMonthSub": "{rate}% tỷ lệ hoàn thành",
+        "gmvThisMonth": "GMV tháng này",
+        "gmvThisMonthSub": "{bookingGmv} đặt lịch · {orderGmv} cửa hàng",
+        "failedPayments": "Thanh toán thất bại",
+        "pendingReports": "Báo cáo chờ xử lý",
+        "expiringSoon": "Gói sắp hết hạn trong 7 ngày",
+        "recentActivity": "Hoạt động gần đây",
+        "noActivity": "Chưa có hoạt động nào"
+      },
+      "users": {
+        "title": "Người dùng",
+        "allRoles": "Tất cả vai trò",
+        "searchPlaceholder": "Tìm theo tên, email, tên người dùng",
+        "table": {
+          "name": "Tên",
+          "email": "Email",
+          "roles": "Vai trò",
+          "joined": "Ngày tham gia",
+          "status": "Trạng thái"
+        },
+        "statusSuspended": "Đã tạm khóa",
+        "statusVerified": "Đã xác minh",
+        "statusActive": "Đang hoạt động",
+        "empty": "Không tìm thấy người dùng nào"
+      },
+      "userDetail": {
+        "backToUsers": "Quay lại danh sách người dùng",
+        "suspendedBadge": "Đã tạm khóa",
+        "verifiedBadge": "Đã xác minh",
+        "unsuspend": "Mở khóa",
+        "suspend": "Tạm khóa",
+        "verifyAccount": "Xác minh tài khoản",
+        "deleteAccount": "Xóa tài khoản",
+        "deleteConfirm": "Xóa mềm tài khoản này? Có thể khôi phục lại trong cơ sở dữ liệu nếu cần.",
+        "tabs": {
+          "overview": "Tổng quan",
+          "billing": "Vai trò & Thanh toán",
+          "bookings": "Lịch đặt"
+        },
+        "fields": {
+          "email": "Email",
+          "username": "Tên người dùng",
+          "location": "Khu vực",
+          "joined": "Ngày tham gia"
+        },
+        "adminNotesLabel": "Ghi chú quản trị (nội bộ)",
+        "saveNotes": "Lưu ghi chú",
+        "updatedToast": "Đã cập nhật",
+        "noRoles": "Chưa có vai trò nào",
+        "activeRole": "Vai trò đang hoạt động",
+        "inactiveRole": "Vai trò không hoạt động",
+        "noSubscription": "Chưa có gói",
+        "asProvider": "Với vai trò nhà cung cấp",
+        "completionRate": "Tỷ lệ hoàn thành",
+        "cancellationRate": "Tỷ lệ hủy",
+        "bookingsSummary": "{customerCount} lượt đặt với vai trò khách hàng, {providerCount} lượt với vai trò nhà cung cấp.",
+        "suspendDialogTitle": "Tạm khóa tài khoản này?",
+        "suspendReasonPlaceholder": "Lý do tạm khóa",
+        "cancel": "Hủy"
+      },
+      "reports": {
+        "title": "Báo cáo",
+        "tabs": {
+          "pending": "Chờ xử lý",
+          "reviewing": "Đang xem xét",
+          "resolved": "Đã xử lý",
+          "dismissed": "Đã bỏ qua",
+          "all": "Tất cả"
+        },
+        "empty": "Không có báo cáo nào",
+        "highPriority": "Ưu tiên cao",
+        "reportedBy": "Báo cáo bởi {name}",
+        "targetIdLabel": "· mã đối tượng",
+        "resolutionNotePlaceholder": "Ghi chú xử lý (không bắt buộc)",
+        "resolve": "Xử lý",
+        "dismiss": "Bỏ qua",
+        "reportUpdatedToast": "Đã cập nhật báo cáo",
+        "unknownReporter": "Không xác định"
+      },
+      "verifications": {
+        "title": "Xác minh danh tính",
+        "description": "Mọi vai trò nhà cung cấp phải được xác minh trước khi hồ sơ có thể công khai (Luật Thương mại điện tử 122/2025). Sắp xếp theo lượt gửi cũ nhất trước.",
+        "empty": "Không có hồ sơ nào đang chờ",
+        "imageFront": "Mặt trước giấy tờ",
+        "imageBack": "Mặt sau giấy tờ",
+        "imageSelfie": "Ảnh chân dung",
+        "viewImage": "Xem {label}",
+        "submittedToday": "Gửi hôm nay",
+        "waitingOneDay": "Đã chờ 1 ngày",
+        "waitingDays": "Đã chờ {days} ngày",
+        "rejectionReasonPlaceholder": "Lý do từ chối (nếu từ chối)",
+        "notePlaceholder": "Ghi chú (không bắt buộc)",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "failedToLoadDocument": "Không thể tải tài liệu",
+        "selectRejectionReason": "Vui lòng chọn lý do từ chối",
+        "verificationUpdated": "Đã cập nhật xác minh"
+      },
+      "moderation": {
+        "title": "Kiểm duyệt nội dung",
+        "description": "Mọi ảnh portfolio cần được duyệt trước khi hiển thị công khai. Phím tắt: A để duyệt, R để từ chối, phím mũi tên để di chuyển. Mục tiêu: xử lý trong vòng {hours} giờ.",
+        "empty": "Không có nội dung nào đang chờ",
+        "selectAll": "Chọn tất cả ({count})",
+        "clearSelection": "Bỏ chọn",
+        "selectedHint": "Đã chọn {count} — Nhấn A để duyệt, R để từ chối",
+        "overdueBadge": "Quá hạn",
+        "rejectionReasonPlaceholder": "Lý do từ chối",
+        "notePlaceholder": "Ghi chú (không bắt buộc)",
+        "confirmReject": "Xác nhận từ chối ({count})",
+        "approve": "Duyệt ({count})",
+        "reject": "Từ chối ({count})",
+        "approvedToast": "Đã duyệt {count}",
+        "rejectedToast": "Đã từ chối {count}"
+      },
+      "compliance": {
+        "title": "Tuân thủ dữ liệu",
+        "tabs": {
+          "requests": "Yêu cầu dữ liệu",
+          "audit": "Nhật ký kiểm tra",
+          "consent": "Thống kê đồng ý"
+        },
+        "dataRequests": {
+          "typeFilter": {
+            "all": "Tất cả loại",
+            "export": "Xuất dữ liệu",
+            "deletion": "Xóa dữ liệu"
+          },
+          "statusFilter": {
+            "all": "Tất cả trạng thái",
+            "pending": "Đang chờ",
+            "processing": "Đang xử lý",
+            "completed": "Đã hoàn tất",
+            "rejected": "Đã từ chối"
+          },
+          "empty": "Không có yêu cầu dữ liệu nào",
+          "unknownUser": "Người dùng không xác định",
+          "requested": "Yêu cầu ngày {date}",
+          "deadline": "Hạn xử lý {date}",
+          "overdueSuffix": " — quá hạn",
+          "completed": "Hoàn tất ngày {date}",
+          "rejectNotePlaceholder": "Ghi chú từ chối (bắt buộc khi từ chối)",
+          "processDeletion": "Xử lý xóa dữ liệu",
+          "rejectBtn": "Từ chối",
+          "noteRequiredToast": "Cần nhập ghi chú để từ chối yêu cầu",
+          "updateFailedToast": "Cập nhật yêu cầu thất bại",
+          "updatedToast": "Đã cập nhật yêu cầu"
+        },
+        "auditLog": {
+          "actorIdPlaceholder": "Mã người thực hiện",
+          "actionPlaceholder": "Hành động chứa…",
+          "colWhen": "Thời gian",
+          "colActor": "Người thực hiện",
+          "colAction": "Hành động",
+          "colTarget": "Đối tượng",
+          "systemActor": "Hệ thống",
+          "empty": "Không có mục nhật ký nào"
+        },
+        "consent": {
+          "purposeService": "Dịch vụ (bắt buộc)",
+          "purposeMarketing": "Tiếp thị",
+          "purposeAnalytics": "Phân tích",
+          "grantedSuffix": "đã đồng ý,",
+          "notGrantedSummary": "{revoked} chưa đồng ý (tổng {total} người dùng)"
+        }
+      }
+    }
+  }
+}

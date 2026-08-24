@@ -9,6 +9,7 @@ import type {
   UserRole,
 } from "@prisma/client";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
@@ -54,6 +55,7 @@ const SUB_STATUS_VARIANT: Record<
 };
 
 export default function AdminUserDetailPage() {
+  const t = useTranslations("accountFlows.admin.userDetail");
   const params = useParams<{ id: string }>();
   const [user, setUser] = useState<UserDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,7 +96,7 @@ export default function AdminUserDetailPage() {
     });
     setBusy(false);
     setSuspendOpen(false);
-    toast.add({ title: "Updated", type: "success" });
+    toast.add({ title: t("updatedToast"), type: "success" });
     setIsLoading(true);
     load();
   };
@@ -133,7 +135,7 @@ export default function AdminUserDetailPage() {
         className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary"
       >
         <ArrowLeft className="size-4" />
-        Back to users
+        {t("backToUsers")}
       </Link>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -141,9 +143,11 @@ export default function AdminUserDetailPage() {
           {user.firstName ?? user.name ?? user.email}
         </h1>
         {user.isSuspended ? (
-          <Badge variant="destructive">Suspended</Badge>
+          <Badge variant="destructive">{t("suspendedBadge")}</Badge>
         ) : null}
-        {user.isVerified ? <Badge variant="success">Verified</Badge> : null}
+        {user.isVerified ? (
+          <Badge variant="success">{t("verifiedBadge")}</Badge>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -154,7 +158,7 @@ export default function AdminUserDetailPage() {
             disabled={busy}
             onClick={() => runAction("unsuspend")}
           >
-            Unsuspend
+            {t("unsuspend")}
           </Button>
         ) : (
           <Button
@@ -163,7 +167,7 @@ export default function AdminUserDetailPage() {
             disabled={busy}
             onClick={() => setSuspendOpen(true)}
           >
-            Suspend
+            {t("suspend")}
           </Button>
         )}
         {!user.isVerified ? (
@@ -173,7 +177,7 @@ export default function AdminUserDetailPage() {
             disabled={busy}
             onClick={() => runAction("verify")}
           >
-            Verify account
+            {t("verifyAccount")}
           </Button>
         ) : null}
         <Button
@@ -181,24 +185,20 @@ export default function AdminUserDetailPage() {
           variant="ghost"
           disabled={busy}
           onClick={() => {
-            if (
-              confirm(
-                "Soft-delete this account? This can be reversed in the database if needed.",
-              )
-            ) {
+            if (confirm(t("deleteConfirm"))) {
               runAction("delete");
             }
           }}
         >
-          Delete account
+          {t("deleteAccount")}
         </Button>
       </div>
 
       <Tabs defaultValue="overview">
         <TabsList>
-          <TabsTab value="overview">Overview</TabsTab>
-          <TabsTab value="billing">Roles & Billing</TabsTab>
-          <TabsTab value="bookings">Bookings</TabsTab>
+          <TabsTab value="overview">{t("tabs.overview")}</TabsTab>
+          <TabsTab value="billing">{t("tabs.billing")}</TabsTab>
+          <TabsTab value="bookings">{t("tabs.bookings")}</TabsTab>
         </TabsList>
 
         <TabsPanel value="overview" className="mt-4">
@@ -208,11 +208,11 @@ export default function AdminUserDetailPage() {
               className="flex flex-col divide-y divide-border-subtle"
             >
               {[
-                ["Email", user.email],
-                ["Username", user.username ?? "—"],
-                ["Location", user.location ?? "—"],
+                [t("fields.email"), user.email],
+                [t("fields.username"), user.username ?? "—"],
+                [t("fields.location"), user.location ?? "—"],
                 [
-                  "Joined",
+                  t("fields.joined"),
                   new Date(user.createdAt).toLocaleDateString("en-US", {
                     dateStyle: "long",
                   }),
@@ -234,7 +234,7 @@ export default function AdminUserDetailPage() {
 
             <Card className="flex flex-col gap-2">
               <span className="text-body-sm font-semibold text-text-primary">
-                Admin notes (internal only)
+                {t("adminNotesLabel")}
               </span>
               <Textarea
                 rows={3}
@@ -248,7 +248,7 @@ export default function AdminUserDetailPage() {
                 disabled={busy}
                 onClick={() => runAction("notes", { notes })}
               >
-                Save notes
+                {t("saveNotes")}
               </Button>
             </Card>
           </div>
@@ -300,7 +300,7 @@ export default function AdminUserDetailPage() {
 
           <div className="flex flex-col gap-3">
             {user.roles.length === 0 ? (
-              <p className="text-body-sm text-text-secondary">No roles</p>
+              <p className="text-body-sm text-text-secondary">{t("noRoles")}</p>
             ) : (
               user.roles.map((ur) => (
                 <Card key={ur.id} className="flex items-center justify-between">
@@ -309,7 +309,7 @@ export default function AdminUserDetailPage() {
                       {ROLE_LABELS[ur.role as Role]}
                     </span>
                     <span className="text-body-sm text-text-secondary">
-                      {ur.active ? "Active role" : "Inactive role"}
+                      {ur.active ? t("activeRole") : t("inactiveRole")}
                     </span>
                   </div>
                   {ur.subscription ? (
@@ -317,7 +317,7 @@ export default function AdminUserDetailPage() {
                       {ur.subscription.status}
                     </Badge>
                   ) : (
-                    <Badge variant="neutral">No subscription</Badge>
+                    <Badge variant="neutral">{t("noSubscription")}</Badge>
                   )}
                 </Card>
               ))
@@ -329,7 +329,7 @@ export default function AdminUserDetailPage() {
           <div className="grid grid-cols-3 gap-4">
             <Card className="flex flex-col gap-1">
               <span className="text-body-sm text-text-tertiary">
-                As provider
+                {t("asProvider")}
               </span>
               <span className="text-heading-lg text-text-primary">
                 {bookingsTotal}
@@ -337,7 +337,7 @@ export default function AdminUserDetailPage() {
             </Card>
             <Card className="flex flex-col gap-1">
               <span className="text-body-sm text-text-tertiary">
-                Completion rate
+                {t("completionRate")}
               </span>
               <span className="text-heading-lg text-text-primary">
                 {bookingsTotal > 0
@@ -348,7 +348,7 @@ export default function AdminUserDetailPage() {
             </Card>
             <Card className="flex flex-col gap-1">
               <span className="text-body-sm text-text-tertiary">
-                Cancellation rate
+                {t("cancellationRate")}
               </span>
               <span className="text-heading-lg text-text-primary">
                 {bookingsTotal > 0
@@ -359,8 +359,10 @@ export default function AdminUserDetailPage() {
             </Card>
           </div>
           <p className="mt-3 text-body-sm text-text-secondary">
-            {user.bookingsAsCustomer.length} bookings as customer,{" "}
-            {bookingsTotal} as provider.
+            {t("bookingsSummary", {
+              customerCount: user.bookingsAsCustomer.length,
+              providerCount: bookingsTotal,
+            })}
           </p>
         </TabsPanel>
       </Tabs>
@@ -368,17 +370,17 @@ export default function AdminUserDetailPage() {
       <Dialog open={suspendOpen} onOpenChange={setSuspendOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Suspend this account?</DialogTitle>
+            <DialogTitle>{t("suspendDialogTitle")}</DialogTitle>
           </DialogHeader>
           <Textarea
-            placeholder="Reason for suspension"
+            placeholder={t("suspendReasonPlaceholder")}
             value={suspendReason}
             onChange={(e) => setSuspendReason(e.target.value)}
             rows={3}
           />
           <DialogFooter>
             <Button variant="ghost" onClick={() => setSuspendOpen(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -386,7 +388,7 @@ export default function AdminUserDetailPage() {
               onClick={() => runAction("suspend", { reason: suspendReason })}
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              Suspend
+              {t("suspend")}
             </Button>
           </DialogFooter>
         </DialogContent>

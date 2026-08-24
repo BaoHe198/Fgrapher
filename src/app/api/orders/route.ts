@@ -1,5 +1,6 @@
 import type { OrderStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
@@ -16,9 +17,10 @@ const VALID_STATUSES: OrderStatus[] = [
 
 // Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function GET(request: Request) {
+  const t = await getTranslations("apiMessages.orders");
   if (!features.marketplaceEnabled) {
     return NextResponse.json(
-      { data: null, error: "not_found", message: "Not found" },
+      { data: null, error: "not_found", message: t("notFound") },
       { status: 404 },
     );
   }
@@ -61,7 +63,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load orders" },
+      { data: null, error: "server_error", message: t("listLoadFailed") },
       { status: 500 },
     );
   }

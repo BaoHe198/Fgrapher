@@ -77,3 +77,48 @@ export const changePasswordSchema = z
   });
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+// Translated variants — see validations/auth.ts's getLoginSchema comment.
+// Namespace "libServices.validation.user".
+export function getUpdateRolesSchema(t: (key: string) => string) {
+  return z.object({
+    roles: z.array(z.enum(Role)).min(1, t("roleRequired")),
+  });
+}
+
+export function getUpdateMeSchema(t: (key: string) => string) {
+  return z.object({
+    acceptingBookings: z.boolean().optional(),
+    notificationPreferences: notificationPreferencesSchema.optional(),
+    avatar: z.string().url().nullable().optional(),
+    coverImage: z.string().url().nullable().optional(),
+    bio: z.string().max(500, t("bioTooLong")).optional(),
+    username: z
+      .string()
+      .min(3, t("usernameTooShort"))
+      .max(30)
+      .regex(/^[a-z0-9_]+$/, t("usernameInvalidChars"))
+      .optional(),
+    name: z.string().min(2).optional(),
+    phone: z.string().max(30).optional(),
+    location: z.string().max(120).optional(),
+    email: z.string().email().optional(),
+  });
+}
+
+export function getChangePasswordSchema(t: (key: string) => string) {
+  return z
+    .object({
+      currentPassword: z.string().min(1, t("currentPasswordRequired")),
+      newPassword: z
+        .string()
+        .min(8, t("passwordMinLength"))
+        .regex(/[A-Z]/, t("passwordUppercase"))
+        .regex(/[0-9]/, t("passwordNumber")),
+      confirmPassword: z.string().min(1, t("confirmPasswordRequired")),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: t("passwordsDoNotMatch"),
+      path: ["confirmPassword"],
+    });
+}

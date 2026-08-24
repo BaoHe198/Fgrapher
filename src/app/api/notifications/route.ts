@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { listNotifications } from "@/services/notification";
 
 export async function GET(request: Request) {
+  const t = await getTranslations("apiMessages.notifications");
   try {
     const session = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -11,7 +13,11 @@ export async function GET(request: Request) {
     const unreadOnly = searchParams.get("unread") === "true";
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
 
-    const result = await listNotifications({ userId: session.user.id, unreadOnly, page });
+    const result = await listNotifications({
+      userId: session.user.id,
+      unreadOnly,
+      page,
+    });
 
     return NextResponse.json(
       {
@@ -34,7 +40,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load notifications" },
+      { data: null, error: "server_error", message: t("loadFailed") },
       { status: 500 },
     );
   }

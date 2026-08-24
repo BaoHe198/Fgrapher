@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
 import { getConsentStats } from "@/services/admin";
 
 export async function GET() {
+  const t = await getTranslations("apiMessages.admin");
   try {
     await requireAdmin();
     const stats = await getConsentStats();
@@ -25,7 +27,7 @@ export async function GET() {
       {
         data: null,
         error: "server_error",
-        message: "Failed to load consent stats",
+        message: t("consentStatsFailed"),
       },
       { status: 500 },
     );

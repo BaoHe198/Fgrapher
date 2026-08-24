@@ -14,28 +14,17 @@ import { formatCurrency } from "@/lib/utils";
 import { getFeaturedProfiles } from "@/services/search";
 
 // phase-1 Step 6 invented this 3-step section — there is no corresponding
-// content in the design's real i18n strings (window.FG_STRINGS), so it stays
-// English-only until real copy exists for it.
-const HOW_IT_WORKS = [
-  {
-    title: "Search & compare",
-    description:
-      "Browse verified profiles, compare pricing, and read real reviews.",
-  },
-  {
-    title: "Book your date",
-    description:
-      "Message the artist, pick a slot, and confirm your booking online.",
-  },
-  {
-    title: "Get your shoot",
-    description:
-      "Meet up, get creative, and receive your final files through Fgrapher.",
-  },
-];
+// content in the design's real i18n strings (window.FG_STRINGS). Now
+// wired to publicPages.landing per CLAUDE.md rule #10 (full Vietnamese UI).
+const HOW_IT_WORKS_KEYS = [
+  { titleKey: "howItWorks.step1Title", descKey: "howItWorks.step1Desc" },
+  { titleKey: "howItWorks.step2Title", descKey: "howItWorks.step2Desc" },
+  { titleKey: "howItWorks.step3Title", descKey: "howItWorks.step3Desc" },
+] as const;
 
 export default async function LandingPage() {
   const t = await getTranslations();
+  const tLanding = await getTranslations("publicPages.landing");
 
   const homeFeatures = [
     { icon: Search, title: t("home.f1t"), description: t("home.f1b") },
@@ -101,18 +90,23 @@ export default async function LandingPage() {
                 key={profile.userId}
                 artist={{
                   id: profile.userId,
-                  name: profile.displayName ?? profile.user.name ?? "Unnamed",
+                  name:
+                    profile.displayName ??
+                    profile.user.name ??
+                    tLanding("unnamed"),
                   username: profile.user.username ?? "",
                   roles: profile.roles.map((role) => ROLE_LABELS[role]),
                   city: profile.user.location ?? "",
                   rating:
                     profile.avgRating > 0
                       ? profile.avgRating.toFixed(1)
-                      : "New",
+                      : tLanding("newBadge"),
                   reviews: profile.reviewCount,
                   price: profile.priceMin
-                    ? `From ${formatCurrency(profile.priceMin)}`
-                    : "Contact for pricing",
+                    ? tLanding("priceFrom", {
+                        price: formatCurrency(profile.priceMin),
+                      })
+                    : tLanding("contactForPricing"),
                   coverImage: profile.media[0]?.url,
                 }}
               />
@@ -145,18 +139,18 @@ export default async function LandingPage() {
         id="how-it-works"
         className="mx-auto max-w-[1240px] px-8 py-[72px] max-md:px-5"
       >
-        <SectionHead title="How it works" />
+        <SectionHead title={tLanding("howItWorks.heading")} />
         <div className="grid grid-cols-3 gap-8 max-md:grid-cols-1">
-          {HOW_IT_WORKS.map((step, index) => (
-            <div key={step.title} className="flex flex-col gap-2.5">
+          {HOW_IT_WORKS_KEYS.map((step, index) => (
+            <div key={step.titleKey} className="flex flex-col gap-2.5">
               <div className="flex size-8 items-center justify-center rounded-full bg-brand-primary font-bold text-text-on-brand">
                 {index + 1}
               </div>
               <h3 className="text-heading-md text-text-primary">
-                {step.title}
+                {tLanding(step.titleKey)}
               </h3>
               <p className="text-body-md text-text-secondary">
-                {step.description}
+                {tLanding(step.descKey)}
               </p>
             </div>
           ))}

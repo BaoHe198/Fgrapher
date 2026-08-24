@@ -26,3 +26,20 @@ export const reorderPortfolioSchema = z.object({
 });
 
 export type ReorderPortfolioInput = z.infer<typeof reorderPortfolioSchema>;
+
+// Translated variant — see validations/auth.ts's getLoginSchema comment.
+// Namespace "libServices.validation.portfolio".
+export function getCreatePortfolioMediaSchema(t: (key: string) => string) {
+  return z.object({
+    profileId: z.string().min(1),
+    url: z.string().url(),
+    publicId: z.string().min(1),
+    type: z.enum(["IMAGE", "VIDEO"]),
+    title: z.string().max(120).optional(),
+    width: z.number().int().positive().optional(),
+    height: z.number().int().positive().optional(),
+    rightsConfirmed: z.boolean().refine((v) => v === true, {
+      message: t("rightsConfirmedRequired"),
+    }),
+  });
+}

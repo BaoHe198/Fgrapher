@@ -1,0 +1,141 @@
+{
+  "sharedComponents": {
+    "modelSafetyNotice": {
+      "title": "Trước khi đặt lịch",
+      "body": "Hãy gặp mặt ở nơi công cộng hoặc tại một studio đã đăng ký cho buổi chụp đầu tiên, và báo cho ai đó biết bạn sẽ ở đâu. Fgrapher không bao giờ yêu cầu thanh toán ngoài nền tảng — hãy báo cáo nếu có điều gì đó bất thường."
+    },
+    "filterSidebar": {
+      "roleLabel": "Vai trò",
+      "styleLabel": "Phong cách",
+      "heightLabel": "Chiều cao (cm)",
+      "heightMinPh": "Tối thiểu",
+      "heightMaxPh": "Tối đa",
+      "experienceLabel": "Kinh nghiệm",
+      "travelWillingLabel": "Sẵn sàng di chuyển",
+      "sortByLabel": "Sắp xếp theo",
+      "sortTopRated": "Đánh giá cao nhất",
+      "sortPriceAsc": "Giá: thấp đến cao",
+      "sortPriceDesc": "Giá: cao đến thấp",
+      "sortNewest": "Mới nhất",
+      "sortMostReviewed": "Nhiều đánh giá nhất",
+      "cityLabel": "Tỉnh/thành",
+      "allCities": "Tất cả tỉnh/thành",
+      "budgetLabel": "Ngân sách",
+      "budgetAny": "Tất cả",
+      "budgetUnder2m": "Dưới 2 triệu",
+      "budget2to5m": "2 – 5 triệu",
+      "budget5to15m": "5 – 15 triệu",
+      "budgetOver15m": "Trên 15 triệu",
+      "ratingLabel": "Đánh giá",
+      "ratingAny": "Tất cả",
+      "rating4Plus": "Từ 4 sao",
+      "rating45Plus": "Từ 4.5 sao",
+      "resetFilters": "Đặt lại bộ lọc"
+    },
+    "mobileFilterSheet": {
+      "filtersButton": "Bộ lọc",
+      "title": "Bộ lọc",
+      "description": "Bộ lọc tìm kiếm"
+    },
+    "searchInput": {
+      "placeholder": "Tìm nghệ sĩ, studio hoặc thiết bị",
+      "clearLabel": "Xóa tìm kiếm"
+    },
+    "cartDrawer": {
+      "title": "Giỏ hàng của bạn ({count})",
+      "description": "Các sản phẩm trong giỏ hàng của bạn",
+      "emptyTitle": "Giỏ hàng của bạn đang trống",
+      "browseGear": "Xem thiết bị",
+      "subtotal": "Tạm tính",
+      "deposits": "Tiền đặt cọc",
+      "shippingNote": "Phí vận chuyển sẽ tính khi thanh toán",
+      "checkout": "Thanh toán",
+      "continueShopping": "Tiếp tục mua sắm",
+      "shopFallback": "Cửa hàng"
+    },
+    "cartItemRow": {
+      "rentalBadge": "Thuê — {days} ngày",
+      "purchaseBadge": "Mua",
+      "removeLabel": "Xóa sản phẩm"
+    },
+    "chatPanel": {
+      "unknown": "Người dùng ẩn danh",
+      "today": "Hôm nay",
+      "yesterday": "Hôm qua",
+      "sentPhoto": "Đã gửi một ảnh",
+      "photo": "Ảnh",
+      "viewProfile": "Xem hồ sơ",
+      "report": "Báo cáo",
+      "block": "Chặn",
+      "emptyState": "Gửi lời chào để bắt đầu cuộc trò chuyện",
+      "safetyNote": "Giữ an toàn: không chia sẻ thông tin thanh toán ngoài Fgrapher. Hãy báo cáo nếu có điều gì đó bất thường.",
+      "bookingRequest": "Yêu cầu đặt lịch",
+      "viewBooking": "Xem chi tiết đặt lịch",
+      "attachImage": "Đính kèm ảnh",
+      "writeMessage": "Nhập tin nhắn...",
+      "sendMessage": "Gửi tin nhắn"
+    },
+    "conversationList": {
+      "title": "Tin nhắn",
+      "searchPlaceholder": "Tìm cuộc trò chuyện",
+      "emptyTitle": "Chưa có cuộc trò chuyện nào",
+      "emptySubtitle": "Nhắn tin cho một nghệ sĩ để bắt đầu",
+      "unknown": "Người dùng ẩn danh",
+      "noMessages": "Chưa có tin nhắn nào",
+      "youPrefix": "Bạn: ",
+      "sentPhoto": "Đã gửi một ảnh",
+      "sentBooking": "Đã gửi yêu cầu đặt lịch",
+      "now": "vừa xong",
+      "yesterday": "Hôm qua"
+    },
+    "environmentBanner": {
+      "staging": "STAGING",
+      "development": "DEVELOPMENT"
+    },
+    "footer": {
+      "copyright": "© 2026 Fgrapher. Bảo lưu mọi quyền."
+    },
+    "notificationBell": {
+      "title": "Thông báo",
+      "markAllRead": "Đánh dấu đã đọc tất cả",
+      "emptyState": "Chưa có thông báo nào",
+      "justNow": "vừa xong",
+      "minutesAgo": "{count} phút trước",
+      "hoursAgo": "{count} giờ trước",
+      "daysAgo": "{count} ngày trước",
+      "viewAll": "Xem tất cả"
+    },
+    "pastDueBanner": {
+      "message": "Thanh toán {role} của bạn không thành công. Cập nhật phương thức thanh toán để giữ hồ sơ của bạn luôn hiển thị. Còn {days} ngày.",
+      "updatePayment": "Cập nhật thanh toán"
+    },
+    "webNav": {
+      "openNavigation": "Mở menu điều hướng",
+      "navigationTitle": "Điều hướng",
+      "navigationDescription": "Điều hướng chính của trang",
+      "notifications": "Thông báo",
+      "toggleTheme": "Chuyển giao diện sáng/tối"
+    },
+    "dashboardSidebar": {
+      "overview": "Tổng quan",
+      "myBookings": "Lịch đặt của tôi",
+      "bookings": "Lịch đặt",
+      "calendar": "Lịch làm việc",
+      "reviews": "Đánh giá",
+      "portfolio": "Portfolio",
+      "listings": "Tin đăng",
+      "shopOrders": "Đơn hàng cửa hàng",
+      "myOrders": "Đơn hàng của tôi",
+      "saved": "Đã lưu",
+      "messages": "Tin nhắn",
+      "settings": "Cài đặt",
+      "planPro": "Pro — {role}",
+      "planFree": "Miễn phí — Khách hàng",
+      "currentPlan": "Gói hiện tại",
+      "managePlan": "Quản lý gói",
+      "openMenu": "Mở menu bảng điều khiển",
+      "menuTitle": "Menu bảng điều khiển",
+      "menuDescription": "Điều hướng bảng điều khiển"
+    }
+  }
+}

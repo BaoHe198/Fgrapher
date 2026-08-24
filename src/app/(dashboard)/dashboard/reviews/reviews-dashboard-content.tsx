@@ -1,6 +1,8 @@
 "use client";
 
 import { Star } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { RespondReviewModal } from "@/components/modals/respond-review-modal";
@@ -9,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
 
 interface ReviewRow {
   id: string;
@@ -34,14 +35,13 @@ interface Stats {
 
 type FilterTab = "ALL" | "AWAITING" | "RESPONDED";
 
-const TABS: { value: FilterTab; label: string }[] = [
-  { value: "ALL", label: "All" },
-  { value: "AWAITING", label: "Awaiting response" },
-  { value: "RESPONDED", label: "Responded" },
-];
+const TAB_VALUES: FilterTab[] = ["ALL", "AWAITING", "RESPONDED"];
 
-function partyName(party: { firstName: string | null; name: string | null }) {
-  return party.firstName ?? party.name ?? "Anonymous";
+function partyName(
+  party: { firstName: string | null; name: string | null },
+  t: ReturnType<typeof useTranslations>,
+) {
+  return party.firstName ?? party.name ?? t("anonymous");
 }
 
 export function ReviewsDashboardContent({
@@ -51,6 +51,10 @@ export function ReviewsDashboardContent({
   stats: Stats;
   reviews: ReviewRow[];
 }) {
+  const t = useTranslations("dashboardCore.reviews");
+  const TABS: { value: FilterTab; label: string }[] = TAB_VALUES.map(
+    (value) => ({ value, label: t(`tabs.${value}`) }),
+  );
   const router = useRouter();
   const [tab, setTab] = useState<FilterTab>("ALL");
   const [respondTarget, setRespondTarget] = useState<ReviewRow | null>(null);
@@ -63,32 +67,36 @@ export function ReviewsDashboardContent({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">Reviews</h1>
+      <h1 className="text-display-md text-text-primary">{t("title")}</h1>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card className="flex flex-col gap-1">
           <span className="text-body-sm text-text-tertiary">
-            Average rating
+            {t("stats.avgRating")}
           </span>
           <span className="text-heading-lg text-text-primary">
             {stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "—"}
           </span>
         </Card>
         <Card className="flex flex-col gap-1">
-          <span className="text-body-sm text-text-tertiary">Total reviews</span>
+          <span className="text-body-sm text-text-tertiary">
+            {t("stats.total")}
+          </span>
           <span className="text-heading-lg text-text-primary">
             {stats.total}
           </span>
         </Card>
         <Card className="flex flex-col gap-1">
-          <span className="text-body-sm text-text-tertiary">Response rate</span>
+          <span className="text-body-sm text-text-tertiary">
+            {t("stats.responseRate")}
+          </span>
           <span className="text-heading-lg text-text-primary">
             {stats.responseRate}%
           </span>
         </Card>
         <Card className="flex flex-col gap-1">
           <span className="text-body-sm text-text-tertiary">
-            Awaiting response
+            {t("stats.awaitingResponse")}
           </span>
           <span className="text-heading-lg text-text-primary">
             {stats.awaitingResponse}
@@ -113,7 +121,7 @@ export function ReviewsDashboardContent({
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Star className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            No reviews here yet
+            {t("empty")}
           </p>
         </Card>
       ) : (
@@ -126,12 +134,12 @@ export function ReviewsDashboardContent({
                     <AvatarImage src={review.reviewer.avatar} alt="" />
                   ) : null}
                   <AvatarFallback>
-                    {partyName(review.reviewer)[0]?.toUpperCase()}
+                    {partyName(review.reviewer, t)[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="text-body-md font-semibold text-text-primary">
-                    {partyName(review.reviewer)}
+                    {partyName(review.reviewer, t)}
                   </span>
                   <div className="flex items-center gap-2">
                     <StarRating
@@ -171,7 +179,7 @@ export function ReviewsDashboardContent({
                   className="w-fit"
                   onClick={() => setRespondTarget(review)}
                 >
-                  Respond
+                  {t("respond")}
                 </Button>
               )}
             </Card>
@@ -184,7 +192,7 @@ export function ReviewsDashboardContent({
           open={Boolean(respondTarget)}
           onOpenChange={(open) => !open && setRespondTarget(null)}
           reviewId={respondTarget.id}
-          reviewerName={partyName(respondTarget.reviewer)}
+          reviewerName={partyName(respondTarget.reviewer, t)}
           rating={respondTarget.rating}
           content={respondTarget.content}
           onSuccess={() => router.refresh()}

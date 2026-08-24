@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ChevronLeft, ChevronRight, Clock, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useMemo, useState } from "react";
@@ -17,15 +18,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
-const SHOOT_TYPE_OPTIONS = [
-  { value: "", label: "Not specified" },
-  { value: "Editorial", label: "Editorial" },
-  { value: "Commercial", label: "Commercial" },
-  { value: "Portfolio building", label: "Portfolio building" },
-  { value: "TFP collaboration", label: "TFP collaboration" },
-  { value: "Event", label: "Event" },
-  { value: "Other", label: "Other" },
-];
+const SHOOT_TYPE_OPTION_KEYS = [
+  { value: "", key: "shootTypeOptions.notSpecified" },
+  { value: "Editorial", key: "shootTypeOptions.editorial" },
+  { value: "Commercial", key: "shootTypeOptions.commercial" },
+  { value: "Portfolio building", key: "shootTypeOptions.portfolioBuilding" },
+  { value: "TFP collaboration", key: "shootTypeOptions.tfpCollaboration" },
+  { value: "Event", key: "shootTypeOptions.event" },
+  { value: "Other", key: "shootTypeOptions.other" },
+] as const;
 
 interface ServiceOption {
   id: string;
@@ -78,7 +79,12 @@ interface Draft {
   muaProvided: boolean;
 }
 
-const STEPS = ["Service", "Date & time", "Details", "Confirm"] as const;
+const STEP_KEYS = [
+  "steps.service",
+  "steps.dateTime",
+  "steps.details",
+  "steps.confirm",
+] as const;
 
 function emptyDraft(contactPhoneDefault: string): Draft {
   return {
@@ -121,6 +127,7 @@ export function BookingWizard({
   isModel,
   requesterCrewRole,
 }: BookingWizardProps) {
+  const t = useTranslations("publicPages.booking");
   const searchParams = useSearchParams();
   const storageKey = `booking-draft-${providerId}`;
 
@@ -203,19 +210,25 @@ export function BookingWizard({
 
     const modelDetailsBlock = isModel
       ? [
-          draft.shootType ? `Shoot type: ${draft.shootType}` : null,
-          draft.usageRights ? `Usage rights: ${draft.usageRights}` : null,
-          draft.wardrobeNotes
-            ? `Wardrobe/styling: ${draft.wardrobeNotes}`
+          draft.shootType
+            ? t("notes.shootType", { value: draft.shootType })
             : null,
-          draft.muaProvided ? "Make-up artist provided by customer" : null,
+          draft.usageRights
+            ? t("notes.usageRights", { value: draft.usageRights })
+            : null,
+          draft.wardrobeNotes
+            ? t("notes.wardrobeStyling", { value: draft.wardrobeNotes })
+            : null,
+          draft.muaProvided ? t("notes.muaProvidedByCustomer") : null,
         ]
           .filter(Boolean)
           .join("\n")
       : "";
 
     const notesParts = [
-      draft.customRequest ? `Custom request: ${draft.customRequest}` : null,
+      draft.customRequest
+        ? t("notes.customRequest", { value: draft.customRequest })
+        : null,
       modelDetailsBlock || null,
       draft.notes || null,
     ].filter(Boolean);
@@ -244,7 +257,7 @@ export function BookingWizard({
     setSubmitting(false);
 
     if (!res.ok) {
-      setSubmitError(body.message ?? "Something went wrong. Please try again.");
+      setSubmitError(body.message ?? t("genericError"));
       return;
     }
 
@@ -260,11 +273,10 @@ export function BookingWizard({
             <Check className="size-8 text-success" />
           </div>
           <h2 className="text-heading-lg text-text-primary">
-            Booking request sent!
+            {t("success.heading")}
           </h2>
           <p className="max-w-md text-body-md text-text-secondary">
-            {providerName} will respond within 24 hours. We&apos;ll email you as
-            soon as they confirm.
+            {t("success.body", { providerName })}
           </p>
           <div className="flex gap-3">
             <Button
@@ -272,14 +284,14 @@ export function BookingWizard({
               nativeButton={false}
               render={<Link href="/dashboard/bookings" />}
             >
-              View my bookings
+              {t("success.viewBookings")}
             </Button>
             <Button
               variant="ghost"
               nativeButton={false}
               render={<Link href="/browse" />}
             >
-              Browse more artists
+              {t("success.browseMore")}
             </Button>
           </div>
         </Card>
@@ -366,15 +378,15 @@ export function BookingWizard({
           onClick={() => setStep((s) => s - 1)}
         >
           <ChevronLeft className="size-4" />
-          Back
+          {t("back")}
         </Button>
-        {step < STEPS.length - 1 ? (
+        {step < STEP_KEYS.length - 1 ? (
           <Button
             variant="accent"
             disabled={!canContinue}
             onClick={() => setStep((s) => s + 1)}
           >
-            Continue
+            {t("continueBtn")}
             <ChevronRight className="size-4" />
           </Button>
         ) : (
@@ -384,7 +396,7 @@ export function BookingWizard({
             onClick={onSubmit}
           >
             {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            Send booking request
+            {t("submitBtn")}
           </Button>
         )}
       </div>
@@ -393,13 +405,15 @@ export function BookingWizard({
 }
 
 function ProgressIndicator({ step }: { step: number }) {
+  const t = useTranslations("publicPages.booking");
   return (
     <div className="mb-8 flex items-center">
-      {STEPS.map((label, index) => {
+      {STEP_KEYS.map((key, index) => {
+        const label = t(key);
         const isDone = index < step;
         const isActive = index === step;
         return (
-          <div key={label} className="flex flex-1 items-center last:flex-none">
+          <div key={key} className="flex flex-1 items-center last:flex-none">
             <div className="flex flex-col items-center gap-1.5">
               <div
                 className={cn(
@@ -424,7 +438,7 @@ function ProgressIndicator({ step }: { step: number }) {
                 {label}
               </span>
             </div>
-            {index < STEPS.length - 1 ? (
+            {index < STEP_KEYS.length - 1 ? (
               <div
                 className={cn(
                   "mx-2 h-px flex-1",
@@ -452,20 +466,23 @@ function StepService({
   onSelect: (id: string) => void;
   onCustomRequest: (value: string) => void;
 }) {
+  const t = useTranslations("publicPages.booking");
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-heading-lg text-text-primary">What do you need?</h2>
+      <h2 className="text-heading-lg text-text-primary">
+        {t("stepService.heading")}
+      </h2>
 
       {services.length === 0 ? (
         <div className="flex flex-col gap-2">
           <label className="text-body-sm font-semibold text-text-primary">
-            Describe what you&apos;re looking for
+            {t("stepService.describeLabel")}
           </label>
           <Textarea
             rows={4}
             value={customRequest}
             onChange={(e) => onCustomRequest(e.target.value)}
-            placeholder="Tell them what kind of shoot, event, or product you need..."
+            placeholder={t("stepService.describePlaceholder")}
           />
         </div>
       ) : (
@@ -495,7 +512,9 @@ function StepService({
                   ) : null}
                   <span className="flex items-center gap-1 text-body-sm text-text-tertiary">
                     <Clock className="size-3.5" />
-                    {service.duration} min
+                    {t("stepService.durationMin", {
+                      duration: service.duration,
+                    })}
                   </span>
                 </div>
                 <span className="text-heading-sm font-bold text-text-primary">
@@ -529,6 +548,7 @@ function StepDateTime({
   onSelectDate: (date: string) => void;
   onSelectTime: (time: string) => void;
 }) {
+  const t = useTranslations("publicPages.booking");
   const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
   const [days, setDays] = useState<DayAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -563,14 +583,16 @@ function StepDateTime({
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-heading-lg text-text-primary">When works for you?</h2>
+      <h2 className="text-heading-lg text-text-primary">
+        {t("stepDateTime.heading")}
+      </h2>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_280px]">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <button
               type="button"
-              aria-label="Previous"
+              aria-label={t("stepDateTime.previous")}
               onClick={() =>
                 setWeekStart(
                   (prev) => new Date(prev.getTime() - 28 * 86_400_000),
@@ -588,7 +610,7 @@ function StepDateTime({
             </span>
             <button
               type="button"
-              aria-label="Next"
+              aria-label={t("stepDateTime.next")}
               onClick={() =>
                 setWeekStart(
                   (prev) => new Date(prev.getTime() + 28 * 86_400_000),
@@ -641,14 +663,14 @@ function StepDateTime({
             </div>
           )}
           <p className="text-body-sm text-text-tertiary">
-            Times shown in your local time · needs at least 24 hours notice
+            {t("stepDateTime.localTimeNote")}
           </p>
         </div>
 
         <div className="flex flex-col gap-2">
           {!date ? (
             <p className="text-body-sm text-text-secondary">
-              Select a date to see open times.
+              {t("stepDateTime.selectDatePrompt")}
             </p>
           ) : (
             <>
@@ -662,7 +684,7 @@ function StepDateTime({
               </span>
               {duration ? (
                 <span className="text-body-sm text-text-tertiary">
-                  Session: {duration} min
+                  {t("stepDateTime.sessionDuration", { duration })}
                 </span>
               ) : null}
               {isLoading ? (
@@ -692,7 +714,7 @@ function StepDateTime({
                 </div>
               ) : (
                 <p className="text-body-sm text-text-secondary">
-                  No availability on this date — try another.
+                  {t("stepDateTime.noAvailability")}
                 </p>
               )}
             </>
@@ -701,7 +723,9 @@ function StepDateTime({
       </div>
 
       <p className="text-body-sm text-text-tertiary">
-        Booking {providerName ? `with ${providerName}` : ""}
+        {providerName
+          ? t("stepDateTime.bookingWith", { providerName })
+          : t("stepDateTime.booking")}
       </p>
     </div>
   );
@@ -740,10 +764,11 @@ function StepDetails({
   parentBookingId: string | null;
   onParentBookingChange: (id: string | null) => void;
 }) {
+  const t = useTranslations("publicPages.booking");
   return (
     <div className="flex flex-col gap-5">
       <h2 className="text-heading-lg text-text-primary">
-        Tell {providerName} about your shoot
+        {t("stepDetails.heading", { providerName })}
       </h2>
 
       {isModel ? <ModelSafetyNotice /> : null}
@@ -757,11 +782,11 @@ function StepDetails({
                 checked === true ? parentBookingOptions[0].id : null,
               )
             }
-            label="Attach this to one of my confirmed client jobs"
+            label={t("stepDetails.attachToJob")}
           />
           {parentBookingId !== null ? (
             <NativeSelect
-              label="Client job"
+              label={t("stepDetails.clientJobLabel")}
               value={parentBookingId}
               onChange={(v) => onParentBookingChange(v)}
               options={parentBookingOptions.map((option) => ({
@@ -770,7 +795,7 @@ function StepDetails({
                   day: "numeric",
                   month: "short",
                   timeZone: "UTC",
-                })} ${option.startTime} — ${option.service?.name ?? "Custom request"}`,
+                })} ${option.startTime} — ${option.service?.name ?? t("stepDetails.customRequestOption")}`,
               }))}
             />
           ) : null}
@@ -780,29 +805,32 @@ function StepDetails({
       {isModel ? (
         <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            Shoot details
+            {t("stepDetails.shootDetails")}
           </span>
           <NativeSelect
-            label="Shoot type"
+            label={t("stepDetails.shootTypeLabel")}
             value={shootType}
             onChange={(v) => onChange("shootType", v)}
-            options={SHOOT_TYPE_OPTIONS}
+            options={SHOOT_TYPE_OPTION_KEYS.map((option) => ({
+              value: option.value,
+              label: t(option.key),
+            }))}
           />
           <Input
-            label="Usage rights"
-            placeholder="Where will the images be used?"
+            label={t("stepDetails.usageRightsLabel")}
+            placeholder={t("stepDetails.usageRightsPlaceholder")}
             value={usageRights}
             onChange={(e) => onChange("usageRights", e.target.value)}
           />
           <div className="flex flex-col gap-1.5">
             <label className="text-body-sm font-semibold text-text-primary">
-              Wardrobe / styling notes
+              {t("stepDetails.wardrobeLabel")}
             </label>
             <Textarea
               rows={2}
               value={wardrobeNotes}
               onChange={(e) => onChange("wardrobeNotes", e.target.value)}
-              placeholder="Outfits, styling direction, anything the model should bring or expect"
+              placeholder={t("stepDetails.wardrobePlaceholder")}
             />
           </div>
           <Checkbox
@@ -810,48 +838,48 @@ function StepDetails({
             onCheckedChange={(checked) =>
               onChange("muaProvided", checked === true)
             }
-            label="A make-up artist will be provided"
+            label={t("stepDetails.muaProvidedLabel")}
           />
         </div>
       ) : null}
 
       <div className="flex flex-col gap-2">
         <span className="text-body-sm font-semibold text-text-primary">
-          Location
+          {t("stepDetails.locationLabel")}
         </span>
         <div className="flex flex-col gap-2">
           <Radio
             name="locationType"
             checked={locationType === "PROVIDER"}
             onChange={() => onChange("locationType", "PROVIDER")}
-            label="At provider's studio"
+            label={t("stepDetails.locationProvider")}
           />
           <Radio
             name="locationType"
             checked={locationType === "CUSTOMER"}
             onChange={() => onChange("locationType", "CUSTOMER")}
-            label="At my location"
+            label={t("stepDetails.locationCustomer")}
           />
           <Radio
             name="locationType"
             checked={locationType === "OUTDOOR"}
             onChange={() => onChange("locationType", "OUTDOOR")}
-            label="Outdoor / other"
+            label={t("stepDetails.locationOutdoor")}
           />
         </div>
       </div>
 
       {locationType !== "PROVIDER" ? (
         <Input
-          label="Address"
+          label={t("stepDetails.addressLabel")}
           value={locationAddress}
           onChange={(e) => onChange("locationAddress", e.target.value)}
-          placeholder="Street, ward, city"
+          placeholder={t("stepDetails.addressPlaceholder")}
         />
       ) : null}
 
       <Input
-        label="Number of people"
+        label={t("stepDetails.numberOfPeopleLabel")}
         type="number"
         min={1}
         value={numberOfPeople}
@@ -860,19 +888,19 @@ function StepDetails({
 
       <div className="flex flex-col gap-1.5">
         <label className="text-body-sm font-semibold text-text-primary">
-          Notes
+          {t("stepDetails.notesLabel")}
         </label>
         <Textarea
           rows={4}
           maxLength={1000}
           value={notes}
           onChange={(e) => onChange("notes", e.target.value)}
-          placeholder="Describe your vision, style references, special requirements..."
+          placeholder={t("stepDetails.notesPlaceholder")}
         />
       </div>
 
       <Input
-        label="Contact phone"
+        label={t("stepDetails.contactPhoneLabel")}
         type="tel"
         value={contactPhone}
         onChange={(e) => onChange("contactPhone", e.target.value)}
@@ -881,11 +909,15 @@ function StepDetails({
   );
 }
 
-const LOCATION_LABEL: Record<LocationType, string> = {
-  PROVIDER: "At provider's studio",
-  CUSTOMER: "At my location",
-  OUTDOOR: "Outdoor / other",
-};
+function getLocationLabel(
+  t: ReturnType<typeof useTranslations>,
+): Record<LocationType, string> {
+  return {
+    PROVIDER: t("stepDetails.locationProvider"),
+    CUSTOMER: t("stepDetails.locationCustomer"),
+    OUTDOOR: t("stepDetails.locationOutdoor"),
+  };
+}
 
 function StepReview({
   providerName,
@@ -914,10 +946,16 @@ function StepReview({
   agreed: boolean;
   onAgree: (v: boolean) => void;
 }) {
+  const t = useTranslations("publicPages.booking");
+  const locationLabel = getLocationLabel(t);
   const rows: [string, string][] = [
-    ["Service", service?.name ?? (customRequest ? "Custom request" : "—")],
     [
-      "Date",
+      t("stepReview.rowService"),
+      service?.name ??
+        (customRequest ? t("stepDetails.customRequestOption") : "—"),
+    ],
+    [
+      t("stepReview.rowDate"),
       date
         ? new Date(date).toLocaleDateString("en-US", {
             weekday: "long",
@@ -927,20 +965,27 @@ function StepReview({
           })
         : "—",
     ],
-    ["Time", time ?? "—"],
-    ["Duration", service ? `${service.duration} min` : "—"],
+    [t("stepReview.rowTime"), time ?? "—"],
     [
-      "Location",
-      locationType === "PROVIDER"
-        ? LOCATION_LABEL.PROVIDER
-        : locationAddress || LOCATION_LABEL[locationType],
+      t("stepReview.rowDuration"),
+      service
+        ? t("stepReview.durationMin", { duration: service.duration })
+        : "—",
     ],
-    ["People", numberOfPeople || "1"],
+    [
+      t("stepReview.rowLocation"),
+      locationType === "PROVIDER"
+        ? locationLabel.PROVIDER
+        : locationAddress || locationLabel[locationType],
+    ],
+    [t("stepReview.rowPeople"), numberOfPeople || "1"],
   ];
 
   return (
     <div className="flex flex-col gap-5">
-      <h2 className="text-heading-lg text-text-primary">Review your booking</h2>
+      <h2 className="text-heading-lg text-text-primary">
+        {t("stepReview.heading")}
+      </h2>
 
       <div className="flex items-center gap-3">
         <Avatar className="size-10">
@@ -966,13 +1011,15 @@ function StepReview({
       {service ? (
         <div className="flex flex-col divide-y divide-border-subtle border-b border-border-subtle">
           <div className="flex justify-between py-2.5 text-body-md">
-            <span className="text-text-secondary">Service price</span>
+            <span className="text-text-secondary">
+              {t("stepReview.servicePrice")}
+            </span>
             <span className="text-text-primary">
               {formatCurrency(service.price, service.currency)}
             </span>
           </div>
           <div className="flex justify-between py-2.5 text-heading-md font-bold text-text-primary">
-            <span>Total</span>
+            <span>{t("stepReview.total")}</span>
             <span>{formatCurrency(service.price, service.currency)}</span>
           </div>
         </div>
@@ -980,20 +1027,21 @@ function StepReview({
 
       {notes ? (
         <div className="flex flex-col gap-1">
-          <span className="text-body-sm text-text-tertiary">Notes</span>
+          <span className="text-body-sm text-text-tertiary">
+            {t("stepReview.notesLabel")}
+          </span>
           <p className="text-body-md text-text-primary">{notes}</p>
         </div>
       ) : null}
 
       <div className="rounded-[var(--fg-radius-md)] bg-bg-sunken p-4 text-body-sm text-text-secondary">
-        Free cancellation up to 48 hours before your session. Cancelling within
-        24 hours may be subject to a fee once payments are enabled.
+        {t("stepReview.cancellationNotice")}
       </div>
 
       <Checkbox
         checked={agreed}
         onCheckedChange={(checked) => onAgree(checked === true)}
-        label="I agree to the booking terms"
+        label={t("stepReview.agreeTerms")}
       />
     </div>
   );

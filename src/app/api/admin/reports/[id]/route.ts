@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
 import { resolveReportSchema } from "@/lib/validations/admin";
 import { resolveReport } from "@/services/admin";
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const t = await getTranslations("apiMessages.admin");
   try {
     const session = await requireAdmin();
     const { id } = await params;
@@ -13,12 +18,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const parsed = resolveReportSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "Invalid input" },
+        { data: null, error: "validation_error", message: t("invalidInput") },
         { status: 400 },
       );
     }
 
-    const report = await resolveReport({ reportId: id, adminId: session.user.id, ...parsed.data });
+    const report = await resolveReport({
+      reportId: id,
+      adminId: session.user.id,
+      ...parsed.data,
+    });
 
     await logAdminAction({
       adminId: session.user.id,
@@ -28,7 +37,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       details: parsed.data,
     });
 
-    return NextResponse.json({ data: report, error: null, message: "Report updated" }, { status: 200 });
+    return NextResponse.json(
+      { data: report, error: null, message: t("reportUpdated") },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -38,7 +50,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update report" },
+      { data: null, error: "server_error", message: t("reportUpdateFailed") },
       { status: 500 },
     );
   }

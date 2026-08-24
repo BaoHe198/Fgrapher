@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
@@ -14,9 +15,10 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const t = await getTranslations("apiMessages.cart");
   if (!features.marketplaceEnabled) {
     return NextResponse.json(
-      { data: null, error: "not_found", message: "Not found" },
+      { data: null, error: "not_found", message: t("notFound") },
       { status: 404 },
     );
   }
@@ -28,7 +30,11 @@ export async function PATCH(
     const parsed = updateCartItemSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "Invalid quantity" },
+        {
+          data: null,
+          error: "validation_error",
+          message: t("invalidQuantity"),
+        },
         { status: 400 },
       );
     }
@@ -61,7 +67,7 @@ export async function PATCH(
       {
         data: null,
         error: "server_error",
-        message: "Failed to update cart item",
+        message: t("updateFailed"),
       },
       { status: 500 },
     );
@@ -72,9 +78,10 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const t = await getTranslations("apiMessages.cart");
   if (!features.marketplaceEnabled) {
     return NextResponse.json(
-      { data: null, error: "not_found", message: "Not found" },
+      { data: null, error: "not_found", message: t("notFound") },
       { status: 404 },
     );
   }
@@ -86,7 +93,7 @@ export async function DELETE(
     await removeCartItem(id, session.user.id);
 
     return NextResponse.json(
-      { data: null, error: null, message: "Removed" },
+      { data: null, error: null, message: t("removed") },
       { status: 200 },
     );
   } catch (err) {
@@ -101,7 +108,7 @@ export async function DELETE(
       {
         data: null,
         error: "server_error",
-        message: "Failed to remove cart item",
+        message: t("removeFailed"),
       },
       { status: 500 },
     );

@@ -1,35 +1,79 @@
 import { AlertTriangle, CreditCard, Flag, TrendingUp } from "lucide-react";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { getAdminStats, getRecentActivity } from "@/services/admin";
 
-export const metadata = { title: "Admin overview — Fgrapher" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("accountFlows.admin.overview");
+  return { title: t("metaTitle") };
+}
 
 export default async function AdminOverviewPage() {
-  const [stats, activity] = await Promise.all([getAdminStats(), getRecentActivity()]);
+  const [stats, activity, t] = await Promise.all([
+    getAdminStats(),
+    getRecentActivity(),
+    getTranslations("accountFlows.admin.overview"),
+  ]);
 
   const metrics = [
-    { label: "Total users", value: stats.totalUsers.toLocaleString(), sub: `${stats.userGrowthPercent >= 0 ? "+" : ""}${stats.userGrowthPercent}% vs last month` },
-    { label: "Active subscriptions", value: stats.activeSubscriptions.toLocaleString(), sub: `${formatCurrency(stats.mrr, "VND")} MRR` },
-    { label: "Bookings this month", value: stats.bookingsThisMonth.toLocaleString(), sub: `${stats.completionRate}% completion rate` },
     {
-      label: "GMV this month",
+      label: t("totalUsers"),
+      value: stats.totalUsers.toLocaleString(),
+      sub: t("totalUsersSub", {
+        sign: stats.userGrowthPercent >= 0 ? "+" : "",
+        percent: stats.userGrowthPercent,
+      }),
+    },
+    {
+      label: t("activeSubscriptions"),
+      value: stats.activeSubscriptions.toLocaleString(),
+      sub: t("activeSubscriptionsSub", {
+        mrr: formatCurrency(stats.mrr, "VND"),
+      }),
+    },
+    {
+      label: t("bookingsThisMonth"),
+      value: stats.bookingsThisMonth.toLocaleString(),
+      sub: t("bookingsThisMonthSub", { rate: stats.completionRate }),
+    },
+    {
+      label: t("gmvThisMonth"),
       value: formatCurrency(stats.bookingGmvVnd + stats.orderGmvVnd),
-      sub: `${formatCurrency(stats.bookingGmvVnd)} bookings · ${formatCurrency(stats.orderGmvVnd)} marketplace`,
+      sub: t("gmvThisMonthSub", {
+        bookingGmv: formatCurrency(stats.bookingGmvVnd),
+        orderGmv: formatCurrency(stats.orderGmvVnd),
+      }),
     },
   ];
 
   const health = [
-    { label: "Failed payments", value: stats.failedPayments, icon: CreditCard, href: "/admin/users" },
-    { label: "Pending reports", value: stats.pendingReports, icon: Flag, href: "/admin/reports" },
-    { label: "Subscriptions expiring in 7 days", value: stats.expiringSoon, icon: AlertTriangle, href: "/admin/users" },
+    {
+      label: t("failedPayments"),
+      value: stats.failedPayments,
+      icon: CreditCard,
+      href: "/admin/users",
+    },
+    {
+      label: t("pendingReports"),
+      value: stats.pendingReports,
+      icon: Flag,
+      href: "/admin/reports",
+    },
+    {
+      label: t("expiringSoon"),
+      value: stats.expiringSoon,
+      icon: AlertTriangle,
+      href: "/admin/users",
+    },
   ];
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-display-md text-text-primary">Overview</h1>
+      <h1 className="text-display-md text-text-primary">{t("title")}</h1>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map((m) => (
@@ -50,8 +94,12 @@ export default async function AdminOverviewPage() {
             <Card className="flex items-center gap-3">
               <h.icon className="size-5 text-text-tertiary" />
               <div className="flex flex-col">
-                <span className="text-heading-md text-text-primary">{h.value}</span>
-                <span className="text-body-sm text-text-secondary">{h.label}</span>
+                <span className="text-heading-md text-text-primary">
+                  {h.value}
+                </span>
+                <span className="text-body-sm text-text-secondary">
+                  {h.label}
+                </span>
               </div>
             </Card>
           </Link>
@@ -59,19 +107,28 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <span className="text-heading-md text-text-primary">Recent activity</span>
+        <span className="text-heading-md text-text-primary">
+          {t("recentActivity")}
+        </span>
         <Card padding={false}>
           {activity.length === 0 ? (
-            <p className="px-5 py-8 text-center text-body-sm text-text-secondary">No activity yet</p>
+            <p className="px-5 py-8 text-center text-body-sm text-text-secondary">
+              {t("noActivity")}
+            </p>
           ) : (
             activity.map((event) => (
               <div
                 key={`${event.type}-${event.id}`}
                 className="flex items-center justify-between border-b border-border-subtle px-5 py-3 last:border-b-0"
               >
-                <span className="text-body-sm text-text-primary">{event.label}</span>
+                <span className="text-body-sm text-text-primary">
+                  {event.label}
+                </span>
                 <span className="text-body-sm text-text-tertiary">
-                  {new Date(event.timestamp).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                  {new Date(event.timestamp).toLocaleString("en-US", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
                 </span>
               </div>
             ))

@@ -1,24 +1,29 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { blockUserSchema } from "@/lib/validations/message";
 import { blockUser, MessagingError, unblockUser } from "@/services/messaging";
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.blocks");
   try {
     const session = await requireAuth();
     const body = await request.json();
     const parsed = blockUserSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "userId is required" },
+        { data: null, error: "validation_error", message: t("userIdRequired") },
         { status: 400 },
       );
     }
 
     await blockUser(session.user.id, parsed.data.userId, parsed.data.reason);
 
-    return NextResponse.json({ data: null, error: null, message: "User blocked" }, { status: 200 });
+    return NextResponse.json(
+      { data: null, error: null, message: t("blocked") },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -34,27 +39,31 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to block user" },
+      { data: null, error: "server_error", message: t("blockFailed") },
       { status: 500 },
     );
   }
 }
 
 export async function DELETE(request: Request) {
+  const t = await getTranslations("apiMessages.blocks");
   try {
     const session = await requireAuth();
     const body = await request.json();
     const parsed = blockUserSchema.pick({ userId: true }).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "userId is required" },
+        { data: null, error: "validation_error", message: t("userIdRequired") },
         { status: 400 },
       );
     }
 
     await unblockUser(session.user.id, parsed.data.userId);
 
-    return NextResponse.json({ data: null, error: null, message: "User unblocked" }, { status: 200 });
+    return NextResponse.json(
+      { data: null, error: null, message: t("unblocked") },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -64,7 +73,7 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to unblock user" },
+      { data: null, error: "server_error", message: t("unblockFailed") },
       { status: 500 },
     );
   }

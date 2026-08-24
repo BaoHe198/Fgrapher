@@ -1,0 +1,141 @@
+{
+  "sharedComponents": {
+    "modelSafetyNotice": {
+      "title": "Before you book",
+      "body": "Meet in public or at a registered studio for a first shoot, and let someone know where you'll be. Fgrapher never asks for payment outside the platform — report anything that feels off."
+    },
+    "filterSidebar": {
+      "roleLabel": "Role",
+      "styleLabel": "Style",
+      "heightLabel": "Height (cm)",
+      "heightMinPh": "Min",
+      "heightMaxPh": "Max",
+      "experienceLabel": "Experience level",
+      "travelWillingLabel": "Willing to travel",
+      "sortByLabel": "Sort by",
+      "sortTopRated": "Top rated",
+      "sortPriceAsc": "Price: low to high",
+      "sortPriceDesc": "Price: high to low",
+      "sortNewest": "Newest",
+      "sortMostReviewed": "Most reviewed",
+      "cityLabel": "City",
+      "allCities": "All cities",
+      "budgetLabel": "Budget",
+      "budgetAny": "Any",
+      "budgetUnder2m": "Under ₫2M",
+      "budget2to5m": "₫2M – ₫5M",
+      "budget5to15m": "₫5M – ₫15M",
+      "budgetOver15m": "Over ₫15M",
+      "ratingLabel": "Rating",
+      "ratingAny": "Any",
+      "rating4Plus": "4+ stars",
+      "rating45Plus": "4.5+ stars",
+      "resetFilters": "Reset filters"
+    },
+    "mobileFilterSheet": {
+      "filtersButton": "Filters",
+      "title": "Filters",
+      "description": "Browse filters"
+    },
+    "searchInput": {
+      "placeholder": "Search artists, studios or gear",
+      "clearLabel": "Clear search"
+    },
+    "cartDrawer": {
+      "title": "Your cart ({count})",
+      "description": "Items in your shopping cart",
+      "emptyTitle": "Your cart is empty",
+      "browseGear": "Browse gear",
+      "subtotal": "Subtotal",
+      "deposits": "Deposits",
+      "shippingNote": "Shipping calculated at checkout",
+      "checkout": "Checkout",
+      "continueShopping": "Continue shopping",
+      "shopFallback": "Shop"
+    },
+    "cartItemRow": {
+      "rentalBadge": "Rental — {days}d",
+      "purchaseBadge": "Purchase",
+      "removeLabel": "Remove item"
+    },
+    "chatPanel": {
+      "unknown": "Unknown",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "sentPhoto": "Sent a photo",
+      "photo": "Photo",
+      "viewProfile": "View profile",
+      "report": "Report",
+      "block": "Block",
+      "emptyState": "Say hello to start the conversation",
+      "safetyNote": "Stay safe: never share payment details outside Fgrapher. Report anything suspicious.",
+      "bookingRequest": "Booking request",
+      "viewBooking": "View booking",
+      "attachImage": "Attach an image",
+      "writeMessage": "Write a message...",
+      "sendMessage": "Send message"
+    },
+    "conversationList": {
+      "title": "Messages",
+      "searchPlaceholder": "Search conversations",
+      "emptyTitle": "No conversations yet",
+      "emptySubtitle": "Message an artist to start",
+      "unknown": "Unknown",
+      "noMessages": "No messages yet",
+      "youPrefix": "You: ",
+      "sentPhoto": "Sent a photo",
+      "sentBooking": "Sent a booking request",
+      "now": "now",
+      "yesterday": "Yesterday"
+    },
+    "environmentBanner": {
+      "staging": "STAGING",
+      "development": "DEVELOPMENT"
+    },
+    "footer": {
+      "copyright": "© 2026 Fgrapher. All rights reserved."
+    },
+    "notificationBell": {
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "emptyState": "No notifications yet",
+      "justNow": "just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago",
+      "viewAll": "View all"
+    },
+    "pastDueBanner": {
+      "message": "Your {role} payment failed. Update your payment method to keep your profile live. {days, plural, one {# day} other {# days}} remaining.",
+      "updatePayment": "Update payment"
+    },
+    "webNav": {
+      "openNavigation": "Open navigation",
+      "navigationTitle": "Navigation",
+      "navigationDescription": "Main site navigation",
+      "notifications": "Notifications",
+      "toggleTheme": "Toggle theme"
+    },
+    "dashboardSidebar": {
+      "overview": "Overview",
+      "myBookings": "My bookings",
+      "bookings": "Bookings",
+      "calendar": "Calendar",
+      "reviews": "Reviews",
+      "portfolio": "Portfolio",
+      "listings": "Listings",
+      "shopOrders": "Shop orders",
+      "myOrders": "My orders",
+      "saved": "Saved",
+      "messages": "Messages",
+      "settings": "Settings",
+      "planPro": "Pro — {role}",
+      "planFree": "Free — Customer",
+      "currentPlan": "Current plan",
+      "managePlan": "Manage plan",
+      "openMenu": "Open dashboard menu",
+      "menuTitle": "Dashboard menu",
+      "menuDescription": "Dashboard navigation"
+    }
+  }
+}

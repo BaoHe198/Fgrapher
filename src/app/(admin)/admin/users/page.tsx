@@ -2,6 +2,7 @@
 
 import type { Role, User, UserRole } from "@prisma/client";
 import { Loader2, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
@@ -13,14 +14,22 @@ import { ROLE_LABELS } from "@/lib/constants";
 
 type AdminUserRow = User & { roles: Pick<UserRole, "role">[] };
 
-const ROLE_OPTIONS = [
-  { value: "", label: "All roles" },
-  ...(["PHOTOGRAPHER", "VIDEOGRAPHER", "MAKEUP_ARTIST", "STUDIO", "CAMERA_SHOP", "CUSTOMER", "ADMIN"] as Role[]).map(
-    (r) => ({ value: r, label: ROLE_LABELS[r] }),
-  ),
-];
-
 export default function AdminUsersPage() {
+  const t = useTranslations("accountFlows.admin.users");
+  const ROLE_OPTIONS = [
+    { value: "", label: t("allRoles") },
+    ...(
+      [
+        "PHOTOGRAPHER",
+        "VIDEOGRAPHER",
+        "MAKEUP_ARTIST",
+        "STUDIO",
+        "CAMERA_SHOP",
+        "CUSTOMER",
+        "ADMIN",
+      ] as Role[]
+    ).map((r) => ({ value: r, label: ROLE_LABELS[r] })),
+  ];
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [users, setUsers] = useState<AdminUserRow[]>([]);
@@ -46,7 +55,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">Users</h1>
+      <h1 className="text-display-md text-text-primary">{t("title")}</h1>
 
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 sm:max-w-xs">
@@ -54,11 +63,16 @@ export default function AdminUsersPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, email, username"
+            placeholder={t("searchPlaceholder")}
             className="pl-9"
           />
         </div>
-        <NativeSelect value={role} onChange={setRole} options={ROLE_OPTIONS} className="w-48" />
+        <NativeSelect
+          value={role}
+          onChange={setRole}
+          options={ROLE_OPTIONS}
+          className="w-48"
+        />
       </div>
 
       {isLoading ? (
@@ -70,35 +84,48 @@ export default function AdminUsersPage() {
           <table className="w-full min-w-[720px] border-collapse text-body-sm">
             <thead>
               <tr className="border-b border-border-subtle text-left text-text-tertiary">
-                <th className="px-5 py-3">Name</th>
-                <th className="px-3 py-3">Email</th>
-                <th className="px-3 py-3">Roles</th>
-                <th className="px-3 py-3">Joined</th>
-                <th className="px-3 py-3">Status</th>
+                <th className="px-5 py-3">{t("table.name")}</th>
+                <th className="px-3 py-3">{t("table.email")}</th>
+                <th className="px-3 py-3">{t("table.roles")}</th>
+                <th className="px-3 py-3">{t("table.joined")}</th>
+                <th className="px-3 py-3">{t("table.status")}</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-b border-border-subtle last:border-b-0 hover:bg-bg-sunken">
+                <tr
+                  key={user.id}
+                  className="border-b border-border-subtle last:border-b-0 hover:bg-bg-sunken"
+                >
                   <td className="px-5 py-3">
-                    <Link href={`/admin/users/${user.id}`} className="font-semibold text-text-primary">
+                    <Link
+                      href={`/admin/users/${user.id}`}
+                      className="font-semibold text-text-primary"
+                    >
                       {user.firstName ?? user.name ?? "—"}
                     </Link>
                   </td>
-                  <td className="px-3 py-3 text-text-secondary">{user.email}</td>
                   <td className="px-3 py-3 text-text-secondary">
-                    {user.roles.map((r) => ROLE_LABELS[r.role]).join(", ") || "—"}
+                    {user.email}
                   </td>
                   <td className="px-3 py-3 text-text-secondary">
-                    {new Date(user.createdAt).toLocaleDateString("en-US", { dateStyle: "medium" })}
+                    {user.roles.map((r) => ROLE_LABELS[r.role]).join(", ") ||
+                      "—"}
+                  </td>
+                  <td className="px-3 py-3 text-text-secondary">
+                    {new Date(user.createdAt).toLocaleDateString("en-US", {
+                      dateStyle: "medium",
+                    })}
                   </td>
                   <td className="px-3 py-3">
                     {user.isSuspended ? (
-                      <Badge variant="destructive">Suspended</Badge>
+                      <Badge variant="destructive">
+                        {t("statusSuspended")}
+                      </Badge>
                     ) : user.isVerified ? (
-                      <Badge variant="success">Verified</Badge>
+                      <Badge variant="success">{t("statusVerified")}</Badge>
                     ) : (
-                      <Badge variant="neutral">Active</Badge>
+                      <Badge variant="neutral">{t("statusActive")}</Badge>
                     )}
                   </td>
                 </tr>
@@ -106,7 +133,9 @@ export default function AdminUsersPage() {
             </tbody>
           </table>
           {users.length === 0 ? (
-            <p className="px-5 py-8 text-center text-body-sm text-text-secondary">No users found</p>
+            <p className="px-5 py-8 text-center text-body-sm text-text-secondary">
+              {t("empty")}
+            </p>
           ) : null}
         </Card>
       )}

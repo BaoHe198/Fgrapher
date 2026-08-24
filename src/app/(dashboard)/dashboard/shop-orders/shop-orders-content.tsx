@@ -8,6 +8,7 @@ import type {
   User,
 } from "@prisma/client";
 import { Package } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
@@ -23,32 +24,39 @@ type OrderRow = Order & {
   items: (OrderItem & { product: Pick<Product, "name"> })[];
 };
 
-const TABS: { value: OrderStatus | "ALL"; label: string }[] = [
-  { value: "ALL", label: "All" },
-  { value: "PENDING", label: "New" },
-  { value: "CONFIRMED", label: "Processing" },
-  { value: "SHIPPED", label: "Shipped" },
-  { value: "DELIVERED", label: "Completed" },
-  { value: "CANCELLED", label: "Cancelled" },
+const TAB_VALUES: (OrderStatus | "ALL")[] = [
+  "ALL",
+  "PENDING",
+  "CONFIRMED",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
 ];
 
-const STATUS_BADGE: Record<
+const STATUS_VARIANT: Record<
   OrderStatus,
-  { label: string; variant: "warning" | "success" | "neutral" | "destructive" }
+  "warning" | "success" | "neutral" | "destructive"
 > = {
-  PENDING: { label: "New", variant: "warning" },
-  CONFIRMED: { label: "Processing", variant: "success" },
-  SHIPPED: { label: "Shipped", variant: "success" },
-  DELIVERED: { label: "Completed", variant: "neutral" },
-  CANCELLED: { label: "Cancelled", variant: "destructive" },
-  RETURNED: { label: "Returned", variant: "neutral" },
+  PENDING: "warning",
+  CONFIRMED: "success",
+  SHIPPED: "success",
+  DELIVERED: "neutral",
+  CANCELLED: "destructive",
+  RETURNED: "neutral",
 };
 
-function partyName(party: Pick<User, "name" | "firstName">) {
-  return party.firstName ?? party.name ?? "Customer";
+function partyName(
+  party: Pick<User, "name" | "firstName">,
+  t: ReturnType<typeof useTranslations>,
+) {
+  return party.firstName ?? party.name ?? t("customerFallback");
 }
 
 export function ShopOrdersContent() {
+  const t = useTranslations("dashboardCore.shopOrders");
+  const TABS: { value: OrderStatus | "ALL"; label: string }[] = TAB_VALUES.map(
+    (value) => ({ value, label: t(`tabs.${value}`) }),
+  );
   const [tab, setTab] = useState<OrderStatus | "ALL">("ALL");
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +75,7 @@ export function ShopOrdersContent() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">Shop orders</h1>
+      <h1 className="text-display-md text-text-primary">{t("title")}</h1>
 
       <Tabs
         value={tab}
@@ -89,21 +97,21 @@ export function ShopOrdersContent() {
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Package className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            No orders yet
+            {t("empty")}
           </p>
         </Card>
       ) : (
         <Card padding={false}>
           <div className="grid grid-cols-[1.2fr_1.6fr_0.9fr_0.9fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.06em] text-text-tertiary">
-            <span>Customer</span>
-            <span>Items</span>
-            <span>Total</span>
-            <span>Date</span>
-            <span>Status</span>
+            <span>{t("columns.customer")}</span>
+            <span>{t("columns.items")}</span>
+            <span>{t("columns.total")}</span>
+            <span>{t("columns.date")}</span>
+            <span>{t("columns.status")}</span>
             <span />
           </div>
           {orders.map((order) => {
-            const status = STATUS_BADGE[order.status];
+            const variant = STATUS_VARIANT[order.status];
             return (
               <div
                 key={order.id}
@@ -115,11 +123,11 @@ export function ShopOrdersContent() {
                       <AvatarImage src={order.customer.avatar} alt="" />
                     ) : null}
                     <AvatarFallback>
-                      {partyName(order.customer)[0]?.toUpperCase()}
+                      {partyName(order.customer, t)[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <span className="font-semibold text-text-primary">
-                    {partyName(order.customer)}
+                    {partyName(order.customer, t)}
                   </span>
                 </div>
                 <span className="truncate text-text-secondary">
@@ -135,14 +143,14 @@ export function ShopOrdersContent() {
                     dateStyle: "medium",
                   })}
                 </span>
-                <Badge variant={status.variant}>{status.label}</Badge>
+                <Badge variant={variant}>{t(`status.${order.status}`)}</Badge>
                 <Button
                   size="sm"
                   variant="secondary"
                   nativeButton={false}
                   render={<Link href={`/dashboard/orders/${order.id}`} />}
                 >
-                  View
+                  {t("view")}
                 </Button>
               </div>
             );

@@ -1,41 +1,42 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Fragment, useState } from "react";
 
 import { Switch } from "@/components/ui/switch";
-import { NOTIFICATION_KEYS, type NotificationPreferences } from "@/lib/validations/user";
+import {
+  NOTIFICATION_KEYS,
+  type NotificationPreferences,
+} from "@/lib/validations/user";
 
 const DEFAULT_PREFERENCES: NotificationPreferences = Object.fromEntries(
   NOTIFICATION_KEYS.map((key) => [key, { email: true, inApp: true }]),
 ) as NotificationPreferences;
 
-const GROUPS: { title: string; keys: (typeof NOTIFICATION_KEYS)[number][] }[] = [
+const GROUPS: {
+  titleKey: "bookings" | "messages" | "social" | "marketing";
+  keys: (typeof NOTIFICATION_KEYS)[number][];
+}[] = [
   {
-    title: "Bookings",
-    keys: ["bookingRequest", "bookingConfirmed", "bookingCancelled", "bookingReminder"],
+    titleKey: "bookings",
+    keys: [
+      "bookingRequest",
+      "bookingConfirmed",
+      "bookingCancelled",
+      "bookingReminder",
+    ],
   },
-  { title: "Messages", keys: ["newMessage"] },
-  { title: "Social", keys: ["newFollower", "newReview"] },
-  { title: "Marketing", keys: ["productUpdates", "tips"] },
+  { titleKey: "messages", keys: ["newMessage"] },
+  { titleKey: "social", keys: ["newFollower", "newReview"] },
+  { titleKey: "marketing", keys: ["productUpdates", "tips"] },
 ];
-
-const LABELS: Record<(typeof NOTIFICATION_KEYS)[number], string> = {
-  bookingRequest: "New booking request",
-  bookingConfirmed: "Booking confirmed",
-  bookingCancelled: "Booking cancelled",
-  bookingReminder: "Upcoming booking reminder",
-  newMessage: "New message",
-  newFollower: "New follower",
-  newReview: "New review",
-  productUpdates: "Product updates",
-  tips: "Tips and best practices",
-};
 
 export function NotificationsSettings({
   initialPreferences,
 }: {
   initialPreferences: NotificationPreferences | null;
 }) {
+  const t = useTranslations("dashboardSettings.notifications");
   const [preferences, setPreferences] = useState<NotificationPreferences>(
     initialPreferences ?? DEFAULT_PREFERENCES,
   );
@@ -45,7 +46,10 @@ export function NotificationsSettings({
     channel: "email" | "inApp",
     value: boolean,
   ) => {
-    const next = { ...preferences, [key]: { ...preferences[key], [channel]: value } };
+    const next = {
+      ...preferences,
+      [key]: { ...preferences[key], [channel]: value },
+    };
     setPreferences(next);
 
     await fetch("/api/users/me", {
@@ -58,17 +62,23 @@ export function NotificationsSettings({
   return (
     <div className="flex flex-col gap-6">
       {GROUPS.map((group) => (
-        <div key={group.title} className="flex flex-col gap-2">
+        <div key={group.titleKey} className="flex flex-col gap-2">
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            {group.title}
+            {t(`groups.${group.titleKey}`)}
           </span>
           <div className="grid grid-cols-[1fr_auto_auto] items-center gap-x-6 gap-y-3">
             <span />
-            <span className="text-body-sm text-text-tertiary">Email</span>
-            <span className="text-body-sm text-text-tertiary">In-app</span>
+            <span className="text-body-sm text-text-tertiary">
+              {t("email")}
+            </span>
+            <span className="text-body-sm text-text-tertiary">
+              {t("inApp")}
+            </span>
             {group.keys.map((key) => (
               <Fragment key={key}>
-                <span className="text-body-md text-text-primary">{LABELS[key]}</span>
+                <span className="text-body-md text-text-primary">
+                  {t(`labels.${key}`)}
+                </span>
                 <Switch
                   checked={preferences[key].email}
                   onChange={(value) => toggle(key, "email", value)}

@@ -1,0 +1,126 @@
+{
+  "apiMessages": {
+    "admin": {
+      "auditLogFailed": "Không thể tải nhật ký hoạt động",
+      "consentStatsFailed": "Không thể tải thống kê đồng ý",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "dataRequestUpdated": "Đã cập nhật yêu cầu",
+      "dataRequestProcessFailed": "Không thể xử lý yêu cầu",
+      "dataRequestsLoadFailed": "Không thể tải danh sách yêu cầu dữ liệu",
+      "moderationQueueLoadFailed": "Không thể tải hàng đợi kiểm duyệt",
+      "moderationUpdated": "Đã cập nhật kiểm duyệt",
+      "moderationUpdateFailed": "Không thể cập nhật kiểm duyệt",
+      "reportUpdated": "Đã cập nhật báo cáo",
+      "reportUpdateFailed": "Không thể cập nhật báo cáo",
+      "reportsLoadFailed": "Không thể tải danh sách báo cáo",
+      "statsLoadFailed": "Không thể tải thống kê quản trị",
+      "userNotFound": "Không tìm thấy người dùng",
+      "userLoadFailed": "Không thể tải thông tin người dùng",
+      "invalidAction": "Hành động không hợp lệ",
+      "updated": "Đã cập nhật",
+      "userUpdateFailed": "Không thể cập nhật người dùng",
+      "usersLoadFailed": "Không thể tải danh sách người dùng",
+      "invalidKycKind": "Loại ảnh phải là mặt trước, mặt sau hoặc ảnh chân dung",
+      "documentLinkFailed": "Không thể tạo liên kết xem giấy tờ",
+      "verificationUpdated": "Đã cập nhật xác minh",
+      "verificationUpdateFailed": "Không thể cập nhật xác minh",
+      "verificationQueueLoadFailed": "Không thể tải hàng đợi xác minh"
+    },
+    "auth": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "resetLinkSent": "Nếu email này có tài khoản, liên kết đặt lại mật khẩu đã được gửi",
+      "emailTaken": "Email này đã được đăng ký",
+      "accountCreated": "Đã tạo tài khoản",
+      "accountCreateFailed": "Không thể tạo tài khoản",
+      "resetLinkInvalid": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
+      "passwordUpdated": "Đã cập nhật mật khẩu"
+    },
+    "availability": {
+      "loadFailed": "Không thể tải lịch làm việc",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "updated": "Đã cập nhật lịch làm việc",
+      "updateFailed": "Không thể cập nhật lịch làm việc"
+    },
+    "blockedDates": {
+      "notFound": "Không tìm thấy ngày đã chặn",
+      "unblocked": "Đã bỏ chặn ngày",
+      "unblockFailed": "Không thể bỏ chặn ngày",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "blocked": "Đã chặn ngày",
+      "blockFailed": "Không thể chặn ngày"
+    },
+    "blocks": {
+      "userIdRequired": "userId là bắt buộc",
+      "blocked": "Đã chặn người dùng",
+      "unblocked": "Đã bỏ chặn người dùng",
+      "blockFailed": "Không thể chặn người dùng",
+      "unblockFailed": "Không thể bỏ chặn người dùng"
+    },
+    "bookings": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "rescheduleProposed": "Đã đề xuất đổi lịch",
+      "rescheduleProposeFailed": "Không thể đề xuất đổi lịch",
+      "rescheduleAccepted": "Đã chấp nhận đổi lịch",
+      "rescheduleDeclined": "Đã từ chối đổi lịch",
+      "rescheduleRespondFailed": "Không thể phản hồi yêu cầu đổi lịch",
+      "notFound": "Không tìm thấy lịch đặt",
+      "loadFailed": "Không thể tải thông tin lịch đặt",
+      "updated": "Đã cập nhật lịch đặt",
+      "updateFailed": "Không thể cập nhật lịch đặt",
+      "calendarLoadFailed": "Không thể tải lịch",
+      "listLoadFailed": "Không thể tải danh sách lịch đặt",
+      "requestSent": "Đã gửi yêu cầu đặt lịch",
+      "createFailed": "Không thể tạo lịch đặt"
+    },
+    "cart": {
+      "notFound": "Không tìm thấy",
+      "invalidQuantity": "Số lượng không hợp lệ",
+      "updateFailed": "Không thể cập nhật sản phẩm trong giỏ hàng",
+      "removed": "Đã xóa",
+      "removeFailed": "Không thể xóa sản phẩm khỏi giỏ hàng",
+      "loadFailed": "Không thể tải giỏ hàng",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "added": "Đã thêm vào giỏ hàng",
+      "addFailed": "Không thể thêm vào giỏ hàng"
+    },
+    "contact": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "messageSent": "Đã gửi tin nhắn"
+    },
+    "conversations": {
+      "messagesLoadFailed": "Không thể tải tin nhắn",
+      "markedRead": "Đã đánh dấu đã đọc",
+      "markReadFailed": "Không thể đánh dấu đã đọc",
+      "loadFailed": "Không thể tải danh sách hội thoại",
+      "userIdRequired": "userId là bắt buộc",
+      "startFailed": "Không thể bắt đầu hội thoại",
+      "unreadCountLoadFailed": "Không thể tải số tin nhắn chưa đọc"
+    },
+    "dashboard": {
+      "statsLoadFailed": "Không thể tải thống kê"
+    },
+    "follows": {
+      "notFound": "Không tìm thấy",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "cannotFollowSelf": "Bạn không thể tự theo dõi chính mình",
+      "followed": "Đã theo dõi",
+      "followFailed": "Không thể theo dõi",
+      "missingUserId": "Thiếu userId",
+      "unfollowed": "Đã bỏ theo dõi",
+      "unfollowFailed": "Không thể bỏ theo dõi",
+      "missingParams": "Thiếu userId hoặc profileId",
+      "socialStateLoadFailed": "Không thể tải trạng thái theo dõi"
+    },
+    "messages": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "sendFailed": "Không thể gửi tin nhắn"
+    },
+    "notifications": {
+      "markedRead": "Đã đánh dấu đã đọc",
+      "updateFailed": "Không thể cập nhật thông báo",
+      "allMarkedRead": "Đã đánh dấu tất cả là đã đọc",
+      "updateAllFailed": "Không thể cập nhật thông báo",
+      "loadFailed": "Không thể tải thông báo"
+    }
+  }
+}

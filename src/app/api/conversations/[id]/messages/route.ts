@@ -1,18 +1,30 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { listMessages, MessagingError } from "@/services/messaging";
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const t = await getTranslations("apiMessages.conversations");
   try {
     const session = await requireAuth();
     const { id } = await params;
     const { searchParams } = new URL(request.url);
     const cursor = searchParams.get("cursor") ?? undefined;
 
-    const messages = await listMessages({ conversationId: id, userId: session.user.id, cursor });
+    const messages = await listMessages({
+      conversationId: id,
+      userId: session.user.id,
+      cursor,
+    });
 
-    return NextResponse.json({ data: messages, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data: messages, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -28,7 +40,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load messages" },
+      { data: null, error: "server_error", message: t("messagesLoadFailed") },
       { status: 500 },
     );
   }

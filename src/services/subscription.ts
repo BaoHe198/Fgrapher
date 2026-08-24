@@ -1,4 +1,5 @@
 import type { Role, SubscriptionStatus } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import type Stripe from "stripe";
 
 import {
@@ -18,6 +19,14 @@ const GRACE_PERIOD_DAYS = 7;
 
 function billingUrl() {
   return `${process.env.NEXTAUTH_URL ?? ""}/dashboard/settings/billing`;
+}
+
+// Every function in this file that sends email is a Stripe webhook handler
+// — no request/cookie context to resolve a locale from, so this explicitly
+// defaults to Vietnamese (CLAUDE.md rule 10), matching services/bookings.ts's
+// cron/system-actor branches and services/orders.ts's checkout-webhook path.
+function getEmailT() {
+  return getTranslations({ locale: "vi", namespace: "libServices.email" });
 }
 
 function mapStripeStatus(
@@ -151,6 +160,7 @@ export async function handleCheckoutCompleted(
     email: {
       subject: "Welcome to Fgrapher Pro!",
       html: welcomeSubscriptionEmailHtml({
+        t: await getEmailT(),
         roleNames: results.map((r) => ROLE_PLANS[r.role]?.name ?? r.role),
         billingUrl: billingUrl(),
       }),
@@ -184,6 +194,7 @@ export async function handleSubscriptionUpdated(
       email: {
         subject: "We're sorry to see you go — Fgrapher",
         html: subscriptionCancellingEmailHtml({
+          t: await getEmailT(),
           periodEndLabel: periodEnd
             ? periodEnd.toDateString()
             : "the end of the period",
@@ -242,6 +253,7 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
     email: {
       subject: "Payment received — Fgrapher",
       html: receiptEmailHtml({
+        t: await getEmailT(),
         amountLabel: `${(invoice.amount_paid / 100).toFixed(2)} ${invoice.currency.toUpperCase()}`,
         periodEndLabel: periodEnd ? periodEnd.toDateString() : "—",
         invoiceUrl: invoice.hosted_invoice_url ?? billingUrl(),
@@ -279,6 +291,7 @@ export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     email: {
       subject: "Payment failed — action needed — Fgrapher",
       html: paymentFailedEmailHtml({
+        t: await getEmailT(),
         graceEndsLabel: graceEndsAt.toDateString(),
         billingUrl: billingUrl(),
       }),
@@ -320,7 +333,10 @@ export async function handleSubscriptionDeleted(
       "Your subscription has ended and your profile is no longer visible in search.",
     email: {
       subject: "Your subscription has ended — Fgrapher",
-      html: subscriptionEndedEmailHtml({ billingUrl: billingUrl() }),
+      html: subscriptionEndedEmailHtml({
+        t: await getEmailT(),
+        billingUrl: billingUrl(),
+      }),
     },
   });
 }

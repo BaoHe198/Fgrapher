@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, MoreHorizontal, ShoppingBag } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useCallback, useEffect, useState } from "react";
 
@@ -29,29 +30,40 @@ interface ProductRow {
   images: { url: string }[];
 }
 
-const FILTERS: { value: ListingFilter; label: string }[] = [
-  { value: "ALL", label: "All" },
-  { value: "SALE", label: "For sale" },
-  { value: "RENT", label: "For rent" },
-  { value: "OUT_OF_STOCK", label: "Out of stock" },
-];
+const FILTER_VALUES: ListingFilter[] = ["ALL", "SALE", "RENT", "OUT_OF_STOCK"];
 
-function typeBadge(type: ProductRow["type"]) {
-  if (type === "RENT") return { label: "Rental", variant: "accent" as const };
-  return { label: "For sale", variant: "neutral" as const };
+function typeBadge(
+  type: ProductRow["type"],
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (type === "RENT")
+    return { label: t("badge.rental"), variant: "accent" as const };
+  return { label: t("badge.forSale"), variant: "neutral" as const };
 }
 
-function priceLabel(product: ProductRow) {
+function priceLabel(
+  product: ProductRow,
+  t: ReturnType<typeof useTranslations>,
+) {
   if (product.type === "RENT") {
-    return `${formatCurrency(product.rentalPrice ?? 0, product.currency)}/day`;
+    return t("priceRental", {
+      price: formatCurrency(product.rentalPrice ?? 0, product.currency),
+    });
   }
   if (product.type === "BOTH") {
-    return `${formatCurrency(product.price ?? 0, product.currency)} · ${formatCurrency(product.rentalPrice ?? 0, product.currency)}/day`;
+    return t("priceBoth", {
+      price: formatCurrency(product.price ?? 0, product.currency),
+      rentalPrice: formatCurrency(product.rentalPrice ?? 0, product.currency),
+    });
   }
   return formatCurrency(product.price ?? 0, product.currency);
 }
 
 export function ListingsList() {
+  const t = useTranslations("dashboardCore.listings");
+  const FILTERS: { value: ListingFilter; label: string }[] = FILTER_VALUES.map(
+    (value) => ({ value, label: t(`filters.${value}`) }),
+  );
   const [filter, setFilter] = useState<ListingFilter>("ALL");
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -107,24 +119,22 @@ export function ListingsList() {
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <ShoppingBag className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            No products listed
+            {t("empty.title")}
           </p>
-          <p className="text-body-md text-text-secondary">
-            Add your first camera, lens, or accessory.
-          </p>
+          <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
           <Button
             variant="secondary"
             size="sm"
             nativeButton={false}
             render={<Link href="/dashboard/listings/new" />}
           >
-            Add product
+            {t("addProduct")}
           </Button>
         </Card>
       ) : (
         <Card padding={false}>
           {products.map((product) => {
-            const badge = typeBadge(product.type);
+            const badge = typeBadge(product.type, t);
             return (
               <div
                 key={product.id}
@@ -149,14 +159,14 @@ export function ListingsList() {
                   </p>
                   <p className="text-body-sm text-text-secondary">
                     {product.stock > 0
-                      ? `${product.stock} in stock`
-                      : "Out of stock"}
+                      ? t("inStock", { count: product.stock })
+                      : t("outOfStock")}
                   </p>
                 </div>
 
                 <Badge variant={badge.variant}>{badge.label}</Badge>
                 <span className="text-body-md font-semibold text-text-primary">
-                  {priceLabel(product)}
+                  {priceLabel(product, t)}
                 </span>
 
                 <Button
@@ -167,7 +177,7 @@ export function ListingsList() {
                     <Link href={`/dashboard/listings/${product.id}/edit`} />
                   }
                 >
-                  Edit
+                  {t("edit")}
                 </Button>
 
                 <DropdownMenu>
@@ -180,13 +190,13 @@ export function ListingsList() {
                   />
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => duplicate(product.id)}>
-                      Duplicate
+                      {t("duplicate")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       variant="destructive"
                       onClick={() => remove(product.id)}
                     >
-                      Delete
+                      {t("delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

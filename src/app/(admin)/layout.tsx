@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -6,7 +7,11 @@ import { AuthError } from "@/lib/auth-helpers";
 
 import { AdminSidebar } from "./admin-sidebar";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   try {
     await requireAdmin();
   } catch (err) {
@@ -18,15 +23,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/dashboard");
   }
 
+  const t = await getTranslations("accountFlows.admin.layout");
+
   return (
     <div className="flex min-h-dvh flex-col bg-bg-sunken">
       <div className="flex h-11 items-center gap-2 bg-neutral-900 px-4 text-body-sm font-semibold text-white">
         <span className="rounded bg-danger px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase">
-          Admin
+          {t("badge")}
         </span>
-        <span className="text-neutral-300">Fgrapher internal tools</span>
-        <Link href="/dashboard" className="ml-auto text-neutral-300 hover:text-white">
-          Exit admin
+        <span className="text-neutral-300">{t("subtitle")}</span>
+        <Link
+          href="/dashboard"
+          className="ml-auto text-neutral-300 hover:text-white"
+        >
+          {t("exitAdmin")}
         </Link>
       </div>
 

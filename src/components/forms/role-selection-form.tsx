@@ -11,6 +11,7 @@ import {
   Video,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -24,48 +25,17 @@ import { cn, formatCurrency } from "@/lib/utils";
 
 interface RoleOption {
   role: Role;
-  label: string;
-  description: string;
+  key: string;
   icon: LucideIcon;
 }
 
 const ROLE_OPTIONS: RoleOption[] = [
-  {
-    role: "PHOTOGRAPHER",
-    label: "Photographer",
-    description: "Showcase your portfolio and get booked",
-    icon: Camera,
-  },
-  {
-    role: "VIDEOGRAPHER",
-    label: "Videographer",
-    description: "Share your reel and find clients",
-    icon: Video,
-  },
-  {
-    role: "MAKEUP_ARTIST",
-    label: "Make-up Artist",
-    description: "Get booked for shoots and events",
-    icon: Palette,
-  },
-  {
-    role: "STUDIO",
-    label: "Studio for Rent",
-    description: "List your space for creatives",
-    icon: Building2,
-  },
-  {
-    role: "CAMERA_SHOP",
-    label: "Camera Shop",
-    description: "Rent or sell your equipment",
-    icon: ShoppingBag,
-  },
-  {
-    role: "CUSTOMER",
-    label: "Customer",
-    description: "Find and book creative talent",
-    icon: User,
-  },
+  { role: "PHOTOGRAPHER", key: "photographer", icon: Camera },
+  { role: "VIDEOGRAPHER", key: "videographer", icon: Video },
+  { role: "MAKEUP_ARTIST", key: "makeupArtist", icon: Palette },
+  { role: "STUDIO", key: "studio", icon: Building2 },
+  { role: "CAMERA_SHOP", key: "cameraShop", icon: ShoppingBag },
+  { role: "CUSTOMER", key: "customer", icon: User },
 ];
 
 const isPaidRole = (role: Role) => (PAID_ROLES as Role[]).includes(role);
@@ -77,6 +47,7 @@ export function RoleSelectionForm({
   rolePrices: Partial<Record<Role, number>>;
   marketplaceEnabled: boolean;
 }) {
+  const t = useTranslations("uiKit.roleSelectionForm");
   const router = useRouter();
   const roleOptions = marketplaceEnabled
     ? ROLE_OPTIONS
@@ -112,9 +83,7 @@ export function RoleSelectionForm({
       const body = await res.json();
 
       if (!res.ok) {
-        setServerError(
-          body.message ?? "Something went wrong. Please try again.",
-        );
+        setServerError(body.message ?? t("genericError"));
         setIsSubmitting(false);
         return;
       }
@@ -122,7 +91,7 @@ export function RoleSelectionForm({
       const hasPaidRole = Array.from(selected).some(isPaidRole);
       router.push(hasPaidRole ? "/onboarding/billing" : "/dashboard");
     } catch {
-      setServerError("Something went wrong. Please try again.");
+      setServerError(t("genericError"));
       setIsSubmitting(false);
     }
   };
@@ -136,11 +105,13 @@ export function RoleSelectionForm({
       ) : null}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {roleOptions.map(({ role, label, description, icon: Icon }) => {
+        {roleOptions.map(({ role, key, icon: Icon }) => {
           const isSelected = selected.has(role);
           const isCustomer = role === "CUSTOMER";
           const paid = isPaidRole(role);
           const price = rolePrices[role];
+          const label = t(`roles.${key}.label`);
+          const description = t(`roles.${key}.description`);
 
           return (
             <Card
@@ -174,7 +145,7 @@ export function RoleSelectionForm({
                 <Checkbox
                   checked={isSelected}
                   disabled={isCustomer}
-                  aria-label={`Select ${label}`}
+                  aria-label={t("selectRole", { role: label })}
                   onCheckedChange={() => toggleRole(role)}
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -187,13 +158,16 @@ export function RoleSelectionForm({
 
               <div className="mt-4 flex items-center gap-2">
                 {isCustomer ? (
-                  <Badge variant="secondary">Default</Badge>
+                  <Badge variant="secondary">{t("defaultBadge")}</Badge>
                 ) : (
-                  <Badge variant="outline">Subscription required</Badge>
+                  <Badge variant="outline">
+                    {t("subscriptionRequiredBadge")}
+                  </Badge>
                 )}
                 {paid && isSelected && price ? (
                   <span className="text-xs font-medium text-muted-foreground">
-                    {formatCurrency(price, "VND")}/mo
+                    {formatCurrency(price, "VND")}
+                    {t("perMonth")}
                   </span>
                 ) : null}
               </div>
@@ -205,7 +179,7 @@ export function RoleSelectionForm({
       <div className="flex justify-end">
         <Button size="lg" onClick={onContinue} disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-          Continue
+          {t("continueButton")}
         </Button>
       </div>
     </div>

@@ -8,26 +8,28 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/reports", label: "Reports", icon: Flag },
-  { href: "/admin/verifications", label: "Verifications", icon: BadgeCheck },
-  { href: "/admin/moderation", label: "Moderation", icon: ImageIcon },
-  { href: "/admin/compliance", label: "Compliance", icon: ShieldCheck },
-];
+  { href: "/admin", key: "overview", icon: LayoutDashboard },
+  { href: "/admin/users", key: "users", icon: Users },
+  { href: "/admin/reports", key: "reports", icon: Flag },
+  { href: "/admin/verifications", key: "verifications", icon: BadgeCheck },
+  { href: "/admin/moderation", key: "moderation", icon: ImageIcon },
+  { href: "/admin/compliance", key: "compliance", icon: ShieldCheck },
+] as const;
 
 export function AdminSidebar() {
+  const t = useTranslations("accountFlows.admin.sidebar");
   const pathname = usePathname();
 
   return (
     <nav className="flex flex-col gap-1">
-      {ITEMS.map(({ href, label, icon: Icon }) => {
+      {ITEMS.map(({ href, key, icon: Icon }) => {
         const isActive =
           href === "/admin" ? pathname === href : pathname.startsWith(href);
         return (
@@ -42,7 +44,7 @@ export function AdminSidebar() {
             )}
           >
             <Icon className="size-[18px]" />
-            {label}
+            {t(key)}
           </Link>
         );
       })}

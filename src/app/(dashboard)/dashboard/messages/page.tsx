@@ -1,15 +1,20 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 
 import { ChatPanel } from "@/components/chat/chat-panel";
-import { ConversationList, type ConversationSummary } from "@/components/chat/conversation-list";
+import {
+  ConversationList,
+  type ConversationSummary,
+} from "@/components/chat/conversation-list";
 import { cn } from "@/lib/utils";
 
 export default function MessagesPage() {
+  const t = useTranslations("dashboardCore.messages");
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -97,8 +102,12 @@ export default function MessagesPage() {
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
             <MessageCircle className="size-16 text-text-tertiary" />
-            <p className="text-body-lg font-semibold text-text-primary">Select a conversation</p>
-            <p className="text-body-md text-text-secondary">Choose from the list to start chatting</p>
+            <p className="text-body-lg font-semibold text-text-primary">
+              {t("selectConversation")}
+            </p>
+            <p className="text-body-md text-text-secondary">
+              {t("selectConversationHint")}
+            </p>
           </div>
         )}
       </div>

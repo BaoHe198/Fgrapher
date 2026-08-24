@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -28,16 +29,22 @@ interface DataSettingsContentProps {
   };
 }
 
-const SUMMARY_LABELS: {
+const SUMMARY_KEYS: {
   key: keyof DataSettingsContentProps["summary"];
-  label: string;
+  labelKey:
+    | "profiles"
+    | "bookingsAsCustomer"
+    | "bookingsAsProvider"
+    | "reviewsWritten"
+    | "reviewsReceived"
+    | "orders";
 }[] = [
-  { key: "profiles", label: "Hồ sơ" },
-  { key: "bookingsAsCustomer", label: "Đơn đặt lịch đã gửi" },
-  { key: "bookingsAsProvider", label: "Đơn đặt lịch đã nhận" },
-  { key: "reviewsWritten", label: "Đánh giá đã viết" },
-  { key: "reviewsReceived", label: "Đánh giá đã nhận" },
-  { key: "orders", label: "Đơn hàng" },
+  { key: "profiles", labelKey: "profiles" },
+  { key: "bookingsAsCustomer", labelKey: "bookingsAsCustomer" },
+  { key: "bookingsAsProvider", labelKey: "bookingsAsProvider" },
+  { key: "reviewsWritten", labelKey: "reviewsWritten" },
+  { key: "reviewsReceived", labelKey: "reviewsReceived" },
+  { key: "orders", labelKey: "orders" },
 ];
 
 export function DataSettingsContent({
@@ -45,6 +52,7 @@ export function DataSettingsContent({
   pendingDeletion,
   summary,
 }: DataSettingsContentProps) {
+  const t = useTranslations("dashboardSettings.data");
   const [consent, setConsent] = useState(initialConsent);
   const [isExporting, setIsExporting] = useState(false);
   const [deletionRequested, setDeletionRequested] = useState(pendingDeletion);
@@ -65,10 +73,10 @@ export function DataSettingsContent({
     });
     if (!res.ok) {
       setConsent((prev) => ({ ...prev, [purpose]: !granted }));
-      toast.add({ title: "Không thể cập nhật lựa chọn", type: "error" });
+      toast.add({ title: t("toastConsentUpdateFail"), type: "error" });
       return;
     }
-    toast.add({ title: "Đã cập nhật lựa chọn", type: "success" });
+    toast.add({ title: t("toastConsentUpdateSuccess"), type: "success" });
   };
 
   const exportData = async () => {
@@ -78,7 +86,7 @@ export function DataSettingsContent({
       const body = await res.json();
       if (!res.ok) {
         toast.add({
-          title: body.message ?? "Xuất dữ liệu thất bại",
+          title: body.message ?? t("toastExportFail"),
           type: "error",
         });
         return;
@@ -92,7 +100,7 @@ export function DataSettingsContent({
       link.download = "fgrapher-du-lieu-cua-toi.json";
       link.click();
       URL.revokeObjectURL(url);
-      toast.add({ title: "Đã tải về dữ liệu của bạn", type: "success" });
+      toast.add({ title: t("toastExportSuccess"), type: "success" });
     } finally {
       setIsExporting(false);
     }
@@ -106,7 +114,7 @@ export function DataSettingsContent({
       });
       if (!res.ok) {
         toast.add({
-          title: "Gửi yêu cầu xóa tài khoản thất bại",
+          title: t("toastDeletionRequestFail"),
           type: "error",
         });
         return;
@@ -114,8 +122,8 @@ export function DataSettingsContent({
       setDeletionRequested(true);
       setDeleteStep("closed");
       toast.add({
-        title: "Đã gửi yêu cầu xóa tài khoản",
-        description: "Đội ngũ Fgrapher sẽ xử lý yêu cầu này.",
+        title: t("toastDeletionRequestSuccessTitle"),
+        description: t("toastDeletionRequestSuccessDesc"),
         type: "success",
       });
     } finally {
@@ -127,10 +135,10 @@ export function DataSettingsContent({
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
         <span className="text-body-md font-semibold text-text-primary">
-          Tổng quan dữ liệu của bạn
+          {t("overviewTitle")}
         </span>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {SUMMARY_LABELS.map(({ key, label }) => (
+          {SUMMARY_KEYS.map(({ key, labelKey }) => (
             <div
               key={key}
               className="rounded-[var(--fg-radius-md)] border border-border-subtle p-3"
@@ -138,7 +146,9 @@ export function DataSettingsContent({
               <div className="text-heading-md text-text-primary">
                 {summary[key]}
               </div>
-              <div className="text-body-sm text-text-secondary">{label}</div>
+              <div className="text-body-sm text-text-secondary">
+                {t(`summary.${labelKey}`)}
+              </div>
             </div>
           ))}
         </div>
@@ -148,23 +158,20 @@ export function DataSettingsContent({
 
       <div className="flex flex-col gap-3">
         <span className="text-body-md font-semibold text-text-primary">
-          Đồng ý sử dụng dữ liệu
+          {t("consentTitle")}
         </span>
-        <p className="text-body-sm text-text-secondary">
-          Việc xử lý dữ liệu để cung cấp dịch vụ là bắt buộc và không thể tắt
-          tại đây. Bạn có thể bật/tắt hai mục tùy chọn dưới đây bất cứ lúc nào.
-        </p>
+        <p className="text-body-sm text-text-secondary">{t("consentIntro")}</p>
         <div className="flex items-center justify-between rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
           <div className="flex flex-col gap-0.5">
             <span className="text-body-md text-text-primary">
-              Thông tin khuyến mại
+              {t("marketingLabel")}
             </span>
             <span className="text-body-sm text-text-secondary">
-              Nhận email về khuyến mại, tin tức từ Fgrapher
+              {t("marketingDesc")}
             </span>
           </div>
           <Switch
-            aria-label="Thông tin khuyến mại"
+            aria-label={t("marketingLabel")}
             checked={consent.MARKETING}
             onChange={(value) => toggleConsent("MARKETING", value)}
           />
@@ -172,23 +179,22 @@ export function DataSettingsContent({
         <div className="flex items-center justify-between rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
           <div className="flex flex-col gap-0.5">
             <span className="text-body-md text-text-primary">
-              Phân tích hành vi sử dụng
+              {t("analyticsLabel")}
             </span>
             <span className="text-body-sm text-text-secondary">
-              Cho phép Fgrapher phân tích cách bạn sử dụng dịch vụ để cải thiện
-              sản phẩm
+              {t("analyticsDesc")}
             </span>
           </div>
           <Switch
-            aria-label="Phân tích hành vi sử dụng"
+            aria-label={t("analyticsLabel")}
             checked={consent.ANALYTICS}
             onChange={(value) => toggleConsent("ANALYTICS", value)}
           />
         </div>
         <p className="text-body-sm text-text-tertiary">
-          Xem chi tiết tại{" "}
+          {t("privacyPolicyIntro")}{" "}
           <Link href="/privacy" className="text-text-link hover:underline">
-            Chính sách quyền riêng tư
+            {t("privacyPolicyLink")}
           </Link>
           .
         </p>
@@ -198,12 +204,9 @@ export function DataSettingsContent({
 
       <div className="flex flex-col gap-3">
         <span className="text-body-md font-semibold text-text-primary">
-          Dữ liệu của tôi
+          {t("myDataTitle")}
         </span>
-        <p className="text-body-sm text-text-secondary">
-          Tải về bản sao đầy đủ dữ liệu cá nhân, hồ sơ, đơn đặt lịch và đánh giá
-          của bạn dưới dạng JSON.
-        </p>
+        <p className="text-body-sm text-text-secondary">{t("myDataDesc")}</p>
         <Button
           variant="secondary"
           size="sm"
@@ -212,7 +215,7 @@ export function DataSettingsContent({
           onClick={exportData}
         >
           {isExporting ? <Loader2 className="size-4 animate-spin" /> : null}
-          Tải về dữ liệu của tôi
+          {t("downloadButton")}
         </Button>
       </div>
 
@@ -220,15 +223,14 @@ export function DataSettingsContent({
 
       <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-danger p-4">
         <span className="text-body-md font-semibold text-danger">
-          Xóa tài khoản
+          {t("deleteAccountTitle")}
         </span>
         <p className="text-body-sm text-text-secondary">
-          Yêu cầu xóa vĩnh viễn tài khoản của bạn. Yêu cầu này sẽ được đội ngũ
-          Fgrapher xử lý, không xóa ngay lập tức.
+          {t("deleteAccountDesc")}
         </p>
         {deletionRequested ? (
           <p className="text-body-sm font-semibold text-warning">
-            Bạn đã có một yêu cầu xóa tài khoản đang chờ xử lý.
+            {t("pendingDeletionNotice")}
           </p>
         ) : (
           <Button
@@ -237,7 +239,7 @@ export function DataSettingsContent({
             className="self-start"
             onClick={() => setDeleteStep("explain")}
           >
-            Yêu cầu xóa tài khoản
+            {t("requestDeletionButton")}
           </Button>
         )}
 
@@ -249,28 +251,23 @@ export function DataSettingsContent({
             {deleteStep === "explain" ? (
               <>
                 <DialogHeader>
-                  <DialogTitle>
-                    Điều gì sẽ xảy ra khi bạn xóa tài khoản?
-                  </DialogTitle>
+                  <DialogTitle>{t("explainDialogTitle")}</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col gap-3 text-body-sm text-text-secondary">
                   <div>
                     <span className="font-semibold text-text-primary">
-                      Sẽ bị xóa vĩnh viễn:{" "}
+                      {t("explainWillBeDeletedLabel")}{" "}
                     </span>
-                    hồ sơ, ảnh/portfolio, dịch vụ đã đăng, tin nhắn của bạn.
+                    {t("explainWillBeDeletedBody")}
                   </div>
                   <div>
                     <span className="font-semibold text-text-primary">
-                      Sẽ được giữ lại (đã ẩn danh):{" "}
+                      {t("explainWillBeKeptLabel")}{" "}
                     </span>
-                    tài khoản của bạn sẽ đổi thành &quot;Người dùng đã xóa&quot;
-                    — email, số điện thoại, ngày sinh và các thông tin cá nhân
-                    khác sẽ bị xóa, nhưng các đơn đặt lịch/đánh giá đã hoàn tất
-                    vẫn được giữ để phía đối tác của bạn tra cứu.
+                    {t("explainWillBeKeptBody")}
                   </div>
                   <div className="font-semibold text-danger">
-                    Hành động này không thể hoàn tác sau khi được xử lý.
+                    {t("explainIrreversible")}
                   </div>
                 </div>
                 <DialogFooter>
@@ -278,32 +275,30 @@ export function DataSettingsContent({
                     variant="ghost"
                     onClick={() => setDeleteStep("closed")}
                   >
-                    Hủy
+                    {t("cancel")}
                   </Button>
                   <Button
                     variant="destructive"
                     onClick={() => setDeleteStep("confirm")}
                   >
-                    Tiếp tục
+                    {t("continueBtn")}
                   </Button>
                 </DialogFooter>
               </>
             ) : (
               <>
                 <DialogHeader>
-                  <DialogTitle>Xác nhận gửi yêu cầu xóa tài khoản</DialogTitle>
+                  <DialogTitle>{t("confirmDialogTitle")}</DialogTitle>
                 </DialogHeader>
                 <p className="text-body-sm text-text-secondary">
-                  Bạn có chắc chắn muốn gửi yêu cầu xóa vĩnh viễn tài khoản này
-                  không? Yêu cầu sẽ được đội ngũ Fgrapher xử lý trong thời gian
-                  sớm nhất.
+                  {t("confirmDialogBody")}
                 </p>
                 <DialogFooter>
                   <Button
                     variant="ghost"
                     onClick={() => setDeleteStep("explain")}
                   >
-                    Quay lại
+                    {t("back")}
                   </Button>
                   <Button
                     variant="destructive"
@@ -313,7 +308,7 @@ export function DataSettingsContent({
                     {isRequestingDeletion ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : null}
-                    Xác nhận gửi yêu cầu
+                    {t("confirmSubmit")}
                   </Button>
                 </DialogFooter>
               </>

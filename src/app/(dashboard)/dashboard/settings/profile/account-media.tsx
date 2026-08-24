@@ -1,13 +1,17 @@
 "use client";
 
 import { Loader2, Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRef, useState } from "react";
 
-async function uploadFile(file: File) {
+async function uploadFile(
+  file: File,
+  messages: { unavailable: string; failed: string },
+) {
   const sigRes = await fetch("/api/upload/signature", { method: "POST" });
   const sigBody = await sigRes.json();
-  if (!sigRes.ok) throw new Error(sigBody.message ?? "Upload unavailable");
+  if (!sigRes.ok) throw new Error(sigBody.message ?? messages.unavailable);
 
   const formData = new FormData();
   formData.append("file", file);
@@ -25,7 +29,7 @@ async function uploadFile(file: File) {
     },
   );
   const result = await res.json();
-  if (!res.ok) throw new Error("Upload failed");
+  if (!res.ok) throw new Error(messages.failed);
   return result.secure_url as string;
 }
 
@@ -36,6 +40,7 @@ export function AccountMedia({
   initialAvatar: string | null;
   initialCoverImage: string | null;
 }) {
+  const t = useTranslations("dashboardSettings.profile.media");
   const [avatar, setAvatar] = useState(initialAvatar);
   const [coverImage, setCoverImage] = useState(initialCoverImage);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +52,10 @@ export function AccountMedia({
     setError(null);
     setUploading(target);
     try {
-      const url = await uploadFile(file);
+      const url = await uploadFile(file, {
+        unavailable: t("uploadUnavailable"),
+        failed: t("uploadFailed"),
+      });
       if (target === "avatar") setAvatar(url);
       else setCoverImage(url);
 
@@ -59,7 +67,7 @@ export function AccountMedia({
         ),
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(err instanceof Error ? err.message : t("uploadFailed"));
     } finally {
       setUploading(null);
     }
@@ -87,7 +95,7 @@ export function AccountMedia({
           ) : (
             <Upload className="size-3.5" />
           )}
-          Cover
+          {t("coverButton")}
         </button>
         <input
           ref={coverInput}

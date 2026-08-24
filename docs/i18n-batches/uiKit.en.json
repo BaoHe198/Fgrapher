@@ -1,49 +1,5 @@
 {
   "uiKit": {
-    "condition": {
-      "new": "New",
-      "likeNew": "Like new",
-      "good": "Good",
-      "fair": "Fair"
-    },
-    "socialRow": {
-      "orDivider": "or",
-      "appleComingSoon": "Coming soon"
-    },
-    "productCard": {
-      "rentalBadge": "Rental",
-      "saleAndRentalBadge": "Sale & Rental",
-      "forSaleBadge": "For sale",
-      "outOfStock": "Out of stock",
-      "perDay": "/day",
-      "shopFallback": "Shop"
-    },
-    "productForm": {
-      "nameLabel": "Name",
-      "namePlaceholder": "Canon EOS R5",
-      "descriptionLabel": "Description",
-      "categoryLabel": "Category",
-      "typeLabel": "Type",
-      "saleOption": "For sale",
-      "rentOption": "For rent",
-      "bothOption": "Both",
-      "salePriceLabel": "Sale price",
-      "rentalPriceLabel": "Rental price per day",
-      "depositLabel": "Deposit (refunded on return)",
-      "conditionLabel": "Condition",
-      "stockLabel": "Stock quantity",
-      "imagesLabel": "Images",
-      "activeLabel": "Active",
-      "saveButton": "Save product",
-      "cancelButton": "Cancel",
-      "genericError": "Something went wrong. Please try again."
-    },
-    "productImageUploader": {
-      "reorder": "Reorder",
-      "remove": "Remove",
-      "uploadUnavailable": "Upload unavailable",
-      "uploadFailed": "One or more uploads failed"
-    },
     "roleSelectionForm": {
       "roles": {
         "photographer": {

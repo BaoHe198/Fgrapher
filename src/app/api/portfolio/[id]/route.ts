@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { deleteCloudinaryAsset, isCloudinaryConfigured } from "@/lib/cloudinary";
+import {
+  deleteCloudinaryAsset,
+  isCloudinaryConfigured,
+} from "@/lib/cloudinary";
 import { db } from "@/lib/db";
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const t = await getTranslations("apiMessages.portfolio");
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -16,19 +24,22 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     if (!media || media.profile.userId !== session.user.id) {
       return NextResponse.json(
-        { data: null, error: "not_found", message: "Media not found" },
+        { data: null, error: "not_found", message: t("mediaNotFound") },
         { status: 404 },
       );
     }
 
     if (media.publicId && isCloudinaryConfigured()) {
-      await deleteCloudinaryAsset(media.publicId, media.type === "VIDEO" ? "video" : "image");
+      await deleteCloudinaryAsset(
+        media.publicId,
+        media.type === "VIDEO" ? "video" : "image",
+      );
     }
 
     await db.profileMedia.delete({ where: { id } });
 
     return NextResponse.json(
-      { data: null, error: null, message: "Media deleted" },
+      { data: null, error: null, message: t("mediaDeleted") },
       { status: 200 },
     );
   } catch (err) {
@@ -40,7 +51,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to delete media" },
+      { data: null, error: "server_error", message: t("deleteFailed") },
       { status: 500 },
     );
   }

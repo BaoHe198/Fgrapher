@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { getCustomerStats, getProviderStats, isProviderRoleSet } from "@/services/dashboard";
+import {
+  getCustomerStats,
+  getProviderStats,
+  isProviderRoleSet,
+} from "@/services/dashboard";
 
 export async function GET() {
+  const t = await getTranslations("apiMessages.dashboard");
   try {
     const session = await requireAuth();
 
@@ -11,7 +17,10 @@ export async function GET() {
       ? await getProviderStats(session.user.id)
       : await getCustomerStats(session.user.id);
 
-    return NextResponse.json({ data, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -21,7 +30,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load stats" },
+      { data: null, error: "server_error", message: t("statsLoadFailed") },
       { status: 500 },
     );
   }

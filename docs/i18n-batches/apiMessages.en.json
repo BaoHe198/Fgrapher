@@ -1,0 +1,126 @@
+{
+  "apiMessages": {
+    "admin": {
+      "auditLogFailed": "Failed to search audit log",
+      "consentStatsFailed": "Failed to load consent stats",
+      "invalidInput": "Invalid input",
+      "dataRequestUpdated": "Request updated",
+      "dataRequestProcessFailed": "Failed to process request",
+      "dataRequestsLoadFailed": "Failed to load data requests",
+      "moderationQueueLoadFailed": "Failed to load moderation queue",
+      "moderationUpdated": "Moderation updated",
+      "moderationUpdateFailed": "Failed to update moderation",
+      "reportUpdated": "Report updated",
+      "reportUpdateFailed": "Failed to update report",
+      "reportsLoadFailed": "Failed to load reports",
+      "statsLoadFailed": "Failed to load admin stats",
+      "userNotFound": "User not found",
+      "userLoadFailed": "Failed to load user",
+      "invalidAction": "Invalid action",
+      "updated": "Updated",
+      "userUpdateFailed": "Failed to update user",
+      "usersLoadFailed": "Failed to load users",
+      "invalidKycKind": "kind must be front, back, or selfie",
+      "documentLinkFailed": "Failed to generate document link",
+      "verificationUpdated": "Verification updated",
+      "verificationUpdateFailed": "Failed to update verification",
+      "verificationQueueLoadFailed": "Failed to load verification queue"
+    },
+    "auth": {
+      "invalidInput": "Invalid input",
+      "resetLinkSent": "If an account exists for that email, a reset link has been sent",
+      "emailTaken": "An account with this email already exists",
+      "accountCreated": "Account created",
+      "accountCreateFailed": "Failed to create account",
+      "resetLinkInvalid": "This reset link is invalid or has expired",
+      "passwordUpdated": "Password updated"
+    },
+    "availability": {
+      "loadFailed": "Failed to load availability",
+      "invalidInput": "Invalid input",
+      "updated": "Availability updated",
+      "updateFailed": "Failed to update availability"
+    },
+    "blockedDates": {
+      "notFound": "Blocked date not found",
+      "unblocked": "Date unblocked",
+      "unblockFailed": "Failed to unblock date",
+      "invalidInput": "Invalid input",
+      "blocked": "Date blocked",
+      "blockFailed": "Failed to block date"
+    },
+    "blocks": {
+      "userIdRequired": "userId is required",
+      "blocked": "User blocked",
+      "unblocked": "User unblocked",
+      "blockFailed": "Failed to block user",
+      "unblockFailed": "Failed to unblock user"
+    },
+    "bookings": {
+      "invalidInput": "Invalid input",
+      "rescheduleProposed": "Reschedule proposed",
+      "rescheduleProposeFailed": "Failed to propose reschedule",
+      "rescheduleAccepted": "Reschedule accepted",
+      "rescheduleDeclined": "Reschedule declined",
+      "rescheduleRespondFailed": "Failed to respond to reschedule",
+      "notFound": "Booking not found",
+      "loadFailed": "Failed to load booking",
+      "updated": "Booking updated",
+      "updateFailed": "Failed to update booking",
+      "calendarLoadFailed": "Failed to load calendar",
+      "listLoadFailed": "Failed to load bookings",
+      "requestSent": "Booking request sent",
+      "createFailed": "Failed to create booking"
+    },
+    "cart": {
+      "notFound": "Not found",
+      "invalidQuantity": "Invalid quantity",
+      "updateFailed": "Failed to update cart item",
+      "removed": "Removed",
+      "removeFailed": "Failed to remove cart item",
+      "loadFailed": "Failed to load cart",
+      "invalidInput": "Invalid input",
+      "added": "Added to cart",
+      "addFailed": "Failed to add to cart"
+    },
+    "contact": {
+      "invalidInput": "Invalid input",
+      "messageSent": "Message sent"
+    },
+    "conversations": {
+      "messagesLoadFailed": "Failed to load messages",
+      "markedRead": "Marked as read",
+      "markReadFailed": "Failed to mark as read",
+      "loadFailed": "Failed to load conversations",
+      "userIdRequired": "userId is required",
+      "startFailed": "Failed to start conversation",
+      "unreadCountLoadFailed": "Failed to load unread count"
+    },
+    "dashboard": {
+      "statsLoadFailed": "Failed to load stats"
+    },
+    "follows": {
+      "notFound": "Not found",
+      "invalidInput": "Invalid input",
+      "cannotFollowSelf": "You cannot follow yourself",
+      "followed": "Followed",
+      "followFailed": "Failed to follow",
+      "missingUserId": "Missing userId",
+      "unfollowed": "Unfollowed",
+      "unfollowFailed": "Failed to unfollow",
+      "missingParams": "Missing userId or profileId",
+      "socialStateLoadFailed": "Failed to load social state"
+    },
+    "messages": {
+      "invalidInput": "Invalid input",
+      "sendFailed": "Failed to send message"
+    },
+    "notifications": {
+      "markedRead": "Marked as read",
+      "updateFailed": "Failed to update notification",
+      "allMarkedRead": "All marked as read",
+      "updateAllFailed": "Failed to update notifications",
+      "loadFailed": "Failed to load notifications"
+    }
+  }
+}

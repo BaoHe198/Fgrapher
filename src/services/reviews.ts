@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+
 import { db } from "@/lib/db";
 import { newReviewEmailHtml, reviewResponseEmailHtml } from "@/lib/email";
 import { notify } from "@/services/notification";
@@ -37,12 +39,17 @@ export async function getReviewEligibility(bookingId: string, userId: string) {
     return { eligible: false as const, reason: "not_completed" as const };
   }
   if (booking.review) {
-    return { eligible: false as const, reason: "already_reviewed" as const, review: booking.review };
+    return {
+      eligible: false as const,
+      reason: "already_reviewed" as const,
+      review: booking.review,
+    };
   }
   if (!booking.completedAt) {
     return { eligible: false as const, reason: "not_completed" as const };
   }
-  const daysSinceCompletion = (Date.now() - booking.completedAt.getTime()) / 86_400_000;
+  const daysSinceCompletion =
+    (Date.now() - booking.completedAt.getTime()) / 86_400_000;
   if (daysSinceCompletion > REVIEW_WINDOW_DAYS) {
     return { eligible: false as const, reason: "window_expired" as const };
   }
@@ -96,6 +103,7 @@ export async function createReview({
     email: {
       subject: "New review — Fgrapher",
       html: newReviewEmailHtml({
+        t: await getTranslations("libServices.email"),
         reviewerName: partyName(review.reviewer),
         rating,
         bookingUrl: bookingUrlFor(bookingId),
@@ -122,12 +130,19 @@ export async function updateReview({
     throw new ReviewError("Review not found", 404);
   }
 
-  const daysSincePosted = (Date.now() - review.createdAt.getTime()) / 86_400_000;
+  const daysSincePosted =
+    (Date.now() - review.createdAt.getTime()) / 86_400_000;
   if (daysSincePosted > EDIT_WINDOW_DAYS) {
-    throw new ReviewError("Reviews can only be edited within 7 days of posting", 400);
+    throw new ReviewError(
+      "Reviews can only be edited within 7 days of posting",
+      400,
+    );
   }
 
-  return db.review.update({ where: { id: reviewId }, data: { rating, content } });
+  return db.review.update({
+    where: { id: reviewId },
+    data: { rating, content },
+  });
 }
 
 export async function respondToReview({
@@ -147,7 +162,10 @@ export async function respondToReview({
     throw new ReviewError("Review not found", 404);
   }
   if (review.response) {
-    throw new ReviewError("This review already has a response — use edit instead", 400);
+    throw new ReviewError(
+      "This review already has a response — use edit instead",
+      400,
+    );
   }
 
   const updated = await db.review.update({
@@ -164,6 +182,7 @@ export async function respondToReview({
     email: {
       subject: "New response to your review — Fgrapher",
       html: reviewResponseEmailHtml({
+        t: await getTranslations("libServices.email"),
         providerName: partyName(review.reviewed),
         bookingUrl: bookingUrlFor(review.bookingId),
       }),
@@ -189,7 +208,8 @@ export async function updateReviewResponse({
   if (!review.respondedAt) {
     throw new ReviewError("No response to edit yet", 400);
   }
-  const hoursSinceResponse = (Date.now() - review.respondedAt.getTime()) / 3_600_000;
+  const hoursSinceResponse =
+    (Date.now() - review.respondedAt.getTime()) / 3_600_000;
   if (hoursSinceResponse > RESPONSE_EDIT_WINDOW_HOURS) {
     throw new ReviewError("Responses can only be edited within 24 hours", 400);
   }
@@ -204,12 +224,19 @@ export async function getProviderReviewStats(providerId: string) {
   ]);
 
   const total = reviews.length;
-  const avgRating = total > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
+  const avgRating =
+    total > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
   const responded = reviews.filter((r) => r.response).length;
   const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0;
   const awaitingResponse = total - responded;
 
-  return { avgRating, total, responseRate, awaitingResponse, totalBookingsCompleted };
+  return {
+    avgRating,
+    total,
+    responseRate,
+    awaitingResponse,
+    totalBookingsCompleted,
+  };
 }
 
 export async function listProviderReviews({

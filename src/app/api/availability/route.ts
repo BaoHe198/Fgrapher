@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { weeklyAvailabilitySchema } from "@/lib/validations/availability";
 
 export async function GET() {
+  const t = await getTranslations("apiMessages.availability");
   try {
     const session = await requireAuth();
 
@@ -32,13 +34,14 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load availability" },
+      { data: null, error: "server_error", message: t("loadFailed") },
       { status: 500 },
     );
   }
 }
 
 export async function PUT(request: Request) {
+  const t = await getTranslations("apiMessages.availability");
   try {
     const session = await requireAuth();
 
@@ -49,7 +52,7 @@ export async function PUT(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -71,7 +74,7 @@ export async function PUT(request: Request) {
     ]);
 
     return NextResponse.json(
-      { data: null, error: null, message: "Availability updated" },
+      { data: null, error: null, message: t("updated") },
       { status: 200 },
     );
   } catch (err) {
@@ -83,7 +86,7 @@ export async function PUT(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update availability" },
+      { data: null, error: "server_error", message: t("updateFailed") },
       { status: 500 },
     );
   }

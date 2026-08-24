@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
 import { ProductForm } from "@/components/forms/product-form";
@@ -30,9 +31,13 @@ export default async function EditProductPage({
     notFound();
   }
 
+  const t = await getTranslations("dashboardCore.listings");
+
   return (
     <div className="flex max-w-xl flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">Edit product</h1>
+      <h1 className="text-display-md text-text-primary">
+        {t("editProductTitle")}
+      </h1>
       <ProductForm
         productId={product.id}
         defaultValues={{

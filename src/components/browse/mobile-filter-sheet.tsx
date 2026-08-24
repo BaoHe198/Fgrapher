@@ -1,6 +1,7 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export function MobileFilterSheet({
   activeCount: number;
   marketplaceEnabled: boolean;
 }) {
+  const t = useTranslations("sharedComponents.mobileFilterSheet");
   const [open, setOpen] = useState(false);
 
   return (
@@ -32,15 +34,15 @@ export function MobileFilterSheet({
         render={
           <Button variant="secondary" size="sm">
             <SlidersHorizontal className="size-4" />
-            Filters
+            {t("filtersButton")}
             {activeCount > 0 ? ` (${activeCount})` : ""}
           </Button>
         }
       />
       <SheetContent side="left" className="w-3/4 overflow-y-auto sm:max-w-xs">
         <SheetHeader className="sr-only">
-          <SheetTitle>Filters</SheetTitle>
-          <SheetDescription>Browse filters</SheetDescription>
+          <SheetTitle>{t("title")}</SheetTitle>
+          <SheetDescription>{t("description")}</SheetDescription>
         </SheetHeader>
         <div className="p-4">
           <FilterSidebar

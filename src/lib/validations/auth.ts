@@ -9,6 +9,19 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
+// Translated variant of loginSchema — Zod schemas are built at module scope
+// (outside any request), so they can't call the async getTranslations()
+// themselves. Route handlers that have a `t` instance (namespace
+// "libServices.validation.auth") should call this factory instead of using
+// the bare `loginSchema` export above, which keeps its English fallback
+// text for any caller not yet wired up to it.
+export function getLoginSchema(t: (key: string) => string) {
+  return z.object({
+    email: z.string().email(t("emailInvalid")),
+    password: z.string().min(8, t("passwordMinLength")),
+  });
+}
+
 // Kept in sync with PAID_ROLES in @/lib/constants — hardcoded here (rather
 // than derived) since zod needs a literal tuple for z.enum.
 const PAID_ROLE_VALUES = [
@@ -73,3 +86,50 @@ export const registerSchema = z
   );
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+// Translated variant of registerSchema — see getLoginSchema's comment above
+// for why this is a factory rather than a bare schema. Namespace
+// "libServices.validation.auth".
+export function getRegisterSchema(t: (key: string) => string) {
+  return z
+    .object({
+      name: z.string().min(2, t("nameRequired")),
+      email: z.string().email(t("emailInvalid")),
+      password: z
+        .string()
+        .min(8, t("passwordMinLength"))
+        .regex(/[A-Z]/, t("passwordUppercase"))
+        .regex(/[0-9]/, t("passwordNumber")),
+      accountType: z.enum(["customer", "provider"]),
+      roles: z.array(z.enum(PAID_ROLE_VALUES)),
+      dateOfBirth: z.string().min(1, t("dateOfBirthRequired")),
+      acceptedContentGuidelines: z.boolean().optional(),
+      consentService: z.boolean(),
+      consentMarketing: z.boolean(),
+      consentAnalytics: z.boolean(),
+    })
+    .refine(
+      (data) => data.accountType !== "provider" || data.roles.length > 0,
+      {
+        message: t("roleRequired"),
+        path: ["roles"],
+      },
+    )
+    .refine((data) => data.consentService === true, {
+      message: t("consentServiceRequired"),
+      path: ["consentService"],
+    })
+    .refine((data) => isAtLeast18(new Date(data.dateOfBirth)), {
+      message: t("mustBe18"),
+      path: ["dateOfBirth"],
+    })
+    .refine(
+      (data) =>
+        !data.roles.includes("MODEL") ||
+        data.acceptedContentGuidelines === true,
+      {
+        message: t("contentGuidelinesRequired"),
+        path: ["acceptedContentGuidelines"],
+      },
+    );
+}

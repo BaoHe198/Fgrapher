@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
 import { listReports } from "@/services/admin";
 
-const VALID_STATUSES = ["PENDING", "REVIEWING", "RESOLVED", "DISMISSED"] as const;
+const VALID_STATUSES = [
+  "PENDING",
+  "REVIEWING",
+  "RESOLVED",
+  "DISMISSED",
+] as const;
 
 export async function GET(request: Request) {
+  const t = await getTranslations("apiMessages.admin");
   try {
     await requireAdmin();
     const { searchParams } = new URL(request.url);
 
     const statusParam = searchParams.get("status")?.toUpperCase();
-    const status = VALID_STATUSES.includes(statusParam as (typeof VALID_STATUSES)[number])
+    const status = VALID_STATUSES.includes(
+      statusParam as (typeof VALID_STATUSES)[number],
+    )
       ? (statusParam as (typeof VALID_STATUSES)[number])
       : undefined;
 
@@ -42,7 +51,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load reports" },
+      { data: null, error: "server_error", message: t("reportsLoadFailed") },
       { status: 500 },
     );
   }

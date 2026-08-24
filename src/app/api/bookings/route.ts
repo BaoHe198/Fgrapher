@@ -1,13 +1,26 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { createBookingSchema } from "@/lib/validations/booking";
 import { isProviderRoleSet } from "@/services/dashboard";
-import { BookingActionError, createBooking, listBookings, type BookingTab } from "@/services/bookings";
+import {
+  BookingActionError,
+  createBooking,
+  listBookings,
+  type BookingTab,
+} from "@/services/bookings";
 
-const VALID_TABS: BookingTab[] = ["ALL", "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"];
+const VALID_TABS: BookingTab[] = [
+  "ALL",
+  "PENDING",
+  "CONFIRMED",
+  "COMPLETED",
+  "CANCELLED",
+];
 
 export async function GET(request: Request) {
+  const t = await getTranslations("apiMessages.bookings");
   try {
     const session = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -45,13 +58,14 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load bookings" },
+      { data: null, error: "server_error", message: t("listLoadFailed") },
       { status: 500 },
     );
   }
 }
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.bookings");
   try {
     const session = await requireAuth();
     const body = await request.json();
@@ -61,7 +75,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -70,7 +84,7 @@ export async function POST(request: Request) {
     const booking = await createBooking(session.user.id, parsed.data);
 
     return NextResponse.json(
-      { data: booking, error: null, message: "Booking request sent" },
+      { data: booking, error: null, message: t("requestSent") },
       { status: 201 },
     );
   } catch (err) {
@@ -88,7 +102,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to create booking" },
+      { data: null, error: "server_error", message: t("createFailed") },
       { status: 500 },
     );
   }

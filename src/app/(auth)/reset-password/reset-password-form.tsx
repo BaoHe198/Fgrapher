@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,23 +12,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 
-const resetPasswordSchema = z
-  .object({
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+type ResetPasswordInput = { password: string; confirmPassword: string };
 
 export function ResetPasswordForm() {
+  const t = useTranslations("accountFlows.resetPassword");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [serverError, setServerError] = useState<string | null>(null);
+
+  const resetPasswordSchema = z
+    .object({
+      password: z.string().min(8, t("passwordMinLength")),
+      confirmPassword: z.string().min(1, t("confirmRequired")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("passwordsMismatch"),
+      path: ["confirmPassword"],
+    });
 
   const {
     register,
@@ -42,7 +44,7 @@ export function ResetPasswordForm() {
     setServerError(null);
 
     if (!token) {
-      setServerError("This reset link is invalid or has expired");
+      setServerError(t("invalidLink"));
       return;
     }
 
@@ -54,13 +56,13 @@ export function ResetPasswordForm() {
 
     if (!res.ok) {
       const body = await res.json();
-      setServerError(body.message ?? "Something went wrong. Please try again.");
+      setServerError(body.message ?? t("genericError"));
       return;
     }
 
     toast.add({
-      title: "Password updated",
-      description: "You can now sign in with your new password.",
+      title: t("updatedToastTitle"),
+      description: t("updatedToastDesc"),
       type: "success",
     });
     router.push("/login");
@@ -69,7 +71,7 @@ export function ResetPasswordForm() {
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="text-display-md text-text-primary">Set a new password</h1>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
       </div>
 
       {serverError ? (
@@ -80,24 +82,34 @@ export function ResetPasswordForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
         <Input
-          label="New password"
+          label={t("newPasswordLabel")}
           type="password"
-          placeholder="At least 8 characters"
+          placeholder={t("passwordPlaceholder")}
           autoComplete="new-password"
           error={errors.password?.message}
           {...register("password")}
         />
         <Input
-          label="Confirm password"
+          label={t("confirmPasswordLabel")}
           type="password"
-          placeholder="At least 8 characters"
+          placeholder={t("passwordPlaceholder")}
           autoComplete="new-password"
           error={errors.confirmPassword?.message}
           {...register("confirmPassword")}
         />
 
-        <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : "Update password"}
+        <Button
+          type="submit"
+          variant="accent"
+          size="lg"
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            t("submit")
+          )}
         </Button>
       </form>
     </>

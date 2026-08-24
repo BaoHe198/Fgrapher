@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { features } from "@/lib/features";
 import { rolePricesVnd } from "@/lib/constants/plans";
 
 import { AuthTabs } from "./auth-tabs";
 
-export const metadata: Metadata = {
-  title: "Sign in or create an account — Fgrapher",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("accountFlows.login");
+  return { title: t("metaTitle") };
+}
 
 interface LoginPageProps {
   searchParams: Promise<{

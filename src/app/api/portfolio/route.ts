@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import {
   AuthError,
@@ -11,6 +12,7 @@ import { createPortfolioMediaSchema } from "@/lib/validations/portfolio";
 import { runModeration } from "@/services/moderation";
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.portfolio");
   try {
     const session = await requireAuth();
 
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "forbidden",
-          message: "This profile does not belong to you",
+          message: t("profileNotOwned"),
         },
         { status: 403 },
       );
@@ -57,7 +59,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "limit_reached",
-          message: `Your plan allows up to ${limit} portfolio items`,
+          message: t("limitReached", { limit }),
         },
         { status: 403 },
       );
@@ -87,7 +89,7 @@ export async function POST(request: Request) {
     void runModeration(media.id);
 
     return NextResponse.json(
-      { data: media, error: null, message: "Media added" },
+      { data: media, error: null, message: t("mediaAdded") },
       { status: 201 },
     );
   } catch (err) {
@@ -99,7 +101,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to save media" },
+      { data: null, error: "server_error", message: t("saveFailed") },
       { status: 500 },
     );
   }

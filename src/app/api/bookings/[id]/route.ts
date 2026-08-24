@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import {
@@ -12,6 +13,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const t = await getTranslations("apiMessages.bookings");
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -19,7 +21,7 @@ export async function GET(
     const booking = await getBookingDetail(id, session.user.id);
     if (!booking) {
       return NextResponse.json(
-        { data: null, error: "not_found", message: "Booking not found" },
+        { data: null, error: "not_found", message: t("notFound") },
         { status: 404 },
       );
     }
@@ -37,7 +39,7 @@ export async function GET(
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load booking" },
+      { data: null, error: "server_error", message: t("loadFailed") },
       { status: 500 },
     );
   }
@@ -47,6 +49,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const t = await getTranslations("apiMessages.bookings");
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -58,7 +61,7 @@ export async function PATCH(
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -72,7 +75,7 @@ export async function PATCH(
     });
 
     return NextResponse.json(
-      { data: booking, error: null, message: "Booking updated" },
+      { data: booking, error: null, message: t("updated") },
       { status: 200 },
     );
   } catch (err) {
@@ -93,7 +96,7 @@ export async function PATCH(
       {
         data: null,
         error: "server_error",
-        message: "Failed to update booking",
+        message: t("updateFailed"),
       },
       { status: 500 },
     );

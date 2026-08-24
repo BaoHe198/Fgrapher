@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
@@ -9,9 +10,10 @@ const followSchema = z.object({ userId: z.string().min(1) });
 
 // Dormant while SOCIAL_FEED_ENABLED=false — see CLAUDE.md.
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.follows");
   if (!features.socialFeedEnabled) {
     return NextResponse.json(
-      { data: null, error: "not_found", message: "Not found" },
+      { data: null, error: "not_found", message: t("notFound") },
       { status: 404 },
     );
   }
@@ -22,7 +24,7 @@ export async function POST(request: Request) {
     const parsed = followSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "Invalid input" },
+        { data: null, error: "validation_error", message: t("invalidInput") },
         { status: 400 },
       );
     }
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "invalid_target",
-          message: "You cannot follow yourself",
+          message: t("cannotFollowSelf"),
         },
         { status: 400 },
       );
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { data: null, error: null, message: "Followed" },
+      { data: null, error: null, message: t("followed") },
       { status: 201 },
     );
   } catch (err) {
@@ -60,16 +62,17 @@ export async function POST(request: Request) {
       );
     }
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to follow" },
+      { data: null, error: "server_error", message: t("followFailed") },
       { status: 500 },
     );
   }
 }
 
 export async function DELETE(request: Request) {
+  const t = await getTranslations("apiMessages.follows");
   if (!features.socialFeedEnabled) {
     return NextResponse.json(
-      { data: null, error: "not_found", message: "Not found" },
+      { data: null, error: "not_found", message: t("notFound") },
       { status: 404 },
     );
   }
@@ -80,7 +83,7 @@ export async function DELETE(request: Request) {
     const userId = searchParams.get("userId");
     if (!userId) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "Missing userId" },
+        { data: null, error: "validation_error", message: t("missingUserId") },
         { status: 400 },
       );
     }
@@ -90,7 +93,7 @@ export async function DELETE(request: Request) {
     });
 
     return NextResponse.json(
-      { data: null, error: null, message: "Unfollowed" },
+      { data: null, error: null, message: t("unfollowed") },
       { status: 200 },
     );
   } catch (err) {
@@ -101,7 +104,7 @@ export async function DELETE(request: Request) {
       );
     }
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to unfollow" },
+      { data: null, error: "server_error", message: t("unfollowFailed") },
       { status: 500 },
     );
   }

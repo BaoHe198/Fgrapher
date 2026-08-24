@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { reorderPortfolioSchema } from "@/lib/validations/portfolio";
 
 export async function PATCH(request: Request) {
+  const t = await getTranslations("apiMessages.portfolio");
   try {
     const session = await requireAuth();
 
@@ -15,7 +17,7 @@ export async function PATCH(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -31,7 +33,7 @@ export async function PATCH(request: Request) {
       media.every((m) => m.profile.userId === session.user.id);
     if (!allOwnedByUser) {
       return NextResponse.json(
-        { data: null, error: "forbidden", message: "One or more items do not belong to you" },
+        { data: null, error: "forbidden", message: t("notOwned") },
         { status: 403 },
       );
     }
@@ -43,7 +45,7 @@ export async function PATCH(request: Request) {
     );
 
     return NextResponse.json(
-      { data: null, error: null, message: "Order updated" },
+      { data: null, error: null, message: t("orderUpdated") },
       { status: 200 },
     );
   } catch (err) {
@@ -55,7 +57,7 @@ export async function PATCH(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to reorder media" },
+      { data: null, error: "server_error", message: t("reorderFailed") },
       { status: 500 },
     );
   }

@@ -2,6 +2,7 @@
 
 import type { Report, ReportStatus } from "@prisma/client";
 import { Flag, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,17 +12,31 @@ import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 
-type ReportRow = Report & { reporter: { name: string | null; firstName: string | null; email: string } | null };
+type ReportRow = Report & {
+  reporter: {
+    name: string | null;
+    firstName: string | null;
+    email: string;
+  } | null;
+};
 
-const TABS: { value: ReportStatus | "ALL"; label: string }[] = [
-  { value: "PENDING", label: "Pending" },
-  { value: "REVIEWING", label: "Reviewing" },
-  { value: "RESOLVED", label: "Resolved" },
-  { value: "DISMISSED", label: "Dismissed" },
-  { value: "ALL", label: "All" },
+const TAB_VALUES: (ReportStatus | "ALL")[] = [
+  "PENDING",
+  "REVIEWING",
+  "RESOLVED",
+  "DISMISSED",
+  "ALL",
 ];
 
 export default function AdminReportsPage() {
+  const t = useTranslations("accountFlows.admin.reports");
+  const TAB_LABELS: Record<ReportStatus | "ALL", string> = {
+    PENDING: t("tabs.pending"),
+    REVIEWING: t("tabs.reviewing"),
+    RESOLVED: t("tabs.resolved"),
+    DISMISSED: t("tabs.dismissed"),
+    ALL: t("tabs.all"),
+  };
   const [tab, setTab] = useState<ReportStatus | "ALL">("PENDING");
   const [reports, setReports] = useState<ReportRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,24 +68,27 @@ export default function AdminReportsPage() {
       body: JSON.stringify({ status, note: notes[id] }),
     });
     setBusyId(null);
-    toast.add({ title: "Report updated", type: "success" });
+    toast.add({ title: t("reportUpdatedToast"), type: "success" });
     load();
   };
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">Reports</h1>
+      <h1 className="text-display-md text-text-primary">{t("title")}</h1>
 
-      <Tabs value={tab} onValueChange={(value) => setTab(value as ReportStatus | "ALL")}>
+      <Tabs
+        value={tab}
+        onValueChange={(value) => setTab(value as ReportStatus | "ALL")}
+      >
         <TabsList>
-          {TABS.map((t) => (
-            <TabsTab key={t.value} value={t.value}>
-              {t.label}
+          {TAB_VALUES.map((value) => (
+            <TabsTab key={value} value={value}>
+              {TAB_LABELS[value]}
             </TabsTab>
           ))}
         </TabsList>
-        {TABS.map((t) => (
-          <TabsPanel key={t.value} value={t.value} />
+        {TAB_VALUES.map((value) => (
+          <TabsPanel key={value} value={value} />
         ))}
       </Tabs>
 
@@ -81,7 +99,9 @@ export default function AdminReportsPage() {
       ) : reports.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Flag className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">No reports here</p>
+          <p className="text-body-lg font-semibold text-text-primary">
+            {t("empty")}
+          </p>
         </Card>
       ) : (
         <div className="flex flex-col gap-4">
@@ -90,31 +110,48 @@ export default function AdminReportsPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   {report.priority === "HIGH" ? (
-                    <Badge variant="destructive">High priority</Badge>
+                    <Badge variant="destructive">{t("highPriority")}</Badge>
                   ) : null}
                   <Badge variant="neutral">{report.targetType}</Badge>
-                  <span className="text-body-md font-semibold text-text-primary">{report.reason}</span>
+                  <span className="text-body-md font-semibold text-text-primary">
+                    {report.reason}
+                  </span>
                 </div>
                 <span className="text-body-sm text-text-tertiary">
-                  {new Date(report.createdAt).toLocaleDateString("en-US", { dateStyle: "medium" })}
+                  {new Date(report.createdAt).toLocaleDateString("en-US", {
+                    dateStyle: "medium",
+                  })}
                 </span>
               </div>
               <p className="text-body-sm text-text-secondary">
-                Reported by {report.reporter?.firstName ?? report.reporter?.name ?? report.reporter?.email ?? "Unknown"}
-                {" · target ID "}
+                {t("reportedBy", {
+                  name:
+                    report.reporter?.firstName ??
+                    report.reporter?.name ??
+                    report.reporter?.email ??
+                    t("unknownReporter"),
+                })}{" "}
+                {t("targetIdLabel")}{" "}
                 <code className="text-body-sm">{report.targetId}</code>
               </p>
               {report.description ? (
-                <p className="text-body-md text-text-primary">{report.description}</p>
+                <p className="text-body-md text-text-primary">
+                  {report.description}
+                </p>
               ) : null}
 
               {report.status === "PENDING" || report.status === "REVIEWING" ? (
                 <>
                   <Textarea
-                    placeholder="Resolution note (optional)"
+                    placeholder={t("resolutionNotePlaceholder")}
                     rows={2}
                     value={notes[report.id] ?? ""}
-                    onChange={(e) => setNotes((prev) => ({ ...prev, [report.id]: e.target.value }))}
+                    onChange={(e) =>
+                      setNotes((prev) => ({
+                        ...prev,
+                        [report.id]: e.target.value,
+                      }))
+                    }
                   />
                   <div className="flex gap-2">
                     <Button
@@ -123,7 +160,7 @@ export default function AdminReportsPage() {
                       disabled={busyId === report.id}
                       onClick={() => resolve(report.id, "RESOLVED")}
                     >
-                      Resolve
+                      {t("resolve")}
                     </Button>
                     <Button
                       size="sm"
@@ -131,12 +168,16 @@ export default function AdminReportsPage() {
                       disabled={busyId === report.id}
                       onClick={() => resolve(report.id, "DISMISSED")}
                     >
-                      Dismiss
+                      {t("dismiss")}
                     </Button>
                   </div>
                 </>
               ) : (
-                <Badge variant={report.status === "RESOLVED" ? "success" : "neutral"}>{report.status}</Badge>
+                <Badge
+                  variant={report.status === "RESOLVED" ? "success" : "neutral"}
+                >
+                  {report.status}
+                </Badge>
               )}
             </Card>
           ))}

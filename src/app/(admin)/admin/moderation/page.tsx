@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ImageOff, Loader2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   startTransition,
   useCallback,
@@ -42,6 +43,7 @@ function isOverdue(createdAt: string) {
 }
 
 export default function AdminModerationPage() {
+  const t = useTranslations("accountFlows.admin.moderation");
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -93,10 +95,13 @@ export default function AdminModerationPage() {
         body: JSON.stringify({ action: "approve", mediaIds: ids }),
       });
       setBusy(false);
-      toast.add({ title: `Approved ${ids.length}`, type: "success" });
+      toast.add({
+        title: t("approvedToast", { count: ids.length }),
+        type: "success",
+      });
       load();
     },
-    [busy, load],
+    [busy, load, t],
   );
 
   const reject = async () => {
@@ -114,7 +119,10 @@ export default function AdminModerationPage() {
     setShowRejectPanel(false);
     setReasonPreset("");
     setReasonNote("");
-    toast.add({ title: `Rejected ${activeIds.length}`, type: "success" });
+    toast.add({
+      title: t("rejectedToast", { count: activeIds.length }),
+      type: "success",
+    });
     load();
   };
 
@@ -150,13 +158,9 @@ export default function AdminModerationPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="text-display-md text-text-primary">
-          Content moderation
-        </h1>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
         <p className="text-body-md text-text-secondary">
-          Every portfolio photo needs approval before it appears publicly.
-          Shortcuts: A approve, R reject, arrow keys navigate. Target: reviewed
-          within {MEDIA_MODERATION_SLA_HOURS}h.
+          {t("description", { hours: MEDIA_MODERATION_SLA_HOURS })}
         </p>
       </div>
 
@@ -168,7 +172,7 @@ export default function AdminModerationPage() {
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <ImageOff className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            Nothing pending
+            {t("empty")}
           </p>
         </Card>
       ) : (
@@ -179,7 +183,7 @@ export default function AdminModerationPage() {
               variant="secondary"
               onClick={() => setSelected(new Set(media.map((m) => m.id)))}
             >
-              Select all ({media.length})
+              {t("selectAll", { count: media.length })}
             </Button>
             {selected.size > 0 ? (
               <Button
@@ -187,11 +191,11 @@ export default function AdminModerationPage() {
                 variant="ghost"
                 onClick={() => setSelected(new Set())}
               >
-                Clear selection
+                {t("clearSelection")}
               </Button>
             ) : null}
             <span className="text-body-sm text-text-tertiary">
-              {activeIds.length} selected — A to approve, R to reject
+              {t("selectedHint", { count: activeIds.length })}
             </span>
           </div>
 
@@ -234,7 +238,7 @@ export default function AdminModerationPage() {
                         variant="destructive"
                         className="absolute top-1.5 left-1.5"
                       >
-                        Overdue
+                        {t("overdueBadge")}
                       </Badge>
                     ) : null}
                     {isSelected ? (
@@ -265,7 +269,7 @@ export default function AdminModerationPage() {
                   value={reasonPreset}
                   onChange={setReasonPreset}
                   options={[
-                    { value: "", label: "Rejection reason" },
+                    { value: "", label: t("rejectionReasonPlaceholder") },
                     ...MEDIA_REJECTION_REASONS.map((r) => ({
                       value: r,
                       label: r,
@@ -273,7 +277,7 @@ export default function AdminModerationPage() {
                   ]}
                 />
                 <Textarea
-                  placeholder="Note (optional)"
+                  placeholder={t("notePlaceholder")}
                   rows={1}
                   value={reasonNote}
                   onChange={(e) => setReasonNote(e.target.value)}
@@ -284,7 +288,7 @@ export default function AdminModerationPage() {
                     disabled={!reasonPreset || busy}
                     onClick={reject}
                   >
-                    Confirm reject ({activeIds.length})
+                    {t("confirmReject", { count: activeIds.length })}
                   </Button>
                   <Button
                     variant="ghost"
@@ -306,7 +310,7 @@ export default function AdminModerationPage() {
                   ) : (
                     <Check className="size-4" />
                   )}
-                  Approve ({activeIds.length})
+                  {t("approve", { count: activeIds.length })}
                 </Button>
                 <Button
                   variant="destructive"
@@ -314,7 +318,7 @@ export default function AdminModerationPage() {
                   onClick={() => setShowRejectPanel(true)}
                 >
                   <X className="size-4" />
-                  Reject ({activeIds.length})
+                  {t("reject", { count: activeIds.length })}
                 </Button>
               </div>
             )}

@@ -12,6 +12,7 @@ import {
   MoreVertical,
   Send,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useEffect, useRef, useState } from "react";
@@ -70,11 +71,14 @@ const BOOKING_STATUS_VARIANT: Record<
   EXPIRED: "neutral",
 };
 
-function partyName(user: ChatPartner) {
-  return user.firstName ?? user.name ?? "Unknown";
+function partyName(user: ChatPartner, unknownLabel: string) {
+  return user.firstName ?? user.name ?? unknownLabel;
 }
 
-function dateSeparatorLabel(date: Date) {
+function dateSeparatorLabel(
+  date: Date,
+  labels: { today: string; yesterday: string },
+) {
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -83,8 +87,8 @@ function dateSeparatorLabel(date: Date) {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
 
-  if (isSameDay(date, today)) return "Today";
-  if (isSameDay(date, yesterday)) return "Yesterday";
+  if (isSameDay(date, today)) return labels.today;
+  if (isSameDay(date, yesterday)) return labels.yesterday;
   return date.toLocaleDateString("en-US", { day: "numeric", month: "long" });
 }
 
@@ -129,6 +133,7 @@ export function ChatPanel({
   otherUser: ChatPartner;
   onBack?: () => void;
 }) {
+  const t = useTranslations("sharedComponents.chatPanel");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [draft, setDraft] = useState("");
@@ -177,7 +182,7 @@ export function ChatPanel({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         conversationId,
-        content: overrides?.content ?? draft.trim() ?? "Sent a photo",
+        content: overrides?.content ?? draft.trim() ?? t("sentPhoto"),
         type: overrides?.type ?? "text",
         mediaUrl: overrides?.mediaUrl,
       }),
@@ -200,7 +205,7 @@ export function ChatPanel({
     const url = await uploadImage(file);
     setUploading(false);
     if (url) {
-      await onSend({ content: "Photo", type: "image", mediaUrl: url });
+      await onSend({ content: t("photo"), type: "image", mediaUrl: url });
     }
   };
 
@@ -226,11 +231,11 @@ export function ChatPanel({
             <AvatarImage src={otherUser.avatar} alt="" />
           ) : null}
           <AvatarFallback>
-            {partyName(otherUser)[0]?.toUpperCase()}
+            {partyName(otherUser, t("unknown"))[0]?.toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <span className="flex-1 text-heading-sm text-text-primary">
-          {partyName(otherUser)}
+          {partyName(otherUser, t("unknown"))}
         </span>
 
         <DropdownMenu>
@@ -246,11 +251,11 @@ export function ChatPanel({
               <DropdownMenuItem
                 render={<Link href={`/profile/${otherUser.username}`} />}
               >
-                View profile
+                {t("viewProfile")}
               </DropdownMenuItem>
             ) : null}
             <DropdownMenuItem onClick={() => setReportOpen(true)}>
-              Report
+              {t("report")}
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
@@ -262,7 +267,7 @@ export function ChatPanel({
                 })
               }
             >
-              Block
+              {t("block")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -283,11 +288,10 @@ export function ChatPanel({
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
             <MessageCircle className="size-10 text-text-tertiary" />
             <p className="text-body-md text-text-secondary">
-              Say hello to start the conversation
+              {t("emptyState")}
             </p>
             <p className="max-w-xs text-body-sm text-text-tertiary">
-              Stay safe: never share payment details outside Fgrapher. Report
-              anything suspicious.
+              {t("safetyNote")}
             </p>
           </div>
         ) : (
@@ -303,7 +307,10 @@ export function ChatPanel({
                 {showSeparator ? (
                   <div className="flex items-center gap-3 text-body-sm text-text-tertiary">
                     <div className="h-px flex-1 bg-border-subtle" />
-                    {dateSeparatorLabel(date)}
+                    {dateSeparatorLabel(date, {
+                      today: t("today"),
+                      yesterday: t("yesterday"),
+                    })}
                     <div className="h-px flex-1 bg-border-subtle" />
                   </div>
                 ) : null}
@@ -322,7 +329,7 @@ export function ChatPanel({
                       <div className="flex items-center gap-2">
                         <Calendar className="size-4 text-brand-primary" />
                         <span className="text-body-sm font-semibold text-text-primary">
-                          {message.booking.service?.name ?? "Booking request"}
+                          {message.booking.service?.name ?? t("bookingRequest")}
                         </span>
                       </div>
                       <span className="text-body-sm text-text-secondary">
@@ -342,7 +349,7 @@ export function ChatPanel({
                         {message.booking.status}
                       </Badge>
                       <span className="text-body-sm font-semibold text-brand-primary">
-                        View booking
+                        {t("viewBooking")}
                       </span>
                     </Link>
                   ) : message.type === "image" && message.mediaUrl ? (
@@ -406,7 +413,7 @@ export function ChatPanel({
           variant="ghost"
           size="icon"
           disabled={uploading}
-          aria-label="Attach an image"
+          aria-label={t("attachImage")}
           onClick={() => fileInputRef.current?.click()}
         >
           {uploading ? (
@@ -425,7 +432,7 @@ export function ChatPanel({
             e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
           }}
           onKeyDown={onKeyDown}
-          placeholder="Write a message..."
+          placeholder={t("writeMessage")}
           className="max-h-[120px] min-h-10 flex-1 resize-none rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20"
         />
         <Button
@@ -433,7 +440,7 @@ export function ChatPanel({
           size="icon"
           className="rounded-full"
           disabled={!draft.trim() || sending}
-          aria-label="Send message"
+          aria-label={t("sendMessage")}
           onClick={() => onSend()}
         >
           {sending ? (

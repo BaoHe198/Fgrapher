@@ -9,6 +9,7 @@ import type {
   User,
 } from "@prisma/client";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
@@ -39,21 +40,22 @@ type OrderDetail = Order & {
   })[];
 };
 
-const STATUS_BADGE: Record<
+const STATUS_VARIANT: Record<
   OrderStatus,
-  { label: string; variant: "warning" | "success" | "neutral" | "destructive" }
+  "warning" | "success" | "neutral" | "destructive"
 > = {
-  PENDING: { label: "Processing", variant: "warning" },
-  CONFIRMED: { label: "Confirmed", variant: "success" },
-  SHIPPED: { label: "Shipped", variant: "success" },
-  DELIVERED: { label: "Delivered", variant: "neutral" },
-  CANCELLED: { label: "Cancelled", variant: "destructive" },
-  RETURNED: { label: "Returned", variant: "neutral" },
+  PENDING: "warning",
+  CONFIRMED: "success",
+  SHIPPED: "success",
+  DELIVERED: "neutral",
+  CANCELLED: "destructive",
+  RETURNED: "neutral",
 };
 
 const STEPS: OrderStatus[] = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"];
 
 export function OrderDetailContent() {
+  const t = useTranslations("dashboardCore.orderDetail");
   const params = useParams<{ id: string }>();
   const { data: session } = useSession();
   const [order, setOrder] = useState<OrderDetail | null>(null);
@@ -119,7 +121,7 @@ export function OrderDetailContent() {
   }
 
   const isShop = session?.user?.id === order.shopId;
-  const status = STATUS_BADGE[order.status];
+  const variant = STATUS_VARIANT[order.status];
   const stepIndex = STEPS.indexOf(order.status);
   const hasRental = order.items.some((i) => i.type === "RENT");
 
@@ -130,14 +132,14 @@ export function OrderDetailContent() {
         className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary"
       >
         <ArrowLeft className="size-4" />
-        Back to orders
+        {t("backToOrders")}
       </Link>
 
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-display-md text-text-primary">
-          Order #{order.id.slice(-8)}
+          {t("orderNumber", { id: order.id.slice(-8) })}
         </h1>
-        <Badge variant={status.variant}>{status.label}</Badge>
+        <Badge variant={variant}>{t(`status.${order.status}`)}</Badge>
       </div>
 
       {order.status !== "CANCELLED" && order.status !== "RETURNED" ? (
@@ -180,7 +182,7 @@ export function OrderDetailContent() {
                   </span>
                   {item.type === "RENT" ? (
                     <span className="text-body-sm text-text-secondary">
-                      Rental:{" "}
+                      {t("rentalLabel")}{" "}
                       {item.rentalStart
                         ? new Date(item.rentalStart).toLocaleDateString(
                             "en-US",
@@ -194,7 +196,7 @@ export function OrderDetailContent() {
                           })
                         : ""}
                       {item.depositAmount
-                        ? ` · Deposit ${formatCurrency(item.depositAmount, order.currency)} (${item.depositStatus ?? "HELD"})`
+                        ? ` · ${t("depositLabel", { amount: formatCurrency(item.depositAmount, order.currency), status: item.depositStatus ?? "HELD" })}`
                         : ""}
                     </span>
                   ) : null}
@@ -212,7 +214,7 @@ export function OrderDetailContent() {
           {order.shippingAddress ? (
             <Card className="flex flex-col gap-1.5">
               <span className="text-body-sm text-text-tertiary">
-                Shipping address
+                {t("shippingAddress")}
               </span>
               <p className="text-body-md text-text-primary">
                 {order.shippingAddress}
@@ -222,7 +224,9 @@ export function OrderDetailContent() {
 
           {order.trackingNumber ? (
             <Card className="flex flex-col gap-1.5">
-              <span className="text-body-sm text-text-tertiary">Tracking</span>
+              <span className="text-body-sm text-text-tertiary">
+                {t("tracking")}
+              </span>
               <p className="text-body-md text-text-primary">
                 {order.trackingCarrier} — {order.trackingNumber}
               </p>
@@ -249,7 +253,7 @@ export function OrderDetailContent() {
                 />
               }
             >
-              Message {isShop ? "customer" : "shop"}
+              {isShop ? t("messageParty.customer") : t("messageParty.shop")}
             </Button>
 
             {isShop && order.status === "PENDING" ? (
@@ -258,7 +262,7 @@ export function OrderDetailContent() {
                 disabled={busy}
                 onClick={() => updateStatus("CONFIRMED")}
               >
-                Confirm order
+                {t("confirmOrder")}
               </Button>
             ) : null}
             {isShop && order.status === "CONFIRMED" ? (
@@ -267,7 +271,7 @@ export function OrderDetailContent() {
                 disabled={busy}
                 onClick={() => setTrackingOpen(true)}
               >
-                Mark as shipped
+                {t("markAsShipped")}
               </Button>
             ) : null}
             {isShop && order.status === "SHIPPED" ? (
@@ -276,7 +280,7 @@ export function OrderDetailContent() {
                 disabled={busy}
                 onClick={() => updateStatus("DELIVERED")}
               >
-                Mark as delivered
+                {t("markAsDelivered")}
               </Button>
             ) : null}
             {isShop && hasRental && order.status === "DELIVERED" ? (
@@ -286,14 +290,14 @@ export function OrderDetailContent() {
                   disabled={busy}
                   onClick={() => returnRental(false)}
                 >
-                  Refund deposit
+                  {t("refundDeposit")}
                 </Button>
                 <Button
                   variant="ghost"
                   disabled={busy}
                   onClick={() => returnRental(true)}
                 >
-                  Deduct deposit (damage)
+                  {t("deductDeposit")}
                 </Button>
               </>
             ) : null}
@@ -303,13 +307,15 @@ export function OrderDetailContent() {
                 disabled={busy}
                 onClick={() => setCancelOpen(true)}
               >
-                Cancel order
+                {t("cancelOrder")}
               </Button>
             ) : null}
           </Card>
 
           <Card className="flex justify-between">
-            <span className="text-body-sm text-text-tertiary">Total</span>
+            <span className="text-body-sm text-text-tertiary">
+              {t("total")}
+            </span>
             <span className="text-heading-sm font-bold text-text-primary">
               {formatCurrency(order.totalPrice, order.currency)}
             </span>
@@ -320,23 +326,23 @@ export function OrderDetailContent() {
       <Dialog open={trackingOpen} onOpenChange={setTrackingOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Mark as shipped</DialogTitle>
+            <DialogTitle>{t("markAsShipped")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <Input
-              label="Carrier"
+              label={t("carrier")}
               value={trackingCarrier}
               onChange={(e) => setTrackingCarrier(e.target.value)}
             />
             <Input
-              label="Tracking number"
+              label={t("trackingNumber")}
               value={trackingNumber}
               onChange={(e) => setTrackingNumber(e.target.value)}
             />
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setTrackingOpen(false)}>
-              Cancel
+              {t("dialogCancel")}
             </Button>
             <Button
               variant="accent"
@@ -346,7 +352,7 @@ export function OrderDetailContent() {
               }
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              Mark as shipped
+              {t("markAsShipped")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -355,14 +361,14 @@ export function OrderDetailContent() {
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancel this order?</DialogTitle>
+            <DialogTitle>{t("cancelDialog.title")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <p className="text-body-sm text-text-secondary">
-              Payment will be refunded and stock restored.
+              {t("cancelDialog.body")}
             </p>
             <Textarea
-              placeholder="Reason (optional)"
+              placeholder={t("cancelDialog.reasonPlaceholder")}
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               rows={3}
@@ -370,7 +376,7 @@ export function OrderDetailContent() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setCancelOpen(false)}>
-              Keep order
+              {t("cancelDialog.keepOrder")}
             </Button>
             <Button
               variant="destructive"
@@ -378,7 +384,7 @@ export function OrderDetailContent() {
               onClick={() => updateStatus("CANCELLED", { cancelReason })}
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              Cancel order
+              {t("cancelOrder")}
             </Button>
           </DialogFooter>
         </DialogContent>

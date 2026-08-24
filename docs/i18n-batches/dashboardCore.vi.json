@@ -1,0 +1,214 @@
+{
+  "dashboardCore": {
+    "acceptingBookingsToggle": {
+      "label": "Đang nhận đặt lịch"
+    },
+    "checkoutSuccessToast": {
+      "welcome": "Chào mừng đến với Fgrapher Pro!"
+    },
+    "error": {
+      "title": "Đã xảy ra lỗi",
+      "body": "Trang này gặp lỗi ngoài ý muốn. Hãy thử lại, hoặc quay về bảng điều khiển.",
+      "retry": "Thử lại",
+      "backToDashboard": "Về bảng điều khiển"
+    },
+    "saved": {
+      "title": "Nghệ sĩ đã lưu",
+      "empty": {
+        "title": "Chưa lưu nghệ sĩ nào",
+        "body": "Nhấn biểu tượng bookmark trên một hồ sơ để lưu vào đây."
+      },
+      "unnamed": "Chưa đặt tên",
+      "priceFrom": "Từ ₫{amount}"
+    },
+    "notifications": {
+      "title": "Thông báo",
+      "tabs": {
+        "ALL": "Tất cả",
+        "UNREAD": "Chưa đọc",
+        "BOOKINGS": "Lịch đặt",
+        "ORDERS": "Đơn hàng",
+        "MESSAGES": "Tin nhắn",
+        "SOCIAL": "Cộng đồng"
+      },
+      "empty": {
+        "title": "Chưa có thông báo",
+        "body": "Bạn đã xem hết thông báo."
+      },
+      "justNow": "vừa xong",
+      "minutesAgo": "{minutes} phút trước",
+      "hoursAgo": "{hours} giờ trước",
+      "daysAgo": "{days} ngày trước"
+    },
+    "portfolio": {
+      "proOnly": {
+        "title": "Portfolio dành cho người làm nghề sáng tạo",
+        "body": "Thêm một vai trò trả phí — Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm, Studio hoặc Cửa hàng máy ảnh — để giới thiệu tác phẩm của bạn.",
+        "cta": "Thêm vai trò"
+      },
+      "noProfile": {
+        "title": "Hãy thiết lập hồ sơ trước",
+        "body": "Tạo hồ sơ nhà cung cấp trước khi tải ảnh/video lên portfolio.",
+        "cta": "Thiết lập hồ sơ"
+      },
+      "sectionTitle": "Portfolio",
+      "gate": {
+        "fallbackTitle": "Kích hoạt gói {role} để tải ảnh lên",
+        "fallbackText": "Portfolio hiện tại của bạn vẫn hiển thị — kích hoạt gói đăng ký để thêm ảnh mới."
+      }
+    },
+    "portfolioGrid": {
+      "moderation": {
+        "pending": "Đang chờ duyệt",
+        "rejected": "Đã bị từ chối"
+      },
+      "reorder": "Sắp xếp lại",
+      "delete": "Xóa",
+      "itemCount": "{count} mục",
+      "dragToReorder": "Kéo để sắp xếp lại",
+      "upload": "Tải lên"
+    },
+    "reviews": {
+      "title": "Đánh giá",
+      "stats": {
+        "avgRating": "Đánh giá trung bình",
+        "total": "Tổng số đánh giá",
+        "responseRate": "Tỷ lệ phản hồi",
+        "awaitingResponse": "Chờ phản hồi"
+      },
+      "tabs": {
+        "ALL": "Tất cả",
+        "AWAITING": "Chờ phản hồi",
+        "RESPONDED": "Đã phản hồi"
+      },
+      "empty": "Chưa có đánh giá nào",
+      "anonymous": "Ẩn danh",
+      "respond": "Phản hồi"
+    },
+    "listings": {
+      "filters": {
+        "ALL": "Tất cả",
+        "SALE": "Đang bán",
+        "RENT": "Cho thuê",
+        "OUT_OF_STOCK": "Hết hàng"
+      },
+      "badge": {
+        "rental": "Cho thuê",
+        "forSale": "Đang bán"
+      },
+      "priceRental": "{price}/ngày",
+      "priceBoth": "{price} · {rentalPrice}/ngày",
+      "empty": {
+        "title": "Chưa có sản phẩm nào",
+        "body": "Thêm chiếc máy ảnh, ống kính hoặc phụ kiện đầu tiên của bạn."
+      },
+      "addProduct": "Thêm sản phẩm",
+      "inStock": "Còn {count} sản phẩm",
+      "outOfStock": "Hết hàng",
+      "edit": "Sửa",
+      "duplicate": "Nhân bản",
+      "delete": "Xóa",
+      "editProductTitle": "Sửa sản phẩm",
+      "addProductTitle": "Thêm sản phẩm",
+      "gate": {
+        "fallbackTitle": "Cần đăng ký gói Cửa hàng máy ảnh",
+        "fallbackText": "Kích hoạt gói Cửa hàng máy ảnh để đăng bán sản phẩm."
+      },
+      "roleRequired": {
+        "title": "Cần có vai trò Cửa hàng máy ảnh",
+        "body": "Thêm vai trò Cửa hàng máy ảnh để bán hoặc cho thuê thiết bị trên Fgrapher.",
+        "cta": "Thêm vai trò"
+      },
+      "pageTitle": "Sản phẩm"
+    },
+    "home": {
+      "greeting": {
+        "morning": "Chào buổi sáng, {name}",
+        "afternoon": "Chào buổi chiều, {name}",
+        "evening": "Chào buổi tối, {name}"
+      },
+      "fallbackName": "bạn",
+      "stats": {
+        "pendingRequests": "Yêu cầu chờ duyệt",
+        "confirmed": "Đã xác nhận",
+        "earnings": "Doanh thu",
+        "profileViews": "Lượt xem hồ sơ",
+        "upcomingBookings": "Lịch sắp tới",
+        "savedArtists": "Nghệ sĩ đã lưu",
+        "messages": "Tin nhắn",
+        "orders": "Đơn hàng"
+      },
+      "completeProfile": {
+        "title": "Hoàn thiện hồ sơ của bạn",
+        "cta": "Hoàn thiện hồ sơ"
+      },
+      "recentActivity": "Hoạt động gần đây",
+      "noActivity": "Chưa có hoạt động nào",
+      "buildPortfolio": "Xây dựng portfolio",
+      "browseArtists": "Khám phá nghệ sĩ"
+    },
+    "messages": {
+      "selectConversation": "Chọn một cuộc trò chuyện",
+      "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin"
+    },
+    "customerOrders": {
+      "title": "Đơn hàng của tôi",
+      "tabs": {
+        "ALL": "Tất cả",
+        "PENDING": "Đang xử lý",
+        "SHIPPED": "Đang giao",
+        "DELIVERED": "Đã giao",
+        "CANCELLED": "Đã hủy"
+      },
+      "status": {
+        "PENDING": "Đang xử lý",
+        "CONFIRMED": "Đã xác nhận",
+        "SHIPPED": "Đang giao",
+        "DELIVERED": "Đã giao",
+        "CANCELLED": "Đã hủy",
+        "RETURNED": "Đã hoàn trả"
+      },
+      "empty": "Chưa có đơn hàng nào",
+      "browseGear": "Khám phá thiết bị",
+      "orderNumber": "Đơn hàng #{id}",
+      "more": "+{count} sản phẩm khác",
+      "viewDetails": "Xem chi tiết"
+    },
+    "orderDetail": {
+      "status": {
+        "PENDING": "Đang xử lý",
+        "CONFIRMED": "Đã xác nhận",
+        "SHIPPED": "Đang giao",
+        "DELIVERED": "Đã giao",
+        "CANCELLED": "Đã hủy",
+        "RETURNED": "Đã hoàn trả"
+      },
+      "backToOrders": "Quay lại danh sách đơn hàng",
+      "orderNumber": "Đơn hàng #{id}",
+      "rentalLabel": "Thuê:",
+      "depositLabel": "Đặt cọc {amount} ({status})",
+      "shippingAddress": "Địa chỉ giao hàng",
+      "tracking": "Vận chuyển",
+      "messageParty": {
+        "customer": "Nhắn tin khách hàng",
+        "shop": "Nhắn tin cửa hàng"
+      },
+      "confirmOrder": "Xác nhận đơn hàng",
+      "markAsShipped": "Đánh dấu đã gửi hàng",
+      "markAsDelivered": "Đánh dấu đã giao hàng",
+      "refundDeposit": "Hoàn trả tiền cọc",
+      "deductDeposit": "Trừ tiền cọc (hư hỏng)",
+      "cancelOrder": "Hủy đơn hàng",
+      "total": "Tổng cộng",
+      "carrier": "Đơn vị vận chuyển",
+      "trackingNumber": "Mã vận đơn",
+      "dialogCancel": "Hủy",
+      "cancelDialog": {
+        "title": "Hủy đơn hàng này?",
+        "body": "Khoản thanh toán sẽ được hoàn lại và tồn kho sẽ được khôi phục.",
+        "reasonPlaceholder": "Lý do (không bắt buộc)",
+        "keepOrder": "Giữ đơn hàng"
+      }
+    }
+  }
+}

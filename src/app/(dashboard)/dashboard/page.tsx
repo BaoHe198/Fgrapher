@@ -5,6 +5,7 @@ import {
   ShoppingBag,
   Star,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -28,11 +29,15 @@ import {
 import { AcceptingBookingsToggle } from "./accepting-bookings-toggle";
 import { CheckoutSuccessToast } from "./checkout-success-toast";
 
-function greeting(firstName: string) {
+type Translator = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
+
+function greeting(firstName: string, t: Translator) {
   const hour = new Date().getHours();
-  const timeOfDay =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  return `${timeOfDay}, ${firstName}`;
+  const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+  return t(`greeting.${timeOfDay}`, { name: firstName });
 }
 
 const ACTIVITY_ICONS = {
@@ -41,23 +46,26 @@ const ACTIVITY_ICONS = {
   review: Star,
 } as const;
 
-function providerStatCards(stats: ProviderStats) {
+function providerStatCards(stats: ProviderStats, t: Translator) {
   return [
-    { label: "Pending requests", value: String(stats.pending) },
-    { label: "Confirmed", value: String(stats.confirmed) },
-    { label: "Earnings", value: formatCurrency(stats.earnings) },
-    { label: "Profile views", value: String(stats.views) },
+    { label: t("stats.pendingRequests"), value: String(stats.pending) },
+    { label: t("stats.confirmed"), value: String(stats.confirmed) },
+    { label: t("stats.earnings"), value: formatCurrency(stats.earnings) },
+    { label: t("stats.profileViews"), value: String(stats.views) },
   ];
 }
 
-function customerStatCards(stats: CustomerStats) {
+function customerStatCards(stats: CustomerStats, t: Translator) {
   return [
-    { label: "Upcoming bookings", value: String(stats.upcomingBookings) },
-    { label: "Saved artists", value: String(stats.savedArtists) },
-    { label: "Messages", value: String(stats.messages) },
+    {
+      label: t("stats.upcomingBookings"),
+      value: String(stats.upcomingBookings),
+    },
+    { label: t("stats.savedArtists"), value: String(stats.savedArtists) },
+    { label: t("stats.messages"), value: String(stats.messages) },
     // Hidden while MARKETPLACE_ENABLED=false.
     ...(features.marketplaceEnabled
-      ? [{ label: "Orders", value: String(stats.orders) }]
+      ? [{ label: t("stats.orders"), value: String(stats.orders) }]
       : []),
   ];
 }
@@ -80,11 +88,13 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const t = await getTranslations("dashboardCore.home");
+
   const [activity, statCards] = await Promise.all([
     getRecentActivity(user.id, isProvider),
     isProvider
-      ? getProviderStats(user.id).then(providerStatCards)
-      : getCustomerStats(user.id).then(customerStatCards),
+      ? getProviderStats(user.id).then((stats) => providerStatCards(stats, t))
+      : getCustomerStats(user.id).then((stats) => customerStatCards(stats, t)),
   ]);
 
   const hasIncompleteProfile =
@@ -104,7 +114,8 @@ export default async function DashboardPage() {
     (completionFields.filter(Boolean).length / completionFields.length) * 100,
   );
 
-  const firstName = user.firstName ?? user.name?.split(" ")[0] ?? "there";
+  const firstName =
+    user.firstName ?? user.name?.split(" ")[0] ?? t("fallbackName");
 
   return (
     <div className="flex flex-col gap-6">
@@ -114,7 +125,7 @@ export default async function DashboardPage() {
       {features.billingEnabled ? <CheckoutSuccessToast /> : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-display-md text-text-primary">
-          {greeting(firstName)}
+          {greeting(firstName, t)}
         </h1>
         {isProvider ? (
           <AcceptingBookingsToggle initialValue={user.acceptingBookings} />
@@ -142,7 +153,7 @@ export default async function DashboardPage() {
         <Card className="flex flex-col gap-3 border border-warning bg-warning-bg">
           <div className="flex items-center justify-between">
             <span className="text-body-md font-semibold text-text-primary">
-              Complete your profile
+              {t("completeProfile.title")}
             </span>
             <span className="text-body-sm text-text-secondary">
               {completion}%
@@ -156,13 +167,13 @@ export default async function DashboardPage() {
             nativeButton={false}
             render={<Link href="/dashboard/settings/profile" />}
           >
-            Complete your profile
+            {t("completeProfile.cta")}
           </Button>
         </Card>
       ) : null}
 
       <div className="flex flex-col gap-3">
-        <SectionHead title="Recent activity" />
+        <SectionHead title={t("recentActivity")} />
         {activity.length === 0 ? (
           <Card className="flex flex-col items-center gap-3 py-12 text-center">
             {isProvider ? (
@@ -171,7 +182,7 @@ export default async function DashboardPage() {
               <Bookmark className="size-10 text-text-tertiary" />
             )}
             <p className="text-body-md font-semibold text-text-primary">
-              No activity yet
+              {t("noActivity")}
             </p>
             <Button
               variant="secondary"
@@ -181,7 +192,7 @@ export default async function DashboardPage() {
                 <Link href={isProvider ? "/dashboard/portfolio" : "/browse"} />
               }
             >
-              {isProvider ? "Build your portfolio" : "Browse artists"}
+              {isProvider ? t("buildPortfolio") : t("browseArtists")}
             </Button>
           </Card>
         ) : (

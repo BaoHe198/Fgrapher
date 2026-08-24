@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
@@ -11,6 +12,7 @@ function parseDate(value: string | null) {
 }
 
 export async function GET(request: Request) {
+  const t = await getTranslations("apiMessages.admin");
   try {
     await requireAdmin();
     const { searchParams } = new URL(request.url);
@@ -46,7 +48,7 @@ export async function GET(request: Request) {
       {
         data: null,
         error: "server_error",
-        message: "Failed to search audit log",
+        message: t("auditLogFailed"),
       },
       { status: 500 },
     );

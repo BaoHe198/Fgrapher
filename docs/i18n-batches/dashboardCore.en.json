@@ -1,0 +1,214 @@
+{
+  "dashboardCore": {
+    "acceptingBookingsToggle": {
+      "label": "Accepting bookings"
+    },
+    "checkoutSuccessToast": {
+      "welcome": "Welcome to Fgrapher Pro!"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "body": "This page hit an unexpected error. Try again, or head back to your dashboard.",
+      "retry": "Try again",
+      "backToDashboard": "Back to dashboard"
+    },
+    "saved": {
+      "title": "Saved artists",
+      "empty": {
+        "title": "No saved artists yet",
+        "body": "Tap the bookmark icon on a profile to save it here."
+      },
+      "unnamed": "Unnamed",
+      "priceFrom": "From ₫{amount}"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "tabs": {
+        "ALL": "All",
+        "UNREAD": "Unread",
+        "BOOKINGS": "Bookings",
+        "ORDERS": "Orders",
+        "MESSAGES": "Messages",
+        "SOCIAL": "Social"
+      },
+      "empty": {
+        "title": "No notifications",
+        "body": "You're all caught up."
+      },
+      "justNow": "just now",
+      "minutesAgo": "{minutes}m ago",
+      "hoursAgo": "{hours}h ago",
+      "daysAgo": "{days}d ago"
+    },
+    "portfolio": {
+      "proOnly": {
+        "title": "Portfolio is for creative pros",
+        "body": "Add a paid role — Photographer, Videographer, Make-up Artist, Studio, or Camera Shop — to showcase your work.",
+        "cta": "Add a role"
+      },
+      "noProfile": {
+        "title": "Set up your profile first",
+        "body": "Create your provider profile before uploading portfolio media.",
+        "cta": "Set up profile"
+      },
+      "sectionTitle": "Portfolio",
+      "gate": {
+        "fallbackTitle": "Activate your {role} subscription to upload",
+        "fallbackText": "Your existing portfolio media stays visible — activate your subscription to add more."
+      }
+    },
+    "portfolioGrid": {
+      "moderation": {
+        "pending": "Pending review",
+        "rejected": "Rejected"
+      },
+      "reorder": "Reorder",
+      "delete": "Delete",
+      "itemCount": "{count, plural, one {# item} other {# items}}",
+      "dragToReorder": "Drag to reorder",
+      "upload": "Upload"
+    },
+    "reviews": {
+      "title": "Reviews",
+      "stats": {
+        "avgRating": "Average rating",
+        "total": "Total reviews",
+        "responseRate": "Response rate",
+        "awaitingResponse": "Awaiting response"
+      },
+      "tabs": {
+        "ALL": "All",
+        "AWAITING": "Awaiting response",
+        "RESPONDED": "Responded"
+      },
+      "empty": "No reviews here yet",
+      "anonymous": "Anonymous",
+      "respond": "Respond"
+    },
+    "listings": {
+      "filters": {
+        "ALL": "All",
+        "SALE": "For sale",
+        "RENT": "For rent",
+        "OUT_OF_STOCK": "Out of stock"
+      },
+      "badge": {
+        "rental": "Rental",
+        "forSale": "For sale"
+      },
+      "priceRental": "{price}/day",
+      "priceBoth": "{price} · {rentalPrice}/day",
+      "empty": {
+        "title": "No products listed",
+        "body": "Add your first camera, lens, or accessory."
+      },
+      "addProduct": "Add product",
+      "inStock": "{count} in stock",
+      "outOfStock": "Out of stock",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "editProductTitle": "Edit product",
+      "addProductTitle": "Add product",
+      "gate": {
+        "fallbackTitle": "Camera Shop subscription required",
+        "fallbackText": "Activate your Camera Shop subscription to list products."
+      },
+      "roleRequired": {
+        "title": "Listings need the Camera Shop role",
+        "body": "Add the Camera Shop role to sell or rent out gear on Fgrapher.",
+        "cta": "Add a role"
+      },
+      "pageTitle": "Listings"
+    },
+    "home": {
+      "greeting": {
+        "morning": "Good morning, {name}",
+        "afternoon": "Good afternoon, {name}",
+        "evening": "Good evening, {name}"
+      },
+      "fallbackName": "there",
+      "stats": {
+        "pendingRequests": "Pending requests",
+        "confirmed": "Confirmed",
+        "earnings": "Earnings",
+        "profileViews": "Profile views",
+        "upcomingBookings": "Upcoming bookings",
+        "savedArtists": "Saved artists",
+        "messages": "Messages",
+        "orders": "Orders"
+      },
+      "completeProfile": {
+        "title": "Complete your profile",
+        "cta": "Complete your profile"
+      },
+      "recentActivity": "Recent activity",
+      "noActivity": "No activity yet",
+      "buildPortfolio": "Build your portfolio",
+      "browseArtists": "Browse artists"
+    },
+    "messages": {
+      "selectConversation": "Select a conversation",
+      "selectConversationHint": "Choose from the list to start chatting"
+    },
+    "customerOrders": {
+      "title": "My orders",
+      "tabs": {
+        "ALL": "All",
+        "PENDING": "Processing",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled"
+      },
+      "status": {
+        "PENDING": "Processing",
+        "CONFIRMED": "Confirmed",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled",
+        "RETURNED": "Returned"
+      },
+      "empty": "No orders yet",
+      "browseGear": "Browse gear",
+      "orderNumber": "Order #{id}",
+      "more": "+{count} more",
+      "viewDetails": "View details"
+    },
+    "orderDetail": {
+      "status": {
+        "PENDING": "Processing",
+        "CONFIRMED": "Confirmed",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled",
+        "RETURNED": "Returned"
+      },
+      "backToOrders": "Back to orders",
+      "orderNumber": "Order #{id}",
+      "rentalLabel": "Rental:",
+      "depositLabel": "Deposit {amount} ({status})",
+      "shippingAddress": "Shipping address",
+      "tracking": "Tracking",
+      "messageParty": {
+        "customer": "Message customer",
+        "shop": "Message shop"
+      },
+      "confirmOrder": "Confirm order",
+      "markAsShipped": "Mark as shipped",
+      "markAsDelivered": "Mark as delivered",
+      "refundDeposit": "Refund deposit",
+      "deductDeposit": "Deduct deposit (damage)",
+      "cancelOrder": "Cancel order",
+      "total": "Total",
+      "carrier": "Carrier",
+      "trackingNumber": "Tracking number",
+      "dialogCancel": "Cancel",
+      "cancelDialog": {
+        "title": "Cancel this order?",
+        "body": "Payment will be refunded and stock restored.",
+        "reasonPlaceholder": "Reason (optional)",
+        "keepOrder": "Keep order"
+      }
+    }
+  }
+}

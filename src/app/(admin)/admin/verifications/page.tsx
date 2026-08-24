@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -25,22 +26,36 @@ interface VerificationRow {
   };
 }
 
-const IMAGE_KINDS: { kind: "front" | "back" | "selfie"; label: string }[] = [
-  { kind: "front", label: "ID front" },
-  { kind: "back", label: "ID back" },
-  { kind: "selfie", label: "Selfie" },
+const IMAGE_KIND_VALUES: ("front" | "back" | "selfie")[] = [
+  "front",
+  "back",
+  "selfie",
 ];
 
-function waitingLabel(createdAt: string) {
-  const days = Math.floor(
-    (Date.now() - new Date(createdAt).getTime()) / 86_400_000,
-  );
-  if (days <= 0) return "Submitted today";
-  if (days === 1) return "Waiting 1 day";
-  return `Waiting ${days} days`;
-}
-
 export default function AdminVerificationsPage() {
+  const t = useTranslations("accountFlows.admin.verifications");
+  const IMAGE_KINDS: { kind: "front" | "back" | "selfie"; label: string }[] =
+    IMAGE_KIND_VALUES.map((kind) => ({
+      kind,
+      label:
+        kind === "front"
+          ? t("imageFront")
+          : kind === "back"
+            ? t("imageBack")
+            : t("imageSelfie"),
+    }));
+
+  // Lazy initializer runs once on mount rather than calling Date.now()
+  // directly during render, which React Compiler flags as an impurity.
+  const [now] = useState(() => Date.now());
+
+  function waitingLabel(createdAt: string) {
+    const days = Math.floor((now - new Date(createdAt).getTime()) / 86_400_000);
+    if (days <= 0) return t("submittedToday");
+    if (days === 1) return t("waitingOneDay");
+    return t("waitingDays", { days });
+  }
+
   const [rows, setRows] = useState<VerificationRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [reasonPreset, setReasonPreset] = useState<Record<string, string>>({});
@@ -76,7 +91,7 @@ export default function AdminVerificationsPage() {
     setLoadingImage(null);
     if (!res.ok) {
       toast.add({
-        title: body.message ?? "Failed to load document",
+        title: body.message ?? t("failedToLoadDocument"),
         type: "error",
       });
       return;
@@ -86,7 +101,7 @@ export default function AdminVerificationsPage() {
 
   const review = async (id: string, action: "approve" | "reject") => {
     if (action === "reject" && !reasonPreset[id]) {
-      toast.add({ title: "Select a rejection reason", type: "error" });
+      toast.add({ title: t("selectRejectionReason"), type: "error" });
       return;
     }
 
@@ -106,20 +121,15 @@ export default function AdminVerificationsPage() {
       ),
     });
     setBusyId(null);
-    toast.add({ title: "Verification updated", type: "success" });
+    toast.add({ title: t("verificationUpdated"), type: "success" });
     load();
   };
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="text-display-md text-text-primary">
-          Identity verification
-        </h1>
-        <p className="text-body-md text-text-secondary">
-          Every provider role must be verified before its profile can go live
-          (Luật Thương mại điện tử 122/2025). Sorted oldest submission first.
-        </p>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+        <p className="text-body-md text-text-secondary">{t("description")}</p>
       </div>
 
       {isLoading ? (
@@ -130,7 +140,7 @@ export default function AdminVerificationsPage() {
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <BadgeCheck className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            Nothing pending
+            {t("empty")}
           </p>
         </Card>
       ) : (
@@ -164,7 +174,7 @@ export default function AdminVerificationsPage() {
                     {loadingImage === `${row.id}-${kind}` ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : null}
-                    View {label}
+                    {t("viewImage", { label })}
                   </Button>
                 ))}
               </div>
@@ -176,7 +186,7 @@ export default function AdminVerificationsPage() {
                     setReasonPreset((prev) => ({ ...prev, [row.id]: value }))
                   }
                   options={[
-                    { value: "", label: "Rejection reason (if rejecting)" },
+                    { value: "", label: t("rejectionReasonPlaceholder") },
                     ...KYC_REJECTION_REASONS.map((r) => ({
                       value: r,
                       label: r,
@@ -184,7 +194,7 @@ export default function AdminVerificationsPage() {
                   ]}
                 />
                 <Textarea
-                  placeholder="Note (optional)"
+                  placeholder={t("notePlaceholder")}
                   rows={1}
                   value={reasonNote[row.id] ?? ""}
                   onChange={(e) =>
@@ -202,7 +212,7 @@ export default function AdminVerificationsPage() {
                   disabled={busyId === row.id}
                   onClick={() => review(row.id, "approve")}
                 >
-                  Approve
+                  {t("approve")}
                 </Button>
                 <Button
                   size="sm"
@@ -210,7 +220,7 @@ export default function AdminVerificationsPage() {
                   disabled={busyId === row.id}
                   onClick={() => review(row.id, "reject")}
                 >
-                  Reject
+                  {t("reject")}
                 </Button>
               </div>
             </Card>

@@ -2,6 +2,14 @@ import { Resend } from "resend";
 
 import { env } from "@/lib/env";
 
+// Every booking/order/review/subscription email template below takes a `t`
+// (namespace "libServices.email") resolved by the caller via
+// getTranslations() — request-context callers use the request's own locale,
+// cron/webhook-triggered callers pass { locale: "vi" } explicitly (no
+// request/cookie context to read a locale from). This file itself stays a
+// thin template layer and never calls getTranslations() on its own.
+type EmailT = (key: string, values?: Record<string, string | number>) => string;
+
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
@@ -60,6 +68,17 @@ export async function sendMarketingEmail({
   await sendEmail({ to, subject, html });
 }
 
+// TODO(i18n): this function's only caller (src/app/api/auth/forgot-password/
+// route.ts) is outside this pass's file scope, and next-intl's
+// getTranslations() is async while this function must stay sync (it just
+// returns an HTML string with no request access of its own). Rather than
+// force a required `t` param that would break that out-of-scope call site,
+// the copy below is hardcoded to Vietnamese directly — matching the
+// platform's Vietnamese-first default (CLAUDE.md rule 10, routing.defaultLocale
+// = "vi") for the common case. Once forgot-password/route.ts is updated to
+// resolve a `t` instance (namespace "libServices.email.resetPassword") and
+// pass it through, this should switch to the same t()-based pattern as the
+// rest of this file.
 export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
   return `
     <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
@@ -67,19 +86,19 @@ export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
         <span style="color: #ffffff; font-size: 20px; font-weight: 700;">Fgrapher</span>
       </div>
       <div style="padding: 32px 24px; background-color: #ffffff;">
-        <h1 style="font-size: 20px; margin: 0 0 12px; color: hsl(30 15% 11%);">Reset your password</h1>
+        <h1 style="font-size: 20px; margin: 0 0 12px; color: hsl(30 15% 11%);">Đặt lại mật khẩu</h1>
         <p style="font-size: 14px; line-height: 1.5; color: hsl(30 8% 38%); margin: 0 0 24px;">
-          We received a request to reset your Fgrapher password. This link expires in 1 hour.
-          If you didn't request this, you can safely ignore this email.
+          Chúng tôi nhận được yêu cầu đặt lại mật khẩu Fgrapher của bạn. Liên kết này hết hạn sau 1 giờ.
+          Nếu bạn không yêu cầu điều này, bạn có thể bỏ qua email này.
         </p>
         <a
           href="${resetUrl}"
           style="display: inline-block; background-color: hsl(38 44% 52%); color: hsl(30 15% 11%); font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 12px; text-decoration: none;"
         >
-          Reset password
+          Đặt lại mật khẩu
         </a>
         <p style="font-size: 12px; line-height: 1.5; color: hsl(30 7% 52%); margin: 24px 0 0; word-break: break-all;">
-          Or copy this link: ${resetUrl}
+          Hoặc sao chép liên kết này: ${resetUrl}
         </p>
       </div>
     </div>
@@ -91,11 +110,13 @@ export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
 // resetPasswordEmailHtml pattern rather than adding a new templating
 // dependency for six emails.
 function bookingEmailShell({
+  t,
   heading,
   body,
   ctaLabel,
   ctaUrl,
 }: {
+  t: EmailT;
   heading: string;
   body: string;
   ctaLabel?: string;
@@ -124,7 +145,7 @@ function bookingEmailShell({
       </div>
       <div style="padding: 16px 24px; background-color: hsl(30 20% 97%); text-align: center;">
         <a href="${process.env.NEXTAUTH_URL ?? ""}/dashboard/settings/notifications" style="font-size: 12px; color: hsl(30 7% 52%);">
-          Manage notification preferences
+          ${t("footer.manageNotifications")}
         </a>
       </div>
     </div>
@@ -140,253 +161,352 @@ interface BookingEmailBase {
 }
 
 export function bookingRequestEmailHtml({
+  t,
   otherPartyName,
   serviceName,
   dateLabel,
   timeLabel,
   bookingUrl,
-}: BookingEmailBase) {
+}: BookingEmailBase & { t: EmailT }) {
   return bookingEmailShell({
-    heading: "New booking request",
-    body: `<p><strong>${otherPartyName}</strong> requested to book <strong>${serviceName}</strong> on ${dateLabel} at ${timeLabel}. Respond within 24 hours to keep your response rate up.</p>`,
-    ctaLabel: "View request",
+    t,
+    heading: t("bookingRequest.heading"),
+    body: t("bookingRequest.body", {
+      otherPartyName: `<strong>${otherPartyName}</strong>`,
+      serviceName: `<strong>${serviceName}</strong>`,
+      dateLabel,
+      timeLabel,
+    }),
+    ctaLabel: t("bookingRequest.cta"),
     ctaUrl: bookingUrl,
   });
 }
 
 export function bookingConfirmedEmailHtml({
+  t,
   otherPartyName,
   serviceName,
   dateLabel,
   timeLabel,
   bookingUrl,
-}: BookingEmailBase) {
+}: BookingEmailBase & { t: EmailT }) {
   return bookingEmailShell({
-    heading: "Booking confirmed",
-    body: `<p><strong>${otherPartyName}</strong> confirmed your <strong>${serviceName}</strong> booking on ${dateLabel} at ${timeLabel}. We'll remind you 24 hours before.</p>`,
-    ctaLabel: "View booking",
+    t,
+    heading: t("bookingConfirmed.heading"),
+    body: t("bookingConfirmed.body", {
+      otherPartyName: `<strong>${otherPartyName}</strong>`,
+      serviceName: `<strong>${serviceName}</strong>`,
+      dateLabel,
+      timeLabel,
+    }),
+    ctaLabel: t("bookingConfirmed.cta"),
     ctaUrl: bookingUrl,
   });
 }
 
 export function bookingDeclinedEmailHtml({
+  t,
   otherPartyName,
   serviceName,
   dateLabel,
   timeLabel,
   bookingUrl,
-}: BookingEmailBase & { reason?: string }) {
+}: BookingEmailBase & { t: EmailT; reason?: string }) {
   return bookingEmailShell({
-    heading: "Booking declined",
-    body: `<p><strong>${otherPartyName}</strong> wasn't able to accept your <strong>${serviceName}</strong> request for ${dateLabel} at ${timeLabel}. Browse other artists to find someone available.</p>`,
-    ctaLabel: "Browse artists",
+    t,
+    heading: t("bookingDeclined.heading"),
+    body: t("bookingDeclined.body", {
+      otherPartyName: `<strong>${otherPartyName}</strong>`,
+      serviceName: `<strong>${serviceName}</strong>`,
+      dateLabel,
+      timeLabel,
+    }),
+    ctaLabel: t("bookingDeclined.cta"),
     ctaUrl: bookingUrl,
   });
 }
 
 export function bookingCancelledEmailHtml({
+  t,
   otherPartyName,
   serviceName,
   dateLabel,
   timeLabel,
   bookingUrl,
-}: BookingEmailBase) {
+}: BookingEmailBase & { t: EmailT }) {
   return bookingEmailShell({
-    heading: "Booking cancelled",
-    body: `<p><strong>${otherPartyName}</strong> cancelled the <strong>${serviceName}</strong> booking on ${dateLabel} at ${timeLabel}.</p>`,
-    ctaLabel: "View bookings",
+    t,
+    heading: t("bookingCancelled.heading"),
+    body: t("bookingCancelled.body", {
+      otherPartyName: `<strong>${otherPartyName}</strong>`,
+      serviceName: `<strong>${serviceName}</strong>`,
+      dateLabel,
+      timeLabel,
+    }),
+    ctaLabel: t("bookingCancelled.cta"),
     ctaUrl: bookingUrl,
   });
 }
 
 export function bookingReminderEmailHtml({
+  t,
   otherPartyName,
   serviceName,
   dateLabel,
   timeLabel,
   bookingUrl,
-}: BookingEmailBase) {
+}: BookingEmailBase & { t: EmailT }) {
   return bookingEmailShell({
-    heading: "Booking tomorrow",
-    body: `<p>Reminder: your <strong>${serviceName}</strong> session with <strong>${otherPartyName}</strong> is on ${dateLabel} at ${timeLabel} — less than 24 hours away.</p>`,
-    ctaLabel: "View booking",
+    t,
+    heading: t("bookingReminder.heading"),
+    body: t("bookingReminder.body", {
+      otherPartyName: `<strong>${otherPartyName}</strong>`,
+      serviceName: `<strong>${serviceName}</strong>`,
+      dateLabel,
+      timeLabel,
+    }),
+    ctaLabel: t("bookingReminder.cta"),
     ctaUrl: bookingUrl,
   });
 }
 
 export function bookingCompletedEmailHtml({
+  t,
   otherPartyName,
   serviceName,
   bookingUrl,
-}: BookingEmailBase) {
+}: BookingEmailBase & { t: EmailT }) {
   return bookingEmailShell({
-    heading: "How was your session?",
-    body: `<p>Your <strong>${serviceName}</strong> session with <strong>${otherPartyName}</strong> is marked complete. Leave a review to help other clients.</p>`,
-    ctaLabel: "Leave a review",
+    t,
+    heading: t("bookingCompleted.heading"),
+    body: t("bookingCompleted.body", {
+      otherPartyName: `<strong>${otherPartyName}</strong>`,
+      serviceName: `<strong>${serviceName}</strong>`,
+    }),
+    ctaLabel: t("bookingCompleted.cta"),
     ctaUrl: bookingUrl,
   });
 }
 
 export function welcomeSubscriptionEmailHtml({
+  t,
   roleNames,
   billingUrl,
 }: {
+  t: EmailT;
   roleNames: string[];
   billingUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "Welcome to Fgrapher Pro!",
-    body: `<p>Your <strong>${roleNames.join(", ")}</strong> profile${roleNames.length > 1 ? "s are" : " is"} now live. Your 14-day free trial has started — manage your subscription anytime from billing settings.</p>`,
-    ctaLabel: "View billing",
+    t,
+    heading: t("welcomeSubscription.heading"),
+    body: t(
+      roleNames.length > 1
+        ? "welcomeSubscription.bodyPlural"
+        : "welcomeSubscription.bodySingular",
+      { roleNames: `<strong>${roleNames.join(", ")}</strong>` },
+    ),
+    ctaLabel: t("welcomeSubscription.cta"),
     ctaUrl: billingUrl,
   });
 }
 
 export function paymentFailedEmailHtml({
+  t,
   graceEndsLabel,
   billingUrl,
 }: {
+  t: EmailT;
   graceEndsLabel: string;
   billingUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "Your payment didn't go through",
-    body: `<p>We couldn't charge your card for your Fgrapher subscription. Your profile stays live until <strong>${graceEndsLabel}</strong> — update your payment method before then to avoid any interruption.</p>`,
-    ctaLabel: "Update payment method",
+    t,
+    heading: t("paymentFailed.heading"),
+    body: t("paymentFailed.body", {
+      graceEndsLabel: `<strong>${graceEndsLabel}</strong>`,
+    }),
+    ctaLabel: t("paymentFailed.cta"),
     ctaUrl: billingUrl,
   });
 }
 
 export function subscriptionCancellingEmailHtml({
+  t,
   periodEndLabel,
   billingUrl,
 }: {
+  t: EmailT;
   periodEndLabel: string;
   billingUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "We're sorry to see you go",
-    body: `<p>Your subscription is set to cancel on <strong>${periodEndLabel}</strong>. You'll keep full access until then. Changed your mind?</p>`,
-    ctaLabel: "Resume subscription",
+    t,
+    heading: t("subscriptionCancelling.heading"),
+    body: t("subscriptionCancelling.body", {
+      periodEndLabel: `<strong>${periodEndLabel}</strong>`,
+    }),
+    ctaLabel: t("subscriptionCancelling.cta"),
     ctaUrl: billingUrl,
   });
 }
 
 export function subscriptionEndedEmailHtml({
+  t,
   billingUrl,
 }: {
+  t: EmailT;
   billingUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "Your subscription has ended",
-    body: `<p>Your Fgrapher Pro subscription has ended and your profile is no longer visible in search. All your data is kept — reactivate anytime to pick up right where you left off.</p>`,
-    ctaLabel: "Reactivate",
+    t,
+    heading: t("subscriptionEnded.heading"),
+    body: t("subscriptionEnded.body"),
+    ctaLabel: t("subscriptionEnded.cta"),
     ctaUrl: billingUrl,
   });
 }
 
 export function receiptEmailHtml({
+  t,
   amountLabel,
   periodEndLabel,
   invoiceUrl,
 }: {
+  t: EmailT;
   amountLabel: string;
   periodEndLabel: string;
   invoiceUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "Payment received",
-    body: `<p>We received your payment of <strong>${amountLabel}</strong>. Your subscription is active through <strong>${periodEndLabel}</strong>.</p>`,
-    ctaLabel: "View receipt",
+    t,
+    heading: t("receipt.heading"),
+    body: t("receipt.body", {
+      amountLabel: `<strong>${amountLabel}</strong>`,
+      periodEndLabel: `<strong>${periodEndLabel}</strong>`,
+    }),
+    ctaLabel: t("receipt.cta"),
     ctaUrl: invoiceUrl,
   });
 }
 
 export function orderConfirmationEmailHtml({
+  t,
   orderNumber,
   itemsSummary,
   totalLabel,
   orderUrl,
 }: {
+  t: EmailT;
   orderNumber: string;
   itemsSummary: string;
   totalLabel: string;
   orderUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "Order confirmed!",
-    body: `<p>Order <strong>#${orderNumber}</strong> — ${itemsSummary}</p><p>Total: <strong>${totalLabel}</strong></p>`,
-    ctaLabel: "View order",
+    t,
+    heading: t("orderConfirmation.heading"),
+    body: t("orderConfirmation.body", {
+      orderNumber: `<strong>#${orderNumber}</strong>`,
+      itemsSummary,
+      totalLabel: `<strong>${totalLabel}</strong>`,
+    }),
+    ctaLabel: t("orderConfirmation.cta"),
     ctaUrl: orderUrl,
   });
 }
 
 export function newOrderEmailHtml({
+  t,
   orderNumber,
   customerName,
   itemsSummary,
   orderUrl,
 }: {
+  t: EmailT;
   orderNumber: string;
   customerName: string;
   itemsSummary: string;
   orderUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "New order received",
-    body: `<p><strong>${customerName}</strong> placed order <strong>#${orderNumber}</strong> — ${itemsSummary}</p>`,
-    ctaLabel: "View order",
+    t,
+    heading: t("newOrder.heading"),
+    body: t("newOrder.body", {
+      customerName: `<strong>${customerName}</strong>`,
+      orderNumber: `<strong>#${orderNumber}</strong>`,
+      itemsSummary,
+    }),
+    ctaLabel: t("newOrder.cta"),
     ctaUrl: orderUrl,
   });
 }
 
 export function orderStatusEmailHtml({
+  t,
   orderNumber,
   statusLabel,
   detail,
   orderUrl,
 }: {
+  t: EmailT;
   orderNumber: string;
   statusLabel: string;
   detail?: string;
   orderUrl: string;
 }) {
   return bookingEmailShell({
-    heading: `Order ${statusLabel}`,
-    body: `<p>Your order <strong>#${orderNumber}</strong> is now <strong>${statusLabel}</strong>.${detail ? ` ${detail}` : ""}</p>`,
-    ctaLabel: "View order",
+    t,
+    heading: t("orderStatus.heading", { statusLabel }),
+    body: t(detail ? "orderStatus.bodyWithDetail" : "orderStatus.body", {
+      orderNumber: `<strong>#${orderNumber}</strong>`,
+      statusLabel: `<strong>${statusLabel}</strong>`,
+      ...(detail ? { detail } : {}),
+    }),
+    ctaLabel: t("orderStatus.cta"),
     ctaUrl: orderUrl,
   });
 }
 
 export function newReviewEmailHtml({
+  t,
   reviewerName,
   rating,
   bookingUrl,
 }: {
+  t: EmailT;
   reviewerName: string;
   rating: number;
   bookingUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "New review",
-    body: `<p><strong>${reviewerName}</strong> left you a <strong>${rating}-star</strong> review.</p>`,
-    ctaLabel: "View & respond",
+    t,
+    heading: t("newReview.heading"),
+    body: t("newReview.body", {
+      reviewerName: `<strong>${reviewerName}</strong>`,
+      rating,
+    }),
+    ctaLabel: t("newReview.cta"),
     ctaUrl: bookingUrl,
   });
 }
 
 export function reviewResponseEmailHtml({
+  t,
   providerName,
   bookingUrl,
 }: {
+  t: EmailT;
   providerName: string;
   bookingUrl: string;
 }) {
   return bookingEmailShell({
-    heading: "New response to your review",
-    body: `<p><strong>${providerName}</strong> responded to your review.</p>`,
-    ctaLabel: "View response",
+    t,
+    heading: t("reviewResponse.heading"),
+    body: t("reviewResponse.body", {
+      providerName: `<strong>${providerName}</strong>`,
+    }),
+    ctaLabel: t("reviewResponse.cta"),
     ctaUrl: bookingUrl,
   });
 }

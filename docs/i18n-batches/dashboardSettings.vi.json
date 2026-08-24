@@ -1,0 +1,172 @@
+{
+  "dashboardSettings": {
+    "nav": {
+      "profile": "Hồ sơ",
+      "account": "Tài khoản",
+      "roles": "Vai trò",
+      "billing": "Thanh toán",
+      "notifications": "Thông báo",
+      "data": "Dữ liệu & Quyền riêng tư"
+    },
+    "layout": {
+      "title": "Cài đặt"
+    },
+    "account": {
+      "emailLabel": "Email",
+      "phoneLabel": "Số điện thoại",
+      "save": "Lưu",
+      "changePasswordTitle": "Đổi mật khẩu",
+      "currentPasswordLabel": "Mật khẩu hiện tại",
+      "newPasswordLabel": "Mật khẩu mới",
+      "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+      "updatePassword": "Cập nhật mật khẩu",
+      "passwordMismatch": "Mật khẩu xác nhận không khớp",
+      "genericError": "Đã có lỗi xảy ra",
+      "languageLabel": "Ngôn ngữ",
+      "themeLabel": "Giao diện",
+      "themeLight": "Sáng",
+      "themeDark": "Tối",
+      "themeSystem": "Theo hệ thống",
+      "dangerZoneTitle": "Khu vực nguy hiểm",
+      "dangerZoneDesc": "Xóa tài khoản là vĩnh viễn. Hành động này không thể hoàn tác.",
+      "deleteAccount": "Xóa tài khoản",
+      "deleteDialogTitle": "Xóa tài khoản của bạn?",
+      "deleteDialogBody": "Thao tác này sẽ vô hiệu hóa vĩnh viễn tài khoản Fgrapher của bạn. Hành động này không thể hoàn tác.",
+      "cancel": "Hủy",
+      "toastAccountUpdated": "Đã cập nhật tài khoản",
+      "toastPasswordUpdated": "Đã cập nhật mật khẩu"
+    },
+    "billing": {
+      "status": {
+        "active": "Đang hoạt động",
+        "trialing": "Đang dùng thử",
+        "pastDue": "Quá hạn thanh toán",
+        "cancelled": "Đã hủy",
+        "expired": "Đã hết hạn"
+      },
+      "notConfigured": "Chức năng thanh toán chưa được kích hoạt trong môi trường này.",
+      "portalGenericError": "Không thể mở cổng quản lý thanh toán.",
+      "emptyTitle": "Chưa có gói đăng ký nào đang hoạt động",
+      "emptyDesc": "Kích hoạt một vai trò trả phí để có hồ sơ công khai, nhận đặt lịch và nhiều hơn nữa.",
+      "browseRoles": "Xem các vai trò",
+      "currentPlanLabel": "Gói hiện tại",
+      "perYear": "/năm",
+      "perMonth": "/tháng",
+      "trialEnds": "Còn {days} ngày dùng thử",
+      "cancelsOn": "Hủy vào {date}",
+      "resumeSubscription": "Khôi phục gói đăng ký",
+      "renewsOn": "Gia hạn vào {date}",
+      "cancelSubscription": "Hủy gói đăng ký",
+      "totalMonthlyCost": "Tổng chi phí hàng tháng",
+      "paymentMethodLabel": "Phương thức thanh toán",
+      "managedByStripe": "Được quản lý an toàn qua Stripe",
+      "manageSubscription": "Quản lý gói đăng ký",
+      "billingHistoryLabel": "Lịch sử thanh toán",
+      "noInvoices": "Chưa có hóa đơn nào.",
+      "viewInvoice": "Xem",
+      "cancelDialogTitle": "Hủy gói đăng ký {role}?",
+      "cancelDialogBody1": "Hồ sơ của bạn vẫn hiển thị cho đến hết chu kỳ thanh toán hiện tại.",
+      "cancelDialogBody2": "Toàn bộ dữ liệu của bạn — portfolio, đơn đặt lịch, đánh giá — vẫn được giữ nguyên, bạn có thể kích hoạt lại bất cứ lúc nào.",
+      "keepSubscription": "Giữ gói đăng ký",
+      "disabledTitle": "Hiện tại Fgrapher đang miễn phí cho toàn bộ nhà cung cấp dịch vụ",
+      "disabledBody": "Chúng tôi sẽ thông báo trước ít nhất 30 ngày trước khi bắt đầu thu phí. Không cần làm gì thêm ở trang này."
+    },
+    "data": {
+      "summary": {
+        "profiles": "Hồ sơ",
+        "bookingsAsCustomer": "Đơn đặt lịch đã gửi",
+        "bookingsAsProvider": "Đơn đặt lịch đã nhận",
+        "reviewsWritten": "Đánh giá đã viết",
+        "reviewsReceived": "Đánh giá đã nhận",
+        "orders": "Đơn hàng"
+      },
+      "overviewTitle": "Tổng quan dữ liệu của bạn",
+      "consentTitle": "Đồng ý sử dụng dữ liệu",
+      "consentIntro": "Việc xử lý dữ liệu để cung cấp dịch vụ là bắt buộc và không thể tắt tại đây. Bạn có thể bật/tắt hai mục tùy chọn dưới đây bất cứ lúc nào.",
+      "marketingLabel": "Thông tin khuyến mại",
+      "marketingDesc": "Nhận email về khuyến mại, tin tức từ Fgrapher",
+      "analyticsLabel": "Phân tích hành vi sử dụng",
+      "analyticsDesc": "Cho phép Fgrapher phân tích cách bạn sử dụng dịch vụ để cải thiện sản phẩm",
+      "privacyPolicyIntro": "Xem chi tiết tại",
+      "privacyPolicyLink": "Chính sách quyền riêng tư",
+      "myDataTitle": "Dữ liệu của tôi",
+      "myDataDesc": "Tải về bản sao đầy đủ dữ liệu cá nhân, hồ sơ, đơn đặt lịch và đánh giá của bạn dưới dạng JSON.",
+      "downloadButton": "Tải về dữ liệu của tôi",
+      "deleteAccountTitle": "Xóa tài khoản",
+      "deleteAccountDesc": "Yêu cầu xóa vĩnh viễn tài khoản của bạn. Yêu cầu này sẽ được đội ngũ Fgrapher xử lý, không xóa ngay lập tức.",
+      "pendingDeletionNotice": "Bạn đã có một yêu cầu xóa tài khoản đang chờ xử lý.",
+      "requestDeletionButton": "Yêu cầu xóa tài khoản",
+      "explainDialogTitle": "Điều gì sẽ xảy ra khi bạn xóa tài khoản?",
+      "explainWillBeDeletedLabel": "Sẽ bị xóa vĩnh viễn:",
+      "explainWillBeDeletedBody": "hồ sơ, ảnh/portfolio, dịch vụ đã đăng, tin nhắn của bạn.",
+      "explainWillBeKeptLabel": "Sẽ được giữ lại (đã ẩn danh):",
+      "explainWillBeKeptBody": "tài khoản của bạn sẽ đổi thành \"Người dùng đã xóa\" — email, số điện thoại, ngày sinh và các thông tin cá nhân khác sẽ bị xóa, nhưng các đơn đặt lịch/đánh giá đã hoàn tất vẫn được giữ để phía đối tác của bạn tra cứu.",
+      "explainIrreversible": "Hành động này không thể hoàn tác sau khi được xử lý.",
+      "cancel": "Hủy",
+      "continueBtn": "Tiếp tục",
+      "confirmDialogTitle": "Xác nhận gửi yêu cầu xóa tài khoản",
+      "confirmDialogBody": "Bạn có chắc chắn muốn gửi yêu cầu xóa vĩnh viễn tài khoản này không? Yêu cầu sẽ được đội ngũ Fgrapher xử lý trong thời gian sớm nhất.",
+      "back": "Quay lại",
+      "confirmSubmit": "Xác nhận gửi yêu cầu",
+      "toastConsentUpdateFail": "Không thể cập nhật lựa chọn",
+      "toastConsentUpdateSuccess": "Đã cập nhật lựa chọn",
+      "toastExportFail": "Xuất dữ liệu thất bại",
+      "toastExportSuccess": "Đã tải về dữ liệu của bạn",
+      "toastDeletionRequestFail": "Gửi yêu cầu xóa tài khoản thất bại",
+      "toastDeletionRequestSuccessTitle": "Đã gửi yêu cầu xóa tài khoản",
+      "toastDeletionRequestSuccessDesc": "Đội ngũ Fgrapher sẽ xử lý yêu cầu này."
+    },
+    "notifications": {
+      "groups": {
+        "bookings": "Đặt lịch",
+        "messages": "Tin nhắn",
+        "social": "Mạng xã hội",
+        "marketing": "Marketing"
+      },
+      "labels": {
+        "bookingRequest": "Yêu cầu đặt lịch mới",
+        "bookingConfirmed": "Đã xác nhận đặt lịch",
+        "bookingCancelled": "Đã hủy đặt lịch",
+        "bookingReminder": "Nhắc lịch sắp tới",
+        "newMessage": "Tin nhắn mới",
+        "newFollower": "Người theo dõi mới",
+        "newReview": "Đánh giá mới",
+        "productUpdates": "Cập nhật sản phẩm",
+        "tips": "Mẹo và thực hành tốt"
+      },
+      "email": "Email",
+      "inApp": "Trong ứng dụng"
+    },
+    "profile": {
+      "basics": {
+        "usernameLabel": "Tên người dùng",
+        "usernameTaken": "Tên người dùng này đã được sử dụng",
+        "bioLabel": "Giới thiệu",
+        "wardLabel": "Phường/xã",
+        "wardNotSelected": "Chưa chọn"
+      },
+      "media": {
+        "coverButton": "Ảnh bìa",
+        "uploadUnavailable": "Chức năng tải lên hiện không khả dụng",
+        "uploadFailed": "Tải lên thất bại"
+      },
+      "availability": {
+        "weeklySchedule": "Lịch làm việc hàng tuần",
+        "days": {
+          "sun": "Chủ nhật",
+          "mon": "Thứ hai",
+          "tue": "Thứ ba",
+          "wed": "Thứ tư",
+          "thu": "Thứ năm",
+          "fri": "Thứ sáu",
+          "sat": "Thứ bảy"
+        },
+        "saveSchedule": "Lưu lịch làm việc",
+        "saved": "Đã lưu",
+        "blockedDates": "Ngày không nhận lịch",
+        "removeAria": "Xóa",
+        "blockDateButton": "Chặn ngày"
+      }
+    }
+  }
+}

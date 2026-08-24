@@ -58,3 +58,34 @@ export type ProposeRescheduleInput = z.infer<typeof proposeRescheduleSchema>;
 export const respondRescheduleSchema = z.object({
   accept: z.boolean(),
 });
+
+// Translated variants — see validations/auth.ts's getLoginSchema comment
+// for why these are factories rather than bare schemas. Namespace
+// "libServices.validation.booking".
+export function getCreateBookingSchema(t: (key: string) => string) {
+  return z.object({
+    providerId: z.string().min(1),
+    serviceId: z.string().min(1).optional(),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("invalidDate")),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, t("invalidTime")),
+    locationType: locationTypeSchema,
+    locationAddress: z.string().max(300).optional(),
+    numberOfPeople: z.coerce.number().int().min(1).max(999).optional(),
+    notes: z.string().max(1000).optional(),
+    contactPhone: z.string().max(30).optional(),
+    referenceImages: z.array(z.string().url()).max(5).optional(),
+    parentBookingId: z.string().min(1).optional(),
+    requesterRole: z.enum(Role).optional(),
+  });
+}
+
+export function getProposeRescheduleSchema(t: (key: string) => string) {
+  return z.object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("invalidDate")),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, t("invalidTime")),
+    endTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/, t("invalidTime"))
+      .optional(),
+  });
+}

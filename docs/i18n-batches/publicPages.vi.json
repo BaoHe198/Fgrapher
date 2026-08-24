@@ -1,0 +1,315 @@
+{
+  "publicPages": {
+    "booking": {
+      "pageTitle": "Đặt lịch chụp — Fgrapher",
+      "fallbackProviderName": "nhà cung cấp này",
+      "shootTypeOptions": {
+        "notSpecified": "Chưa xác định",
+        "editorial": "Editorial",
+        "commercial": "Thương mại",
+        "portfolioBuilding": "Xây dựng portfolio",
+        "tfpCollaboration": "Hợp tác TFP",
+        "event": "Sự kiện",
+        "other": "Khác"
+      },
+      "steps": {
+        "service": "Dịch vụ",
+        "dateTime": "Ngày & giờ",
+        "details": "Chi tiết",
+        "confirm": "Xác nhận"
+      },
+      "back": "Quay lại",
+      "continueBtn": "Tiếp tục",
+      "submitBtn": "Gửi yêu cầu đặt lịch",
+      "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      "success": {
+        "heading": "Đã gửi yêu cầu đặt lịch!",
+        "body": "{providerName} sẽ phản hồi trong vòng 24 giờ. Chúng tôi sẽ gửi email ngay khi họ xác nhận.",
+        "viewBookings": "Xem lịch đặt của tôi",
+        "browseMore": "Khám phá thêm nghệ sĩ"
+      },
+      "notes": {
+        "shootType": "Loại buổi chụp: {value}",
+        "usageRights": "Quyền sử dụng hình ảnh: {value}",
+        "wardrobeStyling": "Trang phục/tạo hình: {value}",
+        "muaProvidedByCustomer": "Khách hàng sẽ mang theo chuyên viên trang điểm",
+        "customRequest": "Yêu cầu riêng: {value}"
+      },
+      "stepService": {
+        "heading": "Bạn cần gì?",
+        "describeLabel": "Mô tả điều bạn đang tìm kiếm",
+        "describePlaceholder": "Cho họ biết bạn cần buổi chụp, sự kiện hay sản phẩm như thế nào...",
+        "durationMin": "{duration} phút"
+      },
+      "stepDateTime": {
+        "heading": "Khi nào phù hợp với bạn?",
+        "previous": "Trước",
+        "next": "Sau",
+        "localTimeNote": "Giờ hiển thị theo múi giờ của bạn · cần đặt trước ít nhất 24 giờ",
+        "selectDatePrompt": "Chọn một ngày để xem khung giờ trống.",
+        "sessionDuration": "Thời lượng: {duration} phút",
+        "noAvailability": "Không có lịch trống vào ngày này — hãy thử ngày khác.",
+        "bookingWith": "Đặt lịch với {providerName}",
+        "booking": "Đặt lịch"
+      },
+      "stepDetails": {
+        "heading": "Trao đổi với {providerName} về buổi chụp của bạn",
+        "attachToJob": "Gắn yêu cầu này vào một đơn hàng đã xác nhận của khách",
+        "clientJobLabel": "Đơn hàng của khách",
+        "customRequestOption": "Yêu cầu riêng",
+        "shootDetails": "Chi tiết buổi chụp",
+        "shootTypeLabel": "Loại buổi chụp",
+        "usageRightsLabel": "Quyền sử dụng hình ảnh",
+        "usageRightsPlaceholder": "Hình ảnh sẽ được sử dụng ở đâu?",
+        "wardrobeLabel": "Ghi chú trang phục / tạo hình",
+        "wardrobePlaceholder": "Trang phục, định hướng tạo hình, những gì người mẫu nên mang theo hoặc chuẩn bị",
+        "muaProvidedLabel": "Sẽ có chuyên viên trang điểm đi cùng",
+        "locationLabel": "Địa điểm",
+        "locationProvider": "Tại studio của nhà cung cấp",
+        "locationCustomer": "Tại địa điểm của tôi",
+        "locationOutdoor": "Ngoài trời / khác",
+        "addressLabel": "Địa chỉ",
+        "addressPlaceholder": "Số nhà, phường/xã, thành phố",
+        "numberOfPeopleLabel": "Số người",
+        "notesLabel": "Ghi chú",
+        "notesPlaceholder": "Mô tả concept, phong cách tham khảo, yêu cầu đặc biệt...",
+        "contactPhoneLabel": "Số điện thoại liên hệ"
+      },
+      "stepReview": {
+        "heading": "Xem lại yêu cầu đặt lịch",
+        "rowService": "Dịch vụ",
+        "rowDate": "Ngày",
+        "rowTime": "Giờ",
+        "rowDuration": "Thời lượng",
+        "rowLocation": "Địa điểm",
+        "rowPeople": "Số người",
+        "durationMin": "{duration} phút",
+        "servicePrice": "Giá dịch vụ",
+        "total": "Tổng cộng",
+        "notesLabel": "Ghi chú",
+        "cancellationNotice": "Miễn phí hủy trước 48 giờ so với buổi hẹn. Hủy trong vòng 24 giờ có thể bị tính phí khi tính năng thanh toán được bật.",
+        "agreeTerms": "Tôi đồng ý với điều khoản đặt lịch"
+      }
+    },
+    "browse": {
+      "pageTitle": "Khám phá nghệ sĩ — Fgrapher",
+      "sortLabels": {
+        "rating": "Đánh giá cao nhất",
+        "priceAsc": "Giá: thấp đến cao",
+        "priceDesc": "Giá: cao đến thấp",
+        "newest": "Mới nhất",
+        "reviews": "Nhiều đánh giá nhất"
+      },
+      "headingWithRoleCity": "{role} tại {city}",
+      "headingDefault": "Khám phá nghệ sĩ",
+      "resultsCount": "{count} kết quả · {sort}",
+      "filterAvailableNow": "Đang rảnh",
+      "filterInstantBook": "Đặt lịch tức thì",
+      "filterTopRated": "Đánh giá cao nhất",
+      "noResults": {
+        "heading": "Không tìm thấy nghệ sĩ nào",
+        "body": "Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm ở một thành phố khác."
+      },
+      "clearFilters": "Xóa tất cả bộ lọc",
+      "unnamed": "Chưa đặt tên",
+      "newBadge": "Mới",
+      "priceFrom": "Từ {price}",
+      "contactForPricing": "Liên hệ để biết giá",
+      "showingResults": "Hiển thị {shown} trên {total} kết quả",
+      "previous": "Trước",
+      "loadMore": "Xem thêm"
+    },
+    "cart": {
+      "heading": "Giỏ hàng của bạn",
+      "empty": {
+        "heading": "Giỏ hàng đang trống",
+        "browseGear": "Khám phá thiết bị"
+      },
+      "orderSummary": "Tóm tắt đơn hàng",
+      "subtotal": "Tạm tính",
+      "deposits": "Tiền đặt cọc",
+      "total": "Tổng cộng",
+      "shippingNote": "Phí vận chuyển sẽ được tính khi thanh toán",
+      "checkoutBtn": "Thanh toán",
+      "continueShopping": "Tiếp tục mua sắm"
+    },
+    "checkout": {
+      "heading": "Thanh toán",
+      "emptyCart": "Giỏ hàng đang trống",
+      "paymentsNotConfigured": "Chức năng thanh toán chưa được thiết lập trong môi trường này.",
+      "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      "deliveryMethod": {
+        "heading": "Phương thức giao hàng",
+        "shipToMe": "Giao đến tôi",
+        "pickupAtShop": "Nhận tại cửa hàng",
+        "shipNote": "Bạn sẽ nhập địa chỉ giao hàng ở bước tiếp theo.",
+        "pickupNote": "Liên hệ cửa hàng sau khi đơn hàng được xác nhận để sắp xếp nhận hàng."
+      },
+      "reviewOrder": "Xem lại đơn hàng",
+      "agreeTerms": "Tôi đồng ý với điều khoản mua/thuê",
+      "orderSummary": "Tóm tắt đơn hàng",
+      "subtotal": "Tạm tính",
+      "deposits": "Tiền đặt cọc",
+      "shippingNote": "Phí vận chuyển sẽ được tính khi thanh toán",
+      "total": "Tổng cộng",
+      "continueToPayment": "Tiếp tục thanh toán"
+    },
+    "checkoutSuccess": {
+      "settingUp": "Đang xử lý đơn hàng của bạn...",
+      "momentNote": "Chỉ mất một chút thời gian thôi.",
+      "orderConfirmed": "Đặt hàng thành công!",
+      "orderLine": "Đơn hàng #{orderId} — {items}",
+      "shopWillConfirm": "Cửa hàng sẽ xác nhận đơn hàng của bạn trong thời gian sớm nhất. Bạn sẽ nhận được email cập nhật.",
+      "viewOrder": "Xem đơn hàng",
+      "continueShopping": "Tiếp tục mua sắm"
+    },
+    "landing": {
+      "unnamed": "Chưa đặt tên",
+      "newBadge": "Mới",
+      "priceFrom": "Từ {price}",
+      "contactForPricing": "Liên hệ để biết giá",
+      "howItWorks": {
+        "heading": "Cách thức hoạt động",
+        "step1Title": "Tìm kiếm & so sánh",
+        "step1Desc": "Duyệt qua các hồ sơ đã xác minh, so sánh giá và đọc đánh giá thật.",
+        "step2Title": "Đặt lịch của bạn",
+        "step2Desc": "Nhắn tin cho nghệ sĩ, chọn khung giờ và xác nhận đặt lịch trực tuyến.",
+        "step3Title": "Tận hưởng buổi chụp",
+        "step3Desc": "Gặp gỡ, sáng tạo và nhận file ảnh cuối cùng qua Fgrapher."
+      }
+    },
+    "pricing": {
+      "pageTitle": "Bảng giá — Fgrapher",
+      "freeDuringLaunch": "Miễn phí toàn bộ trong giai đoạn khởi động. Chúng tôi sẽ thông báo trước ít nhất 30 ngày trước khi bắt đầu thu phí.",
+      "eyebrow": "BẢNG GIÁ",
+      "heroTitle": "Gói dịch vụ đồng hành cùng nghề của bạn",
+      "heroSub": "Một mức phí cố định cho mỗi vai trò, tính bằng VND — không thu hoa hồng trên đơn đặt lịch, không bao giờ.",
+      "billingToggle": {
+        "monthly": "Hàng tháng",
+        "yearly": "Hàng năm",
+        "saveNote": "(tiết kiệm 20%)"
+      },
+      "customerFree": {
+        "heading": "Khách hàng — Miễn phí trọn đời",
+        "sub": "Tìm kiếm, đặt lịch và mua sắm. Không cần thẻ thanh toán.",
+        "signUp": "Đăng ký miễn phí"
+      },
+      "mostPopular": "Phổ biến nhất",
+      "perYear": "năm",
+      "perMonth": "tháng",
+      "startTrial": "Dùng thử 14 ngày",
+      "signUpFree": "Đăng ký miễn phí",
+      "comparePlans": "So sánh các gói",
+      "featureColumn": "Tính năng",
+      "comparisonFeatures": [
+        "Hồ sơ công khai",
+        "Lịch đặt hẹn",
+        "Nhắn tin với khách hàng",
+        "Đánh giá & xếp hạng",
+        "Hiển thị trong tìm kiếm",
+        "Bảng thống kê"
+      ],
+      "faqHeading": "Câu hỏi thường gặp",
+      "stillDeciding": "Vẫn còn phân vân?",
+      "talkToUs": "Liên hệ với chúng tôi",
+      "plans": {
+        "photographer": {
+          "description": "Chụp ảnh cưới, chân dung và sự kiện.",
+          "features": [
+            "Hồ sơ công khai kèm portfolio",
+            "Đăng ảnh không giới hạn",
+            "Lịch đặt hẹn & yêu cầu đặt lịch",
+            "Nhắn tin với khách hàng",
+            "Đánh giá & xếp hạng",
+            "Hiển thị trong tìm kiếm",
+            "Bảng thống kê"
+          ]
+        },
+        "videographer": {
+          "description": "Quay phim điện ảnh và video highlight.",
+          "features": [
+            "Hồ sơ công khai kèm portfolio",
+            "Đăng video không giới hạn",
+            "Lịch đặt hẹn & yêu cầu đặt lịch",
+            "Nhắn tin với khách hàng",
+            "Đánh giá & xếp hạng",
+            "Hiển thị trong tìm kiếm",
+            "Bảng thống kê"
+          ]
+        },
+        "makeupArtist": {
+          "description": "Trang điểm cô dâu, editorial và sự kiện.",
+          "features": [
+            "Hồ sơ công khai kèm portfolio",
+            "Đăng portfolio không giới hạn",
+            "Lịch đặt hẹn & yêu cầu đặt lịch",
+            "Nhắn tin với khách hàng",
+            "Đánh giá & xếp hạng",
+            "Hiển thị trong tìm kiếm",
+            "Bảng thống kê"
+          ]
+        },
+        "model": {
+          "description": "Được mời chụp và xây dựng portfolio của bạn.",
+          "features": [
+            "Hồ sơ công khai kèm portfolio",
+            "Đăng portfolio không giới hạn",
+            "Lịch đặt hẹn & yêu cầu đặt lịch",
+            "Nhắn tin trực tiếp với nhiếp ảnh gia",
+            "Đánh giá & xếp hạng",
+            "Hiển thị trong tìm kiếm",
+            "Huy hiệu đã xác minh"
+          ]
+        },
+        "studio": {
+          "description": "Cho thuê không gian studio theo giờ hoặc theo ngày.",
+          "features": [
+            "Đăng studio kèm hình ảnh",
+            "Đặt lịch theo giờ & theo ngày",
+            "Giới thiệu tiện ích",
+            "Lịch trống",
+            "Nhắn tin với khách hàng",
+            "Đánh giá & xếp hạng"
+          ]
+        },
+        "cameraShop": {
+          "description": "Bán và cho thuê thiết bị cho cộng đồng.",
+          "features": [
+            "Hồ sơ cửa hàng",
+            "Đăng sản phẩm không giới hạn",
+            "Quản lý cho thuê & bán hàng",
+            "Quản lý đơn hàng",
+            "Theo dõi tồn kho",
+            "Nhắn tin với khách hàng"
+          ]
+        }
+      },
+      "faqs": {
+        "multipleRoles": {
+          "q": "Tôi có thể có nhiều vai trò cùng lúc không?",
+          "a": "Có — một tài khoản có thể giữ nhiều vai trò trả phí cùng lúc (ví dụ: Nhiếp ảnh gia + Studio), mỗi vai trò được tính phí như một gói thuê bao riêng, tất cả hiển thị cùng trên một trang hồ sơ."
+        },
+        "afterTrial": {
+          "q": "Điều gì xảy ra sau khi hết thời gian dùng thử miễn phí?",
+          "a": "Sau 14 ngày, thẻ của bạn sẽ tự động bị trừ tiền theo mức giá bạn đã chọn. Bạn có thể hủy bất cứ lúc nào trước khi hết thời gian dùng thử và sẽ không bị tính phí."
+        },
+        "cancelAnytime": {
+          "q": "Tôi có thể hủy bất cứ lúc nào không?",
+          "a": "Có. Khi hủy, gói của bạn vẫn hoạt động đến hết chu kỳ thanh toán hiện tại, và toàn bộ dữ liệu của bạn được giữ lại nếu bạn muốn kích hoạt lại sau này."
+        },
+        "commission": {
+          "q": "Fgrapher có thu hoa hồng trên các lượt đặt lịch không?",
+          "a": "Không — Fgrapher chỉ thu một mức phí thuê bao cố định cho mỗi vai trò, không tính phần trăm trên lượt đặt lịch của bạn."
+        },
+        "paymentMethods": {
+          "q": "Fgrapher chấp nhận những phương thức thanh toán nào?",
+          "a": "Thẻ tín dụng và thẻ ghi nợ, xử lý an toàn qua Stripe, cùng các phương thức thanh toán nội địa Việt Nam nếu bạn bật trong cài đặt Stripe của mình."
+        },
+        "annualDiscount": {
+          "q": "Có ưu đãi khi thanh toán theo năm không?",
+          "a": "Có — chuyển sang thanh toán theo năm trên trang này để được giảm 20% so với mức giá hàng tháng, tính phí một lần mỗi năm."
+        }
+      }
+    }
+  }
+}

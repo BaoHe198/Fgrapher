@@ -8,6 +8,7 @@ import type {
   ProductImage,
 } from "@prisma/client";
 import { Package } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
@@ -23,27 +24,31 @@ type OrderRow = Order & {
   })[];
 };
 
-const TABS: { value: OrderStatus | "ALL"; label: string }[] = [
-  { value: "ALL", label: "All" },
-  { value: "PENDING", label: "Processing" },
-  { value: "SHIPPED", label: "Shipped" },
-  { value: "DELIVERED", label: "Delivered" },
-  { value: "CANCELLED", label: "Cancelled" },
+const TAB_VALUES: (OrderStatus | "ALL")[] = [
+  "ALL",
+  "PENDING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
 ];
 
-const STATUS_BADGE: Record<
+const STATUS_VARIANT: Record<
   OrderStatus,
-  { label: string; variant: "warning" | "success" | "neutral" | "destructive" }
+  "warning" | "success" | "neutral" | "destructive"
 > = {
-  PENDING: { label: "Processing", variant: "warning" },
-  CONFIRMED: { label: "Confirmed", variant: "success" },
-  SHIPPED: { label: "Shipped", variant: "success" },
-  DELIVERED: { label: "Delivered", variant: "neutral" },
-  CANCELLED: { label: "Cancelled", variant: "destructive" },
-  RETURNED: { label: "Returned", variant: "neutral" },
+  PENDING: "warning",
+  CONFIRMED: "success",
+  SHIPPED: "success",
+  DELIVERED: "neutral",
+  CANCELLED: "destructive",
+  RETURNED: "neutral",
 };
 
 export function CustomerOrdersContent() {
+  const t = useTranslations("dashboardCore.customerOrders");
+  const TABS: { value: OrderStatus | "ALL"; label: string }[] = TAB_VALUES.map(
+    (value) => ({ value, label: t(`tabs.${value}`) }),
+  );
   const [tab, setTab] = useState<OrderStatus | "ALL">("ALL");
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +67,7 @@ export function CustomerOrdersContent() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-display-md text-text-primary">My orders</h1>
+      <h1 className="text-display-md text-text-primary">{t("title")}</h1>
 
       <Tabs
         value={tab}
@@ -84,7 +89,7 @@ export function CustomerOrdersContent() {
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Package className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            No orders yet
+            {t("empty")}
           </p>
           <Button
             variant="secondary"
@@ -92,31 +97,31 @@ export function CustomerOrdersContent() {
             nativeButton={false}
             render={<Link href="/shop" />}
           >
-            Browse gear
+            {t("browseGear")}
           </Button>
         </Card>
       ) : (
         <div className="flex flex-col gap-4">
           {orders.map((order) => {
-            const status = STATUS_BADGE[order.status];
+            const variant = STATUS_VARIANT[order.status];
             const preview = order.items.slice(0, 3);
             const extra = order.items.length - preview.length;
             return (
               <Card key={order.id} className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-body-md font-semibold text-text-primary">
-                    Order #{order.id.slice(-8)} ·{" "}
+                    {t("orderNumber", { id: order.id.slice(-8) })} ·{" "}
                     {new Date(order.createdAt).toLocaleDateString("en-US", {
                       dateStyle: "medium",
                     })}
                   </span>
-                  <Badge variant={status.variant}>{status.label}</Badge>
+                  <Badge variant={variant}>{t(`status.${order.status}`)}</Badge>
                 </div>
                 <p className="text-body-sm text-text-secondary">
                   {preview
                     .map((i) => `${i.product.name} x${i.quantity}`)
                     .join(", ")}
-                  {extra > 0 ? ` +${extra} more` : ""}
+                  {extra > 0 ? ` ${t("more", { count: extra })}` : ""}
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-body-md font-semibold text-text-primary">
@@ -128,7 +133,7 @@ export function CustomerOrdersContent() {
                     nativeButton={false}
                     render={<Link href={`/dashboard/orders/${order.id}`} />}
                   >
-                    View details
+                    {t("viewDetails")}
                   </Button>
                 </div>
               </Card>

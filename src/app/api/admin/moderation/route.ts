@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
@@ -6,6 +7,7 @@ import { moderateMediaSchema } from "@/lib/validations/admin";
 import { listPendingMedia, moderateMedia } from "@/services/admin";
 
 export async function GET() {
+  const t = await getTranslations("apiMessages.admin");
   try {
     await requireAdmin();
     const media = await listPendingMedia();
@@ -26,7 +28,7 @@ export async function GET() {
       {
         data: null,
         error: "server_error",
-        message: "Failed to load moderation queue",
+        message: t("moderationQueueLoadFailed"),
       },
       { status: 500 },
     );
@@ -34,6 +36,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  const t = await getTranslations("apiMessages.admin");
   try {
     const session = await requireAdmin();
 
@@ -44,7 +47,7 @@ export async function PATCH(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -66,7 +69,7 @@ export async function PATCH(request: Request) {
     });
 
     return NextResponse.json(
-      { data: { count }, error: null, message: "Moderation updated" },
+      { data: { count }, error: null, message: t("moderationUpdated") },
       { status: 200 },
     );
   } catch (err) {
@@ -81,7 +84,7 @@ export async function PATCH(request: Request) {
       {
         data: null,
         error: "server_error",
-        message: "Failed to update moderation",
+        message: t("moderationUpdateFailed"),
       },
       { status: 500 },
     );

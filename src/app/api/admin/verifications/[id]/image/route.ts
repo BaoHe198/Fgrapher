@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
@@ -10,6 +11,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const t = await getTranslations("apiMessages.admin");
   try {
     const session = await requireAdmin();
     const { id } = await params;
@@ -21,7 +23,7 @@ export async function GET(
         {
           data: null,
           error: "validation_error",
-          message: "kind must be front, back, or selfie",
+          message: t("invalidKycKind"),
         },
         { status: 400 },
       );
@@ -54,7 +56,7 @@ export async function GET(
       {
         data: null,
         error: "server_error",
-        message: "Failed to generate document link",
+        message: t("documentLinkFailed"),
       },
       { status: 500 },
     );

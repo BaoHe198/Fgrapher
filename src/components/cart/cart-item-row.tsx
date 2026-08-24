@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +18,15 @@ export function CartItemRow({
   onUpdateQuantity: (id: string, quantity: number) => void;
   onRemove: (id: string) => void;
 }) {
+  const t = useTranslations("sharedComponents.cartItemRow");
   const days =
     item.type === "RENT" && item.rentalStart && item.rentalEnd
       ? Math.max(
           1,
           Math.round(
-            (new Date(item.rentalEnd).getTime() - new Date(item.rentalStart).getTime()) / 86_400_000,
+            (new Date(item.rentalEnd).getTime() -
+              new Date(item.rentalStart).getTime()) /
+              86_400_000,
           ),
         )
       : null;
@@ -31,21 +35,42 @@ export function CartItemRow({
     <div className="flex gap-3">
       <div className="relative size-20 shrink-0 overflow-hidden rounded-[var(--fg-radius-sm)]">
         {item.product.images[0] ? (
-          <Image src={item.product.images[0].url} alt={item.product.name} fill className="object-cover" />
+          <Image
+            src={item.product.images[0].url}
+            alt={item.product.name}
+            fill
+            className="object-cover"
+          />
         ) : (
-          <MediaPlaceholder tint="neutral-300" height="100%" className="absolute inset-0" />
+          <MediaPlaceholder
+            tint="neutral-300"
+            height="100%"
+            className="absolute inset-0"
+          />
         )}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-body-md font-semibold text-text-primary">{item.product.name}</p>
-        <Badge variant={item.type === "RENT" ? "accent" : "neutral"} className="mt-1">
-          {item.type === "RENT" ? `Rental — ${days}d` : "Purchase"}
+        <p className="line-clamp-2 text-body-md font-semibold text-text-primary">
+          {item.product.name}
+        </p>
+        <Badge
+          variant={item.type === "RENT" ? "accent" : "neutral"}
+          className="mt-1"
+        >
+          {item.type === "RENT"
+            ? t("rentalBadge", { days: days ?? 0 })
+            : t("purchaseBadge")}
         </Badge>
         {item.type === "RENT" && item.rentalStart && item.rentalEnd ? (
           <p className="mt-1 text-body-sm text-text-secondary">
-            {new Date(item.rentalStart).toLocaleDateString("en-US", { timeZone: "UTC" })} –{" "}
-            {new Date(item.rentalEnd).toLocaleDateString("en-US", { timeZone: "UTC" })}
+            {new Date(item.rentalStart).toLocaleDateString("en-US", {
+              timeZone: "UTC",
+            })}{" "}
+            –{" "}
+            {new Date(item.rentalEnd).toLocaleDateString("en-US", {
+              timeZone: "UTC",
+            })}
           </p>
         ) : null}
       </div>
@@ -58,12 +83,16 @@ export function CartItemRow({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
+              onClick={() =>
+                onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
+              }
               className="flex size-6 items-center justify-center rounded-full border border-border-default text-body-sm"
             >
               −
             </button>
-            <span className="w-4 text-center text-body-sm">{item.quantity}</span>
+            <span className="w-4 text-center text-body-sm">
+              {item.quantity}
+            </span>
             <button
               type="button"
               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
@@ -77,7 +106,7 @@ export function CartItemRow({
           type="button"
           onClick={() => onRemove(item.id)}
           className="text-text-tertiary hover:text-danger"
-          aria-label="Remove item"
+          aria-label={t("removeLabel")}
         >
           <X className="size-4" />
         </button>

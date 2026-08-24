@@ -1,0 +1,172 @@
+{
+  "dashboardSettings": {
+    "nav": {
+      "profile": "Profile",
+      "account": "Account",
+      "roles": "Roles",
+      "billing": "Billing",
+      "notifications": "Notifications",
+      "data": "Data & Privacy"
+    },
+    "layout": {
+      "title": "Settings"
+    },
+    "account": {
+      "emailLabel": "Email",
+      "phoneLabel": "Phone number",
+      "save": "Save",
+      "changePasswordTitle": "Change password",
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm new password",
+      "updatePassword": "Update password",
+      "passwordMismatch": "Passwords do not match",
+      "genericError": "Something went wrong",
+      "languageLabel": "Language",
+      "themeLabel": "Theme",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System",
+      "dangerZoneTitle": "Danger zone",
+      "dangerZoneDesc": "Deleting your account is permanent. This cannot be undone.",
+      "deleteAccount": "Delete account",
+      "deleteDialogTitle": "Delete your account?",
+      "deleteDialogBody": "This will permanently deactivate your Fgrapher account. This action cannot be undone.",
+      "cancel": "Cancel",
+      "toastAccountUpdated": "Account updated",
+      "toastPasswordUpdated": "Password updated"
+    },
+    "billing": {
+      "status": {
+        "active": "Active",
+        "trialing": "Trialing",
+        "pastDue": "Past due",
+        "cancelled": "Cancelled",
+        "expired": "Expired"
+      },
+      "notConfigured": "Payments aren't set up in this environment yet.",
+      "portalGenericError": "Couldn't open the billing portal.",
+      "emptyTitle": "No active subscriptions",
+      "emptyDesc": "Activate a paid role to get a public profile, bookings, and more.",
+      "browseRoles": "Browse roles",
+      "currentPlanLabel": "Current plan",
+      "perYear": "/yr",
+      "perMonth": "/mo",
+      "trialEnds": "Trial ends in {days} days",
+      "cancelsOn": "Cancels on {date}",
+      "resumeSubscription": "Resume subscription",
+      "renewsOn": "Renews on {date}",
+      "cancelSubscription": "Cancel subscription",
+      "totalMonthlyCost": "Total monthly cost",
+      "paymentMethodLabel": "Payment method",
+      "managedByStripe": "Managed securely through Stripe",
+      "manageSubscription": "Manage subscription",
+      "billingHistoryLabel": "Billing history",
+      "noInvoices": "No invoices yet.",
+      "viewInvoice": "View",
+      "cancelDialogTitle": "Cancel your {role} subscription?",
+      "cancelDialogBody1": "Your profile stays live until the end of the current billing period.",
+      "cancelDialogBody2": "All your data — portfolio, bookings, reviews — is kept, and you can reactivate anytime.",
+      "keepSubscription": "Keep subscription",
+      "disabledTitle": "Fgrapher is currently free for all service providers",
+      "disabledBody": "We'll give at least 30 days' notice before we start charging. No action is needed on this page."
+    },
+    "data": {
+      "summary": {
+        "profiles": "Profiles",
+        "bookingsAsCustomer": "Bookings sent",
+        "bookingsAsProvider": "Bookings received",
+        "reviewsWritten": "Reviews written",
+        "reviewsReceived": "Reviews received",
+        "orders": "Orders"
+      },
+      "overviewTitle": "Overview of your data",
+      "consentTitle": "Data consent",
+      "consentIntro": "Processing data to provide the service is mandatory and can't be turned off here. You can toggle the two optional items below at any time.",
+      "marketingLabel": "Marketing communications",
+      "marketingDesc": "Receive promotional emails and news from Fgrapher",
+      "analyticsLabel": "Usage analytics",
+      "analyticsDesc": "Allow Fgrapher to analyze how you use the service to improve the product",
+      "privacyPolicyIntro": "See details in our",
+      "privacyPolicyLink": "Privacy Policy",
+      "myDataTitle": "My data",
+      "myDataDesc": "Download a full copy of your personal data, profiles, bookings, and reviews as JSON.",
+      "downloadButton": "Download my data",
+      "deleteAccountTitle": "Delete account",
+      "deleteAccountDesc": "Request permanent deletion of your account. This request will be processed by the Fgrapher team, not deleted immediately.",
+      "pendingDeletionNotice": "You already have a pending account deletion request.",
+      "requestDeletionButton": "Request account deletion",
+      "explainDialogTitle": "What happens when you delete your account?",
+      "explainWillBeDeletedLabel": "Will be permanently deleted:",
+      "explainWillBeDeletedBody": "your profiles, photos/portfolio, listed services, and messages.",
+      "explainWillBeKeptLabel": "Will be kept (anonymized):",
+      "explainWillBeKeptBody": "your account will be renamed to \"Deleted user\" — your email, phone number, date of birth, and other personal details will be removed, but completed bookings/reviews are kept so your counterpart can still reference them.",
+      "explainIrreversible": "This action cannot be undone once processed.",
+      "cancel": "Cancel",
+      "continueBtn": "Continue",
+      "confirmDialogTitle": "Confirm account deletion request",
+      "confirmDialogBody": "Are you sure you want to submit a permanent deletion request for this account? The Fgrapher team will process the request as soon as possible.",
+      "back": "Back",
+      "confirmSubmit": "Confirm submission",
+      "toastConsentUpdateFail": "Couldn't update your preference",
+      "toastConsentUpdateSuccess": "Preference updated",
+      "toastExportFail": "Data export failed",
+      "toastExportSuccess": "Your data has been downloaded",
+      "toastDeletionRequestFail": "Failed to submit account deletion request",
+      "toastDeletionRequestSuccessTitle": "Account deletion request submitted",
+      "toastDeletionRequestSuccessDesc": "The Fgrapher team will process this request."
+    },
+    "notifications": {
+      "groups": {
+        "bookings": "Bookings",
+        "messages": "Messages",
+        "social": "Social",
+        "marketing": "Marketing"
+      },
+      "labels": {
+        "bookingRequest": "New booking request",
+        "bookingConfirmed": "Booking confirmed",
+        "bookingCancelled": "Booking cancelled",
+        "bookingReminder": "Upcoming booking reminder",
+        "newMessage": "New message",
+        "newFollower": "New follower",
+        "newReview": "New review",
+        "productUpdates": "Product updates",
+        "tips": "Tips and best practices"
+      },
+      "email": "Email",
+      "inApp": "In-app"
+    },
+    "profile": {
+      "basics": {
+        "usernameLabel": "Username",
+        "usernameTaken": "That username is taken",
+        "bioLabel": "Bio",
+        "wardLabel": "Ward",
+        "wardNotSelected": "Not selected"
+      },
+      "media": {
+        "coverButton": "Cover",
+        "uploadUnavailable": "Upload unavailable",
+        "uploadFailed": "Upload failed"
+      },
+      "availability": {
+        "weeklySchedule": "Weekly schedule",
+        "days": {
+          "sun": "Sunday",
+          "mon": "Monday",
+          "tue": "Tuesday",
+          "wed": "Wednesday",
+          "thu": "Thursday",
+          "fri": "Friday",
+          "sat": "Saturday"
+        },
+        "saveSchedule": "Save schedule",
+        "saved": "Saved",
+        "blockedDates": "Blocked dates",
+        "removeAria": "Remove",
+        "blockDateButton": "Block date"
+      }
+    }
+  }
+}

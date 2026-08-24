@@ -94,7 +94,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 border-t border-border-subtle pt-6 text-body-sm text-text-tertiary">
-          © 2026 Fgrapher. All rights reserved.
+          {t("sharedComponents.footer.copyright")}
         </div>
       </div>
     </footer>

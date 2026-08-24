@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
@@ -10,6 +11,7 @@ const resetPasswordSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.auth");
   const body = await request.json();
   const parsed = resetPasswordSchema.safeParse(body);
 
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "validation_error",
-        message: parsed.error.issues[0]?.message ?? "Invalid input",
+        message: parsed.error.issues[0]?.message ?? t("invalidInput"),
       },
       { status: 400 },
     );
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "invalid_token",
-        message: "This reset link is invalid or has expired",
+        message: t("resetLinkInvalid"),
       },
       { status: 400 },
     );
@@ -41,12 +43,15 @@ export async function POST(request: Request) {
   const passwordHash = await bcrypt.hash(password, 12);
 
   await db.$transaction([
-    db.user.update({ where: { email: record.identifier }, data: { passwordHash } }),
+    db.user.update({
+      where: { email: record.identifier },
+      data: { passwordHash },
+    }),
     db.verificationToken.delete({ where: { token } }),
   ]);
 
   return NextResponse.json(
-    { data: null, error: null, message: "Password updated" },
+    { data: null, error: null, message: t("passwordUpdated") },
     { status: 200 },
   );
 }

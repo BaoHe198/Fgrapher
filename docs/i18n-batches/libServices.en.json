@@ -1,0 +1,159 @@
+{
+  "libServices": {
+    "validation": {
+      "auth": {
+        "emailInvalid": "Enter a valid email address",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "nameRequired": "Enter your full name",
+        "passwordUppercase": "Password must contain at least one uppercase letter",
+        "passwordNumber": "Password must contain at least one number",
+        "dateOfBirthRequired": "Date of birth is required",
+        "roleRequired": "Select at least one role",
+        "consentServiceRequired": "You must agree to data processing to create an account",
+        "mustBe18": "You must be at least 18 years old to create a Fgrapher account",
+        "contentGuidelinesRequired": "You must accept the content guidelines to register as a Model"
+      },
+      "booking": {
+        "invalidDate": "Invalid date",
+        "invalidTime": "Invalid time"
+      },
+      "marketplace": {
+        "rentalDatesRequired": "Rental dates are required"
+      },
+      "portfolio": {
+        "rightsConfirmedRequired": "You must confirm you have the rights to use these images"
+      },
+      "product": {
+        "nameRequired": "Enter a product name",
+        "salePriceRequired": "Enter a sale price",
+        "rentalPriceRequired": "Enter a rental price per day",
+        "bothPricesRequired": "Enter both a sale price and a rental price"
+      },
+      "profile": {
+        "displayNameRequired": "Enter a display name"
+      },
+      "review": {
+        "contentTooShort": "Share a bit more detail (at least 20 characters)"
+      },
+      "service": {
+        "nameRequired": "Enter a service name",
+        "durationRequired": "Enter a duration in minutes",
+        "priceRequired": "Enter a price"
+      },
+      "subscription": {
+        "roleRequired": "Select at least one role"
+      },
+      "user": {
+        "roleRequired": "Select at least one role",
+        "bioTooLong": "Bio must be 500 characters or fewer",
+        "usernameTooShort": "Username must be at least 3 characters",
+        "usernameInvalidChars": "Lowercase letters, numbers, and underscores only",
+        "currentPasswordRequired": "Enter your current password",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "passwordUppercase": "Password must contain at least one uppercase letter",
+        "passwordNumber": "Password must contain at least one number",
+        "confirmPasswordRequired": "Please confirm your new password",
+        "passwordsDoNotMatch": "Passwords do not match"
+      },
+      "verification": {
+        "fullNameRequired": "Enter your full legal name",
+        "idNumberInvalid": "Enter a valid 9 or 12-digit ID number",
+        "consentRequired": "You must agree to identity document processing to submit verification"
+      }
+    },
+    "auth": {
+      "unauthorized": "Unauthorized",
+      "missingRole": "Missing required role: {role}",
+      "activeSubscriptionRequired": "Active subscription required for role: {role}",
+      "paidRoleRequired": "An active paid role subscription is required",
+      "adminAccessRequired": "Admin access required"
+    },
+    "email": {
+      "footer": {
+        "manageNotifications": "Manage notification preferences"
+      },
+      "bookingRequest": {
+        "heading": "New booking request",
+        "body": "{otherPartyName} requested to book {serviceName} on {dateLabel} at {timeLabel}. Respond within 24 hours to keep your response rate up.",
+        "cta": "View request"
+      },
+      "bookingConfirmed": {
+        "heading": "Booking confirmed",
+        "body": "{otherPartyName} confirmed your {serviceName} booking on {dateLabel} at {timeLabel}. We'll remind you 24 hours before.",
+        "cta": "View booking"
+      },
+      "bookingDeclined": {
+        "heading": "Booking declined",
+        "body": "{otherPartyName} wasn't able to accept your {serviceName} request for {dateLabel} at {timeLabel}. Browse other artists to find someone available.",
+        "cta": "Browse artists"
+      },
+      "bookingCancelled": {
+        "heading": "Booking cancelled",
+        "body": "{otherPartyName} cancelled the {serviceName} booking on {dateLabel} at {timeLabel}.",
+        "cta": "View bookings"
+      },
+      "bookingReminder": {
+        "heading": "Booking tomorrow",
+        "body": "Reminder: your {serviceName} session with {otherPartyName} is on {dateLabel} at {timeLabel} — less than 24 hours away.",
+        "cta": "View booking"
+      },
+      "bookingCompleted": {
+        "heading": "How was your session?",
+        "body": "Your {serviceName} session with {otherPartyName} is marked complete. Leave a review to help other clients.",
+        "cta": "Leave a review"
+      },
+      "welcomeSubscription": {
+        "heading": "Welcome to Fgrapher Pro!",
+        "bodySingular": "Your {roleNames} profile is now live. Your 14-day free trial has started — manage your subscription anytime from billing settings.",
+        "bodyPlural": "Your {roleNames} profiles are now live. Your 14-day free trial has started — manage your subscription anytime from billing settings.",
+        "cta": "View billing"
+      },
+      "paymentFailed": {
+        "heading": "Your payment didn't go through",
+        "body": "We couldn't charge your card for your Fgrapher subscription. Your profile stays live until {graceEndsLabel} — update your payment method before then to avoid any interruption.",
+        "cta": "Update payment method"
+      },
+      "subscriptionCancelling": {
+        "heading": "We're sorry to see you go",
+        "body": "Your subscription is set to cancel on {periodEndLabel}. You'll keep full access until then. Changed your mind?",
+        "cta": "Resume subscription"
+      },
+      "subscriptionEnded": {
+        "heading": "Your subscription has ended",
+        "body": "Your Fgrapher Pro subscription has ended and your profile is no longer visible in search. All your data is kept — reactivate anytime to pick up right where you left off.",
+        "cta": "Reactivate"
+      },
+      "receipt": {
+        "heading": "Payment received",
+        "body": "We received your payment of {amountLabel}. Your subscription is active through {periodEndLabel}.",
+        "cta": "View receipt"
+      },
+      "orderConfirmation": {
+        "heading": "Order confirmed!",
+        "body": "Order {orderNumber} — {itemsSummary}. Total: {totalLabel}",
+        "cta": "View order"
+      },
+      "newOrder": {
+        "heading": "New order received",
+        "body": "{customerName} placed order {orderNumber} — {itemsSummary}",
+        "cta": "View order"
+      },
+      "orderStatus": {
+        "heading": "Order {statusLabel}",
+        "body": "Your order {orderNumber} is now {statusLabel}.",
+        "bodyWithDetail": "Your order {orderNumber} is now {statusLabel}. {detail}",
+        "cta": "View order"
+      },
+      "newReview": {
+        "heading": "New review",
+        "body": "{reviewerName} left you a {rating}-star review.",
+        "cta": "View & respond"
+      },
+      "reviewResponse": {
+        "heading": "New response to your review",
+        "body": "{providerName} responded to your review.",
+        "cta": "View response"
+      }
+    }
+  }
+}

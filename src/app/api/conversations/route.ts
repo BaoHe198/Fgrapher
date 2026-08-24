@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { startConversationSchema } from "@/lib/validations/message";
@@ -9,6 +10,7 @@ import {
 } from "@/services/messaging";
 
 export async function GET(request: Request) {
+  const t = await getTranslations("apiMessages.conversations");
   try {
     const session = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -16,7 +18,10 @@ export async function GET(request: Request) {
 
     const conversations = await listConversations(session.user.id, page);
 
-    return NextResponse.json({ data: conversations, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data: conversations, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -26,25 +31,29 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load conversations" },
+      { data: null, error: "server_error", message: t("loadFailed") },
       { status: 500 },
     );
   }
 }
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.conversations");
   try {
     const session = await requireAuth();
     const body = await request.json();
     const parsed = startConversationSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "userId is required" },
+        { data: null, error: "validation_error", message: t("userIdRequired") },
         { status: 400 },
       );
     }
 
-    const conversationId = await getOrCreateConversation(session.user.id, parsed.data.userId);
+    const conversationId = await getOrCreateConversation(
+      session.user.id,
+      parsed.data.userId,
+    );
 
     return NextResponse.json(
       { data: { id: conversationId }, error: null, message: null },
@@ -65,7 +74,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to start conversation" },
+      { data: null, error: "server_error", message: t("startFailed") },
       { status: 500 },
     );
   }

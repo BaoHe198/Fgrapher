@@ -316,7 +316,8 @@
           "purposeService": "Service (mandatory)",
           "purposeMarketing": "Marketing",
           "purposeAnalytics": "Analytics",
-          "summary": "{granted} granted, {revoked} not granted ({total} users total)"
+          "grantedSuffix": "granted,",
+          "notGrantedSummary": "{revoked} not granted ({total} users total)"
         }
       }
     }

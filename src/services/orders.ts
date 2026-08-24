@@ -1,4 +1,5 @@
 import type { OrderStatus } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import type Stripe from "stripe";
 
 import { db } from "@/lib/db";
@@ -44,10 +45,19 @@ export async function createCheckoutSessionForCart(
   const currency = cart[0].product.currency;
 
   const lineItems = cart.map((item) => {
-    const unitPrice = item.type === "RENT" ? (item.product.rentalPrice ?? 0) : (item.product.price ?? 0);
+    const unitPrice =
+      item.type === "RENT"
+        ? (item.product.rentalPrice ?? 0)
+        : (item.product.price ?? 0);
     const days =
       item.type === "RENT" && item.rentalStart && item.rentalEnd
-        ? Math.max(1, Math.round((item.rentalEnd.getTime() - item.rentalStart.getTime()) / 86_400_000))
+        ? Math.max(
+            1,
+            Math.round(
+              (item.rentalEnd.getTime() - item.rentalStart.getTime()) /
+                86_400_000,
+            ),
+          )
         : 1;
     const amount = item.type === "RENT" ? unitPrice * days : unitPrice;
     return {
@@ -55,7 +65,8 @@ export async function createCheckoutSessionForCart(
         item.type === "RENT"
           ? `${item.product.name} (rental, ${days}d)`
           : item.product.name,
-      amount: amount + (item.type === "RENT" ? (item.product.depositAmount ?? 0) : 0),
+      amount:
+        amount + (item.type === "RENT" ? (item.product.depositAmount ?? 0) : 0),
       currency,
       quantity: item.quantity,
     };
@@ -77,7 +88,9 @@ export async function createCheckoutSessionForCart(
 // Called from the checkout.session.completed webhook — orders are created
 // fresh from the live cart at payment-completion time (not pre-created at
 // checkout start) so an abandoned checkout never leaves an orphaned order.
-export async function createOrdersFromCheckout(session: Stripe.Checkout.Session) {
+export async function createOrdersFromCheckout(
+  session: Stripe.Checkout.Session,
+) {
   const userId = session.metadata?.userId;
   if (!userId || session.metadata?.orderType !== "marketplace") return [];
 
@@ -115,13 +128,24 @@ export async function createOrdersFromCheckout(session: Stripe.Checkout.Session)
 
     const orderItemsData = items.map((item) => {
       const unitPrice =
-        item.type === "RENT" ? (item.product.rentalPrice ?? 0) : (item.product.price ?? 0);
+        item.type === "RENT"
+          ? (item.product.rentalPrice ?? 0)
+          : (item.product.price ?? 0);
       const days =
         item.type === "RENT" && item.rentalStart && item.rentalEnd
-          ? Math.max(1, Math.round((item.rentalEnd.getTime() - item.rentalStart.getTime()) / 86_400_000))
+          ? Math.max(
+              1,
+              Math.round(
+                (item.rentalEnd.getTime() - item.rentalStart.getTime()) /
+                  86_400_000,
+              ),
+            )
           : 1;
-      const lineTotal = (item.type === "RENT" ? unitPrice * days : unitPrice) * item.quantity;
-      totalPrice += lineTotal + (item.type === "RENT" ? (item.product.depositAmount ?? 0) : 0);
+      const lineTotal =
+        (item.type === "RENT" ? unitPrice * days : unitPrice) * item.quantity;
+      totalPrice +=
+        lineTotal +
+        (item.type === "RENT" ? (item.product.depositAmount ?? 0) : 0);
 
       return {
         productId: item.productId,
@@ -131,7 +155,10 @@ export async function createOrdersFromCheckout(session: Stripe.Checkout.Session)
         rentalStart: item.rentalStart,
         rentalEnd: item.rentalEnd,
         depositAmount: item.type === "RENT" ? item.product.depositAmount : null,
-        depositStatus: item.type === "RENT" && item.product.depositAmount ? ("HELD" as const) : null,
+        depositStatus:
+          item.type === "RENT" && item.product.depositAmount
+            ? ("HELD" as const)
+            : null,
       };
     });
 
@@ -144,10 +171,15 @@ export async function createOrdersFromCheckout(session: Stripe.Checkout.Session)
           currency,
           deliveryMethod,
           shippingAddress,
-          stripePaymentId: typeof session.payment_intent === "string" ? session.payment_intent : null,
+          stripePaymentId:
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : null,
           items: { create: orderItemsData },
         },
-        include: { items: { include: { product: { select: { name: true } } } } },
+        include: {
+          items: { include: { product: { select: { name: true } } } },
+        },
       });
 
       for (const item of items) {
@@ -164,8 +196,17 @@ export async function createOrdersFromCheckout(session: Stripe.Checkout.Session)
 
     orders.push(order);
 
-    const itemsSummary = order.items.map((i) => `${i.product.name} x${i.quantity}`).join(", ");
+    const itemsSummary = order.items
+      .map((i) => `${i.product.name} x${i.quantity}`)
+      .join(", ");
     const orderNumber = order.id.slice(-8);
+    // Stripe-webhook-triggered — no request/cookie context to resolve a
+    // locale from, so this explicitly defaults to Vietnamese (CLAUDE.md
+    // rule 10), matching services/bookings.ts's cron/system-actor branches.
+    const emailT = await getTranslations({
+      locale: "vi",
+      namespace: "libServices.email",
+    });
 
     await notify({
       userId: shopId,
@@ -176,6 +217,7 @@ export async function createOrdersFromCheckout(session: Stripe.Checkout.Session)
       email: {
         subject: `New order #${orderNumber} — Fgrapher`,
         html: newOrderEmailHtml({
+          t: emailT,
           orderNumber,
           customerName: customer ? partyName(customer) : "A customer",
           itemsSummary,
@@ -194,6 +236,7 @@ export async function createOrdersFromCheckout(session: Stripe.Checkout.Session)
         email: {
           subject: `Order confirmed #${orderNumber} — Fgrapher`,
           html: orderConfirmationEmailHtml({
+            t: emailT,
             orderNumber,
             itemsSummary,
             totalLabel: `${totalPrice} ${currency}`,
@@ -210,9 +253,31 @@ export async function createOrdersFromCheckout(session: Stripe.Checkout.Session)
 }
 
 const ORDER_INCLUDE = {
-  customer: { select: { id: true, name: true, firstName: true, avatar: true, email: true } },
-  shop: { select: { id: true, name: true, firstName: true, avatar: true, email: true } },
-  items: { include: { product: { include: { images: { orderBy: { order: "asc" as const }, take: 1 } } } } },
+  customer: {
+    select: {
+      id: true,
+      name: true,
+      firstName: true,
+      avatar: true,
+      email: true,
+    },
+  },
+  shop: {
+    select: {
+      id: true,
+      name: true,
+      firstName: true,
+      avatar: true,
+      email: true,
+    },
+  },
+  items: {
+    include: {
+      product: {
+        include: { images: { orderBy: { order: "asc" as const }, take: 1 } },
+      },
+    },
+  },
 } as const;
 
 export async function listOrders({
@@ -242,12 +307,21 @@ export async function listOrders({
     db.order.count({ where }),
   ]);
 
-  return { orders, total, page, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
+  return {
+    orders,
+    total,
+    page,
+    totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+  };
 }
 
 export async function getOrderDetail(orderId: string, userId: string) {
-  const order = await db.order.findUnique({ where: { id: orderId }, include: ORDER_INCLUDE });
-  if (!order || (order.customerId !== userId && order.shopId !== userId)) return null;
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    include: ORDER_INCLUDE,
+  });
+  if (!order || (order.customerId !== userId && order.shopId !== userId))
+    return null;
   return order;
 }
 
@@ -260,7 +334,12 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   RETURNED: "returned",
 };
 
-const NOTIFICATION_TYPE_FOR_STATUS: Partial<Record<OrderStatus, "ORDER_CONFIRMED" | "ORDER_SHIPPED" | "ORDER_DELIVERED" | "ORDER_CANCELLED">> = {
+const NOTIFICATION_TYPE_FOR_STATUS: Partial<
+  Record<
+    OrderStatus,
+    "ORDER_CONFIRMED" | "ORDER_SHIPPED" | "ORDER_DELIVERED" | "ORDER_CANCELLED"
+  >
+> = {
   CONFIRMED: "ORDER_CONFIRMED",
   SHIPPED: "ORDER_SHIPPED",
   DELIVERED: "ORDER_DELIVERED",
@@ -282,12 +361,16 @@ export async function updateOrderStatus({
   trackingCarrier?: string;
   cancelReason?: string;
 }) {
-  const order = await db.order.findUnique({ where: { id: orderId }, include: ORDER_INCLUDE });
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    include: ORDER_INCLUDE,
+  });
   if (!order) throw new OrderError("Order not found", 404);
 
   const isShop = order.shopId === userId;
   const isCustomer = order.customerId === userId;
-  if (!isShop && !isCustomer) throw new OrderError("You are not part of this order", 403);
+  if (!isShop && !isCustomer)
+    throw new OrderError("You are not part of this order", 403);
   if (status !== "CANCELLED" && !isShop) {
     throw new OrderError("Only the shop can update this order's status", 403);
   }
@@ -322,6 +405,7 @@ export async function updateOrderStatus({
   const notificationType = NOTIFICATION_TYPE_FOR_STATUS[status];
   if (notificationType) {
     const orderNumber = order.id.slice(-8);
+    const emailT = await getTranslations("libServices.email");
     await notify({
       userId: recipient.id,
       type: notificationType,
@@ -331,9 +415,12 @@ export async function updateOrderStatus({
       email: {
         subject: `Order ${STATUS_LABEL[status]} — Fgrapher`,
         html: orderStatusEmailHtml({
+          t: emailT,
           orderNumber,
           statusLabel: STATUS_LABEL[status],
-          detail: trackingNumber ? `Tracking: ${trackingCarrier ?? ""} ${trackingNumber}` : undefined,
+          detail: trackingNumber
+            ? `Tracking: ${trackingCarrier ?? ""} ${trackingNumber}`
+            : undefined,
           orderUrl: orderUrlFor(order.id),
         }),
       },
@@ -343,16 +430,28 @@ export async function updateOrderStatus({
   return updated;
 }
 
-export async function markRentalReturned(orderId: string, userId: string, deductDeposit: boolean, note?: string) {
-  const order = await db.order.findUnique({ where: { id: orderId }, include: ORDER_INCLUDE });
-  if (!order || order.shopId !== userId) throw new OrderError("Order not found", 404);
+export async function markRentalReturned(
+  orderId: string,
+  userId: string,
+  deductDeposit: boolean,
+  note?: string,
+) {
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    include: ORDER_INCLUDE,
+  });
+  if (!order || order.shopId !== userId)
+    throw new OrderError("Order not found", 404);
 
   await db.orderItem.updateMany({
     where: { orderId, type: "RENT" },
     data: { depositStatus: deductDeposit ? "DEDUCTED" : "REFUNDED" },
   });
 
-  await db.order.update({ where: { id: orderId }, data: { status: "RETURNED" } });
+  await db.order.update({
+    where: { id: orderId },
+    data: { status: "RETURNED" },
+  });
 
   await notify({
     userId: order.customerId,

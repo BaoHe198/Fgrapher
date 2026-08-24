@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
@@ -10,7 +11,8 @@ export async function requireAdmin() {
     where: { userId: session.user.id, role: "ADMIN", active: true },
   });
   if (!isAdmin) {
-    throw new AuthError("Admin access required", 403);
+    const t = await getTranslations("libServices.auth");
+    throw new AuthError(t("adminAccessRequired"), 403);
   }
 
   return session;
@@ -30,6 +32,12 @@ export async function logAdminAction({
   details?: Record<string, unknown>;
 }) {
   await db.adminAction.create({
-    data: { adminId, action, targetType, targetId, details: details as Prisma.InputJsonValue },
+    data: {
+      adminId,
+      action,
+      targetType,
+      targetId,
+      details: details as Prisma.InputJsonValue,
+    },
   });
 }

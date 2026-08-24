@@ -360,5 +360,1443 @@
       },
       "starAriaLabel": "{count} sao"
     }
+  },
+  "accountFlows": {
+    "authLayout": {
+      "quote": "Fgrapher đưa portfolio của tôi đến đúng khách hàng. Giờ tôi nhận được gấp đôi số lượt đặt lịch.",
+      "quoteBy": "Nhà cung cấp đã xác minh trên Fgrapher"
+    },
+    "login": {
+      "metaTitle": "Đăng nhập hoặc tạo tài khoản — Fgrapher",
+      "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập để quản lý lịch đặt và portfolio của bạn.",
+      "emailLabel": "Email",
+      "passwordLabel": "Mật khẩu",
+      "rememberMe": "Duy trì đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "submit": "Đăng nhập",
+      "submitting": "Đang đăng nhập...",
+      "terms": "Khi đăng nhập, bạn đồng ý với Điều khoản và Chính sách bảo mật.",
+      "noAccount": "Chưa có tài khoản?",
+      "signUp": "Đăng ký"
+    },
+    "register": {
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "title": "Tạo tài khoản",
+      "subtitle": "Tham gia Fgrapher để bắt đầu đặt lịch hoặc nhận đặt lịch.",
+      "iAmA": "TÔI LÀ",
+      "customerLabel": "Khách hàng",
+      "customerDesc": "Đặt lịch nghệ sĩ và mua thiết bị",
+      "providerLabel": "Nhà sáng tạo chuyên nghiệp",
+      "providerDesc": "Nhận đặt lịch và bán hàng",
+      "whatDoYouOffer": "BẠN CUNG CẤP DỊCH VỤ GÌ?",
+      "changeLaterNote": "Bạn có thể thay đổi sau. Quyền truy cập của khách hàng luôn miễn phí.",
+      "contentGuidelinesConfirm": "Tôi xác nhận đã đủ 18 tuổi trở lên và đồng ý với ",
+      "contentGuidelinesLink": "quy tắc nội dung",
+      "fullNameLabel": "Họ và tên",
+      "fullNamePlaceholder": "Nguyễn Văn A",
+      "emailLabel": "Email",
+      "dobLabel": "Ngày sinh",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "Tối thiểu 8 ký tự",
+      "submitting": "Đang tạo tài khoản...",
+      "submit": "Tạo tài khoản",
+      "terms": "Khi đăng ký, bạn đồng ý với Điều khoản và Chính sách bảo mật.",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "signIn": "Đăng nhập"
+    },
+    "forgotPassword": {
+      "metaTitle": "Đặt lại mật khẩu — Fgrapher",
+      "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "checkInboxTitle": "Kiểm tra hộp thư của bạn",
+      "checkInboxBody": "Nếu email này có tài khoản, chúng tôi đã gửi liên kết đặt lại mật khẩu tới đó.",
+      "backToSignIn": "Quay lại đăng nhập",
+      "title": "Đặt lại mật khẩu",
+      "subtitle": "Nhập email của bạn và chúng tôi sẽ gửi liên kết đặt lại mật khẩu.",
+      "emailLabel": "Email",
+      "submit": "Gửi liên kết đặt lại"
+    },
+    "resetPassword": {
+      "metaTitle": "Đặt mật khẩu mới — Fgrapher",
+      "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự",
+      "confirmRequired": "Vui lòng xác nhận mật khẩu",
+      "passwordsMismatch": "Mật khẩu xác nhận không khớp",
+      "invalidLink": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "updatedToastTitle": "Đã cập nhật mật khẩu",
+      "updatedToastDesc": "Bạn có thể đăng nhập bằng mật khẩu mới ngay bây giờ.",
+      "title": "Đặt mật khẩu mới",
+      "newPasswordLabel": "Mật khẩu mới",
+      "confirmPasswordLabel": "Xác nhận mật khẩu",
+      "passwordPlaceholder": "Tối thiểu 8 ký tự",
+      "submit": "Cập nhật mật khẩu"
+    },
+    "onboarding": {
+      "billing": {
+        "headingSingle": "Kích hoạt hồ sơ {role} của bạn",
+        "headingPlural": "Kích hoạt {count} hồ sơ của bạn",
+        "subtitle": "Bắt đầu dùng thử miễn phí 14 ngày — hủy bất cứ lúc nào trước khi kết thúc và bạn sẽ không bị tính phí.",
+        "billedYearlyBadge": "Thanh toán theo năm — tiết kiệm 20%",
+        "checkoutCancelled": "Đã hủy thanh toán — không có khoản phí nào được tính.",
+        "notConfiguredError": "Thanh toán chưa được thiết lập trong môi trường này — vai trò của bạn sẽ tạm thời chưa kích hoạt. Trong lúc chờ, bạn vẫn có thể khám phá các phần khác của bảng điều khiển.",
+        "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+        "total": "Tổng cộng",
+        "freeTrialNote": "Miễn phí trong 14 ngày, sau đó {amount}",
+        "startTrial": "Bắt đầu dùng thử miễn phí",
+        "skipForNow": "Bỏ qua bây giờ",
+        "monthAbbrev": "tháng",
+        "yearAbbrev": "năm"
+      },
+      "roles": {
+        "title": "Bạn sẽ sử dụng Fgrapher như thế nào?",
+        "subtitle": "Chọn mọi vai trò phù hợp với bạn — bạn luôn có thể thêm sau. Vai trò khách hàng luôn được bao gồm mặc định để bạn có thể đặt lịch và duyệt xem."
+      },
+      "verification": {
+        "statusNotStarted": "Chưa bắt đầu",
+        "statusPending": "Đang xem xét",
+        "statusVerified": "Đã xác minh",
+        "statusRejected": "Cần gửi lại",
+        "noRoleTitle": "Chưa có vai trò nhà cung cấp",
+        "noRoleBody": "Thêm vai trò nhà cung cấp trước, sau đó quay lại đây để xác minh danh tính.",
+        "manageRoles": "Quản lý vai trò",
+        "chooseRoleTitle": "Xác minh danh tính",
+        "chooseRoleSubtitle": "Chọn vai trò bạn muốn xác minh.",
+        "form": {
+          "underReviewTitle": "Hồ sơ của bạn đang được xem xét",
+          "underReviewDesc": "Chúng tôi đang xem xét giấy tờ bạn đã gửi cho vai trò {role}. Quá trình này thường mất 1-2 ngày làm việc.",
+          "verifiedTitle": "Bạn đã được xác minh",
+          "verifiedDesc": "Danh tính của bạn đã được xác minh cho vai trò {role}.",
+          "submittedTitle": "Đã gửi để xem xét",
+          "tapToSelectPhoto": "Chạm để chọn ảnh",
+          "title": "Xác minh danh tính",
+          "subtitle": "Bắt buộc để kích hoạt hồ sơ {role} — đây là bước kiểm tra một lần duy nhất.",
+          "rejectedNotice": "Hồ sơ trước đó của bạn đã bị từ chối: {reason}. Bạn có thể gửi lại bên dưới.",
+          "whyWeAskLabel": "Vì sao chúng tôi yêu cầu:",
+          "whyWeAskBody": "Luật Thương mại điện tử Việt Nam (122/2025) yêu cầu các nền tảng thương mại điện tử xác minh danh tính của mọi người bán trước khi họ có thể đăng dịch vụ.",
+          "whoCanSeeLabel": "Ai có thể xem:",
+          "whoCanSeeBody": "Chỉ quản trị viên Fgrapher, chỉ thông qua liên kết có thời hạn ngắn được tạo ngay khi họ xem xét hồ sơ của bạn — mọi lượt xem đều được ghi lại.",
+          "howLongLabel": "Thời gian lưu trữ:",
+          "howLongBody": "Ảnh giấy tờ của bạn sẽ bị xóa vĩnh viễn sau 90 ngày kể từ khi được duyệt. Chúng tôi chỉ lưu lại bản ghi phê duyệt, không lưu ảnh.",
+          "fullLegalNameLabel": "Họ và tên đầy đủ (theo giấy tờ)",
+          "idNumberLabel": "Số giấy tờ (CCCD/CMND)",
+          "idNumberPlaceholder": "9 hoặc 12 chữ số",
+          "idFrontLabel": "Mặt trước giấy tờ",
+          "idBackLabel": "Mặt sau giấy tờ",
+          "selfieLabel": "Ảnh chân dung cầm giấy tờ",
+          "consentLabel": "Tôi đồng ý cho Fgrapher xử lý giấy tờ và ảnh của tôi để xác minh danh tính",
+          "uploadsUnavailable": "Hiện chưa thể tải lên giấy tờ",
+          "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+          "uploadFailed": "Tải lên thất bại. Vui lòng kiểm tra kết nối mạng và thử lại.",
+          "submit": "Gửi để xem xét",
+          "doLater": "Để sau",
+          "backToDashboard": "Quay lại bảng điều khiển"
+        }
+      }
+    },
+    "admin": {
+      "layout": {
+        "badge": "Quản trị",
+        "subtitle": "Công cụ nội bộ Fgrapher",
+        "exitAdmin": "Thoát chế độ quản trị"
+      },
+      "sidebar": {
+        "overview": "Tổng quan",
+        "users": "Người dùng",
+        "reports": "Báo cáo",
+        "verifications": "Xác minh",
+        "moderation": "Kiểm duyệt",
+        "compliance": "Tuân thủ dữ liệu"
+      },
+      "overview": {
+        "metaTitle": "Tổng quan quản trị — Fgrapher",
+        "title": "Tổng quan",
+        "totalUsers": "Tổng người dùng",
+        "totalUsersSub": "{sign}{percent}% so với tháng trước",
+        "activeSubscriptions": "Gói đang hoạt động",
+        "activeSubscriptionsSub": "{mrr} MRR",
+        "bookingsThisMonth": "Lượt đặt lịch tháng này",
+        "bookingsThisMonthSub": "{rate}% tỷ lệ hoàn thành",
+        "gmvThisMonth": "GMV tháng này",
+        "gmvThisMonthSub": "{bookingGmv} đặt lịch · {orderGmv} cửa hàng",
+        "failedPayments": "Thanh toán thất bại",
+        "pendingReports": "Báo cáo chờ xử lý",
+        "expiringSoon": "Gói sắp hết hạn trong 7 ngày",
+        "recentActivity": "Hoạt động gần đây",
+        "noActivity": "Chưa có hoạt động nào"
+      },
+      "users": {
+        "title": "Người dùng",
+        "allRoles": "Tất cả vai trò",
+        "searchPlaceholder": "Tìm theo tên, email, tên người dùng",
+        "table": {
+          "name": "Tên",
+          "email": "Email",
+          "roles": "Vai trò",
+          "joined": "Ngày tham gia",
+          "status": "Trạng thái"
+        },
+        "statusSuspended": "Đã tạm khóa",
+        "statusVerified": "Đã xác minh",
+        "statusActive": "Đang hoạt động",
+        "empty": "Không tìm thấy người dùng nào"
+      },
+      "userDetail": {
+        "backToUsers": "Quay lại danh sách người dùng",
+        "suspendedBadge": "Đã tạm khóa",
+        "verifiedBadge": "Đã xác minh",
+        "unsuspend": "Mở khóa",
+        "suspend": "Tạm khóa",
+        "verifyAccount": "Xác minh tài khoản",
+        "deleteAccount": "Xóa tài khoản",
+        "deleteConfirm": "Xóa mềm tài khoản này? Có thể khôi phục lại trong cơ sở dữ liệu nếu cần.",
+        "tabs": {
+          "overview": "Tổng quan",
+          "billing": "Vai trò & Thanh toán",
+          "bookings": "Lịch đặt"
+        },
+        "fields": {
+          "email": "Email",
+          "username": "Tên người dùng",
+          "location": "Khu vực",
+          "joined": "Ngày tham gia"
+        },
+        "adminNotesLabel": "Ghi chú quản trị (nội bộ)",
+        "saveNotes": "Lưu ghi chú",
+        "updatedToast": "Đã cập nhật",
+        "noRoles": "Chưa có vai trò nào",
+        "activeRole": "Vai trò đang hoạt động",
+        "inactiveRole": "Vai trò không hoạt động",
+        "noSubscription": "Chưa có gói",
+        "asProvider": "Với vai trò nhà cung cấp",
+        "completionRate": "Tỷ lệ hoàn thành",
+        "cancellationRate": "Tỷ lệ hủy",
+        "bookingsSummary": "{customerCount} lượt đặt với vai trò khách hàng, {providerCount} lượt với vai trò nhà cung cấp.",
+        "suspendDialogTitle": "Tạm khóa tài khoản này?",
+        "suspendReasonPlaceholder": "Lý do tạm khóa",
+        "cancel": "Hủy"
+      },
+      "reports": {
+        "title": "Báo cáo",
+        "tabs": {
+          "pending": "Chờ xử lý",
+          "reviewing": "Đang xem xét",
+          "resolved": "Đã xử lý",
+          "dismissed": "Đã bỏ qua",
+          "all": "Tất cả"
+        },
+        "empty": "Không có báo cáo nào",
+        "highPriority": "Ưu tiên cao",
+        "reportedBy": "Báo cáo bởi {name}",
+        "targetIdLabel": "· mã đối tượng",
+        "resolutionNotePlaceholder": "Ghi chú xử lý (không bắt buộc)",
+        "resolve": "Xử lý",
+        "dismiss": "Bỏ qua",
+        "reportUpdatedToast": "Đã cập nhật báo cáo",
+        "unknownReporter": "Không xác định"
+      },
+      "verifications": {
+        "title": "Xác minh danh tính",
+        "description": "Mọi vai trò nhà cung cấp phải được xác minh trước khi hồ sơ có thể công khai (Luật Thương mại điện tử 122/2025). Sắp xếp theo lượt gửi cũ nhất trước.",
+        "empty": "Không có hồ sơ nào đang chờ",
+        "imageFront": "Mặt trước giấy tờ",
+        "imageBack": "Mặt sau giấy tờ",
+        "imageSelfie": "Ảnh chân dung",
+        "viewImage": "Xem {label}",
+        "submittedToday": "Gửi hôm nay",
+        "waitingOneDay": "Đã chờ 1 ngày",
+        "waitingDays": "Đã chờ {days} ngày",
+        "rejectionReasonPlaceholder": "Lý do từ chối (nếu từ chối)",
+        "notePlaceholder": "Ghi chú (không bắt buộc)",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "failedToLoadDocument": "Không thể tải tài liệu",
+        "selectRejectionReason": "Vui lòng chọn lý do từ chối",
+        "verificationUpdated": "Đã cập nhật xác minh"
+      },
+      "moderation": {
+        "title": "Kiểm duyệt nội dung",
+        "description": "Mọi ảnh portfolio cần được duyệt trước khi hiển thị công khai. Phím tắt: A để duyệt, R để từ chối, phím mũi tên để di chuyển. Mục tiêu: xử lý trong vòng {hours} giờ.",
+        "empty": "Không có nội dung nào đang chờ",
+        "selectAll": "Chọn tất cả ({count})",
+        "clearSelection": "Bỏ chọn",
+        "selectedHint": "Đã chọn {count} — Nhấn A để duyệt, R để từ chối",
+        "overdueBadge": "Quá hạn",
+        "rejectionReasonPlaceholder": "Lý do từ chối",
+        "notePlaceholder": "Ghi chú (không bắt buộc)",
+        "confirmReject": "Xác nhận từ chối ({count})",
+        "approve": "Duyệt ({count})",
+        "reject": "Từ chối ({count})",
+        "approvedToast": "Đã duyệt {count}",
+        "rejectedToast": "Đã từ chối {count}"
+      },
+      "compliance": {
+        "title": "Tuân thủ dữ liệu",
+        "tabs": {
+          "requests": "Yêu cầu dữ liệu",
+          "audit": "Nhật ký kiểm tra",
+          "consent": "Thống kê đồng ý"
+        },
+        "dataRequests": {
+          "typeFilter": {
+            "all": "Tất cả loại",
+            "export": "Xuất dữ liệu",
+            "deletion": "Xóa dữ liệu"
+          },
+          "statusFilter": {
+            "all": "Tất cả trạng thái",
+            "pending": "Đang chờ",
+            "processing": "Đang xử lý",
+            "completed": "Đã hoàn tất",
+            "rejected": "Đã từ chối"
+          },
+          "empty": "Không có yêu cầu dữ liệu nào",
+          "unknownUser": "Người dùng không xác định",
+          "requested": "Yêu cầu ngày {date}",
+          "deadline": "Hạn xử lý {date}",
+          "overdueSuffix": " — quá hạn",
+          "completed": "Hoàn tất ngày {date}",
+          "rejectNotePlaceholder": "Ghi chú từ chối (bắt buộc khi từ chối)",
+          "processDeletion": "Xử lý xóa dữ liệu",
+          "rejectBtn": "Từ chối",
+          "noteRequiredToast": "Cần nhập ghi chú để từ chối yêu cầu",
+          "updateFailedToast": "Cập nhật yêu cầu thất bại",
+          "updatedToast": "Đã cập nhật yêu cầu"
+        },
+        "auditLog": {
+          "actorIdPlaceholder": "Mã người thực hiện",
+          "actionPlaceholder": "Hành động chứa…",
+          "colWhen": "Thời gian",
+          "colActor": "Người thực hiện",
+          "colAction": "Hành động",
+          "colTarget": "Đối tượng",
+          "systemActor": "Hệ thống",
+          "empty": "Không có mục nhật ký nào"
+        },
+        "consent": {
+          "purposeService": "Dịch vụ (bắt buộc)",
+          "purposeMarketing": "Tiếp thị",
+          "purposeAnalytics": "Phân tích",
+          "grantedSuffix": "đã đồng ý,",
+          "notGrantedSummary": "{revoked} chưa đồng ý (tổng {total} người dùng)"
+        }
+      }
+    }
+  },
+  "apiMessages": {
+    "admin": {
+      "auditLogFailed": "Không thể tải nhật ký hoạt động",
+      "consentStatsFailed": "Không thể tải thống kê đồng ý",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "dataRequestUpdated": "Đã cập nhật yêu cầu",
+      "dataRequestProcessFailed": "Không thể xử lý yêu cầu",
+      "dataRequestsLoadFailed": "Không thể tải danh sách yêu cầu dữ liệu",
+      "moderationQueueLoadFailed": "Không thể tải hàng đợi kiểm duyệt",
+      "moderationUpdated": "Đã cập nhật kiểm duyệt",
+      "moderationUpdateFailed": "Không thể cập nhật kiểm duyệt",
+      "reportUpdated": "Đã cập nhật báo cáo",
+      "reportUpdateFailed": "Không thể cập nhật báo cáo",
+      "reportsLoadFailed": "Không thể tải danh sách báo cáo",
+      "statsLoadFailed": "Không thể tải thống kê quản trị",
+      "userNotFound": "Không tìm thấy người dùng",
+      "userLoadFailed": "Không thể tải thông tin người dùng",
+      "invalidAction": "Hành động không hợp lệ",
+      "updated": "Đã cập nhật",
+      "userUpdateFailed": "Không thể cập nhật người dùng",
+      "usersLoadFailed": "Không thể tải danh sách người dùng",
+      "invalidKycKind": "Loại ảnh phải là mặt trước, mặt sau hoặc ảnh chân dung",
+      "documentLinkFailed": "Không thể tạo liên kết xem giấy tờ",
+      "verificationUpdated": "Đã cập nhật xác minh",
+      "verificationUpdateFailed": "Không thể cập nhật xác minh",
+      "verificationQueueLoadFailed": "Không thể tải hàng đợi xác minh"
+    },
+    "auth": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "resetLinkSent": "Nếu email này có tài khoản, liên kết đặt lại mật khẩu đã được gửi",
+      "emailTaken": "Email này đã được đăng ký",
+      "accountCreated": "Đã tạo tài khoản",
+      "accountCreateFailed": "Không thể tạo tài khoản",
+      "resetLinkInvalid": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
+      "passwordUpdated": "Đã cập nhật mật khẩu"
+    },
+    "availability": {
+      "loadFailed": "Không thể tải lịch làm việc",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "updated": "Đã cập nhật lịch làm việc",
+      "updateFailed": "Không thể cập nhật lịch làm việc"
+    },
+    "blockedDates": {
+      "notFound": "Không tìm thấy ngày đã chặn",
+      "unblocked": "Đã bỏ chặn ngày",
+      "unblockFailed": "Không thể bỏ chặn ngày",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "blocked": "Đã chặn ngày",
+      "blockFailed": "Không thể chặn ngày"
+    },
+    "blocks": {
+      "userIdRequired": "userId là bắt buộc",
+      "blocked": "Đã chặn người dùng",
+      "unblocked": "Đã bỏ chặn người dùng",
+      "blockFailed": "Không thể chặn người dùng",
+      "unblockFailed": "Không thể bỏ chặn người dùng"
+    },
+    "bookings": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "rescheduleProposed": "Đã đề xuất đổi lịch",
+      "rescheduleProposeFailed": "Không thể đề xuất đổi lịch",
+      "rescheduleAccepted": "Đã chấp nhận đổi lịch",
+      "rescheduleDeclined": "Đã từ chối đổi lịch",
+      "rescheduleRespondFailed": "Không thể phản hồi yêu cầu đổi lịch",
+      "notFound": "Không tìm thấy lịch đặt",
+      "loadFailed": "Không thể tải thông tin lịch đặt",
+      "updated": "Đã cập nhật lịch đặt",
+      "updateFailed": "Không thể cập nhật lịch đặt",
+      "calendarLoadFailed": "Không thể tải lịch",
+      "listLoadFailed": "Không thể tải danh sách lịch đặt",
+      "requestSent": "Đã gửi yêu cầu đặt lịch",
+      "createFailed": "Không thể tạo lịch đặt"
+    },
+    "cart": {
+      "notFound": "Không tìm thấy",
+      "invalidQuantity": "Số lượng không hợp lệ",
+      "updateFailed": "Không thể cập nhật sản phẩm trong giỏ hàng",
+      "removed": "Đã xóa",
+      "removeFailed": "Không thể xóa sản phẩm khỏi giỏ hàng",
+      "loadFailed": "Không thể tải giỏ hàng",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "added": "Đã thêm vào giỏ hàng",
+      "addFailed": "Không thể thêm vào giỏ hàng"
+    },
+    "contact": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "messageSent": "Đã gửi tin nhắn"
+    },
+    "conversations": {
+      "messagesLoadFailed": "Không thể tải tin nhắn",
+      "markedRead": "Đã đánh dấu đã đọc",
+      "markReadFailed": "Không thể đánh dấu đã đọc",
+      "loadFailed": "Không thể tải danh sách hội thoại",
+      "userIdRequired": "userId là bắt buộc",
+      "startFailed": "Không thể bắt đầu hội thoại",
+      "unreadCountLoadFailed": "Không thể tải số tin nhắn chưa đọc"
+    },
+    "dashboard": {
+      "statsLoadFailed": "Không thể tải thống kê"
+    },
+    "follows": {
+      "notFound": "Không tìm thấy",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "cannotFollowSelf": "Bạn không thể tự theo dõi chính mình",
+      "followed": "Đã theo dõi",
+      "followFailed": "Không thể theo dõi",
+      "missingUserId": "Thiếu userId",
+      "unfollowed": "Đã bỏ theo dõi",
+      "unfollowFailed": "Không thể bỏ theo dõi",
+      "missingParams": "Thiếu userId hoặc profileId",
+      "socialStateLoadFailed": "Không thể tải trạng thái theo dõi"
+    },
+    "messages": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "sendFailed": "Không thể gửi tin nhắn"
+    },
+    "notifications": {
+      "markedRead": "Đã đánh dấu đã đọc",
+      "updateFailed": "Không thể cập nhật thông báo",
+      "allMarkedRead": "Đã đánh dấu tất cả là đã đọc",
+      "updateAllFailed": "Không thể cập nhật thông báo",
+      "loadFailed": "Không thể tải thông báo"
+    }
+  },
+  "dashboardCore": {
+    "acceptingBookingsToggle": {
+      "label": "Đang nhận đặt lịch"
+    },
+    "checkoutSuccessToast": {
+      "welcome": "Chào mừng đến với Fgrapher Pro!"
+    },
+    "error": {
+      "title": "Đã xảy ra lỗi",
+      "body": "Trang này gặp lỗi ngoài ý muốn. Hãy thử lại, hoặc quay về bảng điều khiển.",
+      "retry": "Thử lại",
+      "backToDashboard": "Về bảng điều khiển"
+    },
+    "saved": {
+      "title": "Nghệ sĩ đã lưu",
+      "empty": {
+        "title": "Chưa lưu nghệ sĩ nào",
+        "body": "Nhấn biểu tượng bookmark trên một hồ sơ để lưu vào đây."
+      },
+      "unnamed": "Chưa đặt tên",
+      "priceFrom": "Từ ₫{amount}"
+    },
+    "notifications": {
+      "title": "Thông báo",
+      "tabs": {
+        "ALL": "Tất cả",
+        "UNREAD": "Chưa đọc",
+        "BOOKINGS": "Lịch đặt",
+        "ORDERS": "Đơn hàng",
+        "MESSAGES": "Tin nhắn",
+        "SOCIAL": "Cộng đồng"
+      },
+      "empty": {
+        "title": "Chưa có thông báo",
+        "body": "Bạn đã xem hết thông báo."
+      },
+      "justNow": "vừa xong",
+      "minutesAgo": "{minutes} phút trước",
+      "hoursAgo": "{hours} giờ trước",
+      "daysAgo": "{days} ngày trước"
+    },
+    "portfolio": {
+      "proOnly": {
+        "title": "Portfolio dành cho người làm nghề sáng tạo",
+        "body": "Thêm một vai trò trả phí — Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm, Studio hoặc Cửa hàng máy ảnh — để giới thiệu tác phẩm của bạn.",
+        "cta": "Thêm vai trò"
+      },
+      "noProfile": {
+        "title": "Hãy thiết lập hồ sơ trước",
+        "body": "Tạo hồ sơ nhà cung cấp trước khi tải ảnh/video lên portfolio.",
+        "cta": "Thiết lập hồ sơ"
+      },
+      "sectionTitle": "Portfolio",
+      "gate": {
+        "fallbackTitle": "Kích hoạt gói {role} để tải ảnh lên",
+        "fallbackText": "Portfolio hiện tại của bạn vẫn hiển thị — kích hoạt gói đăng ký để thêm ảnh mới."
+      }
+    },
+    "portfolioGrid": {
+      "moderation": {
+        "pending": "Đang chờ duyệt",
+        "rejected": "Đã bị từ chối"
+      },
+      "reorder": "Sắp xếp lại",
+      "delete": "Xóa",
+      "itemCount": "{count} mục",
+      "dragToReorder": "Kéo để sắp xếp lại",
+      "upload": "Tải lên"
+    },
+    "reviews": {
+      "title": "Đánh giá",
+      "stats": {
+        "avgRating": "Đánh giá trung bình",
+        "total": "Tổng số đánh giá",
+        "responseRate": "Tỷ lệ phản hồi",
+        "awaitingResponse": "Chờ phản hồi"
+      },
+      "tabs": {
+        "ALL": "Tất cả",
+        "AWAITING": "Chờ phản hồi",
+        "RESPONDED": "Đã phản hồi"
+      },
+      "empty": "Chưa có đánh giá nào",
+      "anonymous": "Ẩn danh",
+      "respond": "Phản hồi"
+    },
+    "listings": {
+      "filters": {
+        "ALL": "Tất cả",
+        "SALE": "Đang bán",
+        "RENT": "Cho thuê",
+        "OUT_OF_STOCK": "Hết hàng"
+      },
+      "badge": {
+        "rental": "Cho thuê",
+        "forSale": "Đang bán"
+      },
+      "priceRental": "{price}/ngày",
+      "priceBoth": "{price} · {rentalPrice}/ngày",
+      "empty": {
+        "title": "Chưa có sản phẩm nào",
+        "body": "Thêm chiếc máy ảnh, ống kính hoặc phụ kiện đầu tiên của bạn."
+      },
+      "addProduct": "Thêm sản phẩm",
+      "inStock": "Còn {count} sản phẩm",
+      "outOfStock": "Hết hàng",
+      "edit": "Sửa",
+      "duplicate": "Nhân bản",
+      "delete": "Xóa",
+      "editProductTitle": "Sửa sản phẩm",
+      "addProductTitle": "Thêm sản phẩm",
+      "gate": {
+        "fallbackTitle": "Cần đăng ký gói Cửa hàng máy ảnh",
+        "fallbackText": "Kích hoạt gói Cửa hàng máy ảnh để đăng bán sản phẩm."
+      },
+      "roleRequired": {
+        "title": "Cần có vai trò Cửa hàng máy ảnh",
+        "body": "Thêm vai trò Cửa hàng máy ảnh để bán hoặc cho thuê thiết bị trên Fgrapher.",
+        "cta": "Thêm vai trò"
+      },
+      "pageTitle": "Sản phẩm"
+    },
+    "home": {
+      "greeting": {
+        "morning": "Chào buổi sáng, {name}",
+        "afternoon": "Chào buổi chiều, {name}",
+        "evening": "Chào buổi tối, {name}"
+      },
+      "fallbackName": "bạn",
+      "stats": {
+        "pendingRequests": "Yêu cầu chờ duyệt",
+        "confirmed": "Đã xác nhận",
+        "earnings": "Doanh thu",
+        "profileViews": "Lượt xem hồ sơ",
+        "upcomingBookings": "Lịch sắp tới",
+        "savedArtists": "Nghệ sĩ đã lưu",
+        "messages": "Tin nhắn",
+        "orders": "Đơn hàng"
+      },
+      "completeProfile": {
+        "title": "Hoàn thiện hồ sơ của bạn",
+        "cta": "Hoàn thiện hồ sơ"
+      },
+      "recentActivity": "Hoạt động gần đây",
+      "noActivity": "Chưa có hoạt động nào",
+      "buildPortfolio": "Xây dựng portfolio",
+      "browseArtists": "Khám phá nghệ sĩ"
+    },
+    "messages": {
+      "selectConversation": "Chọn một cuộc trò chuyện",
+      "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin"
+    },
+    "customerOrders": {
+      "title": "Đơn hàng của tôi",
+      "tabs": {
+        "ALL": "Tất cả",
+        "PENDING": "Đang xử lý",
+        "SHIPPED": "Đang giao",
+        "DELIVERED": "Đã giao",
+        "CANCELLED": "Đã hủy"
+      },
+      "status": {
+        "PENDING": "Đang xử lý",
+        "CONFIRMED": "Đã xác nhận",
+        "SHIPPED": "Đang giao",
+        "DELIVERED": "Đã giao",
+        "CANCELLED": "Đã hủy",
+        "RETURNED": "Đã hoàn trả"
+      },
+      "empty": "Chưa có đơn hàng nào",
+      "browseGear": "Khám phá thiết bị",
+      "orderNumber": "Đơn hàng #{id}",
+      "more": "+{count} sản phẩm khác",
+      "viewDetails": "Xem chi tiết"
+    },
+    "orderDetail": {
+      "status": {
+        "PENDING": "Đang xử lý",
+        "CONFIRMED": "Đã xác nhận",
+        "SHIPPED": "Đang giao",
+        "DELIVERED": "Đã giao",
+        "CANCELLED": "Đã hủy",
+        "RETURNED": "Đã hoàn trả"
+      },
+      "backToOrders": "Quay lại danh sách đơn hàng",
+      "orderNumber": "Đơn hàng #{id}",
+      "rentalLabel": "Thuê:",
+      "depositLabel": "Đặt cọc {amount} ({status})",
+      "shippingAddress": "Địa chỉ giao hàng",
+      "tracking": "Vận chuyển",
+      "messageParty": {
+        "customer": "Nhắn tin khách hàng",
+        "shop": "Nhắn tin cửa hàng"
+      },
+      "confirmOrder": "Xác nhận đơn hàng",
+      "markAsShipped": "Đánh dấu đã gửi hàng",
+      "markAsDelivered": "Đánh dấu đã giao hàng",
+      "refundDeposit": "Hoàn trả tiền cọc",
+      "deductDeposit": "Trừ tiền cọc (hư hỏng)",
+      "cancelOrder": "Hủy đơn hàng",
+      "total": "Tổng cộng",
+      "carrier": "Đơn vị vận chuyển",
+      "trackingNumber": "Mã vận đơn",
+      "dialogCancel": "Hủy",
+      "cancelDialog": {
+        "title": "Hủy đơn hàng này?",
+        "body": "Khoản thanh toán sẽ được hoàn lại và tồn kho sẽ được khôi phục.",
+        "reasonPlaceholder": "Lý do (không bắt buộc)",
+        "keepOrder": "Giữ đơn hàng"
+      }
+    }
+  },
+  "dashboardSettings": {
+    "nav": {
+      "profile": "Hồ sơ",
+      "account": "Tài khoản",
+      "roles": "Vai trò",
+      "billing": "Thanh toán",
+      "notifications": "Thông báo",
+      "data": "Dữ liệu & Quyền riêng tư"
+    },
+    "layout": {
+      "title": "Cài đặt"
+    },
+    "account": {
+      "emailLabel": "Email",
+      "phoneLabel": "Số điện thoại",
+      "save": "Lưu",
+      "changePasswordTitle": "Đổi mật khẩu",
+      "currentPasswordLabel": "Mật khẩu hiện tại",
+      "newPasswordLabel": "Mật khẩu mới",
+      "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+      "updatePassword": "Cập nhật mật khẩu",
+      "passwordMismatch": "Mật khẩu xác nhận không khớp",
+      "genericError": "Đã có lỗi xảy ra",
+      "languageLabel": "Ngôn ngữ",
+      "themeLabel": "Giao diện",
+      "themeLight": "Sáng",
+      "themeDark": "Tối",
+      "themeSystem": "Theo hệ thống",
+      "dangerZoneTitle": "Khu vực nguy hiểm",
+      "dangerZoneDesc": "Xóa tài khoản là vĩnh viễn. Hành động này không thể hoàn tác.",
+      "deleteAccount": "Xóa tài khoản",
+      "deleteDialogTitle": "Xóa tài khoản của bạn?",
+      "deleteDialogBody": "Thao tác này sẽ vô hiệu hóa vĩnh viễn tài khoản Fgrapher của bạn. Hành động này không thể hoàn tác.",
+      "cancel": "Hủy",
+      "toastAccountUpdated": "Đã cập nhật tài khoản",
+      "toastPasswordUpdated": "Đã cập nhật mật khẩu"
+    },
+    "billing": {
+      "status": {
+        "active": "Đang hoạt động",
+        "trialing": "Đang dùng thử",
+        "pastDue": "Quá hạn thanh toán",
+        "cancelled": "Đã hủy",
+        "expired": "Đã hết hạn"
+      },
+      "notConfigured": "Chức năng thanh toán chưa được kích hoạt trong môi trường này.",
+      "portalGenericError": "Không thể mở cổng quản lý thanh toán.",
+      "emptyTitle": "Chưa có gói đăng ký nào đang hoạt động",
+      "emptyDesc": "Kích hoạt một vai trò trả phí để có hồ sơ công khai, nhận đặt lịch và nhiều hơn nữa.",
+      "browseRoles": "Xem các vai trò",
+      "currentPlanLabel": "Gói hiện tại",
+      "perYear": "/năm",
+      "perMonth": "/tháng",
+      "trialEnds": "Còn {days} ngày dùng thử",
+      "cancelsOn": "Hủy vào {date}",
+      "resumeSubscription": "Khôi phục gói đăng ký",
+      "renewsOn": "Gia hạn vào {date}",
+      "cancelSubscription": "Hủy gói đăng ký",
+      "totalMonthlyCost": "Tổng chi phí hàng tháng",
+      "paymentMethodLabel": "Phương thức thanh toán",
+      "managedByStripe": "Được quản lý an toàn qua Stripe",
+      "manageSubscription": "Quản lý gói đăng ký",
+      "billingHistoryLabel": "Lịch sử thanh toán",
+      "noInvoices": "Chưa có hóa đơn nào.",
+      "viewInvoice": "Xem",
+      "cancelDialogTitle": "Hủy gói đăng ký {role}?",
+      "cancelDialogBody1": "Hồ sơ của bạn vẫn hiển thị cho đến hết chu kỳ thanh toán hiện tại.",
+      "cancelDialogBody2": "Toàn bộ dữ liệu của bạn — portfolio, đơn đặt lịch, đánh giá — vẫn được giữ nguyên, bạn có thể kích hoạt lại bất cứ lúc nào.",
+      "keepSubscription": "Giữ gói đăng ký",
+      "disabledTitle": "Hiện tại Fgrapher đang miễn phí cho toàn bộ nhà cung cấp dịch vụ",
+      "disabledBody": "Chúng tôi sẽ thông báo trước ít nhất 30 ngày trước khi bắt đầu thu phí. Không cần làm gì thêm ở trang này."
+    },
+    "data": {
+      "summary": {
+        "profiles": "Hồ sơ",
+        "bookingsAsCustomer": "Đơn đặt lịch đã gửi",
+        "bookingsAsProvider": "Đơn đặt lịch đã nhận",
+        "reviewsWritten": "Đánh giá đã viết",
+        "reviewsReceived": "Đánh giá đã nhận",
+        "orders": "Đơn hàng"
+      },
+      "overviewTitle": "Tổng quan dữ liệu của bạn",
+      "consentTitle": "Đồng ý sử dụng dữ liệu",
+      "consentIntro": "Việc xử lý dữ liệu để cung cấp dịch vụ là bắt buộc và không thể tắt tại đây. Bạn có thể bật/tắt hai mục tùy chọn dưới đây bất cứ lúc nào.",
+      "marketingLabel": "Thông tin khuyến mại",
+      "marketingDesc": "Nhận email về khuyến mại, tin tức từ Fgrapher",
+      "analyticsLabel": "Phân tích hành vi sử dụng",
+      "analyticsDesc": "Cho phép Fgrapher phân tích cách bạn sử dụng dịch vụ để cải thiện sản phẩm",
+      "privacyPolicyIntro": "Xem chi tiết tại",
+      "privacyPolicyLink": "Chính sách quyền riêng tư",
+      "myDataTitle": "Dữ liệu của tôi",
+      "myDataDesc": "Tải về bản sao đầy đủ dữ liệu cá nhân, hồ sơ, đơn đặt lịch và đánh giá của bạn dưới dạng JSON.",
+      "downloadButton": "Tải về dữ liệu của tôi",
+      "deleteAccountTitle": "Xóa tài khoản",
+      "deleteAccountDesc": "Yêu cầu xóa vĩnh viễn tài khoản của bạn. Yêu cầu này sẽ được đội ngũ Fgrapher xử lý, không xóa ngay lập tức.",
+      "pendingDeletionNotice": "Bạn đã có một yêu cầu xóa tài khoản đang chờ xử lý.",
+      "requestDeletionButton": "Yêu cầu xóa tài khoản",
+      "explainDialogTitle": "Điều gì sẽ xảy ra khi bạn xóa tài khoản?",
+      "explainWillBeDeletedLabel": "Sẽ bị xóa vĩnh viễn:",
+      "explainWillBeDeletedBody": "hồ sơ, ảnh/portfolio, dịch vụ đã đăng, tin nhắn của bạn.",
+      "explainWillBeKeptLabel": "Sẽ được giữ lại (đã ẩn danh):",
+      "explainWillBeKeptBody": "tài khoản của bạn sẽ đổi thành \"Người dùng đã xóa\" — email, số điện thoại, ngày sinh và các thông tin cá nhân khác sẽ bị xóa, nhưng các đơn đặt lịch/đánh giá đã hoàn tất vẫn được giữ để phía đối tác của bạn tra cứu.",
+      "explainIrreversible": "Hành động này không thể hoàn tác sau khi được xử lý.",
+      "cancel": "Hủy",
+      "continueBtn": "Tiếp tục",
+      "confirmDialogTitle": "Xác nhận gửi yêu cầu xóa tài khoản",
+      "confirmDialogBody": "Bạn có chắc chắn muốn gửi yêu cầu xóa vĩnh viễn tài khoản này không? Yêu cầu sẽ được đội ngũ Fgrapher xử lý trong thời gian sớm nhất.",
+      "back": "Quay lại",
+      "confirmSubmit": "Xác nhận gửi yêu cầu",
+      "toastConsentUpdateFail": "Không thể cập nhật lựa chọn",
+      "toastConsentUpdateSuccess": "Đã cập nhật lựa chọn",
+      "toastExportFail": "Xuất dữ liệu thất bại",
+      "toastExportSuccess": "Đã tải về dữ liệu của bạn",
+      "toastDeletionRequestFail": "Gửi yêu cầu xóa tài khoản thất bại",
+      "toastDeletionRequestSuccessTitle": "Đã gửi yêu cầu xóa tài khoản",
+      "toastDeletionRequestSuccessDesc": "Đội ngũ Fgrapher sẽ xử lý yêu cầu này."
+    },
+    "notifications": {
+      "groups": {
+        "bookings": "Đặt lịch",
+        "messages": "Tin nhắn",
+        "social": "Mạng xã hội",
+        "marketing": "Marketing"
+      },
+      "labels": {
+        "bookingRequest": "Yêu cầu đặt lịch mới",
+        "bookingConfirmed": "Đã xác nhận đặt lịch",
+        "bookingCancelled": "Đã hủy đặt lịch",
+        "bookingReminder": "Nhắc lịch sắp tới",
+        "newMessage": "Tin nhắn mới",
+        "newFollower": "Người theo dõi mới",
+        "newReview": "Đánh giá mới",
+        "productUpdates": "Cập nhật sản phẩm",
+        "tips": "Mẹo và thực hành tốt"
+      },
+      "email": "Email",
+      "inApp": "Trong ứng dụng"
+    },
+    "profile": {
+      "basics": {
+        "usernameLabel": "Tên người dùng",
+        "usernameTaken": "Tên người dùng này đã được sử dụng",
+        "bioLabel": "Giới thiệu",
+        "wardLabel": "Phường/xã",
+        "wardNotSelected": "Chưa chọn"
+      },
+      "media": {
+        "coverButton": "Ảnh bìa",
+        "uploadUnavailable": "Chức năng tải lên hiện không khả dụng",
+        "uploadFailed": "Tải lên thất bại"
+      },
+      "availability": {
+        "weeklySchedule": "Lịch làm việc hàng tuần",
+        "days": {
+          "sun": "Chủ nhật",
+          "mon": "Thứ hai",
+          "tue": "Thứ ba",
+          "wed": "Thứ tư",
+          "thu": "Thứ năm",
+          "fri": "Thứ sáu",
+          "sat": "Thứ bảy"
+        },
+        "saveSchedule": "Lưu lịch làm việc",
+        "saved": "Đã lưu",
+        "blockedDates": "Ngày không nhận lịch",
+        "removeAria": "Xóa",
+        "blockDateButton": "Chặn ngày"
+      }
+    }
+  },
+  "libServices": {
+    "validation": {
+      "auth": {
+        "emailInvalid": "Vui lòng nhập một địa chỉ email hợp lệ",
+        "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự",
+        "nameRequired": "Vui lòng nhập họ và tên",
+        "passwordUppercase": "Mật khẩu phải chứa ít nhất một chữ cái viết hoa",
+        "passwordNumber": "Mật khẩu phải chứa ít nhất một chữ số",
+        "dateOfBirthRequired": "Vui lòng nhập ngày sinh",
+        "roleRequired": "Vui lòng chọn ít nhất một vai trò",
+        "consentServiceRequired": "Bạn phải đồng ý xử lý dữ liệu cá nhân để tạo tài khoản",
+        "mustBe18": "Bạn phải từ 18 tuổi trở lên để tạo tài khoản Fgrapher",
+        "contentGuidelinesRequired": "Bạn phải chấp nhận nguyên tắc nội dung để đăng ký với vai trò Người mẫu"
+      },
+      "booking": {
+        "invalidDate": "Ngày không hợp lệ",
+        "invalidTime": "Giờ không hợp lệ"
+      },
+      "marketplace": {
+        "rentalDatesRequired": "Vui lòng chọn ngày thuê"
+      },
+      "portfolio": {
+        "rightsConfirmedRequired": "Bạn phải xác nhận có quyền sử dụng những hình ảnh này"
+      },
+      "product": {
+        "nameRequired": "Vui lòng nhập tên sản phẩm",
+        "salePriceRequired": "Vui lòng nhập giá bán",
+        "rentalPriceRequired": "Vui lòng nhập giá thuê mỗi ngày",
+        "bothPricesRequired": "Vui lòng nhập cả giá bán và giá thuê"
+      },
+      "profile": {
+        "displayNameRequired": "Vui lòng nhập tên hiển thị"
+      },
+      "review": {
+        "contentTooShort": "Vui lòng chia sẻ chi tiết hơn (tối thiểu 20 ký tự)"
+      },
+      "service": {
+        "nameRequired": "Vui lòng nhập tên dịch vụ",
+        "durationRequired": "Vui lòng nhập thời lượng (phút)",
+        "priceRequired": "Vui lòng nhập giá"
+      },
+      "subscription": {
+        "roleRequired": "Vui lòng chọn ít nhất một vai trò"
+      },
+      "user": {
+        "roleRequired": "Vui lòng chọn ít nhất một vai trò",
+        "bioTooLong": "Tiểu sử tối đa 500 ký tự",
+        "usernameTooShort": "Tên người dùng phải có ít nhất 3 ký tự",
+        "usernameInvalidChars": "Chỉ dùng chữ thường, số và dấu gạch dưới",
+        "currentPasswordRequired": "Vui lòng nhập mật khẩu hiện tại",
+        "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự",
+        "passwordUppercase": "Mật khẩu phải chứa ít nhất một chữ cái viết hoa",
+        "passwordNumber": "Mật khẩu phải chứa ít nhất một chữ số",
+        "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu mới",
+        "passwordsDoNotMatch": "Mật khẩu xác nhận không khớp"
+      },
+      "verification": {
+        "fullNameRequired": "Vui lòng nhập họ tên đầy đủ theo giấy tờ",
+        "idNumberInvalid": "Vui lòng nhập số CCCD/CMND hợp lệ (9 hoặc 12 chữ số)",
+        "consentRequired": "Bạn phải đồng ý xử lý giấy tờ tùy thân để gửi yêu cầu xác minh"
+      }
+    },
+    "auth": {
+      "unauthorized": "Bạn cần đăng nhập để tiếp tục",
+      "missingRole": "Thiếu vai trò bắt buộc: {role}",
+      "activeSubscriptionRequired": "Cần có gói đăng ký đang hoạt động cho vai trò: {role}",
+      "paidRoleRequired": "Cần có ít nhất một vai trò trả phí đang hoạt động",
+      "adminAccessRequired": "Yêu cầu quyền quản trị viên"
+    },
+    "email": {
+      "footer": {
+        "manageNotifications": "Quản lý tùy chọn thông báo"
+      },
+      "bookingRequest": {
+        "heading": "Yêu cầu đặt lịch mới",
+        "body": "{otherPartyName} đã yêu cầu đặt {serviceName} vào {dateLabel} lúc {timeLabel}. Phản hồi trong vòng 24 giờ để duy trì tỷ lệ phản hồi tốt.",
+        "cta": "Xem yêu cầu"
+      },
+      "bookingConfirmed": {
+        "heading": "Đã xác nhận lịch hẹn",
+        "body": "{otherPartyName} đã xác nhận lịch {serviceName} vào {dateLabel} lúc {timeLabel}. Chúng tôi sẽ nhắc bạn trước 24 giờ.",
+        "cta": "Xem lịch hẹn"
+      },
+      "bookingDeclined": {
+        "heading": "Lịch hẹn bị từ chối",
+        "body": "{otherPartyName} không thể nhận yêu cầu {serviceName} của bạn vào {dateLabel} lúc {timeLabel}. Hãy tìm nhà cung cấp khác đang có lịch trống.",
+        "cta": "Tìm nghệ sĩ khác"
+      },
+      "bookingCancelled": {
+        "heading": "Lịch hẹn đã bị hủy",
+        "body": "{otherPartyName} đã hủy lịch {serviceName} vào {dateLabel} lúc {timeLabel}.",
+        "cta": "Xem lịch hẹn"
+      },
+      "bookingReminder": {
+        "heading": "Lịch hẹn vào ngày mai",
+        "body": "Nhắc nhở: buổi {serviceName} của bạn với {otherPartyName} diễn ra vào {dateLabel} lúc {timeLabel} — chưa đầy 24 giờ nữa.",
+        "cta": "Xem lịch hẹn"
+      },
+      "bookingCompleted": {
+        "heading": "Buổi chụp của bạn thế nào?",
+        "body": "Buổi {serviceName} của bạn với {otherPartyName} đã được đánh dấu hoàn thành. Hãy để lại đánh giá để giúp những khách hàng khác.",
+        "cta": "Viết đánh giá"
+      },
+      "welcomeSubscription": {
+        "heading": "Chào mừng đến với Fgrapher Pro!",
+        "bodySingular": "Hồ sơ {roleNames} của bạn đã hoạt động. Gói dùng thử 14 ngày miễn phí đã bắt đầu — quản lý gói đăng ký bất cứ lúc nào trong phần cài đặt thanh toán.",
+        "bodyPlural": "Các hồ sơ {roleNames} của bạn đã hoạt động. Gói dùng thử 14 ngày miễn phí đã bắt đầu — quản lý gói đăng ký bất cứ lúc nào trong phần cài đặt thanh toán.",
+        "cta": "Xem thanh toán"
+      },
+      "paymentFailed": {
+        "heading": "Thanh toán của bạn không thành công",
+        "body": "Chúng tôi không thể trừ tiền từ thẻ của bạn cho gói đăng ký Fgrapher. Hồ sơ của bạn vẫn hoạt động đến {graceEndsLabel} — vui lòng cập nhật phương thức thanh toán trước thời hạn để tránh bị gián đoạn.",
+        "cta": "Cập nhật phương thức thanh toán"
+      },
+      "subscriptionCancelling": {
+        "heading": "Rất tiếc phải chia tay bạn",
+        "body": "Gói đăng ký của bạn sẽ hủy vào {periodEndLabel}. Bạn vẫn có toàn quyền truy cập đến lúc đó. Đổi ý rồi?",
+        "cta": "Tiếp tục gói đăng ký"
+      },
+      "subscriptionEnded": {
+        "heading": "Gói đăng ký của bạn đã kết thúc",
+        "body": "Gói đăng ký Fgrapher Pro của bạn đã kết thúc và hồ sơ của bạn không còn hiển thị trong tìm kiếm. Toàn bộ dữ liệu của bạn vẫn được lưu giữ — kích hoạt lại bất cứ lúc nào để tiếp tục.",
+        "cta": "Kích hoạt lại"
+      },
+      "receipt": {
+        "heading": "Đã nhận thanh toán",
+        "body": "Chúng tôi đã nhận được khoản thanh toán {amountLabel} của bạn. Gói đăng ký của bạn đang hoạt động đến {periodEndLabel}.",
+        "cta": "Xem biên lai"
+      },
+      "orderConfirmation": {
+        "heading": "Đơn hàng đã được xác nhận!",
+        "body": "Đơn hàng {orderNumber} — {itemsSummary}. Tổng cộng: {totalLabel}",
+        "cta": "Xem đơn hàng"
+      },
+      "newOrder": {
+        "heading": "Có đơn hàng mới",
+        "body": "{customerName} đã đặt đơn hàng {orderNumber} — {itemsSummary}",
+        "cta": "Xem đơn hàng"
+      },
+      "orderStatus": {
+        "heading": "Đơn hàng {statusLabel}",
+        "body": "Đơn hàng {orderNumber} của bạn hiện đang {statusLabel}.",
+        "bodyWithDetail": "Đơn hàng {orderNumber} của bạn hiện đang {statusLabel}. {detail}",
+        "cta": "Xem đơn hàng"
+      },
+      "newReview": {
+        "heading": "Đánh giá mới",
+        "body": "{reviewerName} đã để lại cho bạn đánh giá {rating} sao.",
+        "cta": "Xem & phản hồi"
+      },
+      "reviewResponse": {
+        "heading": "Có phản hồi mới cho đánh giá của bạn",
+        "body": "{providerName} đã phản hồi đánh giá của bạn.",
+        "cta": "Xem phản hồi"
+      }
+    }
+  },
+  "publicPages": {
+    "booking": {
+      "pageTitle": "Đặt lịch chụp — Fgrapher",
+      "fallbackProviderName": "nhà cung cấp này",
+      "shootTypeOptions": {
+        "notSpecified": "Chưa xác định",
+        "editorial": "Editorial",
+        "commercial": "Thương mại",
+        "portfolioBuilding": "Xây dựng portfolio",
+        "tfpCollaboration": "Hợp tác TFP",
+        "event": "Sự kiện",
+        "other": "Khác"
+      },
+      "steps": {
+        "service": "Dịch vụ",
+        "dateTime": "Ngày & giờ",
+        "details": "Chi tiết",
+        "confirm": "Xác nhận"
+      },
+      "back": "Quay lại",
+      "continueBtn": "Tiếp tục",
+      "submitBtn": "Gửi yêu cầu đặt lịch",
+      "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      "success": {
+        "heading": "Đã gửi yêu cầu đặt lịch!",
+        "body": "{providerName} sẽ phản hồi trong vòng 24 giờ. Chúng tôi sẽ gửi email ngay khi họ xác nhận.",
+        "viewBookings": "Xem lịch đặt của tôi",
+        "browseMore": "Khám phá thêm nghệ sĩ"
+      },
+      "notes": {
+        "shootType": "Loại buổi chụp: {value}",
+        "usageRights": "Quyền sử dụng hình ảnh: {value}",
+        "wardrobeStyling": "Trang phục/tạo hình: {value}",
+        "muaProvidedByCustomer": "Khách hàng sẽ mang theo chuyên viên trang điểm",
+        "customRequest": "Yêu cầu riêng: {value}"
+      },
+      "stepService": {
+        "heading": "Bạn cần gì?",
+        "describeLabel": "Mô tả điều bạn đang tìm kiếm",
+        "describePlaceholder": "Cho họ biết bạn cần buổi chụp, sự kiện hay sản phẩm như thế nào...",
+        "durationMin": "{duration} phút"
+      },
+      "stepDateTime": {
+        "heading": "Khi nào phù hợp với bạn?",
+        "previous": "Trước",
+        "next": "Sau",
+        "localTimeNote": "Giờ hiển thị theo múi giờ của bạn · cần đặt trước ít nhất 24 giờ",
+        "selectDatePrompt": "Chọn một ngày để xem khung giờ trống.",
+        "sessionDuration": "Thời lượng: {duration} phút",
+        "noAvailability": "Không có lịch trống vào ngày này — hãy thử ngày khác.",
+        "bookingWith": "Đặt lịch với {providerName}",
+        "booking": "Đặt lịch"
+      },
+      "stepDetails": {
+        "heading": "Trao đổi với {providerName} về buổi chụp của bạn",
+        "attachToJob": "Gắn yêu cầu này vào một đơn hàng đã xác nhận của khách",
+        "clientJobLabel": "Đơn hàng của khách",
+        "customRequestOption": "Yêu cầu riêng",
+        "shootDetails": "Chi tiết buổi chụp",
+        "shootTypeLabel": "Loại buổi chụp",
+        "usageRightsLabel": "Quyền sử dụng hình ảnh",
+        "usageRightsPlaceholder": "Hình ảnh sẽ được sử dụng ở đâu?",
+        "wardrobeLabel": "Ghi chú trang phục / tạo hình",
+        "wardrobePlaceholder": "Trang phục, định hướng tạo hình, những gì người mẫu nên mang theo hoặc chuẩn bị",
+        "muaProvidedLabel": "Sẽ có chuyên viên trang điểm đi cùng",
+        "locationLabel": "Địa điểm",
+        "locationProvider": "Tại studio của nhà cung cấp",
+        "locationCustomer": "Tại địa điểm của tôi",
+        "locationOutdoor": "Ngoài trời / khác",
+        "addressLabel": "Địa chỉ",
+        "addressPlaceholder": "Số nhà, phường/xã, thành phố",
+        "numberOfPeopleLabel": "Số người",
+        "notesLabel": "Ghi chú",
+        "notesPlaceholder": "Mô tả concept, phong cách tham khảo, yêu cầu đặc biệt...",
+        "contactPhoneLabel": "Số điện thoại liên hệ"
+      },
+      "stepReview": {
+        "heading": "Xem lại yêu cầu đặt lịch",
+        "rowService": "Dịch vụ",
+        "rowDate": "Ngày",
+        "rowTime": "Giờ",
+        "rowDuration": "Thời lượng",
+        "rowLocation": "Địa điểm",
+        "rowPeople": "Số người",
+        "durationMin": "{duration} phút",
+        "servicePrice": "Giá dịch vụ",
+        "total": "Tổng cộng",
+        "notesLabel": "Ghi chú",
+        "cancellationNotice": "Miễn phí hủy trước 48 giờ so với buổi hẹn. Hủy trong vòng 24 giờ có thể bị tính phí khi tính năng thanh toán được bật.",
+        "agreeTerms": "Tôi đồng ý với điều khoản đặt lịch"
+      }
+    },
+    "browse": {
+      "pageTitle": "Khám phá nghệ sĩ — Fgrapher",
+      "sortLabels": {
+        "rating": "Đánh giá cao nhất",
+        "priceAsc": "Giá: thấp đến cao",
+        "priceDesc": "Giá: cao đến thấp",
+        "newest": "Mới nhất",
+        "reviews": "Nhiều đánh giá nhất"
+      },
+      "headingWithRoleCity": "{role} tại {city}",
+      "headingDefault": "Khám phá nghệ sĩ",
+      "resultsCount": "{count} kết quả · {sort}",
+      "filterAvailableNow": "Đang rảnh",
+      "filterInstantBook": "Đặt lịch tức thì",
+      "filterTopRated": "Đánh giá cao nhất",
+      "noResults": {
+        "heading": "Không tìm thấy nghệ sĩ nào",
+        "body": "Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm ở một thành phố khác."
+      },
+      "clearFilters": "Xóa tất cả bộ lọc",
+      "unnamed": "Chưa đặt tên",
+      "newBadge": "Mới",
+      "priceFrom": "Từ {price}",
+      "contactForPricing": "Liên hệ để biết giá",
+      "showingResults": "Hiển thị {shown} trên {total} kết quả",
+      "previous": "Trước",
+      "loadMore": "Xem thêm"
+    },
+    "cart": {
+      "heading": "Giỏ hàng của bạn",
+      "empty": {
+        "heading": "Giỏ hàng đang trống",
+        "browseGear": "Khám phá thiết bị"
+      },
+      "orderSummary": "Tóm tắt đơn hàng",
+      "subtotal": "Tạm tính",
+      "deposits": "Tiền đặt cọc",
+      "total": "Tổng cộng",
+      "shippingNote": "Phí vận chuyển sẽ được tính khi thanh toán",
+      "checkoutBtn": "Thanh toán",
+      "continueShopping": "Tiếp tục mua sắm"
+    },
+    "checkout": {
+      "heading": "Thanh toán",
+      "emptyCart": "Giỏ hàng đang trống",
+      "paymentsNotConfigured": "Chức năng thanh toán chưa được thiết lập trong môi trường này.",
+      "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      "deliveryMethod": {
+        "heading": "Phương thức giao hàng",
+        "shipToMe": "Giao đến tôi",
+        "pickupAtShop": "Nhận tại cửa hàng",
+        "shipNote": "Bạn sẽ nhập địa chỉ giao hàng ở bước tiếp theo.",
+        "pickupNote": "Liên hệ cửa hàng sau khi đơn hàng được xác nhận để sắp xếp nhận hàng."
+      },
+      "reviewOrder": "Xem lại đơn hàng",
+      "agreeTerms": "Tôi đồng ý với điều khoản mua/thuê",
+      "orderSummary": "Tóm tắt đơn hàng",
+      "subtotal": "Tạm tính",
+      "deposits": "Tiền đặt cọc",
+      "shippingNote": "Phí vận chuyển sẽ được tính khi thanh toán",
+      "total": "Tổng cộng",
+      "continueToPayment": "Tiếp tục thanh toán"
+    },
+    "checkoutSuccess": {
+      "settingUp": "Đang xử lý đơn hàng của bạn...",
+      "momentNote": "Chỉ mất một chút thời gian thôi.",
+      "orderConfirmed": "Đặt hàng thành công!",
+      "orderLine": "Đơn hàng #{orderId} — {items}",
+      "shopWillConfirm": "Cửa hàng sẽ xác nhận đơn hàng của bạn trong thời gian sớm nhất. Bạn sẽ nhận được email cập nhật.",
+      "viewOrder": "Xem đơn hàng",
+      "continueShopping": "Tiếp tục mua sắm"
+    },
+    "landing": {
+      "unnamed": "Chưa đặt tên",
+      "newBadge": "Mới",
+      "priceFrom": "Từ {price}",
+      "contactForPricing": "Liên hệ để biết giá",
+      "howItWorks": {
+        "heading": "Cách thức hoạt động",
+        "step1Title": "Tìm kiếm & so sánh",
+        "step1Desc": "Duyệt qua các hồ sơ đã xác minh, so sánh giá và đọc đánh giá thật.",
+        "step2Title": "Đặt lịch của bạn",
+        "step2Desc": "Nhắn tin cho nghệ sĩ, chọn khung giờ và xác nhận đặt lịch trực tuyến.",
+        "step3Title": "Tận hưởng buổi chụp",
+        "step3Desc": "Gặp gỡ, sáng tạo và nhận file ảnh cuối cùng qua Fgrapher."
+      }
+    },
+    "pricing": {
+      "pageTitle": "Bảng giá — Fgrapher",
+      "freeDuringLaunch": "Miễn phí toàn bộ trong giai đoạn khởi động. Chúng tôi sẽ thông báo trước ít nhất 30 ngày trước khi bắt đầu thu phí.",
+      "eyebrow": "BẢNG GIÁ",
+      "heroTitle": "Gói dịch vụ đồng hành cùng nghề của bạn",
+      "heroSub": "Một mức phí cố định cho mỗi vai trò, tính bằng VND — không thu hoa hồng trên đơn đặt lịch, không bao giờ.",
+      "billingToggle": {
+        "monthly": "Hàng tháng",
+        "yearly": "Hàng năm",
+        "saveNote": "(tiết kiệm 20%)"
+      },
+      "customerFree": {
+        "heading": "Khách hàng — Miễn phí trọn đời",
+        "sub": "Tìm kiếm, đặt lịch và mua sắm. Không cần thẻ thanh toán.",
+        "signUp": "Đăng ký miễn phí"
+      },
+      "mostPopular": "Phổ biến nhất",
+      "perYear": "năm",
+      "perMonth": "tháng",
+      "startTrial": "Dùng thử 14 ngày",
+      "signUpFree": "Đăng ký miễn phí",
+      "comparePlans": "So sánh các gói",
+      "featureColumn": "Tính năng",
+      "comparisonFeatures": [
+        "Hồ sơ công khai",
+        "Lịch đặt hẹn",
+        "Nhắn tin với khách hàng",
+        "Đánh giá & xếp hạng",
+        "Hiển thị trong tìm kiếm",
+        "Bảng thống kê"
+      ],
+      "faqHeading": "Câu hỏi thường gặp",
+      "stillDeciding": "Vẫn còn phân vân?",
+      "talkToUs": "Liên hệ với chúng tôi",
+      "plans": {
+        "photographer": {
+          "description": "Chụp ảnh cưới, chân dung và sự kiện.",
+          "features": [
+            "Hồ sơ công khai kèm portfolio",
+            "Đăng ảnh không giới hạn",
+            "Lịch đặt hẹn & yêu cầu đặt lịch",
+            "Nhắn tin với khách hàng",
+            "Đánh giá & xếp hạng",
+            "Hiển thị trong tìm kiếm",
+            "Bảng thống kê"
+          ]
+        },
+        "videographer": {
+          "description": "Quay phim điện ảnh và video highlight.",
+          "features": [
+            "Hồ sơ công khai kèm portfolio",
+            "Đăng video không giới hạn",
+            "Lịch đặt hẹn & yêu cầu đặt lịch",
+            "Nhắn tin với khách hàng",
+            "Đánh giá & xếp hạng",
+            "Hiển thị trong tìm kiếm",
+            "Bảng thống kê"
+          ]
+        },
+        "makeupArtist": {
+          "description": "Trang điểm cô dâu, editorial và sự kiện.",
+          "features": [
+            "Hồ sơ công khai kèm portfolio",
+            "Đăng portfolio không giới hạn",
+            "Lịch đặt hẹn & yêu cầu đặt lịch",
+            "Nhắn tin với khách hàng",
+            "Đánh giá & xếp hạng",
+            "Hiển thị trong tìm kiếm",
+            "Bảng thống kê"
+          ]
+        },
+        "model": {
+          "description": "Được mời chụp và xây dựng portfolio của bạn.",
+          "features": [
+            "Hồ sơ công khai kèm portfolio",
+            "Đăng portfolio không giới hạn",
+            "Lịch đặt hẹn & yêu cầu đặt lịch",
+            "Nhắn tin trực tiếp với nhiếp ảnh gia",
+            "Đánh giá & xếp hạng",
+            "Hiển thị trong tìm kiếm",
+            "Huy hiệu đã xác minh"
+          ]
+        },
+        "studio": {
+          "description": "Cho thuê không gian studio theo giờ hoặc theo ngày.",
+          "features": [
+            "Đăng studio kèm hình ảnh",
+            "Đặt lịch theo giờ & theo ngày",
+            "Giới thiệu tiện ích",
+            "Lịch trống",
+            "Nhắn tin với khách hàng",
+            "Đánh giá & xếp hạng"
+          ]
+        },
+        "cameraShop": {
+          "description": "Bán và cho thuê thiết bị cho cộng đồng.",
+          "features": [
+            "Hồ sơ cửa hàng",
+            "Đăng sản phẩm không giới hạn",
+            "Quản lý cho thuê & bán hàng",
+            "Quản lý đơn hàng",
+            "Theo dõi tồn kho",
+            "Nhắn tin với khách hàng"
+          ]
+        }
+      },
+      "faqs": {
+        "multipleRoles": {
+          "q": "Tôi có thể có nhiều vai trò cùng lúc không?",
+          "a": "Có — một tài khoản có thể giữ nhiều vai trò trả phí cùng lúc (ví dụ: Nhiếp ảnh gia + Studio), mỗi vai trò được tính phí như một gói thuê bao riêng, tất cả hiển thị cùng trên một trang hồ sơ."
+        },
+        "afterTrial": {
+          "q": "Điều gì xảy ra sau khi hết thời gian dùng thử miễn phí?",
+          "a": "Sau 14 ngày, thẻ của bạn sẽ tự động bị trừ tiền theo mức giá bạn đã chọn. Bạn có thể hủy bất cứ lúc nào trước khi hết thời gian dùng thử và sẽ không bị tính phí."
+        },
+        "cancelAnytime": {
+          "q": "Tôi có thể hủy bất cứ lúc nào không?",
+          "a": "Có. Khi hủy, gói của bạn vẫn hoạt động đến hết chu kỳ thanh toán hiện tại, và toàn bộ dữ liệu của bạn được giữ lại nếu bạn muốn kích hoạt lại sau này."
+        },
+        "commission": {
+          "q": "Fgrapher có thu hoa hồng trên các lượt đặt lịch không?",
+          "a": "Không — Fgrapher chỉ thu một mức phí thuê bao cố định cho mỗi vai trò, không tính phần trăm trên lượt đặt lịch của bạn."
+        },
+        "paymentMethods": {
+          "q": "Fgrapher chấp nhận những phương thức thanh toán nào?",
+          "a": "Thẻ tín dụng và thẻ ghi nợ, xử lý an toàn qua Stripe, cùng các phương thức thanh toán nội địa Việt Nam nếu bạn bật trong cài đặt Stripe của mình."
+        },
+        "annualDiscount": {
+          "q": "Có ưu đãi khi thanh toán theo năm không?",
+          "a": "Có — chuyển sang thanh toán theo năm trên trang này để được giảm 20% so với mức giá hàng tháng, tính phí một lần mỗi năm."
+        }
+      }
+    }
+  },
+  "sharedComponents": {
+    "modelSafetyNotice": {
+      "title": "Trước khi đặt lịch",
+      "body": "Hãy gặp mặt ở nơi công cộng hoặc tại một studio đã đăng ký cho buổi chụp đầu tiên, và báo cho ai đó biết bạn sẽ ở đâu. Fgrapher không bao giờ yêu cầu thanh toán ngoài nền tảng — hãy báo cáo nếu có điều gì đó bất thường."
+    },
+    "filterSidebar": {
+      "roleLabel": "Vai trò",
+      "styleLabel": "Phong cách",
+      "heightLabel": "Chiều cao (cm)",
+      "heightMinPh": "Tối thiểu",
+      "heightMaxPh": "Tối đa",
+      "experienceLabel": "Kinh nghiệm",
+      "travelWillingLabel": "Sẵn sàng di chuyển",
+      "sortByLabel": "Sắp xếp theo",
+      "sortTopRated": "Đánh giá cao nhất",
+      "sortPriceAsc": "Giá: thấp đến cao",
+      "sortPriceDesc": "Giá: cao đến thấp",
+      "sortNewest": "Mới nhất",
+      "sortMostReviewed": "Nhiều đánh giá nhất",
+      "cityLabel": "Tỉnh/thành",
+      "allCities": "Tất cả tỉnh/thành",
+      "budgetLabel": "Ngân sách",
+      "budgetAny": "Tất cả",
+      "budgetUnder2m": "Dưới 2 triệu",
+      "budget2to5m": "2 – 5 triệu",
+      "budget5to15m": "5 – 15 triệu",
+      "budgetOver15m": "Trên 15 triệu",
+      "ratingLabel": "Đánh giá",
+      "ratingAny": "Tất cả",
+      "rating4Plus": "Từ 4 sao",
+      "rating45Plus": "Từ 4.5 sao",
+      "resetFilters": "Đặt lại bộ lọc"
+    },
+    "mobileFilterSheet": {
+      "filtersButton": "Bộ lọc",
+      "title": "Bộ lọc",
+      "description": "Bộ lọc tìm kiếm"
+    },
+    "searchInput": {
+      "placeholder": "Tìm nghệ sĩ, studio hoặc thiết bị",
+      "clearLabel": "Xóa tìm kiếm"
+    },
+    "cartDrawer": {
+      "title": "Giỏ hàng của bạn ({count})",
+      "description": "Các sản phẩm trong giỏ hàng của bạn",
+      "emptyTitle": "Giỏ hàng của bạn đang trống",
+      "browseGear": "Xem thiết bị",
+      "subtotal": "Tạm tính",
+      "deposits": "Tiền đặt cọc",
+      "shippingNote": "Phí vận chuyển sẽ tính khi thanh toán",
+      "checkout": "Thanh toán",
+      "continueShopping": "Tiếp tục mua sắm",
+      "shopFallback": "Cửa hàng"
+    },
+    "cartItemRow": {
+      "rentalBadge": "Thuê — {days} ngày",
+      "purchaseBadge": "Mua",
+      "removeLabel": "Xóa sản phẩm"
+    },
+    "chatPanel": {
+      "unknown": "Người dùng ẩn danh",
+      "today": "Hôm nay",
+      "yesterday": "Hôm qua",
+      "sentPhoto": "Đã gửi một ảnh",
+      "photo": "Ảnh",
+      "viewProfile": "Xem hồ sơ",
+      "report": "Báo cáo",
+      "block": "Chặn",
+      "emptyState": "Gửi lời chào để bắt đầu cuộc trò chuyện",
+      "safetyNote": "Giữ an toàn: không chia sẻ thông tin thanh toán ngoài Fgrapher. Hãy báo cáo nếu có điều gì đó bất thường.",
+      "bookingRequest": "Yêu cầu đặt lịch",
+      "viewBooking": "Xem chi tiết đặt lịch",
+      "attachImage": "Đính kèm ảnh",
+      "writeMessage": "Nhập tin nhắn...",
+      "sendMessage": "Gửi tin nhắn"
+    },
+    "conversationList": {
+      "title": "Tin nhắn",
+      "searchPlaceholder": "Tìm cuộc trò chuyện",
+      "emptyTitle": "Chưa có cuộc trò chuyện nào",
+      "emptySubtitle": "Nhắn tin cho một nghệ sĩ để bắt đầu",
+      "unknown": "Người dùng ẩn danh",
+      "noMessages": "Chưa có tin nhắn nào",
+      "youPrefix": "Bạn: ",
+      "sentPhoto": "Đã gửi một ảnh",
+      "sentBooking": "Đã gửi yêu cầu đặt lịch",
+      "now": "vừa xong",
+      "yesterday": "Hôm qua"
+    },
+    "environmentBanner": {
+      "staging": "STAGING",
+      "development": "DEVELOPMENT"
+    },
+    "footer": {
+      "copyright": "© 2026 Fgrapher. Bảo lưu mọi quyền."
+    },
+    "notificationBell": {
+      "title": "Thông báo",
+      "markAllRead": "Đánh dấu đã đọc tất cả",
+      "emptyState": "Chưa có thông báo nào",
+      "justNow": "vừa xong",
+      "minutesAgo": "{count} phút trước",
+      "hoursAgo": "{count} giờ trước",
+      "daysAgo": "{count} ngày trước",
+      "viewAll": "Xem tất cả"
+    },
+    "pastDueBanner": {
+      "message": "Thanh toán {role} của bạn không thành công. Cập nhật phương thức thanh toán để giữ hồ sơ của bạn luôn hiển thị. Còn {days} ngày.",
+      "updatePayment": "Cập nhật thanh toán"
+    },
+    "webNav": {
+      "openNavigation": "Mở menu điều hướng",
+      "navigationTitle": "Điều hướng",
+      "navigationDescription": "Điều hướng chính của trang",
+      "notifications": "Thông báo",
+      "toggleTheme": "Chuyển giao diện sáng/tối"
+    },
+    "dashboardSidebar": {
+      "overview": "Tổng quan",
+      "myBookings": "Lịch đặt của tôi",
+      "bookings": "Lịch đặt",
+      "calendar": "Lịch làm việc",
+      "reviews": "Đánh giá",
+      "portfolio": "Portfolio",
+      "listings": "Tin đăng",
+      "shopOrders": "Đơn hàng cửa hàng",
+      "myOrders": "Đơn hàng của tôi",
+      "saved": "Đã lưu",
+      "messages": "Tin nhắn",
+      "settings": "Cài đặt",
+      "planPro": "Pro — {role}",
+      "planFree": "Miễn phí — Khách hàng",
+      "currentPlan": "Gói hiện tại",
+      "managePlan": "Quản lý gói",
+      "openMenu": "Mở menu bảng điều khiển",
+      "menuTitle": "Menu bảng điều khiển",
+      "menuDescription": "Điều hướng bảng điều khiển"
+    }
   }
 }

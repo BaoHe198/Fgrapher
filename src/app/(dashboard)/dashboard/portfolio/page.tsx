@@ -1,4 +1,5 @@
 import { Camera } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -18,6 +19,8 @@ export default async function PortfolioPage({
 }: {
   searchParams: Promise<{ profile?: string }>;
 }) {
+  const t = await getTranslations("dashboardCore.portfolio");
+
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
@@ -29,11 +32,10 @@ export default async function PortfolioPage({
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <Camera className="size-12 text-text-tertiary" />
         <p className="text-body-lg font-semibold text-text-primary">
-          Portfolio is for creative pros
+          {t("proOnly.title")}
         </p>
         <p className="max-w-sm text-body-md text-text-secondary">
-          Add a paid role — Photographer, Videographer, Make-up Artist, Studio,
-          or Camera Shop — to showcase your work.
+          {t("proOnly.body")}
         </p>
         <Button
           variant="secondary"
@@ -41,7 +43,7 @@ export default async function PortfolioPage({
           nativeButton={false}
           render={<Link href="/dashboard/settings/roles" />}
         >
-          Add a role
+          {t("proOnly.cta")}
         </Button>
       </Card>
     );
@@ -57,10 +59,10 @@ export default async function PortfolioPage({
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <Camera className="size-12 text-text-tertiary" />
         <p className="text-body-lg font-semibold text-text-primary">
-          Set up your profile first
+          {t("noProfile.title")}
         </p>
         <p className="max-w-sm text-body-md text-text-secondary">
-          Create your provider profile before uploading portfolio media.
+          {t("noProfile.body")}
         </p>
         <Button
           variant="secondary"
@@ -68,7 +70,7 @@ export default async function PortfolioPage({
           nativeButton={false}
           render={<Link href="/dashboard/settings/profile" />}
         >
-          Set up profile
+          {t("noProfile.cta")}
         </Button>
       </Card>
     );
@@ -85,7 +87,7 @@ export default async function PortfolioPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <SectionHead title="Portfolio" />
+      <SectionHead title={t("sectionTitle")} />
 
       {profiles.length > 1 ? (
         <div className="flex flex-wrap gap-2">
@@ -103,8 +105,10 @@ export default async function PortfolioPage({
 
       <SubscriptionGate
         role={activeProfile.role}
-        fallbackTitle={`Activate your ${ROLE_LABELS[activeProfile.role]} subscription to upload`}
-        fallbackText="Your existing portfolio media stays visible — activate your subscription to add more."
+        fallbackTitle={t("gate.fallbackTitle", {
+          role: ROLE_LABELS[activeProfile.role],
+        })}
+        fallbackText={t("gate.fallbackText")}
       >
         <PortfolioGrid
           key={activeProfile.id}

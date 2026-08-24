@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
@@ -9,6 +10,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const t = await getTranslations("apiMessages.admin");
   try {
     const session = await requireAdmin();
     const { id } = await params;
@@ -16,7 +18,7 @@ export async function PATCH(
     const parsed = processDataRequestSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "Invalid input" },
+        { data: null, error: "validation_error", message: t("invalidInput") },
         { status: 400 },
       );
     }
@@ -36,7 +38,7 @@ export async function PATCH(
     });
 
     return NextResponse.json(
-      { data: dataRequest, error: null, message: "Request updated" },
+      { data: dataRequest, error: null, message: t("dataRequestUpdated") },
       { status: 200 },
     );
   } catch (err) {
@@ -51,7 +53,7 @@ export async function PATCH(
       {
         data: null,
         error: "server_error",
-        message: "Failed to process request",
+        message: t("dataRequestProcessFailed"),
       },
       { status: 500 },
     );

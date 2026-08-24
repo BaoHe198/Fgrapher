@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { createBlockedDateSchema } from "@/lib/validations/availability";
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.blockedDates");
   try {
     const session = await requireAuth();
 
@@ -15,14 +17,19 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
     }
 
     const blockedDate = await db.blockedDate.upsert({
-      where: { userId_date: { userId: session.user.id, date: new Date(parsed.data.date) } },
+      where: {
+        userId_date: {
+          userId: session.user.id,
+          date: new Date(parsed.data.date),
+        },
+      },
       create: {
         userId: session.user.id,
         date: new Date(parsed.data.date),
@@ -32,7 +39,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { data: blockedDate, error: null, message: "Date blocked" },
+      { data: blockedDate, error: null, message: t("blocked") },
       { status: 201 },
     );
   } catch (err) {
@@ -44,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to block date" },
+      { data: null, error: "server_error", message: t("blockFailed") },
       { status: 500 },
     );
   }

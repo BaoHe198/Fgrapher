@@ -233,6 +233,7 @@ function MobileNavSheet({
   marketplaceEnabled: boolean;
 }) {
   const t = useTranslations("nav");
+  const ts = useTranslations("sharedComponents.webNav");
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const navLinks = marketplaceEnabled
@@ -245,14 +246,14 @@ function MobileNavSheet({
         render={
           <Button variant="ghost" size="icon">
             <Menu className="size-5" />
-            <span className="sr-only">Open navigation</span>
+            <span className="sr-only">{ts("openNavigation")}</span>
           </Button>
         }
       />
       <SheetContent side="right" className="w-3/4 sm:max-w-xs">
         <SheetHeader className="sr-only">
-          <SheetTitle>Navigation</SheetTitle>
-          <SheetDescription>Main site navigation</SheetDescription>
+          <SheetTitle>{ts("navigationTitle")}</SheetTitle>
+          <SheetDescription>{ts("navigationDescription")}</SheetDescription>
         </SheetHeader>
 
         <nav className="flex flex-col gap-1 p-4">
@@ -324,7 +325,7 @@ function MobileNavSheet({
               onClick={() => setOpen(false)}
               className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
             >
-              Notifications
+              {ts("notifications")}
             </Link>
             <Link
               href="/dashboard/profile"
@@ -362,6 +363,7 @@ function MobileNavSheet({
 }
 
 function ThemeToggle() {
+  const ts = useTranslations("sharedComponents.webNav");
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
   const isDark = mounted && resolvedTheme === "dark";
@@ -371,7 +373,7 @@ function ThemeToggle() {
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="flex size-9 items-center justify-center rounded-full border border-border-subtle bg-bg-surface transition-colors duration-150"
-      aria-label="Toggle theme"
+      aria-label={ts("toggleTheme")}
     >
       {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
     </button>

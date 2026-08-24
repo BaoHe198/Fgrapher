@@ -1,4 +1,5 @@
 import type { BookingStatus } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
 import {
@@ -11,6 +12,27 @@ import {
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
+
+// Translation helper for the shared email templates in @/lib/email —
+// namespace "libServices.email". Request-triggered functions (called from a
+// Route Handler, which always has the locale cookie next-intl reads — see
+// src/i18n/request.ts) use getTranslations() with no override. Two call
+// sites here have no request context of their own — sendBookingReminders
+// (daily cron) and transitionBooking's actorId===null branch (the
+// system/cron actor that expires bookings) — those pass
+// { locale: "vi" } explicitly, matching this platform's Vietnamese-first
+// default (CLAUDE.md rule 10).
+//
+// TODO(i18n): this file's own notify() title/message string literals
+// (BOOKING_REQUEST, BOOKING_CONFIRMED, etc.) are still hardcoded English —
+// out of scope for this pass, which only had to satisfy lib/email.ts's now-
+// required `t` param. A future pass should add a "libServices.bookings"
+// namespace and thread it through those call sites the same way.
+function getEmailT(locale?: "vi") {
+  return locale
+    ? getTranslations({ locale, namespace: "libServices.email" })
+    : getTranslations("libServices.email");
+}
 
 const PAGE_SIZE = 20;
 const MIN_NOTICE_HOURS = 24;
@@ -364,6 +386,7 @@ export async function createBooking(
     });
   });
 
+  const createEmailT = await getEmailT();
   await notify({
     userId: booking.providerId,
     type: "BOOKING_REQUEST",
@@ -373,6 +396,7 @@ export async function createBooking(
     email: {
       subject: `New booking request — Fgrapher`,
       html: bookingRequestEmailHtml({
+        t: createEmailT,
         otherPartyName: partyName(booking.customer),
         serviceName: booking.service?.name ?? "a session",
         dateLabel: dateLabel(booking.date),
@@ -516,6 +540,7 @@ export async function transitionBooking({
     const actor = isProvider ? updated.provider : updated.customer;
     const serviceName = updated.service?.name ?? "a session";
     const emailArgs = {
+      t: await getEmailT(),
       otherPartyName: partyName(actor),
       serviceName,
       dateLabel: dateLabel(updated.date),
@@ -696,8 +721,14 @@ export async function sendBookingReminders() {
     include: BOOKING_INCLUDE,
   });
 
+  // Cron-triggered, no request/cookie context to resolve a locale from —
+  // explicit "vi" default (CLAUDE.md rule 10), same as transitionBooking's
+  // system-actor (EXPIRED) branch.
+  const reminderEmailT = await getEmailT("vi");
+
   for (const booking of bookings) {
     const args = (recipientIsProvider: boolean) => ({
+      t: reminderEmailT,
       otherPartyName: partyName(
         recipientIsProvider ? booking.customer : booking.provider,
       ),

@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -19,9 +20,14 @@ interface LoginFormProps {
   onSwitchToRegister: () => void;
 }
 
-export function LoginForm({ callbackUrl, hasError, onSwitchToRegister }: LoginFormProps) {
+export function LoginForm({
+  callbackUrl,
+  hasError,
+  onSwitchToRegister,
+}: LoginFormProps) {
+  const t = useTranslations("accountFlows.login");
   const [serverError, setServerError] = useState<string | null>(
-    hasError ? "Invalid email or password" : null,
+    hasError ? t("invalidCredentials") : null,
   );
 
   const {
@@ -49,10 +55,8 @@ export function LoginForm({ callbackUrl, hasError, onSwitchToRegister }: LoginFo
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="text-display-md text-text-primary">Welcome back</h1>
-        <p className="text-body-md text-text-secondary">
-          Sign in to manage your bookings and portfolio.
-        </p>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+        <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
       </div>
 
       {serverError ? (
@@ -63,7 +67,7 @@ export function LoginForm({ callbackUrl, hasError, onSwitchToRegister }: LoginFo
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
         <Input
-          label="Email"
+          label={t("emailLabel")}
           type="email"
           placeholder="you@studio.com"
           autoComplete="email"
@@ -71,7 +75,7 @@ export function LoginForm({ callbackUrl, hasError, onSwitchToRegister }: LoginFo
           {...register("email")}
         />
         <Input
-          label="Password"
+          label={t("passwordLabel")}
           type="password"
           placeholder="••••••••"
           autoComplete="current-password"
@@ -80,41 +84,45 @@ export function LoginForm({ callbackUrl, hasError, onSwitchToRegister }: LoginFo
         />
 
         <div className="flex items-center justify-between">
-          <Checkbox label="Remember me" defaultChecked />
+          <Checkbox label={t("rememberMe")} defaultChecked />
           <Link
             href="/forgot-password"
             className="text-body-sm font-semibold text-text-link hover:underline"
           >
-            Forgot password?
+            {t("forgotPassword")}
           </Link>
         </div>
 
-        <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="accent"
+          size="lg"
+          className="w-full"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="size-4 animate-spin" />
-              Signing in...
+              {t("submitting")}
             </>
           ) : (
-            "Sign in"
+            t("submit")
           )}
         </Button>
       </form>
 
       <SocialRow />
 
-      <p className="text-body-sm text-text-tertiary">
-        By signing in you agree to our Terms and Privacy Policy.
-      </p>
+      <p className="text-body-sm text-text-tertiary">{t("terms")}</p>
 
       <p className="text-body-md text-text-secondary">
-        Don&apos;t have an account?{" "}
+        {t("noAccount")}{" "}
         <button
           type="button"
           onClick={onSwitchToRegister}
           className="font-semibold text-text-link hover:underline"
         >
-          Sign up
+          {t("signUp")}
         </button>
       </p>
     </>

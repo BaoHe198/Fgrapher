@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { proposeRescheduleSchema, respondRescheduleSchema } from "@/lib/validations/booking";
-import { BookingActionError, proposeReschedule, respondToReschedule } from "@/services/bookings";
+import {
+  proposeRescheduleSchema,
+  respondRescheduleSchema,
+} from "@/lib/validations/booking";
+import {
+  BookingActionError,
+  proposeReschedule,
+  respondToReschedule,
+} from "@/services/bookings";
 
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const t = await getTranslations("apiMessages.bookings");
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -16,7 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -29,7 +41,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     return NextResponse.json(
-      { data: booking, error: null, message: "Reschedule proposed" },
+      { data: booking, error: null, message: t("rescheduleProposed") },
       { status: 200 },
     );
   } catch (err) {
@@ -47,13 +59,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to propose reschedule" },
+      {
+        data: null,
+        error: "server_error",
+        message: t("rescheduleProposeFailed"),
+      },
       { status: 500 },
     );
   }
 }
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const t = await getTranslations("apiMessages.bookings");
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -65,7 +85,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -78,7 +98,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     });
 
     return NextResponse.json(
-      { data: booking, error: null, message: parsed.data.accept ? "Reschedule accepted" : "Reschedule declined" },
+      {
+        data: booking,
+        error: null,
+        message: parsed.data.accept
+          ? t("rescheduleAccepted")
+          : t("rescheduleDeclined"),
+      },
       { status: 200 },
     );
   } catch (err) {
@@ -96,7 +122,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to respond to reschedule" },
+      {
+        data: null,
+        error: "server_error",
+        message: t("rescheduleRespondFailed"),
+      },
       { status: 500 },
     );
   }

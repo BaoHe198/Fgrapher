@@ -1,49 +1,5 @@
 {
   "uiKit": {
-    "condition": {
-      "new": "Mới",
-      "likeNew": "Như mới",
-      "good": "Tốt",
-      "fair": "Khá"
-    },
-    "socialRow": {
-      "orDivider": "hoặc",
-      "appleComingSoon": "Sắp ra mắt"
-    },
-    "productCard": {
-      "rentalBadge": "Cho thuê",
-      "saleAndRentalBadge": "Bán & cho thuê",
-      "forSaleBadge": "Bán",
-      "outOfStock": "Hết hàng",
-      "perDay": "/ngày",
-      "shopFallback": "Cửa hàng"
-    },
-    "productForm": {
-      "nameLabel": "Tên sản phẩm",
-      "namePlaceholder": "Canon EOS R5",
-      "descriptionLabel": "Mô tả",
-      "categoryLabel": "Danh mục",
-      "typeLabel": "Loại",
-      "saleOption": "Bán",
-      "rentOption": "Cho thuê",
-      "bothOption": "Cả hai",
-      "salePriceLabel": "Giá bán",
-      "rentalPriceLabel": "Giá thuê mỗi ngày",
-      "depositLabel": "Tiền đặt cọc (hoàn lại khi trả)",
-      "conditionLabel": "Tình trạng",
-      "stockLabel": "Số lượng tồn kho",
-      "imagesLabel": "Hình ảnh",
-      "activeLabel": "Đang hoạt động",
-      "saveButton": "Lưu sản phẩm",
-      "cancelButton": "Hủy",
-      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
-    },
-    "productImageUploader": {
-      "reorder": "Sắp xếp lại",
-      "remove": "Xóa",
-      "uploadUnavailable": "Không thể tải lên lúc này",
-      "uploadFailed": "Một hoặc nhiều tệp tải lên không thành công"
-    },
     "roleSelectionForm": {
       "roles": {
         "photographer": {

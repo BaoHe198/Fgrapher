@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ export function AccountBasicsForm({
   initialBio: string | null;
   initialWardId: string | null;
 }) {
+  const t = useTranslations("dashboardSettings.profile.basics");
   const [username, setUsername] = useState(initialUsername ?? "");
   const [bio, setBio] = useState(initialBio ?? "");
   const [wardId, setWardId] = useState(initialWardId ?? "");
@@ -94,7 +96,7 @@ export function AccountBasicsForm({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label className="text-body-sm font-semibold text-text-primary">
-          Username
+          {t("usernameLabel")}
         </label>
         <div className="flex items-center gap-2">
           <Input
@@ -112,14 +114,14 @@ export function AccountBasicsForm({
           ) : null}
         </div>
         {usernameStatus === "taken" ? (
-          <p className="text-body-sm text-danger">That username is taken</p>
+          <p className="text-body-sm text-danger">{t("usernameTaken")}</p>
         ) : null}
       </div>
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <label className="text-body-sm font-semibold text-text-primary">
-            Bio
+            {t("bioLabel")}
           </label>
           <span className="text-body-sm text-text-tertiary">
             {bio.length}/500
@@ -135,11 +137,11 @@ export function AccountBasicsForm({
       </div>
 
       <NativeSelect
-        label="Phường/xã"
+        label={t("wardLabel")}
         value={wardId}
         onChange={saveWard}
         options={[
-          { value: "", label: "Chưa chọn" },
+          { value: "", label: t("wardNotSelected") },
           ...wards.map((ward) => ({ value: ward.id, label: ward.name })),
         ]}
       />

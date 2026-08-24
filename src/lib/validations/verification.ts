@@ -34,3 +34,22 @@ export const submitVerificationSchema = z.object({
 });
 
 export type SubmitVerificationInput = z.infer<typeof submitVerificationSchema>;
+
+// Translated variant — see validations/auth.ts's getLoginSchema comment.
+// Namespace "libServices.validation.verification".
+export function getSubmitVerificationSchema(t: (key: string) => string) {
+  return z.object({
+    role: z.enum(PAID_ROLE_VALUES),
+    fullName: z.string().min(2, t("fullNameRequired")),
+    idNumber: z.string().regex(/^\d{9}$|^\d{12}$/, t("idNumberInvalid")),
+    idFrontUrl: z.string().url(),
+    idFrontPublicId: z.string().min(1),
+    idBackUrl: z.string().url(),
+    idBackPublicId: z.string().min(1),
+    selfieUrl: z.string().url(),
+    selfiePublicId: z.string().min(1),
+    consentIdentityVerification: z.boolean().refine((v) => v === true, {
+      message: t("consentRequired"),
+    }),
+  });
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
@@ -7,13 +8,17 @@ import { getProviderForBooking } from "@/services/public-profile";
 
 import { BookingWizard } from "./booking-wizard";
 
-export const metadata: Metadata = { title: "Book a session — Fgrapher" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("publicPages.booking");
+  return { title: t("pageTitle") };
+}
 
 export default async function BookingFlowPage({
   params,
 }: {
   params: Promise<{ providerId: string }>;
 }) {
+  const t = await getTranslations("publicPages.booking");
   const { providerId } = await params;
 
   const session = await auth();
@@ -67,7 +72,9 @@ export default async function BookingFlowPage({
   return (
     <BookingWizard
       providerId={provider.id}
-      providerName={provider.firstName ?? provider.name ?? "this provider"}
+      providerName={
+        provider.firstName ?? provider.name ?? t("fallbackProviderName")
+      }
       providerAvatar={provider.avatar}
       services={services}
       contactPhoneDefault={customer?.phone ?? ""}

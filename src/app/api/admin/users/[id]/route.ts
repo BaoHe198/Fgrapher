@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { logAdminAction, requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
@@ -17,6 +18,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const t = await getTranslations("apiMessages.admin");
   try {
     await requireAdmin();
     const { id } = await params;
@@ -24,7 +26,7 @@ export async function GET(
     const user = await getAdminUserDetail(id);
     if (!user) {
       return NextResponse.json(
-        { data: null, error: "not_found", message: "User not found" },
+        { data: null, error: "not_found", message: t("userNotFound") },
         { status: 404 },
       );
     }
@@ -42,7 +44,7 @@ export async function GET(
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load user" },
+      { data: null, error: "server_error", message: t("userLoadFailed") },
       { status: 500 },
     );
   }
@@ -52,6 +54,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const t = await getTranslations("apiMessages.admin");
   try {
     const session = await requireAdmin();
     const { id } = await params;
@@ -59,7 +62,7 @@ export async function PATCH(
     const parsed = adminUserActionSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "Invalid action" },
+        { data: null, error: "validation_error", message: t("invalidAction") },
         { status: 400 },
       );
     }
@@ -105,7 +108,7 @@ export async function PATCH(
     });
 
     return NextResponse.json(
-      { data: user, error: null, message: "Updated" },
+      { data: user, error: null, message: t("updated") },
       { status: 200 },
     );
   } catch (err) {
@@ -117,7 +120,7 @@ export async function PATCH(
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update user" },
+      { data: null, error: "server_error", message: t("userUpdateFailed") },
       { status: 500 },
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -36,27 +37,8 @@ const CITIES = [
   "Hải Phòng",
 ];
 
-const BUDGET_OPTIONS = [
-  { value: "", label: "Any" },
-  { value: "0-2000000", label: "Under ₫2M" },
-  { value: "2000000-5000000", label: "₫2M – ₫5M" },
-  { value: "5000000-15000000", label: "₫5M – ₫15M" },
-  { value: "15000000-", label: "Over ₫15M" },
-];
-
-const SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: "rating", label: "Top rated" },
-  { value: "price_asc", label: "Price: low to high" },
-  { value: "price_desc", label: "Price: high to low" },
-  { value: "newest", label: "Newest" },
-  { value: "reviews", label: "Most reviewed" },
-];
-
-const RATING_OPTIONS = [
-  { value: "", label: "Any" },
-  { value: "4", label: "4+ stars" },
-  { value: "4.5", label: "4.5+ stars" },
-];
+// Labels for these three option lists are resolved inside the component via
+// useTranslations, since module scope has no access to the hook.
 
 // Batching window for router.push() calls — checkbox/radio clicks feel
 // instant because local state updates synchronously, but the actual
@@ -133,6 +115,26 @@ export function FilterSidebar({
   roleCounts,
   marketplaceEnabled,
 }: FilterSidebarProps) {
+  const t = useTranslations("sharedComponents.filterSidebar");
+  const BUDGET_OPTIONS = [
+    { value: "", label: t("budgetAny") },
+    { value: "0-2000000", label: t("budgetUnder2m") },
+    { value: "2000000-5000000", label: t("budget2to5m") },
+    { value: "5000000-15000000", label: t("budget5to15m") },
+    { value: "15000000-", label: t("budgetOver15m") },
+  ];
+  const SORT_OPTIONS: { value: string; label: string }[] = [
+    { value: "rating", label: t("sortTopRated") },
+    { value: "price_asc", label: t("sortPriceAsc") },
+    { value: "price_desc", label: t("sortPriceDesc") },
+    { value: "newest", label: t("sortNewest") },
+    { value: "reviews", label: t("sortMostReviewed") },
+  ];
+  const RATING_OPTIONS = [
+    { value: "", label: t("ratingAny") },
+    { value: "4", label: t("rating4Plus") },
+    { value: "4.5", label: t("rating45Plus") },
+  ];
   const router = useRouter();
   const roleFilterOptions = marketplaceEnabled
     ? PAID_ROLES
@@ -271,7 +273,7 @@ export function FilterSidebar({
     <div className="sticky top-[104px] flex flex-col gap-[22px] rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-sm)]">
       <div className="flex flex-col gap-2.5">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Role
+          {t("roleLabel")}
         </span>
         <div className="flex flex-col gap-2.5">
           {roleFilterOptions.map((role) => (
@@ -290,7 +292,7 @@ export function FilterSidebar({
           <div className="h-px bg-border-subtle" />
           <div className="flex flex-col gap-2.5">
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-              Style
+              {t("styleLabel")}
             </span>
             <div className="flex flex-col gap-2.5">
               {styleCategories.map((category) => (
@@ -311,19 +313,19 @@ export function FilterSidebar({
           <div className="h-px bg-border-subtle" />
           <div className="flex flex-col gap-2.5">
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-              Height (cm)
+              {t("heightLabel")}
             </span>
             <div className="flex gap-2">
               <input
                 type="number"
-                placeholder="Min"
+                placeholder={t("heightMinPh")}
                 value={filters.heightMin}
                 onChange={(e) => applyFilters({ heightMin: e.target.value })}
                 className="w-full rounded-[var(--fg-radius-sm)] border border-border-default bg-bg-surface px-3 py-2 text-body-sm text-text-primary outline-none focus:border-border-focus"
               />
               <input
                 type="number"
-                placeholder="Max"
+                placeholder={t("heightMaxPh")}
                 value={filters.heightMax}
                 onChange={(e) => applyFilters({ heightMax: e.target.value })}
                 className="w-full rounded-[var(--fg-radius-sm)] border border-border-default bg-bg-surface px-3 py-2 text-body-sm text-text-primary outline-none focus:border-border-focus"
@@ -333,7 +335,7 @@ export function FilterSidebar({
 
           <div className="flex flex-col gap-2.5">
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-              Experience level
+              {t("experienceLabel")}
             </span>
             <div className="flex flex-col gap-2.5">
               {EXPERIENCE_LEVELS.map((level) => (
@@ -352,7 +354,7 @@ export function FilterSidebar({
             onCheckedChange={(checked) =>
               applyFilters({ travelWilling: checked })
             }
-            label="Willing to travel"
+            label={t("travelWillingLabel")}
           />
         </>
       ) : null}
@@ -361,7 +363,7 @@ export function FilterSidebar({
 
       <div className="flex flex-col gap-2.5">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Sort by
+          {t("sortByLabel")}
         </span>
         <div className="flex flex-col gap-2.5">
           {SORT_OPTIONS.map((option) => (
@@ -379,17 +381,17 @@ export function FilterSidebar({
       <div className="h-px bg-border-subtle" />
 
       <NativeSelect
-        label="City"
+        label={t("cityLabel")}
         value={filters.city}
         onChange={(value) => applyFilters({ city: value })}
         options={[
-          { value: "", label: "All cities" },
+          { value: "", label: t("allCities") },
           ...CITIES.map((c) => ({ value: c, label: c })),
         ]}
       />
 
       <NativeSelect
-        label="Budget"
+        label={t("budgetLabel")}
         value={budget}
         onChange={onBudgetChange}
         options={BUDGET_OPTIONS}
@@ -399,7 +401,7 @@ export function FilterSidebar({
 
       <div className="flex flex-col gap-2.5">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Rating
+          {t("ratingLabel")}
         </span>
         <div className="flex flex-col gap-2.5">
           {RATING_OPTIONS.map((option) => (
@@ -415,7 +417,7 @@ export function FilterSidebar({
       </div>
 
       <Button variant="secondary" className="w-full" onClick={resetFilters}>
-        Reset filters
+        {t("resetFilters")}
       </Button>
     </div>
   );

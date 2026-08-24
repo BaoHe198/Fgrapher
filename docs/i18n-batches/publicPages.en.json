@@ -1,0 +1,315 @@
+{
+  "publicPages": {
+    "booking": {
+      "pageTitle": "Book a session — Fgrapher",
+      "fallbackProviderName": "this provider",
+      "shootTypeOptions": {
+        "notSpecified": "Not specified",
+        "editorial": "Editorial",
+        "commercial": "Commercial",
+        "portfolioBuilding": "Portfolio building",
+        "tfpCollaboration": "TFP collaboration",
+        "event": "Event",
+        "other": "Other"
+      },
+      "steps": {
+        "service": "Service",
+        "dateTime": "Date & time",
+        "details": "Details",
+        "confirm": "Confirm"
+      },
+      "back": "Back",
+      "continueBtn": "Continue",
+      "submitBtn": "Send booking request",
+      "genericError": "Something went wrong. Please try again.",
+      "success": {
+        "heading": "Booking request sent!",
+        "body": "{providerName} will respond within 24 hours. We'll email you as soon as they confirm.",
+        "viewBookings": "View my bookings",
+        "browseMore": "Browse more artists"
+      },
+      "notes": {
+        "shootType": "Shoot type: {value}",
+        "usageRights": "Usage rights: {value}",
+        "wardrobeStyling": "Wardrobe/styling: {value}",
+        "muaProvidedByCustomer": "Make-up artist provided by customer",
+        "customRequest": "Custom request: {value}"
+      },
+      "stepService": {
+        "heading": "What do you need?",
+        "describeLabel": "Describe what you're looking for",
+        "describePlaceholder": "Tell them what kind of shoot, event, or product you need...",
+        "durationMin": "{duration} min"
+      },
+      "stepDateTime": {
+        "heading": "When works for you?",
+        "previous": "Previous",
+        "next": "Next",
+        "localTimeNote": "Times shown in your local time · needs at least 24 hours notice",
+        "selectDatePrompt": "Select a date to see open times.",
+        "sessionDuration": "Session: {duration} min",
+        "noAvailability": "No availability on this date — try another.",
+        "bookingWith": "Booking with {providerName}",
+        "booking": "Booking"
+      },
+      "stepDetails": {
+        "heading": "Tell {providerName} about your shoot",
+        "attachToJob": "Attach this to one of my confirmed client jobs",
+        "clientJobLabel": "Client job",
+        "customRequestOption": "Custom request",
+        "shootDetails": "Shoot details",
+        "shootTypeLabel": "Shoot type",
+        "usageRightsLabel": "Usage rights",
+        "usageRightsPlaceholder": "Where will the images be used?",
+        "wardrobeLabel": "Wardrobe / styling notes",
+        "wardrobePlaceholder": "Outfits, styling direction, anything the model should bring or expect",
+        "muaProvidedLabel": "A make-up artist will be provided",
+        "locationLabel": "Location",
+        "locationProvider": "At provider's studio",
+        "locationCustomer": "At my location",
+        "locationOutdoor": "Outdoor / other",
+        "addressLabel": "Address",
+        "addressPlaceholder": "Street, ward, city",
+        "numberOfPeopleLabel": "Number of people",
+        "notesLabel": "Notes",
+        "notesPlaceholder": "Describe your vision, style references, special requirements...",
+        "contactPhoneLabel": "Contact phone"
+      },
+      "stepReview": {
+        "heading": "Review your booking",
+        "rowService": "Service",
+        "rowDate": "Date",
+        "rowTime": "Time",
+        "rowDuration": "Duration",
+        "rowLocation": "Location",
+        "rowPeople": "People",
+        "durationMin": "{duration} min",
+        "servicePrice": "Service price",
+        "total": "Total",
+        "notesLabel": "Notes",
+        "cancellationNotice": "Free cancellation up to 48 hours before your session. Cancelling within 24 hours may be subject to a fee once payments are enabled.",
+        "agreeTerms": "I agree to the booking terms"
+      }
+    },
+    "browse": {
+      "pageTitle": "Browse artists — Fgrapher",
+      "sortLabels": {
+        "rating": "Top rated",
+        "priceAsc": "Price: low to high",
+        "priceDesc": "Price: high to low",
+        "newest": "Newest",
+        "reviews": "Most reviewed"
+      },
+      "headingWithRoleCity": "{role}s in {city}",
+      "headingDefault": "Browse artists",
+      "resultsCount": "{count} results · {sort}",
+      "filterAvailableNow": "Available now",
+      "filterInstantBook": "Instant book",
+      "filterTopRated": "Top rated",
+      "noResults": {
+        "heading": "No artists found",
+        "body": "Try adjusting your filters or searching a different city."
+      },
+      "clearFilters": "Clear all filters",
+      "unnamed": "Unnamed",
+      "newBadge": "New",
+      "priceFrom": "From {price}",
+      "contactForPricing": "Contact for pricing",
+      "showingResults": "Showing {shown} of {total} results",
+      "previous": "Previous",
+      "loadMore": "Load more"
+    },
+    "cart": {
+      "heading": "Your cart",
+      "empty": {
+        "heading": "Your cart is empty",
+        "browseGear": "Browse gear"
+      },
+      "orderSummary": "Order summary",
+      "subtotal": "Subtotal",
+      "deposits": "Deposits",
+      "total": "Total",
+      "shippingNote": "Shipping calculated at checkout",
+      "checkoutBtn": "Checkout",
+      "continueShopping": "Continue shopping"
+    },
+    "checkout": {
+      "heading": "Checkout",
+      "emptyCart": "Your cart is empty",
+      "paymentsNotConfigured": "Payments aren't set up in this environment yet.",
+      "genericError": "Something went wrong. Please try again.",
+      "deliveryMethod": {
+        "heading": "Delivery method",
+        "shipToMe": "Ship to me",
+        "pickupAtShop": "Pick up at shop",
+        "shipNote": "You'll enter your shipping address on the next step.",
+        "pickupNote": "Contact the shop after your order is confirmed to arrange pickup."
+      },
+      "reviewOrder": "Review your order",
+      "agreeTerms": "I agree to the terms of sale/rental",
+      "orderSummary": "Order summary",
+      "subtotal": "Subtotal",
+      "deposits": "Deposits",
+      "shippingNote": "Shipping calculated at checkout",
+      "total": "Total",
+      "continueToPayment": "Continue to payment"
+    },
+    "checkoutSuccess": {
+      "settingUp": "Setting up your order...",
+      "momentNote": "This only takes a moment.",
+      "orderConfirmed": "Order confirmed!",
+      "orderLine": "Order #{orderId} — {items}",
+      "shopWillConfirm": "The shop will confirm your order shortly. You'll get an email with updates.",
+      "viewOrder": "View order",
+      "continueShopping": "Continue shopping"
+    },
+    "landing": {
+      "unnamed": "Unnamed",
+      "newBadge": "New",
+      "priceFrom": "From {price}",
+      "contactForPricing": "Contact for pricing",
+      "howItWorks": {
+        "heading": "How it works",
+        "step1Title": "Search & compare",
+        "step1Desc": "Browse verified profiles, compare pricing, and read real reviews.",
+        "step2Title": "Book your date",
+        "step2Desc": "Message the artist, pick a slot, and confirm your booking online.",
+        "step3Title": "Get your shoot",
+        "step3Desc": "Meet up, get creative, and receive your final files through Fgrapher."
+      }
+    },
+    "pricing": {
+      "pageTitle": "Pricing — Fgrapher",
+      "freeDuringLaunch": "Everything is free during our launch period. We'll give at least 30 days' notice before we start charging.",
+      "eyebrow": "PRICING",
+      "heroTitle": "Plans that grow with your craft",
+      "heroSub": "One flat subscription per role, billed in VND — no commission on bookings, ever.",
+      "billingToggle": {
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "saveNote": "(save 20%)"
+      },
+      "customerFree": {
+        "heading": "Customer — Free forever",
+        "sub": "Browse, book, and buy. No card required.",
+        "signUp": "Sign up free"
+      },
+      "mostPopular": "Most popular",
+      "perYear": "year",
+      "perMonth": "month",
+      "startTrial": "Start 14-day trial",
+      "signUpFree": "Sign up free",
+      "comparePlans": "Compare plans",
+      "featureColumn": "Feature",
+      "comparisonFeatures": [
+        "Public profile",
+        "Booking calendar",
+        "Client messaging",
+        "Reviews & ratings",
+        "Search visibility",
+        "Analytics dashboard"
+      ],
+      "faqHeading": "Frequently asked questions",
+      "stillDeciding": "Still deciding?",
+      "talkToUs": "Talk to us",
+      "plans": {
+        "photographer": {
+          "description": "Wedding, portrait, and event photography.",
+          "features": [
+            "Public profile with portfolio",
+            "Unlimited photo uploads",
+            "Booking calendar & requests",
+            "Client messaging",
+            "Reviews & ratings",
+            "Search visibility",
+            "Analytics dashboard"
+          ]
+        },
+        "videographer": {
+          "description": "Cinematic video and highlight reels.",
+          "features": [
+            "Public profile with portfolio",
+            "Unlimited video uploads",
+            "Booking calendar & requests",
+            "Client messaging",
+            "Reviews & ratings",
+            "Search visibility",
+            "Analytics dashboard"
+          ]
+        },
+        "makeupArtist": {
+          "description": "Bridal, editorial, and event makeup.",
+          "features": [
+            "Public profile with portfolio",
+            "Unlimited portfolio uploads",
+            "Booking calendar & requests",
+            "Client messaging",
+            "Reviews & ratings",
+            "Search visibility",
+            "Analytics dashboard"
+          ]
+        },
+        "model": {
+          "description": "Get booked for shoots and build your portfolio.",
+          "features": [
+            "Public profile with portfolio",
+            "Unlimited portfolio uploads",
+            "Booking calendar & requests",
+            "Direct messaging with photographers",
+            "Reviews & ratings",
+            "Search visibility",
+            "Verified badge"
+          ]
+        },
+        "studio": {
+          "description": "Rent out your studio space by the hour or day.",
+          "features": [
+            "Studio listing with photos",
+            "Hourly & daily rate booking",
+            "Amenities showcase",
+            "Availability calendar",
+            "Client messaging",
+            "Reviews & ratings"
+          ]
+        },
+        "cameraShop": {
+          "description": "Sell and rent gear to the community.",
+          "features": [
+            "Shop profile",
+            "Unlimited product listings",
+            "Rental & sale management",
+            "Order management",
+            "Inventory tracking",
+            "Client messaging"
+          ]
+        }
+      },
+      "faqs": {
+        "multipleRoles": {
+          "q": "Can I have multiple roles?",
+          "a": "Yes — one account can hold several paid roles at once (e.g. Photographer + Studio), each billed as its own subscription, all shown together on one profile page."
+        },
+        "afterTrial": {
+          "q": "What happens after the free trial?",
+          "a": "After 14 days your card is charged automatically at the rate you selected. You can cancel anytime before the trial ends and you won't be charged."
+        },
+        "cancelAnytime": {
+          "q": "Can I cancel anytime?",
+          "a": "Yes. Cancelling keeps your plan active until the end of the current billing period, and all your data is kept if you want to reactivate later."
+        },
+        "commission": {
+          "q": "Do you take a commission on bookings?",
+          "a": "No — Fgrapher charges a flat subscription per role, not a percentage of your bookings."
+        },
+        "paymentMethods": {
+          "q": "What payment methods do you accept?",
+          "a": "Credit and debit cards, processed securely through Stripe, plus local Vietnamese payment methods if you enable them in your Stripe settings."
+        },
+        "annualDiscount": {
+          "q": "Is there a discount for annual billing?",
+          "a": "Yes — switch to yearly billing on this page and pay 20% less than the monthly rate, charged once a year."
+        }
+      }
+    }
+  }
+}

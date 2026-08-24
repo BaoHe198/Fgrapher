@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
@@ -9,6 +10,7 @@ import { features } from "@/lib/features";
 // state, so the route as a whole must keep working. Only the follow
 // lookup itself is skipped while the flag is off.
 export async function GET(request: Request) {
+  const t = await getTranslations("apiMessages.follows");
   try {
     const session = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -20,7 +22,7 @@ export async function GET(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: "Missing userId or profileId",
+          message: t("missingParams"),
         },
         { status: 400 },
       );
@@ -62,7 +64,7 @@ export async function GET(request: Request) {
       {
         data: null,
         error: "server_error",
-        message: "Failed to load social state",
+        message: t("socialStateLoadFailed"),
       },
       { status: 500 },
     );

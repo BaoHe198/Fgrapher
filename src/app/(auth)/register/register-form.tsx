@@ -3,6 +3,7 @@
 import type { Role } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Loader2, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -56,6 +57,7 @@ export function RegisterForm({
   onSwitchToLogin,
   marketplaceEnabled,
 }: RegisterFormProps) {
+  const t = useTranslations("accountFlows.register");
   const PROVIDER_ROLE_OPTIONS = marketplaceEnabled
     ? ALL_PROVIDER_ROLE_OPTIONS
     : ALL_PROVIDER_ROLE_OPTIONS.filter((role) => role !== "CAMERA_SHOP");
@@ -139,7 +141,7 @@ export function RegisterForm({
         setError("email", { message: body.message });
         return;
       }
-      setServerError(body.message ?? "Something went wrong. Please try again.");
+      setServerError(body.message ?? t("genericError"));
       return;
     }
 
@@ -165,12 +167,8 @@ export function RegisterForm({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="text-display-md text-text-primary">
-          Create your account
-        </h1>
-        <p className="text-body-md text-text-secondary">
-          Join Fgrapher and start booking or getting booked.
-        </p>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+        <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
       </div>
 
       {serverError ? (
@@ -182,7 +180,7 @@ export function RegisterForm({
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
         <div className="flex flex-col gap-2">
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            I AM A
+            {t("iAmA")}
           </span>
           <div className="grid grid-cols-2 gap-2.5">
             <button
@@ -204,10 +202,10 @@ export function RegisterForm({
                 )}
               />
               <span className="text-body-md font-semibold text-text-primary">
-                Customer
+                {t("customerLabel")}
               </span>
               <span className="text-body-sm text-text-secondary">
-                Book artists and buy gear
+                {t("customerDesc")}
               </span>
             </button>
 
@@ -230,10 +228,10 @@ export function RegisterForm({
                 )}
               />
               <span className="text-body-md font-semibold text-text-primary">
-                Creative pro
+                {t("providerLabel")}
               </span>
               <span className="text-body-sm text-text-secondary">
-                Get booked and sell
+                {t("providerDesc")}
               </span>
             </button>
           </div>
@@ -247,7 +245,7 @@ export function RegisterForm({
         >
           <div className="flex flex-col gap-2 overflow-hidden">
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-              WHAT DO YOU OFFER?
+              {t("whatDoYouOffer")}
             </span>
             <div className="flex flex-col gap-2.5">
               {PROVIDER_ROLE_OPTIONS.map((role) => (
@@ -267,7 +265,7 @@ export function RegisterForm({
               <p className="text-body-sm text-danger">{errors.roles.message}</p>
             ) : null}
             <p className="text-body-sm text-text-tertiary">
-              You can change this later. Customer access is always free.
+              {t("changeLaterNote")}
             </p>
           </div>
         </div>
@@ -286,13 +284,13 @@ export function RegisterForm({
               }
               label={
                 <>
-                  I confirm I&apos;m 18 or older and agree to the{" "}
+                  {t("contentGuidelinesConfirm")}
                   <Link
                     href="/guidelines"
                     target="_blank"
                     className="text-text-link hover:underline"
                   >
-                    content guidelines
+                    {t("contentGuidelinesLink")}
                   </Link>
                 </>
               }
@@ -306,14 +304,14 @@ export function RegisterForm({
         </div>
 
         <Input
-          label="Full name"
-          placeholder="Jordan Rivera"
+          label={t("fullNameLabel")}
+          placeholder={t("fullNamePlaceholder")}
           autoComplete="name"
           error={errors.name?.message}
           {...register("name")}
         />
         <Input
-          label="Email"
+          label={t("emailLabel")}
           type="email"
           placeholder="you@studio.com"
           autoComplete="email"
@@ -321,16 +319,16 @@ export function RegisterForm({
           {...register("email")}
         />
         <Input
-          label="Date of birth"
+          label={t("dobLabel")}
           type="date"
           error={errors.dateOfBirth?.message}
           {...register("dateOfBirth")}
         />
         <div className="flex flex-col gap-1.5">
           <Input
-            label="Password"
+            label={t("passwordLabel")}
             type="password"
-            placeholder="At least 8 characters"
+            placeholder={t("passwordPlaceholder")}
             autoComplete="new-password"
             error={errors.password?.message}
             {...register("password")}
@@ -392,28 +390,26 @@ export function RegisterForm({
           {isSubmitting ? (
             <>
               <Loader2 className="size-4 animate-spin" />
-              Creating account...
+              {t("submitting")}
             </>
           ) : (
-            "Create account"
+            t("submit")
           )}
         </Button>
       </form>
 
       <SocialRow />
 
-      <p className="text-body-sm text-text-tertiary">
-        By signing in you agree to our Terms and Privacy Policy.
-      </p>
+      <p className="text-body-sm text-text-tertiary">{t("terms")}</p>
 
       <p className="text-body-md text-text-secondary">
-        Already have an account?{" "}
+        {t("alreadyHaveAccount")}{" "}
         <button
           type="button"
           onClick={onSwitchToLogin}
           className="font-semibold text-text-link hover:underline"
         >
-          Sign in
+          {t("signIn")}
         </button>
       </p>
     </>

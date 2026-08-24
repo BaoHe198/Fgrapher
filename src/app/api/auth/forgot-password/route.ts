@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
@@ -13,6 +14,7 @@ const forgotPasswordSchema = z.object({
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.auth");
   const body = await request.json();
   const parsed = forgotPasswordSchema.safeParse(body);
 
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "validation_error",
-        message: parsed.error.issues[0]?.message ?? "Invalid input",
+        message: parsed.error.issues[0]?.message ?? t("invalidInput"),
       },
       { status: 400 },
     );
@@ -37,7 +39,9 @@ export async function POST(request: Request) {
     const expires = new Date(Date.now() + RESET_TOKEN_TTL_MS);
 
     await db.verificationToken.deleteMany({ where: { identifier: email } });
-    await db.verificationToken.create({ data: { identifier: email, token, expires } });
+    await db.verificationToken.create({
+      data: { identifier: email, token, expires },
+    });
 
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
     await sendEmail({
@@ -51,7 +55,7 @@ export async function POST(request: Request) {
     {
       data: null,
       error: null,
-      message: "If an account exists for that email, a reset link has been sent",
+      message: t("resetLinkSent"),
     },
     { status: 200 },
   );

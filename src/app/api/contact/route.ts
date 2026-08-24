@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { sendEmail } from "@/lib/email";
@@ -10,6 +11,7 @@ const contactSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.contact");
   const body = await request.json();
   const parsed = contactSchema.safeParse(body);
 
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "validation_error",
-        message: parsed.error.issues[0]?.message ?? "Invalid input",
+        message: parsed.error.issues[0]?.message ?? t("invalidInput"),
       },
       { status: 400 },
     );
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json(
-    { data: null, error: null, message: "Message sent" },
+    { data: null, error: null, message: t("messageSent") },
     { status: 200 },
   );
 }

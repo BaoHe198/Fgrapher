@@ -1,6 +1,7 @@
 "use client";
 
 import { MessageCircle, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,33 +17,56 @@ export interface ConversationSummary {
     avatar: string | null;
     username: string | null;
   };
-  lastMessage: { content: string; type: string; senderId: string; createdAt: string } | null;
+  lastMessage: {
+    content: string;
+    type: string;
+    senderId: string;
+    createdAt: string;
+  } | null;
   lastMessageAt: string | null;
   unreadCount: number;
 }
 
-function partyName(user: ConversationSummary["otherUser"]) {
-  return user.firstName ?? user.name ?? "Unknown";
+function partyName(
+  user: ConversationSummary["otherUser"],
+  unknownLabel: string,
+) {
+  return user.firstName ?? user.name ?? unknownLabel;
 }
 
-function relativeTime(dateIso: string) {
+function relativeTime(
+  dateIso: string,
+  labels: { now: string; yesterday: string },
+) {
   const diffMs = Date.now() - new Date(dateIso).getTime();
   const minutes = Math.floor(diffMs / 60_000);
-  if (minutes < 1) return "now";
+  if (minutes < 1) return labels.now;
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
-  if (days === 1) return "Yesterday";
+  if (days === 1) return labels.yesterday;
   if (days < 7) return `${days}d`;
-  return new Date(dateIso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return new Date(dateIso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }
 
-function previewText(message: ConversationSummary["lastMessage"], userId: string) {
-  if (!message) return "No messages yet";
-  const prefix = message.senderId === userId ? "You: " : "";
-  if (message.type === "image") return `${prefix}Sent a photo`;
-  if (message.type === "booking_link") return `${prefix}Sent a booking request`;
+function previewText(
+  message: ConversationSummary["lastMessage"],
+  userId: string,
+  labels: {
+    noMessages: string;
+    you: string;
+    sentPhoto: string;
+    sentBooking: string;
+  },
+) {
+  if (!message) return labels.noMessages;
+  const prefix = message.senderId === userId ? labels.you : "";
+  if (message.type === "image") return `${prefix}${labels.sentPhoto}`;
+  if (message.type === "booking_link") return `${prefix}${labels.sentBooking}`;
   return `${prefix}${message.content}`;
 }
 
@@ -57,24 +81,28 @@ export function ConversationList({
   currentUserId: string;
   onSelect: (id: string) => void;
 }) {
+  const t = useTranslations("sharedComponents.conversationList");
   const [query, setQuery] = useState("");
+  const unknownLabel = t("unknown");
 
   const filtered = useMemo(() => {
     if (!query.trim()) return conversations;
     const q = query.toLowerCase();
-    return conversations.filter((c) => partyName(c.otherUser).toLowerCase().includes(q));
-  }, [conversations, query]);
+    return conversations.filter((c) =>
+      partyName(c.otherUser, unknownLabel).toLowerCase().includes(q),
+    );
+  }, [conversations, query, unknownLabel]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden border-r border-border-subtle">
       <div className="flex flex-col gap-3 border-b border-border-subtle p-4">
-        <h2 className="text-heading-lg text-text-primary">Messages</h2>
+        <h2 className="text-heading-lg text-text-primary">{t("title")}</h2>
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-tertiary" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search conversations"
+            placeholder={t("searchPlaceholder")}
             className="pl-9"
           />
         </div>
@@ -84,8 +112,12 @@ export function ConversationList({
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-6 py-16 text-center">
             <MessageCircle className="size-10 text-text-tertiary" />
-            <p className="text-body-md font-semibold text-text-primary">No conversations yet</p>
-            <p className="text-body-sm text-text-secondary">Message an artist to start</p>
+            <p className="text-body-md font-semibold text-text-primary">
+              {t("emptyTitle")}
+            </p>
+            <p className="text-body-sm text-text-secondary">
+              {t("emptySubtitle")}
+            </p>
           </div>
         ) : (
           filtered.map((conversation) => {
@@ -104,24 +136,37 @@ export function ConversationList({
                   {conversation.otherUser.avatar ? (
                     <AvatarImage src={conversation.otherUser.avatar} alt="" />
                   ) : null}
-                  <AvatarFallback>{partyName(conversation.otherUser)[0]?.toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>
+                    {partyName(
+                      conversation.otherUser,
+                      unknownLabel,
+                    )[0]?.toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-body-md font-semibold text-text-primary">
-                      {partyName(conversation.otherUser)}
+                      {partyName(conversation.otherUser, unknownLabel)}
                     </span>
                   </div>
                   <p className="truncate text-body-sm text-text-secondary">
-                    {previewText(conversation.lastMessage, currentUserId)}
+                    {previewText(conversation.lastMessage, currentUserId, {
+                      noMessages: t("noMessages"),
+                      you: t("youPrefix"),
+                      sentPhoto: t("sentPhoto"),
+                      sentBooking: t("sentBooking"),
+                    })}
                   </p>
                 </div>
 
                 <div className="flex flex-col items-end gap-1">
                   {conversation.lastMessageAt ? (
                     <span className="text-body-sm text-text-tertiary">
-                      {relativeTime(conversation.lastMessageAt)}
+                      {relativeTime(conversation.lastMessageAt, {
+                        now: t("now"),
+                        yesterday: t("yesterday"),
+                      })}
                     </span>
                   ) : null}
                   {conversation.unreadCount > 0 ? (

@@ -11,6 +11,7 @@ import {
   UserRound,
   Video,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -29,8 +30,8 @@ interface Plan {
   role: Role;
   icon: LucideIcon;
   popular?: boolean;
-  description: string;
-  features: string[];
+  descriptionKey: string;
+  featuresKey: string;
 }
 
 const PLANS: Plan[] = [
@@ -38,122 +39,51 @@ const PLANS: Plan[] = [
     role: "PHOTOGRAPHER",
     icon: Camera,
     popular: true,
-    description: "Wedding, portrait, and event photography.",
-    features: [
-      "Public profile with portfolio",
-      "Unlimited photo uploads",
-      "Booking calendar & requests",
-      "Client messaging",
-      "Reviews & ratings",
-      "Search visibility",
-      "Analytics dashboard",
-    ],
+    descriptionKey: "plans.photographer.description",
+    featuresKey: "plans.photographer.features",
   },
   {
     role: "VIDEOGRAPHER",
     icon: Video,
-    description: "Cinematic video and highlight reels.",
-    features: [
-      "Public profile with portfolio",
-      "Unlimited video uploads",
-      "Booking calendar & requests",
-      "Client messaging",
-      "Reviews & ratings",
-      "Search visibility",
-      "Analytics dashboard",
-    ],
+    descriptionKey: "plans.videographer.description",
+    featuresKey: "plans.videographer.features",
   },
   {
     role: "MAKEUP_ARTIST",
     icon: Sparkles,
-    description: "Bridal, editorial, and event makeup.",
-    features: [
-      "Public profile with portfolio",
-      "Unlimited portfolio uploads",
-      "Booking calendar & requests",
-      "Client messaging",
-      "Reviews & ratings",
-      "Search visibility",
-      "Analytics dashboard",
-    ],
+    descriptionKey: "plans.makeupArtist.description",
+    featuresKey: "plans.makeupArtist.features",
   },
   {
     role: "MODEL",
     icon: UserRound,
-    description: "Get booked for shoots and build your portfolio.",
-    features: [
-      "Public profile with portfolio",
-      "Unlimited portfolio uploads",
-      "Booking calendar & requests",
-      "Direct messaging with photographers",
-      "Reviews & ratings",
-      "Search visibility",
-      "Verified badge",
-    ],
+    descriptionKey: "plans.model.description",
+    featuresKey: "plans.model.features",
   },
   {
     role: "STUDIO",
     icon: Building2,
-    description: "Rent out your studio space by the hour or day.",
-    features: [
-      "Studio listing with photos",
-      "Hourly & daily rate booking",
-      "Amenities showcase",
-      "Availability calendar",
-      "Client messaging",
-      "Reviews & ratings",
-    ],
+    descriptionKey: "plans.studio.description",
+    featuresKey: "plans.studio.features",
   },
   {
     role: "CAMERA_SHOP",
     icon: ShoppingBag,
-    description: "Sell and rent gear to the community.",
-    features: [
-      "Shop profile",
-      "Unlimited product listings",
-      "Rental & sale management",
-      "Order management",
-      "Inventory tracking",
-      "Client messaging",
-    ],
+    descriptionKey: "plans.cameraShop.description",
+    featuresKey: "plans.cameraShop.features",
   },
 ];
 
-const FAQS = [
-  {
-    q: "Can I have multiple roles?",
-    a: "Yes — one account can hold several paid roles at once (e.g. Photographer + Studio), each billed as its own subscription, all shown together on one profile page.",
-  },
-  {
-    q: "What happens after the free trial?",
-    a: "After 14 days your card is charged automatically at the rate you selected. You can cancel anytime before the trial ends and you won't be charged.",
-  },
-  {
-    q: "Can I cancel anytime?",
-    a: "Yes. Cancelling keeps your plan active until the end of the current billing period, and all your data is kept if you want to reactivate later.",
-  },
-  {
-    q: "Do you take a commission on bookings?",
-    a: "No — Fgrapher charges a flat subscription per role, not a percentage of your bookings.",
-  },
-  {
-    q: "What payment methods do you accept?",
-    a: "Credit and debit cards, processed securely through Stripe, plus local Vietnamese payment methods if you enable them in your Stripe settings.",
-  },
-  {
-    q: "Is there a discount for annual billing?",
-    a: "Yes — switch to yearly billing on this page and pay 20% less than the monthly rate, charged once a year.",
-  },
-];
+const FAQ_KEYS = [
+  "faqs.multipleRoles",
+  "faqs.afterTrial",
+  "faqs.cancelAnytime",
+  "faqs.commission",
+  "faqs.paymentMethods",
+  "faqs.annualDiscount",
+] as const;
 
-const COMPARISON_FEATURES = [
-  "Public profile",
-  "Booking calendar",
-  "Client messaging",
-  "Reviews & ratings",
-  "Search visibility",
-  "Analytics dashboard",
-];
+const COMPARISON_FEATURES_KEY = "comparisonFeatures";
 
 const COMPARISON_MATRIX: Record<Role, boolean[]> = {
   PHOTOGRAPHER: [true, true, true, true, true, true],
@@ -180,29 +110,31 @@ export function PricingContent({
   billingEnabled: boolean;
   marketplaceEnabled: boolean;
 }) {
+  const t = useTranslations("publicPages.pricing");
   const [yearly, setYearly] = useState(false);
   const plans = marketplaceEnabled
     ? PLANS
     : PLANS.filter((plan) => plan.role !== "CAMERA_SHOP");
 
+  const billingToggleLabels = {
+    Monthly: t("billingToggle.monthly"),
+    Yearly: t("billingToggle.yearly"),
+  } as const;
+
   return (
     <div className="flex flex-col">
       {!billingEnabled ? (
         <div className="bg-gold-500 px-6 py-2.5 text-center text-body-sm font-semibold text-text-on-brand">
-          Miễn phí toàn bộ trong giai đoạn khởi động. Chúng tôi sẽ thông báo
-          trước ít nhất 30 ngày trước khi bắt đầu thu phí.
+          {t("freeDuringLaunch")}
         </div>
       ) : null}
       <section className="bg-green-900 px-6 py-20 text-center">
         <span className="text-caption-upper tracking-[0.14em] text-gold-300">
-          PRICING
+          {t("eyebrow")}
         </span>
-        <h1 className="mt-3 text-display-xl text-gold-50">
-          Plans that grow with your craft
-        </h1>
+        <h1 className="mt-3 text-display-xl text-gold-50">{t("heroTitle")}</h1>
         <p className="mx-auto mt-3 max-w-[560px] text-body-lg text-green-200">
-          One flat subscription per role, billed in VND — no commission on
-          bookings, ever.
+          {t("heroSub")}
         </p>
 
         <div className="mx-auto mt-6 inline-flex overflow-hidden rounded-full border border-border-subtle bg-bg-surface">
@@ -218,8 +150,8 @@ export function PricingContent({
                   : "text-text-secondary",
               )}
             >
-              {label}
-              {label === "Yearly" ? " (save 20%)" : ""}
+              {billingToggleLabels[label]}
+              {label === "Yearly" ? ` ${t("billingToggle.saveNote")}` : ""}
             </button>
           ))}
         </div>
@@ -229,10 +161,10 @@ export function PricingContent({
         <Card className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-col gap-1">
             <span className="text-heading-lg text-text-primary">
-              Customer — Free forever
+              {t("customerFree.heading")}
             </span>
             <span className="text-body-md text-text-secondary">
-              Browse, book, and buy. No card required.
+              {t("customerFree.sub")}
             </span>
           </div>
           <Button
@@ -240,7 +172,7 @@ export function PricingContent({
             nativeButton={false}
             render={<Link href="/login?mode=register" />}
           >
-            Sign up free
+            {t("customerFree.signUp")}
           </Button>
         </Card>
 
@@ -260,7 +192,7 @@ export function PricingContent({
               >
                 {plan.popular ? (
                   <span className="w-fit rounded-full bg-brand-primary px-2.5 py-1 text-body-sm font-bold text-text-on-brand">
-                    Most popular
+                    {t("mostPopular")}
                   </span>
                 ) : null}
 
@@ -275,17 +207,17 @@ export function PricingContent({
                   <span className="text-display-md text-text-primary">
                     {formatCurrency(displayPrice, "VND")}
                     <span className="text-body-sm font-normal text-text-secondary">
-                      /{yearly ? "year" : "month"}
+                      /{yearly ? t("perYear") : t("perMonth")}
                     </span>
                   </span>
                   <span className="text-body-sm text-text-secondary">
-                    {plan.description}
+                    {t(plan.descriptionKey)}
                   </span>
                 </div>
 
                 <div className="border-t border-border-subtle pt-4">
                   <ul className="flex flex-col gap-2.5">
-                    {plan.features.map((feature) => (
+                    {(t.raw(plan.featuresKey) as string[]).map((feature) => (
                       <li
                         key={feature}
                         className="flex items-start gap-2 text-body-sm"
@@ -307,7 +239,7 @@ export function PricingContent({
                     />
                   }
                 >
-                  {billingEnabled ? "Start 14-day trial" : "Đăng ký miễn phí"}
+                  {billingEnabled ? t("startTrial") : t("signUpFree")}
                 </Button>
               </Card>
             );
@@ -317,14 +249,14 @@ export function PricingContent({
 
       <section className="mx-auto w-full max-w-7xl px-6 py-12">
         <h2 className="mb-6 text-heading-xl text-text-primary">
-          Compare plans
+          {t("comparePlans")}
         </h2>
         <Card padding={false} className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-body-sm">
             <thead>
               <tr className="border-b border-border-subtle">
                 <th className="px-5 py-3 text-left text-text-tertiary">
-                  Feature
+                  {t("featureColumn")}
                 </th>
                 {plans.map((plan) => (
                   <th
@@ -337,23 +269,25 @@ export function PricingContent({
               </tr>
             </thead>
             <tbody>
-              {COMPARISON_FEATURES.map((feature, i) => (
-                <tr
-                  key={feature}
-                  className="border-b border-border-subtle last:border-b-0"
-                >
-                  <td className="px-5 py-3 text-text-secondary">{feature}</td>
-                  {plans.map((plan) => (
-                    <td key={plan.role} className="px-3 py-3 text-center">
-                      {COMPARISON_MATRIX[plan.role][i] ? (
-                        <Check className="mx-auto size-4 text-success" />
-                      ) : (
-                        <span className="text-text-tertiary">—</span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {(t.raw(COMPARISON_FEATURES_KEY) as string[]).map(
+                (feature, i) => (
+                  <tr
+                    key={feature}
+                    className="border-b border-border-subtle last:border-b-0"
+                  >
+                    <td className="px-5 py-3 text-text-secondary">{feature}</td>
+                    {plans.map((plan) => (
+                      <td key={plan.role} className="px-3 py-3 text-center">
+                        {COMPARISON_MATRIX[plan.role][i] ? (
+                          <Check className="mx-auto size-4 text-success" />
+                        ) : (
+                          <span className="text-text-tertiary">—</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </Card>
@@ -361,14 +295,14 @@ export function PricingContent({
 
       <section className="mx-auto w-full max-w-2xl px-6 py-12">
         <h2 className="mb-4 text-heading-xl text-text-primary">
-          Frequently asked questions
+          {t("faqHeading")}
         </h2>
         <Accordion multiple>
-          {FAQS.map((faq) => (
-            <AccordionItem key={faq.q} value={faq.q}>
-              <AccordionTrigger>{faq.q}</AccordionTrigger>
+          {FAQ_KEYS.map((key) => (
+            <AccordionItem key={key} value={key}>
+              <AccordionTrigger>{t(`${key}.q`)}</AccordionTrigger>
               <AccordionPanel>
-                <p className="pb-4">{faq.a}</p>
+                <p className="pb-4">{t(`${key}.a`)}</p>
               </AccordionPanel>
             </AccordionItem>
           ))}
@@ -376,14 +310,16 @@ export function PricingContent({
       </section>
 
       <section className="bg-bg-sunken px-6 py-16 text-center">
-        <h2 className="text-heading-xl text-text-primary">Still deciding?</h2>
+        <h2 className="text-heading-xl text-text-primary">
+          {t("stillDeciding")}
+        </h2>
         <Button
           variant="secondary"
           className="mt-4"
           nativeButton={false}
           render={<Link href="/contact" />}
         >
-          Talk to us
+          {t("talkToUs")}
         </Button>
       </section>
     </div>

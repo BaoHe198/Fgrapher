@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
@@ -10,6 +11,7 @@ import { assignFreePlan } from "@/services/subscription";
 import { Prisma } from "@prisma/client";
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.auth");
   const body = await request.json();
   const parsed = registerSchema.safeParse(body);
 
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "validation_error",
-        message: parsed.error.issues[0]?.message ?? "Invalid input",
+        message: parsed.error.issues[0]?.message ?? t("invalidInput"),
       },
       { status: 400 },
     );
@@ -54,7 +56,7 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "email_taken",
-        message: "An account with this email already exists",
+        message: t("emailTaken"),
       },
       { status: 400 },
     );
@@ -143,7 +145,7 @@ export async function POST(request: Request) {
       {
         data: { id: user.id, email: user.email },
         error: null,
-        message: "Account created",
+        message: t("accountCreated"),
       },
       { status: 201 },
     );
@@ -156,7 +158,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "email_taken",
-          message: "An account with this email already exists",
+          message: t("emailTaken"),
         },
         { status: 400 },
       );
@@ -166,7 +168,7 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "server_error",
-        message: "Failed to create account",
+        message: t("accountCreateFailed"),
       },
       { status: 500 },
     );

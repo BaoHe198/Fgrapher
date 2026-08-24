@@ -1,10 +1,12 @@
 "use client";
 
 import { Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 
 export function SearchInput({ className }: { className?: string }) {
+  const t = useTranslations("sharedComponents.searchInput");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -44,14 +46,14 @@ export function SearchInput({ className }: { className?: string }) {
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search artists, studios or gear"
+        placeholder={t("placeholder")}
         className="h-11 w-full rounded-full border border-border-default bg-bg-surface py-2 pr-10 pl-10 text-body-md text-text-primary outline-none focus:border-border-focus focus:ring-2 focus:ring-gold-500/20"
       />
       {value ? (
         <button
           type="button"
           onClick={onClear}
-          aria-label="Clear search"
+          aria-label={t("clearLabel")}
           className="absolute top-1/2 right-3.5 -translate-y-1/2 text-text-tertiary"
         >
           <X className="size-4" />

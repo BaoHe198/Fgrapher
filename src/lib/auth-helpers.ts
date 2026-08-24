@@ -1,5 +1,6 @@
 import type { Role } from "@prisma/client";
 import type { Session } from "next-auth";
+import { getTranslations } from "next-intl/server";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -15,10 +16,17 @@ export class AuthError extends Error {
   }
 }
 
+// These messages ultimately reach the client as the API's `message` field
+// (see e.g. src/app/api/bookings/route.ts's `message: err.message`), so
+// they're translated via getTranslations() — every caller of requireAuth/
+// requireRole/etc. runs inside a Next.js request (Route Handler or Server
+// Component), the same context next-intl's request-scoped locale cookie
+// read (src/i18n/request.ts) has already been confirmed to work in.
 export async function requireAuth() {
   const session = await auth();
   if (!session?.user) {
-    throw new AuthError("Unauthorized", 401);
+    const t = await getTranslations("libServices.auth");
+    throw new AuthError(t("unauthorized"), 401);
   }
   return session;
 }
@@ -28,7 +36,8 @@ export async function requireRole(userId: string, role: Role) {
     where: { userId_role: { userId, role } },
   });
   if (!userRole?.active) {
-    throw new AuthError(`Missing required role: ${role}`, 403);
+    const t = await getTranslations("libServices.auth");
+    throw new AuthError(t("missingRole", { role }), 403);
   }
   return userRole;
 }
@@ -37,8 +46,12 @@ export async function requireRole(userId: string, role: Role) {
 // still inside its grace period (payment failed, but the role stays fully
 // usable until graceEndsAt so a card hiccup doesn't instantly take a
 // provider's profile offline).
-function isSubscriptionUsable(subscription: { status: string; graceEndsAt: Date | null }) {
-  if (subscription.status === "ACTIVE" || subscription.status === "TRIALING") return true;
+function isSubscriptionUsable(subscription: {
+  status: string;
+  graceEndsAt: Date | null;
+}) {
+  if (subscription.status === "ACTIVE" || subscription.status === "TRIALING")
+    return true;
   if (subscription.status === "PAST_DUE" && subscription.graceEndsAt) {
     return subscription.graceEndsAt > new Date();
   }
@@ -52,7 +65,8 @@ export async function requireActiveSubscription(userId: string, role: Role) {
     where: { userRoleId: userRole.id },
   });
   if (!subscription || !isSubscriptionUsable(subscription)) {
-    throw new AuthError(`Active subscription required for role: ${role}`, 403);
+    const t = await getTranslations("libServices.auth");
+    throw new AuthError(t("activeSubscriptionRequired", { role }), 403);
   }
   return subscription;
 }
@@ -61,10 +75,21 @@ export async function requireActiveSubscription(userId: string, role: Role) {
 // like "any paid role", not tied to a specific subscription. Used where a
 // subscription check isn't warranted (e.g. viewing your own inactive-role
 // settings) or as a fast pre-check before the DB-backed subscription checks.
+// Synchronous by design (checks the already-loaded session, no DB call) —
+// can't call the async getTranslations() here, so this one keeps an
+// English fallback message. Callers with a translated `t` instance can
+// catch AuthError and re-map its message; none currently do, so this is
+// left as-is rather than forcing an awkward refactor.
+// TODO(i18n): requireAnyRole's thrown message stays English-only until a
+// caller wires through a translated re-map, since this function can't be
+// made async without changing every call site's signature.
 export function requireAnyRole(session: Session, roles: Role[]) {
   const hasRole = session.user.roles.some((role) => roles.includes(role));
   if (!hasRole) {
-    throw new AuthError(`Missing one of the required roles: ${roles.join(", ")}`, 403);
+    throw new AuthError(
+      `Missing one of the required roles: ${roles.join(", ")}`,
+      403,
+    );
   }
 }
 
@@ -74,9 +99,12 @@ export async function requirePaidRole(userId: string) {
     include: { subscription: true },
   });
 
-  const active = userRoles.find((ur) => ur.subscription && isSubscriptionUsable(ur.subscription));
+  const active = userRoles.find(
+    (ur) => ur.subscription && isSubscriptionUsable(ur.subscription),
+  );
   if (!active) {
-    throw new AuthError("An active paid role subscription is required", 403);
+    const t = await getTranslations("libServices.auth");
+    throw new AuthError(t("paidRoleRequired"), 403);
   }
   return active;
 }

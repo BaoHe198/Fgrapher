@@ -360,5 +360,1443 @@
       },
       "starAriaLabel": "{count} star"
     }
+  },
+  "accountFlows": {
+    "authLayout": {
+      "quote": "Fgrapher put my portfolio in front of the right clients. I book twice as many sessions now.",
+      "quoteBy": "Verified provider on Fgrapher"
+    },
+    "login": {
+      "metaTitle": "Sign in or create an account — Fgrapher",
+      "invalidCredentials": "Invalid email or password",
+      "title": "Welcome back",
+      "subtitle": "Sign in to manage your bookings and portfolio.",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "terms": "By signing in you agree to our Terms and Privacy Policy.",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "register": {
+      "genericError": "Something went wrong. Please try again.",
+      "title": "Create your account",
+      "subtitle": "Join Fgrapher and start booking or getting booked.",
+      "iAmA": "I AM A",
+      "customerLabel": "Customer",
+      "customerDesc": "Book artists and buy gear",
+      "providerLabel": "Creative pro",
+      "providerDesc": "Get booked and sell",
+      "whatDoYouOffer": "WHAT DO YOU OFFER?",
+      "changeLaterNote": "You can change this later. Customer access is always free.",
+      "contentGuidelinesConfirm": "I confirm I'm 18 or older and agree to the ",
+      "contentGuidelinesLink": "content guidelines",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Jordan Rivera",
+      "emailLabel": "Email",
+      "dobLabel": "Date of birth",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "submitting": "Creating account...",
+      "submit": "Create account",
+      "terms": "By signing in you agree to our Terms and Privacy Policy.",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "forgotPassword": {
+      "metaTitle": "Reset your password — Fgrapher",
+      "emailInvalid": "Enter a valid email address",
+      "genericError": "Something went wrong. Please try again.",
+      "checkInboxTitle": "Check your inbox",
+      "checkInboxBody": "If an account exists for that email, we've sent a link to reset your password.",
+      "backToSignIn": "Back to sign in",
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "emailLabel": "Email",
+      "submit": "Send reset link"
+    },
+    "resetPassword": {
+      "metaTitle": "Set a new password — Fgrapher",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "confirmRequired": "Please confirm your password",
+      "passwordsMismatch": "Passwords do not match",
+      "invalidLink": "This reset link is invalid or has expired",
+      "genericError": "Something went wrong. Please try again.",
+      "updatedToastTitle": "Password updated",
+      "updatedToastDesc": "You can now sign in with your new password.",
+      "title": "Set a new password",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm password",
+      "passwordPlaceholder": "At least 8 characters",
+      "submit": "Update password"
+    },
+    "onboarding": {
+      "billing": {
+        "headingSingle": "Activate your {role} profile",
+        "headingPlural": "Activate your {count} profiles",
+        "subtitle": "Start a 14-day free trial — cancel anytime before it ends and you won't be charged.",
+        "billedYearlyBadge": "Billed yearly — save 20%",
+        "checkoutCancelled": "Checkout was cancelled — no charge was made.",
+        "notConfiguredError": "Payments aren't set up in this environment yet — your role stays inactive until then. You can keep exploring the rest of the dashboard in the meantime.",
+        "genericError": "Something went wrong. Please try again.",
+        "total": "Total",
+        "freeTrialNote": "Free for 14 days, then {amount}",
+        "startTrial": "Start free trial",
+        "skipForNow": "Skip for now",
+        "monthAbbrev": "mo",
+        "yearAbbrev": "yr"
+      },
+      "roles": {
+        "title": "How will you use Fgrapher?",
+        "subtitle": "Pick every role that fits — you can always add more later. Customer is included by default so you can always book and browse."
+      },
+      "verification": {
+        "statusNotStarted": "Not started",
+        "statusPending": "Under review",
+        "statusVerified": "Verified",
+        "statusRejected": "Needs resubmission",
+        "noRoleTitle": "No provider role yet",
+        "noRoleBody": "Add a provider role first, then come back here to verify your identity.",
+        "manageRoles": "Manage roles",
+        "chooseRoleTitle": "Verify your identity",
+        "chooseRoleSubtitle": "Choose which role to verify.",
+        "form": {
+          "underReviewTitle": "Your submission is under review",
+          "underReviewDesc": "We're reviewing the ID documents you submitted for {role}. This usually takes 1-2 business days.",
+          "verifiedTitle": "You're verified",
+          "verifiedDesc": "Your identity has been verified for {role}.",
+          "submittedTitle": "Submitted for review",
+          "tapToSelectPhoto": "Tap to select a photo",
+          "title": "Verify your identity",
+          "subtitle": "Required to activate your {role} profile — this is a one-time check.",
+          "rejectedNotice": "Your previous submission was rejected: {reason}. You can resubmit below.",
+          "whyWeAskLabel": "Why we ask:",
+          "whyWeAskBody": "Vietnamese e-commerce law (Luật Thương mại điện tử 122/2025) requires marketplaces to verify every seller's identity before they can list services.",
+          "whoCanSeeLabel": "Who can see it:",
+          "whoCanSeeBody": "Only Fgrapher admins, only through a short-lived link generated at the moment they review your submission — every view is logged.",
+          "howLongLabel": "How long we keep it:",
+          "howLongBody": "Your ID photos are permanently deleted 90 days after approval. We keep only the approval record, never the images.",
+          "fullLegalNameLabel": "Full legal name",
+          "idNumberLabel": "ID number (CCCD/CMND)",
+          "idNumberPlaceholder": "9 or 12 digits",
+          "idFrontLabel": "ID front",
+          "idBackLabel": "ID back",
+          "selfieLabel": "Selfie holding ID",
+          "consentLabel": "I agree to Fgrapher processing my ID document and photo to verify my identity",
+          "uploadsUnavailable": "Document uploads aren't available right now",
+          "genericError": "Something went wrong. Please try again.",
+          "uploadFailed": "Upload failed. Please check your connection and try again.",
+          "submit": "Submit for review",
+          "doLater": "Do this later",
+          "backToDashboard": "Back to dashboard"
+        }
+      }
+    },
+    "admin": {
+      "layout": {
+        "badge": "Admin",
+        "subtitle": "Fgrapher internal tools",
+        "exitAdmin": "Exit admin"
+      },
+      "sidebar": {
+        "overview": "Overview",
+        "users": "Users",
+        "reports": "Reports",
+        "verifications": "Verifications",
+        "moderation": "Moderation",
+        "compliance": "Compliance"
+      },
+      "overview": {
+        "metaTitle": "Admin overview — Fgrapher",
+        "title": "Overview",
+        "totalUsers": "Total users",
+        "totalUsersSub": "{sign}{percent}% vs last month",
+        "activeSubscriptions": "Active subscriptions",
+        "activeSubscriptionsSub": "{mrr} MRR",
+        "bookingsThisMonth": "Bookings this month",
+        "bookingsThisMonthSub": "{rate}% completion rate",
+        "gmvThisMonth": "GMV this month",
+        "gmvThisMonthSub": "{bookingGmv} bookings · {orderGmv} marketplace",
+        "failedPayments": "Failed payments",
+        "pendingReports": "Pending reports",
+        "expiringSoon": "Subscriptions expiring in 7 days",
+        "recentActivity": "Recent activity",
+        "noActivity": "No activity yet"
+      },
+      "users": {
+        "title": "Users",
+        "allRoles": "All roles",
+        "searchPlaceholder": "Search name, email, username",
+        "table": {
+          "name": "Name",
+          "email": "Email",
+          "roles": "Roles",
+          "joined": "Joined",
+          "status": "Status"
+        },
+        "statusSuspended": "Suspended",
+        "statusVerified": "Verified",
+        "statusActive": "Active",
+        "empty": "No users found"
+      },
+      "userDetail": {
+        "backToUsers": "Back to users",
+        "suspendedBadge": "Suspended",
+        "verifiedBadge": "Verified",
+        "unsuspend": "Unsuspend",
+        "suspend": "Suspend",
+        "verifyAccount": "Verify account",
+        "deleteAccount": "Delete account",
+        "deleteConfirm": "Soft-delete this account? This can be reversed in the database if needed.",
+        "tabs": {
+          "overview": "Overview",
+          "billing": "Roles & Billing",
+          "bookings": "Bookings"
+        },
+        "fields": {
+          "email": "Email",
+          "username": "Username",
+          "location": "Location",
+          "joined": "Joined"
+        },
+        "adminNotesLabel": "Admin notes (internal only)",
+        "saveNotes": "Save notes",
+        "updatedToast": "Updated",
+        "noRoles": "No roles",
+        "activeRole": "Active role",
+        "inactiveRole": "Inactive role",
+        "noSubscription": "No subscription",
+        "asProvider": "As provider",
+        "completionRate": "Completion rate",
+        "cancellationRate": "Cancellation rate",
+        "bookingsSummary": "{customerCount} bookings as customer, {providerCount} as provider.",
+        "suspendDialogTitle": "Suspend this account?",
+        "suspendReasonPlaceholder": "Reason for suspension",
+        "cancel": "Cancel"
+      },
+      "reports": {
+        "title": "Reports",
+        "tabs": {
+          "pending": "Pending",
+          "reviewing": "Reviewing",
+          "resolved": "Resolved",
+          "dismissed": "Dismissed",
+          "all": "All"
+        },
+        "empty": "No reports here",
+        "highPriority": "High priority",
+        "reportedBy": "Reported by {name}",
+        "targetIdLabel": "· target ID",
+        "resolutionNotePlaceholder": "Resolution note (optional)",
+        "resolve": "Resolve",
+        "dismiss": "Dismiss",
+        "reportUpdatedToast": "Report updated",
+        "unknownReporter": "Unknown"
+      },
+      "verifications": {
+        "title": "Identity verification",
+        "description": "Every provider role must be verified before its profile can go live (Luật Thương mại điện tử 122/2025). Sorted oldest submission first.",
+        "empty": "Nothing pending",
+        "imageFront": "ID front",
+        "imageBack": "ID back",
+        "imageSelfie": "Selfie",
+        "viewImage": "View {label}",
+        "submittedToday": "Submitted today",
+        "waitingOneDay": "Waiting 1 day",
+        "waitingDays": "Waiting {days} days",
+        "rejectionReasonPlaceholder": "Rejection reason (if rejecting)",
+        "notePlaceholder": "Note (optional)",
+        "approve": "Approve",
+        "reject": "Reject",
+        "failedToLoadDocument": "Failed to load document",
+        "selectRejectionReason": "Select a rejection reason",
+        "verificationUpdated": "Verification updated"
+      },
+      "moderation": {
+        "title": "Content moderation",
+        "description": "Every portfolio photo needs approval before it appears publicly. Shortcuts: A approve, R reject, arrow keys navigate. Target: reviewed within {hours}h.",
+        "empty": "Nothing pending",
+        "selectAll": "Select all ({count})",
+        "clearSelection": "Clear selection",
+        "selectedHint": "{count} selected — A to approve, R to reject",
+        "overdueBadge": "Overdue",
+        "rejectionReasonPlaceholder": "Rejection reason",
+        "notePlaceholder": "Note (optional)",
+        "confirmReject": "Confirm reject ({count})",
+        "approve": "Approve ({count})",
+        "reject": "Reject ({count})",
+        "approvedToast": "Approved {count}",
+        "rejectedToast": "Rejected {count}"
+      },
+      "compliance": {
+        "title": "Compliance",
+        "tabs": {
+          "requests": "Data requests",
+          "audit": "Audit log",
+          "consent": "Consent stats"
+        },
+        "dataRequests": {
+          "typeFilter": {
+            "all": "All types",
+            "export": "Export",
+            "deletion": "Deletion"
+          },
+          "statusFilter": {
+            "all": "All statuses",
+            "pending": "Pending",
+            "processing": "Processing",
+            "completed": "Completed",
+            "rejected": "Rejected"
+          },
+          "empty": "No data requests",
+          "unknownUser": "Unknown user",
+          "requested": "Requested {date}",
+          "deadline": "Deadline {date}",
+          "overdueSuffix": " — overdue",
+          "completed": "Completed {date}",
+          "rejectNotePlaceholder": "Rejection note (required to reject)",
+          "processDeletion": "Process deletion",
+          "rejectBtn": "Reject",
+          "noteRequiredToast": "A note is required to reject a request",
+          "updateFailedToast": "Failed to update request",
+          "updatedToast": "Request updated"
+        },
+        "auditLog": {
+          "actorIdPlaceholder": "Actor user ID",
+          "actionPlaceholder": "Action contains…",
+          "colWhen": "When",
+          "colActor": "Actor",
+          "colAction": "Action",
+          "colTarget": "Target",
+          "systemActor": "System",
+          "empty": "No audit log entries"
+        },
+        "consent": {
+          "purposeService": "Service (mandatory)",
+          "purposeMarketing": "Marketing",
+          "purposeAnalytics": "Analytics",
+          "grantedSuffix": "granted,",
+          "notGrantedSummary": "{revoked} not granted ({total} users total)"
+        }
+      }
+    }
+  },
+  "apiMessages": {
+    "admin": {
+      "auditLogFailed": "Failed to search audit log",
+      "consentStatsFailed": "Failed to load consent stats",
+      "invalidInput": "Invalid input",
+      "dataRequestUpdated": "Request updated",
+      "dataRequestProcessFailed": "Failed to process request",
+      "dataRequestsLoadFailed": "Failed to load data requests",
+      "moderationQueueLoadFailed": "Failed to load moderation queue",
+      "moderationUpdated": "Moderation updated",
+      "moderationUpdateFailed": "Failed to update moderation",
+      "reportUpdated": "Report updated",
+      "reportUpdateFailed": "Failed to update report",
+      "reportsLoadFailed": "Failed to load reports",
+      "statsLoadFailed": "Failed to load admin stats",
+      "userNotFound": "User not found",
+      "userLoadFailed": "Failed to load user",
+      "invalidAction": "Invalid action",
+      "updated": "Updated",
+      "userUpdateFailed": "Failed to update user",
+      "usersLoadFailed": "Failed to load users",
+      "invalidKycKind": "kind must be front, back, or selfie",
+      "documentLinkFailed": "Failed to generate document link",
+      "verificationUpdated": "Verification updated",
+      "verificationUpdateFailed": "Failed to update verification",
+      "verificationQueueLoadFailed": "Failed to load verification queue"
+    },
+    "auth": {
+      "invalidInput": "Invalid input",
+      "resetLinkSent": "If an account exists for that email, a reset link has been sent",
+      "emailTaken": "An account with this email already exists",
+      "accountCreated": "Account created",
+      "accountCreateFailed": "Failed to create account",
+      "resetLinkInvalid": "This reset link is invalid or has expired",
+      "passwordUpdated": "Password updated"
+    },
+    "availability": {
+      "loadFailed": "Failed to load availability",
+      "invalidInput": "Invalid input",
+      "updated": "Availability updated",
+      "updateFailed": "Failed to update availability"
+    },
+    "blockedDates": {
+      "notFound": "Blocked date not found",
+      "unblocked": "Date unblocked",
+      "unblockFailed": "Failed to unblock date",
+      "invalidInput": "Invalid input",
+      "blocked": "Date blocked",
+      "blockFailed": "Failed to block date"
+    },
+    "blocks": {
+      "userIdRequired": "userId is required",
+      "blocked": "User blocked",
+      "unblocked": "User unblocked",
+      "blockFailed": "Failed to block user",
+      "unblockFailed": "Failed to unblock user"
+    },
+    "bookings": {
+      "invalidInput": "Invalid input",
+      "rescheduleProposed": "Reschedule proposed",
+      "rescheduleProposeFailed": "Failed to propose reschedule",
+      "rescheduleAccepted": "Reschedule accepted",
+      "rescheduleDeclined": "Reschedule declined",
+      "rescheduleRespondFailed": "Failed to respond to reschedule",
+      "notFound": "Booking not found",
+      "loadFailed": "Failed to load booking",
+      "updated": "Booking updated",
+      "updateFailed": "Failed to update booking",
+      "calendarLoadFailed": "Failed to load calendar",
+      "listLoadFailed": "Failed to load bookings",
+      "requestSent": "Booking request sent",
+      "createFailed": "Failed to create booking"
+    },
+    "cart": {
+      "notFound": "Not found",
+      "invalidQuantity": "Invalid quantity",
+      "updateFailed": "Failed to update cart item",
+      "removed": "Removed",
+      "removeFailed": "Failed to remove cart item",
+      "loadFailed": "Failed to load cart",
+      "invalidInput": "Invalid input",
+      "added": "Added to cart",
+      "addFailed": "Failed to add to cart"
+    },
+    "contact": {
+      "invalidInput": "Invalid input",
+      "messageSent": "Message sent"
+    },
+    "conversations": {
+      "messagesLoadFailed": "Failed to load messages",
+      "markedRead": "Marked as read",
+      "markReadFailed": "Failed to mark as read",
+      "loadFailed": "Failed to load conversations",
+      "userIdRequired": "userId is required",
+      "startFailed": "Failed to start conversation",
+      "unreadCountLoadFailed": "Failed to load unread count"
+    },
+    "dashboard": {
+      "statsLoadFailed": "Failed to load stats"
+    },
+    "follows": {
+      "notFound": "Not found",
+      "invalidInput": "Invalid input",
+      "cannotFollowSelf": "You cannot follow yourself",
+      "followed": "Followed",
+      "followFailed": "Failed to follow",
+      "missingUserId": "Missing userId",
+      "unfollowed": "Unfollowed",
+      "unfollowFailed": "Failed to unfollow",
+      "missingParams": "Missing userId or profileId",
+      "socialStateLoadFailed": "Failed to load social state"
+    },
+    "messages": {
+      "invalidInput": "Invalid input",
+      "sendFailed": "Failed to send message"
+    },
+    "notifications": {
+      "markedRead": "Marked as read",
+      "updateFailed": "Failed to update notification",
+      "allMarkedRead": "All marked as read",
+      "updateAllFailed": "Failed to update notifications",
+      "loadFailed": "Failed to load notifications"
+    }
+  },
+  "dashboardCore": {
+    "acceptingBookingsToggle": {
+      "label": "Accepting bookings"
+    },
+    "checkoutSuccessToast": {
+      "welcome": "Welcome to Fgrapher Pro!"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "body": "This page hit an unexpected error. Try again, or head back to your dashboard.",
+      "retry": "Try again",
+      "backToDashboard": "Back to dashboard"
+    },
+    "saved": {
+      "title": "Saved artists",
+      "empty": {
+        "title": "No saved artists yet",
+        "body": "Tap the bookmark icon on a profile to save it here."
+      },
+      "unnamed": "Unnamed",
+      "priceFrom": "From ₫{amount}"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "tabs": {
+        "ALL": "All",
+        "UNREAD": "Unread",
+        "BOOKINGS": "Bookings",
+        "ORDERS": "Orders",
+        "MESSAGES": "Messages",
+        "SOCIAL": "Social"
+      },
+      "empty": {
+        "title": "No notifications",
+        "body": "You're all caught up."
+      },
+      "justNow": "just now",
+      "minutesAgo": "{minutes}m ago",
+      "hoursAgo": "{hours}h ago",
+      "daysAgo": "{days}d ago"
+    },
+    "portfolio": {
+      "proOnly": {
+        "title": "Portfolio is for creative pros",
+        "body": "Add a paid role — Photographer, Videographer, Make-up Artist, Studio, or Camera Shop — to showcase your work.",
+        "cta": "Add a role"
+      },
+      "noProfile": {
+        "title": "Set up your profile first",
+        "body": "Create your provider profile before uploading portfolio media.",
+        "cta": "Set up profile"
+      },
+      "sectionTitle": "Portfolio",
+      "gate": {
+        "fallbackTitle": "Activate your {role} subscription to upload",
+        "fallbackText": "Your existing portfolio media stays visible — activate your subscription to add more."
+      }
+    },
+    "portfolioGrid": {
+      "moderation": {
+        "pending": "Pending review",
+        "rejected": "Rejected"
+      },
+      "reorder": "Reorder",
+      "delete": "Delete",
+      "itemCount": "{count, plural, one {# item} other {# items}}",
+      "dragToReorder": "Drag to reorder",
+      "upload": "Upload"
+    },
+    "reviews": {
+      "title": "Reviews",
+      "stats": {
+        "avgRating": "Average rating",
+        "total": "Total reviews",
+        "responseRate": "Response rate",
+        "awaitingResponse": "Awaiting response"
+      },
+      "tabs": {
+        "ALL": "All",
+        "AWAITING": "Awaiting response",
+        "RESPONDED": "Responded"
+      },
+      "empty": "No reviews here yet",
+      "anonymous": "Anonymous",
+      "respond": "Respond"
+    },
+    "listings": {
+      "filters": {
+        "ALL": "All",
+        "SALE": "For sale",
+        "RENT": "For rent",
+        "OUT_OF_STOCK": "Out of stock"
+      },
+      "badge": {
+        "rental": "Rental",
+        "forSale": "For sale"
+      },
+      "priceRental": "{price}/day",
+      "priceBoth": "{price} · {rentalPrice}/day",
+      "empty": {
+        "title": "No products listed",
+        "body": "Add your first camera, lens, or accessory."
+      },
+      "addProduct": "Add product",
+      "inStock": "{count} in stock",
+      "outOfStock": "Out of stock",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "editProductTitle": "Edit product",
+      "addProductTitle": "Add product",
+      "gate": {
+        "fallbackTitle": "Camera Shop subscription required",
+        "fallbackText": "Activate your Camera Shop subscription to list products."
+      },
+      "roleRequired": {
+        "title": "Listings need the Camera Shop role",
+        "body": "Add the Camera Shop role to sell or rent out gear on Fgrapher.",
+        "cta": "Add a role"
+      },
+      "pageTitle": "Listings"
+    },
+    "home": {
+      "greeting": {
+        "morning": "Good morning, {name}",
+        "afternoon": "Good afternoon, {name}",
+        "evening": "Good evening, {name}"
+      },
+      "fallbackName": "there",
+      "stats": {
+        "pendingRequests": "Pending requests",
+        "confirmed": "Confirmed",
+        "earnings": "Earnings",
+        "profileViews": "Profile views",
+        "upcomingBookings": "Upcoming bookings",
+        "savedArtists": "Saved artists",
+        "messages": "Messages",
+        "orders": "Orders"
+      },
+      "completeProfile": {
+        "title": "Complete your profile",
+        "cta": "Complete your profile"
+      },
+      "recentActivity": "Recent activity",
+      "noActivity": "No activity yet",
+      "buildPortfolio": "Build your portfolio",
+      "browseArtists": "Browse artists"
+    },
+    "messages": {
+      "selectConversation": "Select a conversation",
+      "selectConversationHint": "Choose from the list to start chatting"
+    },
+    "customerOrders": {
+      "title": "My orders",
+      "tabs": {
+        "ALL": "All",
+        "PENDING": "Processing",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled"
+      },
+      "status": {
+        "PENDING": "Processing",
+        "CONFIRMED": "Confirmed",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled",
+        "RETURNED": "Returned"
+      },
+      "empty": "No orders yet",
+      "browseGear": "Browse gear",
+      "orderNumber": "Order #{id}",
+      "more": "+{count} more",
+      "viewDetails": "View details"
+    },
+    "orderDetail": {
+      "status": {
+        "PENDING": "Processing",
+        "CONFIRMED": "Confirmed",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled",
+        "RETURNED": "Returned"
+      },
+      "backToOrders": "Back to orders",
+      "orderNumber": "Order #{id}",
+      "rentalLabel": "Rental:",
+      "depositLabel": "Deposit {amount} ({status})",
+      "shippingAddress": "Shipping address",
+      "tracking": "Tracking",
+      "messageParty": {
+        "customer": "Message customer",
+        "shop": "Message shop"
+      },
+      "confirmOrder": "Confirm order",
+      "markAsShipped": "Mark as shipped",
+      "markAsDelivered": "Mark as delivered",
+      "refundDeposit": "Refund deposit",
+      "deductDeposit": "Deduct deposit (damage)",
+      "cancelOrder": "Cancel order",
+      "total": "Total",
+      "carrier": "Carrier",
+      "trackingNumber": "Tracking number",
+      "dialogCancel": "Cancel",
+      "cancelDialog": {
+        "title": "Cancel this order?",
+        "body": "Payment will be refunded and stock restored.",
+        "reasonPlaceholder": "Reason (optional)",
+        "keepOrder": "Keep order"
+      }
+    }
+  },
+  "dashboardSettings": {
+    "nav": {
+      "profile": "Profile",
+      "account": "Account",
+      "roles": "Roles",
+      "billing": "Billing",
+      "notifications": "Notifications",
+      "data": "Data & Privacy"
+    },
+    "layout": {
+      "title": "Settings"
+    },
+    "account": {
+      "emailLabel": "Email",
+      "phoneLabel": "Phone number",
+      "save": "Save",
+      "changePasswordTitle": "Change password",
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm new password",
+      "updatePassword": "Update password",
+      "passwordMismatch": "Passwords do not match",
+      "genericError": "Something went wrong",
+      "languageLabel": "Language",
+      "themeLabel": "Theme",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System",
+      "dangerZoneTitle": "Danger zone",
+      "dangerZoneDesc": "Deleting your account is permanent. This cannot be undone.",
+      "deleteAccount": "Delete account",
+      "deleteDialogTitle": "Delete your account?",
+      "deleteDialogBody": "This will permanently deactivate your Fgrapher account. This action cannot be undone.",
+      "cancel": "Cancel",
+      "toastAccountUpdated": "Account updated",
+      "toastPasswordUpdated": "Password updated"
+    },
+    "billing": {
+      "status": {
+        "active": "Active",
+        "trialing": "Trialing",
+        "pastDue": "Past due",
+        "cancelled": "Cancelled",
+        "expired": "Expired"
+      },
+      "notConfigured": "Payments aren't set up in this environment yet.",
+      "portalGenericError": "Couldn't open the billing portal.",
+      "emptyTitle": "No active subscriptions",
+      "emptyDesc": "Activate a paid role to get a public profile, bookings, and more.",
+      "browseRoles": "Browse roles",
+      "currentPlanLabel": "Current plan",
+      "perYear": "/yr",
+      "perMonth": "/mo",
+      "trialEnds": "Trial ends in {days} days",
+      "cancelsOn": "Cancels on {date}",
+      "resumeSubscription": "Resume subscription",
+      "renewsOn": "Renews on {date}",
+      "cancelSubscription": "Cancel subscription",
+      "totalMonthlyCost": "Total monthly cost",
+      "paymentMethodLabel": "Payment method",
+      "managedByStripe": "Managed securely through Stripe",
+      "manageSubscription": "Manage subscription",
+      "billingHistoryLabel": "Billing history",
+      "noInvoices": "No invoices yet.",
+      "viewInvoice": "View",
+      "cancelDialogTitle": "Cancel your {role} subscription?",
+      "cancelDialogBody1": "Your profile stays live until the end of the current billing period.",
+      "cancelDialogBody2": "All your data — portfolio, bookings, reviews — is kept, and you can reactivate anytime.",
+      "keepSubscription": "Keep subscription",
+      "disabledTitle": "Fgrapher is currently free for all service providers",
+      "disabledBody": "We'll give at least 30 days' notice before we start charging. No action is needed on this page."
+    },
+    "data": {
+      "summary": {
+        "profiles": "Profiles",
+        "bookingsAsCustomer": "Bookings sent",
+        "bookingsAsProvider": "Bookings received",
+        "reviewsWritten": "Reviews written",
+        "reviewsReceived": "Reviews received",
+        "orders": "Orders"
+      },
+      "overviewTitle": "Overview of your data",
+      "consentTitle": "Data consent",
+      "consentIntro": "Processing data to provide the service is mandatory and can't be turned off here. You can toggle the two optional items below at any time.",
+      "marketingLabel": "Marketing communications",
+      "marketingDesc": "Receive promotional emails and news from Fgrapher",
+      "analyticsLabel": "Usage analytics",
+      "analyticsDesc": "Allow Fgrapher to analyze how you use the service to improve the product",
+      "privacyPolicyIntro": "See details in our",
+      "privacyPolicyLink": "Privacy Policy",
+      "myDataTitle": "My data",
+      "myDataDesc": "Download a full copy of your personal data, profiles, bookings, and reviews as JSON.",
+      "downloadButton": "Download my data",
+      "deleteAccountTitle": "Delete account",
+      "deleteAccountDesc": "Request permanent deletion of your account. This request will be processed by the Fgrapher team, not deleted immediately.",
+      "pendingDeletionNotice": "You already have a pending account deletion request.",
+      "requestDeletionButton": "Request account deletion",
+      "explainDialogTitle": "What happens when you delete your account?",
+      "explainWillBeDeletedLabel": "Will be permanently deleted:",
+      "explainWillBeDeletedBody": "your profiles, photos/portfolio, listed services, and messages.",
+      "explainWillBeKeptLabel": "Will be kept (anonymized):",
+      "explainWillBeKeptBody": "your account will be renamed to \"Deleted user\" — your email, phone number, date of birth, and other personal details will be removed, but completed bookings/reviews are kept so your counterpart can still reference them.",
+      "explainIrreversible": "This action cannot be undone once processed.",
+      "cancel": "Cancel",
+      "continueBtn": "Continue",
+      "confirmDialogTitle": "Confirm account deletion request",
+      "confirmDialogBody": "Are you sure you want to submit a permanent deletion request for this account? The Fgrapher team will process the request as soon as possible.",
+      "back": "Back",
+      "confirmSubmit": "Confirm submission",
+      "toastConsentUpdateFail": "Couldn't update your preference",
+      "toastConsentUpdateSuccess": "Preference updated",
+      "toastExportFail": "Data export failed",
+      "toastExportSuccess": "Your data has been downloaded",
+      "toastDeletionRequestFail": "Failed to submit account deletion request",
+      "toastDeletionRequestSuccessTitle": "Account deletion request submitted",
+      "toastDeletionRequestSuccessDesc": "The Fgrapher team will process this request."
+    },
+    "notifications": {
+      "groups": {
+        "bookings": "Bookings",
+        "messages": "Messages",
+        "social": "Social",
+        "marketing": "Marketing"
+      },
+      "labels": {
+        "bookingRequest": "New booking request",
+        "bookingConfirmed": "Booking confirmed",
+        "bookingCancelled": "Booking cancelled",
+        "bookingReminder": "Upcoming booking reminder",
+        "newMessage": "New message",
+        "newFollower": "New follower",
+        "newReview": "New review",
+        "productUpdates": "Product updates",
+        "tips": "Tips and best practices"
+      },
+      "email": "Email",
+      "inApp": "In-app"
+    },
+    "profile": {
+      "basics": {
+        "usernameLabel": "Username",
+        "usernameTaken": "That username is taken",
+        "bioLabel": "Bio",
+        "wardLabel": "Ward",
+        "wardNotSelected": "Not selected"
+      },
+      "media": {
+        "coverButton": "Cover",
+        "uploadUnavailable": "Upload unavailable",
+        "uploadFailed": "Upload failed"
+      },
+      "availability": {
+        "weeklySchedule": "Weekly schedule",
+        "days": {
+          "sun": "Sunday",
+          "mon": "Monday",
+          "tue": "Tuesday",
+          "wed": "Wednesday",
+          "thu": "Thursday",
+          "fri": "Friday",
+          "sat": "Saturday"
+        },
+        "saveSchedule": "Save schedule",
+        "saved": "Saved",
+        "blockedDates": "Blocked dates",
+        "removeAria": "Remove",
+        "blockDateButton": "Block date"
+      }
+    }
+  },
+  "libServices": {
+    "validation": {
+      "auth": {
+        "emailInvalid": "Enter a valid email address",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "nameRequired": "Enter your full name",
+        "passwordUppercase": "Password must contain at least one uppercase letter",
+        "passwordNumber": "Password must contain at least one number",
+        "dateOfBirthRequired": "Date of birth is required",
+        "roleRequired": "Select at least one role",
+        "consentServiceRequired": "You must agree to data processing to create an account",
+        "mustBe18": "You must be at least 18 years old to create a Fgrapher account",
+        "contentGuidelinesRequired": "You must accept the content guidelines to register as a Model"
+      },
+      "booking": {
+        "invalidDate": "Invalid date",
+        "invalidTime": "Invalid time"
+      },
+      "marketplace": {
+        "rentalDatesRequired": "Rental dates are required"
+      },
+      "portfolio": {
+        "rightsConfirmedRequired": "You must confirm you have the rights to use these images"
+      },
+      "product": {
+        "nameRequired": "Enter a product name",
+        "salePriceRequired": "Enter a sale price",
+        "rentalPriceRequired": "Enter a rental price per day",
+        "bothPricesRequired": "Enter both a sale price and a rental price"
+      },
+      "profile": {
+        "displayNameRequired": "Enter a display name"
+      },
+      "review": {
+        "contentTooShort": "Share a bit more detail (at least 20 characters)"
+      },
+      "service": {
+        "nameRequired": "Enter a service name",
+        "durationRequired": "Enter a duration in minutes",
+        "priceRequired": "Enter a price"
+      },
+      "subscription": {
+        "roleRequired": "Select at least one role"
+      },
+      "user": {
+        "roleRequired": "Select at least one role",
+        "bioTooLong": "Bio must be 500 characters or fewer",
+        "usernameTooShort": "Username must be at least 3 characters",
+        "usernameInvalidChars": "Lowercase letters, numbers, and underscores only",
+        "currentPasswordRequired": "Enter your current password",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "passwordUppercase": "Password must contain at least one uppercase letter",
+        "passwordNumber": "Password must contain at least one number",
+        "confirmPasswordRequired": "Please confirm your new password",
+        "passwordsDoNotMatch": "Passwords do not match"
+      },
+      "verification": {
+        "fullNameRequired": "Enter your full legal name",
+        "idNumberInvalid": "Enter a valid 9 or 12-digit ID number",
+        "consentRequired": "You must agree to identity document processing to submit verification"
+      }
+    },
+    "auth": {
+      "unauthorized": "Unauthorized",
+      "missingRole": "Missing required role: {role}",
+      "activeSubscriptionRequired": "Active subscription required for role: {role}",
+      "paidRoleRequired": "An active paid role subscription is required",
+      "adminAccessRequired": "Admin access required"
+    },
+    "email": {
+      "footer": {
+        "manageNotifications": "Manage notification preferences"
+      },
+      "bookingRequest": {
+        "heading": "New booking request",
+        "body": "{otherPartyName} requested to book {serviceName} on {dateLabel} at {timeLabel}. Respond within 24 hours to keep your response rate up.",
+        "cta": "View request"
+      },
+      "bookingConfirmed": {
+        "heading": "Booking confirmed",
+        "body": "{otherPartyName} confirmed your {serviceName} booking on {dateLabel} at {timeLabel}. We'll remind you 24 hours before.",
+        "cta": "View booking"
+      },
+      "bookingDeclined": {
+        "heading": "Booking declined",
+        "body": "{otherPartyName} wasn't able to accept your {serviceName} request for {dateLabel} at {timeLabel}. Browse other artists to find someone available.",
+        "cta": "Browse artists"
+      },
+      "bookingCancelled": {
+        "heading": "Booking cancelled",
+        "body": "{otherPartyName} cancelled the {serviceName} booking on {dateLabel} at {timeLabel}.",
+        "cta": "View bookings"
+      },
+      "bookingReminder": {
+        "heading": "Booking tomorrow",
+        "body": "Reminder: your {serviceName} session with {otherPartyName} is on {dateLabel} at {timeLabel} — less than 24 hours away.",
+        "cta": "View booking"
+      },
+      "bookingCompleted": {
+        "heading": "How was your session?",
+        "body": "Your {serviceName} session with {otherPartyName} is marked complete. Leave a review to help other clients.",
+        "cta": "Leave a review"
+      },
+      "welcomeSubscription": {
+        "heading": "Welcome to Fgrapher Pro!",
+        "bodySingular": "Your {roleNames} profile is now live. Your 14-day free trial has started — manage your subscription anytime from billing settings.",
+        "bodyPlural": "Your {roleNames} profiles are now live. Your 14-day free trial has started — manage your subscription anytime from billing settings.",
+        "cta": "View billing"
+      },
+      "paymentFailed": {
+        "heading": "Your payment didn't go through",
+        "body": "We couldn't charge your card for your Fgrapher subscription. Your profile stays live until {graceEndsLabel} — update your payment method before then to avoid any interruption.",
+        "cta": "Update payment method"
+      },
+      "subscriptionCancelling": {
+        "heading": "We're sorry to see you go",
+        "body": "Your subscription is set to cancel on {periodEndLabel}. You'll keep full access until then. Changed your mind?",
+        "cta": "Resume subscription"
+      },
+      "subscriptionEnded": {
+        "heading": "Your subscription has ended",
+        "body": "Your Fgrapher Pro subscription has ended and your profile is no longer visible in search. All your data is kept — reactivate anytime to pick up right where you left off.",
+        "cta": "Reactivate"
+      },
+      "receipt": {
+        "heading": "Payment received",
+        "body": "We received your payment of {amountLabel}. Your subscription is active through {periodEndLabel}.",
+        "cta": "View receipt"
+      },
+      "orderConfirmation": {
+        "heading": "Order confirmed!",
+        "body": "Order {orderNumber} — {itemsSummary}. Total: {totalLabel}",
+        "cta": "View order"
+      },
+      "newOrder": {
+        "heading": "New order received",
+        "body": "{customerName} placed order {orderNumber} — {itemsSummary}",
+        "cta": "View order"
+      },
+      "orderStatus": {
+        "heading": "Order {statusLabel}",
+        "body": "Your order {orderNumber} is now {statusLabel}.",
+        "bodyWithDetail": "Your order {orderNumber} is now {statusLabel}. {detail}",
+        "cta": "View order"
+      },
+      "newReview": {
+        "heading": "New review",
+        "body": "{reviewerName} left you a {rating}-star review.",
+        "cta": "View & respond"
+      },
+      "reviewResponse": {
+        "heading": "New response to your review",
+        "body": "{providerName} responded to your review.",
+        "cta": "View response"
+      }
+    }
+  },
+  "publicPages": {
+    "booking": {
+      "pageTitle": "Book a session — Fgrapher",
+      "fallbackProviderName": "this provider",
+      "shootTypeOptions": {
+        "notSpecified": "Not specified",
+        "editorial": "Editorial",
+        "commercial": "Commercial",
+        "portfolioBuilding": "Portfolio building",
+        "tfpCollaboration": "TFP collaboration",
+        "event": "Event",
+        "other": "Other"
+      },
+      "steps": {
+        "service": "Service",
+        "dateTime": "Date & time",
+        "details": "Details",
+        "confirm": "Confirm"
+      },
+      "back": "Back",
+      "continueBtn": "Continue",
+      "submitBtn": "Send booking request",
+      "genericError": "Something went wrong. Please try again.",
+      "success": {
+        "heading": "Booking request sent!",
+        "body": "{providerName} will respond within 24 hours. We'll email you as soon as they confirm.",
+        "viewBookings": "View my bookings",
+        "browseMore": "Browse more artists"
+      },
+      "notes": {
+        "shootType": "Shoot type: {value}",
+        "usageRights": "Usage rights: {value}",
+        "wardrobeStyling": "Wardrobe/styling: {value}",
+        "muaProvidedByCustomer": "Make-up artist provided by customer",
+        "customRequest": "Custom request: {value}"
+      },
+      "stepService": {
+        "heading": "What do you need?",
+        "describeLabel": "Describe what you're looking for",
+        "describePlaceholder": "Tell them what kind of shoot, event, or product you need...",
+        "durationMin": "{duration} min"
+      },
+      "stepDateTime": {
+        "heading": "When works for you?",
+        "previous": "Previous",
+        "next": "Next",
+        "localTimeNote": "Times shown in your local time · needs at least 24 hours notice",
+        "selectDatePrompt": "Select a date to see open times.",
+        "sessionDuration": "Session: {duration} min",
+        "noAvailability": "No availability on this date — try another.",
+        "bookingWith": "Booking with {providerName}",
+        "booking": "Booking"
+      },
+      "stepDetails": {
+        "heading": "Tell {providerName} about your shoot",
+        "attachToJob": "Attach this to one of my confirmed client jobs",
+        "clientJobLabel": "Client job",
+        "customRequestOption": "Custom request",
+        "shootDetails": "Shoot details",
+        "shootTypeLabel": "Shoot type",
+        "usageRightsLabel": "Usage rights",
+        "usageRightsPlaceholder": "Where will the images be used?",
+        "wardrobeLabel": "Wardrobe / styling notes",
+        "wardrobePlaceholder": "Outfits, styling direction, anything the model should bring or expect",
+        "muaProvidedLabel": "A make-up artist will be provided",
+        "locationLabel": "Location",
+        "locationProvider": "At provider's studio",
+        "locationCustomer": "At my location",
+        "locationOutdoor": "Outdoor / other",
+        "addressLabel": "Address",
+        "addressPlaceholder": "Street, ward, city",
+        "numberOfPeopleLabel": "Number of people",
+        "notesLabel": "Notes",
+        "notesPlaceholder": "Describe your vision, style references, special requirements...",
+        "contactPhoneLabel": "Contact phone"
+      },
+      "stepReview": {
+        "heading": "Review your booking",
+        "rowService": "Service",
+        "rowDate": "Date",
+        "rowTime": "Time",
+        "rowDuration": "Duration",
+        "rowLocation": "Location",
+        "rowPeople": "People",
+        "durationMin": "{duration} min",
+        "servicePrice": "Service price",
+        "total": "Total",
+        "notesLabel": "Notes",
+        "cancellationNotice": "Free cancellation up to 48 hours before your session. Cancelling within 24 hours may be subject to a fee once payments are enabled.",
+        "agreeTerms": "I agree to the booking terms"
+      }
+    },
+    "browse": {
+      "pageTitle": "Browse artists — Fgrapher",
+      "sortLabels": {
+        "rating": "Top rated",
+        "priceAsc": "Price: low to high",
+        "priceDesc": "Price: high to low",
+        "newest": "Newest",
+        "reviews": "Most reviewed"
+      },
+      "headingWithRoleCity": "{role}s in {city}",
+      "headingDefault": "Browse artists",
+      "resultsCount": "{count} results · {sort}",
+      "filterAvailableNow": "Available now",
+      "filterInstantBook": "Instant book",
+      "filterTopRated": "Top rated",
+      "noResults": {
+        "heading": "No artists found",
+        "body": "Try adjusting your filters or searching a different city."
+      },
+      "clearFilters": "Clear all filters",
+      "unnamed": "Unnamed",
+      "newBadge": "New",
+      "priceFrom": "From {price}",
+      "contactForPricing": "Contact for pricing",
+      "showingResults": "Showing {shown} of {total} results",
+      "previous": "Previous",
+      "loadMore": "Load more"
+    },
+    "cart": {
+      "heading": "Your cart",
+      "empty": {
+        "heading": "Your cart is empty",
+        "browseGear": "Browse gear"
+      },
+      "orderSummary": "Order summary",
+      "subtotal": "Subtotal",
+      "deposits": "Deposits",
+      "total": "Total",
+      "shippingNote": "Shipping calculated at checkout",
+      "checkoutBtn": "Checkout",
+      "continueShopping": "Continue shopping"
+    },
+    "checkout": {
+      "heading": "Checkout",
+      "emptyCart": "Your cart is empty",
+      "paymentsNotConfigured": "Payments aren't set up in this environment yet.",
+      "genericError": "Something went wrong. Please try again.",
+      "deliveryMethod": {
+        "heading": "Delivery method",
+        "shipToMe": "Ship to me",
+        "pickupAtShop": "Pick up at shop",
+        "shipNote": "You'll enter your shipping address on the next step.",
+        "pickupNote": "Contact the shop after your order is confirmed to arrange pickup."
+      },
+      "reviewOrder": "Review your order",
+      "agreeTerms": "I agree to the terms of sale/rental",
+      "orderSummary": "Order summary",
+      "subtotal": "Subtotal",
+      "deposits": "Deposits",
+      "shippingNote": "Shipping calculated at checkout",
+      "total": "Total",
+      "continueToPayment": "Continue to payment"
+    },
+    "checkoutSuccess": {
+      "settingUp": "Setting up your order...",
+      "momentNote": "This only takes a moment.",
+      "orderConfirmed": "Order confirmed!",
+      "orderLine": "Order #{orderId} — {items}",
+      "shopWillConfirm": "The shop will confirm your order shortly. You'll get an email with updates.",
+      "viewOrder": "View order",
+      "continueShopping": "Continue shopping"
+    },
+    "landing": {
+      "unnamed": "Unnamed",
+      "newBadge": "New",
+      "priceFrom": "From {price}",
+      "contactForPricing": "Contact for pricing",
+      "howItWorks": {
+        "heading": "How it works",
+        "step1Title": "Search & compare",
+        "step1Desc": "Browse verified profiles, compare pricing, and read real reviews.",
+        "step2Title": "Book your date",
+        "step2Desc": "Message the artist, pick a slot, and confirm your booking online.",
+        "step3Title": "Get your shoot",
+        "step3Desc": "Meet up, get creative, and receive your final files through Fgrapher."
+      }
+    },
+    "pricing": {
+      "pageTitle": "Pricing — Fgrapher",
+      "freeDuringLaunch": "Everything is free during our launch period. We'll give at least 30 days' notice before we start charging.",
+      "eyebrow": "PRICING",
+      "heroTitle": "Plans that grow with your craft",
+      "heroSub": "One flat subscription per role, billed in VND — no commission on bookings, ever.",
+      "billingToggle": {
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "saveNote": "(save 20%)"
+      },
+      "customerFree": {
+        "heading": "Customer — Free forever",
+        "sub": "Browse, book, and buy. No card required.",
+        "signUp": "Sign up free"
+      },
+      "mostPopular": "Most popular",
+      "perYear": "year",
+      "perMonth": "month",
+      "startTrial": "Start 14-day trial",
+      "signUpFree": "Sign up free",
+      "comparePlans": "Compare plans",
+      "featureColumn": "Feature",
+      "comparisonFeatures": [
+        "Public profile",
+        "Booking calendar",
+        "Client messaging",
+        "Reviews & ratings",
+        "Search visibility",
+        "Analytics dashboard"
+      ],
+      "faqHeading": "Frequently asked questions",
+      "stillDeciding": "Still deciding?",
+      "talkToUs": "Talk to us",
+      "plans": {
+        "photographer": {
+          "description": "Wedding, portrait, and event photography.",
+          "features": [
+            "Public profile with portfolio",
+            "Unlimited photo uploads",
+            "Booking calendar & requests",
+            "Client messaging",
+            "Reviews & ratings",
+            "Search visibility",
+            "Analytics dashboard"
+          ]
+        },
+        "videographer": {
+          "description": "Cinematic video and highlight reels.",
+          "features": [
+            "Public profile with portfolio",
+            "Unlimited video uploads",
+            "Booking calendar & requests",
+            "Client messaging",
+            "Reviews & ratings",
+            "Search visibility",
+            "Analytics dashboard"
+          ]
+        },
+        "makeupArtist": {
+          "description": "Bridal, editorial, and event makeup.",
+          "features": [
+            "Public profile with portfolio",
+            "Unlimited portfolio uploads",
+            "Booking calendar & requests",
+            "Client messaging",
+            "Reviews & ratings",
+            "Search visibility",
+            "Analytics dashboard"
+          ]
+        },
+        "model": {
+          "description": "Get booked for shoots and build your portfolio.",
+          "features": [
+            "Public profile with portfolio",
+            "Unlimited portfolio uploads",
+            "Booking calendar & requests",
+            "Direct messaging with photographers",
+            "Reviews & ratings",
+            "Search visibility",
+            "Verified badge"
+          ]
+        },
+        "studio": {
+          "description": "Rent out your studio space by the hour or day.",
+          "features": [
+            "Studio listing with photos",
+            "Hourly & daily rate booking",
+            "Amenities showcase",
+            "Availability calendar",
+            "Client messaging",
+            "Reviews & ratings"
+          ]
+        },
+        "cameraShop": {
+          "description": "Sell and rent gear to the community.",
+          "features": [
+            "Shop profile",
+            "Unlimited product listings",
+            "Rental & sale management",
+            "Order management",
+            "Inventory tracking",
+            "Client messaging"
+          ]
+        }
+      },
+      "faqs": {
+        "multipleRoles": {
+          "q": "Can I have multiple roles?",
+          "a": "Yes — one account can hold several paid roles at once (e.g. Photographer + Studio), each billed as its own subscription, all shown together on one profile page."
+        },
+        "afterTrial": {
+          "q": "What happens after the free trial?",
+          "a": "After 14 days your card is charged automatically at the rate you selected. You can cancel anytime before the trial ends and you won't be charged."
+        },
+        "cancelAnytime": {
+          "q": "Can I cancel anytime?",
+          "a": "Yes. Cancelling keeps your plan active until the end of the current billing period, and all your data is kept if you want to reactivate later."
+        },
+        "commission": {
+          "q": "Do you take a commission on bookings?",
+          "a": "No — Fgrapher charges a flat subscription per role, not a percentage of your bookings."
+        },
+        "paymentMethods": {
+          "q": "What payment methods do you accept?",
+          "a": "Credit and debit cards, processed securely through Stripe, plus local Vietnamese payment methods if you enable them in your Stripe settings."
+        },
+        "annualDiscount": {
+          "q": "Is there a discount for annual billing?",
+          "a": "Yes — switch to yearly billing on this page and pay 20% less than the monthly rate, charged once a year."
+        }
+      }
+    }
+  },
+  "sharedComponents": {
+    "modelSafetyNotice": {
+      "title": "Before you book",
+      "body": "Meet in public or at a registered studio for a first shoot, and let someone know where you'll be. Fgrapher never asks for payment outside the platform — report anything that feels off."
+    },
+    "filterSidebar": {
+      "roleLabel": "Role",
+      "styleLabel": "Style",
+      "heightLabel": "Height (cm)",
+      "heightMinPh": "Min",
+      "heightMaxPh": "Max",
+      "experienceLabel": "Experience level",
+      "travelWillingLabel": "Willing to travel",
+      "sortByLabel": "Sort by",
+      "sortTopRated": "Top rated",
+      "sortPriceAsc": "Price: low to high",
+      "sortPriceDesc": "Price: high to low",
+      "sortNewest": "Newest",
+      "sortMostReviewed": "Most reviewed",
+      "cityLabel": "City",
+      "allCities": "All cities",
+      "budgetLabel": "Budget",
+      "budgetAny": "Any",
+      "budgetUnder2m": "Under ₫2M",
+      "budget2to5m": "₫2M – ₫5M",
+      "budget5to15m": "₫5M – ₫15M",
+      "budgetOver15m": "Over ₫15M",
+      "ratingLabel": "Rating",
+      "ratingAny": "Any",
+      "rating4Plus": "4+ stars",
+      "rating45Plus": "4.5+ stars",
+      "resetFilters": "Reset filters"
+    },
+    "mobileFilterSheet": {
+      "filtersButton": "Filters",
+      "title": "Filters",
+      "description": "Browse filters"
+    },
+    "searchInput": {
+      "placeholder": "Search artists, studios or gear",
+      "clearLabel": "Clear search"
+    },
+    "cartDrawer": {
+      "title": "Your cart ({count})",
+      "description": "Items in your shopping cart",
+      "emptyTitle": "Your cart is empty",
+      "browseGear": "Browse gear",
+      "subtotal": "Subtotal",
+      "deposits": "Deposits",
+      "shippingNote": "Shipping calculated at checkout",
+      "checkout": "Checkout",
+      "continueShopping": "Continue shopping",
+      "shopFallback": "Shop"
+    },
+    "cartItemRow": {
+      "rentalBadge": "Rental — {days}d",
+      "purchaseBadge": "Purchase",
+      "removeLabel": "Remove item"
+    },
+    "chatPanel": {
+      "unknown": "Unknown",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "sentPhoto": "Sent a photo",
+      "photo": "Photo",
+      "viewProfile": "View profile",
+      "report": "Report",
+      "block": "Block",
+      "emptyState": "Say hello to start the conversation",
+      "safetyNote": "Stay safe: never share payment details outside Fgrapher. Report anything suspicious.",
+      "bookingRequest": "Booking request",
+      "viewBooking": "View booking",
+      "attachImage": "Attach an image",
+      "writeMessage": "Write a message...",
+      "sendMessage": "Send message"
+    },
+    "conversationList": {
+      "title": "Messages",
+      "searchPlaceholder": "Search conversations",
+      "emptyTitle": "No conversations yet",
+      "emptySubtitle": "Message an artist to start",
+      "unknown": "Unknown",
+      "noMessages": "No messages yet",
+      "youPrefix": "You: ",
+      "sentPhoto": "Sent a photo",
+      "sentBooking": "Sent a booking request",
+      "now": "now",
+      "yesterday": "Yesterday"
+    },
+    "environmentBanner": {
+      "staging": "STAGING",
+      "development": "DEVELOPMENT"
+    },
+    "footer": {
+      "copyright": "© 2026 Fgrapher. All rights reserved."
+    },
+    "notificationBell": {
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "emptyState": "No notifications yet",
+      "justNow": "just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago",
+      "viewAll": "View all"
+    },
+    "pastDueBanner": {
+      "message": "Your {role} payment failed. Update your payment method to keep your profile live. {days, plural, one {# day} other {# days}} remaining.",
+      "updatePayment": "Update payment"
+    },
+    "webNav": {
+      "openNavigation": "Open navigation",
+      "navigationTitle": "Navigation",
+      "navigationDescription": "Main site navigation",
+      "notifications": "Notifications",
+      "toggleTheme": "Toggle theme"
+    },
+    "dashboardSidebar": {
+      "overview": "Overview",
+      "myBookings": "My bookings",
+      "bookings": "Bookings",
+      "calendar": "Calendar",
+      "reviews": "Reviews",
+      "portfolio": "Portfolio",
+      "listings": "Listings",
+      "shopOrders": "Shop orders",
+      "myOrders": "My orders",
+      "saved": "Saved",
+      "messages": "Messages",
+      "settings": "Settings",
+      "planPro": "Pro — {role}",
+      "planFree": "Free — Customer",
+      "currentPlan": "Current plan",
+      "managePlan": "Manage plan",
+      "openMenu": "Open dashboard menu",
+      "menuTitle": "Dashboard menu",
+      "menuDescription": "Dashboard navigation"
+    }
   }
 }

@@ -14,6 +14,7 @@ import {
   Star,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -46,58 +47,69 @@ export function DashboardSidebar({
   className?: string;
   marketplaceEnabled: boolean;
 }) {
+  const t = useTranslations("sharedComponents.dashboardSidebar");
   const pathname = usePathname();
   const { roles, canUpload, canSell, canReceiveBookings, isCustomerOnly } =
     useUserRoles();
   const unreadMessages = useUnreadMessages();
 
   const items: NavItem[] = [
-    { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+    { href: "/dashboard", label: t("overview"), icon: LayoutDashboard },
     {
       href: "/dashboard/bookings",
-      label: isCustomerOnly ? "My bookings" : "Bookings",
+      label: isCustomerOnly ? t("myBookings") : t("bookings"),
       icon: Calendar,
     },
     ...(canReceiveBookings
       ? [
           {
             href: "/dashboard/calendar",
-            label: "Calendar",
+            label: t("calendar"),
             icon: CalendarDays,
           },
-          { href: "/dashboard/reviews", label: "Reviews", icon: Star },
+          { href: "/dashboard/reviews", label: t("reviews"), icon: Star },
         ]
       : []),
     ...(canUpload
-      ? [{ href: "/dashboard/portfolio", label: "Portfolio", icon: ImageIcon }]
+      ? [
+          {
+            href: "/dashboard/portfolio",
+            label: t("portfolio"),
+            icon: ImageIcon,
+          },
+        ]
       : []),
     ...(marketplaceEnabled && canSell
       ? [
-          { href: "/dashboard/listings", label: "Listings", icon: ShoppingBag },
+          {
+            href: "/dashboard/listings",
+            label: t("listings"),
+            icon: ShoppingBag,
+          },
           {
             href: "/dashboard/shop-orders",
-            label: "Shop orders",
+            label: t("shopOrders"),
             icon: Package,
           },
         ]
       : []),
     ...(marketplaceEnabled
-      ? [{ href: "/dashboard/orders", label: "My orders", icon: Package }]
+      ? [{ href: "/dashboard/orders", label: t("myOrders"), icon: Package }]
       : []),
-    { href: "/saved", label: "Saved", icon: Bookmark },
+    { href: "/saved", label: t("saved"), icon: Bookmark },
     {
       href: "/dashboard/messages",
-      label: "Messages",
+      label: t("messages"),
       icon: MessageCircle,
       badge: unreadMessages,
     },
-    { href: "/dashboard/settings", label: "Settings", icon: Settings },
+    { href: "/dashboard/settings", label: t("settings"), icon: Settings },
   ];
 
   const nonCustomerRole = roles.find((role) => role !== "CUSTOMER");
   const planName = nonCustomerRole
-    ? `Pro — ${ROLE_LABELS[nonCustomerRole]}`
-    : "Free — Customer";
+    ? t("planPro", { role: ROLE_LABELS[nonCustomerRole] })
+    : t("planFree");
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
@@ -127,7 +139,7 @@ export function DashboardSidebar({
       })}
 
       <div className="mt-3.5 flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-green-900 p-3.5">
-        <span className="text-body-sm text-green-200">Current plan</span>
+        <span className="text-body-sm text-green-200">{t("currentPlan")}</span>
         <span className="text-heading-sm text-gold-50">{planName}</span>
         <Button
           variant="accent"
@@ -135,7 +147,7 @@ export function DashboardSidebar({
           nativeButton={false}
           render={<Link href="/dashboard/settings/billing" />}
         >
-          Manage plan
+          {t("managePlan")}
         </Button>
       </div>
     </div>
@@ -147,6 +159,7 @@ export function MobileDashboardSidebar({
 }: {
   marketplaceEnabled: boolean;
 }) {
+  const t = useTranslations("sharedComponents.dashboardSidebar");
   const [open, setOpen] = useState(false);
 
   return (
@@ -155,14 +168,14 @@ export function MobileDashboardSidebar({
         render={
           <Button variant="secondary" size="icon">
             <Menu className="size-5" />
-            <span className="sr-only">Open dashboard menu</span>
+            <span className="sr-only">{t("openMenu")}</span>
           </Button>
         }
       />
       <SheetContent side="left" className="w-3/4 sm:max-w-xs">
         <SheetHeader className="sr-only">
-          <SheetTitle>Dashboard menu</SheetTitle>
-          <SheetDescription>Dashboard navigation</SheetDescription>
+          <SheetTitle>{t("menuTitle")}</SheetTitle>
+          <SheetDescription>{t("menuDescription")}</SheetDescription>
         </SheetHeader>
         <div className="p-4" onClick={() => setOpen(false)}>
           <DashboardSidebar marketplaceEnabled={marketplaceEnabled} />

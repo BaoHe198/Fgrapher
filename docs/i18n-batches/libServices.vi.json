@@ -1,0 +1,159 @@
+{
+  "libServices": {
+    "validation": {
+      "auth": {
+        "emailInvalid": "Vui lòng nhập một địa chỉ email hợp lệ",
+        "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự",
+        "nameRequired": "Vui lòng nhập họ và tên",
+        "passwordUppercase": "Mật khẩu phải chứa ít nhất một chữ cái viết hoa",
+        "passwordNumber": "Mật khẩu phải chứa ít nhất một chữ số",
+        "dateOfBirthRequired": "Vui lòng nhập ngày sinh",
+        "roleRequired": "Vui lòng chọn ít nhất một vai trò",
+        "consentServiceRequired": "Bạn phải đồng ý xử lý dữ liệu cá nhân để tạo tài khoản",
+        "mustBe18": "Bạn phải từ 18 tuổi trở lên để tạo tài khoản Fgrapher",
+        "contentGuidelinesRequired": "Bạn phải chấp nhận nguyên tắc nội dung để đăng ký với vai trò Người mẫu"
+      },
+      "booking": {
+        "invalidDate": "Ngày không hợp lệ",
+        "invalidTime": "Giờ không hợp lệ"
+      },
+      "marketplace": {
+        "rentalDatesRequired": "Vui lòng chọn ngày thuê"
+      },
+      "portfolio": {
+        "rightsConfirmedRequired": "Bạn phải xác nhận có quyền sử dụng những hình ảnh này"
+      },
+      "product": {
+        "nameRequired": "Vui lòng nhập tên sản phẩm",
+        "salePriceRequired": "Vui lòng nhập giá bán",
+        "rentalPriceRequired": "Vui lòng nhập giá thuê mỗi ngày",
+        "bothPricesRequired": "Vui lòng nhập cả giá bán và giá thuê"
+      },
+      "profile": {
+        "displayNameRequired": "Vui lòng nhập tên hiển thị"
+      },
+      "review": {
+        "contentTooShort": "Vui lòng chia sẻ chi tiết hơn (tối thiểu 20 ký tự)"
+      },
+      "service": {
+        "nameRequired": "Vui lòng nhập tên dịch vụ",
+        "durationRequired": "Vui lòng nhập thời lượng (phút)",
+        "priceRequired": "Vui lòng nhập giá"
+      },
+      "subscription": {
+        "roleRequired": "Vui lòng chọn ít nhất một vai trò"
+      },
+      "user": {
+        "roleRequired": "Vui lòng chọn ít nhất một vai trò",
+        "bioTooLong": "Tiểu sử tối đa 500 ký tự",
+        "usernameTooShort": "Tên người dùng phải có ít nhất 3 ký tự",
+        "usernameInvalidChars": "Chỉ dùng chữ thường, số và dấu gạch dưới",
+        "currentPasswordRequired": "Vui lòng nhập mật khẩu hiện tại",
+        "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự",
+        "passwordUppercase": "Mật khẩu phải chứa ít nhất một chữ cái viết hoa",
+        "passwordNumber": "Mật khẩu phải chứa ít nhất một chữ số",
+        "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu mới",
+        "passwordsDoNotMatch": "Mật khẩu xác nhận không khớp"
+      },
+      "verification": {
+        "fullNameRequired": "Vui lòng nhập họ tên đầy đủ theo giấy tờ",
+        "idNumberInvalid": "Vui lòng nhập số CCCD/CMND hợp lệ (9 hoặc 12 chữ số)",
+        "consentRequired": "Bạn phải đồng ý xử lý giấy tờ tùy thân để gửi yêu cầu xác minh"
+      }
+    },
+    "auth": {
+      "unauthorized": "Bạn cần đăng nhập để tiếp tục",
+      "missingRole": "Thiếu vai trò bắt buộc: {role}",
+      "activeSubscriptionRequired": "Cần có gói đăng ký đang hoạt động cho vai trò: {role}",
+      "paidRoleRequired": "Cần có ít nhất một vai trò trả phí đang hoạt động",
+      "adminAccessRequired": "Yêu cầu quyền quản trị viên"
+    },
+    "email": {
+      "footer": {
+        "manageNotifications": "Quản lý tùy chọn thông báo"
+      },
+      "bookingRequest": {
+        "heading": "Yêu cầu đặt lịch mới",
+        "body": "{otherPartyName} đã yêu cầu đặt {serviceName} vào {dateLabel} lúc {timeLabel}. Phản hồi trong vòng 24 giờ để duy trì tỷ lệ phản hồi tốt.",
+        "cta": "Xem yêu cầu"
+      },
+      "bookingConfirmed": {
+        "heading": "Đã xác nhận lịch hẹn",
+        "body": "{otherPartyName} đã xác nhận lịch {serviceName} vào {dateLabel} lúc {timeLabel}. Chúng tôi sẽ nhắc bạn trước 24 giờ.",
+        "cta": "Xem lịch hẹn"
+      },
+      "bookingDeclined": {
+        "heading": "Lịch hẹn bị từ chối",
+        "body": "{otherPartyName} không thể nhận yêu cầu {serviceName} của bạn vào {dateLabel} lúc {timeLabel}. Hãy tìm nhà cung cấp khác đang có lịch trống.",
+        "cta": "Tìm nghệ sĩ khác"
+      },
+      "bookingCancelled": {
+        "heading": "Lịch hẹn đã bị hủy",
+        "body": "{otherPartyName} đã hủy lịch {serviceName} vào {dateLabel} lúc {timeLabel}.",
+        "cta": "Xem lịch hẹn"
+      },
+      "bookingReminder": {
+        "heading": "Lịch hẹn vào ngày mai",
+        "body": "Nhắc nhở: buổi {serviceName} của bạn với {otherPartyName} diễn ra vào {dateLabel} lúc {timeLabel} — chưa đầy 24 giờ nữa.",
+        "cta": "Xem lịch hẹn"
+      },
+      "bookingCompleted": {
+        "heading": "Buổi chụp của bạn thế nào?",
+        "body": "Buổi {serviceName} của bạn với {otherPartyName} đã được đánh dấu hoàn thành. Hãy để lại đánh giá để giúp những khách hàng khác.",
+        "cta": "Viết đánh giá"
+      },
+      "welcomeSubscription": {
+        "heading": "Chào mừng đến với Fgrapher Pro!",
+        "bodySingular": "Hồ sơ {roleNames} của bạn đã hoạt động. Gói dùng thử 14 ngày miễn phí đã bắt đầu — quản lý gói đăng ký bất cứ lúc nào trong phần cài đặt thanh toán.",
+        "bodyPlural": "Các hồ sơ {roleNames} của bạn đã hoạt động. Gói dùng thử 14 ngày miễn phí đã bắt đầu — quản lý gói đăng ký bất cứ lúc nào trong phần cài đặt thanh toán.",
+        "cta": "Xem thanh toán"
+      },
+      "paymentFailed": {
+        "heading": "Thanh toán của bạn không thành công",
+        "body": "Chúng tôi không thể trừ tiền từ thẻ của bạn cho gói đăng ký Fgrapher. Hồ sơ của bạn vẫn hoạt động đến {graceEndsLabel} — vui lòng cập nhật phương thức thanh toán trước thời hạn để tránh bị gián đoạn.",
+        "cta": "Cập nhật phương thức thanh toán"
+      },
+      "subscriptionCancelling": {
+        "heading": "Rất tiếc phải chia tay bạn",
+        "body": "Gói đăng ký của bạn sẽ hủy vào {periodEndLabel}. Bạn vẫn có toàn quyền truy cập đến lúc đó. Đổi ý rồi?",
+        "cta": "Tiếp tục gói đăng ký"
+      },
+      "subscriptionEnded": {
+        "heading": "Gói đăng ký của bạn đã kết thúc",
+        "body": "Gói đăng ký Fgrapher Pro của bạn đã kết thúc và hồ sơ của bạn không còn hiển thị trong tìm kiếm. Toàn bộ dữ liệu của bạn vẫn được lưu giữ — kích hoạt lại bất cứ lúc nào để tiếp tục.",
+        "cta": "Kích hoạt lại"
+      },
+      "receipt": {
+        "heading": "Đã nhận thanh toán",
+        "body": "Chúng tôi đã nhận được khoản thanh toán {amountLabel} của bạn. Gói đăng ký của bạn đang hoạt động đến {periodEndLabel}.",
+        "cta": "Xem biên lai"
+      },
+      "orderConfirmation": {
+        "heading": "Đơn hàng đã được xác nhận!",
+        "body": "Đơn hàng {orderNumber} — {itemsSummary}. Tổng cộng: {totalLabel}",
+        "cta": "Xem đơn hàng"
+      },
+      "newOrder": {
+        "heading": "Có đơn hàng mới",
+        "body": "{customerName} đã đặt đơn hàng {orderNumber} — {itemsSummary}",
+        "cta": "Xem đơn hàng"
+      },
+      "orderStatus": {
+        "heading": "Đơn hàng {statusLabel}",
+        "body": "Đơn hàng {orderNumber} của bạn hiện đang {statusLabel}.",
+        "bodyWithDetail": "Đơn hàng {orderNumber} của bạn hiện đang {statusLabel}. {detail}",
+        "cta": "Xem đơn hàng"
+      },
+      "newReview": {
+        "heading": "Đánh giá mới",
+        "body": "{reviewerName} đã để lại cho bạn đánh giá {rating} sao.",
+        "cta": "Xem & phản hồi"
+      },
+      "reviewResponse": {
+        "heading": "Có phản hồi mới cho đánh giá của bạn",
+        "body": "{providerName} đã phản hồi đánh giá của bạn.",
+        "cta": "Xem phản hồi"
+      }
+    }
+  }
+}
