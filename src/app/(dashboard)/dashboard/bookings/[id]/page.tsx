@@ -2,6 +2,7 @@
 
 import type { Booking, BookingStatus, Service, User } from "@prisma/client";
 import { AlertTriangle, ArrowLeft, Loader2, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
@@ -54,39 +55,46 @@ type BookingDetail = Booking & {
   isFirstBookingBetweenParties: boolean;
 };
 
-const STATUS_BADGE: Record<
+const STATUS_VARIANT: Record<
   BookingStatus,
-  { label: string; variant: "warning" | "success" | "neutral" | "destructive" }
+  "warning" | "success" | "neutral" | "destructive"
 > = {
-  PENDING: { label: "Pending", variant: "warning" },
-  CONFIRMED: { label: "Confirmed", variant: "success" },
-  COMPLETED: { label: "Completed", variant: "neutral" },
-  CANCELLED: { label: "Cancelled", variant: "destructive" },
-  DECLINED: { label: "Declined", variant: "destructive" },
-  NO_SHOW: { label: "No-show", variant: "destructive" },
-  EXPIRED: { label: "Expired", variant: "neutral" },
+  PENDING: "warning",
+  CONFIRMED: "success",
+  COMPLETED: "neutral",
+  CANCELLED: "destructive",
+  DECLINED: "destructive",
+  NO_SHOW: "destructive",
+  EXPIRED: "neutral",
 };
 
-const LOCATION_LABEL: Record<string, string> = {
-  PROVIDER: "At provider's studio",
-  CUSTOMER: "At customer's location",
-  OUTDOOR: "Outdoor / other",
-};
-
-const DECLINE_REASONS = [
-  { value: "Unavailable", label: "Unavailable" },
-  { value: "Outside my service area", label: "Outside my service area" },
-  { value: "Not my specialty", label: "Not my specialty" },
-  { value: "Other", label: "Other" },
-];
-
-function partyName(party: Party) {
-  return party.firstName ?? party.name ?? "Unknown";
-}
+const DECLINE_REASON_VALUES = [
+  "unavailable",
+  "outsideArea",
+  "notSpecialty",
+  "other",
+] as const;
 
 export default function BookingDetailPage() {
+  const t = useTranslations("dashboardCore.bookingDetail");
+  const tBookings = useTranslations("dashboardCore.bookings");
   const params = useParams<{ id: string }>();
   const { data: session } = useSession();
+
+  function partyName(party: Party) {
+    return party.firstName ?? party.name ?? tBookings("unknownParty");
+  }
+
+  const LOCATION_LABEL: Record<string, string> = {
+    PROVIDER: t("locationLabel.PROVIDER"),
+    CUSTOMER: t("locationLabel.CUSTOMER"),
+    OUTDOOR: t("locationLabel.OUTDOOR"),
+  };
+
+  const DECLINE_REASONS = DECLINE_REASON_VALUES.map((value) => ({
+    value,
+    label: t(`dialogs.decline.reasons.${value}`),
+  }));
 
   const [booking, setBooking] = useState<BookingDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,7 +102,9 @@ export default function BookingDetailPage() {
   const [busy, setBusy] = useState(false);
 
   const [declineOpen, setDeclineOpen] = useState(false);
-  const [declineReason, setDeclineReason] = useState(DECLINE_REASONS[0].value);
+  const [declineReason, setDeclineReason] = useState<string>(
+    DECLINE_REASONS[0].value,
+  );
   const [declineMessage, setDeclineMessage] = useState("");
 
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -165,14 +175,14 @@ export default function BookingDetailPage() {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p className="text-body-lg font-semibold text-text-primary">
-          Booking not found
+          {t("notFound")}
         </p>
         <Button
           variant="secondary"
           nativeButton={false}
           render={<Link href="/dashboard/bookings" />}
         >
-          Back to bookings
+          {t("backToBookings")}
         </Button>
       </div>
     );
@@ -188,7 +198,7 @@ export default function BookingDetailPage() {
 
   const viewerIsProvider = session?.user?.id === booking.provider.id;
   const otherParty = viewerIsProvider ? booking.customer : booking.provider;
-  const status = STATUS_BADGE[booking.status];
+  const statusVariant = STATUS_VARIANT[booking.status];
   const isPast = new Date(booking.date).getTime() < now;
   const withinCancellationWindow =
     new Date(booking.date).getTime() - now < MIN_NOTICE_HOURS * 60 * 60 * 1000;
@@ -202,14 +212,19 @@ export default function BookingDetailPage() {
         className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary"
       >
         <ArrowLeft className="size-4" />
-        Back to bookings
+        {t("backToBookings")}
       </Link>
 
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-display-md text-text-primary">Booking details</h1>
-        <Badge variant={status.variant}>{status.label}</Badge>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+        <Badge variant={statusVariant}>
+          {tBookings(`status.${booking.status}`)}
+        </Badge>
         <span className="text-body-sm text-text-tertiary">
-          #{booking.id.slice(-8)} · Requested {formatDate(booking.createdAt)}
+          {t("idRequested", {
+            id: booking.id.slice(-8),
+            date: formatDate(booking.createdAt),
+          })}
         </span>
       </div>
 
@@ -217,11 +232,10 @@ export default function BookingDetailPage() {
         <Card className="flex flex-col gap-1.5 border border-warning bg-warning-bg">
           <span className="flex items-center gap-1.5 text-body-md font-semibold text-text-primary">
             <AlertTriangle className="size-4" />
-            First time working with {partyName(otherParty)}?
+            {t("firstTimeWarning.title", { name: partyName(otherParty) })}
           </span>
           <p className="text-body-sm text-text-secondary">
-            For your first session together, meet in a public place if possible
-            and let a friend or family member know your schedule and location.
+            {t("firstTimeWarning.body")}
           </p>
         </Card>
       ) : null}
@@ -229,23 +243,28 @@ export default function BookingDetailPage() {
       {booking.parentBooking ? (
         <Card className="flex items-center justify-between gap-2">
           <span className="text-body-sm text-text-secondary">
-            Part of a crew for{" "}
+            {t("crewHire.partOf")}{" "}
             <Link
               href={`/dashboard/bookings/${booking.parentBooking.id}`}
               className="font-semibold text-text-link hover:underline"
             >
-              {booking.parentBooking.service?.name ?? "a client booking"} on{" "}
-              {formatDate(booking.parentBooking.date)}
+              {booking.parentBooking.service?.name ??
+                t("crewHire.unnamedClientBooking")}{" "}
+              {t("crewHire.onDate", {
+                date: formatDate(booking.parentBooking.date),
+              })}
             </Link>
           </span>
-          <Badge variant="neutral">{booking.parentBooking.status}</Badge>
+          <Badge variant="neutral">
+            {tBookings(`status.${booking.parentBooking.status}`)}
+          </Badge>
         </Card>
       ) : null}
 
       {booking.childBookings.length > 0 ? (
         <Card className="flex flex-col gap-2">
           <span className="text-body-sm font-semibold text-text-primary">
-            Crew booked for this job
+            {t("crewHire.crewBookedTitle")}
           </span>
           {booking.childBookings.map((child) => (
             <div
@@ -256,10 +275,14 @@ export default function BookingDetailPage() {
                 href={`/dashboard/bookings/${child.id}`}
                 className="text-body-sm text-text-link hover:underline"
               >
-                {child.provider.firstName ?? child.provider.name ?? "Unknown"}
+                {child.provider.firstName ??
+                  child.provider.name ??
+                  t("crewHire.unknown")}
                 {child.recipientRole ? ` — ${child.recipientRole}` : ""}
               </Link>
-              <Badge variant="neutral">{child.status}</Badge>
+              <Badge variant="neutral">
+                {tBookings(`status.${child.status}`)}
+              </Badge>
             </div>
           ))}
         </Card>
@@ -269,11 +292,11 @@ export default function BookingDetailPage() {
         <Card className="flex flex-col gap-2 border border-brand-primary bg-success-bg">
           <span className="text-body-md font-semibold text-text-primary">
             {proposedByMe
-              ? "Waiting for a response to your proposed time"
-              : "New time proposed"}
+              ? t("reschedule.waitingForResponse")
+              : t("reschedule.newTimeProposed")}
           </span>
           <span className="text-body-sm text-text-secondary">
-            {formatDate(booking.rescheduleProposedDate!)} at{" "}
+            {formatDate(booking.rescheduleProposedDate!)} {t("reschedule.at")}{" "}
             {booking.rescheduleProposedStartTime}
           </span>
           {!proposedByMe ? (
@@ -284,7 +307,7 @@ export default function BookingDetailPage() {
                 disabled={busy}
                 onClick={() => respondReschedule(true)}
               >
-                Accept new time
+                {t("reschedule.acceptNewTime")}
               </Button>
               <Button
                 size="sm"
@@ -292,7 +315,7 @@ export default function BookingDetailPage() {
                 disabled={busy}
                 onClick={() => respondReschedule(false)}
               >
-                Keep original time
+                {t("reschedule.keepOriginalTime")}
               </Button>
             </div>
           ) : null}
@@ -315,11 +338,13 @@ export default function BookingDetailPage() {
                 <span className="flex items-center gap-1.5 text-body-md font-semibold text-text-primary">
                   {partyName(otherParty)}
                   {(otherParty.roles?.length ?? 0) > 0 ? (
-                    <Badge variant="accent">Verified</Badge>
+                    <Badge variant="accent">{t("otherParty.verified")}</Badge>
                   ) : null}
                 </span>
                 <span className="text-body-sm text-text-secondary">
-                  {viewerIsProvider ? "Client" : "Provider"}
+                  {viewerIsProvider
+                    ? t("otherParty.client")
+                    : t("otherParty.provider")}
                 </span>
               </div>
             </div>
@@ -331,7 +356,7 @@ export default function BookingDetailPage() {
                   nativeButton={false}
                   render={<Link href={`/profile/${otherParty.username}`} />}
                 >
-                  View profile
+                  {t("otherParty.viewProfile")}
                 </Button>
               ) : null}
               <Button
@@ -342,7 +367,7 @@ export default function BookingDetailPage() {
                   <Link href={`/dashboard/messages?to=${otherParty.id}`} />
                 }
               >
-                Message
+                {t("otherParty.message")}
               </Button>
             </div>
           </Card>
@@ -352,30 +377,37 @@ export default function BookingDetailPage() {
             padding={false}
           >
             {[
-              ["Service", booking.service?.name ?? "Custom request"],
-              ["Date", formatDate(booking.date)],
               [
-                "Time",
+                t("fields.service"),
+                booking.service?.name ?? t("fields.customRequest"),
+              ],
+              [t("fields.date"), formatDate(booking.date)],
+              [
+                t("fields.time"),
                 booking.endTime
                   ? `${booking.startTime} – ${booking.endTime}`
                   : booking.startTime,
               ],
               [
-                "Duration",
-                booking.service ? `${booking.service.duration} min` : "—",
+                t("fields.duration"),
+                booking.service
+                  ? t("fields.durationMinutes", {
+                      minutes: booking.service.duration,
+                    })
+                  : "—",
               ],
               [
-                "Location",
+                t("fields.location"),
                 booking.locationType
                   ? LOCATION_LABEL[booking.locationType]
                   : "—",
               ],
               [
-                "People",
+                t("fields.people"),
                 booking.numberOfPeople ? String(booking.numberOfPeople) : "—",
               ],
               [
-                "Total",
+                t("fields.total"),
                 booking.totalPrice
                   ? formatCurrency(booking.totalPrice, booking.currency)
                   : "—",
@@ -404,7 +436,9 @@ export default function BookingDetailPage() {
 
           {booking.notes ? (
             <Card className="flex flex-col gap-1.5">
-              <span className="text-body-sm text-text-tertiary">Notes</span>
+              <span className="text-body-sm text-text-tertiary">
+                {t("notes")}
+              </span>
               <p className="whitespace-pre-line text-body-md text-text-primary">
                 {booking.notes}
               </p>
@@ -416,7 +450,7 @@ export default function BookingDetailPage() {
           !booking.review ? (
             <Card className="flex flex-col items-center gap-3 text-center">
               <span className="text-body-lg font-semibold text-text-primary">
-                How was your session with {partyName(otherParty)}?
+                {t("reviewPrompt", { name: partyName(otherParty) })}
               </span>
               <StarInput
                 value={reviewRating}
@@ -429,19 +463,29 @@ export default function BookingDetailPage() {
           ) : null}
 
           <Card className="flex flex-col gap-2.5">
-            <span className="text-body-sm text-text-tertiary">Timeline</span>
-            <TimelineRow label="Request created" date={booking.createdAt} />
+            <span className="text-body-sm text-text-tertiary">
+              {t("timeline.title")}
+            </span>
+            <TimelineRow
+              label={t("timeline.requestCreated")}
+              date={booking.createdAt}
+            />
             {booking.status === "CANCELLED" || booking.status === "DECLINED" ? (
               <TimelineRow
                 label={
-                  booking.status === "CANCELLED" ? "Cancelled" : "Declined"
+                  booking.status === "CANCELLED"
+                    ? t("timeline.cancelled")
+                    : t("timeline.declined")
                 }
                 date={booking.updatedAt}
                 detail={booking.cancelReason}
               />
             ) : null}
             {booking.status === "COMPLETED" && booking.completedAt ? (
-              <TimelineRow label="Marked complete" date={booking.completedAt} />
+              <TimelineRow
+                label={t("timeline.markedComplete")}
+                date={booking.completedAt}
+              />
             ) : null}
           </Card>
         </div>
@@ -455,21 +499,21 @@ export default function BookingDetailPage() {
                   disabled={busy}
                   onClick={() => setAcceptOpen(true)}
                 >
-                  Accept
+                  {t("actions.accept")}
                 </Button>
                 <Button
                   variant="ghost"
                   disabled={busy}
                   onClick={() => setDeclineOpen(true)}
                 >
-                  Decline
+                  {t("actions.decline")}
                 </Button>
                 <Button
                   variant="secondary"
                   disabled={busy}
                   onClick={() => setRescheduleOpen(true)}
                 >
-                  Propose new time
+                  {t("actions.proposeNewTime")}
                 </Button>
               </>
             ) : null}
@@ -480,7 +524,7 @@ export default function BookingDetailPage() {
                 disabled={busy}
                 onClick={() => setCancelOpen(true)}
               >
-                Cancel request
+                {t("actions.cancelRequest")}
               </Button>
             ) : null}
 
@@ -493,21 +537,21 @@ export default function BookingDetailPage() {
                     <Link href={`/dashboard/messages?to=${otherParty.id}`} />
                   }
                 >
-                  Message
+                  {t("actions.message")}
                 </Button>
                 <Button
                   variant="secondary"
                   disabled={busy}
                   onClick={() => setRescheduleOpen(true)}
                 >
-                  Reschedule
+                  {t("actions.reschedule")}
                 </Button>
                 <Button
                   variant="ghost"
                   disabled={busy}
                   onClick={() => setCancelOpen(true)}
                 >
-                  Cancel
+                  {t("actions.cancel")}
                 </Button>
                 {viewerIsProvider && isPast ? (
                   <>
@@ -516,14 +560,14 @@ export default function BookingDetailPage() {
                       disabled={busy}
                       onClick={() => updateStatus("COMPLETED")}
                     >
-                      Mark completed
+                      {t("actions.markCompleted")}
                     </Button>
                     <Button
                       variant="ghost"
                       disabled={busy}
                       onClick={() => updateStatus("NO_SHOW")}
                     >
-                      Report no-show
+                      {t("actions.reportNoShow")}
                     </Button>
                   </>
                 ) : null}
@@ -535,15 +579,18 @@ export default function BookingDetailPage() {
             booking.status === "DECLINED" ||
             booking.status === "NO_SHOW" ? (
               <p className="text-body-sm text-text-secondary">
-                This booking is {status.label.toLowerCase()} — no further action
-                needed.
+                {t("actions.doneStatusNote", {
+                  status: tBookings(`status.${booking.status}`),
+                })}
               </p>
             ) : null}
           </Card>
 
           {booking.totalPrice ? (
             <Card className="flex justify-between">
-              <span className="text-body-sm text-text-tertiary">Total</span>
+              <span className="text-body-sm text-text-tertiary">
+                {t("fields.total")}
+              </span>
               <span className="text-heading-sm font-bold text-text-primary">
                 {formatCurrency(booking.totalPrice, booking.currency)}
               </span>
@@ -556,8 +603,7 @@ export default function BookingDetailPage() {
             <Card className="flex items-start gap-2 border border-warning/40 bg-warning-bg">
               <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
               <span className="text-body-sm text-text-primary">
-                Less than 24 hours until this booking — cancelling now may be
-                subject to a fee once payments are enabled.
+                {t("cancellationWarning")}
               </span>
             </Card>
           ) : null}
@@ -567,15 +613,18 @@ export default function BookingDetailPage() {
       <Dialog open={acceptOpen} onOpenChange={setAcceptOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm this booking?</DialogTitle>
+            <DialogTitle>{t("dialogs.accept.title")}</DialogTitle>
           </DialogHeader>
           <p className="text-body-md text-text-secondary">
-            {partyName(booking.customer)} will be notified and the slot will be
-            locked in for {formatDate(booking.date)} at {booking.startTime}.
+            {t("dialogs.accept.body", {
+              name: partyName(booking.customer),
+              date: formatDate(booking.date),
+              time: booking.startTime,
+            })}
           </p>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAcceptOpen(false)}>
-              Cancel
+              {t("dialogs.accept.cancel")}
             </Button>
             <Button
               variant="accent"
@@ -583,7 +632,7 @@ export default function BookingDetailPage() {
               onClick={() => updateStatus("CONFIRMED")}
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              Confirm booking
+              {t("dialogs.accept.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -592,17 +641,17 @@ export default function BookingDetailPage() {
       <Dialog open={declineOpen} onOpenChange={setDeclineOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Decline this booking</DialogTitle>
+            <DialogTitle>{t("dialogs.decline.title")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <NativeSelect
-              label="Reason"
+              label={t("dialogs.decline.reasonLabel")}
               value={declineReason}
               onChange={setDeclineReason}
               options={DECLINE_REASONS}
             />
             <Textarea
-              placeholder="Optional message to the customer..."
+              placeholder={t("dialogs.decline.messagePlaceholder")}
               value={declineMessage}
               onChange={(e) => setDeclineMessage(e.target.value)}
               rows={3}
@@ -610,22 +659,25 @@ export default function BookingDetailPage() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDeclineOpen(false)}>
-              Back
+              {t("dialogs.decline.back")}
             </Button>
             <Button
               variant="accent"
               disabled={busy}
-              onClick={() =>
+              onClick={() => {
+                const reasonLabel = t(
+                  `dialogs.decline.reasons.${declineReason}`,
+                );
                 updateStatus(
                   "DECLINED",
                   declineMessage
-                    ? `${declineReason} — ${declineMessage}`
-                    : declineReason,
-                )
-              }
+                    ? `${reasonLabel} — ${declineMessage}`
+                    : reasonLabel,
+                );
+              }}
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              Decline booking
+              {t("dialogs.decline.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -634,20 +686,19 @@ export default function BookingDetailPage() {
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancel this booking?</DialogTitle>
+            <DialogTitle>{t("dialogs.cancel.title")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             {withinCancellationWindow ? (
               <div className="flex items-start gap-2 rounded-[var(--fg-radius-md)] bg-warning-bg p-3">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
                 <span className="text-body-sm text-text-primary">
-                  This is within 24 hours of the booking — the cancellation
-                  policy may apply once payments are enabled.
+                  {t("dialogs.cancel.withinWindowWarning")}
                 </span>
               </div>
             ) : null}
             <Textarea
-              placeholder="Reason for cancelling (optional)"
+              placeholder={t("dialogs.cancel.reasonPlaceholder")}
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               rows={3}
@@ -655,7 +706,7 @@ export default function BookingDetailPage() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setCancelOpen(false)}>
-              Keep booking
+              {t("dialogs.cancel.keepBooking")}
             </Button>
             <Button
               variant="destructive"
@@ -665,7 +716,7 @@ export default function BookingDetailPage() {
               }
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              Cancel booking
+              {t("dialogs.cancel.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -741,6 +792,7 @@ function RescheduleDialog({
   serviceDuration: number | undefined;
   onProposed: () => void;
 }) {
+  const t = useTranslations("dashboardCore.bookingDetail");
   const params = useParams<{ id: string }>();
   const [days, setDays] = useState<DayAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -789,7 +841,7 @@ function RescheduleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Propose a new time</DialogTitle>
+          <DialogTitle>{t("dialogs.reschedule.title")}</DialogTitle>
         </DialogHeader>
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -850,7 +902,7 @@ function RescheduleDialog({
         )}
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("dialogs.reschedule.cancel")}
           </Button>
           <Button
             variant="accent"
@@ -858,7 +910,7 @@ function RescheduleDialog({
             onClick={onSubmit}
           >
             {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-            Send proposal
+            {t("dialogs.reschedule.sendProposal")}
           </Button>
         </DialogFooter>
       </DialogContent>

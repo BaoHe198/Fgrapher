@@ -2,6 +2,7 @@
 
 import type { Booking, BookingStatus, User } from "@prisma/client";
 import { Calendar, Loader2, MoreHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useCallback, useEffect, useState } from "react";
 
@@ -28,37 +29,38 @@ type BookingRow = Booking & {
   service: { name: string } | null;
 };
 
-const TABS: { value: BookingTab; label: string }[] = [
-  { value: "ALL", label: "All" },
-  { value: "PENDING", label: "Pending" },
-  { value: "CONFIRMED", label: "Confirmed" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "CANCELLED", label: "Cancelled" },
+const TAB_VALUES: BookingTab[] = [
+  "ALL",
+  "PENDING",
+  "CONFIRMED",
+  "COMPLETED",
+  "CANCELLED",
 ];
 
-const STATUS_BADGE: Record<
+const STATUS_VARIANT: Record<
   BookingStatus,
-  { label: string; variant: "warning" | "success" | "neutral" | "destructive" }
+  "warning" | "success" | "neutral" | "destructive"
 > = {
-  PENDING: { label: "Pending", variant: "warning" },
-  CONFIRMED: { label: "Confirmed", variant: "success" },
-  COMPLETED: { label: "Completed", variant: "neutral" },
-  CANCELLED: { label: "Cancelled", variant: "destructive" },
-  DECLINED: { label: "Declined", variant: "destructive" },
-  NO_SHOW: { label: "No-show", variant: "destructive" },
-  EXPIRED: { label: "Expired", variant: "neutral" },
+  PENDING: "warning",
+  CONFIRMED: "success",
+  COMPLETED: "neutral",
+  CANCELLED: "destructive",
+  DECLINED: "destructive",
+  NO_SHOW: "destructive",
+  EXPIRED: "neutral",
 };
 
 function formatWhen(date: string | Date, startTime: string) {
   return `${formatWeekdayDayMonth(date)} · ${startTime}`;
 }
 
-function partyName(party: BookingParty) {
-  return party.firstName ?? party.name ?? "Unknown";
-}
-
 export default function BookingsPage() {
+  const t = useTranslations("dashboardCore.bookings");
   const { isCustomerOnly } = useUserRoles();
+
+  function partyName(party: BookingParty) {
+    return party.firstName ?? party.name ?? t("unknownParty");
+  }
   const [tab, setTab] = useState<BookingTab>("ALL");
   const [page, setPage] = useState(1);
   const [bookings, setBookings] = useState<BookingRow[]>([]);
@@ -109,7 +111,7 @@ export default function BookingsPage() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-display-md text-text-primary">
-        {isCustomerOnly ? "My bookings" : "Bookings"}
+        {isCustomerOnly ? t("titleCustomer") : t("titleProvider")}
       </h1>
 
       <Tabs
@@ -117,14 +119,14 @@ export default function BookingsPage() {
         onValueChange={(value) => changeTab(value as BookingTab)}
       >
         <TabsList>
-          {TABS.map((t) => (
-            <TabsTab key={t.value} value={t.value}>
-              {t.label}
+          {TAB_VALUES.map((value) => (
+            <TabsTab key={value} value={value}>
+              {t(`tabs.${value.toLowerCase()}`)}
             </TabsTab>
           ))}
         </TabsList>
-        {TABS.map((t) => (
-          <TabsPanel key={t.value} value={t.value} />
+        {TAB_VALUES.map((value) => (
+          <TabsPanel key={value} value={value} />
         ))}
       </Tabs>
 
@@ -136,11 +138,9 @@ export default function BookingsPage() {
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Calendar className="size-12 text-text-tertiary" />
           <p className="text-body-lg font-semibold text-text-primary">
-            No bookings yet
+            {t("empty.heading")}
           </p>
-          <p className="text-body-md text-text-secondary">
-            When clients book you, they&apos;ll appear here.
-          </p>
+          <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
           {!isCustomerOnly ? (
             <Button
               variant="secondary"
@@ -148,24 +148,26 @@ export default function BookingsPage() {
               nativeButton={false}
               render={<Link href="/dashboard/settings/profile" />}
             >
-              Share your profile
+              {t("shareProfile")}
             </Button>
           ) : null}
         </Card>
       ) : (
         <Card padding={false}>
           <div className="grid grid-cols-[1.2fr_1.2fr_1.4fr_0.8fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.06em] text-text-tertiary">
-            <span>{isCustomerOnly ? "Provider" : "Client"}</span>
-            <span>Service</span>
-            <span>When</span>
-            <span>Total</span>
-            <span>Status</span>
+            <span>
+              {isCustomerOnly ? t("table.provider") : t("table.client")}
+            </span>
+            <span>{t("table.service")}</span>
+            <span>{t("table.when")}</span>
+            <span>{t("table.total")}</span>
+            <span>{t("table.status")}</span>
             <span />
           </div>
 
           {bookings.map((booking) => {
             const party = isCustomerOnly ? booking.provider : booking.customer;
-            const status = STATUS_BADGE[booking.status];
+            const statusVariant = STATUS_VARIANT[booking.status];
             const isBusy = actionId === booking.id;
 
             return (
@@ -197,7 +199,9 @@ export default function BookingsPage() {
                     ? formatCurrency(booking.totalPrice, booking.currency)
                     : "—"}
                 </span>
-                <Badge variant={status.variant}>{status.label}</Badge>
+                <Badge variant={statusVariant}>
+                  {t(`status.${booking.status}`)}
+                </Badge>
 
                 <div className="flex justify-end gap-2">
                   {booking.status === "PENDING" && !isCustomerOnly ? (
@@ -208,7 +212,7 @@ export default function BookingsPage() {
                         disabled={isBusy}
                         onClick={() => updateStatus(booking.id, "CONFIRMED")}
                       >
-                        Accept
+                        {t("accept")}
                       </Button>
                       <Button
                         size="sm"
@@ -216,7 +220,7 @@ export default function BookingsPage() {
                         disabled={isBusy}
                         onClick={() => updateStatus(booking.id, "DECLINED")}
                       >
-                        Decline
+                        {t("decline")}
                       </Button>
                       <Button
                         size="sm"
@@ -226,7 +230,7 @@ export default function BookingsPage() {
                           <Link href={`/dashboard/bookings/${booking.id}`} />
                         }
                       >
-                        Details
+                        {t("details")}
                       </Button>
                     </>
                   ) : null}
@@ -241,7 +245,7 @@ export default function BookingsPage() {
                           <Link href={`/dashboard/bookings/${booking.id}`} />
                         }
                       >
-                        Details
+                        {t("details")}
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger
@@ -257,7 +261,7 @@ export default function BookingsPage() {
                               updateStatus(booking.id, "COMPLETED")
                             }
                           >
-                            Mark complete
+                            {t("markComplete")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             variant="destructive"
@@ -265,7 +269,7 @@ export default function BookingsPage() {
                               updateStatus(booking.id, "CANCELLED")
                             }
                           >
-                            Cancel
+                            {t("cancel")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -282,7 +286,7 @@ export default function BookingsPage() {
                           <Link href={`/dashboard/bookings/${booking.id}`} />
                         }
                       >
-                        View details
+                        {t("viewDetails")}
                       </Button>
                       {(booking.status === "PENDING" ||
                         booking.status === "CONFIRMED") &&
@@ -293,7 +297,7 @@ export default function BookingsPage() {
                           disabled={isBusy}
                           onClick={() => updateStatus(booking.id, "CANCELLED")}
                         >
-                          Cancel
+                          {t("cancel")}
                         </Button>
                       ) : null}
                     </>
@@ -313,10 +317,10 @@ export default function BookingsPage() {
             disabled={page <= 1}
             onClick={() => changePage(page - 1)}
           >
-            Previous
+            {t("previous")}
           </Button>
           <span className="text-body-sm text-text-secondary">
-            Page {page} of {totalPages}
+            {t("pageOf", { page, total: totalPages })}
           </span>
           <Button
             size="sm"
@@ -324,7 +328,7 @@ export default function BookingsPage() {
             disabled={page >= totalPages}
             onClick={() => changePage(page + 1)}
           >
-            Next
+            {t("next")}
           </Button>
         </div>
       ) : null}

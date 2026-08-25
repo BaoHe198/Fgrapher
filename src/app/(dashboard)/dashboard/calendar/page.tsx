@@ -2,13 +2,25 @@
 
 import type { Booking, BookingStatus, User } from "@prisma/client";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { formatMonthYear, formatWeekdayDayMonth } from "@/lib/format";
+import {
+  formatMonthYear,
+  formatWeekdayDayMonth,
+  formatWeekdayShort,
+} from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+// 2024-01-07 (UTC) was a Sunday — used only to derive locale weekday
+// abbreviations in Sun..Sat order for the calendar grid header, not tied
+// to the actual displayed month.
+const WEEKDAY_HEADERS = Array.from({ length: 7 }, (_, i) =>
+  formatWeekdayShort(new Date(Date.UTC(2024, 0, 7 + i))),
+);
 
 type BookingParty = Pick<User, "firstName" | "name">;
 type BookingRow = Booking & {
@@ -40,10 +52,6 @@ const STATUS_BADGE_VARIANT: Record<
   EXPIRED: "neutral",
 };
 
-function partyName(party: BookingParty) {
-  return party.firstName ?? party.name ?? "Unknown";
-}
-
 function monthKey(date: Date) {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
 }
@@ -53,6 +61,13 @@ function dateKey(date: Date) {
 }
 
 export default function CalendarPage() {
+  const t = useTranslations("dashboardCore.calendar");
+  const tBookings = useTranslations("dashboardCore.bookings");
+
+  function partyName(party: BookingParty) {
+    return party.firstName ?? party.name ?? tBookings("unknownParty");
+  }
+
   const [view, setView] = useState<"MONTH" | "AGENDA">("MONTH");
   const [monthCursor, setMonthCursor] = useState(() => new Date());
   const [bookings, setBookings] = useState<BookingRow[]>([]);
@@ -114,7 +129,7 @@ export default function CalendarPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-display-md text-text-primary">Calendar</h1>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
         <div className="inline-flex overflow-hidden rounded-full border border-border-subtle">
           {(["MONTH", "AGENDA"] as const).map((v) => (
             <button
@@ -128,7 +143,7 @@ export default function CalendarPage() {
                   : "text-text-secondary",
               )}
             >
-              {v === "MONTH" ? "Month" : "Agenda"}
+              {v === "MONTH" ? t("monthView") : t("agendaView")}
             </button>
           ))}
         </div>
@@ -137,7 +152,7 @@ export default function CalendarPage() {
       <div className="flex items-center justify-between">
         <button
           type="button"
-          aria-label="Previous month"
+          aria-label={t("prevMonth")}
           onClick={() => changeMonth(-1)}
           className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
         >
@@ -148,7 +163,7 @@ export default function CalendarPage() {
         </span>
         <button
           type="button"
-          aria-label="Next month"
+          aria-label={t("nextMonth")}
           onClick={() => changeMonth(1)}
           className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
         >
@@ -163,8 +178,8 @@ export default function CalendarPage() {
       ) : view === "MONTH" ? (
         <Card padding={false} className="overflow-hidden">
           <div className="grid grid-cols-7 border-b border-border-subtle text-caption-upper tracking-[0.06em] text-text-tertiary">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-              <div key={d} className="px-2 py-2.5 text-center">
+            {WEEKDAY_HEADERS.map((d, i) => (
+              <div key={i} className="px-2 py-2.5 text-center">
                 {d}
               </div>
             ))}
@@ -211,7 +226,7 @@ export default function CalendarPage() {
                     ))}
                     {dayBookings.length > 3 ? (
                       <span className="text-body-sm text-text-tertiary">
-                        +{dayBookings.length - 3} more
+                        {t("moreCount", { count: dayBookings.length - 3 })}
                       </span>
                     ) : null}
                   </div>
@@ -224,7 +239,7 @@ export default function CalendarPage() {
         <Card padding={false}>
           {bookings.length === 0 ? (
             <p className="px-5 py-8 text-center text-body-sm text-text-secondary">
-              No bookings this month
+              {t("emptyMonth")}
             </p>
           ) : (
             bookings.map((b) => (
@@ -236,14 +251,14 @@ export default function CalendarPage() {
                 <div className="flex flex-col">
                   <span className="text-body-md font-semibold text-text-primary">
                     {partyName(b.customer)} ·{" "}
-                    {b.service?.name ?? "Custom request"}
+                    {b.service?.name ?? t("customRequest")}
                   </span>
                   <span className="text-body-sm text-text-secondary">
                     {formatWeekdayDayMonth(b.date)} · {b.startTime}
                   </span>
                 </div>
                 <Badge variant={STATUS_BADGE_VARIANT[b.status]}>
-                  {b.status}
+                  {tBookings(`status.${b.status}`)}
                 </Badge>
               </Link>
             ))

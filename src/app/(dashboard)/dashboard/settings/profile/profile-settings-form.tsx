@@ -112,6 +112,7 @@ function toFormValues(
 
 export function ProfileSettingsForm({ role }: { role: Role }) {
   const t = useTranslations("dashboardSettings.profile.location");
+  const tEditor = useTranslations("dashboardSettings.profile.editor");
   const categoryT = useTranslations("profileCategory");
   const experienceLevelT = useTranslations("experienceLevel");
   const [values, setValues] = useState<ProfileFormValues>(toFormValues(null));
@@ -189,7 +190,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
     const body = await res.json();
     setIsPublishing(false);
     if (!res.ok) {
-      setPublishError(body.message ?? "Something went wrong");
+      setPublishError(body.message ?? tEditor("publishError"));
       return;
     }
     setIsPublished(next);
@@ -302,12 +303,10 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
               <ShieldCheck className="size-4 text-success" />
             ) : null}
             <span className="text-body-md font-semibold text-text-primary">
-              {isPublished
-                ? "Live — visible in search"
-                : "Draft — not visible in search"}
+              {isPublished ? tEditor("liveStatus") : tEditor("draftStatus")}
             </span>
             {verificationStatus === "VERIFIED" ? (
-              <Badge variant="success">Verified</Badge>
+              <Badge variant="success">{tEditor("verifiedBadge")}</Badge>
             ) : null}
           </div>
           <Switch
@@ -321,14 +320,14 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         </div>
         {verificationStatus !== "VERIFIED" ? (
           <p className="text-body-sm text-text-secondary">
-            You can keep editing this profile as a draft. Once{" "}
+            {tEditor("notVerifiedNoteBefore")}{" "}
             <Link
               href={`/onboarding/verification?role=${role}`}
               className="text-text-link hover:underline"
             >
-              your identity is verified
+              {tEditor("verifiedLinkText")}
             </Link>
-            , you can publish it to appear in search and receive bookings.
+            {tEditor("notVerifiedNoteAfter")}
           </p>
         ) : null}
         {publishError ? (
@@ -337,7 +336,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       </div>
 
       <Input
-        label="Display name"
+        label={tEditor("displayNameLabel")}
         value={values.displayName}
         onChange={(e) => set("displayName", e.target.value)}
       />
@@ -345,7 +344,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <label className="text-body-sm font-semibold text-text-primary">
-            Description
+            {tEditor("descriptionLabel")}
           </label>
           <span className="text-body-sm text-text-tertiary">
             {values.description.length}/1000
@@ -361,7 +360,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       <div className="flex flex-col gap-2">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Categories
+          {tEditor("categoriesLabel")}
         </span>
         <div className="flex flex-wrap gap-2">
           {(CATEGORIES_BY_ROLE[role] ?? []).map((category) => (
@@ -378,13 +377,13 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       <div className="grid grid-cols-2 gap-3">
         <Input
-          label="Min price"
+          label={tEditor("minPriceLabel")}
           type="number"
           value={values.priceMin}
           onChange={(e) => set("priceMin", e.target.value)}
         />
         <Input
-          label="Max price"
+          label={tEditor("maxPriceLabel")}
           type="number"
           value={values.priceMax}
           onChange={(e) => set("priceMax", e.target.value)}
@@ -467,19 +466,19 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       {role === "STUDIO" ? (
         <>
           <Input
-            label="Address"
+            label={tEditor("addressLabel")}
             value={values.address}
             onChange={(e) => set("address", e.target.value)}
           />
           <Input
-            label="Area (sqm)"
+            label={tEditor("areaLabel")}
             type="number"
             value={values.area}
             onChange={(e) => set("area", e.target.value)}
           />
           <div className="flex flex-col gap-2">
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-              Amenities
+              {tEditor("amenitiesLabel")}
             </span>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {AMENITY_OPTIONS.map((amenity) => (
@@ -487,7 +486,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
                   key={amenity}
                   checked={values.amenities.includes(amenity)}
                   onCheckedChange={() => toggleAmenity(amenity)}
-                  label={amenity.replace(/_/g, " ")}
+                  label={tEditor(`amenities.${amenity}`)}
                 />
               ))}
             </div>
@@ -498,37 +497,39 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       {role === "MODEL" ? (
         <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            Model details
+            {tEditor("modelDetails.title")}
           </span>
           <p className="text-body-sm text-text-tertiary">
-            All optional and shown publicly on your profile — leave anything
-            blank to hide it.
+            {tEditor("modelDetails.subtitle")}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Height (cm)"
+              label={tEditor("modelDetails.heightLabel")}
               type="number"
               value={values.height}
               onChange={(e) => set("height", e.target.value)}
             />
             <Input
-              label="Shoe size"
+              label={tEditor("modelDetails.shoeSizeLabel")}
               value={values.shoeSize}
               onChange={(e) => set("shoeSize", e.target.value)}
             />
             <Input
-              label="Measurements"
+              label={tEditor("modelDetails.measurementsLabel")}
               value={values.measurements}
               onChange={(e) => set("measurements", e.target.value)}
             />
             <NativeSelect
-              label="Experience level"
+              label={tEditor("modelDetails.experienceLevelLabel")}
               value={values.experienceLevel}
               onChange={(v) =>
                 set("experienceLevel", v as ExperienceLevel | "")
               }
               options={[
-                { value: "", label: "Not specified" },
+                {
+                  value: "",
+                  label: tEditor("modelDetails.experienceLevelNotSpecified"),
+                },
                 ...EXPERIENCE_LEVELS.map((level) => ({
                   value: level,
                   label: experienceLevelT(level),
@@ -536,12 +537,12 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
               ]}
             />
             <Input
-              label="Hair color"
+              label={tEditor("modelDetails.hairColorLabel")}
               value={values.hairColor}
               onChange={(e) => set("hairColor", e.target.value)}
             />
             <Input
-              label="Eye color"
+              label={tEditor("modelDetails.eyeColorLabel")}
               value={values.eyeColor}
               onChange={(e) => set("eyeColor", e.target.value)}
             />
@@ -549,16 +550,16 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           <Checkbox
             checked={values.travelWilling}
             onCheckedChange={(checked) => set("travelWilling", checked)}
-            label="Willing to travel for shoots"
+            label={tEditor("modelDetails.travelWillingLabel")}
           />
           <Checkbox
             checked={values.agencyRepresented}
             onCheckedChange={(checked) => set("agencyRepresented", checked)}
-            label="Represented by an agency"
+            label={tEditor("modelDetails.agencyRepresentedLabel")}
           />
           {values.agencyRepresented ? (
             <Input
-              label="Agency name"
+              label={tEditor("modelDetails.agencyNameLabel")}
               value={values.agencyName}
               onChange={(e) => set("agencyName", e.target.value)}
             />
@@ -566,26 +567,26 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
           <div className="h-px bg-border-subtle" />
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            Privacy
+            {tEditor("modelDetails.privacyTitle")}
           </span>
           <Checkbox
             checked={values.hideExactLocation}
             onCheckedChange={(checked) => set("hideExactLocation", checked)}
-            label="Show city only — hide exact location"
+            label={tEditor("modelDetails.hideExactLocationLabel")}
           />
           <Checkbox
             checked={values.requireDepositBeforeContact}
             onCheckedChange={(checked) =>
               set("requireDepositBeforeContact", checked)
             }
-            label="Require a deposit before sharing my contact details"
+            label={tEditor("modelDetails.requireDepositLabel")}
           />
         </div>
       ) : null}
 
       {role === "CAMERA_SHOP" ? (
         <Input
-          label="Shop name"
+          label={tEditor("shopNameLabel")}
           value={values.shopName}
           onChange={(e) => set("shopName", e.target.value)}
         />
@@ -597,22 +598,22 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Input
-          label="Website"
+          label={tEditor("websiteLabel")}
           value={values.website}
           onChange={(e) => set("website", e.target.value)}
         />
         <Input
-          label="Instagram"
+          label={tEditor("instagramLabel")}
           value={values.instagram}
           onChange={(e) => set("instagram", e.target.value)}
         />
         <Input
-          label="Facebook"
+          label={tEditor("facebookLabel")}
           value={values.facebook}
           onChange={(e) => set("facebook", e.target.value)}
         />
         <Input
-          label="TikTok"
+          label={tEditor("tiktokLabel")}
           value={values.tiktok}
           onChange={(e) => set("tiktok", e.target.value)}
         />
@@ -621,10 +622,10 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       <div className="flex items-center gap-3 border-t border-border-subtle pt-4">
         <Button variant="accent" disabled={isSaving} onClick={onSave}>
           {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-          Save changes
+          {tEditor("saveChanges")}
         </Button>
         {saved ? (
-          <span className="text-body-sm text-success">Saved</span>
+          <span className="text-body-sm text-success">{tEditor("saved")}</span>
         ) : null}
       </div>
     </div>

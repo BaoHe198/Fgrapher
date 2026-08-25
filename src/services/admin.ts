@@ -108,7 +108,14 @@ export async function getAdminStats() {
   };
 }
 
-export async function getRecentActivity(limit = 15) {
+// Matches lib/email.ts's EmailT shape — the caller passes a translator
+// scoped to accountFlows.admin.overview.activity (see admin/page.tsx).
+type ActivityT = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
+
+export async function getRecentActivity(t: ActivityT, limit = 15) {
   const [signups, bookings, reports] = await Promise.all([
     db.user.findMany({
       where: { deletedAt: null },
@@ -144,19 +151,21 @@ export async function getRecentActivity(limit = 15) {
     ...signups.map((u) => ({
       type: "signup" as const,
       id: u.id,
-      label: `${u.firstName ?? u.name ?? u.email} signed up`,
+      label: t("signedUp", { name: u.firstName ?? u.name ?? u.email }),
       timestamp: u.createdAt,
     })),
     ...bookings.map((b) => ({
       type: "booking" as const,
       id: b.id,
-      label: `${b.customer.firstName ?? b.customer.name ?? "Someone"} made a booking`,
+      label: t("madeBooking", {
+        name: b.customer.firstName ?? b.customer.name ?? t("someone"),
+      }),
       timestamp: b.createdAt,
     })),
     ...reports.map((r) => ({
       type: "report" as const,
       id: r.id,
-      label: `New ${r.targetType} report — ${r.reason}`,
+      label: t("newReport", { targetType: r.targetType, reason: r.reason }),
       timestamp: r.createdAt,
     })),
   ];

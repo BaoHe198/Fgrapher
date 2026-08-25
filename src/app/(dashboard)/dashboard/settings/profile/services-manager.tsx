@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,13 @@ interface ServiceDraft {
   isActive: boolean;
 }
 
-const EMPTY_DRAFT: ServiceDraft = { name: "", description: "", duration: "60", price: "", isActive: true };
+const EMPTY_DRAFT: ServiceDraft = {
+  name: "",
+  description: "",
+  duration: "60",
+  price: "",
+  isActive: true,
+};
 
 export function ServicesManager({
   profileId,
@@ -42,6 +49,7 @@ export function ServicesManager({
   profileId: string;
   initialServices: ServiceItem[];
 }) {
+  const t = useTranslations("dashboardSettings.profile.services");
   const [services, setServices] = useState<ServiceItem[]>(initialServices);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -109,15 +117,17 @@ export function ServicesManager({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Services</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          {t("title")}
+        </span>
         <Button size="sm" variant="secondary" onClick={openCreate}>
           <Plus className="size-4" />
-          Add service
+          {t("addService")}
         </Button>
       </div>
 
       {services.length === 0 ? (
-        <p className="text-body-sm text-text-secondary">No service packages yet.</p>
+        <p className="text-body-sm text-text-secondary">{t("empty")}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {services.map((service) => (
@@ -127,17 +137,26 @@ export function ServicesManager({
             >
               <div>
                 <p className="text-body-md font-semibold text-text-primary">
-                  {service.name} {!service.isActive ? "(inactive)" : ""}
+                  {service.name} {!service.isActive ? t("inactive") : ""}
                 </p>
                 <p className="text-body-sm text-text-secondary">
-                  {formatCurrency(service.price, service.currency)} · {service.duration} min
+                  {formatCurrency(service.price, service.currency)} ·{" "}
+                  {service.duration} {t("minutesSuffix")}
                 </p>
               </div>
               <div className="flex gap-1">
-                <Button size="icon-sm" variant="ghost" onClick={() => openEdit(service)}>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={() => openEdit(service)}
+                >
                   <Pencil className="size-4" />
                 </Button>
-                <Button size="icon-sm" variant="ghost" onClick={() => remove(service.id)}>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={() => remove(service.id)}
+                >
                   <Trash2 className="size-4" />
                 </Button>
               </div>
@@ -149,49 +168,61 @@ export function ServicesManager({
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit service" : "Add service"}</DialogTitle>
+            <DialogTitle>
+              {editingId ? t("editService") : t("addServiceDialogTitle")}
+            </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <Input
-              label="Name"
+              label={t("nameLabel")}
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             />
             <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-semibold text-text-primary">Description</label>
+              <label className="text-body-sm font-semibold text-text-primary">
+                {t("descriptionLabel")}
+              </label>
               <textarea
                 className="min-h-20 w-full rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none focus:border-border-focus focus:ring-2 focus:ring-gold-500/20"
                 value={draft.description}
-                onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                onChange={(e) =>
+                  setDraft({ ...draft, description: e.target.value })
+                }
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Input
-                label="Duration (min)"
+                label={t("durationLabel")}
                 type="number"
                 value={draft.duration}
-                onChange={(e) => setDraft({ ...draft, duration: e.target.value })}
+                onChange={(e) =>
+                  setDraft({ ...draft, duration: e.target.value })
+                }
               />
               <Input
-                label="Price"
+                label={t("priceLabel")}
                 type="number"
                 value={draft.price}
                 onChange={(e) => setDraft({ ...draft, price: e.target.value })}
               />
             </div>
             <Switch
-              label="Active"
+              label={t("activeLabel")}
               checked={draft.isActive}
               onChange={(value) => setDraft({ ...draft, isActive: value })}
             />
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
-            <Button variant="accent" disabled={isSaving || !draft.name || !draft.price} onClick={save}>
+            <Button
+              variant="accent"
+              disabled={isSaving || !draft.name || !draft.price}
+              onClick={save}
+            >
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-              Save
+              {t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>

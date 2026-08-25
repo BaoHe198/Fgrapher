@@ -74,7 +74,7 @@
     "title": "Tìm nghệ sĩ của bạn",
     "sub": "Nhiếp ảnh gia, quay phim, chuyên viên trang điểm, studio và cửa hàng máy ảnh — tìm kiếm, đặt lịch và thanh toán ở một nơi.",
     "searchPh": "Tìm nghệ sĩ, studio hoặc thiết bị",
-    "city": "Hà Nội",
+    "city": "Thành phố Hồ Chí Minh",
     "cta": "Tìm kiếm"
   },
   "home": {
@@ -566,7 +566,13 @@
         "pendingReports": "Báo cáo chờ xử lý",
         "expiringSoon": "Gói sắp hết hạn trong 7 ngày",
         "recentActivity": "Hoạt động gần đây",
-        "noActivity": "Chưa có hoạt động nào"
+        "noActivity": "Chưa có hoạt động nào",
+        "activity": {
+          "signedUp": "{name} vừa đăng ký",
+          "madeBooking": "{name} vừa đặt lịch",
+          "someone": "Một người dùng",
+          "newReport": "Báo cáo {targetType} mới — {reason}"
+        }
       },
       "users": {
         "title": "Người dùng",
@@ -896,6 +902,49 @@
       "hoursAgo": "{hours} giờ trước",
       "daysAgo": "{days} ngày trước"
     },
+    "bookings": {
+      "titleProvider": "Lịch đặt",
+      "titleCustomer": "Lịch đặt của tôi",
+      "tabs": {
+        "all": "Tất cả",
+        "pending": "Chờ xác nhận",
+        "confirmed": "Đã xác nhận",
+        "completed": "Hoàn tất",
+        "cancelled": "Đã hủy"
+      },
+      "status": {
+        "PENDING": "Chờ xác nhận",
+        "CONFIRMED": "Đã xác nhận",
+        "COMPLETED": "Hoàn tất",
+        "CANCELLED": "Đã hủy",
+        "DECLINED": "Đã từ chối",
+        "NO_SHOW": "Không đến",
+        "EXPIRED": "Hết hạn"
+      },
+      "table": {
+        "provider": "Nhà cung cấp",
+        "client": "Khách hàng",
+        "service": "Dịch vụ",
+        "when": "Thời gian",
+        "total": "Tổng tiền",
+        "status": "Trạng thái"
+      },
+      "empty": {
+        "heading": "Chưa có lịch đặt nào",
+        "body": "Khi khách đặt lịch với bạn, lịch đặt sẽ hiện ở đây."
+      },
+      "shareProfile": "Chia sẻ hồ sơ",
+      "accept": "Chấp nhận",
+      "decline": "Từ chối",
+      "details": "Chi tiết",
+      "viewDetails": "Xem chi tiết",
+      "markComplete": "Đánh dấu hoàn tất",
+      "cancel": "Hủy",
+      "unknownParty": "Không xác định",
+      "previous": "Trước",
+      "next": "Sau",
+      "pageOf": "Trang {page} / {total}"
+    },
     "portfolio": {
       "proOnly": {
         "title": "Portfolio dành cho người làm nghề sáng tạo",
@@ -940,6 +989,118 @@
       "empty": "Chưa có đánh giá nào",
       "anonymous": "Ẩn danh",
       "respond": "Phản hồi"
+    },
+    "calendar": {
+      "title": "Lịch",
+      "monthView": "Tháng",
+      "agendaView": "Danh sách",
+      "prevMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "moreCount": "+{count} nữa",
+      "emptyMonth": "Không có lịch đặt trong tháng này",
+      "customRequest": "Yêu cầu tùy chỉnh"
+    },
+    "bookingDetail": {
+      "notFound": "Không tìm thấy lịch đặt",
+      "backToBookings": "Quay lại lịch đặt",
+      "title": "Chi tiết lịch đặt",
+      "idRequested": "#{id} · Yêu cầu lúc {date}",
+      "firstTimeWarning": {
+        "title": "Lần đầu làm việc với {name}?",
+        "body": "Với buổi đầu tiên cùng nhau, hãy gặp ở nơi công cộng nếu có thể và báo lịch trình, địa điểm cho người thân hoặc bạn bè."
+      },
+      "crewHire": {
+        "partOf": "Thuộc ê-kíp cho",
+        "unnamedClientBooking": "một lịch đặt của khách",
+        "onDate": "vào {date}",
+        "crewBookedTitle": "Ê-kíp đã đặt cho công việc này",
+        "unknown": "Không xác định"
+      },
+      "reschedule": {
+        "waitingForResponse": "Đang chờ phản hồi cho thời gian bạn đề xuất",
+        "newTimeProposed": "Có đề xuất thời gian mới",
+        "at": "lúc",
+        "acceptNewTime": "Chấp nhận thời gian mới",
+        "keepOriginalTime": "Giữ thời gian ban đầu"
+      },
+      "otherParty": {
+        "verified": "Đã xác minh",
+        "client": "Khách hàng",
+        "provider": "Nhà cung cấp",
+        "viewProfile": "Xem hồ sơ",
+        "message": "Nhắn tin"
+      },
+      "fields": {
+        "service": "Dịch vụ",
+        "date": "Ngày",
+        "time": "Giờ",
+        "duration": "Thời lượng",
+        "location": "Địa điểm",
+        "people": "Số người",
+        "total": "Tổng tiền",
+        "customRequest": "Yêu cầu tùy chỉnh",
+        "durationMinutes": "{minutes} phút"
+      },
+      "locationLabel": {
+        "PROVIDER": "Tại studio nhà cung cấp",
+        "CUSTOMER": "Tại địa điểm của khách",
+        "OUTDOOR": "Ngoài trời / khác"
+      },
+      "notes": "Ghi chú",
+      "reviewPrompt": "Buổi làm việc với {name} thế nào?",
+      "timeline": {
+        "title": "Dòng thời gian",
+        "requestCreated": "Đã tạo yêu cầu",
+        "cancelled": "Đã hủy",
+        "declined": "Đã từ chối",
+        "markedComplete": "Đã đánh dấu hoàn tất"
+      },
+      "actions": {
+        "accept": "Chấp nhận",
+        "decline": "Từ chối",
+        "proposeNewTime": "Đề xuất thời gian mới",
+        "cancelRequest": "Hủy yêu cầu",
+        "message": "Nhắn tin",
+        "reschedule": "Đổi lịch",
+        "cancel": "Hủy",
+        "markCompleted": "Đánh dấu hoàn tất",
+        "reportNoShow": "Báo cáo không đến",
+        "doneStatusNote": "Lịch đặt này đã ở trạng thái \"{status}\" — không cần thao tác thêm."
+      },
+      "cancellationWarning": "Còn dưới 24 giờ nữa đến giờ hẹn — hủy lúc này có thể bị tính phí sau khi bật thanh toán.",
+      "dialogs": {
+        "accept": {
+          "title": "Xác nhận lịch đặt này?",
+          "body": "{name} sẽ được thông báo và khung giờ sẽ được giữ cho ngày {date} lúc {time}.",
+          "cancel": "Hủy",
+          "confirm": "Xác nhận lịch đặt"
+        },
+        "decline": {
+          "title": "Từ chối lịch đặt này",
+          "reasonLabel": "Lý do",
+          "messagePlaceholder": "Tin nhắn tùy chọn gửi khách hàng...",
+          "back": "Quay lại",
+          "confirm": "Từ chối lịch đặt",
+          "reasons": {
+            "unavailable": "Không có lịch trống",
+            "outsideArea": "Ngoài khu vực phục vụ",
+            "notSpecialty": "Không phải chuyên môn của tôi",
+            "other": "Khác"
+          }
+        },
+        "cancel": {
+          "title": "Hủy lịch đặt này?",
+          "withinWindowWarning": "Đây là trong vòng 24 giờ trước giờ hẹn — chính sách hủy có thể áp dụng sau khi bật thanh toán.",
+          "reasonPlaceholder": "Lý do hủy (tùy chọn)",
+          "keepBooking": "Giữ lịch đặt",
+          "confirm": "Hủy lịch đặt"
+        },
+        "reschedule": {
+          "title": "Đề xuất thời gian mới",
+          "cancel": "Hủy",
+          "sendProposal": "Gửi đề xuất"
+        }
+      }
     },
     "listings": {
       "filters": {
@@ -1225,6 +1386,71 @@
         "extraAreasLabel": "Tỉnh/thành phục vụ thêm (tùy chọn)",
         "extraAreasHelper": "Ngoài tỉnh/thành chính ở trên, chọn thêm các tỉnh/thành khác bạn cũng nhận job",
         "studioRequiredNote": "Studio bắt buộc có địa chỉ, tỉnh/thành, và phường/xã cụ thể trước khi công khai hồ sơ"
+      },
+      "editor": {
+        "liveStatus": "Đang hoạt động — hiển thị trong tìm kiếm",
+        "draftStatus": "Bản nháp — không hiển thị trong tìm kiếm",
+        "verifiedBadge": "Đã xác minh",
+        "notVerifiedNoteBefore": "Bạn có thể tiếp tục chỉnh sửa hồ sơ này ở chế độ nháp. Sau khi",
+        "verifiedLinkText": "danh tính được xác minh",
+        "notVerifiedNoteAfter": ", bạn có thể công khai để xuất hiện trong tìm kiếm và nhận lịch đặt.",
+        "publishError": "Đã xảy ra lỗi",
+        "displayNameLabel": "Tên hiển thị",
+        "descriptionLabel": "Mô tả",
+        "categoriesLabel": "Danh mục",
+        "minPriceLabel": "Giá tối thiểu",
+        "maxPriceLabel": "Giá tối đa",
+        "addressLabel": "Địa chỉ",
+        "areaLabel": "Diện tích (m²)",
+        "amenitiesLabel": "Tiện ích",
+        "amenities": {
+          "wifi": "Wifi",
+          "ac": "Điều hòa",
+          "parking": "Bãi đỗ xe",
+          "changing_room": "Phòng thay đồ",
+          "kitchen": "Bếp",
+          "restroom": "Nhà vệ sinh"
+        },
+        "modelDetails": {
+          "title": "Thông tin người mẫu",
+          "subtitle": "Tất cả đều tùy chọn và hiển thị công khai trên hồ sơ — để trống nếu không muốn hiển thị.",
+          "heightLabel": "Chiều cao (cm)",
+          "shoeSizeLabel": "Cỡ giày",
+          "measurementsLabel": "Số đo",
+          "experienceLevelLabel": "Kinh nghiệm",
+          "experienceLevelNotSpecified": "Chưa xác định",
+          "hairColorLabel": "Màu tóc",
+          "eyeColorLabel": "Màu mắt",
+          "travelWillingLabel": "Sẵn sàng di chuyển để chụp",
+          "agencyRepresentedLabel": "Có đại diện bởi agency",
+          "agencyNameLabel": "Tên agency",
+          "privacyTitle": "Quyền riêng tư",
+          "hideExactLocationLabel": "Chỉ hiện thành phố — ẩn vị trí chính xác",
+          "requireDepositLabel": "Yêu cầu đặt cọc trước khi chia sẻ thông tin liên hệ"
+        },
+        "shopNameLabel": "Tên cửa hàng",
+        "websiteLabel": "Website",
+        "instagramLabel": "Instagram",
+        "facebookLabel": "Facebook",
+        "tiktokLabel": "TikTok",
+        "saveChanges": "Lưu thay đổi",
+        "saved": "Đã lưu"
+      },
+      "services": {
+        "title": "Dịch vụ",
+        "addService": "Thêm dịch vụ",
+        "empty": "Chưa có gói dịch vụ nào.",
+        "inactive": "(ngừng hoạt động)",
+        "minutesSuffix": "phút",
+        "editService": "Sửa dịch vụ",
+        "addServiceDialogTitle": "Thêm dịch vụ",
+        "nameLabel": "Tên",
+        "descriptionLabel": "Mô tả",
+        "durationLabel": "Thời lượng (phút)",
+        "priceLabel": "Giá",
+        "activeLabel": "Đang hoạt động",
+        "cancel": "Hủy",
+        "save": "Lưu"
       },
       "media": {
         "coverButton": "Ảnh bìa",

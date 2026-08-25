@@ -14,11 +14,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AdminOverviewPage() {
-  const [stats, activity, t] = await Promise.all([
+  const [stats, t, activityT] = await Promise.all([
     getAdminStats(),
-    getRecentActivity(),
     getTranslations("accountFlows.admin.overview"),
+    getTranslations("accountFlows.admin.overview.activity"),
   ]);
+  const activity = await getRecentActivity(activityT);
 
   const metrics = [
     {

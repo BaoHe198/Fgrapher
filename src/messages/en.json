@@ -566,7 +566,13 @@
         "pendingReports": "Pending reports",
         "expiringSoon": "Subscriptions expiring in 7 days",
         "recentActivity": "Recent activity",
-        "noActivity": "No activity yet"
+        "noActivity": "No activity yet",
+        "activity": {
+          "signedUp": "{name} signed up",
+          "madeBooking": "{name} made a booking",
+          "someone": "Someone",
+          "newReport": "New {targetType} report — {reason}"
+        }
       },
       "users": {
         "title": "Users",
@@ -896,6 +902,49 @@
       "hoursAgo": "{hours}h ago",
       "daysAgo": "{days}d ago"
     },
+    "bookings": {
+      "titleProvider": "Bookings",
+      "titleCustomer": "My bookings",
+      "tabs": {
+        "all": "All",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled",
+        "DECLINED": "Declined",
+        "NO_SHOW": "No-show",
+        "EXPIRED": "Expired"
+      },
+      "table": {
+        "provider": "Provider",
+        "client": "Client",
+        "service": "Service",
+        "when": "When",
+        "total": "Total",
+        "status": "Status"
+      },
+      "empty": {
+        "heading": "No bookings yet",
+        "body": "When clients book you, they'll appear here."
+      },
+      "shareProfile": "Share your profile",
+      "accept": "Accept",
+      "decline": "Decline",
+      "details": "Details",
+      "viewDetails": "View details",
+      "markComplete": "Mark complete",
+      "cancel": "Cancel",
+      "unknownParty": "Unknown",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {total}"
+    },
     "portfolio": {
       "proOnly": {
         "title": "Portfolio is for creative pros",
@@ -940,6 +989,118 @@
       "empty": "No reviews here yet",
       "anonymous": "Anonymous",
       "respond": "Respond"
+    },
+    "calendar": {
+      "title": "Calendar",
+      "monthView": "Month",
+      "agendaView": "Agenda",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "moreCount": "+{count} more",
+      "emptyMonth": "No bookings this month",
+      "customRequest": "Custom request"
+    },
+    "bookingDetail": {
+      "notFound": "Booking not found",
+      "backToBookings": "Back to bookings",
+      "title": "Booking details",
+      "idRequested": "#{id} · Requested {date}",
+      "firstTimeWarning": {
+        "title": "First time working with {name}?",
+        "body": "For your first session together, meet in a public place if possible and let a friend or family member know your schedule and location."
+      },
+      "crewHire": {
+        "partOf": "Part of a crew for",
+        "unnamedClientBooking": "a client booking",
+        "onDate": "on {date}",
+        "crewBookedTitle": "Crew booked for this job",
+        "unknown": "Unknown"
+      },
+      "reschedule": {
+        "waitingForResponse": "Waiting for a response to your proposed time",
+        "newTimeProposed": "New time proposed",
+        "at": "at",
+        "acceptNewTime": "Accept new time",
+        "keepOriginalTime": "Keep original time"
+      },
+      "otherParty": {
+        "verified": "Verified",
+        "client": "Client",
+        "provider": "Provider",
+        "viewProfile": "View profile",
+        "message": "Message"
+      },
+      "fields": {
+        "service": "Service",
+        "date": "Date",
+        "time": "Time",
+        "duration": "Duration",
+        "location": "Location",
+        "people": "People",
+        "total": "Total",
+        "customRequest": "Custom request",
+        "durationMinutes": "{minutes} min"
+      },
+      "locationLabel": {
+        "PROVIDER": "At provider's studio",
+        "CUSTOMER": "At customer's location",
+        "OUTDOOR": "Outdoor / other"
+      },
+      "notes": "Notes",
+      "reviewPrompt": "How was your session with {name}?",
+      "timeline": {
+        "title": "Timeline",
+        "requestCreated": "Request created",
+        "cancelled": "Cancelled",
+        "declined": "Declined",
+        "markedComplete": "Marked complete"
+      },
+      "actions": {
+        "accept": "Accept",
+        "decline": "Decline",
+        "proposeNewTime": "Propose new time",
+        "cancelRequest": "Cancel request",
+        "message": "Message",
+        "reschedule": "Reschedule",
+        "cancel": "Cancel",
+        "markCompleted": "Mark completed",
+        "reportNoShow": "Report no-show",
+        "doneStatusNote": "This booking is {status} — no further action needed."
+      },
+      "cancellationWarning": "Less than 24 hours until this booking — cancelling now may be subject to a fee once payments are enabled.",
+      "dialogs": {
+        "accept": {
+          "title": "Confirm this booking?",
+          "body": "{name} will be notified and the slot will be locked in for {date} at {time}.",
+          "cancel": "Cancel",
+          "confirm": "Confirm booking"
+        },
+        "decline": {
+          "title": "Decline this booking",
+          "reasonLabel": "Reason",
+          "messagePlaceholder": "Optional message to the customer...",
+          "back": "Back",
+          "confirm": "Decline booking",
+          "reasons": {
+            "unavailable": "Unavailable",
+            "outsideArea": "Outside my service area",
+            "notSpecialty": "Not my specialty",
+            "other": "Other"
+          }
+        },
+        "cancel": {
+          "title": "Cancel this booking?",
+          "withinWindowWarning": "This is within 24 hours of the booking — the cancellation policy may apply once payments are enabled.",
+          "reasonPlaceholder": "Reason for cancelling (optional)",
+          "keepBooking": "Keep booking",
+          "confirm": "Cancel booking"
+        },
+        "reschedule": {
+          "title": "Propose a new time",
+          "cancel": "Cancel",
+          "sendProposal": "Send proposal"
+        }
+      }
     },
     "listings": {
       "filters": {
@@ -1225,6 +1386,71 @@
         "extraAreasLabel": "Additional provinces served (optional)",
         "extraAreasHelper": "Besides your main province above, pick other provinces you also take bookings in",
         "studioRequiredNote": "A specific address, province, and ward are required before publishing a studio profile"
+      },
+      "editor": {
+        "liveStatus": "Live — visible in search",
+        "draftStatus": "Draft — not visible in search",
+        "verifiedBadge": "Verified",
+        "notVerifiedNoteBefore": "You can keep editing this profile as a draft. Once",
+        "verifiedLinkText": "your identity is verified",
+        "notVerifiedNoteAfter": ", you can publish it to appear in search and receive bookings.",
+        "publishError": "Something went wrong",
+        "displayNameLabel": "Display name",
+        "descriptionLabel": "Description",
+        "categoriesLabel": "Categories",
+        "minPriceLabel": "Min price",
+        "maxPriceLabel": "Max price",
+        "addressLabel": "Address",
+        "areaLabel": "Area (sqm)",
+        "amenitiesLabel": "Amenities",
+        "amenities": {
+          "wifi": "Wifi",
+          "ac": "AC",
+          "parking": "Parking",
+          "changing_room": "Changing room",
+          "kitchen": "Kitchen",
+          "restroom": "Restroom"
+        },
+        "modelDetails": {
+          "title": "Model details",
+          "subtitle": "All optional and shown publicly on your profile — leave anything blank to hide it.",
+          "heightLabel": "Height (cm)",
+          "shoeSizeLabel": "Shoe size",
+          "measurementsLabel": "Measurements",
+          "experienceLevelLabel": "Experience level",
+          "experienceLevelNotSpecified": "Not specified",
+          "hairColorLabel": "Hair color",
+          "eyeColorLabel": "Eye color",
+          "travelWillingLabel": "Willing to travel for shoots",
+          "agencyRepresentedLabel": "Represented by an agency",
+          "agencyNameLabel": "Agency name",
+          "privacyTitle": "Privacy",
+          "hideExactLocationLabel": "Show city only — hide exact location",
+          "requireDepositLabel": "Require a deposit before sharing my contact details"
+        },
+        "shopNameLabel": "Shop name",
+        "websiteLabel": "Website",
+        "instagramLabel": "Instagram",
+        "facebookLabel": "Facebook",
+        "tiktokLabel": "TikTok",
+        "saveChanges": "Save changes",
+        "saved": "Saved"
+      },
+      "services": {
+        "title": "Services",
+        "addService": "Add service",
+        "empty": "No service packages yet.",
+        "inactive": "(inactive)",
+        "minutesSuffix": "min",
+        "editService": "Edit service",
+        "addServiceDialogTitle": "Add service",
+        "nameLabel": "Name",
+        "descriptionLabel": "Description",
+        "durationLabel": "Duration (min)",
+        "priceLabel": "Price",
+        "activeLabel": "Active",
+        "cancel": "Cancel",
+        "save": "Save"
       },
       "media": {
         "coverButton": "Cover",

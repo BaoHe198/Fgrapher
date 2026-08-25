@@ -10,9 +10,12 @@ export async function GET() {
   try {
     await requireAdmin();
 
+    const activityT = await getTranslations(
+      "accountFlows.admin.overview.activity",
+    );
     const [stats, activity] = await Promise.all([
       getAdminStats(),
-      getRecentActivity(),
+      getRecentActivity(activityT),
     ]);
 
     return NextResponse.json(
