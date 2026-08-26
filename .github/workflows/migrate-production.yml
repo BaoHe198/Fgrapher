@@ -71,12 +71,14 @@ jobs:
         run: npx prisma migrate status
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
 
       - name: Apply migrations to production
         if: steps.check.outputs.changed == 'true'
         run: pnpm db:migrate:deploy
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
 
       - name: On failure, stop and alert clearly
         if: failure() && steps.check.outputs.changed == 'true'
