@@ -17,6 +17,7 @@
     "predb:push": "node scripts/check-db-safety.mjs",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
+    "db:seed:geography": "npx tsx scripts/seed-geography.ts",
     "db:studio": "prisma studio",
     "predb:reset": "node scripts/check-db-safety.mjs",
     "db:reset": "prisma migrate reset",

@@ -86,6 +86,17 @@ jobs:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
           DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
 
+      - name: Seed reference geography data (provinces/wards)
+        # Idempotent upsert, not the full prisma/seed.ts (which also
+        # creates fake *@test.com users/bookings — never run that against
+        # production). Safe to run every time this workflow runs, migration
+        # or not, since it only touches Province/Ward rows.
+        if: steps.check.outputs.changed == 'true'
+        run: pnpm db:seed:geography
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
+
       - name: On failure, stop and alert clearly
         if: failure() && steps.check.outputs.changed == 'true'
         run: |
