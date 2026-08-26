@@ -68,7 +68,13 @@ jobs:
 
       - name: Log current migration status before applying
         if: steps.check.outputs.changed == 'true'
-        run: npx prisma migrate status
+        # `prisma migrate status` exits 1 whenever there are unapplied
+        # migrations — the exact, expected state right before this
+        # workflow's whole reason for existing (running `migrate deploy`
+        # below). This step is purely informational (its output is
+        # already visible in the log above), so a non-zero exit here must
+        # not fail the job and block the real Apply step from running.
+        run: npx prisma migrate status || true
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
           DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
