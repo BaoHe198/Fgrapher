@@ -8,6 +8,18 @@ name: Migrate production
 on:
   push:
     branches: [master]
+  # Manual escape hatch — e.g. the diff-based check below missed a batch
+  # of migrations that landed via a multi-commit fast-forward push (see
+  # the git blame on this line for the incident), or you just want to
+  # confirm production is at `prisma migrate status`'s reported state
+  # without waiting for a new push. GitHub → Actions → Migrate production
+  # → Run workflow.
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run migrate deploy even if no migration files changed in the diff"
+        type: boolean
+        default: true
 
 jobs:
   migrate:
@@ -25,6 +37,10 @@ jobs:
       - name: Check whether migrations changed
         id: check
         run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force }}" = "true" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           before="${{ github.event.before }}"
           # All-zeros `before` means this ref didn't exist prior to the
           # push (e.g. a new branch) — nothing to diff against, so treat
@@ -73,12 +89,7 @@ jobs:
         if: steps.check.outputs.changed == 'true' && success()
         run: |
           echo "## Migrations applied to production" >> "$GITHUB_STEP_SUMMARY"
-          before="${{ github.event.before }}"
-          if [ "$before" = "0000000000000000000000000000000000000000" ]; then
-            git ls-files -- prisma/migrations | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
-          else
-            git diff --name-only "$before" "${{ github.sha }}" -- prisma/migrations | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
-          fi
+          npx prisma migrate status >> "$GITHUB_STEP_SUMMARY" || true
 
       - name: No migration changes
         if: steps.check.outputs.changed == 'false'
