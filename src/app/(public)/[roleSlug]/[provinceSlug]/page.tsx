@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 import { ArtistCard } from "@/components/cards/artist-card";
 import { db } from "@/lib/db";
-import { ROLE_SLUGS, SLUG_TO_ROLE } from "@/lib/constants";
+import { SLUG_TO_ROLE } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { formatCurrency } from "@/lib/utils";
 import { searchProfiles } from "@/services/search";
@@ -16,23 +16,18 @@ interface PageProps {
 
 // Prompt B4, VIỆC 5 — "kênh khách tự nhiên quan trọng nhất": SEO landing
 // pages for every (role, province) combination, e.g. /photographer/tp-ho-chi-minh.
-// Static params are generated from real Province rows (CLAUDE.md mục 9 —
-// no hardcoded province list), so this scales to 0 extra code the moment
-// more provinces are seeded (see prisma/data/provinces-registry.ts).
-export async function generateStaticParams() {
-  const provinces = await db.province.findMany({ select: { code: true } });
-  const roleSlugs = Object.entries(ROLE_SLUGS).filter(
-    ([role]) => role !== "CAMERA_SHOP" || features.marketplaceEnabled,
-  );
-
-  return roleSlugs.flatMap(([, roleSlug]) =>
-    provinces.map((province) => ({
-      roleSlug: roleSlug as string,
-      provinceSlug: province.code,
-    })),
-  );
-}
-
+//
+// Deliberately NOT using generateStaticParams() here: every other page in
+// this app reads the locale cookie via next-intl (cookie-based i18n, no
+// [locale] URL segment — see CLAUDE.md), which forces per-request dynamic
+// rendering. This route was the one exception marked for build-time static
+// generation, and that conflicted with the shared layout's cookie read —
+// it 500'd in production with a DYNAMIC_SERVER_USAGE digest even though
+// the exact same page rendered fine in every other route in the app.
+// Rendering dynamically like everything else still gets fully-rendered
+// HTML per request (Server Components render server-side either way), so
+// SEO crawlers aren't worse off — only the build-time-only CDN pre-render
+// is lost.
 async function resolveParams(roleSlug: string, provinceSlug: string) {
   const role = SLUG_TO_ROLE[roleSlug];
   if (!role) return null;
