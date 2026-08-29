@@ -1,9 +1,10 @@
 import { Role } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { updateProfileSchema } from "@/lib/validations/profile";
+import { getUpdateProfileSchema } from "@/lib/validations/profile";
 
 export async function GET(
   _request: Request,
@@ -80,7 +81,8 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const parsed = updateProfileSchema.safeParse(body);
+    const tValidation = await getTranslations("libServices.validation.profile");
+    const parsed = getUpdateProfileSchema(tValidation).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {

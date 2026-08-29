@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { updateMeSchema } from "@/lib/validations/user";
+import { contentScanner } from "@/services/moderation";
 
 export async function GET() {
   try {
@@ -51,6 +53,28 @@ export async function PATCH(request: Request) {
         },
         { status: 400 },
       );
+    }
+
+    // Prompt G2, VIỆC 2 — avatar/cover skip the human moderation queue
+    // portfolio photos go through, but still get scanned for auto-block
+    // (never auto-approved into a queue — just outright rejected here if
+    // flagged). MockScanner never flags anything today (see
+    // services/moderation.ts's comment); this wiring is what a real
+    // scanner implementation plugs into later.
+    for (const url of [parsed.data.avatar, parsed.data.coverImage]) {
+      if (!url) continue;
+      const result = await contentScanner.scan({ url, publicId: null });
+      if (result.verdict === "flagged") {
+        const t = await getTranslations("apiMessages.users");
+        return NextResponse.json(
+          {
+            data: null,
+            error: "content_flagged",
+            message: t("imageFlagged"),
+          },
+          { status: 422 },
+        );
+      }
     }
 
     const { wardId, ...rest } = parsed.data;

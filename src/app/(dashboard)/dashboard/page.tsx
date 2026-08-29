@@ -11,7 +11,6 @@ import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -93,7 +92,10 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const t = await getTranslations("dashboardCore.home");
+  const [t, roleT] = await Promise.all([
+    getTranslations("dashboardCore.home"),
+    getTranslations("role"),
+  ]);
 
   const [activity, statCards] = await Promise.all([
     getRecentActivity(user.id, isProvider),
@@ -102,22 +104,32 @@ export default async function DashboardPage() {
       : getCustomerStats(user.id).then((stats) => customerStatCards(stats, t)),
   ]);
 
-  const hasIncompleteProfile =
-    nonCustomerRoles.length > 0 &&
-    !nonCustomerRoles.every((role) =>
-      user.profiles.some((profile) => profile.role === role),
-    );
+  // Prompt G2, VIỆC 6 — "Nêu rõ còn thiếu gì thay vì chỉ hiện phần trăm":
+  // each entry is a translated label for one missing piece, not just a
+  // percentage. A role with no Profile row at all counts as missing that
+  // role's whole profile; a role WITH a Profile but no categories still
+  // gets its own "chọn thể loại sở trường" line (previously invisible —
+  // completion% never looked at Profile.categories at all).
+  const missingItems: string[] = [];
+  if (!user.avatar) missingItems.push(t("completeProfile.missing.avatar"));
+  if (!user.coverImage)
+    missingItems.push(t("completeProfile.missing.coverImage"));
+  if (!user.bio) missingItems.push(t("completeProfile.missing.bio"));
+  if (!user.phone) missingItems.push(t("completeProfile.missing.phone"));
+  for (const role of nonCustomerRoles) {
+    const profile = user.profiles.find((p) => p.role === role);
+    if (!profile) {
+      missingItems.push(
+        t("completeProfile.missing.roleProfile", { role: roleT(role) }),
+      );
+    } else if (profile.categories.length === 0) {
+      missingItems.push(
+        t("completeProfile.missing.categories", { role: roleT(role) }),
+      );
+    }
+  }
 
-  const completionFields = [
-    user.avatar,
-    user.bio,
-    user.phone,
-    user.location,
-    user.username,
-  ];
-  const completion = Math.round(
-    (completionFields.filter(Boolean).length / completionFields.length) * 100,
-  );
+  const hasIncompleteProfile = missingItems.length > 0;
 
   const firstName =
     user.firstName ?? user.name?.split(" ")[0] ?? t("fallbackName");
@@ -156,15 +168,20 @@ export default async function DashboardPage() {
 
       {hasIncompleteProfile ? (
         <Card className="flex flex-col gap-3 border border-warning bg-warning-bg">
-          <div className="flex items-center justify-between">
-            <span className="text-body-md font-semibold text-text-primary">
-              {t("completeProfile.title")}
-            </span>
-            <span className="text-body-sm text-text-secondary">
-              {completion}%
-            </span>
-          </div>
-          <Progress value={completion} />
+          <span className="text-body-md font-semibold text-text-primary">
+            {t("completeProfile.title")}
+          </span>
+          <ul className="flex flex-col gap-1.5">
+            {missingItems.map((item) => (
+              <li
+                key={item}
+                className="flex items-center gap-2 text-body-sm text-text-secondary"
+              >
+                <span className="size-1.5 shrink-0 rounded-full bg-warning" />
+                {item}
+              </li>
+            ))}
+          </ul>
           <Button
             variant="secondary"
             size="sm"

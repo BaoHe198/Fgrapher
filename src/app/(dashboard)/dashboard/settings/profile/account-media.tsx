@@ -5,6 +5,11 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRef, useState } from "react";
 
+import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
+
+const MAX_BYTES = 5 * 1024 * 1024;
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 async function uploadFile(
   file: File,
   messages: { unavailable: string; failed: string },
@@ -48,6 +53,35 @@ export function AccountMedia({
   const avatarInput = useRef<HTMLInputElement>(null);
   const coverInput = useRef<HTMLInputElement>(null);
 
+  // Crop dialog state — set together whenever a valid file is picked, for
+  // either target; the dialog itself is generic over `aspect`.
+  const [cropTarget, setCropTarget] = useState<"avatar" | "cover" | null>(null);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [pendingFileMeta, setPendingFileMeta] = useState<{
+    name: string;
+    type: string;
+  } | null>(null);
+
+  const validateFile = (file: File) => {
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setError(t("invalidType"));
+      return false;
+    }
+    if (file.size > MAX_BYTES) {
+      setError(t("tooLarge"));
+      return false;
+    }
+    return true;
+  };
+
+  const onFileSelected = (file: File, target: "avatar" | "cover") => {
+    setError(null);
+    if (!validateFile(file)) return;
+    setPendingFileMeta({ name: file.name, type: file.type });
+    setCropImageSrc(URL.createObjectURL(file));
+    setCropTarget(target);
+  };
+
   const handleUpload = async (file: File, target: "avatar" | "cover") => {
     setError(null);
     setUploading(target);
@@ -56,16 +90,22 @@ export function AccountMedia({
         unavailable: t("uploadUnavailable"),
         failed: t("uploadFailed"),
       });
-      if (target === "avatar") setAvatar(url);
-      else setCoverImage(url);
 
-      await fetch("/api/users/me", {
+      const res = await fetch("/api/users/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           target === "avatar" ? { avatar: url } : { coverImage: url },
         ),
       });
+      const body = await res.json();
+      if (!res.ok) {
+        setError(body.message ?? t("uploadFailed"));
+        return;
+      }
+
+      if (target === "avatar") setAvatar(url);
+      else setCoverImage(url);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("uploadFailed"));
     } finally {
@@ -102,9 +142,11 @@ export function AccountMedia({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) =>
-            e.target.files?.[0] && handleUpload(e.target.files[0], "cover")
-          }
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onFileSelected(file, "cover");
+            e.target.value = "";
+          }}
         />
       </div>
 
@@ -135,14 +177,35 @@ export function AccountMedia({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) =>
-              e.target.files?.[0] && handleUpload(e.target.files[0], "avatar")
-            }
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onFileSelected(file, "avatar");
+              e.target.value = "";
+            }}
           />
         </div>
       </div>
 
+      <p className="text-body-sm text-text-tertiary">{t("sizeLimit")}</p>
       {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+
+      <ImageCropDialog
+        open={cropTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCropTarget(null);
+            setCropImageSrc(null);
+          }
+        }}
+        imageSrc={cropImageSrc}
+        aspect={cropTarget === "avatar" ? 1 : 3}
+        fileName={pendingFileMeta?.name ?? "image"}
+        mimeType={pendingFileMeta?.type ?? "image/jpeg"}
+        onCropped={(file) => {
+          if (cropTarget) void handleUpload(file, cropTarget);
+          setCropImageSrc(null);
+        }}
+      />
     </div>
   );
 }

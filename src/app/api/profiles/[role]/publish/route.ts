@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import {
   ProfileHasNoApprovedMediaError,
+  ProfileMissingCategoryError,
   ProfileMissingLocationError,
   ProfileNotFoundError,
   ProfileNotVerifiedError,
@@ -87,6 +88,12 @@ export async function PATCH(
     if (err instanceof ProfileMissingLocationError) {
       return NextResponse.json(
         { data: null, error: "missing_location", message: err.message },
+        { status: 403 },
+      );
+    }
+    if (err instanceof ProfileMissingCategoryError) {
+      return NextResponse.json(
+        { data: null, error: "missing_category", message: err.message },
         { status: 403 },
       );
     }

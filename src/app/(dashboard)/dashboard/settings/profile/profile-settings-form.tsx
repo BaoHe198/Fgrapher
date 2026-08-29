@@ -23,6 +23,11 @@ import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
 import { ServicesManager } from "./services-manager";
 
+// Prompt G2, VIỆC 4 — forces a provider to pick their strongest
+// specialties rather than ticking every box; matches the zod schema's
+// .max(5) in lib/validations/profile.ts.
+const MAX_CATEGORIES = 5;
+
 interface ServiceItem {
   id: string;
   name: string;
@@ -204,12 +209,21 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   };
 
   const toggleCategory = (category: ProfileCategory) => {
-    setValues((prev) => ({
-      ...prev,
-      categories: prev.categories.includes(category)
-        ? prev.categories.filter((c) => c !== category)
-        : [...prev.categories, category],
-    }));
+    setValues((prev) => {
+      const isSelected = prev.categories.includes(category);
+      // Prompt G2, VIỆC 4 — max 5, enforced here too (not just the zod
+      // schema on save) so the chip itself visibly refuses the 6th pick
+      // instead of silently no-oping until Save.
+      if (!isSelected && prev.categories.length >= MAX_CATEGORIES) {
+        return prev;
+      }
+      return {
+        ...prev,
+        categories: isSelected
+          ? prev.categories.filter((c) => c !== category)
+          : [...prev.categories, category],
+      };
+    });
   };
 
   const toggleAmenity = (amenity: string) => {
@@ -359,20 +373,39 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          {tEditor("categoriesLabel")}
-        </span>
-        <div className="flex flex-wrap gap-2">
-          {(CATEGORIES_BY_ROLE[role] ?? []).map((category) => (
-            <Tag
-              key={category}
-              selected={values.categories.includes(category)}
-              onClick={() => toggleCategory(category)}
-            >
-              {categoryT(category)}
-            </Tag>
-          ))}
+        <div className="flex items-center justify-between">
+          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            {tEditor("categoriesLabel")}
+          </span>
+          <span className="text-body-sm text-text-tertiary">
+            {tEditor("categoriesCount", {
+              count: values.categories.length,
+              max: MAX_CATEGORIES,
+            })}
+          </span>
         </div>
+        <div className="flex flex-wrap gap-2">
+          {(CATEGORIES_BY_ROLE[role] ?? []).map((category) => {
+            const selected = values.categories.includes(category);
+            const atMax =
+              !selected && values.categories.length >= MAX_CATEGORIES;
+            return (
+              <Tag
+                key={category}
+                selected={selected}
+                disabled={atMax}
+                onClick={() => toggleCategory(category)}
+              >
+                {categoryT(category)}
+              </Tag>
+            );
+          })}
+        </div>
+        {values.categories.length === 0 ? (
+          <p className="text-body-sm text-warning">
+            {tEditor("categoriesRequiredHint")}
+          </p>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-2 gap-3">

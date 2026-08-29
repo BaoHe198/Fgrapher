@@ -19,7 +19,12 @@ export const updateProfileSchema = z.object({
   tiktok: z.string().max(60).optional(),
   priceMin: z.number().nonnegative().optional(),
   priceMax: z.number().nonnegative().optional(),
-  categories: z.array(z.enum(ProfileCategory)).optional(),
+  // Prompt G2, VIỆC 4 — max 5 forces a provider to pick their strongest
+  // specialties rather than ticking every box.
+  categories: z
+    .array(z.enum(ProfileCategory))
+    .max(5, "Choose up to 5 categories")
+    .optional(),
   address: z.string().max(200).optional(),
   area: z.number().positive().optional(),
   amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
@@ -68,7 +73,10 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     tiktok: z.string().max(60).optional(),
     priceMin: z.number().nonnegative().optional(),
     priceMax: z.number().nonnegative().optional(),
-    categories: z.array(z.enum(ProfileCategory)).optional(),
+    categories: z
+      .array(z.enum(ProfileCategory))
+      .max(5, t("categoriesMax"))
+      .optional(),
     address: z.string().max(200).optional(),
     area: z.number().positive().optional(),
     amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
