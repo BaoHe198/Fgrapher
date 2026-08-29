@@ -699,6 +699,14 @@ model BlockedDate {
   date   DateTime @db.Date
   reason String?
 
+  // Both null = the whole day is blocked. Both set ("HH:MM") = only that
+  // window is blocked — the rest of the day's weekly Availability windows
+  // stay bookable. One row per date (see @@unique below), so a single date
+  // can carry at most one whole-day block OR one time-range block, not
+  // several disjoint ranges — a deliberate scope limit (Prompt F3, VIỆC 1).
+  startTime String?
+  endTime   String?
+
   @@unique([userId, date])
   @@map("blocked_dates")
 }
@@ -1204,6 +1212,8 @@ enum NotificationType {
   ORDER_DELIVERED
   ORDER_CANCELLED
   REVIEW_RESPONSE
+  MEDIA_APPROVED
+  MEDIA_REJECTED
 }
 
 model Notification {
