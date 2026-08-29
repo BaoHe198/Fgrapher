@@ -159,7 +159,8 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
                       price: formatCurrency(profile.priceMin),
                     })
                   : tBrowse("contactForPricing"),
-                coverImage: profile.media[0]?.url,
+                avatar: profile.user.avatar ?? undefined,
+                media: profile.media,
               }}
             />
           ))}

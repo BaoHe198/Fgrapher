@@ -192,6 +192,26 @@ in the naive version of this (clicks clobbering each other under Next.js's
 async navigation) was diagnosed and fixed; see that file's comments for
 the mechanism if touching this area again.
 
+**Result cards** (`components/cards/artist-card.tsx`, a Client Component
+for its carousel/touch state — every one of its four callers,
+`/browse`, the landing page's featured strip, the `/[roleSlug]/
+[provinceSlug]` SEO landing pages, and `/saved`, fetch the same shape via
+`services/search.ts`'s `PROVIDER_INCLUDE`, except `/saved` which runs its
+own equivalent query directly): shows up to 5 approved photos as an
+in-card carousel (hover arrows on desktop, swipe on mobile, dot
+indicators) — only the currently-shown photo is ever mounted as an
+`<Image>`, so browsing never eagerly loads more than one photo per card.
+A provider with zero approved photos gets a brand-gradient background
+with their avatar centered, falling back to an initial-letter avatar in a
+name-derived stable color (`lib/utils.ts`'s `avatarFallbackColor`) when
+they have no avatar either — never a bare gray block. A zero-review
+provider shows "Mới" alone, not "Mới (0)" (`StarRating`'s
+`hideCountWhenZero` prop, opt-in so other `StarRating` call sites are
+unaffected). Name is clamped to 2 lines, role badges cap at 2 plus a
+"+N" overflow badge, both on their own rows so a long name never
+squeezes the role badges (or vice versa) — this keeps every card in a
+result grid the same height regardless of content length.
+
 ## 6. Booking
 
 **Who can use it:** Customer → any provider role; a provider role can also

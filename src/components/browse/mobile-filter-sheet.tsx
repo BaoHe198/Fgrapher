@@ -18,10 +18,12 @@ import { FilterSidebar } from "./filter-sidebar";
 
 export function MobileFilterSheet({
   roleCounts,
+  categoryCounts,
   activeCount,
   marketplaceEnabled,
 }: {
   roleCounts: Record<string, number>;
+  categoryCounts: Partial<Record<string, number>>;
   activeCount: number;
   marketplaceEnabled: boolean;
 }) {
@@ -47,6 +49,7 @@ export function MobileFilterSheet({
         <div className="p-4">
           <FilterSidebar
             roleCounts={roleCounts}
+            categoryCounts={categoryCounts}
             marketplaceEnabled={marketplaceEnabled}
           />
         </div>

@@ -46,10 +46,13 @@ const PROVIDER_INCLUDE = {
   },
   // Prompt B5, VIỆC 5 — public search must never surface unmoderated
   // media, same rule as public-profile.ts's getPublicProfileUser.
+  // Prompt G5, VIỆC 3 — the card carousel shows up to 5 photos; per
+  // profile here (groupProfilesByUser then slices the merged total to 5
+  // too, since one person can hold several role-profiles).
   media: {
     where: { moderationStatus: "APPROVED" as const },
     orderBy: { order: "asc" as const },
-    take: 3,
+    take: 5,
   },
 };
 
@@ -109,7 +112,7 @@ function groupProfilesByUser(
       displayName: userProfiles.find((p) => p.displayName)?.displayName ?? null,
       priceMin,
       currency: userProfiles[0].currency,
-      media: userProfiles.flatMap((p) => p.media),
+      media: userProfiles.flatMap((p) => p.media).slice(0, 5),
       avgRating: stats.avg,
       reviewCount: stats.count,
       createdAt,
@@ -312,7 +315,7 @@ export async function searchProfiles(params: SearchParams) {
 
   const roleRows = await db.profile.findMany({
     where: { isPublished: true, role: { in: PAID_ROLES } },
-    select: { role: true, userId: true },
+    select: { role: true, userId: true, categories: true },
   });
 
   // Count unique providers per role, not profile rows — a role's Profile
@@ -320,10 +323,22 @@ export async function searchProfiles(params: SearchParams) {
   // @@unique([userId, role]) constraint), but building the set explicitly
   // keeps this correct even if that assumption ever changes.
   const usersByRole = new Map<Role, Set<string>>();
+  // Prompt G4, VIỆC 2 — "hiện số lượng provider theo từng thể loại" /
+  // "0 provider thì làm mờ hoặc ẩn". Global counts, not scoped to the
+  // current filter selection (same choice roleCounts already makes) —
+  // category values are disjoint per role group (see CATEGORIES_BY_ROLE),
+  // so there's no cross-role ambiguity in counting them together.
+  const usersByCategory = new Map<ProfileCategory, Set<string>>();
   for (const row of roleRows) {
-    const set = usersByRole.get(row.role) ?? new Set<string>();
-    set.add(row.userId);
-    usersByRole.set(row.role, set);
+    const roleSet = usersByRole.get(row.role) ?? new Set<string>();
+    roleSet.add(row.userId);
+    usersByRole.set(row.role, roleSet);
+
+    for (const category of row.categories) {
+      const categorySet = usersByCategory.get(category) ?? new Set<string>();
+      categorySet.add(row.userId);
+      usersByCategory.set(category, categorySet);
+    }
   }
 
   return {
@@ -341,6 +356,12 @@ export async function searchProfiles(params: SearchParams) {
         role,
         count: usersByRole.get(role)?.size ?? 0,
       })),
+      categories: Object.fromEntries(
+        Array.from(usersByCategory.entries()).map(([category, users]) => [
+          category,
+          users.size,
+        ]),
+      ) as Partial<Record<ProfileCategory, number>>,
     },
   };
 }

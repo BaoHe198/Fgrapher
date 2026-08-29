@@ -92,6 +92,28 @@ export function mondayFirstColumn(dayOfWeek: number) {
   return (dayOfWeek + 6) % 7;
 }
 
+// Prompt G5, VIỆC 1 — "hiện chữ cái đầu tên trên nền màu sinh theo tên
+// (mỗi người một màu ổn định)". Only green/gold exist as brand hues
+// (docs/design-reference/design-tokens.md), so variety comes from cycling
+// shades within those two scales rather than introducing off-brand colors.
+const AVATAR_FALLBACK_COLORS = [
+  "bg-green-500",
+  "bg-gold-500",
+  "bg-green-700",
+  "bg-gold-700",
+  "bg-green-400",
+  "bg-gold-300",
+] as const;
+
+export function avatarFallbackColor(seed: string) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  return AVATAR_FALLBACK_COLORS[Math.abs(hash) % AVATAR_FALLBACK_COLORS.length];
+}
+
 export function formatRelativeTime(date: Date) {
   const diffMs = Date.now() - date.getTime();
   const diffMinutes = Math.round(diffMs / 60_000);

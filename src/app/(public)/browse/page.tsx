@@ -20,6 +20,21 @@ interface BrowsePageProps {
   searchParams: Promise<Record<string, string | undefined>>;
 }
 
+// Prompt G4, VIỆC 5 — "gợi ý cụ thể nên bỏ tiêu chí nào" instead of just a
+// generic "no results" message. Builds a link back to the current filter
+// state minus one param at a time.
+function queryWithout(
+  params: Record<string, string | undefined>,
+  keysToDrop: string[],
+) {
+  const next = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value && !keysToDrop.includes(key)) next.set(key, value);
+  }
+  const qs = next.toString();
+  return qs ? `/browse?${qs}` : "/browse";
+}
+
 export async function generateMetadata() {
   const t = await getTranslations("publicPages.browse");
   return { title: t("pageTitle") };
@@ -66,6 +81,47 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const roleCounts = Object.fromEntries(
     result.facets.roles.map((r) => [r.role, r.count]),
   );
+  const categoryCounts = result.facets.categories;
+
+  // Each entry: a translated label for the active criterion + the keys to
+  // drop from the URL to remove just that one. Order roughly matches how
+  // restrictive each filter tends to be (categories/budget/rating first —
+  // the ones most likely to zero out results — before broader ones).
+  const removableFilters: { key: string; label: string; drop: string[] }[] = [
+    ...(categories && categories.length > 0
+      ? [
+          {
+            key: "categories",
+            label: t("noResults.removeCategories"),
+            drop: ["categories"],
+          },
+        ]
+      : []),
+    ...(params.minPrice || params.maxPrice
+      ? [
+          {
+            key: "budget",
+            label: t("noResults.removeBudget"),
+            drop: ["minPrice", "maxPrice"],
+          },
+        ]
+      : []),
+    ...(params.minRating
+      ? [
+          {
+            key: "rating",
+            label: t("noResults.removeRating"),
+            drop: ["minRating"],
+          },
+        ]
+      : []),
+    ...(params.city
+      ? [{ key: "city", label: t("noResults.removeCity"), drop: ["city"] }]
+      : []),
+    ...(roles && roles.length > 0
+      ? [{ key: "roles", label: t("noResults.removeRoles"), drop: ["roles"] }]
+      : []),
+  ];
 
   const activeFilterCount = [
     roles?.length,
@@ -90,6 +146,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
           <div className="hidden lg:block">
             <FilterSidebar
               roleCounts={roleCounts}
+              categoryCounts={categoryCounts}
               marketplaceEnabled={features.marketplaceEnabled}
             />
           </div>
@@ -110,6 +167,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 <div className="lg:hidden">
                   <MobileFilterSheet
                     roleCounts={roleCounts}
+                    categoryCounts={categoryCounts}
                     activeCount={activeFilterCount}
                     marketplaceEnabled={features.marketplaceEnabled}
                   />
@@ -148,6 +206,25 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   <p className="text-body-md text-text-secondary">
                     {t("noResults.body")}
                   </p>
+                  {removableFilters.length > 0 ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-body-sm text-text-tertiary">
+                        {t("noResults.tryRemoving")}
+                      </p>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {removableFilters.map((filter) => (
+                          <Tag
+                            key={filter.key}
+                            render={
+                              <Link href={queryWithout(params, filter.drop)} />
+                            }
+                          >
+                            {filter.label}
+                          </Tag>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                   <Button
                     variant="secondary"
                     size="sm"
@@ -194,7 +271,8 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                                 price: formatCurrency(profile.priceMin),
                               })
                             : t("contactForPricing"),
-                          coverImage: profile.media[0]?.url,
+                          avatar: profile.user.avatar ?? undefined,
+                          media: profile.media,
                         }}
                       />
                     ))}
@@ -270,7 +348,8 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                                 price: formatCurrency(profile.priceMin),
                               })
                             : t("contactForPricing"),
-                          coverImage: profile.media[0]?.url,
+                          avatar: profile.user.avatar ?? undefined,
+                          media: profile.media,
                           nationwideLabel: t("nationwideBadge"),
                         }}
                       />

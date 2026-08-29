@@ -120,7 +120,8 @@ export default async function LandingPage() {
                         price: formatCurrency(profile.priceMin),
                       })
                     : tLanding("contactForPricing"),
-                  coverImage: profile.media[0]?.url,
+                  avatar: profile.user.avatar ?? undefined,
+                  media: profile.media,
                 }}
               />
             ))}

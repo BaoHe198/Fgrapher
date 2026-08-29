@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
+import { toast } from "@/components/ui/toast";
 import {
   CATEGORIES_BY_ROLE,
   EXPERIENCE_LEVELS,
@@ -16,6 +17,16 @@ import {
 } from "@/lib/constants";
 
 import { useBrowseFilterNavigation } from "./browse-filter-context";
+
+// Roles that have a specialty-category list at all (CAMERA_SHOP doesn't).
+const STYLE_ROLES = Object.keys(CATEGORIES_BY_ROLE) as Role[];
+
+// Prompt G4, VIỆC 2 — long groups (photographer alone has 12) collapse to
+// this many with a "show more" toggle, rather than dumping the whole list.
+const COLLAPSE_THRESHOLD = 6;
+// How many "most popular platform-wide" categories to show before any
+// role is selected, before the "see all" expansion.
+const POPULAR_CATEGORIES_COUNT = 8;
 
 interface ProvinceOption {
   id: string;
@@ -94,16 +105,20 @@ function filterStateToQuery(filters: FilterState): string {
 
 interface FilterSidebarProps {
   roleCounts: Record<string, number>;
+  categoryCounts: Partial<Record<string, number>>;
   marketplaceEnabled: boolean;
 }
 
 export function FilterSidebar({
   roleCounts,
+  categoryCounts,
   marketplaceEnabled,
 }: FilterSidebarProps) {
   const t = useTranslations("sharedComponents.filterSidebar");
   const roleT = useTranslations("role");
   const categoryT = useTranslations("profileCategory");
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<Role>>(new Set());
   const experienceLevelT = useTranslations("experienceLevel");
   const BUDGET_OPTIONS = [
     { value: "", label: t("budgetAny") },
@@ -200,21 +215,40 @@ export function FilterSidebar({
     const roles = current.includes(role)
       ? current.filter((r) => r !== role)
       : [...current, role];
-    // Role-specific filters (style, height, experience, travel) stop
-    // applying once more than one role is selected — clear them so they
-    // don't linger as invisible state that silently narrows results.
-    applyFilters(
-      roles.length === 1
-        ? { roles }
+
+    // Prompt G4, VIỆC 1 — categories now stay meaningful for 0 or 2+
+    // selected roles too (see the render logic below), so only drop a
+    // selected category that's no longer valid for ANY currently-selected
+    // role, and tell the user when that happens instead of silently
+    // clearing it.
+    const validCategories = new Set(
+      roles.flatMap((r) => CATEGORIES_BY_ROLE[r] ?? []),
+    );
+    const currentCategories = filtersRef.current.categories;
+    const categories =
+      roles.length === 0
+        ? []
+        : currentCategories.filter((c) => validCategories.has(c));
+    const droppedCount = currentCategories.length - categories.length;
+    if (droppedCount > 0) {
+      toast.add({ title: t("categoriesClearedNotice"), type: "info" });
+    }
+
+    const singleRole = roles.length === 1 ? roles[0] : null;
+    applyFilters({
+      roles,
+      categories,
+      // Height/experience/travel are MODEL-only and only apply when
+      // scoped to exactly that one role.
+      ...(singleRole === "MODEL"
+        ? {}
         : {
-            roles,
-            categories: [],
             heightMin: "",
             heightMax: "",
             experienceLevel: [],
             travelWilling: false,
-          },
-    );
+          }),
+    });
   };
 
   const toggleCategory = (category: ProfileCategory) => {
@@ -261,11 +295,53 @@ export function FilterSidebar({
     scheduleNavigate(empty, true);
   };
 
+  const toggleGroupExpand = (role: Role) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(role)) next.delete(role);
+      else next.add(role);
+      return next;
+    });
+  };
+
   const budget = `${filters.minPrice}-${filters.maxPrice}`.replace(/^-$/, "");
   const singleRole = filters.roles.length === 1 ? filters.roles[0] : null;
-  const styleCategories = singleRole
-    ? (CATEGORIES_BY_ROLE[singleRole] ?? [])
-    : [];
+
+  // Prompt G4, VIỆC 1 — categories now render in three shapes depending on
+  // how many roles are selected:
+  //   0 roles  -> the platform's most popular categories (by provider
+  //               count), collapsed into one ungrouped list, with a "see
+  //               all" toggle that switches to every role's full list
+  //   1 role   -> that role's categories, no group header (the Role
+  //               checkbox above already scopes it)
+  //   2+ roles -> the union, grouped under a header per role
+  interface CategoryGroup {
+    role: Role | null;
+    categories: ProfileCategory[];
+  }
+  let categoryGroups: CategoryGroup[];
+  if (filters.roles.length === 1) {
+    categoryGroups = [
+      { role: null, categories: CATEGORIES_BY_ROLE[filters.roles[0]] ?? [] },
+    ];
+  } else if (filters.roles.length >= 2) {
+    categoryGroups = filters.roles
+      .map((role) => ({ role, categories: CATEGORIES_BY_ROLE[role] ?? [] }))
+      .filter((group) => group.categories.length > 0);
+  } else if (showAllCategories) {
+    categoryGroups = STYLE_ROLES.map((role) => ({
+      role,
+      categories: CATEGORIES_BY_ROLE[role] ?? [],
+    }));
+  } else {
+    const popular = STYLE_ROLES.flatMap(
+      (role) => CATEGORIES_BY_ROLE[role] ?? [],
+    )
+      .sort((a, b) => (categoryCounts[b] ?? 0) - (categoryCounts[a] ?? 0))
+      .slice(0, POPULAR_CATEGORIES_COUNT);
+    categoryGroups = [{ role: null, categories: popular }];
+  }
+  const hasAnyCategory = categoryGroups.some((g) => g.categories.length > 0);
 
   return (
     <div className="sticky top-[104px] flex flex-col gap-[22px] rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-sm)]">
@@ -285,23 +361,76 @@ export function FilterSidebar({
         </div>
       </div>
 
-      {styleCategories.length > 0 ? (
+      {hasAnyCategory ? (
         <>
           <div className="h-px bg-border-subtle" />
-          <div className="flex flex-col gap-2.5">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-              {t("styleLabel")}
-            </span>
-            <div className="flex flex-col gap-2.5">
-              {styleCategories.map((category) => (
-                <Checkbox
-                  key={category}
-                  checked={filters.categories.includes(category)}
-                  onCheckedChange={() => toggleCategory(category)}
-                  label={categoryT(category)}
-                />
-              ))}
+          <div className="flex flex-col gap-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+                {t("styleLabel")}
+              </span>
+              {filters.roles.length === 0 && !showAllCategories ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllCategories(true)}
+                  className="text-body-sm font-semibold text-text-link"
+                >
+                  {t("seeAllCategories")}
+                </button>
+              ) : null}
             </div>
+            {categoryGroups.map((group) => {
+              const isExpanded = group.role
+                ? expandedGroups.has(group.role)
+                : true;
+              const visible = isExpanded
+                ? group.categories
+                : group.categories.slice(0, COLLAPSE_THRESHOLD);
+              const hasMore =
+                group.role != null &&
+                group.categories.length > COLLAPSE_THRESHOLD;
+              return (
+                <div
+                  key={group.role ?? "popular"}
+                  className="flex flex-col gap-2.5"
+                >
+                  {group.role ? (
+                    <span className="text-body-sm font-semibold text-text-secondary">
+                      {roleT(group.role)}
+                    </span>
+                  ) : null}
+                  <div className="flex flex-col gap-2.5">
+                    {visible.map((category) => {
+                      const count = categoryCounts[category] ?? 0;
+                      return (
+                        <Checkbox
+                          key={category}
+                          checked={filters.categories.includes(category)}
+                          onCheckedChange={() => toggleCategory(category)}
+                          disabled={count === 0}
+                          label={`${categoryT(category)} (${count})`}
+                        />
+                      );
+                    })}
+                  </div>
+                  {hasMore ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        group.role && toggleGroupExpand(group.role)
+                      }
+                      className="self-start text-body-sm font-semibold text-text-link"
+                    >
+                      {isExpanded
+                        ? t("showLess")
+                        : t("showMore", {
+                            count: group.categories.length - COLLAPSE_THRESHOLD,
+                          })}
+                    </button>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </>
       ) : null}
