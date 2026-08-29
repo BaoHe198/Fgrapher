@@ -84,6 +84,14 @@ export function formatCurrency(amount: number, _currency = "VND") {
   return formatVND(amount);
 }
 
+// Converts a JS Date.getUTCDay() value (0=Sunday..6=Saturday) into a
+// Monday-first grid column (Monday=0..Sunday=6) — see WEEK_STARTS_ON's
+// comment in lib/constants for why the stored numbering itself never
+// changes, only display order.
+export function mondayFirstColumn(dayOfWeek: number) {
+  return (dayOfWeek + 6) % 7;
+}
+
 export function formatRelativeTime(date: Date) {
   const diffMs = Date.now() - date.getTime();
   const diffMinutes = Math.round(diffMs / 60_000);

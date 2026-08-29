@@ -11,6 +11,7 @@ import {
   bookingRequestEmailHtml,
 } from "@/lib/email";
 import { formatDate } from "@/lib/format";
+import { isSlotBookable } from "@/services/availability";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
@@ -371,6 +372,24 @@ export async function createBooking(
     Number(input.startTime.slice(0, 2)) * 60 + Number(input.startTime.slice(3));
   const endMinutes = startMinutes + duration;
   const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+
+  // Server-side gate (Prompt F3, VIỆC 4) — the booking widget already
+  // disables blocked/unavailable slots client-side, but that's UI-only; a
+  // direct API call must be stopped here too. Reuses the exact same
+  // day-availability computation the widget reads, so the two surfaces
+  // can never disagree about what's bookable.
+  const bookable = await isSlotBookable(
+    input.providerId,
+    input.date,
+    input.startTime,
+    duration,
+  );
+  if (!bookable) {
+    throw new BookingActionError(
+      "That date or time isn't available for this provider",
+      409,
+    );
+  }
 
   const booking = await db.$transaction(async (tx) => {
     // Race-condition guard: re-check for an overlapping PENDING/CONFIRMED
