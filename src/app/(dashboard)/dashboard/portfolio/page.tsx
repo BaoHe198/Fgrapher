@@ -11,8 +11,9 @@ import { Tag } from "@/components/ui/tag";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
+import { listAlbums } from "@/services/albums";
 
-import { PortfolioGrid } from "./portfolio-grid";
+import { AlbumGrid } from "./album-grid";
 
 export default async function PortfolioPage({
   searchParams,
@@ -81,10 +82,7 @@ export default async function PortfolioPage({
   const activeProfile =
     profiles.find((p) => p.role === profileParam) ?? profiles[0];
 
-  const media = await db.profileMedia.findMany({
-    where: { profileId: activeProfile.id },
-    orderBy: { order: "asc" },
-  });
+  const albums = await listAlbums(activeProfile.id);
 
   return (
     <div className="flex flex-col gap-5">
@@ -111,16 +109,17 @@ export default async function PortfolioPage({
         })}
         fallbackText={t("gate.fallbackText")}
       >
-        <PortfolioGrid
+        <AlbumGrid
           key={activeProfile.id}
           profileId={activeProfile.id}
-          initialMedia={media.map((m) => ({
-            id: m.id,
-            url: m.url,
-            type: m.type,
-            title: m.title,
-            moderationStatus: m.moderationStatus,
-            moderationNote: m.moderationNote,
+          role={activeProfile.role}
+          initialAlbums={albums.map((a) => ({
+            id: a.id,
+            title: a.title,
+            category: a.category,
+            shootDate: a.shootDate ? a.shootDate.toISOString() : null,
+            coverMedia: a.coverMedia,
+            mediaCount: a._count.media,
           }))}
         />
       </SubscriptionGate>

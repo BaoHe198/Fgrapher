@@ -8,16 +8,19 @@ import {
 } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { ROLE_PLANS } from "@/lib/constants/plans";
-import { createPortfolioMediaSchema } from "@/lib/validations/portfolio";
+import { getCreatePortfolioMediaSchema } from "@/lib/validations/portfolio";
 import { runModeration } from "@/services/moderation";
 
 export async function POST(request: Request) {
-  const t = await getTranslations("apiMessages.portfolio");
+  const [t, tValidation] = await Promise.all([
+    getTranslations("apiMessages.portfolio"),
+    getTranslations("libServices.validation.portfolio"),
+  ]);
   try {
     const session = await requireAuth();
 
     const body = await request.json();
-    const parsed = createPortfolioMediaSchema.safeParse(body);
+    const parsed = getCreatePortfolioMediaSchema(tValidation).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -50,7 +53,14 @@ export async function POST(request: Request) {
         where: { profileId: profile.id },
         _max: { order: true },
       }),
-      db.profileMedia.count({ where: { profileId: profile.id } }),
+      // Prompt G3, VIỆC 3 — "tính trên TỔNG số ảnh của hồ sơ chứ không
+      // phải theo từng album": unchanged by albums (this already counted
+      // across the whole profile, never per-album), just now also
+      // excludes soft-deleted photos so a trashed photo doesn't count
+      // against the limit while it's awaiting purge.
+      db.profileMedia.count({
+        where: { profileId: profile.id, deletedAt: null },
+      }),
     ]);
 
     const limit = ROLE_PLANS[profile.role]?.maxPortfolioImages;
@@ -65,9 +75,22 @@ export async function POST(request: Request) {
       );
     }
 
+    if (parsed.data.albumId) {
+      const album = await db.album.findUnique({
+        where: { id: parsed.data.albumId },
+      });
+      if (!album || album.profileId !== profile.id) {
+        return NextResponse.json(
+          { data: null, error: "not_found", message: t("albumNotFound") },
+          { status: 404 },
+        );
+      }
+    }
+
     const media = await db.profileMedia.create({
       data: {
         profileId: profile.id,
+        albumId: parsed.data.albumId,
         url: parsed.data.url,
         publicId: parsed.data.publicId,
         type: parsed.data.type,

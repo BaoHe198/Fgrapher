@@ -641,6 +641,11 @@ export async function listPendingMedia() {
           },
         },
       },
+      // Prompt G3, VIỆC 5 — "Màn hình duyệt của admin cần hiện thêm ảnh
+      // này thuộc album nào để người duyệt có ngữ cảnh." Albums aren't
+      // moderated themselves, but the reviewer benefits from knowing
+      // which shoot/category a pending photo was grouped under.
+      album: { select: { id: true, title: true } },
     },
     // Oldest first — surfaces anything approaching/past the 24h SLA badge
     // shown on /admin/moderation.

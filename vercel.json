@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/expire-bookings",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/purge-trashed-media",
+      "schedule": "0 5 * * *"
     }
   ]
 }

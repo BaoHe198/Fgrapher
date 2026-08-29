@@ -2,10 +2,6 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import {
-  deleteCloudinaryAsset,
-  isCloudinaryConfigured,
-} from "@/lib/cloudinary";
 import { db } from "@/lib/db";
 
 export async function DELETE(
@@ -29,17 +25,17 @@ export async function DELETE(
       );
     }
 
-    if (media.publicId && isCloudinaryConfigured()) {
-      await deleteCloudinaryAsset(
-        media.publicId,
-        media.type === "VIDEO" ? "video" : "image",
-      );
-    }
-
-    await db.profileMedia.delete({ where: { id } });
+    // Prompt G3, VIỆC 2 — soft delete now, not an immediate hard delete
+    // (and the Cloudinary asset is intentionally left alone here too) —
+    // both only actually happen once TRASH_TTL_DAYS pass, via the
+    // purge-trashed-media cron (services/albums.ts's purgeExpiredTrash).
+    await db.profileMedia.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
 
     return NextResponse.json(
-      { data: null, error: null, message: t("mediaDeleted") },
+      { data: null, error: null, message: t("mediaMovedToTrash") },
       { status: 200 },
     );
   } catch (err) {

@@ -36,6 +36,7 @@ interface MediaRow {
     displayName: string | null;
     user: { name: string | null; firstName: string | null; email: string };
   };
+  album: { id: string; title: string } | null;
 }
 
 function isOverdue(createdAt: string) {
@@ -314,6 +315,11 @@ export default function AdminModerationPage() {
                       <span className="text-body-sm text-text-tertiary">
                         {roleT(item.profile.role as Role)}
                       </span>
+                      {item.album ? (
+                        <span className="truncate text-body-sm text-text-tertiary">
+                          {t("albumLabel", { title: item.album.title })}
+                        </span>
+                      ) : null}
                       <span className="text-body-sm text-text-tertiary">
                         {t("waitingSince", {
                           time: formatRelativeTime(new Date(item.createdAt)),

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const createPortfolioMediaSchema = z.object({
   profileId: z.string().min(1),
+  albumId: z.string().min(1).optional(),
   url: z.string().url(),
   publicId: z.string().min(1),
   type: z.enum(["IMAGE", "VIDEO"]),
@@ -32,6 +33,7 @@ export type ReorderPortfolioInput = z.infer<typeof reorderPortfolioSchema>;
 export function getCreatePortfolioMediaSchema(t: (key: string) => string) {
   return z.object({
     profileId: z.string().min(1),
+    albumId: z.string().min(1).optional(),
     url: z.string().url(),
     publicId: z.string().min(1),
     type: z.enum(["IMAGE", "VIDEO"]),

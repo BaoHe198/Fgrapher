@@ -120,13 +120,34 @@ proxies the file bytes. The upload signature bakes in an incoming
 the stored asset itself, not just the delivered view of it. Upload is
 capped per role's `maxPortfolioImages` (`lib/constants/plans.ts`, 30
 today for every role) — the pricing page's "Unlimited uploads" copy
-predates this and should be corrected. A rights-confirmation checkbox
-("I confirm I have the rights to use these images...") is required on
-every upload, unticked by default; the server stamps
-`rightsConfirmedAt` itself. Ordering is drag-and-drop (`@dnd-kit`,
-`/api/portfolio/reorder`, persisted as each row's `order` integer).
-Deletion removes the DB row; the Cloudinary asset is removed via
-`deleteCloudinaryAsset` using the stored `publicId`.
+predates this and should be corrected. The cap is enforced against the
+profile's total photo count across every album combined, never per
+album. A rights-confirmation checkbox ("I confirm I have the rights to
+use these images...") is required on every upload, unticked by default;
+the server stamps `rightsConfirmedAt` itself. Ordering is drag-and-drop
+(`@dnd-kit`, `/api/portfolio/reorder`, persisted as each row's `order`
+integer).
+
+**Albums:** every `ProfileMedia` row belongs to an `Album` (`title`,
+optional `description`, `category`, `shootDate`, own drag-reorder
+`sortOrder`, optional `coverMediaId`) — `/dashboard/portfolio` manages
+albums, not a flat photo grid, and the upload modal's first step is
+choosing (or inline-creating) the target album (`services/albums.ts`).
+Migrating from the earlier flat layout created one "Ảnh chưa phân loại"
+album per profile and reassigned its existing photos, verified
+photo-count-preserving by `scripts/verify-album-migration.ts` — that
+migrated album's `category` is the one case where `Album.category` is
+null; every album created since is required to have one. Deleting an
+album (or an individual photo inside a still-live album) soft-deletes it
+(`deletedAt`, both paired under the same timestamp when a whole album is
+deleted so they restore together) into a 7-day recoverable trash
+surfaced at `/dashboard/portfolio`'s Thùng rác sheet; a daily cron
+(`/api/cron/purge-trashed-media` → `purgeExpiredTrash()`) permanently
+deletes anything past that window, including the Cloudinary asset via
+`deleteCloudinaryAsset`. The public profile's Portfolio tab shows albums
+as a grid (`services/public-profile.ts`'s `getPublicProfileUser`); an
+album with zero `APPROVED` photos is excluded from that query entirely,
+not just hidden client-side.
 
 **Moderation:** every upload starts `moderationStatus: PENDING` and is
 run through `services/moderation.ts`'s `contentScanner` (currently
@@ -136,10 +157,13 @@ run through `services/moderation.ts`'s `contentScanner` (currently
 `search.ts`); the owner's own dashboard view is unfiltered and shows a
 Pending/Rejected badge. A profile can't be published (`isPublished:
 true`) without at least one `APPROVED` photo, on top of the identity-
-verification requirement (§3). Admins review the queue at
+verification requirement (§3). Albums themselves are never moderated —
+only the photos inside them are. Admins review the queue at
 `/admin/moderation` (bulk approve/reject, keyboard shortcuts, 24h SLA
-badge); a scanner-flagged (`AUTO_REJECTED`) upload adds a strike to
-`User.violationPoints`, auto-suspending the account at 3 strikes.
+badge, each pending photo's card shows which album it belongs to for
+reviewer context); a scanner-flagged (`AUTO_REJECTED`) upload adds a
+strike to `User.violationPoints`, auto-suspending the account at 3
+strikes.
 
 ## 5. Search and discovery
 
