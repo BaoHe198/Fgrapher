@@ -168,7 +168,7 @@ export function ConversationList({
                     </span>
                   ) : null}
                   {conversation.unreadCount > 0 ? (
-                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-xs font-bold text-text-on-brand">
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-sm font-bold text-text-on-brand">
                       {conversation.unreadCount}
                     </span>
                   ) : null}

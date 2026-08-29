@@ -201,7 +201,11 @@
   --surface-card: #ffffff;
   --text-primary: hsl(30 15% 11%);
   --text-secondary: hsl(30 8% 38%);
-  --text-tertiary: hsl(30 7% 52%);
+  /* Prompt G6 VIỆC 2 — was hsl(30 7% 52%), 3.27–3.65:1 against bg-page/
+     bg-surface/bg-sunken (fails WCAG AA's 4.5:1 for normal text). Darkened
+     to clear 4.5:1 on all three; dark-mode's --text-tertiary (line ~312)
+     already passed AA as-is and is untouched. */
+  --text-tertiary: hsl(30 7% 44%);
   --text-on-brand: #ffffff;
   --text-link: hsl(168 55% 20%);
   --border-subtle: hsl(30 12% 90%);
@@ -225,14 +229,41 @@
   --text-display-xl: 600 3rem/1.08 var(--font-display);
   --text-display-lg: 600 2.25rem/1.12 var(--font-display);
   --text-display-md: 600 1.75rem/1.2 var(--font-display);
+  /* Prompt G6 VIỆC 1 found this referenced by 2 files (product H1,
+     checkout-success H1) with no token/@utility behind it anywhere —
+     silently unstyled. Sized between display-md (28px) and heading-lg
+     (24px), the gap those call sites were reaching into. */
+  --text-display-sm: 600 1.625rem/1.2 var(--font-display);
   --text-heading-lg: 600 1.5rem/1.3 var(--font-display);
+  /* Same "referenced but never defined" bug as display-sm above, found by
+     the G6 audit — 6 files (page H1s + pricing section H2s) were relying
+     on this with zero CSS behind it. Same 24–28px gap as display-sm; kept
+     as a same-size sibling distinguished by weight/line-height rather than
+     inventing an arbitrary different size with no design rationale. */
+  --text-heading-xl: 600 1.625rem/1.25 var(--font-display);
   --text-heading-md: 600 1.25rem/1.35 var(--font-body);
-  --text-heading-sm: 600 1.0625rem/1.4 var(--font-body);
+  /* Line-height only: 1.4 → 1.5. Used for card titles/subheadings that
+     wrap in Vietnamese (e.g. multi-role labels) — VIỆC 2's Vietnamese
+     diacritic-clipping concern applies here, not just to body text. */
+  --text-heading-sm: 600 1.0625rem/1.5 var(--font-body);
   --text-body-lg: 400 1.0625rem/1.55 var(--font-body);
-  --text-body-md: 400 0.9375rem/1.55 var(--font-body);
-  --text-body-sm: 400 0.8125rem/1.5 var(--font-body);
-  --text-caption: 500 0.75rem/1.4 var(--font-body);
-  --text-caption-upper: 600 0.6875rem/1.3 var(--font-body);
+  /* 15px/1.55 → 16px/1.6 — was 1px under VIỆC 2's 16px body-text floor;
+     line-height bumped too since the size grew. */
+  --text-body-md: 400 1rem/1.6 var(--font-body);
+  /* 13px/1.5 → 14px/1.6 — was under BOTH the 16px body floor (this is
+     used as paragraph body copy in several places per the G6 audit) and
+     the 14px absolute secondary-text floor. At 327 uses this was the
+     single highest-volume violation in the app; line-height raised above
+     the bare 1.5 minimum since it's the smallest paragraph-tier size and
+     the most exposed to Vietnamese diacritic clipping. */
+  --text-body-sm: 400 0.875rem/1.6 var(--font-body);
+  /* 12px/1.4 → 14px/1.5 — "chữ phụ, chú thích tối thiểu 14px, không nhỏ
+     hơn" (VIỆC 2) applies to captions same as any other secondary text. */
+  --text-caption: 500 0.875rem/1.5 var(--font-body);
+  /* 11px/1.3 → 14px/1.4 — same 14px floor; still the boldest/most
+     compressed step in the scale (weight 600), so it stays visually
+     distinct from --text-caption above at the same size. */
+  --text-caption-upper: 600 0.875rem/1.4 var(--font-body);
 
   /* Fgrapher brand — radius (theme-invariant). --radius-sm/md/lg/xl are
      shadcn EXISTING radius scale (used by every current component) —
@@ -348,8 +379,14 @@
 @utility text-display-md {
   font: var(--text-display-md);
 }
+@utility text-display-sm {
+  font: var(--text-display-sm);
+}
 @utility text-heading-lg {
   font: var(--text-heading-lg);
+}
+@utility text-heading-xl {
+  font: var(--text-heading-xl);
 }
 @utility text-heading-md {
   font: var(--text-heading-md);

@@ -96,23 +96,44 @@ mechanism.
 
 Type scale (`font-weight/size/line-height/family`):
 
-| Token                  | Value                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------- |
-| `--text-display-2xl`   | `600 4rem/1.05 var(--font-display)`                                               |
-| `--text-display-xl`    | `600 3rem/1.08 var(--font-display)`                                               |
-| `--text-display-lg`    | `600 2.25rem/1.12 var(--font-display)`                                            |
-| `--text-display-md`    | `600 1.75rem/1.2 var(--font-display)`                                             |
-| `--text-heading-lg`    | `600 1.5rem/1.3 var(--font-display)`                                              |
-| `--text-heading-md`    | `600 1.25rem/1.35 var(--font-body)`                                               |
-| `--text-heading-sm`    | `600 1.0625rem/1.4 var(--font-body)`                                              |
-| `--text-body-lg`       | `400 1.0625rem/1.55 var(--font-body)`                                             |
-| `--text-body-md`       | `400 0.9375rem/1.55 var(--font-body)`                                             |
-| `--text-body-sm`       | `400 0.8125rem/1.5 var(--font-body)`                                              |
-| `--text-caption`       | `500 0.75rem/1.4 var(--font-body)`                                                |
-| `--text-caption-upper` | `600 0.6875rem/1.3 var(--font-body)` (eyebrow labels, uppercase + letter-spacing) |
+| Token                  | Value                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `--text-display-2xl`   | `600 4rem/1.05 var(--font-display)`                                              |
+| `--text-display-xl`    | `600 3rem/1.08 var(--font-display)`                                              |
+| `--text-display-lg`    | `600 2.25rem/1.12 var(--font-display)`                                           |
+| `--text-display-md`    | `600 1.75rem/1.2 var(--font-display)`                                            |
+| `--text-display-sm`    | `600 1.625rem/1.2 var(--font-display)`                                           |
+| `--text-heading-xl`    | `600 1.625rem/1.25 var(--font-display)`                                          |
+| `--text-heading-lg`    | `600 1.5rem/1.3 var(--font-display)`                                             |
+| `--text-heading-md`    | `600 1.25rem/1.35 var(--font-body)`                                              |
+| `--text-heading-sm`    | `600 1.0625rem/1.5 var(--font-body)`                                             |
+| `--text-body-lg`       | `400 1.0625rem/1.55 var(--font-body)`                                            |
+| `--text-body-md`       | `400 1rem/1.6 var(--font-body)`                                                  |
+| `--text-body-sm`       | `400 0.875rem/1.6 var(--font-body)`                                              |
+| `--text-caption`       | `500 0.875rem/1.5 var(--font-body)`                                              |
+| `--text-caption-upper` | `600 0.875rem/1.4 var(--font-body)` (eyebrow labels, uppercase + letter-spacing) |
 
 Weights used: 400 (body), 600 (nearly everything else — headings, buttons, badges, nav).
 700 appears rarely.
+
+**Readability pass (Prompt G6, `docs/guides/fgrapher-prompt-dot-2.md`):** the
+scale above was raised from an earlier iteration where `--text-body-md` was
+15px, `--text-body-sm` 13px, and `--text-caption`/`--text-caption-upper` were
+12px/11px — all under a 16px body-text / 14px secondary-text floor, and most
+paragraph-tier line-heights were tightened to reduce risk of Vietnamese
+diacritics (`ế`, `ự`, `ỡ`, `ặ`) clipping or colliding with the line above.
+`--text-display-sm` and `--text-heading-xl` are new — both were already
+referenced by several page headings with no token or `@utility` behind them
+(silently unstyled); they fill the same 24–28px gap between `--text-heading-lg`
+and `--text-display-md`, distinguished by weight/line-height rather than an
+arbitrary different size. `--text-tertiary` (light mode only; see the color
+tokens above) was also darkened — it measured 3.27–3.65:1 against the light
+backgrounds, under WCAG AA's 4.5:1 for normal text; dark mode's
+`--text-tertiary` already passed and is untouched. Small fixed-size numeric
+badges (unread counts, cart/notification counters) intentionally use Tailwind's
+raw `text-sm` (14px) rather than `--text-caption`, since those need an
+explicit `font-bold` that would conflict with the token's own baked-in
+font-weight in its `font` shorthand.
 
 ## Spacing scale
 

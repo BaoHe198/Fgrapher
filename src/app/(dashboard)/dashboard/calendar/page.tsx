@@ -252,7 +252,7 @@ export default function CalendarPage() {
                       {date.getUTCDate()}
                     </span>
                     {blocked ? (
-                      <span className="rounded-full bg-text-tertiary px-1.5 py-0.5 text-[10px] font-bold text-text-on-brand">
+                      <span className="rounded-full bg-text-tertiary px-1.5 py-0.5 text-sm font-bold text-text-on-brand">
                         {t("busyLabel")}
                       </span>
                     ) : null}

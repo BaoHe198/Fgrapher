@@ -15,7 +15,7 @@ export default async function OnboardingRolesPage() {
     <div className="mx-auto flex min-h-full max-w-5xl flex-col justify-center px-6 py-16">
       <div className="space-y-8">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight text-balance">
+          <h1 className="text-display-md text-balance text-text-primary">
             How will you use Fgrapher?
           </h1>
           <p className="mx-auto max-w-lg text-muted-foreground">

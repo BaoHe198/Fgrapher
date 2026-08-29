@@ -376,7 +376,7 @@ export function ChatPanel({
                     </div>
                   )}
 
-                  <div className="mt-1 flex items-center gap-1 text-xs text-text-tertiary">
+                  <div className="mt-1 flex items-center gap-1 text-caption text-text-tertiary">
                     <span>{formatTime(date)}</span>
                     {isOwn ? (
                       message.readAt ? (

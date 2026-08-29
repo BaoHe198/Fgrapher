@@ -17,6 +17,8 @@ const FONT_SIZE_UTILITIES = [
   "text-display-xl",
   "text-display-lg",
   "text-display-md",
+  "text-display-sm",
+  "text-heading-xl",
   "text-heading-lg",
   "text-heading-md",
   "text-heading-sm",

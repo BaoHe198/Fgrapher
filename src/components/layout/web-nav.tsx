@@ -330,7 +330,7 @@ function MobileNavSheet({
             >
               {t("messages")}
               {messaging.unreadCount > 0 ? (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-xs font-bold text-text-on-brand">
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-sm font-bold text-text-on-brand">
                   {messaging.unreadCount}
                 </span>
               ) : null}

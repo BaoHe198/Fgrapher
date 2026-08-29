@@ -33,7 +33,7 @@ export default async function CompleteProfilePage() {
     <div className="mx-auto flex min-h-full max-w-md flex-col justify-center px-6 py-16">
       <div className="space-y-8">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight text-balance">
+          <h1 className="text-display-md text-balance text-text-primary">
             Hoàn tất hồ sơ
           </h1>
           <p className="mx-auto max-w-sm text-muted-foreground">

@@ -145,7 +145,7 @@ export function DashboardSidebar({
             <Icon className="size-[18px]" />
             {label}
             {badge ? (
-              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-xs font-bold text-text-on-brand">
+              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-sm font-bold text-text-on-brand">
                 {badge}
               </span>
             ) : null}
