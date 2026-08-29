@@ -374,6 +374,17 @@ in-scope feature) in the same response, so that endpoint itself is never
   simple mean over all of a provider's reviews (not weighted/decayed), a
   response rate (`responded / total`), and surfaces `awaitingResponse`
   count for the provider's dashboard.
+- **Reminder (project owner's decision, not from a numbered prompt):** a
+  non-blocking banner (`components/layout/review-reminder-banner.tsx`,
+  injected in `(dashboard)/layout.tsx` so it's visible on every dashboard
+  page) lists a customer's `COMPLETED` bookings still inside the 30-day
+  review window with no `Review` row yet
+  (`getUnreviewedCompletedBookings`), linking to `/review/[bookingId]` for
+  the oldest one. Deliberately not a hard gate: "Để sau" only hides it for
+  the current client-side render (`useState`, no persistence) — the
+  Server Component re-queries fresh on every navigation, so it reappears
+  on the next page load rather than staying dismissed. No other action is
+  blocked by having an unreviewed booking.
 
 ## 11. Notifications
 

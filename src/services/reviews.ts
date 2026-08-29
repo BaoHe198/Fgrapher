@@ -57,6 +57,30 @@ export async function getReviewEligibility(bookingId: string, userId: string) {
   return { eligible: true as const, booking };
 }
 
+// Prompt G5 aside (project owner's C4 decision, not in the original doc):
+// a non-blocking dashboard reminder for customers with completed bookings
+// they haven't reviewed yet — see components/layout/review-reminder-banner.tsx.
+// Same eligibility rules as getReviewEligibility (COMPLETED, no Review row,
+// within REVIEW_WINDOW_DAYS), just listed across all of a customer's
+// bookings instead of checked for one.
+export async function getUnreviewedCompletedBookings(userId: string) {
+  return db.booking.findMany({
+    where: {
+      customerId: userId,
+      status: "COMPLETED",
+      completedAt: {
+        gte: new Date(Date.now() - REVIEW_WINDOW_DAYS * 86_400_000),
+      },
+      review: null,
+    },
+    include: {
+      provider: { select: { firstName: true, name: true } },
+      service: { select: { name: true } },
+    },
+    orderBy: { completedAt: "asc" },
+  });
+}
+
 export async function createReview({
   bookingId,
   reviewerId,

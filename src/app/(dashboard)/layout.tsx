@@ -5,6 +5,7 @@ import {
   MobileDashboardSidebar,
 } from "@/components/layout/dashboard-sidebar";
 import { PastDueBanner } from "@/components/layout/past-due-banner";
+import { ReviewReminderBanner } from "@/components/layout/review-reminder-banner";
 import { WebNav } from "@/components/layout/web-nav";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -37,6 +38,7 @@ export default async function DashboardLayout({
     <div className="flex min-h-dvh flex-col">
       <WebNav marketplaceEnabled={features.marketplaceEnabled} />
       <PastDueBanner userId={session.user.id} />
+      <ReviewReminderBanner userId={session.user.id} />
 
       <main
         id="main-content"
