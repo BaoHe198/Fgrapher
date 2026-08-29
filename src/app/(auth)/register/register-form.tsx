@@ -17,7 +17,7 @@ import { Tag } from "@/components/ui/tag";
 import { PAID_ROLES } from "@/lib/constants";
 import { cn, formatCurrency } from "@/lib/utils";
 import {
-  registerSchema,
+  getRegisterSchema,
   type ProviderRole,
   type RegisterInput,
 } from "@/lib/validations/auth";
@@ -59,6 +59,11 @@ export function RegisterForm({
 }: RegisterFormProps) {
   const t = useTranslations("accountFlows.register");
   const roleT = useTranslations("role");
+  const tValidation = useTranslations("libServices.validation.auth");
+  const registerSchema = useMemo(
+    () => getRegisterSchema(tValidation),
+    [tValidation],
+  );
   const PROVIDER_ROLE_OPTIONS = marketplaceEnabled
     ? ALL_PROVIDER_ROLE_OPTIONS
     : ALL_PROVIDER_ROLE_OPTIONS.filter((role) => role !== "CAMERA_SHOP");

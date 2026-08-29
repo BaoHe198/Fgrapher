@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { db } from "@/lib/db";
-import { completeProfileSchema } from "@/lib/validations/auth";
+import { getCompleteProfileSchema } from "@/lib/validations/auth";
 import { recordConsent } from "@/services/compliance";
 
 // Closes the gap documented in PRE_LAUNCH_REVIEW.md — Google OAuth signups
@@ -12,17 +13,21 @@ import { recordConsent } from "@/services/compliance";
 // equivalent step, gated onto first dashboard visit by
 // (dashboard)/layout.tsx rather than at signup.
 export async function POST(request: Request) {
+  const [t, tValidation] = await Promise.all([
+    getTranslations("apiMessages.onboarding"),
+    getTranslations("libServices.validation.auth"),
+  ]);
   try {
     const session = await requireAuth();
 
     const body = await request.json();
-    const parsed = completeProfileSchema.safeParse(body);
+    const parsed = getCompleteProfileSchema(tValidation).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -73,7 +78,7 @@ export async function POST(request: Request) {
     ]);
 
     return NextResponse.json(
-      { data: { ok: true }, error: null, message: "Profile completed" },
+      { data: { ok: true }, error: null, message: t("profileCompleted") },
       { status: 200 },
     );
   } catch (err) {
@@ -88,7 +93,7 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "server_error",
-        message: "Failed to save your details",
+        message: t("saveFailed"),
       },
       { status: 500 },
     );

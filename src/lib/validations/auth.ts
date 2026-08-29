@@ -116,6 +116,26 @@ export const completeProfileSchema = z
 
 export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
 
+// Translated variant of completeProfileSchema — see getLoginSchema's
+// comment above. Namespace "libServices.validation.auth".
+export function getCompleteProfileSchema(t: (key: string) => string) {
+  return z
+    .object({
+      dateOfBirth: z.string().min(1, t("dateOfBirthRequired")),
+      consentService: z.boolean(),
+      consentMarketing: z.boolean(),
+      consentAnalytics: z.boolean(),
+    })
+    .refine((data) => data.consentService === true, {
+      message: t("consentServiceRequired"),
+      path: ["consentService"],
+    })
+    .refine((data) => isAtLeast18(new Date(data.dateOfBirth)), {
+      message: t("mustBe18"),
+      path: ["dateOfBirth"],
+    });
+}
+
 // Translated variant of registerSchema — see getLoginSchema's comment above
 // for why this is a factory rather than a bare schema. Namespace
 // "libServices.validation.auth".

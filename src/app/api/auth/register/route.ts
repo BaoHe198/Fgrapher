@@ -5,15 +5,18 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { features } from "@/lib/features";
-import { registerSchema } from "@/lib/validations/auth";
+import { getRegisterSchema } from "@/lib/validations/auth";
 import { recordConsent } from "@/services/compliance";
 import { assignFreePlan } from "@/services/subscription";
 import { Prisma } from "@prisma/client";
 
 export async function POST(request: Request) {
-  const t = await getTranslations("apiMessages.auth");
+  const [t, tValidation] = await Promise.all([
+    getTranslations("apiMessages.auth"),
+    getTranslations("libServices.validation.auth"),
+  ]);
   const body = await request.json();
-  const parsed = registerSchema.safeParse(body);
+  const parsed = getRegisterSchema(tValidation).safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(

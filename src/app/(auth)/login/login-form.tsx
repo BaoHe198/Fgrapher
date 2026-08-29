@@ -5,14 +5,14 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { SocialRow } from "@/components/auth/social-row";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { loginSchema, type LoginInput } from "@/lib/validations/auth";
+import { getLoginSchema, type LoginInput } from "@/lib/validations/auth";
 
 interface LoginFormProps {
   callbackUrl?: string;
@@ -26,9 +26,12 @@ export function LoginForm({
   onSwitchToRegister,
 }: LoginFormProps) {
   const t = useTranslations("accountFlows.login");
+  const tValidation = useTranslations("libServices.validation.auth");
   const [serverError, setServerError] = useState<string | null>(
     hasError ? t("invalidCredentials") : null,
   );
+
+  const loginSchema = useMemo(() => getLoginSchema(tValidation), [tValidation]);
 
   const {
     register,

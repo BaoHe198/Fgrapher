@@ -2,20 +2,26 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
-  completeProfileSchema,
+  getCompleteProfileSchema,
   type CompleteProfileInput,
 } from "@/lib/validations/auth";
 
 export function CompleteProfileForm() {
   const router = useRouter();
+  const tValidation = useTranslations("libServices.validation.auth");
+  const completeProfileSchema = useMemo(
+    () => getCompleteProfileSchema(tValidation),
+    [tValidation],
+  );
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
