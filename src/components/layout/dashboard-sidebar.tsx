@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Package,
   Settings,
+  Shield,
   ShoppingBag,
   Star,
   type LucideIcon,
@@ -28,7 +29,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useUnreadMessages } from "@/hooks/use-unread-messages";
+import { useMessaging } from "@/components/providers/messaging-provider";
 import { useUserRoles } from "@/hooks/use-user-roles";
 import { cn } from "@/lib/utils";
 
@@ -49,9 +50,16 @@ export function DashboardSidebar({
   const t = useTranslations("sharedComponents.dashboardSidebar");
   const roleT = useTranslations("role");
   const pathname = usePathname();
-  const { roles, canUpload, canSell, canReceiveBookings, isCustomerOnly } =
-    useUserRoles();
-  const unreadMessages = useUnreadMessages();
+  const {
+    roles,
+    canUpload,
+    canSell,
+    canReceiveBookings,
+    isCustomerOnly,
+    hasRole,
+  } = useUserRoles();
+  const isAdmin = hasRole("ADMIN");
+  const unreadMessages = useMessaging().unreadCount;
 
   const items: NavItem[] = [
     { href: "/dashboard", label: t("overview"), icon: LayoutDashboard },
@@ -104,9 +112,16 @@ export function DashboardSidebar({
       badge: unreadMessages,
     },
     { href: "/dashboard/settings", label: t("settings"), icon: Settings },
+    ...(isAdmin ? [{ href: "/admin", label: t("admin"), icon: Shield }] : []),
   ];
 
-  const nonCustomerRole = roles.find((role) => role !== "CUSTOMER");
+  // ADMIN is never "the plan" — admins have no Subscription (see the
+  // schema comment on Role.ADMIN) and this card has nothing useful to
+  // show them, so it's hidden entirely rather than picking ADMIN as the
+  // displayed role.
+  const nonCustomerRole = roles.find(
+    (role) => role !== "CUSTOMER" && role !== "ADMIN",
+  );
   const planName = nonCustomerRole
     ? t("planPro", { role: roleT(nonCustomerRole) })
     : t("planFree");
@@ -138,18 +153,22 @@ export function DashboardSidebar({
         );
       })}
 
-      <div className="mt-3.5 flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-green-900 p-3.5">
-        <span className="text-body-sm text-green-200">{t("currentPlan")}</span>
-        <span className="text-heading-sm text-gold-50">{planName}</span>
-        <Button
-          variant="accent"
-          size="sm"
-          nativeButton={false}
-          render={<Link href="/dashboard/settings/billing" />}
-        >
-          {t("managePlan")}
-        </Button>
-      </div>
+      {isAdmin ? null : (
+        <div className="mt-3.5 flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-green-900 p-3.5">
+          <span className="text-body-sm text-green-200">
+            {t("currentPlan")}
+          </span>
+          <span className="text-heading-sm text-gold-50">{planName}</span>
+          <Button
+            variant="accent"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/dashboard/settings/billing" />}
+          >
+            {t("managePlan")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

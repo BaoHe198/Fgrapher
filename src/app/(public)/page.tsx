@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CalendarCheck, Search, ShoppingBag } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -7,10 +8,23 @@ import { HeroSearch } from "@/components/sections/hero-search";
 import { Button } from "@/components/ui/button";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { SectionHead } from "@/components/ui/section-head";
-import { minMonthlyPrice } from "@/lib/constants/plans";
 import { features } from "@/lib/features";
 import { formatCurrency } from "@/lib/utils";
 import { getFeaturedProfiles } from "@/services/search";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("seo.home");
+  const title = t("title");
+  const description = t("description");
+  const url = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  return {
+    title,
+    description,
+    alternates: { canonical: "/" },
+    openGraph: { title, description, url, type: "website" },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 // phase-1 Step 6 invented this 3-step section — there is no corresponding
 // content in the design's real i18n strings (window.FG_STRINGS). Now
@@ -161,9 +175,7 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-[1240px] px-8 py-20 text-center max-md:px-5">
           <h2 className="text-display-lg">{t("home.ctaTitle")}</h2>
           <p className="mx-auto max-w-[520px] text-body-lg text-green-200">
-            {t("home.ctaSub", {
-              price: formatCurrency(minMonthlyPrice(), "VND"),
-            })}
+            {t("home.ctaSub")}
           </p>
           <div className="mt-6 flex justify-center gap-3">
             <Button

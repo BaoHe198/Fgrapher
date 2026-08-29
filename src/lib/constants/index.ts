@@ -1,5 +1,28 @@
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 
+// Prompt F4 — the app's full z-index stacking order, gathered from every
+// existing z-* Tailwind class in src/ at the time this was written:
+//   0-10   → in-flow decorative layers (calendar cell rings, avatar badges)
+//   Z_INDEX.stickyBanner (10) → past-due billing banner
+//   Z_INDEX.stickyHeader (20) → the site header (web-nav.tsx)
+//   Z_INDEX.messagingPanel (30) → the global floating messages popup below
+//   Z_INDEX.overlay (50) → Dialog/Sheet/DropdownMenu/Select/media lightbox
+//     (all portalled Base UI primitives — they already stack correctly
+//     relative to EACH OTHER by portal/open order, so they intentionally
+//     share one tier rather than being individually renumbered here)
+//   Z_INDEX.toast (~1000, computed as 1000 - index) → src/components/ui/toast.tsx
+// Existing components still hardcode their own Tailwind z-* class (Tailwind
+// utility classes can't reference a JS constant without a broader
+// CSS-variable refactor of every one of those files) — this object is the
+// documented source of truth new code should match, and what the
+// messaging panel below actually uses.
+export const Z_INDEX = {
+  stickyBanner: 10,
+  stickyHeader: 20,
+  messagingPanel: 30,
+  overlay: 50,
+} as const;
+
 // Bump this whenever the privacy/data-processing policy text changes —
 // every ConsentRecord stores the version that was current when it was
 // created, so consent history stays interpretable ("they agreed to v1,
@@ -38,6 +61,30 @@ export const KYC_REJECTION_REASONS = [
   "Ảnh selfie không cầm giấy tờ rõ ràng",
   "Nghi ngờ ảnh đã bị chỉnh sửa",
   "Khác",
+] as const;
+
+// Prompt F3, VIỆC 5 — every fixed-grid calendar in the app displays
+// Monday-first (Vietnamese convention), matching date-fns' weekStartsOn
+// contract (1 = Monday). This does NOT change the stored day-of-week
+// numbering used everywhere else (0=Sunday..6=Saturday, matching
+// Prisma's Availability.dayOfWeek and JS Date.getUTCDay()) — see
+// mondayFirstColumn() in lib/utils.ts for converting between the two.
+export const WEEK_STARTS_ON = 1;
+
+// Monday-first short labels for a fixed weekly grid header. Deliberately
+// its own constant rather than reusing formatWeekdayShort() (Intl
+// "vi-VN" short weekday, e.g. "Th 2") — that formatter is also used for
+// per-day labels on the rolling-window booking widgets, which isn't a
+// week-start bug (see F3 VIỆC 5's investigation notes) and shouldn't
+// change format there.
+export const WEEKDAY_SHORT_LABELS_VI = [
+  "T2",
+  "T3",
+  "T4",
+  "T5",
+  "T6",
+  "T7",
+  "CN",
 ] as const;
 
 // Hours before a PENDING ProfileMedia row is flagged overdue on

@@ -8,6 +8,7 @@ import {
   CalendarX,
   CreditCard,
   Heart,
+  Image as ImageIcon,
   MessageCircle,
   Package,
   Star,
@@ -49,6 +50,8 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   ORDER_DELIVERED: Package,
   ORDER_CANCELLED: Package,
   REVIEW_RESPONSE: Star,
+  MEDIA_APPROVED: ImageIcon,
+  MEDIA_REJECTED: ImageIcon,
 };
 
 function relativeTime(
@@ -167,7 +170,7 @@ export function NotificationBell() {
 
         <div className="max-h-[360px] overflow-y-auto">
           {notifications.length === 0 ? (
-            <p className="px-4 py-8 text-center text-body-sm text-text-secondary">
+            <p className="px-4 py-5 text-center text-body-sm text-text-secondary">
               {t("emptyState")}
             </p>
           ) : (

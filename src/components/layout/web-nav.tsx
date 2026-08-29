@@ -11,8 +11,8 @@ import { useTheme } from "next-themes";
 import { LogoFull } from "@/components/brand/logo-full";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { NotificationBell } from "@/components/layout/notification-bell";
+import { useMessaging } from "@/components/providers/messaging-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUnreadMessages } from "@/hooks/use-unread-messages";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -42,13 +42,7 @@ const WIDE_BREAKPOINT = 1180;
 // out below when MARKETPLACE_ENABLED is off.
 const NAV_LINKS = [
   { href: "/browse", labelKey: "browse" as const, alwaysVisible: true },
-  {
-    href: "/browse?role=STUDIO",
-    labelKey: "studios" as const,
-    alwaysVisible: false,
-  },
   { href: "/shop", labelKey: "shop" as const, alwaysVisible: false },
-  { href: "/pricing", labelKey: "pricing" as const, alwaysVisible: true },
 ];
 
 function subscribeResize(callback: () => void) {
@@ -74,7 +68,7 @@ export function WebNav({
   const isWide = useIsWide();
   const { data: session } = useSession();
   const { isAuthenticated } = useUserRoles();
-  const unreadMessages = useUnreadMessages();
+  const messaging = useMessaging();
 
   const navLinks = marketplaceEnabled
     ? NAV_LINKS
@@ -116,12 +110,17 @@ export function WebNav({
           {isWide ? (
             <>
               {isAuthenticated ? (
-                <Link href="/dashboard/messages" className="relative">
+                <button
+                  type="button"
+                  onClick={messaging.toggle}
+                  className="relative"
+                  aria-label={t("messagesAria")}
+                >
                   <MessageCircle className="size-5 text-text-secondary" />
-                  {unreadMessages > 0 ? (
+                  {messaging.unreadCount > 0 ? (
                     <span className="absolute -top-1 -right-1 size-2 rounded-full bg-danger" />
                   ) : null}
-                </Link>
+                </button>
               ) : (
                 <MessageCircle className="size-5 text-text-secondary" />
               )}
@@ -202,13 +201,13 @@ function UserMenu({
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem render={<Link href="/dashboard/profile" />}>
+        <DropdownMenuItem render={<Link href="/dashboard/settings/profile" />}>
           {t("profile")}
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
           {t("settings")}
         </DropdownMenuItem>
-        <DropdownMenuItem render={<Link href="/dashboard/billing" />}>
+        <DropdownMenuItem render={<Link href="/dashboard/settings/billing" />}>
           {t("billing")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -236,6 +235,7 @@ function MobileNavSheet({
   const ts = useTranslations("sharedComponents.webNav");
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const messaging = useMessaging();
   const navLinks = marketplaceEnabled
     ? NAV_LINKS
     : NAV_LINKS.filter((link) => link.href !== "/shop");
@@ -320,6 +320,21 @@ function MobileNavSheet({
                 {session.user.name}
               </span>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                messaging.toggle();
+              }}
+              className="flex items-center gap-2 rounded-[var(--fg-radius-sm)] px-3 py-2 text-left text-body-md font-semibold text-text-secondary"
+            >
+              {t("messages")}
+              {messaging.unreadCount > 0 ? (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-xs font-bold text-text-on-brand">
+                  {messaging.unreadCount}
+                </span>
+              ) : null}
+            </button>
             <Link
               href="/dashboard/notifications"
               onClick={() => setOpen(false)}
@@ -328,7 +343,7 @@ function MobileNavSheet({
               {ts("notifications")}
             </Link>
             <Link
-              href="/dashboard/profile"
+              href="/dashboard/settings/profile"
               onClick={() => setOpen(false)}
               className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
             >
@@ -342,7 +357,7 @@ function MobileNavSheet({
               {t("settings")}
             </Link>
             <Link
-              href="/dashboard/billing"
+              href="/dashboard/settings/billing"
               onClick={() => setOpen(false)}
               className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
             >

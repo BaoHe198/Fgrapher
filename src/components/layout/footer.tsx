@@ -22,8 +22,7 @@ const PROVIDER_LINKS = [
 
 const COMPANY_LINKS = [
   { labelKey: "about", href: "/about" },
-  { labelKey: "careers", href: "/careers" },
-  { labelKey: "support", href: "/support" },
+  { labelKey: "support", href: "/help" },
   { labelKey: "terms", href: "/terms" },
 ] as const;
 
