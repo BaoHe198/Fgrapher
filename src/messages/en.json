@@ -1,6 +1,28 @@
 {
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist, or may have been moved.",
+    "home": "Go home",
+    "browse": "Browse artists"
+  },
+  "rootError": {
+    "title": "Something went wrong",
+    "body": "An unexpected error occurred. Try again, or head back to the homepage.",
+    "retry": "Try again",
+    "home": "Go home"
+  },
+  "seo": {
+    "default": {
+      "title": "Fgrapher — Find your photography artist",
+      "description": "Book verified photographers, videographers, make-up artists, and studios nationwide. Message, book, and review — all on Fgrapher."
+    },
+    "home": {
+      "title": "Fgrapher — Find & book photography artists nationwide",
+      "description": "The platform connecting clients with identity-verified photographers, videographers, make-up artists, and studios. Search by province, compare prices, book online."
+    }
+  },
   "nav": {
-    "browse": "Browse",
+    "browse": "Search",
     "studios": "Studios",
     "shop": "Shop",
     "providers": "For providers",
@@ -12,7 +34,9 @@
     "profile": "Profile",
     "settings": "Settings",
     "billing": "Billing",
-    "signout": "Sign out"
+    "signout": "Sign out",
+    "messages": "Messages",
+    "messagesAria": "Open messages"
   },
   "role": {
     "PHOTOGRAPHER": "Photographer",
@@ -72,8 +96,8 @@
   "hero": {
     "eyebrow": "THE PLATFORM FOR VISUAL CREATORS",
     "title": "Find Your Artist",
-    "sub": "Photographers, videographers, make-up artists, studios and camera shops — discovered, booked and paid in one place.",
-    "searchPh": "Search artists, studios or gear",
+    "sub": "Photographers, videographers, make-up artists and studios — search and book in one place.",
+    "searchPh": "Search artists or studios",
     "city": "Ho Chi Minh City",
     "cta": "Search"
   },
@@ -85,11 +109,11 @@
     "f1t": "Discover",
     "f1b": "Filter by role, city, price and availability — every profile is a portfolio first.",
     "f2t": "Book",
-    "f2b": "Pick a date and slot from a real calendar. The artist accepts within 24 hours.",
+    "f2b": "Pick a date and slot from a real calendar. Artists respond quickly by message.",
     "f3t": "Rent or buy",
     "f3b": "Camera shops and studios list gear and space alongside their services.",
     "ctaTitle": "Sell your work where clients already look",
-    "ctaSub": "Provider roles start at {price}/month. Customers browse and book for free.",
+    "ctaSub": "Free to join during our early access period. Customers browse and book for free.",
     "ctaBtn": "Become a provider"
   },
   "foot": {
@@ -677,7 +701,11 @@
         "approve": "Approve ({count})",
         "reject": "Reject ({count})",
         "approvedToast": "Approved {count}",
-        "rejectedToast": "Rejected {count}"
+        "rejectedToast": "Rejected {count}",
+        "allRoles": "All roles",
+        "emptyFiltered": "Nothing pending for this role",
+        "viewLarge": "View full size",
+        "waitingSince": "Waiting {time}"
       },
       "compliance": {
         "title": "Compliance",
@@ -733,6 +761,11 @@
     }
   },
   "apiMessages": {
+    "onboarding": {
+      "invalidInput": "Invalid input",
+      "profileCompleted": "Profile completed",
+      "saveFailed": "Failed to save your details"
+    },
     "admin": {
       "auditLogFailed": "Failed to search audit log",
       "consentStatsFailed": "Failed to load consent stats",
@@ -781,7 +814,11 @@
       "unblockFailed": "Failed to unblock date",
       "invalidInput": "Invalid input",
       "blocked": "Date blocked",
-      "blockFailed": "Failed to block date"
+      "blockFailed": "Failed to block date",
+      "listFailed": "Failed to load blocked dates",
+      "conflict": "Can't block — there's a confirmed booking in this window. Cancel it first if you really need to block this time.",
+      "invalidRange": "End date must be after start date",
+      "rangeTooLong": "Blocked ranges are limited to 90 days"
     },
     "blocks": {
       "userIdRequired": "userId is required",
@@ -998,7 +1035,31 @@
       "nextMonth": "Next month",
       "moreCount": "+{count} more",
       "emptyMonth": "No bookings this month",
-      "customRequest": "Custom request"
+      "customRequest": "Custom request",
+      "busyLabel": "Busy",
+      "legend": {
+        "booked": "Booked",
+        "blocked": "Blocked",
+        "open": "Open"
+      },
+      "blockDialog": {
+        "title": "{date}",
+        "modeDay": "Block the whole day",
+        "modeTimeRange": "Block a time range",
+        "modeDateRange": "Block multiple days",
+        "dateRangeTo": "to",
+        "reasonPlaceholder": "Reason (optional, only you see this)",
+        "privateNote": "The reason is only visible to you, never to clients.",
+        "cancel": "Cancel",
+        "confirmBlock": "Confirm block",
+        "unblockButton": "Unblock this day",
+        "currentlyBlockedDay": "This day is fully blocked.",
+        "currentlyBlockedRange": "This day is blocked from {start} to {end}.",
+        "reasonPrefix": "Reason:",
+        "blockedToast": "Blocked",
+        "unblockedToast": "Unblocked",
+        "genericError": "Something went wrong, please try again"
+      }
     },
     "bookingDetail": {
       "notFound": "Booking not found",
@@ -1229,6 +1290,23 @@
     }
   },
   "dashboardSettings": {
+    "roles": {
+      "verificationBadge": {
+        "UNVERIFIED": "Not verified",
+        "PENDING": "Verification pending",
+        "VERIFIED": "Verified",
+        "REJECTED": "Verification rejected"
+      },
+      "yourRoles": "Your roles",
+      "customer": "Customer",
+      "alwaysFree": "Always free",
+      "active": "Active",
+      "manage": "Manage",
+      "verifyIdentity": "Verify identity",
+      "addRole": "Add a role",
+      "activate": "Activate",
+      "perMonth": "/mo"
+    },
     "nav": {
       "profile": "Profile",
       "account": "Account",
@@ -1630,10 +1708,32 @@
         "heading": "New response to your review",
         "body": "{providerName} responded to your review.",
         "cta": "View response"
+      },
+      "mediaApproved": {
+        "heading": "Your photo was approved",
+        "body": "A photo in your portfolio was approved and is now visible on your public profile.",
+        "cta": "View portfolio"
+      },
+      "mediaRejected": {
+        "heading": "A portfolio photo was rejected",
+        "body": "A photo was not approved for public display. Reason: {reason}",
+        "cta": "View portfolio"
       }
     }
   },
   "publicPages": {
+    "review": {
+      "reasonNotFound": "We couldn't find this booking, or it doesn't belong to you.",
+      "reasonNotCompleted": "This booking hasn't been marked complete yet.",
+      "reasonAlreadyReviewed": "You've already reviewed this booking.",
+      "reasonWindowExpired": "The 30-day review window for this booking has closed.",
+      "reasonInvalid": "This review link is no longer valid.",
+      "thanks": "Thanks for your review!",
+      "thanksBody": "Your feedback helps other clients find the right artist.",
+      "viewProfile": "View profile",
+      "cantReview": "Can't leave a review",
+      "backToBookings": "Back to bookings"
+    },
     "booking": {
       "pageTitle": "Book a session — Fgrapher",
       "fallbackProviderName": "this provider",
@@ -1763,6 +1863,91 @@
         "roleRequired": "Select a role above first to sign up for this province"
       }
     },
+    "profile": {
+      "tabs": {
+        "portfolio": "Portfolio",
+        "services": "Services",
+        "reviews": "Reviews"
+      },
+      "status": {
+        "available": "Available",
+        "bookedOut": "Booked out",
+        "verified": "Verified"
+      },
+      "age": "· Age {age}",
+      "modelDetails": {
+        "height": "Height",
+        "experience": "Experience",
+        "travel": "Travel",
+        "willingToTravel": "Willing to travel",
+        "agency": "Agency",
+        "represented": "Represented",
+        "measurements": "Measurements",
+        "hair": "Hair",
+        "eyes": "Eyes",
+        "shoeSize": "Shoe size"
+      },
+      "shareMenu": {
+        "follow": "Follow",
+        "following": "Following",
+        "followers": "{count} followers",
+        "removeFromSaved": "Remove from saved",
+        "saveProfile": "Save profile",
+        "share": "Share",
+        "report": "Report this profile",
+        "linkCopied": "Link copied",
+        "copyLink": "Copy link",
+        "shareFacebook": "Share to Facebook",
+        "showQrCode": "Show QR code",
+        "qrCodeTitle": "Profile QR code",
+        "qrCodeAlt": "QR code linking to this profile",
+        "qrCodeHint": "Scan to open this profile — handy for printing or a social media bio."
+      },
+      "metadata": {
+        "title": "{name} — {role} | Fgrapher",
+        "fallbackDescription": "See {name}'s portfolio, services, and reviews on Fgrapher."
+      },
+      "portfolioTab": {
+        "empty": "No portfolio items yet",
+        "loadMore": "Load more"
+      },
+      "servicesTab": {
+        "empty": "No service packages listed",
+        "tfpAvailable": "TFP available",
+        "tfpCollab": "TFP / Collaboration",
+        "book": "Book",
+        "durationMinutes": "{count} min",
+        "durationHours": "{count}h"
+      },
+      "reviewsTab": {
+        "sortNewest": "Newest",
+        "sortHighest": "Highest",
+        "sortLowest": "Lowest",
+        "empty": "No reviews yet",
+        "all": "All",
+        "anonymous": "Anonymous",
+        "respond": "Respond",
+        "report": "Report"
+      },
+      "bookingSidebar": {
+        "book": "Book {name}",
+        "from": "From {price} per session",
+        "selectService": "Select a service",
+        "selectDate": "Select a date",
+        "prevWeek": "Previous week",
+        "nextWeek": "Next week",
+        "availableTimes": "Available times",
+        "noTimes": "No times available on this date",
+        "service": "Service",
+        "date": "Date",
+        "time": "Time",
+        "total": "Total",
+        "bookNow": "Book now",
+        "message": "Message {name}",
+        "cancellationNote": "Free cancellation up to 48h before",
+        "responseNote": "Artists usually respond quickly"
+      }
+    },
     "roleProvinceLanding": {
       "metaTitle": "{role}s in {province} | Fgrapher",
       "metaDescription": "Find and book trusted {role}s in {province}. Browse portfolios, prices, and reviews on Fgrapher.",
@@ -1830,7 +2015,7 @@
         "step2Title": "Book your date",
         "step2Desc": "Message the artist, pick a slot, and confirm your booking online.",
         "step3Title": "Get your shoot",
-        "step3Desc": "Meet up, get creative, and receive your final files through Fgrapher."
+        "step3Desc": "Meet up and get creative with the artist you booked."
       }
     },
     "pricing": {
@@ -2026,6 +2211,74 @@
       "purchaseBadge": "Purchase",
       "removeLabel": "Remove item"
     },
+    "uploadMediaModal": {
+      "title": "Upload media",
+      "dropzone": "Drag files here, or click to browse",
+      "sizeLimits": "Images up to 10MB, videos up to 100MB",
+      "removeFile": "Remove file",
+      "titlePlaceholder": "Title (optional)",
+      "uploaded": "Uploaded",
+      "rightsConfirm": "I confirm I have the rights to use these images and have the consent of anyone appearing in them",
+      "uploading": "Uploading...",
+      "upload": "Upload {count}",
+      "videoTooLarge": "Videos must be under 100MB",
+      "imageTooLarge": "Images must be under 10MB",
+      "uploadUnavailable": "Upload unavailable",
+      "uploadFailed": "Upload failed"
+    },
+    "mediaLightbox": {
+      "close": "Close",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "reviewModal": {
+      "editTitle": "Edit your review",
+      "newTitle": "How was your session with {name}?",
+      "shareExperience": "Share your experience",
+      "contentPlaceholder": "What did you like? What could be better?",
+      "chooseRating": "Choose a star rating",
+      "needMoreDetail": "Share a bit more detail (at least {min} characters)",
+      "genericError": "Something went wrong. Please try again.",
+      "updated": "Review updated",
+      "posted": "Review posted",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes",
+      "submit": "Submit review"
+    },
+    "respondReviewModal": {
+      "title": "Respond to review",
+      "yourResponse": "Your response",
+      "placeholder": "Thank the reviewer and address any concerns...",
+      "note": "Thank the reviewer and address any concerns professionally. Responses are public.",
+      "emptyError": "Write a response before posting",
+      "genericError": "Something went wrong. Please try again.",
+      "updated": "Response updated",
+      "posted": "Response posted",
+      "cancel": "Cancel",
+      "postResponse": "Post response"
+    },
+    "reportModal": {
+      "title": "Report {target}",
+      "targetReview": "this review",
+      "targetUser": "this profile",
+      "targetMessage": "this message",
+      "targetProduct": "this product",
+      "reasonLabel": "Reason",
+      "detailsPlaceholder": "Additional details (optional)",
+      "cancel": "Cancel",
+      "submit": "Submit report",
+      "submitted": "Report submitted",
+      "reasons": {
+        "Spam": "Spam",
+        "Fake": "Fake",
+        "Offensive": "Offensive",
+        "Off-topic": "Off-topic",
+        "Personal information": "Personal information",
+        "Inappropriate content": "Inappropriate content",
+        "Appears to be a minor": "Appears to be a minor",
+        "Other": "Other"
+      }
+    },
     "chatPanel": {
       "unknown": "Unknown",
       "today": "Today",
@@ -2084,6 +2337,12 @@
       "notifications": "Notifications",
       "toggleTheme": "Toggle theme"
     },
+    "messagingPopup": {
+      "title": "Messages",
+      "expandAria": "Open full screen",
+      "minimizeAria": "Minimize",
+      "closeAria": "Close"
+    },
     "dashboardSidebar": {
       "overview": "Overview",
       "myBookings": "My bookings",
@@ -2097,6 +2356,7 @@
       "saved": "Saved",
       "messages": "Messages",
       "settings": "Settings",
+      "admin": "Admin",
       "planPro": "Pro — {role}",
       "planFree": "Free — Customer",
       "currentPlan": "Current plan",

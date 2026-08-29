@@ -1,6 +1,28 @@
 {
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "body": "Trang bạn tìm không tồn tại hoặc đã được chuyển đi.",
+    "home": "Về trang chủ",
+    "browse": "Tìm nghệ sĩ"
+  },
+  "rootError": {
+    "title": "Đã xảy ra lỗi",
+    "body": "Có lỗi ngoài ý muốn xảy ra. Hãy thử lại, hoặc quay về trang chủ.",
+    "retry": "Thử lại",
+    "home": "Về trang chủ"
+  },
+  "seo": {
+    "default": {
+      "title": "Fgrapher — Tìm nghệ sĩ nhiếp ảnh của bạn",
+      "description": "Đặt lịch nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio đã xác minh trên toàn quốc. Nhắn tin, đặt lịch và đánh giá — tất cả trên Fgrapher."
+    },
+    "home": {
+      "title": "Fgrapher — Tìm & đặt lịch nghệ sĩ nhiếp ảnh trên toàn quốc",
+      "description": "Nền tảng kết nối khách hàng với nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio đã xác minh danh tính. Tìm kiếm theo tỉnh thành, so sánh giá, đặt lịch trực tuyến."
+    }
+  },
   "nav": {
-    "browse": "Khám phá",
+    "browse": "Tìm kiếm",
     "studios": "Studio",
     "shop": "Cửa hàng",
     "providers": "Dành cho nhà cung cấp",
@@ -12,7 +34,9 @@
     "profile": "Hồ sơ",
     "settings": "Cài đặt",
     "billing": "Thanh toán",
-    "signout": "Đăng xuất"
+    "signout": "Đăng xuất",
+    "messages": "Tin nhắn",
+    "messagesAria": "Mở tin nhắn"
   },
   "role": {
     "PHOTOGRAPHER": "Nhiếp ảnh gia",
@@ -72,8 +96,8 @@
   "hero": {
     "eyebrow": "NỀN TẢNG CHO NGƯỜI SÁNG TẠO HÌNH ẢNH",
     "title": "Tìm nghệ sĩ của bạn",
-    "sub": "Nhiếp ảnh gia, quay phim, chuyên viên trang điểm, studio và cửa hàng máy ảnh — tìm kiếm, đặt lịch và thanh toán ở một nơi.",
-    "searchPh": "Tìm nghệ sĩ, studio hoặc thiết bị",
+    "sub": "Nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio — tìm kiếm và đặt lịch ở một nơi.",
+    "searchPh": "Tìm nghệ sĩ hoặc studio",
     "city": "Thành phố Hồ Chí Minh",
     "cta": "Tìm kiếm"
   },
@@ -85,11 +109,11 @@
     "f1t": "Khám phá",
     "f1b": "Lọc theo vai trò, thành phố, giá và lịch trống — mỗi hồ sơ trước hết là một portfolio.",
     "f2t": "Đặt lịch",
-    "f2b": "Chọn ngày và khung giờ trên lịch thật. Nghệ sĩ xác nhận trong vòng 24 giờ.",
+    "f2b": "Chọn ngày và khung giờ trên lịch thật. Nghệ sĩ phản hồi nhanh chóng qua tin nhắn.",
     "f3t": "Thuê hoặc mua",
     "f3b": "Cửa hàng máy ảnh và studio đăng thiết bị, mặt bằng cùng với dịch vụ của họ.",
     "ctaTitle": "Bán tác phẩm của bạn ở nơi khách hàng đang tìm",
-    "ctaSub": "Vai trò nhà cung cấp từ {price}/tháng. Khách hàng duyệt và đặt lịch miễn phí.",
+    "ctaSub": "Miễn phí tham gia trong giai đoạn đầu. Khách hàng duyệt và đặt lịch miễn phí.",
     "ctaBtn": "Trở thành nhà cung cấp"
   },
   "foot": {
@@ -677,7 +701,11 @@
         "approve": "Duyệt ({count})",
         "reject": "Từ chối ({count})",
         "approvedToast": "Đã duyệt {count}",
-        "rejectedToast": "Đã từ chối {count}"
+        "rejectedToast": "Đã từ chối {count}",
+        "allRoles": "Tất cả vai trò",
+        "emptyFiltered": "Không có nội dung nào đang chờ với vai trò này",
+        "viewLarge": "Xem ảnh lớn",
+        "waitingSince": "Chờ {time}"
       },
       "compliance": {
         "title": "Tuân thủ dữ liệu",
@@ -733,6 +761,11 @@
     }
   },
   "apiMessages": {
+    "onboarding": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "profileCompleted": "Đã hoàn tất hồ sơ",
+      "saveFailed": "Không thể lưu thông tin, vui lòng thử lại"
+    },
     "admin": {
       "auditLogFailed": "Không thể tải nhật ký hoạt động",
       "consentStatsFailed": "Không thể tải thống kê đồng ý",
@@ -781,7 +814,11 @@
       "unblockFailed": "Không thể bỏ chặn ngày",
       "invalidInput": "Dữ liệu không hợp lệ",
       "blocked": "Đã chặn ngày",
-      "blockFailed": "Không thể chặn ngày"
+      "blockFailed": "Không thể chặn ngày",
+      "listFailed": "Không thể tải danh sách ngày đã chặn",
+      "conflict": "Không thể chặn — đã có đơn được xác nhận trong khoảng thời gian này. Hủy đơn trước nếu thực sự cần chặn.",
+      "invalidRange": "Ngày kết thúc phải sau ngày bắt đầu",
+      "rangeTooLong": "Khoảng ngày chặn tối đa 90 ngày"
     },
     "blocks": {
       "userIdRequired": "userId là bắt buộc",
@@ -998,7 +1035,31 @@
       "nextMonth": "Tháng sau",
       "moreCount": "+{count} nữa",
       "emptyMonth": "Không có lịch đặt trong tháng này",
-      "customRequest": "Yêu cầu tùy chỉnh"
+      "customRequest": "Yêu cầu tùy chỉnh",
+      "busyLabel": "Bận",
+      "legend": {
+        "booked": "Có đơn",
+        "blocked": "Đã chặn",
+        "open": "Còn trống"
+      },
+      "blockDialog": {
+        "title": "Ngày {date}",
+        "modeDay": "Chặn cả ngày",
+        "modeTimeRange": "Chặn khung giờ",
+        "modeDateRange": "Chặn nhiều ngày",
+        "dateRangeTo": "đến",
+        "reasonPlaceholder": "Lý do (không bắt buộc, chỉ bạn thấy)",
+        "privateNote": "Lý do chỉ hiển thị với bạn, khách không thấy được.",
+        "cancel": "Hủy",
+        "confirmBlock": "Xác nhận chặn",
+        "unblockButton": "Bỏ chặn ngày này",
+        "currentlyBlockedDay": "Ngày này đang bị chặn cả ngày.",
+        "currentlyBlockedRange": "Ngày này đang bị chặn từ {start} đến {end}.",
+        "reasonPrefix": "Lý do:",
+        "blockedToast": "Đã chặn lịch",
+        "unblockedToast": "Đã bỏ chặn",
+        "genericError": "Không thể thực hiện, vui lòng thử lại"
+      }
     },
     "bookingDetail": {
       "notFound": "Không tìm thấy lịch đặt",
@@ -1229,6 +1290,23 @@
     }
   },
   "dashboardSettings": {
+    "roles": {
+      "verificationBadge": {
+        "UNVERIFIED": "Chưa xác minh",
+        "PENDING": "Đang chờ xác minh",
+        "VERIFIED": "Đã xác minh",
+        "REJECTED": "Xác minh bị từ chối"
+      },
+      "yourRoles": "Vai trò của bạn",
+      "customer": "Khách hàng",
+      "alwaysFree": "Luôn miễn phí",
+      "active": "Đang hoạt động",
+      "manage": "Quản lý",
+      "verifyIdentity": "Xác minh danh tính",
+      "addRole": "Thêm vai trò",
+      "activate": "Kích hoạt",
+      "perMonth": "/tháng"
+    },
     "nav": {
       "profile": "Hồ sơ",
       "account": "Tài khoản",
@@ -1630,10 +1708,32 @@
         "heading": "Có phản hồi mới cho đánh giá của bạn",
         "body": "{providerName} đã phản hồi đánh giá của bạn.",
         "cta": "Xem phản hồi"
+      },
+      "mediaApproved": {
+        "heading": "Ảnh của bạn đã được duyệt",
+        "body": "Một ảnh trong portfolio của bạn đã được duyệt và hiện hiển thị công khai trên hồ sơ.",
+        "cta": "Xem portfolio"
+      },
+      "mediaRejected": {
+        "heading": "Một ảnh trong portfolio bị từ chối",
+        "body": "Ảnh không được duyệt hiển thị công khai. Lý do: {reason}",
+        "cta": "Xem portfolio"
       }
     }
   },
   "publicPages": {
+    "review": {
+      "reasonNotFound": "Không tìm thấy lịch đặt này, hoặc lịch đặt không thuộc về bạn.",
+      "reasonNotCompleted": "Lịch đặt này chưa được đánh dấu hoàn thành.",
+      "reasonAlreadyReviewed": "Bạn đã đánh giá lịch đặt này rồi.",
+      "reasonWindowExpired": "Thời hạn 30 ngày để đánh giá lịch đặt này đã hết.",
+      "reasonInvalid": "Liên kết đánh giá này không còn hiệu lực.",
+      "thanks": "Cảm ơn bạn đã đánh giá!",
+      "thanksBody": "Đánh giá của bạn giúp khách hàng khác tìm đúng nghệ sĩ.",
+      "viewProfile": "Xem hồ sơ",
+      "cantReview": "Không thể đánh giá",
+      "backToBookings": "Về danh sách lịch đặt"
+    },
     "booking": {
       "pageTitle": "Đặt lịch chụp — Fgrapher",
       "fallbackProviderName": "nhà cung cấp này",
@@ -1763,6 +1863,91 @@
         "roleRequired": "Chọn một vai trò ở trên trước để đăng ký cho tỉnh/thành này"
       }
     },
+    "profile": {
+      "tabs": {
+        "portfolio": "Portfolio",
+        "services": "Dịch vụ",
+        "reviews": "Đánh giá"
+      },
+      "status": {
+        "available": "Đang nhận đơn",
+        "bookedOut": "Đã kín lịch",
+        "verified": "Đã xác minh"
+      },
+      "age": "· {age} tuổi",
+      "modelDetails": {
+        "height": "Chiều cao",
+        "experience": "Kinh nghiệm",
+        "travel": "Di chuyển",
+        "willingToTravel": "Sẵn sàng di chuyển",
+        "agency": "Công ty quản lý",
+        "represented": "Có đại diện",
+        "measurements": "Số đo",
+        "hair": "Tóc",
+        "eyes": "Mắt",
+        "shoeSize": "Cỡ giày"
+      },
+      "shareMenu": {
+        "follow": "Theo dõi",
+        "following": "Đang theo dõi",
+        "followers": "{count} người theo dõi",
+        "removeFromSaved": "Bỏ lưu",
+        "saveProfile": "Lưu hồ sơ",
+        "share": "Chia sẻ",
+        "report": "Báo cáo hồ sơ này",
+        "linkCopied": "Đã sao chép liên kết",
+        "copyLink": "Sao chép liên kết",
+        "shareFacebook": "Chia sẻ qua Facebook",
+        "showQrCode": "Tạo mã QR",
+        "qrCodeTitle": "Mã QR hồ sơ",
+        "qrCodeAlt": "Mã QR liên kết đến hồ sơ này",
+        "qrCodeHint": "Quét mã để mở hồ sơ này — tiện để in ra hoặc đăng trong bio mạng xã hội."
+      },
+      "metadata": {
+        "title": "{name} — {role} | Fgrapher",
+        "fallbackDescription": "Xem portfolio, dịch vụ và đánh giá của {name} trên Fgrapher."
+      },
+      "portfolioTab": {
+        "empty": "Chưa có ảnh trong portfolio",
+        "loadMore": "Xem thêm"
+      },
+      "servicesTab": {
+        "empty": "Chưa có gói dịch vụ nào",
+        "tfpAvailable": "Nhận hợp tác TFP",
+        "tfpCollab": "TFP / Hợp tác",
+        "book": "Đặt lịch",
+        "durationMinutes": "{count} phút",
+        "durationHours": "{count} giờ"
+      },
+      "reviewsTab": {
+        "sortNewest": "Mới nhất",
+        "sortHighest": "Cao nhất",
+        "sortLowest": "Thấp nhất",
+        "empty": "Chưa có đánh giá nào",
+        "all": "Tất cả",
+        "anonymous": "Ẩn danh",
+        "respond": "Phản hồi",
+        "report": "Báo cáo"
+      },
+      "bookingSidebar": {
+        "book": "Đặt lịch với {name}",
+        "from": "Từ {price} / buổi",
+        "selectService": "Chọn dịch vụ",
+        "selectDate": "Chọn ngày",
+        "prevWeek": "Tuần trước",
+        "nextWeek": "Tuần sau",
+        "availableTimes": "Khung giờ trống",
+        "noTimes": "Không có khung giờ trống ngày này",
+        "service": "Dịch vụ",
+        "date": "Ngày",
+        "time": "Giờ",
+        "total": "Tổng cộng",
+        "bookNow": "Đặt lịch ngay",
+        "message": "Nhắn tin {name}",
+        "cancellationNote": "Có thể hủy trước 48 giờ",
+        "responseNote": "Nghệ sĩ thường phản hồi nhanh chóng"
+      }
+    },
     "roleProvinceLanding": {
       "metaTitle": "{role} tại {province} | Fgrapher",
       "metaDescription": "Tìm và đặt lịch {role} uy tín tại {province}. Xem portfolio, bảng giá, và đánh giá trên Fgrapher.",
@@ -1830,7 +2015,7 @@
         "step2Title": "Đặt lịch của bạn",
         "step2Desc": "Nhắn tin cho nghệ sĩ, chọn khung giờ và xác nhận đặt lịch trực tuyến.",
         "step3Title": "Tận hưởng buổi chụp",
-        "step3Desc": "Gặp gỡ, sáng tạo và nhận file ảnh cuối cùng qua Fgrapher."
+        "step3Desc": "Gặp gỡ và sáng tạo cùng nghệ sĩ bạn đã chọn."
       }
     },
     "pricing": {
@@ -2026,6 +2211,74 @@
       "purchaseBadge": "Mua",
       "removeLabel": "Xóa sản phẩm"
     },
+    "uploadMediaModal": {
+      "title": "Tải ảnh/video lên",
+      "dropzone": "Kéo thả file vào đây, hoặc bấm để chọn",
+      "sizeLimits": "Ảnh tối đa 10MB, video tối đa 100MB",
+      "removeFile": "Xóa file",
+      "titlePlaceholder": "Tiêu đề (không bắt buộc)",
+      "uploaded": "Đã tải lên",
+      "rightsConfirm": "Tôi xác nhận có quyền sử dụng những ảnh/video này và đã được sự đồng ý của người xuất hiện trong đó",
+      "uploading": "Đang tải lên...",
+      "upload": "Tải lên {count}",
+      "videoTooLarge": "Video phải nhỏ hơn 100MB",
+      "imageTooLarge": "Ảnh phải nhỏ hơn 10MB",
+      "uploadUnavailable": "Chức năng tải lên chưa khả dụng",
+      "uploadFailed": "Tải lên thất bại"
+    },
+    "mediaLightbox": {
+      "close": "Đóng",
+      "previous": "Ảnh trước",
+      "next": "Ảnh sau"
+    },
+    "reviewModal": {
+      "editTitle": "Chỉnh sửa đánh giá",
+      "newTitle": "Buổi làm việc với {name} thế nào?",
+      "shareExperience": "Chia sẻ trải nghiệm của bạn",
+      "contentPlaceholder": "Bạn thích điều gì? Điều gì có thể tốt hơn?",
+      "chooseRating": "Chọn số sao đánh giá",
+      "needMoreDetail": "Viết chi tiết hơn một chút (tối thiểu {min} ký tự)",
+      "genericError": "Có lỗi xảy ra. Vui lòng thử lại.",
+      "updated": "Đã cập nhật đánh giá",
+      "posted": "Đã đăng đánh giá",
+      "cancel": "Hủy",
+      "saveChanges": "Lưu thay đổi",
+      "submit": "Gửi đánh giá"
+    },
+    "respondReviewModal": {
+      "title": "Phản hồi đánh giá",
+      "yourResponse": "Phản hồi của bạn",
+      "placeholder": "Cảm ơn người đánh giá và giải quyết mọi băn khoăn...",
+      "note": "Cảm ơn người đánh giá và giải quyết mọi băn khoăn một cách chuyên nghiệp. Phản hồi sẽ hiển thị công khai.",
+      "emptyError": "Viết phản hồi trước khi đăng",
+      "genericError": "Có lỗi xảy ra. Vui lòng thử lại.",
+      "updated": "Đã cập nhật phản hồi",
+      "posted": "Đã đăng phản hồi",
+      "cancel": "Hủy",
+      "postResponse": "Đăng phản hồi"
+    },
+    "reportModal": {
+      "title": "Báo cáo {target}",
+      "targetReview": "đánh giá này",
+      "targetUser": "hồ sơ này",
+      "targetMessage": "tin nhắn này",
+      "targetProduct": "sản phẩm này",
+      "reasonLabel": "Lý do",
+      "detailsPlaceholder": "Thông tin bổ sung (không bắt buộc)",
+      "cancel": "Hủy",
+      "submit": "Gửi báo cáo",
+      "submitted": "Đã gửi báo cáo",
+      "reasons": {
+        "Spam": "Spam",
+        "Fake": "Giả mạo",
+        "Offensive": "Xúc phạm",
+        "Off-topic": "Lạc đề",
+        "Personal information": "Thông tin cá nhân",
+        "Inappropriate content": "Nội dung không phù hợp",
+        "Appears to be a minor": "Nghi ngờ dưới 18 tuổi",
+        "Other": "Khác"
+      }
+    },
     "chatPanel": {
       "unknown": "Người dùng ẩn danh",
       "today": "Hôm nay",
@@ -2084,6 +2337,12 @@
       "notifications": "Thông báo",
       "toggleTheme": "Chuyển giao diện sáng/tối"
     },
+    "messagingPopup": {
+      "title": "Tin nhắn",
+      "expandAria": "Mở toàn màn hình",
+      "minimizeAria": "Thu nhỏ",
+      "closeAria": "Đóng"
+    },
     "dashboardSidebar": {
       "overview": "Tổng quan",
       "myBookings": "Lịch đặt của tôi",
@@ -2097,6 +2356,7 @@
       "saved": "Đã lưu",
       "messages": "Tin nhắn",
       "settings": "Cài đặt",
+      "admin": "Quản trị",
       "planPro": "Pro — {role}",
       "planFree": "Miễn phí — Khách hàng",
       "currentPlan": "Gói hiện tại",
