@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
@@ -13,12 +15,6 @@ interface ServiceItem {
   currency: string;
 }
 
-function formatDuration(minutes: number) {
-  if (minutes < 60) return `${minutes} min`;
-  const hours = minutes / 60;
-  return `${hours % 1 === 0 ? hours : hours.toFixed(1)} hour${hours === 1 ? "" : "s"}`;
-}
-
 export function ServicesTab({
   services,
   onBook,
@@ -28,10 +24,20 @@ export function ServicesTab({
   onBook: (serviceId: string) => void;
   offersTfp?: boolean;
 }) {
+  const t = useTranslations("publicPages.profile.servicesTab");
+
+  function formatDuration(minutes: number) {
+    if (minutes < 60) return t("durationMinutes", { count: minutes });
+    const hours = minutes / 60;
+    return t("durationHours", {
+      count: hours % 1 === 0 ? hours : hours.toFixed(1),
+    });
+  }
+
   if (services.length === 0) {
     return (
       <p className="py-12 text-center text-body-md text-text-secondary">
-        No service packages listed
+        {t("empty")}
       </p>
     );
   }
@@ -40,7 +46,7 @@ export function ServicesTab({
     <div className="flex flex-col gap-3">
       {offersTfp ? (
         <Badge variant="accent" className="w-fit">
-          TFP available
+          {t("tfpAvailable")}
         </Badge>
       ) : null}
       {services.map((service) => (
@@ -49,9 +55,13 @@ export function ServicesTab({
           className="flex items-center justify-between rounded-[var(--fg-radius-md)] bg-surface-card p-[18px] shadow-[var(--shadow-sm)]"
         >
           <div className="flex flex-col gap-1">
-            <span className="text-heading-sm text-text-primary">{service.name}</span>
+            <span className="text-heading-sm text-text-primary">
+              {service.name}
+            </span>
             {service.description ? (
-              <p className="text-body-sm text-text-secondary">{service.description}</p>
+              <p className="text-body-sm text-text-secondary">
+                {service.description}
+              </p>
             ) : null}
             <span className="w-fit rounded-full bg-bg-sunken px-2.5 py-0.5 text-body-sm text-text-tertiary">
               {formatDuration(service.duration)}
@@ -59,10 +69,16 @@ export function ServicesTab({
           </div>
           <div className="flex items-center gap-3.5">
             <span className="text-heading-sm text-text-primary">
-              {service.price === 0 ? "TFP / Collaboration" : formatCurrency(service.price, service.currency)}
+              {service.price === 0
+                ? t("tfpCollab")
+                : formatCurrency(service.price, service.currency)}
             </span>
-            <Button size="sm" variant="secondary" onClick={() => onBook(service.id)}>
-              Book
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => onBook(service.id)}
+            >
+              {t("book")}
             </Button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import type { MediaType } from "@prisma/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import Image from "next/image";
 
@@ -16,13 +17,14 @@ interface MediaItem {
 const PAGE_SIZE = 12;
 
 export function PortfolioTab({ media }: { media: MediaItem[] }) {
+  const t = useTranslations("publicPages.profile.portfolioTab");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   if (media.length === 0) {
     return (
       <p className="py-12 text-center text-body-md text-text-secondary">
-        No portfolio items yet
+        {t("empty")}
       </p>
     );
   }
@@ -42,7 +44,13 @@ export function PortfolioTab({ media }: { media: MediaItem[] }) {
             {item.type === "VIDEO" ? (
               <video src={item.url} className="size-full object-cover" muted />
             ) : (
-              <Image src={item.url} alt={item.title ?? ""} fill className="object-cover" unoptimized />
+              <Image
+                src={item.url}
+                alt={item.title ?? ""}
+                fill
+                className="object-cover"
+                unoptimized
+              />
             )}
           </button>
         ))}
@@ -54,7 +62,7 @@ export function PortfolioTab({ media }: { media: MediaItem[] }) {
           onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
           className="self-center text-body-md font-semibold text-text-link"
         >
-          Load more
+          {t("loadMore")}
         </button>
       ) : null}
 

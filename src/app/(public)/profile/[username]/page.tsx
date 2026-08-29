@@ -8,7 +8,6 @@ import { cache } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tag } from "@/components/ui/tag";
 import { ProfileActions } from "@/components/profile/profile-actions";
@@ -64,16 +63,45 @@ export async function generateMetadata({
   const activeProfile =
     user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
   const name = activeProfile.displayName ?? user.name ?? username;
-  const bio = activeProfile.description ?? "";
-  const roleT = await getTranslations("role");
+  const [roleT, t] = await Promise.all([
+    getTranslations("role"),
+    getTranslations("publicPages.profile.metadata"),
+  ]);
+
+  // Prompt F7, VIỆC 3 — always an absolute URL (never window.location,
+  // which would bake in "localhost" for anyone testing/sharing from a dev
+  // build — Facebook/Zalo can't fetch that to read the tags below).
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const url = `${baseUrl}/profile/${username}`;
+  const title = t("title", {
+    name,
+    role: joinRoleLabels(user.profiles, roleT),
+  });
+  const description = (
+    activeProfile.description || t("fallbackDescription", { name })
+  ).slice(0, 160);
+  // Cover photo first, then the first approved portfolio image — no
+  // generated branded fallback (would need next/og wired up, deferred).
+  // A profile with neither still gets title/description in the share
+  // preview, just no image.
+  const ogImage = user.coverImage ?? activeProfile.media[0]?.url;
 
   return {
-    title: `${name} — ${joinRoleLabels(user.profiles, roleT)} in ${user.location ?? "Fgrapher"} | Fgrapher`,
-    description: bio.slice(0, 155),
+    title,
+    description,
     alternates: { canonical: `/profile/${username}` },
     openGraph: {
-      images: user.coverImage ? [user.coverImage] : [],
+      title,
+      description,
+      url,
       type: "profile",
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
+    },
+    twitter: {
+      card: ogImage ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: ogImage ? [ogImage] : [],
     },
   };
 }
@@ -88,9 +116,10 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  const [roleT, experienceLevelT] = await Promise.all([
+  const [roleT, experienceLevelT, t] = await Promise.all([
     getTranslations("role"),
     getTranslations("experienceLevel"),
+    getTranslations("publicPages.profile"),
   ]);
 
   const { role: roleParam } = await searchParams;
@@ -123,34 +152,47 @@ export default async function PublicProfilePage({
     activeProfile.role === "MODEL"
       ? ([
           activeProfile.height
-            ? { label: "Height", value: `${activeProfile.height} cm` }
+            ? {
+                label: t("modelDetails.height"),
+                value: `${activeProfile.height} cm`,
+              }
             : null,
           activeProfile.experienceLevel
             ? {
-                label: "Experience",
+                label: t("modelDetails.experience"),
                 value: experienceLevelT(activeProfile.experienceLevel),
               }
             : null,
           activeProfile.travelWilling
-            ? { label: "Travel", value: "Willing to travel" }
+            ? {
+                label: t("modelDetails.travel"),
+                value: t("modelDetails.willingToTravel"),
+              }
             : null,
           activeProfile.agencyRepresented
             ? {
-                label: "Agency",
-                value: activeProfile.agencyName || "Represented",
+                label: t("modelDetails.agency"),
+                value:
+                  activeProfile.agencyName || t("modelDetails.represented"),
               }
             : null,
           activeProfile.measurements
-            ? { label: "Measurements", value: activeProfile.measurements }
+            ? {
+                label: t("modelDetails.measurements"),
+                value: activeProfile.measurements,
+              }
             : null,
           activeProfile.hairColor
-            ? { label: "Hair", value: activeProfile.hairColor }
+            ? { label: t("modelDetails.hair"), value: activeProfile.hairColor }
             : null,
           activeProfile.eyeColor
-            ? { label: "Eyes", value: activeProfile.eyeColor }
+            ? { label: t("modelDetails.eyes"), value: activeProfile.eyeColor }
             : null,
           activeProfile.shoeSize
-            ? { label: "Shoe size", value: activeProfile.shoeSize }
+            ? {
+                label: t("modelDetails.shoeSize"),
+                value: activeProfile.shoeSize,
+              }
             : null,
         ].filter(Boolean) as { label: string; value: string }[])
       : [];
@@ -188,7 +230,7 @@ export default async function PublicProfilePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="relative h-[280px] w-full">
+      <div className="relative h-[200px] w-full sm:h-[240px]">
         {user.coverImage ? (
           <Image
             src={user.coverImage}
@@ -199,15 +241,21 @@ export default async function PublicProfilePage({
             className="object-cover"
           />
         ) : (
-          <MediaPlaceholder tint="green-300" height="100%" />
+          <div
+            className="size-full"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--green-900), var(--green-500) 60%, var(--gold-300))",
+            }}
+          />
         )}
       </div>
 
       <div className="mx-auto w-full max-w-[1240px] px-4 pb-[72px] sm:px-8">
-        <div className="mt-[-46px] flex flex-col gap-[18px]">
-          <div className="flex flex-wrap items-end justify-between gap-[18px]">
-            <div className="flex items-end gap-[18px]">
-              <Avatar className="size-[104px] border-4 border-bg-surface">
+        <div className="flex flex-col gap-[18px] pt-4">
+          <div className="flex flex-wrap items-start justify-between gap-[18px]">
+            <div className="flex flex-wrap items-start gap-[18px]">
+              <Avatar className="-mt-16 size-[104px] shrink-0 border-4 border-bg-surface bg-bg-surface">
                 {user.avatar ? (
                   <AvatarImage src={user.avatar} alt={displayName} />
                 ) : null}
@@ -216,7 +264,7 @@ export default async function PublicProfilePage({
                 </AvatarFallback>
               </Avatar>
 
-              <div className="flex flex-col gap-1.5 pb-2">
+              <div className="flex flex-col gap-1.5 pt-2">
                 <h1 className="text-display-md text-text-primary">
                   {displayName}
                 </h1>
@@ -241,9 +289,13 @@ export default async function PublicProfilePage({
                   <Badge
                     variant={user.acceptingBookings ? "success" : "warning"}
                   >
-                    {user.acceptingBookings ? "Available" : "Booked out"}
+                    {user.acceptingBookings
+                      ? t("status.available")
+                      : t("status.bookedOut")}
                   </Badge>
-                  {isVerified ? <Badge variant="accent">Verified</Badge> : null}
+                  {isVerified ? (
+                    <Badge variant="accent">{t("status.verified")}</Badge>
+                  ) : null}
                   <StarRating rating={averageRating} reviews={reviews.length} />
                 </div>
                 {user.location || ageRangeLabel ? (
@@ -254,7 +306,9 @@ export default async function PublicProfilePage({
                         {user.location}
                       </span>
                     ) : null}
-                    {ageRangeLabel ? <span>· Age {ageRangeLabel}</span> : null}
+                    {ageRangeLabel ? (
+                      <span>{t("age", { age: ageRangeLabel })}</span>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

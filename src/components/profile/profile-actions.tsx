@@ -1,9 +1,12 @@
 "use client";
 
-import { Bookmark, Check, Flag, Link2, Share2 } from "lucide-react";
+import { Bookmark, Check, Flag, Link2, QrCode, Share2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
+import Script from "next/script";
 import { startTransition, useEffect, useState } from "react";
 
+import { QrCodeDialog } from "@/components/profile/qr-code-dialog";
 import { ReportModal } from "@/components/modals/report-modal";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +33,7 @@ export function ProfileActions({
   shareUrl,
   socialFeedEnabled,
 }: ProfileActionsProps) {
+  const t = useTranslations("publicPages.profile.shareMenu");
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && Boolean(session?.user);
 
@@ -37,6 +41,14 @@ export function ProfileActions({
   const [followerCount, setFollowerCount] = useState(initialFollowerCount);
   const [isSaved, setIsSaved] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
+
+  // Zalo's official share widget needs a registered Zalo Official Account
+  // (data-oaid) — there's no unauthenticated sharer.php-style URL for it,
+  // unlike Facebook. Not configured in this environment (same category as
+  // Stripe/Cloudinary/Resend in CLAUDE.md's "Current phase" notes) — the
+  // menu item below simply doesn't render until a real OA ID is set.
+  const zaloOaId = process.env.NEXT_PUBLIC_ZALO_OA_ID;
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -97,7 +109,7 @@ export function ProfileActions({
 
   const copyLink = async () => {
     await navigator.clipboard.writeText(shareUrl);
-    toast.add({ title: "Link copied", type: "success" });
+    toast.add({ title: t("linkCopied"), type: "success" });
   };
 
   return (
@@ -111,10 +123,10 @@ export function ProfileActions({
             onClick={toggleFollow}
           >
             {isFollowing ? <Check className="size-4" /> : null}
-            {isFollowing ? "Following" : "Follow"}
+            {isFollowing ? t("following") : t("follow")}
           </Button>
           <span className="text-body-sm text-text-tertiary">
-            {followerCount} followers
+            {t("followers", { count: followerCount })}
           </span>
         </>
       ) : null}
@@ -124,15 +136,19 @@ export function ProfileActions({
         size="icon-sm"
         disabled={!isAuthenticated}
         onClick={toggleSave}
-        aria-label={isSaved ? "Remove from saved" : "Save profile"}
+        aria-label={isSaved ? t("removeFromSaved") : t("saveProfile")}
       >
         <Bookmark className={cn("size-4", isSaved && "fill-current")} />
       </Button>
 
+      {zaloOaId ? (
+        <Script src="https://sp.zalo.me/plugins/sdk.js" strategy="lazyOnload" />
+      ) : null}
+
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="ghost" size="icon-sm" aria-label="Share">
+            <Button variant="ghost" size="icon-sm" aria-label={t("share")}>
               <Share2 className="size-4" />
             </Button>
           }
@@ -140,7 +156,7 @@ export function ProfileActions({
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={copyLink}>
             <Link2 className="size-4" />
-            Copy link
+            {t("copyLink")}
           </DropdownMenuItem>
           <DropdownMenuItem
             render={
@@ -151,29 +167,22 @@ export function ProfileActions({
               />
             }
           >
-            Share to Facebook
+            {t("shareFacebook")}
           </DropdownMenuItem>
-          <DropdownMenuItem
-            render={
-              <a
-                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              />
-            }
-          >
-            Share to X
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            render={
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              />
-            }
-          >
-            Share via WhatsApp
+          {zaloOaId ? (
+            <div
+              className="zalo-share-button px-2 py-1.5"
+              data-oaid={zaloOaId}
+              data-href={shareUrl}
+              data-share-type="4"
+              data-layout="1"
+              data-color="white"
+              data-customize="false"
+            />
+          ) : null}
+          <DropdownMenuItem onClick={() => setQrOpen(true)}>
+            <QrCode className="size-4" />
+            {t("showQrCode")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -183,7 +192,7 @@ export function ProfileActions({
         size="icon-sm"
         disabled={!isAuthenticated}
         onClick={() => setReportOpen(true)}
-        aria-label="Report this profile"
+        aria-label={t("report")}
       >
         <Flag className="size-4" />
       </Button>
@@ -193,6 +202,7 @@ export function ProfileActions({
         targetType="user"
         targetId={targetUserId}
       />
+      <QrCodeDialog open={qrOpen} onOpenChange={setQrOpen} url={shareUrl} />
     </div>
   );
 }

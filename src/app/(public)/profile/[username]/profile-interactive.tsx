@@ -1,6 +1,7 @@
 "use client";
 
 import type { MediaType } from "@prisma/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { BookingSidebar } from "@/components/profile/booking-sidebar";
@@ -16,14 +17,25 @@ interface ProfileInteractiveProps {
   firstName: string;
   hasGear: boolean;
   media: { id: string; url: string; type: MediaType; title: string | null }[];
-  services: { id: string; name: string; description: string | null; duration: number; price: number; currency: string }[];
+  services: {
+    id: string;
+    name: string;
+    description: string | null;
+    duration: number;
+    price: number;
+    currency: string;
+  }[];
   reviews: {
     id: string;
     rating: number;
     content: string | null;
     response: string | null;
     createdAt: string;
-    reviewer: { name: string | null; firstName: string | null; avatar: string | null };
+    reviewer: {
+      name: string | null;
+      firstName: string | null;
+      avatar: string | null;
+    };
   }[];
   products: {
     id: string;
@@ -47,12 +59,17 @@ export function ProfileInteractive({
   products,
   offersTfp,
 }: ProfileInteractiveProps) {
+  const t = useTranslations("publicPages.profile.tabs");
   const [tab, setTab] = useState("portfolio");
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null,
+  );
 
   const onBook = (serviceId: string) => {
     setSelectedServiceId(serviceId);
-    document.getElementById("booking-sidebar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById("booking-sidebar")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -60,16 +77,20 @@ export function ProfileInteractive({
       <div className="min-w-0">
         <Tabs value={tab} onValueChange={(v) => setTab(v as string)}>
           <TabsList>
-            <TabsTab value="portfolio">Portfolio</TabsTab>
-            <TabsTab value="services">Services</TabsTab>
-            <TabsTab value="reviews">Reviews</TabsTab>
+            <TabsTab value="portfolio">{t("portfolio")}</TabsTab>
+            <TabsTab value="services">{t("services")}</TabsTab>
+            <TabsTab value="reviews">{t("reviews")}</TabsTab>
             {hasGear ? <TabsTab value="gear">Gear</TabsTab> : null}
           </TabsList>
           <TabsPanel value="portfolio" className="mt-6">
             <PortfolioTab media={media} />
           </TabsPanel>
           <TabsPanel value="services" className="mt-6">
-            <ServicesTab services={services} onBook={onBook} offersTfp={offersTfp} />
+            <ServicesTab
+              services={services}
+              onBook={onBook}
+              offersTfp={offersTfp}
+            />
           </TabsPanel>
           <TabsPanel value="reviews" className="mt-6">
             <ReviewsTab providerId={providerId} reviews={reviews} />

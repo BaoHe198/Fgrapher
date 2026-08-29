@@ -59,11 +59,15 @@ export async function generateMetadata({
   };
   const title = t("metaTitle", values);
   const description = t("metaDescription", values);
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const url = `${baseUrl}/${roleSlug}/${provinceSlug}`;
 
   return {
     title,
     description,
-    openGraph: { title, description, type: "website" },
+    alternates: { canonical: `/${roleSlug}/${provinceSlug}` },
+    openGraph: { title, description, url, type: "website" },
+    twitter: { card: "summary", title, description },
   };
 }
 

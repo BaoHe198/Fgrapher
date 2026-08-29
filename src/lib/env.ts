@@ -72,6 +72,12 @@ const publicSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().optional(),
   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  // Zalo Official Account ID for the profile share menu's Zalo widget
+  // (Prompt F7, VIỆC 4) — read directly via process.env in
+  // profile-actions.tsx (same reason NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is,
+  // per lib/cloudinary.ts's comment: needs to work from a Client
+  // Component). Unset in this environment; see that file's comment.
+  NEXT_PUBLIC_ZALO_OA_ID: z.string().optional(),
 });
 
 const fullSchema = serverSchema.merge(publicSchema);

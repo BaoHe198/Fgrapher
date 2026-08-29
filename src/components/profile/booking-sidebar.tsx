@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
@@ -50,6 +51,7 @@ export function BookingSidebar({
   selectedServiceId,
   onServiceChange,
 }: BookingSidebarProps) {
+  const t = useTranslations("publicPages.profile.bookingSidebar");
   const router = useRouter();
   const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
   const [days, setDays] = useState<DayAvailability[]>([]);
@@ -107,10 +109,14 @@ export function BookingSidebar({
   return (
     <div className="sticky top-[104px] flex flex-col gap-4 rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-md)]">
       <div className="flex flex-col gap-1">
-        <h3 className="text-heading-lg text-text-primary">Book {firstName}</h3>
+        <h3 className="text-heading-lg text-text-primary">
+          {t("book", { name: firstName })}
+        </h3>
         {minPrice !== null ? (
           <p className="text-body-md text-text-secondary">
-            From {formatCurrency(minPrice, services[0]?.currency)} per session
+            {t("from", {
+              price: formatCurrency(minPrice, services[0]?.currency),
+            })}
           </p>
         ) : null}
       </div>
@@ -120,7 +126,7 @@ export function BookingSidebar({
           value={selectedServiceId ?? ""}
           onChange={onServiceChange}
           options={[
-            { value: "", label: "Select a service" },
+            { value: "", label: t("selectService") },
             ...services.map((s) => ({
               value: s.id,
               label: `${s.name} — ${formatCurrency(s.price, s.currency)}`,
@@ -131,13 +137,13 @@ export function BookingSidebar({
 
       <div className="flex flex-col gap-2">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Select a date
+          {t("selectDate")}
         </span>
         <div className="flex items-center justify-between">
           <button
             type="button"
             onClick={() => changeWeek(-7)}
-            aria-label="Previous week"
+            aria-label={t("prevWeek")}
             className="flex size-7 items-center justify-center rounded-full hover:bg-bg-sunken"
           >
             <ChevronLeft className="size-4" />
@@ -148,7 +154,7 @@ export function BookingSidebar({
           <button
             type="button"
             onClick={() => changeWeek(7)}
-            aria-label="Next week"
+            aria-label={t("nextWeek")}
             className="flex size-7 items-center justify-center rounded-full hover:bg-bg-sunken"
           >
             <ChevronRight className="size-4" />
@@ -201,12 +207,10 @@ export function BookingSidebar({
       {activeDay && !activeDay.busy ? (
         <div className="flex flex-col gap-2">
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            Available times
+            {t("availableTimes")}
           </span>
           {activeDay.slots.filter((s) => s.available).length === 0 ? (
-            <p className="text-body-sm text-text-secondary">
-              No times available on this date
-            </p>
+            <p className="text-body-sm text-text-secondary">{t("noTimes")}</p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {activeDay.slots
@@ -234,21 +238,21 @@ export function BookingSidebar({
         <div className="flex flex-col gap-2 border-t border-border-subtle pt-3">
           {selectedService ? (
             <div className="flex justify-between text-body-sm">
-              <span className="text-text-tertiary">Service</span>
+              <span className="text-text-tertiary">{t("service")}</span>
               <span className="text-text-primary">{selectedService.name}</span>
             </div>
           ) : null}
           <div className="flex justify-between text-body-sm">
-            <span className="text-text-tertiary">Date</span>
+            <span className="text-text-tertiary">{t("date")}</span>
             <span className="text-text-primary">{selectedDate}</span>
           </div>
           <div className="flex justify-between text-body-sm">
-            <span className="text-text-tertiary">Time</span>
+            <span className="text-text-tertiary">{t("time")}</span>
             <span className="text-text-primary">{selectedTime}</span>
           </div>
           {selectedService ? (
             <div className="flex justify-between text-heading-sm font-bold">
-              <span>Total</span>
+              <span>{t("total")}</span>
               <span>
                 {formatCurrency(
                   selectedService.price,
@@ -267,7 +271,7 @@ export function BookingSidebar({
         disabled={!selectedDate || !selectedTime}
         onClick={onBookNow}
       >
-        Book now
+        {t("bookNow")}
       </Button>
       <Button
         variant="ghost"
@@ -275,12 +279,12 @@ export function BookingSidebar({
         nativeButton={false}
         render={<a href={`/dashboard/messages?to=${providerId}`} />}
       >
-        Message {firstName}
+        {t("message", { name: firstName })}
       </Button>
 
       <div className="flex flex-col gap-2 text-body-sm text-text-secondary">
-        <span>Free cancellation up to 48h before</span>
-        <span>Response time: usually within 2 hours</span>
+        <span>{t("cancellationNote")}</span>
+        <span>{t("responseNote")}</span>
       </div>
     </div>
   );

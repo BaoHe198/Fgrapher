@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -25,12 +26,6 @@ interface ReviewItem {
   };
 }
 
-const SORT_OPTIONS = [
-  { value: "newest", label: "Newest" },
-  { value: "highest", label: "Highest" },
-  { value: "lowest", label: "Lowest" },
-];
-
 export function ReviewsTab({
   providerId,
   reviews,
@@ -38,6 +33,12 @@ export function ReviewsTab({
   providerId: string;
   reviews: ReviewItem[];
 }) {
+  const t = useTranslations("publicPages.profile.reviewsTab");
+  const SORT_OPTIONS = [
+    { value: "newest", label: t("sortNewest") },
+    { value: "highest", label: t("sortHighest") },
+    { value: "lowest", label: t("sortLowest") },
+  ];
   const { data: session } = useSession();
   const router = useRouter();
   const isOwner = session?.user?.id === providerId;
@@ -80,7 +81,7 @@ export function ReviewsTab({
   if (reviews.length === 0) {
     return (
       <p className="py-12 text-center text-body-md text-text-secondary">
-        No reviews yet
+        {t("empty")}
       </p>
     );
   }
@@ -118,7 +119,7 @@ export function ReviewsTab({
             selected={ratingFilter === null}
             onClick={() => setRatingFilter(null)}
           >
-            All
+            {t("all")}
           </Tag>
           {[5, 4, 3, 2, 1].map((stars) => (
             <Tag
@@ -143,7 +144,7 @@ export function ReviewsTab({
       <div className="flex flex-col gap-[18px]">
         {filtered.map((review) => {
           const name =
-            review.reviewer.firstName ?? review.reviewer.name ?? "Anonymous";
+            review.reviewer.firstName ?? review.reviewer.name ?? t("anonymous");
           return (
             <div key={review.id} className="flex gap-3">
               <Avatar size="lg" className="shrink-0">
@@ -186,7 +187,7 @@ export function ReviewsTab({
                       onClick={() => setRespondTarget(review)}
                       className="text-body-sm font-semibold text-brand-primary"
                     >
-                      Respond
+                      {t("respond")}
                     </button>
                   ) : null}
                   {!isOwner ? (
@@ -195,7 +196,7 @@ export function ReviewsTab({
                       onClick={() => setReportTarget(review.id)}
                       className="text-body-sm text-text-tertiary"
                     >
-                      Report
+                      {t("report")}
                     </button>
                   ) : null}
                 </div>
@@ -213,7 +214,7 @@ export function ReviewsTab({
           reviewerName={
             respondTarget.reviewer.firstName ??
             respondTarget.reviewer.name ??
-            "Anonymous"
+            t("anonymous")
           }
           rating={respondTarget.rating}
           content={respondTarget.content}
