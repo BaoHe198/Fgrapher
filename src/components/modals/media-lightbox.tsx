@@ -10,6 +10,13 @@ interface MediaLightboxProps {
   index: number;
   onClose: () => void;
   onIndexChange: (index: number) => void;
+  // Prompt G3, VIỆC 4 — the public album viewer needs to show the
+  // album's own title/description/category, not just per-photo captions.
+  // Optional so the product-gallery and chat-panel callers (plain photo
+  // sets with no album context) are unaffected.
+  title?: string;
+  description?: string | null;
+  categoryLabel?: string;
 }
 
 export function MediaLightbox({
@@ -17,6 +24,9 @@ export function MediaLightbox({
   index,
   onClose,
   onIndexChange,
+  title,
+  description,
+  categoryLabel,
 }: MediaLightboxProps) {
   const t = useTranslations("sharedComponents.mediaLightbox");
 
@@ -47,6 +57,25 @@ export function MediaLightbox({
       >
         <X className="size-5" />
       </button>
+
+      {title ? (
+        <div
+          className="absolute top-5 left-5 max-w-[70vw] text-white"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center gap-2">
+            <p className="text-body-lg font-semibold">{title}</p>
+            {categoryLabel ? (
+              <span className="rounded-full bg-white/15 px-2 py-0.5 text-body-sm">
+                {categoryLabel}
+              </span>
+            ) : null}
+          </div>
+          {description ? (
+            <p className="mt-1 text-body-sm text-white/70">{description}</p>
+          ) : null}
+        </div>
+      ) : null}
 
       {items.length > 1 ? (
         <button

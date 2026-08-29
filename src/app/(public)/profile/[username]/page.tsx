@@ -116,9 +116,10 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  const [roleT, experienceLevelT, t] = await Promise.all([
+  const [roleT, experienceLevelT, categoryT, t] = await Promise.all([
     getTranslations("role"),
     getTranslations("experienceLevel"),
+    getTranslations("profileCategory"),
     getTranslations("publicPages.profile"),
   ]);
 
@@ -311,6 +312,22 @@ export default async function PublicProfilePage({
                     ) : null}
                   </div>
                 ) : null}
+                {activeProfile.categories.length > 0 ? (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {activeProfile.categories.map((category) => (
+                      <Tag
+                        key={category}
+                        render={
+                          <Link
+                            href={`/browse?roles=${activeProfile.role}&categories=${category}`}
+                          />
+                        }
+                      >
+                        {categoryT(category)}
+                      </Tag>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -351,7 +368,7 @@ export default async function PublicProfilePage({
               features.marketplaceEnabled &&
               user.profiles.some((p) => p.role === "CAMERA_SHOP")
             }
-            media={activeProfile.media}
+            albums={activeProfile.albums}
             services={activeProfile.services}
             reviews={reviews.map((r) => ({
               ...r,

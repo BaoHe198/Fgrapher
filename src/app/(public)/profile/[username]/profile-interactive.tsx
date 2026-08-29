@@ -1,6 +1,6 @@
 "use client";
 
-import type { MediaType } from "@prisma/client";
+import type { MediaType, ProfileCategory } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -16,7 +16,14 @@ interface ProfileInteractiveProps {
   providerId: string;
   firstName: string;
   hasGear: boolean;
-  media: { id: string; url: string; type: MediaType; title: string | null }[];
+  albums: {
+    id: string;
+    title: string;
+    description: string | null;
+    category: ProfileCategory | null;
+    coverMedia: { id: string; url: string; type: MediaType } | null;
+    media: { id: string; url: string; type: MediaType; title: string | null }[];
+  }[];
   services: {
     id: string;
     name: string;
@@ -53,7 +60,7 @@ export function ProfileInteractive({
   providerId,
   firstName,
   hasGear,
-  media,
+  albums,
   services,
   reviews,
   products,
@@ -83,7 +90,7 @@ export function ProfileInteractive({
             {hasGear ? <TabsTab value="gear">Gear</TabsTab> : null}
           </TabsList>
           <TabsPanel value="portfolio" className="mt-6">
-            <PortfolioTab media={media} />
+            <PortfolioTab albums={albums} />
           </TabsPanel>
           <TabsPanel value="services" className="mt-6">
             <ServicesTab

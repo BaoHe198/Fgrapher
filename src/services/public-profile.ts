@@ -7,6 +7,7 @@ export class ProfileNotVerifiedError extends Error {}
 export class ProfileNotFoundError extends Error {}
 export class ProfileHasNoApprovedMediaError extends Error {}
 export class ProfileMissingLocationError extends Error {}
+export class ProfileMissingCategoryError extends Error {}
 
 // The single write path for Profile.isPublished (Prompt B3, VIỆC 4) —
 // every other read site (search.ts, sitemap.ts, this file's own queries
@@ -51,6 +52,16 @@ export async function setProfilePublished(
     }
   }
 
+  // Prompt G2, VIỆC 4 — "Ít nhất 1 thể loại là bắt buộc trước khi công
+  // khai hồ sơ": specialty categories are how both the search filter
+  // (G4) and the public profile page (VIỆC 5) let clients find the right
+  // provider, so a profile with none of those set isn't ready to go live.
+  if (isPublished && profile.categories.length === 0) {
+    throw new ProfileMissingCategoryError(
+      "Choose at least one specialty category before publishing",
+    );
+  }
+
   // Prompt B4, VIỆC 3 — a Studio's whole value proposition is "come shoot
   // here," so unlike other roles (where provinceId is a nice-to-have for
   // search filtering), a Studio without a specific address + province +
@@ -72,7 +83,7 @@ export async function setProfilePublished(
 }
 
 export async function getPublicProfileUser(username: string) {
-  return db.user.findUnique({
+  const user = await db.user.findUnique({
     where: { username, deletedAt: null },
     // Explicit select, not include — this is a *public* read, and an
     // unfiltered include on User returns every scalar column (email,
@@ -107,6 +118,44 @@ export async function getPublicProfileUser(username: string) {
             where: { moderationStatus: "APPROVED" },
             orderBy: { order: "asc" },
           },
+          // Prompt G3, VIỆC 4 — the public Portfolio tab shows albums, not
+          // a flat grid. An album with zero approved photos would render
+          // as an empty tile, so it's excluded here (not just visually
+          // hidden client-side) via the `media: { some: ... }` filter —
+          // and the nested `media` picked back up below is filtered the
+          // same way so a not-yet-approved photo can't leak through an
+          // otherwise-visible album either.
+          albums: {
+            where: {
+              deletedAt: null,
+              isPublished: true,
+              media: {
+                some: { moderationStatus: "APPROVED", deletedAt: null },
+              },
+            },
+            orderBy: { sortOrder: "asc" },
+            include: {
+              media: {
+                where: { moderationStatus: "APPROVED", deletedAt: null },
+                orderBy: { order: "asc" },
+              },
+              // Prisma can't apply `media`'s APPROVED/not-deleted `where`
+              // to a to-one relation like this — coverMedia could point at
+              // a photo still pending review. Select its moderation fields
+              // too so the mapping below can fall back to the album's own
+              // (already-filtered) `media[0]` instead of leaking an
+              // unapproved image URL to public viewers.
+              coverMedia: {
+                select: {
+                  id: true,
+                  url: true,
+                  type: true,
+                  moderationStatus: true,
+                  deletedAt: true,
+                },
+              },
+            },
+          },
           services: { where: { isActive: true } },
         },
       },
@@ -116,6 +165,29 @@ export async function getPublicProfileUser(username: string) {
       roles: { select: { role: true, verificationStatus: true } },
     },
   });
+
+  if (!user) return user;
+
+  return {
+    ...user,
+    profiles: user.profiles.map((profile) => ({
+      ...profile,
+      albums: profile.albums.map((album) => {
+        const cover =
+          album.coverMedia &&
+          album.coverMedia.moderationStatus === "APPROVED" &&
+          !album.coverMedia.deletedAt
+            ? album.coverMedia
+            : (album.media[0] ?? null);
+        return {
+          ...album,
+          coverMedia: cover
+            ? { id: cover.id, url: cover.url, type: cover.type }
+            : null,
+        };
+      }),
+    })),
+  };
 }
 
 export async function getProviderForBooking(providerId: string) {
