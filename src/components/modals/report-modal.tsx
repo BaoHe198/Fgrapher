@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,20 @@ interface ReportModalProps {
   targetId: string;
 }
 
-export function ReportModal({ open, onOpenChange, targetType, targetId }: ReportModalProps) {
+const TARGET_KEY = {
+  review: "targetReview",
+  user: "targetUser",
+  message: "targetMessage",
+  product: "targetProduct",
+} as const;
+
+export function ReportModal({
+  open,
+  onOpenChange,
+  targetType,
+  targetId,
+}: ReportModalProps) {
+  const t = useTranslations("sharedComponents.reportModal");
   const [reason, setReason] = useState(REASONS[0]);
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,12 +49,17 @@ export function ReportModal({ open, onOpenChange, targetType, targetId }: Report
     const res = await fetch("/api/reports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ targetType, targetId, reason, description: description || undefined }),
+      body: JSON.stringify({
+        targetType,
+        targetId,
+        reason,
+        description: description || undefined,
+      }),
     });
     setIsSubmitting(false);
 
     if (res.ok) {
-      toast.add({ title: "Report submitted", type: "success" });
+      toast.add({ title: t("submitted"), type: "success" });
       onOpenChange(false);
       setDescription("");
     }
@@ -50,17 +69,22 @@ export function ReportModal({ open, onOpenChange, targetType, targetId }: Report
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Report this {targetType}</DialogTitle>
+          <DialogTitle>
+            {t("title", { target: t(TARGET_KEY[targetType]) })}
+          </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3">
           <NativeSelect
-            label="Reason"
+            label={t("reasonLabel")}
             value={reason}
             onChange={setReason}
-            options={REASONS}
+            options={REASONS.map((r) => ({
+              value: r,
+              label: t(`reasons.${r}`),
+            }))}
           />
           <Textarea
-            placeholder="Additional details (optional)"
+            placeholder={t("detailsPlaceholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
@@ -68,11 +92,15 @@ export function ReportModal({ open, onOpenChange, targetType, targetId }: Report
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("cancel")}
           </Button>
-          <Button variant="destructive" disabled={isSubmitting} onClick={onSubmit}>
+          <Button
+            variant="destructive"
+            disabled={isSubmitting}
+            onClick={onSubmit}
+          >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            Submit report
+            {t("submit")}
           </Button>
         </DialogFooter>
       </DialogContent>

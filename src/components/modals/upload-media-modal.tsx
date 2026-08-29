@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, UploadCloud, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -104,6 +105,7 @@ export function UploadMediaModal({
   profileId,
   onUploaded,
 }: UploadMediaModalProps) {
+  const t = useTranslations("sharedComponents.uploadMediaModal");
   const [files, setFiles] = useState<PendingFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
@@ -130,9 +132,7 @@ export function UploadMediaModal({
       if (file.size > max) {
         return {
           code: "file-too-large",
-          message: isVideo
-            ? "Videos must be under 100MB"
-            : "Images must be under 10MB",
+          message: isVideo ? t("videoTooLarge") : t("imageTooLarge"),
         };
       }
       return null;
@@ -159,7 +159,7 @@ export function UploadMediaModal({
         prev.map((f) => ({
           ...f,
           status: "error",
-          error: sigBody.message ?? "Upload unavailable",
+          error: sigBody.message ?? t("uploadUnavailable"),
         })),
       );
       setIsSubmitting(false);
@@ -219,7 +219,7 @@ export function UploadMediaModal({
       } catch {
         setFiles((prev) =>
           prev.map((f, idx) =>
-            idx === i ? { ...f, status: "error", error: "Upload failed" } : f,
+            idx === i ? { ...f, status: "error", error: t("uploadFailed") } : f,
           ),
         );
       }
@@ -243,7 +243,7 @@ export function UploadMediaModal({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Upload media</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
 
         <div
@@ -256,10 +256,8 @@ export function UploadMediaModal({
         >
           <input {...getInputProps()} />
           <UploadCloud className="size-6" />
-          <p className="text-body-sm">Drag files here, or click to browse</p>
-          <p className="text-body-sm text-text-tertiary">
-            Images up to 10MB, videos up to 100MB
-          </p>
+          <p className="text-body-sm">{t("dropzone")}</p>
+          <p className="text-body-sm text-text-tertiary">{t("sizeLimits")}</p>
         </div>
 
         {files.length > 0 ? (
@@ -278,7 +276,7 @@ export function UploadMediaModal({
                       <button
                         type="button"
                         onClick={() => removeFile(index)}
-                        aria-label="Remove file"
+                        aria-label={t("removeFile")}
                       >
                         <X className="size-3.5 text-text-tertiary" />
                       </button>
@@ -286,7 +284,7 @@ export function UploadMediaModal({
                   </div>
                   {f.status === "pending" ? (
                     <Input
-                      placeholder="Title (optional)"
+                      placeholder={t("titlePlaceholder")}
                       value={f.title}
                       onChange={(e) => setTitle(index, e.target.value)}
                       className="mt-1.5"
@@ -296,7 +294,9 @@ export function UploadMediaModal({
                   ) : f.status === "error" ? (
                     <p className="mt-1 text-body-sm text-danger">{f.error}</p>
                   ) : (
-                    <p className="mt-1 text-body-sm text-success">Uploaded</p>
+                    <p className="mt-1 text-body-sm text-success">
+                      {t("uploaded")}
+                    </p>
                   )}
                 </div>
               </div>
@@ -307,7 +307,7 @@ export function UploadMediaModal({
         <Checkbox
           checked={rightsConfirmed}
           onCheckedChange={(checked) => setRightsConfirmed(checked === true)}
-          label="I confirm I have the rights to use these images and have the consent of anyone appearing in them"
+          label={t("rightsConfirm")}
         />
 
         <Button
@@ -320,10 +320,10 @@ export function UploadMediaModal({
           {isSubmitting ? (
             <>
               <Loader2 className="size-4 animate-spin" />
-              Uploading...
+              {t("uploading")}
             </>
           ) : (
-            `Upload ${files.length || ""}`
+            t("upload", { count: files.length || "" })
           )}
         </Button>
       </DialogContent>

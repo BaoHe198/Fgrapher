@@ -3,10 +3,20 @@
 // Catches errors thrown by the root layout itself (rare — the regular
 // error.tsx above can't catch those since it renders inside that layout).
 // Must render its own <html>/<body>; kept deliberately plain/inline-styled
-// since it can't rely on globals.css having loaded successfully.
-export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+// since it can't rely on globals.css having loaded successfully. Text is
+// hardcoded Vietnamese (not next-intl) rather than "just wire up t()" —
+// this boundary can fire when the root layout itself (which is what sets
+// up NextIntlClientProvider) has failed, so the locale context it would
+// need may not exist. vi matches the app's default locale (CLAUDE.md
+// rule 10) for the one screen that can never safely depend on it.
+export default function GlobalError({
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   return (
-    <html lang="en">
+    <html lang="vi">
       <body
         style={{
           display: "flex",
@@ -20,9 +30,9 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
           padding: "24px",
         }}
       >
-        <h1 style={{ fontSize: "24px", fontWeight: 700 }}>Something went wrong</h1>
+        <h1 style={{ fontSize: "24px", fontWeight: 700 }}>Đã xảy ra lỗi</h1>
         <p style={{ color: "#6b7280", maxWidth: "420px" }}>
-          An unexpected error occurred. Please try again.
+          Có lỗi ngoài ý muốn xảy ra. Vui lòng thử lại.
         </p>
         <button
           type="button"
@@ -37,7 +47,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
             cursor: "pointer",
           }}
         >
-          Try again
+          Thử lại
         </button>
       </body>
     </html>

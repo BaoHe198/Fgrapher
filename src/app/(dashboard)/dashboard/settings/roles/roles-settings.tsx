@@ -26,14 +26,14 @@ interface VerificationInfo {
   verificationRejectedReason: string | null;
 }
 
-const VERIFICATION_BADGE: Record<
+const VERIFICATION_VARIANT: Record<
   VerificationStatus,
-  { label: string; variant: "success" | "warning" | "destructive" | "neutral" }
+  "success" | "warning" | "destructive" | "neutral"
 > = {
-  UNVERIFIED: { label: "Not verified", variant: "neutral" },
-  PENDING: { label: "Verification pending", variant: "warning" },
-  VERIFIED: { label: "Verified", variant: "success" },
-  REJECTED: { label: "Verification rejected", variant: "destructive" },
+  UNVERIFIED: "neutral",
+  PENDING: "warning",
+  VERIFIED: "success",
+  REJECTED: "destructive",
 };
 
 const ROLE_ICONS: Record<Role, LucideIcon> = {
@@ -57,6 +57,7 @@ export function RolesSettings({
   verifications: VerificationInfo[];
 }) {
   const roleT = useTranslations("role");
+  const t = useTranslations("dashboardSettings.roles");
   const activeRoles = currentRoles.filter((r) => r !== "CUSTOMER");
   const availableRoles = PAID_ROLES.filter((r) => !currentRoles.includes(r));
   const verificationByRole = new Map(verifications.map((v) => [v.role, v]));
@@ -65,7 +66,7 @@ export function RolesSettings({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Your roles
+          {t("yourRoles")}
         </span>
 
         <Card className="flex items-center justify-between">
@@ -73,19 +74,26 @@ export function RolesSettings({
             <User className="size-5 text-text-tertiary" />
             <div>
               <p className="text-body-md font-semibold text-text-primary">
-                Customer
+                {t("customer")}
               </p>
-              <p className="text-body-sm text-text-secondary">Always free</p>
+              <p className="text-body-sm text-text-secondary">
+                {t("alwaysFree")}
+              </p>
             </div>
           </div>
-          <Badge variant="success">Active</Badge>
+          <Badge variant="success">{t("active")}</Badge>
         </Card>
 
         {activeRoles.map((role) => {
           const Icon = ROLE_ICONS[role];
           const verification = verificationByRole.get(role);
           const verificationBadge = verification
-            ? VERIFICATION_BADGE[verification.verificationStatus]
+            ? {
+                label: t(
+                  `verificationBadge.${verification.verificationStatus}`,
+                ),
+                variant: VERIFICATION_VARIANT[verification.verificationStatus],
+              }
             : null;
           const needsVerification =
             verification?.verificationStatus === "UNVERIFIED" ||
@@ -101,19 +109,20 @@ export function RolesSettings({
                       {roleT(role)}
                     </p>
                     <p className="text-body-sm text-text-secondary">
-                      {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo
+                      {formatCurrency(rolePrices[role] ?? 0, "VND")}
+                      {t("perMonth")}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="success">Active</Badge>
+                  <Badge variant="success">{t("active")}</Badge>
                   <Button
                     size="sm"
                     variant="secondary"
                     nativeButton={false}
                     render={<Link href="/dashboard/settings/billing" />}
                   >
-                    Manage
+                    {t("manage")}
                   </Button>
                 </div>
               </div>
@@ -140,7 +149,7 @@ export function RolesSettings({
                         <Link href={`/onboarding/verification?role=${role}`} />
                       }
                     >
-                      Verify identity
+                      {t("verifyIdentity")}
                     </Button>
                   ) : null}
                 </div>
@@ -153,7 +162,7 @@ export function RolesSettings({
       {availableRoles.length > 0 ? (
         <div className="flex flex-col gap-3">
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            Add a role
+            {t("addRole")}
           </span>
           {availableRoles.map((role) => {
             const Icon = ROLE_ICONS[role];
@@ -166,7 +175,8 @@ export function RolesSettings({
                       {roleT(role)}
                     </p>
                     <p className="text-body-sm text-text-secondary">
-                      {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo
+                      {formatCurrency(rolePrices[role] ?? 0, "VND")}
+                      {t("perMonth")}
                     </p>
                   </div>
                 </div>
@@ -176,7 +186,7 @@ export function RolesSettings({
                   nativeButton={false}
                   render={<Link href={`/onboarding/billing?roles=${role}`} />}
                 >
-                  Activate
+                  {t("activate")}
                 </Button>
               </Card>
             );

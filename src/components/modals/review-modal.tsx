@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export function ReviewModal({
   initialRating = 0,
   onSuccess,
 }: ReviewModalProps) {
+  const t = useTranslations("sharedComponents.reviewModal");
   const [rating, setRating] = useState(existingReview?.rating ?? initialRating);
   const [content, setContent] = useState(existingReview?.content ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,11 +76,11 @@ export function ReviewModal({
   const onSubmit = async () => {
     setError(null);
     if (rating === 0) {
-      setError("Choose a star rating");
+      setError(t("chooseRating"));
       return;
     }
     if (content.trim().length < MIN_LENGTH) {
-      setError(`Share a bit more detail (at least ${MIN_LENGTH} characters)`);
+      setError(t("needMoreDetail", { min: MIN_LENGTH }));
       return;
     }
 
@@ -98,12 +100,12 @@ export function ReviewModal({
     setIsSubmitting(false);
 
     if (!res.ok) {
-      setError(body.message ?? "Something went wrong. Please try again.");
+      setError(body.message ?? t("genericError"));
       return;
     }
 
     toast.add({
-      title: isEdit ? "Review updated" : "Review posted",
+      title: isEdit ? t("updated") : t("posted"),
       type: "success",
     });
     onOpenChange(false);
@@ -115,9 +117,7 @@ export function ReviewModal({
       <DialogContent className="max-w-[520px]">
         <DialogHeader>
           <DialogTitle>
-            {isEdit
-              ? "Edit your review"
-              : `How was your session with ${providerName}?`}
+            {isEdit ? t("editTitle") : t("newTitle", { name: providerName })}
           </DialogTitle>
         </DialogHeader>
 
@@ -130,14 +130,14 @@ export function ReviewModal({
 
           <div className="flex flex-col gap-1.5">
             <label className="text-body-sm font-semibold text-text-primary">
-              Share your experience
+              {t("shareExperience")}
             </label>
             <Textarea
               rows={5}
               maxLength={MAX_LENGTH}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="What did you like? What could be better?"
+              placeholder={t("contentPlaceholder")}
             />
             <span className="self-end text-body-sm text-text-tertiary">
               {content.length}/{MAX_LENGTH}
@@ -149,11 +149,11 @@ export function ReviewModal({
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button variant="accent" disabled={isSubmitting} onClick={onSubmit}>
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            {isEdit ? "Save changes" : "Submit review"}
+            {isEdit ? t("saveChanges") : t("submit")}
           </Button>
         </DialogFooter>
       </DialogContent>

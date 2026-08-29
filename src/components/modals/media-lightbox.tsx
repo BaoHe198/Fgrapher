@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect } from "react";
 
@@ -11,12 +12,20 @@ interface MediaLightboxProps {
   onIndexChange: (index: number) => void;
 }
 
-export function MediaLightbox({ items, index, onClose, onIndexChange }: MediaLightboxProps) {
+export function MediaLightbox({
+  items,
+  index,
+  onClose,
+  onIndexChange,
+}: MediaLightboxProps) {
+  const t = useTranslations("sharedComponents.mediaLightbox");
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight") onIndexChange((index + 1) % items.length);
-      if (e.key === "ArrowLeft") onIndexChange((index - 1 + items.length) % items.length);
+      if (e.key === "ArrowLeft")
+        onIndexChange((index - 1 + items.length) % items.length);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -33,7 +42,7 @@ export function MediaLightbox({ items, index, onClose, onIndexChange }: MediaLig
       <button
         type="button"
         onClick={onClose}
-        aria-label="Close"
+        aria-label={t("close")}
         className="absolute top-5 right-5 flex size-10 items-center justify-center rounded-full bg-white/10 text-white"
       >
         <X className="size-5" />
@@ -46,7 +55,7 @@ export function MediaLightbox({ items, index, onClose, onIndexChange }: MediaLig
             e.stopPropagation();
             onIndexChange((index - 1 + items.length) % items.length);
           }}
-          aria-label="Previous"
+          aria-label={t("previous")}
           className="absolute left-5 flex size-10 items-center justify-center rounded-full bg-white/10 text-white"
         >
           <ChevronLeft className="size-5" />
@@ -74,7 +83,7 @@ export function MediaLightbox({ items, index, onClose, onIndexChange }: MediaLig
             e.stopPropagation();
             onIndexChange((index + 1) % items.length);
           }}
-          aria-label="Next"
+          aria-label={t("next")}
           className="absolute right-5 flex size-10 items-center justify-center rounded-full bg-white/10 text-white"
         >
           <ChevronRight className="size-5" />

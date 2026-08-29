@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export function RespondReviewModal({
   existingResponse,
   onSuccess,
 }: RespondReviewModalProps) {
+  const t = useTranslations("sharedComponents.respondReviewModal");
   const [response, setResponse] = useState(existingResponse ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export function RespondReviewModal({
   const onSubmit = async () => {
     setError(null);
     if (!response.trim()) {
-      setError("Write a response before posting");
+      setError(t("emptyError"));
       return;
     }
 
@@ -61,11 +63,11 @@ export function RespondReviewModal({
     setIsSubmitting(false);
 
     if (!res.ok) {
-      setError(body.message ?? "Something went wrong. Please try again.");
+      setError(body.message ?? t("genericError"));
       return;
     }
 
-    toast.add({ title: isEdit ? "Response updated" : "Response posted", type: "success" });
+    toast.add({ title: isEdit ? t("updated") : t("posted"), type: "success" });
     onOpenChange(false);
     onSuccess?.();
   };
@@ -74,46 +76,54 @@ export function RespondReviewModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Respond to review</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1 rounded-[var(--fg-radius-md)] bg-bg-sunken p-3.5">
             <div className="flex items-center gap-2">
-              <span className="text-body-sm font-semibold text-text-primary">{reviewerName}</span>
-              <StarRating rating={rating} reviews={0} className="[&>span:last-child]:hidden" />
+              <span className="text-body-sm font-semibold text-text-primary">
+                {reviewerName}
+              </span>
+              <StarRating
+                rating={rating}
+                reviews={0}
+                className="[&>span:last-child]:hidden"
+              />
             </div>
-            {content ? <p className="text-body-sm text-text-secondary">{content}</p> : null}
+            {content ? (
+              <p className="text-body-sm text-text-secondary">{content}</p>
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-body-sm font-semibold text-text-primary">Your response</label>
+            <label className="text-body-sm font-semibold text-text-primary">
+              {t("yourResponse")}
+            </label>
             <Textarea
               rows={4}
               maxLength={MAX_LENGTH}
               value={response}
               onChange={(e) => setResponse(e.target.value)}
-              placeholder="Thank the reviewer and address any concerns..."
+              placeholder={t("placeholder")}
             />
             <span className="self-end text-body-sm text-text-tertiary">
               {response.length}/{MAX_LENGTH}
             </span>
           </div>
 
-          <p className="text-body-sm text-text-tertiary">
-            Thank the reviewer and address any concerns professionally. Responses are public.
-          </p>
+          <p className="text-body-sm text-text-tertiary">{t("note")}</p>
 
           {error ? <p className="text-body-sm text-danger">{error}</p> : null}
         </div>
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button variant="accent" disabled={isSubmitting} onClick={onSubmit}>
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            Post response
+            {t("postResponse")}
           </Button>
         </DialogFooter>
       </DialogContent>
