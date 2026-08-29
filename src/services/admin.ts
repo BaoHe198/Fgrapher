@@ -3,12 +3,27 @@ import type {
   DataRequestStatus,
   DataRequestType,
 } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 
 import { generateKycSignedUrl } from "@/lib/cloudinary";
+import { mediaApprovedEmailHtml, mediaRejectedEmailHtml } from "@/lib/email";
 import { db } from "@/lib/db";
 import { KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
 import { ROLE_PLANS } from "@/lib/constants/plans";
 import { logAudit, processDeletion } from "@/services/compliance";
+import { notifyCritical } from "@/services/notification";
+
+// Reads the requesting admin's locale cookie, same as the other
+// request-triggered (non-cron) service call sites — see
+// services/bookings.ts's identical helper for the cron/webhook
+// counterpart that pins to "vi" instead.
+function getEmailT() {
+  return getTranslations("libServices.email");
+}
+
+function portfolioUrlFor() {
+  return `${process.env.NEXTAUTH_URL ?? ""}/dashboard/portfolio`;
+}
 
 // Larger than the other admin list pages' PAGE_SIZE (50) — moderation
 // review is a visual grid of small tiles, not a text list, so more fit
@@ -652,6 +667,13 @@ export async function moderateMedia({
 }) {
   const status = action === "approve" ? "APPROVED" : "REJECTED";
 
+  // Fetched before the update so the owning provider is known for the
+  // notification loop below — updateMany itself returns no rows.
+  const rows = await db.profileMedia.findMany({
+    where: { id: { in: mediaIds } },
+    select: { id: true, profile: { select: { userId: true } } },
+  });
+
   await db.profileMedia.updateMany({
     where: { id: { in: mediaIds } },
     data: {
@@ -670,6 +692,46 @@ export async function moderateMedia({
         targetType: "profile_media",
         targetId: mediaId,
         metadata: reason ? { reason } : undefined,
+      }),
+    ),
+  );
+
+  // Always both channels — whether a photo can go public is a
+  // business-critical outcome for the provider, not a preference-gated
+  // convenience notification (same reasoning as notifyCritical's other
+  // billing/account-critical call sites).
+  const t = await getEmailT();
+  const portfolioUrl = portfolioUrlFor();
+  await Promise.all(
+    rows.map((row) =>
+      notifyCritical({
+        userId: row.profile.userId,
+        type: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
+        title: t(
+          action === "approve"
+            ? "mediaApproved.heading"
+            : "mediaRejected.heading",
+        ),
+        message:
+          action === "approve"
+            ? t("mediaApproved.body")
+            : t("mediaRejected.body", { reason: reason ?? "" }),
+        data: { mediaId: row.id },
+        email: {
+          subject: t(
+            action === "approve"
+              ? "mediaApproved.heading"
+              : "mediaRejected.heading",
+          ),
+          html:
+            action === "approve"
+              ? mediaApprovedEmailHtml({ t, portfolioUrl })
+              : mediaRejectedEmailHtml({
+                  t,
+                  reason: reason ?? "",
+                  portfolioUrl,
+                }),
+        },
       }),
     ),
   );

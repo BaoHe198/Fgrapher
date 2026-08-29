@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 
 import { requireAdmin } from "@/lib/admin";
@@ -18,9 +18,10 @@ export default async function AdminLayout({
     if (err instanceof AuthError && err.status === 401) {
       redirect("/login?callbackUrl=/admin");
     }
-    // Authenticated but not an admin — bounce to the regular dashboard
-    // rather than exposing a 403 with no way out.
-    redirect("/dashboard");
+    // Authenticated but not an admin — 404, not a redirect, so this
+    // doesn't confirm to a logged-in non-admin that /admin/* is even a
+    // real section of the app.
+    notFound();
   }
 
   const t = await getTranslations("accountFlows.admin.layout");

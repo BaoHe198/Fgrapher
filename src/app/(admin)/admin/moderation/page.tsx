@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, ImageOff, Loader2, X } from "lucide-react";
+import type { Role } from "@prisma/client";
+import { Check, Expand, ImageOff, Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
@@ -14,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
@@ -22,7 +24,7 @@ import {
   MEDIA_REJECTION_REASONS,
 } from "@/lib/constants";
 import { buildMediaVariants } from "@/lib/media-variants";
-import { cn } from "@/lib/utils";
+import { cn, formatRelativeTime } from "@/lib/utils";
 
 interface MediaRow {
   id: string;
@@ -45,6 +47,7 @@ function isOverdue(createdAt: string) {
 
 export default function AdminModerationPage() {
   const t = useTranslations("accountFlows.admin.moderation");
+  const roleT = useTranslations("role");
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -53,6 +56,8 @@ export default function AdminModerationPage() {
   const [reasonNote, setReasonNote] = useState("");
   const [showRejectPanel, setShowRejectPanel] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [roleFilter, setRoleFilter] = useState("");
+  const [lightboxItem, setLightboxItem] = useState<MediaRow | null>(null);
 
   const load = useCallback(() => {
     startTransition(() => setIsLoading(true));
@@ -72,10 +77,21 @@ export default function AdminModerationPage() {
     load();
   }, [load]);
 
+  const roleOptions = useMemo(
+    () => Array.from(new Set(media.map((m) => m.profile.role))).sort(),
+    [media],
+  );
+
+  const filteredMedia = useMemo(
+    () =>
+      roleFilter ? media.filter((m) => m.profile.role === roleFilter) : media,
+    [media, roleFilter],
+  );
+
   const activeIds = useMemo(() => {
     if (selected.size > 0) return Array.from(selected);
-    return media[focusedIndex] ? [media[focusedIndex].id] : [];
-  }, [selected, media, focusedIndex]);
+    return filteredMedia[focusedIndex] ? [filteredMedia[focusedIndex].id] : [];
+  }, [selected, filteredMedia, focusedIndex]);
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -140,7 +156,7 @@ export default function AdminModerationPage() {
 
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
-        setFocusedIndex((i) => Math.min(i + 1, media.length - 1));
+        setFocusedIndex((i) => Math.min(i + 1, filteredMedia.length - 1));
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
         setFocusedIndex((i) => Math.max(i - 1, 0));
@@ -154,7 +170,7 @@ export default function AdminModerationPage() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [media.length, activeIds, approve]);
+  }, [filteredMedia.length, activeIds, approve]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -182,9 +198,11 @@ export default function AdminModerationPage() {
             <Button
               size="sm"
               variant="secondary"
-              onClick={() => setSelected(new Set(media.map((m) => m.id)))}
+              onClick={() =>
+                setSelected(new Set(filteredMedia.map((m) => m.id)))
+              }
             >
-              {t("selectAll", { count: media.length })}
+              {t("selectAll", { count: filteredMedia.length })}
             </Button>
             {selected.size > 0 ? (
               <Button
@@ -198,71 +216,115 @@ export default function AdminModerationPage() {
             <span className="text-body-sm text-text-tertiary">
               {t("selectedHint", { count: activeIds.length })}
             </span>
+            <div className="ml-auto w-44">
+              <NativeSelect
+                value={roleFilter}
+                onChange={(value) => {
+                  setRoleFilter(value);
+                  setFocusedIndex(0);
+                  setSelected(new Set());
+                }}
+                options={[
+                  { value: "", label: t("allRoles") },
+                  ...roleOptions.map((role) => ({
+                    value: role,
+                    label: roleT(role as Role),
+                  })),
+                ]}
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
-            {media.map((item, index) => {
-              const overdue = isOverdue(item.createdAt);
-              const isSelected = selected.has(item.id);
-              const isFocused = index === focusedIndex && selected.size === 0;
+          {filteredMedia.length === 0 ? (
+            <Card className="flex flex-col items-center gap-3 py-16 text-center">
+              <ImageOff className="size-12 text-text-tertiary" />
+              <p className="text-body-lg font-semibold text-text-primary">
+                {t("emptyFiltered")}
+              </p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
+              {filteredMedia.map((item, index) => {
+                const overdue = isOverdue(item.createdAt);
+                const isSelected = selected.has(item.id);
+                const isFocused = index === focusedIndex && selected.size === 0;
 
-              return (
-                <Card
-                  key={item.id}
-                  padding={false}
-                  className={cn(
-                    "flex cursor-pointer flex-col gap-0 overflow-hidden",
-                    (isSelected || isFocused) && "ring-2 ring-brand-primary",
-                  )}
-                  onClick={() => {
-                    setFocusedIndex(index);
-                    toggleSelect(item.id);
-                  }}
-                >
-                  <div className="relative aspect-square bg-bg-sunken">
-                    {item.type === "VIDEO" ? (
-                      <video
-                        src={item.url}
-                        className="size-full object-cover"
-                        muted
-                      />
-                    ) : (
-                      <Image
-                        src={buildMediaVariants(item.url).thumbnail}
-                        alt=""
-                        fill
-                        sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                        className="object-cover"
-                      />
+                return (
+                  <Card
+                    key={item.id}
+                    padding={false}
+                    className={cn(
+                      "flex cursor-pointer flex-col gap-0 overflow-hidden",
+                      (isSelected || isFocused) && "ring-2 ring-brand-primary",
                     )}
-                    {overdue ? (
-                      <Badge
-                        variant="destructive"
-                        className="absolute top-1.5 left-1.5"
-                      >
-                        {t("overdueBadge")}
-                      </Badge>
-                    ) : null}
-                    {isSelected ? (
-                      <div className="absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-brand-primary text-text-on-brand">
-                        <Check className="size-3.5" />
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-col gap-0.5 p-2">
-                    <span className="truncate text-body-sm font-semibold text-text-primary">
-                      {item.profile.user.firstName ??
-                        item.profile.user.name ??
-                        item.profile.user.email}
-                    </span>
-                    <span className="text-body-sm text-text-tertiary">
-                      {item.profile.role}
-                    </span>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+                    onClick={() => {
+                      setFocusedIndex(index);
+                      toggleSelect(item.id);
+                    }}
+                  >
+                    <div className="relative aspect-square bg-bg-sunken">
+                      {item.type === "VIDEO" ? (
+                        <video
+                          src={item.url}
+                          className="size-full object-cover"
+                          muted
+                        />
+                      ) : (
+                        <Image
+                          src={buildMediaVariants(item.url).thumbnail}
+                          alt=""
+                          fill
+                          sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                          className="object-cover"
+                        />
+                      )}
+                      {overdue ? (
+                        <Badge
+                          variant="destructive"
+                          className="absolute top-1.5 left-1.5"
+                        >
+                          {t("overdueBadge")}
+                        </Badge>
+                      ) : null}
+                      {isSelected ? (
+                        <div className="absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-brand-primary text-text-on-brand">
+                          <Check className="size-3.5" />
+                        </div>
+                      ) : (
+                        <Button
+                          variant="secondary"
+                          size="icon-sm"
+                          className="absolute top-1.5 right-1.5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxItem(item);
+                          }}
+                        >
+                          <Expand className="size-3.5" />
+                          <span className="sr-only">{t("viewLarge")}</span>
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-0.5 p-2">
+                      <span className="truncate text-body-sm font-semibold text-text-primary">
+                        {item.profile.user.firstName ??
+                          item.profile.user.name ??
+                          item.profile.user.email}
+                      </span>
+                      <span className="text-body-sm text-text-tertiary">
+                        {roleT(item.profile.role as Role)}
+                      </span>
+                      <span className="text-body-sm text-text-tertiary">
+                        {t("waitingSince", {
+                          time: formatRelativeTime(new Date(item.createdAt)),
+                        })}
+                      </span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
           <div className="sticky bottom-4 flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface p-3.5 shadow-lg">
             {showRejectPanel ? (
@@ -327,6 +389,34 @@ export default function AdminModerationPage() {
           </div>
         </>
       )}
+
+      <Dialog
+        open={lightboxItem !== null}
+        onOpenChange={(open) => {
+          if (!open) setLightboxItem(null);
+        }}
+      >
+        <DialogContent className="max-w-3xl bg-transparent p-0 ring-0">
+          {lightboxItem ? (
+            lightboxItem.type === "VIDEO" ? (
+              <video
+                src={lightboxItem.url}
+                controls
+                autoPlay
+                className="max-h-[80vh] w-full rounded-xl"
+              />
+            ) : (
+              <Image
+                src={buildMediaVariants(lightboxItem.url).large}
+                alt=""
+                width={1200}
+                height={1200}
+                className="max-h-[80vh] w-full rounded-xl object-contain"
+              />
+            )
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

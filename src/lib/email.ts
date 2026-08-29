@@ -510,3 +510,37 @@ export function reviewResponseEmailHtml({
     ctaUrl: bookingUrl,
   });
 }
+
+export function mediaApprovedEmailHtml({
+  t,
+  portfolioUrl,
+}: {
+  t: EmailT;
+  portfolioUrl: string;
+}) {
+  return bookingEmailShell({
+    t,
+    heading: t("mediaApproved.heading"),
+    body: t("mediaApproved.body"),
+    ctaLabel: t("mediaApproved.cta"),
+    ctaUrl: portfolioUrl,
+  });
+}
+
+export function mediaRejectedEmailHtml({
+  t,
+  reason,
+  portfolioUrl,
+}: {
+  t: EmailT;
+  reason: string;
+  portfolioUrl: string;
+}) {
+  return bookingEmailShell({
+    t,
+    heading: t("mediaRejected.heading"),
+    body: t("mediaRejected.body", { reason: `<strong>${reason}</strong>` }),
+    ctaLabel: t("mediaRejected.cta"),
+    ctaUrl: portfolioUrl,
+  });
+}

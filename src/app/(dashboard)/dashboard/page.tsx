@@ -78,7 +78,12 @@ export default async function DashboardPage() {
 
   const roles = session.user.roles;
   const isProvider = isProviderRoleSet(roles);
-  const nonCustomerRoles = roles.filter((role) => role !== "CUSTOMER");
+  // ADMIN has no Profile row and no Subscription (see the schema comment
+  // on Role.ADMIN) — including it here made every admin-only account see
+  // a permanently-stuck "complete your profile" nudge.
+  const nonCustomerRoles = roles.filter(
+    (role) => role !== "CUSTOMER" && role !== "ADMIN",
+  );
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
