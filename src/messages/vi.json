@@ -705,7 +705,8 @@
         "allRoles": "Tất cả vai trò",
         "emptyFiltered": "Không có nội dung nào đang chờ với vai trò này",
         "viewLarge": "Xem ảnh lớn",
-        "waitingSince": "Chờ {time}"
+        "waitingSince": "Chờ {time}",
+        "albumLabel": "Album: {title}"
       },
       "compliance": {
         "title": "Tuân thủ dữ liệu",
@@ -761,6 +762,39 @@
     }
   },
   "apiMessages": {
+    "users": {
+      "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa"
+    },
+    "portfolio": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "profileNotOwned": "Bạn không sở hữu hồ sơ này",
+      "limitReached": "Đã đạt giới hạn {limit} ảnh của gói hiện tại",
+      "albumNotFound": "Không tìm thấy album",
+      "mediaAdded": "Đã thêm ảnh",
+      "saveFailed": "Không thể lưu ảnh",
+      "mediaNotFound": "Không tìm thấy ảnh",
+      "mediaMovedToTrash": "Đã chuyển ảnh vào thùng rác",
+      "mediaRestored": "Đã khôi phục ảnh",
+      "restoreFailed": "Không thể khôi phục",
+      "notOwned": "Bạn không sở hữu một số ảnh trong danh sách này",
+      "orderUpdated": "Đã cập nhật thứ tự",
+      "reorderFailed": "Không thể cập nhật thứ tự"
+    },
+    "albums": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "loadFailed": "Không thể tải album",
+      "profileNotOwned": "Bạn không sở hữu hồ sơ này",
+      "albumCreated": "Đã tạo album",
+      "createFailed": "Không thể tạo album",
+      "notFound": "Không tìm thấy album",
+      "updateFailed": "Không thể cập nhật album",
+      "albumNotOwned": "Bạn không sở hữu album này",
+      "albumMovedToTrash": "Đã chuyển album vào thùng rác",
+      "deleteFailed": "Không thể xóa album",
+      "albumRestored": "Đã khôi phục album",
+      "restoreFailed": "Không thể khôi phục",
+      "orderUpdated": "Đã cập nhật thứ tự"
+    },
     "onboarding": {
       "invalidInput": "Dữ liệu không hợp lệ",
       "profileCompleted": "Đã hoàn tất hồ sơ",
@@ -918,7 +952,8 @@
         "body": "Nhấn biểu tượng bookmark trên một hồ sơ để lưu vào đây."
       },
       "unnamed": "Chưa đặt tên",
-      "priceFrom": "Từ {amount}"
+      "priceFrom": "Từ {amount}",
+      "newBadge": "Mới"
     },
     "notifications": {
       "title": "Thông báo",
@@ -999,16 +1034,67 @@
         "fallbackText": "Portfolio hiện tại của bạn vẫn hiển thị — kích hoạt gói đăng ký để thêm ảnh mới."
       }
     },
-    "portfolioGrid": {
-      "moderation": {
-        "pending": "Đang chờ duyệt",
-        "rejected": "Đã bị từ chối"
+    "albums": {
+      "uploadPhotos": "Tải ảnh lên",
+      "newAlbum": "Tạo album mới",
+      "trashButton": "Thùng rác",
+      "trash": {
+        "title": "Thùng rác",
+        "description": "Album và ảnh đã xóa được giữ lại 7 ngày trước khi xóa vĩnh viễn.",
+        "empty": "Thùng rác đang trống",
+        "restore": "Khôi phục",
+        "restoredToast": "Đã khôi phục",
+        "daysLeft": "{count, plural, =0 {Xóa vĩnh viễn hôm nay} =1 {Còn 1 ngày} other {Còn # ngày}}"
       },
-      "reorder": "Sắp xếp lại",
-      "delete": "Xóa",
-      "itemCount": "{count} mục",
-      "dragToReorder": "Kéo để sắp xếp lại",
-      "upload": "Tải lên"
+      "albumCount": "{count, plural, =0 {Chưa có album} other {# album}}",
+      "photoCount": "{count, plural, =0 {Chưa có ảnh} other {# ảnh}}",
+      "uncategorized": "Chưa phân loại",
+      "reorder": "Kéo để sắp xếp",
+      "deleteAlbum": "Xóa album",
+      "deleteConfirm": "Xóa album này? Toàn bộ ảnh bên trong sẽ chuyển vào thùng rác và có thể khôi phục trong 7 ngày.",
+      "deletedToast": "Đã chuyển album vào thùng rác",
+      "deleteFailedToast": "Không thể xóa album, vui lòng thử lại",
+      "empty": {
+        "title": "Chưa có album nào",
+        "body": "Tạo album đầu tiên để bắt đầu sắp xếp portfolio của bạn."
+      },
+      "form": {
+        "title": "Tạo album mới",
+        "titleLabel": "Tiêu đề",
+        "titleRequired": "Tiêu đề album phải có ít nhất 2 ký tự",
+        "descriptionLabel": "Mô tả",
+        "categoryLabel": "Thể loại",
+        "categoryPlaceholder": "Chọn thể loại",
+        "categoryRequired": "Vui lòng chọn thể loại",
+        "shootDateLabel": "Ngày chụp",
+        "cancel": "Hủy",
+        "create": "Tạo album",
+        "createFailed": "Không thể tạo album, vui lòng thử lại",
+        "createdToast": "Đã tạo album mới"
+      },
+      "detail": {
+        "back": "Quay lại portfolio",
+        "titleLabel": "Tiêu đề",
+        "descriptionLabel": "Mô tả",
+        "categoryLabel": "Thể loại",
+        "categoryPlaceholder": "Chọn thể loại",
+        "shootDateLabel": "Ngày chụp",
+        "save": "Lưu",
+        "saved": "Đã lưu",
+        "photoCount": "{count, plural, =0 {Chưa có ảnh} other {# ảnh}}",
+        "dragToReorder": "Kéo thả để sắp xếp",
+        "upload": "Tải ảnh lên",
+        "reorder": "Kéo để sắp xếp",
+        "setCover": "Đặt làm ảnh bìa",
+        "coverBadge": "Ảnh bìa",
+        "coverUpdatedToast": "Đã cập nhật ảnh bìa",
+        "delete": "Xóa ảnh",
+        "photoTrashedToast": "Đã chuyển ảnh vào thùng rác",
+        "moderation": {
+          "pending": "Đang chờ duyệt",
+          "rejected": "Bị từ chối"
+        }
+      }
     },
     "reviews": {
       "title": "Đánh giá",
@@ -1218,7 +1304,15 @@
       },
       "completeProfile": {
         "title": "Hoàn thiện hồ sơ của bạn",
-        "cta": "Hoàn thiện hồ sơ"
+        "cta": "Hoàn thiện hồ sơ",
+        "missing": {
+          "avatar": "Thêm ảnh đại diện",
+          "coverImage": "Thêm ảnh bìa",
+          "bio": "Viết giới thiệu ngắn",
+          "phone": "Thêm số điện thoại",
+          "roleProfile": "Hoàn thiện hồ sơ {role}",
+          "categories": "Chọn thể loại sở trường cho hồ sơ {role}"
+        }
       },
       "recentActivity": "Hoạt động gần đây",
       "noActivity": "Chưa có hoạt động nào",
@@ -1476,6 +1570,8 @@
         "displayNameLabel": "Tên hiển thị",
         "descriptionLabel": "Mô tả",
         "categoriesLabel": "Danh mục",
+        "categoriesCount": "{count}/{max} đã chọn",
+        "categoriesRequiredHint": "Chọn ít nhất 1 danh mục trước khi công khai hồ sơ",
         "minPriceLabel": "Giá tối thiểu",
         "maxPriceLabel": "Giá tối đa",
         "addressLabel": "Địa chỉ",
@@ -1533,7 +1629,14 @@
       "media": {
         "coverButton": "Ảnh bìa",
         "uploadUnavailable": "Chức năng tải lên hiện không khả dụng",
-        "uploadFailed": "Tải lên thất bại"
+        "uploadFailed": "Tải lên thất bại",
+        "sizeLimit": "Tối đa 5MB, định dạng JPG/PNG/WebP",
+        "invalidType": "Chỉ chấp nhận ảnh JPG, PNG hoặc WebP",
+        "tooLarge": "Ảnh phải nhỏ hơn 5MB",
+        "cropTitle": "Cắt ảnh",
+        "cropCancel": "Hủy",
+        "cropConfirm": "Xác nhận",
+        "zoomAria": "Phóng to/thu nhỏ"
       },
       "availability": {
         "weeklySchedule": "Lịch làm việc hàng tuần",
@@ -1585,7 +1688,8 @@
         "bothPricesRequired": "Vui lòng nhập cả giá bán và giá thuê"
       },
       "profile": {
-        "displayNameRequired": "Vui lòng nhập tên hiển thị"
+        "displayNameRequired": "Vui lòng nhập tên hiển thị",
+        "categoriesMax": "Chọn tối đa 5 thể loại"
       },
       "review": {
         "contentTooShort": "Vui lòng chia sẻ chi tiết hơn (tối thiểu 20 ký tự)"
@@ -1842,7 +1946,13 @@
       "filterTopRated": "Đánh giá cao nhất",
       "noResults": {
         "heading": "Không tìm thấy nghệ sĩ nào",
-        "body": "Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm ở một thành phố khác."
+        "body": "Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm ở một thành phố khác.",
+        "tryRemoving": "Thử bỏ bớt một trong các tiêu chí sau:",
+        "removeCategories": "Bỏ lọc theo thể loại",
+        "removeBudget": "Bỏ lọc theo ngân sách",
+        "removeRating": "Bỏ lọc theo đánh giá",
+        "removeCity": "Bỏ lọc theo tỉnh/thành",
+        "removeRoles": "Bỏ lọc theo vai trò"
       },
       "clearFilters": "Xóa tất cả bộ lọc",
       "unnamed": "Chưa đặt tên",
@@ -1909,7 +2019,7 @@
       },
       "portfolioTab": {
         "empty": "Chưa có ảnh trong portfolio",
-        "loadMore": "Xem thêm"
+        "photoCount": "{count, plural, =0 {Chưa có ảnh} other {# ảnh}}"
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
@@ -2153,6 +2263,12 @@
     }
   },
   "sharedComponents": {
+    "artistCard": {
+      "noPhotoLabel": "Chưa có ảnh portfolio",
+      "previousPhoto": "Ảnh trước",
+      "nextPhoto": "Ảnh sau",
+      "viewPhoto": "Xem ảnh {index}"
+    },
     "modelSafetyNotice": {
       "title": "Trước khi đặt lịch",
       "body": "Hãy gặp mặt ở nơi công cộng hoặc tại một studio đã đăng ký cho buổi chụp đầu tiên, và báo cho ai đó biết bạn sẽ ở đâu. Fgrapher không bao giờ yêu cầu thanh toán ngoài nền tảng — hãy báo cáo nếu có điều gì đó bất thường."
@@ -2160,6 +2276,10 @@
     "filterSidebar": {
       "roleLabel": "Vai trò",
       "styleLabel": "Phong cách",
+      "seeAllCategories": "Xem tất cả",
+      "showMore": "Xem thêm (+{count})",
+      "showLess": "Thu gọn",
+      "categoriesClearedNotice": "Đã bỏ chọn một số thể loại không còn phù hợp với vai trò bạn chọn",
       "heightLabel": "Chiều cao (cm)",
       "heightMinPh": "Tối thiểu",
       "heightMaxPh": "Tối đa",
@@ -2224,7 +2344,17 @@
       "videoTooLarge": "Video phải nhỏ hơn 100MB",
       "imageTooLarge": "Ảnh phải nhỏ hơn 10MB",
       "uploadUnavailable": "Chức năng tải lên chưa khả dụng",
-      "uploadFailed": "Tải lên thất bại"
+      "uploadFailed": "Tải lên thất bại",
+      "albumPickerLabel": "Album",
+      "albumPickerPlaceholder": "Chọn album",
+      "albumPickerCreateNew": "+ Tạo album mới",
+      "albumTitleLabel": "Tên album",
+      "albumCategoryLabel": "Danh mục",
+      "albumCategoryPlaceholder": "Chọn danh mục",
+      "albumCreateButton": "Tạo album",
+      "albumTitleRequired": "Tên album phải có ít nhất 2 ký tự",
+      "albumCategoryRequired": "Vui lòng chọn danh mục",
+      "albumCreateFailed": "Không thể tạo album, vui lòng thử lại"
     },
     "mediaLightbox": {
       "close": "Đóng",
@@ -2329,6 +2459,11 @@
     "pastDueBanner": {
       "message": "Thanh toán {role} của bạn không thành công. Cập nhật phương thức thanh toán để giữ hồ sơ của bạn luôn hiển thị. Còn {days} ngày.",
       "updatePayment": "Cập nhật thanh toán"
+    },
+    "reviewReminderBanner": {
+      "message": "Bạn có {count, plural, =1 {1 buổi chụp} other {# buổi chụp}} đã hoàn thành chưa đánh giá, gần đây nhất với {provider}.",
+      "cta": "Đánh giá ngay",
+      "dismiss": "Để sau"
     },
     "webNav": {
       "openNavigation": "Mở menu điều hướng",

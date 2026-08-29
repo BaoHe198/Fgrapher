@@ -705,7 +705,8 @@
         "allRoles": "All roles",
         "emptyFiltered": "Nothing pending for this role",
         "viewLarge": "View full size",
-        "waitingSince": "Waiting {time}"
+        "waitingSince": "Waiting {time}",
+        "albumLabel": "Album: {title}"
       },
       "compliance": {
         "title": "Compliance",
@@ -761,6 +762,39 @@
     }
   },
   "apiMessages": {
+    "users": {
+      "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo"
+    },
+    "portfolio": {
+      "invalidInput": "Invalid input",
+      "profileNotOwned": "You don't own this profile",
+      "limitReached": "You've reached your plan's {limit}-photo limit",
+      "albumNotFound": "Album not found",
+      "mediaAdded": "Photo added",
+      "saveFailed": "Failed to save photo",
+      "mediaNotFound": "Photo not found",
+      "mediaMovedToTrash": "Photo moved to trash",
+      "mediaRestored": "Photo restored",
+      "restoreFailed": "Failed to restore",
+      "notOwned": "You don't own some of these photos",
+      "orderUpdated": "Order updated",
+      "reorderFailed": "Failed to update order"
+    },
+    "albums": {
+      "invalidInput": "Invalid input",
+      "loadFailed": "Failed to load albums",
+      "profileNotOwned": "You don't own this profile",
+      "albumCreated": "Album created",
+      "createFailed": "Failed to create album",
+      "notFound": "Album not found",
+      "updateFailed": "Failed to update album",
+      "albumNotOwned": "You don't own this album",
+      "albumMovedToTrash": "Album moved to trash",
+      "deleteFailed": "Failed to delete album",
+      "albumRestored": "Album restored",
+      "restoreFailed": "Failed to restore",
+      "orderUpdated": "Order updated"
+    },
     "onboarding": {
       "invalidInput": "Invalid input",
       "profileCompleted": "Profile completed",
@@ -918,7 +952,8 @@
         "body": "Tap the bookmark icon on a profile to save it here."
       },
       "unnamed": "Unnamed",
-      "priceFrom": "From {amount}"
+      "priceFrom": "From {amount}",
+      "newBadge": "New"
     },
     "notifications": {
       "title": "Notifications",
@@ -999,16 +1034,67 @@
         "fallbackText": "Your existing portfolio media stays visible — activate your subscription to add more."
       }
     },
-    "portfolioGrid": {
-      "moderation": {
-        "pending": "Pending review",
-        "rejected": "Rejected"
+    "albums": {
+      "uploadPhotos": "Upload photos",
+      "newAlbum": "New album",
+      "trashButton": "Trash",
+      "trash": {
+        "title": "Trash",
+        "description": "Deleted albums and photos are kept for 7 days before being permanently removed.",
+        "empty": "Trash is empty",
+        "restore": "Restore",
+        "restoredToast": "Restored",
+        "daysLeft": "{count, plural, =0 {Permanently deleted today} one {1 day left} other {# days left}}"
       },
-      "reorder": "Reorder",
-      "delete": "Delete",
-      "itemCount": "{count, plural, one {# item} other {# items}}",
-      "dragToReorder": "Drag to reorder",
-      "upload": "Upload"
+      "albumCount": "{count, plural, =0 {No albums yet} one {# album} other {# albums}}",
+      "photoCount": "{count, plural, =0 {No photos yet} one {# photo} other {# photos}}",
+      "uncategorized": "Uncategorized",
+      "reorder": "Drag to reorder",
+      "deleteAlbum": "Delete album",
+      "deleteConfirm": "Delete this album? Photos inside will move to trash and can be restored within 7 days.",
+      "deletedToast": "Album moved to trash",
+      "deleteFailedToast": "Couldn't delete the album, please try again",
+      "empty": {
+        "title": "No albums yet",
+        "body": "Create your first album to start organizing your portfolio."
+      },
+      "form": {
+        "title": "Create new album",
+        "titleLabel": "Title",
+        "titleRequired": "Album title must be at least 2 characters",
+        "descriptionLabel": "Description",
+        "categoryLabel": "Category",
+        "categoryPlaceholder": "Choose a category",
+        "categoryRequired": "Please choose a category",
+        "shootDateLabel": "Shoot date",
+        "cancel": "Cancel",
+        "create": "Create album",
+        "createFailed": "Couldn't create the album, please try again",
+        "createdToast": "Album created"
+      },
+      "detail": {
+        "back": "Back to portfolio",
+        "titleLabel": "Title",
+        "descriptionLabel": "Description",
+        "categoryLabel": "Category",
+        "categoryPlaceholder": "Choose a category",
+        "shootDateLabel": "Shoot date",
+        "save": "Save",
+        "saved": "Saved",
+        "photoCount": "{count, plural, =0 {No photos yet} one {# photo} other {# photos}}",
+        "dragToReorder": "Drag to reorder",
+        "upload": "Upload photos",
+        "reorder": "Drag to reorder",
+        "setCover": "Set as cover",
+        "coverBadge": "Cover",
+        "coverUpdatedToast": "Cover photo updated",
+        "delete": "Delete photo",
+        "photoTrashedToast": "Photo moved to trash",
+        "moderation": {
+          "pending": "Pending review",
+          "rejected": "Rejected"
+        }
+      }
     },
     "reviews": {
       "title": "Reviews",
@@ -1218,7 +1304,15 @@
       },
       "completeProfile": {
         "title": "Complete your profile",
-        "cta": "Complete your profile"
+        "cta": "Complete your profile",
+        "missing": {
+          "avatar": "Add a profile photo",
+          "coverImage": "Add a cover photo",
+          "bio": "Write a short bio",
+          "phone": "Add a phone number",
+          "roleProfile": "Finish your {role} profile",
+          "categories": "Choose specialty categories for your {role} profile"
+        }
       },
       "recentActivity": "Recent activity",
       "noActivity": "No activity yet",
@@ -1476,6 +1570,8 @@
         "displayNameLabel": "Display name",
         "descriptionLabel": "Description",
         "categoriesLabel": "Categories",
+        "categoriesCount": "{count}/{max} selected",
+        "categoriesRequiredHint": "Choose at least 1 category before publishing your profile",
         "minPriceLabel": "Min price",
         "maxPriceLabel": "Max price",
         "addressLabel": "Address",
@@ -1533,7 +1629,14 @@
       "media": {
         "coverButton": "Cover",
         "uploadUnavailable": "Upload unavailable",
-        "uploadFailed": "Upload failed"
+        "uploadFailed": "Upload failed",
+        "sizeLimit": "Up to 5MB, JPG/PNG/WebP",
+        "invalidType": "Only JPG, PNG, or WebP images are accepted",
+        "tooLarge": "Image must be under 5MB",
+        "cropTitle": "Crop image",
+        "cropCancel": "Cancel",
+        "cropConfirm": "Confirm",
+        "zoomAria": "Zoom"
       },
       "availability": {
         "weeklySchedule": "Weekly schedule",
@@ -1585,7 +1688,8 @@
         "bothPricesRequired": "Enter both a sale price and a rental price"
       },
       "profile": {
-        "displayNameRequired": "Enter a display name"
+        "displayNameRequired": "Enter a display name",
+        "categoriesMax": "Choose up to 5 categories"
       },
       "review": {
         "contentTooShort": "Share a bit more detail (at least 20 characters)"
@@ -1842,7 +1946,13 @@
       "filterTopRated": "Top rated",
       "noResults": {
         "heading": "No artists found",
-        "body": "Try adjusting your filters or searching a different city."
+        "body": "Try adjusting your filters or searching a different city.",
+        "tryRemoving": "Try removing one of these:",
+        "removeCategories": "Remove category filter",
+        "removeBudget": "Remove budget filter",
+        "removeRating": "Remove rating filter",
+        "removeCity": "Remove province filter",
+        "removeRoles": "Remove role filter"
       },
       "clearFilters": "Clear all filters",
       "unnamed": "Unnamed",
@@ -1909,7 +2019,7 @@
       },
       "portfolioTab": {
         "empty": "No portfolio items yet",
-        "loadMore": "Load more"
+        "photoCount": "{count, plural, =0 {No photos yet} one {# photo} other {# photos}}"
       },
       "servicesTab": {
         "empty": "No service packages listed",
@@ -2153,6 +2263,12 @@
     }
   },
   "sharedComponents": {
+    "artistCard": {
+      "noPhotoLabel": "No portfolio photos yet",
+      "previousPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "viewPhoto": "View photo {index}"
+    },
     "modelSafetyNotice": {
       "title": "Before you book",
       "body": "Meet in public or at a registered studio for a first shoot, and let someone know where you'll be. Fgrapher never asks for payment outside the platform — report anything that feels off."
@@ -2160,6 +2276,10 @@
     "filterSidebar": {
       "roleLabel": "Role",
       "styleLabel": "Style",
+      "seeAllCategories": "See all",
+      "showMore": "Show more (+{count})",
+      "showLess": "Show less",
+      "categoriesClearedNotice": "Cleared some categories that no longer apply to your selected roles",
       "heightLabel": "Height (cm)",
       "heightMinPh": "Min",
       "heightMaxPh": "Max",
@@ -2224,7 +2344,17 @@
       "videoTooLarge": "Videos must be under 100MB",
       "imageTooLarge": "Images must be under 10MB",
       "uploadUnavailable": "Upload unavailable",
-      "uploadFailed": "Upload failed"
+      "uploadFailed": "Upload failed",
+      "albumPickerLabel": "Album",
+      "albumPickerPlaceholder": "Choose an album",
+      "albumPickerCreateNew": "+ Create new album",
+      "albumTitleLabel": "Album title",
+      "albumCategoryLabel": "Category",
+      "albumCategoryPlaceholder": "Choose a category",
+      "albumCreateButton": "Create album",
+      "albumTitleRequired": "Album title must be at least 2 characters",
+      "albumCategoryRequired": "Please choose a category",
+      "albumCreateFailed": "Couldn't create the album, please try again"
     },
     "mediaLightbox": {
       "close": "Close",
@@ -2329,6 +2459,11 @@
     "pastDueBanner": {
       "message": "Your {role} payment failed. Update your payment method to keep your profile live. {days, plural, one {# day} other {# days}} remaining.",
       "updatePayment": "Update payment"
+    },
+    "reviewReminderBanner": {
+      "message": "You have {count, plural, one {1 completed session} other {# completed sessions}} you haven't reviewed yet, most recently with {provider}.",
+      "cta": "Leave a review",
+      "dismiss": "Later"
     },
     "webNav": {
       "openNavigation": "Open navigation",
