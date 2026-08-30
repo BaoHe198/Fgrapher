@@ -89,7 +89,7 @@ export function CustomerOrdersContent() {
       {isLoading ? null : orders.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Package className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty")}
           </p>
           <Button
@@ -110,7 +110,7 @@ export function CustomerOrdersContent() {
             return (
               <Card key={order.id} className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {t("orderNumber", { id: order.id.slice(-8) })} ·{" "}
                     {formatDate(order.createdAt)}
                   </span>
@@ -123,7 +123,7 @@ export function CustomerOrdersContent() {
                   {extra > 0 ? ` ${t("more", { count: extra })}` : ""}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {formatCurrency(order.totalPrice, order.currency)}
                   </span>
                   <Button

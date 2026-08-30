@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { CalendarCheck, Search, ShoppingBag } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import Image from "next/image";
 import Link from "next/link";
 
 import { ArtistCard } from "@/components/cards/artist-card";
 import { HeroSearch } from "@/components/sections/hero-search";
 import { Button } from "@/components/ui/button";
-import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { SectionHead } from "@/components/ui/section-head";
 import { features } from "@/lib/features";
 import { formatCurrency } from "@/lib/utils";
@@ -78,12 +78,44 @@ export default async function LandingPage() {
 
           <div className="grid grid-cols-2 gap-3 py-10 max-lg:hidden">
             <div className="flex flex-col gap-3">
-              <MediaPlaceholder tint="green-300" height={200} radius={16} />
-              <MediaPlaceholder tint="gold-200" height={140} radius={16} />
+              <div className="relative h-[200px] overflow-hidden rounded-2xl">
+                <Image
+                  src="https://images.unsplash.com/photo-1497316730643-415fac54a2af?q=80&w=800&auto=format&fit=crop"
+                  alt={t("hero.imageAlt.photographer")}
+                  fill
+                  sizes="(min-width: 1024px) 300px, 0px"
+                  className="object-cover"
+                />
+              </div>
+              <div className="relative h-[140px] overflow-hidden rounded-2xl">
+                <Image
+                  src="https://images.unsplash.com/photo-1622336889416-8d790ad807d7?q=80&w=800&auto=format&fit=crop"
+                  alt={t("hero.imageAlt.makeupArtist")}
+                  fill
+                  sizes="(min-width: 1024px) 300px, 0px"
+                  className="object-cover"
+                />
+              </div>
             </div>
             <div className="flex flex-col gap-3 pt-[34px]">
-              <MediaPlaceholder tint="neutral-300" height={150} radius={16} />
-              <MediaPlaceholder tint="green-200" height={190} radius={16} />
+              <div className="relative h-[150px] overflow-hidden rounded-2xl">
+                <Image
+                  src="https://images.unsplash.com/photo-1497015289639-54688650d173?q=80&w=800&auto=format&fit=crop"
+                  alt={t("hero.imageAlt.videographer")}
+                  fill
+                  sizes="(min-width: 1024px) 300px, 0px"
+                  className="object-cover"
+                />
+              </div>
+              <div className="relative h-[190px] overflow-hidden rounded-2xl">
+                <Image
+                  src="https://images.unsplash.com/photo-1617463874381-85b513b3e991?q=80&w=800&auto=format&fit=crop"
+                  alt={t("hero.imageAlt.studio")}
+                  fill
+                  sizes="(min-width: 1024px) 300px, 0px"
+                  className="object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>

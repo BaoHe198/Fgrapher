@@ -77,7 +77,20 @@ export async function PATCH(request: Request) {
       }
     }
 
-    const { wardId, ...rest } = parsed.data;
+    const { wardId, phone, ...rest } = parsed.data;
+    // Prompt G7 — a verified phone number is proof of THAT number, not of
+    // whatever the user later types into this field. Any change re-locks
+    // phoneVerified until the new number goes through /api/phone/verify-code.
+    let phoneVerifiedUpdate: { phoneVerified?: boolean } = {};
+    if (phone !== undefined) {
+      const current = await db.user.findUnique({
+        where: { id: session.user.id },
+        select: { phone: true },
+      });
+      if (current?.phone !== phone) {
+        phoneVerifiedUpdate = { phoneVerified: false };
+      }
+    }
     let locationUpdate: { location?: string } = {};
     if (wardId !== undefined) {
       if (wardId === null) {
@@ -106,7 +119,13 @@ export async function PATCH(request: Request) {
 
     const user = await db.user.update({
       where: { id: session.user.id },
-      data: { ...rest, wardId, ...locationUpdate },
+      data: {
+        ...rest,
+        phone,
+        wardId,
+        ...locationUpdate,
+        ...phoneVerifiedUpdate,
+      },
     });
 
     return NextResponse.json(

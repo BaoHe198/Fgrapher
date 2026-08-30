@@ -53,7 +53,7 @@ export function CartContent() {
         <div className="flex flex-col gap-6">
           {groups.map((group) => (
             <Card key={group.shopId} className="flex flex-col gap-4">
-              <span className="text-body-md font-semibold text-text-primary">
+              <span className="text-body-md font-semibold! text-text-primary">
                 {group.shopName}
               </span>
               {group.items.map((item) => (
@@ -86,7 +86,7 @@ export function CartContent() {
               </span>
             </div>
           ) : null}
-          <div className="flex justify-between border-t border-border-subtle pt-3 text-heading-sm font-bold text-text-primary">
+          <div className="flex justify-between border-t border-border-subtle pt-3 text-heading-sm font-bold! text-text-primary">
             <span>{t("total")}</span>
             <span>{formatCurrency(totals.total)}</span>
           </div>

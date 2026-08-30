@@ -207,7 +207,7 @@ export function RegisterForm({
                     : "text-text-tertiary",
                 )}
               />
-              <span className="text-body-md font-semibold text-text-primary">
+              <span className="text-body-md font-semibold! text-text-primary">
                 {t("customerLabel")}
               </span>
               <span className="text-body-sm text-text-secondary">
@@ -233,7 +233,7 @@ export function RegisterForm({
                     : "text-text-tertiary",
                 )}
               />
-              <span className="text-body-md font-semibold text-text-primary">
+              <span className="text-body-md font-semibold! text-text-primary">
                 {t("providerLabel")}
               </span>
               <span className="text-body-sm text-text-secondary">

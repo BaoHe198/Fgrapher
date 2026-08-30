@@ -72,7 +72,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           {result.data.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-20 text-center">
               <SearchX className="size-12 text-text-tertiary" />
-              <p className="text-body-lg font-semibold text-text-primary">
+              <p className="text-body-lg font-semibold! text-text-primary">
                 No gear found
               </p>
               <p className="text-body-md text-text-secondary">

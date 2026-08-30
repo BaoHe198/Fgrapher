@@ -197,6 +197,13 @@ function DropdownMenuRadioItem({
   className,
   children,
   inset,
+  // Base UI's own default is false (a radio item, unlike a plain menu
+  // item, doesn't close its menu on click) — but every call site in this
+  // app uses radio items as a single-select dropdown, where staying open
+  // after picking a value reads as broken, not as an intentional
+  // multi-step menu. Flipped here so callers get select-like behavior
+  // without having to remember the prop; still overridable per item.
+  closeOnClick = true,
   ...props
 }: MenuPrimitive.RadioItem.Props & {
   inset?: boolean;
@@ -205,6 +212,7 @@ function DropdownMenuRadioItem({
     <MenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       data-inset={inset}
+      closeOnClick={closeOnClick}
       className={cn(
         "relative flex cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-7 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,

@@ -1,15 +1,15 @@
-import * as React from "react"
-import { Input as InputPrimitive } from "@base-ui/react/input"
+import * as React from "react";
+import { Input as InputPrimitive } from "@base-ui/react/input";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 // React 19 forwards `ref` as a normal prop on function components — no
 // React.forwardRef wrapper needed for react-hook-form's register() to reach
 // the underlying <input>; already confirmed working end-to-end (phase-0
 // register/login forms use {...register(...)} on this component).
 interface InputProps extends React.ComponentProps<"input"> {
-  label?: string
-  error?: string
+  label?: string;
+  error?: string;
 }
 
 function Input({
@@ -21,8 +21,8 @@ function Input({
   "aria-invalid": ariaInvalid,
   ...props
 }: InputProps) {
-  const generatedId = React.useId()
-  const inputId = id ?? generatedId
+  const generatedId = React.useId();
+  const inputId = id ?? generatedId;
 
   const input = (
     <InputPrimitive
@@ -36,21 +36,24 @@ function Input({
       )}
       {...props}
     />
-  )
+  );
 
-  if (!label && !error) return input
+  if (!label && !error) return input;
 
   return (
     <div className="flex flex-col gap-1.5">
       {label ? (
-        <label htmlFor={inputId} className="text-body-sm font-semibold text-text-primary">
+        <label
+          htmlFor={inputId}
+          className="text-body-sm font-semibold! text-text-primary"
+        >
           {label}
         </label>
       ) : null}
       {input}
       {error ? <p className="text-body-sm text-danger">{error}</p> : null}
     </div>
-  )
+  );
 }
 
-export { Input }
+export { Input };

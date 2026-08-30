@@ -29,7 +29,7 @@ function MediaPlaceholder({
       }}
     >
       {label ? (
-        <span className="text-body-sm font-medium text-neutral-900/40">
+        <span className="text-body-sm font-medium! text-neutral-900/40">
           {label}
         </span>
       ) : null}

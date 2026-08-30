@@ -45,7 +45,7 @@ export function CartItemRow({
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-body-md font-semibold text-text-primary">
+        <p className="line-clamp-2 text-body-md font-semibold! text-text-primary">
           {item.product.name}
         </p>
         <Badge
@@ -64,7 +64,7 @@ export function CartItemRow({
       </div>
 
       <div className="flex flex-col items-end gap-2">
-        <span className="text-body-md font-semibold text-text-primary">
+        <span className="text-body-md font-semibold! text-text-primary">
           {formatCurrency(itemLineTotal(item), item.product.currency)}
         </span>
         {item.type === "SALE" ? (

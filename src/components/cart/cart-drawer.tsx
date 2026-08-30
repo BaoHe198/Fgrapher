@@ -61,7 +61,7 @@ export function CartDrawer() {
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
             <ShoppingBag className="size-12 text-text-tertiary" />
-            <p className="text-body-lg font-semibold text-text-primary">
+            <p className="text-body-lg font-semibold! text-text-primary">
               {t("emptyTitle")}
             </p>
             <Button
@@ -78,7 +78,7 @@ export function CartDrawer() {
             <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-4">
               {groups.map((group) => (
                 <div key={group.shopId} className="flex flex-col gap-3">
-                  <span className="text-body-sm font-semibold text-text-tertiary">
+                  <span className="text-body-sm font-semibold! text-text-tertiary">
                     {group.shopName}
                   </span>
                   {group.items.map((item) => (

@@ -28,7 +28,7 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg-sunken">
-      <div className="flex h-11 items-center gap-2 bg-neutral-900 px-4 text-body-sm font-semibold text-white">
+      <div className="flex h-11 items-center gap-2 bg-neutral-900 px-4 text-body-sm font-semibold! text-white">
         <span className="rounded bg-danger px-1.5 py-0.5 text-sm font-bold tracking-wide uppercase">
           {t("badge")}
         </span>

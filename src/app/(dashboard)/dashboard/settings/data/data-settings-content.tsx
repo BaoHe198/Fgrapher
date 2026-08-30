@@ -134,7 +134,7 @@ export function DataSettingsContent({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <span className="text-body-md font-semibold text-text-primary">
+        <span className="text-body-md font-semibold! text-text-primary">
           {t("overviewTitle")}
         </span>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -157,7 +157,7 @@ export function DataSettingsContent({
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-3">
-        <span className="text-body-md font-semibold text-text-primary">
+        <span className="text-body-md font-semibold! text-text-primary">
           {t("consentTitle")}
         </span>
         <p className="text-body-sm text-text-secondary">{t("consentIntro")}</p>
@@ -203,7 +203,7 @@ export function DataSettingsContent({
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-3">
-        <span className="text-body-md font-semibold text-text-primary">
+        <span className="text-body-md font-semibold! text-text-primary">
           {t("myDataTitle")}
         </span>
         <p className="text-body-sm text-text-secondary">{t("myDataDesc")}</p>
@@ -222,14 +222,14 @@ export function DataSettingsContent({
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-danger p-4">
-        <span className="text-body-md font-semibold text-danger">
+        <span className="text-body-md font-semibold! text-danger">
           {t("deleteAccountTitle")}
         </span>
         <p className="text-body-sm text-text-secondary">
           {t("deleteAccountDesc")}
         </p>
         {deletionRequested ? (
-          <p className="text-body-sm font-semibold text-warning">
+          <p className="text-body-sm font-semibold! text-warning">
             {t("pendingDeletionNotice")}
           </p>
         ) : (

@@ -66,7 +66,7 @@ export function BillingOnboardingContent({
           <h1 className="text-display-md text-text-primary">{heading}</h1>
           <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
           {interval === "year" ? (
-            <span className="mx-auto w-fit rounded-full bg-success-bg px-2.5 py-1 text-body-sm font-bold text-success">
+            <span className="mx-auto w-fit rounded-full bg-success-bg px-2.5 py-1 text-body-sm font-bold! text-success">
               {t("billedYearlyBadge")}
             </span>
           ) : null}
@@ -95,17 +95,17 @@ export function BillingOnboardingContent({
               <span className="text-body-md text-text-primary">
                 {roleT(role)}
               </span>
-              <span className="text-body-md font-semibold text-text-primary">
+              <span className="text-body-md font-semibold! text-text-primary">
                 {formatCurrency(rolePrices[role] ?? 0, "VND")}
                 {suffix}
               </span>
             </div>
           ))}
           <div className="flex items-center justify-between px-5 py-3.5">
-            <span className="text-body-md font-semibold text-text-primary">
+            <span className="text-body-md font-semibold! text-text-primary">
               {t("total")}
             </span>
-            <span className="text-heading-md font-bold text-text-primary">
+            <span className="text-heading-md font-bold! text-text-primary">
               {formatCurrency(total, "VND")}
               {suffix}
             </span>

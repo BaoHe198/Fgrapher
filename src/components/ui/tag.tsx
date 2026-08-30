@@ -15,7 +15,7 @@ function Tag({ selected = false, className, render, ...props }: TagProps) {
       {
         type: "button",
         className: cn(
-          "cursor-pointer rounded-full border px-3.5 py-2 text-body-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40",
+          "cursor-pointer rounded-full border px-3.5 py-2 text-body-sm font-semibold! transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40",
           selected
             ? "border-transparent bg-brand-primary text-text-on-brand"
             : "border-border-default bg-bg-surface text-text-secondary",

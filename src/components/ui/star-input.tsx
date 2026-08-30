@@ -58,7 +58,7 @@ export function StarInput({
         ))}
       </div>
       {showLabel && active > 0 ? (
-        <span className="text-body-sm font-semibold text-text-secondary">
+        <span className="text-body-sm font-semibold! text-text-secondary">
           {LABELS[active]}
         </span>
       ) : null}

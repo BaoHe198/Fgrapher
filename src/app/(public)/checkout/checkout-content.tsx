@@ -60,7 +60,7 @@ export function CheckoutContent() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-xl px-6 py-24 text-center">
-        <p className="text-body-lg font-semibold text-text-primary">
+        <p className="text-body-lg font-semibold! text-text-primary">
           {t("emptyCart")}
         </p>
       </div>
@@ -104,7 +104,7 @@ export function CheckoutContent() {
             </h2>
             {groups.map((group) => (
               <Card key={group.shopId} className="flex flex-col gap-4">
-                <span className="text-body-md font-semibold text-text-primary">
+                <span className="text-body-md font-semibold! text-text-primary">
                   {group.shopName}
                 </span>
                 {group.items.map((item) => (
@@ -145,7 +145,7 @@ export function CheckoutContent() {
             </div>
           ) : null}
           <p className="text-body-sm text-text-tertiary">{t("shippingNote")}</p>
-          <div className="flex justify-between border-t border-border-subtle pt-3 text-heading-sm font-bold text-text-primary">
+          <div className="flex justify-between border-t border-border-subtle pt-3 text-heading-sm font-bold! text-text-primary">
             <span>{t("total")}</span>
             <span>{formatCurrency(totals.total)}</span>
           </div>

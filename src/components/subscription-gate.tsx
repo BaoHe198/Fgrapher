@@ -48,7 +48,7 @@ export async function SubscriptionGate({
       <div className="flex size-12 items-center justify-center rounded-full bg-warning-bg">
         <Lock className="size-5 text-warning" />
       </div>
-      <p className="text-body-lg font-semibold text-text-primary">
+      <p className="text-body-lg font-semibold! text-text-primary">
         {fallbackTitle ?? `Activate your ${roleT(role)} subscription`}
       </p>
       <p className="max-w-sm text-body-md text-text-secondary">

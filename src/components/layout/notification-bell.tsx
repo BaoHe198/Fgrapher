@@ -7,6 +7,7 @@ import {
   CalendarCheck,
   CalendarX,
   CreditCard,
+  Handshake,
   Heart,
   Image as ImageIcon,
   MessageCircle,
@@ -52,6 +53,11 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   REVIEW_RESPONSE: Star,
   MEDIA_APPROVED: ImageIcon,
   MEDIA_REJECTED: ImageIcon,
+  REQUEST_NEW_MATCH: Handshake,
+  REQUEST_NEW_OFFER: Handshake,
+  REQUEST_OFFER_ACCEPTED: Handshake,
+  REQUEST_OFFER_DECLINED: Handshake,
+  REQUEST_NO_OFFERS_48H: Handshake,
 };
 
 function relativeTime(
@@ -154,14 +160,14 @@ export function NotificationBell() {
       />
       <DropdownMenuContent align="end" className="w-[340px] p-0">
         <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
-          <span className="text-body-md font-semibold text-text-primary">
+          <span className="text-body-md font-semibold! text-text-primary">
             {t("title")}
           </span>
           {unreadCount > 0 ? (
             <button
               type="button"
               onClick={onMarkAllRead}
-              className="text-body-sm font-semibold text-brand-primary"
+              className="text-body-sm font-semibold! text-brand-primary"
             >
               {t("markAllRead")}
             </button>
@@ -190,7 +196,7 @@ export function NotificationBell() {
                     <Icon className="size-4 text-text-secondary" />
                   </div>
                   <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="text-body-sm font-semibold text-text-primary">
+                    <span className="text-body-sm font-semibold! text-text-primary">
                       {notification.title}
                     </span>
                     <span className="line-clamp-2 text-body-sm text-text-secondary">
@@ -214,7 +220,7 @@ export function NotificationBell() {
         <Link
           href="/dashboard/notifications"
           onClick={() => setIsOpen(false)}
-          className="block border-t border-border-subtle px-4 py-3 text-center text-body-sm font-semibold text-brand-primary"
+          className="block border-t border-border-subtle px-4 py-3 text-center text-body-sm font-semibold! text-brand-primary"
         >
           {t("viewAll")}
         </Link>

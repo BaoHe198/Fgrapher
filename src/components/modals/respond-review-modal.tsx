@@ -82,7 +82,7 @@ export function RespondReviewModal({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1 rounded-[var(--fg-radius-md)] bg-bg-sunken p-3.5">
             <div className="flex items-center gap-2">
-              <span className="text-body-sm font-semibold text-text-primary">
+              <span className="text-body-sm font-semibold! text-text-primary">
                 {reviewerName}
               </span>
               <StarRating
@@ -97,7 +97,7 @@ export function RespondReviewModal({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-body-sm font-semibold text-text-primary">
+            <label className="text-body-sm font-semibold! text-text-primary">
               {t("yourResponse")}
             </label>
             <Textarea

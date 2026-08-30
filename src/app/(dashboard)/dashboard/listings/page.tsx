@@ -27,7 +27,7 @@ export default async function ListingsPage() {
     return (
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <ShoppingBag className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold text-text-primary">
+        <p className="text-body-lg font-semibold! text-text-primary">
           {t("roleRequired.title")}
         </p>
         <p className="max-w-sm text-body-md text-text-secondary">

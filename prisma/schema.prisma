@@ -38,6 +38,13 @@ model User {
   location                String?
   latitude                Float?
   longitude               Float?
+  // Prompt G7 — posting a ServiceRequest requires a phone-verified
+  // account (anti-fake-request measure). Verified via Twilio Verify
+  // (lib/sms.ts); phoneVerified is cleared whenever `phone` itself
+  // changes, since a new number hasn't been proven to belong to this
+  // account yet — see /api/users/me's PATCH handler.
+  phoneVerified           Boolean   @default(false)
+  phoneVerifiedAt         DateTime?
   // Prompt B4/B8 — real administrative ward, sourced from the Ward table
   // (never hardcoded, per CLAUDE.md mục 9). Nullable: coverage starts with
   // Hồ Chí Minh's 168 wards only, so most non-HCMC users won't have one
@@ -96,6 +103,8 @@ model User {
   conversationParticipants ConversationParticipant[]
   consentRecords           ConsentRecord[]
   dataRequests             DataRequest[]
+  serviceRequests          ServiceRequest[]          @relation("requestCustomer")
+  requestOffers            RequestOffer[]            @relation("offerProvider")
 
   @@index([wardId])
   // Both filtered on every admin dashboard load (getAdminOverview) and by
@@ -132,6 +141,7 @@ model Province {
   serviceAreas    ProfileServiceArea[]
   bookings        Booking[]
   waitlistEntries WaitlistEntry[]
+  serviceRequests ServiceRequest[]
 
   @@map("provinces")
 }
@@ -146,9 +156,10 @@ model Ward {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  province Province  @relation(fields: [provinceId], references: [id])
-  users    User[]
-  profiles Profile[]
+  province        Province         @relation(fields: [provinceId], references: [id])
+  users           User[]
+  profiles        Profile[]
+  serviceRequests ServiceRequest[]
 
   @@unique([provinceId, code])
   @@index([provinceId])
@@ -647,9 +658,9 @@ model ProfileMedia {
   // "Thùng rác" screen until then.
   deletedAt DateTime?
 
-  profile        Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  album          Album?  @relation("AlbumMedia", fields: [albumId], references: [id], onDelete: SetNull)
-  coverOfAlbums  Album[] @relation("AlbumCover")
+  profile       Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  album         Album?  @relation("AlbumMedia", fields: [albumId], references: [id], onDelete: SetNull)
+  coverOfAlbums Album[] @relation("AlbumCover")
 
   @@index([profileId, order])
   @@index([moderationStatus, createdAt])
@@ -659,10 +670,10 @@ model ProfileMedia {
 }
 
 model Album {
-  id          String           @id @default(cuid())
-  profileId   String
-  title       String
-  description String?
+  id           String           @id @default(cuid())
+  profileId    String
+  title        String
+  description  String?
   // Nullable, deliberately deviating from the source prompt's literal
   // "category (ProfileCategory)" (required) — the migration that
   // introduces this table must create one default "Ảnh chưa phân loại"
@@ -671,13 +682,13 @@ model Album {
   // still requires a category for every NEW album (Prompt G3, VIỆC 2) —
   // this is a DB-level allowance for the one legacy migrated album, not
   // a relaxation of that rule going forward.
-  category    ProfileCategory?
+  category     ProfileCategory?
   coverMediaId String?
-  sortOrder   Int              @default(0)
-  isPublished Boolean          @default(true)
-  shootDate   DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  sortOrder    Int              @default(0)
+  isPublished  Boolean          @default(true)
+  shootDate    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
   // Prompt G3 — same soft-delete/trash contract as ProfileMedia.deletedAt;
   // deleting an album stamps this AND every ProfileMedia row in it with
@@ -837,14 +848,18 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  customer      User                   @relation("customer", fields: [customerId], references: [id])
-  provider      User                   @relation("provider", fields: [providerId], references: [id])
-  service       Service?               @relation(fields: [serviceId], references: [id])
-  province      Province?              @relation(fields: [provinceId], references: [id])
-  review        Review?
-  parentBooking Booking?               @relation("crewHire", fields: [parentBookingId], references: [id])
-  childBookings Booking[]              @relation("crewHire")
-  statusHistory BookingStatusHistory[]
+  customer       User                   @relation("customer", fields: [customerId], references: [id])
+  provider       User                   @relation("provider", fields: [providerId], references: [id])
+  service        Service?               @relation(fields: [serviceId], references: [id])
+  province       Province?              @relation(fields: [provinceId], references: [id])
+  review         Review?
+  parentBooking  Booking?               @relation("crewHire", fields: [parentBookingId], references: [id])
+  childBookings  Booking[]              @relation("crewHire")
+  statusHistory  BookingStatusHistory[]
+  // A Booking created from an ACCEPTED RequestOffer points back to it here
+  // — read-only history link, nothing about Booking's own lifecycle
+  // (transitionBooking) changes because of it.
+  serviceRequest ServiceRequest?
 
   @@index([customerId])
   @@index([providerId, status])
@@ -1236,6 +1251,141 @@ model Review {
 }
 
 // ============================================================================
+// SERVICE REQUESTS (Prompt G7 — reverse marketplace: customer posts a need,
+// providers offer)
+// ============================================================================
+//
+// Simplified from the source prompt's literal schema per the project
+// owner's explicit decision: ONE role per request, ONE accepted offer —
+// no ServiceRequestRole join table, no PARTIALLY_FULFILLED status, no
+// per-role quantity. A request is either fulfilled or it isn't.
+
+enum ServiceRequestStatus {
+  OPEN
+  HAS_OFFERS
+  FULFILLED
+  EXPIRED
+  CANCELLED
+}
+
+enum RequestOfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
+
+model ServiceRequest {
+  id          String            @id @default(cuid())
+  // Human-readable reference shown in the UI/notifications, e.g.
+  // "YC-2026-00042" — generated at creation (services/service-requests.ts),
+  // never reused, not the primary key.
+  code        String            @unique
+  customerId  String
+  title       String
+  description String?           @db.Text
+  role        Role
+  categories  ProfileCategory[]
+
+  shootDate      DateTime? @db.Date
+  isDateFlexible Boolean   @default(false)
+  dateRangeStart DateTime? @db.Date
+  dateRangeEnd   DateTime? @db.Date
+
+  // Bảo vệ dữ liệu cá nhân (ràng buộc #1 của prompt gốc) — provinceId +
+  // areaNote are shown to every verified provider browsing opportunities;
+  // detailedAddress is withheld until an offer for this request is
+  // ACCEPTED (see services/request-offers.ts's acceptOffer — it's the
+  // only place detailedAddress is ever read for a non-owner).
+  provinceId      String
+  // Optional — Ward coverage is HCMC-only today (Prompt B8/B4), so most
+  // provinces have no rows to pick from yet. areaNote remains the free-text
+  // fallback for everywhere else.
+  wardId          String?
+  areaNote        String?
+  detailedAddress String?
+
+  budgetMin Float?
+  budgetMax Float?
+  currency  String @default("VND")
+
+  status             ServiceRequestStatus @default(OPEN)
+  // Set once, when an offer is accepted — the single source of truth for
+  // "which offer fulfilled this request," mirrored by the resulting
+  // Booking's own id for convenience.
+  fulfilledByOfferId String?              @unique
+  bookingId          String?              @unique
+  // 7 days from creation (ràng buộc #2) — the cron in
+  // /api/cron/expire-service-requests moves anything still OPEN/
+  // HAS_OFFERS past this to EXPIRED. Never touches FULFILLED/CANCELLED.
+  expiresAt          DateTime
+  noOffersNudgedAt   DateTime? // 48h-no-offer nudge (ràng buộc #3) — set once so the cron doesn't re-notify every run
+  isDraft            Boolean              @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer       User                      @relation("requestCustomer", fields: [customerId], references: [id])
+  province       Province                  @relation(fields: [provinceId], references: [id])
+  ward           Ward?                     @relation(fields: [wardId], references: [id])
+  fulfilledOffer RequestOffer?             @relation("fulfilledOffer", fields: [fulfilledByOfferId], references: [id])
+  booking        Booking?                  @relation(fields: [bookingId], references: [id])
+  references     ServiceRequestReference[]
+  offers         RequestOffer[]            @relation("requestOffers")
+
+  @@index([customerId, status])
+  @@index([role, provinceId, status])
+  @@index([status, expiresAt])
+  @@index([wardId])
+  @@map("service_requests")
+}
+
+model ServiceRequestReference {
+  id        String   @id @default(cuid())
+  requestId String
+  mediaUrl  String
+  publicId  String?
+  createdAt DateTime @default(now())
+
+  request ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@map("service_request_references")
+}
+
+model RequestOffer {
+  id            String             @id @default(cuid())
+  requestId     String
+  providerId    String
+  message       String?            @db.Text
+  proposedPrice Float
+  currency      String             @default("VND")
+  // Only meaningful when the request's own isDateFlexible = true — the
+  // provider proposes a specific date within (or near) the customer's
+  // range. Ignored/unused when the request already has a fixed shootDate.
+  proposedDate  DateTime?          @db.Date
+  status        RequestOfferStatus @default(PENDING)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  request          ServiceRequest  @relation("requestOffers", fields: [requestId], references: [id], onDelete: Cascade)
+  provider         User            @relation("offerProvider", fields: [providerId], references: [id])
+  fulfilledRequest ServiceRequest? @relation("fulfilledOffer")
+
+  // One offer per provider per request — re-offering means editing the
+  // existing PENDING row, not creating a second one.
+  @@unique([requestId, providerId])
+  @@index([providerId, status])
+  @@map("request_offers")
+}
+
+// Ràng buộc #1 của prompt gốc — "Ghi AuditLog mỗi lần một provider xem
+// chi tiết yêu cầu." Reuses the existing generic AuditLog model
+// (services/compliance.ts's logAudit()) rather than a dedicated table —
+// action: "service_request_viewed", targetType: "service_request",
+// targetId: the ServiceRequest id, actorId: the viewing provider's userId.
+
+// ============================================================================
 // NOTIFICATIONS & MISC
 // ============================================================================
 
@@ -1264,6 +1414,12 @@ enum NotificationType {
   REVIEW_RESPONSE
   MEDIA_APPROVED
   MEDIA_REJECTED
+  // Prompt G7 — reverse marketplace (ServiceRequest/RequestOffer)
+  REQUEST_NEW_MATCH
+  REQUEST_NEW_OFFER
+  REQUEST_OFFER_ACCEPTED
+  REQUEST_OFFER_DECLINED
+  REQUEST_NO_OFFERS_48H
 }
 
 model Notification {

@@ -23,6 +23,15 @@ Flipping a flag back to `true` (env var, not code) re-enables everything
 described in this document for that feature — nothing needs to be
 un-commented or rebuilt.
 
+**Service requests (§6a)** is a deliberate exception to this pattern —
+Prompt G7's own author recommended waiting for 50-100 real providers
+before launching a reverse-marketplace feature (a request posted into
+zero supply is worse than not having the feature), and the natural
+engineering response would have been the same flag treatment as above.
+The project owner explicitly chose otherwise: it's live, unflagged, from
+the moment it shipped, specifically so early providers can experience it
+while the platform is still bootstrapping supply.
+
 ## 1. Accounts and roles
 
 **Who can use it:** everyone.
@@ -261,6 +270,66 @@ stateDiagram-v2
   notification preferences — see §11) and, on creation, opens/uses a
   `Conversation` and posts a `booking_link`-type message so the request is
   immediately visible in messaging too.
+
+## 6a. Service requests (reverse marketplace)
+
+**Who can use it:** any customer to post a request; any verified provider of
+the matching role to send an offer.
+
+The reverse of §6's flow — instead of a customer searching and booking a
+provider directly, they post a `ServiceRequest` describing what they need
+and matching providers proactively send `RequestOffer`s. Simplified from
+the source prompt (`docs/guides/fgrapher-prompt-dot-2.md`, Prompt G7) per
+the project owner's explicit decision: **one role per request, one
+accepted offer** — no multi-role join table, no partial-fulfillment status.
+
+- **Posting:** a 6-step wizard (`/dashboard/requests/new`) — role +
+  specialty categories (max 5, reusing G2's `CATEGORIES_BY_ROLE`), when
+  (fixed date or a flexible range), where (province + general area now,
+  `detailedAddress` withheld until an offer is accepted), budget, concept +
+  up to 10 reference photos, review. Savable as a draft at any step
+  (`isDraft: true`) and published later. Posting requires
+  `User.phoneVerified` (Twilio Verify — see below) and caps at 3
+  simultaneously open requests per customer, both anti-fake-request
+  measures from the source prompt.
+- **Matching (`services/request-offers.ts`):** hard filters only, no
+  subscription-active requirement (the project owner's explicit MVP
+  decision, to let providers experience the feature) — role held,
+  `verificationStatus: VERIFIED`, published profile serving that province
+  (`servesNationwide` or a `ProfileServiceArea` row) or nationwide, and a
+  same-day availability check (`BlockedDate` + confirmed `Booking`
+  conflicts) when the request has a fixed date. The same filter feeds both
+  the provider's own "Yêu cầu phù hợp" feed and the proactive
+  `REQUEST_NEW_MATCH` notification fired at posting time.
+- **Offers:** one `PENDING` offer per provider per request (re-offering
+  edits it in place); a customer can view, message the provider first
+  (`/dashboard/messages?to=`), then accept or decline. **Accepting an
+  offer calls the existing `createBooking()`** — not `transitionBooking()`,
+  which only ever transitions an already-existing booking's status and
+  never creates one, a correction from the source prompt's own text — so
+  every existing booking guarantee (notice window, pending-booking cap,
+  availability) applies unchanged. `totalPrice`/`currency` are set from the
+  offer afterward, since `createBooking()` only ever prices off a `Service`
+  record and there isn't one for an ad-hoc negotiated request. Every other
+  `PENDING` offer on that request is auto-declined with a notification.
+- **Phone verification (`lib/sms.ts`):** Twilio Verify, no-ops gracefully
+  without `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN`/`TWILIO_VERIFY_SERVICE_SID`
+  configured — same pattern as Stripe/Cloudinary/Resend. `/api/phone/
+send-code` + `/api/phone/verify-code`; changing `User.phone` clears
+  `phoneVerified` until the new number is re-verified.
+- **Auditing:** every time a provider opens a request's detail, a
+  `service_request_viewed` `AuditLog` row is written (`services/
+request-offers.ts`'s `getOpportunityDetail`) — the source prompt's
+  explicit privacy requirement, since a request can carry the customer's
+  approximate location.
+- **Lifecycle crons:** `/api/cron/expire-service-requests` moves any
+  `OPEN`/`HAS_OFFERS` request past its 7-day `expiresAt` to `EXPIRED`
+  (auto-declining any still-`PENDING` offers) — never touches a `FULFILLED`
+  request or its `Booking`. `/api/cron/nudge-unanswered-requests` notifies
+  the customer once, 48 hours after posting, if a request still has zero
+  offers (`noOffersNudgedAt` guards against re-notifying). `/admin/
+service-requests` lists every currently-`OPEN` (i.e. zero-offer) request
+  for ops to intervene on manually.
 
 ## 7. Availability
 

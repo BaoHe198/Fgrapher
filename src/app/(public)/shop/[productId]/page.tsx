@@ -97,7 +97,7 @@ export default async function ProductDetailPage({
                 <AvatarFallback>{shopName[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-body-md font-semibold text-text-primary">
+                <span className="text-body-md font-semibold! text-text-primary">
                   {shopName}
                 </span>
                 <StarRating

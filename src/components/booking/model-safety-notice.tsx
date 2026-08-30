@@ -13,7 +13,7 @@ export async function ModelSafetyNotice() {
     <div className="flex gap-2.5 rounded-[var(--fg-radius-md)] bg-warning-bg p-3.5">
       <ShieldAlert className="size-5 shrink-0 text-warning" />
       <div className="flex flex-col gap-1">
-        <span className="text-body-sm font-semibold text-text-primary">
+        <span className="text-body-sm font-semibold! text-text-primary">
           {t("title")}
         </span>
         <p className="text-body-sm text-text-secondary">{t("body")}</p>

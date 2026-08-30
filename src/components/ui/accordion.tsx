@@ -17,13 +17,17 @@ function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
   );
 }
 
-function AccordionTrigger({ className, children, ...props }: AccordionPrimitive.Trigger.Props) {
+function AccordionTrigger({
+  className,
+  children,
+  ...props
+}: AccordionPrimitive.Trigger.Props) {
   return (
     <AccordionPrimitive.Header>
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "group flex w-full cursor-pointer items-center justify-between gap-3 py-4 text-left text-body-lg font-semibold text-text-primary",
+          "group flex w-full cursor-pointer items-center justify-between gap-3 py-4 text-left text-body-lg font-semibold! text-text-primary",
           className,
         )}
         {...props}
@@ -35,7 +39,10 @@ function AccordionTrigger({ className, children, ...props }: AccordionPrimitive.
   );
 }
 
-function AccordionPanel({ className, ...props }: AccordionPrimitive.Panel.Props) {
+function AccordionPanel({
+  className,
+  ...props
+}: AccordionPrimitive.Panel.Props) {
   return (
     <AccordionPrimitive.Panel
       data-slot="accordion-panel"

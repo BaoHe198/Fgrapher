@@ -119,7 +119,7 @@ export function ListingsList() {
       ) : products.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <ShoppingBag className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty.title")}
           </p>
           <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
@@ -167,7 +167,7 @@ export function ListingsList() {
                 </div>
 
                 <Badge variant={badge.variant}>{badge.label}</Badge>
-                <span className="text-body-md font-semibold text-text-primary">
+                <span className="text-body-md font-semibold! text-text-primary">
                   {priceLabel(product, t)}
                 </span>
 

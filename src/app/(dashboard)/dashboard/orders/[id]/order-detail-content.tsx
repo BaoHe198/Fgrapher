@@ -132,7 +132,7 @@ export function OrderDetailContent() {
     <div className="flex flex-col gap-5">
       <Link
         href={isShop ? "/dashboard/shop-orders" : "/dashboard/orders"}
-        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary"
+        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold! text-text-secondary"
       >
         <ArrowLeft className="size-4" />
         {t("backToOrders")}
@@ -180,7 +180,7 @@ export function OrderDetailContent() {
                 className="flex items-center justify-between px-5 py-3.5"
               >
                 <div className="flex flex-col">
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {item.product.name} x{item.quantity}
                   </span>
                   {item.type === "RENT" ? (
@@ -230,7 +230,7 @@ export function OrderDetailContent() {
         <div className="flex flex-col gap-3">
           <Card className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3 pb-2">
-              <span className="text-body-md font-semibold text-text-primary">
+              <span className="text-body-md font-semibold! text-text-primary">
                 {isShop
                   ? (order.customer.firstName ?? order.customer.name)
                   : (order.shop.firstName ?? order.shop.name)}
@@ -309,7 +309,7 @@ export function OrderDetailContent() {
             <span className="text-body-sm text-text-tertiary">
               {t("total")}
             </span>
-            <span className="text-heading-sm font-bold text-text-primary">
+            <span className="text-heading-sm font-bold! text-text-primary">
               {formatCurrency(order.totalPrice, order.currency)}
             </span>
           </Card>

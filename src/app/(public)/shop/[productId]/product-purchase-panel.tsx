@@ -158,7 +158,7 @@ export function ProductPurchasePanel({
             >
               −
             </button>
-            <span className="w-6 text-center text-body-md font-semibold">
+            <span className="w-6 text-center text-body-md font-semibold!">
               {quantity}
             </span>
             <button
@@ -243,7 +243,7 @@ export function ProductPurchasePanel({
                   </span>
                 </div>
               ) : null}
-              <div className="flex justify-between text-heading-sm font-bold text-text-primary">
+              <div className="flex justify-between text-heading-sm font-bold! text-text-primary">
                 <span>Total</span>
                 <span>
                   {formatCurrency(

@@ -47,7 +47,7 @@ export function CheckoutSuccessContent() {
       {!orders ? (
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="size-10 animate-spin text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("settingUp")}
           </p>
           <p className="text-body-md text-text-secondary">{t("momentNote")}</p>

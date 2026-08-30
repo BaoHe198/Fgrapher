@@ -73,7 +73,7 @@ export function RolesSettings({
           <div className="flex items-center gap-3">
             <User className="size-5 text-text-tertiary" />
             <div>
-              <p className="text-body-md font-semibold text-text-primary">
+              <p className="text-body-md font-semibold! text-text-primary">
                 {t("customer")}
               </p>
               <p className="text-body-sm text-text-secondary">
@@ -105,7 +105,7 @@ export function RolesSettings({
                 <div className="flex items-center gap-3">
                   <Icon className="size-5 text-text-tertiary" />
                   <div>
-                    <p className="text-body-md font-semibold text-text-primary">
+                    <p className="text-body-md font-semibold! text-text-primary">
                       {roleT(role)}
                     </p>
                     <p className="text-body-sm text-text-secondary">
@@ -171,7 +171,7 @@ export function RolesSettings({
                 <div className="flex items-center gap-3">
                   <Icon className="size-5 text-text-tertiary" />
                   <div>
-                    <p className="text-body-md font-semibold text-text-primary">
+                    <p className="text-body-md font-semibold! text-text-primary">
                       {roleT(role)}
                     </p>
                     <p className="text-body-sm text-text-secondary">

@@ -4,11 +4,13 @@ import {
   Bookmark,
   Calendar,
   CalendarDays,
+  Handshake,
   Image as ImageIcon,
   LayoutDashboard,
   Menu,
   MessageCircle,
   Package,
+  Send,
   Settings,
   Shield,
   ShoppingBag,
@@ -87,6 +89,21 @@ export function DashboardSidebar({
           },
         ]
       : []),
+    { href: "/dashboard/requests", label: t("myRequests"), icon: Send },
+    ...(canReceiveBookings
+      ? [
+          {
+            href: "/dashboard/opportunities",
+            label: t("opportunities"),
+            icon: Handshake,
+          },
+          {
+            href: "/dashboard/my-offers",
+            label: t("myOffers"),
+            icon: Handshake,
+          },
+        ]
+      : []),
     ...(marketplaceEnabled && canSell
       ? [
           {
@@ -136,7 +153,7 @@ export function DashboardSidebar({
             key={href}
             href={href}
             className={cn(
-              "flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] px-3 py-2.5 text-body-md font-semibold transition-colors duration-150",
+              "flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] px-3 py-2.5 text-body-md font-semibold! transition-colors duration-150",
               isActive
                 ? "bg-success-bg text-brand-primary"
                 : "text-text-secondary hover:bg-bg-sunken",

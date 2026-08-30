@@ -39,10 +39,25 @@ const WIDE_BREAKPOINT = 1180;
 
 // Keys are relative to the "nav" namespace — both WebNav and MobileNavSheet
 // scope their t() with useTranslations("nav"). The "shop" entry is spliced
-// out below when MARKETPLACE_ENABLED is off.
+// out below when MARKETPLACE_ENABLED is off; authOnly entries (Prompt G7)
+// are spliced out for logged-out visitors, same reasoning as hiding the
+// dashboard button itself — a link into /dashboard/* isn't useful to show
+// prominently to someone who isn't signed in.
 const NAV_LINKS = [
   { href: "/browse", labelKey: "browse" as const, alwaysVisible: true },
   { href: "/shop", labelKey: "shop" as const, alwaysVisible: false },
+  {
+    href: "/requests/new",
+    labelKey: "createRequest" as const,
+    alwaysVisible: false,
+    authOnly: true,
+  },
+  {
+    href: "/requests",
+    labelKey: "browseRequests" as const,
+    alwaysVisible: false,
+    authOnly: true,
+  },
 ];
 
 function subscribeResize(callback: () => void) {
@@ -70,9 +85,11 @@ export function WebNav({
   const { isAuthenticated } = useUserRoles();
   const messaging = useMessaging();
 
-  const navLinks = marketplaceEnabled
-    ? NAV_LINKS
-    : NAV_LINKS.filter((link) => link.href !== "/shop");
+  const navLinks = NAV_LINKS.filter(
+    (link) =>
+      (marketplaceEnabled || link.href !== "/shop") &&
+      (!link.authOnly || isAuthenticated),
+  );
   const links = isWide
     ? navLinks
     : navLinks.filter((link) => link.alwaysVisible);
@@ -96,7 +113,7 @@ export function WebNav({
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-body-md font-semibold",
+                  "text-body-md font-semibold!",
                   isActive ? "text-text-primary" : "text-text-secondary",
                 )}
               >
@@ -236,9 +253,11 @@ function MobileNavSheet({
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const messaging = useMessaging();
-  const navLinks = marketplaceEnabled
-    ? NAV_LINKS
-    : NAV_LINKS.filter((link) => link.href !== "/shop");
+  const navLinks = NAV_LINKS.filter(
+    (link) =>
+      (marketplaceEnabled || link.href !== "/shop") &&
+      (!link.authOnly || isAuthenticated),
+  );
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -265,7 +284,7 @@ function MobileNavSheet({
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold",
+                  "rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold!",
                   isActive ? "text-text-primary" : "text-text-secondary",
                 )}
               >
@@ -326,7 +345,7 @@ function MobileNavSheet({
                 setOpen(false);
                 messaging.toggle();
               }}
-              className="flex items-center gap-2 rounded-[var(--fg-radius-sm)] px-3 py-2 text-left text-body-md font-semibold text-text-secondary"
+              className="flex items-center gap-2 rounded-[var(--fg-radius-sm)] px-3 py-2 text-left text-body-md font-semibold! text-text-secondary"
             >
               {t("messages")}
               {messaging.unreadCount > 0 ? (
@@ -338,35 +357,35 @@ function MobileNavSheet({
             <Link
               href="/dashboard/notifications"
               onClick={() => setOpen(false)}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
             >
               {ts("notifications")}
             </Link>
             <Link
               href="/dashboard/settings/profile"
               onClick={() => setOpen(false)}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
             >
               {t("profile")}
             </Link>
             <Link
               href="/dashboard/settings"
               onClick={() => setOpen(false)}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
             >
               {t("settings")}
             </Link>
             <Link
               href="/dashboard/settings/billing"
               onClick={() => setOpen(false)}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold text-text-secondary"
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
             >
               {t("billing")}
             </Link>
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-left text-body-md font-semibold text-danger"
+              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-left text-body-md font-semibold! text-danger"
             >
               {t("signout")}
             </button>
@@ -417,7 +436,7 @@ function LangToggle() {
           disabled={isPending}
           onClick={() => handleSelect(code)}
           className={cn(
-            "px-3 py-[7px] text-body-sm font-bold transition-colors duration-150 disabled:opacity-50",
+            "px-3 py-[7px] text-body-sm font-bold! transition-colors duration-150 disabled:opacity-50",
             locale === code
               ? "bg-brand-primary text-text-on-brand"
               : "text-text-secondary",

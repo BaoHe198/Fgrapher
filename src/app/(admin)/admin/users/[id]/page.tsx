@@ -136,7 +136,7 @@ export default function AdminUserDetailPage() {
     <div className="flex flex-col gap-5">
       <Link
         href="/admin/users"
-        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary"
+        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold! text-text-secondary"
       >
         <ArrowLeft className="size-4" />
         {t("backToUsers")}
@@ -232,7 +232,7 @@ export default function AdminUserDetailPage() {
             </Card>
 
             <Card className="flex flex-col gap-2">
-              <span className="text-body-sm font-semibold text-text-primary">
+              <span className="text-body-sm font-semibold! text-text-primary">
                 {t("adminNotesLabel")}
               </span>
               <Textarea
@@ -255,7 +255,7 @@ export default function AdminUserDetailPage() {
 
         <TabsPanel value="billing" className="mt-4">
           <Card className="mb-4 flex flex-col gap-3">
-            <span className="text-body-sm font-semibold text-text-primary">
+            <span className="text-body-sm font-semibold! text-text-primary">
               Gán gói thủ công (billing đang tắt — xem CLAUDE.md)
             </span>
             <div className="grid grid-cols-2 gap-3">
@@ -304,7 +304,7 @@ export default function AdminUserDetailPage() {
               user.roles.map((ur) => (
                 <Card key={ur.id} className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-body-md font-semibold text-text-primary">
+                    <span className="text-body-md font-semibold! text-text-primary">
                       {roleT(ur.role)}
                     </span>
                     <span className="text-body-sm text-text-secondary">

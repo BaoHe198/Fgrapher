@@ -316,7 +316,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             {isPublished ? (
               <ShieldCheck className="size-4 text-success" />
             ) : null}
-            <span className="text-body-md font-semibold text-text-primary">
+            <span className="text-body-md font-semibold! text-text-primary">
               {isPublished ? tEditor("liveStatus") : tEditor("draftStatus")}
             </span>
             {verificationStatus === "VERIFIED" ? (
@@ -357,7 +357,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-body-sm font-semibold text-text-primary">
+          <label className="text-body-sm font-semibold! text-text-primary">
             {tEditor("descriptionLabel")}
           </label>
           <span className="text-body-sm text-text-tertiary">
@@ -473,7 +473,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
         {provinces.length > 1 ? (
           <div className="flex flex-col gap-2">
-            <span className="text-body-sm font-semibold text-text-primary">
+            <span className="text-body-sm font-semibold! text-text-primary">
               {t("extraAreasLabel")}
             </span>
             <p className="text-body-sm text-text-tertiary">

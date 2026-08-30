@@ -332,7 +332,7 @@ export function ChatPanel({
                     >
                       <div className="flex items-center gap-2">
                         <Calendar className="size-4 text-brand-primary" />
-                        <span className="text-body-sm font-semibold text-text-primary">
+                        <span className="text-body-sm font-semibold! text-text-primary">
                           {message.booking.service?.name ?? t("bookingRequest")}
                         </span>
                       </div>
@@ -346,7 +346,7 @@ export function ChatPanel({
                       >
                         {message.booking.status}
                       </Badge>
-                      <span className="text-body-sm font-semibold text-brand-primary">
+                      <span className="text-body-sm font-semibold! text-brand-primary">
                         {t("viewBooking")}
                       </span>
                     </Link>

@@ -7,8 +7,10 @@ import { cn } from "@/lib/utils";
 
 type NativeSelectOption = string | { value: string; label: string };
 
-interface NativeSelectProps
-  extends Omit<React.ComponentProps<"select">, "value" | "onChange"> {
+interface NativeSelectProps extends Omit<
+  React.ComponentProps<"select">,
+  "value" | "onChange"
+> {
   label?: string;
   error?: string;
   options: NativeSelectOption[];
@@ -44,7 +46,10 @@ function NativeSelect({
         {...props}
       >
         {options.map((option) => {
-          const opt = typeof option === "string" ? { value: option, label: option } : option;
+          const opt =
+            typeof option === "string"
+              ? { value: option, label: option }
+              : option;
           return (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -61,7 +66,10 @@ function NativeSelect({
   return (
     <div className="flex flex-col gap-1.5">
       {label ? (
-        <label htmlFor={selectId} className="text-body-sm font-semibold text-text-primary">
+        <label
+          htmlFor={selectId}
+          className="text-body-sm font-semibold! text-text-primary"
+        >
           {label}
         </label>
       ) : null}

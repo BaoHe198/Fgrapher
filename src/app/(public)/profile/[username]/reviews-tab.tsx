@@ -185,7 +185,7 @@ export function ReviewsTab({
                     <button
                       type="button"
                       onClick={() => setRespondTarget(review)}
-                      className="text-body-sm font-semibold text-brand-primary"
+                      className="text-body-sm font-semibold! text-brand-primary"
                     >
                       {t("respond")}
                     </button>

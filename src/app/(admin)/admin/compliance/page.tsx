@@ -173,7 +173,7 @@ function DataRequestsPanel() {
                     >
                       {r.type}
                     </Badge>
-                    <span className="text-body-md font-semibold text-text-primary">
+                    <span className="text-body-md font-semibold! text-text-primary">
                       {r.user?.firstName ??
                         r.user?.name ??
                         r.user?.email ??
@@ -407,7 +407,7 @@ function ConsentStatsPanel() {
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {stats.map((stat) => (
         <Card key={stat.purpose} className="flex flex-col gap-2">
-          <span className="text-body-md font-semibold text-text-primary">
+          <span className="text-body-md font-semibold! text-text-primary">
             {PURPOSE_LABELS[stat.purpose]}
           </span>
           <span className="text-heading-md text-text-primary">

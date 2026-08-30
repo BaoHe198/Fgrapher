@@ -1,12 +1,13 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { BadgeCheck, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { PhoneVerifyDialog } from "@/components/modals/phone-verify-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,11 +26,13 @@ import { routing } from "@/i18n/routing";
 interface AccountSettingsFormProps {
   initialEmail: string;
   initialPhone: string | null;
+  initialPhoneVerified: boolean;
 }
 
 export function AccountSettingsForm({
   initialEmail,
   initialPhone,
+  initialPhoneVerified,
 }: AccountSettingsFormProps) {
   const router = useRouter();
   const mounted = useMounted();
@@ -41,6 +44,16 @@ export function AccountSettingsForm({
   const [email, setEmail] = useState(initialEmail);
   const [phone, setPhone] = useState(initialPhone ?? "");
   const [savingBasics, setSavingBasics] = useState(false);
+  // The exact phone number currently verified, or null — the badge/CTA
+  // below compares this against the live `phone` field rather than a
+  // separate boolean, so editing the number back out of a verified state
+  // (even without saving yet) immediately shows "needs verification"
+  // instead of a stale checkmark.
+  const [verifiedPhone, setVerifiedPhone] = useState(
+    initialPhoneVerified ? (initialPhone ?? null) : null,
+  );
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const isPhoneVerified = phone.length > 0 && phone === verifiedPhone;
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -104,11 +117,33 @@ export function AccountSettingsForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <Input
-          label={t("phoneLabel")}
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
+        <div className="flex flex-col gap-1.5">
+          <Input
+            label={t("phoneLabel")}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+          {isPhoneVerified ? (
+            <span className="flex items-center gap-1.5 text-body-sm text-success">
+              <BadgeCheck className="size-4" />
+              {t("phoneVerified")}
+            </span>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-body-sm text-text-tertiary">
+                {t("phoneNotVerified")}
+              </span>
+              <button
+                type="button"
+                onClick={() => setVerifyDialogOpen(true)}
+                disabled={!phone}
+                className="text-body-sm font-semibold! text-text-link disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t("phoneVerifyCta")}
+              </button>
+            </div>
+          )}
+        </div>
         <Button
           variant="secondary"
           size="sm"
@@ -124,7 +159,7 @@ export function AccountSettingsForm({
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-4">
-        <span className="text-body-md font-semibold text-text-primary">
+        <span className="text-body-md font-semibold! text-text-primary">
           {t("changePasswordTitle")}
         </span>
         {passwordError ? (
@@ -196,7 +231,7 @@ export function AccountSettingsForm({
       <div className="h-px bg-border-subtle" />
 
       <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-danger p-4">
-        <span className="text-body-md font-semibold text-danger">
+        <span className="text-body-md font-semibold! text-danger">
           {t("dangerZoneTitle")}
         </span>
         <p className="text-body-sm text-text-secondary">
@@ -237,6 +272,16 @@ export function AccountSettingsForm({
           </DialogContent>
         </Dialog>
       </div>
+
+      <PhoneVerifyDialog
+        open={verifyDialogOpen}
+        onOpenChange={setVerifyDialogOpen}
+        phone={phone}
+        onVerified={(normalizedPhone) => {
+          setPhone(normalizedPhone);
+          setVerifiedPhone(normalizedPhone);
+        }}
+      />
     </div>
   );
 }

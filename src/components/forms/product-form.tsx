@@ -101,7 +101,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold text-text-primary">
+        <label className="text-body-sm font-semibold! text-text-primary">
           {t("descriptionLabel")}
         </label>
         <textarea
@@ -124,7 +124,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       />
 
       <div className="flex flex-col gap-2">
-        <span className="text-body-sm font-semibold text-text-primary">
+        <span className="text-body-sm font-semibold! text-text-primary">
           {t("typeLabel")}
         </span>
         <div className="flex gap-4">
@@ -199,7 +199,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       />
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-body-sm font-semibold text-text-primary">
+        <span className="text-body-sm font-semibold! text-text-primary">
           {t("imagesLabel")}
         </span>
         <Controller

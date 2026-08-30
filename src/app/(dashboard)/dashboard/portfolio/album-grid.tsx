@@ -97,7 +97,7 @@ function SortableAlbumCard({
           <div className="min-w-0">
             <Link
               href={`/dashboard/portfolio/${album.id}`}
-              className="truncate text-body-md font-semibold text-text-primary hover:underline"
+              className="truncate text-body-md font-semibold! text-text-primary hover:underline"
             >
               {album.title}
             </Link>
@@ -208,7 +208,7 @@ export function AlbumGrid({
       {albums.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <ImageOff className="size-10 text-text-tertiary" />
-          <p className="text-body-md font-semibold text-text-primary">
+          <p className="text-body-md font-semibold! text-text-primary">
             {t("empty.title")}
           </p>
           <p className="text-body-sm text-text-secondary">{t("empty.body")}</p>

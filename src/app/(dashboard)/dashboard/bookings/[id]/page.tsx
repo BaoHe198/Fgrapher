@@ -174,7 +174,7 @@ export default function BookingDetailPage() {
   if (notFoundError) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <p className="text-body-lg font-semibold text-text-primary">
+        <p className="text-body-lg font-semibold! text-text-primary">
           {t("notFound")}
         </p>
         <Button
@@ -209,7 +209,7 @@ export default function BookingDetailPage() {
     <div className="flex flex-col gap-5">
       <Link
         href="/dashboard/bookings"
-        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary"
+        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold! text-text-secondary"
       >
         <ArrowLeft className="size-4" />
         {t("backToBookings")}
@@ -230,7 +230,7 @@ export default function BookingDetailPage() {
 
       {booking.isFirstBookingBetweenParties && booking.status === "PENDING" ? (
         <Card className="flex flex-col gap-1.5 border border-warning bg-warning-bg">
-          <span className="flex items-center gap-1.5 text-body-md font-semibold text-text-primary">
+          <span className="flex items-center gap-1.5 text-body-md font-semibold! text-text-primary">
             <AlertTriangle className="size-4" />
             {t("firstTimeWarning.title", { name: partyName(otherParty) })}
           </span>
@@ -263,7 +263,7 @@ export default function BookingDetailPage() {
 
       {booking.childBookings.length > 0 ? (
         <Card className="flex flex-col gap-2">
-          <span className="text-body-sm font-semibold text-text-primary">
+          <span className="text-body-sm font-semibold! text-text-primary">
             {t("crewHire.crewBookedTitle")}
           </span>
           {booking.childBookings.map((child) => (
@@ -290,7 +290,7 @@ export default function BookingDetailPage() {
 
       {hasReschedulePending ? (
         <Card className="flex flex-col gap-2 border border-brand-primary bg-success-bg">
-          <span className="text-body-md font-semibold text-text-primary">
+          <span className="text-body-md font-semibold! text-text-primary">
             {proposedByMe
               ? t("reschedule.waitingForResponse")
               : t("reschedule.newTimeProposed")}
@@ -335,7 +335,7 @@ export default function BookingDetailPage() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="flex items-center gap-1.5 text-body-md font-semibold text-text-primary">
+                <span className="flex items-center gap-1.5 text-body-md font-semibold! text-text-primary">
                   {partyName(otherParty)}
                   {(otherParty.roles?.length ?? 0) > 0 ? (
                     <Badge variant="accent">{t("otherParty.verified")}</Badge>
@@ -418,7 +418,7 @@ export default function BookingDetailPage() {
                 className="flex items-center justify-between px-5 py-3.5"
               >
                 <span className="text-body-sm text-text-tertiary">{label}</span>
-                <span className="text-body-md font-semibold text-text-primary">
+                <span className="text-body-md font-semibold! text-text-primary">
                   {value}
                 </span>
               </div>
@@ -449,7 +449,7 @@ export default function BookingDetailPage() {
           !viewerIsProvider &&
           !booking.review ? (
             <Card className="flex flex-col items-center gap-3 text-center">
-              <span className="text-body-lg font-semibold text-text-primary">
+              <span className="text-body-lg font-semibold! text-text-primary">
                 {t("reviewPrompt", { name: partyName(otherParty) })}
               </span>
               <StarInput
@@ -591,7 +591,7 @@ export default function BookingDetailPage() {
               <span className="text-body-sm text-text-tertiary">
                 {t("fields.total")}
               </span>
-              <span className="text-heading-sm font-bold text-text-primary">
+              <span className="text-heading-sm font-bold! text-text-primary">
                 {formatCurrency(booking.totalPrice, booking.currency)}
               </span>
             </Card>
@@ -766,7 +766,7 @@ function TimelineRow({
 }) {
   return (
     <div className="flex flex-col gap-0.5 border-l-2 border-border-subtle pl-3">
-      <span className="text-body-sm font-semibold text-text-primary">
+      <span className="text-body-sm font-semibold! text-text-primary">
         {label}
       </span>
       <span className="text-body-sm text-text-tertiary">

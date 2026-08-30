@@ -366,6 +366,22 @@
  * shorthand value, which Tailwind own --text-* theme namespace cannot hold
  * (it only takes a size, optionally paired with a --text-*--line-height).
  * @utility exposes them as plain Tailwind classes instead.
+ *
+ * IMPORTANT — confirmed by testing, don't re-attempt without re-verifying:
+ * moving these blocks earlier in this file (even before `@import
+ * "tailwindcss"`) does NOT change their position in Tailwind v4's compiled
+ * output — custom @utility-registered classes are consistently emitted
+ * AFTER every core Tailwind utility regardless of source position. That
+ * means combining one of these with a plain font-weight utility
+ * (`text-body-md font-semibold`) always resolves to THIS shorthand's own
+ * baked-in weight (confirmed live: computed font-weight was 400, not the
+ * intended 600) — source-order tricks can't fix that. Where a call site
+ * genuinely needs a different weight than the one baked in here, use
+ * Tailwind's `!` important modifier on the weight utility (e.g.
+ * `font-semibold!`), or a raw Tailwind size utility instead of one of
+ * these for that element, not a plain font-weight class — see
+ * components/cards/artist-card.tsx's small-badge treatment for the
+ * latter pattern.
  */
 @utility text-display-2xl {
   font: var(--text-display-2xl);

@@ -102,7 +102,7 @@ export default function AdminReportsPage() {
       ) : reports.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Flag className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty")}
           </p>
         </Card>
@@ -116,7 +116,7 @@ export default function AdminReportsPage() {
                     <Badge variant="destructive">{t("highPriority")}</Badge>
                   ) : null}
                   <Badge variant="neutral">{report.targetType}</Badge>
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {report.reason}
                   </span>
                 </div>

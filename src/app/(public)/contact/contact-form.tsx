@@ -40,7 +40,7 @@ export function ContactForm() {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
         <CheckCircle className="size-10 text-brand-primary" />
-        <p className="text-body-lg font-semibold text-text-primary">
+        <p className="text-body-lg font-semibold! text-text-primary">
           Đã gửi tin nhắn
         </p>
         <p className="text-body-md text-text-secondary">
@@ -71,7 +71,7 @@ export function ContactForm() {
         required
       />
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold text-text-primary">
+        <label className="text-body-sm font-semibold! text-text-primary">
           Nội dung
         </label>
         <textarea

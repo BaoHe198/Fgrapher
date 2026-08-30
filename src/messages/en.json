@@ -25,6 +25,8 @@
     "browse": "Search",
     "studios": "Studios",
     "shop": "Shop",
+    "createRequest": "Create request",
+    "browseRequests": "Browse requests",
     "providers": "For providers",
     "dashboard": "Dashboard",
     "signin": "Sign in",
@@ -99,7 +101,19 @@
     "sub": "Photographers, videographers, make-up artists and studios — search and book in one place.",
     "searchPh": "Search artists or studios",
     "city": "Ho Chi Minh City",
-    "cta": "Search"
+    "cta": "Search",
+    "imageAlt": {
+      "photographer": "A photographer at work at sunset",
+      "makeupArtist": "A makeup artist applying makeup to a client",
+      "videographer": "A videographer filming with a professional camera",
+      "studio": "A photography studio set up with professional lighting"
+    },
+    "filters": {
+      "allCategories": "All styles",
+      "categoryNeedsRole": "Choose a role first",
+      "wardNeedsProvince": "Choose a province first",
+      "wardUnavailable": "No ward data available"
+    }
   },
   "home": {
     "featured": "Featured near you",
@@ -573,7 +587,8 @@
         "reports": "Reports",
         "verifications": "Verifications",
         "moderation": "Moderation",
-        "compliance": "Compliance"
+        "compliance": "Compliance",
+        "serviceRequests": "Unclaimed requests"
       },
       "overview": {
         "metaTitle": "Admin overview — Fgrapher",
@@ -758,12 +773,56 @@
           "grantedSuffix": "granted,",
           "notGrantedSummary": "{revoked} not granted ({total} users total)"
         }
+      },
+      "serviceRequests": {
+        "title": "Unclaimed requests",
+        "description": "Open requests with no offers yet — ops can proactively reach out to matching providers.",
+        "empty": "No requests waiting — every open request already has at least one offer.",
+        "hoursOpen": "{hours}h with no offers",
+        "budgetNotSet": "No budget set"
       }
     }
   },
   "apiMessages": {
     "users": {
       "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo"
+    },
+    "phone": {
+      "notConfigured": "Phone verification isn't configured on this system",
+      "invalidInput": "Invalid input",
+      "invalidPhone": "Invalid phone number",
+      "codeSent": "Verification code sent via SMS",
+      "sendFailed": "Couldn't send the verification code, please try again",
+      "codeInvalid": "Incorrect or expired verification code",
+      "verified": "Phone number verified",
+      "verifyFailed": "Couldn't verify, please try again"
+    },
+    "serviceRequests": {
+      "invalidInput": "Invalid input",
+      "loadFailed": "Couldn't load requests",
+      "created": "Request posted",
+      "createFailed": "Couldn't post the request",
+      "saved": "Draft saved",
+      "saveFailed": "Couldn't save",
+      "cancelled": "Request cancelled",
+      "cancelFailed": "Couldn't cancel the request",
+      "published": "Request posted",
+      "publishFailed": "Couldn't post the request"
+    },
+    "offers": {
+      "roleRequired": "Missing role",
+      "invalidInput": "Invalid input",
+      "loadFailed": "Couldn't load data",
+      "offerSent": "Offer sent",
+      "offerFailed": "Couldn't send the offer",
+      "offerUpdated": "Offer updated",
+      "offerUpdateFailed": "Couldn't update the offer",
+      "offerWithdrawn": "Offer withdrawn",
+      "offerWithdrawFailed": "Couldn't withdraw the offer",
+      "offerAccepted": "Offer accepted and booking created",
+      "acceptFailed": "Couldn't accept the offer",
+      "offerDeclined": "Offer declined",
+      "declineFailed": "Couldn't decline the offer"
     },
     "portfolio": {
       "invalidInput": "Invalid input",
@@ -933,6 +992,186 @@
     }
   },
   "dashboardCore": {
+    "requestWizard": {
+      "heading": "Post a request",
+      "subheading": "Describe what you need — matching providers will send you offers.",
+      "stepLabel": "Step {current}/{total}",
+      "steps": {
+        "who": "Who do you need?",
+        "when": "When?",
+        "where": "Where?",
+        "budget": "Budget",
+        "concept": "Describe the concept",
+        "review": "Review"
+      },
+      "roleLabel": "Role you need",
+      "rolePlaceholder": "Choose a role",
+      "categoriesLabel": "Specialty categories — {count}/{max} chosen",
+      "isDateFlexibleLabel": "Flexible date (no fixed date yet)",
+      "dateRangeStartLabel": "From",
+      "dateRangeEndLabel": "To",
+      "shootDateLabel": "Shoot date",
+      "provinceLabel": "Province/city",
+      "provincePlaceholder": "Choose a province/city",
+      "wardLabel": "Ward",
+      "wardPlaceholder": "Choose a ward",
+      "wardUnavailable": "No ward data available for this area yet",
+      "areaNoteLabel": "General area",
+      "areaNotePlaceholder": "e.g. District 1, near downtown",
+      "detailedAddressLabel": "Detailed address",
+      "detailedAddressHint": "Only shown to a provider after you accept their offer.",
+      "budgetMinLabel": "Minimum budget",
+      "budgetMaxLabel": "Maximum budget",
+      "budgetHint": "Optional, but helps providers quote a fitting price.",
+      "titleLabel": "Request title",
+      "descriptionLabel": "Describe the concept",
+      "referencesLabel": "Reference photos",
+      "uploadUnavailable": "Photo upload isn't available yet",
+      "uploadFailed": "Couldn't upload the photo",
+      "reviewDateFlexible": "Flexible: {start} — {end}",
+      "budgetNotSet": "No budget set",
+      "phoneVerifyRequired": "Verify your phone number before posting a request.",
+      "phoneVerifiedToast": "Phone number verified",
+      "back": "Back",
+      "saveDraft": "Save draft",
+      "continue": "Continue",
+      "post": "Post request",
+      "draftSaved": "Draft saved",
+      "posted": "Request posted",
+      "genericError": "Something went wrong, please try again"
+    },
+    "serviceRequests": {
+      "title": "My requests",
+      "newRequest": "Post a request",
+      "empty": {
+        "title": "No requests yet",
+        "body": "Post a request so matching providers can send you offers."
+      },
+      "draftPrefix": "[Draft]",
+      "draftBadge": "Draft",
+      "budgetNotSet": "No budget set",
+      "offerCount": "{count, plural, =0 {No offers yet} one {# offer} other {# offers}}",
+      "status": {
+        "OPEN": "Open",
+        "HAS_OFFERS": "Has offers",
+        "FULFILLED": "Fulfilled",
+        "EXPIRED": "Expired",
+        "CANCELLED": "Cancelled"
+      },
+      "detail": {
+        "back": "Back to my requests",
+        "whenLabel": "When",
+        "whereLabel": "Where",
+        "budgetLabel": "Budget",
+        "budgetNotSet": "Not set",
+        "flexibleRange": "Flexible: {start} — {end}",
+        "cancelRequest": "Cancel request",
+        "cancelConfirm": "Cancel this request? Every pending offer will be automatically declined.",
+        "cancelledToast": "Request cancelled",
+        "offersCount": "{count, plural, =0 {No offers yet} one {# offer} other {# offers}}",
+        "noOffers": "No provider has sent an offer yet. We'll notify you when one arrives.",
+        "offerStatus": {
+          "PENDING": "Pending",
+          "ACCEPTED": "Accepted",
+          "DECLINED": "Declined",
+          "WITHDRAWN": "Withdrawn"
+        },
+        "viewProfile": "View profile",
+        "message": "Message",
+        "accept": "Accept",
+        "decline": "Decline",
+        "offerDeclinedToast": "Offer declined",
+        "acceptDialogTitle": "Confirm booking",
+        "acceptDateLabel": "Date",
+        "acceptTimeLabel": "Start time",
+        "acceptLocationLabel": "Location",
+        "locationOutdoor": "Outdoor",
+        "locationProvider": "At the provider's location",
+        "locationCustomer": "At my location",
+        "cancel": "Cancel",
+        "confirmAccept": "Confirm",
+        "offerAcceptedToast": "Offer accepted and booking created",
+        "genericError": "Something went wrong, please try again"
+      }
+    },
+    "opportunities": {
+      "title": "Matching requests",
+      "proOnly": {
+        "title": "For service providers",
+        "body": "Add a provider role to see requests that match you."
+      },
+      "empty": {
+        "title": "No matching requests yet",
+        "body": "We'll notify you as soon as a request matches your role, area, and specialty categories."
+      },
+      "budgetNotSet": "No budget set",
+      "flexible": "Flexible date",
+      "offerCount": "{count, plural, =0 {No offers yet} one {# offer} other {# offers}}",
+      "myOfferStatus": {
+        "PENDING": "You offered — pending",
+        "ACCEPTED": "You were chosen",
+        "DECLINED": "Declined",
+        "WITHDRAWN": "Withdrawn"
+      },
+      "detail": {
+        "back": "Back to matching requests",
+        "postedBy": "Posted by {name}",
+        "whenLabel": "When",
+        "whereLabel": "Where",
+        "budgetLabel": "Budget",
+        "budgetNotSet": "Not set",
+        "flexibleRange": "Flexible: {start} — {end}",
+        "addressHiddenNote": "The detailed address only shows once the customer accepts your offer.",
+        "yourOfferTitle": "Your offer",
+        "sendOfferTitle": "Send an offer",
+        "offerStatus": {
+          "ACCEPTED": "You were chosen",
+          "DECLINED": "Declined",
+          "WITHDRAWN": "Withdrawn"
+        },
+        "proposedPriceLabel": "Proposed price",
+        "proposedDateLabel": "Proposed date",
+        "messageLabel": "Message",
+        "sendOffer": "Send offer",
+        "updateOffer": "Update offer",
+        "withdraw": "Withdraw offer",
+        "withdrawConfirm": "Withdraw this offer?",
+        "offerSentToast": "Offer sent",
+        "withdrawnToast": "Offer withdrawn",
+        "genericError": "Something went wrong, please try again"
+      }
+    },
+    "browseRequests": {
+      "heading": "Browse requests",
+      "subheading": "Every open request on the platform — filter by role and province to find one that fits you.",
+      "filtersHeading": "Filters",
+      "roleFilterLabel": "Role",
+      "allRoles": "All roles",
+      "provinceFilterLabel": "Province/city",
+      "allProvinces": "All provinces",
+      "wardFilterLabel": "Ward",
+      "allWards": "All wards",
+      "empty": {
+        "title": "No open requests right now",
+        "body": "Check back later or try loosening your filters."
+      },
+      "budgetNotSet": "No budget set",
+      "flexible": "Flexible date",
+      "offerCount": "{count, plural, =0 {No offers yet} other {# offers}}"
+    },
+    "myOffers": {
+      "title": "Offers sent",
+      "empty": {
+        "title": "No offers sent yet",
+        "body": "Check \"Matching requests\" to find requests that fit your role."
+      },
+      "status": {
+        "PENDING": "Pending",
+        "ACCEPTED": "You were chosen",
+        "DECLINED": "Declined",
+        "WITHDRAWN": "Withdrawn"
+      }
+    },
     "acceptingBookingsToggle": {
       "label": "Accepting bookings"
     },
@@ -1415,6 +1654,9 @@
     "account": {
       "emailLabel": "Email",
       "phoneLabel": "Phone number",
+      "phoneVerified": "Verified",
+      "phoneNotVerified": "Not verified",
+      "phoneVerifyCta": "Verify now",
       "save": "Save",
       "changePasswordTitle": "Change password",
       "currentPasswordLabel": "Current password",
@@ -1952,6 +2194,7 @@
         "removeBudget": "Remove budget filter",
         "removeRating": "Remove rating filter",
         "removeCity": "Remove province filter",
+        "removeWard": "Remove ward filter",
         "removeRoles": "Remove role filter"
       },
       "clearFilters": "Clear all filters",
@@ -2263,6 +2506,18 @@
     }
   },
   "sharedComponents": {
+    "phoneVerifyDialog": {
+      "title": "Verify phone number",
+      "sendDescription": "Send a 6-digit code via SMS to {phone}",
+      "codeDescription": "Enter the 6-digit code sent to {phone}",
+      "devHint": "Dev mode (Twilio not configured) — use code {code}",
+      "codeLabel": "Verification code",
+      "resend": "Resend code",
+      "sendCode": "Send code",
+      "verify": "Verify",
+      "cancel": "Cancel",
+      "genericError": "Something went wrong, please try again"
+    },
     "artistCard": {
       "noPhotoLabel": "No portfolio photos yet",
       "previousPhoto": "Previous photo",
@@ -2293,6 +2548,8 @@
       "sortMostReviewed": "Most reviewed",
       "cityLabel": "City",
       "allCities": "All cities",
+      "wardLabel": "Ward",
+      "allWards": "All wards",
       "budgetLabel": "Budget",
       "budgetAny": "Any",
       "budgetUnder2m": "Under ₫2M",
@@ -2485,6 +2742,9 @@
       "calendar": "Calendar",
       "reviews": "Reviews",
       "portfolio": "Portfolio",
+      "myRequests": "My requests",
+      "opportunities": "Matching requests",
+      "myOffers": "Offers sent",
       "listings": "Listings",
       "shopOrders": "Shop orders",
       "myOrders": "My orders",

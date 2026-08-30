@@ -60,7 +60,7 @@ export function ReviewPageContent({
     return (
       <div className="mx-auto max-w-lg px-6 py-24 text-center">
         <Card className="flex flex-col items-center gap-3 py-12">
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("cantReview")}
           </p>
           <p className="text-body-md text-text-secondary">

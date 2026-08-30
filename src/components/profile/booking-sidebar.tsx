@@ -148,7 +148,7 @@ export function BookingSidebar({
           >
             <ChevronLeft className="size-4" />
           </button>
-          <span className="text-body-sm font-semibold text-text-primary">
+          <span className="text-body-sm font-semibold! text-text-primary">
             {formatMonthYear(weekStart)}
           </span>
           <button
@@ -191,7 +191,7 @@ export function BookingSidebar({
                   <span className="text-body-sm text-text-tertiary">
                     {formatWeekdayShort(date)}
                   </span>
-                  <span className="text-body-md font-semibold">
+                  <span className="text-body-md font-semibold!">
                     {date.getUTCDate()}
                   </span>
                   {day.busy ? (
@@ -251,7 +251,7 @@ export function BookingSidebar({
             <span className="text-text-primary">{selectedTime}</span>
           </div>
           {selectedService ? (
-            <div className="flex justify-between text-heading-sm font-bold">
+            <div className="flex justify-between text-heading-sm font-bold!">
               <span>{t("total")}</span>
               <span>
                 {formatCurrency(

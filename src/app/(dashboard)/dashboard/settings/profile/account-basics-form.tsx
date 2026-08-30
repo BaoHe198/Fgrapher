@@ -95,7 +95,7 @@ export function AccountBasicsForm({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold text-text-primary">
+        <label className="text-body-sm font-semibold! text-text-primary">
           {t("usernameLabel")}
         </label>
         <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export function AccountBasicsForm({
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-body-sm font-semibold text-text-primary">
+          <label className="text-body-sm font-semibold! text-text-primary">
             {t("bioLabel")}
           </label>
           <span className="text-body-sm text-text-tertiary">

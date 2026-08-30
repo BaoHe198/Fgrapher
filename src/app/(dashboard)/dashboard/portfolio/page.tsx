@@ -33,7 +33,7 @@ export default async function PortfolioPage({
     return (
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <Camera className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold text-text-primary">
+        <p className="text-body-lg font-semibold! text-text-primary">
           {t("proOnly.title")}
         </p>
         <p className="max-w-sm text-body-md text-text-secondary">
@@ -60,7 +60,7 @@ export default async function PortfolioPage({
     return (
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <Camera className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold text-text-primary">
+        <p className="text-body-lg font-semibold! text-text-primary">
           {t("noProfile.title")}
         </p>
         <p className="max-w-sm text-body-md text-text-secondary">

@@ -136,7 +136,7 @@ export function ServicesManager({
               className="flex items-center justify-between rounded-[var(--fg-radius-sm)] border border-border-default p-3"
             >
               <div>
-                <p className="text-body-md font-semibold text-text-primary">
+                <p className="text-body-md font-semibold! text-text-primary">
                   {service.name} {!service.isActive ? t("inactive") : ""}
                 </p>
                 <p className="text-body-sm text-text-secondary">
@@ -179,7 +179,7 @@ export function ServicesManager({
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             />
             <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-semibold text-text-primary">
+              <label className="text-body-sm font-semibold! text-text-primary">
                 {t("descriptionLabel")}
               </label>
               <textarea

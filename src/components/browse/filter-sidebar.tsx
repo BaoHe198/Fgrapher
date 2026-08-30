@@ -34,6 +34,11 @@ interface ProvinceOption {
   name: string;
 }
 
+interface WardOption {
+  id: string;
+  name: string;
+}
+
 // Labels for these three option lists are resolved inside the component via
 // useTranslations, since module scope has no access to the hook.
 
@@ -47,6 +52,7 @@ interface FilterState {
   roles: Role[];
   sort: string;
   city: string;
+  ward: string;
   minPrice: string;
   maxPrice: string;
   minRating: string;
@@ -63,6 +69,7 @@ function filterStateFromParams(searchParams: URLSearchParams): FilterState {
       []) as Role[],
     sort: searchParams.get("sort") ?? "rating",
     city: searchParams.get("city") ?? "",
+    ward: searchParams.get("ward") ?? "",
     minPrice: searchParams.get("minPrice") ?? "",
     maxPrice: searchParams.get("maxPrice") ?? "",
     minRating: searchParams.get("minRating") ?? "",
@@ -83,6 +90,7 @@ function filterStateToQuery(filters: FilterState): string {
   if (filters.roles.length > 0) params.set("roles", filters.roles.join(","));
   if (filters.sort !== "rating") params.set("sort", filters.sort);
   if (filters.city) params.set("city", filters.city);
+  if (filters.city && filters.ward) params.set("ward", filters.ward);
   if (filters.minPrice) params.set("minPrice", filters.minPrice);
   if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
   if (filters.minRating) params.set("minRating", filters.minRating);
@@ -159,6 +167,23 @@ export function FilterSidebar({
       .then((res) => res.json())
       .then((body) => startTransition(() => setProvinces(body.data ?? [])));
   }, []);
+
+  // Ward coverage is HCMC-only today (see prisma/data/hcmc-wards.ts) — most
+  // provinces resolve to an empty list here, so the select below falls back
+  // to "all wards" rather than hiding.
+  const [wards, setWards] = useState<WardOption[]>([]);
+  useEffect(() => {
+    if (!filters.city) {
+      startTransition(() => setWards([]));
+      return;
+    }
+    fetch(
+      `/api/geography/wards?provinceCode=${encodeURIComponent(filters.city)}`,
+    )
+      .then((res) => res.json())
+      .then((body) => startTransition(() => setWards(body.data ?? [])))
+      .catch(() => startTransition(() => setWards([])));
+  }, [filters.city]);
   // Mirrors `filters` synchronously (state updates are batched/async, this
   // isn't) so a click reads the freshest local intent even if it fires
   // before React has re-rendered from the previous click. Written only in
@@ -281,6 +306,7 @@ export function FilterSidebar({
       roles: [],
       sort: "rating",
       city: "",
+      ward: "",
       minPrice: "",
       maxPrice: "",
       minRating: "",
@@ -373,7 +399,7 @@ export function FilterSidebar({
                 <button
                   type="button"
                   onClick={() => setShowAllCategories(true)}
-                  className="text-body-sm font-semibold text-text-link"
+                  className="text-body-sm font-semibold! text-text-link"
                 >
                   {t("seeAllCategories")}
                 </button>
@@ -395,7 +421,7 @@ export function FilterSidebar({
                   className="flex flex-col gap-2.5"
                 >
                   {group.role ? (
-                    <span className="text-body-sm font-semibold text-text-secondary">
+                    <span className="text-body-sm font-semibold! text-text-secondary">
                       {roleT(group.role)}
                     </span>
                   ) : null}
@@ -419,7 +445,7 @@ export function FilterSidebar({
                       onClick={() =>
                         group.role && toggleGroupExpand(group.role)
                       }
-                      className="self-start text-body-sm font-semibold text-text-link"
+                      className="self-start text-body-sm font-semibold! text-text-link"
                     >
                       {isExpanded
                         ? t("showLess")
@@ -510,10 +536,21 @@ export function FilterSidebar({
       <NativeSelect
         label={t("cityLabel")}
         value={filters.city}
-        onChange={(value) => applyFilters({ city: value })}
+        onChange={(value) => applyFilters({ city: value, ward: "" })}
         options={[
           { value: "", label: t("allCities") },
           ...provinces.map((p) => ({ value: p.code, label: p.name })),
+        ]}
+      />
+
+      <NativeSelect
+        label={t("wardLabel")}
+        value={filters.ward}
+        onChange={(value) => applyFilters({ ward: value })}
+        disabled={!filters.city || wards.length === 0}
+        options={[
+          { value: "", label: t("allWards") },
+          ...wards.map((w) => ({ value: w.id, label: w.name })),
         ]}
       />
 

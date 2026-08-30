@@ -28,7 +28,7 @@ export function SettingsNav() {
             key={tab.href}
             href={tab.href}
             className={cn(
-              "shrink-0 border-b-2 px-4 py-3 text-body-md font-semibold transition-colors duration-150",
+              "shrink-0 border-b-2 px-4 py-3 text-body-md font-semibold! transition-colors duration-150",
               isActive
                 ? "border-brand-primary text-text-primary"
                 : "border-transparent text-text-secondary",

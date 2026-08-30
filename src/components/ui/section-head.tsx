@@ -21,7 +21,7 @@ function SectionHead({
       {actionLabel && actionHref ? (
         <Link
           href={actionHref}
-          className="text-body-md font-semibold text-text-link"
+          className="text-body-md font-semibold! text-text-link"
         >
           {actionLabel}
         </Link>

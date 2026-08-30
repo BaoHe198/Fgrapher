@@ -418,7 +418,7 @@ export function UploadMediaModal({
                   >
                     <div className="flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-body-sm font-semibold text-text-primary">
+                        <span className="truncate text-body-sm font-semibold! text-text-primary">
                           {f.file.name}
                         </span>
                         {f.status === "pending" ? (

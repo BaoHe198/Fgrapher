@@ -426,7 +426,7 @@ function ProgressIndicator({ step }: { step: number }) {
             <div className="flex flex-col items-center gap-1.5">
               <div
                 className={cn(
-                  "flex size-8 items-center justify-center rounded-full text-body-sm font-bold",
+                  "flex size-8 items-center justify-center rounded-full text-body-sm font-bold!",
                   isDone
                     ? "bg-success text-white"
                     : isActive
@@ -438,7 +438,7 @@ function ProgressIndicator({ step }: { step: number }) {
               </div>
               <span
                 className={cn(
-                  "text-body-sm font-semibold whitespace-nowrap",
+                  "text-body-sm font-semibold! whitespace-nowrap",
                   isActive || isDone
                     ? "text-text-primary"
                     : "text-text-tertiary",
@@ -484,7 +484,7 @@ function StepService({
 
       {services.length === 0 ? (
         <div className="flex flex-col gap-2">
-          <label className="text-body-sm font-semibold text-text-primary">
+          <label className="text-body-sm font-semibold! text-text-primary">
             {t("stepService.describeLabel")}
           </label>
           <Textarea
@@ -526,7 +526,7 @@ function StepService({
                     })}
                   </span>
                 </div>
-                <span className="text-heading-sm font-bold text-text-primary">
+                <span className="text-heading-sm font-bold! text-text-primary">
                   {formatCurrency(service.price, service.currency)}
                 </span>
               </button>
@@ -611,7 +611,7 @@ function StepDateTime({
             >
               <ChevronLeft className="size-4" />
             </button>
-            <span className="text-body-md font-semibold text-text-primary">
+            <span className="text-body-md font-semibold! text-text-primary">
               {formatMonthYear(weekStart)}
             </span>
             <button
@@ -677,7 +677,7 @@ function StepDateTime({
             </p>
           ) : (
             <>
-              <span className="text-body-sm font-semibold text-text-primary">
+              <span className="text-body-sm font-semibold! text-text-primary">
                 {formatDateLong(date)}
               </span>
               {duration ? (
@@ -700,7 +700,7 @@ function StepDateTime({
                         type="button"
                         onClick={() => onSelectTime(slot.time)}
                         className={cn(
-                          "rounded-[var(--fg-radius-sm)] border py-2.5 text-body-md font-semibold",
+                          "rounded-[var(--fg-radius-sm)] border py-2.5 text-body-md font-semibold!",
                           time === slot.time
                             ? "border-transparent bg-brand-primary text-text-on-brand"
                             : "border-border-default bg-bg-surface text-text-primary",
@@ -817,7 +817,7 @@ function StepDetails({
             onChange={(e) => onChange("usageRights", e.target.value)}
           />
           <div className="flex flex-col gap-1.5">
-            <label className="text-body-sm font-semibold text-text-primary">
+            <label className="text-body-sm font-semibold! text-text-primary">
               {t("stepDetails.wardrobeLabel")}
             </label>
             <Textarea
@@ -838,7 +838,7 @@ function StepDetails({
       ) : null}
 
       <div className="flex flex-col gap-2">
-        <span className="text-body-sm font-semibold text-text-primary">
+        <span className="text-body-sm font-semibold! text-text-primary">
           {t("stepDetails.locationLabel")}
         </span>
         <div className="flex flex-col gap-2">
@@ -881,7 +881,7 @@ function StepDetails({
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold text-text-primary">
+        <label className="text-body-sm font-semibold! text-text-primary">
           {t("stepDetails.notesLabel")}
         </label>
         <Textarea
@@ -976,7 +976,7 @@ function StepReview({
           {providerAvatar ? <AvatarImage src={providerAvatar} alt="" /> : null}
           <AvatarFallback>{providerName[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
-        <span className="text-body-md font-semibold text-text-primary">
+        <span className="text-body-md font-semibold! text-text-primary">
           {providerName}
         </span>
       </div>
@@ -985,7 +985,7 @@ function StepReview({
         {rows.map(([label, value]) => (
           <div key={label} className="flex justify-between py-2.5">
             <span className="text-body-sm text-text-tertiary">{label}</span>
-            <span className="text-body-md font-semibold text-text-primary">
+            <span className="text-body-md font-semibold! text-text-primary">
               {value}
             </span>
           </div>
@@ -1002,7 +1002,7 @@ function StepReview({
               {formatCurrency(service.price, service.currency)}
             </span>
           </div>
-          <div className="flex justify-between py-2.5 text-heading-md font-bold text-text-primary">
+          <div className="flex justify-between py-2.5 text-heading-md font-bold! text-text-primary">
             <span>{t("stepReview.total")}</span>
             <span>{formatCurrency(service.price, service.currency)}</span>
           </div>

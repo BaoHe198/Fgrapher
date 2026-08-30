@@ -3,6 +3,7 @@
 import {
   BadgeCheck,
   Flag,
+  Handshake,
   Image as ImageIcon,
   LayoutDashboard,
   ShieldCheck,
@@ -21,6 +22,11 @@ const ITEMS = [
   { href: "/admin/verifications", key: "verifications", icon: BadgeCheck },
   { href: "/admin/moderation", key: "moderation", icon: ImageIcon },
   { href: "/admin/compliance", key: "compliance", icon: ShieldCheck },
+  {
+    href: "/admin/service-requests",
+    key: "serviceRequests",
+    icon: Handshake,
+  },
 ] as const;
 
 export function AdminSidebar() {
@@ -37,7 +43,7 @@ export function AdminSidebar() {
             key={href}
             href={href}
             className={cn(
-              "flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] px-3 py-2.5 text-body-md font-semibold transition-colors duration-150",
+              "flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] px-3 py-2.5 text-body-md font-semibold! transition-colors duration-150",
               isActive
                 ? "bg-surface-card text-text-primary"
                 : "text-text-secondary hover:bg-surface-card/60",

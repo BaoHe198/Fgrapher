@@ -137,7 +137,7 @@ export default function BookingsPage() {
       ) : bookings.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Calendar className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty.heading")}
           </p>
           <p className="text-body-md text-text-secondary">{t("empty.body")}</p>

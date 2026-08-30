@@ -15,6 +15,14 @@
     {
       "path": "/api/cron/purge-trashed-media",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/expire-service-requests",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/nudge-unanswered-requests",
+      "schedule": "0 7 * * *"
     }
   ]
 }

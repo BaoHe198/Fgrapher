@@ -126,7 +126,7 @@ export function MessagingPopup({
   const header = (
     <div className="flex shrink-0 items-center gap-2 border-b border-border-subtle px-3.5 py-2.5">
       <MessageCircle className="size-4 text-brand-primary" />
-      <span className="text-body-md font-semibold text-text-primary">
+      <span className="text-body-md font-semibold! text-text-primary">
         {t("title")}
       </span>
       <div className="ml-auto flex items-center gap-1">
@@ -183,7 +183,7 @@ export function MessagingPopup({
             className="flex items-center gap-2 px-3.5 py-2.5 text-left"
           >
             <MessageCircle className="size-4 text-brand-primary" />
-            <span className="text-body-md font-semibold text-text-primary">
+            <span className="text-body-md font-semibold! text-text-primary">
               {t("title")}
             </span>
             <Button

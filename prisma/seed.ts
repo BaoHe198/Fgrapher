@@ -333,7 +333,10 @@ const USERS: UserSeed[] = [
   },
 ];
 
-const WEEKDAYS = [1, 2, 3, 4, 5]; // Mon-Fri (0=Sunday, 6=Saturday)
+// All 7 days (0=Sunday..6=Saturday) — providers decide their own working
+// days, the platform doesn't pre-exclude weekends for them (matches
+// availability-settings.tsx's DEFAULT_SCHEDULE).
+const ALL_WEEK_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 // Prompt B4/B8 — real administrative geography, one entry per province in
 // PROVINCE_REGISTRY (see prisma/data/provinces-registry.ts for how to add
@@ -508,7 +511,7 @@ async function main() {
 
     if (seedUser.profiles && seedUser.profiles.length > 0) {
       await db.availability.createMany({
-        data: WEEKDAYS.map((dayOfWeek) => ({
+        data: ALL_WEEK_DAYS.map((dayOfWeek) => ({
           userId: user.id,
           dayOfWeek,
           startTime: "09:00",

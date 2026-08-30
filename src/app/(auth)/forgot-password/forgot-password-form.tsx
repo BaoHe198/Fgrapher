@@ -61,7 +61,7 @@ export function ForgotPasswordForm() {
         </p>
         <Link
           href="/login"
-          className="text-body-sm font-semibold text-text-link hover:underline"
+          className="text-body-sm font-semibold! text-text-link hover:underline"
         >
           {t("backToSignIn")}
         </Link>

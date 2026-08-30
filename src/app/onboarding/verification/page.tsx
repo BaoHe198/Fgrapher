@@ -78,7 +78,7 @@ export default async function OnboardingVerificationPage({
               href={`/onboarding/verification?role=${r.role}`}
               className="flex items-center justify-between rounded-[var(--fg-radius-md)] border border-border-default p-4 hover:bg-bg-sunken"
             >
-              <span className="text-body-md font-semibold text-text-primary">
+              <span className="text-body-md font-semibold! text-text-primary">
                 {roleT(r.role)}
               </span>
               <span className="text-body-sm text-text-secondary">

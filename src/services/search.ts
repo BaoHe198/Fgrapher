@@ -15,6 +15,7 @@ export interface SearchParams {
   q?: string;
   roles?: Role[];
   city?: string;
+  wardId?: string;
   minPrice?: number;
   maxPrice?: number;
   categories?: ProfileCategory[];
@@ -273,7 +274,7 @@ export async function searchProfiles(params: SearchParams) {
     : null;
 
   const baseWhere = buildBaseWhere(params);
-  const primaryWhere: Prisma.ProfileWhereInput = province
+  const withProvince: Prisma.ProfileWhereInput = province
     ? {
         AND: [
           baseWhere,
@@ -286,6 +287,14 @@ export async function searchProfiles(params: SearchParams) {
         ],
       }
     : baseWhere;
+
+  // Ward is strictly more specific than a service area (ProfileServiceArea
+  // has no ward granularity), so it narrows to providers actually based in
+  // that ward rather than widening the OR above — a nationwide/service-area
+  // match with no wardId of its own correctly falls out of the results here.
+  const primaryWhere: Prisma.ProfileWhereInput = params.wardId
+    ? { AND: [withProvince, { wardId: params.wardId }] }
+    : withProvince;
 
   const results = await resolveProviderCards(
     primaryWhere,

@@ -110,7 +110,7 @@ export function ConversationList({
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-6 py-16 text-center">
             <MessageCircle className="size-10 text-text-tertiary" />
-            <p className="text-body-md font-semibold text-text-primary">
+            <p className="text-body-md font-semibold! text-text-primary">
               {t("emptyTitle")}
             </p>
             <p className="text-body-sm text-text-secondary">
@@ -144,7 +144,7 @@ export function ConversationList({
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="truncate text-body-md font-semibold text-text-primary">
+                    <span className="truncate text-body-md font-semibold! text-text-primary">
                       {partyName(conversation.otherUser, unknownLabel)}
                     </span>
                   </div>

@@ -127,7 +127,7 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
 
       {result.data.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-3 text-center">
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty.heading", values)}
           </p>
           <p className="text-body-md text-text-secondary">{t("empty.body")}</p>

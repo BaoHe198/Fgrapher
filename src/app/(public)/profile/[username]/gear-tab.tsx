@@ -53,7 +53,7 @@ export function GearTab({ products }: { products: ProductItem[] }) {
               <span className="text-heading-sm text-text-primary">
                 {product.name}
               </span>
-              <span className="text-body-md font-semibold text-text-primary">
+              <span className="text-body-md font-semibold! text-text-primary">
                 {product.type === "RENT"
                   ? `${formatCurrency(product.rentalPrice ?? 0, product.currency)}/day`
                   : formatCurrency(product.price ?? 0, product.currency)}
@@ -65,7 +65,7 @@ export function GearTab({ products }: { products: ProductItem[] }) {
 
       <Link
         href="/shop"
-        className="self-center text-body-md font-semibold text-text-link"
+        className="self-center text-body-md font-semibold! text-text-link"
       >
         View all gear
       </Link>

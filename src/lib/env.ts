@@ -50,6 +50,10 @@ const serverSchema = z.object({
   // read via bracket notation per-role and are already optional at every
   // call site (priceIdForRole returns undefined, handled by callers).
 
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_VERIFY_SERVICE_SID: z.string().optional(),
+
   RESEND_API_KEY: z.string().optional(),
   CRON_SECRET: z.string().optional(),
   // Staging-only — see lib/email.ts's sendEmail(). Every outbound email

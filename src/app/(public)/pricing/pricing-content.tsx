@@ -124,7 +124,7 @@ export function PricingContent({
   return (
     <div className="flex flex-col">
       {!billingEnabled ? (
-        <div className="bg-gold-500 px-6 py-2.5 text-center text-body-sm font-semibold text-text-on-brand">
+        <div className="bg-gold-500 px-6 py-2.5 text-center text-body-sm font-semibold! text-text-on-brand">
           {t("freeDuringLaunch")}
         </div>
       ) : null}
@@ -144,7 +144,7 @@ export function PricingContent({
               type="button"
               onClick={() => setYearly(label === "Yearly")}
               className={cn(
-                "px-4 py-1.5 text-body-sm font-bold transition-colors duration-150",
+                "px-4 py-1.5 text-body-sm font-bold! transition-colors duration-150",
                 yearly === (label === "Yearly")
                   ? "bg-brand-primary text-text-on-brand"
                   : "text-text-secondary",
@@ -191,7 +191,7 @@ export function PricingContent({
                 )}
               >
                 {plan.popular ? (
-                  <span className="w-fit rounded-full bg-brand-primary px-2.5 py-1 text-body-sm font-bold text-text-on-brand">
+                  <span className="w-fit rounded-full bg-brand-primary px-2.5 py-1 text-body-sm font-bold! text-text-on-brand">
                     {t("mostPopular")}
                   </span>
                 ) : null}

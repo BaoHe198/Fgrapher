@@ -50,6 +50,11 @@ const TYPE_GROUP: Record<
   REVIEW_RESPONSE: "SOCIAL",
   MEDIA_APPROVED: "OTHER",
   MEDIA_REJECTED: "OTHER",
+  REQUEST_NEW_MATCH: "OTHER",
+  REQUEST_NEW_OFFER: "OTHER",
+  REQUEST_OFFER_ACCEPTED: "OTHER",
+  REQUEST_OFFER_DECLINED: "OTHER",
+  REQUEST_NO_OFFERS_48H: "OTHER",
 };
 
 function relativeTime(
@@ -140,7 +145,7 @@ export default function NotificationsPage() {
       ) : visible.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Bell className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty.title")}
           </p>
           <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
@@ -157,7 +162,7 @@ export default function NotificationsPage() {
                 !notification.readAt && "bg-success-bg/40",
               )}
             >
-              <span className="text-body-md font-semibold text-text-primary">
+              <span className="text-body-md font-semibold! text-text-primary">
                 {notification.title}
               </span>
               <span className="text-body-sm text-text-secondary">

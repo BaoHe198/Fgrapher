@@ -79,7 +79,7 @@ export async function ProductCard({ product }: ProductCardProps) {
           <Badge variant="neutral" className="w-fit">
             {CONDITION_LABEL[product.condition] ?? product.condition}
           </Badge>
-          <span className="text-body-md font-semibold text-text-primary">
+          <span className="text-body-md font-semibold! text-text-primary">
             {product.type === "RENT" && product.rentalPrice
               ? `${formatCurrency(product.rentalPrice, product.currency)}${t("perDay")}`
               : product.price

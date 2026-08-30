@@ -75,7 +75,7 @@ export function PortfolioTab({ albums }: { albums: AlbumItem[] }) {
               </div>
             )}
             <div className="relative z-10 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
-              <p className="truncate text-body-sm font-semibold text-white">
+              <p className="truncate text-body-sm font-semibold! text-white">
                 {album.title}
               </p>
               <p className="text-body-sm text-white/80">

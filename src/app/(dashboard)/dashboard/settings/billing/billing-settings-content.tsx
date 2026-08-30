@@ -153,7 +153,7 @@ export function BillingSettingsContent({
     return (
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <CreditCard className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold text-text-primary">
+        <p className="text-body-lg font-semibold! text-text-primary">
           {t("emptyTitle")}
         </p>
         <p className="max-w-sm text-body-md text-text-secondary">
@@ -184,7 +184,7 @@ export function BillingSettingsContent({
             <Card key={role} className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {roleT(role)}
                   </span>
                   <span className="text-body-sm text-text-secondary">
@@ -257,10 +257,10 @@ export function BillingSettingsContent({
         })}
 
         <Card className="flex items-center justify-between">
-          <span className="text-body-md font-semibold text-text-primary">
+          <span className="text-body-md font-semibold! text-text-primary">
             {t("totalMonthlyCost")}
           </span>
-          <span className="text-heading-md font-bold text-text-primary">
+          <span className="text-heading-md font-bold! text-text-primary">
             {formatCurrency(totalMonthly, "VND")}
             {t("perMonth")}
           </span>
@@ -318,7 +318,7 @@ export function BillingSettingsContent({
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {formatCurrency(invoice.amount, invoice.currency)}
                   </span>
                   {invoice.hostedUrl ? (
@@ -326,7 +326,7 @@ export function BillingSettingsContent({
                       href={invoice.hostedUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-body-sm font-semibold text-brand-primary"
+                      className="text-body-sm font-semibold! text-brand-primary"
                     >
                       {t("viewInvoice")}
                     </a>

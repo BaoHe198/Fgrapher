@@ -66,6 +66,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     q: params.q,
     roles,
     city: params.city,
+    wardId: params.ward,
     minPrice: params.minPrice ? Number(params.minPrice) : undefined,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
     categories,
@@ -115,8 +116,17 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
           },
         ]
       : []),
+    ...(params.ward
+      ? [{ key: "ward", label: t("noResults.removeWard"), drop: ["ward"] }]
+      : []),
     ...(params.city
-      ? [{ key: "city", label: t("noResults.removeCity"), drop: ["city"] }]
+      ? [
+          {
+            key: "city",
+            label: t("noResults.removeCity"),
+            drop: ["city", "ward"],
+          },
+        ]
       : []),
     ...(roles && roles.length > 0
       ? [{ key: "roles", label: t("noResults.removeRoles"), drop: ["roles"] }]
@@ -126,6 +136,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const activeFilterCount = [
     roles?.length,
     params.city,
+    params.ward,
     params.minPrice,
     params.maxPrice,
     params.minRating,
@@ -200,7 +211,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               {result.data.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-20 text-center">
                   <SearchX className="size-12 text-text-tertiary" />
-                  <p className="text-body-lg font-semibold text-text-primary">
+                  <p className="text-body-lg font-semibold! text-text-primary">
                     {t("noResults.heading")}
                   </p>
                   <p className="text-body-md text-text-secondary">

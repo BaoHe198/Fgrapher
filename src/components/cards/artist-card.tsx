@@ -72,7 +72,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
         className="group cursor-pointer overflow-hidden transition-shadow duration-150 hover:shadow-[var(--shadow-md)]"
       >
         <div
-          className="relative h-[180px] w-full bg-bg-sunken"
+          className="relative aspect-[3/4] w-full bg-bg-sunken"
           onTouchStart={hasPhotos ? onTouchStart : undefined}
           onTouchEnd={hasPhotos ? onTouchEnd : undefined}
         >
@@ -178,7 +178,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
                 {initial}
               </AvatarFallback>
             </Avatar>
-            <span className="line-clamp-2 min-h-[2.5rem] min-w-0 flex-1 text-heading-sm font-semibold text-text-primary">
+            <span className="line-clamp-2 min-h-[2.5rem] min-w-0 flex-1 text-heading-sm font-semibold! text-text-primary">
               {artist.name}
             </span>
           </div>
@@ -205,7 +205,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
             hideCountWhenZero
           />
 
-          <span className="text-body-md font-semibold text-text-primary">
+          <span className="text-body-md font-semibold! text-text-primary">
             {artist.price}
           </span>
         </div>

@@ -90,7 +90,7 @@ export function LoginForm({
           <Checkbox label={t("rememberMe")} defaultChecked />
           <Link
             href="/forgot-password"
-            className="text-body-sm font-semibold text-text-link hover:underline"
+            className="text-body-sm font-semibold! text-text-link hover:underline"
           >
             {t("forgotPassword")}
           </Link>

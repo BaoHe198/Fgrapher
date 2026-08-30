@@ -60,7 +60,7 @@ interface SlotProps {
 function FileSlot({ label, file, onSelect }: SlotProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-body-sm font-semibold text-text-primary">
+      <span className="text-body-sm font-semibold! text-text-primary">
         {label}
       </span>
       <label className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[var(--fg-radius-md)] border-2 border-dashed border-border-default p-5 text-center transition-colors duration-150 hover:border-brand-primary">
@@ -72,7 +72,7 @@ function FileSlot({ label, file, onSelect }: SlotProps) {
           onChange={(e) => onSelect(e.target.files?.[0] ?? null)}
         />
         {file ? (
-          <span className="text-body-sm font-semibold text-success">
+          <span className="text-body-sm font-semibold! text-success">
             {file.name}
           </span>
         ) : (

@@ -155,7 +155,7 @@ export default function CalendarPage() {
               type="button"
               onClick={() => setView(v)}
               className={cn(
-                "px-4 py-1.5 text-body-sm font-semibold",
+                "px-4 py-1.5 text-body-sm font-semibold!",
                 view === v
                   ? "bg-brand-primary text-text-on-brand"
                   : "text-text-secondary",
@@ -248,7 +248,7 @@ export default function CalendarPage() {
                   )}
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span className="text-body-sm font-semibold text-text-primary">
+                    <span className="text-body-sm font-semibold! text-text-primary">
                       {date.getUTCDate()}
                     </span>
                     {blocked ? (
@@ -305,7 +305,7 @@ export default function CalendarPage() {
                   className="flex w-full items-center justify-between border-b border-border-subtle px-5 py-3.5 text-left last:border-b-0 hover:bg-bg-sunken"
                 >
                   <div className="flex flex-col">
-                    <span className="text-body-md font-semibold text-text-primary">
+                    <span className="text-body-md font-semibold! text-text-primary">
                       {t("busyLabel")}
                       {b.reason ? ` · ${b.reason}` : ""}
                     </span>
@@ -326,7 +326,7 @@ export default function CalendarPage() {
                   className="flex items-center justify-between border-b border-border-subtle px-5 py-3.5 last:border-b-0 hover:bg-bg-sunken"
                 >
                   <div className="flex flex-col">
-                    <span className="text-body-md font-semibold text-text-primary">
+                    <span className="text-body-md font-semibold! text-text-primary">
                       {partyName(b.customer)} ·{" "}
                       {b.service?.name ?? t("customRequest")}
                     </span>

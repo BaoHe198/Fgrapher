@@ -70,7 +70,7 @@ export default async function SavedProfilesPage() {
       {profiles.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <Bookmark className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty.title")}
           </p>
           <p className="text-body-md text-text-secondary">{t("empty.body")}</p>

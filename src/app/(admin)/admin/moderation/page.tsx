@@ -189,7 +189,7 @@ export default function AdminModerationPage() {
       ) : media.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <ImageOff className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty")}
           </p>
         </Card>
@@ -239,7 +239,7 @@ export default function AdminModerationPage() {
           {filteredMedia.length === 0 ? (
             <Card className="flex flex-col items-center gap-3 py-16 text-center">
               <ImageOff className="size-12 text-text-tertiary" />
-              <p className="text-body-lg font-semibold text-text-primary">
+              <p className="text-body-lg font-semibold! text-text-primary">
                 {t("emptyFiltered")}
               </p>
             </Card>
@@ -307,7 +307,7 @@ export default function AdminModerationPage() {
                       )}
                     </div>
                     <div className="flex flex-col gap-0.5 p-2">
-                      <span className="truncate text-body-sm font-semibold text-text-primary">
+                      <span className="truncate text-body-sm font-semibold! text-text-primary">
                         {item.profile.user.firstName ??
                           item.profile.user.name ??
                           item.profile.user.email}

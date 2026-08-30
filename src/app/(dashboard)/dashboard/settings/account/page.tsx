@@ -11,7 +11,15 @@ export default async function AccountSettingsPage() {
     redirect("/login");
   }
 
-  const user = await db.user.findUniqueOrThrow({ where: { id: session.user.id } });
+  const user = await db.user.findUniqueOrThrow({
+    where: { id: session.user.id },
+  });
 
-  return <AccountSettingsForm initialEmail={user.email} initialPhone={user.phone} />;
+  return (
+    <AccountSettingsForm
+      initialEmail={user.email}
+      initialPhone={user.phone}
+      initialPhoneVerified={user.phoneVerified}
+    />
+  );
 }

@@ -168,7 +168,7 @@ export default async function DashboardPage() {
 
       {hasIncompleteProfile ? (
         <Card className="flex flex-col gap-3 border border-warning bg-warning-bg">
-          <span className="text-body-md font-semibold text-text-primary">
+          <span className="text-body-md font-semibold! text-text-primary">
             {t("completeProfile.title")}
           </span>
           <ul className="flex flex-col gap-1.5">
@@ -203,7 +203,7 @@ export default async function DashboardPage() {
             ) : (
               <Bookmark className="size-10 text-text-tertiary" />
             )}
-            <p className="text-body-md font-semibold text-text-primary">
+            <p className="text-body-md font-semibold! text-text-primary">
               {t("noActivity")}
             </p>
             <Button

@@ -353,7 +353,7 @@ export default async function PublicProfilePage({
                   <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
                     {detail.label}
                   </span>
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {detail.value}
                   </span>
                 </div>

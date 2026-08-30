@@ -243,7 +243,7 @@ export function AlbumDetail({
     <div className="flex flex-col gap-5">
       <Link
         href="/dashboard/portfolio"
-        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold text-text-secondary hover:text-text-primary"
+        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold! text-text-secondary hover:text-text-primary"
       >
         <ArrowLeft className="size-4" />
         {backLabel}
@@ -256,7 +256,7 @@ export function AlbumDetail({
           onChange={(e) => setMeta((p) => ({ ...p, title: e.target.value }))}
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-body-sm font-semibold text-text-primary">
+          <label className="text-body-sm font-semibold! text-text-primary">
             {t("descriptionLabel")}
           </label>
           <Textarea

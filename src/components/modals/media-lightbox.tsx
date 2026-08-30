@@ -64,7 +64,7 @@ export function MediaLightbox({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-2">
-            <p className="text-body-lg font-semibold">{title}</p>
+            <p className="text-body-lg font-semibold!">{title}</p>
             {categoryLabel ? (
               <span className="rounded-full bg-white/15 px-2 py-0.5 text-body-sm">
                 {categoryLabel}

@@ -25,6 +25,8 @@
     "browse": "Tìm kiếm",
     "studios": "Studio",
     "shop": "Cửa hàng",
+    "createRequest": "Tạo yêu cầu",
+    "browseRequests": "Danh sách yêu cầu",
     "providers": "Dành cho nhà cung cấp",
     "dashboard": "Bảng điều khiển",
     "signin": "Đăng nhập",
@@ -99,7 +101,19 @@
     "sub": "Nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio — tìm kiếm và đặt lịch ở một nơi.",
     "searchPh": "Tìm nghệ sĩ hoặc studio",
     "city": "Thành phố Hồ Chí Minh",
-    "cta": "Tìm kiếm"
+    "cta": "Tìm kiếm",
+    "imageAlt": {
+      "photographer": "Nhiếp ảnh gia tác nghiệp lúc hoàng hôn",
+      "makeupArtist": "Chuyên viên trang điểm đang trang điểm cho khách",
+      "videographer": "Quay phim đang ghi hình bằng máy quay chuyên nghiệp",
+      "studio": "Không gian studio với đèn chụp ảnh chuyên nghiệp"
+    },
+    "filters": {
+      "allCategories": "Tất cả phong cách",
+      "categoryNeedsRole": "Chọn vai trò trước",
+      "wardNeedsProvince": "Chọn tỉnh/thành trước",
+      "wardUnavailable": "Chưa có dữ liệu phường/xã"
+    }
   },
   "home": {
     "featured": "Nổi bật gần bạn",
@@ -573,7 +587,8 @@
         "reports": "Báo cáo",
         "verifications": "Xác minh",
         "moderation": "Kiểm duyệt",
-        "compliance": "Tuân thủ dữ liệu"
+        "compliance": "Tuân thủ dữ liệu",
+        "serviceRequests": "Yêu cầu chưa ai nhận"
       },
       "overview": {
         "metaTitle": "Tổng quan quản trị — Fgrapher",
@@ -758,12 +773,56 @@
           "grantedSuffix": "đã đồng ý,",
           "notGrantedSummary": "{revoked} chưa đồng ý (tổng {total} người dùng)"
         }
+      },
+      "serviceRequests": {
+        "title": "Yêu cầu chưa ai nhận",
+        "description": "Các yêu cầu đang mở, chưa nhận được đề nghị nào — đội vận hành có thể chủ động liên hệ provider phù hợp.",
+        "empty": "Không có yêu cầu nào đang chờ — mọi yêu cầu mở đều đã có ít nhất một đề nghị.",
+        "hoursOpen": "{hours} giờ chưa ai nhận",
+        "budgetNotSet": "Chưa đặt ngân sách"
       }
     }
   },
   "apiMessages": {
     "users": {
       "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa"
+    },
+    "phone": {
+      "notConfigured": "Xác minh số điện thoại chưa được cấu hình trên hệ thống",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "invalidPhone": "Số điện thoại không hợp lệ",
+      "codeSent": "Đã gửi mã xác minh qua SMS",
+      "sendFailed": "Không thể gửi mã xác minh, vui lòng thử lại",
+      "codeInvalid": "Mã xác minh không đúng hoặc đã hết hạn",
+      "verified": "Đã xác minh số điện thoại",
+      "verifyFailed": "Không thể xác minh, vui lòng thử lại"
+    },
+    "serviceRequests": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "loadFailed": "Không thể tải yêu cầu",
+      "created": "Đã đăng yêu cầu",
+      "createFailed": "Không thể đăng yêu cầu",
+      "saved": "Đã lưu nháp",
+      "saveFailed": "Không thể lưu",
+      "cancelled": "Đã hủy yêu cầu",
+      "cancelFailed": "Không thể hủy yêu cầu",
+      "published": "Đã đăng yêu cầu",
+      "publishFailed": "Không thể đăng yêu cầu"
+    },
+    "offers": {
+      "roleRequired": "Thiếu thông tin vai trò",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "loadFailed": "Không thể tải dữ liệu",
+      "offerSent": "Đã gửi đề nghị",
+      "offerFailed": "Không thể gửi đề nghị",
+      "offerUpdated": "Đã cập nhật đề nghị",
+      "offerUpdateFailed": "Không thể cập nhật đề nghị",
+      "offerWithdrawn": "Đã rút đề nghị",
+      "offerWithdrawFailed": "Không thể rút đề nghị",
+      "offerAccepted": "Đã chấp nhận đề nghị và tạo lịch đặt",
+      "acceptFailed": "Không thể chấp nhận đề nghị",
+      "offerDeclined": "Đã từ chối đề nghị",
+      "declineFailed": "Không thể từ chối đề nghị"
     },
     "portfolio": {
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -933,6 +992,186 @@
     }
   },
   "dashboardCore": {
+    "requestWizard": {
+      "heading": "Đăng yêu cầu",
+      "subheading": "Mô tả nhu cầu của bạn, các provider phù hợp sẽ chủ động gửi đề nghị.",
+      "stepLabel": "Bước {current}/{total}",
+      "steps": {
+        "who": "Cần những ai?",
+        "when": "Khi nào?",
+        "where": "Ở đâu?",
+        "budget": "Ngân sách",
+        "concept": "Mô tả concept",
+        "review": "Xem lại"
+      },
+      "roleLabel": "Vai trò cần tìm",
+      "rolePlaceholder": "Chọn vai trò",
+      "categoriesLabel": "Thể loại sở trường — đã chọn {count}/{max}",
+      "isDateFlexibleLabel": "Ngày linh hoạt (chưa chốt ngày cụ thể)",
+      "dateRangeStartLabel": "Từ ngày",
+      "dateRangeEndLabel": "Đến ngày",
+      "shootDateLabel": "Ngày chụp",
+      "provinceLabel": "Tỉnh/thành",
+      "provincePlaceholder": "Chọn tỉnh/thành",
+      "wardLabel": "Phường/xã",
+      "wardPlaceholder": "Chọn phường/xã",
+      "wardUnavailable": "Chưa có dữ liệu phường/xã cho khu vực này",
+      "areaNoteLabel": "Khu vực chung",
+      "areaNotePlaceholder": "Ví dụ: Quận 1, gần trung tâm",
+      "detailedAddressLabel": "Địa chỉ chi tiết",
+      "detailedAddressHint": "Chỉ hiển thị với provider sau khi bạn chấp nhận đề nghị của họ.",
+      "budgetMinLabel": "Ngân sách tối thiểu",
+      "budgetMaxLabel": "Ngân sách tối đa",
+      "budgetHint": "Không bắt buộc, nhưng giúp provider chào giá phù hợp hơn.",
+      "titleLabel": "Tiêu đề yêu cầu",
+      "descriptionLabel": "Mô tả concept",
+      "referencesLabel": "Ảnh tham khảo",
+      "uploadUnavailable": "Tính năng tải ảnh chưa khả dụng",
+      "uploadFailed": "Không thể tải ảnh lên",
+      "reviewDateFlexible": "Linh hoạt: {start} — {end}",
+      "budgetNotSet": "Chưa đặt ngân sách",
+      "phoneVerifyRequired": "Bạn cần xác minh số điện thoại trước khi đăng yêu cầu.",
+      "phoneVerifiedToast": "Đã xác minh số điện thoại",
+      "back": "Quay lại",
+      "saveDraft": "Lưu nháp",
+      "continue": "Tiếp tục",
+      "post": "Đăng yêu cầu",
+      "draftSaved": "Đã lưu nháp",
+      "posted": "Đã đăng yêu cầu",
+      "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+    },
+    "serviceRequests": {
+      "title": "Yêu cầu của tôi",
+      "newRequest": "Đăng yêu cầu",
+      "empty": {
+        "title": "Chưa có yêu cầu nào",
+        "body": "Đăng yêu cầu để các provider phù hợp chủ động gửi đề nghị cho bạn."
+      },
+      "draftPrefix": "[Nháp]",
+      "draftBadge": "Nháp",
+      "budgetNotSet": "Chưa đặt ngân sách",
+      "offerCount": "{count, plural, =0 {Chưa có đề nghị} other {# đề nghị}}",
+      "status": {
+        "OPEN": "Đang mở",
+        "HAS_OFFERS": "Có đề nghị",
+        "FULFILLED": "Đã hoàn tất",
+        "EXPIRED": "Đã hết hạn",
+        "CANCELLED": "Đã hủy"
+      },
+      "detail": {
+        "back": "Quay lại danh sách yêu cầu",
+        "whenLabel": "Thời gian",
+        "whereLabel": "Địa điểm",
+        "budgetLabel": "Ngân sách",
+        "budgetNotSet": "Chưa đặt",
+        "flexibleRange": "Linh hoạt: {start} — {end}",
+        "cancelRequest": "Hủy yêu cầu",
+        "cancelConfirm": "Hủy yêu cầu này? Mọi đề nghị đang chờ sẽ tự động bị từ chối.",
+        "cancelledToast": "Đã hủy yêu cầu",
+        "offersCount": "{count, plural, =0 {Chưa có đề nghị} other {# đề nghị}}",
+        "noOffers": "Chưa có provider nào gửi đề nghị. Chúng tôi sẽ thông báo khi có đề nghị mới.",
+        "offerStatus": {
+          "PENDING": "Đang chờ",
+          "ACCEPTED": "Đã chấp nhận",
+          "DECLINED": "Đã từ chối",
+          "WITHDRAWN": "Đã rút"
+        },
+        "viewProfile": "Xem hồ sơ",
+        "message": "Nhắn tin",
+        "accept": "Chấp nhận",
+        "decline": "Từ chối",
+        "offerDeclinedToast": "Đã từ chối đề nghị",
+        "acceptDialogTitle": "Xác nhận lịch đặt",
+        "acceptDateLabel": "Ngày",
+        "acceptTimeLabel": "Giờ bắt đầu",
+        "acceptLocationLabel": "Địa điểm",
+        "locationOutdoor": "Ngoại cảnh",
+        "locationProvider": "Tại chỗ của provider",
+        "locationCustomer": "Tại chỗ của tôi",
+        "cancel": "Hủy",
+        "confirmAccept": "Xác nhận",
+        "offerAcceptedToast": "Đã chấp nhận đề nghị và tạo lịch đặt",
+        "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+      }
+    },
+    "opportunities": {
+      "title": "Yêu cầu phù hợp",
+      "proOnly": {
+        "title": "Dành cho nhà cung cấp",
+        "body": "Thêm một vai trò cung cấp dịch vụ để xem các yêu cầu phù hợp với bạn."
+      },
+      "empty": {
+        "title": "Chưa có yêu cầu nào phù hợp",
+        "body": "Chúng tôi sẽ thông báo ngay khi có yêu cầu khớp với vai trò, khu vực và thể loại sở trường của bạn."
+      },
+      "budgetNotSet": "Chưa đặt ngân sách",
+      "flexible": "Ngày linh hoạt",
+      "offerCount": "{count, plural, =0 {Chưa có ai chào} other {# đề nghị}}",
+      "myOfferStatus": {
+        "PENDING": "Đã chào — đang chờ",
+        "ACCEPTED": "Đã được chọn",
+        "DECLINED": "Đã bị từ chối",
+        "WITHDRAWN": "Đã rút"
+      },
+      "detail": {
+        "back": "Quay lại yêu cầu phù hợp",
+        "postedBy": "Đăng bởi {name}",
+        "whenLabel": "Thời gian",
+        "whereLabel": "Địa điểm",
+        "budgetLabel": "Ngân sách",
+        "budgetNotSet": "Chưa đặt",
+        "flexibleRange": "Linh hoạt: {start} — {end}",
+        "addressHiddenNote": "Địa chỉ chi tiết chỉ hiển thị sau khi khách chấp nhận đề nghị của bạn.",
+        "yourOfferTitle": "Đề nghị của bạn",
+        "sendOfferTitle": "Gửi đề nghị",
+        "offerStatus": {
+          "ACCEPTED": "Đã được chọn",
+          "DECLINED": "Đã bị từ chối",
+          "WITHDRAWN": "Đã rút"
+        },
+        "proposedPriceLabel": "Giá đề xuất",
+        "proposedDateLabel": "Ngày đề xuất",
+        "messageLabel": "Lời nhắn",
+        "sendOffer": "Gửi đề nghị",
+        "updateOffer": "Cập nhật đề nghị",
+        "withdraw": "Rút đề nghị",
+        "withdrawConfirm": "Rút đề nghị này?",
+        "offerSentToast": "Đã gửi đề nghị",
+        "withdrawnToast": "Đã rút đề nghị",
+        "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+      }
+    },
+    "browseRequests": {
+      "heading": "Danh sách yêu cầu",
+      "subheading": "Toàn bộ yêu cầu đang mở trên hệ thống — lọc theo vai trò và khu vực để tìm yêu cầu phù hợp với bạn.",
+      "filtersHeading": "Bộ lọc",
+      "roleFilterLabel": "Vai trò",
+      "allRoles": "Tất cả vai trò",
+      "provinceFilterLabel": "Tỉnh/thành",
+      "allProvinces": "Tất cả tỉnh/thành",
+      "wardFilterLabel": "Phường/xã",
+      "allWards": "Tất cả phường/xã",
+      "empty": {
+        "title": "Chưa có yêu cầu nào đang mở",
+        "body": "Quay lại sau hoặc thử bỏ bớt bộ lọc."
+      },
+      "budgetNotSet": "Chưa đặt ngân sách",
+      "flexible": "Ngày linh hoạt",
+      "offerCount": "{count, plural, =0 {Chưa có ai chào} other {# đề nghị}}"
+    },
+    "myOffers": {
+      "title": "Đề nghị đã gửi",
+      "empty": {
+        "title": "Chưa gửi đề nghị nào",
+        "body": "Xem \"Yêu cầu phù hợp\" để tìm yêu cầu đúng vai trò của bạn."
+      },
+      "status": {
+        "PENDING": "Đang chờ",
+        "ACCEPTED": "Đã được chọn",
+        "DECLINED": "Đã bị từ chối",
+        "WITHDRAWN": "Đã rút"
+      }
+    },
     "acceptingBookingsToggle": {
       "label": "Đang nhận đặt lịch"
     },
@@ -1415,6 +1654,9 @@
     "account": {
       "emailLabel": "Email",
       "phoneLabel": "Số điện thoại",
+      "phoneVerified": "Đã xác minh",
+      "phoneNotVerified": "Chưa xác minh",
+      "phoneVerifyCta": "Xác minh ngay",
       "save": "Lưu",
       "changePasswordTitle": "Đổi mật khẩu",
       "currentPasswordLabel": "Mật khẩu hiện tại",
@@ -1952,6 +2194,7 @@
         "removeBudget": "Bỏ lọc theo ngân sách",
         "removeRating": "Bỏ lọc theo đánh giá",
         "removeCity": "Bỏ lọc theo tỉnh/thành",
+        "removeWard": "Bỏ lọc theo phường/xã",
         "removeRoles": "Bỏ lọc theo vai trò"
       },
       "clearFilters": "Xóa tất cả bộ lọc",
@@ -2263,6 +2506,18 @@
     }
   },
   "sharedComponents": {
+    "phoneVerifyDialog": {
+      "title": "Xác minh số điện thoại",
+      "sendDescription": "Gửi mã xác minh 6 số qua SMS tới {phone}",
+      "codeDescription": "Nhập mã 6 số vừa gửi tới {phone}",
+      "devHint": "Chế độ dev (chưa cấu hình Twilio) — dùng mã {code}",
+      "codeLabel": "Mã xác minh",
+      "resend": "Gửi lại mã",
+      "sendCode": "Gửi mã",
+      "verify": "Xác nhận",
+      "cancel": "Hủy",
+      "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+    },
     "artistCard": {
       "noPhotoLabel": "Chưa có ảnh portfolio",
       "previousPhoto": "Ảnh trước",
@@ -2293,6 +2548,8 @@
       "sortMostReviewed": "Nhiều đánh giá nhất",
       "cityLabel": "Tỉnh/thành",
       "allCities": "Tất cả tỉnh/thành",
+      "wardLabel": "Phường/xã",
+      "allWards": "Tất cả phường/xã",
       "budgetLabel": "Ngân sách",
       "budgetAny": "Tất cả",
       "budgetUnder2m": "Dưới 2 triệu",
@@ -2485,6 +2742,9 @@
       "calendar": "Lịch làm việc",
       "reviews": "Đánh giá",
       "portfolio": "Portfolio",
+      "myRequests": "Yêu cầu của tôi",
+      "opportunities": "Yêu cầu phù hợp",
+      "myOffers": "Đề nghị đã gửi",
       "listings": "Tin đăng",
       "shopOrders": "Đơn hàng cửa hàng",
       "myOrders": "Đơn hàng của tôi",

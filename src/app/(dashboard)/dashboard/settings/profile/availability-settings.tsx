@@ -26,9 +26,13 @@ interface BlockedDate {
   reason: string | null;
 }
 
+// All 7 days default ON — the provider decides which days to work, the
+// system doesn't pre-exclude weekends on their behalf. A provider who
+// never touches this screen ends up with a full 7-day schedule, not a
+// silently-imposed Mon–Fri one.
 const DEFAULT_SCHEDULE: DaySchedule[] = DAY_LABELS.map((_, dayOfWeek) => ({
   dayOfWeek,
-  isActive: dayOfWeek >= 1 && dayOfWeek <= 5,
+  isActive: true,
   startTime: "09:00",
   endTime: "17:00",
 }));

@@ -122,7 +122,7 @@ export function TrashSheet({
                   className="flex items-center justify-between gap-2 rounded-[var(--fg-radius-md)] border border-border-subtle p-3"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-body-md font-semibold text-text-primary">
+                    <p className="truncate text-body-md font-semibold! text-text-primary">
                       {album.title}
                     </p>
                     <p className="text-body-sm text-text-tertiary">
@@ -133,7 +133,7 @@ export function TrashSheet({
                     type="button"
                     onClick={() => restoreAlbum(album.id)}
                     disabled={restoringId === album.id}
-                    className="flex shrink-0 items-center gap-1.5 rounded-full bg-bg-sunken px-3 py-1.5 text-body-sm font-semibold text-text-primary"
+                    className="flex shrink-0 items-center gap-1.5 rounded-full bg-bg-sunken px-3 py-1.5 text-body-sm font-semibold! text-text-primary"
                   >
                     {restoringId === album.id ? (
                       <Loader2 className="size-3.5 animate-spin" />
@@ -169,7 +169,7 @@ export function TrashSheet({
                     type="button"
                     onClick={() => restoreMedia(item.id)}
                     disabled={restoringId === item.id}
-                    className="flex shrink-0 items-center gap-1.5 rounded-full bg-bg-sunken px-3 py-1.5 text-body-sm font-semibold text-text-primary"
+                    className="flex shrink-0 items-center gap-1.5 rounded-full bg-bg-sunken px-3 py-1.5 text-body-sm font-semibold! text-text-primary"
                   >
                     {restoringId === item.id ? (
                       <Loader2 className="size-3.5 animate-spin" />

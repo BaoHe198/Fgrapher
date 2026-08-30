@@ -121,7 +121,7 @@ export function ReviewsDashboardContent({
       {filtered.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Star className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty")}
           </p>
         </Card>
@@ -139,7 +139,7 @@ export function ReviewsDashboardContent({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {partyName(review.reviewer, t)}
                   </span>
                   <div className="flex items-center gap-2">

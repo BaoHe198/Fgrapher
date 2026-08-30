@@ -106,7 +106,7 @@ export default function MessagesPage() {
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
             <MessageCircle className="size-16 text-text-tertiary" />
-            <p className="text-body-lg font-semibold text-text-primary">
+            <p className="text-body-lg font-semibold! text-text-primary">
               {t("selectConversation")}
             </p>
             <p className="text-body-md text-text-secondary">

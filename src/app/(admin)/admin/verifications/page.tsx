@@ -139,7 +139,7 @@ export default function AdminVerificationsPage() {
       ) : rows.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <BadgeCheck className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold text-text-primary">
+          <p className="text-body-lg font-semibold! text-text-primary">
             {t("empty")}
           </p>
         </Card>
@@ -150,7 +150,7 @@ export default function AdminVerificationsPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Badge variant="neutral">{row.role}</Badge>
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold! text-text-primary">
                     {row.user.firstName ?? row.user.name ?? row.user.email}
                   </span>
                 </div>
