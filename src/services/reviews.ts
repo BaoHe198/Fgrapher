@@ -242,15 +242,23 @@ export async function updateReviewResponse({
 }
 
 export async function getProviderReviewStats(providerId: string) {
-  const [reviews, totalBookingsCompleted] = await Promise.all([
-    db.review.findMany({ where: { reviewedId: providerId } }),
-    db.booking.count({ where: { providerId, status: "COMPLETED" } }),
-  ]);
+  // Was pulling every review row into memory just to average/count them —
+  // aggregate/count push that down to the DB instead, so this stays O(1)
+  // regardless of how many reviews a provider has accumulated.
+  const [ratingAgg, total, responded, totalBookingsCompleted] =
+    await Promise.all([
+      db.review.aggregate({
+        where: { reviewedId: providerId },
+        _avg: { rating: true },
+      }),
+      db.review.count({ where: { reviewedId: providerId } }),
+      db.review.count({
+        where: { reviewedId: providerId, response: { not: null } },
+      }),
+      db.booking.count({ where: { providerId, status: "COMPLETED" } }),
+    ]);
 
-  const total = reviews.length;
-  const avgRating =
-    total > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
-  const responded = reviews.filter((r) => r.response).length;
+  const avgRating = ratingAgg._avg.rating ?? 0;
   const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0;
   const awaitingResponse = total - responded;
 
@@ -284,5 +292,9 @@ export async function listProviderReviews({
       reviewer: { select: { name: true, firstName: true, avatar: true } },
       booking: { select: { service: { select: { name: true } } } },
     },
+    // No pagination UI on the dashboard reviews list yet — a generous
+    // cap protects against an unbounded fetch without changing today's
+    // actual behavior for any real provider.
+    take: 100,
   });
 }

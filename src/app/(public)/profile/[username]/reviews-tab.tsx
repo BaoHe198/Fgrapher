@@ -29,9 +29,15 @@ interface ReviewItem {
 export function ReviewsTab({
   providerId,
   reviews,
+  stats,
 }: {
   providerId: string;
   reviews: ReviewItem[];
+  stats: {
+    avgRating: number;
+    count: number;
+    breakdown: { stars: number; count: number; percent: number }[];
+  };
 }) {
   const t = useTranslations("publicPages.profile.reviewsTab");
   const SORT_OPTIONS = [
@@ -47,24 +53,12 @@ export function ReviewsTab({
   const [respondTarget, setRespondTarget] = useState<ReviewItem | null>(null);
   const [reportTarget, setReportTarget] = useState<string | null>(null);
 
-  const average =
-    reviews.length > 0
-      ? (
-          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        ).toFixed(1)
-      : "0.0";
-
-  const breakdown = useMemo(() => {
-    const counts = [5, 4, 3, 2, 1].map((stars) => ({
-      stars,
-      count: reviews.filter((r) => r.rating === stars).length,
-    }));
-    return counts.map((c) => ({
-      ...c,
-      percent:
-        reviews.length > 0 ? Math.round((c.count / reviews.length) * 100) : 0,
-    }));
-  }, [reviews]);
+  // From the true DB-side aggregate (stats), not derived from `reviews` —
+  // that list is capped (see getProfileReviews), so computing these here
+  // would silently go wrong for a provider with more reviews than the
+  // display cap fetches.
+  const average = stats.avgRating.toFixed(1);
+  const breakdown = stats.breakdown;
 
   const filtered = useMemo(() => {
     let list = reviews;
@@ -78,7 +72,7 @@ export function ReviewsTab({
     );
   }, [reviews, sort, ratingFilter]);
 
-  if (reviews.length === 0) {
+  if (stats.count === 0) {
     return (
       <p className="py-12 text-center text-body-md text-text-secondary">
         {t("empty")}
@@ -91,7 +85,7 @@ export function ReviewsTab({
       <div className="flex flex-col gap-4 rounded-[var(--fg-radius-md)] bg-surface-card p-5 shadow-[var(--shadow-sm)] sm:flex-row sm:items-center sm:gap-8">
         <div className="flex flex-col items-center gap-1">
           <span className="text-display-lg text-text-primary">{average}</span>
-          <StarRating rating={average} reviews={reviews.length} />
+          <StarRating rating={average} reviews={stats.count} />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
           {breakdown.map((b) => (

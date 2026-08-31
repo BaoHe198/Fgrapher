@@ -225,6 +225,37 @@ export async function getProviderForBooking(providerId: string) {
   });
 }
 
+// The true average/count/star-breakdown, independent of
+// getProfileReviews' capped list below — page.tsx (star rating, JSON-LD
+// aggregateRating) and ReviewsTab (the 5★..1★ bar chart) both read this
+// instead of deriving from the fetched list, so neither goes wrong for
+// a provider with more reviews than the display cap fetches.
+export async function getProfileReviewStats(userId: string) {
+  const [agg, byRating] = await Promise.all([
+    db.review.aggregate({
+      where: { reviewedId: userId },
+      _avg: { rating: true },
+      _count: true,
+    }),
+    db.review.groupBy({
+      by: ["rating"],
+      where: { reviewedId: userId },
+      _count: true,
+    }),
+  ]);
+  const count = agg._count;
+  const countByRating = new Map(byRating.map((r) => [r.rating, r._count]));
+  const breakdown = [5, 4, 3, 2, 1].map((stars) => {
+    const starCount = countByRating.get(stars) ?? 0;
+    return {
+      stars,
+      count: starCount,
+      percent: count > 0 ? Math.round((starCount / count) * 100) : 0,
+    };
+  });
+  return { avgRating: agg._avg.rating ?? 0, count, breakdown };
+}
+
 export async function getProfileReviews(userId: string) {
   return db.review.findMany({
     where: { reviewedId: userId },
@@ -232,6 +263,11 @@ export async function getProfileReviews(userId: string) {
       reviewer: { select: { name: true, firstName: true, avatar: true } },
     },
     orderBy: { createdAt: "desc" },
+    // No "load more" on the public reviews tab yet — was fetching every
+    // review a heavily-reviewed provider had ever received on every
+    // profile view. 50 is generous for what a viewer actually scrolls
+    // through today.
+    take: 50,
   });
 }
 

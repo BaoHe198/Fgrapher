@@ -17,6 +17,7 @@ import type { ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import {
   getProfileReviews,
+  getProfileReviewStats,
   getPublicProfileUser,
   getShopProducts,
   incrementProfileView,
@@ -128,8 +129,9 @@ export default async function PublicProfilePage({
     user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
   incrementProfileView(activeProfile.id);
 
-  const [reviews, products, followerCount] = await Promise.all([
+  const [reviews, reviewStats, products, followerCount] = await Promise.all([
     getProfileReviews(user.id),
+    getProfileReviewStats(user.id),
     features.marketplaceEnabled
       ? getShopProducts(user.id)
       : Promise.resolve([]),
@@ -198,12 +200,11 @@ export default async function PublicProfilePage({
         ].filter(Boolean) as { label: string; value: string }[])
       : [];
   const offersTfp = activeProfile.services.some((s) => s.price === 0);
-  const averageRating =
-    reviews.length > 0
-      ? (
-          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        ).toFixed(1)
-      : "0.0";
+  // From the true DB-side aggregate (reviewStats), not reviews.length —
+  // getProfileReviews only fetches a capped page for display, which
+  // would otherwise silently under-count/misaverage a heavily-reviewed
+  // provider.
+  const averageRating = reviewStats.avgRating.toFixed(1);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -214,12 +215,12 @@ export default async function PublicProfilePage({
     address: user.location
       ? { "@type": "PostalAddress", addressLocality: user.location }
       : undefined,
-    ...(reviews.length > 0
+    ...(reviewStats.count > 0
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
             ratingValue: averageRating,
-            reviewCount: reviews.length,
+            reviewCount: reviewStats.count,
           },
         }
       : {}),
@@ -297,7 +298,10 @@ export default async function PublicProfilePage({
                   {isVerified ? (
                     <Badge variant="accent">{t("status.verified")}</Badge>
                   ) : null}
-                  <StarRating rating={averageRating} reviews={reviews.length} />
+                  <StarRating
+                    rating={averageRating}
+                    reviews={reviewStats.count}
+                  />
                 </div>
                 {user.location || ageRangeLabel ? (
                   <div className="flex items-center gap-1.5 text-body-sm text-text-secondary">
@@ -374,6 +378,7 @@ export default async function PublicProfilePage({
               ...r,
               createdAt: r.createdAt.toISOString(),
             }))}
+            reviewStats={reviewStats}
             products={products}
             offersTfp={offersTfp}
           />

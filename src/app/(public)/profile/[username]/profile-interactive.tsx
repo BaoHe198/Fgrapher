@@ -44,6 +44,11 @@ interface ProfileInteractiveProps {
       avatar: string | null;
     };
   }[];
+  reviewStats: {
+    avgRating: number;
+    count: number;
+    breakdown: { stars: number; count: number; percent: number }[];
+  };
   products: {
     id: string;
     name: string;
@@ -63,6 +68,7 @@ export function ProfileInteractive({
   albums,
   services,
   reviews,
+  reviewStats,
   products,
   offersTfp,
 }: ProfileInteractiveProps) {
@@ -100,7 +106,11 @@ export function ProfileInteractive({
             />
           </TabsPanel>
           <TabsPanel value="reviews" className="mt-6">
-            <ReviewsTab providerId={providerId} reviews={reviews} />
+            <ReviewsTab
+              providerId={providerId}
+              reviews={reviews}
+              stats={reviewStats}
+            />
           </TabsPanel>
           {hasGear ? (
             <TabsPanel value="gear" className="mt-6">
