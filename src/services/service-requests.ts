@@ -263,6 +263,9 @@ export async function listCustomerRequests(customerId: string) {
       ward: { select: { name: true } },
       _count: { select: { offers: { where: { status: "PENDING" } } } },
     },
+    // No pagination UI on /dashboard/requests yet — caps an otherwise-
+    // unbounded fetch of a customer's full request history.
+    take: 50,
   });
   return requests;
 }
@@ -357,6 +360,9 @@ export async function listBrowsableRequests(filters: BrowsableRequestFilters) {
       ward: { select: { name: true } },
       _count: { select: { offers: true } },
     },
+    // No pagination UI on /requests (browse) yet — caps an otherwise-
+    // unbounded fetch of every open request nationwide.
+    take: 50,
   });
 }
 

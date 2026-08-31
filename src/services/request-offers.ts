@@ -2,7 +2,6 @@ import type { RequestOfferStatus, Role, ServiceRequest } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { logAudit } from "@/services/compliance";
-import { findConfirmedBookingConflicts } from "@/services/availability";
 import { BookingActionError, createBooking } from "@/services/bookings";
 import { notify } from "@/services/notification";
 
@@ -65,19 +64,36 @@ async function findMatchingProviderIds(request: {
   // Whole-day availability check — a best-effort filter (the request has
   // no specific time slot to check against), not the final word: a real
   // conflict is caught for real by createBooking() at accept time.
+  //
+  // Batched (2 queries covering every candidate) instead of a per-
+  // candidate loop — this runs on every new service request, against
+  // every verified provider for that role/area.
   const shootDate = request.shootDate;
-  const available: string[] = [];
-  for (const { userId } of candidates) {
-    const [blocked, conflicts] = await Promise.all([
-      db.blockedDate.findFirst({
-        where: { userId, date: shootDate, startTime: null, endTime: null },
-        select: { id: true },
-      }),
-      findConfirmedBookingConflicts(userId, shootDate),
-    ]);
-    if (!blocked && conflicts.length === 0) available.push(userId);
-  }
-  return available;
+  const candidateIds = candidates.map((c) => c.userId);
+  const [blockedRows, confirmedRows] = await Promise.all([
+    db.blockedDate.findMany({
+      where: {
+        userId: { in: candidateIds },
+        date: shootDate,
+        startTime: null,
+        endTime: null,
+      },
+      select: { userId: true },
+    }),
+    db.booking.findMany({
+      where: {
+        providerId: { in: candidateIds },
+        status: "CONFIRMED",
+        date: shootDate,
+      },
+      select: { providerId: true },
+    }),
+  ]);
+  const unavailableIds = new Set([
+    ...blockedRows.map((r) => r.userId),
+    ...confirmedRows.map((r) => r.providerId),
+  ]);
+  return candidateIds.filter((id) => !unavailableIds.has(id));
 }
 
 // Ràng buộc #3 — thông báo chủ động cho provider phù hợp ngay khi có yêu
@@ -144,6 +160,10 @@ export async function listOpportunitiesForProvider(userId: string, role: Role) {
         select: { id: true, status: true },
       },
     },
+    // No pagination UI on /dashboard/opportunities yet — caps an
+    // otherwise-unbounded fetch of every open request nationwide
+    // matching this provider's role/area.
+    take: 50,
   });
 }
 
@@ -315,6 +335,9 @@ export async function listProviderOffers(providerId: string) {
         },
       },
     },
+    // No pagination UI on /dashboard/my-offers yet — caps an otherwise-
+    // unbounded fetch of a provider's full offer history.
+    take: 50,
   });
 }
 
