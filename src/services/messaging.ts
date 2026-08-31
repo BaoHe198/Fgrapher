@@ -81,7 +81,14 @@ export async function listConversations(userId: string, page = 1) {
     };
   });
 
-  return results.filter((r) => r.otherUser !== null);
+  // A plain `!== null` filter doesn't narrow the element type on its own —
+  // this type predicate lets callers (page.tsx passes this straight into
+  // a ConversationSummary[]-typed prop) see that otherUser is guaranteed
+  // non-null after filtering, matching what was already true at runtime.
+  return results.filter(
+    (r): r is typeof r & { otherUser: NonNullable<typeof r.otherUser> } =>
+      r.otherUser !== null,
+  );
 }
 
 export async function getUnreadConversationCount(userId: string) {
