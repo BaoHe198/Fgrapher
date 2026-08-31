@@ -213,9 +213,11 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
                 {initial}
               </AvatarFallback>
             </Avatar>
-            <span className="line-clamp-2 min-h-[2.5rem] min-w-0 flex-1 text-heading-sm font-semibold! text-text-primary">
-              {artist.name}
-            </span>
+            <div className="flex min-h-[2.5rem] min-w-0 flex-1 items-center">
+              <span className="line-clamp-2 text-heading-sm font-semibold! text-text-primary">
+                {artist.name}
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-1">
