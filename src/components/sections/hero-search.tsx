@@ -110,8 +110,8 @@ export function HeroSearch({
   };
 
   return (
-    <div className="flex max-w-[700px] flex-wrap items-center gap-2">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)]">
+    <div className="flex max-w-[860px] flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)]">
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
             <span className="max-w-[110px] truncate">
@@ -280,7 +280,7 @@ export function HeroSearch({
         variant="accent"
         size="lg"
         onClick={onSearch}
-        className="h-auto shrink-0 self-stretch rounded-[var(--fg-radius-lg)] px-6 shadow-[var(--shadow-lg)]"
+        className="w-full rounded-[var(--fg-radius-lg)] shadow-[var(--shadow-lg)]"
       >
         <Search className="size-4" />
         {t("hero.cta")}
