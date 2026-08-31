@@ -56,7 +56,13 @@ export function CompleteProfileForm() {
       return;
     }
 
-    router.push("/dashboard");
+    // Straight to the profile settings page rather than the dashboard —
+    // Google OAuth only hands over name/email, so avatar/cover/bio/phone
+    // are still missing at this point. Continuing the same momentum as a
+    // manual registration (which collects everything upfront) beats
+    // landing on the dashboard and hoping they notice the "complete your
+    // profile" reminder card there on their own.
+    router.push("/dashboard/settings/profile");
     router.refresh();
   };
 
