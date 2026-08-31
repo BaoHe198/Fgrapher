@@ -1584,7 +1584,15 @@
       "recentActivity": "Hoạt động gần đây",
       "noActivity": "Chưa có hoạt động nào",
       "buildPortfolio": "Xây dựng portfolio",
-      "browseArtists": "Khám phá nghệ sĩ"
+      "browseArtists": "Khám phá nghệ sĩ",
+      "activityItems": {
+        "booking": "Đặt lịch {status} — {name}",
+        "message": "Tin nhắn mới từ {name}",
+        "review": "Đánh giá {rating}★ mới từ {name}",
+        "album": "Đã thêm album mới — \"{title}\"",
+        "fallbackPerson": "một người dùng",
+        "fallbackSender": "Ai đó"
+      }
     },
     "messages": {
       "selectConversation": "Chọn một cuộc trò chuyện",

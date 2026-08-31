@@ -86,12 +86,36 @@ export async function getCustomerStats(userId: string): Promise<CustomerStats> {
   };
 }
 
-export interface RecentActivityItem {
-  id: string;
-  type: "booking" | "message" | "review";
-  text: string;
-  timestamp: Date;
-}
+// Text is built by the caller via next-intl (a page component, not this
+// data-layer service) — each variant carries the raw params a template
+// needs to interpolate, not pre-rendered English strings.
+export type RecentActivityItem =
+  | {
+      id: string;
+      type: "booking";
+      timestamp: Date;
+      status: string;
+      personName: string | null;
+    }
+  | {
+      id: string;
+      type: "message";
+      timestamp: Date;
+      personName: string | null;
+    }
+  | {
+      id: string;
+      type: "review";
+      timestamp: Date;
+      personName: string | null;
+      rating: number;
+    }
+  | {
+      id: string;
+      type: "album";
+      timestamp: Date;
+      albumTitle: string;
+    };
 
 export async function getRecentActivity(
   userId: string,
@@ -101,7 +125,7 @@ export async function getRecentActivity(
     ? { providerId: userId }
     : { customerId: userId };
 
-  const [bookings, messages, reviews] = await Promise.all([
+  const [bookings, messages, reviews, albums] = await Promise.all([
     db.booking.findMany({
       where: bookingWhere,
       orderBy: { updatedAt: "desc" },
@@ -125,28 +149,45 @@ export async function getRecentActivity(
           include: { reviewer: { select: { name: true, firstName: true } } },
         })
       : Promise.resolve([]),
+    // Providers only — a customer has no Profile/Album rows of their own.
+    isProvider
+      ? db.album.findMany({
+          where: { profile: { userId }, deletedAt: null },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: { id: true, title: true, createdAt: true },
+        })
+      : Promise.resolve([]),
   ]);
 
   const items: RecentActivityItem[] = [
     ...bookings.map((b) => ({
       id: `booking-${b.id}`,
       type: "booking" as const,
-      text: isProvider
-        ? `Booking ${b.status.toLowerCase()} — ${b.customer.firstName ?? b.customer.name ?? "A client"}`
-        : `Booking ${b.status.toLowerCase()} — ${b.provider.firstName ?? b.provider.name ?? "A provider"}`,
+      status: b.status,
+      personName: isProvider
+        ? (b.customer.firstName ?? b.customer.name)
+        : (b.provider.firstName ?? b.provider.name),
       timestamp: b.updatedAt,
     })),
     ...messages.map((m) => ({
       id: `message-${m.id}`,
       type: "message" as const,
-      text: `New message from ${m.sender.firstName ?? m.sender.name ?? "Someone"}`,
+      personName: m.sender.firstName ?? m.sender.name,
       timestamp: m.createdAt,
     })),
     ...reviews.map((r) => ({
       id: `review-${r.id}`,
       type: "review" as const,
-      text: `New ${r.rating}★ review from ${r.reviewer.firstName ?? r.reviewer.name ?? "A client"}`,
+      personName: r.reviewer.firstName ?? r.reviewer.name,
+      rating: r.rating,
       timestamp: r.createdAt,
+    })),
+    ...albums.map((a) => ({
+      id: `album-${a.id}`,
+      type: "album" as const,
+      albumTitle: a.title,
+      timestamp: a.createdAt,
     })),
   ];
 

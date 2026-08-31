@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tag } from "@/components/ui/tag";
 import { ProfileActions } from "@/components/profile/profile-actions";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
 import type { ROLE_LABELS } from "@/lib/constants";
@@ -127,7 +128,10 @@ export default async function PublicProfilePage({
   const { role: roleParam } = await searchParams;
   const activeProfile =
     user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
-  incrementProfileView(activeProfile.id);
+  const session = await auth();
+  if (session?.user?.id !== user.id) {
+    incrementProfileView(activeProfile.id);
+  }
 
   const [reviews, reviewStats, products, followerCount] = await Promise.all([
     getProfileReviews(user.id),
@@ -253,7 +257,7 @@ export default async function PublicProfilePage({
         )}
       </div>
 
-      <div className="mx-auto w-full max-w-[1240px] px-4 pb-[72px] sm:px-8">
+      <div className="mx-auto w-full max-w-[1440px] px-4 pb-[72px] sm:px-8">
         <div className="flex flex-col gap-[18px] pt-4">
           <div className="flex flex-wrap items-start justify-between gap-[18px]">
             <div className="flex flex-wrap items-start gap-[18px]">

@@ -1,6 +1,7 @@
 import {
   Bookmark,
   Calendar,
+  Images,
   MessageCircle,
   ShoppingBag,
   Star,
@@ -23,6 +24,7 @@ import {
   isProviderRoleSet,
   type CustomerStats,
   type ProviderStats,
+  type RecentActivityItem,
 } from "@/services/dashboard";
 
 import { AcceptingBookingsToggle } from "./accepting-bookings-toggle";
@@ -43,7 +45,33 @@ const ACTIVITY_ICONS = {
   booking: Calendar,
   message: MessageCircle,
   review: Star,
+  album: Images,
 } as const;
+
+function activityText(
+  item: RecentActivityItem,
+  t: Translator,
+  bookingStatusT: Translator,
+) {
+  switch (item.type) {
+    case "booking":
+      return t("activityItems.booking", {
+        status: bookingStatusT(`status.${item.status}`),
+        name: item.personName ?? t("activityItems.fallbackPerson"),
+      });
+    case "message":
+      return t("activityItems.message", {
+        name: item.personName ?? t("activityItems.fallbackSender"),
+      });
+    case "review":
+      return t("activityItems.review", {
+        rating: item.rating,
+        name: item.personName ?? t("activityItems.fallbackPerson"),
+      });
+    case "album":
+      return t("activityItems.album", { title: item.albumTitle });
+  }
+}
 
 function providerStatCards(stats: ProviderStats, t: Translator) {
   return [
@@ -92,9 +120,10 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [t, roleT] = await Promise.all([
+  const [t, roleT, bookingStatusT] = await Promise.all([
     getTranslations("dashboardCore.home"),
     getTranslations("role"),
+    getTranslations("dashboardCore.bookings"),
   ]);
 
   const [activity, statCards] = await Promise.all([
@@ -230,7 +259,7 @@ export default async function DashboardPage() {
                 >
                   <Icon className="size-4 shrink-0 text-text-tertiary" />
                   <span className="flex-1 text-body-md text-text-primary">
-                    {item.text}
+                    {activityText(item, t, bookingStatusT)}
                   </span>
                   <span className="text-body-sm text-text-tertiary">
                     {formatRelativeTime(item.timestamp)}

@@ -1584,7 +1584,15 @@
       "recentActivity": "Recent activity",
       "noActivity": "No activity yet",
       "buildPortfolio": "Build your portfolio",
-      "browseArtists": "Browse artists"
+      "browseArtists": "Browse artists",
+      "activityItems": {
+        "booking": "Booking {status} — {name}",
+        "message": "New message from {name}",
+        "review": "New {rating}★ review from {name}",
+        "album": "New album added — \"{title}\"",
+        "fallbackPerson": "a user",
+        "fallbackSender": "Someone"
+      }
     },
     "messages": {
       "selectConversation": "Select a conversation",
