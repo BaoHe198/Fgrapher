@@ -12,6 +12,7 @@ import {
   type ProductImage,
 } from "@/components/forms/product-image-uploader";
 import { Button } from "@/components/ui/button";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
@@ -150,30 +151,51 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       </div>
 
       {type === "SALE" || type === "BOTH" ? (
-        <Input
-          label={t("salePriceLabel")}
-          type="number"
-          step="0.01"
-          error={errors.price?.message}
-          {...register("price", { valueAsNumber: true })}
+        <Controller
+          control={control}
+          name="price"
+          render={({ field }) => (
+            <CurrencyInput
+              label={t("salePriceLabel")}
+              error={errors.price?.message}
+              value={field.value != null ? String(field.value) : ""}
+              onChange={(digits) =>
+                field.onChange(digits ? Number(digits) : undefined)
+              }
+            />
+          )}
         />
       ) : null}
 
       {type === "RENT" || type === "BOTH" ? (
         <>
-          <Input
-            label={t("rentalPriceLabel")}
-            type="number"
-            step="0.01"
-            error={errors.rentalPrice?.message}
-            {...register("rentalPrice", { valueAsNumber: true })}
+          <Controller
+            control={control}
+            name="rentalPrice"
+            render={({ field }) => (
+              <CurrencyInput
+                label={t("rentalPriceLabel")}
+                error={errors.rentalPrice?.message}
+                value={field.value != null ? String(field.value) : ""}
+                onChange={(digits) =>
+                  field.onChange(digits ? Number(digits) : undefined)
+                }
+              />
+            )}
           />
-          <Input
-            label={t("depositLabel")}
-            type="number"
-            step="0.01"
-            error={errors.depositAmount?.message}
-            {...register("depositAmount", { valueAsNumber: true })}
+          <Controller
+            control={control}
+            name="depositAmount"
+            render={({ field }) => (
+              <CurrencyInput
+                label={t("depositLabel")}
+                error={errors.depositAmount?.message}
+                value={field.value != null ? String(field.value) : ""}
+                onChange={(digits) =>
+                  field.onChange(digits ? Number(digits) : undefined)
+                }
+              />
+            )}
           />
         </>
       ) : null}

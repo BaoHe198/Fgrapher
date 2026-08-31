@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { PRODUCT_CATEGORIES } from "@/lib/validations/product";
@@ -33,8 +33,10 @@ export function ShopFilters({
   const searchParams = useSearchParams();
 
   const type = searchParams.get("type") ?? "";
-  const categories = searchParams.get("category")?.split(",").filter(Boolean) ?? [];
-  const conditions = searchParams.get("condition")?.split(",").filter(Boolean) ?? [];
+  const categories =
+    searchParams.get("category")?.split(",").filter(Boolean) ?? [];
+  const conditions =
+    searchParams.get("condition")?.split(",").filter(Boolean) ?? [];
   const inStockOnly = searchParams.get("inStockOnly") === "true";
   const sort = searchParams.get("sort") ?? "newest";
 
@@ -50,7 +52,9 @@ export function ShopFilters({
 
   const toggleListValue = (key: string, value: string, current: string[]) => {
     update((params) => {
-      const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
       if (next.length) params.set(key, next.join(","));
       else params.delete(key);
     });
@@ -67,7 +71,9 @@ export function ShopFilters({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Type</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          Type
+        </span>
         <Radio
           label="All"
           checked={type === ""}
@@ -86,46 +92,66 @@ export function ShopFilters({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Category</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          Category
+        </span>
         {PRODUCT_CATEGORIES.map((category) => (
           <Checkbox
             key={category}
             label={`${category}${categoryCounts[category] ? ` (${categoryCounts[category]})` : ""}`}
             checked={categories.includes(category)}
-            onCheckedChange={() => toggleListValue("category", category, categories)}
+            onCheckedChange={() =>
+              toggleListValue("category", category, categories)
+            }
           />
         ))}
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Condition</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          Condition
+        </span>
         {CONDITIONS.map((c) => (
           <Checkbox
             key={c.value}
             label={c.label}
             checked={conditions.includes(c.value)}
-            onCheckedChange={() => toggleListValue("condition", c.value, conditions)}
+            onCheckedChange={() =>
+              toggleListValue("condition", c.value, conditions)
+            }
           />
         ))}
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">Price</span>
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          Price
+        </span>
         <div className="flex items-center gap-2">
-          <Input
+          <CurrencyInput
             placeholder="Min"
-            type="number"
             value={priceMin}
-            onChange={(e) => setPriceMin(e.target.value)}
-            onBlur={() => update((params) => (priceMin ? params.set("priceMin", priceMin) : params.delete("priceMin")))}
+            onChange={setPriceMin}
+            onBlur={() =>
+              update((params) =>
+                priceMin
+                  ? params.set("priceMin", priceMin)
+                  : params.delete("priceMin"),
+              )
+            }
           />
           <span className="text-text-tertiary">–</span>
-          <Input
+          <CurrencyInput
             placeholder="Max"
-            type="number"
             value={priceMax}
-            onChange={(e) => setPriceMax(e.target.value)}
-            onBlur={() => update((params) => (priceMax ? params.set("priceMax", priceMax) : params.delete("priceMax")))}
+            onChange={setPriceMax}
+            onBlur={() =>
+              update((params) =>
+                priceMax
+                  ? params.set("priceMax", priceMax)
+                  : params.delete("priceMax"),
+              )
+            }
           />
         </div>
       </div>
@@ -134,7 +160,11 @@ export function ShopFilters({
         label="In stock only"
         checked={inStockOnly}
         onCheckedChange={(checked) =>
-          update((params) => (checked ? params.set("inStockOnly", "true") : params.delete("inStockOnly")))
+          update((params) =>
+            checked
+              ? params.set("inStockOnly", "true")
+              : params.delete("inStockOnly"),
+          )
         }
       />
 

@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { formatCurrency } from "@/lib/utils";
@@ -199,11 +200,10 @@ export function ServicesManager({
                   setDraft({ ...draft, duration: e.target.value })
                 }
               />
-              <Input
+              <CurrencyInput
                 label={t("priceLabel")}
-                type="number"
                 value={draft.price}
-                onChange={(e) => setDraft({ ...draft, price: e.target.value })}
+                onChange={(digits) => setDraft({ ...draft, price: digits })}
               />
             </div>
             <Switch

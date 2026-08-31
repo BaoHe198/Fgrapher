@@ -14,6 +14,7 @@ import { startTransition, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
@@ -392,17 +393,15 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Input
+        <CurrencyInput
           label={tEditor("minPriceLabel")}
-          type="number"
           value={values.priceMin}
-          onChange={(e) => set("priceMin", e.target.value)}
+          onChange={(digits) => set("priceMin", digits)}
         />
-        <Input
+        <CurrencyInput
           label={tEditor("maxPriceLabel")}
-          type="number"
           value={values.priceMax}
-          onChange={(e) => set("priceMax", e.target.value)}
+          onChange={(digits) => set("priceMax", digits)}
         />
       </div>
 

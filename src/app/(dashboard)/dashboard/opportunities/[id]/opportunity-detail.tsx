@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
@@ -217,13 +218,11 @@ export function OpportunityDetail({
           </Badge>
         ) : null}
 
-        <Input
+        <CurrencyInput
           label={t("proposedPriceLabel")}
-          type="number"
-          min={0}
           value={proposedPrice}
           disabled={!isEditable}
-          onChange={(e) => setProposedPrice(e.target.value)}
+          onChange={setProposedPrice}
         />
         {request.isDateFlexible ? (
           <Input
