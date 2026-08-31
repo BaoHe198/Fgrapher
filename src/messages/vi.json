@@ -1876,6 +1876,7 @@
           "requireDepositLabel": "Yêu cầu đặt cọc trước khi chia sẻ thông tin liên hệ"
         },
         "shopNameLabel": "Tên cửa hàng",
+        "servicesNeedSaveFirst": "Lưu thông tin hồ sơ (vd: chọn danh mục sở trường) rồi quay lại đây để thêm gói dịch vụ.",
         "websiteLabel": "Website",
         "instagramLabel": "Instagram",
         "facebookLabel": "Facebook",

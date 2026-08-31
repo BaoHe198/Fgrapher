@@ -1876,6 +1876,7 @@
           "requireDepositLabel": "Require a deposit before sharing my contact details"
         },
         "shopNameLabel": "Shop name",
+        "servicesNeedSaveFirst": "Save your profile details (e.g. pick a specialty category) first, then come back here to add packages.",
         "websiteLabel": "Website",
         "instagramLabel": "Instagram",
         "facebookLabel": "Facebook",

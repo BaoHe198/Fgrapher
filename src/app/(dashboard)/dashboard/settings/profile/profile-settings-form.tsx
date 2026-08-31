@@ -588,8 +588,20 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         />
       ) : null}
 
-      {role !== "CAMERA_SHOP" && profileId ? (
-        <ServicesManager profileId={profileId} initialServices={services} />
+      {role !== "CAMERA_SHOP" ? (
+        profileId ? (
+          <ServicesManager profileId={profileId} initialServices={services} />
+        ) : (
+          // Profile rows are created lazily on first save — a role that
+          // was just activated has none yet, so ServicesManager (which
+          // needs a real profileId to attach services to) has nothing to
+          // render against. Silently omitting the whole section here
+          // read as "packages aren't supported for this role," not "save
+          // once first" — say so explicitly instead.
+          <p className="text-body-sm text-text-tertiary">
+            {tEditor("servicesNeedSaveFirst")}
+          </p>
+        )
       ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
