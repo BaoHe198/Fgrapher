@@ -94,12 +94,16 @@ function filterStateToQuery(filters: FilterState): string {
   if (filters.minPrice) params.set("minPrice", filters.minPrice);
   if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
   if (filters.minRating) params.set("minRating", filters.minRating);
-  // Role-specific filters only apply when scoped to a single role — drop
+  // Categories are valid with 0, 1, or 2+ roles selected (the sidebar
+  // renders checkboxes in all three cases, and the backend filters on
+  // category independently of role) — unlike the MODEL-only fields below,
+  // this isn't gated to a single role.
+  if (filters.categories.length > 0)
+    params.set("categories", filters.categories.join(","));
+  // MODEL-specific filters only apply when scoped to that one role — drop
   // them from the URL entirely otherwise so switching roles doesn't leave
   // a stale, invisible filter narrowing results.
   if (filters.roles.length === 1) {
-    if (filters.categories.length > 0)
-      params.set("categories", filters.categories.join(","));
     if (filters.roles[0] === "MODEL") {
       if (filters.heightMin) params.set("heightMin", filters.heightMin);
       if (filters.heightMax) params.set("heightMax", filters.heightMax);

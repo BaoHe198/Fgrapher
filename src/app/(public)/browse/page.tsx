@@ -35,6 +35,22 @@ function queryWithout(
   return qs ? `/browse?${qs}` : "/browse";
 }
 
+// Same idea as queryWithout, but for the quick-filter tags above the
+// results — those set one param without discarding every other active
+// filter (role/city/ward/category/budget/rating) the way a bare
+// `href="?sort=rating"` would.
+function queryWith(
+  params: Record<string, string | undefined>,
+  patch: Record<string, string>,
+) {
+  const next = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value) next.set(key, value);
+  }
+  for (const [key, value] of Object.entries(patch)) next.set(key, value);
+  return `/browse?${next.toString()}`;
+}
+
 export async function generateMetadata() {
   const t = await getTranslations("publicPages.browse");
   return { title: t("pageTitle") };
@@ -188,20 +204,8 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
             <div className="mb-5 flex flex-wrap gap-2">
               <Tag
-                selected={params.availableNow === "1"}
-                render={<Link href="?availableNow=1" />}
-              >
-                {t("filterAvailableNow")}
-              </Tag>
-              <Tag
-                selected={params.instantBook === "1"}
-                render={<Link href="?instantBook=1" />}
-              >
-                {t("filterInstantBook")}
-              </Tag>
-              <Tag
                 selected={sort === "rating"}
-                render={<Link href="?sort=rating" />}
+                render={<Link href={queryWith(params, { sort: "rating" })} />}
               >
                 {t("filterTopRated")}
               </Tag>
