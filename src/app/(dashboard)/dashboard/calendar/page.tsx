@@ -1,6 +1,11 @@
 "use client";
 
-import type { Booking, BookingStatus, User } from "@prisma/client";
+import type {
+  Availability,
+  Booking,
+  BookingStatus,
+  User,
+} from "@prisma/client";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -64,6 +69,7 @@ export default function CalendarPage() {
   const [monthCursor, setMonthCursor] = useState(() => new Date());
   const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDateRow[]>([]);
+  const [weeklySchedule, setWeeklySchedule] = useState<Availability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogDate, setDialogDate] = useState<Date | null>(null);
 
@@ -82,10 +88,17 @@ export default function CalendarPage() {
       fetch(`/api/blocked-dates?from=${dateKey(from)}&to=${dateKey(to)}`).then(
         (res) => res.json(),
       ),
-    ]).then(([bookingsBody, blockedBody]) => {
+      // The customer-facing booking engine (services/availability.ts)
+      // only ever treats a day as bookable if it falls inside a saved
+      // weekly working-hours window — without this, "no bookings and no
+      // explicit block" reads as "open" here even on a day nobody could
+      // actually book, which is exactly backwards.
+      fetch("/api/availability").then((res) => res.json()),
+    ]).then(([bookingsBody, blockedBody, availabilityBody]) => {
       startTransition(() => {
         setBookings(bookingsBody.data ?? []);
         setBlockedDates(blockedBody.data ?? []);
+        setWeeklySchedule(availabilityBody.data?.schedule ?? []);
         setIsLoading(false);
       });
     });
@@ -109,6 +122,8 @@ export default function CalendarPage() {
       date: dateKey(new Date(b.date)),
     });
   }
+
+  const workingWeekdays = new Set(weeklySchedule.map((w) => w.dayOfWeek));
 
   const firstOfMonth = new Date(
     Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth(), 1),
@@ -202,7 +217,14 @@ export default function CalendarPage() {
           <span className="size-2 rounded-full border border-border-default" />
           {t("legend.open")}
         </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-2 rounded-full border border-dashed border-warning" />
+          {t("legend.noWorkingHours")}
+        </span>
       </div>
+      {workingWeekdays.size === 0 ? (
+        <p className="text-body-sm text-warning">{t("noScheduleWarning")}</p>
+      ) : null}
 
       {isLoading ? (
         <div className="flex justify-center py-16">
@@ -229,6 +251,7 @@ export default function CalendarPage() {
               const key = dateKey(date);
               const dayBookings = byDate.get(key) ?? [];
               const blocked = blockedByDate.get(key);
+              const noWorkingHours = !workingWeekdays.has(date.getUTCDay());
               return (
                 <div
                   key={key}
@@ -245,6 +268,7 @@ export default function CalendarPage() {
                     "min-h-[96px] cursor-pointer border-b border-r border-border-subtle p-1.5 hover:bg-bg-sunken",
                     key === todayKey && "bg-success-bg/40",
                     blocked && "bg-bg-sunken",
+                    !blocked && noWorkingHours && "bg-warning-bg/30",
                   )}
                 >
                   <div className="flex items-center justify-between gap-1">
@@ -254,6 +278,10 @@ export default function CalendarPage() {
                     {blocked ? (
                       <span className="rounded-full bg-text-tertiary px-1.5 py-0.5 text-sm font-bold text-text-on-brand">
                         {t("busyLabel")}
+                      </span>
+                    ) : noWorkingHours ? (
+                      <span className="rounded-full bg-warning px-1.5 py-0.5 text-sm font-bold text-text-on-brand">
+                        {t("noHoursLabel")}
                       </span>
                     ) : null}
                   </div>

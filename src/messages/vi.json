@@ -1388,10 +1388,13 @@
       "emptyMonth": "Không có lịch đặt trong tháng này",
       "customRequest": "Yêu cầu tùy chỉnh",
       "busyLabel": "Bận",
+      "noHoursLabel": "Chưa có giờ làm",
+      "noScheduleWarning": "Bạn chưa lưu lịch làm việc hàng tuần nào — khách sẽ không đặt được lịch cho tới khi bạn cấu hình và lưu ở Cài đặt hồ sơ.",
       "legend": {
         "booked": "Có đơn",
         "blocked": "Đã chặn",
-        "open": "Còn trống"
+        "open": "Còn trống",
+        "noWorkingHours": "Chưa cấu hình giờ làm việc"
       },
       "blockDialog": {
         "title": "Ngày {date}",

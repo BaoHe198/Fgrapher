@@ -1388,10 +1388,13 @@
       "emptyMonth": "No bookings this month",
       "customRequest": "Custom request",
       "busyLabel": "Busy",
+      "noHoursLabel": "No hours set",
+      "noScheduleWarning": "You haven't saved any weekly working hours yet — customers won't be able to book until you set and save them in Profile settings.",
       "legend": {
         "booked": "Booked",
         "blocked": "Blocked",
-        "open": "Open"
+        "open": "Open",
+        "noWorkingHours": "No working hours set"
       },
       "blockDialog": {
         "title": "{date}",
