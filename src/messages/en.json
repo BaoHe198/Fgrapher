@@ -795,6 +795,14 @@
     "users": {
       "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo"
     },
+    "profilePublish": {
+      "unknownRole": "Unknown role",
+      "noRole": "You don't have this role",
+      "invalidInput": "Invalid input",
+      "nowLive": "Profile is now live",
+      "unpublished": "Profile unpublished",
+      "updateFailed": "Failed to update publish status"
+    },
     "roles": {
       "invalidInput": "Invalid input",
       "saved": "Role saved",
@@ -1990,6 +1998,13 @@
       "activeSubscriptionRequired": "Active subscription required for role: {role}",
       "paidRoleRequired": "An active paid role subscription is required",
       "adminAccessRequired": "Admin access required"
+    },
+    "publicProfile": {
+      "notVerified": "Your identity must be verified before this profile can go live",
+      "notFound": "Save your profile details before publishing",
+      "noApprovedMedia": "Upload at least one approved portfolio photo before publishing",
+      "missingCategory": "Choose at least one specialty category before publishing",
+      "missingLocation": "Add a specific address, province, and ward before publishing a studio profile"
     },
     "email": {
       "footer": {

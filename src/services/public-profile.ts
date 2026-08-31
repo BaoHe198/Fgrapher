@@ -1,4 +1,5 @@
 import type { Role } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
@@ -20,14 +21,14 @@ export async function setProfilePublished(
   role: Role,
   isPublished: boolean,
 ) {
+  const t = await getTranslations("libServices.publicProfile");
+
   if (isPublished) {
     const userRole = await db.userRole.findUnique({
       where: { userId_role: { userId, role } },
     });
     if (userRole?.verificationStatus !== "VERIFIED") {
-      throw new ProfileNotVerifiedError(
-        "Your identity must be verified before this profile can go live",
-      );
+      throw new ProfileNotVerifiedError(t("notVerified"));
     }
   }
 
@@ -35,9 +36,7 @@ export async function setProfilePublished(
     where: { userId_role: { userId, role } },
   });
   if (!profile) {
-    throw new ProfileNotFoundError(
-      "Save your profile details before publishing",
-    );
+    throw new ProfileNotFoundError(t("notFound"));
   }
 
   if (isPublished) {
@@ -46,9 +45,7 @@ export async function setProfilePublished(
       select: { id: true },
     });
     if (!approvedMedia) {
-      throw new ProfileHasNoApprovedMediaError(
-        "Upload at least one approved portfolio photo before publishing",
-      );
+      throw new ProfileHasNoApprovedMediaError(t("noApprovedMedia"));
     }
   }
 
@@ -57,9 +54,7 @@ export async function setProfilePublished(
   // (G4) and the public profile page (VIỆC 5) let clients find the right
   // provider, so a profile with none of those set isn't ready to go live.
   if (isPublished && profile.categories.length === 0) {
-    throw new ProfileMissingCategoryError(
-      "Choose at least one specialty category before publishing",
-    );
+    throw new ProfileMissingCategoryError(t("missingCategory"));
   }
 
   // Prompt B4, VIỆC 3 — a Studio's whole value proposition is "come shoot
@@ -70,9 +65,7 @@ export async function setProfilePublished(
   // back to the free-text city filter).
   if (isPublished && role === "STUDIO") {
     if (!profile.address || !profile.provinceId || !profile.wardId) {
-      throw new ProfileMissingLocationError(
-        "Add a specific address, province, and ward before publishing a studio profile",
-      );
+      throw new ProfileMissingLocationError(t("missingLocation"));
     }
   }
 

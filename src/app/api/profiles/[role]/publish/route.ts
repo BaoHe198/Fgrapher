@@ -1,5 +1,6 @@
 import { Role } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
@@ -18,19 +19,20 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ role: string }> },
 ) {
+  const t = await getTranslations("apiMessages.profilePublish");
   try {
     const session = await requireAuth();
     const { role } = await params;
 
     if (!(Object.values(Role) as string[]).includes(role)) {
       return NextResponse.json(
-        { data: null, error: "invalid_role", message: "Unknown role" },
+        { data: null, error: "invalid_role", message: t("unknownRole") },
         { status: 400 },
       );
     }
     if (!session.user.roles.includes(role as Role)) {
       return NextResponse.json(
-        { data: null, error: "forbidden", message: "You don't have this role" },
+        { data: null, error: "forbidden", message: t("noRole") },
         { status: 403 },
       );
     }
@@ -39,7 +41,7 @@ export async function PATCH(
     const parsed = bodySchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "Invalid input" },
+        { data: null, error: "validation_error", message: t("invalidInput") },
         { status: 400 },
       );
     }
@@ -54,9 +56,7 @@ export async function PATCH(
       {
         data: profile,
         error: null,
-        message: parsed.data.isPublished
-          ? "Profile is now live"
-          : "Profile unpublished",
+        message: parsed.data.isPublished ? t("nowLive") : t("unpublished"),
       },
       { status: 200 },
     );
@@ -102,7 +102,7 @@ export async function PATCH(
       {
         data: null,
         error: "server_error",
-        message: "Failed to update publish status",
+        message: t("updateFailed"),
       },
       { status: 500 },
     );

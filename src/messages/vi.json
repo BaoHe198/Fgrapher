@@ -795,6 +795,14 @@
     "users": {
       "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa"
     },
+    "profilePublish": {
+      "unknownRole": "Vai trò không xác định",
+      "noRole": "Bạn không có vai trò này",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "nowLive": "Hồ sơ đã được công khai",
+      "unpublished": "Đã gỡ công khai hồ sơ",
+      "updateFailed": "Không thể cập nhật trạng thái công khai"
+    },
     "roles": {
       "invalidInput": "Dữ liệu không hợp lệ",
       "saved": "Đã lưu vai trò",
@@ -1990,6 +1998,13 @@
       "activeSubscriptionRequired": "Cần có gói đăng ký đang hoạt động cho vai trò: {role}",
       "paidRoleRequired": "Cần có ít nhất một vai trò trả phí đang hoạt động",
       "adminAccessRequired": "Yêu cầu quyền quản trị viên"
+    },
+    "publicProfile": {
+      "notVerified": "Danh tính của bạn phải được xác minh trước khi hồ sơ này có thể công khai",
+      "notFound": "Hãy lưu thông tin hồ sơ trước khi công khai",
+      "noApprovedMedia": "Hãy tải lên ít nhất một ảnh portfolio đã được duyệt trước khi công khai",
+      "missingCategory": "Hãy chọn ít nhất một danh mục sở trường trước khi công khai",
+      "missingLocation": "Hãy thêm địa chỉ, tỉnh/thành và phường/xã cụ thể trước khi công khai hồ sơ studio"
     },
     "email": {
       "footer": {
