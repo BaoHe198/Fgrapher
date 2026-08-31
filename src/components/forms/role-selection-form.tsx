@@ -56,17 +56,17 @@ export function RoleSelectionForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
+  // MVP scope decision — one provider role per account (CLAUDE.md).
+  // Picking a paid role replaces whatever paid role was selected before,
+  // rather than adding to it; CUSTOMER always stays selected.
   const toggleRole = (role: Role) => {
     if (role === "CUSTOMER") return;
 
     setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(role)) {
-        next.delete(role);
-      } else {
-        next.add(role);
+      if (prev.has(role)) {
+        return new Set(["CUSTOMER"]);
       }
-      return next;
+      return new Set(["CUSTOMER", role]);
     });
   };
 

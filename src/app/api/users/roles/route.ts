@@ -45,6 +45,36 @@ export async function POST(request: Request) {
       );
     }
 
+    // MVP scope decision — one provider role per account. parsed.data.roles
+    // is already capped to at most 1 by the schema, but that alone doesn't
+    // catch the self-service "add a role" flow: it sends just the one new
+    // role, while an existing active role (if any) lives only in the DB,
+    // never in this request. Check both together.
+    const requestedPaidRole = parsed.data.roles[0] as string | undefined;
+    if (requestedPaidRole) {
+      const existingActivePaidRole = await db.userRole.findFirst({
+        where: {
+          userId: session.user.id,
+          active: true,
+          role: {
+            in: PAID_ROLES,
+            not: requestedPaidRole as (typeof PAID_ROLES)[number],
+          },
+        },
+        select: { role: true },
+      });
+      if (existingActivePaidRole) {
+        return NextResponse.json(
+          {
+            data: null,
+            error: "validation_error",
+            message: t("onlyOneProviderRole"),
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     // CUSTOMER is always active, regardless of what the client sends.
     const roles = Array.from(
       new Set([...parsed.data.roles, "CUSTOMER" as const]),

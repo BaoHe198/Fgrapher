@@ -65,13 +65,20 @@ export function RolesSettings({
   const [activatingRole, setActivatingRole] = useState<Role | null>(null);
   const [removingRole, setRemovingRole] = useState<Role | null>(null);
   const activeRoles = currentRoles.filter((r) => r !== "CUSTOMER");
-  // CAMERA_SHOP stays hidden while the marketplace is out of MVP scope
-  // (CLAUDE.md) — the API route enforces this too, this is just so the
-  // option never shows up to begin with.
-  const availableRoles = PAID_ROLES.filter(
-    (r) =>
-      !currentRoles.includes(r) && (marketplaceEnabled || r !== "CAMERA_SHOP"),
-  );
+  // MVP scope decision — one provider role per account (CLAUDE.md): once
+  // an account already holds one, hide the option to add another entirely
+  // rather than letting them pick a second. The API route enforces this
+  // too, this is just so the option never shows up to begin with.
+  // CAMERA_SHOP additionally stays hidden while the marketplace is out of
+  // MVP scope.
+  const availableRoles =
+    activeRoles.length > 0
+      ? []
+      : PAID_ROLES.filter(
+          (r) =>
+            !currentRoles.includes(r) &&
+            (marketplaceEnabled || r !== "CAMERA_SHOP"),
+        );
   const verificationByRole = new Map(verifications.map((v) => [v.role, v]));
 
   const activateRole = async (role: Role) => {

@@ -808,6 +808,7 @@
       "saved": "Role saved",
       "saveFailed": "Couldn't save this role, please try again",
       "invalidRole": "Invalid role",
+      "onlyOneProviderRole": "You can only have 1 active provider role. Remove your current role before adding another.",
       "roleNotFound": "You don't have this role",
       "cannotRemoveVerified": "Can't remove a role that's already verified",
       "removed": "Role removed",
@@ -1952,6 +1953,7 @@
         "passwordNumber": "Password must contain at least one number",
         "dateOfBirthRequired": "Date of birth is required",
         "roleRequired": "Select at least one role",
+        "onlyOneRoleAllowed": "You can only select 1 provider role",
         "consentServiceRequired": "You must agree to data processing to create an account",
         "mustBe18": "You must be at least 18 years old to create a Fgrapher account",
         "contentGuidelinesRequired": "You must accept the content guidelines to register as a Model"

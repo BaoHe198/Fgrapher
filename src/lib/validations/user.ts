@@ -9,7 +9,15 @@ import { PAID_ROLE_VALUES } from "@/lib/validations/auth";
 // regardless of input (see the route), and ADMIN must never be
 // self-assignable — only PAID_ROLE_VALUES' six provider roles are.
 export const updateRolesSchema = z.object({
-  roles: z.array(z.enum(PAID_ROLE_VALUES)).min(1, "Select at least one role"),
+  // MVP scope decision — one provider role per account. The route handler
+  // additionally checks the caller's existing active roles in the DB,
+  // since this only bounds what's in THIS request (relevant for the
+  // self-service "add a role" flow, which sends just the one new role and
+  // relies on an existing active role already being in the database).
+  roles: z
+    .array(z.enum(PAID_ROLE_VALUES))
+    .min(1, "Select at least one role")
+    .max(1, "Select only one role"),
 });
 
 export type UpdateRolesInput = z.infer<typeof updateRolesSchema>;

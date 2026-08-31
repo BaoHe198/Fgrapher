@@ -51,7 +51,11 @@ export const registerSchema = z
       .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
       .regex(/[0-9]/, "Password must contain at least one number"),
     accountType: z.enum(["customer", "provider"]),
-    roles: z.array(z.enum(PAID_ROLE_VALUES)),
+    // MVP scope decision — one provider role per account, to keep launch
+    // simple (dashboard, billing, verification all assume a single active
+    // provider identity for now). CUSTOMER isn't in this list at all (see
+    // PAID_ROLE_VALUES), so this only caps provider roles.
+    roles: z.array(z.enum(PAID_ROLE_VALUES)).max(1, "Select only one role"),
     // Age gate (Prompt B3, docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md)
     // — required for EVERY account as of B3, not just MODEL (was optional
     // before). Stored privately on User; never returned to the client or
@@ -150,7 +154,9 @@ export function getRegisterSchema(t: (key: string) => string) {
         .regex(/[A-Z]/, t("passwordUppercase"))
         .regex(/[0-9]/, t("passwordNumber")),
       accountType: z.enum(["customer", "provider"]),
-      roles: z.array(z.enum(PAID_ROLE_VALUES)),
+      // MVP scope decision — one provider role per account (see the
+      // matching comment on registerSchema above).
+      roles: z.array(z.enum(PAID_ROLE_VALUES)).max(1, t("onlyOneRoleAllowed")),
       dateOfBirth: z.string().min(1, t("dateOfBirthRequired")),
       acceptedContentGuidelines: z.boolean().optional(),
       consentService: z.boolean(),

@@ -808,6 +808,7 @@
       "saved": "Đã lưu vai trò",
       "saveFailed": "Không thể lưu vai trò, vui lòng thử lại",
       "invalidRole": "Vai trò không hợp lệ",
+      "onlyOneProviderRole": "Bạn chỉ có thể kích hoạt 1 vai trò nhà cung cấp. Hãy xoá vai trò hiện tại trước khi thêm vai trò khác.",
       "roleNotFound": "Bạn chưa có vai trò này",
       "cannotRemoveVerified": "Không thể xoá vai trò đã được xác minh",
       "removed": "Đã xoá vai trò",
@@ -1952,6 +1953,7 @@
         "passwordNumber": "Mật khẩu phải chứa ít nhất một chữ số",
         "dateOfBirthRequired": "Vui lòng nhập ngày sinh",
         "roleRequired": "Vui lòng chọn ít nhất một vai trò",
+        "onlyOneRoleAllowed": "Chỉ được chọn 1 vai trò nhà cung cấp",
         "consentServiceRequired": "Bạn phải đồng ý xử lý dữ liệu cá nhân để tạo tài khoản",
         "mustBe18": "Bạn phải từ 18 tuổi trở lên để tạo tài khoản Fgrapher",
         "contentGuidelinesRequired": "Bạn phải chấp nhận nguyên tắc nội dung để đăng ký với vai trò Người mẫu"

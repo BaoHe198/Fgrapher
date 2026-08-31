@@ -12,6 +12,7 @@ import { SocialRow } from "@/components/auth/social-row";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Radio } from "@/components/ui/radio";
 import { PAID_ROLES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
@@ -115,14 +116,11 @@ export function RegisterForm({
     }
   };
 
+  // MVP scope decision — one provider role per account (CLAUDE.md). Picking
+  // a role replaces whatever was selected before rather than adding to it.
   const toggleRole = (role: ProviderRole) => {
     setSelectedRoles((prev) => {
-      const next = new Set(prev);
-      if (next.has(role)) {
-        next.delete(role);
-      } else {
-        next.add(role);
-      }
+      const next = prev.has(role) ? new Set<ProviderRole>() : new Set([role]);
       setValue("roles", Array.from(next));
       return next;
     });
@@ -251,10 +249,11 @@ export function RegisterForm({
             </span>
             <div className="flex flex-col gap-2.5">
               {PROVIDER_ROLE_OPTIONS.map((role) => (
-                <Checkbox
+                <Radio
                   key={role}
+                  name="providerRole"
                   checked={selectedRoles.has(role)}
-                  onCheckedChange={() => toggleRole(role)}
+                  onChange={() => toggleRole(role)}
                   label={roleT(role)}
                 />
               ))}

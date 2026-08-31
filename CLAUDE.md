@@ -137,7 +137,18 @@ docs/
 
 ### User roles (critical domain concept)
 
-One user can hold MULTIPLE roles simultaneously. Roles determine UI visibility, permissions, and billing:
+One user can hold MULTIPLE roles at the data-model level (`UserRole` is a
+join table, CUSTOMER + a provider role always coexist). **As of this MVP
+scope decision, self-service is capped to at most one active PAID/provider
+role per account at a time** (`PAID_ROLES`: PHOTOGRAPHER, VIDEOGRAPHER,
+MAKEUP_ARTIST, STUDIO, CAMERA_SHOP, MODEL) — registration only lets you pick
+one, and `/dashboard/settings/roles` hides "add another role" entirely once
+one is active; the current role must be removed first. Enforced both
+client-side and server-side (`/api/auth/register`, `/api/users/roles`).
+CUSTOMER is unaffected and always coexists. This keeps launch simpler
+(dashboard, billing, verification all assume a single active provider
+identity for now) — revisit if multi-role providers become a real need
+post-launch. Roles determine UI visibility, permissions, and billing:
 
 | Role          | Paid          | Can upload | Can sell/book        | Profile type            |
 | ------------- | ------------- | ---------- | -------------------- | ----------------------- |
