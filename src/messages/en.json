@@ -478,6 +478,7 @@
       "providerDesc": "Get booked and sell",
       "whatDoYouOffer": "WHAT DO YOU OFFER?",
       "changeLaterNote": "You can change this later. Customer access is always free.",
+      "billingNotice": "Free during this stage. If Fgrapher introduces fees in the future, we'll give at least 30 days' notice.",
       "contentGuidelinesConfirm": "I confirm I'm 18 or older and agree to the ",
       "contentGuidelinesLink": "content guidelines",
       "fullNameLabel": "Full name",

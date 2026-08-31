@@ -1,6 +1,5 @@
 "use client";
 
-import type { Role } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -12,7 +11,6 @@ import { LoginForm } from "./login-form";
 type Mode = "login" | "register";
 
 interface AuthTabsProps {
-  rolePrices: Partial<Record<Role, number>>;
   initialRole?: string;
   interval: "month" | "year";
   callbackUrl?: string;
@@ -21,7 +19,6 @@ interface AuthTabsProps {
 }
 
 export function AuthTabs({
-  rolePrices,
   initialRole,
   interval,
   callbackUrl,
@@ -71,7 +68,6 @@ export function AuthTabs({
 
       <TabsPanel value="register" className="mt-6 flex flex-col gap-[22px]">
         <RegisterForm
-          rolePrices={rolePrices}
           interval={interval}
           initialRole={initialRole}
           onSwitchToLogin={() => setMode("login")}

@@ -1,6 +1,5 @@
 "use client";
 
-import type { Role } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Loader2, User } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -13,9 +12,8 @@ import { SocialRow } from "@/components/auth/social-row";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Tag } from "@/components/ui/tag";
 import { PAID_ROLES } from "@/lib/constants";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import {
   getRegisterSchema,
   type ProviderRole,
@@ -43,7 +41,6 @@ function strengthColor(score: number) {
 }
 
 interface RegisterFormProps {
-  rolePrices: Partial<Record<Role, number>>;
   interval: "month" | "year";
   initialRole?: string;
   onSwitchToLogin: () => void;
@@ -51,7 +48,6 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({
-  rolePrices,
   interval,
   initialRole,
   onSwitchToLogin,
@@ -255,16 +251,12 @@ export function RegisterForm({
             </span>
             <div className="flex flex-col gap-2.5">
               {PROVIDER_ROLE_OPTIONS.map((role) => (
-                <div key={role} className="flex items-center justify-between">
-                  <Checkbox
-                    checked={selectedRoles.has(role)}
-                    onCheckedChange={() => toggleRole(role)}
-                    label={roleT(role)}
-                  />
-                  <Tag tabIndex={-1} className="pointer-events-none">
-                    {formatCurrency(rolePrices[role] ?? 0, "VND")}/mo
-                  </Tag>
-                </div>
+                <Checkbox
+                  key={role}
+                  checked={selectedRoles.has(role)}
+                  onCheckedChange={() => toggleRole(role)}
+                  label={roleT(role)}
+                />
               ))}
             </div>
             {errors.roles ? (
@@ -272,6 +264,9 @@ export function RegisterForm({
             ) : null}
             <p className="text-body-sm text-text-tertiary">
               {t("changeLaterNote")}
+            </p>
+            <p className="text-body-sm text-text-tertiary">
+              {t("billingNotice")}
             </p>
           </div>
         </div>
