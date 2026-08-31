@@ -45,7 +45,7 @@ const BUDGET_LABEL_KEYS: Record<(typeof BUDGET_VALUES)[number], string> = {
 };
 
 const segmentClass =
-  "flex items-center gap-1 rounded-full px-3.5 py-2.5 text-body-sm text-text-primary outline-none hover:bg-bg-sunken focus-visible:bg-bg-sunken";
+  "flex flex-1 min-w-0 items-center justify-center gap-1 rounded-full px-3.5 py-2.5 text-body-sm text-text-primary outline-none hover:bg-bg-sunken focus-visible:bg-bg-sunken";
 
 export function HeroSearch({
   marketplaceEnabled,
@@ -110,11 +110,11 @@ export function HeroSearch({
   };
 
   return (
-    <div className="flex w-fit max-w-full flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)]">
+    <div className="flex w-full flex-col gap-2 lg:flex-row lg:items-stretch">
+      <div className="flex flex-1 flex-wrap items-center gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)]">
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
-            <span className="max-w-[110px] truncate">
+            <span className="max-w-full truncate">
               {role ? roleT(role) : filterT("roleLabel")}
             </span>
             <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
@@ -143,7 +143,7 @@ export function HeroSearch({
 
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
-            <span className="max-w-[110px] truncate">
+            <span className="max-w-full truncate">
               {category ? categoryT(category) : filterT("styleLabel")}
             </span>
             <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
@@ -177,7 +177,7 @@ export function HeroSearch({
 
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
-            <span className="max-w-[110px] truncate">
+            <span className="max-w-full truncate">
               {provinceCode
                 ? (provinces.find((p) => p.code === provinceCode)?.name ??
                   filterT("cityLabel"))
@@ -209,7 +209,7 @@ export function HeroSearch({
 
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
-            <span className="max-w-[110px] truncate">
+            <span className="max-w-full truncate">
               {wardId
                 ? (wards.find((w) => w.id === wardId)?.name ??
                   filterT("wardLabel"))
@@ -248,7 +248,7 @@ export function HeroSearch({
 
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
-            <span className="max-w-[110px] truncate">
+            <span className="max-w-full truncate">
               {budget
                 ? filterT(
                     BUDGET_LABEL_KEYS[budget] as Parameters<typeof filterT>[0],
@@ -280,7 +280,7 @@ export function HeroSearch({
         variant="accent"
         size="lg"
         onClick={onSearch}
-        className="w-full rounded-[var(--fg-radius-lg)] shadow-[var(--shadow-lg)]"
+        className="w-full shrink-0 rounded-[var(--fg-radius-lg)] shadow-[var(--shadow-lg)] lg:w-auto lg:px-10"
       >
         <Search className="size-4" />
         {t("hero.cta")}
