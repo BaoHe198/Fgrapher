@@ -110,7 +110,7 @@ export function HeroSearch({
   };
 
   return (
-    <div className="flex max-w-[860px] flex-col gap-2">
+    <div className="flex w-fit max-w-full flex-col gap-2">
       <div className="flex flex-wrap items-center gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)]">
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>

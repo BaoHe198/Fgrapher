@@ -61,63 +61,69 @@ export default async function LandingPage() {
     <>
       {/* SECTION 1 — HERO */}
       <section className="relative bg-green-900 text-gold-50">
-        <div className="mx-auto grid min-h-[520px] max-w-[1240px] grid-cols-[1.05fr_1fr] items-center gap-14 px-8 max-lg:grid-cols-1 max-md:px-5">
-          <div className="flex flex-col gap-[22px] py-16">
-            <span className="text-caption-upper tracking-[0.14em] text-gold-300">
-              {t("hero.eyebrow")}
-            </span>
-            <h1 className="m-0 text-display-2xl tracking-[-0.02em]">
-              {t("hero.title")}
-            </h1>
-            <p className="max-w-[460px] text-body-lg text-green-200">
-              {t("hero.sub")}
-            </p>
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-10 px-8 py-16 max-md:px-5">
+          <div className="grid grid-cols-[1.05fr_1fr] items-center gap-14 max-lg:grid-cols-1">
+            <div className="flex flex-col gap-[22px]">
+              <span className="text-caption-upper tracking-[0.14em] text-gold-300">
+                {t("hero.eyebrow")}
+              </span>
+              <h1 className="m-0 text-display-2xl tracking-[-0.02em]">
+                {t("hero.title")}
+              </h1>
+              <p className="max-w-[460px] text-body-lg text-green-200">
+                {t("hero.sub")}
+              </p>
+            </div>
 
-            <HeroSearch marketplaceEnabled={features.marketplaceEnabled} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 py-10 max-lg:hidden">
-            <div className="flex flex-col gap-3">
-              <div className="relative h-[200px] overflow-hidden rounded-2xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1497316730643-415fac54a2af?q=80&w=800&auto=format&fit=crop"
-                  alt={t("hero.imageAlt.photographer")}
-                  fill
-                  sizes="(min-width: 1024px) 300px, 0px"
-                  className="object-cover"
-                />
+            <div className="grid grid-cols-2 gap-3 max-lg:hidden">
+              <div className="flex flex-col gap-3">
+                <div className="relative h-[200px] overflow-hidden rounded-2xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1497316730643-415fac54a2af?q=80&w=800&auto=format&fit=crop"
+                    alt={t("hero.imageAlt.photographer")}
+                    fill
+                    sizes="(min-width: 1024px) 300px, 0px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="relative h-[140px] overflow-hidden rounded-2xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1622336889416-8d790ad807d7?q=80&w=800&auto=format&fit=crop"
+                    alt={t("hero.imageAlt.makeupArtist")}
+                    fill
+                    sizes="(min-width: 1024px) 300px, 0px"
+                    className="object-cover"
+                  />
+                </div>
               </div>
-              <div className="relative h-[140px] overflow-hidden rounded-2xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1622336889416-8d790ad807d7?q=80&w=800&auto=format&fit=crop"
-                  alt={t("hero.imageAlt.makeupArtist")}
-                  fill
-                  sizes="(min-width: 1024px) 300px, 0px"
-                  className="object-cover"
-                />
+              <div className="flex flex-col gap-3 pt-[34px]">
+                <div className="relative h-[150px] overflow-hidden rounded-2xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1497015289639-54688650d173?q=80&w=800&auto=format&fit=crop"
+                    alt={t("hero.imageAlt.videographer")}
+                    fill
+                    sizes="(min-width: 1024px) 300px, 0px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="relative h-[190px] overflow-hidden rounded-2xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1617463874381-85b513b3e991?q=80&w=800&auto=format&fit=crop"
+                    alt={t("hero.imageAlt.studio")}
+                    fill
+                    sizes="(min-width: 1024px) 300px, 0px"
+                    className="object-cover"
+                  />
+                </div>
               </div>
             </div>
-            <div className="flex flex-col gap-3 pt-[34px]">
-              <div className="relative h-[150px] overflow-hidden rounded-2xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1497015289639-54688650d173?q=80&w=800&auto=format&fit=crop"
-                  alt={t("hero.imageAlt.videographer")}
-                  fill
-                  sizes="(min-width: 1024px) 300px, 0px"
-                  className="object-cover"
-                />
-              </div>
-              <div className="relative h-[190px] overflow-hidden rounded-2xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1617463874381-85b513b3e991?q=80&w=800&auto=format&fit=crop"
-                  alt={t("hero.imageAlt.studio")}
-                  fill
-                  sizes="(min-width: 1024px) 300px, 0px"
-                  className="object-cover"
-                />
-              </div>
-            </div>
           </div>
+
+          {/* Full hero width rather than confined to the left text column —
+              at 5 filters + a search button, the dropdown box needs more
+              room than the 2-column split above leaves it to fit them on
+              one row. */}
+          <HeroSearch marketplaceEnabled={features.marketplaceEnabled} />
         </div>
       </section>
 
