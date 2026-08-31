@@ -4,6 +4,7 @@ import type {
   ServiceRequestStatus,
 } from "@prisma/client";
 
+import { features } from "@/lib/features";
 import { db } from "@/lib/db";
 import { notify } from "@/services/notification";
 import { notifyMatchingProviders } from "@/services/request-offers";
@@ -83,15 +84,17 @@ export async function createServiceRequest(
   // thoại mới đăng được yêu cầu. Drafts are exempt (nothing is visible to
   // providers yet), only publishing is gated.
   if (!input.isDraft) {
-    const customer = await db.user.findUnique({
-      where: { id: customerId },
-      select: { phoneVerified: true },
-    });
-    if (!customer?.phoneVerified) {
-      throw new ServiceRequestError(
-        "Verify your phone number before posting a request",
-        403,
-      );
+    if (features.phoneVerificationRequired) {
+      const customer = await db.user.findUnique({
+        where: { id: customerId },
+        select: { phoneVerified: true },
+      });
+      if (!customer?.phoneVerified) {
+        throw new ServiceRequestError(
+          "Verify your phone number before posting a request",
+          403,
+        );
+      }
     }
 
     const openCount = await db.serviceRequest.count({
@@ -214,15 +217,17 @@ export async function publishDraftServiceRequest(
     throw new ServiceRequestError("This request has already been posted", 400);
   }
 
-  const customer = await db.user.findUnique({
-    where: { id: customerId },
-    select: { phoneVerified: true },
-  });
-  if (!customer?.phoneVerified) {
-    throw new ServiceRequestError(
-      "Verify your phone number before posting a request",
-      403,
-    );
+  if (features.phoneVerificationRequired) {
+    const customer = await db.user.findUnique({
+      where: { id: customerId },
+      select: { phoneVerified: true },
+    });
+    if (!customer?.phoneVerified) {
+      throw new ServiceRequestError(
+        "Verify your phone number before posting a request",
+        403,
+      );
+    }
   }
 
   const openCount = await db.serviceRequest.count({

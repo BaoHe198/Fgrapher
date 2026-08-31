@@ -16,4 +16,8 @@ export const features = {
   marketplaceEnabled: env.MARKETPLACE_ENABLED,
   // Post/Like/Comment/Follow.
   socialFeedEnabled: env.SOCIAL_FEED_ENABLED,
+  // Requires Twilio Verify (paid beyond trial-verified numbers) — off
+  // temporarily disables the phone-verification gate on posting a
+  // ServiceRequest while that isn't set up.
+  phoneVerificationRequired: env.PHONE_VERIFICATION_REQUIRED,
 } as const;

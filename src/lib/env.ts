@@ -69,6 +69,11 @@ const serverSchema = z.object({
   BILLING_ENABLED: booleanFlag("false"),
   MARKETPLACE_ENABLED: booleanFlag("false"),
   SOCIAL_FEED_ENABLED: booleanFlag("false"),
+  // Defaults ON (the anti-fake-request gate from Prompt G7 stays in
+  // force by default) — set to "false" only while Twilio isn't
+  // configured/paid for yet, per the project owner's explicit call to
+  // temporarily let service requests post without a verified phone.
+  PHONE_VERIFICATION_REQUIRED: booleanFlag("true"),
 });
 
 const publicSchema = z.object({
