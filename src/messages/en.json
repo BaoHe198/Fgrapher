@@ -444,7 +444,13 @@
   "accountFlows": {
     "authLayout": {
       "quote": "Fgrapher put my portfolio in front of the right clients. I book twice as many sessions now.",
-      "quoteBy": "Verified provider on Fgrapher"
+      "quoteBy": "Verified provider on Fgrapher",
+      "imageAlt": {
+        "photographer": "Photographer at work",
+        "videographer": "Professional video equipment",
+        "event": "Event photography moment",
+        "studio": "Professional studio lighting"
+      }
     },
     "login": {
       "metaTitle": "Sign in or create an account — Fgrapher",

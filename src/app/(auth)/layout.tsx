@@ -1,8 +1,8 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { LogoFull } from "@/components/brand/logo-full";
-import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -25,10 +25,42 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
 
         <div className="relative hidden items-end bg-green-900 p-10 lg:flex">
           <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 opacity-50">
-            <MediaPlaceholder tint="green-700" height="100%" />
-            <MediaPlaceholder tint="gold-700" height="100%" />
-            <MediaPlaceholder tint="green-600" height="100%" />
-            <MediaPlaceholder tint="neutral-700" height="100%" />
+            <div className="relative h-full w-full">
+              <Image
+                src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?q=80&w=800&auto=format&fit=crop"
+                alt={t("imageAlt.photographer")}
+                fill
+                sizes="(min-width: 1024px) 400px, 0px"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative h-full w-full">
+              <Image
+                src="https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=800&auto=format&fit=crop"
+                alt={t("imageAlt.videographer")}
+                fill
+                sizes="(min-width: 1024px) 400px, 0px"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative h-full w-full">
+              <Image
+                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop"
+                alt={t("imageAlt.event")}
+                fill
+                sizes="(min-width: 1024px) 400px, 0px"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative h-full w-full">
+              <Image
+                src="https://images.unsplash.com/photo-1514996937319-344454492b37?q=80&w=800&auto=format&fit=crop"
+                alt={t("imageAlt.studio")}
+                fill
+                sizes="(min-width: 1024px) 400px, 0px"
+                className="object-cover"
+              />
+            </div>
           </div>
           <blockquote className="relative flex max-w-[440px] flex-col gap-3">
             <p className="text-heading-lg text-gold-50">

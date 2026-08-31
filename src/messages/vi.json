@@ -444,7 +444,13 @@
   "accountFlows": {
     "authLayout": {
       "quote": "Fgrapher đưa portfolio của tôi đến đúng khách hàng. Giờ tôi nhận được gấp đôi số lượt đặt lịch.",
-      "quoteBy": "Nhà cung cấp đã xác minh trên Fgrapher"
+      "quoteBy": "Nhà cung cấp đã xác minh trên Fgrapher",
+      "imageAlt": {
+        "photographer": "Nhiếp ảnh gia đang tác nghiệp",
+        "videographer": "Thiết bị quay video chuyên nghiệp",
+        "event": "Khoảnh khắc chụp ảnh sự kiện",
+        "studio": "Ánh sáng studio chuyên nghiệp"
+      }
     },
     "login": {
       "metaTitle": "Đăng nhập hoặc tạo tài khoản — Fgrapher",

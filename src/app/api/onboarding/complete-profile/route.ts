@@ -89,6 +89,7 @@ export async function POST(request: Request) {
       );
     }
 
+    console.error("[onboarding/complete-profile]", err);
     return NextResponse.json(
       {
         data: null,
