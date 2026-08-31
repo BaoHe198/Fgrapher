@@ -1564,7 +1564,6 @@
         "missing": {
           "avatar": "Thêm ảnh đại diện",
           "coverImage": "Thêm ảnh bìa",
-          "bio": "Viết giới thiệu ngắn",
           "phone": "Thêm số điện thoại",
           "roleProfile": "Hoàn thiện hồ sơ {role}",
           "categories": "Chọn thể loại sở trường cho hồ sơ {role}"
@@ -1808,7 +1807,6 @@
         "usernameLabel": "Tên người dùng",
         "usernameHint": "Dùng cho đường dẫn hồ sơ của bạn (vd: fgrapher.vn/profile/tenban) — chỉ chữ không dấu, số và dấu gạch dưới. Muốn hiển thị tên có dấu, hãy dùng mục \"Tên hiển thị\".",
         "usernameTaken": "Tên người dùng này đã được sử dụng",
-        "bioLabel": "Giới thiệu",
         "wardLabel": "Phường/xã",
         "wardNotSelected": "Chưa chọn"
       },
@@ -1836,7 +1834,7 @@
         "displayNameLabel": "Tên hiển thị",
         "descriptionLabel": "Mô tả",
         "categoriesLabel": "Danh mục",
-        "categoriesCount": "{count}/{max} đã chọn",
+        "categoriesCount": "{count} đã chọn",
         "categoriesRequiredHint": "Chọn ít nhất 1 danh mục trước khi công khai hồ sơ",
         "minPriceLabel": "Giá tối thiểu",
         "maxPriceLabel": "Giá tối đa",
@@ -1954,8 +1952,7 @@
         "bothPricesRequired": "Vui lòng nhập cả giá bán và giá thuê"
       },
       "profile": {
-        "displayNameRequired": "Vui lòng nhập tên hiển thị",
-        "categoriesMax": "Chọn tối đa 5 thể loại"
+        "displayNameRequired": "Vui lòng nhập tên hiển thị"
       },
       "review": {
         "contentTooShort": "Vui lòng chia sẻ chi tiết hơn (tối thiểu 20 ký tự)"

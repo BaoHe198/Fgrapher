@@ -31,7 +31,6 @@ export default async function ProfileSettingsPage() {
       <AccountBasicsForm
         initialName={user.name}
         initialUsername={user.username}
-        initialBio={user.bio}
         initialWardId={user.wardId}
         // Anyone with a provider role already sets a "Tên hiển thị" per role
         // below (RoleProfileSwitcher, backed by Profile.displayName) —

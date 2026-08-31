@@ -15,20 +15,17 @@ interface WardOption {
 export function AccountBasicsForm({
   initialName,
   initialUsername,
-  initialBio,
   initialWardId,
   showDisplayName,
 }: {
   initialName: string | null;
   initialUsername: string | null;
-  initialBio: string | null;
   initialWardId: string | null;
   showDisplayName: boolean;
 }) {
   const t = useTranslations("dashboardSettings.profile.basics");
   const [name, setName] = useState(initialName ?? "");
   const [username, setUsername] = useState(initialUsername ?? "");
-  const [bio, setBio] = useState(initialBio ?? "");
   const [wardId, setWardId] = useState(initialWardId ?? "");
   const [wards, setWards] = useState<WardOption[]>([]);
 
@@ -89,14 +86,6 @@ export function AccountBasicsForm({
     });
   };
 
-  const saveBio = async (value: string) => {
-    await fetch("/api/users/me", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bio: value }),
-    });
-  };
-
   const saveName = async (value: string) => {
     if (value.trim().length < 2 || value === (initialName ?? "")) return;
     await fetch("/api/users/me", {
@@ -144,24 +133,6 @@ export function AccountBasicsForm({
         {usernameStatus === "taken" ? (
           <p className="text-body-sm text-danger">{t("usernameTaken")}</p>
         ) : null}
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center justify-between">
-          <label className="text-body-sm font-semibold! text-text-primary">
-            {t("bioLabel")}
-          </label>
-          <span className="text-body-sm text-text-tertiary">
-            {bio.length}/500
-          </span>
-        </div>
-        <textarea
-          maxLength={500}
-          className="min-h-24 w-full rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none focus:border-border-focus focus:ring-2 focus:ring-gold-500/20"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          onBlur={(e) => saveBio(e.target.value)}
-        />
       </div>
 
       <NativeSelect

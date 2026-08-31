@@ -23,11 +23,6 @@ import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
 import { ServicesManager } from "./services-manager";
 
-// Prompt G2, VIỆC 4 — forces a provider to pick their strongest
-// specialties rather than ticking every box; matches the zod schema's
-// .max(5) in lib/validations/profile.ts.
-const MAX_CATEGORIES = 5;
-
 interface ServiceItem {
   id: string;
   name: string;
@@ -211,12 +206,6 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   const toggleCategory = (category: ProfileCategory) => {
     setValues((prev) => {
       const isSelected = prev.categories.includes(category);
-      // Prompt G2, VIỆC 4 — max 5, enforced here too (not just the zod
-      // schema on save) so the chip itself visibly refuses the 6th pick
-      // instead of silently no-oping until Save.
-      if (!isSelected && prev.categories.length >= MAX_CATEGORIES) {
-        return prev;
-      }
       return {
         ...prev,
         categories: isSelected
@@ -378,22 +367,16 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             {tEditor("categoriesLabel")}
           </span>
           <span className="text-body-sm text-text-tertiary">
-            {tEditor("categoriesCount", {
-              count: values.categories.length,
-              max: MAX_CATEGORIES,
-            })}
+            {tEditor("categoriesCount", { count: values.categories.length })}
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
           {(CATEGORIES_BY_ROLE[role] ?? []).map((category) => {
             const selected = values.categories.includes(category);
-            const atMax =
-              !selected && values.categories.length >= MAX_CATEGORIES;
             return (
               <Tag
                 key={category}
                 selected={selected}
-                disabled={atMax}
                 onClick={() => toggleCategory(category)}
               >
                 {categoryT(category)}

@@ -1564,7 +1564,6 @@
         "missing": {
           "avatar": "Add a profile photo",
           "coverImage": "Add a cover photo",
-          "bio": "Write a short bio",
           "phone": "Add a phone number",
           "roleProfile": "Finish your {role} profile",
           "categories": "Choose specialty categories for your {role} profile"
@@ -1808,7 +1807,6 @@
         "usernameLabel": "Username",
         "usernameHint": "Used for your profile URL (e.g. fgrapher.vn/profile/yourname) — unaccented letters, numbers, and underscores only. For a name with diacritics, use \"Display name\".",
         "usernameTaken": "That username is taken",
-        "bioLabel": "Bio",
         "wardLabel": "Ward",
         "wardNotSelected": "Not selected"
       },
@@ -1836,7 +1834,7 @@
         "displayNameLabel": "Display name",
         "descriptionLabel": "Description",
         "categoriesLabel": "Categories",
-        "categoriesCount": "{count}/{max} selected",
+        "categoriesCount": "{count} selected",
         "categoriesRequiredHint": "Choose at least 1 category before publishing your profile",
         "minPriceLabel": "Min price",
         "maxPriceLabel": "Max price",
@@ -1954,8 +1952,7 @@
         "bothPricesRequired": "Enter both a sale price and a rental price"
       },
       "profile": {
-        "displayNameRequired": "Enter a display name",
-        "categoriesMax": "Choose up to 5 categories"
+        "displayNameRequired": "Enter a display name"
       },
       "review": {
         "contentTooShort": "Share a bit more detail (at least 20 characters)"

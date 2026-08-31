@@ -114,7 +114,6 @@ export default async function DashboardPage() {
   if (!user.avatar) missingItems.push(t("completeProfile.missing.avatar"));
   if (!user.coverImage)
     missingItems.push(t("completeProfile.missing.coverImage"));
-  if (!user.bio) missingItems.push(t("completeProfile.missing.bio"));
   if (!user.phone) missingItems.push(t("completeProfile.missing.phone"));
   for (const role of nonCustomerRoles) {
     const profile = user.profiles.find((p) => p.role === role);
