@@ -110,171 +110,178 @@ export function HeroSearch({
   };
 
   return (
-    <div className="flex max-w-[620px] flex-wrap items-center gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)]">
-      <DropdownMenu>
-        <DropdownMenuTrigger className={segmentClass}>
-          <span className="max-w-[110px] truncate">
-            {role ? roleT(role) : filterT("roleLabel")}
-          </span>
-          <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuRadioGroup
-            value={role}
-            onValueChange={(value) => {
-              setRole(value as Role | "");
-              setCategory("");
-            }}
-          >
-            <DropdownMenuRadioItem value="">
-              {browseRequestsT("allRoles")}
-            </DropdownMenuRadioItem>
-            {roleOptions.map((r) => (
-              <DropdownMenuRadioItem key={r} value={r}>
-                {roleT(r)}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <div className="h-6 w-px shrink-0 bg-border-subtle" />
-
-      <DropdownMenu>
-        <DropdownMenuTrigger className={segmentClass}>
-          <span className="max-w-[110px] truncate">
-            {category ? categoryT(category) : filterT("styleLabel")}
-          </span>
-          <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {categoryOptions.length === 0 ? (
-            <DropdownMenuItem disabled>
-              {t("hero.filters.categoryNeedsRole")}
-            </DropdownMenuItem>
-          ) : (
+    <div className="flex max-w-[700px] flex-wrap items-center gap-2">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)]">
+        <DropdownMenu>
+          <DropdownMenuTrigger className={segmentClass}>
+            <span className="max-w-[110px] truncate">
+              {role ? roleT(role) : filterT("roleLabel")}
+            </span>
+            <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
             <DropdownMenuRadioGroup
-              value={category}
+              value={role}
+              onValueChange={(value) => {
+                setRole(value as Role | "");
+                setCategory("");
+              }}
+            >
+              <DropdownMenuRadioItem value="">
+                {browseRequestsT("allRoles")}
+              </DropdownMenuRadioItem>
+              {roleOptions.map((r) => (
+                <DropdownMenuRadioItem key={r} value={r}>
+                  {roleT(r)}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="h-6 w-px shrink-0 bg-border-subtle" />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger className={segmentClass}>
+            <span className="max-w-[110px] truncate">
+              {category ? categoryT(category) : filterT("styleLabel")}
+            </span>
+            <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            {categoryOptions.length === 0 ? (
+              <DropdownMenuItem disabled>
+                {t("hero.filters.categoryNeedsRole")}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuRadioGroup
+                value={category}
+                onValueChange={(value) =>
+                  setCategory(value as ProfileCategory | "")
+                }
+              >
+                <DropdownMenuRadioItem value="">
+                  {t("hero.filters.allCategories")}
+                </DropdownMenuRadioItem>
+                {categoryOptions.map((c) => (
+                  <DropdownMenuRadioItem key={c} value={c}>
+                    {categoryT(c)}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="h-6 w-px shrink-0 bg-border-subtle" />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger className={segmentClass}>
+            <span className="max-w-[110px] truncate">
+              {provinceCode
+                ? (provinces.find((p) => p.code === provinceCode)?.name ??
+                  filterT("cityLabel"))
+                : filterT("cityLabel")}
+            </span>
+            <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuRadioGroup
+              value={provinceCode}
+              onValueChange={(value) => {
+                setProvinceCode(value as string);
+                setWardId("");
+              }}
+            >
+              <DropdownMenuRadioItem value="">
+                {filterT("allCities")}
+              </DropdownMenuRadioItem>
+              {provinces.map((p) => (
+                <DropdownMenuRadioItem key={p.id} value={p.code}>
+                  {p.name}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="h-6 w-px shrink-0 bg-border-subtle" />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger className={segmentClass}>
+            <span className="max-w-[110px] truncate">
+              {wardId
+                ? (wards.find((w) => w.id === wardId)?.name ??
+                  filterT("wardLabel"))
+                : filterT("wardLabel")}
+            </span>
+            <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            {!provinceCode ? (
+              <DropdownMenuItem disabled>
+                {t("hero.filters.wardNeedsProvince")}
+              </DropdownMenuItem>
+            ) : wards.length === 0 ? (
+              <DropdownMenuItem disabled>
+                {t("hero.filters.wardUnavailable")}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuRadioGroup
+                value={wardId}
+                onValueChange={(value) => setWardId(value as string)}
+              >
+                <DropdownMenuRadioItem value="">
+                  {filterT("allWards")}
+                </DropdownMenuRadioItem>
+                {wards.map((w) => (
+                  <DropdownMenuRadioItem key={w.id} value={w.id}>
+                    {w.name}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="h-6 w-px shrink-0 bg-border-subtle" />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger className={segmentClass}>
+            <span className="max-w-[110px] truncate">
+              {budget
+                ? filterT(
+                    BUDGET_LABEL_KEYS[budget] as Parameters<typeof filterT>[0],
+                  )
+                : filterT("budgetLabel")}
+            </span>
+            <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuRadioGroup
+              value={budget}
               onValueChange={(value) =>
-                setCategory(value as ProfileCategory | "")
+                setBudget(value as (typeof BUDGET_VALUES)[number])
               }
             >
-              <DropdownMenuRadioItem value="">
-                {t("hero.filters.allCategories")}
-              </DropdownMenuRadioItem>
-              {categoryOptions.map((c) => (
-                <DropdownMenuRadioItem key={c} value={c}>
-                  {categoryT(c)}
+              {BUDGET_VALUES.map((value) => (
+                <DropdownMenuRadioItem key={value} value={value}>
+                  {filterT(
+                    BUDGET_LABEL_KEYS[value] as Parameters<typeof filterT>[0],
+                  )}
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-      <div className="h-6 w-px shrink-0 bg-border-subtle" />
-
-      <DropdownMenu>
-        <DropdownMenuTrigger className={segmentClass}>
-          <span className="max-w-[110px] truncate">
-            {provinceCode
-              ? (provinces.find((p) => p.code === provinceCode)?.name ??
-                filterT("cityLabel"))
-              : filterT("cityLabel")}
-          </span>
-          <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuRadioGroup
-            value={provinceCode}
-            onValueChange={(value) => {
-              setProvinceCode(value as string);
-              setWardId("");
-            }}
-          >
-            <DropdownMenuRadioItem value="">
-              {filterT("allCities")}
-            </DropdownMenuRadioItem>
-            {provinces.map((p) => (
-              <DropdownMenuRadioItem key={p.id} value={p.code}>
-                {p.name}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <div className="h-6 w-px shrink-0 bg-border-subtle" />
-
-      <DropdownMenu>
-        <DropdownMenuTrigger className={segmentClass}>
-          <span className="max-w-[110px] truncate">
-            {wardId
-              ? (wards.find((w) => w.id === wardId)?.name ??
-                filterT("wardLabel"))
-              : filterT("wardLabel")}
-          </span>
-          <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {!provinceCode ? (
-            <DropdownMenuItem disabled>
-              {t("hero.filters.wardNeedsProvince")}
-            </DropdownMenuItem>
-          ) : wards.length === 0 ? (
-            <DropdownMenuItem disabled>
-              {t("hero.filters.wardUnavailable")}
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuRadioGroup
-              value={wardId}
-              onValueChange={(value) => setWardId(value as string)}
-            >
-              <DropdownMenuRadioItem value="">
-                {filterT("allWards")}
-              </DropdownMenuRadioItem>
-              {wards.map((w) => (
-                <DropdownMenuRadioItem key={w.id} value={w.id}>
-                  {w.name}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <div className="h-6 w-px shrink-0 bg-border-subtle" />
-
-      <DropdownMenu>
-        <DropdownMenuTrigger className={segmentClass}>
-          <span className="max-w-[110px] truncate">
-            {budget
-              ? filterT(
-                  BUDGET_LABEL_KEYS[budget] as Parameters<typeof filterT>[0],
-                )
-              : filterT("budgetLabel")}
-          </span>
-          <ChevronDown className="size-3.5 shrink-0 text-text-tertiary" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuRadioGroup
-            value={budget}
-            onValueChange={(value) =>
-              setBudget(value as (typeof BUDGET_VALUES)[number])
-            }
-          >
-            {BUDGET_VALUES.map((value) => (
-              <DropdownMenuRadioItem key={value} value={value}>
-                {filterT(
-                  BUDGET_LABEL_KEYS[value] as Parameters<typeof filterT>[0],
-                )}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Button variant="accent" onClick={onSearch} className="ml-auto shrink-0">
+      <Button
+        variant="accent"
+        size="lg"
+        onClick={onSearch}
+        className="h-auto shrink-0 self-stretch rounded-[var(--fg-radius-lg)] px-6 shadow-[var(--shadow-lg)]"
+      >
         <Search className="size-4" />
         {t("hero.cta")}
       </Button>
