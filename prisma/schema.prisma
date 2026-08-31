@@ -183,6 +183,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -194,6 +195,7 @@ model Session {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -583,6 +585,7 @@ model Profile {
   // Prompt B4 VIỆC 6 — common browse-filter combinations.
   @@index([role, isPublished, provinceId])
   @@index([provinceId, priceMin])
+  @@index([wardId])
   @@map("profiles")
 }
 
@@ -702,6 +705,7 @@ model Album {
 
   @@index([profileId, sortOrder])
   @@index([deletedAt])
+  @@index([coverMediaId])
   @@map("albums")
 }
 
@@ -866,6 +870,8 @@ model Booking {
   @@index([date])
   @@index([parentBookingId])
   @@index([status, expiresAt])
+  @@index([serviceId])
+  @@index([provinceId])
   @@map("bookings")
 }
 
@@ -935,6 +941,7 @@ model Like {
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
+  @@index([postId])
   @@map("likes")
 }
 
@@ -951,6 +958,7 @@ model Comment {
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId, createdAt])
+  @@index([userId])
   @@map("comments")
 }
 
@@ -964,6 +972,7 @@ model Follow {
   following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
+  @@index([followingId])
   @@map("follows")
 }
 
@@ -1085,6 +1094,8 @@ model OrderItem {
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
 
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
 
@@ -1103,6 +1114,7 @@ model CartItem {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId, type, rentalStart, rentalEnd])
+  @@index([productId])
   @@map("cart_items")
 }
 
@@ -1158,6 +1170,7 @@ model Message {
 
   @@index([conversationId, createdAt])
   @@index([receiverId, readAt])
+  @@index([senderId])
   @@map("messages")
 }
 
@@ -1247,6 +1260,7 @@ model Review {
   reviewed User    @relation("reviewed", fields: [reviewedId], references: [id])
 
   @@index([reviewedId, rating])
+  @@index([reviewerId])
   @@map("reviews")
 }
 
@@ -1337,6 +1351,7 @@ model ServiceRequest {
   @@index([role, provinceId, status])
   @@index([status, expiresAt])
   @@index([wardId])
+  @@index([provinceId])
   @@map("service_requests")
 }
 

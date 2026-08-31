@@ -65,6 +65,23 @@ the due-booking count ever gets large; not urgent pre-launch.
 
 ### 1.2 Missing database indexes
 
+> **Update (migration `20260831121631_add_missing_foreign_key_indexes`):**
+> Supabase's own performance advisor (not just this audit's manual
+> query-pattern review) flagged every FK column across the schema
+> lacking a covering index, which is a broader/more mechanical check
+> than the analysis below — it doesn't reason about whether a column is
+> "currently queried," just whether the FK itself is covered. Added
+> `@@index` for all of them: `Account.userId`, `Session.userId`,
+> `Profile.wardId`, `Album.coverMediaId`, `Booking.serviceId`,
+> `Booking.provinceId`, `Review.reviewerId`, `ServiceRequest.provinceId`,
+> `Message.senderId` (was flagged speculative below — the advisor made
+> it concrete), plus the out-of-MVP-scope marketplace/social tables kept
+> per CLAUDE.md (`CartItem.productId`, `Comment.userId`,
+> `Follow.followingId`, `Like.postId`, `OrderItem.orderId`/`productId`).
+> The `User.isSuspended`/`isVerified`/`deletedAt` gap noted below is
+> _not_ an FK (no advisor signal either way) — still open, not covered
+> by this pass.
+
 Cross-referenced `prisma/schema.prisma` against every migration's actual
 `CREATE INDEX`/`CREATE UNIQUE INDEX` statements (confirmed Prisma+Postgres
 does **not** auto-index foreign-key columns — only explicit `@@index`/
