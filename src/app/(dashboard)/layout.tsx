@@ -42,7 +42,7 @@ export default async function DashboardLayout({
 
       <main
         id="main-content"
-        className="mx-auto w-full max-w-[1240px] px-4 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-[72px]"
+        className="mx-auto w-full max-w-[1440px] px-4 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-[72px]"
       >
         <div className="mb-4 lg:hidden">
           <MobileDashboardSidebar

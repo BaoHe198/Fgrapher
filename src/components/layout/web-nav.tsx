@@ -102,7 +102,7 @@ export function WebNav({
       }}
     >
       {/* Desktop / tablet row (>=640px) — collapses which links show at 1180px */}
-      <div className="mx-auto hidden h-[72px] max-w-[1240px] items-center gap-6 px-6 sm:flex">
+      <div className="mx-auto hidden h-[72px] max-w-[1440px] items-center gap-6 px-6 sm:flex">
         <LogoFull className="shrink-0" />
 
         <nav className="flex items-center gap-[18px]">

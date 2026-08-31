@@ -61,7 +61,7 @@ export default async function LandingPage() {
     <>
       {/* SECTION 1 — HERO */}
       <section className="relative bg-green-900 text-gold-50">
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-10 px-8 py-16 max-md:px-5">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-8 py-16 max-md:px-5">
           <div className="grid grid-cols-[1.05fr_1fr] items-center gap-14 max-lg:grid-cols-1">
             <div className="flex flex-col gap-[22px]">
               <span className="text-caption-upper tracking-[0.14em] text-gold-300">
@@ -129,7 +129,7 @@ export default async function LandingPage() {
 
       {/* SECTION 2 — FEATURED ARTISTS */}
       {featuredProfiles.length > 0 ? (
-        <section className="mx-auto max-w-[1240px] px-8 py-[72px] max-md:px-5">
+        <section className="mx-auto max-w-[1440px] px-8 py-[72px] max-md:px-5">
           <SectionHead
             title={t("home.featured")}
             actionLabel={t("home.seeAll")}
@@ -170,7 +170,7 @@ export default async function LandingPage() {
       {/* SECTION 3 — FEATURES */}
       <section className="border-y border-border-subtle bg-bg-surface">
         <div
-          className={`mx-auto grid max-w-[1240px] gap-8 px-8 py-16 max-md:grid-cols-1 max-md:px-5 ${
+          className={`mx-auto grid max-w-[1440px] gap-8 px-8 py-16 max-md:grid-cols-1 max-md:px-5 ${
             features.marketplaceEnabled ? "grid-cols-3" : "grid-cols-2"
           }`}
         >
@@ -189,7 +189,7 @@ export default async function LandingPage() {
       {/* SECTION 4 — HOW IT WORKS (not part of the real design strings — see comment above) */}
       <section
         id="how-it-works"
-        className="mx-auto max-w-[1240px] px-8 py-[72px] max-md:px-5"
+        className="mx-auto max-w-[1440px] px-8 py-[72px] max-md:px-5"
       >
         <SectionHead title={tLanding("howItWorks.heading")} />
         <div className="grid grid-cols-3 gap-8 max-md:grid-cols-1">
@@ -211,7 +211,7 @@ export default async function LandingPage() {
 
       {/* SECTION 5 — CTA */}
       <section className="bg-green-900 text-gold-50">
-        <div className="mx-auto max-w-[1240px] px-8 py-20 text-center max-md:px-5">
+        <div className="mx-auto max-w-[1440px] px-8 py-20 text-center max-md:px-5">
           <h2 className="text-display-lg">{t("home.ctaTitle")}</h2>
           <p className="mx-auto max-w-[520px] text-body-lg text-green-200">
             {t("home.ctaSub")}

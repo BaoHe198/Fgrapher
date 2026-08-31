@@ -112,7 +112,7 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
   };
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 pt-8 pb-[72px] sm:px-8">
+    <div className="mx-auto max-w-[1440px] px-4 pt-8 pb-[72px] sm:px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

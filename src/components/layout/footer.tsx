@@ -37,7 +37,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-border-subtle bg-bg-surface">
-      <div className="mx-auto max-w-[1240px] px-8 py-14 max-md:px-5">
+      <div className="mx-auto max-w-[1440px] px-8 py-14 max-md:px-5">
         <div className="grid grid-cols-4 gap-8 max-md:grid-cols-1">
           <div className="flex flex-col gap-3">
             <LogoFull />

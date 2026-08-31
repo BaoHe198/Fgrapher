@@ -55,7 +55,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         : "Newest";
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 pt-8 pb-[72px] sm:px-8">
+    <div className="mx-auto max-w-[1440px] px-4 pt-8 pb-[72px] sm:px-8">
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[268px_1fr]">
         <div className="hidden lg:block">
           <ShopFilters categoryCounts={categoryCounts} />
