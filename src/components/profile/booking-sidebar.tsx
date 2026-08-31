@@ -1,10 +1,16 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  MessageCircle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
+import { useMessaging } from "@/components/providers/messaging-provider";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { formatMonthYear, formatWeekdayShort } from "@/lib/format";
@@ -53,11 +59,13 @@ export function BookingSidebar({
 }: BookingSidebarProps) {
   const t = useTranslations("publicPages.profile.bookingSidebar");
   const router = useRouter();
+  const messaging = useMessaging();
   const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
   const [days, setDays] = useState<DayAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [isOpeningChat, setIsOpeningChat] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,6 +112,27 @@ export function BookingSidebar({
     if (selectedDate) params.set("date", selectedDate);
     if (selectedTime) params.set("time", selectedTime);
     router.push(`/booking/${providerId}?${params.toString()}`);
+  };
+
+  // Opens the floating chat popup with this provider in-place, instead of
+  // navigating to /dashboard/messages — a full navigation would lose
+  // whatever service/date/time the customer already picked above, which
+  // defeats the point of messaging to sort out details *before* booking.
+  const onMessage = async () => {
+    setIsOpeningChat(true);
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: providerId }),
+      });
+      const body = await res.json();
+      if (res.ok && body.data?.id) {
+        messaging.open(body.data.id);
+      }
+    } finally {
+      setIsOpeningChat(false);
+    }
   };
 
   return (
@@ -276,9 +305,14 @@ export function BookingSidebar({
       <Button
         variant="ghost"
         className="w-full"
-        nativeButton={false}
-        render={<a href={`/dashboard/messages?to=${providerId}`} />}
+        disabled={isOpeningChat}
+        onClick={onMessage}
       >
+        {isOpeningChat ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <MessageCircle className="size-4" />
+        )}
         {t("message", { name: firstName })}
       </Button>
 

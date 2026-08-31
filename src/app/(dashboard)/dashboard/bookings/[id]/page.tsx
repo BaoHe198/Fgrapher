@@ -241,7 +241,7 @@ export default function BookingDetailPage() {
       ) : null}
 
       {booking.parentBooking ? (
-        <Card className="flex items-center justify-between gap-2">
+        <Card className="flex flex-row items-center justify-between gap-2">
           <span className="text-body-sm text-text-secondary">
             {t("crewHire.partOf")}{" "}
             <Link
@@ -324,7 +324,7 @@ export default function BookingDetailPage() {
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-4">
-          <Card className="flex items-center justify-between gap-3">
+          <Card className="flex flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <Avatar className="size-11">
                 {otherParty.avatar ? (
@@ -426,7 +426,7 @@ export default function BookingDetailPage() {
           </Card>
 
           {booking.locationAddress ? (
-            <Card className="flex items-start gap-2">
+            <Card className="flex flex-row items-start gap-2">
               <MapPin className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
               <span className="text-body-md text-text-primary">
                 {booking.locationAddress}
@@ -587,7 +587,7 @@ export default function BookingDetailPage() {
           </Card>
 
           {booking.totalPrice ? (
-            <Card className="flex justify-between">
+            <Card className="flex flex-row justify-between">
               <span className="text-body-sm text-text-tertiary">
                 {t("fields.total")}
               </span>
@@ -600,7 +600,7 @@ export default function BookingDetailPage() {
           {withinCancellationWindow &&
           !isPast &&
           (booking.status === "PENDING" || booking.status === "CONFIRMED") ? (
-            <Card className="flex items-start gap-2 border border-warning/40 bg-warning-bg">
+            <Card className="flex flex-row items-start gap-2 border border-warning/40 bg-warning-bg">
               <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
               <span className="text-body-sm text-text-primary">
                 {t("cancellationWarning")}

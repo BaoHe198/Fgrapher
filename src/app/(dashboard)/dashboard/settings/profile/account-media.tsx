@@ -7,14 +7,22 @@ import { useRef, useState } from "react";
 
 import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
 
-const MAX_BYTES = 5 * 1024 * 1024;
+// Raised from 5MB — modern phone photos routinely land in the 8-15MB
+// range at full resolution. Kept bounded (not removed outright) so a
+// pathological multi-hundred-MB pick doesn't hang the crop dialog's canvas
+// or blow past Cloudinary's own account-level upload cap.
+const MAX_BYTES = 20 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 async function uploadFile(
   file: File,
   messages: { unavailable: string; failed: string },
 ) {
-  const sigRes = await fetch("/api/upload/signature", { method: "POST" });
+  const sigRes = await fetch("/api/upload/signature", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ purpose: "account" }),
+  });
   const sigBody = await sigRes.json();
   if (!sigRes.ok) throw new Error(sigBody.message ?? messages.unavailable);
 

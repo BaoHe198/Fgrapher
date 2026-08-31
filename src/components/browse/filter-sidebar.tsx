@@ -360,9 +360,14 @@ export function FilterSidebar({
       categories: CATEGORIES_BY_ROLE[role] ?? [],
     }));
   } else {
-    const popular = STYLE_ROLES.flatMap(
-      (role) => CATEGORIES_BY_ROLE[role] ?? [],
-    )
+    // A category can appear under more than one role's list (e.g. "Cưới"
+    // is valid for both PHOTOGRAPHER and VIDEOGRAPHER) — flatMap alone
+    // would duplicate it here since this branch renders one flat,
+    // ungrouped list (unlike the 2+-roles branch above, where each
+    // role gets its own group/key-space and a repeat is fine).
+    const popular = [
+      ...new Set(STYLE_ROLES.flatMap((role) => CATEGORIES_BY_ROLE[role] ?? [])),
+    ]
       .sort((a, b) => (categoryCounts[b] ?? 0) - (categoryCounts[a] ?? 0))
       .slice(0, POPULAR_CATEGORIES_COUNT);
     categoryGroups = [{ role: null, categories: popular }];

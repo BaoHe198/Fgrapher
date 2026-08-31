@@ -11,15 +11,17 @@ export async function POST(request: Request) {
     const session = await requireAuth();
 
     // This route is shared across portfolio media, product images,
-    // provider profile photos, chat image attachments, and (Prompt G7)
-    // ServiceRequest reference photos. Portfolio/products/profile photos
-    // are paid-role-only (the route that actually persists the reference
-    // does the precise per-role subscription check); chat images and
-    // request references must stay open to every authenticated user —
-    // including CUSTOMER-only accounts, who have no paid role at all — so
-    // only those two skip the paid-role pre-check.
+    // provider profile photos, chat image attachments, (Prompt G7)
+    // ServiceRequest reference photos, and account avatar/cover photos.
+    // Portfolio/products/provider-profile photos are paid-role-only (the
+    // route that actually persists the reference does the precise
+    // per-role subscription check) since that's sellable content; chat
+    // images, request references, and a basic account avatar/cover are
+    // just account functionality, not something being sold, so they stay
+    // open to every authenticated user — including CUSTOMER-only
+    // accounts, who have no paid role at all.
     const body = await request.json().catch(() => ({}));
-    const openPurposes = new Set(["chat", "request"]);
+    const openPurposes = new Set(["chat", "request", "account"]);
     const purpose = openPurposes.has(body?.purpose)
       ? body.purpose
       : "portfolio";

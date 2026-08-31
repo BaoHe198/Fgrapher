@@ -787,6 +787,16 @@
     "users": {
       "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo"
     },
+    "roles": {
+      "invalidInput": "Invalid input",
+      "saved": "Role saved",
+      "saveFailed": "Couldn't save this role, please try again",
+      "invalidRole": "Invalid role",
+      "roleNotFound": "You don't have this role",
+      "cannotRemoveVerified": "Can't remove a role that's already verified",
+      "removed": "Role removed",
+      "removeFailed": "Couldn't remove this role, please try again"
+    },
     "phone": {
       "notConfigured": "Phone verification isn't configured on this system",
       "invalidInput": "Invalid input",
@@ -1638,7 +1648,12 @@
       "verifyIdentity": "Verify identity",
       "addRole": "Add a role",
       "activate": "Activate",
-      "perMonth": "/mo"
+      "activated": "{role} role activated",
+      "activateFailed": "Couldn't activate this role, please try again",
+      "removeRole": "Remove role",
+      "removeRoleConfirm": "Remove the {role} role? Any profile info already entered for it (if any) will be deleted.",
+      "removed": "{role} role removed",
+      "removeFailed": "Couldn't remove this role, please try again"
     },
     "nav": {
       "profile": "Profile",
@@ -1782,7 +1797,9 @@
     },
     "profile": {
       "basics": {
+        "displayNameLabel": "Display name",
         "usernameLabel": "Username",
+        "usernameHint": "Used for your profile URL (e.g. fgrapher.vn/profile/yourname) — unaccented letters, numbers, and underscores only. For a name with diacritics, use \"Display name\".",
         "usernameTaken": "That username is taken",
         "bioLabel": "Bio",
         "wardLabel": "Ward",
@@ -1872,9 +1889,9 @@
         "coverButton": "Cover",
         "uploadUnavailable": "Upload unavailable",
         "uploadFailed": "Upload failed",
-        "sizeLimit": "Up to 5MB, JPG/PNG/WebP",
+        "sizeLimit": "Up to 20MB, JPG/PNG/WebP",
         "invalidType": "Only JPG, PNG, or WebP images are accepted",
-        "tooLarge": "Image must be under 5MB",
+        "tooLarge": "Image must be under 20MB",
         "cropTitle": "Crop image",
         "cropCancel": "Cancel",
         "cropConfirm": "Confirm",

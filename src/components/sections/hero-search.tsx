@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
@@ -148,9 +149,9 @@ export function HeroSearch({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           {categoryOptions.length === 0 ? (
-            <DropdownMenuRadioItem value="" disabled>
+            <DropdownMenuItem disabled>
               {t("hero.filters.categoryNeedsRole")}
-            </DropdownMenuRadioItem>
+            </DropdownMenuItem>
           ) : (
             <DropdownMenuRadioGroup
               value={category}
@@ -217,13 +218,13 @@ export function HeroSearch({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           {!provinceCode ? (
-            <DropdownMenuRadioItem value="" disabled>
+            <DropdownMenuItem disabled>
               {t("hero.filters.wardNeedsProvince")}
-            </DropdownMenuRadioItem>
+            </DropdownMenuItem>
           ) : wards.length === 0 ? (
-            <DropdownMenuRadioItem value="" disabled>
+            <DropdownMenuItem disabled>
               {t("hero.filters.wardUnavailable")}
-            </DropdownMenuRadioItem>
+            </DropdownMenuItem>
           ) : (
             <DropdownMenuRadioGroup
               value={wardId}

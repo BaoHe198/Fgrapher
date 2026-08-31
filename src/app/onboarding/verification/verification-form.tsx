@@ -5,13 +5,14 @@ import { Loader2, ShieldCheck, UploadCloud } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface KycSignature {
   cloudName: string;
@@ -57,13 +58,37 @@ interface SlotProps {
   onSelect: (file: File | null) => void;
 }
 
-function FileSlot({ label, file, onSelect }: SlotProps) {
+function FileSlot({
+  label,
+  file,
+  onSelect,
+  tapToSelectPhoto,
+}: SlotProps & { tapToSelectPhoto: string }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Object URLs are only valid client-side and must be revoked when no
+  // longer needed (picking a different file, or unmounting) or they leak.
+  useEffect(() => {
+    if (!file) {
+      startTransition(() => setPreviewUrl(null));
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    startTransition(() => setPreviewUrl(url));
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-body-sm font-semibold! text-text-primary">
         {label}
       </span>
-      <label className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[var(--fg-radius-md)] border-2 border-dashed border-border-default p-5 text-center transition-colors duration-150 hover:border-brand-primary">
+      <label
+        className={cn(
+          "relative flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[var(--fg-radius-md)] border-2 border-dashed p-5 text-center transition-colors duration-150 hover:border-brand-primary",
+          file ? "border-success" : "border-border-default",
+        )}
+      >
         <input
           type="file"
           accept="image/*"
@@ -71,15 +96,18 @@ function FileSlot({ label, file, onSelect }: SlotProps) {
           className="hidden"
           onChange={(e) => onSelect(e.target.files?.[0] ?? null)}
         />
-        {file ? (
-          <span className="text-body-sm font-semibold! text-success">
-            {file.name}
-          </span>
+        {previewUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- a local blob: object URL, not a remote image next/image can optimize
+          <img
+            src={previewUrl}
+            alt=""
+            className="absolute inset-0 size-full object-cover"
+          />
         ) : (
           <>
             <UploadCloud className="size-5 text-text-tertiary" />
             <span className="text-body-sm text-text-tertiary">
-              Tap to select a photo
+              {tapToSelectPhoto}
             </span>
           </>
         )}
@@ -99,6 +127,7 @@ export function VerificationForm({
 }) {
   const router = useRouter();
   const roleT = useTranslations("role");
+  const t = useTranslations("accountFlows.onboarding.verification.form");
   const [fullName, setFullName] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [idFront, setIdFront] = useState<File | null>(null);
@@ -113,8 +142,9 @@ export function VerificationForm({
     return (
       <StatusScreen
         icon={<Loader2 className="size-8 animate-spin text-brand-primary" />}
-        title="Your submission is under review"
-        description={`We're reviewing the ID documents you submitted for ${roleT(role)}. This usually takes 1-2 business days.`}
+        title={t("underReviewTitle")}
+        description={t("underReviewDesc", { role: roleT(role) })}
+        backToDashboard={t("backToDashboard")}
       />
     );
   }
@@ -123,8 +153,9 @@ export function VerificationForm({
     return (
       <StatusScreen
         icon={<ShieldCheck className="size-8 text-success" />}
-        title="You're verified"
-        description={`Your identity has been verified for ${roleT(role)}.`}
+        title={t("verifiedTitle")}
+        description={t("verifiedDesc", { role: roleT(role) })}
+        backToDashboard={t("backToDashboard")}
       />
     );
   }
@@ -133,8 +164,9 @@ export function VerificationForm({
     return (
       <StatusScreen
         icon={<Loader2 className="size-8 animate-spin text-brand-primary" />}
-        title="Submitted for review"
-        description={`We're reviewing the ID documents you submitted for ${roleT(role)}. This usually takes 1-2 business days.`}
+        title={t("submittedTitle")}
+        description={t("underReviewDesc", { role: roleT(role) })}
+        backToDashboard={t("backToDashboard")}
       />
     );
   }
@@ -158,9 +190,7 @@ export function VerificationForm({
       });
       const sigBody = await sigRes.json();
       if (!sigRes.ok) {
-        setError(
-          sigBody.message ?? "Document uploads aren't available right now",
-        );
+        setError(sigBody.message ?? t("uploadsUnavailable"));
         return;
       }
 
@@ -188,14 +218,14 @@ export function VerificationForm({
       });
       const body = await res.json();
       if (!res.ok) {
-        setError(body.message ?? "Something went wrong. Please try again.");
+        setError(body.message ?? t("genericError"));
         return;
       }
 
       setSubmitted(true);
       router.refresh();
     } catch {
-      setError("Upload failed. Please check your connection and try again.");
+      setError(t("uploadFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -204,20 +234,16 @@ export function VerificationForm({
   return (
     <div className="mx-auto flex min-h-full max-w-lg flex-col gap-6 px-6 py-16">
       <div className="flex flex-col gap-2 text-center">
-        <h1 className="text-display-md text-text-primary">
-          Verify your identity
-        </h1>
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
         <p className="text-body-md text-text-secondary">
-          Required to activate your {roleT(role)} profile — this is a one-time
-          check.
+          {t("subtitle", { role: roleT(role) })}
         </p>
       </div>
 
       {rejectedReason ? (
         <Alert variant="destructive">
           <AlertDescription>
-            Your previous submission was rejected: {rejectedReason}. You can
-            resubmit below.
+            {t("rejectedNotice", { reason: rejectedReason })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -229,49 +255,56 @@ export function VerificationForm({
 
       <Card className="flex flex-col gap-2 text-body-sm text-text-secondary">
         <p>
-          <strong className="text-text-primary">Why we ask:</strong> Vietnamese
-          e-commerce law (Luật Thương mại điện tử 122/2025) requires
-          marketplaces to verify every seller&apos;s identity before they can
-          list services.
+          <strong className="text-text-primary">{t("whyWeAskLabel")}</strong>{" "}
+          {t("whyWeAskBody")}
         </p>
         <p>
-          <strong className="text-text-primary">Who can see it:</strong> Only
-          Fgrapher admins, only through a short-lived link generated at the
-          moment they review your submission — every view is logged.
+          <strong className="text-text-primary">{t("whoCanSeeLabel")}</strong>{" "}
+          {t("whoCanSeeBody")}
         </p>
         <p>
-          <strong className="text-text-primary">How long we keep it:</strong>{" "}
-          Your ID photos are permanently deleted 90 days after approval. We keep
-          only the approval record, never the images.
+          <strong className="text-text-primary">{t("howLongLabel")}</strong>{" "}
+          {t("howLongBody")}
         </p>
       </Card>
 
       <div className="flex flex-col gap-3.5">
         <Input
-          label="Full legal name"
+          label={t("fullLegalNameLabel")}
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
         />
         <Input
-          label="ID number (CCCD/CMND)"
+          label={t("idNumberLabel")}
           value={idNumber}
           onChange={(e) => setIdNumber(e.target.value)}
-          placeholder="9 or 12 digits"
+          placeholder={t("idNumberPlaceholder")}
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <FileSlot label="ID front" file={idFront} onSelect={setIdFront} />
-          <FileSlot label="ID back" file={idBack} onSelect={setIdBack} />
           <FileSlot
-            label="Selfie holding ID"
+            label={t("idFrontLabel")}
+            file={idFront}
+            onSelect={setIdFront}
+            tapToSelectPhoto={t("tapToSelectPhoto")}
+          />
+          <FileSlot
+            label={t("idBackLabel")}
+            file={idBack}
+            onSelect={setIdBack}
+            tapToSelectPhoto={t("tapToSelectPhoto")}
+          />
+          <FileSlot
+            label={t("selfieLabel")}
             file={selfie}
             onSelect={setSelfie}
+            tapToSelectPhoto={t("tapToSelectPhoto")}
           />
         </div>
 
         <Checkbox
           checked={consent}
           onCheckedChange={(checked) => setConsent(checked === true)}
-          label="I agree to Fgrapher processing my ID document and photo to verify my identity"
+          label={t("consentLabel")}
         />
       </div>
 
@@ -282,14 +315,14 @@ export function VerificationForm({
         onClick={onSubmit}
       >
         {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-        Submit for review
+        {t("submit")}
       </Button>
       <Button
         variant="ghost"
         nativeButton={false}
         render={<Link href="/dashboard" />}
       >
-        Do this later
+        {t("doLater")}
       </Button>
     </div>
   );
@@ -299,10 +332,12 @@ function StatusScreen({
   icon,
   title,
   description,
+  backToDashboard,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
+  backToDashboard: string;
 }) {
   return (
     <div className="mx-auto flex min-h-full max-w-lg flex-col items-center justify-center gap-3 px-6 py-16 text-center">
@@ -310,7 +345,7 @@ function StatusScreen({
       <h1 className="text-display-md text-text-primary">{title}</h1>
       <p className="text-body-md text-text-secondary">{description}</p>
       <Link href="/dashboard" className="text-text-link hover:underline">
-        Back to dashboard
+        {backToDashboard}
       </Link>
     </div>
   );

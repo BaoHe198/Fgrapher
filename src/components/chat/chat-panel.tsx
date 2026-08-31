@@ -128,11 +128,18 @@ export function ChatPanel({
   currentUserId,
   otherUser,
   onBack,
+  // The full /dashboard/messages page shows the conversation list alongside
+  // the chat at lg+ (so the back button there is redundant and stays
+  // lg:hidden), but the floating MessagingPopup is a single narrow panel at
+  // every viewport width — its own back button needs to stay visible
+  // regardless of how wide the browser window is.
+  alwaysShowBack = false,
 }: {
   conversationId: string;
   currentUserId: string;
   otherUser: ChatPartner;
   onBack?: () => void;
+  alwaysShowBack?: boolean;
 }) {
   const t = useTranslations("sharedComponents.chatPanel");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -145,6 +152,11 @@ export function ChatPanel({
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // A ref, not just the `sending` state, because two calls to onSend() in
+  // the same tick (e.g. Enter-key handler firing twice) would both still
+  // see the pre-update `sending` value — state updates aren't synchronous,
+  // refs are.
+  const isSendingRef = useRef(false);
 
   const load = async (scrollToBottom: boolean) => {
     const res = await fetch(`/api/conversations/${conversationId}/messages`);
@@ -165,8 +177,10 @@ export function ChatPanel({
     startTransition(() => setIsLoading(true));
     load(true);
     // No live transport (Pusher/Socket.io) in this environment — polling is
-    // the pragmatic stand-in while a conversation is open.
-    const interval = setInterval(() => load(false), 4000);
+    // the pragmatic stand-in while a conversation is open. 2s (was 4s) so
+    // incoming messages from the other side feel closer to real-time; the
+    // sender's own messages no longer wait on this poll at all (see onSend).
+    const interval = setInterval(() => load(false), 2000);
     return () => clearInterval(interval);
     // `load` is a fresh closure every render but only truly depends on
     // conversationId, already listed — switching conversations reloads and
@@ -179,24 +193,40 @@ export function ChatPanel({
   ) => {
     const content = overrides?.content ?? draft.trim();
     if (!content && !overrides?.mediaUrl) return;
+    if (isSendingRef.current) return;
+    isSendingRef.current = true;
 
     setSending(true);
-    const res = await fetch("/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        conversationId,
-        content: overrides?.content ?? draft.trim() ?? t("sentPhoto"),
-        type: overrides?.type ?? "text",
-        mediaUrl: overrides?.mediaUrl,
-      }),
-    });
-    setSending(false);
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationId,
+          content: overrides?.content ?? draft.trim() ?? t("sentPhoto"),
+          type: overrides?.type ?? "text",
+          mediaUrl: overrides?.mediaUrl,
+        }),
+      });
 
-    if (res.ok) {
-      setDraft("");
-      if (textareaRef.current) textareaRef.current.style.height = "auto";
-      load(true);
+      if (res.ok) {
+        const body = await res.json();
+        setDraft("");
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
+        // Append the just-created message directly instead of waiting on
+        // load(true)'s round-trip — the POST response already has the real,
+        // persisted row, so there's nothing left to fetch. The next poll
+        // reconciles it against the server's list like any other message.
+        if (body.data) {
+          setMessages((prev) => [...prev, body.data]);
+          requestAnimationFrame(() =>
+            bottomRef.current?.scrollIntoView({ block: "end" }),
+          );
+        }
+      }
+    } finally {
+      isSendingRef.current = false;
+      setSending(false);
     }
   };
 
@@ -226,7 +256,11 @@ export function ChatPanel({
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-border-subtle p-4">
         {onBack ? (
-          <button type="button" onClick={onBack} className="lg:hidden">
+          <button
+            type="button"
+            onClick={onBack}
+            className={alwaysShowBack ? undefined : "lg:hidden"}
+          >
             <ArrowLeft className="size-5 text-text-secondary" />
           </button>
         ) : null}

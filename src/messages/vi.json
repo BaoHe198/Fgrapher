@@ -787,6 +787,16 @@
     "users": {
       "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa"
     },
+    "roles": {
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "saved": "Đã lưu vai trò",
+      "saveFailed": "Không thể lưu vai trò, vui lòng thử lại",
+      "invalidRole": "Vai trò không hợp lệ",
+      "roleNotFound": "Bạn chưa có vai trò này",
+      "cannotRemoveVerified": "Không thể xoá vai trò đã được xác minh",
+      "removed": "Đã xoá vai trò",
+      "removeFailed": "Không thể xoá vai trò, vui lòng thử lại"
+    },
     "phone": {
       "notConfigured": "Xác minh số điện thoại chưa được cấu hình trên hệ thống",
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -1638,7 +1648,12 @@
       "verifyIdentity": "Xác minh danh tính",
       "addRole": "Thêm vai trò",
       "activate": "Kích hoạt",
-      "perMonth": "/tháng"
+      "activated": "Đã kích hoạt vai trò {role}",
+      "activateFailed": "Không thể kích hoạt vai trò này, vui lòng thử lại",
+      "removeRole": "Xoá vai trò",
+      "removeRoleConfirm": "Xoá vai trò {role}? Hồ sơ và thông tin đã nhập cho vai trò này (nếu có) sẽ bị xoá.",
+      "removed": "Đã xoá vai trò {role}",
+      "removeFailed": "Không thể xoá vai trò này, vui lòng thử lại"
     },
     "nav": {
       "profile": "Hồ sơ",
@@ -1782,7 +1797,9 @@
     },
     "profile": {
       "basics": {
+        "displayNameLabel": "Tên hiển thị",
         "usernameLabel": "Tên người dùng",
+        "usernameHint": "Dùng cho đường dẫn hồ sơ của bạn (vd: fgrapher.vn/profile/tenban) — chỉ chữ không dấu, số và dấu gạch dưới. Muốn hiển thị tên có dấu, hãy dùng mục \"Tên hiển thị\".",
         "usernameTaken": "Tên người dùng này đã được sử dụng",
         "bioLabel": "Giới thiệu",
         "wardLabel": "Phường/xã",
@@ -1872,9 +1889,9 @@
         "coverButton": "Ảnh bìa",
         "uploadUnavailable": "Chức năng tải lên hiện không khả dụng",
         "uploadFailed": "Tải lên thất bại",
-        "sizeLimit": "Tối đa 5MB, định dạng JPG/PNG/WebP",
+        "sizeLimit": "Tối đa 20MB, định dạng JPG/PNG/WebP",
         "invalidType": "Chỉ chấp nhận ảnh JPG, PNG hoặc WebP",
-        "tooLarge": "Ảnh phải nhỏ hơn 5MB",
+        "tooLarge": "Ảnh phải nhỏ hơn 20MB",
         "cropTitle": "Cắt ảnh",
         "cropCancel": "Hủy",
         "cropConfirm": "Xác nhận",

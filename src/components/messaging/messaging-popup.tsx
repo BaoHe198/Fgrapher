@@ -1,6 +1,6 @@
 "use client";
 
-import { Maximize2, MessageCircle, Minus, X } from "lucide-react";
+import { Loader2, Maximize2, MessageCircle, Minus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -65,6 +65,24 @@ export function MessagingPopup({
     return () => clearInterval(interval);
   }, [isOpen]);
 
+  // open(conversationId) (e.g. from booking-sidebar's "Message" button,
+  // which creates the conversation via POST /api/conversations right
+  // before calling this) can select an id this popup's own conversations
+  // list hasn't fetched yet — without this, the body below would fall
+  // through to ConversationList's "no conversations" empty state for a
+  // moment, which reads as a bug rather than a loading state.
+  useEffect(() => {
+    if (!isOpen || !selectedConversationId) return;
+    const alreadyLoaded = conversations.some(
+      (c) => c.id === selectedConversationId,
+    );
+    if (!alreadyLoaded) loadConversations();
+    // Only the id (and isOpen) should trigger a re-sync — reacting to
+    // `conversations` here too would refetch in a loop every time
+    // loadConversations() itself updates that same state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConversationId, isOpen]);
+
   // Escape-to-close + a lightweight Tab-cycle focus trap — non-modal, so
   // this only intercepts keys while focus is already inside the panel,
   // never blocking clicks/keys elsewhere on the page.
@@ -105,6 +123,8 @@ export function MessagingPopup({
   const selectedConversation = conversations.find(
     (c) => c.id === selectedConversationId,
   );
+  const isResolvingSelection =
+    Boolean(selectedConversationId) && !selectedConversation;
 
   const body = selectedConversation ? (
     <ChatPanel
@@ -113,13 +133,19 @@ export function MessagingPopup({
       currentUserId={session.user.id}
       otherUser={selectedConversation.otherUser}
       onBack={() => onSelectConversation(null)}
+      alwaysShowBack
     />
+  ) : isResolvingSelection ? (
+    <div className="flex h-full items-center justify-center">
+      <Loader2 className="size-6 animate-spin text-text-tertiary" />
+    </div>
   ) : (
     <ConversationList
       conversations={conversations}
       selectedId={null}
       currentUserId={session.user.id}
       onSelect={onSelectConversation}
+      showHeading={false}
     />
   );
 

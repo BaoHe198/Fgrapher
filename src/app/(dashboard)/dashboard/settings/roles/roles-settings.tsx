@@ -3,6 +3,7 @@
 import type { Role, VerificationStatus } from "@prisma/client";
 import {
   Camera,
+  Loader2,
   Palette,
   ShoppingBag,
   Sparkles,
@@ -13,12 +14,14 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { toast } from "@/components/ui/toast";
 import { PAID_ROLES } from "@/lib/constants";
-import { formatCurrency } from "@/lib/utils";
 
 interface VerificationInfo {
   role: Role;
@@ -49,18 +52,82 @@ const ROLE_ICONS: Record<Role, LucideIcon> = {
 
 export function RolesSettings({
   currentRoles,
-  rolePrices,
   verifications,
+  marketplaceEnabled,
 }: {
   currentRoles: Role[];
-  rolePrices: Partial<Record<Role, number>>;
   verifications: VerificationInfo[];
+  marketplaceEnabled: boolean;
 }) {
   const roleT = useTranslations("role");
   const t = useTranslations("dashboardSettings.roles");
+  const router = useRouter();
+  const [activatingRole, setActivatingRole] = useState<Role | null>(null);
+  const [removingRole, setRemovingRole] = useState<Role | null>(null);
   const activeRoles = currentRoles.filter((r) => r !== "CUSTOMER");
-  const availableRoles = PAID_ROLES.filter((r) => !currentRoles.includes(r));
+  // CAMERA_SHOP stays hidden while the marketplace is out of MVP scope
+  // (CLAUDE.md) — the API route enforces this too, this is just so the
+  // option never shows up to begin with.
+  const availableRoles = PAID_ROLES.filter(
+    (r) =>
+      !currentRoles.includes(r) && (marketplaceEnabled || r !== "CAMERA_SHOP"),
+  );
   const verificationByRole = new Map(verifications.map((v) => [v.role, v]));
+
+  const activateRole = async (role: Role) => {
+    setActivatingRole(role);
+    try {
+      const res = await fetch("/api/users/roles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roles: [role] }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        toast.add({
+          title: body.message ?? t("activateFailed"),
+          type: "error",
+        });
+        return;
+      }
+      toast.add({
+        title: t("activated", { role: roleT(role) }),
+        type: "success",
+      });
+      router.refresh();
+    } catch {
+      toast.add({ title: t("activateFailed"), type: "error" });
+    } finally {
+      setActivatingRole(null);
+    }
+  };
+
+  // MVP-stage-only: undoing a self-activated role is allowed as long as
+  // it's never been verified — once VERIFIED, removal has to go through
+  // an admin like everything else billing-adjacent while
+  // BILLING_ENABLED=false. The API enforces this too; this is just the UI
+  // gate.
+  const removeRole = async (role: Role) => {
+    if (!window.confirm(t("removeRoleConfirm", { role: roleT(role) }))) return;
+    setRemovingRole(role);
+    try {
+      const res = await fetch(`/api/users/roles/${role}`, { method: "DELETE" });
+      const body = await res.json();
+      if (!res.ok) {
+        toast.add({ title: body.message ?? t("removeFailed"), type: "error" });
+        return;
+      }
+      toast.add({
+        title: t("removed", { role: roleT(role) }),
+        type: "success",
+      });
+      router.refresh();
+    } catch {
+      toast.add({ title: t("removeFailed"), type: "error" });
+    } finally {
+      setRemovingRole(null);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -69,7 +136,7 @@ export function RolesSettings({
           {t("yourRoles")}
         </span>
 
-        <Card className="flex items-center justify-between">
+        <Card className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             <User className="size-5 text-text-tertiary" />
             <div>
@@ -98,21 +165,17 @@ export function RolesSettings({
           const needsVerification =
             verification?.verificationStatus === "UNVERIFIED" ||
             verification?.verificationStatus === "REJECTED";
+          const canRemove = verification?.verificationStatus !== "VERIFIED";
+          const isRemoving = removingRole === role;
 
           return (
             <Card key={role} className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Icon className="size-5 text-text-tertiary" />
-                  <div>
-                    <p className="text-body-md font-semibold! text-text-primary">
-                      {roleT(role)}
-                    </p>
-                    <p className="text-body-sm text-text-secondary">
-                      {formatCurrency(rolePrices[role] ?? 0, "VND")}
-                      {t("perMonth")}
-                    </p>
-                  </div>
+                  <p className="text-body-md font-semibold! text-text-primary">
+                    {roleT(role)}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="success">{t("active")}</Badge>
@@ -124,6 +187,20 @@ export function RolesSettings({
                   >
                     {t("manage")}
                   </Button>
+                  {canRemove ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-danger"
+                      disabled={removingRole !== null}
+                      onClick={() => removeRole(role)}
+                    >
+                      {isRemoving ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : null}
+                      {t("removeRole")}
+                    </Button>
+                  ) : null}
                 </div>
               </div>
 
@@ -166,26 +243,24 @@ export function RolesSettings({
           </span>
           {availableRoles.map((role) => {
             const Icon = ROLE_ICONS[role];
+            const isActivating = activatingRole === role;
             return (
               <Card key={role} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Icon className="size-5 text-text-tertiary" />
-                  <div>
-                    <p className="text-body-md font-semibold! text-text-primary">
-                      {roleT(role)}
-                    </p>
-                    <p className="text-body-sm text-text-secondary">
-                      {formatCurrency(rolePrices[role] ?? 0, "VND")}
-                      {t("perMonth")}
-                    </p>
-                  </div>
+                  <p className="text-body-md font-semibold! text-text-primary">
+                    {roleT(role)}
+                  </p>
                 </div>
                 <Button
                   size="sm"
                   variant="accent"
-                  nativeButton={false}
-                  render={<Link href={`/onboarding/billing?roles=${role}`} />}
+                  disabled={activatingRole !== null}
+                  onClick={() => activateRole(role)}
                 >
+                  {isActivating ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : null}
                   {t("activate")}
                 </Button>
               </Card>

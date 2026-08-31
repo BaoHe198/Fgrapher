@@ -20,7 +20,7 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-[var(--fg-radius-lg)] bg-surface-card py-(--card-spacing) text-sm text-text-primary shadow-[var(--shadow-sm)] [--card-spacing:--spacing(5)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[var(--fg-radius-lg)] *:[img:last-child]:rounded-b-[var(--fg-radius-lg)]",
+        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-[var(--fg-radius-lg)] bg-surface-card px-(--card-spacing) py-(--card-spacing) text-sm text-text-primary shadow-[var(--shadow-sm)] [--card-spacing:--spacing(5)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[var(--fg-radius-lg)] *:[img:last-child]:rounded-b-[var(--fg-radius-lg)]",
         !padding && "[--card-spacing:--spacing(0)]",
         className,
       )}

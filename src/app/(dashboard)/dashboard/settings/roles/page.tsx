@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { PAID_ROLES } from "@/lib/constants";
-import { rolePricesVnd } from "@/lib/constants/plans";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 
 import { RolesSettings } from "./roles-settings";
 
@@ -25,8 +25,8 @@ export default async function RolesSettingsPage() {
   return (
     <RolesSettings
       currentRoles={session.user.roles}
-      rolePrices={rolePricesVnd()}
       verifications={verifications}
+      marketplaceEnabled={features.marketplaceEnabled}
     />
   );
 }

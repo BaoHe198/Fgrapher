@@ -93,7 +93,7 @@ export default async function AdminOverviewPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {health.map((h) => (
           <Link key={h.label} href={h.href}>
-            <Card className="flex items-center gap-3">
+            <Card className="flex flex-row items-center gap-3">
               <h.icon className="size-5 text-text-tertiary" />
               <div className="flex flex-col">
                 <span className="text-heading-md text-text-primary">

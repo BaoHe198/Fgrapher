@@ -88,7 +88,7 @@ export default async function ProductDetailPage({
             </div>
           ) : null}
 
-          <Card className="flex items-center justify-between gap-3">
+          <Card className="flex flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <Avatar className="size-11">
                 {product.user.avatar ? (

@@ -29,9 +29,16 @@ export default async function ProfileSettingsPage() {
         initialCoverImage={user.coverImage}
       />
       <AccountBasicsForm
+        initialName={user.name}
         initialUsername={user.username}
         initialBio={user.bio}
         initialWardId={user.wardId}
+        // Anyone with a provider role already sets a "Tên hiển thị" per role
+        // below (RoleProfileSwitcher, backed by Profile.displayName) —
+        // showing a second, account-level name field here would just be the
+        // same concept twice. Customers have no Profile at all, so this is
+        // their only place to set one (backed by User.name instead).
+        showDisplayName={providerRoles.length === 0}
       />
 
       {providerRoles.length > 0 ? (

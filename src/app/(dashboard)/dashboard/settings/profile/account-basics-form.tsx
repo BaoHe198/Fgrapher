@@ -13,15 +13,20 @@ interface WardOption {
 }
 
 export function AccountBasicsForm({
+  initialName,
   initialUsername,
   initialBio,
   initialWardId,
+  showDisplayName,
 }: {
+  initialName: string | null;
   initialUsername: string | null;
   initialBio: string | null;
   initialWardId: string | null;
+  showDisplayName: boolean;
 }) {
   const t = useTranslations("dashboardSettings.profile.basics");
+  const [name, setName] = useState(initialName ?? "");
   const [username, setUsername] = useState(initialUsername ?? "");
   const [bio, setBio] = useState(initialBio ?? "");
   const [wardId, setWardId] = useState(initialWardId ?? "");
@@ -92,8 +97,30 @@ export function AccountBasicsForm({
     });
   };
 
+  const saveName = async (value: string) => {
+    if (value.trim().length < 2 || value === (initialName ?? "")) return;
+    await fetch("/api/users/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: value.trim() }),
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4">
+      {showDisplayName ? (
+        <div className="flex flex-col gap-1.5">
+          <label className="text-body-sm font-semibold! text-text-primary">
+            {t("displayNameLabel")}
+          </label>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={(e) => saveName(e.target.value)}
+          />
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-1.5">
         <label className="text-body-sm font-semibold! text-text-primary">
           {t("usernameLabel")}
@@ -113,6 +140,7 @@ export function AccountBasicsForm({
             <XCircle className="size-4 text-danger" />
           ) : null}
         </div>
+        <p className="text-body-sm text-text-tertiary">{t("usernameHint")}</p>
         {usernameStatus === "taken" ? (
           <p className="text-body-sm text-danger">{t("usernameTaken")}</p>
         ) : null}

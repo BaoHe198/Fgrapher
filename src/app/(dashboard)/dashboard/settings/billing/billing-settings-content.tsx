@@ -256,7 +256,7 @@ export function BillingSettingsContent({
           );
         })}
 
-        <Card className="flex items-center justify-between">
+        <Card className="flex flex-row items-center justify-between">
           <span className="text-body-md font-semibold! text-text-primary">
             {t("totalMonthlyCost")}
           </span>
@@ -271,7 +271,7 @@ export function BillingSettingsContent({
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
           {t("paymentMethodLabel")}
         </span>
-        <Card className="flex items-center justify-between">
+        <Card className="flex flex-row items-center justify-between">
           <span className="text-body-md text-text-secondary">
             {t("managedByStripe")}
           </span>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { requireAuth, AuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
@@ -6,6 +7,7 @@ import { features } from "@/lib/features";
 import { updateRolesSchema } from "@/lib/validations/user";
 
 export async function POST(request: Request) {
+  const t = await getTranslations("apiMessages.roles");
   try {
     const session = await requireAuth();
 
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "validation_error",
-          message: "Camera Shop is not available yet",
+          message: t("invalidRole"),
         },
         { status: 400 },
       );
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
       {
         data: { roles: userRoles.map((r) => r.role) },
         error: null,
-        message: "Roles saved",
+        message: t("saved"),
       },
       { status: 200 },
     );
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to save roles" },
+      { data: null, error: "server_error", message: t("saveFailed") },
       { status: 500 },
     );
   }

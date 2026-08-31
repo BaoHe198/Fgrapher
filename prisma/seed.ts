@@ -375,8 +375,12 @@ async function seedGeography() {
 async function main() {
   await seedGeography();
 
-  const wards = await db.ward.findMany({ select: { id: true, name: true } });
-  const wardIdByName = new Map(wards.map((w) => [w.name, w.id]));
+  const wards = await db.ward.findMany({
+    select: { id: true, name: true, provinceId: true },
+  });
+  const wardByName = new Map(
+    wards.map((w) => [w.name, { id: w.id, provinceId: w.provinceId }]),
+  );
 
   const emails = USERS.map((u) => u.email);
 
@@ -443,12 +447,13 @@ async function main() {
   const passwordHash = await bcrypt.hash(SEED_PASSWORD, 12);
 
   for (const seedUser of USERS) {
-    const wardId = wardIdByName.get(seedUser.wardName);
-    if (!wardId) {
+    const ward = wardByName.get(seedUser.wardName);
+    if (!ward) {
       throw new Error(
         `Seed user ${seedUser.email} references unknown wardName "${seedUser.wardName}" — check prisma/data/hcmc-wards.ts`,
       );
     }
+    const wardId = ward.id;
 
     const user = await db.user.create({
       data: {
@@ -525,6 +530,13 @@ async function main() {
         data: {
           userId: user.id,
           role: profileSeed.role,
+          // Matches what real onboarding persists (src/app/api/profiles/
+          // [role]/route.ts) — without this, services/search.ts's province
+          // filter (which reads Profile.provinceId, not User.location) has
+          // nothing to match against, and every seeded provider silently
+          // drops out of any province-filtered /browse search.
+          provinceId: ward.provinceId,
+          wardId: ward.id,
           displayName: profileSeed.displayName,
           description: profileSeed.description,
           categories: profileSeed.categories ?? [],

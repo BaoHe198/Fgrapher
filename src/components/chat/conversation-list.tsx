@@ -73,11 +73,16 @@ export function ConversationList({
   selectedId,
   currentUserId,
   onSelect,
+  // The floating MessagingPopup already shows a "Tin nhắn" title in its own
+  // header bar directly above this component — the full /dashboard/messages
+  // page has no other heading, so it keeps this one by default.
+  showHeading = true,
 }: {
   conversations: ConversationSummary[];
   selectedId: string | null;
   currentUserId: string;
   onSelect: (id: string) => void;
+  showHeading?: boolean;
 }) {
   const t = useTranslations("sharedComponents.conversationList");
   const [query, setQuery] = useState("");
@@ -94,7 +99,9 @@ export function ConversationList({
   return (
     <div className="flex h-full flex-col overflow-hidden border-r border-border-subtle">
       <div className="flex flex-col gap-3 border-b border-border-subtle p-4">
-        <h2 className="text-heading-lg text-text-primary">{t("title")}</h2>
+        {showHeading ? (
+          <h2 className="text-heading-lg text-text-primary">{t("title")}</h2>
+        ) : null}
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-tertiary" />
           <Input

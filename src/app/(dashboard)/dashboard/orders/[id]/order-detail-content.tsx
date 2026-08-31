@@ -305,7 +305,7 @@ export function OrderDetailContent() {
             ) : null}
           </Card>
 
-          <Card className="flex justify-between">
+          <Card className="flex flex-row justify-between">
             <span className="text-body-sm text-text-tertiary">
               {t("total")}
             </span>
