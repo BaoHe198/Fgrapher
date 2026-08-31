@@ -38,10 +38,18 @@ interface ArtistCardProps {
 export function ArtistCard({ artist, onClick }: ArtistCardProps) {
   const t = useTranslations("sharedComponents.artistCard");
   const [activeIndex, setActiveIndex] = useState(0);
+  // Tracks photo URLs that failed to load (e.g. a transient Cloudinary/
+  // image-optimizer hiccup) so that slide falls back to the same "no
+  // photo" treatment below instead of a bare broken-image icon.
+  const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set());
   const touchStartX = useRef(0);
 
   const photos = artist.media.slice(0, 5);
   const hasPhotos = photos.length > 0;
+  const activePhoto = photos[activeIndex];
+  const activePhotoFailed = activePhoto
+    ? failedUrls.has(activePhoto.url)
+    : false;
   const initial = artist.name[0]?.toUpperCase() ?? "?";
   const visibleRoles = artist.roles.slice(0, MAX_VISIBLE_ROLES);
   const extraRoleCount = artist.roles.length - visibleRoles.length;
@@ -78,18 +86,45 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
         >
           {hasPhotos ? (
             <>
-              {photos[activeIndex].type === "VIDEO" ? (
+              {activePhotoFailed ? (
+                <div
+                  className="flex size-full items-center justify-center"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, var(--green-900), var(--green-500) 60%, var(--gold-300))",
+                  }}
+                >
+                  <Avatar className="size-[64px] border-2 border-white/50">
+                    {artist.avatar ? (
+                      <AvatarImage src={artist.avatar} alt={artist.name} />
+                    ) : null}
+                    <AvatarFallback
+                      className={cn(
+                        "text-heading-md text-white",
+                        avatarFallbackColor(artist.name),
+                      )}
+                    >
+                      {initial}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              ) : activePhoto.type === "VIDEO" ? (
                 <video
-                  src={photos[activeIndex].url}
+                  src={activePhoto.url}
                   className="size-full object-cover"
                   muted
                 />
               ) : (
                 <Image
-                  src={photos[activeIndex].url}
+                  key={activePhoto.url}
+                  src={activePhoto.url}
                   alt={artist.name}
                   fill
+                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
                   className="object-cover"
+                  onError={() =>
+                    setFailedUrls((prev) => new Set(prev).add(activePhoto.url))
+                  }
                 />
               )}
 
