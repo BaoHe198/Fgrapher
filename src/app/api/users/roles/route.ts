@@ -4,7 +4,9 @@ import { getTranslations } from "next-intl/server";
 import { requireAuth, AuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
+import { PAID_ROLES } from "@/lib/constants";
 import { updateRolesSchema } from "@/lib/validations/user";
+import { assignFreePlan } from "@/services/subscription";
 
 export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.roles");
@@ -57,6 +59,21 @@ export async function POST(request: Request) {
         }),
       ),
     );
+
+    // Mirrors /api/auth/register's own assignFreePlan call (CLAUDE.md's
+    // Stripe ban — no VN merchant account, so BILLING_ENABLED=false and
+    // plans go out free instead of through Checkout). Registration was
+    // the only place this ran, so activating a paid role afterward
+    // through this route left it with an `active` UserRole but no
+    // Subscription row at all — permanently blocked by every
+    // subscription-gated feature (SubscriptionGate, requirePaidRole),
+    // with no admin action expected to unblock it.
+    const paidRoles = roles.filter((role) =>
+      (PAID_ROLES as string[]).includes(role),
+    );
+    if (!features.billingEnabled && paidRoles.length > 0) {
+      await assignFreePlan(session.user.id, paidRoles);
+    }
 
     return NextResponse.json(
       {

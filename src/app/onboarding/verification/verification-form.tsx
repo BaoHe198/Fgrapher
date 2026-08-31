@@ -43,10 +43,21 @@ function uploadKycFile(file: File, signature: KycSignature) {
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve(JSON.parse(xhr.responseText));
         } else {
-          reject(new Error("Upload failed"));
+          // Surface Cloudinary's own error text (e.g. "File size too
+          // large", "Invalid Signature") instead of a generic failure —
+          // the caller's catch block shows this directly, so a bad
+          // upload is diagnosable from the error banner alone instead of
+          // requiring browser devtools.
+          let reason = `HTTP ${xhr.status}`;
+          try {
+            reason = JSON.parse(xhr.responseText)?.error?.message ?? reason;
+          } catch {
+            // Non-JSON response body — keep the HTTP-status fallback above.
+          }
+          reject(new Error(reason));
         }
       };
-      xhr.onerror = () => reject(new Error("Upload failed"));
+      xhr.onerror = () => reject(new Error("Network error"));
       xhr.send(formData);
     },
   );
@@ -224,8 +235,15 @@ export function VerificationForm({
 
       setSubmitted(true);
       router.refresh();
-    } catch {
-      setError(t("uploadFailed"));
+    } catch (err) {
+      // uploadKycFile rejects with Cloudinary's own error text when the
+      // upload itself is what failed — show that directly rather than a
+      // generic message, so a bad file/signature is diagnosable from the
+      // banner alone.
+      const detail = err instanceof Error ? err.message : null;
+      setError(
+        detail ? t("uploadFailedDetail", { detail }) : t("uploadFailed"),
+      );
     } finally {
       setIsSubmitting(false);
     }

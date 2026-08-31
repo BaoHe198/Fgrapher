@@ -576,6 +576,7 @@
           "uploadsUnavailable": "Hiện chưa thể tải lên giấy tờ",
           "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
           "uploadFailed": "Tải lên thất bại. Vui lòng kiểm tra kết nối mạng và thử lại.",
+          "uploadFailedDetail": "Tải lên thất bại: {detail}",
           "submit": "Gửi để xem xét",
           "doLater": "Để sau",
           "backToDashboard": "Quay lại bảng điều khiển"
@@ -2527,6 +2528,11 @@
     }
   },
   "sharedComponents": {
+    "subscriptionGate": {
+      "defaultTitle": "Kích hoạt gói {role} của bạn",
+      "defaultText": "Cần có gói {role} đang hoạt động để dùng tính năng này.",
+      "cta": "Kích hoạt ngay"
+    },
     "phoneVerifyDialog": {
       "title": "Xác minh số điện thoại",
       "sendDescription": "Gửi mã xác minh 6 số qua SMS tới {phone}",

@@ -576,6 +576,7 @@
           "uploadsUnavailable": "Document uploads aren't available right now",
           "genericError": "Something went wrong. Please try again.",
           "uploadFailed": "Upload failed. Please check your connection and try again.",
+          "uploadFailedDetail": "Upload failed: {detail}",
           "submit": "Submit for review",
           "doLater": "Do this later",
           "backToDashboard": "Back to dashboard"
@@ -2527,6 +2528,11 @@
     }
   },
   "sharedComponents": {
+    "subscriptionGate": {
+      "defaultTitle": "Activate your {role} subscription",
+      "defaultText": "An active {role} subscription is required to use this feature.",
+      "cta": "Activate now"
+    },
     "phoneVerifyDialog": {
       "title": "Verify phone number",
       "sendDescription": "Send a 6-digit code via SMS to {phone}",
