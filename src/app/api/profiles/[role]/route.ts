@@ -5,18 +5,20 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { getUpdateProfileSchema } from "@/lib/validations/profile";
+import { tryAutoPublish } from "@/services/public-profile";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ role: string }> },
 ) {
+  const t = await getTranslations("apiMessages.profiles");
   try {
     const session = await requireAuth();
     const { role } = await params;
 
     if (!(Object.values(Role) as string[]).includes(role)) {
       return NextResponse.json(
-        { data: null, error: "invalid_role", message: "Unknown role" },
+        { data: null, error: "invalid_role", message: t("unknownRole") },
         { status: 400 },
       );
     }
@@ -53,7 +55,7 @@ export async function GET(
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load profile" },
+      { data: null, error: "server_error", message: t("loadFailed") },
       { status: 500 },
     );
   }
@@ -63,19 +65,20 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ role: string }> },
 ) {
+  const t = await getTranslations("apiMessages.profiles");
   try {
     const session = await requireAuth();
     const { role } = await params;
 
     if (!(Object.values(Role) as string[]).includes(role)) {
       return NextResponse.json(
-        { data: null, error: "invalid_role", message: "Unknown role" },
+        { data: null, error: "invalid_role", message: t("unknownRole") },
         { status: 400 },
       );
     }
     if (!session.user.roles.includes(role as Role)) {
       return NextResponse.json(
-        { data: null, error: "forbidden", message: "You don't have this role" },
+        { data: null, error: "forbidden", message: t("noRole") },
         { status: 403 },
       );
     }
@@ -88,7 +91,7 @@ export async function PATCH(
         {
           data: null,
           error: "validation_error",
-          message: parsed.error.issues[0]?.message ?? "Invalid input",
+          message: parsed.error.issues[0]?.message ?? t("invalidInput"),
         },
         { status: 400 },
       );
@@ -100,8 +103,13 @@ export async function PATCH(
       update: parsed.data,
     });
 
+    // Categories (and, for STUDIO, location) are two of the requirements
+    // gating auto-publish (see tryAutoPublish) — saving them here may be
+    // the last one this profile was waiting on.
+    await tryAutoPublish(session.user.id, role as Role);
+
     return NextResponse.json(
-      { data: profile, error: null, message: "Profile updated" },
+      { data: profile, error: null, message: t("updated") },
       { status: 200 },
     );
   } catch (err) {
@@ -116,7 +124,7 @@ export async function PATCH(
       {
         data: null,
         error: "server_error",
-        message: "Failed to update profile",
+        message: t("updateFailed"),
       },
       { status: 500 },
     );

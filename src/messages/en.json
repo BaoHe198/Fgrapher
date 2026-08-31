@@ -795,13 +795,13 @@
     "users": {
       "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo"
     },
-    "profilePublish": {
+    "profiles": {
       "unknownRole": "Unknown role",
       "noRole": "You don't have this role",
       "invalidInput": "Invalid input",
-      "nowLive": "Profile is now live",
-      "unpublished": "Profile unpublished",
-      "updateFailed": "Failed to update publish status"
+      "updated": "Profile updated",
+      "loadFailed": "Failed to load profile",
+      "updateFailed": "Failed to update profile"
     },
     "roles": {
       "invalidInput": "Invalid input",
@@ -1838,8 +1838,8 @@
         "verifiedBadge": "Verified",
         "notVerifiedNoteBefore": "You can keep editing this profile as a draft. Once",
         "verifiedLinkText": "your identity is verified",
-        "notVerifiedNoteAfter": ", you can publish it to appear in search and receive bookings.",
-        "publishError": "Something went wrong",
+        "notVerifiedNoteAfter": ", you have at least 1 approved photo, and you've chosen a specialty category, this profile will automatically appear in search.",
+        "autoPublishNote": "This profile will automatically appear in search as soon as you have at least 1 approved portfolio photo and a specialty category chosen.",
         "displayNameLabel": "Display name",
         "descriptionLabel": "Description",
         "categoriesLabel": "Categories",
@@ -2094,8 +2094,11 @@
       },
       "mediaApproved": {
         "heading": "Your photo was approved",
-        "body": "A photo in your portfolio was approved and is now visible on your public profile.",
+        "body": "{count, plural, one {A photo} other {# photos}} in your portfolio {count, plural, one {was} other {were}} approved and now visible on your public profile.",
         "cta": "View portfolio"
+      },
+      "mediaApprovedAlbum": {
+        "body": "{count, plural, one {A photo} other {# photos}} in your album \"{album}\" {count, plural, one {was} other {were}} approved and now visible on your public profile."
       },
       "mediaRejected": {
         "heading": "A portfolio photo was rejected",

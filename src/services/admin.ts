@@ -12,6 +12,7 @@ import { KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
 import { ROLE_PLANS } from "@/lib/constants/plans";
 import { logAudit, processDeletion } from "@/services/compliance";
 import { notifyCritical } from "@/services/notification";
+import { tryAutoPublish } from "@/services/public-profile";
 
 // Reads the requesting admin's locale cookie, same as the other
 // request-triggered (non-cron) service call sites — see
@@ -363,7 +364,7 @@ export async function reviewVerification({
   approve: boolean;
   reason?: string;
 }) {
-  return db.userRole.update({
+  const userRole = await db.userRole.update({
     where: { id: userRoleId },
     data: approve
       ? {
@@ -385,6 +386,15 @@ export async function reviewVerification({
           purgeAfter: new Date(Date.now() + KYC_PURGE_AFTER_DAYS * 86_400_000),
         },
   });
+
+  // Verification is one of several gates a profile needs to auto-publish
+  // (see tryAutoPublish) — approving it here may be the last one a
+  // provider was waiting on.
+  if (approve) {
+    await tryAutoPublish(userRole.userId, userRole.role);
+  }
+
+  return userRole;
 }
 
 const KYC_IMAGE_FIELD = {
@@ -672,11 +682,16 @@ export async function moderateMedia({
 }) {
   const status = action === "approve" ? "APPROVED" : "REJECTED";
 
-  // Fetched before the update so the owning provider is known for the
-  // notification loop below — updateMany itself returns no rows.
+  // Fetched before the update so the owning provider (and, for grouping
+  // the approve notification below, the album + role) is known —
+  // updateMany itself returns no rows.
   const rows = await db.profileMedia.findMany({
     where: { id: { in: mediaIds } },
-    select: { id: true, profile: { select: { userId: true } } },
+    select: {
+      id: true,
+      album: { select: { id: true, title: true } },
+      profile: { select: { userId: true, role: true } },
+    },
   });
 
   await db.profileMedia.updateMany({
@@ -707,37 +722,94 @@ export async function moderateMedia({
   // billing/account-critical call sites).
   const t = await getEmailT();
   const portfolioUrl = portfolioUrlFor();
-  await Promise.all(
-    rows.map((row) =>
-      notifyCritical({
+
+  if (action === "reject") {
+    // Each rejected photo needs its own reason surfaced, so this stays
+    // one notification per photo.
+    await Promise.all(
+      rows.map((row) =>
+        notifyCritical({
+          userId: row.profile.userId,
+          type: "MEDIA_REJECTED",
+          title: t("mediaRejected.heading"),
+          message: t("mediaRejected.body", { reason: reason ?? "" }),
+          data: { mediaId: row.id },
+          email: {
+            subject: t("mediaRejected.heading"),
+            html: mediaRejectedEmailHtml({
+              t,
+              reason: reason ?? "",
+              portfolioUrl,
+            }),
+          },
+        }),
+      ),
+    );
+    return mediaIds.length;
+  }
+
+  // Approving a batch (an admin's "select all, approve") used to fire one
+  // identical "your photo was approved" notification + email per photo —
+  // for an album of 20, that's 20 of each. Grouped by album instead, so a
+  // bulk approval reads as the one event it actually is. Photos with no
+  // album (shouldn't happen post-migration, but not guaranteed) fall back
+  // to one group per provider instead of one per photo.
+  const groups = new Map<
+    string,
+    { userId: string; albumTitle: string | null; mediaIds: string[] }
+  >();
+  for (const row of rows) {
+    const key = row.album?.id ?? `no-album:${row.profile.userId}`;
+    const group = groups.get(key);
+    if (group) {
+      group.mediaIds.push(row.id);
+    } else {
+      groups.set(key, {
         userId: row.profile.userId,
-        type: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
-        title: t(
-          action === "approve"
-            ? "mediaApproved.heading"
-            : "mediaRejected.heading",
-        ),
-        message:
-          action === "approve"
-            ? t("mediaApproved.body")
-            : t("mediaRejected.body", { reason: reason ?? "" }),
-        data: { mediaId: row.id },
+        albumTitle: row.album?.title ?? null,
+        mediaIds: [row.id],
+      });
+    }
+  }
+
+  await Promise.all(
+    Array.from(groups.values()).map((group) =>
+      notifyCritical({
+        userId: group.userId,
+        type: "MEDIA_APPROVED",
+        title: t("mediaApproved.heading"),
+        message: group.albumTitle
+          ? t("mediaApprovedAlbum.body", {
+              count: group.mediaIds.length,
+              album: group.albumTitle,
+            })
+          : t("mediaApproved.body", { count: group.mediaIds.length }),
+        data: { mediaIds: group.mediaIds },
         email: {
-          subject: t(
-            action === "approve"
-              ? "mediaApproved.heading"
-              : "mediaRejected.heading",
-          ),
-          html:
-            action === "approve"
-              ? mediaApprovedEmailHtml({ t, portfolioUrl })
-              : mediaRejectedEmailHtml({
-                  t,
-                  reason: reason ?? "",
-                  portfolioUrl,
-                }),
+          subject: t("mediaApproved.heading"),
+          html: mediaApprovedEmailHtml({
+            t,
+            portfolioUrl,
+            count: group.mediaIds.length,
+            albumTitle: group.albumTitle,
+          }),
         },
       }),
+    ),
+  );
+
+  // A newly-approved photo may be the last gate a profile was waiting
+  // on to go live (see tryAutoPublish) — check each affected profile
+  // once, not once per photo.
+  const uniqueProfiles = new Map(
+    rows.map((row) => [
+      `${row.profile.userId}:${row.profile.role}`,
+      { userId: row.profile.userId, role: row.profile.role },
+    ]),
+  );
+  await Promise.all(
+    Array.from(uniqueProfiles.values()).map(({ userId, role }) =>
+      tryAutoPublish(userId, role),
     ),
   );
 

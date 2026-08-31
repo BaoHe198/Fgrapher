@@ -795,13 +795,13 @@
     "users": {
       "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa"
     },
-    "profilePublish": {
+    "profiles": {
       "unknownRole": "Vai trò không xác định",
       "noRole": "Bạn không có vai trò này",
       "invalidInput": "Dữ liệu không hợp lệ",
-      "nowLive": "Hồ sơ đã được công khai",
-      "unpublished": "Đã gỡ công khai hồ sơ",
-      "updateFailed": "Không thể cập nhật trạng thái công khai"
+      "updated": "Đã cập nhật hồ sơ",
+      "loadFailed": "Không thể tải hồ sơ",
+      "updateFailed": "Không thể cập nhật hồ sơ"
     },
     "roles": {
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -1838,8 +1838,8 @@
         "verifiedBadge": "Đã xác minh",
         "notVerifiedNoteBefore": "Bạn có thể tiếp tục chỉnh sửa hồ sơ này ở chế độ nháp. Sau khi",
         "verifiedLinkText": "danh tính được xác minh",
-        "notVerifiedNoteAfter": ", bạn có thể công khai để xuất hiện trong tìm kiếm và nhận lịch đặt.",
-        "publishError": "Đã xảy ra lỗi",
+        "notVerifiedNoteAfter": ", có ít nhất 1 ảnh được duyệt và chọn danh mục sở trường, hồ sơ sẽ tự động hiển thị trong tìm kiếm.",
+        "autoPublishNote": "Hồ sơ sẽ tự động hiển thị trong tìm kiếm ngay khi bạn có ít nhất 1 ảnh portfolio được duyệt và đã chọn danh mục sở trường.",
         "displayNameLabel": "Tên hiển thị",
         "descriptionLabel": "Mô tả",
         "categoriesLabel": "Danh mục",
@@ -2094,8 +2094,11 @@
       },
       "mediaApproved": {
         "heading": "Ảnh của bạn đã được duyệt",
-        "body": "Một ảnh trong portfolio của bạn đã được duyệt và hiện hiển thị công khai trên hồ sơ.",
+        "body": "{count} ảnh trong portfolio của bạn đã được duyệt và hiện hiển thị công khai trên hồ sơ.",
         "cta": "Xem portfolio"
+      },
+      "mediaApprovedAlbum": {
+        "body": "{count} ảnh trong album \"{album}\" của bạn đã được duyệt và hiện hiển thị công khai trên hồ sơ."
       },
       "mediaRejected": {
         "heading": "Một ảnh trong portfolio bị từ chối",

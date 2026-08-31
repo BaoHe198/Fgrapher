@@ -75,6 +75,22 @@ export async function setProfilePublished(
   });
 }
 
+// The project owner's explicit call to drop the manual "Đang hoạt động"
+// toggle (it read as a confusing extra step) — a profile now goes live
+// on its own the moment every requirement is already met. Call this
+// after anything that could complete the checklist: identity
+// verification approved, a portfolio photo approved, or the profile's
+// own categories/location saved. Silently no-ops via setProfilePublished's
+// own checks when something is still missing — this isn't a user-
+// initiated action, so there's no error to surface.
+export async function tryAutoPublish(userId: string, role: Role) {
+  try {
+    await setProfilePublished(userId, role, true);
+  } catch {
+    // Not ready yet.
+  }
+}
+
 export async function getPublicProfileUser(username: string) {
   const user = await db.user.findUnique({
     where: { username, deletedAt: null },

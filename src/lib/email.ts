@@ -514,14 +514,20 @@ export function reviewResponseEmailHtml({
 export function mediaApprovedEmailHtml({
   t,
   portfolioUrl,
+  count,
+  albumTitle,
 }: {
   t: EmailT;
   portfolioUrl: string;
+  count: number;
+  albumTitle: string | null;
 }) {
   return bookingEmailShell({
     t,
     heading: t("mediaApproved.heading"),
-    body: t("mediaApproved.body"),
+    body: albumTitle
+      ? t("mediaApprovedAlbum.body", { count, album: albumTitle })
+      : t("mediaApproved.body", { count }),
     ctaLabel: t("mediaApproved.cta"),
     ctaUrl: portfolioUrl,
   });

@@ -125,8 +125,6 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   const [isPublished, setIsPublished] = useState(false);
   const [verificationStatus, setVerificationStatus] =
     useState<VerificationStatus | null>(null);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [publishError, setPublishError] = useState<string | null>(null);
   const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
   const [wards, setWards] = useState<WardOption[]>([]);
   const [extraProvinceIds, setExtraProvinceIds] = useState<string[]>([]);
@@ -180,23 +178,6 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       .then((body) => startTransition(() => setWards(body.data ?? [])));
   }, [selectedProvinceCode]);
 
-  const togglePublished = async (next: boolean) => {
-    setPublishError(null);
-    setIsPublishing(true);
-    const res = await fetch(`/api/profiles/${role}/publish`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isPublished: next }),
-    });
-    const body = await res.json();
-    setIsPublishing(false);
-    if (!res.ok) {
-      setPublishError(body.message ?? tEditor("publishError"));
-      return;
-    }
-    setIsPublished(next);
-  };
-
   const set = <K extends keyof ProfileFormValues>(
     key: K,
     value: ProfileFormValues[K],
@@ -229,7 +210,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
     setIsSaving(true);
     setSaved(false);
 
-    await Promise.all([
+    const [profileRes] = await Promise.all([
       fetch(`/api/profiles/${role}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -278,6 +259,15 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       }),
     ]);
 
+    // Saving categories/location can be the last thing tryAutoPublish
+    // (server-side, in the PATCH route) was waiting on — reflect the
+    // result immediately instead of leaving the status card stale until
+    // the next full page load.
+    const profileBody = await profileRes.json();
+    if (profileBody.data) {
+      setIsPublished(Boolean(profileBody.data.isPublished));
+    }
+
     setIsSaving(false);
     setSaved(true);
   };
@@ -301,41 +291,32 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            {isPublished ? (
-              <ShieldCheck className="size-4 text-success" />
-            ) : null}
-            <span className="text-body-md font-semibold! text-text-primary">
-              {isPublished ? tEditor("liveStatus") : tEditor("draftStatus")}
-            </span>
-            {verificationStatus === "VERIFIED" ? (
-              <Badge variant="success">{tEditor("verifiedBadge")}</Badge>
-            ) : null}
-          </div>
-          <Switch
-            checked={isPublished}
-            disabled={
-              isPublishing ||
-              (!isPublished && verificationStatus !== "VERIFIED")
-            }
-            onChange={togglePublished}
-          />
+        <div className="flex items-center gap-2">
+          {isPublished ? <ShieldCheck className="size-4 text-success" /> : null}
+          <span className="text-body-md font-semibold! text-text-primary">
+            {isPublished ? tEditor("liveStatus") : tEditor("draftStatus")}
+          </span>
+          {verificationStatus === "VERIFIED" ? (
+            <Badge variant="success">{tEditor("verifiedBadge")}</Badge>
+          ) : null}
         </div>
-        {verificationStatus !== "VERIFIED" ? (
-          <p className="text-body-sm text-text-secondary">
-            {tEditor("notVerifiedNoteBefore")}{" "}
-            <Link
-              href={`/onboarding/verification?role=${role}`}
-              className="text-text-link hover:underline"
-            >
-              {tEditor("verifiedLinkText")}
-            </Link>
-            {tEditor("notVerifiedNoteAfter")}
-          </p>
-        ) : null}
-        {publishError ? (
-          <p className="text-body-sm text-danger">{publishError}</p>
+        {!isPublished ? (
+          verificationStatus !== "VERIFIED" ? (
+            <p className="text-body-sm text-text-secondary">
+              {tEditor("notVerifiedNoteBefore")}{" "}
+              <Link
+                href={`/onboarding/verification?role=${role}`}
+                className="text-text-link hover:underline"
+              >
+                {tEditor("verifiedLinkText")}
+              </Link>
+              {tEditor("notVerifiedNoteAfter")}
+            </p>
+          ) : (
+            <p className="text-body-sm text-text-secondary">
+              {tEditor("autoPublishNote")}
+            </p>
+          )
         ) : null}
       </div>
 
