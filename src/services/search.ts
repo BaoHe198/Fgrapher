@@ -211,28 +211,30 @@ async function resolveProviderCards(
     new Set(matches.map((m) => m.userId).filter((id) => !excludeSet.has(id))),
   );
 
-  const profiles = matchedUserIds.length
-    ? await db.profile.findMany({
-        where: {
-          isPublished: true,
-          role: { in: PAID_ROLES },
-          userId: { in: matchedUserIds },
-        },
-        include: PROVIDER_INCLUDE,
-      })
-    : [];
-
-  // Rating/review count aren't denormalized columns (see Step 3's note on
-  // avoiding a trigger-maintained column at this scale) — Review.reviewedId
-  // points at the User, so this is naturally already per-person, not per-role.
-  const reviewStats = matchedUserIds.length
-    ? await db.review.groupBy({
-        by: ["reviewedId"],
-        where: { reviewedId: { in: matchedUserIds } },
-        _avg: { rating: true },
-        _count: { rating: true },
-      })
-    : [];
+  // Independent once matchedUserIds is known — run together rather than
+  // waiting on `profiles` before starting the review-stats query.
+  const [profiles, reviewStats] = matchedUserIds.length
+    ? await Promise.all([
+        db.profile.findMany({
+          where: {
+            isPublished: true,
+            role: { in: PAID_ROLES },
+            userId: { in: matchedUserIds },
+          },
+          include: PROVIDER_INCLUDE,
+        }),
+        // Rating/review count aren't denormalized columns (see Step 3's
+        // note on avoiding a trigger-maintained column at this scale) —
+        // Review.reviewedId points at the User, so this is naturally
+        // already per-person, not per-role.
+        db.review.groupBy({
+          by: ["reviewedId"],
+          where: { reviewedId: { in: matchedUserIds } },
+          _avg: { rating: true },
+          _count: { rating: true },
+        }),
+      ])
+    : [[], []];
   const statsByUser = new Map(
     reviewStats.map((s) => [
       s.reviewedId,
@@ -265,6 +267,15 @@ async function resolveProviderCards(
 export async function searchProfiles(params: SearchParams) {
   const page = Math.max(1, params.page ?? 1);
   const limit = params.limit ?? PAGE_SIZE_DEFAULT;
+
+  // Global facet-count query (role filter badges) — doesn't depend on
+  // `params` at all, so it's kicked off here and only awaited once it's
+  // actually needed below, letting it run alongside everything else
+  // instead of queuing up after the filtered results resolve.
+  const roleRowsPromise = db.profile.findMany({
+    where: { isPublished: true, role: { in: PAID_ROLES } },
+    select: { role: true, userId: true, categories: true },
+  });
 
   // `city` carries a Province.code (Prompt B4) — the browse filter's
   // dropdown is populated straight from services/geography.ts's real
@@ -322,10 +333,7 @@ export async function searchProfiles(params: SearchParams) {
     nationwide = nationwideResults.slice(0, NATIONWIDE_SECTION_SIZE);
   }
 
-  const roleRows = await db.profile.findMany({
-    where: { isPublished: true, role: { in: PAID_ROLES } },
-    select: { role: true, userId: true, categories: true },
-  });
+  const roleRows = await roleRowsPromise;
 
   // Count unique providers per role, not profile rows — a role's Profile
   // rows already map 1:1 to users for that role (Profile has a

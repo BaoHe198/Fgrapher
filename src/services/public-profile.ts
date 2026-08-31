@@ -123,9 +123,16 @@ export async function getPublicProfileUser(username: string) {
           // approved media. The owner's own view (dashboard/portfolio)
           // reads directly via db.profileMedia.findMany with no filter,
           // deliberately not through this function.
+          //
+          // take: 1 — this flat list's only consumer is page.tsx's
+          // `activeProfile.media[0]?.url` og:image fallback; the real
+          // portfolio display reads albums[].media below instead. Was
+          // fetching every approved photo on a profile just to use the
+          // first one.
           media: {
             where: { moderationStatus: "APPROVED" },
             orderBy: { order: "asc" },
+            take: 1,
           },
           // Prompt G3, VIỆC 4 — the public Portfolio tab shows albums, not
           // a flat grid. An album with zero approved photos would render
