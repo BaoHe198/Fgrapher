@@ -44,8 +44,17 @@ const BUDGET_LABEL_KEYS: Record<(typeof BUDGET_VALUES)[number], string> = {
   "15000000-": "budgetOver15m",
 };
 
+// Full-width row (label left, chevron right) on mobile — cramming all 5
+// filters into one horizontal row there left each trigger ~56px wide,
+// truncating every label down to 1-2 characters. From lg: up, reverts to
+// the compact flex-1 pill segment that fits in a single row.
 const segmentClass =
-  "flex flex-1 min-w-0 items-center justify-center gap-1 rounded-full px-3.5 py-2.5 text-body-sm text-text-primary outline-none hover:bg-bg-sunken focus-visible:bg-bg-sunken";
+  "flex w-full min-w-0 items-center justify-between gap-2 rounded-[var(--fg-radius-sm)] px-3.5 py-3 text-body-md text-text-primary outline-none hover:bg-bg-sunken focus-visible:bg-bg-sunken lg:w-auto lg:flex-1 lg:justify-center lg:gap-1 lg:rounded-full lg:px-3.5 lg:py-2.5 lg:text-body-sm";
+
+// A single divider whose orientation flips with the layout: a full-width
+// horizontal rule between stacked rows on mobile, a thin vertical rule
+// between inline segments from lg: up.
+const dividerClass = "h-px w-full bg-border-subtle lg:h-6 lg:w-px";
 
 export function HeroSearch({
   marketplaceEnabled,
@@ -111,7 +120,7 @@ export function HeroSearch({
 
   return (
     <div className="flex w-full flex-col gap-2 lg:flex-row lg:items-stretch">
-      <div className="flex flex-1 flex-wrap items-center gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)]">
+      <div className="flex flex-1 flex-col items-stretch gap-1 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)] lg:flex-row lg:flex-wrap lg:items-center">
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
             <span className="max-w-full truncate">
@@ -139,7 +148,7 @@ export function HeroSearch({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="h-6 w-px shrink-0 bg-border-subtle" />
+        <div className={dividerClass} />
 
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
@@ -173,7 +182,7 @@ export function HeroSearch({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="h-6 w-px shrink-0 bg-border-subtle" />
+        <div className={dividerClass} />
 
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
@@ -205,7 +214,7 @@ export function HeroSearch({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="h-6 w-px shrink-0 bg-border-subtle" />
+        <div className={dividerClass} />
 
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
@@ -244,7 +253,7 @@ export function HeroSearch({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="h-6 w-px shrink-0 bg-border-subtle" />
+        <div className={dividerClass} />
 
         <DropdownMenu>
           <DropdownMenuTrigger className={segmentClass}>
