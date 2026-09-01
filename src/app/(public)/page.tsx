@@ -67,7 +67,7 @@ export default async function LandingPage() {
               <span className="text-caption-upper tracking-[0.14em] text-gold-300">
                 {t("hero.eyebrow")}
               </span>
-              <h1 className="m-0 text-display-2xl tracking-[-0.02em]">
+              <h1 className="m-0 text-display-lg tracking-[-0.02em] sm:text-display-xl lg:text-display-2xl">
                 {t("hero.title")}
               </h1>
               <p className="max-w-[460px] text-body-lg text-green-200">
