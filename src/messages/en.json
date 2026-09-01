@@ -594,6 +594,7 @@
         "users": "Users",
         "reports": "Reports",
         "verifications": "Verifications",
+        "roleChangeRequests": "Role changes",
         "moderation": "Moderation",
         "compliance": "Compliance",
         "serviceRequests": "Unclaimed requests"
@@ -710,6 +711,19 @@
         "selectRejectionReason": "Select a rejection reason",
         "verificationUpdated": "Verification updated"
       },
+      "roleChangeRequests": {
+        "title": "Role change requests",
+        "description": "A verified provider role can't be self-removed — users submit a request here to switch to a different one instead. Sorted oldest submission first.",
+        "empty": "Nothing pending",
+        "submittedToday": "Submitted today",
+        "waitingOneDay": "Waiting 1 day",
+        "waitingDays": "Waiting {days} days",
+        "userReason": "User's stated reason: {reason}",
+        "rejectionNotePlaceholder": "Rejection note (optional)",
+        "approve": "Approve",
+        "reject": "Reject",
+        "requestUpdated": "Request updated"
+      },
       "moderation": {
         "title": "Content moderation",
         "description": "Every portfolio photo needs approval before it appears publicly. Shortcuts: A approve, R reject, arrow keys navigate. Target: reviewed within {hours}h.",
@@ -812,7 +826,13 @@
       "roleNotFound": "You don't have this role",
       "cannotRemoveVerified": "Can't remove a role that's already verified",
       "removed": "Role removed",
-      "removeFailed": "Couldn't remove this role, please try again"
+      "removeFailed": "Couldn't remove this role, please try again",
+      "changeRequestSubmitted": "Role change request submitted, waiting on admin review",
+      "changeRequestFailed": "Couldn't submit the request, please try again",
+      "changeRequestNoActiveRole": "You don't have an active provider role",
+      "changeRequestNotVerified": "This role isn't verified yet — you can remove and add a different role directly",
+      "changeRequestSameRole": "The new role must be different from your current one",
+      "changeRequestAlreadyPending": "You already have a role change request pending review"
     },
     "phone": {
       "notConfigured": "Phone verification isn't configured on this system",
@@ -910,7 +930,12 @@
       "documentLinkFailed": "Failed to generate document link",
       "verificationUpdated": "Verification updated",
       "verificationUpdateFailed": "Failed to update verification",
-      "verificationQueueLoadFailed": "Failed to load verification queue"
+      "verificationQueueLoadFailed": "Failed to load verification queue",
+      "roleChangeRequestUpdated": "Role change request updated",
+      "roleChangeRequestUpdateFailed": "Failed to update role change request",
+      "roleChangeRequestNotFound": "Role change request not found",
+      "roleChangeRequestAlreadyReviewed": "This request has already been reviewed",
+      "roleChangeRequestsLoadFailed": "Failed to load role change requests"
     },
     "auth": {
       "invalidInput": "Invalid input",
@@ -1680,7 +1705,17 @@
       "removeRole": "Remove role",
       "removeRoleConfirm": "Remove the {role} role? Any profile info already entered for it (if any) will be deleted.",
       "removed": "{role} role removed",
-      "removeFailed": "Couldn't remove this role, please try again"
+      "removeFailed": "Couldn't remove this role, please try again",
+      "requestRoleChange": "Request role change",
+      "requestRoleChangeDialogTitle": "Request switching from {role} to another role",
+      "requestRoleChangeTargetLabel": "New role",
+      "requestRoleChangeTargetPlaceholder": "Select a role",
+      "requestRoleChangeReasonPlaceholder": "Reason (optional)",
+      "requestRoleChangeCancel": "Cancel",
+      "requestRoleChangeSubmit": "Submit request",
+      "pendingRequestBadge": "Pending review — switching to {role}",
+      "changeRequestSubmitted": "Role change request submitted",
+      "changeRequestFailed": "Couldn't submit the request, please try again"
     },
     "nav": {
       "profile": "Profile",
@@ -2118,6 +2153,17 @@
         "heading": "A portfolio photo was rejected",
         "body": "A photo was not approved for public display. Reason: {reason}",
         "cta": "View portfolio"
+      },
+      "roleChangeApproved": {
+        "heading": "Your role change request was approved",
+        "body": "Your role has been switched to {role}.",
+        "cta": "View roles"
+      },
+      "roleChangeRejected": {
+        "heading": "Your role change request was rejected",
+        "body": "Your role change request wasn't approved. Your current role is unchanged.",
+        "bodyWithReason": "Your role change request wasn't approved. Reason: {reason}. Your current role is unchanged.",
+        "cta": "View roles"
       }
     }
   },

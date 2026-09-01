@@ -20,6 +20,15 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { PAID_ROLES } from "@/lib/constants";
 
@@ -27,6 +36,12 @@ interface VerificationInfo {
   role: Role;
   verificationStatus: VerificationStatus;
   verificationRejectedReason: string | null;
+}
+
+interface PendingRoleChangeRequest {
+  id: string;
+  fromRole: Role;
+  toRole: Role;
 }
 
 const VERIFICATION_VARIANT: Record<
@@ -54,16 +69,22 @@ export function RolesSettings({
   currentRoles,
   verifications,
   marketplaceEnabled,
+  pendingRoleChangeRequest,
 }: {
   currentRoles: Role[];
   verifications: VerificationInfo[];
   marketplaceEnabled: boolean;
+  pendingRoleChangeRequest: PendingRoleChangeRequest | null;
 }) {
   const roleT = useTranslations("role");
   const t = useTranslations("dashboardSettings.roles");
   const router = useRouter();
   const [activatingRole, setActivatingRole] = useState<Role | null>(null);
   const [removingRole, setRemovingRole] = useState<Role | null>(null);
+  const [changeRequestRole, setChangeRequestRole] = useState<Role | null>(null);
+  const [changeRequestTarget, setChangeRequestTarget] = useState<Role | "">("");
+  const [changeRequestReason, setChangeRequestReason] = useState("");
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
   const activeRoles = currentRoles.filter((r) => r !== "CUSTOMER");
   // MVP scope decision — one provider role per account (CLAUDE.md): once
   // an account already holds one, hide the option to add another entirely
@@ -136,6 +157,50 @@ export function RolesSettings({
     }
   };
 
+  const openChangeRequestDialog = (role: Role) => {
+    setChangeRequestRole(role);
+    setChangeRequestTarget("");
+    setChangeRequestReason("");
+  };
+
+  const submitRoleChangeRequest = async () => {
+    if (!changeRequestTarget) return;
+    setIsSubmittingRequest(true);
+    try {
+      const res = await fetch("/api/users/role-change-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toRole: changeRequestTarget,
+          reason: changeRequestReason.trim() || undefined,
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        toast.add({
+          title: body.message ?? t("changeRequestFailed"),
+          type: "error",
+        });
+        return;
+      }
+      toast.add({ title: t("changeRequestSubmitted"), type: "success" });
+      setChangeRequestRole(null);
+      router.refresh();
+    } catch {
+      toast.add({ title: t("changeRequestFailed"), type: "error" });
+    } finally {
+      setIsSubmittingRequest(false);
+    }
+  };
+
+  const changeRequestTargetOptions = changeRequestRole
+    ? PAID_ROLES.filter(
+        (r) =>
+          r !== changeRequestRole &&
+          (marketplaceEnabled || r !== "CAMERA_SHOP"),
+      )
+    : [];
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
@@ -207,7 +272,21 @@ export function RolesSettings({
                       ) : null}
                       {t("removeRole")}
                     </Button>
-                  ) : null}
+                  ) : pendingRoleChangeRequest?.fromRole === role ? (
+                    <Badge variant="warning">
+                      {t("pendingRequestBadge", {
+                        role: roleT(pendingRoleChangeRequest.toRole),
+                      })}
+                    </Badge>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => openChangeRequestDialog(role)}
+                    >
+                      {t("requestRoleChange")}
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -275,6 +354,63 @@ export function RolesSettings({
           })}
         </div>
       ) : null}
+
+      <Dialog
+        open={changeRequestRole !== null}
+        onOpenChange={(open) => {
+          if (!open) setChangeRequestRole(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {changeRequestRole
+                ? t("requestRoleChangeDialogTitle", {
+                    role: roleT(changeRequestRole),
+                  })
+                : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <NativeSelect
+              label={t("requestRoleChangeTargetLabel")}
+              value={changeRequestTarget}
+              onChange={(value) => setChangeRequestTarget(value as Role | "")}
+              options={[
+                { value: "", label: t("requestRoleChangeTargetPlaceholder") },
+                ...changeRequestTargetOptions.map((r) => ({
+                  value: r,
+                  label: roleT(r),
+                })),
+              ]}
+            />
+            <Textarea
+              placeholder={t("requestRoleChangeReasonPlaceholder")}
+              rows={3}
+              value={changeRequestReason}
+              onChange={(e) => setChangeRequestReason(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setChangeRequestRole(null)}
+            >
+              {t("requestRoleChangeCancel")}
+            </Button>
+            <Button
+              variant="accent"
+              disabled={!changeRequestTarget || isSubmittingRequest}
+              onClick={submitRoleChangeRequest}
+            >
+              {isSubmittingRequest ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : null}
+              {t("requestRoleChangeSubmit")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

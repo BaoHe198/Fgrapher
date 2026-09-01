@@ -22,6 +22,18 @@ export const updateRolesSchema = z.object({
 
 export type UpdateRolesInput = z.infer<typeof updateRolesSchema>;
 
+// A verified role can't be self-removed (see UserRole.verificationStatus),
+// so switching roles instead goes through this admin-approved request —
+// see services/role-change-requests.ts.
+export const createRoleChangeRequestSchema = z.object({
+  toRole: z.enum(PAID_ROLE_VALUES),
+  reason: z.string().max(500).optional(),
+});
+
+export type CreateRoleChangeRequestInput = z.infer<
+  typeof createRoleChangeRequestSchema
+>;
+
 const notificationChannelsSchema = z.object({
   email: z.boolean(),
   inApp: z.boolean(),

@@ -594,6 +594,7 @@
         "users": "Người dùng",
         "reports": "Báo cáo",
         "verifications": "Xác minh",
+        "roleChangeRequests": "Đổi vai trò",
         "moderation": "Kiểm duyệt",
         "compliance": "Tuân thủ dữ liệu",
         "serviceRequests": "Yêu cầu chưa ai nhận"
@@ -710,6 +711,19 @@
         "selectRejectionReason": "Vui lòng chọn lý do từ chối",
         "verificationUpdated": "Đã cập nhật xác minh"
       },
+      "roleChangeRequests": {
+        "title": "Yêu cầu đổi vai trò",
+        "description": "Vai trò nhà cung cấp đã xác minh không thể tự xoá — người dùng gửi yêu cầu ở đây để đổi sang vai trò khác. Sắp xếp theo lượt gửi cũ nhất trước.",
+        "empty": "Không có yêu cầu nào đang chờ",
+        "submittedToday": "Gửi hôm nay",
+        "waitingOneDay": "Đã chờ 1 ngày",
+        "waitingDays": "Đã chờ {days} ngày",
+        "userReason": "Lý do người dùng đưa ra: {reason}",
+        "rejectionNotePlaceholder": "Ghi chú từ chối (không bắt buộc)",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "requestUpdated": "Đã cập nhật yêu cầu"
+      },
       "moderation": {
         "title": "Kiểm duyệt nội dung",
         "description": "Mọi ảnh portfolio cần được duyệt trước khi hiển thị công khai. Phím tắt: A để duyệt, R để từ chối, phím mũi tên để di chuyển. Mục tiêu: xử lý trong vòng {hours} giờ.",
@@ -812,7 +826,13 @@
       "roleNotFound": "Bạn chưa có vai trò này",
       "cannotRemoveVerified": "Không thể xoá vai trò đã được xác minh",
       "removed": "Đã xoá vai trò",
-      "removeFailed": "Không thể xoá vai trò, vui lòng thử lại"
+      "removeFailed": "Không thể xoá vai trò, vui lòng thử lại",
+      "changeRequestSubmitted": "Đã gửi yêu cầu đổi vai trò, chờ admin duyệt",
+      "changeRequestFailed": "Không thể gửi yêu cầu, vui lòng thử lại",
+      "changeRequestNoActiveRole": "Bạn chưa có vai trò nhà cung cấp nào đang hoạt động",
+      "changeRequestNotVerified": "Vai trò này chưa được xác minh — bạn có thể tự xoá và thêm vai trò khác trực tiếp",
+      "changeRequestSameRole": "Vai trò mới phải khác vai trò hiện tại",
+      "changeRequestAlreadyPending": "Bạn đã có một yêu cầu đổi vai trò đang chờ duyệt"
     },
     "phone": {
       "notConfigured": "Xác minh số điện thoại chưa được cấu hình trên hệ thống",
@@ -910,7 +930,12 @@
       "documentLinkFailed": "Không thể tạo liên kết xem giấy tờ",
       "verificationUpdated": "Đã cập nhật xác minh",
       "verificationUpdateFailed": "Không thể cập nhật xác minh",
-      "verificationQueueLoadFailed": "Không thể tải hàng đợi xác minh"
+      "verificationQueueLoadFailed": "Không thể tải hàng đợi xác minh",
+      "roleChangeRequestUpdated": "Đã cập nhật yêu cầu đổi vai trò",
+      "roleChangeRequestUpdateFailed": "Không thể cập nhật yêu cầu đổi vai trò",
+      "roleChangeRequestNotFound": "Không tìm thấy yêu cầu đổi vai trò",
+      "roleChangeRequestAlreadyReviewed": "Yêu cầu này đã được xử lý",
+      "roleChangeRequestsLoadFailed": "Không thể tải danh sách yêu cầu đổi vai trò"
     },
     "auth": {
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -1680,7 +1705,17 @@
       "removeRole": "Xoá vai trò",
       "removeRoleConfirm": "Xoá vai trò {role}? Hồ sơ và thông tin đã nhập cho vai trò này (nếu có) sẽ bị xoá.",
       "removed": "Đã xoá vai trò {role}",
-      "removeFailed": "Không thể xoá vai trò này, vui lòng thử lại"
+      "removeFailed": "Không thể xoá vai trò này, vui lòng thử lại",
+      "requestRoleChange": "Yêu cầu đổi vai trò",
+      "requestRoleChangeDialogTitle": "Yêu cầu đổi từ {role} sang vai trò khác",
+      "requestRoleChangeTargetLabel": "Vai trò mới",
+      "requestRoleChangeTargetPlaceholder": "Chọn vai trò",
+      "requestRoleChangeReasonPlaceholder": "Lý do (không bắt buộc)",
+      "requestRoleChangeCancel": "Huỷ",
+      "requestRoleChangeSubmit": "Gửi yêu cầu",
+      "pendingRequestBadge": "Đang chờ duyệt đổi sang {role}",
+      "changeRequestSubmitted": "Đã gửi yêu cầu đổi vai trò",
+      "changeRequestFailed": "Không thể gửi yêu cầu, vui lòng thử lại"
     },
     "nav": {
       "profile": "Hồ sơ",
@@ -2118,6 +2153,17 @@
         "heading": "Một ảnh trong portfolio bị từ chối",
         "body": "Ảnh không được duyệt hiển thị công khai. Lý do: {reason}",
         "cta": "Xem portfolio"
+      },
+      "roleChangeApproved": {
+        "heading": "Yêu cầu đổi vai trò đã được duyệt",
+        "body": "Vai trò của bạn đã được chuyển sang {role}.",
+        "cta": "Xem vai trò"
+      },
+      "roleChangeRejected": {
+        "heading": "Yêu cầu đổi vai trò bị từ chối",
+        "body": "Yêu cầu đổi vai trò của bạn không được chấp thuận. Vai trò hiện tại của bạn không thay đổi.",
+        "bodyWithReason": "Yêu cầu đổi vai trò của bạn không được chấp thuận. Lý do: {reason}. Vai trò hiện tại của bạn không thay đổi.",
+        "cta": "Xem vai trò"
       }
     }
   },

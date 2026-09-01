@@ -2,6 +2,7 @@
 
 import type { Notification, NotificationType } from "@prisma/client";
 import {
+  ArrowLeftRight,
   Bell,
   Calendar,
   CalendarCheck,
@@ -58,6 +59,8 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   REQUEST_OFFER_ACCEPTED: Handshake,
   REQUEST_OFFER_DECLINED: Handshake,
   REQUEST_NO_OFFERS_48H: Handshake,
+  ROLE_CHANGE_APPROVED: ArrowLeftRight,
+  ROLE_CHANGE_REJECTED: ArrowLeftRight,
 };
 
 function relativeTime(

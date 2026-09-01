@@ -108,8 +108,11 @@ export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
 // Shared shell for booking emails — kept as plain template-literal HTML
 // (not a full react-email component package) to match the existing
 // resetPasswordEmailHtml pattern rather than adding a new templating
-// dependency for six emails.
-function bookingEmailShell({
+// dependency for six emails. Exported since it's also the generic
+// heading/body/CTA shell every other non-booking transactional email in
+// this file reuses (media moderation, role-change requests, ...) despite
+// the booking-specific name.
+export function bookingEmailShell({
   t,
   heading,
   body,

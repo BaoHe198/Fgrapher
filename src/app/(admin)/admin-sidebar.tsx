@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeftRight,
   BadgeCheck,
   Flag,
   Handshake,
@@ -20,6 +21,11 @@ const ITEMS = [
   { href: "/admin/users", key: "users", icon: Users },
   { href: "/admin/reports", key: "reports", icon: Flag },
   { href: "/admin/verifications", key: "verifications", icon: BadgeCheck },
+  {
+    href: "/admin/role-change-requests",
+    key: "roleChangeRequests",
+    icon: ArrowLeftRight,
+  },
   { href: "/admin/moderation", key: "moderation", icon: ImageIcon },
   { href: "/admin/compliance", key: "compliance", icon: ShieldCheck },
   {

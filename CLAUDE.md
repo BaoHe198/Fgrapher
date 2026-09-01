@@ -145,7 +145,14 @@ MAKEUP_ARTIST, STUDIO, CAMERA_SHOP, MODEL) — registration only lets you pick
 one, and `/dashboard/settings/roles` hides "add another role" entirely once
 one is active; the current role must be removed first. Enforced both
 client-side and server-side (`/api/auth/register`, `/api/users/roles`).
-CUSTOMER is unaffected and always coexists. This keeps launch simpler
+An **unverified** role can be self-removed and swapped for a different one
+directly; a **verified** role cannot (`UserRole.verificationStatus`) — the
+user instead submits a `RoleChangeRequest` (self-service "Yêu cầu đổi vai
+trò" button on `/dashboard/settings/roles`) that an admin approves/rejects
+at `/admin/role-change-requests` (`services/role-change-requests.ts`);
+approval performs the same remove-old/activate-new operation the
+unverified self-service path uses. CUSTOMER is unaffected and always
+coexists. This keeps launch simpler
 (dashboard, billing, verification all assume a single active provider
 identity for now) — revisit if multi-role providers become a real need
 post-launch. Roles determine UI visibility, permissions, and billing:

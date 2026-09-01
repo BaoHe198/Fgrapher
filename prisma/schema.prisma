@@ -105,6 +105,7 @@ model User {
   dataRequests             DataRequest[]
   serviceRequests          ServiceRequest[]          @relation("requestCustomer")
   requestOffers            RequestOffer[]            @relation("offerProvider")
+  roleChangeRequests       RoleChangeRequest[]
 
   @@index([wardId])
   // Both filtered on every admin dashboard load (getAdminOverview) and by
@@ -375,6 +376,48 @@ model UserRole {
   // first) without a full table scan.
   @@index([verificationStatus, createdAt])
   @@map("user_roles")
+}
+
+// MVP scope decision (CLAUDE.md) — accounts hold at most one active
+// provider role. A verified role can't be self-removed (see UserRole's
+// verificationStatus comment), so switching to a different role instead
+// goes through this admin-approved request — the one-role-per-account
+// rule combined with a locked verified role would otherwise leave no path
+// forward at all for someone who picked the wrong role.
+enum RoleChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model RoleChangeRequest {
+  id       String  @id @default(cuid())
+  userId   String
+  // Snapshotted at creation time rather than derived at review time —
+  // nothing else can change a user's role between request and review (the
+  // one-role rule blocks adding another, and this role is locked from
+  // self-removal), but storing it keeps the admin queue's display and
+  // audit trail self-contained regardless.
+  fromRole Role
+  toRole   Role
+  reason   String?
+
+  status     RoleChangeRequestStatus @default(PENDING)
+  reviewedBy String? // admin userId
+  reviewedAt DateTime?
+  reviewNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Powers the admin queue's sort (oldest PENDING first).
+  @@index([status, createdAt])
+  // "does this user already have a pending request" check before creating
+  // a new one (enforced in the service layer, not a DB constraint).
+  @@index([userId, status])
+  @@map("role_change_requests")
 }
 
 enum SubscriptionStatus {
@@ -1435,6 +1478,8 @@ enum NotificationType {
   REQUEST_OFFER_ACCEPTED
   REQUEST_OFFER_DECLINED
   REQUEST_NO_OFFERS_48H
+  ROLE_CHANGE_APPROVED
+  ROLE_CHANGE_REJECTED
 }
 
 model Notification {
