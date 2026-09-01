@@ -2648,9 +2648,9 @@
       "metaDescription": "Content standards for every profile and photo uploaded to Fgrapher — age requirements, image rights, moderation, and how violations are handled.",
       "title": "Community guidelines",
       "subtitle": "Apply to every profile and every photo uploaded to Fgrapher",
-      "intro": "Fgrapher stores real photos of real people. The standards below exist to keep the platform safe and professional for everyone — photographers, models, and clients alike. Every account must comply; violations can lead to content removal, temporary suspension, or a permanent ban.",
+      "intro": "Fgrapher stores real photos of real people, so we've set a few clear standards below to keep the platform safe and professional for everyone — photographers, models, and clients alike. Every account must comply; violations can lead to content removal, temporary suspension, or a permanent ban.",
       "prohibited": {
-        "heading": "Content that isn't allowed",
+        "heading": "1. Content that isn't allowed",
         "items": [
           "Nudity in any form.",
           "Pornographic or sexually suggestive content.",
@@ -2660,23 +2660,23 @@
         ]
       },
       "ageRequirement": {
-        "heading": "Age requirement",
+        "heading": "2. Age requirement",
         "body": "Every Fgrapher account — not just Model — must be 18 or older. This is required at registration, not optional."
       },
       "moderation": {
-        "heading": "Photos are moderated before going public",
+        "heading": "3. Photos are moderated before going public",
         "body": "Every portfolio photo stays \"Pending review\" until the Fgrapher team checks and approves it. Unapproved photos are only visible to you, never on a public profile or in search results. You can still build and edit your portfolio as a draft while you wait."
       },
       "violations": {
-        "heading": "Violation process — a 3-strike suspension",
+        "heading": "4. Violation process — a 3-strike suspension",
         "body": "Each time a photo is rejected for violating content standards (whether caught by automated scanning or by the moderation team), your account gets one violation point. At the third point, the account is automatically suspended. Serious violations (e.g. suspected involvement of someone under 18) can result in an immediate suspension and a report to authorities where the law requires it."
       },
       "appeals": {
-        "heading": "Appealing a rejected photo",
+        "heading": "5. Appealing a rejected photo",
         "body": "If you believe a photo was rejected in error, message support through the Contact page with which photo and why you think the decision was wrong. Every appeal is reviewed independently by a different admin."
       },
       "reporting": {
-        "heading": "Reporting a violation",
+        "heading": "6. Reporting a violation",
         "body": "Every profile has a \"Report\" option. Reports about inappropriate content or a profile suspected of belonging to someone under 18 go into a high-priority queue and are handled as soon as possible."
       }
     }

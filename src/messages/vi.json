@@ -137,7 +137,7 @@
     "pricing": "Bảng giá",
     "tools": "Công cụ đặt lịch",
     "sell": "Bán thiết bị",
-    "guidelines": "Hướng dẫn",
+    "guidelines": "Tiêu chuẩn cộng đồng",
     "about": "Giới thiệu",
     "careers": "Tuyển dụng",
     "support": "Hỗ trợ",
@@ -2648,9 +2648,9 @@
       "metaDescription": "Tiêu chuẩn nội dung áp dụng cho mọi hồ sơ và ảnh đăng tải trên Fgrapher — quy định về độ tuổi, quyền sử dụng hình ảnh, kiểm duyệt và xử lý vi phạm.",
       "title": "Tiêu chuẩn cộng đồng",
       "subtitle": "Áp dụng cho mọi hồ sơ và mọi ảnh đăng tải trên Fgrapher",
-      "intro": "Fgrapher lưu trữ ảnh thật của người thật. Những tiêu chuẩn dưới đây tồn tại để giữ nền tảng an toàn và chuyên nghiệp cho tất cả mọi người — nhiếp ảnh gia, người mẫu, và khách hàng. Mọi tài khoản đều phải tuân thủ; vi phạm có thể dẫn đến gỡ nội dung, khóa tài khoản tạm thời, hoặc cấm vĩnh viễn.",
+      "intro": "Fgrapher lưu trữ ảnh thật của người thật, nên chúng tôi đặt ra vài tiêu chuẩn rõ ràng dưới đây để giữ nền tảng an toàn và chuyên nghiệp cho tất cả mọi người — nhiếp ảnh gia, người mẫu và khách hàng. Mọi tài khoản đều phải tuân thủ; vi phạm có thể dẫn đến gỡ nội dung, khóa tài khoản tạm thời, hoặc cấm vĩnh viễn.",
       "prohibited": {
-        "heading": "Nội dung không được chấp nhận",
+        "heading": "1. Nội dung không được chấp nhận",
         "items": [
           "Ảnh khỏa thân dưới mọi hình thức.",
           "Ảnh khiêu dâm hoặc có tính chất khiêu dâm.",
@@ -2660,23 +2660,23 @@
         ]
       },
       "ageRequirement": {
-        "heading": "Yêu cầu về độ tuổi",
+        "heading": "2. Yêu cầu về độ tuổi",
         "body": "Mọi tài khoản Fgrapher — không riêng vai trò nào — đều phải từ 18 tuổi trở lên. Đây là điều kiện bắt buộc khi đăng ký, không phải một tùy chọn."
       },
       "moderation": {
-        "heading": "Ảnh được kiểm duyệt trước khi công khai",
+        "heading": "3. Ảnh được kiểm duyệt trước khi công khai",
         "body": "Mọi ảnh portfolio đều ở trạng thái \"Đang chờ duyệt\" cho đến khi đội ngũ Fgrapher xem xét và phê duyệt. Ảnh chưa được duyệt chỉ hiển thị cho chính bạn, không xuất hiện trên hồ sơ công khai hay kết quả tìm kiếm. Bạn vẫn có thể tạo và chỉnh sửa portfolio ở chế độ nháp trong lúc chờ."
       },
       "violations": {
-        "heading": "Quy trình xử lý vi phạm — 3 lần khóa tài khoản",
+        "heading": "4. Quy trình xử lý vi phạm — 3 lần khóa tài khoản",
         "body": "Mỗi lần một ảnh bị từ chối vì vi phạm tiêu chuẩn nội dung (dù do hệ thống tự động phát hiện hay do đội ngũ kiểm duyệt), tài khoản của bạn nhận một điểm vi phạm. Đến điểm vi phạm thứ 3, tài khoản sẽ tự động bị tạm khóa. Trường hợp vi phạm nghiêm trọng (ví dụ nghi ngờ liên quan đến người dưới 18 tuổi) có thể bị khóa ngay từ lần đầu và báo cáo cho cơ quan chức năng khi pháp luật yêu cầu."
       },
       "appeals": {
-        "heading": "Khiếu nại khi ảnh bị từ chối",
+        "heading": "5. Khiếu nại khi ảnh bị từ chối",
         "body": "Nếu bạn cho rằng ảnh của mình bị từ chối nhầm, hãy nhắn tin cho đội ngũ hỗ trợ qua trang Liên hệ, nêu rõ ảnh nào và lý do bạn cho là quyết định chưa chính xác. Mỗi khiếu nại sẽ được một quản trị viên khác xem xét lại độc lập."
       },
       "reporting": {
-        "heading": "Báo cáo vi phạm",
+        "heading": "6. Báo cáo vi phạm",
         "body": "Mọi hồ sơ đều có tùy chọn \"Báo cáo\". Báo cáo về nội dung không phù hợp hoặc hồ sơ nghi ngờ thuộc về người dưới 18 tuổi được chuyển vào hàng đợi ưu tiên cao và xử lý sớm nhất có thể."
       }
     }
