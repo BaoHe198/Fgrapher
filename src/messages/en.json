@@ -14,11 +14,11 @@
   "seo": {
     "default": {
       "title": "Fgrapher — Find your photography artist",
-      "description": "Book verified photographers, videographers, make-up artists, and studios nationwide. Message, book, and review — all on Fgrapher."
+      "description": "Book identity-verified photographers, videographers, make-up artists, and studios nationwide — search, message, and book right on Fgrapher."
     },
     "home": {
       "title": "Fgrapher — Find & book photography artists nationwide",
-      "description": "The platform connecting clients with identity-verified photographers, videographers, make-up artists, and studios. Search by province, compare prices, book online."
+      "description": "Find identity-verified photographers, videographers, make-up artists, and studios nationwide. Compare prices, browse portfolios, and book online now."
     }
   },
   "nav": {
@@ -97,7 +97,7 @@
   },
   "hero": {
     "eyebrow": "THE PLATFORM FOR VISUAL CREATORS",
-    "title": "Find Your Artist",
+    "title": "Find Your Photography Artist",
     "sub": "Photographers, videographers, make-up artists and studios — search and book in one place.",
     "searchPh": "Search artists or studios",
     "city": "Ho Chi Minh City",
@@ -126,8 +126,8 @@
     "f2b": "Pick a date and slot from a real calendar. Artists respond quickly by message.",
     "f3t": "Rent or buy",
     "f3b": "Camera shops and studios list gear and space alongside their services.",
-    "ctaTitle": "Sell your work where clients already look",
-    "ctaSub": "Free to join during our early access period. Customers browse and book for free.",
+    "ctaTitle": "Bring your services to clients already searching",
+    "ctaSub": "Free to join during our early access period — clients search for and book with you at no cost.",
     "ctaBtn": "Become a provider"
   },
   "foot": {
@@ -2273,6 +2273,7 @@
     },
     "browse": {
       "pageTitle": "Browse artists — Fgrapher",
+      "pageDescription": "Find and compare identity-verified photographers, videographers, make-up artists, and studios across Vietnam. Filter by province, budget, and rating.",
       "sortLabels": {
         "rating": "Top rated",
         "priceAsc": "Price: low to high",
@@ -2402,7 +2403,7 @@
       }
     },
     "roleProvinceLanding": {
-      "metaTitle": "{role}s in {province} | Fgrapher",
+      "metaTitle": "{role}s in {province} — Fgrapher",
       "metaDescription": "Find and book trusted {role}s in {province}. Browse portfolios, prices, and reviews on Fgrapher.",
       "heading": "{role}s in {province}",
       "intro": "Browse {role}s based in {province}, compare portfolios and prices, and book directly on Fgrapher.",
@@ -2580,7 +2581,7 @@
       "faqs": {
         "multipleRoles": {
           "q": "Can I have multiple roles?",
-          "a": "Yes — one account can hold several paid roles at once (e.g. Photographer + Studio), each billed as its own subscription, all shown together on one profile page."
+          "a": "Right now each account holds one provider role at a time (e.g. Photographer or Studio, not both). You can switch to a different role anytime in Settings."
         },
         "afterTrial": {
           "q": "What happens after the free trial?",
@@ -2602,6 +2603,81 @@
           "q": "Is there a discount for annual billing?",
           "a": "Yes — switch to yearly billing on this page and pay 20% less than the monthly rate, charged once a year."
         }
+      }
+    },
+    "about": {
+      "metaTitle": "About — Fgrapher",
+      "metaDescription": "Fgrapher is the platform connecting clients with identity-verified photographers, videographers, make-up artists, and studios nationwide.",
+      "title": "About Fgrapher",
+      "subtitle": "The platform connecting photographers, videographers, make-up artists, and studios with clients looking for them.",
+      "body1": "Fgrapher connects clients with the visual creators behind the shoots they love — and connects those creators with clients looking for their services. Build a portfolio, list your services, manage bookings, and get found, all in one place.",
+      "body2": "Fgrapher is currently in early access. If something isn't working the way you'd expect, let us know — see the Contact page."
+    },
+    "contact": {
+      "metaTitle": "Contact — Fgrapher",
+      "metaDescription": "Questions about booking, provider profiles, or a bug on Fgrapher? Message our support team and we'll get back to you as soon as possible.",
+      "title": "Contact us",
+      "subtitle": "Have a question or found a bug? Send us a message."
+    },
+    "help": {
+      "metaTitle": "Help center — Fgrapher",
+      "metaDescription": "Answers to common questions about becoming a provider, how booking works, and the cost of using Fgrapher.",
+      "title": "Help center",
+      "subtitle": "Answers to common questions.",
+      "faqs": {
+        "becomeProvider": {
+          "q": "How do I become a provider?",
+          "a": "Register and choose the role that fits you — Photographer, Videographer, Make-up Artist, or Studio. Each account currently holds one provider role at a time; you can switch to a different one in Settings."
+        },
+        "howBookingWorks": {
+          "q": "How does booking work?",
+          "a": "Clients pick a service and an open time slot on a provider's profile, then send a booking request. Providers can accept or decline requests right from their dashboard."
+        },
+        "isFree": {
+          "q": "Is Fgrapher free?",
+          "a": "Browsing and booking are completely free for clients. Provider roles are currently assigned a plan manually by the Fgrapher team — self-service subscriptions via online payment aren't open yet."
+        },
+        "howToContactSupport": {
+          "q": "How do I contact support?",
+          "a": "Use the Contact page — the Fgrapher team will respond as soon as possible."
+        }
+      }
+    },
+    "guidelines": {
+      "metaTitle": "Community guidelines — Fgrapher",
+      "metaDescription": "Content standards for every profile and photo uploaded to Fgrapher — age requirements, image rights, moderation, and how violations are handled.",
+      "title": "Community guidelines",
+      "subtitle": "Apply to every profile and every photo uploaded to Fgrapher",
+      "intro": "Fgrapher stores real photos of real people. The standards below exist to keep the platform safe and professional for everyone — photographers, models, and clients alike. Every account must comply; violations can lead to content removal, temporary suspension, or a permanent ban.",
+      "prohibited": {
+        "heading": "Content that isn't allowed",
+        "items": [
+          "Nudity in any form.",
+          "Pornographic or sexually suggestive content.",
+          "Photos that sexualize the body.",
+          "Photos of anyone under 18, in any context.",
+          "Photos you don't have the right to use — under Article 32 of the 2015 Civil Code, using someone's likeness requires their consent. You must be the subject, the photographer, or have the subject's clear consent before uploading."
+        ]
+      },
+      "ageRequirement": {
+        "heading": "Age requirement",
+        "body": "Every Fgrapher account — not just Model — must be 18 or older. This is required at registration, not optional."
+      },
+      "moderation": {
+        "heading": "Photos are moderated before going public",
+        "body": "Every portfolio photo stays \"Pending review\" until the Fgrapher team checks and approves it. Unapproved photos are only visible to you, never on a public profile or in search results. You can still build and edit your portfolio as a draft while you wait."
+      },
+      "violations": {
+        "heading": "Violation process — a 3-strike suspension",
+        "body": "Each time a photo is rejected for violating content standards (whether caught by automated scanning or by the moderation team), your account gets one violation point. At the third point, the account is automatically suspended. Serious violations (e.g. suspected involvement of someone under 18) can result in an immediate suspension and a report to authorities where the law requires it."
+      },
+      "appeals": {
+        "heading": "Appealing a rejected photo",
+        "body": "If you believe a photo was rejected in error, message support through the Contact page with which photo and why you think the decision was wrong. Every appeal is reviewed independently by a different admin."
+      },
+      "reporting": {
+        "heading": "Reporting a violation",
+        "body": "Every profile has a \"Report\" option. Reports about inappropriate content or a profile suspected of belonging to someone under 18 go into a high-priority queue and are handled as soon as possible."
       }
     }
   },

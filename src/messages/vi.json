@@ -14,11 +14,11 @@
   "seo": {
     "default": {
       "title": "Fgrapher — Tìm nghệ sĩ nhiếp ảnh của bạn",
-      "description": "Đặt lịch nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio đã xác minh trên toàn quốc. Nhắn tin, đặt lịch và đánh giá — tất cả trên Fgrapher."
+      "description": "Đặt lịch nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio đã xác minh danh tính trên toàn quốc — tìm kiếm, nhắn tin và đặt lịch ngay trên Fgrapher."
     },
     "home": {
       "title": "Fgrapher — Tìm & đặt lịch nghệ sĩ nhiếp ảnh trên toàn quốc",
-      "description": "Nền tảng kết nối khách hàng với nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio đã xác minh danh tính. Tìm kiếm theo tỉnh thành, so sánh giá, đặt lịch trực tuyến."
+      "description": "Tìm nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio đã xác minh danh tính trên toàn quốc. So sánh giá, xem portfolio và đặt lịch trực tuyến ngay."
     }
   },
   "nav": {
@@ -97,7 +97,7 @@
   },
   "hero": {
     "eyebrow": "NỀN TẢNG CHO NGƯỜI SÁNG TẠO HÌNH ẢNH",
-    "title": "Tìm nghệ sĩ của bạn",
+    "title": "Tìm nghệ sĩ nhiếp ảnh của bạn",
     "sub": "Nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio — tìm kiếm và đặt lịch ở một nơi.",
     "searchPh": "Tìm nghệ sĩ hoặc studio",
     "city": "Thành phố Hồ Chí Minh",
@@ -126,8 +126,8 @@
     "f2b": "Chọn ngày và khung giờ trên lịch thật. Nghệ sĩ phản hồi nhanh chóng qua tin nhắn.",
     "f3t": "Thuê hoặc mua",
     "f3b": "Cửa hàng máy ảnh và studio đăng thiết bị, mặt bằng cùng với dịch vụ của họ.",
-    "ctaTitle": "Bán tác phẩm của bạn ở nơi khách hàng đang tìm",
-    "ctaSub": "Miễn phí tham gia trong giai đoạn đầu. Khách hàng duyệt và đặt lịch miễn phí.",
+    "ctaTitle": "Đưa dịch vụ của bạn đến khách hàng đang tìm kiếm",
+    "ctaSub": "Miễn phí tham gia trong giai đoạn đầu — khách hàng tìm kiếm và đặt lịch với bạn hoàn toàn miễn phí.",
     "ctaBtn": "Trở thành nhà cung cấp"
   },
   "foot": {
@@ -2273,6 +2273,7 @@
     },
     "browse": {
       "pageTitle": "Khám phá nghệ sĩ — Fgrapher",
+      "pageDescription": "Tìm và so sánh nhiếp ảnh gia, quay phim, chuyên viên trang điểm, studio đã xác minh danh tính khắp Việt Nam. Lọc theo tỉnh/thành, ngân sách, đánh giá.",
       "sortLabels": {
         "rating": "Đánh giá cao nhất",
         "priceAsc": "Giá: thấp đến cao",
@@ -2402,7 +2403,7 @@
       }
     },
     "roleProvinceLanding": {
-      "metaTitle": "{role} tại {province} | Fgrapher",
+      "metaTitle": "{role} tại {province} — Fgrapher",
       "metaDescription": "Tìm và đặt lịch {role} uy tín tại {province}. Xem portfolio, bảng giá, và đánh giá trên Fgrapher.",
       "heading": "{role} tại {province}",
       "intro": "Khám phá các {role} đang hoạt động tại {province}, so sánh portfolio và bảng giá, đặt lịch trực tiếp trên Fgrapher.",
@@ -2580,7 +2581,7 @@
       "faqs": {
         "multipleRoles": {
           "q": "Tôi có thể có nhiều vai trò cùng lúc không?",
-          "a": "Có — một tài khoản có thể giữ nhiều vai trò trả phí cùng lúc (ví dụ: Nhiếp ảnh gia + Studio), mỗi vai trò được tính phí như một gói thuê bao riêng, tất cả hiển thị cùng trên một trang hồ sơ."
+          "a": "Hiện tại mỗi tài khoản chỉ giữ 1 vai trò nhà cung cấp tại một thời điểm (ví dụ: Nhiếp ảnh gia hoặc Studio, không phải cả hai). Bạn có thể đổi sang vai trò khác bất cứ lúc nào trong phần Cài đặt."
         },
         "afterTrial": {
           "q": "Điều gì xảy ra sau khi hết thời gian dùng thử miễn phí?",
@@ -2602,6 +2603,81 @@
           "q": "Có ưu đãi khi thanh toán theo năm không?",
           "a": "Có — chuyển sang thanh toán theo năm trên trang này để được giảm 20% so với mức giá hàng tháng, tính phí một lần mỗi năm."
         }
+      }
+    },
+    "about": {
+      "metaTitle": "Giới thiệu — Fgrapher",
+      "metaDescription": "Fgrapher là nền tảng kết nối khách hàng với nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio đã xác minh danh tính trên toàn quốc.",
+      "title": "Giới thiệu về Fgrapher",
+      "subtitle": "Nền tảng kết nối nhiếp ảnh gia, quay phim, chuyên viên trang điểm và studio với khách hàng đang tìm kiếm họ.",
+      "body1": "Fgrapher kết nối khách hàng với những người sáng tạo hình ảnh đứng sau các buổi chụp họ yêu thích — và kết nối những người sáng tạo đó với khách hàng đang tìm kiếm dịch vụ của họ. Xây dựng portfolio, đăng dịch vụ, quản lý lịch đặt và được khách hàng tìm thấy, tất cả ở một nơi.",
+      "body2": "Fgrapher hiện đang trong giai đoạn thử nghiệm sớm. Nếu bạn gặp phải điều gì đó chưa hoạt động như mong đợi, hãy cho chúng tôi biết — xem trang Liên hệ."
+    },
+    "contact": {
+      "metaTitle": "Liên hệ — Fgrapher",
+      "metaDescription": "Có câu hỏi về đặt lịch, hồ sơ nhà cung cấp hoặc gặp lỗi trên Fgrapher? Gửi tin nhắn cho đội ngũ hỗ trợ, chúng tôi sẽ phản hồi sớm nhất có thể.",
+      "title": "Liên hệ với chúng tôi",
+      "subtitle": "Có câu hỏi hoặc phát hiện lỗi? Gửi tin nhắn cho chúng tôi."
+    },
+    "help": {
+      "metaTitle": "Trung tâm hỗ trợ — Fgrapher",
+      "metaDescription": "Giải đáp các câu hỏi thường gặp về đăng ký làm nhà cung cấp, cách đặt lịch và chi phí sử dụng Fgrapher.",
+      "title": "Trung tâm hỗ trợ",
+      "subtitle": "Giải đáp các câu hỏi thường gặp.",
+      "faqs": {
+        "becomeProvider": {
+          "q": "Làm sao để trở thành nhà cung cấp?",
+          "a": "Đăng ký và chọn vai trò phù hợp với bạn — Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm hoặc Studio. Mỗi tài khoản hiện chỉ giữ 1 vai trò nhà cung cấp tại một thời điểm; bạn có thể đổi sang vai trò khác trong phần Cài đặt."
+        },
+        "howBookingWorks": {
+          "q": "Đặt lịch hoạt động như thế nào?",
+          "a": "Khách hàng chọn một dịch vụ và một khung giờ trống trên hồ sơ nhà cung cấp rồi gửi yêu cầu đặt lịch. Nhà cung cấp có thể chấp nhận hoặc từ chối yêu cầu ngay trong bảng điều khiển của mình."
+        },
+        "isFree": {
+          "q": "Fgrapher có miễn phí không?",
+          "a": "Duyệt và đặt lịch hoàn toàn miễn phí với khách hàng. Vai trò nhà cung cấp hiện được gán gói thủ công qua đội ngũ Fgrapher — tính năng đăng ký gói tự động qua thanh toán trực tuyến chưa được mở tại giai đoạn này."
+        },
+        "howToContactSupport": {
+          "q": "Làm sao để liên hệ hỗ trợ?",
+          "a": "Dùng trang Liên hệ, đội ngũ Fgrapher sẽ phản hồi sớm nhất có thể."
+        }
+      }
+    },
+    "guidelines": {
+      "metaTitle": "Tiêu chuẩn cộng đồng — Fgrapher",
+      "metaDescription": "Tiêu chuẩn nội dung áp dụng cho mọi hồ sơ và ảnh đăng tải trên Fgrapher — quy định về độ tuổi, quyền sử dụng hình ảnh, kiểm duyệt và xử lý vi phạm.",
+      "title": "Tiêu chuẩn cộng đồng",
+      "subtitle": "Áp dụng cho mọi hồ sơ và mọi ảnh đăng tải trên Fgrapher",
+      "intro": "Fgrapher lưu trữ ảnh thật của người thật. Những tiêu chuẩn dưới đây tồn tại để giữ nền tảng an toàn và chuyên nghiệp cho tất cả mọi người — nhiếp ảnh gia, người mẫu, và khách hàng. Mọi tài khoản đều phải tuân thủ; vi phạm có thể dẫn đến gỡ nội dung, khóa tài khoản tạm thời, hoặc cấm vĩnh viễn.",
+      "prohibited": {
+        "heading": "Nội dung không được chấp nhận",
+        "items": [
+          "Ảnh khỏa thân dưới mọi hình thức.",
+          "Ảnh khiêu dâm hoặc có tính chất khiêu dâm.",
+          "Ảnh phô bày cơ thể mang tính gợi dục.",
+          "Ảnh của bất kỳ ai dưới 18 tuổi, trong mọi bối cảnh.",
+          "Ảnh bạn không có quyền sử dụng — theo Điều 32 Bộ luật Dân sự 2015, việc sử dụng hình ảnh cá nhân phải được người đó đồng ý. Bạn phải là người trong ảnh, là người chụp, hoặc có sự đồng ý rõ ràng của người trong ảnh trước khi đăng tải."
+        ]
+      },
+      "ageRequirement": {
+        "heading": "Yêu cầu về độ tuổi",
+        "body": "Mọi tài khoản Fgrapher — không riêng vai trò nào — đều phải từ 18 tuổi trở lên. Đây là điều kiện bắt buộc khi đăng ký, không phải một tùy chọn."
+      },
+      "moderation": {
+        "heading": "Ảnh được kiểm duyệt trước khi công khai",
+        "body": "Mọi ảnh portfolio đều ở trạng thái \"Đang chờ duyệt\" cho đến khi đội ngũ Fgrapher xem xét và phê duyệt. Ảnh chưa được duyệt chỉ hiển thị cho chính bạn, không xuất hiện trên hồ sơ công khai hay kết quả tìm kiếm. Bạn vẫn có thể tạo và chỉnh sửa portfolio ở chế độ nháp trong lúc chờ."
+      },
+      "violations": {
+        "heading": "Quy trình xử lý vi phạm — 3 lần khóa tài khoản",
+        "body": "Mỗi lần một ảnh bị từ chối vì vi phạm tiêu chuẩn nội dung (dù do hệ thống tự động phát hiện hay do đội ngũ kiểm duyệt), tài khoản của bạn nhận một điểm vi phạm. Đến điểm vi phạm thứ 3, tài khoản sẽ tự động bị tạm khóa. Trường hợp vi phạm nghiêm trọng (ví dụ nghi ngờ liên quan đến người dưới 18 tuổi) có thể bị khóa ngay từ lần đầu và báo cáo cho cơ quan chức năng khi pháp luật yêu cầu."
+      },
+      "appeals": {
+        "heading": "Khiếu nại khi ảnh bị từ chối",
+        "body": "Nếu bạn cho rằng ảnh của mình bị từ chối nhầm, hãy nhắn tin cho đội ngũ hỗ trợ qua trang Liên hệ, nêu rõ ảnh nào và lý do bạn cho là quyết định chưa chính xác. Mỗi khiếu nại sẽ được một quản trị viên khác xem xét lại độc lập."
+      },
+      "reporting": {
+        "heading": "Báo cáo vi phạm",
+        "body": "Mọi hồ sơ đều có tùy chọn \"Báo cáo\". Báo cáo về nội dung không phù hợp hoặc hồ sơ nghi ngờ thuộc về người dưới 18 tuổi được chuyển vào hàng đợi ưu tiên cao và xử lý sớm nhất có thể."
       }
     }
   },

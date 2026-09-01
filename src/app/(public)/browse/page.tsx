@@ -53,7 +53,11 @@ function queryWith(
 
 export async function generateMetadata() {
   const t = await getTranslations("publicPages.browse");
-  return { title: t("pageTitle") };
+  return {
+    title: t("pageTitle"),
+    description: t("pageDescription"),
+    alternates: { canonical: "/browse" },
+  };
 }
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {

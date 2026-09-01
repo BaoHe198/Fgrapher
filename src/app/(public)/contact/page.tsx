@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { SimplePage } from "@/components/sections/simple-page";
 
 import { ContactForm } from "./contact-form";
 
-export const metadata: Metadata = { title: "Liên hệ — Fgrapher" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("publicPages.contact");
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    alternates: { canonical: "/contact" },
+  };
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const t = await getTranslations("publicPages.contact");
   return (
-    <SimplePage
-      title="Liên hệ với chúng tôi"
-      subtitle="Có câu hỏi hoặc phát hiện lỗi? Gửi tin nhắn cho chúng tôi."
-    >
+    <SimplePage title={t("title")} subtitle={t("subtitle")}>
       <ContactForm />
     </SimplePage>
   );
