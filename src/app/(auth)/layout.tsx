@@ -27,7 +27,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
           <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 opacity-50">
             <div className="relative h-full w-full">
               <Image
-                src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?q=80&w=800&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1497316730643-415fac54a2af?q=80&w=800&auto=format&fit=crop"
                 alt={t("imageAlt.photographer")}
                 fill
                 sizes="(min-width: 1024px) 400px, 0px"
@@ -36,7 +36,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
             </div>
             <div className="relative h-full w-full">
               <Image
-                src="https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=800&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1497015289639-54688650d173?q=80&w=800&auto=format&fit=crop"
                 alt={t("imageAlt.videographer")}
                 fill
                 sizes="(min-width: 1024px) 400px, 0px"
@@ -45,8 +45,8 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
             </div>
             <div className="relative h-full w-full">
               <Image
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop"
-                alt={t("imageAlt.event")}
+                src="https://images.unsplash.com/photo-1622336889416-8d790ad807d7?q=80&w=800&auto=format&fit=crop"
+                alt={t("imageAlt.makeupArtist")}
                 fill
                 sizes="(min-width: 1024px) 400px, 0px"
                 className="object-cover"
@@ -54,7 +54,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
             </div>
             <div className="relative h-full w-full">
               <Image
-                src="https://images.unsplash.com/photo-1514996937319-344454492b37?q=80&w=800&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1617463874381-85b513b3e991?q=80&w=800&auto=format&fit=crop"
                 alt={t("imageAlt.studio")}
                 fill
                 sizes="(min-width: 1024px) 400px, 0px"
