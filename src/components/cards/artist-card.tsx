@@ -134,7 +134,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
                     type="button"
                     onClick={(e) => stopAndGo(e, activeIndex - 1)}
                     aria-label={t("previousPhoto")}
-                    className="absolute top-1/2 left-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                    className="absolute top-1/2 left-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100"
                   >
                     <ChevronLeft className="size-4" />
                   </button>
@@ -142,11 +142,11 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
                     type="button"
                     onClick={(e) => stopAndGo(e, activeIndex + 1)}
                     aria-label={t("nextPhoto")}
-                    className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                    className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100"
                   >
                     <ChevronRight className="size-4" />
                   </button>
-                  <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
+                  <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-black/25 px-2 py-1.5">
                     {photos.map((photo, index) => (
                       <button
                         key={photo.url}
