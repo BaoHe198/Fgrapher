@@ -138,6 +138,7 @@
     "tools": "Công cụ đặt lịch",
     "sell": "Bán thiết bị",
     "guidelines": "Tiêu chuẩn cộng đồng",
+    "guide": "Hướng dẫn sử dụng",
     "about": "Giới thiệu",
     "careers": "Tuyển dụng",
     "support": "Hỗ trợ",
@@ -2678,6 +2679,175 @@
       "reporting": {
         "heading": "6. Báo cáo vi phạm",
         "body": "Mọi hồ sơ đều có tùy chọn \"Báo cáo\". Báo cáo về nội dung không phù hợp hoặc hồ sơ nghi ngờ thuộc về người dưới 18 tuổi được chuyển vào hàng đợi ưu tiên cao và xử lý sớm nhất có thể."
+      }
+    },
+    "guide": {
+      "metaTitle": "Hướng dẫn sử dụng — Fgrapher",
+      "metaDescription": "Hướng dẫn từng bước sử dụng Fgrapher — đăng ký, tìm và đặt lịch nghệ sĩ, đăng yêu cầu, xác minh danh tính, hoàn thiện hồ sơ nhà cung cấp và quản lý tài khoản.",
+      "title": "Hướng dẫn sử dụng Fgrapher",
+      "subtitle": "Từng bước sử dụng Fgrapher, cho cả khách hàng và nhà cung cấp",
+      "intro": "Trang này tổng hợp mọi thứ bạn cần biết để dùng Fgrapher — từ đăng ký tài khoản đến đặt lịch, nhắn tin và quản lý hồ sơ. Chọn đúng phần dành cho bạn bên dưới.",
+      "tabs": {
+        "customer": "Dành cho khách hàng",
+        "provider": "Dành cho nhà cung cấp",
+        "account": "Tài khoản & quyền riêng tư"
+      },
+      "customer": {
+        "sections": [
+          {
+            "heading": "Đăng ký tài khoản",
+            "steps": [
+              "Chọn \"Khách hàng\" khi đăng ký — chỉ cần họ tên, email, ngày sinh (từ 18 tuổi trở lên) và mật khẩu.",
+              "Tài khoản khách hàng luôn miễn phí: tìm kiếm, đặt lịch và nhắn tin không tốn phí."
+            ]
+          },
+          {
+            "heading": "Tìm nghệ sĩ phù hợp",
+            "steps": [
+              "Dùng ô tìm kiếm ở trang chủ hoặc trang \"Tìm kiếm\" để lọc theo vai trò, phong cách, tỉnh/thành, phường/xã và ngân sách.",
+              "Sắp xếp kết quả theo đánh giá cao nhất, giá, hoặc mới nhất.",
+              "Xem hồ sơ chi tiết: portfolio, bảng giá, khu vực phục vụ và đánh giá thật từ khách trước."
+            ]
+          },
+          {
+            "heading": "Đặt lịch trực tiếp với một nghệ sĩ",
+            "steps": [
+              "Vào hồ sơ nghệ sĩ bạn chọn, bấm \"Đặt lịch\".",
+              "Chọn dịch vụ (hoặc mô tả yêu cầu riêng nếu nghệ sĩ chưa có gói dịch vụ cụ thể), rồi chọn ngày giờ còn trống.",
+              "Điền thông tin liên hệ, địa điểm chụp và ghi chú, sau đó xác nhận gửi yêu cầu.",
+              "Nghệ sĩ sẽ chấp nhận hoặc từ chối trong vòng 48 giờ; bạn nhận thông báo ngay khi có phản hồi."
+            ]
+          },
+          {
+            "heading": "Chưa biết chọn ai? Đăng yêu cầu để nghệ sĩ chủ động báo giá",
+            "steps": [
+              "Vào \"Tạo yêu cầu\", mô tả nhu cầu: vai trò cần tìm, ngày chụp (hoặc khoảng thời gian linh hoạt), khu vực, ngân sách và ảnh tham khảo nếu có.",
+              "Cần xác minh số điện thoại trước khi đăng yêu cầu công khai, để hạn chế yêu cầu ảo.",
+              "Các nghệ sĩ phù hợp sẽ chủ động gửi báo giá; bạn xem và chọn người ưng ý nhất để xác nhận thành một lịch đặt thật."
+            ]
+          },
+          {
+            "heading": "Nhắn tin với nghệ sĩ",
+            "steps": [
+              "Trò chuyện trực tiếp qua mục \"Tin nhắn\", có thể gửi kèm hình ảnh.",
+              "Mỗi lịch đặt tự động có một cuộc trò chuyện riêng để trao đổi chi tiết."
+            ]
+          },
+          {
+            "heading": "Đánh giá sau buổi chụp",
+            "steps": [
+              "Sau khi nghệ sĩ đánh dấu lịch đặt là \"Hoàn thành\", bạn có 30 ngày để để lại đánh giá sao kèm nhận xét.",
+              "Đánh giá của bạn giúp những khách hàng khác chọn đúng người."
+            ]
+          },
+          {
+            "heading": "Lưu hồ sơ yêu thích",
+            "steps": [
+              "Bấm biểu tượng lưu trên bất kỳ hồ sơ nào để xem lại sau tại trang \"Đã lưu\"."
+            ]
+          }
+        ]
+      },
+      "provider": {
+        "sections": [
+          {
+            "heading": "Đăng ký & chọn vai trò",
+            "steps": [
+              "Chọn \"Nhà cung cấp\" khi đăng ký, sau đó chọn đúng 1 vai trò: Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm, Studio hoặc Người mẫu.",
+              "Hiện tại mỗi tài khoản chỉ giữ 1 vai trò nhà cung cấp tại một thời điểm.",
+              "Mọi vai trò đang miễn phí sử dụng trong giai đoạn khởi động — chúng tôi sẽ thông báo trước ít nhất 30 ngày nếu bắt đầu thu phí."
+            ]
+          },
+          {
+            "heading": "Xác minh danh tính",
+            "steps": [
+              "Vào \"Xác minh danh tính\" (trong Cài đặt → Vai trò, hoặc lối tắt ngay sau khi đăng ký).",
+              "Điền họ tên thật, số CMND/CCCD, và tải lên ảnh CMND/CCCD 2 mặt cùng 1 ảnh chân dung.",
+              "Hồ sơ của bạn CHƯA hiển thị công khai cho đến khi bước này được duyệt — thường trong vài ngày làm việc."
+            ]
+          },
+          {
+            "heading": "Hoàn thiện hồ sơ",
+            "steps": [
+              "Vào Cài đặt → Hồ sơ: viết phần giới thiệu, chọn ít nhất 1 thể loại sở trường, đặt khoảng giá, chọn tỉnh/thành và phường/xã phục vụ (có thể bật \"nhận job toàn quốc\").",
+              "Thêm liên kết mạng xã hội nếu muốn: website, Instagram, Facebook, TikTok.",
+              "Studio có thêm mục địa chỉ, diện tích, tiện ích; Người mẫu có thêm chiều cao, số đo, kinh nghiệm và tuỳ chọn ẩn vị trí chính xác."
+            ]
+          },
+          {
+            "heading": "Đăng portfolio",
+            "steps": [
+              "Tạo album (đặt tên, chọn thể loại), rồi tải ảnh hoặc video lên.",
+              "Mỗi ảnh/video cần được đội ngũ Fgrapher duyệt nội dung trước khi hiển thị công khai — bạn vẫn thấy và chỉnh sửa được portfolio ở chế độ nháp trong lúc chờ."
+            ]
+          },
+          {
+            "heading": "Thêm dịch vụ & thiết lập lịch làm việc",
+            "steps": [
+              "Tạo các gói dịch vụ với tên, thời lượng và giá cụ thể để khách dễ đặt lịch.",
+              "Thiết lập lịch làm việc theo tuần (bật/tắt từng ngày, giờ bắt đầu - kết thúc) và chặn thêm những ngày bận đột xuất."
+            ]
+          },
+          {
+            "heading": "Hồ sơ tự động công khai khi đủ điều kiện",
+            "steps": [
+              "Không cần bấm nút \"đăng\" nào cả — khi bạn đã xác minh danh tính xong, có ít nhất 1 ảnh được duyệt, và chọn ít nhất 1 thể loại, hồ sơ sẽ tự động hiển thị công khai và xuất hiện trong tìm kiếm."
+            ]
+          },
+          {
+            "heading": "Nhận & xử lý yêu cầu đặt lịch",
+            "steps": [
+              "Yêu cầu đặt lịch mới xuất hiện ở \"Lịch đặt\" trong bảng điều khiển — chấp nhận hoặc từ chối.",
+              "Số điện thoại và địa chỉ chi tiết của khách chỉ hiển thị sau khi bạn chấp nhận yêu cầu.",
+              "Sau ngày hẹn, đánh dấu lịch là \"Hoàn thành\" để khách có thể để lại đánh giá."
+            ]
+          },
+          {
+            "heading": "Tìm cơ hội từ yêu cầu khách đăng",
+            "steps": [
+              "Xem \"Danh sách yêu cầu\" công khai, hoặc mục cơ hội phù hợp trong bảng điều khiển (gợi ý riêng theo vai trò/khu vực của bạn).",
+              "Gửi báo giá kèm giá đề xuất, ngày (nếu yêu cầu cho phép chọn ngày linh hoạt) và lời nhắn. Có thể chỉnh sửa hoặc rút báo giá khi khách chưa chọn ai."
+            ]
+          },
+          {
+            "heading": "Quản lý đánh giá",
+            "steps": [
+              "Xem toàn bộ đánh giá và số liệu tổng quan tại \"Đánh giá\".",
+              "Bạn có thể viết 1 phản hồi cho mỗi đánh giá nhận được."
+            ]
+          },
+          {
+            "heading": "Đổi vai trò",
+            "steps": [
+              "Vai trò chưa xác minh: có thể tự xoá và chọn vai trò khác ngay trong Cài đặt → Vai trò.",
+              "Vai trò đã xác minh: gửi \"Yêu cầu đổi vai trò\" để admin xem xét, vì đây là bước liên quan đến danh tính đã xác minh nên cần kiểm soát chặt hơn."
+            ]
+          }
+        ]
+      },
+      "account": {
+        "sections": [
+          {
+            "heading": "Thông báo",
+            "steps": [
+              "Xem thông báo mới tại biểu tượng chuông trên thanh điều hướng, hoặc đầy đủ tại trang \"Thông báo\".",
+              "Tuỳ chỉnh nhận qua email hay chỉ trong ứng dụng cho từng loại tại Cài đặt → Thông báo."
+            ]
+          },
+          {
+            "heading": "Cài đặt tài khoản",
+            "steps": [
+              "Đổi email, số điện thoại (có xác minh qua mã OTP), mật khẩu, ngôn ngữ hiển thị và giao diện sáng/tối tại Cài đặt → Tài khoản."
+            ]
+          },
+          {
+            "heading": "Dữ liệu cá nhân & quyền riêng tư",
+            "steps": [
+              "Xem lại toàn bộ dữ liệu Fgrapher đang lưu về bạn tại Cài đặt → Dữ liệu & quyền riêng tư.",
+              "Tải về bản sao dữ liệu của bạn, hoặc gửi yêu cầu xoá tài khoản — yêu cầu xoá được xử lý theo đúng quy trình bảo vệ dữ liệu cá nhân."
+            ]
+          }
+        ]
       }
     }
   },

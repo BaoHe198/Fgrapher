@@ -138,6 +138,7 @@
     "tools": "Booking tools",
     "sell": "Sell gear",
     "guidelines": "Guidelines",
+    "guide": "User guide",
     "about": "About",
     "careers": "Careers",
     "support": "Support",
@@ -2678,6 +2679,175 @@
       "reporting": {
         "heading": "6. Reporting a violation",
         "body": "Every profile has a \"Report\" option. Reports about inappropriate content or a profile suspected of belonging to someone under 18 go into a high-priority queue and are handled as soon as possible."
+      }
+    },
+    "guide": {
+      "metaTitle": "User guide — Fgrapher",
+      "metaDescription": "A step-by-step guide to using Fgrapher — signing up, finding and booking an artist, posting a request, identity verification, setting up a provider profile, and managing your account.",
+      "title": "Fgrapher user guide",
+      "subtitle": "Step by step, for both clients and providers",
+      "intro": "This page covers everything you need to use Fgrapher — from creating an account to booking, messaging, and managing your profile. Pick the section that applies to you below.",
+      "tabs": {
+        "customer": "For clients",
+        "provider": "For providers",
+        "account": "Account & privacy"
+      },
+      "customer": {
+        "sections": [
+          {
+            "heading": "Create an account",
+            "steps": [
+              "Choose \"Khách hàng\" (Client) when registering — you just need your name, email, date of birth (18+), and a password.",
+              "Client accounts are always free: searching, booking, and messaging cost nothing."
+            ]
+          },
+          {
+            "heading": "Find the right artist",
+            "steps": [
+              "Use the search bar on the homepage or the \"Tìm kiếm\" (Search) page to filter by role, style, province, ward, and budget.",
+              "Sort results by top rated, price, or newest.",
+              "Check a provider's full profile: portfolio, price ranges, service area, and real reviews from past clients."
+            ]
+          },
+          {
+            "heading": "Book directly with an artist",
+            "steps": [
+              "Open the provider's profile and click \"Đặt lịch\" (Book).",
+              "Pick a service package (or describe your own request if they don't have one that fits), then choose an open date and time.",
+              "Fill in your contact details, shoot location, and notes, then confirm the request.",
+              "The provider accepts or declines within 48 hours — you're notified as soon as they respond."
+            ]
+          },
+          {
+            "heading": "Not sure who to pick? Post a request and let providers pitch you",
+            "steps": [
+              "Go to \"Tạo yêu cầu\" (Create request): describe what you need — role, shoot date (or a flexible range), area, budget, and reference photos if you have any.",
+              "You'll need a verified phone number before publishing a request, to cut down on fake ones.",
+              "Matching providers send you offers; review them and accept the one you like to turn it into a real booking."
+            ]
+          },
+          {
+            "heading": "Message an artist",
+            "steps": [
+              "Chat directly through \"Tin nhắn\" (Messages), including image attachments.",
+              "Every booking automatically gets its own conversation thread for details."
+            ]
+          },
+          {
+            "heading": "Leave a review after your session",
+            "steps": [
+              "Once the provider marks the booking \"Hoàn thành\" (Completed), you have 30 days to leave a star rating and a written review.",
+              "Your review helps other clients pick the right person."
+            ]
+          },
+          {
+            "heading": "Save a favorite profile",
+            "steps": [
+              "Tap the save icon on any profile to find it again later on the \"Đã lưu\" (Saved) page."
+            ]
+          }
+        ]
+      },
+      "provider": {
+        "sections": [
+          {
+            "heading": "Register and choose your role",
+            "steps": [
+              "Choose \"Nhà cung cấp\" (Provider) when registering, then pick exactly one role: Photographer, Videographer, Make-up Artist, Studio, or Model.",
+              "Right now each account holds one provider role at a time.",
+              "Every role is free during this early access period — we'll give at least 30 days' notice before any charge starts."
+            ]
+          },
+          {
+            "heading": "Verify your identity",
+            "steps": [
+              "Go to \"Xác minh danh tính\" (Identity verification), reachable from Settings → Roles or a shortcut right after registering.",
+              "Enter your real legal name and ID number, and upload both sides of your ID plus one selfie photo.",
+              "Your profile stays private until this step is approved — usually within a few business days."
+            ]
+          },
+          {
+            "heading": "Complete your profile",
+            "steps": [
+              "In Settings → Profile: write your bio, pick at least one specialty category, set a price range, and choose the province/ward you serve (or turn on \"serves nationwide\").",
+              "Add social links if you'd like: website, Instagram, Facebook, TikTok.",
+              "Studio profiles add address, floor area, and amenities; Model profiles add height, measurements, experience level, and an option to hide your exact location."
+            ]
+          },
+          {
+            "heading": "Upload your portfolio",
+            "steps": [
+              "Create an album (name it, pick a category), then upload photos or video.",
+              "Every photo/video needs to pass content moderation before it's shown publicly — you can still build and edit your portfolio as a draft while you wait."
+            ]
+          },
+          {
+            "heading": "Add services and set your schedule",
+            "steps": [
+              "Create service packages with a name, duration, and price so clients can book you easily.",
+              "Set a weekly working schedule (toggle each day, start/end time) and block off any one-off dates you're unavailable."
+            ]
+          },
+          {
+            "heading": "Your profile goes public automatically once ready",
+            "steps": [
+              "There's no \"publish\" button to click — once you're verified, have at least one approved photo, and have picked at least one category, your profile goes live and starts showing up in search on its own."
+            ]
+          },
+          {
+            "heading": "Handle booking requests",
+            "steps": [
+              "New booking requests show up under \"Lịch đặt\" (Bookings) in your dashboard — accept or decline.",
+              "The client's phone number and exact address only appear once you accept.",
+              "After the shoot date, mark the booking \"Hoàn thành\" (Completed) so the client can leave a review."
+            ]
+          },
+          {
+            "heading": "Find opportunities from client requests",
+            "steps": [
+              "Browse the public request list, or the personalized opportunities feed in your dashboard (matched to your role/area).",
+              "Send an offer with your proposed price, a date if the request allows a flexible one, and a message. You can edit or withdraw it while the client hasn't picked anyone yet."
+            ]
+          },
+          {
+            "heading": "Manage your reviews",
+            "steps": [
+              "See every review and your overall stats under \"Đánh giá\" (Reviews).",
+              "You can post one response per review you receive."
+            ]
+          },
+          {
+            "heading": "Switch roles",
+            "steps": [
+              "An unverified role can be removed and swapped for another right in Settings → Roles.",
+              "A verified role requires a \"Yêu cầu đổi vai trò\" (Role change request) for an admin to review — a stricter process since it involves an already-verified identity."
+            ]
+          }
+        ]
+      },
+      "account": {
+        "sections": [
+          {
+            "heading": "Notifications",
+            "steps": [
+              "Check new notifications via the bell icon in the nav, or the full \"Thông báo\" (Notifications) page.",
+              "Choose email vs. in-app delivery per category under Settings → Notifications."
+            ]
+          },
+          {
+            "heading": "Account settings",
+            "steps": [
+              "Change your email, phone number (verified via an OTP code), password, display language, and light/dark theme under Settings → Account."
+            ]
+          },
+          {
+            "heading": "Personal data & privacy",
+            "steps": [
+              "Review what data Fgrapher stores about you under Settings → Data & Privacy.",
+              "Download a copy of your data, or submit an account deletion request — handled through the proper personal-data protection process."
+            ]
+          }
+        ]
       }
     }
   },
