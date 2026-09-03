@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { SimplePage } from "@/components/sections/simple-page";
+import { jsonLdScriptProps } from "@/lib/utils";
 
 const FAQ_KEYS = [
   "becomeProvider",
@@ -42,10 +43,7 @@ export default async function HelpPage() {
 
   return (
     <SimplePage title={t("title")} subtitle={t("subtitle")}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script {...jsonLdScriptProps(jsonLd)} />
       <div className="flex flex-col gap-6">
         {faqs.map((item) => (
           <div key={item.q} className="flex flex-col gap-1.5">

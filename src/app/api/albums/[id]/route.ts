@@ -17,9 +17,9 @@ export async function GET(
 ) {
   const t = await getTranslations("apiMessages.albums");
   try {
-    await requireAuth();
+    const session = await requireAuth();
     const { id } = await params;
-    const album = await getAlbumWithMedia(id);
+    const album = await getAlbumWithMedia(id, session.user.id);
     if (!album) {
       return NextResponse.json(
         { data: null, error: "not_found", message: t("notFound") },
@@ -35,6 +35,12 @@ export async function GET(
       return NextResponse.json(
         { data: null, error: "unauthorized", message: err.message },
         { status: err.status },
+      );
+    }
+    if (err instanceof AlbumNotOwnedError) {
+      return NextResponse.json(
+        { data: null, error: "forbidden", message: t("albumNotOwned") },
+        { status: 403 },
       );
     }
     return NextResponse.json(

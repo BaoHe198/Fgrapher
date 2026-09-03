@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { StarRating } from "@/components/ui/star-rating";
 import { features } from "@/lib/features";
+import { jsonLdScriptProps } from "@/lib/utils";
 import { getProductDetail } from "@/services/marketplace";
 
 import { ProductGallery } from "./product-gallery";
@@ -70,10 +71,7 @@ export default async function ProductDetailPage({
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-8">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script {...jsonLdScriptProps(jsonLd)} />
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.1fr_400px] lg:gap-12">
         <div className="flex flex-col gap-8">

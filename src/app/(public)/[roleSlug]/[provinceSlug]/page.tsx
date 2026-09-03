@@ -7,7 +7,7 @@ import { ArtistCard } from "@/components/cards/artist-card";
 import { db } from "@/lib/db";
 import { SLUG_TO_ROLE } from "@/lib/constants";
 import { features } from "@/lib/features";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, jsonLdScriptProps } from "@/lib/utils";
 import { searchProfiles } from "@/services/search";
 
 interface PageProps {
@@ -113,10 +113,7 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 pt-8 pb-[72px] sm:px-8">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script {...jsonLdScriptProps(jsonLd)} />
 
       <h1 className="text-display-md text-text-primary">
         {t("heading", values)}

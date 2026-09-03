@@ -73,6 +73,23 @@ const twMerge = extendTailwindMerge({
   },
 });
 
+// JSON.stringify never escapes "<", so structured data built from any
+// user-submitted text (display name, bio, product name/description, ...)
+// and injected via dangerouslySetInnerHTML can be broken out of its
+// <script type="application/ld+json"> tag with a literal "</script>",
+// letting an attacker-controlled <script> run on the page — the classic
+// JSON-LD XSS pattern. < is semantically identical JSON but can't
+// close an HTML tag. Use this for every dangerouslySetInnerHTML JSON-LD
+// block instead of calling JSON.stringify directly.
+export function jsonLdScriptProps(data: unknown) {
+  return {
+    type: "application/ld+json",
+    dangerouslySetInnerHTML: {
+      __html: JSON.stringify(data).replace(/</g, "\\u003c"),
+    },
+  } as const;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

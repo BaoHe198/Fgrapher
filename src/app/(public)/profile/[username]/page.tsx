@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
 import type { ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
+import { jsonLdScriptProps } from "@/lib/utils";
 import {
   getProfileReviews,
   getProfileReviewStats,
@@ -232,10 +233,7 @@ export default async function PublicProfilePage({
 
   return (
     <div className="flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script {...jsonLdScriptProps(jsonLd)} />
       <div className="relative h-[200px] w-full sm:h-[240px]">
         {user.coverImage ? (
           <Image

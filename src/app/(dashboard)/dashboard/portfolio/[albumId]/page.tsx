@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getAlbumWithMedia } from "@/services/albums";
+import { AlbumNotOwnedError, getAlbumWithMedia } from "@/services/albums";
 
 import { AlbumDetail } from "./album-detail";
 
@@ -19,7 +19,12 @@ export default async function AlbumDetailPage({
   }
 
   const { albumId } = await params;
-  const album = await getAlbumWithMedia(albumId);
+  const album = await getAlbumWithMedia(albumId, session.user.id).catch(
+    (err) => {
+      if (err instanceof AlbumNotOwnedError) return null;
+      throw err;
+    },
+  );
   if (!album) notFound();
 
   const profile = await db.profile.findUnique({

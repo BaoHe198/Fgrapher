@@ -86,13 +86,24 @@ export async function createAlbum(
   });
 }
 
-export async function getAlbumWithMedia(albumId: string) {
-  return db.album.findUnique({
+export async function getAlbumWithMedia(albumId: string, userId: string) {
+  const album = await db.album.findUnique({
     where: { id: albumId, deletedAt: null },
     include: {
       media: { where: { deletedAt: null }, orderBy: { order: "asc" } },
+      profile: { select: { userId: true } },
     },
   });
+  if (!album) return null;
+  // Unlike listAlbums (used on public profile pages, already scoped to
+  // published/moderated media), this powers the dashboard's own
+  // owner-only editing view — it must never let one authenticated user
+  // pull another's album (including unpublished ones or media still
+  // pending moderation) just by knowing/guessing its id.
+  if (album.profile.userId !== userId) {
+    throw new AlbumNotOwnedError("You don't own this album");
+  }
+  return album;
 }
 
 export async function updateAlbum(
