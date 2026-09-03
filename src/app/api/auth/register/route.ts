@@ -5,16 +5,36 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { features } from "@/lib/features";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRegisterSchema } from "@/lib/validations/auth";
 import { recordConsent } from "@/services/compliance";
 import { assignFreePlan } from "@/services/subscription";
 import { Prisma } from "@prisma/client";
+
+// Registration hits the DB unconditionally (email-uniqueness check, user
+// insert) with no auth gate at all — a scripted loop had zero resistance
+// before this. 5 per 15 minutes per IP is generous for a real person
+// signing up, tight for an automated loop.
+const REGISTER_RATE_LIMIT = { max: 5, windowMs: 15 * 60 * 1000 };
 
 export async function POST(request: Request) {
   const [t, tValidation] = await Promise.all([
     getTranslations("apiMessages.auth"),
     getTranslations("libServices.validation.auth"),
   ]);
+
+  const ip = getClientIp(request);
+  const rateLimit = checkRateLimit(`register:${ip}`, REGISTER_RATE_LIMIT);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { data: null, error: "too_many_requests", message: t("tooManyRequests") },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   const body = await request.json();
   const parsed = getRegisterSchema(tValidation).safeParse(body);
 

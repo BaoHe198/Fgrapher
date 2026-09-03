@@ -118,6 +118,7 @@ export function ProductImageUploader({
         formData.append("signature", sigBody.data.signature);
         formData.append("folder", sigBody.data.folder);
         formData.append("transformation", sigBody.data.transformation);
+        formData.append("allowed_formats", sigBody.data.allowedFormats);
 
         try {
           const res = await fetch(

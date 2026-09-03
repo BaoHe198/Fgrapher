@@ -14,6 +14,30 @@ export function isCloudinaryConfigured() {
   );
 }
 
+// Formats accepted through the shared (non-KYC) upload path — images for
+// avatars/chat/products, plus the video formats the portfolio's own
+// MediaType.VIDEO already assumes elsewhere in the app. Signing this as an
+// upload param (not just checking it client-side) is what makes it an
+// actual server-side control: previously the signature only covered
+// {timestamp, folder, transformation}, so a client bypassing the
+// browser's own `accept` check and calling Cloudinary directly with a
+// valid signature could upload literally any file type Cloudinary
+// accepts.
+//
+// No `max_file_size` alongside it — that isn't a real Cloudinary Upload
+// API parameter (confirmed against the SDK's own type definitions; it
+// doesn't appear anywhere in `node_modules/cloudinary`), only a doc-typo
+// I nearly shipped. Signing a nonexistent param makes Cloudinary
+// recompute a different hash than the one sent, so every upload would
+// have failed with "Invalid Signature". File size is enforced by the
+// Cloudinary account's own plan-level cap plus the client-side checks
+// already in place (e.g. account-media.tsx's MAX_BYTES) — bypassable by
+// a determined attacker calling Cloudinary directly, same residual gap
+// as before this pass. A real server-side cap would need a post-upload
+// check via Cloudinary's Admin API (`cloudinary.api.resource`, reading
+// `bytes`) and deleting anything over the limit — not implemented here.
+const ALLOWED_UPLOAD_FORMATS = "jpg,jpeg,png,webp,gif,mp4,mov,webm";
+
 // Portfolio/product/chat images — public delivery type (the default).
 // Never use this for KYC documents; see generateKycUploadSignature below,
 // which is deliberately a separate function so the two can't be swapped
@@ -29,7 +53,12 @@ export function generateUploadSignature(folder: string) {
   // through this shared signature, since there's no case where keeping it
   // would be desirable.
   const transformation = "fl_strip_profile";
-  const paramsToSign = { timestamp, folder, transformation };
+  const paramsToSign = {
+    timestamp,
+    folder,
+    transformation,
+    allowed_formats: ALLOWED_UPLOAD_FORMATS,
+  };
 
   const signature = cloudinary.utils.api_sign_request(
     paramsToSign,
@@ -43,6 +72,7 @@ export function generateUploadSignature(folder: string) {
     cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     folder,
     transformation,
+    allowedFormats: ALLOWED_UPLOAD_FORMATS,
   };
 }
 
@@ -70,6 +100,12 @@ export async function deleteCloudinaryAsset(
 
 const KYC_FOLDER_PREFIX = "fgrapher-kyc";
 const KYC_SIGNED_URL_TTL_SECONDS = 5 * 60;
+// ID photos/selfies only, never video. No `max_file_size` here either —
+// see the comment above ALLOWED_UPLOAD_FORMATS for why that's not a real
+// Cloudinary param. Size stays enforced by verification-form.tsx's own
+// client-side compression target (MAX_KYC_BYTES) plus Cloudinary's
+// account-level cap, same residual gap noted above.
+const KYC_ALLOWED_FORMATS = "jpg,jpeg,png,webp";
 
 export function generateKycUploadSignature(userId: string) {
   const timestamp = Math.round(Date.now() / 1000);
@@ -80,7 +116,12 @@ export function generateKycUploadSignature(userId: string) {
   // signature, or the upload is rejected. This is what actually forces
   // the asset to land as delivery type "authenticated" rather than the
   // client being able to request public delivery.
-  const paramsToSign = { timestamp, folder, type };
+  const paramsToSign = {
+    timestamp,
+    folder,
+    type,
+    allowed_formats: KYC_ALLOWED_FORMATS,
+  };
 
   const signature = cloudinary.utils.api_sign_request(
     paramsToSign,
@@ -94,6 +135,7 @@ export function generateKycUploadSignature(userId: string) {
     cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     folder,
     type,
+    allowedFormats: KYC_ALLOWED_FORMATS,
   };
 }
 

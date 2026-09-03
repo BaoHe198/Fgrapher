@@ -30,7 +30,13 @@ const serverSchema = z.object({
 
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   DIRECT_URL: z.string().min(1, "DIRECT_URL is required"),
-  NEXTAUTH_SECRET: z.string().min(1, "NEXTAUTH_SECRET is required"),
+  // 32 chars is the minimum NextAuth/Auth.js itself recommends (`openssl
+  // rand -base64 32`) — a non-empty-but-weak value like "secret" would
+  // otherwise pass, and a low-entropy JWT signing secret is directly
+  // brute-forceable.
+  NEXTAUTH_SECRET: z
+    .string()
+    .min(32, "NEXTAUTH_SECRET must be at least 32 characters"),
   // Deliberately optional, unlike the other three: on Vercel Preview this
   // is meant to be left unset (see docs/ENVIRONMENTS.md) so NextAuth
   // infers the URL per-deployment from VERCEL_URL, since every Preview

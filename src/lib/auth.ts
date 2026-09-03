@@ -6,7 +6,16 @@ import Google from "next-auth/providers/google";
 import { cache } from "react";
 
 import { db } from "@/lib/db";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations/auth";
+
+// Two layers: per-IP catches a scripted credential-stuffing loop trying
+// many different accounts from one source; per-email catches someone
+// brute-forcing (or credential-stuffing) one specific account while
+// rotating IPs. Neither existed before — authorize() ran a straight
+// bcrypt.compare with no attempt limit at all.
+const LOGIN_IP_RATE_LIMIT = { max: 20, windowMs: 10 * 60 * 1000 };
+const LOGIN_EMAIL_RATE_LIMIT = { max: 8, windowMs: 10 * 60 * 1000 };
 
 const {
   handlers,
@@ -29,9 +38,22 @@ const {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
+      authorize: async (credentials, request) => {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
+
+        const ip = getClientIp(request);
+        if (!checkRateLimit(`login-ip:${ip}`, LOGIN_IP_RATE_LIMIT).allowed) {
+          return null;
+        }
+        if (
+          !checkRateLimit(
+            `login-email:${parsed.data.email}`,
+            LOGIN_EMAIL_RATE_LIMIT,
+          ).allowed
+        ) {
+          return null;
+        }
 
         const user = await db.user.findUnique({
           where: { email: parsed.data.email },
@@ -57,6 +79,27 @@ const {
     }),
   ],
   callbacks: {
+    // Explicit same-origin check for the `callbackUrl` NextAuth's signIn()
+    // redirects to after login — `login-form.tsx`/`social-row.tsx` read it
+    // straight from the URL query string, so without this an attacker
+    // could send someone `/login?callbackUrl=https://evil.com` and land
+    // them there, still logged in, right after authenticating. Auth.js's
+    // own built-in default already restricts this to same-origin, so this
+    // isn't fixing an active bypass today — it's making that guarantee
+    // explicit and impossible to accidentally lose (e.g. the moment
+    // someone adds role-based post-login routing here and this callback
+    // stops being a no-op-passthrough of the safe default).
+    redirect({ url, baseUrl }) {
+      if (url.startsWith("/") && !url.startsWith("//")) {
+        return `${baseUrl}${url}`;
+      }
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch {
+        // Not a parseable absolute URL — fall through to baseUrl below.
+      }
+      return baseUrl;
+    },
     async signIn({ user, account }) {
       // OAuth providers already verify email ownership; only gate credentials login.
       if (account?.provider !== "credentials") return true;

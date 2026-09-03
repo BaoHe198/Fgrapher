@@ -270,6 +270,7 @@ export function RequestWizard({
     formData.append("signature", sigBody.data.signature);
     formData.append("folder", sigBody.data.folder);
     formData.append("transformation", sigBody.data.transformation);
+    formData.append("allowed_formats", sigBody.data.allowedFormats);
 
     const uploadRes = await fetch(
       `https://api.cloudinary.com/v1_1/${sigBody.data.cloudName}/auto/upload`,

@@ -21,6 +21,7 @@ interface KycSignature {
   signature: string;
   folder: string;
   type: string;
+  allowedFormats: string;
 }
 
 function uploadKycFile(file: File, signature: KycSignature) {
@@ -33,6 +34,7 @@ function uploadKycFile(file: File, signature: KycSignature) {
       formData.append("signature", signature.signature);
       formData.append("folder", signature.folder);
       formData.append("type", signature.type);
+      formData.append("allowed_formats", signature.allowedFormats);
 
       const xhr = new XMLHttpRequest();
       xhr.open(

@@ -102,8 +102,15 @@ async function uploadImage(file: File): Promise<string | null> {
   const sigBody = await sigRes.json();
   if (!sigRes.ok) return null;
 
-  const { cloudName, apiKey, timestamp, signature, folder, transformation } =
-    sigBody.data;
+  const {
+    cloudName,
+    apiKey,
+    timestamp,
+    signature,
+    folder,
+    transformation,
+    allowedFormats,
+  } = sigBody.data;
   const formData = new FormData();
   formData.append("file", file);
   formData.append("api_key", apiKey);
@@ -111,6 +118,7 @@ async function uploadImage(file: File): Promise<string | null> {
   formData.append("signature", signature);
   formData.append("folder", folder);
   formData.append("transformation", transformation);
+  formData.append("allowed_formats", allowedFormats);
 
   const uploadRes = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,

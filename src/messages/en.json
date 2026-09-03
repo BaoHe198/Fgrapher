@@ -837,6 +837,7 @@
     },
     "phone": {
       "notConfigured": "Phone verification isn't configured on this system",
+      "tooManyRequests": "You've requested too many codes. Please wait a few minutes and try again.",
       "invalidInput": "Invalid input",
       "invalidPhone": "Invalid phone number",
       "codeSent": "Verification code sent via SMS",
@@ -946,7 +947,8 @@
       "accountCreateFailed": "Failed to create account",
       "resetLinkInvalid": "This reset link is invalid or has expired",
       "passwordUpdated": "Password updated",
-      "cameraShopUnavailable": "Camera Shop is not available yet"
+      "cameraShopUnavailable": "Camera Shop is not available yet",
+      "tooManyRequests": "Too many attempts. Please wait a few minutes and try again."
     },
     "availability": {
       "loadFailed": "Failed to load availability",

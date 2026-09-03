@@ -76,6 +76,7 @@ function uploadToCloudinary(
     signature: string;
     folder: string;
     transformation: string;
+    allowedFormats: string;
   },
   onProgress: (percent: number) => void,
 ) {
@@ -93,6 +94,7 @@ function uploadToCloudinary(
     formData.append("signature", signature.signature);
     formData.append("folder", signature.folder);
     formData.append("transformation", signature.transformation);
+    formData.append("allowed_formats", signature.allowedFormats);
 
     const xhr = new XMLHttpRequest();
     xhr.open(

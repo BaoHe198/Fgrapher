@@ -6,15 +6,38 @@ import { z } from "zod";
 
 import { db } from "@/lib/db";
 import { resetPasswordEmailHtml, sendEmail } from "@/lib/email";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Enter a valid email address"),
 });
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+// Keyed by IP, not email — the endpoint always reports success regardless
+// of whether the account exists (see below), so this can't be used to
+// enumerate registered emails; it's purely a cap on how many reset emails
+// one source can trigger (email-bombing) and how many token rows it can
+// insert per hour, unrelated to which specific address is targeted.
+const FORGOT_PASSWORD_RATE_LIMIT = { max: 5, windowMs: 60 * 60 * 1000 };
 
 export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.auth");
+
+  const ip = getClientIp(request);
+  const rateLimit = checkRateLimit(
+    `forgot-password:${ip}`,
+    FORGOT_PASSWORD_RATE_LIMIT,
+  );
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { data: null, error: "too_many_requests", message: t("tooManyRequests") },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   const body = await request.json();
   const parsed = forgotPasswordSchema.safeParse(body);
 

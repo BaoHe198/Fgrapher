@@ -837,6 +837,7 @@
     },
     "phone": {
       "notConfigured": "Xác minh số điện thoại chưa được cấu hình trên hệ thống",
+      "tooManyRequests": "Bạn đã gửi mã quá nhiều lần. Vui lòng đợi ít phút rồi thử lại.",
       "invalidInput": "Dữ liệu không hợp lệ",
       "invalidPhone": "Số điện thoại không hợp lệ",
       "codeSent": "Đã gửi mã xác minh qua SMS",
@@ -946,7 +947,8 @@
       "accountCreateFailed": "Không thể tạo tài khoản",
       "resetLinkInvalid": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
       "passwordUpdated": "Đã cập nhật mật khẩu",
-      "cameraShopUnavailable": "Vai trò Cửa hàng máy ảnh chưa khả dụng"
+      "cameraShopUnavailable": "Vai trò Cửa hàng máy ảnh chưa khả dụng",
+      "tooManyRequests": "Bạn đã thử quá nhiều lần. Vui lòng đợi ít phút rồi thử lại."
     },
     "availability": {
       "loadFailed": "Không thể tải lịch làm việc",
