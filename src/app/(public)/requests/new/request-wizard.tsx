@@ -18,9 +18,15 @@ import { Tag } from "@/components/ui/tag";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { CATEGORIES_BY_ROLE, PROVIDER_ROLES } from "@/lib/constants";
+import { compressImageFile } from "@/lib/image-compression";
 import { formatCurrency } from "@/lib/utils";
 
 const MAX_CATEGORIES = 5;
+
+// Reference photos are just visual context for a provider reviewing a
+// request — not something anyone views at full resolution.
+const REFERENCE_UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
+const REFERENCE_UPLOAD_MAX_DIMENSION = 1600;
 const STEP_KEYS = [
   "who",
   "when",
@@ -263,8 +269,13 @@ export function RequestWizard({
       return;
     }
 
+    const compressed = await compressImageFile(file, {
+      maxBytes: REFERENCE_UPLOAD_MAX_BYTES,
+      maxDimension: REFERENCE_UPLOAD_MAX_DIMENSION,
+    });
+
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", compressed);
     formData.append("api_key", sigBody.data.apiKey);
     formData.append("timestamp", String(sigBody.data.timestamp));
     formData.append("signature", sigBody.data.signature);

@@ -29,7 +29,13 @@ import {
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ReportModal } from "@/components/modals/report-modal";
 import { formatDate, formatDayMonthLong, formatTime } from "@/lib/format";
+import { compressImageFile } from "@/lib/image-compression";
 import { cn } from "@/lib/utils";
+
+// Chat attachments are viewed inline in a narrow message bubble (and full-
+// size in the lightbox) — not a case that needs an uncompressed original.
+const CHAT_UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
+const CHAT_UPLOAD_MAX_DIMENSION = 1600;
 
 interface ChatMessage {
   id: string;
@@ -111,8 +117,13 @@ async function uploadImage(file: File): Promise<string | null> {
     transformation,
     allowedFormats,
   } = sigBody.data;
+  const compressed = await compressImageFile(file, {
+    maxBytes: CHAT_UPLOAD_MAX_BYTES,
+    maxDimension: CHAT_UPLOAD_MAX_DIMENSION,
+  });
+
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", compressed);
   formData.append("api_key", apiKey);
   formData.append("timestamp", timestamp);
   formData.append("signature", signature);

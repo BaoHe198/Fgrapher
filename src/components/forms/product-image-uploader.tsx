@@ -21,7 +21,13 @@ import Image from "next/image";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
+import { compressImageFile } from "@/lib/image-compression";
 import { cn } from "@/lib/utils";
+
+// Product photos are shown in shop listing grids and a product detail
+// gallery — not full-photo resolution territory.
+const UPLOAD_MAX_BYTES = 3 * 1024 * 1024;
+const UPLOAD_MAX_DIMENSION = 1920;
 
 export interface ProductImage {
   url: string;
@@ -109,34 +115,39 @@ export function ProductImageUploader({
         return;
       }
 
-      const uploaded: ProductImage[] = [];
-      for (const file of accepted) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("api_key", sigBody.data.apiKey);
-        formData.append("timestamp", String(sigBody.data.timestamp));
-        formData.append("signature", sigBody.data.signature);
-        formData.append("folder", sigBody.data.folder);
-        formData.append("transformation", sigBody.data.transformation);
-        formData.append("allowed_formats", sigBody.data.allowedFormats);
+      const results = await Promise.all(
+        accepted.map(async (file): Promise<ProductImage | null> => {
+          const compressed = await compressImageFile(file, {
+            maxBytes: UPLOAD_MAX_BYTES,
+            maxDimension: UPLOAD_MAX_DIMENSION,
+          });
 
-        try {
-          const res = await fetch(
-            `https://api.cloudinary.com/v1_1/${sigBody.data.cloudName}/auto/upload`,
-            { method: "POST", body: formData },
-          );
-          const result = await res.json();
-          if (res.ok) {
-            uploaded.push({
-              url: result.secure_url,
-              publicId: result.public_id,
-            });
+          const formData = new FormData();
+          formData.append("file", compressed);
+          formData.append("api_key", sigBody.data.apiKey);
+          formData.append("timestamp", String(sigBody.data.timestamp));
+          formData.append("signature", sigBody.data.signature);
+          formData.append("folder", sigBody.data.folder);
+          formData.append("transformation", sigBody.data.transformation);
+          formData.append("allowed_formats", sigBody.data.allowedFormats);
+
+          try {
+            const res = await fetch(
+              `https://api.cloudinary.com/v1_1/${sigBody.data.cloudName}/auto/upload`,
+              { method: "POST", body: formData },
+            );
+            const result = await res.json();
+            if (res.ok) {
+              return { url: result.secure_url, publicId: result.public_id };
+            }
+          } catch {
+            setError(t("uploadFailed"));
           }
-        } catch {
-          setError(t("uploadFailed"));
-        }
-      }
+          return null;
+        }),
+      );
 
+      const uploaded = results.filter((r): r is ProductImage => r !== null);
       onChange([...images, ...uploaded]);
       setIsUploading(false);
     },

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { compressImageFile } from "@/lib/image-compression";
 import { cn } from "@/lib/utils";
 
 interface KycSignature {
@@ -72,36 +73,10 @@ function uploadKycFile(file: File, signature: KycSignature) {
 const MAX_KYC_BYTES = 8 * 1024 * 1024;
 const MAX_KYC_DIMENSION = 2400;
 
-async function compressImageFile(file: File): Promise<File> {
-  if (file.size <= MAX_KYC_BYTES) return file;
-
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(
-    1,
-    MAX_KYC_DIMENSION / Math.max(bitmap.width, bitmap.height),
-  );
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return file;
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-
-  // Tries progressively lower quality until it fits; falls back to the
-  // last (lowest-quality) attempt on the rare photo that still doesn't.
-  let best: Blob | null = null;
-  for (const quality of [0.85, 0.7, 0.55, 0.4]) {
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/jpeg", quality),
-    );
-    if (!blob) continue;
-    best = blob;
-    if (blob.size <= MAX_KYC_BYTES) break;
-  }
-  if (!best) return file;
-
-  return new File([best], file.name.replace(/\.\w+$/, ".jpg"), {
-    type: "image/jpeg",
+function compressKycFile(file: File): Promise<File> {
+  return compressImageFile(file, {
+    maxBytes: MAX_KYC_BYTES,
+    maxDimension: MAX_KYC_DIMENSION,
   });
 }
 
@@ -149,7 +124,7 @@ function FileSlot({
           className="hidden"
           onChange={async (e) => {
             const picked = e.target.files?.[0] ?? null;
-            onSelect(picked ? await compressImageFile(picked) : null);
+            onSelect(picked ? await compressKycFile(picked) : null);
           }}
         />
         {previewUrl ? (

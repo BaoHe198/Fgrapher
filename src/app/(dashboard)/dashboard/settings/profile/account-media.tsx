@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 
 import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
+import { compressImageFile } from "@/lib/image-compression";
 
 // Raised from 5MB — modern phone photos routinely land in the 8-15MB
 // range at full resolution. Kept bounded (not removed outright) so a
@@ -13,6 +14,15 @@ import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
 // or blow past Cloudinary's own account-level upload cap.
 const MAX_BYTES = 20 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+// The crop dialog (image-crop.ts) outputs the cropped region at its full
+// native pixel resolution and quality 0.92 — plenty large for a source
+// photo from a modern phone even after cropping down to a small avatar or
+// a wide cover banner. Compress that output before it goes to Cloudinary;
+// this is a display image, not something anyone needs at full photo
+// resolution.
+const UPLOAD_MAX_BYTES = 3 * 1024 * 1024;
+const UPLOAD_MAX_DIMENSION = 1600;
 
 async function uploadFile(
   file: File,
@@ -95,7 +105,11 @@ export function AccountMedia({
     setError(null);
     setUploading(target);
     try {
-      const url = await uploadFile(file, {
+      const compressed = await compressImageFile(file, {
+        maxBytes: UPLOAD_MAX_BYTES,
+        maxDimension: UPLOAD_MAX_DIMENSION,
+      });
+      const url = await uploadFile(compressed, {
         unavailable: t("uploadUnavailable"),
         failed: t("uploadFailed"),
       });

@@ -17,12 +17,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Progress } from "@/components/ui/progress";
+import { compressImageFile } from "@/lib/image-compression";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 
 const NEW_ALBUM_VALUE = "__new__";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
+
+// Portfolio images are provider marketing content, shown at meaningful
+// display sizes (profile grids, lightbox) — kept larger/higher-quality
+// than the avatar/cover pipeline, but still well under the raw 10MB cap a
+// modern phone photo can hit. Videos are left untouched: compressImageFile
+// only knows how to decode images via createImageBitmap.
+const UPLOAD_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const UPLOAD_IMAGE_MAX_DIMENSION = 2400;
 const ACCEPT = {
   "image/jpeg": [".jpg", ".jpeg"],
   "image/png": [".png"],
@@ -250,65 +259,84 @@ export function UploadMediaModal({
       return;
     }
 
-    const uploaded: UploadedMedia[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      setFiles((prev) =>
-        prev.map((f, idx) => (idx === i ? { ...f, status: "uploading" } : f)),
-      );
-
-      try {
-        const result = await uploadToCloudinary(
-          files[i].file,
-          sigBody.data,
-          (percent) => {
-            setFiles((prev) =>
-              prev.map((f, idx) =>
-                idx === i ? { ...f, progress: percent } : f,
-              ),
-            );
-          },
+    // Uploaded in parallel rather than one-at-a-time — each file's progress
+    // is tracked independently via its own index, so concurrent XHRs don't
+    // interfere with each other's state updates.
+    const results = await Promise.all(
+      files.map(async (f, i) => {
+        setFiles((prev) =>
+          prev.map((cur, idx) =>
+            idx === i ? { ...cur, status: "uploading" } : cur,
+          ),
         );
 
-        const type = result.resource_type === "video" ? "VIDEO" : "IMAGE";
-        const saveRes = await fetch("/api/portfolio", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            profileId,
-            albumId: resolvedAlbumId,
-            url: result.secure_url,
-            publicId: result.public_id,
-            type,
-            title: files[i].title || undefined,
-            width: result.width,
-            height: result.height,
-            rightsConfirmed,
-          }),
-        });
-        const saveBody = await saveRes.json();
-        if (saveRes.ok) {
-          uploaded.push({
+        try {
+          const uploadFile = f.file.type.startsWith("image/")
+            ? await compressImageFile(f.file, {
+                maxBytes: UPLOAD_IMAGE_MAX_BYTES,
+                maxDimension: UPLOAD_IMAGE_MAX_DIMENSION,
+              })
+            : f.file;
+
+          const result = await uploadToCloudinary(
+            uploadFile,
+            sigBody.data,
+            (percent) => {
+              setFiles((prev) =>
+                prev.map((cur, idx) =>
+                  idx === i ? { ...cur, progress: percent } : cur,
+                ),
+              );
+            },
+          );
+
+          const type = result.resource_type === "video" ? "VIDEO" : "IMAGE";
+          const saveRes = await fetch("/api/portfolio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              profileId,
+              albumId: resolvedAlbumId,
+              url: result.secure_url,
+              publicId: result.public_id,
+              type,
+              title: f.title || undefined,
+              width: result.width,
+              height: result.height,
+              rightsConfirmed,
+            }),
+          });
+          const saveBody = await saveRes.json();
+
+          setFiles((prev) =>
+            prev.map((cur, idx) =>
+              idx === i ? { ...cur, status: "done" } : cur,
+            ),
+          );
+
+          if (!saveRes.ok) return null;
+          return {
             id: saveBody.data.id,
             url: result.secure_url,
             type,
-            title: files[i].title || null,
+            title: f.title || null,
             moderationStatus: saveBody.data.moderationStatus,
             moderationNote: saveBody.data.moderationNote,
-          });
+          } satisfies UploadedMedia;
+        } catch {
+          setFiles((prev) =>
+            prev.map((cur, idx) =>
+              idx === i
+                ? { ...cur, status: "error", error: t("uploadFailed") }
+                : cur,
+            ),
+          );
+          return null;
         }
+      }),
+    );
 
-        setFiles((prev) =>
-          prev.map((f, idx) => (idx === i ? { ...f, status: "done" } : f)),
-        );
-      } catch {
-        setFiles((prev) =>
-          prev.map((f, idx) =>
-            idx === i ? { ...f, status: "error", error: t("uploadFailed") } : f,
-          ),
-        );
-      }
-    }
+    const uploaded = results.filter((r): r is UploadedMedia => r !== null);
 
     setIsSubmitting(false);
     onUploaded(uploaded);
