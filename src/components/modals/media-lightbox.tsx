@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect } from "react";
 
+import { buildMediaVariants } from "@/lib/media-variants";
+
 interface MediaLightboxProps {
   items: { url: string; title?: string | null }[];
   index: number;
@@ -96,7 +98,7 @@ export function MediaLightbox({
         onClick={(e) => e.stopPropagation()}
       >
         <Image
-          src={current.url}
+          src={buildMediaVariants(current.url).large}
           alt={current.title ?? ""}
           width={1200}
           height={800}

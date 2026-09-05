@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { MediaLightbox } from "@/components/modals/media-lightbox";
+import { buildMediaVariants } from "@/lib/media-variants";
 
 interface MediaItem {
   id: string;
@@ -62,7 +63,7 @@ export function PortfolioTab({ albums }: { albums: AlbumItem[] }) {
                 />
               ) : (
                 <Image
-                  src={album.coverMedia.url}
+                  src={buildMediaVariants(album.coverMedia.url).thumbnail}
                   alt={album.title}
                   fill
                   className="object-cover transition-transform duration-150 group-hover:scale-105"

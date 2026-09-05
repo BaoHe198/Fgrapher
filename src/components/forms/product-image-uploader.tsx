@@ -22,6 +22,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 import { compressImageFile } from "@/lib/image-compression";
+import { buildMediaVariants } from "@/lib/media-variants";
 import { cn } from "@/lib/utils";
 
 // Product photos are shown in shop listing grids and a product detail
@@ -67,7 +68,13 @@ function SortableThumb({
         isDragging && "opacity-50",
       )}
     >
-      <Image src={image.url} alt="" fill className="object-cover" unoptimized />
+      <Image
+        src={buildMediaVariants(image.url).thumbnail}
+        alt=""
+        fill
+        className="object-cover"
+        unoptimized
+      />
       <div className="absolute inset-0 flex items-start justify-between bg-black/40 p-1.5 opacity-0 transition-opacity group-hover:opacity-100">
         <button
           type="button"
