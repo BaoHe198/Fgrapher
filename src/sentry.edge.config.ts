@@ -13,4 +13,5 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   tracesSampleRate: sentryTracesSampleRate,
   dataCollection: sentryDataCollection,
+  environment: process.env.VERCEL_ENV ?? "development",
 });

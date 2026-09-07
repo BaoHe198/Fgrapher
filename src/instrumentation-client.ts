@@ -20,4 +20,10 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   tracesSampleRate: sentryTracesSampleRate,
   dataCollection: sentryDataCollection,
+  // Only populated if Vercel project settings → Environment Variables →
+  // "Automatically expose System Environment Variables" is checked;
+  // otherwise silently falls back to "development" here (harmless, just
+  // less useful filtering in the Sentry dashboard) — same var, same
+  // fallback, as sentry.server.config.ts/sentry.edge.config.ts.
+  environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? "development",
 });
