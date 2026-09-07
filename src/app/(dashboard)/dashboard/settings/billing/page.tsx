@@ -7,6 +7,7 @@ import { features } from "@/lib/features";
 import { getBillingOverview } from "@/services/subscription";
 
 import { BillingSettingsContent } from "./billing-settings-content";
+import { LocalPaymentsContent } from "./local-payments-content";
 
 export default async function BillingSettingsPage() {
   const session = await auth();
@@ -14,11 +15,15 @@ export default async function BillingSettingsPage() {
     redirect("/login");
   }
 
-  // Dormant while BILLING_ENABLED=false — see CLAUDE.md. Show a plain
-  // message instead of Stripe-backed billing UI (plan/cancel/portal
-  // buttons that would just 404 against the disabled /api/stripe/*
-  // routes).
-  if (!features.billingEnabled) {
+  const localPaymentsEnabled =
+    features.momoEnabled ||
+    features.zalopayEnabled ||
+    features.bankTransferEnabled;
+
+  // Dormant while BILLING_ENABLED=false — see CLAUDE.md. Falls through to
+  // the local-rail picker below whenever at least one of those is on;
+  // only shows this flat message when every payment method is off.
+  if (!features.billingEnabled && !localPaymentsEnabled) {
     const t = await getTranslations("dashboardSettings.billing");
     return (
       <div className="rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card p-8 text-center">
@@ -33,6 +38,29 @@ export default async function BillingSettingsPage() {
   }
 
   const userRoles = await getBillingOverview(session.user.id);
+
+  if (!features.billingEnabled) {
+    return (
+      <LocalPaymentsContent
+        roles={userRoles.map((ur) => ({
+          role: ur.role,
+          active: ur.active,
+          subscription: ur.subscription
+            ? {
+                status: ur.subscription.status,
+                currentPeriodEnd:
+                  ur.subscription.currentPeriodEnd?.toISOString() ?? null,
+              }
+            : null,
+        }))}
+        monthlyPrices={rolePricesVnd("month")}
+        yearlyPrices={rolePricesVnd("year")}
+        momoEnabled={features.momoEnabled}
+        zalopayEnabled={features.zalopayEnabled}
+        bankTransferEnabled={features.bankTransferEnabled}
+      />
+    );
+  }
 
   return (
     <BillingSettingsContent

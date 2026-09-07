@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   ShieldCheck,
   Users,
+  Wallet,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -26,6 +27,7 @@ const ITEMS = [
     key: "roleChangeRequests",
     icon: ArrowLeftRight,
   },
+  { href: "/admin/payments", key: "payments", icon: Wallet },
   { href: "/admin/moderation", key: "moderation", icon: ImageIcon },
   { href: "/admin/compliance", key: "compliance", icon: ShieldCheck },
   {

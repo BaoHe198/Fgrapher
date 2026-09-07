@@ -20,4 +20,12 @@ export const features = {
   // temporarily disables the phone-verification gate on posting a
   // ServiceRequest while that isn't set up.
   phoneVerificationRequired: env.PHONE_VERIFICATION_REQUIRED,
+  // Local Vietnamese payment rails for provider subscription billing —
+  // independent of billingEnabled (which is Stripe-specific and stays
+  // permanently off per CLAUDE.md rule 1). Each defaults off; flip on
+  // only once the business is actually ready to charge — see
+  // src/services/payments.ts.
+  momoEnabled: env.MOMO_ENABLED,
+  zalopayEnabled: env.ZALOPAY_ENABLED,
+  bankTransferEnabled: env.BANK_TRANSFER_ENABLED,
 } as const;

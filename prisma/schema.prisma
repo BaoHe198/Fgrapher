@@ -477,24 +477,72 @@ model WebhookEvent {
 }
 
 enum PaymentStatus {
+  // Created at checkout-intent time (MoMo/ZaloPay), before the provider
+  // confirms anything — not a real Stripe status, so pre-existing Stripe
+  // Payment rows (only ever written post-success by handleInvoicePaid)
+  // never land here.
+  PENDING
+  // Bank transfer only — customer says they've sent the money and
+  // submitted proof, no admin has reviewed it yet.
+  AWAITING_REVIEW
   SUCCEEDED
   FAILED
   REFUNDED
 }
 
+// Which rail a Payment went through. Stripe is the default so every
+// pre-existing row (all Stripe, all written before this field existed)
+// backfills correctly without a data migration.
+enum PaymentProvider {
+  STRIPE
+  MOMO
+  ZALOPAY
+  BANK_TRANSFER
+}
+
 model Payment {
-  id              String        @id @default(cuid())
-  userId          String
-  stripePaymentId String        @unique
-  amount          Float
-  currency        String
-  status          PaymentStatus
-  description     String?
-  createdAt       DateTime      @default(now())
+  id       String          @id @default(cuid())
+  userId   String
+  // Which paid role/billing interval this payment is funding — null on
+  // pre-existing Stripe rows (handleInvoicePaid never recorded this),
+  // always set on every new row from src/services/payments.ts.
+  role     Role?
+  interval String? // "month" | "year"
+  provider PaymentProvider @default(STRIPE)
+
+  // stripePaymentId was required+unique before this change; now optional
+  // so non-Stripe rows can simply leave it null (a unique index allows
+  // multiple NULLs in Postgres — existing Stripe rows are unaffected).
+  stripePaymentId String? @unique
+  // Our own generated order/reference id, sent to MoMo/ZaloPay as their
+  // order id, or the code a bank-transfer customer is asked to put in
+  // their transfer message so an admin can match it against a bank
+  // statement. This is what confirmMomoPayment/confirmZalopayPayment
+  // look the row up by — MoMo/ZaloPay's IPN payload doesn't carry any ID
+  // of ours other than the one we handed them at creation.
+  providerOrderId String? @unique
+  // MoMo's transId / ZaloPay's zp_trans_id — only known once the
+  // provider actually confirms the payment, never set at intent-creation.
+  providerTransactionId String?
+
+  amount      Float
+  currency    String
+  status      PaymentStatus
+  description String?
+
+  // Bank transfer only.
+  proofUrl   String? // Cloudinary receipt/screenshot upload
+  reviewedBy String? // admin userId
+  reviewedAt DateTime?
+  reviewNote String? // set on reject
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([provider, status])
   @@map("payments")
 }
 

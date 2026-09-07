@@ -16,12 +16,14 @@ export async function POST(request: Request) {
     // Portfolio/products/provider-profile photos are paid-role-only (the
     // route that actually persists the reference does the precise
     // per-role subscription check) since that's sellable content; chat
-    // images, request references, and a basic account avatar/cover are
-    // just account functionality, not something being sold, so they stay
-    // open to every authenticated user — including CUSTOMER-only
-    // accounts, who have no paid role at all.
+    // images, request references, a basic account avatar/cover, and a
+    // bank-transfer payment receipt are just account functionality, not
+    // something being sold, so they stay open to every authenticated
+    // user — including CUSTOMER-only accounts, who have no paid role at
+    // all (a bank-transfer submission is specifically how someone WITHOUT
+    // a paid role yet gets one — requiring one first would be circular).
     const body = await request.json().catch(() => ({}));
-    const openPurposes = new Set(["chat", "request", "account"]);
+    const openPurposes = new Set(["chat", "request", "account", "payment"]);
     const purpose = openPurposes.has(body?.purpose)
       ? body.purpose
       : "portfolio";

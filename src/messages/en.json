@@ -598,7 +598,8 @@
         "roleChangeRequests": "Role changes",
         "moderation": "Moderation",
         "compliance": "Compliance",
-        "serviceRequests": "Unclaimed requests"
+        "serviceRequests": "Unclaimed requests",
+        "payments": "Payments"
       },
       "overview": {
         "metaTitle": "Admin overview — Fgrapher",
@@ -803,6 +804,18 @@
         "empty": "No requests waiting — every open request already has at least one offer.",
         "hoursOpen": "{hours}h with no offers",
         "budgetNotSet": "No budget set"
+      },
+      "payments": {
+        "title": "Payments awaiting confirmation",
+        "description": "Bank transfers need an admin to cross-check the bank statement and confirm manually. Pending MoMo/ZaloPay rows are shown for visibility only, with no action button — they confirm automatically or expire after 24 hours.",
+        "empty": "No payments awaiting review",
+        "paymentUpdated": "Payment updated",
+        "referenceLabel": "Reference",
+        "viewProof": "View transfer receipt",
+        "rejectionNotePlaceholder": "Rejection note (optional)",
+        "approve": "Approve",
+        "reject": "Reject",
+        "awaitingProviderConfirmation": "Waiting on MoMo/ZaloPay to confirm automatically — no admin action needed."
       }
     }
   },
@@ -937,7 +950,12 @@
       "roleChangeRequestUpdateFailed": "Failed to update role change request",
       "roleChangeRequestNotFound": "Role change request not found",
       "roleChangeRequestAlreadyReviewed": "This request has already been reviewed",
-      "roleChangeRequestsLoadFailed": "Failed to load role change requests"
+      "roleChangeRequestsLoadFailed": "Failed to load role change requests",
+      "paymentsLoadFailed": "Couldn't load the payments list.",
+      "paymentUpdated": "Payment updated.",
+      "paymentNotFound": "Payment not found.",
+      "paymentAlreadyReviewed": "This payment has already been reviewed.",
+      "paymentUpdateFailed": "Couldn't update the payment."
     },
     "auth": {
       "invalidInput": "Invalid input",
@@ -1044,6 +1062,14 @@
       "allMarkedRead": "All marked as read",
       "updateAllFailed": "Failed to update notifications",
       "loadFailed": "Failed to load notifications"
+    },
+    "payments": {
+      "tooManyRequests": "You're doing that too fast — try again shortly.",
+      "notConfigured": "This payment method isn't configured yet.",
+      "invalidInput": "Invalid input.",
+      "createFailed": "Couldn't start the payment. Please try again.",
+      "loadFailed": "Couldn't load payment information.",
+      "bankTransferSubmitted": "Proof submitted — waiting for admin confirmation."
     }
   },
   "dashboardCore": {
@@ -1792,7 +1818,21 @@
       "cancelDialogBody2": "All your data — portfolio, bookings, reviews — is kept, and you can reactivate anytime.",
       "keepSubscription": "Keep subscription",
       "disabledTitle": "Fgrapher is currently free for all service providers",
-      "disabledBody": "We'll give at least 30 days' notice before we start charging. No action is needed on this page."
+      "disabledBody": "We'll give at least 30 days' notice before we start charging. No action is needed on this page.",
+      "paymentCreateFailed": "Couldn't start the payment. Please try again.",
+      "billingIntervalLabel": "Billing interval",
+      "payWithMomo": "Pay with MoMo",
+      "payWithZalopay": "Pay with ZaloPay",
+      "payWithBankTransfer": "Bank transfer",
+      "bankNameLabel": "Bank",
+      "accountNumberLabel": "Account number",
+      "accountNameLabel": "Account name",
+      "amountLabel": "Amount",
+      "transferReferenceLabel": "Reference code",
+      "transferReferenceHint": "Include this exact code in your transfer message for faster confirmation.",
+      "uploadProof": "Upload transfer receipt",
+      "awaitingReview": "Proof submitted — waiting for admin confirmation.",
+      "startBankTransfer": "Start bank transfer"
     },
     "data": {
       "summary": {
@@ -2167,6 +2207,12 @@
         "body": "Your role change request wasn't approved. Your current role is unchanged.",
         "bodyWithReason": "Your role change request wasn't approved. Reason: {reason}. Your current role is unchanged.",
         "cta": "View roles"
+      },
+      "paymentRejected": {
+        "heading": "We couldn't confirm your bank transfer",
+        "body": "Unfortunately we couldn't confirm your bank transfer. Please double-check the details and try again.",
+        "bodyWithReason": "Unfortunately we couldn't confirm your bank transfer. Reason: {reason}",
+        "cta": "Try again"
       }
     }
   },

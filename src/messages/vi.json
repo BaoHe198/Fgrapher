@@ -598,7 +598,8 @@
         "roleChangeRequests": "Đổi vai trò",
         "moderation": "Kiểm duyệt",
         "compliance": "Tuân thủ dữ liệu",
-        "serviceRequests": "Yêu cầu chưa ai nhận"
+        "serviceRequests": "Yêu cầu chưa ai nhận",
+        "payments": "Thanh toán"
       },
       "overview": {
         "metaTitle": "Tổng quan quản trị — Fgrapher",
@@ -803,6 +804,18 @@
         "empty": "Không có yêu cầu nào đang chờ — mọi yêu cầu mở đều đã có ít nhất một đề nghị.",
         "hoursOpen": "{hours} giờ chưa ai nhận",
         "budgetNotSet": "Chưa đặt ngân sách"
+      },
+      "payments": {
+        "title": "Thanh toán chờ xác nhận",
+        "description": "Chuyển khoản ngân hàng cần admin đối chiếu sao kê rồi xác nhận thủ công. MoMo/ZaloPay còn đang chờ chỉ hiển thị để theo dõi, không có nút thao tác — hệ thống tự xác nhận hoặc tự hết hạn sau 24 giờ.",
+        "empty": "Không có khoản thanh toán nào đang chờ",
+        "paymentUpdated": "Đã cập nhật thanh toán",
+        "referenceLabel": "Mã tham chiếu",
+        "viewProof": "Xem minh chứng chuyển khoản",
+        "rejectionNotePlaceholder": "Ghi chú từ chối (không bắt buộc)",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "awaitingProviderConfirmation": "Đang chờ MoMo/ZaloPay tự xác nhận — không cần admin thao tác."
       }
     }
   },
@@ -937,7 +950,12 @@
       "roleChangeRequestUpdateFailed": "Không thể cập nhật yêu cầu đổi vai trò",
       "roleChangeRequestNotFound": "Không tìm thấy yêu cầu đổi vai trò",
       "roleChangeRequestAlreadyReviewed": "Yêu cầu này đã được xử lý",
-      "roleChangeRequestsLoadFailed": "Không thể tải danh sách yêu cầu đổi vai trò"
+      "roleChangeRequestsLoadFailed": "Không thể tải danh sách yêu cầu đổi vai trò",
+      "paymentsLoadFailed": "Không thể tải danh sách thanh toán.",
+      "paymentUpdated": "Đã cập nhật thanh toán.",
+      "paymentNotFound": "Không tìm thấy khoản thanh toán.",
+      "paymentAlreadyReviewed": "Khoản thanh toán này đã được xử lý.",
+      "paymentUpdateFailed": "Không thể cập nhật thanh toán."
     },
     "auth": {
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -1044,6 +1062,14 @@
       "allMarkedRead": "Đã đánh dấu tất cả là đã đọc",
       "updateAllFailed": "Không thể cập nhật thông báo",
       "loadFailed": "Không thể tải thông báo"
+    },
+    "payments": {
+      "tooManyRequests": "Bạn thao tác quá nhanh, vui lòng thử lại sau.",
+      "notConfigured": "Phương thức thanh toán này chưa được cấu hình.",
+      "invalidInput": "Dữ liệu không hợp lệ.",
+      "createFailed": "Không thể khởi tạo thanh toán. Vui lòng thử lại.",
+      "loadFailed": "Không thể tải thông tin thanh toán.",
+      "bankTransferSubmitted": "Đã gửi minh chứng chuyển khoản, đang chờ admin xác nhận."
     }
   },
   "dashboardCore": {
@@ -1792,7 +1818,21 @@
       "cancelDialogBody2": "Toàn bộ dữ liệu của bạn — portfolio, đơn đặt lịch, đánh giá — vẫn được giữ nguyên, bạn có thể kích hoạt lại bất cứ lúc nào.",
       "keepSubscription": "Giữ gói đăng ký",
       "disabledTitle": "Hiện tại Fgrapher đang miễn phí cho toàn bộ nhà cung cấp dịch vụ",
-      "disabledBody": "Chúng tôi sẽ thông báo trước ít nhất 30 ngày trước khi bắt đầu thu phí. Không cần làm gì thêm ở trang này."
+      "disabledBody": "Chúng tôi sẽ thông báo trước ít nhất 30 ngày trước khi bắt đầu thu phí. Không cần làm gì thêm ở trang này.",
+      "paymentCreateFailed": "Không thể khởi tạo thanh toán. Vui lòng thử lại.",
+      "billingIntervalLabel": "Chu kỳ thanh toán",
+      "payWithMomo": "Thanh toán qua MoMo",
+      "payWithZalopay": "Thanh toán qua ZaloPay",
+      "payWithBankTransfer": "Chuyển khoản ngân hàng",
+      "bankNameLabel": "Ngân hàng",
+      "accountNumberLabel": "Số tài khoản",
+      "accountNameLabel": "Chủ tài khoản",
+      "amountLabel": "Số tiền",
+      "transferReferenceLabel": "Mã tham chiếu",
+      "transferReferenceHint": "Ghi đúng mã này vào nội dung chuyển khoản để được xác nhận nhanh hơn.",
+      "uploadProof": "Tải lên minh chứng chuyển khoản",
+      "awaitingReview": "Đã gửi minh chứng, đang chờ admin xác nhận.",
+      "startBankTransfer": "Bắt đầu chuyển khoản"
     },
     "data": {
       "summary": {
@@ -2167,6 +2207,12 @@
         "body": "Yêu cầu đổi vai trò của bạn không được chấp thuận. Vai trò hiện tại của bạn không thay đổi.",
         "bodyWithReason": "Yêu cầu đổi vai trò của bạn không được chấp thuận. Lý do: {reason}. Vai trò hiện tại của bạn không thay đổi.",
         "cta": "Xem vai trò"
+      },
+      "paymentRejected": {
+        "heading": "Khoản chuyển khoản chưa được xác nhận",
+        "body": "Rất tiếc, chúng tôi chưa thể xác nhận khoản chuyển khoản của bạn. Vui lòng kiểm tra lại thông tin và thử lại.",
+        "bodyWithReason": "Rất tiếc, chúng tôi chưa thể xác nhận khoản chuyển khoản của bạn. Lý do: {reason}",
+        "cta": "Thử lại"
       }
     }
   },

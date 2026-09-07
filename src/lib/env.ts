@@ -62,6 +62,19 @@ const serverSchema = z.object({
 
   RESEND_API_KEY: z.string().optional(),
   CRON_SECRET: z.string().optional(),
+
+  // MoMo Payment Gateway — src/lib/momo.ts no-ops without these, same
+  // pattern as every other integration above.
+  MOMO_PARTNER_CODE: z.string().optional(),
+  MOMO_ACCESS_KEY: z.string().optional(),
+  MOMO_SECRET_KEY: z.string().optional(),
+
+  // ZaloPay — src/lib/zalopay.ts. key1 signs outgoing requests, key2
+  // verifies incoming callbacks — see that file's comment for why mixing
+  // them up is a real, easy-to-make security bug.
+  ZALOPAY_APP_ID: z.string().optional(),
+  ZALOPAY_KEY1: z.string().optional(),
+  ZALOPAY_KEY2: z.string().optional(),
   // Staging-only — see lib/email.ts's sendEmail(). Every outbound email
   // is redirected here instead of the real recipient when APP_ENV is
   // "staging" and this is set.
@@ -80,6 +93,13 @@ const serverSchema = z.object({
   // configured/paid for yet, per the project owner's explicit call to
   // temporarily let service requests post without a verified phone.
   PHONE_VERIFICATION_REQUIRED: booleanFlag("true"),
+  // Local Vietnamese payment rails for provider subscription billing —
+  // independent of BILLING_ENABLED (Stripe-specific, stays off
+  // permanently per CLAUDE.md rule 1). Flip on only once the business is
+  // ready to actually charge — see src/services/payments.ts.
+  MOMO_ENABLED: booleanFlag("false"),
+  ZALOPAY_ENABLED: booleanFlag("false"),
+  BANK_TRANSFER_ENABLED: booleanFlag("false"),
 });
 
 const publicSchema = z.object({
@@ -103,6 +123,12 @@ const publicSchema = z.object({
   // it, and so .env.example stays the single source of truth for every
   // var the app reads.
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
+  // Not secrets — shown directly to any customer paying by bank
+  // transfer, same reasoning as NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME. Read
+  // via src/lib/bank-transfer.ts.
+  NEXT_PUBLIC_BANK_TRANSFER_ACCOUNT_NUMBER: z.string().optional(),
+  NEXT_PUBLIC_BANK_TRANSFER_ACCOUNT_NAME: z.string().optional(),
+  NEXT_PUBLIC_BANK_TRANSFER_BANK_NAME: z.string().optional(),
 });
 
 const fullSchema = serverSchema.merge(publicSchema);
