@@ -101,10 +101,18 @@ const {
       return baseUrl;
     },
     async signIn({ user, account }) {
+      const dbUser = await db.user.findUnique({ where: { id: user.id } });
+
+      // Checked for every provider — a suspended user shouldn't be able to
+      // sign back in via Google just because credentials login is blocked.
+      // Doesn't revoke an already-active session (JWT strategy has no
+      // server-side store to revoke from — see docs/DEVELOPMENT.md's
+      // technical debt register), only blocks new sign-ins from here on.
+      if (dbUser?.isSuspended) return false;
+
       // OAuth providers already verify email ownership; only gate credentials login.
       if (account?.provider !== "credentials") return true;
 
-      const dbUser = await db.user.findUnique({ where: { id: user.id } });
       return Boolean(dbUser?.emailVerified);
     },
     async jwt({ token, user }) {
