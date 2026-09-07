@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { features } from "@/lib/features";
@@ -105,8 +106,10 @@ export async function POST(request: Request) {
   } catch (err) {
     // Still return 200 — an internal error shouldn't make Stripe retry
     // indefinitely. The error is persisted on the WebhookEvent row (left
-    // unprocessed) for manual investigation; wire up Sentry here once it's
-    // set up in the project.
+    // unprocessed) for manual investigation, and captured explicitly
+    // here (deliberately caught, so Next's onRequestError instrumentation
+    // never sees it) rather than relying on that hook.
+    Sentry.captureException(err);
     await db.webhookEvent.update({
       where: { id: event.id },
       data: { error: err instanceof Error ? err.message : String(err) },
