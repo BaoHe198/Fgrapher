@@ -39,8 +39,17 @@ lịch, nhắn tin, đánh giá, thông báo, quản trị, tuân thủ dữ li�
 1. **Stripe KHÔNG dùng được**: Stripe không mở tài khoản cho doanh nghiệp
    đăng ký tại Việt Nam. Không viết thêm code Stripe. Code Stripe hiện có
    giữ lại nhưng vô hiệu hóa sau feature flag (`BILLING_ENABLED=false`).
-2. Không tích hợp bất kỳ cổng thanh toán nào ở giai đoạn này. Gói thuê
-   bao gán thủ công qua trang admin.
+2. ~~Không tích hợp bất kỳ cổng thanh toán nào ở giai đoạn này.~~
+   **[Cập nhật 07/09/2026, quyết định của chủ dự án, ghi đè câu gốc ở
+   trên]** MoMo, ZaloPay, và chuyển khoản ngân hàng (xác nhận thủ công
+   qua `/admin/payments`) đã được xây dựng — xem `src/services/
+payments.ts`, `src/lib/momo.ts`, `src/lib/zalopay.ts`, `src/lib/
+bank-transfer.ts`. Mỗi cổng nằm sau feature flag riêng
+   (`MOMO_ENABLED`/`ZALOPAY_ENABLED`/`BANK_TRANSFER_ENABLED`, mặc định
+   `false`) — chỉ bật khi thật sự sẵn sàng thu phí, không cần deploy lại
+   code. Ràng buộc #1 (cấm Stripe) không đổi. Khi mọi flag đều tắt, gán
+   gói thủ công qua trang admin (`assignManualPlan`) vẫn là phương án dự
+   phòng như trước.
 3. **KHÔNG** có danh mục hoặc nhãn nội dung nude/sexy/boudoir. Không
    thêm vào `ProfileCategory`. Đây là yêu cầu pháp lý.
 4. Mọi tài khoản phải từ 18 tuổi. Áp dụng cho **mọi** vai trò, không

@@ -90,8 +90,37 @@ marketplace), webhook 5 event. Không có real-time thật — polling
 - Trang: `/onboarding/billing`, `(dashboard)/dashboard/settings/billing`
 - 12 biến `STRIPE_PRICE_<ROLE>_*`, `STRIPE_SECRET_KEY`,
   `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-- Model `Payment`, `WebhookEvent` — giữ nguyên trong schema, không còn
-  đường ghi mới khi cờ tắt
+- Model `WebhookEvent` — giữ nguyên trong schema, không còn đường ghi
+  mới khi cờ tắt. Model `Payment` thì KHÔNG còn đúng câu này nữa kể từ
+  07/09/2026 — xem mục ngay dưới đây, các cổng thanh toán nội địa vẫn
+  ghi vào `Payment` dù `BILLING_ENABLED=false`.
+
+## Sẽ ẩn sau `MOMO_ENABLED` / `ZALOPAY_ENABLED` / `BANK_TRANSFER_ENABLED`
+
+(bổ sung 07/09/2026 — xem CLAUDE.md "Ràng buộc bắt buộc" #2)
+
+Độc lập với `BILLING_ENABLED` ở trên — 3 cờ riêng, mặc định tắt, không
+liên quan gì tới Stripe.
+
+- `lib/momo.ts`, `lib/zalopay.ts`, `lib/bank-transfer.ts`,
+  `services/payments.ts`
+- API: `/api/payments/{momo,zalopay,bank-transfer}/*`,
+  `/api/webhooks/{momo,zalopay}`, `/api/admin/payments/*`
+- Trang: `/admin/payments`; `(dashboard)/dashboard/settings/billing` khi
+  `BILLING_ENABLED=false` hiển thị UI chọn cổng thanh toán này thay vì
+  thông báo "chưa bật" như trước
+- Cron: `subscription-renewal-reminders`, `expire-payment-intents`
+- Biến môi trường: `MOMO_PARTNER_CODE`/`MOMO_ACCESS_KEY`/
+  `MOMO_SECRET_KEY`, `ZALOPAY_APP_ID`/`ZALOPAY_KEY1`/`ZALOPAY_KEY2`,
+  `NEXT_PUBLIC_BANK_TRANSFER_ACCOUNT_NUMBER`/`_ACCOUNT_NAME`/
+  `_BANK_NAME`
+- Model `Payment` — mở rộng thêm `provider`/`providerOrderId`/
+  `providerTransactionId`/`role`/`interval`/`proofUrl`/`reviewedBy`/
+  `reviewedAt`/`reviewNote`, `stripePaymentId` đổi từ bắt buộc sang tuỳ
+  chọn. Enum `PaymentStatus` thêm `PENDING`/`AWAITING_REVIEW`, enum mới
+  `PaymentProvider`. Chưa có kiểm thử với thông tin merchant thật của
+  MoMo/ZaloPay — mới xác minh bằng sandbox, xem `src/lib/momo.ts`/
+  `src/lib/zalopay.ts` để biết chi tiết.
 
 ## Chưa xây (không phải code chết, chỉ là chưa có)
 
