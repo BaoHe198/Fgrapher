@@ -29,14 +29,18 @@ const isDev = process.env.NODE_ENV === "development";
 // the browser to Cloudinary's API with a signed upload, not through our own
 // backend — confirmed by grepping every fetch()/XMLHttpRequest target in
 // src/ before writing this, since guessing wrong here would silently break
-// every upload flow in the app.
+// every upload flow in the app. The three ingest.*.sentry.io patterns are
+// Sentry's browser SDK reporting endpoint (src/instrumentation-client.ts)
+// — org ID is the wildcard segment, region (us/de) is fixed per Sentry
+// account, so all three cover any account regardless of which region a
+// real DSN ends up using.
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com;
   font-src 'self' data:;
-  connect-src 'self' https://api.cloudinary.com;
+  connect-src 'self' https://api.cloudinary.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io;
   object-src 'none';
   base-uri 'self';
   form-action 'self';

@@ -93,6 +93,16 @@ const publicSchema = z.object({
   // per lib/cloudinary.ts's comment: needs to work from a Client
   // Component). Unset in this environment; see that file's comment.
   NEXT_PUBLIC_ZALO_OA_ID: z.string().optional(),
+  // Read directly via process.env in sentry.server.config.ts/sentry.edge.
+  // config.ts/instrumentation-client.ts (not `env.NEXT_PUBLIC_SENTRY_DSN`
+  // from this module) — instrumentation-client.ts runs in the browser
+  // bundle, where importing this file would crash: parseEnv() below
+  // validates the *required* server vars too (DATABASE_URL etc.), which
+  // don't exist in client process.env. Declared here anyway so it's
+  // documented/validated for any server-side code that does want to check
+  // it, and so .env.example stays the single source of truth for every
+  // var the app reads.
+  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
 });
 
 const fullSchema = serverSchema.merge(publicSchema);

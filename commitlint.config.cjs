@@ -24,6 +24,9 @@ module.exports = {
         "db",
         "i18n",
         "test",
+        // Error tracking, health checks, uptime/monitoring — infra concerns
+        // that don't belong to any single product domain above.
+        "ops",
       ],
     ],
   },

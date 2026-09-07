@@ -1,5 +1,8 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
 // Catches errors thrown by the root layout itself (rare — the regular
 // error.tsx above can't catch those since it renders inside that layout).
 // Must render its own <html>/<body>; kept deliberately plain/inline-styled
@@ -10,11 +13,16 @@
 // need may not exist. vi matches the app's default locale (CLAUDE.md
 // rule 10) for the one screen that can never safely depend on it.
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <html lang="vi">
       <body

@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -17,9 +18,7 @@ export default function GlobalError({
   const t = useTranslations("rootError");
 
   useEffect(() => {
-    // Wire up to Sentry (or another error tracker) once one is set up in
-    // the project — for now this at least keeps the failure visible in
-    // server/browser logs instead of silently swallowing it.
+    Sentry.captureException(error);
   }, [error]);
 
   return (
