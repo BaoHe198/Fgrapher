@@ -2454,7 +2454,10 @@
         "bookNow": "Đặt lịch ngay",
         "message": "Nhắn tin {name}",
         "cancellationNote": "Có thể hủy trước 48 giờ",
-        "responseNote": "Nghệ sĩ thường phản hồi nhanh chóng"
+        "responseNote": "Nghệ sĩ thường phản hồi nhanh chóng",
+        "ownProfileTitle": "Đây là hồ sơ của bạn",
+        "ownProfileBody": "Bạn không thể đặt lịch hoặc nhắn tin cho chính mình. Quản lý lịch trống, dịch vụ và portfolio trong Dashboard.",
+        "manageAvailability": "Quản lý lịch trống"
       }
     },
     "roleProvinceLanding": {

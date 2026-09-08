@@ -59,6 +59,7 @@ interface ProfileInteractiveProps {
     images: { url: string }[];
   }[];
   offersTfp?: boolean;
+  isOwnProfile: boolean;
 }
 
 export function ProfileInteractive({
@@ -71,6 +72,7 @@ export function ProfileInteractive({
   reviewStats,
   products,
   offersTfp,
+  isOwnProfile,
 }: ProfileInteractiveProps) {
   const t = useTranslations("publicPages.profile.tabs");
   const [tab, setTab] = useState("portfolio");
@@ -127,6 +129,7 @@ export function ProfileInteractive({
           services={services}
           selectedServiceId={selectedServiceId}
           onServiceChange={setSelectedServiceId}
+          isOwnProfile={isOwnProfile}
         />
       </div>
     </div>

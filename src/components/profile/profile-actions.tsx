@@ -24,6 +24,12 @@ interface ProfileActionsProps {
   initialFollowerCount: number;
   shareUrl: string;
   socialFeedEnabled: boolean;
+  // Follow/save/report all target another account — none of them make
+  // sense pointed at yourself (follow-self and message-self are already
+  // rejected server-side; save-self and report-self aren't harmful, just
+  // nonsensical). Share/QR stay visible either way — sharing your own
+  // profile link is exactly what an owner would want to do here.
+  isOwnProfile: boolean;
 }
 
 export function ProfileActions({
@@ -32,6 +38,7 @@ export function ProfileActions({
   initialFollowerCount,
   shareUrl,
   socialFeedEnabled,
+  isOwnProfile,
 }: ProfileActionsProps) {
   const t = useTranslations("publicPages.profile.shareMenu");
   const { data: session, status } = useSession();
@@ -51,7 +58,7 @@ export function ProfileActions({
   const zaloOaId = process.env.NEXT_PUBLIC_ZALO_OA_ID;
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || isOwnProfile) return;
     let cancelled = false;
 
     fetch(`/api/follows/status?userId=${targetUserId}&profileId=${profileId}`)
@@ -68,7 +75,7 @@ export function ProfileActions({
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, targetUserId, profileId]);
+  }, [isAuthenticated, isOwnProfile, targetUserId, profileId]);
 
   const toggleFollow = async () => {
     if (!isAuthenticated) return;
@@ -114,7 +121,7 @@ export function ProfileActions({
 
   return (
     <div className="flex items-center gap-2">
-      {socialFeedEnabled ? (
+      {socialFeedEnabled && !isOwnProfile ? (
         <>
           <Button
             variant={isFollowing ? "ghost" : "secondary"}
@@ -131,15 +138,17 @@ export function ProfileActions({
         </>
       ) : null}
 
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        disabled={!isAuthenticated}
-        onClick={toggleSave}
-        aria-label={isSaved ? t("removeFromSaved") : t("saveProfile")}
-      >
-        <Bookmark className={cn("size-4", isSaved && "fill-current")} />
-      </Button>
+      {!isOwnProfile ? (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          disabled={!isAuthenticated}
+          onClick={toggleSave}
+          aria-label={isSaved ? t("removeFromSaved") : t("saveProfile")}
+        >
+          <Bookmark className={cn("size-4", isSaved && "fill-current")} />
+        </Button>
+      ) : null}
 
       {zaloOaId ? (
         <Script src="https://sp.zalo.me/plugins/sdk.js" strategy="lazyOnload" />
@@ -187,15 +196,17 @@ export function ProfileActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        disabled={!isAuthenticated}
-        onClick={() => setReportOpen(true)}
-        aria-label={t("report")}
-      >
-        <Flag className="size-4" />
-      </Button>
+      {!isOwnProfile ? (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          disabled={!isAuthenticated}
+          onClick={() => setReportOpen(true)}
+          aria-label={t("report")}
+        >
+          <Flag className="size-4" />
+        </Button>
+      ) : null}
       <ReportModal
         open={reportOpen}
         onOpenChange={setReportOpen}

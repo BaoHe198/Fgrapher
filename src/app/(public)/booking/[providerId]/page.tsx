@@ -26,6 +26,17 @@ export default async function BookingFlowPage({
     redirect(`/login?callbackUrl=/booking/${providerId}`);
   }
 
+  // A provider can't book themselves — createBooking() already rejects
+  // this server-side ("You can't book yourself"), but without this guard
+  // a provider could still click through the whole multi-step wizard
+  // (pick a service, date, time, fill in contact details) only to have
+  // the final submit fail. Bouncing here, before any of that renders, is
+  // the same principle as the AUTH_ONLY_PREFIXES redirect in proxy.ts —
+  // don't let someone reach a flow that can never succeed for them.
+  if (session.user.id === providerId) {
+    redirect("/dashboard");
+  }
+
   const [provider, customer] = await Promise.all([
     getProviderForBooking(providerId),
     db.user.findUnique({

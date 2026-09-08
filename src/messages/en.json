@@ -2454,7 +2454,10 @@
         "bookNow": "Book now",
         "message": "Message {name}",
         "cancellationNote": "Free cancellation up to 48h before",
-        "responseNote": "Artists usually respond quickly"
+        "responseNote": "Artists usually respond quickly",
+        "ownProfileTitle": "This is your profile",
+        "ownProfileBody": "You can't book or message yourself. Manage your availability, services, and portfolio from your dashboard.",
+        "manageAvailability": "Manage availability"
       }
     },
     "roleProvinceLanding": {

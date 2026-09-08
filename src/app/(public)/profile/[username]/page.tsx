@@ -130,7 +130,8 @@ export default async function PublicProfilePage({
   const activeProfile =
     user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
   const session = await auth();
-  if (session?.user?.id !== user.id) {
+  const isOwnProfile = session?.user?.id === user.id;
+  if (!isOwnProfile) {
     incrementProfileView(activeProfile.id);
   }
 
@@ -343,6 +344,7 @@ export default async function PublicProfilePage({
               initialFollowerCount={followerCount}
               shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/profile/${username}`}
               socialFeedEnabled={features.socialFeedEnabled}
+              isOwnProfile={isOwnProfile}
             />
           </div>
 
@@ -383,6 +385,7 @@ export default async function PublicProfilePage({
             reviewStats={reviewStats}
             products={products}
             offersTfp={offersTfp}
+            isOwnProfile={isOwnProfile}
           />
         </div>
       </div>

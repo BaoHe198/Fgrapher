@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  CalendarCog,
   ChevronLeft,
   ChevronRight,
   Loader2,
   MessageCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
@@ -31,6 +33,11 @@ interface BookingSidebarProps {
   services: ServiceOption[];
   selectedServiceId: string | null;
   onServiceChange: (id: string) => void;
+  // The viewer is this profile's own owner — booking/messaging yourself
+  // makes no sense (createBooking/getOrCreateConversation already reject
+  // it server-side), so this renders a pointer to the dashboard instead
+  // of a booking form that can only ever end in an error.
+  isOwnProfile: boolean;
 }
 
 function startOfDay(date: Date) {
@@ -56,6 +63,7 @@ export function BookingSidebar({
   services,
   selectedServiceId,
   onServiceChange,
+  isOwnProfile,
 }: BookingSidebarProps) {
   const t = useTranslations("publicPages.profile.bookingSidebar");
   const router = useRouter();
@@ -68,6 +76,7 @@ export function BookingSidebar({
   const [isOpeningChat, setIsOpeningChat] = useState(false);
 
   useEffect(() => {
+    if (isOwnProfile) return;
     let cancelled = false;
     const serviceParam = selectedServiceId
       ? `&serviceId=${selectedServiceId}`
@@ -87,7 +96,7 @@ export function BookingSidebar({
     return () => {
       cancelled = true;
     };
-  }, [providerId, weekStart, selectedServiceId]);
+  }, [providerId, weekStart, selectedServiceId, isOwnProfile]);
 
   const changeWeek = (deltaDays: number) => {
     setIsLoading(true);
@@ -134,6 +143,28 @@ export function BookingSidebar({
       setIsOpeningChat(false);
     }
   };
+
+  if (isOwnProfile) {
+    return (
+      <div className="sticky top-[104px] flex flex-col items-start gap-3 rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-md)]">
+        <CalendarCog className="size-6 text-text-tertiary" />
+        <h3 className="text-heading-lg text-text-primary">
+          {t("ownProfileTitle")}
+        </h3>
+        <p className="text-body-sm text-text-secondary">
+          {t("ownProfileBody")}
+        </p>
+        <Button
+          variant="secondary"
+          className="w-full"
+          nativeButton={false}
+          render={<Link href="/dashboard/calendar" />}
+        >
+          {t("manageAvailability")}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="sticky top-[104px] flex flex-col gap-4 rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-md)]">
