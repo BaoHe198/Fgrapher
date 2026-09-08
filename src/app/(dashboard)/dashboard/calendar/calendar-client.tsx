@@ -80,6 +80,17 @@ export function CalendarClient({
   }
 
   const [view, setView] = useState<"MONTH" | "AGENDA">("MONTH");
+  // QA: the month grid's day cells (min-h-[96px] in a 7-col grid) crammed
+  // a date number next to a "Chưa có giờ làm" pill badge — fine at
+  // desktop widths, genuinely too tight on a real phone. AGENDA (list)
+  // mode has no such cell — full-width rows instead — so default to it
+  // below the lg breakpoint, once, on mount; still just a default, the
+  // toggle above keeps working normally either direction from there.
+  useEffect(() => {
+    if (window.innerWidth < 1024) startTransition(() => setView("AGENDA"));
+    // Intentionally mount-only — this sets the initial default, not a
+    // live resize listener that would fight a user's manual toggle.
+  }, []);
   const [monthCursor, setMonthCursor] = useState(() => new Date());
   const [bookings, setBookings] = useState<BookingRow[]>(initialBookings);
   const [blockedDates, setBlockedDates] =
@@ -300,12 +311,19 @@ export function CalendarClient({
                     <span className="text-body-sm font-semibold! text-text-primary">
                       {date.getUTCDate()}
                     </span>
+                    {/* Text pills hidden below sm — a 7-col grid cell on a
+                        real phone has no room for a date number plus a
+                        multi-word pill (QA: "rất chật"). The cell's own
+                        background tint (bg-warning-bg/30 / bg-bg-sunken
+                        above) plus the legend already carry the same
+                        meaning at a glance; the full pill comes back once
+                        cells actually have room for it. */}
                     {blocked ? (
-                      <span className="rounded-full bg-text-tertiary px-1.5 py-0.5 text-sm font-bold text-text-on-brand">
+                      <span className="hidden rounded-full bg-text-tertiary px-1.5 py-0.5 text-sm font-bold text-text-on-brand sm:inline-block">
                         {t("busyLabel")}
                       </span>
                     ) : noWorkingHours ? (
-                      <span className="rounded-full bg-warning px-1.5 py-0.5 text-sm font-bold text-text-on-brand">
+                      <span className="hidden rounded-full bg-warning px-1.5 py-0.5 text-sm font-bold text-text-on-brand sm:inline-block">
                         {t("noHoursLabel")}
                       </span>
                     ) : null}

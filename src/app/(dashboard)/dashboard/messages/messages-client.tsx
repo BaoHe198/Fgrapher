@@ -11,6 +11,7 @@ import {
   ConversationList,
   type ConversationSummary,
 } from "@/components/chat/conversation-list";
+import { MessagesSkeleton } from "@/components/chat/messages-skeleton";
 import { cn } from "@/lib/utils";
 
 export function MessagesClient({
@@ -88,7 +89,20 @@ export function MessagesClient({
     router.replace("/dashboard/messages");
   };
 
-  if (!session?.user) return null;
+  // QA: this used to just return null here — SessionProvider isn't
+  // seeded with an SSR session (see auth-provider.tsx), so useSession()
+  // genuinely fetches client-side even after the server-rendered page
+  // (with its real initialConversations) has already mounted, producing
+  // a second blank flash right after loading.tsx's skeleton resolved.
+  // Same skeleton shape covers this shorter second window too.
+  if (!session?.user) {
+    return (
+      <>
+        <h1 className="sr-only">{t("pageTitle")}</h1>
+        <MessagesSkeleton />
+      </>
+    );
+  }
 
   return (
     <>
