@@ -116,7 +116,7 @@
     }
   },
   "home": {
-    "featured": "Nổi bật gần bạn",
+    "featured": "Nổi bật trên Fgrapher",
     "seeAll": "Xem tất cả →",
     "studios": "Studio cho thuê",
     "browseStudios": "Xem studio →",
@@ -3017,7 +3017,8 @@
     },
     "searchInput": {
       "placeholder": "Tìm nghệ sĩ, studio hoặc thiết bị",
-      "clearLabel": "Xóa tìm kiếm"
+      "clearLabel": "Xóa tìm kiếm",
+      "placeholderNoGear": "Tìm nghệ sĩ hoặc studio"
     },
     "cartDrawer": {
       "title": "Giỏ hàng của bạn ({count})",

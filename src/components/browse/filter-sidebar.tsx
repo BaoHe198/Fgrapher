@@ -385,14 +385,23 @@ export function FilterSidebar({
           {t("roleLabel")}
         </span>
         <div className="flex flex-col gap-2.5">
-          {roleFilterOptions.map((role) => (
-            <Checkbox
-              key={role}
-              checked={filters.roles.includes(role)}
-              onCheckedChange={() => toggleRole(role)}
-              label={`${roleT(role)} (${roleCounts[role] ?? 0})`}
-            />
-          ))}
+          {roleFilterOptions.map((role) => {
+            const count = roleCounts[role] ?? 0;
+            return (
+              <Checkbox
+                key={role}
+                checked={filters.roles.includes(role)}
+                onCheckedChange={() => toggleRole(role)}
+                // Matching the category checkboxes below (already
+                // disabled at 0) — QA flagged the filter sheet as long
+                // and still showing plenty of options that can only ever
+                // return nothing; a checked-but-disabled role isn't
+                // reachable, so this only applies while unchecked.
+                disabled={count === 0 && !filters.roles.includes(role)}
+                label={`${roleT(role)} (${count})`}
+              />
+            );
+          })}
         </div>
       </div>
 

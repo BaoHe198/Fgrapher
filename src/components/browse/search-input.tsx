@@ -5,7 +5,17 @@ import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 
-export function SearchInput({ className }: { className?: string }) {
+export function SearchInput({
+  className,
+  marketplaceEnabled,
+}: {
+  className?: string;
+  // QA: the placeholder mentioned searching for "thiết bị" (gear) even
+  // while the marketplace is off (CLAUDE.md — CAMERA_SHOP/Product listings
+  // are hidden behind this flag), which promises a search capability that
+  // doesn't currently do anything.
+  marketplaceEnabled: boolean;
+}) {
   const t = useTranslations("sharedComponents.searchInput");
   const router = useRouter();
   const pathname = usePathname();
@@ -46,7 +56,9 @@ export function SearchInput({ className }: { className?: string }) {
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={t("placeholder")}
+        placeholder={
+          marketplaceEnabled ? t("placeholder") : t("placeholderNoGear")
+        }
         className="h-11 w-full rounded-full border border-border-default bg-bg-surface py-2 pr-10 pl-10 text-body-md text-text-primary outline-none focus:border-border-focus focus:ring-2 focus:ring-gold-500/20"
       />
       {value ? (

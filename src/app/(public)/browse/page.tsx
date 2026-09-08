@@ -153,13 +153,26 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       : []),
   ];
 
+  // QA: selecting Photographer + Portrait (a role AND a category) still
+  // showed "Bộ lọc (1)" — this array drove that badge but never included
+  // `categories` at all (nor experienceLevel/height/travelWilling, the
+  // Model-specific filters), so only role/city/ward/budget/rating ever
+  // counted. Each entry counts as at most 1 regardless of how many values
+  // are selected within it (roles?.length was already doing this for
+  // multi-select roles) — the badge means "N filter types active", not a
+  // literal sum of every checked box.
   const activeFilterCount = [
     roles?.length,
+    categories?.length,
     params.city,
     params.ward,
     params.minPrice,
     params.maxPrice,
     params.minRating,
+    experienceLevel?.length,
+    params.heightMin,
+    params.heightMax,
+    params.travelWilling,
   ].filter(Boolean).length;
 
   const heading =
@@ -194,7 +207,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <SearchInput className="w-full sm:w-64" />
+                <SearchInput
+                  className="w-full sm:w-64"
+                  marketplaceEnabled={features.marketplaceEnabled}
+                />
                 <div className="lg:hidden">
                   <MobileFilterSheet
                     roleCounts={roleCounts}

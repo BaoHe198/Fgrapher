@@ -116,7 +116,7 @@
     }
   },
   "home": {
-    "featured": "Featured near you",
+    "featured": "Featured on Fgrapher",
     "seeAll": "See all →",
     "studios": "Studios for rent",
     "browseStudios": "Browse studios →",
@@ -3017,7 +3017,8 @@
     },
     "searchInput": {
       "placeholder": "Search artists, studios or gear",
-      "clearLabel": "Clear search"
+      "clearLabel": "Clear search",
+      "placeholderNoGear": "Search for artists or studios"
     },
     "cartDrawer": {
       "title": "Your cart ({count})",

@@ -7,6 +7,17 @@ import type {
 
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
+import { features } from "@/lib/features";
+
+// QA: /browse results and facets included CAMERA_SHOP even with the
+// marketplace off (features.marketplaceEnabled=false) — this file used
+// the raw PAID_ROLES constant everywhere instead of excluding the one
+// role that's dormant behind that flag (see CLAUDE.md's MVP scope).
+// Computed once at module load, same pattern already used client-side
+// in hero-search.tsx/filter-sidebar.tsx.
+const SEARCHABLE_ROLES = features.marketplaceEnabled
+  ? PAID_ROLES
+  : PAID_ROLES.filter((role) => role !== "CAMERA_SHOP");
 
 export type SortOption =
   "rating" | "price_asc" | "price_desc" | "newest" | "reviews";
@@ -135,10 +146,23 @@ const NATIONWIDE_SECTION_SIZE = 6;
 const NATIONWIDE_SECTION_THRESHOLD = 5;
 
 function buildBaseWhere(params: SearchParams): Prisma.ProfileWhereInput {
+  // Also clamps an explicit ?roles=CAMERA_SHOP (a direct URL edit, not
+  // just the UI's own role picker, which already omits that option) down
+  // while the marketplace is off, rather than trusting it — but only
+  // falls back to "every searchable role" when no roles filter was given
+  // at all. If one *was* given and none of it survives the clamp (e.g.
+  // ?roles=CAMERA_SHOP alone), `in: []` correctly matches nothing rather
+  // than silently showing every provider instead.
+  const requestedRoles =
+    params.roles && params.roles.length > 0
+      ? params.roles.filter((role) =>
+          (SEARCHABLE_ROLES as Role[]).includes(role),
+        )
+      : undefined;
   return {
     isPublished: true,
     role: {
-      in: params.roles && params.roles.length > 0 ? params.roles : PAID_ROLES,
+      in: requestedRoles ?? SEARCHABLE_ROLES,
     },
     ...(params.categories && params.categories.length > 0
       ? { categories: { hasSome: params.categories } }
@@ -218,7 +242,7 @@ async function resolveProviderCards(
         db.profile.findMany({
           where: {
             isPublished: true,
-            role: { in: PAID_ROLES },
+            role: { in: SEARCHABLE_ROLES },
             userId: { in: matchedUserIds },
           },
           include: PROVIDER_INCLUDE,
@@ -273,7 +297,7 @@ export async function searchProfiles(params: SearchParams) {
   // actually needed below, letting it run alongside everything else
   // instead of queuing up after the filtered results resolve.
   const roleRowsPromise = db.profile.findMany({
-    where: { isPublished: true, role: { in: PAID_ROLES } },
+    where: { isPublished: true, role: { in: SEARCHABLE_ROLES } },
     select: { role: true, userId: true, categories: true },
   });
 
@@ -377,7 +401,7 @@ export async function searchProfiles(params: SearchParams) {
     // form, its id (Prompt B4 VIỆC 4).
     province: province ? { id: province.id, name: province.name } : null,
     facets: {
-      roles: PAID_ROLES.map((role) => ({
+      roles: SEARCHABLE_ROLES.map((role) => ({
         role,
         count: usersByRole.get(role)?.size ?? 0,
       })),
@@ -419,6 +443,7 @@ export async function getFeaturedProfiles(limit = 4) {
     ? await db.profile.findMany({
         where: {
           isPublished: true,
+          role: { in: SEARCHABLE_ROLES },
           userId: { in: rated.map((r) => r.reviewedId) },
         },
         include: PROVIDER_INCLUDE,
@@ -432,15 +457,17 @@ export async function getFeaturedProfiles(limit = 4) {
   if (featured.length < limit) {
     const excludeUserIds = featured.map((p) => p.userId);
     const needed = limit - featured.length;
-    // Over-fetch: a user can have up to one profile per PAID_ROLES entry, so
-    // grouping this batch by user may yield fewer than `needed` new people.
+    // Over-fetch: a user can have up to one profile per SEARCHABLE_ROLES
+    // entry, so grouping this batch by user may yield fewer than `needed`
+    // new people.
     const fallbackProfiles = await db.profile.findMany({
       where: {
         isPublished: true,
+        role: { in: SEARCHABLE_ROLES },
         userId: excludeUserIds.length ? { notIn: excludeUserIds } : undefined,
       },
       orderBy: { createdAt: "desc" },
-      take: needed * PAID_ROLES.length,
+      take: needed * SEARCHABLE_ROLES.length,
       include: PROVIDER_INCLUDE,
     });
     const fallback = groupProfilesByUser(fallbackProfiles, new Map())
