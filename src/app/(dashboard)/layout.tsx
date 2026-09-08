@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { SuspendedAccountNotice } from "@/components/auth/suspended-account-notice";
 import {
   DashboardSidebar,
   MobileDashboardSidebar,
@@ -28,9 +29,30 @@ export default async function DashboardLayout({
   // a false positive. See src/app/onboarding/complete-profile/.
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { dateOfBirth: true },
+    select: { dateOfBirth: true, isSuspended: true, deletedAt: true },
   });
-  if (!user?.dateOfBirth) {
+
+  // Same live-status check as requireAuth() (src/lib/auth-helpers.ts) —
+  // that one covers every protected API route, this one covers page
+  // rendering for the whole dashboard, since a JWT session issued before
+  // a suspension/soft-delete stays technically valid until it expires
+  // (no server-side revocation list).
+  //
+  // Renders a notice instead of redirect("/login") — that seemed like the
+  // obvious fix but isn't: src/proxy.ts's edge middleware decodes the
+  // same still-valid JWT with no DB call of its own, sees an
+  // "authenticated" request hitting /login, and bounces it straight back
+  // to /dashboard, an infinite redirect loop a real browser hits as
+  // ERR_TOO_MANY_REDIRECTS (found via testing, not theoretical).
+  // SuspendedAccountNotice calls next-auth/react's signOut() instead,
+  // which actually clears the session cookie via a real POST before
+  // navigating anywhere, so there's no token left for the middleware to
+  // act on by the time it reaches /login.
+  if (!user || user.isSuspended || user.deletedAt) {
+    return <SuspendedAccountNotice />;
+  }
+
+  if (!user.dateOfBirth) {
     redirect("/onboarding/complete-profile");
   }
 

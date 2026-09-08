@@ -3158,6 +3158,11 @@
       "openMenu": "Mở menu bảng điều khiển",
       "menuTitle": "Menu bảng điều khiển",
       "menuDescription": "Điều hướng bảng điều khiển"
+    },
+    "suspendedAccountNotice": {
+      "title": "Tài khoản của bạn đã bị tạm khóa",
+      "body": "Bạn không thể tiếp tục sử dụng Fgrapher lúc này. Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ đội ngũ hỗ trợ. Bạn sẽ được đăng xuất tự động.",
+      "signOut": "Đăng xuất"
     }
   }
 }

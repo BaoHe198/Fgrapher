@@ -2,8 +2,11 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 
+import { SuspendedAccountNotice } from "@/components/auth/suspended-account-notice";
 import { requireAdmin } from "@/lib/admin";
+import { auth } from "@/lib/auth";
 import { AuthError } from "@/lib/auth-helpers";
+import { db } from "@/lib/db";
 
 import { AdminSidebar } from "./admin-sidebar";
 
@@ -12,6 +15,28 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Same live isSuspended/deletedAt check and same reasoning as
+  // (dashboard)/layout.tsx — checked explicitly here, BEFORE
+  // requireAdmin() (which calls requireAuth(), which now throws the same
+  // generic 401 for this case too), specifically so this can render
+  // SuspendedAccountNotice instead of redirect("/login?callbackUrl=/admin").
+  // That redirect used to be fine because it only ever fired for "no
+  // session at all" — but it shares src/proxy.ts's edge middleware with
+  // every other route, which bounces a request to /login right back out
+  // whenever it still finds a valid (if now-suspended) JWT, an infinite
+  // loop for a suspended admin visiting /admin (confirmed for the
+  // dashboard's identical case; same root cause here).
+  const session = await auth();
+  if (session?.user) {
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { isSuspended: true, deletedAt: true },
+    });
+    if (!user || user.isSuspended || user.deletedAt) {
+      return <SuspendedAccountNotice />;
+    }
+  }
+
   try {
     await requireAdmin();
   } catch (err) {

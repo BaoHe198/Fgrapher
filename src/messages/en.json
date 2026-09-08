@@ -3158,6 +3158,11 @@
       "openMenu": "Open dashboard menu",
       "menuTitle": "Dashboard menu",
       "menuDescription": "Dashboard navigation"
+    },
+    "suspendedAccountNotice": {
+      "title": "Your account has been suspended",
+      "body": "You can't continue using Fgrapher right now. If you think this is a mistake, please contact support. You'll be signed out automatically.",
+      "signOut": "Sign out"
     }
   }
 }

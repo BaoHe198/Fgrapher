@@ -22,12 +22,36 @@ export class AuthError extends Error {
 // requireRole/etc. runs inside a Next.js request (Route Handler or Server
 // Component), the same context next-intl's request-scoped locale cookie
 // read (src/i18n/request.ts) has already been confirmed to work in.
+//
+// Live isSuspended/deletedAt check — JWT sessions have no server-side
+// revocation list (docs/DEVELOPMENT.md's technical debt register), so a
+// still-valid cookie issued before a suspension/soft-delete would
+// otherwise keep passing every check that only looks at session?.user.
+// auth.ts's signIn callback already blocks a *new* sign-in once
+// isSuspended is set, but does nothing for a session that was already
+// live at that moment — this is the per-request check that actually
+// closes that gap for every protected API route (every one of them
+// calls requireAuth() first, per this file's own documented convention).
+// (dashboard)/layout.tsx carries the equivalent check for page rendering
+// — pages outside that group that call auth() directly for optional/
+// contextual display (not a protected action) are not covered here, since
+// every actual mutation still routes through an API handler that is.
 export async function requireAuth() {
   const session = await auth();
   if (!session?.user) {
     const t = await getTranslations("libServices.auth");
     throw new AuthError(t("unauthorized"), 401);
   }
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { isSuspended: true, deletedAt: true },
+  });
+  if (!user || user.isSuspended || user.deletedAt) {
+    const t = await getTranslations("libServices.auth");
+    throw new AuthError(t("unauthorized"), 401);
+  }
+
   return session;
 }
 
@@ -64,16 +88,31 @@ export async function requireRole(userId: string, role: Role) {
   return userRole;
 }
 
-// A subscription grants access when it's ACTIVE/TRIALING, or PAST_DUE but
-// still inside its grace period (payment failed, but the role stays fully
-// usable until graceEndsAt so a card hiccup doesn't instantly take a
-// provider's profile offline).
+// A subscription grants access when it's ACTIVE/TRIALING *and not past its
+// own currentPeriodEnd*, or PAST_DUE but still inside its grace period
+// (payment failed, but the role stays fully usable until graceEndsAt so a
+// card hiccup doesn't instantly take a provider's profile offline).
+//
+// The currentPeriodEnd check matters most for the local payment rails
+// (MoMo/ZaloPay/bank transfer, src/services/payments.ts) and manually
+// assigned plans (assignManualPlan) — nothing ever flips their status
+// away from ACTIVE on its own (Stripe subscriptions get that from
+// webhooks; these don't), so without this a plan that's genuinely
+// expired keeps granting access forever. currentPeriodEnd null is
+// treated as still-usable — defensive only, a real Subscription row
+// always has one; this predicate shouldn't be the thing that breaks if
+// that assumption is ever wrong.
 function isSubscriptionUsable(subscription: {
   status: string;
+  currentPeriodEnd: Date | null;
   graceEndsAt: Date | null;
 }) {
-  if (subscription.status === "ACTIVE" || subscription.status === "TRIALING")
-    return true;
+  if (subscription.status === "ACTIVE" || subscription.status === "TRIALING") {
+    return (
+      !subscription.currentPeriodEnd ||
+      subscription.currentPeriodEnd > new Date()
+    );
+  }
   if (subscription.status === "PAST_DUE" && subscription.graceEndsAt) {
     return subscription.graceEndsAt > new Date();
   }

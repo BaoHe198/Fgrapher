@@ -7,12 +7,52 @@ import { Prisma } from "@prisma/client";
 import { updateMeSchema } from "@/lib/validations/user";
 import { contentScanner } from "@/services/moderation";
 
+// Shared allowlist for GET and PATCH — both used to return whatever
+// `db.user.findUnique`/`db.user.update` handed back with no `select`,
+// which is every scalar column on User by default, including
+// `passwordHash` (a bcrypt hash — never appropriate to send to any
+// client, even the account owner's own) and admin-moderation-only
+// fields (`adminNotes`, `suspendedReason`, `suspendedUntil`,
+// `violationPoints`) that aren't meant to be user-facing. Keep this in
+// sync with prisma/schema.prisma's User model deliberately, not
+// automatically — a new sensitive field added there should require a
+// conscious decision here, not silent inclusion.
+const ME_SELECT = {
+  id: true,
+  email: true,
+  emailVerified: true,
+  firstName: true,
+  lastName: true,
+  username: true,
+  avatar: true,
+  name: true,
+  image: true,
+  coverImage: true,
+  bio: true,
+  phone: true,
+  location: true,
+  latitude: true,
+  longitude: true,
+  phoneVerified: true,
+  phoneVerifiedAt: true,
+  wardId: true,
+  dateOfBirth: true,
+  acceptingBookings: true,
+  notificationPreferences: true,
+  isVerified: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
 export async function GET() {
   try {
     const session = await requireAuth();
     const user = await db.user.findUnique({
       where: { id: session.user.id },
-      include: { roles: { where: { active: true }, select: { role: true } } },
+      select: {
+        ...ME_SELECT,
+        roles: { where: { active: true }, select: { role: true } },
+      },
     });
 
     return NextResponse.json(
@@ -126,6 +166,7 @@ export async function PATCH(request: Request) {
         ...locationUpdate,
         ...phoneVerifiedUpdate,
       },
+      select: ME_SELECT,
     });
 
     return NextResponse.json(
