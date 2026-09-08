@@ -1,6 +1,6 @@
 "use client";
 
-import type { MediaType, ProfileCategory } from "@prisma/client";
+import type { MediaType, ProfileCategory, Role } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -12,8 +12,20 @@ import { PortfolioTab } from "./portfolio-tab";
 import { ReviewsTab } from "./reviews-tab";
 import { ServicesTab } from "./services-tab";
 
+interface OwnerAlbum {
+  id: string;
+  title: string;
+  description: string | null;
+  category: ProfileCategory | null;
+  coverMedia: { id: string; url: string; type: MediaType } | null;
+  mediaCount: number;
+  isPublished: boolean;
+}
+
 interface ProfileInteractiveProps {
   providerId: string;
+  profileId: string;
+  role: Role;
   firstName: string;
   hasGear: boolean;
   albums: {
@@ -24,6 +36,11 @@ interface ProfileInteractiveProps {
     coverMedia: { id: string; url: string; type: MediaType } | null;
     media: { id: string; url: string; type: MediaType; title: string | null }[];
   }[];
+  // Only present (non-null) when isOwnProfile — everything the owner has,
+  // unfiltered by isPublished/moderation (unlike `albums` above). See
+  // page.tsx's comment on why this is a second, separate fetch.
+  ownerAlbums: OwnerAlbum[] | null;
+  canEditPortfolio: boolean;
   services: {
     id: string;
     name: string;
@@ -64,9 +81,13 @@ interface ProfileInteractiveProps {
 
 export function ProfileInteractive({
   providerId,
+  profileId,
+  role,
   firstName,
   hasGear,
   albums,
+  ownerAlbums,
+  canEditPortfolio,
   services,
   reviews,
   reviewStats,
@@ -98,7 +119,14 @@ export function ProfileInteractive({
             {hasGear ? <TabsTab value="gear">Gear</TabsTab> : null}
           </TabsList>
           <TabsPanel value="portfolio" className="mt-6">
-            <PortfolioTab albums={albums} />
+            <PortfolioTab
+              albums={albums}
+              ownerAlbums={ownerAlbums}
+              profileId={profileId}
+              role={role}
+              isOwnProfile={isOwnProfile}
+              canEdit={canEditPortfolio}
+            />
           </TabsPanel>
           <TabsPanel value="services" className="mt-6">
             <ServicesTab

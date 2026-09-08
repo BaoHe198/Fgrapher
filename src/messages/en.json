@@ -916,7 +916,8 @@
       "deleteFailed": "Failed to delete album",
       "albumRestored": "Album restored",
       "restoreFailed": "Failed to restore",
-      "orderUpdated": "Order updated"
+      "orderUpdated": "Order updated",
+      "albumUpdated": "Album updated"
     },
     "onboarding": {
       "invalidInput": "Invalid input",
@@ -1415,7 +1416,9 @@
         "moderation": {
           "pending": "Pending review",
           "rejected": "Rejected"
-        }
+        },
+        "cancel": "Cancel",
+        "saveFailed": "Couldn't save changes, please try again"
       }
     },
     "reviews": {
@@ -2418,7 +2421,12 @@
       },
       "portfolioTab": {
         "empty": "No portfolio items yet",
-        "photoCount": "{count, plural, =0 {No photos yet} one {# photo} other {# photos}}"
+        "photoCount": "{count, plural, =0 {No photos yet} one {# photo} other {# photos}}",
+        "reorderAria": "Drag to reorder",
+        "editAlbumAria": "Edit album",
+        "newAlbumTile": "New album",
+        "draftBadge": "Not public yet",
+        "upgradeHint": "Renew your subscription to create new albums."
       },
       "servicesTab": {
         "empty": "No service packages listed",
@@ -2457,7 +2465,18 @@
         "responseNote": "Artists usually respond quickly",
         "ownProfileTitle": "This is your profile",
         "ownProfileBody": "You can't book or message yourself. Manage your availability, services, and portfolio from your dashboard.",
-        "manageAvailability": "Manage availability"
+        "manageAvailability": "Manage availability",
+        "availabilityDialogTitle": "Availability",
+        "fullCalendarLink": "Manage in full calendar"
+      },
+      "hero": {
+        "editCoverAria": "Edit cover photo",
+        "editCoverLabel": "Edit cover",
+        "editAvatarAria": "Edit avatar"
+      },
+      "albumEditDialog": {
+        "title": "Edit album",
+        "managePhotosLink": "Manage photos →"
       }
     },
     "roleProvinceLanding": {

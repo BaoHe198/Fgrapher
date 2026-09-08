@@ -8,10 +8,10 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
+import { AvailabilityDialog } from "@/components/profile/availability-dialog";
 import { useMessaging } from "@/components/providers/messaging-provider";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -74,6 +74,7 @@ export function BookingSidebar({
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [isOpeningChat, setIsOpeningChat] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
 
   useEffect(() => {
     if (isOwnProfile) return;
@@ -157,11 +158,14 @@ export function BookingSidebar({
         <Button
           variant="secondary"
           className="w-full"
-          nativeButton={false}
-          render={<Link href="/dashboard/calendar" />}
+          onClick={() => setAvailabilityOpen(true)}
         >
           {t("manageAvailability")}
         </Button>
+        <AvailabilityDialog
+          open={availabilityOpen}
+          onOpenChange={setAvailabilityOpen}
+        />
       </div>
     );
   }

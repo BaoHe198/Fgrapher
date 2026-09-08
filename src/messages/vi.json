@@ -916,7 +916,8 @@
       "deleteFailed": "Không thể xóa album",
       "albumRestored": "Đã khôi phục album",
       "restoreFailed": "Không thể khôi phục",
-      "orderUpdated": "Đã cập nhật thứ tự"
+      "orderUpdated": "Đã cập nhật thứ tự",
+      "albumUpdated": "Đã cập nhật album"
     },
     "onboarding": {
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -1415,7 +1416,9 @@
         "moderation": {
           "pending": "Đang chờ duyệt",
           "rejected": "Bị từ chối"
-        }
+        },
+        "cancel": "Hủy",
+        "saveFailed": "Không thể lưu thay đổi, vui lòng thử lại"
       }
     },
     "reviews": {
@@ -2418,7 +2421,12 @@
       },
       "portfolioTab": {
         "empty": "Chưa có ảnh trong portfolio",
-        "photoCount": "{count, plural, =0 {Chưa có ảnh} other {# ảnh}}"
+        "photoCount": "{count, plural, =0 {Chưa có ảnh} other {# ảnh}}",
+        "reorderAria": "Kéo để sắp xếp",
+        "editAlbumAria": "Sửa album",
+        "newAlbumTile": "Album mới",
+        "draftBadge": "Chưa công khai",
+        "upgradeHint": "Gia hạn gói để tạo album mới."
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
@@ -2457,7 +2465,18 @@
         "responseNote": "Nghệ sĩ thường phản hồi nhanh chóng",
         "ownProfileTitle": "Đây là hồ sơ của bạn",
         "ownProfileBody": "Bạn không thể đặt lịch hoặc nhắn tin cho chính mình. Quản lý lịch trống, dịch vụ và portfolio trong Dashboard.",
-        "manageAvailability": "Quản lý lịch trống"
+        "manageAvailability": "Quản lý lịch trống",
+        "availabilityDialogTitle": "Lịch trống",
+        "fullCalendarLink": "Quản lý trong lịch đầy đủ"
+      },
+      "hero": {
+        "editCoverAria": "Sửa ảnh bìa",
+        "editCoverLabel": "Sửa ảnh bìa",
+        "editAvatarAria": "Sửa ảnh đại diện"
+      },
+      "albumEditDialog": {
+        "title": "Chỉnh sửa album",
+        "managePhotosLink": "Quản lý ảnh →"
       }
     },
     "roleProvinceLanding": {

@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
 import { MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tag } from "@/components/ui/tag";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { auth } from "@/lib/auth";
+import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
 import type { ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
+import { listAlbums } from "@/services/albums";
 import {
   getProfileReviews,
   getProfileReviewStats,
@@ -25,6 +25,7 @@ import {
   incrementProfileView,
 } from "@/services/public-profile";
 
+import { ProfileAvatar, ProfileCover } from "./profile-hero";
 import { ProfileInteractive } from "./profile-interactive";
 
 function joinRoleLabels(
@@ -135,16 +136,40 @@ export default async function PublicProfilePage({
     incrementProfileView(activeProfile.id);
   }
 
-  const [reviews, reviewStats, products, followerCount] = await Promise.all([
-    getProfileReviews(user.id),
-    getProfileReviewStats(user.id),
-    features.marketplaceEnabled
-      ? getShopProducts(user.id)
-      : Promise.resolve([]),
-    features.socialFeedEnabled
-      ? db.follow.count({ where: { followingId: user.id } })
-      : Promise.resolve(0),
-  ]);
+  const [reviews, reviewStats, products, followerCount, ownerAlbums] =
+    await Promise.all([
+      getProfileReviews(user.id),
+      getProfileReviewStats(user.id),
+      features.marketplaceEnabled
+        ? getShopProducts(user.id)
+        : Promise.resolve([]),
+      features.socialFeedEnabled
+        ? db.follow.count({ where: { followingId: user.id } })
+        : Promise.resolve(0),
+      // getPublicProfileUser's activeProfile.albums (below) is filtered to
+      // isPublished albums with at least one APPROVED photo — correct for
+      // what a visitor sees, but the owner needs to see and reorder
+      // everything they have, including drafts and albums still pending
+      // moderation. Same call dashboard/portfolio/page.tsx makes for its
+      // own owner-only view.
+      isOwnProfile ? listAlbums(activeProfile.id) : Promise.resolve(null),
+    ]);
+
+  // Album creation (POST /api/albums) requires an active subscription
+  // server-side; dashboard/portfolio/page.tsx already hides its whole
+  // AlbumGrid behind the same check via SubscriptionGate (a Server
+  // Component, can't be used inside ProfileInteractive/PortfolioTab which
+  // are Client Components) — this mirrors that by computing the boolean
+  // here and passing it down instead. In practice a lapsed subscription
+  // also unpublishes every Profile row (expireLocalSubscriptions), which
+  // already 404s this whole page for everyone including the owner — this
+  // only matters for the narrow window between actual expiry and the
+  // next daily cron run.
+  const canEditPortfolio = isOwnProfile
+    ? await requireActiveSubscription(user.id, activeProfile.role)
+        .then(() => true)
+        .catch(() => false)
+    : false;
 
   const displayName = activeProfile.displayName ?? user.name ?? username;
   const firstName = user.firstName ?? displayName.split(" ")[0];
@@ -235,39 +260,17 @@ export default async function PublicProfilePage({
   return (
     <div className="flex flex-col">
       <script {...jsonLdScriptProps(jsonLd)} />
-      <div className="relative h-[200px] w-full sm:h-[240px]">
-        {user.coverImage ? (
-          <Image
-            src={user.coverImage}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        ) : (
-          <div
-            className="size-full"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--green-900), var(--green-500) 60%, var(--gold-300))",
-            }}
-          />
-        )}
-      </div>
+      <ProfileCover coverImage={user.coverImage} isOwnProfile={isOwnProfile} />
 
       <div className="mx-auto w-full max-w-[1440px] px-4 pb-[72px] sm:px-8">
         <div className="flex flex-col gap-[18px] pt-4">
           <div className="flex flex-wrap items-start justify-between gap-[18px]">
             <div className="flex flex-wrap items-start gap-[18px]">
-              <Avatar className="-mt-16 size-[104px] shrink-0 border-4 border-bg-surface bg-bg-surface">
-                {user.avatar ? (
-                  <AvatarImage src={user.avatar} alt={displayName} />
-                ) : null}
-                <AvatarFallback className="text-heading-lg">
-                  {displayName[0]?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <ProfileAvatar
+                avatar={user.avatar}
+                displayName={displayName}
+                isOwnProfile={isOwnProfile}
+              />
 
               <div className="flex flex-col gap-1.5 pt-2">
                 <h1 className="text-display-md text-text-primary">
@@ -371,12 +374,25 @@ export default async function PublicProfilePage({
 
           <ProfileInteractive
             providerId={user.id}
+            profileId={activeProfile.id}
+            role={activeProfile.role}
             firstName={firstName}
             hasGear={
               features.marketplaceEnabled &&
               user.profiles.some((p) => p.role === "CAMERA_SHOP")
             }
             albums={activeProfile.albums}
+            ownerAlbums={
+              ownerAlbums?.map((a) => ({
+                id: a.id,
+                title: a.title,
+                description: a.description,
+                category: a.category,
+                coverMedia: a.coverMedia,
+                mediaCount: a._count.media,
+                isPublished: a.isPublished,
+              })) ?? null
+            }
             services={activeProfile.services}
             reviews={reviews.map((r) => ({
               ...r,
@@ -386,6 +402,7 @@ export default async function PublicProfilePage({
             products={products}
             offersTfp={offersTfp}
             isOwnProfile={isOwnProfile}
+            canEditPortfolio={canEditPortfolio}
           />
         </div>
       </div>
