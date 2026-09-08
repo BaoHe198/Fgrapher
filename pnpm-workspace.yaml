@@ -6,6 +6,20 @@ overrides:
   # exploitability here, but a one-line override with no functional
   # downside once confirmed `prisma generate`/`db:migrate:dev` still work.
   deepmerge-ts: ">=8.0.0"
+  # GHSA-5jgf-p345-68v8, GHSA-f65p-4m7j-42xc, GHSA-fph4-wmhf-6fwf,
+  # GHSA-jqff-g426-hqxp (4 high) — host-confusion/SSRF bugs in fast-uri's
+  # URI parsing, patched >=3.1.6. Pulled in via ajv, used by
+  # @hookform/resolvers' zodResolver (a real runtime dependency — every
+  # form in this app) as well as commitlint/@sentry/nextjs's build
+  # tooling/shadcn's dev-only MCP SDK. Confirmed 3.1.5 (vulnerable) was
+  # the resolved version before this override.
+  fast-uri: ">=3.1.6"
+  # GHSA-x5fp-wj9c-mxmx (moderate, array-limit bypass), GHSA-4mjr-xmp4-gh2g
+  # (moderate, DoS via attacker-controlled isBuffer) — patched >=6.16.0.
+  # Pulled in via twilio (a real runtime dependency, src/lib/sms.ts) and
+  # shadcn's dev-only MCP SDK/express. Confirmed 6.15.3 (vulnerable) was
+  # the resolved version before this override.
+  qs: ">=6.16.0"
 allowBuilds:
   "@parcel/watcher": true
   "@prisma/client": true
