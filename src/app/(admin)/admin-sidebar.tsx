@@ -7,6 +7,7 @@ import {
   Handshake,
   Image as ImageIcon,
   LayoutDashboard,
+  Menu,
   ShieldCheck,
   Users,
   Wallet,
@@ -14,7 +15,17 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -63,5 +74,37 @@ export function AdminSidebar() {
         );
       })}
     </nav>
+  );
+}
+
+// Same Sheet-based drawer pattern as MobileDashboardSidebar
+// (src/components/layout/dashboard-sidebar.tsx) — the admin section had
+// no mobile navigation at all below lg (aside is hidden, no trigger of
+// any kind), leaving every /admin/* page below 1024px with no way to
+// move between sections.
+export function MobileAdminSidebar() {
+  const t = useTranslations("accountFlows.admin.sidebar");
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger
+        render={
+          <Button variant="secondary" size="icon">
+            <Menu className="size-5" />
+            <span className="sr-only">{t("openMenu")}</span>
+          </Button>
+        }
+      />
+      <SheetContent side="left" className="w-3/4 sm:max-w-xs">
+        <SheetHeader className="sr-only">
+          <SheetTitle>{t("menuTitle")}</SheetTitle>
+          <SheetDescription>{t("menuDescription")}</SheetDescription>
+        </SheetHeader>
+        <div className="p-4" onClick={() => setOpen(false)}>
+          <AdminSidebar />
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -8,7 +8,7 @@ import { auth } from "@/lib/auth";
 import { AuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 
-import { AdminSidebar } from "./admin-sidebar";
+import { AdminSidebar, MobileAdminSidebar } from "./admin-sidebar";
 
 export default async function AdminLayout({
   children,
@@ -66,11 +66,17 @@ export default async function AdminLayout({
         </Link>
       </div>
 
-      <div className="mx-auto grid w-full max-w-[1400px] flex-1 grid-cols-1 gap-6 px-4 py-6 sm:px-8 lg:grid-cols-[200px_1fr]">
-        <aside className="hidden lg:block">
-          <AdminSidebar />
-        </aside>
-        <div className="min-w-0">{children}</div>
+      <div className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-8">
+        <div className="mb-4 lg:hidden">
+          <MobileAdminSidebar />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_1fr]">
+          <aside className="hidden lg:block">
+            <AdminSidebar />
+          </aside>
+          <div className="min-w-0">{children}</div>
+        </div>
       </div>
     </div>
   );

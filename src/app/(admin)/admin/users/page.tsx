@@ -1,7 +1,7 @@
 "use client";
 
 import type { Role, User, UserRole } from "@prisma/client";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, MoveHorizontal, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
@@ -81,61 +81,71 @@ export default function AdminUsersPage() {
           <Loader2 className="size-6 animate-spin text-text-tertiary" />
         </div>
       ) : (
-        <Card padding={false} className="overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse text-body-sm">
-            <thead>
-              <tr className="border-b border-border-subtle text-left text-text-tertiary">
-                <th className="px-5 py-3">{t("table.name")}</th>
-                <th className="px-3 py-3">{t("table.email")}</th>
-                <th className="px-3 py-3">{t("table.roles")}</th>
-                <th className="px-3 py-3">{t("table.joined")}</th>
-                <th className="px-3 py-3">{t("table.status")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="border-b border-border-subtle last:border-b-0 hover:bg-bg-sunken"
-                >
-                  <td className="px-5 py-3">
-                    <Link
-                      href={`/admin/users/${user.id}`}
-                      className="font-semibold text-text-primary"
-                    >
-                      {user.firstName ?? user.name ?? "—"}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-3 text-text-secondary">
-                    {user.email}
-                  </td>
-                  <td className="px-3 py-3 text-text-secondary">
-                    {user.roles.map((r) => roleT(r.role)).join(", ") || "—"}
-                  </td>
-                  <td className="px-3 py-3 text-text-secondary">
-                    {formatDate(user.createdAt)}
-                  </td>
-                  <td className="px-3 py-3">
-                    {user.isSuspended ? (
-                      <Badge variant="destructive">
-                        {t("statusSuspended")}
-                      </Badge>
-                    ) : user.isVerified ? (
-                      <Badge variant="success">{t("statusVerified")}</Badge>
-                    ) : (
-                      <Badge variant="neutral">{t("statusActive")}</Badge>
-                    )}
-                  </td>
+        <>
+          {/* Card below already scrolls its own overflow (no document-
+              width leak) — this is purely the missing visual cue QA
+              flagged: at 320px only ~1-2 of 5 columns are visible with
+              nothing indicating the rest scrolls into view. */}
+          <div className="flex items-center gap-1.5 text-body-sm text-text-tertiary sm:hidden">
+            <MoveHorizontal className="size-4" />
+            {t("scrollHint")}
+          </div>
+          <Card padding={false} className="overflow-x-auto">
+            <table className="w-full min-w-[720px] border-collapse text-body-sm">
+              <thead>
+                <tr className="border-b border-border-subtle text-left text-text-tertiary">
+                  <th className="px-5 py-3">{t("table.name")}</th>
+                  <th className="px-3 py-3">{t("table.email")}</th>
+                  <th className="px-3 py-3">{t("table.roles")}</th>
+                  <th className="px-3 py-3">{t("table.joined")}</th>
+                  <th className="px-3 py-3">{t("table.status")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {users.length === 0 ? (
-            <p className="px-5 py-8 text-center text-body-sm text-text-secondary">
-              {t("empty")}
-            </p>
-          ) : null}
-        </Card>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="border-b border-border-subtle last:border-b-0 hover:bg-bg-sunken"
+                  >
+                    <td className="px-5 py-3">
+                      <Link
+                        href={`/admin/users/${user.id}`}
+                        className="font-semibold text-text-primary"
+                      >
+                        {user.firstName ?? user.name ?? "—"}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-3 text-text-secondary">
+                      {user.email}
+                    </td>
+                    <td className="px-3 py-3 text-text-secondary">
+                      {user.roles.map((r) => roleT(r.role)).join(", ") || "—"}
+                    </td>
+                    <td className="px-3 py-3 text-text-secondary">
+                      {formatDate(user.createdAt)}
+                    </td>
+                    <td className="px-3 py-3">
+                      {user.isSuspended ? (
+                        <Badge variant="destructive">
+                          {t("statusSuspended")}
+                        </Badge>
+                      ) : user.isVerified ? (
+                        <Badge variant="success">{t("statusVerified")}</Badge>
+                      ) : (
+                        <Badge variant="neutral">{t("statusActive")}</Badge>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {users.length === 0 ? (
+              <p className="px-5 py-8 text-center text-body-sm text-text-secondary">
+                {t("empty")}
+              </p>
+            ) : null}
+          </Card>
+        </>
       )}
     </div>
   );

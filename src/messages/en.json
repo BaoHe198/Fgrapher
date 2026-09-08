@@ -599,7 +599,10 @@
         "moderation": "Moderation",
         "compliance": "Compliance",
         "serviceRequests": "Unclaimed requests",
-        "payments": "Payments"
+        "payments": "Payments",
+        "openMenu": "Open admin menu",
+        "menuTitle": "Admin menu",
+        "menuDescription": "Admin navigation"
       },
       "overview": {
         "metaTitle": "Admin overview — Fgrapher",
@@ -638,7 +641,8 @@
         "statusSuspended": "Suspended",
         "statusVerified": "Verified",
         "statusActive": "Active",
-        "empty": "No users found"
+        "empty": "No users found",
+        "scrollHint": "Swipe to see more columns"
       },
       "userDetail": {
         "backToUsers": "Back to users",

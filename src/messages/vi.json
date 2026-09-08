@@ -599,7 +599,10 @@
         "moderation": "Kiểm duyệt",
         "compliance": "Tuân thủ dữ liệu",
         "serviceRequests": "Yêu cầu chưa ai nhận",
-        "payments": "Thanh toán"
+        "payments": "Thanh toán",
+        "openMenu": "Mở menu quản trị",
+        "menuTitle": "Menu quản trị",
+        "menuDescription": "Điều hướng khu vực quản trị"
       },
       "overview": {
         "metaTitle": "Tổng quan quản trị — Fgrapher",
@@ -638,7 +641,8 @@
         "statusSuspended": "Đã tạm khóa",
         "statusVerified": "Đã xác minh",
         "statusActive": "Đang hoạt động",
-        "empty": "Không tìm thấy người dùng nào"
+        "empty": "Không tìm thấy người dùng nào",
+        "scrollHint": "Vuốt ngang để xem thêm cột"
       },
       "userDetail": {
         "backToUsers": "Quay lại danh sách người dùng",
