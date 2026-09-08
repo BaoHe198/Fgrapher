@@ -10,15 +10,26 @@ import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import { assignFreePlan } from "@/services/subscription";
 
+// Duplicate of isSubscriptionUsable in src/lib/auth-helpers.ts — kept as
+// its own copy since this file already had one before that one existed,
+// but fixed in lockstep with it: ACTIVE/TRIALING alone isn't enough,
+// currentPeriodEnd must not have passed. Without this, a subscription
+// from the local payment rails (MoMo/ZaloPay/bank transfer) or a
+// manually assigned plan — neither of which anything ever transitions
+// away from ACTIVE on its own — would keep gating content open forever
+// past its real expiry.
 function isUsable(
   subscription: {
     status: string;
+    currentPeriodEnd: Date | null;
     graceEndsAt: Date | null;
   } | null,
 ) {
   if (!subscription) return false;
-  const { status, graceEndsAt } = subscription;
-  if (status === "ACTIVE" || status === "TRIALING") return true;
+  const { status, currentPeriodEnd, graceEndsAt } = subscription;
+  if (status === "ACTIVE" || status === "TRIALING") {
+    return !currentPeriodEnd || currentPeriodEnd > new Date();
+  }
   if (status === "PAST_DUE" && graceEndsAt) return graceEndsAt > new Date();
   return false;
 }
@@ -31,14 +42,19 @@ async function hasUsableSubscription(userId: string, role: Role) {
   if (!userRole?.active) return false;
   if (isUsable(userRole.subscription)) return true;
 
-  // Self-heals accounts that activated a paid role through
+  // Only self-heals the specific historical gap this was written for: an
+  // active role with NO Subscription row at all (activated through
   // /api/users/roles before that route also started granting a free
-  // plan (or any other gap that leaves an active role with no
-  // Subscription row) — while billing is disabled there's no self-serve
-  // Checkout to send them through, and no admin step is expected here,
-  // so the correct behavior is just to grant the same free plan
-  // /api/auth/register already gives every paid role at signup.
-  if (!features.billingEnabled) {
+  // plan, or any other gap of the same shape). A role that HAS a
+  // subscription row which is simply expired must NOT silently get a
+  // free re-grant here — that would defeat currentPeriodEnd enforcement
+  // above via a back door, and now that the local payment rails exist,
+  // renewing is what those are for.
+  if (
+    !userRole.subscription &&
+    !features.billingEnabled &&
+    features.freeRoleGrantEnabled
+  ) {
     await assignFreePlan(userId, [role]);
     return true;
   }

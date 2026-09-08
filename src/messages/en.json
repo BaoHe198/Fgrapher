@@ -2213,6 +2213,9 @@
         "body": "Unfortunately we couldn't confirm your bank transfer. Please double-check the details and try again.",
         "bodyWithReason": "Unfortunately we couldn't confirm your bank transfer. Reason: {reason}",
         "cta": "Try again"
+      },
+      "paymentNeedsReview": {
+        "body": "We received your payment but couldn't activate your plan automatically — our support team will follow up shortly."
       }
     }
   },

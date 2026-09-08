@@ -1,9 +1,14 @@
 import crypto from "node:crypto";
 
-import type { PaymentProvider, Role } from "@prisma/client";
+import * as Sentry from "@sentry/nextjs";
+import type { Payment, PaymentProvider, Role } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
-import { bookingEmailShell, receiptEmailHtml } from "@/lib/email";
+import {
+  bookingEmailShell,
+  receiptEmailHtml,
+  subscriptionEndedEmailHtml,
+} from "@/lib/email";
 import { db } from "@/lib/db";
 import {
   buildAppTransId,
@@ -19,6 +24,8 @@ import type { ZalopayCallbackData } from "@/lib/zalopay";
 import { generateTransferReference } from "@/lib/bank-transfer";
 import { formatCurrency } from "@/lib/utils";
 import { type BillingInterval, ROLE_PLANS } from "@/lib/constants/plans";
+import { PAID_ROLES } from "@/lib/constants";
+import { features } from "@/lib/features";
 import { notifyCritical } from "@/services/notification";
 
 export class PaymentError extends Error {}
@@ -40,11 +47,44 @@ function amountForRole(role: Role, interval: BillingInterval) {
   return interval === "year" ? rolePlan.yearly : rolePlan.monthly;
 }
 
-function periodEndFor(interval: BillingInterval) {
-  const end = new Date();
+function periodEndFrom(base: Date, interval: BillingInterval) {
+  const end = new Date(base);
   if (interval === "year") end.setFullYear(end.getFullYear() + 1);
   else end.setMonth(end.getMonth() + 1);
   return end;
+}
+
+// Same one-active-paid-role-per-account rule /api/users/roles and
+// createRoleChangeRequest already enforce (CLAUDE.md) — checked here too
+// because these 3 create-intent functions are a second, independent path
+// that can activate a role, and previously validated nothing beyond "is
+// this a real Role enum value" (which includes CAMERA_SHOP regardless of
+// MARKETPLACE_ENABLED, and includes every role regardless of what the
+// account already has active). Called again inside activateRoleFromPayment
+// right before actually flipping the role live, since real time passes
+// between creating an intent and its confirmation landing (a MoMo/ZaloPay
+// redirect-and-pay round trip, or a bank-transfer submission sitting in
+// the admin queue for days) during which the account's eligibility can
+// change — a RoleChangeRequest approval, or MARKETPLACE_ENABLED flipping.
+async function assertPayableRole(userId: string, role: Role) {
+  if (role === "CAMERA_SHOP" && !features.marketplaceEnabled) {
+    throw new PaymentError("invalid_role");
+  }
+
+  const currentRole = await db.userRole.findFirst({
+    where: { userId, active: true, role: { in: PAID_ROLES } },
+    select: { role: true },
+  });
+  // No current paid role at all: any valid role above is a first-time
+  // activation. A current paid role: only paying to renew/extend THAT
+  // SAME role is allowed — switching roles goes through the existing
+  // admin-approved RoleChangeRequest flow, never silently through a
+  // payment. Without this, paying for a different role than the one
+  // already active would leave two providers "active" on one account at
+  // once.
+  if (currentRole && currentRole.role !== role) {
+    throw new PaymentError("role_mismatch");
+  }
 }
 
 // Short, url-safe, unique enough for a per-payment order id — this is
@@ -59,82 +99,148 @@ function generateOrderId() {
 // role — every rail below (MoMo IPN, ZaloPay callback, admin bank-
 // transfer approval) funnels through this, so "money in" and "role
 // activated" can never drift apart between the four payment methods.
-// Same two writes as services/subscription.ts's assignManualPlan
-// (UserRole → active: true, Subscription upsert) — not wrapped in a
-// db.$transaction, matching assignManualPlan's own existing precedent
-// (sequential awaits) rather than introducing a stricter guarantee only
-// for the new rails.
+//
+// Concurrency: the payment.updateMany's `where: { id, status: fromStatus }`
+// is an atomic compare-and-swap — Postgres row-level locking means at
+// most one concurrent caller can match it and actually transition the
+// row (a duplicate MoMo IPN delivery, or two admins clicking approve on
+// the same AWAITING_REVIEW row at once). A caller that loses the race
+// gets `count: 0` and this returns null without touching UserRole/
+// Subscription/notifications at all — not a partial write. The claim and
+// the role/subscription upserts run in one db.$transaction so a DB error
+// between them can never leave "payment SUCCEEDED but role still
+// inactive" or the reverse; notifyCritical (a side effect, not a DB
+// write, and its own failure shouldn't roll back already-committed
+// state) runs after the transaction commits, not inside it.
+//
+// Role re-validated via assertPayableRole right before activating, not
+// just at intent-creation time (see that function's comment) — if it now
+// fails, the payment is still marked SUCCEEDED (the money was genuinely
+// received) but the role is left untouched; this is a rare edge case
+// (the account's eligibility changing in the gap between starting and
+// confirming a payment), not something to silently drop or crash on, so
+// it's logged to Sentry and the customer is told to contact support
+// rather than getting a silent no-op.
 async function activateRoleFromPayment({
   paymentId,
   userId,
   role,
   interval,
+  fromStatus,
+  claimData = {},
 }: {
   paymentId: string;
   userId: string;
   role: Role;
   interval: BillingInterval;
-}) {
-  const expiresAt = periodEndFor(interval);
+  fromStatus: "PENDING" | "AWAITING_REVIEW";
+  claimData?: Record<string, unknown>;
+}): Promise<{ activated: boolean; payment: Payment } | null> {
+  let roleValid = true;
+  try {
+    await assertPayableRole(userId, role);
+  } catch {
+    roleValid = false;
+  }
 
-  const userRole = await db.userRole.upsert({
-    where: { userId_role: { userId, role } },
-    create: { userId, role, active: true },
-    update: { active: true },
+  const claim = await db.$transaction(async (tx) => {
+    const result = await tx.payment.updateMany({
+      where: { id: paymentId, status: fromStatus },
+      data: { status: "SUCCEEDED", ...claimData },
+    });
+    if (result.count === 0) return null; // lost the race, or already resolved
+    if (!roleValid) return { activated: false as const, expiresAt: null };
+
+    // Renewing the SAME role's subscription extends from whichever is
+    // later: its existing currentPeriodEnd, or now. Without this, paying
+    // early (including via the 3-day renewal reminder) discarded
+    // whatever time was already paid for, replacing it with a fresh
+    // `interval` starting today.
+    const existing = await tx.subscription.findFirst({
+      where: { userRole: { userId, role } },
+      select: { id: true, userRoleId: true, currentPeriodEnd: true },
+    });
+    const baseDate =
+      existing?.currentPeriodEnd && existing.currentPeriodEnd > new Date()
+        ? existing.currentPeriodEnd
+        : new Date();
+    const expiresAt = periodEndFrom(baseDate, interval);
+
+    const userRole = await tx.userRole.upsert({
+      where: { userId_role: { userId, role } },
+      create: { userId, role, active: true },
+      update: { active: true },
+    });
+
+    await tx.subscription.upsert({
+      where: { userRoleId: userRole.id },
+      create: {
+        userRoleId: userRole.id,
+        plan: role,
+        interval,
+        status: "ACTIVE",
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: expiresAt,
+      },
+      update: {
+        plan: role,
+        interval,
+        status: "ACTIVE",
+        currentPeriodEnd: expiresAt,
+        cancelAtPeriodEnd: false,
+      },
+    });
+
+    return { activated: true as const, expiresAt };
   });
 
-  await db.subscription.upsert({
-    where: { userRoleId: userRole.id },
-    create: {
-      userRoleId: userRole.id,
-      plan: role,
-      interval,
-      status: "ACTIVE",
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: expiresAt,
-    },
-    update: {
-      plan: role,
-      interval,
-      status: "ACTIVE",
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: expiresAt,
-      cancelAtPeriodEnd: false,
-    },
-  });
+  if (!claim) return null;
 
-  const payment = await db.payment.update({
+  const payment = await db.payment.findUniqueOrThrow({
     where: { id: paymentId },
-    data: { status: "SUCCEEDED" },
   });
+
+  if (!claim.activated) {
+    Sentry.captureMessage(
+      `Payment ${paymentId} succeeded but role ${role} could not be activated for user ${userId} (assertPayableRole failed at confirmation time) — needs manual review.`,
+      "error",
+    );
+    const emailT = await getEmailT();
+    await notifyCritical({
+      userId,
+      type: "PAYMENT_FAILED",
+      title: emailT("paymentRejected.heading"),
+      message: emailT("paymentNeedsReview.body"),
+      data: { paymentId, role },
+    });
+    return { activated: false, payment };
+  }
 
   const [roleT, emailT] = await Promise.all([
     getTranslations("role"),
     getEmailT(),
   ]);
   const amountLabel = formatCurrency(payment.amount);
+  const periodEndLabel = claim.expiresAt!.toLocaleDateString("vi-VN");
 
   await notifyCritical({
     userId,
     type: "SUBSCRIPTION_ACTIVE",
     title: emailT("receipt.heading"),
-    message: emailT("receipt.body", {
-      amountLabel,
-      periodEndLabel: expiresAt.toLocaleDateString("vi-VN"),
-    }),
-    data: { paymentId, role },
+    message: emailT("receipt.body", { amountLabel, periodEndLabel }),
+    data: { paymentId, role, roleLabel: roleT(role) },
     email: {
       subject: emailT("receipt.heading"),
       html: receiptEmailHtml({
         t: emailT,
         amountLabel,
-        periodEndLabel: expiresAt.toLocaleDateString("vi-VN"),
+        periodEndLabel,
         invoiceUrl: billingUrl(),
       }),
     },
   });
 
-  return { userRole, payment, roleLabel: roleT(role) };
+  return { activated: true, payment };
 }
 
 // Distinct from Stripe's paymentFailedEmailHtml (a card-decline template
@@ -180,6 +286,7 @@ export async function createMomoPaymentIntent(
   role: Role,
   interval: BillingInterval,
 ) {
+  await assertPayableRole(userId, role);
   const amount = amountForRole(role, interval);
   const orderId = generateOrderId();
   const roleT = await getTranslations("role");
@@ -236,8 +343,13 @@ export async function confirmMomoPayment(payload: MomoIpnPayload) {
   if (payment.status !== "PENDING") return payment; // already resolved
 
   if (payload.resultCode !== 0) {
-    await db.payment.update({
-      where: { id: payment.id },
+    // Atomic claim here too — a duplicate failure IPN replay must also
+    // be a no-op, not repeatedly re-write providerTransactionId (harmless
+    // by itself, but keeping one consistent pattern for every status
+    // transition in this file is what makes the concurrency story
+    // reviewable at all).
+    await db.payment.updateMany({
+      where: { id: payment.id, status: "PENDING" },
       data: {
         status: "FAILED",
         providerTransactionId: String(payload.transId),
@@ -254,19 +366,16 @@ export async function confirmMomoPayment(payload: MomoIpnPayload) {
     throw new PaymentError("amount_mismatch");
   }
 
-  await db.payment.update({
-    where: { id: payment.id },
-    data: { providerTransactionId: String(payload.transId) },
-  });
-
-  await activateRoleFromPayment({
+  const result = await activateRoleFromPayment({
     paymentId: payment.id,
     userId: payment.userId,
     role: payment.role,
     interval: payment.interval as BillingInterval,
+    fromStatus: "PENDING",
+    claimData: { providerTransactionId: String(payload.transId) },
   });
 
-  return payment;
+  return result?.payment ?? payment;
 }
 
 // ---------------------------------------------------------------------
@@ -278,6 +387,7 @@ export async function createZalopayPaymentIntent(
   role: Role,
   interval: BillingInterval,
 ) {
+  await assertPayableRole(userId, role);
   const amount = amountForRole(role, interval);
   const orderId = generateOrderId();
   const appTransId = buildAppTransId(orderId);
@@ -342,19 +452,16 @@ export async function confirmZalopayPayment(rawData: string, mac: string) {
     throw new PaymentError("amount_mismatch");
   }
 
-  await db.payment.update({
-    where: { id: payment.id },
-    data: { providerTransactionId: String(data.zp_trans_id) },
-  });
-
-  await activateRoleFromPayment({
+  const result = await activateRoleFromPayment({
     paymentId: payment.id,
     userId: payment.userId,
     role: payment.role,
     interval: payment.interval as BillingInterval,
+    fromStatus: "PENDING",
+    claimData: { providerTransactionId: String(data.zp_trans_id) },
   });
 
-  return payment;
+  return result?.payment ?? payment;
 }
 
 // ---------------------------------------------------------------------
@@ -372,6 +479,7 @@ export async function createBankTransferIntent(
   role: Role,
   interval: BillingInterval,
 ) {
+  await assertPayableRole(userId, role);
   const amount = amountForRole(role, interval);
   const roleT = await getTranslations("role");
 
@@ -432,27 +540,32 @@ export async function reviewBankTransferPayment({
   if (!payment || payment.provider !== "BANK_TRANSFER") {
     throw new PaymentError("payment_not_found");
   }
-  if (payment.status !== "AWAITING_REVIEW") {
-    throw new PaymentError("already_reviewed");
-  }
   if (!payment.role || !payment.interval) {
     throw new PaymentError("missing_role_or_interval");
   }
 
   if (approve) {
-    await db.payment.update({
-      where: { id: paymentId },
-      data: { reviewedBy: adminId, reviewedAt: new Date() },
-    });
-    await activateRoleFromPayment({
+    // reviewedBy/reviewedAt now set atomically as part of the same claim
+    // that transitions status — previously a separate db.payment.update
+    // ran BEFORE activateRoleFromPayment's own read-then-write, which is
+    // exactly the kind of gap that let two concurrent reviews (one
+    // approve, one reject) both believe they were the one making the
+    // decision. Status is no longer checked here at all — the atomic
+    // claim inside activateRoleFromPayment (`where: { status:
+    // "AWAITING_REVIEW" }`) is the single source of truth for whether
+    // this call is the one that gets to act, for both branches.
+    const result = await activateRoleFromPayment({
       paymentId,
       userId: payment.userId,
       role: payment.role,
       interval: payment.interval as BillingInterval,
+      fromStatus: "AWAITING_REVIEW",
+      claimData: { reviewedBy: adminId, reviewedAt: new Date() },
     });
+    if (!result) throw new PaymentError("already_reviewed");
   } else {
-    await db.payment.update({
-      where: { id: paymentId },
+    const claim = await db.payment.updateMany({
+      where: { id: paymentId, status: "AWAITING_REVIEW" },
       data: {
         status: "FAILED",
         reviewedBy: adminId,
@@ -460,6 +573,7 @@ export async function reviewBankTransferPayment({
         reviewNote: reason,
       },
     });
+    if (claim.count === 0) throw new PaymentError("already_reviewed");
     await notifyBankTransferRejected(payment.userId, reason);
   }
 
@@ -515,6 +629,74 @@ export async function sendSubscriptionRenewalReminders() {
   }
 
   return sent;
+}
+
+// The counterpart to isSubscriptionUsable's currentPeriodEnd check
+// (src/lib/auth-helpers.ts) — that predicate stops an expired local-rail
+// subscription from granting access at read time, but nothing was ever
+// writing the actual DB state to match (status stayed ACTIVE forever,
+// unlike Stripe's own webhooks). This makes the two agree: once
+// currentPeriodEnd has passed, transition to EXPIRED, deactivate the
+// role, and unpublish the profile — the same 3-way state change
+// services/subscription.ts's handleSubscriptionDeleted already performs
+// for a cancelled Stripe subscription.
+export async function expireLocalSubscriptions() {
+  const now = new Date();
+  const candidates = await db.subscription.findMany({
+    where: {
+      status: "ACTIVE",
+      stripeSubscriptionId: null,
+      currentPeriodEnd: { lt: now },
+    },
+    include: { userRole: true },
+  });
+
+  const emailT = await getEmailT();
+  let expired = 0;
+
+  for (const subscription of candidates) {
+    // Atomic claim, same reasoning as activateRoleFromPayment — a
+    // renewal payment could land for this exact subscription between the
+    // findMany above and this update; only proceed if it's still ACTIVE
+    // at write time, so a concurrent renewal always wins over expiry.
+    const claim = await db.subscription.updateMany({
+      where: { id: subscription.id, status: "ACTIVE" },
+      data: { status: "EXPIRED" },
+    });
+    if (claim.count === 0) continue;
+
+    await db.$transaction([
+      db.userRole.update({
+        where: { id: subscription.userRoleId },
+        data: { active: false },
+      }),
+      db.profile.updateMany({
+        where: {
+          userId: subscription.userRole.userId,
+          role: subscription.userRole.role,
+        },
+        data: { isPublished: false },
+      }),
+    ]);
+
+    await notifyCritical({
+      userId: subscription.userRole.userId,
+      type: "SUBSCRIPTION_CANCELLED",
+      title: emailT("subscriptionEnded.heading"),
+      message: emailT("subscriptionEnded.body"),
+      data: { role: subscription.userRole.role },
+      email: {
+        subject: emailT("subscriptionEnded.heading"),
+        html: subscriptionEndedEmailHtml({
+          t: emailT,
+          billingUrl: billingUrl(),
+        }),
+      },
+    });
+    expired++;
+  }
+
+  return expired;
 }
 
 const PAYMENT_INTENT_EXPIRY_HOURS = 24;

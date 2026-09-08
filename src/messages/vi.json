@@ -2213,6 +2213,9 @@
         "body": "Rất tiếc, chúng tôi chưa thể xác nhận khoản chuyển khoản của bạn. Vui lòng kiểm tra lại thông tin và thử lại.",
         "bodyWithReason": "Rất tiếc, chúng tôi chưa thể xác nhận khoản chuyển khoản của bạn. Lý do: {reason}",
         "cta": "Thử lại"
+      },
+      "paymentNeedsReview": {
+        "body": "Chúng tôi đã nhận được thanh toán của bạn nhưng chưa thể kích hoạt gói tự động — đội ngũ hỗ trợ sẽ liên hệ để xử lý trong thời gian sớm nhất."
       }
     }
   },

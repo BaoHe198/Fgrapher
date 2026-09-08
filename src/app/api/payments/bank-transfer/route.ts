@@ -122,6 +122,16 @@ export async function POST(request: Request) {
         { status: err.status },
       );
     }
+    // assertPayableRole (invalid_role / role_mismatch) throws PaymentError
+    // — was previously falling through to a generic 500 here, unlike the
+    // MoMo/ZaloPay create routes' equivalent branch, even though the
+    // rejection itself was already working correctly.
+    if (err instanceof PaymentError) {
+      return NextResponse.json(
+        { data: null, error: err.message, message: t("createFailed") },
+        { status: 400 },
+      );
+    }
     return NextResponse.json(
       { data: null, error: "server_error", message: t("createFailed") },
       { status: 500 },
