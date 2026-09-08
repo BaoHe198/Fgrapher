@@ -515,7 +515,7 @@ function StepService({
                     {service.name}
                   </span>
                   {service.description ? (
-                    <span className="text-body-sm text-text-secondary">
+                    <span className="whitespace-pre-line text-body-sm text-text-secondary">
                       {service.description}
                     </span>
                   ) : null}

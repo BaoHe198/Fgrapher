@@ -19,10 +19,12 @@ export function ServicesTab({
   services,
   onBook,
   offersTfp,
+  isOwnProfile,
 }: {
   services: ServiceItem[];
   onBook: (serviceId: string) => void;
   offersTfp?: boolean;
+  isOwnProfile: boolean;
 }) {
   const t = useTranslations("publicPages.profile.servicesTab");
 
@@ -59,7 +61,7 @@ export function ServicesTab({
               {service.name}
             </span>
             {service.description ? (
-              <p className="text-body-sm text-text-secondary">
+              <p className="whitespace-pre-line text-body-sm text-text-secondary">
                 {service.description}
               </p>
             ) : null}
@@ -73,13 +75,15 @@ export function ServicesTab({
                 ? t("tfpCollab")
                 : formatCurrency(service.price, service.currency)}
             </span>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => onBook(service.id)}
-            >
-              {t("book")}
-            </Button>
+            {isOwnProfile ? null : (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => onBook(service.id)}
+              >
+                {t("book")}
+              </Button>
+            )}
           </div>
         </div>
       ))}

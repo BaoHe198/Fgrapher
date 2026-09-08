@@ -2,6 +2,7 @@
 
 import type { MediaType, ProfileCategory, Role } from "@prisma/client";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { BookingSidebar } from "@/components/profile/booking-sidebar";
@@ -96,16 +97,18 @@ export function ProfileInteractive({
   isOwnProfile,
 }: ProfileInteractiveProps) {
   const t = useTranslations("publicPages.profile.tabs");
+  const router = useRouter();
   const [tab, setTab] = useState("portfolio");
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
 
+  // Jump straight to the booking page with this service pre-selected
+  // (booking-wizard.tsx reads ?service= on mount) — scrolling to the
+  // sidebar and asking the visitor to click "Đặt lịch ngay" a second
+  // time was an extra, confusing step for what's already a clear intent.
   const onBook = (serviceId: string) => {
-    setSelectedServiceId(serviceId);
-    document
-      .getElementById("booking-sidebar")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    router.push(`/booking/${providerId}?service=${serviceId}`);
   };
 
   return (
@@ -133,6 +136,7 @@ export function ProfileInteractive({
               services={services}
               onBook={onBook}
               offersTfp={offersTfp}
+              isOwnProfile={isOwnProfile}
             />
           </TabsPanel>
           <TabsPanel value="reviews" className="mt-6">

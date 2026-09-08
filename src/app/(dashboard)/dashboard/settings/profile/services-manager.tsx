@@ -15,6 +15,7 @@ import {
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/utils";
 
 interface ServiceItem {
@@ -167,7 +168,7 @@ export function ServicesManager({
       )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
               {editingId ? t("editService") : t("addServiceDialogTitle")}
@@ -183,8 +184,9 @@ export function ServicesManager({
               <label className="text-body-sm font-semibold! text-text-primary">
                 {t("descriptionLabel")}
               </label>
-              <textarea
-                className="min-h-20 w-full rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none focus:border-border-focus focus:ring-2 focus:ring-gold-500/20"
+              <Textarea
+                rows={6}
+                className="min-h-36 text-body-md"
                 value={draft.description}
                 onChange={(e) =>
                   setDraft({ ...draft, description: e.target.value })
