@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Plus, Send } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -23,6 +24,11 @@ const STATUS_VARIANT: Record<
   CANCELLED: "destructive",
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboardCore.serviceRequests");
+  return { title: t("title") };
+}
+
 export default async function ServiceRequestsPage() {
   const t = await getTranslations("dashboardCore.serviceRequests");
   const roleT = await getTranslations("role");
@@ -38,7 +44,7 @@ export default async function ServiceRequestsPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-2">
-        <SectionHead title={t("title")} />
+        <SectionHead title={t("title")} as="h1" />
         <Button
           variant="accent"
           size="sm"

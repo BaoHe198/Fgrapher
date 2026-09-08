@@ -7,6 +7,12 @@ interface SectionHeadProps {
   actionLabel?: string;
   actionHref?: string;
   className?: string;
+  // Defaults to h2 — most call sites sit under a page that already has
+  // its own <h1> elsewhere (e.g. the home page's hero). Several
+  // standalone dashboard pages use SectionHead as their ONLY heading
+  // though, and had no <h1> anywhere on the page at all as a result —
+  // those pass as="h1" explicitly.
+  as?: "h1" | "h2";
 }
 
 function SectionHead({
@@ -14,10 +20,11 @@ function SectionHead({
   actionLabel,
   actionHref,
   className,
+  as: Heading = "h2",
 }: SectionHeadProps) {
   return (
     <div className={cn("mb-5 flex items-center justify-between", className)}>
-      <h2 className="text-display-md text-text-primary">{title}</h2>
+      <Heading className="text-display-md text-text-primary">{title}</Heading>
       {actionLabel && actionHref ? (
         <Link
           href={actionHref}

@@ -310,6 +310,11 @@ export function BookingWizard({
 
   return (
     <div className="mx-auto max-w-[900px] px-8 py-10">
+      {/* QA: no <h1> anywhere in the wizard — each step already has its
+          own <h2> ("Bạn cần gì?", "Chọn ngày & giờ", ...), so a second
+          large visible title here would be redundant; a screen-reader
+          -only one still gives the page an actual name. */}
+      <h1 className="sr-only">{t("pageTitle")}</h1>
       <ProgressIndicator step={step} />
 
       <Card className="p-8">

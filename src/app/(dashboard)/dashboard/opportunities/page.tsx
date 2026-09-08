@@ -1,4 +1,5 @@
 import type { Role } from "@prisma/client";
+import type { Metadata } from "next";
 import { Handshake } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -13,6 +14,11 @@ import { PROVIDER_ROLES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
 import { listOpportunitiesForProvider } from "@/services/request-offers";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboardCore.opportunities");
+  return { title: t("title") };
+}
 
 export default async function OpportunitiesPage({
   searchParams,
@@ -63,7 +69,7 @@ export default async function OpportunitiesPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <SectionHead title={t("title")} />
+      <SectionHead title={t("title")} as="h1" />
 
       {providerRoles.length > 1 ? (
         <div className="flex flex-wrap gap-2">

@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { listConversations } from "@/services/messaging";
 
 import { MessagesClient } from "./messages-client";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboardCore.messages");
+  return { title: t("pageTitle") };
+}
 
 export default async function MessagesPage() {
   const session = await auth();

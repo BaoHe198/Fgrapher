@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Camera } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -14,6 +15,11 @@ import { PAID_ROLES } from "@/lib/constants";
 import { listAlbums } from "@/services/albums";
 
 import { AlbumGrid } from "./album-grid";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboardCore.portfolio");
+  return { title: t("sectionTitle") };
+}
 
 export default async function PortfolioPage({
   searchParams,
@@ -86,7 +92,7 @@ export default async function PortfolioPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <SectionHead title={t("sectionTitle")} />
+      <SectionHead title={t("sectionTitle")} as="h1" />
 
       {profiles.length > 1 ? (
         <div className="flex flex-wrap gap-2">

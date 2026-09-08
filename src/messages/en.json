@@ -1663,7 +1663,8 @@
     },
     "messages": {
       "selectConversation": "Select a conversation",
-      "selectConversationHint": "Choose from the list to start chatting"
+      "selectConversationHint": "Choose from the list to start chatting",
+      "pageTitle": "Messages"
     },
     "customerOrders": {
       "title": "My orders",

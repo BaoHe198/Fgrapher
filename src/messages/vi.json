@@ -1663,7 +1663,8 @@
     },
     "messages": {
       "selectConversation": "Chọn một cuộc trò chuyện",
-      "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin"
+      "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin",
+      "pageTitle": "Tin nhắn"
     },
     "customerOrders": {
       "title": "Đơn hàng của tôi",

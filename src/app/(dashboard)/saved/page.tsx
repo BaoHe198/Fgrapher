@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Bookmark } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
@@ -7,6 +8,11 @@ import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatVND } from "@/lib/format";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboardCore.saved");
+  return { title: t("title") };
+}
 
 export default async function SavedProfilesPage() {
   const session = await auth();
@@ -65,7 +71,7 @@ export default async function SavedProfilesPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <SectionHead title={t("title")} />
+      <SectionHead title={t("title")} as="h1" />
 
       {profiles.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Send } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -21,6 +22,11 @@ const STATUS_VARIANT: Record<
   WITHDRAWN: "neutral",
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboardCore.myOffers");
+  return { title: t("title") };
+}
+
 export default async function MyOffersPage() {
   const t = await getTranslations("dashboardCore.myOffers");
 
@@ -33,7 +39,7 @@ export default async function MyOffersPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <SectionHead title={t("title")} />
+      <SectionHead title={t("title")} as="h1" />
 
       {offers.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">

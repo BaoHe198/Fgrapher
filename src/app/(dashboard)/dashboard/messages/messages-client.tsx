@@ -91,37 +91,43 @@ export function MessagesClient({
   if (!session?.user) return null;
 
   return (
-    <div className="grid h-[calc(100dvh-180px)] min-h-[480px] grid-cols-1 overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card lg:grid-cols-[340px_1fr]">
-      <div className={cn("h-full", selectedId ? "hidden lg:block" : "block")}>
-        <ConversationList
-          conversations={conversations}
-          selectedId={selectedId}
-          currentUserId={session.user.id}
-          onSelect={onSelect}
-        />
-      </div>
-
-      <div className={cn("h-full", selectedId ? "block" : "hidden lg:block")}>
-        {selectedConversation ? (
-          <ChatPanel
-            key={selectedConversation.id}
-            conversationId={selectedConversation.id}
+    <>
+      {/* QA: this page had no <h1> anywhere — a chat-style layout (list +
+          panel) genuinely doesn't need a big visible page title the way
+          other dashboard pages do, but a screen reader still needs one. */}
+      <h1 className="sr-only">{t("pageTitle")}</h1>
+      <div className="grid h-[calc(100dvh-180px)] min-h-[480px] grid-cols-1 overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card lg:grid-cols-[340px_1fr]">
+        <div className={cn("h-full", selectedId ? "hidden lg:block" : "block")}>
+          <ConversationList
+            conversations={conversations}
+            selectedId={selectedId}
             currentUserId={session.user.id}
-            otherUser={selectedConversation.otherUser}
-            onBack={onBack}
+            onSelect={onSelect}
           />
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-            <MessageCircle className="size-16 text-text-tertiary" />
-            <p className="text-body-lg font-semibold! text-text-primary">
-              {t("selectConversation")}
-            </p>
-            <p className="text-body-md text-text-secondary">
-              {t("selectConversationHint")}
-            </p>
-          </div>
-        )}
+        </div>
+
+        <div className={cn("h-full", selectedId ? "block" : "hidden lg:block")}>
+          {selectedConversation ? (
+            <ChatPanel
+              key={selectedConversation.id}
+              conversationId={selectedConversation.id}
+              currentUserId={session.user.id}
+              otherUser={selectedConversation.otherUser}
+              onBack={onBack}
+            />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+              <MessageCircle className="size-16 text-text-tertiary" />
+              <p className="text-body-lg font-semibold! text-text-primary">
+                {t("selectConversation")}
+              </p>
+              <p className="text-body-md text-text-secondary">
+                {t("selectConversationHint")}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
