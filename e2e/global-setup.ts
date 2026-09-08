@@ -1,4 +1,6 @@
 import { execSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   activatePaidRole,
@@ -9,12 +11,23 @@ import {
   seedWeekdayAvailability,
 } from "./helpers/db";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 // Runs once before the whole suite. Resets the test database to a known,
-// empty-except-fixtures state on every run — safe because this only ever
-// targets DATABASE_URL from .env.test (a disposable Postgres instance, see
+// empty-except-fixtures state on every run — intended to only ever target
+// DATABASE_URL from .env.test (a disposable Postgres instance, see
 // e2e/README.md), never dev or prod. Idempotent by design so repeated local
 // runs against a persistent local Postgres behave the same as a fresh
 // container in CI.
+//
+// scripts/check-e2e-db-safety.mjs is what actually ENFORCES that "only
+// ever" above — without it, this ran `migrate reset --force` against
+// whatever DATABASE_URL happened to be set with no verification it was
+// the test DB at all (e.g. a dev DATABASE_URL leaked into the shell from
+// an earlier `source .env.local`, or running the Playwright "smoke"
+// project locally without BASE_URL/SKIP_GLOBAL_SETUP, both of which
+// still hit this file). The guard fails closed on anything that isn't
+// localhost/127.0.0.1 + database name "fgrapher_test".
 export default async function globalSetup() {
   if (!process.env.DATABASE_URL) {
     throw new Error(
@@ -22,6 +35,14 @@ export default async function globalSetup() {
         "(copy e2e/.env.test.example first) — see e2e/README.md.",
     );
   }
+
+  execSync(
+    `node "${path.join(__dirname, "..", "scripts", "check-e2e-db-safety.mjs")}"`,
+    {
+      stdio: "inherit",
+      env: process.env,
+    },
+  );
 
   execSync("npx prisma migrate reset --force --skip-seed", {
     stdio: "inherit",
@@ -50,7 +71,12 @@ export default async function globalSetup() {
     priceMin: 1_000_000,
     priceMax: 8_000_000,
     services: [
-      { name: "Portrait Session", description: "90 min portrait shoot", duration: 90, price: 1_500_000 },
+      {
+        name: "Portrait Session",
+        description: "90 min portrait shoot",
+        duration: 90,
+        price: 1_500_000,
+      },
     ],
   });
 
@@ -71,7 +97,11 @@ export default async function globalSetup() {
     displayName: "Fixture Camera Shop",
     description: "Seeded E2E fixture shop.",
   });
-  await createProduct({ userId: shop.id, name: "Fixture Mirrorless Camera", price: 25_000_000 });
+  await createProduct({
+    userId: shop.id,
+    name: "Fixture Mirrorless Camera",
+    price: 25_000_000,
+  });
 
   await disconnect();
 }
