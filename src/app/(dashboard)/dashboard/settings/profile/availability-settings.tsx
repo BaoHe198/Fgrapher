@@ -138,6 +138,10 @@ export function AvailabilitySettings() {
               onChange={(value) =>
                 updateDay(day.dayOfWeek, { isActive: value })
               }
+              // Same gap as notifications-settings.tsx's 18 Switches — the
+              // day name is only visually adjacent, not an accessible name
+              // for this specific switch.
+              aria-label={t(`days.${DAY_LABELS[day.dayOfWeek]}`)}
             />
             <span className="w-24 text-body-sm text-text-primary">
               {t(`days.${DAY_LABELS[day.dayOfWeek]}`)}

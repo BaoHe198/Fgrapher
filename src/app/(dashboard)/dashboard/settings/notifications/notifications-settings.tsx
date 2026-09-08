@@ -74,21 +74,33 @@ export function NotificationsSettings({
             <span className="text-body-sm text-text-tertiary">
               {t("inApp")}
             </span>
-            {group.keys.map((key) => (
-              <Fragment key={key}>
-                <span className="text-body-md text-text-primary">
-                  {t(`labels.${key}`)}
-                </span>
-                <Switch
-                  checked={preferences[key].email}
-                  onChange={(value) => toggle(key, "email", value)}
-                />
-                <Switch
-                  checked={preferences[key].inApp}
-                  onChange={(value) => toggle(key, "inApp", value)}
-                />
-              </Fragment>
-            ))}
+            {group.keys.map((key) => {
+              // QA: 18 Switch elements here (9 notification types × 2
+              // channels) had no accessible name at all — the row label
+              // and "Email"/"Trong ứng dụng" column headers only convey
+              // which switch is which visually, via grid position, not
+              // to a screen reader. aria-label combines both per switch
+              // without adding a second visible label next to the
+              // existing grid text.
+              const rowLabel = t(`labels.${key}`);
+              return (
+                <Fragment key={key}>
+                  <span className="text-body-md text-text-primary">
+                    {rowLabel}
+                  </span>
+                  <Switch
+                    checked={preferences[key].email}
+                    onChange={(value) => toggle(key, "email", value)}
+                    aria-label={`${rowLabel} — ${t("email")}`}
+                  />
+                  <Switch
+                    checked={preferences[key].inApp}
+                    onChange={(value) => toggle(key, "inApp", value)}
+                    aria-label={`${rowLabel} — ${t("inApp")}`}
+                  />
+                </Fragment>
+              );
+            })}
           </div>
         </div>
       ))}
