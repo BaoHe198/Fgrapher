@@ -170,13 +170,22 @@ export async function POST(request: Request) {
       }),
     ]);
 
-    // BILLING_ENABLED=false (Stripe can't take a Vietnam-registered
-    // merchant account — see CLAUDE.md): every paid role gets a free
-    // 12-month plan immediately instead of being routed through Stripe
-    // Checkout. onboarding/billing redirects straight past its own step
-    // when this flag is off, so this is the only place that activates
-    // these roles in that case.
-    if (!features.billingEnabled && uniqueRoles.length > 0) {
+    // Free-granting is its own switch (freeRoleGrantEnabled), separate
+    // from billingEnabled — see src/lib/features.ts's comment. Today
+    // that means: while Stripe is off (it can't take a Vietnam-
+    // registered merchant account — CLAUDE.md) AND the free-grant switch
+    // is on (its default), every paid role gets a free 12-month plan
+    // immediately instead of being routed through Stripe Checkout.
+    // onboarding/billing redirects straight past its own step when
+    // billingEnabled is off, so this is the only place that activates
+    // these roles in that case. Turning on a local payment rail (MoMo/
+    // ZaloPay/bank transfer) does NOT by itself stop this — that's a
+    // separate, deliberate decision via FREE_ROLE_GRANT_ENABLED.
+    if (
+      !features.billingEnabled &&
+      features.freeRoleGrantEnabled &&
+      uniqueRoles.length > 0
+    ) {
       await assignFreePlan(user.id, uniqueRoles);
     }
 

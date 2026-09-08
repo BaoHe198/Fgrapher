@@ -137,7 +137,9 @@ export async function reviewRoleChangeRequest({
     // Mirrors /api/users/roles' own assignFreePlan call (CLAUDE.md's
     // Stripe ban) — the upsert above only marks the role active, this is
     // what actually unblocks every subscription-gated feature for it.
-    if (!features.billingEnabled) {
+    // See src/lib/features.ts's freeRoleGrantEnabled comment for why
+    // that's now its own condition alongside billingEnabled.
+    if (!features.billingEnabled && features.freeRoleGrantEnabled) {
       await assignFreePlan(request.userId, [request.toRole]);
     }
 

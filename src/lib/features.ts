@@ -12,6 +12,19 @@ export const features = {
   // business — see CLAUDE.md's "Ràng buộc bắt buộc" #1. Plans are
   // assigned manually via /admin/users/[id] while this is false.
   billingEnabled: env.BILLING_ENABLED,
+  // Whether a new paid-role signup gets a free plan immediately
+  // (assignFreePlan) instead of being required to pay. Read this
+  // together with billingEnabled at every call site (registration,
+  // adding a role, the subscription-gate self-heal, a role-change-
+  // request approval — see FREE_ROLE_GRANT_ENABLED's comment in env.ts
+  // for why): free-granting was previously an implicit side effect of
+  // "Stripe is off," which stopped meaning what it used to the moment
+  // local payment rails (momoEnabled/zalopayEnabled/bankTransferEnabled)
+  // existed as a real, independent way to actually charge someone. This
+  // makes that a deliberate, separately-named policy switch instead —
+  // defaults to true, i.e. today's exact behavior, unchanged, until the
+  // project owner explicitly decides otherwise.
+  freeRoleGrantEnabled: env.FREE_ROLE_GRANT_ENABLED,
   // Product/Order/Cart/checkout and the CAMERA_SHOP role.
   marketplaceEnabled: env.MARKETPLACE_ENABLED,
   // Post/Like/Comment/Follow.

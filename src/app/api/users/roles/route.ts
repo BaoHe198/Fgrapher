@@ -101,7 +101,13 @@ export async function POST(request: Request) {
     const paidRoles = roles.filter((role) =>
       (PAID_ROLES as string[]).includes(role),
     );
-    if (!features.billingEnabled && paidRoles.length > 0) {
+    // See src/lib/features.ts's freeRoleGrantEnabled comment — kept in
+    // sync with /api/auth/register's identical check.
+    if (
+      !features.billingEnabled &&
+      features.freeRoleGrantEnabled &&
+      paidRoles.length > 0
+    ) {
       await assignFreePlan(session.user.id, paidRoles);
     }
 

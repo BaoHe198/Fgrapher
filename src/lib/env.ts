@@ -100,6 +100,16 @@ const serverSchema = z.object({
   MOMO_ENABLED: booleanFlag("false"),
   ZALOPAY_ENABLED: booleanFlag("false"),
   BANK_TRANSFER_ENABLED: booleanFlag("false"),
+  // Default true — preserves today's exact behavior (every paid-role
+  // signup gets a free 12-month plan while Stripe is off). Deliberately
+  // its OWN switch, not derived from MOMO_ENABLED/ZALOPAY_ENABLED/
+  // BANK_TRANSFER_ENABLED — turning one of those on means a local rail
+  // CAN take a real payment, not that free registration should silently
+  // stop. Whether it should is a business decision for the project
+  // owner to make explicitly by flipping this to "false" when ready, not
+  // an automatic side effect of enabling a payment method. See
+  // src/lib/features.ts's freeRoleGrantEnabled comment.
+  FREE_ROLE_GRANT_ENABLED: booleanFlag("true"),
 });
 
 const publicSchema = z.object({
