@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { LOCALE_COOKIE_NAME, routing } from "@/i18n/routing";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 // A hand-rolled proxy instead of next-intl's own createMiddleware(routing):
 // that one rewrites every request to a /<locale> path internally even with
@@ -44,8 +45,92 @@ const MARKETPLACE_DASHBOARD_PREFIXES = [
   "/dashboard/shop-orders",
 ];
 
+// Blanket floor for every /api/* route that doesn't already define its
+// own tighter limit (register, login, forgot-password, search, phone,
+// payment creation — see their own route files/auth.ts). Those keep
+// governing their routes since they're stricter; this exists purely to
+// close the gap for the ~120 other routes (booking, messaging, reviews,
+// portfolio, ...) that had no request-volume limit of any kind — a
+// scripted loop against any of them today gets through as fast as the
+// network allows. Deliberately generous: the busiest legitimate client
+// pattern in this app is the chat panel polling every 2s (30 req/min)
+// plus a couple of slower background polls, nowhere close to this.
+// Authenticated requests are keyed by user id (fairer than IP — several
+// people can legitimately share one IP behind NAT/office wifi); anonymous
+// requests fall back to IP, matching every other limiter in this codebase.
+const API_DEFAULT_RATE_LIMIT = { max: 300, windowMs: 60 * 1000 };
+const API_ANONYMOUS_RATE_LIMIT = { max: 100, windowMs: 60 * 1000 };
+
+// Cron calls (Vercel's own scheduler, already gated by requireCronSecret)
+// and payment webhooks (MoMo/ZaloPay/Stripe's own servers, already gated
+// by signature verification) are excluded — rate-limiting a trusted
+// caller by IP could drop a real delivery during exactly the kind of
+// incident where a provider retries quickly, matching the existing
+// Stripe webhook route's own "no rate limit" precedent.
+const RATE_LIMIT_EXEMPT_PREFIXES = ["/api/cron", "/api/webhooks"];
+
+// Every route in this app only ever receives JSON metadata — actual
+// files (portfolio photos, KYC images, chat attachments, ...) upload
+// directly from the browser to Cloudinary with a signed URL, never
+// through our own API (confirmed by grepping every upload call site
+// before writing next.config.ts's CSP connect-src). 1MB is already
+// generous headroom for the largest legitimate JSON body this app sends
+// (e.g. a profile update with every text field at its Zod .max()).
+// This is a fast, best-effort rejection based on the Content-Length
+// header a client declares — not a hard guarantee, since a client could
+// lie about it or omit it and stream more. The real hard backstop is
+// Vercel's own platform-level request body limit (~4.5MB), which exists
+// regardless of this check and can't be bypassed by lying about a header.
+const API_MAX_BODY_BYTES = 1024 * 1024;
+
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (
+    pathname.startsWith("/api") &&
+    !RATE_LIMIT_EXEMPT_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  ) {
+    const contentLength = Number(request.headers.get("content-length") ?? 0);
+    if (contentLength > API_MAX_BODY_BYTES) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "payload_too_large",
+          message: "Dữ liệu gửi lên quá lớn.",
+        },
+        { status: 413 },
+      );
+    }
+
+    const apiToken = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: request.nextUrl.protocol === "https:",
+    });
+    const key = apiToken?.id
+      ? `api-global:user:${apiToken.id}`
+      : `api-global:ip:${getClientIp(request)}`;
+    const limit = apiToken?.id
+      ? API_DEFAULT_RATE_LIMIT
+      : API_ANONYMOUS_RATE_LIMIT;
+
+    const result = checkRateLimit(key, limit);
+    if (!result.allowed) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "too_many_requests",
+          message: "Bạn thao tác quá nhanh, vui lòng thử lại sau.",
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(result.retryAfterSeconds) },
+        },
+      );
+    }
+
+    return NextResponse.next();
+  }
 
   if (
     !MARKETPLACE_ENABLED &&
@@ -106,6 +191,14 @@ function withLocaleCookie(request: NextRequest, response: NextResponse) {
 }
 
 export const config = {
-  // Skip API routes, static files, and Next internals.
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  matcher: [
+    // Pages: skip API routes (handled by the second pattern below with
+    // different logic), static files, and Next internals.
+    "/((?!api|_next|_vercel|.*\\..*).*)",
+    // API routes: only the rate-limit/payload-size guard above applies —
+    // none of the page-routing logic (PROTECTED_PREFIXES redirect,
+    // AUTH_ONLY_PREFIXES bounce, locale cookie) makes sense for a JSON
+    // endpoint, and the function returns before reaching any of it.
+    "/api/:path*",
+  ],
 };
