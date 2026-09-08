@@ -54,7 +54,7 @@ export function Footer() {
             {discoverRoles.map((role) => (
               <Link
                 key={role}
-                href={`/browse?role=${role}`}
+                href={`/browse?roles=${role}`}
                 className="text-body-sm text-text-secondary hover:text-text-primary"
               >
                 {t(`role.${role}`)}

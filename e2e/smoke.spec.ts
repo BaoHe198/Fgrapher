@@ -26,3 +26,25 @@ for (const path of PAGES) {
     expect(errors).toEqual([]);
   });
 }
+
+// Regression for a real bug: footer.tsx's "Discover" role links used
+// ?role= (singular) while /browse only ever reads ?roles= (plural,
+// comma-separated) — the query silently matched nothing, so every
+// footer role link landed on the fully-unfiltered browse page with no
+// checkbox ticked. Read-only (no login, no writes) — safe alongside the
+// rest of this file's checks.
+test("footer role link filters /browse via roles= (not role=)", async ({
+  page,
+}) => {
+  await page.goto("/");
+  // Target the href directly rather than the link's visible label — this
+  // page can render in either locale (EN/VI, cookie-based, no URL
+  // segment), and the actual bug was in the query contract, not the copy.
+  const link = page.locator('footer a[href*="/browse?"]').first();
+  await link.click();
+  await page.waitForURL(/\/browse/);
+
+  const url = new URL(page.url());
+  expect(url.searchParams.get("roles")).toBeTruthy();
+  expect(url.searchParams.has("role")).toBe(false);
+});
