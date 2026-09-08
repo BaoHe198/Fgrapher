@@ -44,6 +44,13 @@ export function AccountSettingsForm({
   const [email, setEmail] = useState(initialEmail);
   const [phone, setPhone] = useState(initialPhone ?? "");
   const [savingBasics, setSavingBasics] = useState(false);
+  const [basicsError, setBasicsError] = useState<string | null>(null);
+  // Only asked for when email actually differs from the account's saved
+  // value — the server enforces this is required (and correct) before
+  // an email change is allowed, this is just the matching UI. See
+  // src/app/api/users/me/route.ts's comment for why.
+  const [emailChangePassword, setEmailChangePassword] = useState("");
+  const emailChanged = email !== initialEmail;
   // The exact phone number currently verified, or null — the badge/CTA
   // below compares this against the live `phone` field rather than a
   // separate boolean, so editing the number back out of a verified state
@@ -63,15 +70,30 @@ export function AccountSettingsForm({
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const saveBasics = async () => {
+    setBasicsError(null);
     setSavingBasics(true);
-    await fetch("/api/users/me", {
+    const res = await fetch("/api/users/me", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, phone }),
+      body: JSON.stringify({
+        email,
+        phone,
+        ...(emailChanged ? { currentPassword: emailChangePassword } : {}),
+      }),
     });
+    const body = await res.json();
     setSavingBasics(false);
+
+    if (!res.ok) {
+      setBasicsError(body.message ?? t("genericError"));
+      return;
+    }
+
+    setEmailChangePassword("");
     toast.add({ title: t("toastAccountUpdated"), type: "success" });
   };
 
@@ -103,20 +125,49 @@ export function AccountSettingsForm({
   };
 
   const deleteAccount = async () => {
+    setDeleteError(null);
     setIsDeleting(true);
-    await fetch("/api/users/me", { method: "DELETE" });
+    const res = await fetch("/api/users/me", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: deletePassword }),
+    });
+    if (!res.ok) {
+      const body = await res.json();
+      setIsDeleting(false);
+      setDeleteError(body.message ?? t("genericError"));
+      return;
+    }
     await signOut({ callbackUrl: "/" });
   };
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
+        {basicsError ? (
+          <div className="rounded-[var(--fg-radius-md)] bg-danger-bg p-3 text-body-sm text-danger">
+            {basicsError}
+          </div>
+        ) : null}
         <Input
           label={t("emailLabel")}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+        {emailChanged ? (
+          <div className="flex flex-col gap-1.5">
+            <Input
+              label={t("currentPasswordLabel")}
+              type="password"
+              value={emailChangePassword}
+              onChange={(e) => setEmailChangePassword(e.target.value)}
+            />
+            <p className="text-body-sm text-text-tertiary">
+              {t("emailChangeHint")}
+            </p>
+          </div>
+        ) : null}
         <div className="flex flex-col gap-1.5">
           <Input
             label={t("phoneLabel")}
@@ -148,7 +199,7 @@ export function AccountSettingsForm({
           variant="secondary"
           size="sm"
           className="self-start"
-          disabled={savingBasics}
+          disabled={savingBasics || (emailChanged && !emailChangePassword)}
           onClick={saveBasics}
         >
           {savingBasics ? <Loader2 className="size-4 animate-spin" /> : null}
@@ -246,7 +297,16 @@ export function AccountSettingsForm({
           {t("deleteAccount")}
         </Button>
 
-        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <Dialog
+          open={deleteOpen}
+          onOpenChange={(open) => {
+            setDeleteOpen(open);
+            if (!open) {
+              setDeletePassword("");
+              setDeleteError(null);
+            }
+          }}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t("deleteDialogTitle")}</DialogTitle>
@@ -254,6 +314,17 @@ export function AccountSettingsForm({
             <p className="text-body-sm text-text-secondary">
               {t("deleteDialogBody")}
             </p>
+            {deleteError ? (
+              <div className="rounded-[var(--fg-radius-md)] bg-danger-bg p-3 text-body-sm text-danger">
+                {deleteError}
+              </div>
+            ) : null}
+            <Input
+              label={t("currentPasswordLabel")}
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+            />
             <DialogFooter>
               <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
                 {t("cancel")}

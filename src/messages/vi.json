@@ -821,7 +821,9 @@
   },
   "apiMessages": {
     "users": {
-      "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa"
+      "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa",
+      "emailChangeNoPassword": "Tài khoản này đăng nhập qua mạng xã hội, không có mật khẩu để xác nhận — không thể đổi email theo cách này.",
+      "emailChangeWrongPassword": "Mật khẩu hiện tại không đúng."
     },
     "profiles": {
       "unknownRole": "Vai trò không xác định",
@@ -1783,7 +1785,8 @@
       "deleteDialogBody": "Thao tác này sẽ vô hiệu hóa vĩnh viễn tài khoản Fgrapher của bạn. Hành động này không thể hoàn tác.",
       "cancel": "Hủy",
       "toastAccountUpdated": "Đã cập nhật tài khoản",
-      "toastPasswordUpdated": "Đã cập nhật mật khẩu"
+      "toastPasswordUpdated": "Đã cập nhật mật khẩu",
+      "emailChangeHint": "Đổi email cần xác nhận mật khẩu hiện tại."
     },
     "billing": {
       "status": {

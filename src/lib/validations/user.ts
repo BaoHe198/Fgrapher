@@ -84,6 +84,16 @@ export const updateMeSchema = z.object({
   // the route, not here, since Zod has no DB access.
   wardId: z.string().min(1).nullable().optional(),
   email: z.string().email().optional(),
+  // Only required when `email` is actually changing from the account's
+  // current value — enforced in the route handler (needs an async
+  // bcrypt.compare against the DB, which a Zod refine can't cleanly do
+  // here without duplicating the DB read). See src/app/api/users/me/
+  // route.ts's comment for why this exists: without it, anyone who got
+  // hold of a valid session (however briefly — a stolen cookie, an XSS
+  // payload, a shared device) could silently redirect the account's
+  // email to one they control, then use "forgot password" to take over
+  // the account permanently, long after the original session was gone.
+  currentPassword: z.string().min(1).optional(),
 });
 
 export type UpdateMeInput = z.infer<typeof updateMeSchema>;
@@ -130,6 +140,7 @@ export function getUpdateMeSchema(t: (key: string) => string) {
     phone: z.string().max(30).optional(),
     location: z.string().max(120).optional(),
     email: z.string().email().optional(),
+    currentPassword: z.string().min(1, t("currentPasswordRequired")).optional(),
   });
 }
 

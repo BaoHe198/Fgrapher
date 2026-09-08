@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
@@ -117,7 +118,54 @@ export async function PATCH(request: Request) {
       }
     }
 
-    const { wardId, phone, ...rest } = parsed.data;
+    const { wardId, phone, currentPassword, ...rest } = parsed.data;
+
+    // Changing the account's email requires proving the current password
+    // first — without this, a session alone (a stolen cookie, an XSS
+    // payload, a shared/unlocked device — anything short of the password
+    // itself) would be enough to silently redirect the account's email
+    // to one an attacker controls, then use "forgot password" (which
+    // sends the reset link to whatever `email` currently is) to take the
+    // account over permanently, long after the original session is gone.
+    // This app has no real "click the link we emailed you" verification
+    // flow yet (emailVerified is only ever set once, at registration —
+    // see auth.ts's signIn callback, which trusts it as proof credentials
+    // login is allowed) — until one exists, this password re-check is the
+    // actual barrier, not resetting emailVerified to something with no
+    // way back.
+    if (rest.email !== undefined) {
+      const current = await db.user.findUnique({
+        where: { id: session.user.id },
+        select: { email: true, passwordHash: true },
+      });
+      if (current && rest.email !== current.email) {
+        const t = await getTranslations("apiMessages.users");
+        if (!current.passwordHash) {
+          return NextResponse.json(
+            {
+              data: null,
+              error: "no_password",
+              message: t("emailChangeNoPassword"),
+            },
+            { status: 400 },
+          );
+        }
+        const isValid =
+          currentPassword &&
+          (await bcrypt.compare(currentPassword, current.passwordHash));
+        if (!isValid) {
+          return NextResponse.json(
+            {
+              data: null,
+              error: "invalid_password",
+              message: t("emailChangeWrongPassword"),
+            },
+            { status: 400 },
+          );
+        }
+      }
+    }
+
     // Prompt G7 — a verified phone number is proof of THAT number, not of
     // whatever the user later types into this field. Any change re-locks
     // phoneVerified until the new number goes through /api/phone/verify-code.
@@ -207,9 +255,39 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE() {
+// Requires the current password for the same reason PATCH does for an
+// email change — this is destructive and, unlike portfolio media/albums
+// (which have a real restore endpoint), there's no self-service way back
+// for a soft-deleted User row. A session alone (stolen cookie, XSS,
+// unlocked device) shouldn't be enough to take that away from someone.
+export async function DELETE(request: Request) {
   try {
     const session = await requireAuth();
+    const t = await getTranslations("apiMessages.users");
+
+    const body = await request.json().catch(() => ({}));
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { passwordHash: true },
+    });
+    if (user?.passwordHash) {
+      const isValid =
+        typeof body.currentPassword === "string" &&
+        (await bcrypt.compare(body.currentPassword, user.passwordHash));
+      if (!isValid) {
+        return NextResponse.json(
+          {
+            data: null,
+            error: "invalid_password",
+            message: t("emailChangeWrongPassword"),
+          },
+          { status: 400 },
+        );
+      }
+    }
+    // Accounts with no password (OAuth-only) have nothing to confirm
+    // with — requireAuth()'s live session check is the only gate
+    // available for those, same as it always was.
 
     await db.user.update({
       where: { id: session.user.id },

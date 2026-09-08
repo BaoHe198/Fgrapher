@@ -821,7 +821,9 @@
   },
   "apiMessages": {
     "users": {
-      "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo"
+      "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo",
+      "emailChangeNoPassword": "This account signs in with a social provider and has no password to confirm with — email can't be changed this way.",
+      "emailChangeWrongPassword": "Current password is incorrect."
     },
     "profiles": {
       "unknownRole": "Unknown role",
@@ -1783,7 +1785,8 @@
       "deleteDialogBody": "This will permanently deactivate your Fgrapher account. This action cannot be undone.",
       "cancel": "Cancel",
       "toastAccountUpdated": "Account updated",
-      "toastPasswordUpdated": "Password updated"
+      "toastPasswordUpdated": "Password updated",
+      "emailChangeHint": "Changing your email requires confirming your current password."
     },
     "billing": {
       "status": {
