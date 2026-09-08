@@ -2479,7 +2479,9 @@
         "ownProfileBody": "Bạn không thể đặt lịch hoặc nhắn tin cho chính mình. Quản lý lịch trống, dịch vụ và portfolio trong Dashboard.",
         "manageAvailability": "Quản lý lịch trống",
         "availabilityDialogTitle": "Lịch trống",
-        "fullCalendarLink": "Quản lý trong lịch đầy đủ"
+        "fullCalendarLink": "Quản lý trong lịch đầy đủ",
+        "stickyMessage": "Nhắn tin",
+        "stickyBook": "Đặt lịch"
       },
       "hero": {
         "editCoverAria": "Sửa ảnh bìa",

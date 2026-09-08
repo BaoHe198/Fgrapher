@@ -2479,7 +2479,9 @@
         "ownProfileBody": "You can't book or message yourself. Manage your availability, services, and portfolio from your dashboard.",
         "manageAvailability": "Manage availability",
         "availabilityDialogTitle": "Availability",
-        "fullCalendarLink": "Manage in full calendar"
+        "fullCalendarLink": "Manage in full calendar",
+        "stickyMessage": "Message",
+        "stickyBook": "Book now"
       },
       "hero": {
         "editCoverAria": "Edit cover photo",

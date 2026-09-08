@@ -1,11 +1,14 @@
 "use client";
 
 import type { MediaType, ProfileCategory, Role } from "@prisma/client";
+import { CalendarDays, Loader2, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { BookingSidebar } from "@/components/profile/booking-sidebar";
+import { useMessaging } from "@/components/providers/messaging-provider";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 
 import { GearTab } from "./gear-tab";
@@ -97,11 +100,14 @@ export function ProfileInteractive({
   isOwnProfile,
 }: ProfileInteractiveProps) {
   const t = useTranslations("publicPages.profile.tabs");
+  const stickyT = useTranslations("publicPages.profile.bookingSidebar");
   const router = useRouter();
+  const messaging = useMessaging();
   const [tab, setTab] = useState("portfolio");
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
+  const [isOpeningChat, setIsOpeningChat] = useState(false);
 
   // Jump straight to the booking page with this service pre-selected
   // (booking-wizard.tsx reads ?service= on mount) — scrolling to the
@@ -111,8 +117,37 @@ export function ProfileInteractive({
     router.push(`/booking/${providerId}?service=${serviceId}`);
   };
 
+  // QA: on mobile the layout is a single column, so the real booking
+  // sidebar (with its own Đặt lịch/Nhắn tin) sits after the entire
+  // portfolio/services/reviews tab content — reachable only after a long
+  // scroll. This sticky bar keeps both actions reachable from anywhere,
+  // same targets as BookingSidebar's own buttons (direct booking-page
+  // navigation, same conversation-opening call), just always in reach.
+  const onStickyMessage = async () => {
+    setIsOpeningChat(true);
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: providerId }),
+      });
+      const body = await res.json();
+      if (res.ok && body.data?.id) {
+        messaging.open(body.data.id);
+      }
+    } finally {
+      setIsOpeningChat(false);
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_360px]">
+    <div
+      className={
+        isOwnProfile
+          ? "grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_360px]"
+          : "grid grid-cols-1 items-start gap-10 pb-20 lg:pb-0 lg:grid-cols-[1fr_360px]"
+      }
+    >
       <div className="min-w-0">
         <Tabs value={tab} onValueChange={(v) => setTab(v as string)}>
           <TabsList>
@@ -164,6 +199,36 @@ export function ProfileInteractive({
           isOwnProfile={isOwnProfile}
         />
       </div>
+
+      {isOwnProfile ? null : (
+        <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-border-subtle bg-bg-surface p-3 shadow-[var(--shadow-lg)] lg:hidden">
+          <Button
+            variant="secondary"
+            className="flex-1"
+            disabled={isOpeningChat}
+            onClick={onStickyMessage}
+          >
+            {isOpeningChat ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <MessageCircle className="size-4" />
+            )}
+            {stickyT("stickyMessage")}
+          </Button>
+          <Button
+            variant="accent"
+            className="flex-1"
+            onClick={() =>
+              document
+                .getElementById("booking-sidebar")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          >
+            <CalendarDays className="size-4" />
+            {stickyT("stickyBook")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
