@@ -7,9 +7,9 @@ import {
   Handshake,
   Image as ImageIcon,
   LayoutDashboard,
-  Menu,
   MessageCircle,
   Package,
+  PanelLeft,
   Send,
   Settings,
   Shield,
@@ -200,10 +200,16 @@ export function MobileDashboardSidebar({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
+      {/* QA: this trigger and WebNav's site-wide nav trigger both render
+          on every dashboard page and previously used the identical Menu
+          (≡) icon — indistinguishable at a glance, despite opening two
+          different navigation sets (this one: dashboard sections, left;
+          WebNav's: site-wide links, right). PanelLeft reads as "open the
+          side panel", matching what this one specifically does. */}
       <SheetTrigger
         render={
           <Button variant="secondary" size="icon">
-            <Menu className="size-5" />
+            <PanelLeft className="size-5" />
             <span className="sr-only">{t("openMenu")}</span>
           </Button>
         }
