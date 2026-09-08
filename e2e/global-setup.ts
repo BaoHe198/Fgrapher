@@ -1,6 +1,5 @@
 import { execSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import {
   activatePaidRole,
@@ -11,7 +10,14 @@ import {
   seedWeekdayAvailability,
 } from "./helpers/db";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Not import.meta.url + fileURLToPath — Playwright transpiles config/setup
+// files to CommonJS when the nearest package.json has no "type": "module"
+// (true here), and import.meta throws a SyntaxError under CJS. Playwright
+// always runs from the project root (testDir/globalSetup are resolved
+// relative to playwright.config.ts's own location), so process.cwd() is
+// the reliable equivalent here — confirmed by pnpm test:smoke actually
+// running after this fix, which it didn't with import.meta.url.
+const projectRoot = process.cwd();
 
 // Runs once before the whole suite. Resets the test database to a known,
 // empty-except-fixtures state on every run — intended to only ever target
@@ -37,7 +43,7 @@ export default async function globalSetup() {
   }
 
   execSync(
-    `node "${path.join(__dirname, "..", "scripts", "check-e2e-db-safety.mjs")}"`,
+    `node "${path.join(projectRoot, "scripts", "check-e2e-db-safety.mjs")}"`,
     {
       stdio: "inherit",
       env: process.env,
