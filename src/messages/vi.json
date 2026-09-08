@@ -2687,6 +2687,13 @@
           "q": "Có ưu đãi khi thanh toán theo năm không?",
           "a": "Có — chuyển sang thanh toán theo năm trên trang này để được giảm 20% so với mức giá hàng tháng, tính phí một lần mỗi năm."
         }
+      },
+      "simpleTitle": "Miễn phí trong giai đoạn khởi động",
+      "simpleSubtitle": "Áp dụng cho mọi vai trò trên Fgrapher — nhiếp ảnh gia, quay phim, trang điểm, studio, người mẫu và cửa hàng thiết bị.",
+      "simpleBenefits": {
+        "profile": "Đăng hồ sơ, portfolio và dịch vụ không giới hạn",
+        "bookings": "Nhận yêu cầu đặt lịch và tin nhắn từ khách hàng",
+        "noCard": "Không cần thẻ thanh toán, không có phí ẩn"
       }
     },
     "about": {

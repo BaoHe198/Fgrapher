@@ -2687,6 +2687,13 @@
           "q": "Is there a discount for annual billing?",
           "a": "Yes — switch to yearly billing on this page and pay 20% less than the monthly rate, charged once a year."
         }
+      },
+      "simpleTitle": "Free during launch",
+      "simpleSubtitle": "Applies to every role on Fgrapher — photographers, videographers, makeup artists, studios, models, and camera shops.",
+      "simpleBenefits": {
+        "profile": "Unlimited profile, portfolio, and service listings",
+        "bookings": "Receive booking requests and messages from customers",
+        "noCard": "No payment card required, no hidden fees"
       }
     },
     "about": {
