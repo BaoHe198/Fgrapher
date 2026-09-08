@@ -311,16 +311,34 @@ export function RequestWizard({
     }));
   };
 
+  // Both are optional fields (the app never requires a preferred window
+  // or a budget at all — see service-request.ts's schema), so these only
+  // ever fire once BOTH sides of a pair are filled in and out of order,
+  // never for a merely-incomplete one.
+  const dateRangeInvalid = Boolean(
+    form.isDateFlexible &&
+    form.dateRangeStart &&
+    form.dateRangeEnd &&
+    form.dateRangeStart > form.dateRangeEnd,
+  );
+  const budgetInvalid = Boolean(
+    form.budgetMin &&
+    form.budgetMax &&
+    Number(form.budgetMin) > Number(form.budgetMax),
+  );
+
   const canContinue = (() => {
     switch (step) {
       case 0:
         return Boolean(form.role) && form.categories.length > 0;
       case 1:
-        return form.isDateFlexible || Boolean(form.shootDate);
+        return (
+          (form.isDateFlexible || Boolean(form.shootDate)) && !dateRangeInvalid
+        );
       case 2:
         return Boolean(form.provinceId);
       case 3:
-        return true;
+        return !budgetInvalid;
       case 4:
         return form.title.trim().length >= 3;
       default:
@@ -407,12 +425,16 @@ export function RequestWizard({
                   type="date"
                   value={form.dateRangeStart}
                   onChange={(e) => update("dateRangeStart", e.target.value)}
+                  aria-invalid={dateRangeInvalid}
                 />
                 <Input
                   label={t("dateRangeEndLabel")}
                   type="date"
                   value={form.dateRangeEnd}
                   onChange={(e) => update("dateRangeEnd", e.target.value)}
+                  error={
+                    dateRangeInvalid ? t("dateRangeOrderError") : undefined
+                  }
                 />
               </div>
             ) : (
@@ -478,11 +500,13 @@ export function RequestWizard({
                 label={t("budgetMinLabel")}
                 value={form.budgetMin}
                 onChange={(digits) => update("budgetMin", digits)}
+                aria-invalid={budgetInvalid}
               />
               <CurrencyInput
                 label={t("budgetMaxLabel")}
                 value={form.budgetMax}
                 onChange={(digits) => update("budgetMax", digits)}
+                error={budgetInvalid ? t("budgetOrderError") : undefined}
               />
             </div>
             <p className="text-body-sm text-text-tertiary">{t("budgetHint")}</p>
@@ -585,10 +609,12 @@ export function RequestWizard({
               </span>
               <span className="text-text-secondary">
                 {form.isDateFlexible
-                  ? t("reviewDateFlexible", {
-                      start: form.dateRangeStart || "?",
-                      end: form.dateRangeEnd || "?",
-                    })
+                  ? form.dateRangeStart && form.dateRangeEnd
+                    ? t("reviewDateFlexible", {
+                        start: form.dateRangeStart,
+                        end: form.dateRangeEnd,
+                      })
+                    : t("reviewDateFlexibleNoRange")
                   : form.shootDate || "—"}
               </span>
             </div>
@@ -609,7 +635,10 @@ export function RequestWizard({
                 {t("steps.budget")}
               </span>
               <span className="text-text-secondary">
-                {form.budgetMin || form.budgetMax
+                {/* budgetInvalid should be unreachable here — canContinue
+                    blocks leaving step 3 while it's true — but review
+                    must never show an inverted range regardless. */}
+                {(form.budgetMin || form.budgetMax) && !budgetInvalid
                   ? `${formatCurrency(Number(form.budgetMin) || 0)} – ${formatCurrency(Number(form.budgetMax) || 0)}`
                   : t("budgetNotSet")}
               </span>

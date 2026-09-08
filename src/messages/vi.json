@@ -1122,7 +1122,10 @@
       "post": "Đăng yêu cầu",
       "draftSaved": "Đã lưu nháp",
       "posted": "Đã đăng yêu cầu",
-      "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+      "genericError": "Có lỗi xảy ra, vui lòng thử lại",
+      "dateRangeOrderError": "Ngày bắt đầu không được sau ngày kết thúc",
+      "budgetOrderError": "Ngân sách tối thiểu không được lớn hơn ngân sách tối đa",
+      "reviewDateFlexibleNoRange": "Linh hoạt — chưa chọn khoảng ngày cụ thể"
     },
     "serviceRequests": {
       "title": "Yêu cầu của tôi",

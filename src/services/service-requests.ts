@@ -217,6 +217,34 @@ export async function publishDraftServiceRequest(
     throw new ServiceRequestError("This request has already been posted", 400);
   }
 
+  // Defense-in-depth, not the primary gate — createServiceRequestSchema/
+  // updateDraftServiceRequestSchema's refine()s already block saving an
+  // inconsistent budget or date range on every create/PATCH. This is the
+  // one code path that flips isDraft without going through either schema
+  // (no request body at all), so a request from before that fix shipped,
+  // or any other future caller of this function, still can't go live
+  // showing a provider a nonsensical "5.000.000 – 2.000.000" range.
+  if (
+    request.budgetMin !== null &&
+    request.budgetMax !== null &&
+    request.budgetMin > request.budgetMax
+  ) {
+    throw new ServiceRequestError(
+      "Budget minimum can't be greater than the maximum",
+      400,
+    );
+  }
+  if (
+    request.dateRangeStart &&
+    request.dateRangeEnd &&
+    request.dateRangeStart > request.dateRangeEnd
+  ) {
+    throw new ServiceRequestError(
+      "Date range start can't be after the end",
+      400,
+    );
+  }
+
   if (features.phoneVerificationRequired) {
     const customer = await db.user.findUnique({
       where: { id: customerId },

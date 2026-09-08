@@ -1122,7 +1122,10 @@
       "post": "Post request",
       "draftSaved": "Draft saved",
       "posted": "Request posted",
-      "genericError": "Something went wrong, please try again"
+      "genericError": "Something went wrong, please try again",
+      "dateRangeOrderError": "Start date can't be after the end date",
+      "budgetOrderError": "Minimum budget can't be greater than the maximum",
+      "reviewDateFlexibleNoRange": "Flexible — no specific window chosen"
     },
     "serviceRequests": {
       "title": "My requests",

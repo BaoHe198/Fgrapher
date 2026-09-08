@@ -40,19 +40,64 @@ const serviceRequestFields = z.object({
   isDraft: z.boolean().default(false),
 });
 
-export const createServiceRequestSchema = serviceRequestFields.refine(
-  (data) => data.isDraft || data.isDateFlexible || Boolean(data.shootDate),
-  {
-    message: "Choose a shoot date, or mark the date as flexible",
-    path: ["shootDate"],
-  },
-);
+// Applied to both the create and draft-update schemas below (not just
+// final submit) — a "draft" is still meant to resume to a coherent form
+// later, and QA found a swapped min/max or date range could otherwise be
+// saved via "Lưu nháp" and only surface as garbage once the wizard's
+// review step (or a provider reading the published request) tried to
+// display it. Only fires when BOTH sides of a pair are present, so an
+// intentionally-incomplete draft (only one of the two fields filled in)
+// is never blocked.
+function budgetOrderValid(data: { budgetMin?: number; budgetMax?: number }) {
+  if (data.budgetMin === undefined || data.budgetMax === undefined) {
+    return true;
+  }
+  return data.budgetMin <= data.budgetMax;
+}
+
+function dateRangeOrderValid(data: {
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
+}) {
+  if (!data.dateRangeStart || !data.dateRangeEnd) return true;
+  // Both are "YYYY-MM-DD" (regex-validated above), which compares
+  // correctly lexicographically — no Date parsing needed.
+  return data.dateRangeStart <= data.dateRangeEnd;
+}
+
+function budgetOrderIssue() {
+  return {
+    message: "Ngân sách tối thiểu không được lớn hơn ngân sách tối đa",
+    path: ["budgetMax"],
+  };
+}
+
+function dateRangeOrderIssue() {
+  return {
+    message: "Ngày bắt đầu không được sau ngày kết thúc",
+    path: ["dateRangeEnd"],
+  };
+}
+
+export const createServiceRequestSchema = serviceRequestFields
+  .refine(
+    (data) => data.isDraft || data.isDateFlexible || Boolean(data.shootDate),
+    {
+      message: "Choose a shoot date, or mark the date as flexible",
+      path: ["shootDate"],
+    },
+  )
+  .refine(budgetOrderValid, budgetOrderIssue())
+  .refine(dateRangeOrderValid, dateRangeOrderIssue());
 
 export type CreateServiceRequestInput = z.infer<
   typeof createServiceRequestSchema
 >;
 
-export const updateDraftServiceRequestSchema = serviceRequestFields.partial();
+export const updateDraftServiceRequestSchema = serviceRequestFields
+  .partial()
+  .refine(budgetOrderValid, budgetOrderIssue())
+  .refine(dateRangeOrderValid, dateRangeOrderIssue());
 
 export const createOfferSchema = z.object({
   message: z.string().max(1000).optional(),
