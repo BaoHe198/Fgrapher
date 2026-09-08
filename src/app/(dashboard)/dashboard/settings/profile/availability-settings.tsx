@@ -129,7 +129,10 @@ export function AvailabilitySettings() {
           {t("weeklySchedule")}
         </span>
         {schedule.map((day) => (
-          <div key={day.dayOfWeek} className="flex items-center gap-3">
+          <div
+            key={day.dayOfWeek}
+            className="flex flex-wrap items-center gap-3"
+          >
             <Switch
               checked={day.isActive}
               onChange={(value) =>

@@ -2031,6 +2031,11 @@
         "blockedDates": "Blocked dates",
         "removeAria": "Remove",
         "blockDateButton": "Block date"
+      },
+      "sections": {
+        "basics": "Basic information",
+        "roleProfile": "Role profile",
+        "availability": "Availability"
       }
     }
   },

@@ -2031,6 +2031,11 @@
         "blockedDates": "Ngày không nhận lịch",
         "removeAria": "Xóa",
         "blockDateButton": "Chặn ngày"
+      },
+      "sections": {
+        "basics": "Thông tin cơ bản",
+        "roleProfile": "Hồ sơ theo vai trò",
+        "availability": "Lịch trống"
       }
     }
   },
