@@ -1,9 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import { Switch } from "@/components/ui/switch";
+import { features } from "@/lib/features";
 import {
   NOTIFICATION_KEYS,
   type NotificationPreferences,
@@ -13,7 +14,7 @@ const DEFAULT_PREFERENCES: NotificationPreferences = Object.fromEntries(
   NOTIFICATION_KEYS.map((key) => [key, { email: true, inApp: true }]),
 ) as NotificationPreferences;
 
-const GROUPS: {
+const BASE_GROUPS: {
   titleKey: "bookings" | "messages" | "social" | "marketing";
   keys: (typeof NOTIFICATION_KEYS)[number][];
 }[] = [
@@ -28,7 +29,10 @@ const GROUPS: {
   },
   { titleKey: "messages", keys: ["newMessage"] },
   { titleKey: "social", keys: ["newFollower", "newReview"] },
-  { titleKey: "marketing", keys: ["productUpdates", "tips"] },
+  {
+    titleKey: "marketing",
+    keys: features.marketplaceEnabled ? ["productUpdates", "tips"] : ["tips"],
+  },
 ];
 
 export function NotificationsSettings({
@@ -39,6 +43,14 @@ export function NotificationsSettings({
   const t = useTranslations("dashboardSettings.notifications");
   const [preferences, setPreferences] = useState<NotificationPreferences>(
     initialPreferences ?? DEFAULT_PREFERENCES,
+  );
+
+  const GROUPS = useMemo(
+    () =>
+      BASE_GROUPS.filter(
+        (g) => g.titleKey !== "social" || features.socialFeedEnabled,
+      ),
+    [],
   );
 
   const toggle = async (

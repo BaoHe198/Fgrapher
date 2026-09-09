@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { SimplePage } from "@/components/sections/simple-page";
 import { Button } from "@/components/ui/button";
+import { features } from "@/lib/features";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("publicPages.pricing");
@@ -21,9 +22,12 @@ export async function generateMetadata(): Promise<Metadata> {
 // pricing-content.tsx, see git history) if the plan cards come back.
 export default async function PricingPage() {
   const t = await getTranslations("publicPages.pricing");
+  const subtitleKey = features.marketplaceEnabled
+    ? "simpleSubtitle"
+    : "simpleSubtitleNoMarketplace";
 
   return (
-    <SimplePage title={t("simpleTitle")} subtitle={t("simpleSubtitle")}>
+    <SimplePage title={t("simpleTitle")} subtitle={t(subtitleKey)}>
       <ul>
         <li>{t("simpleBenefits.profile")}</li>
         <li>{t("simpleBenefits.bookings")}</li>

@@ -14,18 +14,18 @@ import {
 
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+import { features } from "@/lib/features";
 import { cn } from "@/lib/utils";
 
 type FilterTab =
   "ALL" | "UNREAD" | "BOOKINGS" | "ORDERS" | "MESSAGES" | "SOCIAL";
 
+const BASE_TAB_VALUES: FilterTab[] = ["ALL", "UNREAD", "BOOKINGS", "MESSAGES"];
+
 const TAB_VALUES: FilterTab[] = [
-  "ALL",
-  "UNREAD",
-  "BOOKINGS",
-  "ORDERS",
-  "MESSAGES",
-  "SOCIAL",
+  ...BASE_TAB_VALUES,
+  ...(features.marketplaceEnabled ? (["ORDERS"] as const) : []),
+  ...(features.socialFeedEnabled ? (["SOCIAL"] as const) : []),
 ];
 
 const TYPE_GROUP: Record<
@@ -40,20 +40,20 @@ const TYPE_GROUP: Record<
   BOOKING_RESCHEDULE_PROPOSED: "BOOKINGS",
   BOOKING_COMPLETED: "BOOKINGS",
   NEW_MESSAGE: "MESSAGES",
-  NEW_FOLLOWER: "SOCIAL",
-  NEW_REVIEW: "SOCIAL",
-  NEW_LIKE: "SOCIAL",
-  NEW_COMMENT: "SOCIAL",
+  NEW_FOLLOWER: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
+  NEW_REVIEW: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
+  NEW_LIKE: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
+  NEW_COMMENT: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
   SUBSCRIPTION_ACTIVE: "OTHER",
   SUBSCRIPTION_EXPIRING: "OTHER",
   SUBSCRIPTION_CANCELLED: "OTHER",
   PAYMENT_FAILED: "OTHER",
-  NEW_ORDER: "ORDERS",
-  ORDER_CONFIRMED: "ORDERS",
-  ORDER_SHIPPED: "ORDERS",
-  ORDER_DELIVERED: "ORDERS",
-  ORDER_CANCELLED: "ORDERS",
-  REVIEW_RESPONSE: "SOCIAL",
+  NEW_ORDER: features.marketplaceEnabled ? "ORDERS" : "OTHER",
+  ORDER_CONFIRMED: features.marketplaceEnabled ? "ORDERS" : "OTHER",
+  ORDER_SHIPPED: features.marketplaceEnabled ? "ORDERS" : "OTHER",
+  ORDER_DELIVERED: features.marketplaceEnabled ? "ORDERS" : "OTHER",
+  ORDER_CANCELLED: features.marketplaceEnabled ? "ORDERS" : "OTHER",
+  REVIEW_RESPONSE: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
   MEDIA_APPROVED: "OTHER",
   MEDIA_REJECTED: "OTHER",
   REQUEST_NEW_MATCH: "OTHER",

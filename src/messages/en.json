@@ -2698,6 +2698,7 @@
       },
       "simpleTitle": "Free during launch",
       "simpleSubtitle": "Applies to every role on Fgrapher — photographers, videographers, makeup artists, studios, models, and camera shops.",
+      "simpleSubtitleNoMarketplace": "Applies to every role on Fgrapher — photographers, videographers, makeup artists, studios, and models.",
       "simpleBenefits": {
         "profile": "Unlimited profile, portfolio, and service listings",
         "bookings": "Receive booking requests and messages from customers",
