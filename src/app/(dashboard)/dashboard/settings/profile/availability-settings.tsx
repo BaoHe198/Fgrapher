@@ -150,6 +150,7 @@ export function AvailabilitySettings() {
               <div className="flex items-center gap-2">
                 <Input
                   type="time"
+                  aria-label={`${t(`days.${DAY_LABELS[day.dayOfWeek]}`)} — ${t("startTime")}`}
                   value={day.startTime}
                   onChange={(e) =>
                     updateDay(day.dayOfWeek, { startTime: e.target.value })
@@ -159,6 +160,7 @@ export function AvailabilitySettings() {
                 <span className="text-text-tertiary">–</span>
                 <Input
                   type="time"
+                  aria-label={`${t(`days.${DAY_LABELS[day.dayOfWeek]}`)} — ${t("endTime")}`}
                   value={day.endTime}
                   onChange={(e) =>
                     updateDay(day.dayOfWeek, { endTime: e.target.value })
@@ -208,6 +210,7 @@ export function AvailabilitySettings() {
         <div className="flex items-center gap-2">
           <Input
             type="date"
+            aria-label={t("blockedDateLabel")}
             value={newBlockedDate}
             onChange={(e) => setNewBlockedDate(e.target.value)}
             className="w-44"

@@ -1995,6 +1995,8 @@
         "inactive": "(ngừng hoạt động)",
         "minutesSuffix": "phút",
         "editService": "Sửa dịch vụ",
+        "editServiceAria": "Sửa {service}",
+        "deleteServiceAria": "Xóa {service}",
         "addServiceDialogTitle": "Thêm dịch vụ",
         "nameLabel": "Tên",
         "descriptionLabel": "Mô tả",
@@ -2006,6 +2008,7 @@
       },
       "media": {
         "coverButton": "Ảnh bìa",
+        "avatarButton": "Ảnh đại diện",
         "uploadUnavailable": "Chức năng tải lên hiện không khả dụng",
         "uploadFailed": "Tải lên thất bại",
         "sizeLimit": "Tối đa 20MB, định dạng JPG/PNG/WebP",
@@ -2027,6 +2030,9 @@
           "fri": "Thứ sáu",
           "sat": "Thứ bảy"
         },
+        "startTime": "Giờ bắt đầu",
+        "endTime": "Giờ kết thúc",
+        "blockedDateLabel": "Chặn ngày",
         "saveSchedule": "Lưu lịch làm việc",
         "saved": "Đã lưu",
         "blockedDates": "Ngày không nhận lịch",

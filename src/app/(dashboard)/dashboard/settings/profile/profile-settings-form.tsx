@@ -336,6 +336,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           </span>
         </div>
         <textarea
+          aria-label={tEditor("descriptionLabel")}
           maxLength={1000}
           className="min-h-28 w-full rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none focus:border-border-focus focus:ring-2 focus:ring-gold-500/20"
           value={values.description}

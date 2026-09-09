@@ -103,6 +103,7 @@ export function AccountBasicsForm({
             {t("displayNameLabel")}
           </label>
           <Input
+            aria-label={t("displayNameLabel")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={(e) => saveName(e.target.value)}
@@ -116,6 +117,7 @@ export function AccountBasicsForm({
         </label>
         <div className="flex items-center gap-2">
           <Input
+            aria-label={t("usernameLabel")}
             value={username}
             onChange={(e) => setUsername(e.target.value.toLowerCase())}
             onBlur={saveUsername}

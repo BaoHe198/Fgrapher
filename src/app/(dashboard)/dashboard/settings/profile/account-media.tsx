@@ -47,6 +47,7 @@ export function AccountMedia({
         <button
           type="button"
           onClick={() => coverInput.current?.click()}
+          aria-label={t("coverButton")}
           className="absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-body-sm text-white"
         >
           {uploading === "cover" ? (
@@ -61,6 +62,7 @@ export function AccountMedia({
           type="file"
           accept="image/*"
           className="hidden"
+          aria-label={t("coverButton")}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) onFileSelected(file, "cover");
@@ -83,6 +85,7 @@ export function AccountMedia({
           <button
             type="button"
             onClick={() => avatarInput.current?.click()}
+            aria-label={t("avatarButton")}
             className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 transition-opacity hover:opacity-100"
           >
             {uploading === "avatar" ? (
@@ -96,6 +99,7 @@ export function AccountMedia({
             type="file"
             accept="image/*"
             className="hidden"
+            aria-label={t("avatarButton")}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) onFileSelected(file, "avatar");

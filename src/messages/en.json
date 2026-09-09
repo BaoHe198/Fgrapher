@@ -1995,6 +1995,8 @@
         "inactive": "(inactive)",
         "minutesSuffix": "min",
         "editService": "Edit service",
+        "editServiceAria": "Edit {service}",
+        "deleteServiceAria": "Delete {service}",
         "addServiceDialogTitle": "Add service",
         "nameLabel": "Name",
         "descriptionLabel": "Description",
@@ -2006,6 +2008,7 @@
       },
       "media": {
         "coverButton": "Cover",
+        "avatarButton": "Avatar",
         "uploadUnavailable": "Upload unavailable",
         "uploadFailed": "Upload failed",
         "sizeLimit": "Up to 20MB, JPG/PNG/WebP",
@@ -2027,6 +2030,9 @@
           "fri": "Friday",
           "sat": "Saturday"
         },
+        "startTime": "Start time",
+        "endTime": "End time",
+        "blockedDateLabel": "Block date",
         "saveSchedule": "Save schedule",
         "saved": "Saved",
         "blockedDates": "Blocked dates",

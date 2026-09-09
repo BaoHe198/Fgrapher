@@ -151,6 +151,7 @@ export function ServicesManager({
                   size="icon-sm"
                   variant="ghost"
                   onClick={() => openEdit(service)}
+                  aria-label={t("editServiceAria", { service: service.name })}
                 >
                   <Pencil className="size-4" />
                 </Button>
@@ -158,6 +159,7 @@ export function ServicesManager({
                   size="icon-sm"
                   variant="ghost"
                   onClick={() => remove(service.id)}
+                  aria-label={t("deleteServiceAria", { service: service.name })}
                 >
                   <Trash2 className="size-4" />
                 </Button>
@@ -185,6 +187,7 @@ export function ServicesManager({
                 {t("descriptionLabel")}
               </label>
               <Textarea
+                aria-label={t("descriptionLabel")}
                 rows={6}
                 className="min-h-36 text-body-md"
                 value={draft.description}
