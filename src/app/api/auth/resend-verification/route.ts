@@ -12,6 +12,10 @@ const resendSchema = z.object({
     .string()
     .transform((value) => value.trim())
     .pipe(z.string().email()),
+  // Same two-value enum as the verification link. Optional and never a
+  // gate: a missing or mangled preference falls back to monthly rather
+  // than refusing to send someone their link.
+  interval: z.enum(["month", "year"]).optional(),
 });
 
 // Two buckets, same reasoning as the login limiter in lib/auth.ts: the IP
@@ -51,7 +55,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { email } = parsed.data;
+  const { email, interval } = parsed.data;
 
   // Lower-cased for the bucket key only, never for the lookup: otherwise
   // "a@b.com", "A@b.com" and "A@B.COM" each get their own budget and the
@@ -61,7 +65,7 @@ export async function POST(request: Request) {
     RESEND_EMAIL_RATE_LIMIT,
   );
   if (emailLimit.allowed) {
-    await resendVerificationEmail(email);
+    await resendVerificationEmail(email, interval);
   }
 
   // Always the same response, whether the address is registered, already

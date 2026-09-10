@@ -4,10 +4,9 @@ import { z } from "zod";
 
 import { features } from "@/lib/features";
 import {
-  buildOnboardingDestination,
   type BillingInterval,
-  isSafeInternalPath,
   parseBillingInterval,
+  resolveOnboardingNext,
 } from "@/lib/onboarding-destination";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
@@ -33,16 +32,11 @@ async function resolveNextDestination(
   interval: BillingInterval,
 ): Promise<string> {
   try {
-    const destination = buildOnboardingDestination({
+    return resolveOnboardingNext({
       billingEnabled: features.billingEnabled,
       pendingRoles: await getPendingPaidRoles(userId),
       interval,
     });
-    // Belt and braces: this is built from an allow-listed role list and two
-    // fixed interval values, so it cannot currently be anything else — but
-    // it becomes a callbackUrl, and a callbackUrl that stops being internal
-    // is an open redirect.
-    return isSafeInternalPath(destination) ? destination : "/dashboard";
   } catch {
     // The account IS verified at this point. Failing to work out where to
     // send them next must not turn that into an error.

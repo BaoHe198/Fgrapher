@@ -65,6 +65,7 @@ export function AuthTabs({
           callbackUrl={callbackUrl}
           hasError={hasError}
           errorCode={errorCode}
+          interval={interval}
           onSwitchToRegister={() => setMode("register")}
         />
       </TabsPanel>

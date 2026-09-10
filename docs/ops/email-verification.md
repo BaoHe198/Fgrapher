@@ -123,6 +123,15 @@ through the inbox even onto another device, and is normalised on the way
 back in — a mangled value falls back to monthly rather than blocking
 verification.
 
+The period is carried at **every** point that knows it, not just the first
+send: registration, the "check your inbox" panel, the /verify-email page's
+own resend, and the login page's unverified prompt. The last of those is
+the awkward one — NextAuth's redirect keeps only its own error params, so
+the period travels in `sessionStorage` alongside the attempted address and
+is read-and-cleared together with it. Missing it on a **resend** would have
+been the worst place to miss it: resend is exactly what a year-plan signup
+reaches for when their first email never arrives.
+
 **While `BILLING_ENABLED` is false — today's configuration, and permanently
 so for Stripe — all of this resolves to `/dashboard`**, because
 registration already granted a free plan for every paid role. The path

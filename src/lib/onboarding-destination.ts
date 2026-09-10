@@ -79,3 +79,21 @@ export function isSafeInternalPath(path: unknown): path is string {
   if (/[\u0000-\u001f\u007f]/.test(path)) return false;
   return true;
 }
+
+/**
+ * The onboarding destination, validated and with a safe fallback — the
+ * exact value handed to the browser as a callbackUrl.
+ *
+ * The safety check is belt and braces: the path is assembled from an
+ * allow-listed role list and two fixed interval values, so it cannot
+ * currently be anything else. But it becomes a callbackUrl, and this is the
+ * one place a future change could make that attacker-influenced.
+ */
+export function resolveOnboardingNext(input: {
+  billingEnabled: boolean;
+  pendingRoles: ReadonlyArray<Role>;
+  interval: BillingInterval;
+}): string {
+  const destination = buildOnboardingDestination(input);
+  return isSafeInternalPath(destination) ? destination : "/dashboard";
+}

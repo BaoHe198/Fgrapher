@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import {
   canSubmitResend,
   rememberAttemptedEmail,
-  takeAttemptedEmail,
+  takeAttemptedSignIn,
 } from "@/lib/resend-verification";
 
 // Guards the resend prompt against being rendered in a state where it can
@@ -69,32 +69,50 @@ describe("canSubmitResend", () => {
   });
 });
 
-describe("attempted-email handoff", () => {
+describe("attempted sign-in handoff", () => {
   it("gives the address back to the prompt", () => {
     const storage = fakeStorage();
-    rememberAttemptedEmail("nguyen@example.com", storage);
-    assert.equal(takeAttemptedEmail(storage), "nguyen@example.com");
+    rememberAttemptedEmail("nguyen@example.com", "month", storage);
+    assert.equal(takeAttemptedSignIn(storage).email, "nguyen@example.com");
   });
 
-  it("clears the address once read, so it doesn't outlive the attempt", () => {
+  it("carries the billing period through the redirect", () => {
+    // NextAuth's redirect keeps only its own error params, so a year-plan
+    // signup resending from the login page would otherwise be handed a
+    // monthly link.
     const storage = fakeStorage();
-    rememberAttemptedEmail("nguyen@example.com", storage);
+    rememberAttemptedEmail("nguyen@example.com", "year", storage);
+    assert.equal(takeAttemptedSignIn(storage).interval, "year");
+  });
 
-    takeAttemptedEmail(storage);
+  it("defaults to monthly when no period was remembered", () => {
+    const storage = fakeStorage();
+    rememberAttemptedEmail("nguyen@example.com", undefined, storage);
+    assert.equal(takeAttemptedSignIn(storage).interval, "month");
+  });
+
+  it("clears everything once read, so it doesn't outlive the attempt", () => {
+    const storage = fakeStorage();
+    rememberAttemptedEmail("nguyen@example.com", "year", storage);
+
+    takeAttemptedSignIn(storage);
 
     assert.equal(storage.size(), 0);
-    assert.equal(takeAttemptedEmail(storage), "");
+    assert.deepEqual(takeAttemptedSignIn(storage), {
+      email: "",
+      interval: "month",
+    });
   });
 
-  it("returns an empty string when nothing was remembered", () => {
-    assert.equal(takeAttemptedEmail(fakeStorage()), "");
+  it("returns an empty address when nothing was remembered", () => {
+    assert.equal(takeAttemptedSignIn(fakeStorage()).email, "");
   });
 
   it("hands back a prefill that is immediately submittable", () => {
     const storage = fakeStorage();
-    rememberAttemptedEmail("nguyen@example.com", storage);
+    rememberAttemptedEmail("nguyen@example.com", "year", storage);
 
-    const email = takeAttemptedEmail(storage);
+    const { email } = takeAttemptedSignIn(storage);
 
     assert.equal(canSubmitResend({ status: "idle", email }), true);
   });
@@ -113,14 +131,22 @@ describe("attempted-email handoff", () => {
       },
     };
 
-    assert.doesNotThrow(() => rememberAttemptedEmail("a@b.com", throwing));
-    assert.equal(takeAttemptedEmail(throwing), "");
+    assert.doesNotThrow(() =>
+      rememberAttemptedEmail("a@b.com", "year", throwing),
+    );
+    assert.deepEqual(takeAttemptedSignIn(throwing), {
+      email: "",
+      interval: "month",
+    });
     // Falls back to the user typing it, which is still submittable.
     assert.equal(canSubmitResend({ status: "idle", email: "a@b.com" }), true);
   });
 
   it("does nothing when there is no storage at all (SSR)", () => {
-    assert.doesNotThrow(() => rememberAttemptedEmail("a@b.com", null));
-    assert.equal(takeAttemptedEmail(null), "");
+    assert.doesNotThrow(() => rememberAttemptedEmail("a@b.com", "year", null));
+    assert.deepEqual(takeAttemptedSignIn(null), {
+      email: "",
+      interval: "month",
+    });
   });
 });

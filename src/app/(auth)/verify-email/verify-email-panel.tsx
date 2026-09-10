@@ -12,6 +12,7 @@ import {
   isSafeInternalPath,
 } from "@/lib/onboarding-destination";
 import { canSubmitResend, type ResendStatus } from "@/lib/resend-verification";
+import { buildLoginCallbackPath } from "@/lib/verification-link";
 import { cn } from "@/lib/utils";
 
 type PanelState =
@@ -104,9 +105,7 @@ export function VerifyEmailPanel({
           {isFresh ? t("successBody") : t("alreadyBody")}
         </p>
         <Link
-          href={
-            next ? `/login?callbackUrl=${encodeURIComponent(next)}` : "/login"
-          }
+          href={buildLoginCallbackPath(next)}
           className={cn(
             buttonVariants({ variant: "accent", size: "lg" }),
             "w-full",
@@ -137,7 +136,7 @@ export function VerifyEmailPanel({
         <p className="text-body-md text-text-secondary">{t(bodyKey)}</p>
       </div>
 
-      <ResendVerificationForm initialEmail={initialEmail} />
+      <ResendVerificationForm initialEmail={initialEmail} interval={interval} />
 
       <p className="text-center text-body-md text-text-secondary">
         <Link
@@ -154,6 +153,13 @@ export function VerifyEmailPanel({
 interface ResendVerificationFormProps {
   initialEmail: string;
   compact?: boolean;
+  /**
+   * The billing period, where the surrounding context knows it. Without it
+   * a replacement link drops back to the monthly default — and the resend
+   * is precisely the path a year-plan signup takes when their first email
+   * never arrives.
+   */
+  interval?: BillingInterval;
 }
 
 /**
@@ -168,6 +174,7 @@ interface ResendVerificationFormProps {
 export function ResendVerificationForm({
   initialEmail,
   compact = false,
+  interval,
 }: ResendVerificationFormProps) {
   const t = useTranslations("accountFlows.verifyEmail");
   const [email, setEmail] = useState(initialEmail);
@@ -183,7 +190,7 @@ export function ResendVerificationForm({
       const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, interval }),
       });
       setStatus(res.ok ? "sent" : "error");
     } catch {

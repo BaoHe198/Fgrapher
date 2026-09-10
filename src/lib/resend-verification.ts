@@ -5,6 +5,11 @@
 // email field in the compact layout while still disabling the button on an
 // empty address, which made the login prompt impossible to submit.
 
+import {
+  type BillingInterval,
+  parseBillingInterval,
+} from "@/lib/onboarding-destination";
+
 export type ResendStatus = "idle" | "sending" | "sent" | "error";
 
 /**
@@ -25,9 +30,13 @@ export function canSubmitResend({
   return email.trim().length > 0;
 }
 
-// Where the login form parks the address someone just tried to sign in
-// with, so the unverified prompt can offer it back.
+// Where the login form parks what it knows about the attempt, so the
+// unverified prompt can offer it back. NextAuth's redirect drops the
+// query string, so the billing period rides along here too — otherwise a
+// year-plan signup resending from the login page silently gets a monthly
+// link.
 const PENDING_EMAIL_KEY = "fg:pending-verification-email";
+const PENDING_INTERVAL_KEY = "fg:pending-verification-interval";
 
 type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -52,11 +61,13 @@ function safeStorage(): StorageLike | null {
  */
 export function rememberAttemptedEmail(
   email: string,
+  interval?: BillingInterval,
   storage: StorageLike | null = safeStorage(),
 ): void {
   if (!storage) return;
   try {
     storage.setItem(PENDING_EMAIL_KEY, email);
+    if (interval) storage.setItem(PENDING_INTERVAL_KEY, interval);
   } catch {
     // Storage full or blocked — the prompt just asks for the address.
   }
@@ -70,15 +81,20 @@ export function rememberAttemptedEmail(
  * very next render of the login page purges it rather than letting it sit
  * in the tab.
  */
-export function takeAttemptedEmail(
+export function takeAttemptedSignIn(
   storage: StorageLike | null = safeStorage(),
-): string {
-  if (!storage) return "";
+): { email: string; interval: BillingInterval } {
+  const empty = { email: "", interval: "month" as const };
+  if (!storage) return empty;
   try {
-    const value = storage.getItem(PENDING_EMAIL_KEY) ?? "";
+    const email = storage.getItem(PENDING_EMAIL_KEY) ?? "";
+    const interval = parseBillingInterval(
+      storage.getItem(PENDING_INTERVAL_KEY),
+    );
     storage.removeItem(PENDING_EMAIL_KEY);
-    return value;
+    storage.removeItem(PENDING_INTERVAL_KEY);
+    return { email, interval };
   } catch {
-    return "";
+    return empty;
   }
 }

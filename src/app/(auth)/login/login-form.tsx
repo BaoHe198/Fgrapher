@@ -14,9 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth-errors";
+import type { BillingInterval } from "@/lib/onboarding-destination";
 import {
   rememberAttemptedEmail,
-  takeAttemptedEmail,
+  takeAttemptedSignIn,
 } from "@/lib/resend-verification";
 import { getLoginSchema, type LoginInput } from "@/lib/validations/auth";
 
@@ -24,6 +25,8 @@ interface LoginFormProps {
   callbackUrl?: string;
   hasError: boolean;
   errorCode?: string;
+  /** From /login?interval=…; survives into a resend via sessionStorage. */
+  interval: BillingInterval;
   onSwitchToRegister: () => void;
 }
 
@@ -31,6 +34,7 @@ export function LoginForm({
   callbackUrl,
   hasError,
   errorCode,
+  interval,
   onSwitchToRegister,
 }: LoginFormProps) {
   const t = useTranslations("accountFlows.login");
@@ -45,14 +49,22 @@ export function LoginForm({
     hasError && !isUnverified ? t("invalidCredentials") : null,
   );
   const [attemptedEmail, setAttemptedEmail] = useState("");
+  const [attemptedInterval, setAttemptedInterval] =
+    useState<BillingInterval>(interval);
 
   // sessionStorage isn't readable during render (it doesn't exist on the
   // server, and reading it in the render body would desync hydration), so
   // this happens on mount. takeAttemptedEmail() clears the entry whether or
   // not this render needs it.
   useEffect(() => {
-    const remembered = takeAttemptedEmail();
-    if (remembered) startTransition(() => setAttemptedEmail(remembered));
+    const remembered = takeAttemptedSignIn();
+    if (!remembered.email) return;
+    startTransition(() => {
+      setAttemptedEmail(remembered.email);
+      // The URL's interval is gone by now — NextAuth's redirect keeps only
+      // its own error params — so the remembered one wins where it exists.
+      setAttemptedInterval(remembered.interval);
+    });
   }, []);
 
   const loginSchema = useMemo(() => getLoginSchema(tValidation), [tValidation]);
@@ -73,7 +85,7 @@ export function LoginForm({
     // offer the address back instead of making the user retype it — the
     // redirect discards component state. Read-and-cleared on the next
     // render of this page, so nothing lingers after a successful sign-in.
-    rememberAttemptedEmail(values.email);
+    rememberAttemptedEmail(values.email, interval);
 
     // redirect: true (the default) lets next-auth navigate directly rather than
     // resolving the client-side promise itself — the latter awaits an internal
@@ -110,6 +122,7 @@ export function LoginForm({
           <ResendVerificationForm
             key={attemptedEmail}
             initialEmail={attemptedEmail}
+            interval={attemptedInterval}
             compact
           />
         </div>

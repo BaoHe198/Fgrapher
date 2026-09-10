@@ -9,6 +9,7 @@ import {
   type BillingInterval,
   pendingPaidRoles,
 } from "@/lib/onboarding-destination";
+import { buildVerificationPath } from "@/lib/verification-link";
 import { emailIdempotencyKey } from "@/services/email-outbox-policy";
 
 // Credential signups must prove they control the address they registered
@@ -89,14 +90,11 @@ export async function sendVerificationEmail({
   try {
     const { rawToken, tokenHash } = await createEmailVerificationToken(userId);
 
-    const query = new URLSearchParams({ token: rawToken });
-    if (interval) query.set("interval", interval);
-
     const result = await sendEmail({
       to: email,
       subject: "Xác minh email Fgrapher của bạn",
       html: verifyEmailHtml({
-        verifyUrl: appUrl(`/verify-email?${query.toString()}`),
+        verifyUrl: appUrl(buildVerificationPath({ rawToken, interval })),
       }),
       // Scoped to the issued token, not to the user or the address: every
       // resend mints a new token and therefore a new key, so a legitimately
@@ -321,7 +319,16 @@ export async function getPendingPaidRoles(userId: string) {
  * tell whether the address is registered — the route reports the same
  * success either way, so this endpoint can't be used to enumerate accounts.
  */
-export async function resendVerificationEmail(email: string): Promise<void> {
+export async function resendVerificationEmail(
+  email: string,
+  /**
+   * The billing period, when the caller knows it. A replacement link that
+   * dropped it would quietly move a year-plan signup onto the monthly
+   * default at checkout — the resend is the *likely* path for exactly that
+   * user, since it is what they reach for when the first email fails.
+   */
+  interval?: BillingInterval,
+): Promise<void> {
   const normalized = email.trim();
   const select = {
     id: true,
@@ -360,5 +367,5 @@ export async function resendVerificationEmail(email: string): Promise<void> {
     return;
   }
 
-  await sendVerificationEmail({ userId: user.id, email: user.email });
+  await sendVerificationEmail({ userId: user.id, email: user.email, interval });
 }

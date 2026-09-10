@@ -195,7 +195,11 @@ export function RegisterForm({
         </p>
         <p className="text-body-sm text-text-tertiary">{t("verifyHint")}</p>
         <div className="w-full">
-          <ResendVerificationForm initialEmail={pendingEmail} compact />
+          <ResendVerificationForm
+            initialEmail={pendingEmail}
+            interval={interval}
+            compact
+          />
         </div>
         <button
           type="button"
