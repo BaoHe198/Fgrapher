@@ -110,8 +110,13 @@ export function MessagesClient({
           panel) genuinely doesn't need a big visible page title the way
           other dashboard pages do, but a screen reader still needs one. */}
       <h1 className="sr-only">{t("pageTitle")}</h1>
-      <div className="grid h-[calc(100dvh-180px)] min-h-[480px] grid-cols-1 overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card lg:grid-cols-[340px_1fr]">
-        <div className={cn("h-full", selectedId ? "hidden lg:block" : "block")}>
+      <div className="grid h-[calc(100dvh-140px)] min-h-[480px] grid-cols-1 overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card lg:h-[calc(100dvh-180px)] lg:grid-cols-[340px_1fr]">
+        <div
+          className={cn(
+            "h-full min-h-0",
+            selectedId ? "hidden lg:block" : "block",
+          )}
+        >
           <ConversationList
             conversations={conversations}
             selectedId={selectedId}
@@ -120,7 +125,12 @@ export function MessagesClient({
           />
         </div>
 
-        <div className={cn("h-full", selectedId ? "block" : "hidden lg:block")}>
+        <div
+          className={cn(
+            "h-full min-h-0",
+            selectedId ? "block" : "hidden lg:block",
+          )}
+        >
           {selectedConversation ? (
             <ChatPanel
               key={selectedConversation.id}

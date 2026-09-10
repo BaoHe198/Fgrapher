@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 // flash right after the first skeleton resolved.
 export function MessagesSkeleton() {
   return (
-    <div className="grid h-[calc(100dvh-180px)] min-h-[480px] grid-cols-1 overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card lg:grid-cols-[340px_1fr]">
+    <div className="grid h-[calc(100dvh-140px)] min-h-[480px] grid-cols-1 overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card lg:h-[calc(100dvh-180px)] lg:grid-cols-[340px_1fr]">
       <div className="hidden h-full flex-col gap-3 border-r border-border-subtle p-4 lg:flex">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3">

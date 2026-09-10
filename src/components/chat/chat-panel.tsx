@@ -336,7 +336,11 @@ export function ChatPanel({
         />
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-5">
+      {/* min-h-0: without it a flex child defaults to min-height:auto and
+          won't shrink below its content, so a full thread pushes the
+          composer past the container edge (clipped by overflow-hidden on
+          the page grid) instead of scrolling here. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-5">
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center">
             <Loader2 className="size-6 animate-spin text-text-tertiary" />
