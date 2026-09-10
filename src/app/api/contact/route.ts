@@ -49,11 +49,16 @@ export async function POST(request: Request) {
   const { name, email, message } = parsed.data;
   const result = await sendEmail({
     to: getSupportEmail(),
-    subject: `Contact form: ${escapeHtml(name)}`,
+    // A subject line is not markup — escaping it would show the sender
+    // literal entities like `&#39;` in their name.
+    subject: `Contact form: ${name}`,
     html: `<p>From: ${escapeHtml(name)} (${escapeHtml(email)})</p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
   });
 
-  if (!result.success) {
+  // Queued counts as accepted: the retry cron owns it from here, and
+  // telling someone their message failed when it's durably stored just
+  // gets it sent twice.
+  if (!result.success && !result.queued) {
     return NextResponse.json(
       {
         data: null,

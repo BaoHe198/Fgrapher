@@ -1549,34 +1549,56 @@ model Notification {
 
 enum EmailOutboxStatus {
   PENDING
+  // Claimed by a cron run and currently being handed to the provider.
+  // Exists so two overlapping runs can't both send the same row — see
+  // services/email-outbox.ts's processEmailOutbox.
+  SENDING
   SENT
   FAILED
 }
 
 model EmailOutbox {
-  id                String             @id @default(cuid())
-  idempotencyKey    String             @unique
-  to                String
-  subject           String
-  html              String
-  status            EmailOutboxStatus  @default(PENDING)
-  attempts          Int                @default(0)
-  nextAttemptAt     DateTime           @default(now())
-  providerId        String? // Resend message ID
-  lastError         String?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  sentAt            DateTime?
+  id             String            @id @default(cuid())
+  // Event-scoped, NOT a hash of the message content — see
+  // services/email-outbox-policy.ts's emailIdempotencyKey for why content
+  // hashing silently drops legitimate repeat emails.
+  idempotencyKey String            @unique
+  to             String
+  subject        String
+  html           String
+  status         EmailOutboxStatus @default(PENDING)
+  attempts       Int               @default(0)
+  // Nullable: a row in a terminal state (SENT/FAILED) has no next attempt.
+  // Storing a schedule on a terminal row is a contradiction the processor
+  // would never act on, and the non-null version didn't typecheck against
+  // the code writing it.
+  nextAttemptAt  DateTime?         @default(now())
+  // When the current SENDING claim was taken, so a run that died mid-send
+  // can be recovered instead of stranding the row.
+  lockedAt       DateTime?
+  providerId     String? // Resend message ID
+  lastError      String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  sentAt         DateTime?
 
   @@index([status, nextAttemptAt])
-  @@index([idempotencyKey])
+  @@index([status, lockedAt])
   @@map("email_outbox")
 }
 
 model EmailVerificationToken {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
+  id String @id @default(cuid())
+
+  userId String
+  // SHA-256 of the token, never the token itself. The raw value exists
+  // only in the email that was sent, so a leaked database dump (or a read
+  // through an unrelated SQL injection) can't be replayed to verify — and
+  // therefore take over — an account whose owner never clicked the link.
+  // Password reset (VerificationToken) still stores its token in the
+  // clear; that's pre-existing and tracked separately, not a reason to
+  // repeat it here.
+  tokenHash String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
 

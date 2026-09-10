@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
+import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
 import { resetPasswordEmailHtml, sendEmail } from "@/lib/email";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -66,19 +67,26 @@ export async function POST(request: Request) {
       data: { identifier: email, token, expires },
     });
 
-    const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
+    // appUrl(), not `process.env.NEXTAUTH_URL` — that var is deliberately
+    // unset on Vercel Preview (see lib/env.ts), which made this produce the
+    // literal string "undefined/reset-password?token=…".
+    const resetUrl = appUrl(`/reset-password?token=${token}`);
     const result = await sendEmail({
       to: email,
-      subject: "Reset your Fgrapher password",
+      // Vietnamese-first, matching resetPasswordEmailHtml's own copy
+      // (CLAUDE.md rule 10) — the subject was the last English string left
+      // in this flow.
+      subject: "Đặt lại mật khẩu Fgrapher",
       html: resetPasswordEmailHtml({ resetUrl }),
+      // No idempotency key on purpose: asking for a second reset link is a
+      // legitimate repeat of a *new* event, and each request mints a fresh
+      // token, so every call must actually send.
     });
 
-    if (!result.success) {
-      if (process.env.NODE_ENV === "production") {
-        console.error("[Password Reset] Email send failed:", {
-          error: result.error,
-        });
-      }
+    if (!result.success && !result.queued) {
+      console.error("[Password Reset] Email send failed", {
+        error: result.error,
+      });
     }
   }
 

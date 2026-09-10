@@ -11,6 +11,13 @@ const booleanFlag = (defaultValue: "true" | "false") =>
     .default(defaultValue)
     .transform((v) => v === "true");
 
+// Either a bare address (`noreply@fgrapher.com`) or RFC 5322's display-name
+// form (`Fgrapher <noreply@fgrapher.com>`) — both are valid values for an
+// SMTP/Resend "from" header. See EMAIL_FROM below for why this can't just
+// be z.string().email().
+const EMAIL_FROM_PATTERN =
+  /^(?:[^<>@\s]+@[^<>@\s]+\.[^<>@\s]+|[^<>]*<\s*[^<>@\s]+@[^<>@\s]+\.[^<>@\s]+\s*>)$/;
+
 // Fails loudly at build/startup time rather than silently at request time.
 //
 // Required vs optional here matches how the rest of the app already
@@ -61,7 +68,20 @@ const serverSchema = z.object({
   TWILIO_VERIFY_SERVICE_SID: z.string().optional(),
 
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().email().optional(),
+  // NOT a bare z.string().email(): the documented Resend "from" format —
+  // and this app's own fallback — is the display-name form
+  // `Fgrapher <noreply@fgrapher.com>`, which z.email() rejects. Requiring
+  // a bare address here meant that setting EMAIL_FROM to the value the
+  // docs tell you to use threw out of parseEnv() at import time and 500'd
+  // every request in the app. Accept either shape.
+  EMAIL_FROM: z
+    .string()
+    .refine(
+      (value) => EMAIL_FROM_PATTERN.test(value.trim()),
+      "EMAIL_FROM must be an email address or `Name <email@example.com>`",
+    )
+    .optional(),
+  // Bare address only — it's used as a recipient (`to`), not a `from`.
   SUPPORT_EMAIL: z.string().email().optional(),
   CRON_SECRET: z.string().optional(),
 

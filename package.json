@@ -8,6 +8,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test \"src/**/__tests__/*.test.ts\"",
     "format": "prettier --write .",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",

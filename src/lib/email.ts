@@ -1,126 +1,141 @@
-import { Resend } from "resend";
+import {
+  deliverEmail,
+  getSupportEmail,
+  logEmailFailure,
+} from "@/lib/email-transport";
+import {
+  enqueueEmail,
+  recordFailedEmail,
+  recordSentEmail,
+} from "@/services/email-outbox";
 
-import { env } from "@/lib/env";
-import { escapeHtml } from "@/lib/utils";
-
-// Every booking/order/review/subscription email template below takes a `t`
-// (namespace "libServices.email") resolved by the caller via
-// getTranslations() — request-context callers use the request's own locale,
-// cron/webhook-triggered callers pass { locale: "vi" } explicitly (no
-// request/cookie context to read a locale from). This file itself stays a
-// thin template layer and never calls getTranslations() on its own.
-type EmailT = (key: string, values?: Record<string, string | number>) => string;
-
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
-
-const FROM_ADDRESS =
-  process.env.EMAIL_FROM || "Fgrapher <noreply@fgrapher.com>";
-const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@fgrapher.com";
+// The templates themselves live in lib/email-templates.ts (pure, no env/db,
+// unit-testable). Re-exported here so every existing
+// `import { bookingRequestEmailHtml } from "@/lib/email"` keeps working.
+export * from "@/lib/email-templates";
+export { getSupportEmail };
 
 export interface SendEmailResult {
+  /** The provider accepted the email on this request. */
   success: boolean;
+  /**
+   * The email is durably stored in the outbox and the retry cron will keep
+   * trying. `success: false, queued: true` is a normal, non-error outcome —
+   * callers should treat it as accepted.
+   */
+  queued: boolean;
   error?: string;
   messageId?: string;
+  outboxId?: string;
 }
 
-interface SendEmailInput {
+export interface SendEmailInput {
   to: string;
   subject: string;
   html: string;
+  /**
+   * Event-scoped idempotency key (see services/email-outbox-policy.ts's
+   * emailIdempotencyKey). Supply one when the *same event* may legitimately
+   * trigger this send more than once and should only produce one email.
+   * Omit it when every call is a distinct email the user asked for — a
+   * resent verification link, a second contact-form message — because an
+   * omitted key always sends.
+   */
+  idempotencyKey?: string;
 }
 
-function logEmailError(error: unknown, to: string) {
-  const message = error instanceof Error ? error.message : String(error);
-  if (env.NODE_ENV === "production") {
-    console.error("[Email Error]", { message });
-  } else {
-    console.error("[Email Error]", { message, to });
-  }
-}
-
-// No-ops when RESEND_API_KEY isn't configured (e.g. local dev without the
-// provider set up) rather than throwing, so auth flows stay testable without
-// live email credentials.
-//
-// On staging, every email is redirected to a single test inbox rather than
-// the real recipient — real API key, fake destination, so staging can
-// exercise the real Resend integration without ever emailing an actual
-// user. Set STAGING_TEST_INBOX to enable; unset, this falls through to
-// sending nowhere differently (still gated by RESEND_API_KEY above).
-//
-// Email failures are queued to an outbox and retried asynchronously —
-// sendEmail always returns success to callers so failures never propagate
-// as HTTP 500s. The caller should not assume immediate delivery.
+/**
+ * Sends one transactional email.
+ *
+ * Never throws and never fails the caller's mutation: a booking that was
+ * created successfully must not turn into an HTTP 500 because Resend was
+ * briefly unreachable. What it does *not* do is claim success it didn't
+ * have — the previous version returned `{ success: true }` unconditionally,
+ * which made the `if (!result.success)` branches in the contact and
+ * password-reset routes permanently dead code and left callers unable to
+ * tell "delivered" from "silently dropped". Check `success || queued` to
+ * mean "accepted".
+ *
+ * Every outcome is recorded in the outbox — delivered on the first attempt
+ * included — so the table is a complete ledger of what the platform sent,
+ * not just of what broke.
+ */
 export async function sendEmail({
   to,
   subject,
   html,
+  idempotencyKey,
 }: SendEmailInput): Promise<SendEmailResult> {
-  if (!resend) {
-    if (env.NODE_ENV === "production") {
-      console.warn(
-        "[Email Warn] RESEND_API_KEY not configured; emails will not send",
-      );
-    }
-    return { success: true };
-  }
+  const delivery = await deliverEmail({ to, subject, html });
 
-  const isStaging = env.APP_ENV === "staging";
-  const testInbox = process.env.STAGING_TEST_INBOX;
-  const recipient = isStaging && testInbox ? testInbox : to;
-
-  try {
-    const result = await resend.emails.send({
-      from: FROM_ADDRESS,
-      to: recipient,
-      subject:
-        isStaging && testInbox
-          ? `[staging, would go to ${escapeHtml(to)}] ${subject}`
-          : subject,
-      html,
-    });
-
-    if (result.error) {
-      logEmailError(result.error, to);
-      // Enqueue for retry asynchronously, don't wait
-      enqueueEmailForRetry({ to, subject, html }).catch((err) => {
-        if (env.NODE_ENV === "production") {
-          console.error("[Email] Failed to enqueue for retry", {
-            message: err instanceof Error ? err.message : String(err),
-          });
-        }
-      });
-      return { success: true };
-    }
-
+  if (delivery.delivered) {
+    const outboxId = await safeRecord(() =>
+      recordSentEmail({
+        to,
+        subject,
+        html,
+        idempotencyKey,
+        providerId: delivery.messageId,
+      }),
+    );
     return {
       success: true,
-      messageId: result.data?.id,
+      queued: false,
+      messageId: delivery.messageId,
+      ...(outboxId ? { outboxId } : {}),
     };
-  } catch (error) {
-    logEmailError(error, to);
-    enqueueEmailForRetry({ to, subject, html }).catch((err) => {
-      if (env.NODE_ENV === "production") {
-        console.error("[Email] Failed to enqueue for retry", {
-          message: err instanceof Error ? err.message : String(err),
-        });
-      }
-    });
-    return { success: true };
   }
+
+  logEmailFailure("immediate send failed", delivery.error, to);
+
+  if (!delivery.retryable) {
+    const outboxId = await safeRecord(() =>
+      recordFailedEmail({
+        to,
+        subject,
+        html,
+        idempotencyKey,
+        error: delivery.error,
+      }),
+    );
+    return {
+      success: false,
+      queued: false,
+      error: delivery.error,
+      ...(outboxId ? { outboxId } : {}),
+    };
+  }
+
+  const outboxId = await safeRecord(() =>
+    enqueueEmail({ to, subject, html, idempotencyKey }),
+  );
+
+  return {
+    success: false,
+    // No outbox row means nothing will retry — say so, rather than implying
+    // the email is safely queued when it isn't.
+    queued: outboxId !== null,
+    error: delivery.error,
+    ...(outboxId ? { outboxId } : {}),
+  };
 }
 
-// Enqueue email for retry via outbox — this is async and non-blocking.
-// Dynamically import to avoid circular dependency since email-outbox.ts
-// imports db which may have other dependencies.
-async function enqueueEmailForRetry(payload: SendEmailInput) {
+// The outbox write is awaited, not fire-and-forget. The original kicked off
+// the enqueue without awaiting it, which on a serverless runtime is a data
+// loss bug: the handler returns, the instance is frozen, and the pending
+// insert never runs — the email is gone with nothing recording it was ever
+// attempted. It's a single indexed insert, so awaiting it is cheap.
+async function safeRecord(
+  write: () => Promise<string | null>,
+): Promise<string | null> {
   try {
-    const { enqueueEmail } = await import("@/services/email-outbox");
-    await enqueueEmail(payload);
+    return await write();
   } catch (err) {
-    throw err;
+    // The outbox is a reliability mechanism, not a reason to fail the
+    // caller's mutation — if even the queue write fails, log and move on.
+    const message = err instanceof Error ? err.message : String(err);
+    logEmailFailure("outbox write failed", message, "");
+    return null;
   }
 }
 
@@ -137,503 +152,17 @@ export async function sendMarketingEmail({
   to,
   subject,
   html,
+  idempotencyKey,
   hasMarketingConsent,
 }: SendEmailInput & {
   hasMarketingConsent: boolean;
 }): Promise<SendEmailResult> {
   if (!hasMarketingConsent) {
-    return { success: false, error: "marketing_consent_not_given" };
+    return {
+      success: false,
+      queued: false,
+      error: "marketing_consent_not_given",
+    };
   }
-  return sendEmail({ to, subject, html });
-}
-
-export function getSupportEmail(): string {
-  return SUPPORT_EMAIL;
-}
-
-// TODO(i18n): this function's only caller (src/app/api/auth/forgot-password/
-// route.ts) is outside this pass's file scope, and next-intl's
-// getTranslations() is async while this function must stay sync (it just
-// returns an HTML string with no request access of its own). Rather than
-// force a required `t` param that would break that out-of-scope call site,
-// the copy below is hardcoded to Vietnamese directly — matching the
-// platform's Vietnamese-first default (CLAUDE.md rule 10, routing.defaultLocale
-// = "vi") for the common case. Once forgot-password/route.ts is updated to
-// resolve a `t` instance (namespace "libServices.email.resetPassword") and
-// pass it through, this should switch to the same t()-based pattern as the
-// rest of this file.
-export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
-  const escapedUrl = escapeHtml(resetUrl);
-  return `
-    <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
-      <div style="background-color: hsl(168 58% 15%); padding: 32px 24px; text-align: center;">
-        <span style="color: #ffffff; font-size: 20px; font-weight: 700;">Fgrapher</span>
-      </div>
-      <div style="padding: 32px 24px; background-color: #ffffff;">
-        <h1 style="font-size: 20px; margin: 0 0 12px; color: hsl(30 15% 11%);">Đặt lại mật khẩu</h1>
-        <p style="font-size: 14px; line-height: 1.5; color: hsl(30 8% 38%); margin: 0 0 24px;">
-          Chúng tôi nhận được yêu cầu đặt lại mật khẩu Fgrapher của bạn. Liên kết này hết hạn sau 1 giờ.
-          Nếu bạn không yêu cầu điều này, bạn có thể bỏ qua email này.
-        </p>
-        <a
-          href="${escapedUrl}"
-          style="display: inline-block; background-color: hsl(38 44% 52%); color: hsl(30 15% 11%); font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 12px; text-decoration: none;"
-        >
-          Đặt lại mật khẩu
-        </a>
-        <p style="font-size: 12px; line-height: 1.5; color: hsl(30 7% 52%); margin: 24px 0 0; word-break: break-all;">
-          Hoặc sao chép liên kết này: ${escapedUrl}
-        </p>
-      </div>
-    </div>
-  `;
-}
-
-// Shared shell for booking emails — kept as plain template-literal HTML
-// (not a full react-email component package) to match the existing
-// resetPasswordEmailHtml pattern rather than adding a new templating
-// dependency for six emails. Exported since it's also the generic
-// heading/body/CTA shell every other non-booking transactional email in
-// this file reuses (media moderation, role-change requests, ...) despite
-// the booking-specific name.
-export function bookingEmailShell({
-  t,
-  heading,
-  body,
-  ctaLabel,
-  ctaUrl,
-}: {
-  t: EmailT;
-  heading: string;
-  body: string;
-  ctaLabel?: string;
-  ctaUrl?: string;
-}) {
-  return `
-    <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
-      <div style="background-color: hsl(168 58% 15%); padding: 32px 24px; text-align: center;">
-        <span style="color: #ffffff; font-size: 20px; font-weight: 700;">Fgrapher</span>
-      </div>
-      <div style="padding: 32px 24px; background-color: #ffffff;">
-        <h1 style="font-size: 20px; margin: 0 0 12px; color: hsl(30 15% 11%);">${heading}</h1>
-        <div style="font-size: 14px; line-height: 1.6; color: hsl(30 8% 38%); margin: 0 0 24px;">
-          ${body}
-        </div>
-        ${
-          ctaLabel && ctaUrl
-            ? `<a
-          href="${ctaUrl}"
-          style="display: inline-block; background-color: hsl(38 44% 52%); color: hsl(30 15% 11%); font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 12px; text-decoration: none;"
-        >
-          ${ctaLabel}
-        </a>`
-            : ""
-        }
-      </div>
-      <div style="padding: 16px 24px; background-color: hsl(30 20% 97%); text-align: center;">
-        <a href="${process.env.NEXTAUTH_URL ?? ""}/dashboard/settings/notifications" style="font-size: 12px; color: hsl(30 7% 52%);">
-          ${t("footer.manageNotifications")}
-        </a>
-      </div>
-    </div>
-  `;
-}
-
-interface BookingEmailBase {
-  otherPartyName: string;
-  serviceName: string;
-  dateLabel: string;
-  timeLabel: string;
-  bookingUrl: string;
-}
-
-export function bookingRequestEmailHtml({
-  t,
-  otherPartyName,
-  serviceName,
-  dateLabel,
-  timeLabel,
-  bookingUrl,
-}: BookingEmailBase & { t: EmailT }) {
-  return bookingEmailShell({
-    t,
-    heading: t("bookingRequest.heading"),
-    body: t("bookingRequest.body", {
-      otherPartyName: `<strong>${otherPartyName}</strong>`,
-      serviceName: `<strong>${serviceName}</strong>`,
-      dateLabel,
-      timeLabel,
-    }),
-    ctaLabel: t("bookingRequest.cta"),
-    ctaUrl: bookingUrl,
-  });
-}
-
-export function bookingConfirmedEmailHtml({
-  t,
-  otherPartyName,
-  serviceName,
-  dateLabel,
-  timeLabel,
-  bookingUrl,
-}: BookingEmailBase & { t: EmailT }) {
-  return bookingEmailShell({
-    t,
-    heading: t("bookingConfirmed.heading"),
-    body: t("bookingConfirmed.body", {
-      otherPartyName: `<strong>${otherPartyName}</strong>`,
-      serviceName: `<strong>${serviceName}</strong>`,
-      dateLabel,
-      timeLabel,
-    }),
-    ctaLabel: t("bookingConfirmed.cta"),
-    ctaUrl: bookingUrl,
-  });
-}
-
-export function bookingDeclinedEmailHtml({
-  t,
-  otherPartyName,
-  serviceName,
-  dateLabel,
-  timeLabel,
-  bookingUrl,
-}: BookingEmailBase & { t: EmailT; reason?: string }) {
-  return bookingEmailShell({
-    t,
-    heading: t("bookingDeclined.heading"),
-    body: t("bookingDeclined.body", {
-      otherPartyName: `<strong>${otherPartyName}</strong>`,
-      serviceName: `<strong>${serviceName}</strong>`,
-      dateLabel,
-      timeLabel,
-    }),
-    ctaLabel: t("bookingDeclined.cta"),
-    ctaUrl: bookingUrl,
-  });
-}
-
-export function bookingCancelledEmailHtml({
-  t,
-  otherPartyName,
-  serviceName,
-  dateLabel,
-  timeLabel,
-  bookingUrl,
-}: BookingEmailBase & { t: EmailT }) {
-  return bookingEmailShell({
-    t,
-    heading: t("bookingCancelled.heading"),
-    body: t("bookingCancelled.body", {
-      otherPartyName: `<strong>${otherPartyName}</strong>`,
-      serviceName: `<strong>${serviceName}</strong>`,
-      dateLabel,
-      timeLabel,
-    }),
-    ctaLabel: t("bookingCancelled.cta"),
-    ctaUrl: bookingUrl,
-  });
-}
-
-export function bookingReminderEmailHtml({
-  t,
-  otherPartyName,
-  serviceName,
-  dateLabel,
-  timeLabel,
-  bookingUrl,
-}: BookingEmailBase & { t: EmailT }) {
-  return bookingEmailShell({
-    t,
-    heading: t("bookingReminder.heading"),
-    body: t("bookingReminder.body", {
-      otherPartyName: `<strong>${otherPartyName}</strong>`,
-      serviceName: `<strong>${serviceName}</strong>`,
-      dateLabel,
-      timeLabel,
-    }),
-    ctaLabel: t("bookingReminder.cta"),
-    ctaUrl: bookingUrl,
-  });
-}
-
-export function bookingCompletedEmailHtml({
-  t,
-  otherPartyName,
-  serviceName,
-  bookingUrl,
-}: BookingEmailBase & { t: EmailT }) {
-  return bookingEmailShell({
-    t,
-    heading: t("bookingCompleted.heading"),
-    body: t("bookingCompleted.body", {
-      otherPartyName: `<strong>${otherPartyName}</strong>`,
-      serviceName: `<strong>${serviceName}</strong>`,
-    }),
-    ctaLabel: t("bookingCompleted.cta"),
-    ctaUrl: bookingUrl,
-  });
-}
-
-export function welcomeSubscriptionEmailHtml({
-  t,
-  roleNames,
-  billingUrl,
-}: {
-  t: EmailT;
-  roleNames: string[];
-  billingUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("welcomeSubscription.heading"),
-    body: t(
-      roleNames.length > 1
-        ? "welcomeSubscription.bodyPlural"
-        : "welcomeSubscription.bodySingular",
-      { roleNames: `<strong>${roleNames.join(", ")}</strong>` },
-    ),
-    ctaLabel: t("welcomeSubscription.cta"),
-    ctaUrl: billingUrl,
-  });
-}
-
-export function paymentFailedEmailHtml({
-  t,
-  graceEndsLabel,
-  billingUrl,
-}: {
-  t: EmailT;
-  graceEndsLabel: string;
-  billingUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("paymentFailed.heading"),
-    body: t("paymentFailed.body", {
-      graceEndsLabel: `<strong>${graceEndsLabel}</strong>`,
-    }),
-    ctaLabel: t("paymentFailed.cta"),
-    ctaUrl: billingUrl,
-  });
-}
-
-export function subscriptionCancellingEmailHtml({
-  t,
-  periodEndLabel,
-  billingUrl,
-}: {
-  t: EmailT;
-  periodEndLabel: string;
-  billingUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("subscriptionCancelling.heading"),
-    body: t("subscriptionCancelling.body", {
-      periodEndLabel: `<strong>${periodEndLabel}</strong>`,
-    }),
-    ctaLabel: t("subscriptionCancelling.cta"),
-    ctaUrl: billingUrl,
-  });
-}
-
-export function subscriptionEndedEmailHtml({
-  t,
-  billingUrl,
-}: {
-  t: EmailT;
-  billingUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("subscriptionEnded.heading"),
-    body: t("subscriptionEnded.body"),
-    ctaLabel: t("subscriptionEnded.cta"),
-    ctaUrl: billingUrl,
-  });
-}
-
-export function receiptEmailHtml({
-  t,
-  amountLabel,
-  periodEndLabel,
-  invoiceUrl,
-}: {
-  t: EmailT;
-  amountLabel: string;
-  periodEndLabel: string;
-  invoiceUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("receipt.heading"),
-    body: t("receipt.body", {
-      amountLabel: `<strong>${amountLabel}</strong>`,
-      periodEndLabel: `<strong>${periodEndLabel}</strong>`,
-    }),
-    ctaLabel: t("receipt.cta"),
-    ctaUrl: invoiceUrl,
-  });
-}
-
-export function orderConfirmationEmailHtml({
-  t,
-  orderNumber,
-  itemsSummary,
-  totalLabel,
-  orderUrl,
-}: {
-  t: EmailT;
-  orderNumber: string;
-  itemsSummary: string;
-  totalLabel: string;
-  orderUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("orderConfirmation.heading"),
-    body: t("orderConfirmation.body", {
-      orderNumber: `<strong>#${orderNumber}</strong>`,
-      itemsSummary,
-      totalLabel: `<strong>${totalLabel}</strong>`,
-    }),
-    ctaLabel: t("orderConfirmation.cta"),
-    ctaUrl: orderUrl,
-  });
-}
-
-export function newOrderEmailHtml({
-  t,
-  orderNumber,
-  customerName,
-  itemsSummary,
-  orderUrl,
-}: {
-  t: EmailT;
-  orderNumber: string;
-  customerName: string;
-  itemsSummary: string;
-  orderUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("newOrder.heading"),
-    body: t("newOrder.body", {
-      customerName: `<strong>${customerName}</strong>`,
-      orderNumber: `<strong>#${orderNumber}</strong>`,
-      itemsSummary,
-    }),
-    ctaLabel: t("newOrder.cta"),
-    ctaUrl: orderUrl,
-  });
-}
-
-export function orderStatusEmailHtml({
-  t,
-  orderNumber,
-  statusLabel,
-  detail,
-  orderUrl,
-}: {
-  t: EmailT;
-  orderNumber: string;
-  statusLabel: string;
-  detail?: string;
-  orderUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("orderStatus.heading", { statusLabel }),
-    body: t(detail ? "orderStatus.bodyWithDetail" : "orderStatus.body", {
-      orderNumber: `<strong>#${orderNumber}</strong>`,
-      statusLabel: `<strong>${statusLabel}</strong>`,
-      ...(detail ? { detail } : {}),
-    }),
-    ctaLabel: t("orderStatus.cta"),
-    ctaUrl: orderUrl,
-  });
-}
-
-export function newReviewEmailHtml({
-  t,
-  reviewerName,
-  rating,
-  bookingUrl,
-}: {
-  t: EmailT;
-  reviewerName: string;
-  rating: number;
-  bookingUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("newReview.heading"),
-    body: t("newReview.body", {
-      reviewerName: `<strong>${reviewerName}</strong>`,
-      rating,
-    }),
-    ctaLabel: t("newReview.cta"),
-    ctaUrl: bookingUrl,
-  });
-}
-
-export function reviewResponseEmailHtml({
-  t,
-  providerName,
-  bookingUrl,
-}: {
-  t: EmailT;
-  providerName: string;
-  bookingUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("reviewResponse.heading"),
-    body: t("reviewResponse.body", {
-      providerName: `<strong>${providerName}</strong>`,
-    }),
-    ctaLabel: t("reviewResponse.cta"),
-    ctaUrl: bookingUrl,
-  });
-}
-
-export function mediaApprovedEmailHtml({
-  t,
-  portfolioUrl,
-  count,
-  albumTitle,
-}: {
-  t: EmailT;
-  portfolioUrl: string;
-  count: number;
-  albumTitle: string | null;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("mediaApproved.heading"),
-    body: albumTitle
-      ? t("mediaApprovedAlbum.body", { count, album: albumTitle })
-      : t("mediaApproved.body", { count }),
-    ctaLabel: t("mediaApproved.cta"),
-    ctaUrl: portfolioUrl,
-  });
-}
-
-export function mediaRejectedEmailHtml({
-  t,
-  reason,
-  portfolioUrl,
-}: {
-  t: EmailT;
-  reason: string;
-  portfolioUrl: string;
-}) {
-  return bookingEmailShell({
-    t,
-    heading: t("mediaRejected.heading"),
-    body: t("mediaRejected.body", { reason: `<strong>${reason}</strong>` }),
-    ctaLabel: t("mediaRejected.cta"),
-    ctaUrl: portfolioUrl,
-  });
+  return sendEmail({ to, subject, html, idempotencyKey });
 }
