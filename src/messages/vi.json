@@ -1029,7 +1029,9 @@
     },
     "contact": {
       "invalidInput": "Dữ liệu không hợp lệ",
-      "messageSent": "Đã gửi tin nhắn"
+      "messageSent": "Đã gửi tin nhắn",
+      "failedToSend": "Không thể gửi tin nhắn",
+      "tooManyRequests": "Bạn đã thử quá nhiều lần. Vui lòng đợi ít phút rồi thử lại."
     },
     "waitlist": {
       "invalidInput": "Dữ liệu không hợp lệ",

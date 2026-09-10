@@ -67,11 +67,19 @@ export async function POST(request: Request) {
     });
 
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
-    await sendEmail({
+    const result = await sendEmail({
       to: email,
       subject: "Reset your Fgrapher password",
       html: resetPasswordEmailHtml({ resetUrl }),
     });
+
+    if (!result.success) {
+      if (process.env.NODE_ENV === "production") {
+        console.error("[Password Reset] Email send failed:", {
+          error: result.error,
+        });
+      }
+    }
   }
 
   return NextResponse.json(

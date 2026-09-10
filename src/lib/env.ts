@@ -61,6 +61,8 @@ const serverSchema = z.object({
   TWILIO_VERIFY_SERVICE_SID: z.string().optional(),
 
   RESEND_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().email().optional(),
+  SUPPORT_EMAIL: z.string().email().optional(),
   CRON_SECRET: z.string().optional(),
 
   // MoMo Payment Gateway — src/lib/momo.ts no-ops without these, same

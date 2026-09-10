@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
 import { env } from "@/lib/env";
+import { escapeHtml } from "@/lib/utils";
 
 // Every booking/order/review/subscription email template below takes a `t`
 // (namespace "libServices.email") resolved by the caller via
@@ -14,12 +15,29 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const FROM_ADDRESS = "Fgrapher <noreply@fgrapher.com>";
+const FROM_ADDRESS =
+  process.env.EMAIL_FROM || "Fgrapher <noreply@fgrapher.com>";
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@fgrapher.com";
+
+export interface SendEmailResult {
+  success: boolean;
+  error?: string;
+  messageId?: string;
+}
 
 interface SendEmailInput {
   to: string;
   subject: string;
   html: string;
+}
+
+function logEmailError(error: unknown, to: string) {
+  const message = error instanceof Error ? error.message : String(error);
+  if (env.NODE_ENV === "production") {
+    console.error("[Email Error]", { message });
+  } else {
+    console.error("[Email Error]", { message, to });
+  }
 }
 
 // No-ops when RESEND_API_KEY isn't configured (e.g. local dev without the
@@ -31,22 +49,48 @@ interface SendEmailInput {
 // exercise the real Resend integration without ever emailing an actual
 // user. Set STAGING_TEST_INBOX to enable; unset, this falls through to
 // sending nowhere differently (still gated by RESEND_API_KEY above).
-export async function sendEmail({ to, subject, html }: SendEmailInput) {
-  if (!resend) return;
+export async function sendEmail({
+  to,
+  subject,
+  html,
+}: SendEmailInput): Promise<SendEmailResult> {
+  if (!resend) {
+    if (env.NODE_ENV === "production") {
+      console.warn(
+        "[Email Warn] RESEND_API_KEY not configured; emails will not send",
+      );
+    }
+    return { success: false, error: "resend_not_configured" };
+  }
 
   const isStaging = env.APP_ENV === "staging";
   const testInbox = process.env.STAGING_TEST_INBOX;
   const recipient = isStaging && testInbox ? testInbox : to;
 
-  await resend.emails.send({
-    from: FROM_ADDRESS,
-    to: recipient,
-    subject:
-      isStaging && testInbox
-        ? `[staging, would go to ${to}] ${subject}`
-        : subject,
-    html,
-  });
+  try {
+    const result = await resend.emails.send({
+      from: FROM_ADDRESS,
+      to: recipient,
+      subject:
+        isStaging && testInbox
+          ? `[staging, would go to ${escapeHtml(to)}] ${subject}`
+          : subject,
+      html,
+    });
+
+    if (result.error) {
+      logEmailError(result.error, to);
+      return { success: false, error: result.error.message };
+    }
+
+    return {
+      success: true,
+      messageId: result.data?.id,
+    };
+  } catch (error) {
+    logEmailError(error, to);
+    return { success: false, error: "send_failed" };
+  }
 }
 
 // Every other export in this file is transactional — booking status
@@ -63,9 +107,17 @@ export async function sendMarketingEmail({
   subject,
   html,
   hasMarketingConsent,
-}: SendEmailInput & { hasMarketingConsent: boolean }) {
-  if (!hasMarketingConsent) return;
-  await sendEmail({ to, subject, html });
+}: SendEmailInput & {
+  hasMarketingConsent: boolean;
+}): Promise<SendEmailResult> {
+  if (!hasMarketingConsent) {
+    return { success: false, error: "marketing_consent_not_given" };
+  }
+  return sendEmail({ to, subject, html });
+}
+
+export function getSupportEmail(): string {
+  return SUPPORT_EMAIL;
 }
 
 // TODO(i18n): this function's only caller (src/app/api/auth/forgot-password/
@@ -80,6 +132,7 @@ export async function sendMarketingEmail({
 // pass it through, this should switch to the same t()-based pattern as the
 // rest of this file.
 export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
+  const escapedUrl = escapeHtml(resetUrl);
   return `
     <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
       <div style="background-color: hsl(168 58% 15%); padding: 32px 24px; text-align: center;">
@@ -92,13 +145,13 @@ export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
           Nếu bạn không yêu cầu điều này, bạn có thể bỏ qua email này.
         </p>
         <a
-          href="${resetUrl}"
+          href="${escapedUrl}"
           style="display: inline-block; background-color: hsl(38 44% 52%); color: hsl(30 15% 11%); font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 12px; text-decoration: none;"
         >
           Đặt lại mật khẩu
         </a>
         <p style="font-size: 12px; line-height: 1.5; color: hsl(30 7% 52%); margin: 24px 0 0; word-break: break-all;">
-          Hoặc sao chép liên kết này: ${resetUrl}
+          Hoặc sao chép liên kết này: ${escapedUrl}
         </p>
       </div>
     </div>

@@ -3,6 +3,18 @@ import { extendTailwindMerge } from "tailwind-merge";
 
 import { formatDate, formatVND } from "@/lib/format";
 
+const HTML_ESCAPE_MAP: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+export function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (char) => HTML_ESCAPE_MAP[char] ?? char);
+}
+
 // Fgrapher brand tokens (docs/design-reference/design-tokens.md) reuse the
 // "text-" prefix for two different things: color utilities (text-brand-primary,
 // text-text-primary, text-green-500, ...) and the @utility typography classes

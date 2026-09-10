@@ -1029,7 +1029,9 @@
     },
     "contact": {
       "invalidInput": "Invalid input",
-      "messageSent": "Message sent"
+      "messageSent": "Message sent",
+      "failedToSend": "Failed to send message",
+      "tooManyRequests": "Too many attempts. Please wait a few minutes and try again."
     },
     "waitlist": {
       "invalidInput": "Invalid input",
