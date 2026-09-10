@@ -82,8 +82,11 @@ export async function GET(request: Request) {
       totalPages: result.totalPages,
       facets: result.facets,
     },
-    // Public, visitor-independent results. Short shared-cache window with
-    // background revalidation; the 429 branch above returns no such header.
+    // No shared cache: results carry per-account visibility, and a CDN window
+    // would outlive revalidateTag (which only reaches the origin Data Cache),
+    // serving a just-suspended or deleted provider. Caching for this endpoint
+    // is the ~90s Data Cache in services/search.ts plus immediate tag
+    // invalidation — see PUBLIC_SEARCH_CACHE_CONTROL.
     { status: 200, headers: { "Cache-Control": PUBLIC_SEARCH_CACHE_CONTROL } },
   );
 }

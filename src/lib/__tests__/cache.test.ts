@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 
 import {
+  CACHE_KEY_VERSION,
   CACHE_TAGS,
   CACHE_TTL,
   GEOGRAPHY_CACHE_CONTROL,
@@ -12,7 +13,10 @@ import {
   profileUserTag,
   reviveDates,
 } from "@/lib/cache-tags";
-import { PUBLIC_USER_FILTER } from "@/services/search";
+import {
+  FEATURED_RATED_PROVIDER_WHERE,
+  PUBLIC_USER_FILTER,
+} from "@/services/search";
 
 const repoRoot = path.resolve(__dirname, "../../..");
 const read = (rel: string) => readFileSync(path.join(repoRoot, rel), "utf8");
@@ -180,9 +184,35 @@ describe("cached reads stay cached", () => {
       read("src/app/api/search/route.ts"),
       /PUBLIC_SEARCH_CACHE_CONTROL/,
     );
-    // sanity: the constants themselves are well-formed
+  });
+
+  it("geography may sit in a shared cache — it carries no visibility state", () => {
     assert.match(GEOGRAPHY_CACHE_CONTROL, /^public,.*s-maxage=\d+/);
-    assert.match(PUBLIC_SEARCH_CACHE_CONTROL, /^public,.*s-maxage=\d+/);
+  });
+
+  it("search must NOT sit in a shared cache — revalidateTag cannot reach a CDN", () => {
+    // A CDN window here would keep serving a just-suspended / soft-deleted /
+    // unpublished provider for its whole duration, because tag invalidation
+    // only clears the origin Data Cache.
+    assert.equal(PUBLIC_SEARCH_CACHE_CONTROL, "no-store");
+    assert.doesNotMatch(PUBLIC_SEARCH_CACHE_CONTROL, /s-maxage|public/);
+  });
+
+  it("every unstable_cache key carries CACHE_KEY_VERSION", () => {
+    // unstable_cache persists across deployments, so a return-shape change or
+    // an out-of-band reseed needs a new key to take effect. Each cached read
+    // must therefore include the version segment.
+    assert.match(CACHE_KEY_VERSION, /^v\d+$/);
+    for (const mod of cachedReadModules) {
+      const src = read(mod);
+      const wraps = (src.match(/unstable_cache\(/g) ?? []).length;
+      const versioned = (src.match(/\[\s*CACHE_KEY_VERSION,/g) ?? []).length;
+      assert.equal(
+        versioned,
+        wraps,
+        `${mod}: ${wraps} unstable_cache call(s) but ${versioned} versioned key(s)`,
+      );
+    }
   });
 });
 
@@ -225,6 +255,63 @@ describe("public reads exclude suspended / soft-deleted accounts", () => {
     const src = read("src/services/public-profile.ts");
     assert.doesNotMatch(src, /"shop-products"/);
     assert.match(src, /NOT cached/);
+  });
+});
+
+describe("featured strip ranks only eligible providers", () => {
+  // Regression: review.groupBy used `take: limit` with no `where`, so it took
+  // the top N reviewed users platform-wide and *then* filtered for published /
+  // live / searchable-role owners. An ineligible high-rated user burned a slot
+  // and produced no card, and an eligible rated provider ranked just below the
+  // cutoff was never considered — the slot silently fell through to the
+  // "newest published" backfill instead.
+
+  it("the eligibility filter demands a live owner with a published searchable profile", () => {
+    const { reviewed } = FEATURED_RATED_PROVIDER_WHERE;
+
+    // Same live-owner rule the rest of the public reads use.
+    assert.equal(reviewed.deletedAt, PUBLIC_USER_FILTER.deletedAt);
+    assert.equal(reviewed.isSuspended, PUBLIC_USER_FILTER.isSuspended);
+
+    // ...plus "can actually be shown on a card at all".
+    const shown = reviewed.profiles.some;
+    assert.equal(shown.isPublished, true);
+    assert.ok(
+      Array.isArray(shown.role.in) && shown.role.in.length > 0,
+      "the searchable-role list must be a non-empty allow-list",
+    );
+    // CAMERA_SHOP is dormant behind MARKETPLACE_ENABLED, which defaults off.
+    assert.ok(
+      !(shown.role.in as readonly string[]).includes("CAMERA_SHOP"),
+      "a role that cannot appear in search must not be able to win a featured slot",
+    );
+  });
+
+  it("review.groupBy applies that filter before `take`, not after", () => {
+    const src = read("src/services/search.ts");
+    // Anchored on the featured strip's own call — search.ts has a second,
+    // unrelated review.groupBy inside resolveProviderCards.
+    const groupBy = src.match(
+      /const rated = await db\.review\.groupBy\(\{[\s\S]*?\n {2}\}\);/,
+    );
+    assert.ok(
+      groupBy,
+      "could not locate the featured strip's review.groupBy call in search.ts",
+    );
+
+    const call = groupBy[0];
+    assert.match(
+      call,
+      /where:\s*FEATURED_RATED_PROVIDER_WHERE/,
+      "review.groupBy lost its eligibility `where` — `take` would again spend slots on providers that cannot be shown",
+    );
+    assert.match(call, /take:\s*limit/);
+    // The filter has to be inside the grouped query itself; a `where` on the
+    // findMany that follows is what the original bug already did.
+    assert.ok(
+      call.indexOf("where:") < call.indexOf("take:"),
+      "the eligibility filter must constrain the grouped query, not run after it",
+    );
   });
 });
 

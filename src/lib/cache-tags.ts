@@ -19,12 +19,36 @@ export const profileNameTag = (username: string) =>
 /** Tag for a provider's per-user public reads (reviews, review stats, shop). */
 export const profileUserTag = (userId: string) => `profile:user:${userId}`;
 
+/**
+ * Prefix segment on every `unstable_cache` key.
+ *
+ * `unstable_cache` **persists across deployments** and across serverless
+ * instances (Next 16 docs, "Migrating to Cache Components" § unstable_cache:
+ * "Like the `fetch` Data Cache, `unstable_cache` persists cached values across
+ * deployments and serverless instances"). Shipping new code therefore does NOT
+ * clear it — an entry written by the previous deploy is still served until its
+ * TTL expires or its tag is bumped.
+ *
+ * Two consequences, both handled by bumping this string:
+ *  1. **Return-shape changes.** Edit what a cached function selects/returns and
+ *     the old shape keeps being served for up to its TTL. Bump on any such edit.
+ *  2. **Out-of-band data changes.** Reseeding Province/Ward against a live
+ *     database has no runtime invalidation hook (see services/geography.ts);
+ *     bumping this is the supported way to force those 24h entries to be
+ *     recomputed without waiting.
+ *
+ * Bumping orphans every entry at once, which is cheap: everything but geography
+ * has a ≤10-minute TTL, and geography is three small queries.
+ */
+export const CACHE_KEY_VERSION = "v1";
+
 /** Revalidate seconds per cached read. Kept together so the policy is legible. */
 export const CACHE_TTL = {
   /**
-   * Geography (Province / Ward). Changes only via a seed / migration, which
-   * is followed by a redeploy that drops the whole Data Cache anyway — see
-   * the note in services/geography.ts.
+   * Geography (Province / Ward). No runtime write path exists, so this TTL —
+   * not a deploy — is the real staleness bound after an out-of-band reseed.
+   * See services/geography.ts for the full staleness budget and how to force
+   * it early (CACHE_KEY_VERSION above).
    */
   geography: 60 * 60 * 24, // 24h
   /** Landing-page "featured" strip — its own function, its own cache. */
@@ -44,15 +68,37 @@ export const CACHE_TTL = {
 // -----------------------------------------------------------------------------
 // Cache-Control header values for the public JSON APIs. Applied to 200s only —
 // never to errors or to anything behind auth.
+//
+// A CDN/browser cache is a SEPARATE layer from the Data Cache: `revalidateTag`
+// does not reach it. So a shared cache is only acceptable on a response whose
+// contents cannot need urgent withdrawal.
 // -----------------------------------------------------------------------------
 
-/** Geography APIs: rarely changes, safe to let a CDN hold it for a day. */
+/**
+ * Geography APIs. Safe to hold in a shared cache: Province/Ward rows are static
+ * reference data carrying no per-account visibility state, so there is no
+ * mutation that ever needs to purge them urgently.
+ *
+ * Staleness budget (worst case, and it compounds — see services/geography.ts):
+ * a CDN entry may be served fresh for 24h and then stale-while-revalidate for
+ * another 24h, and the response it holds was itself rendered from a Data Cache
+ * entry up to 24h old. Purging the CDN is a separate, manual operation.
+ */
 export const GEOGRAPHY_CACHE_CONTROL =
   "public, max-age=300, s-maxage=86400, stale-while-revalidate=86400";
 
-/** Public search API: brief shared cache, revalidate in the background. */
-export const PUBLIC_SEARCH_CACHE_CONTROL =
-  "public, max-age=0, s-maxage=60, stale-while-revalidate=120";
+/**
+ * Public search API: **no shared cache**, deliberately.
+ *
+ * Search results carry per-account visibility (a provider who was just
+ * suspended, soft-deleted or unpublished must disappear). `revalidateTag`
+ * invalidates the origin's Data Cache immediately but has no reach into a CDN,
+ * so an `s-maxage`/`stale-while-revalidate` window here would keep serving a
+ * withdrawn profile for the length of that window regardless. The ~90s Data
+ * Cache (CACHE_TTL.search) plus immediate tag invalidation is the whole caching
+ * story for this endpoint; the CDN must not add a second, uninvalidatable one.
+ */
+export const PUBLIC_SEARCH_CACHE_CONTROL = "no-store";
 
 // -----------------------------------------------------------------------------
 // Date rehydration.

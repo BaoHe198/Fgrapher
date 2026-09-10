@@ -1,6 +1,11 @@
 import { revalidateTag, unstable_cache } from "next/cache";
 
-import { CACHE_TAGS, profileNameTag, profileUserTag } from "@/lib/cache-tags";
+import {
+  CACHE_TAGS,
+  CACHE_TTL,
+  profileNameTag,
+  profileUserTag,
+} from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 
 // -----------------------------------------------------------------------------
@@ -59,9 +64,14 @@ function bumpTag(tag: string) {
 
 /**
  * Evict cached Province / Ward data. Provided for a future admin-driven
- * geography edit — no runtime path calls it today (geography changes via a
- * seed script + redeploy, and a deploy drops the whole Data Cache). It only
- * has an effect when called from a request-scoped context.
+ * geography edit; no runtime path calls it today, and it only works from a
+ * request-scoped context, so it is NOT usable from the seed script that
+ * actually changes this data.
+ *
+ * Note that shipping a deploy does not substitute for it: `unstable_cache`
+ * persists across deployments. To make an out-of-band reseed visible, bump
+ * `CACHE_KEY_VERSION` (and purge the CDN separately) — see the staleness
+ * budget documented in services/geography.ts.
  */
 export function revalidateGeography() {
   bumpTag(CACHE_TAGS.geography);
@@ -93,10 +103,16 @@ export async function revalidatePublicProfile(userId: string) {
       select: { username: true },
     });
     if (user?.username) bumpTag(profileNameTag(user.username));
-  } catch {
+  } catch (err) {
     // A failed username lookup must never turn a successful mutation into a
-    // 500. The per-user and search tags are already bumped; the profile-page
-    // entry falls back to its TTL.
+    // 500 — but it does mean this provider's /profile/<username> page keeps
+    // serving the pre-mutation copy until its TTL expires, so say so rather
+    // than dropping it. The per-user and search tags are already bumped.
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(
+      `[cache] could not resolve username for ${userId} — their public profile page may be stale for up to ${CACHE_TTL.publicProfile}s`,
+      { message },
+    );
   }
 }
 

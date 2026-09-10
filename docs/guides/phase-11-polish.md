@@ -211,6 +211,26 @@ Optimize application performance:
      Public data: s-maxage=60, stale-while-revalidate=300
      User data: private, no-store
 
+   > **What actually shipped, and one correction to the line above.**
+   > No Redis/KV: caching is Next's Data Cache (`unstable_cache` + tag
+   > invalidation), see `src/lib/cache.ts`. TTLs landed as geography 24h,
+   > featured 10m, search + public profiles ~90s.
+   >
+   > "Public data: s-maxage=60" is **not** safe as a blanket rule and is not
+   > what `/api/search` does. A CDN window is a second cache layer that
+   > `revalidateTag` cannot reach, so any endpoint whose response can need
+   > *urgent withdrawal* — search results and public profiles both carry
+   > per-account visibility, and a provider can be suspended, soft-deleted or
+   > unpublished at any moment — would keep serving the withdrawn row for the
+   > full window. `/api/search` therefore sends `no-store` and relies on the
+   > ~90s Data Cache plus immediate tag invalidation.
+   >
+   > A shared cache is only used where the payload carries no visibility
+   > state at all: `/api/geography/*` (static Province/Ward reference data).
+   > Booking availability is `no-store` for the same reason plus collision
+   > risk. Note also that `unstable_cache` persists across deployments, so a
+   > redeploy does not clear it — `CACHE_KEY_VERSION` is the lever for that.
+
 6. FONTS:
    - Use next/font for the chosen font family
    - Subset to latin + vietnamese

@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import {
+  CACHE_KEY_VERSION,
   CACHE_TAGS,
   CACHE_TTL,
   reviveDates,
@@ -449,7 +450,7 @@ function canonicalParamsKey(params: SearchParams): string {
 
 const searchProfilesCached = unstable_cache(
   (key: string) => searchProfilesUncached(JSON.parse(key) as SearchParams),
-  ["search", "profiles"],
+  [CACHE_KEY_VERSION, "search", "profiles"],
   { tags: [CACHE_TAGS.search], revalidate: CACHE_TTL.search },
 );
 
@@ -464,6 +465,31 @@ export async function searchProfiles(params: SearchParams) {
 }
 
 /**
+ * A review only counts toward the featured strip if the person it is *about*
+ * is themselves eligible to appear there: a live (not suspended, not
+ * soft-deleted) account holding at least one published profile in a searchable
+ * role.
+ *
+ * This must constrain the `groupBy` itself, not only the `findMany` after it.
+ * `groupBy` applies `take` after ordering by average rating, so filtering
+ * afterwards let an ineligible high-rated user — unpublished, suspended,
+ * soft-deleted, CUSTOMER-only, or holding a role that is not searchable while
+ * the marketplace flag is off — consume one of the `limit` slots and produce
+ * no card. Worse, an eligible rated provider ranked just below the cutoff was
+ * never considered at all: the slot fell through to the "newest published"
+ * backfill, which orders by createdAt, so the strip quietly degraded from
+ * "top rated" to "newest" while genuinely rated providers existed.
+ */
+export const FEATURED_RATED_PROVIDER_WHERE = {
+  reviewed: {
+    ...PUBLIC_USER_FILTER,
+    profiles: {
+      some: { isPublished: true, role: { in: SEARCHABLE_ROLES } },
+    },
+  },
+} satisfies Prisma.ReviewWhereInput;
+
+/**
  * Top-rated published providers for the landing page's "Featured near you"
  * section, backfilled with the newest published providers when there aren't
  * enough reviewed ones yet — never pads with fake data.
@@ -471,9 +497,12 @@ export async function searchProfiles(params: SearchParams) {
 async function getFeaturedProfilesUncached(limit = 4) {
   // A groupBy only returns groups that have at least one row, so every
   // entry here already has reviewCount >= 1. reviewedId is a User, so this
-  // is already deduplicated by person, not by role.
+  // is already deduplicated by person, not by role. The `where` restricts the
+  // ranking to providers who can actually be shown, so `take` spends all
+  // `limit` slots on real candidates — see FEATURED_RATED_PROVIDER_WHERE.
   const rated = await db.review.groupBy({
     by: ["reviewedId"],
+    where: FEATURED_RATED_PROVIDER_WHERE,
     _avg: { rating: true },
     _count: { rating: true },
     orderBy: { _avg: { rating: "desc" } },
@@ -531,7 +560,7 @@ async function getFeaturedProfilesUncached(limit = 4) {
 
 const getFeaturedProfilesCached = unstable_cache(
   (limit: number) => getFeaturedProfilesUncached(limit),
-  ["search", "featured"],
+  [CACHE_KEY_VERSION, "search", "featured"],
   { tags: [CACHE_TAGS.search], revalidate: CACHE_TTL.featured },
 );
 

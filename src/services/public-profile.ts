@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
 import {
+  CACHE_KEY_VERSION,
   CACHE_TTL,
   profileNameTag,
   profileUserTag,
@@ -233,7 +234,7 @@ async function getPublicProfileUserUncached(username: string) {
 export async function getPublicProfileUser(username: string) {
   const cached = unstable_cache(
     () => getPublicProfileUserUncached(username),
-    ["public-profile", "user", username.toLowerCase()],
+    [CACHE_KEY_VERSION, "public-profile", "user", username.toLowerCase()],
     { tags: [profileNameTag(username)], revalidate: CACHE_TTL.publicProfile },
   );
   return reviveDates(await cached());
@@ -314,7 +315,7 @@ async function getProfileReviewsUncached(userId: string) {
 export async function getProfileReviewStats(userId: string) {
   const cached = unstable_cache(
     () => getProfileReviewStatsUncached(userId),
-    ["public-profile", "review-stats", userId],
+    [CACHE_KEY_VERSION, "public-profile", "review-stats", userId],
     { tags: [profileUserTag(userId)], revalidate: CACHE_TTL.publicProfile },
   );
   return cached();
@@ -323,7 +324,7 @@ export async function getProfileReviewStats(userId: string) {
 export async function getProfileReviews(userId: string) {
   const cached = unstable_cache(
     () => getProfileReviewsUncached(userId),
-    ["public-profile", "reviews", userId],
+    [CACHE_KEY_VERSION, "public-profile", "reviews", userId],
     { tags: [profileUserTag(userId)], revalidate: CACHE_TTL.publicProfile },
   );
   return reviveDates(await cached());
