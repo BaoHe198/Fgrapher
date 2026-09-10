@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { updateServiceSchema } from "@/lib/validations/service";
@@ -12,7 +13,10 @@ async function assertOwnedService(id: string, userId: string) {
   return service && service.profile.userId === userId ? service : null;
 }
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -38,7 +42,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       );
     }
 
-    const service = await db.service.update({ where: { id }, data: parsed.data });
+    const service = await db.service.update({
+      where: { id },
+      data: parsed.data,
+    });
+
+    await revalidatePublicProfile(session.user.id);
 
     return NextResponse.json(
       { data: service, error: null, message: "Service updated" },
@@ -53,13 +62,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update service" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to update service",
+      },
       { status: 500 },
     );
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -74,6 +90,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
     await db.service.delete({ where: { id } });
 
+    await revalidatePublicProfile(session.user.id);
+
     return NextResponse.json(
       { data: null, error: null, message: "Service deleted" },
       { status: 200 },
@@ -87,7 +105,11 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to delete service" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to delete service",
+      },
       { status: 500 },
     );
   }

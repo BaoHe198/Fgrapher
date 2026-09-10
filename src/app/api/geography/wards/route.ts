@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { GEOGRAPHY_CACHE_CONTROL } from "@/lib/cache";
 import { listWards } from "@/services/geography";
 
 // Public, unauthenticated — the registration form needs this before login,
@@ -13,6 +14,6 @@ export async function GET(request: Request) {
 
   return NextResponse.json(
     { data: wards, error: null, message: null },
-    { status: 200 },
+    { status: 200, headers: { "Cache-Control": GEOGRAPHY_CACHE_CONTROL } },
   );
 }

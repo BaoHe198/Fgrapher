@@ -8,6 +8,12 @@ import type {
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
+import {
+  CACHE_TAGS,
+  CACHE_TTL,
+  reviveDates,
+  unstable_cache,
+} from "@/lib/cache";
 
 // QA: /browse results and facets included CAMERA_SHOP even with the
 // marketplace off (features.marketplaceEnabled=false) — this file used
@@ -45,6 +51,15 @@ export interface SearchParams {
 }
 
 const PAGE_SIZE_DEFAULT = 24;
+
+// Publish state alone is not enough to be public: a suspended or soft-deleted
+// account keeps its `isPublished` Profile rows, so every public Profile query
+// here (and the featured strip, and getPublicProfileUser) must also require a
+// live owning user. Applied as a relation filter on `Profile.user`.
+export const PUBLIC_USER_FILTER = {
+  deletedAt: null,
+  isSuspended: false,
+} as const;
 
 const PROVIDER_INCLUDE = {
   user: {
@@ -161,6 +176,7 @@ function buildBaseWhere(params: SearchParams): Prisma.ProfileWhereInput {
       : undefined;
   return {
     isPublished: true,
+    user: PUBLIC_USER_FILTER,
     role: {
       in: requestedRoles ?? SEARCHABLE_ROLES,
     },
@@ -242,6 +258,7 @@ async function resolveProviderCards(
         db.profile.findMany({
           where: {
             isPublished: true,
+            user: PUBLIC_USER_FILTER,
             role: { in: SEARCHABLE_ROLES },
             userId: { in: matchedUserIds },
           },
@@ -288,7 +305,7 @@ async function resolveProviderCards(
   });
 }
 
-export async function searchProfiles(params: SearchParams) {
+async function searchProfilesUncached(params: SearchParams) {
   const page = Math.max(1, params.page ?? 1);
   const limit = params.limit ?? PAGE_SIZE_DEFAULT;
 
@@ -297,7 +314,11 @@ export async function searchProfiles(params: SearchParams) {
   // actually needed below, letting it run alongside everything else
   // instead of queuing up after the filtered results resolve.
   const roleRowsPromise = db.profile.findMany({
-    where: { isPublished: true, role: { in: SEARCHABLE_ROLES } },
+    where: {
+      isPublished: true,
+      user: PUBLIC_USER_FILTER,
+      role: { in: SEARCHABLE_ROLES },
+    },
     select: { role: true, userId: true, categories: true },
   });
 
@@ -415,12 +436,39 @@ export async function searchProfiles(params: SearchParams) {
   };
 }
 
+// A canonical string for the params object so `unstable_cache`'s key is
+// deterministic regardless of the order callers happen to build the object
+// in (the API route and the /browse page build it differently). Undefined
+// fields are dropped; keys are sorted.
+function canonicalParamsKey(params: SearchParams): string {
+  const entries = Object.entries(params)
+    .filter(([, v]) => v !== undefined)
+    .sort(([a], [b]) => a.localeCompare(b));
+  return JSON.stringify(Object.fromEntries(entries));
+}
+
+const searchProfilesCached = unstable_cache(
+  (key: string) => searchProfilesUncached(JSON.parse(key) as SearchParams),
+  ["search", "profiles"],
+  { tags: [CACHE_TAGS.search], revalidate: CACHE_TTL.search },
+);
+
+/**
+ * Public search. Cached in the Data Cache for ~90s, keyed by the (canonical)
+ * filter set, tagged `search` so any mutation that can move a profile in or
+ * out of results invalidates it (see revalidatePublicProfile /
+ * revalidateSearch). Fully public — never fed a session or per-user value.
+ */
+export async function searchProfiles(params: SearchParams) {
+  return reviveDates(await searchProfilesCached(canonicalParamsKey(params)));
+}
+
 /**
  * Top-rated published providers for the landing page's "Featured near you"
  * section, backfilled with the newest published providers when there aren't
  * enough reviewed ones yet — never pads with fake data.
  */
-export async function getFeaturedProfiles(limit = 4) {
+async function getFeaturedProfilesUncached(limit = 4) {
   // A groupBy only returns groups that have at least one row, so every
   // entry here already has reviewCount >= 1. reviewedId is a User, so this
   // is already deduplicated by person, not by role.
@@ -443,6 +491,7 @@ export async function getFeaturedProfiles(limit = 4) {
     ? await db.profile.findMany({
         where: {
           isPublished: true,
+          user: PUBLIC_USER_FILTER,
           role: { in: SEARCHABLE_ROLES },
           userId: { in: rated.map((r) => r.reviewedId) },
         },
@@ -463,6 +512,7 @@ export async function getFeaturedProfiles(limit = 4) {
     const fallbackProfiles = await db.profile.findMany({
       where: {
         isPublished: true,
+        user: PUBLIC_USER_FILTER,
         role: { in: SEARCHABLE_ROLES },
         userId: excludeUserIds.length ? { notIn: excludeUserIds } : undefined,
       },
@@ -477,4 +527,19 @@ export async function getFeaturedProfiles(limit = 4) {
   }
 
   return featured;
+}
+
+const getFeaturedProfilesCached = unstable_cache(
+  (limit: number) => getFeaturedProfilesUncached(limit),
+  ["search", "featured"],
+  { tags: [CACHE_TAGS.search], revalidate: CACHE_TTL.featured },
+);
+
+/**
+ * Cached (~10m, tag `search`) wrapper around the featured strip. Public,
+ * visitor-independent. Invalidated alongside search results by any profile /
+ * review / verification mutation.
+ */
+export async function getFeaturedProfiles(limit = 4) {
+  return reviveDates(await getFeaturedProfilesCached(limit));
 }

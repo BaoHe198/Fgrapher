@@ -25,7 +25,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: {
         isPublished: true,
         role: { in: PAID_ROLES },
-        user: { username: { not: null } },
+        // A suspended or soft-deleted owner's profile is not public — keep it
+        // out of the sitemap too (soft-delete also nulls the username, but be
+        // explicit). Matches services/search.ts's PUBLIC_USER_FILTER.
+        user: { username: { not: null }, deletedAt: null, isSuspended: false },
       },
       select: { updatedAt: true, user: { select: { username: true } } },
     }),

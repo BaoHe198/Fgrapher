@@ -9,6 +9,7 @@ import {
   receiptEmailHtml,
   subscriptionEndedEmailHtml,
 } from "@/lib/email";
+import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import {
   buildAppTransId,
@@ -684,6 +685,9 @@ export async function expireLocalSubscriptions() {
         data: { isPublished: false },
       }),
     ]);
+
+    // The role's profile is now unpublished — clear it from public caches.
+    await revalidatePublicProfile(subscription.userRole.userId);
 
     await notifyCritical({
       userId: subscription.userRole.userId,

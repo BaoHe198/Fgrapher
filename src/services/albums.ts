@@ -1,3 +1,4 @@
+import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import {
   deleteCloudinaryAsset,
@@ -120,7 +121,7 @@ export async function updateAlbum(
 ) {
   await assertOwnsAlbum(albumId, userId);
 
-  return db.album.update({
+  const updated = await db.album.update({
     where: { id: albumId },
     data: {
       ...data,
@@ -133,6 +134,10 @@ export async function updateAlbum(
             : new Date(data.shootDate),
     },
   });
+  // Title/cover/publish state of an album is all visible on the public
+  // portfolio tab.
+  await revalidatePublicProfile(userId);
+  return updated;
 }
 
 export async function reorderAlbums(
@@ -153,6 +158,7 @@ export async function reorderAlbums(
       }),
     ),
   );
+  await revalidatePublicProfile(userId);
 }
 
 // Prompt G3, VIỆC 2 — deletes the album AND every photo inside it
@@ -170,6 +176,7 @@ export async function deleteAlbum(albumId: string, userId: string) {
       data: { deletedAt },
     }),
   ]);
+  await revalidatePublicProfile(userId);
 }
 
 export async function restoreAlbum(albumId: string, userId: string) {
@@ -195,6 +202,7 @@ export async function restoreAlbum(albumId: string, userId: string) {
     }),
   ]);
 
+  await revalidatePublicProfile(userId);
   return album;
 }
 
@@ -206,10 +214,12 @@ export async function restoreMedia(mediaId: string, userId: string) {
   if (!media || media.profile.userId !== userId) {
     throw new AlbumNotFoundError("Photo not found");
   }
-  return db.profileMedia.update({
+  const restored = await db.profileMedia.update({
     where: { id: mediaId },
     data: { deletedAt: null },
   });
+  await revalidatePublicProfile(userId);
+  return restored;
 }
 
 export async function listTrash(profileId: string, userId: string) {

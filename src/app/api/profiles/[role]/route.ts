@@ -2,6 +2,7 @@ import { Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { getUpdateProfileSchema } from "@/lib/validations/profile";
@@ -107,6 +108,12 @@ export async function PATCH(
     // gating auto-publish (see tryAutoPublish) — saving them here may be
     // the last one this profile was waiting on.
     await tryAutoPublish(session.user.id, role as Role);
+
+    // Description, price, categories, location, Model attributes — all of
+    // it feeds the public profile and the browse cards. (tryAutoPublish
+    // above also invalidates, but only when it actually flips a profile
+    // live; an edit to an already-published profile still needs this.)
+    await revalidatePublicProfile(session.user.id);
 
     return NextResponse.json(
       { data: profile, error: null, message: t("updated") },

@@ -2,6 +2,10 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
+import {
+  revalidatePublicProfile,
+  revalidateProfileUsername,
+} from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
@@ -205,6 +209,11 @@ export async function PATCH(request: Request) {
       }
     }
 
+    const previous = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { username: true },
+    });
+
     const user = await db.user.update({
       where: { id: session.user.id },
       data: {
@@ -216,6 +225,16 @@ export async function PATCH(request: Request) {
       },
       select: ME_SELECT,
     });
+
+    // name / username / avatar / coverImage / location / acceptingBookings
+    // all appear on the public profile and/or the browse cards.
+    await revalidatePublicProfile(session.user.id);
+    if (previous?.username && previous.username !== user.username) {
+      // The old /profile/<username> URL now 404s, but its cache entry still
+      // holds the pre-rename data — bump it explicitly (revalidatePublicProfile
+      // only knows the new username).
+      revalidateProfileUsername(previous.username);
+    }
 
     return NextResponse.json(
       { data: user, error: null, message: "Account updated" },
@@ -268,7 +287,7 @@ export async function DELETE(request: Request) {
     const body = await request.json().catch(() => ({}));
     const user = await db.user.findUnique({
       where: { id: session.user.id },
-      select: { passwordHash: true },
+      select: { passwordHash: true, username: true },
     });
     if (user?.passwordHash) {
       const isValid =
@@ -293,6 +312,11 @@ export async function DELETE(request: Request) {
       where: { id: session.user.id },
       data: { deletedAt: new Date() },
     });
+
+    // Soft-delete leaves published Profile rows in place; the public reads now
+    // filter on `user.deletedAt`, so evict the cached copies immediately.
+    await revalidatePublicProfile(session.user.id);
+    if (user?.username) revalidateProfileUsername(user.username);
 
     return NextResponse.json(
       { data: null, error: null, message: "Account deleted" },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 
@@ -33,6 +34,10 @@ export async function DELETE(
       where: { id },
       data: { deletedAt: new Date() },
     });
+
+    // An approved photo that was showing on the public profile / browse card
+    // is now hidden.
+    await revalidatePublicProfile(session.user.id);
 
     return NextResponse.json(
       { data: null, error: null, message: t("mediaMovedToTrash") },

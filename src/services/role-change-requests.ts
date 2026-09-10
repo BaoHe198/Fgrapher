@@ -1,6 +1,7 @@
 import type { Role } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { bookingEmailShell } from "@/lib/email";
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
@@ -142,6 +143,11 @@ export async function reviewRoleChangeRequest({
     if (!features.billingEnabled && features.freeRoleGrantEnabled) {
       await assignFreePlan(request.userId, [request.toRole]);
     }
+
+    // The old role's Profile (possibly published) is gone and a new role is
+    // active — both the browse role facets and this provider's public
+    // profile change.
+    await revalidatePublicProfile(request.userId);
 
     await notifyCritical({
       userId: request.userId,

@@ -5,6 +5,7 @@ import type {
 } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { generateKycSignedUrl } from "@/lib/cloudinary";
 import { mediaApprovedEmailHtml, mediaRejectedEmailHtml } from "@/lib/email";
 import { db } from "@/lib/db";
@@ -254,17 +255,21 @@ export async function suspendUser({
   reason: string;
   until?: Date;
 }) {
-  return db.user.update({
+  const user = await db.user.update({
     where: { id: userId },
     data: { isSuspended: true, suspendedReason: reason, suspendedUntil: until },
   });
+  await revalidatePublicProfile(userId);
+  return user;
 }
 
 export async function unsuspendUser(userId: string) {
-  return db.user.update({
+  const user = await db.user.update({
     where: { id: userId },
     data: { isSuspended: false, suspendedReason: null, suspendedUntil: null },
   });
+  await revalidatePublicProfile(userId);
+  return user;
 }
 
 export async function verifyUser(userId: string) {
@@ -272,10 +277,12 @@ export async function verifyUser(userId: string) {
 }
 
 export async function softDeleteAdminUser(userId: string) {
-  return db.user.update({
+  const user = await db.user.update({
     where: { id: userId },
     data: { deletedAt: new Date() },
   });
+  await revalidatePublicProfile(userId);
+  return user;
 }
 
 export async function updateAdminNotes(userId: string, notes: string) {
@@ -393,6 +400,11 @@ export async function reviewVerification({
   if (approve) {
     await tryAutoPublish(userRole.userId, userRole.role);
   }
+
+  // The "Verified" badge on the public profile is driven by this status, so
+  // either outcome needs the profile page (and search) invalidated even
+  // when publish state itself doesn't move.
+  await revalidatePublicProfile(userRole.userId);
 
   return userRole;
 }
@@ -713,6 +725,16 @@ export async function moderateMedia({
         targetId: mediaId,
         metadata: reason ? { reason } : undefined,
       }),
+    ),
+  );
+
+  // Either direction changes what's on the public portfolio / browse card:
+  // approve adds a photo, reject removes a previously-approved one. (The
+  // approve path also runs tryAutoPublish below, but that only invalidates
+  // when it flips a profile live.)
+  await Promise.all(
+    [...new Set(rows.map((row) => row.profile.userId))].map((userId) =>
+      revalidatePublicProfile(userId),
     ),
   );
 

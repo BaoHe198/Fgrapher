@@ -25,19 +25,33 @@ export async function GET(
     ? Math.max(
         1,
         Math.ceil(
-          (new Date(`${toParam}T00:00:00.000Z`).getTime() - from.getTime()) / 86_400_000,
+          (new Date(`${toParam}T00:00:00.000Z`).getTime() - from.getTime()) /
+            86_400_000,
         ),
       )
     : 7;
 
   const service = serviceId
-    ? await db.service.findUnique({ where: { id: serviceId }, select: { duration: true } })
+    ? await db.service.findUnique({
+        where: { id: serviceId },
+        select: { duration: true },
+      })
     : null;
 
-  const dates = await getProviderAvailability(providerId, from, days, service?.duration);
+  const dates = await getProviderAvailability(
+    providerId,
+    from,
+    days,
+    service?.duration,
+  );
 
   return NextResponse.json(
     { data: { dates }, error: null, message: null },
-    { status: 200, headers: { "Cache-Control": "public, max-age=0, s-maxage=60" } },
+    // Deliberately no-store (was a 60-second shared cache). Availability is
+    // derived from bookings, blocked dates and blocked time ranges, and not
+    // every one of those mutation paths is proven to invalidate a shared
+    // cache entry — a stale slot that is actually taken is a booking-collision
+    // risk, so this read is always live.
+    { status: 200, headers: { "Cache-Control": "no-store" } },
   );
 }

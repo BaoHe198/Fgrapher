@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { GEOGRAPHY_CACHE_CONTROL } from "@/lib/cache";
 import { listProvinces } from "@/services/geography";
 
 // Public, unauthenticated — same reasoning as /api/geography/wards. Backs
@@ -11,6 +12,6 @@ export async function GET() {
 
   return NextResponse.json(
     { data: provinces, error: null, message: null },
-    { status: 200 },
+    { status: 200, headers: { "Cache-Control": GEOGRAPHY_CACHE_CONTROL } },
   );
 }

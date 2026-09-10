@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { updateServiceAreasSchema } from "@/lib/validations/profile";
@@ -79,6 +80,10 @@ export async function PUT(
           ]
         : []),
     ]);
+
+    // Service areas widen/narrow which province searches surface this
+    // provider (searchProfiles matches on serviceAreas).
+    await revalidatePublicProfile(session.user.id);
 
     return NextResponse.json(
       { data: { provinceIds }, error: null, message: "Service areas updated" },

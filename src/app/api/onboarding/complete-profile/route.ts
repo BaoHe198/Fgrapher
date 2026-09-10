@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -46,6 +47,9 @@ export async function POST(request: Request) {
       where: { id: session.user.id },
       data: { dateOfBirth: new Date(dateOfBirth) },
     });
+
+    // dateOfBirth drives the MODEL-role age-range label on the public profile.
+    await revalidatePublicProfile(session.user.id);
 
     // Same "record every purpose, including declines" pattern as
     // /api/auth/register — a complete evidence trail of what was actually

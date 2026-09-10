@@ -1,5 +1,9 @@
 import type { ConsentPurpose } from "@prisma/client";
 
+import {
+  revalidatePublicProfile,
+  revalidateProfileUsername,
+} from "@/lib/cache";
 import { db } from "@/lib/db";
 
 interface RequestMeta {
@@ -181,6 +185,13 @@ const DELETED_USER_LABEL = "Người dùng đã xóa";
 // user's own content: portfolio media (cascades from deleting Profile),
 // services (same cascade), and every message they sent or received.
 export async function processDeletion(userId: string, requestId?: string) {
+  // Captured before the transaction nulls it — the reviver in
+  // revalidatePublicProfile can't resolve a username that no longer exists.
+  const before = await db.user.findUnique({
+    where: { id: userId },
+    select: { username: true },
+  });
+
   await db.$transaction([
     db.message.deleteMany({
       where: { OR: [{ senderId: userId }, { receiverId: userId }] },
@@ -221,6 +232,11 @@ export async function processDeletion(userId: string, requestId?: string) {
         ]
       : []),
   ]);
+
+  // Every Profile row is gone and the account is anonymized — evict it from
+  // search / featured and its (now-404) public profile page.
+  await revalidatePublicProfile(userId);
+  if (before?.username) revalidateProfileUsername(before.username);
 
   await logAudit({
     actorId: userId,

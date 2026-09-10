@@ -9,6 +9,7 @@ import {
   subscriptionEndedEmailHtml,
   welcomeSubscriptionEmailHtml,
 } from "@/lib/email";
+import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { intervalForPriceId, ROLE_PLANS } from "@/lib/constants/plans";
 import { PAID_ROLES } from "@/lib/constants";
@@ -334,6 +335,10 @@ export async function handleSubscriptionDeleted(
       data: { isPublished: false },
     }),
   ]);
+
+  // Profiles just went unpublished — drop them from search / featured / their
+  // own public page immediately.
+  await revalidatePublicProfile(userId);
 
   await notifyCritical({
     userId,

@@ -1,6 +1,7 @@
 import type { ProfileCategory, Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+import { PUBLIC_SEARCH_CACHE_CONTROL } from "@/lib/cache";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { searchProfiles, type SortOption } from "@/services/search";
 
@@ -81,6 +82,8 @@ export async function GET(request: Request) {
       totalPages: result.totalPages,
       facets: result.facets,
     },
-    { status: 200 },
+    // Public, visitor-independent results. Short shared-cache window with
+    // background revalidation; the 429 branch above returns no such header.
+    { status: 200, headers: { "Cache-Control": PUBLIC_SEARCH_CACHE_CONTROL } },
   );
 }

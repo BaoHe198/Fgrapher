@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { newReviewEmailHtml, reviewResponseEmailHtml } from "@/lib/email";
 import { notify } from "@/services/notification";
@@ -118,6 +119,10 @@ export async function createReview({
     include: { reviewer: { select: { firstName: true, name: true } } },
   });
 
+  // A new review changes the provider's rating + review count — both feed
+  // the browse cards, the featured strip and the public profile's reviews tab.
+  await revalidatePublicProfile(booking.providerId);
+
   const newReviewEmailT = await getTranslations("libServices.email");
   const newReviewNt = await getTranslations("libServices.notifications");
   await notify({
@@ -169,10 +174,12 @@ export async function updateReview({
     );
   }
 
-  return db.review.update({
+  const updated = await db.review.update({
     where: { id: reviewId },
     data: { rating, content },
   });
+  await revalidatePublicProfile(review.reviewedId);
+  return updated;
 }
 
 export async function respondToReview({
@@ -202,6 +209,7 @@ export async function respondToReview({
     where: { id: reviewId },
     data: { response, respondedAt: new Date() },
   });
+  await revalidatePublicProfile(review.reviewedId);
 
   const responseEmailT = await getTranslations("libServices.email");
   const responseNt = await getTranslations("libServices.notifications");
@@ -249,7 +257,12 @@ export async function updateReviewResponse({
     throw new ReviewError("Responses can only be edited within 24 hours", 400);
   }
 
-  return db.review.update({ where: { id: reviewId }, data: { response } });
+  const updated = await db.review.update({
+    where: { id: reviewId },
+    data: { response },
+  });
+  await revalidatePublicProfile(review.reviewedId);
+  return updated;
 }
 
 export async function getProviderReviewStats(providerId: string) {

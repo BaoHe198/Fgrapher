@@ -1,3 +1,4 @@
+import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { logAudit } from "@/services/compliance";
 
@@ -95,5 +96,7 @@ export async function runModeration(mediaId: string) {
       targetId: user.id,
       metadata: { violationPoints: user.violationPoints },
     });
+    // Suspension is meant to take the account out of public view.
+    await revalidatePublicProfile(user.id);
   }
 }

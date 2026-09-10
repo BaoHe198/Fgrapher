@@ -3,6 +3,14 @@ import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
+import {
+  CACHE_TTL,
+  profileNameTag,
+  profileUserTag,
+  revalidatePublicProfile,
+  reviveDates,
+  unstable_cache,
+} from "@/lib/cache";
 
 export class ProfileNotVerifiedError extends Error {}
 export class ProfileNotFoundError extends Error {}
@@ -69,10 +77,18 @@ export async function setProfilePublished(
     }
   }
 
-  return db.profile.update({
+  const updated = await db.profile.update({
     where: { id: profile.id },
     data: { isPublished },
   });
+
+  // Publish state is the single biggest lever on what's public: it decides
+  // whether this provider appears in /browse, the featured strip and their
+  // own /profile/<username> page. Covers tryAutoPublish's callers too
+  // (verification approved, a portfolio photo approved, categories saved).
+  await revalidatePublicProfile(userId);
+
+  return updated;
 }
 
 // The project owner's explicit call to drop the manual "Đang hoạt động"
@@ -91,9 +107,11 @@ export async function tryAutoPublish(userId: string, role: Role) {
   }
 }
 
-export async function getPublicProfileUser(username: string) {
-  const user = await db.user.findUnique({
-    where: { username, deletedAt: null },
+async function getPublicProfileUserUncached(username: string) {
+  const user = await db.user.findFirst({
+    // A suspended or soft-deleted account is not public even if its Profile
+    // rows are still `isPublished` (suspension/deletion doesn't unpublish).
+    where: { username, deletedAt: null, isSuspended: false },
     // Explicit select, not include — this is a *public* read, and an
     // unfiltered include on User returns every scalar column (email,
     // phone, passwordHash...) to the caller. Nothing downstream spreads
@@ -206,9 +224,25 @@ export async function getPublicProfileUser(username: string) {
   };
 }
 
+// Public profile page data — published profiles, approved media, published
+// albums. Fully visitor-independent (the owner's editing view reads albums
+// separately via listAlbums). Cached ~90s, tagged by username so a mutation
+// to this provider clears exactly this page (see revalidatePublicProfile).
+// reviveDates() restores the Date fields that unstable_cache's JSON round-trip
+// would otherwise hand back as strings (dateOfBirth -> getAgeRangeLabel).
+export async function getPublicProfileUser(username: string) {
+  const cached = unstable_cache(
+    () => getPublicProfileUserUncached(username),
+    ["public-profile", "user", username.toLowerCase()],
+    { tags: [profileNameTag(username)], revalidate: CACHE_TTL.publicProfile },
+  );
+  return reviveDates(await cached());
+}
+
 export async function getProviderForBooking(providerId: string) {
-  return db.user.findUnique({
-    where: { id: providerId, deletedAt: null },
+  return db.user.findFirst({
+    // A suspended provider can't take new bookings.
+    where: { id: providerId, deletedAt: null, isSuspended: false },
     select: {
       id: true,
       firstName: true,
@@ -230,7 +264,7 @@ export async function getProviderForBooking(providerId: string) {
 // aggregateRating) and ReviewsTab (the 5★..1★ bar chart) both read this
 // instead of deriving from the fetched list, so neither goes wrong for
 // a provider with more reviews than the display cap fetches.
-export async function getProfileReviewStats(userId: string) {
+async function getProfileReviewStatsUncached(userId: string) {
   const [agg, byRating] = await Promise.all([
     db.review.aggregate({
       where: { reviewedId: userId },
@@ -256,7 +290,7 @@ export async function getProfileReviewStats(userId: string) {
   return { avgRating: agg._avg.rating ?? 0, count, breakdown };
 }
 
-export async function getProfileReviews(userId: string) {
+async function getProfileReviewsUncached(userId: string) {
   return db.review.findMany({
     where: { reviewedId: userId },
     include: {
@@ -271,6 +305,34 @@ export async function getProfileReviews(userId: string) {
   });
 }
 
+// These two are per-provider public reads, cached ~90s and tagged
+// `profile:user:<id>` so revalidatePublicProfile(userId) clears them on any
+// review / profile / media / service / verification change. reviveDates()
+// undoes the cache's Date -> ISO-string round-trip (review.createdAt is
+// rendered with .toISOString() on the profile page).
+
+export async function getProfileReviewStats(userId: string) {
+  const cached = unstable_cache(
+    () => getProfileReviewStatsUncached(userId),
+    ["public-profile", "review-stats", userId],
+    { tags: [profileUserTag(userId)], revalidate: CACHE_TTL.publicProfile },
+  );
+  return cached();
+}
+
+export async function getProfileReviews(userId: string) {
+  const cached = unstable_cache(
+    () => getProfileReviewsUncached(userId),
+    ["public-profile", "reviews", userId],
+    { tags: [profileUserTag(userId)], revalidate: CACHE_TTL.publicProfile },
+  );
+  return reviveDates(await cached());
+}
+
+// NOT cached. The shop tab only renders while MARKETPLACE_ENABLED is true,
+// and product create/update/delete + order stock decrements are not wired
+// into revalidatePublicProfile — caching this would serve stale inventory.
+// Revisit together with the marketplace feature flag.
 export async function getShopProducts(userId: string) {
   return db.product.findMany({
     where: { userId, isActive: true, deletedAt: null },

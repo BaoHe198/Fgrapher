@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { AuthError, requireActiveSubscription, requireAuth } from "@/lib/auth-helpers";
+import { revalidatePublicProfile } from "@/lib/cache";
+import {
+  AuthError,
+  requireActiveSubscription,
+  requireAuth,
+} from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { createServiceSchema } from "@/lib/validations/service";
 
@@ -21,10 +26,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const profile = await db.profile.findUnique({ where: { id: parsed.data.profileId } });
+    const profile = await db.profile.findUnique({
+      where: { id: parsed.data.profileId },
+    });
     if (!profile || profile.userId !== session.user.id) {
       return NextResponse.json(
-        { data: null, error: "forbidden", message: "This profile does not belong to you" },
+        {
+          data: null,
+          error: "forbidden",
+          message: "This profile does not belong to you",
+        },
         { status: 403 },
       );
     }
@@ -32,6 +43,9 @@ export async function POST(request: Request) {
     await requireActiveSubscription(session.user.id, profile.role);
 
     const service = await db.service.create({ data: parsed.data });
+
+    // Services show on the public profile's Services tab and the booking page.
+    await revalidatePublicProfile(session.user.id);
 
     return NextResponse.json(
       { data: service, error: null, message: "Service created" },
@@ -46,7 +60,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to create service" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to create service",
+      },
       { status: 500 },
     );
   }

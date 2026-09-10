@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
+import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { reorderPortfolioSchema } from "@/lib/validations/portfolio";
@@ -43,6 +44,8 @@ export async function PATCH(request: Request) {
         db.profileMedia.update({ where: { id }, data: { order: index } }),
       ),
     );
+
+    await revalidatePublicProfile(session.user.id);
 
     return NextResponse.json(
       { data: null, error: null, message: t("orderUpdated") },
