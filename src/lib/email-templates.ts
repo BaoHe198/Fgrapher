@@ -31,6 +31,44 @@ export type EmailT = (
 const strong = (value: string | number) =>
   `<strong>${escapeHtml(String(value))}</strong>`;
 
+const HTML_ENTITIES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+  "&nbsp;": " ",
+};
+
+/**
+ * A readable plain-text rendering of one of the HTML emails above. Every
+ * transactional email should carry a `text/plain` alternative alongside
+ * the HTML — a missing one is a real spam-score signal at Gmail/Outlook —
+ * and this derives it from the same markup so the two never drift.
+ *
+ * Not a general HTML-to-text converter: it only has to handle the narrow,
+ * self-authored markup in this file. Links are kept as `label (url)` so
+ * the call-to-action URL survives; block tags become newlines.
+ */
+export function emailHtmlToText(html: string): string {
+  return html
+    .replace(
+      /<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
+      (_m, href, label) => {
+        const text = label.replace(/<[^>]+>/g, "").trim();
+        return text && text !== href ? `${text} (${href})` : href;
+      },
+    )
+    .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&#?\w+;/g, (e) => HTML_ENTITIES[e] ?? e)
+    .replace(/[ \t]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 interface ShellOptions {
   t: EmailT;
   heading: string;

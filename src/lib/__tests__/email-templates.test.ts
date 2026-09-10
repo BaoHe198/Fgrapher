@@ -6,6 +6,7 @@ import {
   bookingExpiredEmailHtml,
   bookingRequestEmailHtml,
   bookingRescheduleProposedEmailHtml,
+  emailHtmlToText,
   mediaRejectedEmailHtml,
   newMessageEmailHtml,
   newOrderEmailHtml,
@@ -178,6 +179,41 @@ describe("Task 4 templates — user-controlled values are escaped", () => {
     });
     assert.ok(forCustomer.includes("bookingExpired.bodyCustomer"));
     assert.ok(forProvider.includes("bookingExpired.bodyProvider"));
+  });
+});
+
+describe("emailHtmlToText", () => {
+  it("keeps the CTA link as `label (url)` and drops the rest of the markup", () => {
+    const html = verifyEmailHtml({
+      verifyUrl: "https://fgrapher.test/verify-email?token=abc",
+    });
+    const text = emailHtmlToText(html);
+    assert.ok(!text.includes("<"));
+    assert.ok(text.includes("https://fgrapher.test/verify-email?token=abc"));
+    assert.ok(text.includes("Xác minh email"));
+  });
+
+  it("decodes entities, separates blocks, and caps blank runs", () => {
+    assert.equal(
+      emailHtmlToText("<p>x &amp; y</p>\n\n\n<div>z&nbsp;w</div>"),
+      "x & y\n\nz w",
+    );
+    assert.equal(emailHtmlToText("a&nbsp;&nbsp;b"), "a b");
+  });
+
+  it("renders a real booking email as readable plain text", () => {
+    const html = bookingRequestEmailHtml({
+      t: (key, values) =>
+        values ? `${key} ${Object.values(values).join(" ")}` : key,
+      otherPartyName: "Nguyễn Văn A",
+      serviceName: "Chụp cưới",
+      dateLabel: "10/09/2026",
+      timeLabel: "09:00",
+      bookingUrl: "https://fgrapher.test/dashboard/bookings/1",
+    });
+    const text = emailHtmlToText(html);
+    assert.ok(!/<[a-z]/i.test(text));
+    assert.ok(text.includes("https://fgrapher.test/dashboard/bookings/1"));
   });
 });
 

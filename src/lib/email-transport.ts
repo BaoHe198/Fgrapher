@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 
 import { Resend } from "resend";
 
+import { emailHtmlToText } from "@/lib/email-templates";
 import { env } from "@/lib/env";
 
 // The single place that talks to Resend. Both the immediate send path
@@ -109,6 +110,10 @@ export async function deliverEmail({
         // so escaping it here only mangles the address it's meant to show.
         subject: redirected ? `[staging → ${to}] ${subject}` : subject,
         html,
+        // A text/plain alternative alongside the HTML — derived from the
+        // same markup so they can't drift. A missing plain part is a
+        // measurable spam-score signal at Gmail/Outlook.
+        text: emailHtmlToText(html),
       },
       idempotencyKey
         ? { idempotencyKey: providerIdempotencyKey(idempotencyKey) }
