@@ -2,6 +2,10 @@
   "regions": ["sin1"],
   "crons": [
     {
+      "path": "/api/cron/email-retry",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron/booking-reminders",
       "schedule": "0 9 * * *"
     },

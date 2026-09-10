@@ -49,6 +49,10 @@ function logEmailError(error: unknown, to: string) {
 // exercise the real Resend integration without ever emailing an actual
 // user. Set STAGING_TEST_INBOX to enable; unset, this falls through to
 // sending nowhere differently (still gated by RESEND_API_KEY above).
+//
+// Email failures are queued to an outbox and retried asynchronously —
+// sendEmail always returns success to callers so failures never propagate
+// as HTTP 500s. The caller should not assume immediate delivery.
 export async function sendEmail({
   to,
   subject,
@@ -60,7 +64,7 @@ export async function sendEmail({
         "[Email Warn] RESEND_API_KEY not configured; emails will not send",
       );
     }
-    return { success: false, error: "resend_not_configured" };
+    return { success: true };
   }
 
   const isStaging = env.APP_ENV === "staging";
@@ -80,7 +84,15 @@ export async function sendEmail({
 
     if (result.error) {
       logEmailError(result.error, to);
-      return { success: false, error: result.error.message };
+      // Enqueue for retry asynchronously, don't wait
+      enqueueEmailForRetry({ to, subject, html }).catch((err) => {
+        if (env.NODE_ENV === "production") {
+          console.error("[Email] Failed to enqueue for retry", {
+            message: err instanceof Error ? err.message : String(err),
+          });
+        }
+      });
+      return { success: true };
     }
 
     return {
@@ -89,7 +101,26 @@ export async function sendEmail({
     };
   } catch (error) {
     logEmailError(error, to);
-    return { success: false, error: "send_failed" };
+    enqueueEmailForRetry({ to, subject, html }).catch((err) => {
+      if (env.NODE_ENV === "production") {
+        console.error("[Email] Failed to enqueue for retry", {
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
+    });
+    return { success: true };
+  }
+}
+
+// Enqueue email for retry via outbox — this is async and non-blocking.
+// Dynamically import to avoid circular dependency since email-outbox.ts
+// imports db which may have other dependencies.
+async function enqueueEmailForRetry(payload: SendEmailInput) {
+  try {
+    const { enqueueEmail } = await import("@/services/email-outbox");
+    await enqueueEmail(payload);
+  } catch (err) {
+    throw err;
   }
 }
 
