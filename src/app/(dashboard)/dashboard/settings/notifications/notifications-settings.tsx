@@ -45,8 +45,15 @@ export function NotificationsSettings({
   socialFeedEnabled: boolean;
 }) {
   const t = useTranslations("dashboardSettings.notifications");
+  // Merge over defaults, don't replace: a preferences object stored before
+  // a new key (e.g. `serviceRequests`) was added is missing that key, and
+  // the render below indexes `preferences[key].email` directly. Without
+  // this backfill every existing user's settings page throws.
   const [preferences, setPreferences] = useState<NotificationPreferences>(
-    initialPreferences ?? DEFAULT_PREFERENCES,
+    () => ({
+      ...DEFAULT_PREFERENCES,
+      ...(initialPreferences ?? {}),
+    }),
   );
 
   const GROUPS = useMemo(
