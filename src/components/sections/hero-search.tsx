@@ -315,18 +315,15 @@ export function HeroSearch({
 
   return (
     <div className="flex w-full flex-col gap-2">
-      {/* Mobile (<lg): a quick role + city pair, always visible, plus a
-          "Bộ lọc" button opening a Sheet with all 5 filters — replaces
-          the old stacked 5-row layout, which pushed the Search CTA below
-          the first viewport on a real phone. Desktop (lg:+) keeps the
-          single inline pill row unchanged. */}
+      {/* Mobile (<lg): one wide "Vai trò" quick-pick, always visible, plus
+          a search button and a "Bộ lọc" button opening a Sheet with all 5
+          filters (city included). Fitting two dropdowns + two buttons on
+          one ~375px row left each dropdown ~110px, truncating the city
+          label to "Thành ..."; one dropdown gets a comfortable width.
+          Desktop (lg:+) keeps the single inline pill row unchanged. */}
       <div className="flex flex-col gap-2 rounded-[var(--fg-radius-lg)] bg-bg-surface p-2 shadow-[var(--shadow-lg)] lg:hidden">
         <div className="flex items-stretch gap-1">
-          <div className="flex flex-1 items-center gap-1">
-            {roleDropdown}
-            <div className={dividerClass} />
-            {cityDropdown}
-          </div>
+          <div className="min-w-0 flex-1">{roleDropdown}</div>
           <Button
             variant="accent"
             size="icon"
