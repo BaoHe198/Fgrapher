@@ -10,11 +10,16 @@
 // checks the ref, not the host.
 //
 // This is an allow-list, not a block-list: anything not explicitly listed
-// below is refused, including the production database once it exists — no
-// further edit is needed here when the prod project is created, since it
-// simply won't be on the list.
+// below is refused, including the production database — no further edit is
+// needed here to protect prod, since its ref simply isn't on the list.
+//
+// The production project now exists (Supabase ref `mplyshxbtzovpexjhkoh`,
+// wired into Vercel Production + the local-only `.env.production`). It is
+// deliberately NOT added below: db:reset / db:push must never run against
+// it. Migrations reach prod only via `prisma migrate deploy` in CI on
+// merge to master — see docs/MIGRATIONS.md.
 const SAFE_DB_REFS = [
-  "oikhakndcpezqaxpakzv", // dev (the only Supabase project that exists today)
+  "oikhakndcpezqaxpakzv", // fgrapher-dev — the only ref these destructive commands may touch
 ];
 
 const url = process.env.DATABASE_URL ?? process.env.DIRECT_URL ?? "";

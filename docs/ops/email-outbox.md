@@ -39,8 +39,11 @@ on the first attempt are recorded too.
      attempts are burned on them.
    - Temporarily failed → a `PENDING` row is queued and the caller gets
      `{ success: false, queued: true }`.
-2. **Async retry** — the `/api/cron/email-retry` cron runs every 5 minutes,
-   claims due rows one at a time and re-sends them.
+2. **Async retry** — the `/api/cron/email-retry` cron claims due rows one at
+   a time and re-sends them. Its frequency is plan-dependent (see "Cron
+   configuration" below): on the current Vercel **Hobby** plan it runs
+   **once a day**, so the backoff schedule below is effectively "one retry
+   per day, up to five days" rather than the ~15 minutes it describes.
 
 `sendEmail()` never throws and never fails the caller's mutation. It does
 report honestly: **`success || queued` means accepted.** Treat
@@ -80,11 +83,14 @@ Callers that send such an email pass `sensitive: true`. For those rows:
 
 **Residual risk, stated plainly:** a credential-bearing body is readable in
 the database for as long as the row is `PENDING` or `SENDING`. That window
-is bounded by the retry budget (five attempts over ~15 minutes) and, past
-that, by the token's own TTL — 1 hour for password reset, 24 hours for
-email verification — after which the link is useless even if read. It is
-not zero. Treat database backups of this table accordingly, and prefer
-`sensitive` on any future email that carries a token.
+is bounded by the retry budget (five attempts — ~15 minutes on a 5-minute
+cron, but up to **~4 days** on the current daily cron, see "Cron
+configuration") and, past that, by the token's own TTL — 1 hour for
+password reset, 24 hours for email verification — after which the link is
+useless even if read. On the daily schedule the TTL, not the retry budget,
+is the effective bound for a stuck row. It is not zero. Treat database
+backups of this table accordingly, and prefer `sensitive` on any future
+email that carries a token.
 
 Password reset has a second, pre-existing exposure this does not address:
 `VerificationToken` stores its reset token in the clear. That is tracked
@@ -116,21 +122,60 @@ loop forever.
 | 5       | 8 min          | 15 min     |
 
 After 5 attempts the row is marked `FAILED` with `nextAttemptAt = NULL`.
-The cron polls every 5 minutes, so real-world waits round up to the next
-tick. The schedule lives in `getBackoffMs()` and is covered by
+The schedule lives in `getBackoffMs()` and is covered by
 `src/services/__tests__/email-outbox-policy.test.ts`.
+
+**The cron tick is the real floor on every wait.** `nextAttemptAt` is only
+a "not before" time — a retry happens on the first cron run _after_ it, not
+at it. On a 5-minute cron the 1/2/4/8-minute curve above is roughly honest.
+On the **daily** cron the curve collapses: every `nextAttemptAt` is already
+in the past by the next run, so a persistently-failing email gets exactly
+one retry per day and takes **~4 days** (attempt 1 immediate, attempts 2–5
+on four subsequent daily runs) to reach `FAILED`. A transient provider
+outage that clears within a day is still absorbed; a first-attempt failure
+for an email the user is waiting on (verification, password reset) is not
+retried until the next day.
 
 ## Cron configuration
 
 ```json
-{ "path": "/api/cron/email-retry", "schedule": "*/5 * * * *" }
+{ "path": "/api/cron/email-retry", "schedule": "0 1 * * *" }
 ```
+
+**This is once a day (01:00–01:59 UTC), not every 5 minutes.** Vercel's
+**Hobby** plan rejects any cron more frequent than daily _at deployment
+time_ — `*/5 * * * *` failed every production build, which is why nothing
+deployed between the outbox landing and commit `5bb3353`. Hobby also gives
+no timing precision better than the hour (`0 1 * * *` fires anywhere in the
+1am hour).
+
+To restore prompt draining, either:
+
+- **Upgrade to Vercel Pro** and set the schedule back to `*/5 * * * *`, or
+- **Drive `/api/cron/email-retry` from an external scheduler** (GitHub
+  Actions `schedule:`, Upstash QStash, cron-job.org, a Supabase
+  `pg_cron` + `net.http_get`) hitting the deployed URL every few minutes
+  with the `Authorization: Bearer $CRON_SECRET` header. The route is
+  unchanged, idempotent, and safe to call concurrently, so an external
+  driver needs no code change.
+
+**Interaction with Resend's idempotency window:** each delivery attempt
+forwards the outbox row's `idempotencyKey` to Resend as `Idempotency-Key`,
+which Resend honours for **~24 hours**. That guards the one crash-recovery
+case — a row Resend accepted but our DB failed to finalise, later requeued
+by the stale-lock sweep — against a double send. On the 5-minute cron the
+requeue lands well inside 24h; on the **daily** cron it lands ~24h later,
+at or past the edge of Resend's retention, so that single guarantee is
+weakened. The exposure is narrow (a rare compound failure, and the cost is
+one duplicate email, never data loss), but it is a second reason to prefer
+a sub-daily schedule.
 
 Vercel Cron issues a **GET** and authenticates with an
 **`Authorization: Bearer $CRON_SECRET`** header. There is no
 `X-Cron-Secret` header and Vercel does not add one. The route uses the
 shared `requireCronSecret()` helper, same as every other cron in
-`vercel.json`.
+`vercel.json` (which fails **closed** when `CRON_SECRET` is unset outside
+development — see `src/lib/auth-helpers.ts`).
 
 Manual invocation:
 
