@@ -7,6 +7,10 @@ import { startTransition, useEffect, useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  type BillingInterval,
+  isSafeInternalPath,
+} from "@/lib/onboarding-destination";
 import { canSubmitResend, type ResendStatus } from "@/lib/resend-verification";
 import { cn } from "@/lib/utils";
 
@@ -21,16 +25,22 @@ type PanelState =
 interface VerifyEmailPanelProps {
   token: string | null;
   initialEmail: string;
+  interval: BillingInterval;
 }
 
 export function VerifyEmailPanel({
   token,
   initialEmail,
+  interval,
 }: VerifyEmailPanelProps) {
   const t = useTranslations("accountFlows.verifyEmail");
   const [state, setState] = useState<PanelState>(
     token ? "verifying" : "missing_token",
   );
+  // Where the server says this account still needs to go — for a paid
+  // provider with billing switched on, the checkout step registration used
+  // to link to directly. Handed to the login page as a callbackUrl.
+  const [next, setNext] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -40,7 +50,7 @@ export function VerifyEmailPanel({
     fetch("/api/auth/verify-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({ token, interval }),
     })
       .then((res) => res.json())
       .then((body) => {
@@ -56,6 +66,11 @@ export function VerifyEmailPanel({
               ? status
               : "invalid",
           );
+          // Re-checked on this side too: it goes straight into a URL, and
+          // the response is the one part of this flow that a future change
+          // could make attacker-influenced.
+          const candidate = body?.data?.next;
+          if (isSafeInternalPath(candidate)) setNext(candidate);
         });
       })
       .catch(() => {
@@ -66,7 +81,7 @@ export function VerifyEmailPanel({
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, interval]);
 
   if (state === "verifying") {
     return (
@@ -89,7 +104,9 @@ export function VerifyEmailPanel({
           {isFresh ? t("successBody") : t("alreadyBody")}
         </p>
         <Link
-          href="/login"
+          href={
+            next ? `/login?callbackUrl=${encodeURIComponent(next)}` : "/login"
+          }
           className={cn(
             buttonVariants({ variant: "accent", size: "lg" }),
             "w-full",

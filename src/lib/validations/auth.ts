@@ -73,6 +73,12 @@ export const registerSchema = z
     consentService: z.boolean(),
     consentMarketing: z.boolean(),
     consentAnalytics: z.boolean(),
+    // The billing period picked before signup (/login?interval=year).
+    // Posted so it can ride the verification link — registration no longer
+    // signs the user in, so it has nothing else to survive on, and the
+    // server has nowhere to persist a preference for an account that has
+    // no subscription yet. Optional: it is a preference, never a gate.
+    interval: z.enum(["month", "year"]).optional(),
   })
   .refine((data) => data.accountType !== "provider" || data.roles.length > 0, {
     message: "Select at least one role",
@@ -108,6 +114,12 @@ export const completeProfileSchema = z
     consentService: z.boolean(),
     consentMarketing: z.boolean(),
     consentAnalytics: z.boolean(),
+    // The billing period picked before signup (/login?interval=year).
+    // Posted so it can ride the verification link — registration no longer
+    // signs the user in, so it has nothing else to survive on, and the
+    // server has nowhere to persist a preference for an account that has
+    // no subscription yet. Optional: it is a preference, never a gate.
+    interval: z.enum(["month", "year"]).optional(),
   })
   .refine((data) => data.consentService === true, {
     message: "You must agree to data processing to continue",
@@ -162,6 +174,8 @@ export function getRegisterSchema(t: (key: string) => string) {
       consentService: z.boolean(),
       consentMarketing: z.boolean(),
       consentAnalytics: z.boolean(),
+      // See registerSchema above for why this is posted at all.
+      interval: z.enum(["month", "year"]).optional(),
     })
     .refine(
       (data) => data.accountType !== "provider" || data.roles.length > 0,

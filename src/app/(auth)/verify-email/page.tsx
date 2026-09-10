@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import { parseBillingInterval } from "@/lib/onboarding-destination";
+
 import { VerifyEmailPanel } from "./verify-email-panel";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface VerifyEmailPageProps {
-  searchParams: Promise<{ token?: string; email?: string }>;
+  searchParams: Promise<{ token?: string; email?: string; interval?: string }>;
 }
 
 export default async function VerifyEmailPage({
@@ -26,6 +28,11 @@ export default async function VerifyEmailPage({
     <VerifyEmailPanel
       token={params.token ?? null}
       initialEmail={params.email ?? ""}
+      // The billing period chosen at signup, carried in the link because
+      // it never reaches the database. Normalised rather than validated:
+      // a mangled value falls back to monthly instead of blocking anyone
+      // from verifying.
+      interval={parseBillingInterval(params.interval)}
     />
   );
 }

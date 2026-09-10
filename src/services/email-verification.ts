@@ -5,6 +5,10 @@ import { Prisma } from "@prisma/client";
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
 import { sendEmail, verifyEmailHtml } from "@/lib/email";
+import {
+  type BillingInterval,
+  pendingPaidRoles,
+} from "@/lib/onboarding-destination";
 import { emailIdempotencyKey } from "@/services/email-outbox-policy";
 
 // Credential signups must prove they control the address they registered
@@ -69,18 +73,30 @@ export async function createEmailVerificationToken(
 export async function sendVerificationEmail({
   userId,
   email,
+  interval,
 }: {
   userId: string;
   email: string;
+  /**
+   * The billing period the user picked at signup. Carried in the link
+   * because the server has no other way to remember it — it is a UI choice
+   * that never reaches the database — and because the link is the only
+   * thing that survives the trip through an inbox, including onto another
+   * device. Two harmless values, validated on the way back in.
+   */
+  interval?: BillingInterval;
 }): Promise<{ sent: boolean; queued: boolean }> {
   try {
     const { rawToken, tokenHash } = await createEmailVerificationToken(userId);
+
+    const query = new URLSearchParams({ token: rawToken });
+    if (interval) query.set("interval", interval);
 
     const result = await sendEmail({
       to: email,
       subject: "Xác minh email Fgrapher của bạn",
       html: verifyEmailHtml({
-        verifyUrl: appUrl(`/verify-email?token=${rawToken}`),
+        verifyUrl: appUrl(`/verify-email?${query.toString()}`),
       }),
       // Scoped to the issued token, not to the user or the address: every
       // resend mints a new token and therefore a new key, so a legitimately
@@ -104,8 +120,10 @@ export async function sendVerificationEmail({
 }
 
 export type VerifyEmailResult =
-  | { status: "verified"; email: string }
-  | { status: "already_verified"; email: string }
+  // userId is for the caller's own server-side use (deriving where to send
+  // the user next). It is never returned to the browser.
+  | { status: "verified"; email: string; userId: string }
+  | { status: "already_verified"; email: string; userId: string }
   | { status: "invalid" }
   | { status: "expired" };
 
@@ -252,12 +270,21 @@ export async function verifyEmailToken(
 
   if (record.user.emailVerified) {
     await store.discard(record.id);
-    return { status: "already_verified", email: record.user.email };
+    return {
+      status: "already_verified",
+      email: record.user.email,
+      userId: record.userId,
+    };
   }
 
   const consumed = await store.consume(record.id, record.userId, new Date());
 
-  if (consumed) return { status: "verified", email: record.user.email };
+  if (consumed)
+    return {
+      status: "verified",
+      email: record.user.email,
+      userId: record.userId,
+    };
 
   // The token was gone by the time we tried to consume it. Usually that's
   // a concurrent request that verified the account a moment ago, and
@@ -269,8 +296,24 @@ export async function verifyEmailToken(
   const state = await store.getVerificationState(record.userId);
 
   return state?.emailVerified
-    ? { status: "already_verified", email: record.user.email }
+    ? {
+        status: "already_verified",
+        email: record.user.email,
+        userId: record.userId,
+      }
     : { status: "invalid" };
+}
+
+/**
+ * The account's paid roles that are still inactive — the ones onboarding
+ * has yet to collect payment for.
+ */
+export async function getPendingPaidRoles(userId: string) {
+  const roles = await db.userRole.findMany({
+    where: { userId },
+    select: { role: true, active: true },
+  });
+  return pendingPaidRoles(roles);
 }
 
 /**

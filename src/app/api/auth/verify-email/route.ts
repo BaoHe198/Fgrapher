@@ -2,11 +2,60 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
+import { features } from "@/lib/features";
+import {
+  buildOnboardingDestination,
+  type BillingInterval,
+  isSafeInternalPath,
+  parseBillingInterval,
+} from "@/lib/onboarding-destination";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { verifyEmailToken } from "@/services/email-verification";
+import {
+  getPendingPaidRoles,
+  verifyEmailToken,
+} from "@/services/email-verification";
+
+/**
+ * Where to send the user after they sign in.
+ *
+ * Derived here from the account's own roles rather than carried from
+ * registration: registration no longer signs anyone in, so the destination
+ * it used to compute was thrown away, leaving a paid provider on
+ * /dashboard with an inactive role and nothing prompting them to pay.
+ *
+ * Only the billing period travels with the user (in the link), because it
+ * is a UI choice that never reaches the database. Everything else is read
+ * from the record, so nothing here can be steered by whoever holds the
+ * link.
+ */
+async function resolveNextDestination(
+  userId: string,
+  interval: BillingInterval,
+): Promise<string> {
+  try {
+    const destination = buildOnboardingDestination({
+      billingEnabled: features.billingEnabled,
+      pendingRoles: await getPendingPaidRoles(userId),
+      interval,
+    });
+    // Belt and braces: this is built from an allow-listed role list and two
+    // fixed interval values, so it cannot currently be anything else — but
+    // it becomes a callbackUrl, and a callbackUrl that stops being internal
+    // is an open redirect.
+    return isSafeInternalPath(destination) ? destination : "/dashboard";
+  } catch {
+    // The account IS verified at this point. Failing to work out where to
+    // send them next must not turn that into an error.
+    return "/dashboard";
+  }
+}
 
 const verifyEmailSchema = z.object({
   token: z.string().min(1),
+  // Carried from the verification link. Two harmless values, and anything
+  // else falls back to "month" rather than being rejected — a mangled
+  // preference must not block someone from verifying their account.
+  interval: z.enum(["month", "year"]).optional(),
 });
 
 // Tokens are 256 bits of randomness, so this isn't holding back a
@@ -47,21 +96,23 @@ export async function POST(request: Request) {
 
   switch (result.status) {
     case "verified":
-      return NextResponse.json(
-        {
-          data: { status: result.status },
-          error: null,
-          message: t("emailVerified"),
-        },
-        { status: 200 },
-      );
     case "already_verified":
-      // Not an error: mail clients prefetch links, and people click twice.
+      // already_verified is not an error: mail clients prefetch links, and
+      // people click twice. Both cases get the same onward destination.
       return NextResponse.json(
         {
-          data: { status: result.status },
+          data: {
+            status: result.status,
+            next: await resolveNextDestination(
+              result.userId,
+              parseBillingInterval(parsed.data.interval),
+            ),
+          },
           error: null,
-          message: t("emailAlreadyVerified"),
+          message:
+            result.status === "verified"
+              ? t("emailVerified")
+              : t("emailAlreadyVerified"),
         },
         { status: 200 },
       );

@@ -137,7 +137,10 @@ export function RegisterForm({
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      // interval isn't part of the visible form — it comes from the page's
+      // query string — so it's merged in here rather than registered as a
+      // field.
+      body: JSON.stringify({ ...values, interval }),
     });
     const body = await res.json();
 

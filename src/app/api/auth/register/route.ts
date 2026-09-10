@@ -60,6 +60,7 @@ export async function POST(request: Request) {
     consentService,
     consentMarketing,
     consentAnalytics,
+    interval,
   } = parsed.data;
 
   // registerSchema's role list can't read the runtime feature flag (it's
@@ -198,7 +199,14 @@ export async function POST(request: Request) {
     // registration either: sendVerificationEmail() swallows its own errors
     // and the outbox retries, with the resend endpoint as the manual
     // fallback. The account exists regardless; it just can't sign in yet.
-    await sendVerificationEmail({ userId: user.id, email: user.email });
+    await sendVerificationEmail({
+      userId: user.id,
+      email: user.email,
+      // Rides the link so the billing step still defaults to what the user
+      // picked, even after the trip through their inbox onto another
+      // device. Only meaningful once billing is switched on.
+      interval,
+    });
 
     return NextResponse.json(
       {

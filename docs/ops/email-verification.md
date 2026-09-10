@@ -93,6 +93,41 @@ Accepting this was deliberate. The alternative — keeping several tokens
 live per user — widens the window in which a leaked older link still works,
 for a problem that a clear error message handles.
 
+## Where the user lands afterwards
+
+Registration used to build `/onboarding/billing?roles=…&interval=…` and
+hand it to `signIn()` as a `callbackUrl`. Requiring verification broke
+that: registration no longer signs anyone in, so the destination was
+computed and discarded. A paid provider would verify, sign in, land on
+`/dashboard` with an inactive role, and never be prompted to pay.
+
+It was never durable anyway — anyone who closed the billing page and signed
+in again later hit the same dead end, because the destination only ever
+existed inside one navigation.
+
+So the destination is now **derived, not carried**:
+
+- `POST /api/auth/verify-email` returns a `next` path built from the
+  account's own still-inactive paid roles, read from the database. Nothing
+  about it can be steered by whoever holds the link.
+- The success panel links to `/login?callbackUrl=<next>`.
+- The path is checked with `isSafeInternalPath()` on both sides before it
+  becomes a `callbackUrl`. NextAuth's `redirect` callback enforces
+  same-origin too; this is the belt to those braces.
+
+The one thing that _is_ carried is the billing period (`month`/`year`),
+because it is a UI choice made before signup that never reaches the
+database, and there is nowhere to persist a preference for an account with
+no subscription yet. It rides the verification link, so it survives the trip
+through the inbox even onto another device, and is normalised on the way
+back in — a mangled value falls back to monthly rather than blocking
+verification.
+
+**While `BILLING_ENABLED` is false — today's configuration, and permanently
+so for Stripe — all of this resolves to `/dashboard`**, because
+registration already granted a free plan for every paid role. The path
+matters the moment billing is switched on.
+
 ## Enumeration
 
 `POST /api/auth/resend-verification` returns the same 200 and the same

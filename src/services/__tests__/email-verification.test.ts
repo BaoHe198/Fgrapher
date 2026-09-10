@@ -157,6 +157,9 @@ describe("verifyEmailToken", () => {
     assert.deepEqual(result, {
       status: "verified",
       email: "nguyen@example.com",
+      // Returned for the caller's own server-side use — deriving where to
+      // send the user next. Never forwarded to the browser.
+      userId: "usr_1",
     });
     assert.equal(state.tokens.size, 0, "token must be single-use");
     assert.ok(state.users.get("usr_1")?.emailVerified);
