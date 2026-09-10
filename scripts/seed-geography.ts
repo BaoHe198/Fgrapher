@@ -2,7 +2,16 @@ import { PrismaClient } from "@prisma/client";
 
 import { PROVINCE_REGISTRY } from "../prisma/data/provinces-registry";
 
-const db = new PrismaClient();
+// Connect over the DIRECT (non-pooled) URL, not the pooled one. This is a
+// one-shot batch of hundreds of upserts run from CI, not the app: routing
+// it through Supabase's transaction-mode pgbouncer breaks Prisma's
+// prepared statements mid-run (`prepared statement "s1" does not exist`,
+// PostgresError 26000). `prisma migrate deploy` in the same workflow
+// already uses DIRECT_URL for exactly this reason. Falls back to
+// DATABASE_URL for local runs where only that is set.
+const db = new PrismaClient({
+  datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL,
+});
 
 // Geography-only counterpart to prisma/seed.ts's seedGeography() step, for
 // environments (production) where the rest of seed.ts's fake *@test.com
