@@ -1,0 +1,84 @@
+// Shared logic for the "resend verification link" form, which renders in
+// two places (the /verify-email page and the login page's unverified
+// prompt). Kept out of the component so the two rules that actually decide
+// whether the action is usable are unit-testable: an earlier draft hid the
+// email field in the compact layout while still disabling the button on an
+// empty address, which made the login prompt impossible to submit.
+
+export type ResendStatus = "idle" | "sending" | "sent" | "error";
+
+/**
+ * Whether the resend button should be clickable.
+ *
+ * The form MUST always give the user a way to supply an address — there is
+ * no layout in which the field is hidden — or this returns false forever
+ * and the button is dead.
+ */
+export function canSubmitResend({
+  status,
+  email,
+}: {
+  status: ResendStatus;
+  email: string;
+}): boolean {
+  if (status === "sending" || status === "sent") return false;
+  return email.trim().length > 0;
+}
+
+// Where the login form parks the address someone just tried to sign in
+// with, so the unverified prompt can offer it back.
+const PENDING_EMAIL_KEY = "fg:pending-verification-email";
+
+type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+function safeStorage(): StorageLike | null {
+  try {
+    // Absent during SSR; throws outright in browsers configured to block
+    // site data.
+    return typeof window === "undefined" ? null : window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Remembers the address a sign-in was attempted with.
+ *
+ * sessionStorage, deliberately, not the URL: NextAuth redirects on a failed
+ * sign-in, so component state is gone by the time the prompt renders, and
+ * putting an email address in a query string would write it into browser
+ * history and any referrer the page leaks. This stays in the tab, is never
+ * transmitted, and dies with the tab.
+ */
+export function rememberAttemptedEmail(
+  email: string,
+  storage: StorageLike | null = safeStorage(),
+): void {
+  if (!storage) return;
+  try {
+    storage.setItem(PENDING_EMAIL_KEY, email);
+  } catch {
+    // Storage full or blocked — the prompt just asks for the address.
+  }
+}
+
+/**
+ * Reads the remembered address and clears it in the same breath.
+ *
+ * Always clearing, even when the caller doesn't want the value, is the
+ * point: a successful sign-in also leaves an entry behind, and this way the
+ * very next render of the login page purges it rather than letting it sit
+ * in the tab.
+ */
+export function takeAttemptedEmail(
+  storage: StorageLike | null = safeStorage(),
+): string {
+  if (!storage) return "";
+  try {
+    const value = storage.getItem(PENDING_EMAIL_KEY) ?? "";
+    storage.removeItem(PENDING_EMAIL_KEY);
+    return value;
+  } catch {
+    return "";
+  }
+}

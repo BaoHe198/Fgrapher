@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { ResendVerificationForm } from "@/app/(auth)/verify-email/verify-email-panel";
@@ -14,6 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth-errors";
+import {
+  rememberAttemptedEmail,
+  takeAttemptedEmail,
+} from "@/lib/resend-verification";
 import { getLoginSchema, type LoginInput } from "@/lib/validations/auth";
 
 interface LoginFormProps {
@@ -40,6 +44,16 @@ export function LoginForm({
   const [serverError, setServerError] = useState<string | null>(
     hasError && !isUnverified ? t("invalidCredentials") : null,
   );
+  const [attemptedEmail, setAttemptedEmail] = useState("");
+
+  // sessionStorage isn't readable during render (it doesn't exist on the
+  // server, and reading it in the render body would desync hydration), so
+  // this happens on mount. takeAttemptedEmail() clears the entry whether or
+  // not this render needs it.
+  useEffect(() => {
+    const remembered = takeAttemptedEmail();
+    if (remembered) startTransition(() => setAttemptedEmail(remembered));
+  }, []);
 
   const loginSchema = useMemo(() => getLoginSchema(tValidation), [tValidation]);
 
@@ -54,6 +68,12 @@ export function LoginForm({
 
   const onSubmit = async (values: LoginInput) => {
     setServerError(null);
+
+    // Parked before navigating away so the unverified prompt below can
+    // offer the address back instead of making the user retype it — the
+    // redirect discards component state. Read-and-cleared on the next
+    // render of this page, so nothing lingers after a successful sign-in.
+    rememberAttemptedEmail(values.email);
 
     // redirect: true (the default) lets next-auth navigate directly rather than
     // resolving the client-side promise itself — the latter awaits an internal
@@ -83,7 +103,15 @@ export function LoginForm({
           <p className="text-body-sm text-text-primary">
             {t("emailNotVerified")}
           </p>
-          <ResendVerificationForm initialEmail="" compact />
+          {/* Keyed on the address: ResendVerificationForm seeds its own
+              state from initialEmail on mount, and the remembered value
+              only arrives after the effect above runs. The key remounts it
+              once, before the user can have interacted with it. */}
+          <ResendVerificationForm
+            key={attemptedEmail}
+            initialEmail={attemptedEmail}
+            compact
+          />
         </div>
       ) : null}
 

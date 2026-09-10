@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --import ./scripts/test-setup.ts --test \"src/**/__tests__/*.test.ts\"",
+    "test": "tsx --import ./scripts/test-setup.ts --test \"src/**/__tests__/*.test.ts\" \"src/**/__tests__/*.test.tsx\"",
     "format": "prettier --write .",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",

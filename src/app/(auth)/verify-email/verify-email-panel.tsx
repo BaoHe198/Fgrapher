@@ -7,6 +7,7 @@ import { startTransition, useEffect, useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { canSubmitResend, type ResendStatus } from "@/lib/resend-verification";
 import { cn } from "@/lib/utils";
 
 type PanelState =
@@ -153,13 +154,12 @@ export function ResendVerificationForm({
 }: ResendVerificationFormProps) {
   const t = useTranslations("accountFlows.verifyEmail");
   const [email, setEmail] = useState(initialEmail);
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<ResendStatus>("idle");
+  const canSubmit = canSubmitResend({ status, email });
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (status === "sending" || status === "sent") return;
+    if (!canSubmit) return;
 
     setStatus("sending");
     try {
@@ -184,9 +184,10 @@ export function ResendVerificationForm({
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      {/* Shown in both layouts: NextAuth redirects on a failed sign-in, so
-          by the time the login page renders this prompt the address the
-          user typed is gone and has to be entered again. */}
+      {/* Rendered in BOTH layouts, never hidden in the compact one: the
+          submit button is gated on a non-empty address, so a layout with
+          no field would be permanently unsubmittable. The compact variant
+          drops the visible label and keeps an accessible one. */}
       <Input
         label={compact ? undefined : t("emailLabel")}
         aria-label={compact ? t("emailLabel") : undefined}
@@ -209,7 +210,7 @@ export function ResendVerificationForm({
         variant={compact ? "secondary" : "accent"}
         size={compact ? "sm" : "lg"}
         className={compact ? "self-start" : "w-full"}
-        disabled={status === "sending" || email.trim().length === 0}
+        disabled={!canSubmit}
       >
         {status === "sending" ? (
           <>
