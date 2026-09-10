@@ -42,6 +42,12 @@ export interface SendEmailInput {
    * omitted key always sends.
    */
   idempotencyKey?: string;
+  /**
+   * The body embeds a credential — a password-reset or email-verification
+   * link. Set it and the outbox keeps the body only for as long as a retry
+   * could still need it (see EmailOutbox.sensitive).
+   */
+  sensitive?: boolean;
 }
 
 /**
@@ -65,6 +71,7 @@ export async function sendEmail({
   subject,
   html,
   idempotencyKey,
+  sensitive,
 }: SendEmailInput): Promise<SendEmailResult> {
   const delivery = await deliverEmail({ to, subject, html });
 
@@ -75,6 +82,7 @@ export async function sendEmail({
         subject,
         html,
         idempotencyKey,
+        sensitive,
         providerId: delivery.messageId,
       }),
     );
@@ -95,6 +103,7 @@ export async function sendEmail({
         subject,
         html,
         idempotencyKey,
+        sensitive,
         error: delivery.error,
       }),
     );
@@ -107,7 +116,7 @@ export async function sendEmail({
   }
 
   const outboxId = await safeRecord(() =>
-    enqueueEmail({ to, subject, html, idempotencyKey }),
+    enqueueEmail({ to, subject, html, idempotencyKey, sensitive }),
   );
 
   return {
@@ -164,5 +173,6 @@ export async function sendMarketingEmail({
       error: "marketing_consent_not_given",
     };
   }
+  // Marketing email never carries a credential, so no `sensitive`.
   return sendEmail({ to, subject, html, idempotencyKey });
 }

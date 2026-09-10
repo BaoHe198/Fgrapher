@@ -1,13 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Camera, Loader2, User } from "lucide-react";
+import { Camera, Loader2, MailCheck, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { ResendVerificationForm } from "@/app/(auth)/verify-email/verify-email-panel";
 import { SocialRow } from "@/components/auth/social-row";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -74,6 +75,10 @@ export function RegisterForm({
       : null;
 
   const [serverError, setServerError] = useState<string | null>(null);
+  // Set once registration succeeds: the account exists but can't sign in
+  // until the emailed link is clicked, so the form swaps to a "check your
+  // inbox" panel rather than attempting a sign-in that would be refused.
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [accountType, setAccountType] = useState<"customer" | "provider">(
     preselectedRole ? "provider" : "customer",
   );
@@ -145,6 +150,17 @@ export function RegisterForm({
       return;
     }
 
+    // Credential signups can't sign in until they've clicked the link in
+    // their inbox (lib/auth.ts's authorize() enforces it), so signing in
+    // here would only bounce to /login?error=CredentialsSignin. Show the
+    // "check your inbox" state instead. The paid-role onboarding redirect
+    // this used to perform happens after the first real sign-in; the
+    // roles were already granted server-side by the register route.
+    if (body?.data?.verificationRequired) {
+      setPendingEmail(values.email);
+      return;
+    }
+
     const paidRoles = values.roles.filter((role) =>
       (PAID_ROLES as string[]).includes(role),
     );
@@ -163,6 +179,31 @@ export function RegisterForm({
       callbackUrl,
     });
   };
+
+  if (pendingEmail) {
+    return (
+      <div className="flex flex-col items-center gap-3 text-center">
+        <MailCheck className="size-10 text-brand-primary" />
+        <h1 className="text-display-md text-text-primary">
+          {t("verifyTitle")}
+        </h1>
+        <p className="text-body-md text-text-secondary">
+          {t("verifyBody", { email: pendingEmail })}
+        </p>
+        <p className="text-body-sm text-text-tertiary">{t("verifyHint")}</p>
+        <div className="w-full">
+          <ResendVerificationForm initialEmail={pendingEmail} compact />
+        </div>
+        <button
+          type="button"
+          onClick={onSwitchToLogin}
+          className="text-body-sm font-semibold text-text-link hover:underline"
+        >
+          {t("verifyBackToLogin")}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>

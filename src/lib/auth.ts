@@ -1,10 +1,11 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { cache } from "react";
 
+import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth-errors";
 import { db } from "@/lib/db";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations/auth";
@@ -16,6 +17,16 @@ import { loginSchema } from "@/lib/validations/auth";
 // bcrypt.compare with no attempt limit at all.
 const LOGIN_IP_RATE_LIMIT = { max: 20, windowMs: 10 * 60 * 1000 };
 const LOGIN_EMAIL_RATE_LIMIT = { max: 8, windowMs: 10 * 60 * 1000 };
+
+/**
+ * Signals a correct password on an account whose email is still
+ * unverified, so the login page can show the resend prompt rather than
+ * "wrong email or password". The code itself lives in lib/auth-errors.ts
+ * so the login page can read it without importing this server module.
+ */
+class EmailNotVerifiedError extends CredentialsSignin {
+  code = EMAIL_NOT_VERIFIED_CODE;
+}
 
 const {
   handlers,
@@ -65,6 +76,20 @@ const {
           user.passwordHash,
         );
         if (!isValid) return null;
+
+        // Checked only after the password verifies, so the distinct error
+        // below can't be used to test whether an address is registered —
+        // you have to already know the password to see it.
+        //
+        // Thrown rather than returned as null so the login page can offer
+        // "resend the link" instead of the misleading "wrong email or
+        // password". @auth/core puts `code` in the redirect query string
+        // (?error=CredentialsSignin&code=email_not_verified); it's a
+        // deliberate, non-sensitive disclosure to someone holding valid
+        // credentials for the account.
+        if (!user.emailVerified) {
+          throw new EmailNotVerifiedError();
+        }
 
         return {
           id: user.id,

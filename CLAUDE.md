@@ -246,7 +246,8 @@ pnpm db:studio                    # prisma studio (GUI)
 pnpm db:reset                     # reset + seed
 
 # Testing
-pnpm test                         # vitest
+pnpm typecheck                    # tsc --noEmit
+pnpm test                         # unit tests (node:test via tsx, no extra dep)
 pnpm test:e2e                     # playwright
 ```
 
@@ -330,6 +331,15 @@ services with no live credentials in this sandboxed environment:
   a stub — swapping in real-time delivery later means adding a transport
   layer, not rewriting the polling call sites.
 - **Redis/Upstash**: no caching layer exists; Phase 11 skipped it entirely.
+
+**Email verification is live for credential signups** (see
+`docs/ops/email-verification.md`): registration no longer sets
+`emailVerified`, and `lib/auth.ts`'s `authorize()` refuses to sign in until
+the emailed link is clicked. OAuth is unaffected. Seed accounts are created
+already-verified. All transactional email goes through a database-backed
+outbox with a retry cron — `docs/ops/email-outbox.md`, including the
+residual risk that a queued credential-bearing body is readable until it's
+delivered.
 
 seed.ts creates a synthetic ACTIVE Subscription (no real Stripe IDs) for every
 paid-role seed account, plus one seeded `admin@test.com` (password `Test1234!`,

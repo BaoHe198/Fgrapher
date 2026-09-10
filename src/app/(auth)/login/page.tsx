@@ -17,6 +17,7 @@ interface LoginPageProps {
     interval?: string;
     callbackUrl?: string;
     error?: string;
+    code?: string;
   }>;
 }
 
@@ -30,6 +31,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       interval={interval}
       callbackUrl={params.callbackUrl}
       hasError={Boolean(params.error)}
+      // @auth/core appends `code` for a CredentialsSignin subclass — see
+      // EMAIL_NOT_VERIFIED_CODE in lib/auth.ts. Everything else stays the
+      // generic "wrong email or password".
+      errorCode={params.code}
       marketplaceEnabled={features.marketplaceEnabled}
     />
   );

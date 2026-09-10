@@ -466,7 +466,12 @@
       "submitting": "Đang đăng nhập...",
       "terms": "Khi đăng nhập, bạn đồng ý với Điều khoản và Chính sách bảo mật.",
       "noAccount": "Chưa có tài khoản?",
-      "signUp": "Đăng ký"
+      "signUp": "Đăng ký",
+      "emailNotVerified": "Bạn cần xác minh email trước khi đăng nhập.",
+      "resendVerification": "Gửi lại liên kết xác minh",
+      "resendVerificationSending": "Đang gửi...",
+      "resendVerificationSent": "Đã gửi. Vui lòng kiểm tra hộp thư của bạn.",
+      "resendVerificationFailed": "Không thể gửi lại lúc này. Vui lòng thử lại sau."
     },
     "register": {
       "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
@@ -492,7 +497,15 @@
       "submit": "Tạo tài khoản",
       "terms": "Khi đăng ký, bạn đồng ý với Điều khoản và Chính sách bảo mật.",
       "alreadyHaveAccount": "Đã có tài khoản?",
-      "signIn": "Đăng nhập"
+      "signIn": "Đăng nhập",
+      "verifyTitle": "Kiểm tra hộp thư của bạn",
+      "verifyBody": "Chúng tôi đã gửi liên kết xác minh tới {email}. Nhấn vào liên kết đó để kích hoạt tài khoản.",
+      "verifyHint": "Không thấy email? Kiểm tra thư mục spam, hoặc gửi lại sau vài phút. Liên kết có hiệu lực trong 24 giờ.",
+      "verifyResend": "Gửi lại email xác minh",
+      "verifyResendSending": "Đang gửi...",
+      "verifyResendSent": "Đã gửi lại. Vui lòng kiểm tra hộp thư của bạn.",
+      "verifyResendFailed": "Không thể gửi lại lúc này. Vui lòng thử lại sau.",
+      "verifyBackToLogin": "Quay lại đăng nhập"
     },
     "forgotPassword": {
       "metaTitle": "Đặt lại mật khẩu — Fgrapher",
@@ -821,6 +834,25 @@
         "reject": "Từ chối",
         "awaitingProviderConfirmation": "Đang chờ MoMo/ZaloPay tự xác nhận — không cần admin thao tác."
       }
+    },
+    "verifyEmail": {
+      "metaTitle": "Xác minh email — Fgrapher",
+      "verifying": "Đang xác minh email của bạn...",
+      "successTitle": "Email đã được xác minh",
+      "successBody": "Tài khoản của bạn đã sẵn sàng. Bạn có thể đăng nhập ngay bây giờ.",
+      "alreadyTitle": "Email đã được xác minh",
+      "alreadyBody": "Địa chỉ này đã được xác minh trước đó. Bạn có thể đăng nhập bình thường.",
+      "expiredTitle": "Liên kết đã hết hạn",
+      "expiredBody": "Liên kết xác minh chỉ có hiệu lực trong 24 giờ. Nhập email của bạn để nhận liên kết mới.",
+      "invalidTitle": "Liên kết không hợp lệ",
+      "invalidBody": "Liên kết này không đúng hoặc đã được sử dụng. Nhập email của bạn để nhận liên kết mới.",
+      "missingToken": "Liên kết thiếu mã xác minh. Hãy mở lại liên kết trong email, hoặc yêu cầu một liên kết mới.",
+      "emailLabel": "Email",
+      "resend": "Gửi lại liên kết",
+      "resending": "Đang gửi...",
+      "resendSent": "Nếu địa chỉ này cần xác minh, chúng tôi đã gửi một liên kết mới.",
+      "resendFailed": "Không thể gửi lúc này. Vui lòng thử lại sau.",
+      "goToLogin": "Đăng nhập"
     }
   },
   "apiMessages": {
@@ -973,7 +1005,13 @@
       "resetLinkInvalid": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
       "passwordUpdated": "Đã cập nhật mật khẩu",
       "cameraShopUnavailable": "Vai trò Cửa hàng máy ảnh chưa khả dụng",
-      "tooManyRequests": "Bạn đã thử quá nhiều lần. Vui lòng đợi ít phút rồi thử lại."
+      "tooManyRequests": "Bạn đã thử quá nhiều lần. Vui lòng đợi ít phút rồi thử lại.",
+      "accountCreatedVerifyEmail": "Đã tạo tài khoản. Vui lòng kiểm tra email để xác minh.",
+      "emailVerified": "Email đã được xác minh",
+      "emailAlreadyVerified": "Email này đã được xác minh trước đó",
+      "verifyEmailExpired": "Liên kết xác minh đã hết hạn",
+      "verifyEmailInvalid": "Liên kết xác minh không hợp lệ hoặc đã được sử dụng",
+      "verificationEmailSent": "Nếu địa chỉ này cần xác minh, chúng tôi đã gửi một liên kết mới"
     },
     "availability": {
       "loadFailed": "Không thể tải lịch làm việc",

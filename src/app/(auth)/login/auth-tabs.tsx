@@ -15,6 +15,7 @@ interface AuthTabsProps {
   interval: "month" | "year";
   callbackUrl?: string;
   hasError: boolean;
+  errorCode?: string;
   marketplaceEnabled: boolean;
 }
 
@@ -23,6 +24,7 @@ export function AuthTabs({
   interval,
   callbackUrl,
   hasError,
+  errorCode,
   marketplaceEnabled,
 }: AuthTabsProps) {
   const t = useTranslations("auth");
@@ -62,6 +64,7 @@ export function AuthTabs({
         <LoginForm
           callbackUrl={callbackUrl}
           hasError={hasError}
+          errorCode={errorCode}
           onSwitchToRegister={() => setMode("register")}
         />
       </TabsPanel>

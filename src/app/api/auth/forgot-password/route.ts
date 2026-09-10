@@ -78,6 +78,8 @@ export async function POST(request: Request) {
       // in this flow.
       subject: "Đặt lại mật khẩu Fgrapher",
       html: resetPasswordEmailHtml({ resetUrl }),
+      // The body contains the raw reset link.
+      sensitive: true,
       // No idempotency key on purpose: asking for a second reset link is a
       // legitimate repeat of a *new* event, and each request mints a fresh
       // token, so every call must actually send.

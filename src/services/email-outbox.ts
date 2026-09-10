@@ -20,6 +20,12 @@ export interface OutboxEmailInput {
   subject: string;
   html: string;
   /**
+   * The body embeds a credential (a password-reset or verification link).
+   * Such a body is never written for an email delivered on the first
+   * attempt, and is scrubbed as soon as the row reaches a terminal state.
+   */
+  sensitive?: boolean;
+  /**
    * Event-scoped key (see emailIdempotencyKey). Omit for emails with no
    * natural event identity — a fresh random key is generated, so the
    * email always sends.
@@ -49,7 +55,11 @@ async function recordTerminal(
         idempotencyKey: payload.idempotencyKey ?? oneOffIdempotencyKey(),
         to: payload.to,
         subject: payload.subject,
-        html: payload.html,
+        // A terminal row is never sent again, so a credential-bearing body
+        // has no reason to be written at all. The ledger keeps recipient,
+        // subject, status and provider id, which is what it exists for.
+        html: payload.sensitive ? null : payload.html,
+        sensitive: payload.sensitive ?? false,
         attempts: 1,
         nextAttemptAt: null,
         ...fields,
@@ -91,7 +101,11 @@ export async function enqueueEmail(
         idempotencyKey,
         to: payload.to,
         subject: payload.subject,
+        // Kept, because retrying needs it. This is the residual exposure
+        // window for a credential-bearing email — bounded by the retry
+        // budget and by the token's own TTL. See docs/ops/email-outbox.md.
         html: payload.html,
+        sensitive: payload.sensitive ?? false,
         status: "PENDING",
         nextAttemptAt: new Date(),
       },
@@ -235,10 +249,34 @@ export async function processEmailOutbox(): Promise<ProcessOutboxResult> {
     try {
       const email = await db.emailOutbox.findUnique({
         where: { id },
-        select: { to: true, subject: true, html: true, attempts: true },
+        select: {
+          to: true,
+          subject: true,
+          html: true,
+          attempts: true,
+          sensitive: true,
+        },
       });
       if (!email) {
         result.skipped += 1;
+        continue;
+      }
+
+      // A scrubbed body can never be sent. That only happens if a row was
+      // somehow returned to PENDING after reaching a terminal state, so
+      // fail it outright rather than looping on an empty email.
+      if (email.html === null) {
+        await db.emailOutbox.update({
+          where: { id },
+          data: {
+            status: "FAILED",
+            nextAttemptAt: null,
+            lockedAt: null,
+            lastError: "body_unavailable",
+          },
+        });
+        result.processed += 1;
+        result.failed += 1;
         continue;
       }
 
@@ -254,6 +292,9 @@ export async function processEmailOutbox(): Promise<ProcessOutboxResult> {
         retryable: delivery.delivered ? undefined : delivery.retryable,
       });
 
+      const isTerminal =
+        outcome.status === "SENT" || outcome.status === "FAILED";
+
       await db.emailOutbox.update({
         where: { id },
         data: {
@@ -261,6 +302,10 @@ export async function processEmailOutbox(): Promise<ProcessOutboxResult> {
           nextAttemptAt: outcome.nextAttemptAt,
           sentAt: outcome.sentAt,
           lockedAt: null,
+          // Scrub the credential the moment it can no longer be needed for
+          // a retry, so a durable queue doesn't become a durable store of
+          // live reset/verification links.
+          ...(email.sensitive && isTerminal ? { html: null } : {}),
           providerId: delivery.delivered ? (delivery.messageId ?? null) : null,
           // Cleared on success so a row that eventually delivered doesn't
           // keep reading as broken.

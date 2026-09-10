@@ -8,27 +8,37 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { ResendVerificationForm } from "@/app/(auth)/verify-email/verify-email-panel";
 import { SocialRow } from "@/components/auth/social-row";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth-errors";
 import { getLoginSchema, type LoginInput } from "@/lib/validations/auth";
 
 interface LoginFormProps {
   callbackUrl?: string;
   hasError: boolean;
+  errorCode?: string;
   onSwitchToRegister: () => void;
 }
 
 export function LoginForm({
   callbackUrl,
   hasError,
+  errorCode,
   onSwitchToRegister,
 }: LoginFormProps) {
   const t = useTranslations("accountFlows.login");
   const tValidation = useTranslations("libServices.validation.auth");
+  // The password was right but the address is unverified. Only reachable
+  // by someone who already holds valid credentials for the account (the
+  // check runs after bcrypt.compare in lib/auth.ts), so naming the reason
+  // discloses nothing an attacker didn't have — and telling everyone else
+  // "wrong email or password" would send them to reset a working password.
+  const isUnverified = hasError && errorCode === EMAIL_NOT_VERIFIED_CODE;
   const [serverError, setServerError] = useState<string | null>(
-    hasError ? t("invalidCredentials") : null,
+    hasError && !isUnverified ? t("invalidCredentials") : null,
   );
 
   const loginSchema = useMemo(() => getLoginSchema(tValidation), [tValidation]);
@@ -65,6 +75,15 @@ export function LoginForm({
       {serverError ? (
         <div className="rounded-[var(--fg-radius-md)] bg-danger-bg p-3 text-body-sm text-danger">
           {serverError}
+        </div>
+      ) : null}
+
+      {isUnverified ? (
+        <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-warning-bg p-3">
+          <p className="text-body-sm text-text-primary">
+            {t("emailNotVerified")}
+          </p>
+          <ResendVerificationForm initialEmail="" compact />
         </div>
       ) : null}
 

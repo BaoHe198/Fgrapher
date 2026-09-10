@@ -466,7 +466,12 @@
       "submitting": "Signing in...",
       "terms": "By signing in you agree to our Terms and Privacy Policy.",
       "noAccount": "Don't have an account?",
-      "signUp": "Sign up"
+      "signUp": "Sign up",
+      "emailNotVerified": "Verify your email address before signing in.",
+      "resendVerification": "Resend the verification link",
+      "resendVerificationSending": "Sending...",
+      "resendVerificationSent": "Sent. Check your inbox.",
+      "resendVerificationFailed": "Couldn't resend right now. Try again shortly."
     },
     "register": {
       "genericError": "Something went wrong. Please try again.",
@@ -492,7 +497,15 @@
       "submit": "Create account",
       "terms": "By signing in you agree to our Terms and Privacy Policy.",
       "alreadyHaveAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "verifyTitle": "Check your inbox",
+      "verifyBody": "We've sent a verification link to {email}. Click it to activate your account.",
+      "verifyHint": "No email? Check your spam folder, or resend in a few minutes. The link is valid for 24 hours.",
+      "verifyResend": "Resend verification email",
+      "verifyResendSending": "Sending...",
+      "verifyResendSent": "Resent. Check your inbox.",
+      "verifyResendFailed": "Couldn't resend right now. Try again shortly.",
+      "verifyBackToLogin": "Back to sign in"
     },
     "forgotPassword": {
       "metaTitle": "Reset your password — Fgrapher",
@@ -821,6 +834,25 @@
         "reject": "Reject",
         "awaitingProviderConfirmation": "Waiting on MoMo/ZaloPay to confirm automatically — no admin action needed."
       }
+    },
+    "verifyEmail": {
+      "metaTitle": "Verify your email — Fgrapher",
+      "verifying": "Verifying your email...",
+      "successTitle": "Email verified",
+      "successBody": "Your account is ready. You can sign in now.",
+      "alreadyTitle": "Email verified",
+      "alreadyBody": "This address was already verified. You can sign in as usual.",
+      "expiredTitle": "Link expired",
+      "expiredBody": "Verification links are valid for 24 hours. Enter your email to get a new one.",
+      "invalidTitle": "Invalid link",
+      "invalidBody": "This link is wrong or has already been used. Enter your email to get a new one.",
+      "missingToken": "This link has no verification code. Open the link from your email again, or request a new one.",
+      "emailLabel": "Email",
+      "resend": "Resend link",
+      "resending": "Sending...",
+      "resendSent": "If this address needs verifying, we've sent a new link.",
+      "resendFailed": "Couldn't send right now. Try again shortly.",
+      "goToLogin": "Sign in"
     }
   },
   "apiMessages": {
@@ -973,7 +1005,13 @@
       "resetLinkInvalid": "This reset link is invalid or has expired",
       "passwordUpdated": "Password updated",
       "cameraShopUnavailable": "Camera Shop is not available yet",
-      "tooManyRequests": "Too many attempts. Please wait a few minutes and try again."
+      "tooManyRequests": "Too many attempts. Please wait a few minutes and try again.",
+      "accountCreatedVerifyEmail": "Account created. Check your email to verify it.",
+      "emailVerified": "Email verified",
+      "emailAlreadyVerified": "This email was already verified",
+      "verifyEmailExpired": "This verification link has expired",
+      "verifyEmailInvalid": "This verification link is invalid or has already been used",
+      "verificationEmailSent": "If this address needs verifying, we've sent a new link"
     },
     "availability": {
       "loadFailed": "Failed to load availability",

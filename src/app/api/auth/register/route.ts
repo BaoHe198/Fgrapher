@@ -8,6 +8,7 @@ import { features } from "@/lib/features";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRegisterSchema } from "@/lib/validations/auth";
 import { recordConsent } from "@/services/compliance";
+import { sendVerificationEmail } from "@/services/email-verification";
 import { assignFreePlan } from "@/services/subscription";
 import { Prisma } from "@prisma/client";
 
@@ -113,9 +114,12 @@ export async function POST(request: Request) {
         lastName,
         name: name.trim(),
         passwordHash,
-        // No email-delivery provider is wired up yet (phase 0); treat
-        // registrations as verified until a real verification flow exists.
-        emailVerified: new Date(),
+        // Deliberately NOT set: a credential signup has not yet proven it
+        // controls this address. lib/auth.ts's authorize() refuses to sign
+        // in an account with a null emailVerified, and the verification
+        // email below is what clears it. (OAuth signups are unaffected —
+        // the provider has already verified the address and the Prisma
+        // adapter stamps this at account link time.)
         // Age gate (Prompt B3) — required for every account; registerSchema
         // already enforced >= 18 before this route runs.
         dateOfBirth: new Date(dateOfBirth),
@@ -189,11 +193,24 @@ export async function POST(request: Request) {
       await assignFreePlan(user.id, uniqueRoles);
     }
 
+    // After the consent records and the free-plan grant, so a failure here
+    // can't leave a half-registered account — and it can't fail the
+    // registration either: sendVerificationEmail() swallows its own errors
+    // and the outbox retries, with the resend endpoint as the manual
+    // fallback. The account exists regardless; it just can't sign in yet.
+    await sendVerificationEmail({ userId: user.id, email: user.email });
+
     return NextResponse.json(
       {
-        data: { id: user.id, email: user.email },
+        data: {
+          id: user.id,
+          email: user.email,
+          // Tells the client to show "check your inbox" instead of
+          // signing in, which would now bounce off the authorize() gate.
+          verificationRequired: true,
+        },
         error: null,
-        message: t("accountCreated"),
+        message: t("accountCreatedVerifyEmail"),
       },
       { status: 201 },
     );

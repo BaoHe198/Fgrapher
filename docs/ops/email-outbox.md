@@ -19,7 +19,8 @@ on the first attempt are recorded too.
 | `idempotencyKey` | Unique. **Event-scoped** — see below. Never a hash of the content. |
 | `to`             | Recipient address                                                  |
 | `subject`        | Subject line                                                       |
-| `html`           | Body                                                               |
+| `html`           | Body. **Nullable** — scrubbed once it can no longer be sent        |
+| `sensitive`      | The body embeds a credential (see below)                           |
 | `status`         | `PENDING` \| `SENDING` \| `SENT` \| `FAILED`                       |
 | `attempts`       | Delivery attempts made (0–5)                                       |
 | `nextAttemptAt`  | When to try next. **Null on terminal rows** (`SENT`/`FAILED`)      |
@@ -61,6 +62,33 @@ rather than merely delayed.
 
 **Omitting the key always sends.** An enqueue with no key gets a fresh
 random one, so "no key" can never silently mean "deduplicate".
+
+### Credential-bearing bodies
+
+The outbox stores the _rendered_ email. Password-reset and
+email-verification emails embed a live token in that body, so an outbox
+that kept every body forever would be a durable store of working
+account-takeover links — which would undo the point of hashing the token
+in `email_verification_tokens`.
+
+Callers that send such an email pass `sensitive: true`. For those rows:
+
+- delivered on the first attempt → the body is **never written**;
+- reaching a terminal state (`SENT`/`FAILED`) on retry → the body is
+  **cleared** in the same update;
+- queued for retry → the body **is stored**, because retrying needs it.
+
+**Residual risk, stated plainly:** a credential-bearing body is readable in
+the database for as long as the row is `PENDING` or `SENDING`. That window
+is bounded by the retry budget (five attempts over ~15 minutes) and, past
+that, by the token's own TTL — 1 hour for password reset, 24 hours for
+email verification — after which the link is useless even if read. It is
+not zero. Treat database backups of this table accordingly, and prefer
+`sensitive` on any future email that carries a token.
+
+Password reset has a second, pre-existing exposure this does not address:
+`VerificationToken` stores its reset token in the clear. That is tracked
+separately.
 
 ### Concurrency
 
@@ -149,6 +177,11 @@ SELECT "id", "to", "attempts", "lockedAt"
 FROM "email_outbox"
 WHERE "status" = 'SENDING' AND "lockedAt" < now() - interval '10 minutes';
 
+-- Credential-bearing bodies still readable (should be small, short-lived)
+SELECT "id", "to", "status", "attempts", "createdAt"
+FROM "email_outbox"
+WHERE "sensitive" AND "html" IS NOT NULL;
+
 -- Did a specific signup's email go out?
 SELECT "status", "attempts", "sentAt", "lastError"
 FROM "email_outbox"
@@ -196,6 +229,9 @@ if (!result.success && !result.queued) {
   // Nothing will retry this. Rare — log it.
 }
 ```
+
+Pass `sensitive: true` whenever the body contains a token or a one-time
+link.
 
 `enqueueEmail()` from `@/services/email-outbox` skips the immediate
 attempt and queues directly; use it for bulk background work where a

@@ -1565,7 +1565,17 @@ model EmailOutbox {
   idempotencyKey String            @unique
   to             String
   subject        String
-  html           String
+  // Nullable because the body is discarded once it can no longer be sent —
+  // see `sensitive`. A null body on a PENDING row is unsendable and is
+  // failed rather than retried.
+  html           String?
+  // The body embeds a credential (a password-reset or email-verification
+  // link). Such a body is never persisted for an email that was delivered
+  // on the first attempt, and is scrubbed the moment the row reaches a
+  // terminal state. It is still stored while the row is queued for retry,
+  // because retrying requires it — that window is the real residual risk,
+  // bounded by the retry budget (~15 minutes) and by the token's own TTL.
+  sensitive      Boolean           @default(false)
   status         EmailOutboxStatus @default(PENDING)
   attempts       Int               @default(0)
   // Nullable: a row in a terminal state (SENT/FAILED) has no next attempt.
@@ -1590,21 +1600,32 @@ model EmailOutbox {
 model EmailVerificationToken {
   id String @id @default(cuid())
 
-  userId String
-  // SHA-256 of the token, never the token itself. The raw value exists
-  // only in the email that was sent, so a leaked database dump (or a read
-  // through an unrelated SQL injection) can't be replayed to verify — and
-  // therefore take over — an account whose owner never clicked the link.
-  // Password reset (VerificationToken) still stores its token in the
-  // clear; that's pre-existing and tracked separately, not a reason to
-  // repeat it here.
+  // Unique, not merely indexed: a user has at most ONE outstanding
+  // verification token. Two concurrent "resend" requests would otherwise
+  // each delete-then-insert against their own snapshot and leave two live
+  // tokens behind, so the promise that issuing a new link kills the old
+  // one would be false. The constraint makes that a database guarantee
+  // rather than a race the application usually wins.
+  userId String @unique
+  // SHA-256 of the token, never the token itself, so a leaked dump of
+  // THIS table (or a read through an unrelated SQL injection) can't be
+  // replayed to verify — and therefore take over — an account whose owner
+  // never clicked the link.
+  //
+  // That guarantee is scoped to this table. The raw link also appears in
+  // the rendered body stored in email_outbox, which is why
+  // EmailOutbox.sensitive exists: such a body is never persisted for a
+  // first-attempt delivery and is scrubbed on reaching a terminal state,
+  // leaving only the retry window. Password reset (VerificationToken)
+  // still stores its token in the clear; that's pre-existing and tracked
+  // separately, not a reason to repeat it here.
   tokenHash String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+  // No @@index([userId]) — @unique above already provides one.
   @@index([expiresAt])
   @@map("email_verification_tokens")
 }
