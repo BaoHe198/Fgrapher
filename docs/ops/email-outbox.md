@@ -155,9 +155,10 @@ To restore prompt draining, either:
 - **Drive `/api/cron/email-retry` from an external scheduler** (GitHub
   Actions `schedule:`, Upstash QStash, cron-job.org, a Supabase
   `pg_cron` + `net.http_get`) hitting the deployed URL every few minutes
-  with the `Authorization: Bearer $CRON_SECRET` header. The route is
-  unchanged, idempotent, and safe to call concurrently, so an external
-  driver needs no code change.
+  with the `Authorization: Bearer $CRON_SECRET` header. No code change is
+  needed: it is a plain authenticated GET, and `processEmailOutbox()` is
+  already safe to run concurrently (see "Concurrency" above), so an
+  external caller and the `vercel.json` cron can both hit it.
 
 **Interaction with Resend's idempotency window:** each delivery attempt
 forwards the outbox row's `idempotencyKey` to Resend as `Idempotency-Key`,

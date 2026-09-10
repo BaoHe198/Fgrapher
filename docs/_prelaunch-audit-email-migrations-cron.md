@@ -213,12 +213,13 @@ Verified against Vercel's current limits
     itself be delayed several minutes under load.
   - **Supabase `pg_cron` + `pg_net`** (`cron.schedule('email-retry', '*/5 * * * *', $$select net.http_get('https://<host>/api/cron/email-retry', headers => '{"Authorization":"Bearer ..."}'::jsonb)$$)`).
     Runs next to the DB, no third party; secret lives in the DB.
-  - **Upstash QStash / cron-job.org** — managed, reliable, one more vendor
-    - secret to hold.
-      Keep `vercel.json`'s `0 1 * * *` as a floor either way (harmless backstop).
+  - **Upstash QStash / cron-job.org** — managed and reliable, but one more
+    vendor + secret to hold.
 
-The route needs **no code change** for any of these — it is idempotent,
-concurrency-safe, GET, and already `CRON_SECRET`-gated fail-closed.
+  Keep `vercel.json`'s `0 1 * * *` as a floor under any external driver
+  (harmless backstop). No code change is needed for any of these options —
+  see `docs/ops/email-outbox.md` § "Cron configuration" for why the route
+  already tolerates an external caller.
 
 ---
 
@@ -272,18 +273,25 @@ pieces of concurrency in the repo.
 
 ## 8. Other findings surfaced during the audit
 
-- **RLS disabled on all 47 public tables (dev; almost certainly prod too).**
-  Supabase's advisor flags this as critical: the `anon` / `authenticated`
-  roles behind the Supabase client libraries can read/write every row. This
-  is only _safe_ as long as nothing ever hands out the anon key to a browser
-  and every DB path goes through Prisma on the pooled `postgres` user — which
-  is the case today (`@supabase/supabase-js` is installed but the app reads
-  through Prisma). It becomes a live hole the moment any client-side Supabase
-  call is added. Decide before launch: either keep it deliberately (and
-  document that the anon key must never ship to a client) or enable RLS with
-  policies. Remediation SQL is long — see the advisor output; do **not**
-  blanket-enable without policies or every table goes dark.
+- **RLS disabled on all 47 public tables (dev only — prod not inspected).**
+  Supabase's advisor flags RLS-disabled as critical. What that flag proves is
+  only that no row-level policy is enforced; whether the `anon` /
+  `authenticated` roles actually hold table privileges (and could therefore
+  read/write rows with the anon key) is a separate question this audit did
+  **not** verify — it needs a `\dp public.*` / `information_schema.role_table_grants`
+  check, on each database. Only the **dev** project was looked at here; the
+  **prod** project's RLS and grant state are unknown.
+
+  Regardless of the grant details, the app itself does not rely on RLS: every
+  DB path goes through Prisma on the pooled `postgres` role, and
+  `@supabase/supabase-js` — though installed — is not used for data reads
+  today. The exposure becomes real only if a client-side Supabase call using
+  the anon key is ever added. Before launch: (a) run the grant check on both
+  databases, then (b) decide to either keep RLS off deliberately (documenting
+  that the anon key must never ship to a browser) or enable RLS with policies
+  — do **not** blanket-enable without policies or every table goes dark.
   <https://supabase.com/docs/guides/database/postgres/row-level-security>
+
 - **`scripts/check-db-safety.mjs` comment was stale** ("the only Supabase
   project that exists today"). Prod exists now; comment updated in this
   change. The allow-list itself is unchanged and still correctly excludes the
