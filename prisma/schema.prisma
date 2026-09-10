@@ -103,6 +103,7 @@ model User {
   conversationParticipants ConversationParticipant[]
   consentRecords           ConsentRecord[]
   dataRequests             DataRequest[]
+  emailVerificationTokens  EmailVerificationToken[]
   serviceRequests          ServiceRequest[]          @relation("requestCustomer")
   requestOffers            RequestOffer[]            @relation("offerProvider")
   roleChangeRequests       RoleChangeRequest[]
@@ -1570,6 +1571,20 @@ model EmailOutbox {
   @@index([status, nextAttemptAt])
   @@index([idempotencyKey])
   @@map("email_outbox")
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("email_verification_tokens")
 }
 
 model SavedProfile {
