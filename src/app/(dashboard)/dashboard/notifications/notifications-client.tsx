@@ -14,7 +14,6 @@ import {
 
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
-import { features } from "@/lib/features";
 import { cn } from "@/lib/utils";
 
 type FilterTab =
@@ -22,48 +21,58 @@ type FilterTab =
 
 const BASE_TAB_VALUES: FilterTab[] = ["ALL", "UNREAD", "BOOKINGS", "MESSAGES"];
 
-const TAB_VALUES: FilterTab[] = [
-  ...BASE_TAB_VALUES,
-  ...(features.marketplaceEnabled ? (["ORDERS"] as const) : []),
-  ...(features.socialFeedEnabled ? (["SOCIAL"] as const) : []),
-];
+type TabGroup = "BOOKINGS" | "ORDERS" | "MESSAGES" | "SOCIAL" | "OTHER";
 
-const TYPE_GROUP: Record<
-  NotificationType,
-  "BOOKINGS" | "ORDERS" | "MESSAGES" | "SOCIAL" | "OTHER"
-> = {
-  BOOKING_REQUEST: "BOOKINGS",
-  BOOKING_CONFIRMED: "BOOKINGS",
-  BOOKING_DECLINED: "BOOKINGS",
-  BOOKING_CANCELLED: "BOOKINGS",
-  BOOKING_REMINDER: "BOOKINGS",
-  BOOKING_RESCHEDULE_PROPOSED: "BOOKINGS",
-  BOOKING_COMPLETED: "BOOKINGS",
-  NEW_MESSAGE: "MESSAGES",
-  NEW_FOLLOWER: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
-  NEW_REVIEW: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
-  NEW_LIKE: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
-  NEW_COMMENT: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
-  SUBSCRIPTION_ACTIVE: "OTHER",
-  SUBSCRIPTION_EXPIRING: "OTHER",
-  SUBSCRIPTION_CANCELLED: "OTHER",
-  PAYMENT_FAILED: "OTHER",
-  NEW_ORDER: features.marketplaceEnabled ? "ORDERS" : "OTHER",
-  ORDER_CONFIRMED: features.marketplaceEnabled ? "ORDERS" : "OTHER",
-  ORDER_SHIPPED: features.marketplaceEnabled ? "ORDERS" : "OTHER",
-  ORDER_DELIVERED: features.marketplaceEnabled ? "ORDERS" : "OTHER",
-  ORDER_CANCELLED: features.marketplaceEnabled ? "ORDERS" : "OTHER",
-  REVIEW_RESPONSE: features.socialFeedEnabled ? "SOCIAL" : "OTHER",
-  MEDIA_APPROVED: "OTHER",
-  MEDIA_REJECTED: "OTHER",
-  REQUEST_NEW_MATCH: "OTHER",
-  REQUEST_NEW_OFFER: "OTHER",
-  REQUEST_OFFER_ACCEPTED: "OTHER",
-  REQUEST_OFFER_DECLINED: "OTHER",
-  REQUEST_NO_OFFERS_48H: "OTHER",
-  ROLE_CHANGE_APPROVED: "OTHER",
-  ROLE_CHANGE_REJECTED: "OTHER",
-};
+// Feature-flag state comes in as props from page.tsx — this Client
+// Component must not import lib/features.ts (→ lib/env.ts).
+function tabValues(marketplaceEnabled: boolean, socialFeedEnabled: boolean) {
+  return [
+    ...BASE_TAB_VALUES,
+    ...(marketplaceEnabled ? (["ORDERS"] as FilterTab[]) : []),
+    ...(socialFeedEnabled ? (["SOCIAL"] as FilterTab[]) : []),
+  ];
+}
+
+function typeGroup(
+  marketplaceEnabled: boolean,
+  socialFeedEnabled: boolean,
+): Record<NotificationType, TabGroup> {
+  const social = (g: TabGroup): TabGroup => (socialFeedEnabled ? g : "OTHER");
+  const shop = (g: TabGroup): TabGroup => (marketplaceEnabled ? g : "OTHER");
+  return {
+    BOOKING_REQUEST: "BOOKINGS",
+    BOOKING_CONFIRMED: "BOOKINGS",
+    BOOKING_DECLINED: "BOOKINGS",
+    BOOKING_CANCELLED: "BOOKINGS",
+    BOOKING_REMINDER: "BOOKINGS",
+    BOOKING_RESCHEDULE_PROPOSED: "BOOKINGS",
+    BOOKING_COMPLETED: "BOOKINGS",
+    NEW_MESSAGE: "MESSAGES",
+    NEW_FOLLOWER: social("SOCIAL"),
+    NEW_REVIEW: "OTHER",
+    NEW_LIKE: social("SOCIAL"),
+    NEW_COMMENT: social("SOCIAL"),
+    SUBSCRIPTION_ACTIVE: "OTHER",
+    SUBSCRIPTION_EXPIRING: "OTHER",
+    SUBSCRIPTION_CANCELLED: "OTHER",
+    PAYMENT_FAILED: "OTHER",
+    NEW_ORDER: shop("ORDERS"),
+    ORDER_CONFIRMED: shop("ORDERS"),
+    ORDER_SHIPPED: shop("ORDERS"),
+    ORDER_DELIVERED: shop("ORDERS"),
+    ORDER_CANCELLED: shop("ORDERS"),
+    REVIEW_RESPONSE: "OTHER",
+    MEDIA_APPROVED: "OTHER",
+    MEDIA_REJECTED: "OTHER",
+    REQUEST_NEW_MATCH: "OTHER",
+    REQUEST_NEW_OFFER: "OTHER",
+    REQUEST_OFFER_ACCEPTED: "OTHER",
+    REQUEST_OFFER_DECLINED: "OTHER",
+    REQUEST_NO_OFFERS_48H: "OTHER",
+    ROLE_CHANGE_APPROVED: "OTHER",
+    ROLE_CHANGE_REJECTED: "OTHER",
+  };
+}
 
 function relativeTime(
   date: string | Date,
@@ -91,10 +100,16 @@ function notificationHref(notification: Notification) {
 
 export function NotificationsClient({
   initialNotifications,
+  marketplaceEnabled = false,
+  socialFeedEnabled = false,
 }: {
   initialNotifications: Notification[];
+  marketplaceEnabled?: boolean;
+  socialFeedEnabled?: boolean;
 }) {
   const t = useTranslations("dashboardCore.notifications");
+  const TAB_VALUES = tabValues(marketplaceEnabled, socialFeedEnabled);
+  const TYPE_GROUP = typeGroup(marketplaceEnabled, socialFeedEnabled);
   const TABS: { value: FilterTab; label: string }[] = TAB_VALUES.map(
     (value) => ({ value, label: t(`tabs.${value}`) }),
   );

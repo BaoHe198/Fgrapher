@@ -118,20 +118,26 @@ export async function createReview({
     include: { reviewer: { select: { firstName: true, name: true } } },
   });
 
+  const newReviewEmailT = await getTranslations("libServices.email");
+  const newReviewNt = await getTranslations("libServices.notifications");
   await notify({
     userId: booking.providerId,
     type: "NEW_REVIEW",
-    title: "New review",
-    message: `${partyName(review.reviewer)} left you a ${rating}-star review`,
+    title: newReviewNt("review.new.title"),
+    message: newReviewNt("review.new.message", {
+      reviewerName: partyName(review.reviewer),
+      rating,
+    }),
     data: { bookingId },
     email: {
-      subject: "New review — Fgrapher",
+      subject: newReviewEmailT("newReview.subject"),
       html: newReviewEmailHtml({
-        t: await getTranslations("libServices.email"),
+        t: newReviewEmailT,
         reviewerName: partyName(review.reviewer),
         rating,
         bookingUrl: bookingUrlFor(bookingId),
       }),
+      dedupe: [bookingId, "NEW_REVIEW"],
     },
   });
 
@@ -197,19 +203,24 @@ export async function respondToReview({
     data: { response, respondedAt: new Date() },
   });
 
+  const responseEmailT = await getTranslations("libServices.email");
+  const responseNt = await getTranslations("libServices.notifications");
   await notify({
     userId: review.reviewerId,
     type: "REVIEW_RESPONSE",
-    title: "New response to your review",
-    message: `${partyName(review.reviewed)} responded to your review`,
+    title: responseNt("review.response.title"),
+    message: responseNt("review.response.message", {
+      providerName: partyName(review.reviewed),
+    }),
     data: { bookingId: review.bookingId },
     email: {
-      subject: "New response to your review — Fgrapher",
+      subject: responseEmailT("reviewResponse.subject"),
       html: reviewResponseEmailHtml({
-        t: await getTranslations("libServices.email"),
+        t: responseEmailT,
         providerName: partyName(review.reviewed),
         bookingUrl: bookingUrlFor(review.bookingId),
       }),
+      dedupe: [reviewId, "REVIEW_RESPONSE"],
     },
   });
 

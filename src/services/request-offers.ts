@@ -1,9 +1,36 @@
 import type { RequestOfferStatus, Role, ServiceRequest } from "@prisma/client";
 
+import { getTranslations } from "next-intl/server";
+
+import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
+import {
+  requestNewOfferEmailHtml,
+  requestOfferAcceptedEmailHtml,
+  requestOfferDeclinedEmailHtml,
+} from "@/lib/email";
 import { logAudit } from "@/services/compliance";
 import { BookingActionError, createBooking } from "@/services/bookings";
 import { notify } from "@/services/notification";
+
+function requestUrlFor(requestId: string) {
+  return appUrl(`/dashboard/requests/${requestId}`);
+}
+
+// namespace "libServices.email" — every caller below runs in a request
+// context (route handlers), so the request locale is used.
+function getRequestEmailT() {
+  return getTranslations("libServices.email");
+}
+
+// In-app notification copy — namespace "libServices.notifications". Offer
+// events run in a request context; notifyMatchingProviders is
+// fire-and-forget (no request scope) and passes { locale: "vi" }.
+function getRequestNotifyT(locale?: "vi") {
+  return locale
+    ? getTranslations({ locale, namespace: "libServices.notifications" })
+    : getTranslations("libServices.notifications");
+}
 
 export class OfferError extends Error {
   constructor(
@@ -113,12 +140,16 @@ export async function notifyMatchingProviders(
   >,
 ) {
   const providerIds = await findMatchingProviderIds(request);
+  const nt = await getRequestNotifyT("vi");
   for (const userId of providerIds) {
     await notify({
       userId,
       type: "REQUEST_NEW_MATCH",
-      title: "Có yêu cầu mới phù hợp với bạn",
-      message: `"${request.title}" (${request.code}) đang tìm provider — xem chi tiết và gửi đề nghị.`,
+      title: nt("request.newMatch.title"),
+      message: nt("request.newMatch.message", {
+        title: request.title,
+        code: request.code,
+      }),
       data: { requestId: request.id },
     });
   }
@@ -274,12 +305,27 @@ export async function createOffer(
     });
   }
 
+  const newOfferEmailT = await getRequestEmailT();
+  const newOfferNt = await getRequestNotifyT();
   await notify({
     userId: request.customerId,
     type: "REQUEST_NEW_OFFER",
-    title: "Có đề nghị mới",
-    message: `Yêu cầu "${request.title}" (${request.code}) vừa nhận được một đề nghị mới.`,
+    title: newOfferNt("request.newOffer.title"),
+    message: newOfferNt("request.newOffer.message", {
+      title: request.title,
+      code: request.code,
+    }),
     data: { requestId },
+    email: {
+      subject: newOfferEmailT("requestNewOffer.subject"),
+      html: requestNewOfferEmailHtml({
+        t: newOfferEmailT,
+        requestTitle: request.title,
+        requestCode: request.code,
+        requestUrl: requestUrlFor(requestId),
+      }),
+      dedupe: [requestId, "NEW_OFFER", offer.id],
+    },
   });
 
   return offer;
@@ -433,21 +479,47 @@ export async function acceptOffer(
     }),
   ]);
 
+  const acceptEmailT = await getRequestEmailT();
+  const acceptNt = await getRequestNotifyT();
+  const requestLabels = {
+    title: offer.request.title,
+    code: offer.request.code,
+  };
   await notify({
     userId: offer.providerId,
     type: "REQUEST_OFFER_ACCEPTED",
-    title: "Đề nghị của bạn đã được chấp nhận",
-    message: `Yêu cầu "${offer.request.title}" (${offer.request.code}) đã chọn bạn — kiểm tra lịch đặt mới.`,
+    title: acceptNt("request.offerAccepted.title"),
+    message: acceptNt("request.offerAccepted.message", requestLabels),
     data: { requestId: offer.requestId, bookingId: booking.id },
+    email: {
+      subject: acceptEmailT("requestOfferAccepted.subject"),
+      html: requestOfferAcceptedEmailHtml({
+        t: acceptEmailT,
+        requestTitle: offer.request.title,
+        requestCode: offer.request.code,
+        requestUrl: appUrl(`/dashboard/bookings/${booking.id}`),
+      }),
+      dedupe: [offer.requestId, "ACCEPTED", offer.id],
+    },
   });
 
   for (const declined of declinedOffers) {
     await notify({
       userId: declined.providerId,
       type: "REQUEST_OFFER_DECLINED",
-      title: "Yêu cầu đã chọn provider khác",
-      message: `Yêu cầu "${offer.request.title}" (${offer.request.code}) đã chọn một đề nghị khác.`,
+      title: acceptNt("request.offerNotChosen.title"),
+      message: acceptNt("request.offerNotChosen.message", requestLabels),
       data: { requestId: offer.requestId },
+      email: {
+        subject: acceptEmailT("requestOfferDeclined.subject"),
+        html: requestOfferDeclinedEmailHtml({
+          t: acceptEmailT,
+          requestTitle: offer.request.title,
+          requestCode: offer.request.code,
+          requestUrl: appUrl("/dashboard/my-offers"),
+        }),
+        dedupe: [offer.requestId, "DECLINED", declined.id],
+      },
     });
   }
 
@@ -472,11 +544,26 @@ export async function declineOffer(offerId: string, customerId: string) {
     data: { status: "DECLINED" as RequestOfferStatus },
   });
 
+  const declineEmailT = await getRequestEmailT();
+  const declineNt = await getRequestNotifyT();
   await notify({
     userId: offer.providerId,
     type: "REQUEST_OFFER_DECLINED",
-    title: "Đề nghị đã bị từ chối",
-    message: `Đề nghị của bạn cho yêu cầu "${offer.request.title}" (${offer.request.code}) đã bị từ chối.`,
+    title: declineNt("request.offerDeclined.title"),
+    message: declineNt("request.offerDeclined.message", {
+      title: offer.request.title,
+      code: offer.request.code,
+    }),
     data: { requestId: offer.requestId },
+    email: {
+      subject: declineEmailT("requestOfferDeclined.subject"),
+      html: requestOfferDeclinedEmailHtml({
+        t: declineEmailT,
+        requestTitle: offer.request.title,
+        requestCode: offer.request.code,
+        requestUrl: requestUrlFor(offer.requestId),
+      }),
+      dedupe: [offer.requestId, "DECLINED", offer.id],
+    },
   });
 }

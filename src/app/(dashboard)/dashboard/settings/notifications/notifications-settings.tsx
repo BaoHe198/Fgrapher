@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { Fragment, useMemo, useState } from "react";
 
 import { Switch } from "@/components/ui/switch";
-import { features } from "@/lib/features";
 import {
   NOTIFICATION_KEYS,
   type NotificationPreferences,
@@ -14,8 +13,13 @@ const DEFAULT_PREFERENCES: NotificationPreferences = Object.fromEntries(
   NOTIFICATION_KEYS.map((key) => [key, { email: true, inApp: true }]),
 ) as NotificationPreferences;
 
+// Groups follow lib/notifications.ts's feature model: `newReview` is a
+// core MVP type (CLAUDE.md "đánh giá") so it gets its own always-visible
+// group rather than sitting under "social", which is hidden while the
+// social feed is disabled. The "marketing" group is omitted entirely —
+// no NotificationType feeds productUpdates/tips and nothing sends them.
 const BASE_GROUPS: {
-  titleKey: "bookings" | "messages" | "social" | "marketing";
+  titleKey: "bookings" | "messages" | "serviceRequests" | "reviews" | "social";
   keys: (typeof NOTIFICATION_KEYS)[number][];
 }[] = [
   {
@@ -28,17 +32,17 @@ const BASE_GROUPS: {
     ],
   },
   { titleKey: "messages", keys: ["newMessage"] },
-  { titleKey: "social", keys: ["newFollower", "newReview"] },
-  {
-    titleKey: "marketing",
-    keys: features.marketplaceEnabled ? ["productUpdates", "tips"] : ["tips"],
-  },
+  { titleKey: "serviceRequests", keys: ["serviceRequests"] },
+  { titleKey: "reviews", keys: ["newReview"] },
+  { titleKey: "social", keys: ["newFollower"] },
 ];
 
 export function NotificationsSettings({
   initialPreferences,
+  socialFeedEnabled,
 }: {
   initialPreferences: NotificationPreferences | null;
+  socialFeedEnabled: boolean;
 }) {
   const t = useTranslations("dashboardSettings.notifications");
   const [preferences, setPreferences] = useState<NotificationPreferences>(
@@ -47,10 +51,8 @@ export function NotificationsSettings({
 
   const GROUPS = useMemo(
     () =>
-      BASE_GROUPS.filter(
-        (g) => g.titleKey !== "social" || features.socialFeedEnabled,
-      ),
-    [],
+      BASE_GROUPS.filter((g) => g.titleKey !== "social" || socialFeedEnabled),
+    [socialFeedEnabled],
   );
 
   const toggle = async (

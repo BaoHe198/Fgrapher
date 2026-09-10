@@ -237,6 +237,7 @@ async function activateRoleFromPayment({
         periodEndLabel,
         invoiceUrl: billingUrl(),
       }),
+      dedupe: [paymentId, "RECEIPT"],
     },
   });
 
@@ -249,7 +250,11 @@ async function activateRoleFromPayment({
 // usually means the role was never activated in the first place. Own
 // dedicated content instead, same bookingEmailShell wrapper role-change-
 // requests.ts's rejection notice already uses for the same reason.
-async function notifyBankTransferRejected(userId: string, reason?: string) {
+async function notifyBankTransferRejected(
+  userId: string,
+  paymentId: string,
+  reason?: string,
+) {
   const emailT = await getEmailT();
   const body = reason
     ? emailT("paymentRejected.bodyWithReason", { reason })
@@ -273,6 +278,7 @@ async function notifyBankTransferRejected(userId: string, reason?: string) {
         ctaLabel: emailT("paymentRejected.cta"),
         ctaUrl: billingUrl(),
       }),
+      dedupe: [paymentId, "BANK_TRANSFER_REJECTED"],
     },
   });
 }
@@ -574,7 +580,7 @@ export async function reviewBankTransferPayment({
       },
     });
     if (claim.count === 0) throw new PaymentError("already_reviewed");
-    await notifyBankTransferRejected(payment.userId, reason);
+    await notifyBankTransferRejected(payment.userId, payment.id, reason);
   }
 
   return db.payment.findUniqueOrThrow({ where: { id: paymentId } });
@@ -691,6 +697,7 @@ export async function expireLocalSubscriptions() {
           t: emailT,
           billingUrl: billingUrl(),
         }),
+        dedupe: [subscription.id, "EXPIRED"],
       },
     });
     expired++;

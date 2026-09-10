@@ -1938,7 +1938,9 @@
         "bookings": "Bookings",
         "messages": "Messages",
         "social": "Social",
-        "marketing": "Marketing"
+        "marketing": "Marketing",
+        "serviceRequests": "Service requests",
+        "reviews": "Reviews"
       },
       "labels": {
         "bookingRequest": "New booking request",
@@ -1949,7 +1951,8 @@
         "newFollower": "New follower",
         "newReview": "New review",
         "productUpdates": "Product updates",
-        "tips": "Tips and best practices"
+        "tips": "Tips and best practices",
+        "serviceRequests": "Service request activity"
       },
       "email": "Email",
       "inApp": "In-app"
@@ -2170,32 +2173,38 @@
       "bookingRequest": {
         "heading": "New booking request",
         "body": "{otherPartyName} requested to book {serviceName} on {dateLabel} at {timeLabel}. Respond within 24 hours to keep your response rate up.",
-        "cta": "View request"
+        "cta": "View request",
+        "subject": "New booking request — Fgrapher"
       },
       "bookingConfirmed": {
         "heading": "Booking confirmed",
         "body": "{otherPartyName} confirmed your {serviceName} booking on {dateLabel} at {timeLabel}. We'll remind you 24 hours before.",
-        "cta": "View booking"
+        "cta": "View booking",
+        "subject": "Booking confirmed — Fgrapher"
       },
       "bookingDeclined": {
         "heading": "Booking declined",
         "body": "{otherPartyName} wasn't able to accept your {serviceName} request for {dateLabel} at {timeLabel}. Browse other artists to find someone available.",
-        "cta": "Browse artists"
+        "cta": "Browse artists",
+        "subject": "Booking request declined — Fgrapher"
       },
       "bookingCancelled": {
         "heading": "Booking cancelled",
         "body": "{otherPartyName} cancelled the {serviceName} booking on {dateLabel} at {timeLabel}.",
-        "cta": "View bookings"
+        "cta": "View bookings",
+        "subject": "Booking cancelled — Fgrapher"
       },
       "bookingReminder": {
         "heading": "Booking tomorrow",
         "body": "Reminder: your {serviceName} session with {otherPartyName} is on {dateLabel} at {timeLabel} — less than 24 hours away.",
-        "cta": "View booking"
+        "cta": "View booking",
+        "subject": "Booking reminder — tomorrow — Fgrapher"
       },
       "bookingCompleted": {
         "heading": "How was your session?",
         "body": "Your {serviceName} session with {otherPartyName} is marked complete. Leave a review to help other clients.",
-        "cta": "Leave a review"
+        "cta": "Leave a review",
+        "subject": "Session completed — Fgrapher"
       },
       "welcomeSubscription": {
         "heading": "Welcome to Fgrapher Pro!",
@@ -2242,12 +2251,14 @@
       "newReview": {
         "heading": "New review",
         "body": "{reviewerName} left you a {rating}-star review.",
-        "cta": "View & respond"
+        "cta": "View & respond",
+        "subject": "You have a new review — Fgrapher"
       },
       "reviewResponse": {
         "heading": "New response to your review",
         "body": "{providerName} responded to your review.",
-        "cta": "View response"
+        "cta": "View response",
+        "subject": "A response to your review — Fgrapher"
       },
       "mediaApproved": {
         "heading": "Your photo was approved",
@@ -2281,6 +2292,168 @@
       },
       "paymentNeedsReview": {
         "body": "We received your payment but couldn't activate your plan automatically — our support team will follow up shortly."
+      },
+      "bookingRescheduleProposed": {
+        "heading": "New time proposed",
+        "body": "{otherPartyName} proposed moving the {serviceName} session to {dateLabel} at {timeLabel}. Please respond to accept or decline.",
+        "cta": "View proposal",
+        "subject": "Reschedule proposed — response needed — Fgrapher"
+      },
+      "bookingRescheduleAccepted": {
+        "heading": "Reschedule accepted",
+        "body": "{otherPartyName} accepted moving the {serviceName} session to {dateLabel} at {timeLabel}. Your calendar is updated.",
+        "cta": "View booking",
+        "subject": "Reschedule accepted — Fgrapher"
+      },
+      "bookingRescheduleDeclined": {
+        "heading": "Reschedule declined",
+        "body": "{otherPartyName} declined the proposed new time for the {serviceName} session. The booking stays as it was.",
+        "cta": "View booking",
+        "subject": "Reschedule declined — Fgrapher"
+      },
+      "bookingExpired": {
+        "heading": "Booking request expired",
+        "bodyCustomer": "Your request for the {serviceName} session with {otherPartyName} expired without a response in time. You can send a new request or pick another provider.",
+        "bodyProvider": "A request for a {serviceName} session from {otherPartyName} expired without a response in time.",
+        "cta": "Book again",
+        "subject": "Booking request expired — Fgrapher"
+      },
+      "bookingRelatedCancelled": {
+        "heading": "A linked job was cancelled",
+        "body": "The client booking your {serviceName} job was attached to has been cancelled. Your booking is unaffected — you can decide whether to cancel it too.",
+        "cta": "View booking",
+        "subject": "A linked job was cancelled — Fgrapher"
+      },
+      "newMessage": {
+        "heading": "New message from {senderName}",
+        "body": "{senderName} sent you a message: {preview}",
+        "cta": "Reply",
+        "subject": "You have a new message — Fgrapher"
+      },
+      "requestNewOffer": {
+        "heading": "New offer on your request",
+        "body": "Your request “{requestTitle}” ({requestCode}) just received a new offer. Review it and respond to choose a provider.",
+        "cta": "View offer",
+        "subject": "New offer on your request — Fgrapher"
+      },
+      "requestOfferAccepted": {
+        "heading": "Your offer was accepted",
+        "body": "The client chose your offer for request “{requestTitle}” ({requestCode}). Check the new booking to confirm the details.",
+        "cta": "View booking",
+        "subject": "Your offer was accepted — Fgrapher"
+      },
+      "requestOfferDeclined": {
+        "heading": "The request went with another provider",
+        "body": "Your offer for request “{requestTitle}” ({requestCode}) wasn't chosen this time. Keep an eye on other matching requests.",
+        "cta": "View matching requests",
+        "subject": "Update on your offer — Fgrapher"
+      },
+      "requestNoOffers": {
+        "heading": "No offers yet on your request",
+        "body": "Your request “{requestTitle}” ({requestCode}) hasn't received any offers after 48 hours. Consider widening the budget, adding detail, or booking directly.",
+        "cta": "Edit request",
+        "subject": "Your request has no offers yet — Fgrapher"
+      }
+    },
+    "notifications": {
+      "booking": {
+        "request": {
+          "title": "New booking request",
+          "message": "{otherPartyName} requested {serviceName} on {dateLabel}"
+        },
+        "confirmed": {
+          "title": "Booking confirmed",
+          "message": "{otherPartyName} confirmed {serviceName} on {dateLabel}"
+        },
+        "declined": {
+          "title": "Booking declined",
+          "message": "{otherPartyName} declined your request for {serviceName}"
+        },
+        "cancelled": {
+          "title": "Booking cancelled",
+          "message": "{otherPartyName} cancelled {serviceName} on {dateLabel}"
+        },
+        "reminder": {
+          "title": "Booking tomorrow",
+          "message": "Your {serviceName} session with {otherPartyName} is tomorrow at {timeLabel}"
+        },
+        "completed": {
+          "title": "Booking completed",
+          "message": "Your {serviceName} session is marked complete — leave a review"
+        },
+        "rescheduleProposed": {
+          "title": "New time proposed",
+          "message": "{otherPartyName} proposed rescheduling to {dateLabel} at {timeLabel}"
+        },
+        "rescheduleAccepted": {
+          "title": "Reschedule accepted",
+          "message": "Your proposed time for {serviceName} was accepted"
+        },
+        "rescheduleDeclined": {
+          "title": "Reschedule declined",
+          "message": "Your proposed new time for {serviceName} was declined"
+        },
+        "expiredCustomer": {
+          "title": "Booking request expired",
+          "message": "Your request for {serviceName} with {otherPartyName} expired without a response"
+        },
+        "expiredProvider": {
+          "title": "Booking request expired",
+          "message": "A request for {serviceName} from {otherPartyName} expired"
+        },
+        "noShow": {
+          "title": "Marked as no-show",
+          "message": "Your {serviceName} booking was marked as a no-show"
+        },
+        "relatedCancelled": {
+          "title": "Linked job cancelled",
+          "message": "The client booking this job was attached to was cancelled. Your booking is unaffected — you can decide whether to cancel it too."
+        }
+      },
+      "review": {
+        "new": {
+          "title": "New review",
+          "message": "{reviewerName} left you a {rating}-star review"
+        },
+        "response": {
+          "title": "New response to your review",
+          "message": "{providerName} responded to your review"
+        }
+      },
+      "fallback": {
+        "service": "a session",
+        "person": "someone"
+      },
+      "message": {
+        "title": "New message from {senderName}",
+        "body": "{senderName}: {preview}",
+        "imagePreview": "Sent a photo"
+      },
+      "request": {
+        "newMatch": {
+          "title": "A new request matches you",
+          "message": "“{title}” ({code}) is looking for a provider — view it and send an offer."
+        },
+        "newOffer": {
+          "title": "New offer",
+          "message": "Request “{title}” ({code}) just received a new offer."
+        },
+        "offerAccepted": {
+          "title": "Your offer was accepted",
+          "message": "Request “{title}” ({code}) chose you — check the new booking."
+        },
+        "offerNotChosen": {
+          "title": "The request chose another provider",
+          "message": "Request “{title}” ({code}) went with a different offer."
+        },
+        "offerDeclined": {
+          "title": "Offer declined",
+          "message": "Your offer for request “{title}” ({code}) was declined."
+        },
+        "noOffers": {
+          "title": "No offers yet",
+          "message": "Request “{title}” ({code}) has had no offers after 48 hours. Consider widening the budget or booking directly."
+        }
       }
     }
   },

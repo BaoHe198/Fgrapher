@@ -38,6 +38,192 @@ interface RecordedSend extends OutboxEmailInput {
 }
 
 /**
+ * Atomically claims an event before anything observable happens. The
+ * `idempotencyKey` unique constraint is the arbiter: of N requests racing
+ * to send the same event, exactly one `create` wins and the rest get
+ * P2002 back as `{ reserved: false }`. The winner then delivers and
+ * finalises the row (finalizeReservedEmail). This is what makes an
+ * idempotent send race-safe without a check-then-send read that two
+ * concurrent callers could both pass.
+ *
+ * The row starts SENDING with a lock held, so a crash between reserving
+ * and finalising is recovered by the cron's stale-lock sweep rather than
+ * stranding the event.
+ */
+export async function reserveEmail(
+  payload: OutboxEmailInput & { idempotencyKey: string },
+): Promise<{ reserved: true; id: string } | { reserved: false }> {
+  try {
+    const row = await db.emailOutbox.create({
+      data: {
+        idempotencyKey: payload.idempotencyKey,
+        to: payload.to,
+        subject: payload.subject,
+        // Kept for now: a retryable failure leaves this row PENDING and the
+        // cron needs the body. Scrubbed by finalizeReservedEmail once the
+        // row reaches a terminal state, if it is sensitive.
+        html: payload.html,
+        sensitive: payload.sensitive ?? false,
+        status: "SENDING",
+        attempts: 1,
+        lockedAt: new Date(),
+        nextAttemptAt: null,
+      },
+      select: { id: true },
+    });
+    return { reserved: true, id: row.id };
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      return { reserved: false };
+    }
+    throw err;
+  }
+}
+
+/**
+ * Rolling-window throttle for emails that would otherwise fire on every
+ * occurrence of a high-frequency event (chat messages). "At most one email
+ * per `scopeKey` per `windowMs`", measured against the actual last send —
+ * NOT a wall-clock bucket, which lets two sends 90 seconds apart through
+ * if they straddle a bucket edge.
+ *
+ * `withLock` serialises concurrent callers for the same `scopeKey` (a
+ * Postgres advisory xact lock in production), so the "is there a recent
+ * one?" check and the reservation insert are atomic as a pair: two
+ * requests racing for the same conversation can't both find "nothing
+ * recent" and both send.
+ */
+export interface ThrottleReservationOps {
+  hasRecent(keyPrefix: string, since: Date): Promise<boolean>;
+  create(row: {
+    idempotencyKey: string;
+    to: string;
+    subject: string;
+    html: string;
+    sensitive: boolean;
+  }): Promise<string>;
+}
+
+export interface ThrottleReservationStore {
+  withLock<T>(
+    lockKey: string,
+    fn: (ops: ThrottleReservationOps) => Promise<T>,
+  ): Promise<T>;
+}
+
+export async function reserveThrottledEmail(
+  input: OutboxEmailInput & {
+    scopeKey: string;
+    windowMs: number;
+    now?: Date;
+  },
+  store: ThrottleReservationStore,
+): Promise<
+  { reserved: true; id: string; idempotencyKey: string } | { reserved: false }
+> {
+  const now = input.now ?? new Date();
+  const since = new Date(now.getTime() - input.windowMs);
+
+  return store.withLock(input.scopeKey, async (ops) => {
+    if (await ops.hasRecent(`${input.scopeKey}:`, since)) {
+      return { reserved: false };
+    }
+    // A fresh key per send (the send time) so the outbox keeps one row per
+    // email; the shared `scopeKey:` prefix is what the window query
+    // matches on.
+    const idempotencyKey = `${input.scopeKey}:${now.getTime()}`;
+    const id = await ops.create({
+      idempotencyKey,
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      sensitive: input.sensitive ?? false,
+    });
+    return { reserved: true, id, idempotencyKey };
+  });
+}
+
+export const prismaThrottleReservationStore: ThrottleReservationStore = {
+  withLock(lockKey, fn) {
+    return db.$transaction(async (tx) => {
+      // Advisory lock is transaction-scoped: released automatically on
+      // COMMIT/ROLLBACK. hashtextextended maps the key to the bigint the
+      // lock function wants.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`;
+      return fn({
+        hasRecent: (keyPrefix, since) =>
+          tx.emailOutbox
+            .findFirst({
+              where: {
+                idempotencyKey: { startsWith: keyPrefix },
+                createdAt: { gt: since },
+              },
+              select: { id: true },
+            })
+            .then((row) => row !== null),
+        create: (row) =>
+          tx.emailOutbox
+            .create({
+              data: {
+                idempotencyKey: row.idempotencyKey,
+                to: row.to,
+                subject: row.subject,
+                html: row.html,
+                sensitive: row.sensitive,
+                status: "SENDING",
+                attempts: 1,
+                lockedAt: new Date(),
+                nextAttemptAt: null,
+              },
+              select: { id: true },
+            })
+            .then((created) => created.id),
+      });
+    });
+  },
+};
+
+/**
+ * Resolves a row reserved by reserveEmail() to its terminal (or, for a
+ * retryable failure, next-attempt) state. Mirrors the per-row update in
+ * processEmailOutbox so the immediate and retry paths converge.
+ */
+export async function finalizeReservedEmail({
+  id,
+  sensitive,
+  delivery,
+}: {
+  id: string;
+  sensitive: boolean;
+  delivery:
+    | { delivered: true; messageId?: string }
+    | { delivered: false; error: string; retryable: boolean };
+}): Promise<void> {
+  const outcome = resolveAttemptOutcome({
+    attempts: 1,
+    error: delivery.delivered ? undefined : delivery.error,
+    retryable: delivery.delivered ? undefined : delivery.retryable,
+  });
+  const isTerminal = outcome.status === "SENT" || outcome.status === "FAILED";
+
+  await db.emailOutbox.update({
+    where: { id },
+    data: {
+      status: outcome.status,
+      nextAttemptAt: outcome.nextAttemptAt,
+      sentAt: outcome.sentAt,
+      lockedAt: null,
+      ...(sensitive && isTerminal ? { html: null } : {}),
+      providerId: delivery.delivered ? (delivery.messageId ?? null) : null,
+      lastError: delivery.delivered ? null : delivery.error,
+    },
+  });
+}
+
+/**
  * Writes a terminal row without queueing a retry. Shared by the two
  * immediate-path outcomes that must still be recorded: a first-attempt
  * success, and a permanent rejection that retrying can't fix.
@@ -255,6 +441,7 @@ export async function processEmailOutbox(): Promise<ProcessOutboxResult> {
           html: true,
           attempts: true,
           sensitive: true,
+          idempotencyKey: true,
         },
       });
       if (!email) {
@@ -284,6 +471,10 @@ export async function processEmailOutbox(): Promise<ProcessOutboxResult> {
         to: email.to,
         subject: email.subject,
         html: email.html,
+        // Carry the same key to Resend so a row that was actually
+        // delivered but not finalized here (crash between send and update)
+        // is not re-sent when the stale-lock sweep requeues it.
+        idempotencyKey: email.idempotencyKey,
       });
 
       const outcome = resolveAttemptOutcome({

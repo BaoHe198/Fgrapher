@@ -1938,7 +1938,9 @@
         "bookings": "Đặt lịch",
         "messages": "Tin nhắn",
         "social": "Mạng xã hội",
-        "marketing": "Marketing"
+        "marketing": "Marketing",
+        "serviceRequests": "Yêu cầu dịch vụ",
+        "reviews": "Đánh giá"
       },
       "labels": {
         "bookingRequest": "Yêu cầu đặt lịch mới",
@@ -1949,7 +1951,8 @@
         "newFollower": "Người theo dõi mới",
         "newReview": "Đánh giá mới",
         "productUpdates": "Cập nhật sản phẩm",
-        "tips": "Mẹo và thực hành tốt"
+        "tips": "Mẹo và thực hành tốt",
+        "serviceRequests": "Hoạt động yêu cầu dịch vụ"
       },
       "email": "Email",
       "inApp": "Trong ứng dụng"
@@ -2170,32 +2173,38 @@
       "bookingRequest": {
         "heading": "Yêu cầu đặt lịch mới",
         "body": "{otherPartyName} đã yêu cầu đặt {serviceName} vào {dateLabel} lúc {timeLabel}. Phản hồi trong vòng 24 giờ để duy trì tỷ lệ phản hồi tốt.",
-        "cta": "Xem yêu cầu"
+        "cta": "Xem yêu cầu",
+        "subject": "Yêu cầu đặt lịch mới — Fgrapher"
       },
       "bookingConfirmed": {
         "heading": "Đã xác nhận lịch hẹn",
         "body": "{otherPartyName} đã xác nhận lịch {serviceName} vào {dateLabel} lúc {timeLabel}. Chúng tôi sẽ nhắc bạn trước 24 giờ.",
-        "cta": "Xem lịch hẹn"
+        "cta": "Xem lịch hẹn",
+        "subject": "Lịch hẹn đã được xác nhận — Fgrapher"
       },
       "bookingDeclined": {
         "heading": "Lịch hẹn bị từ chối",
         "body": "{otherPartyName} không thể nhận yêu cầu {serviceName} của bạn vào {dateLabel} lúc {timeLabel}. Hãy tìm nhà cung cấp khác đang có lịch trống.",
-        "cta": "Tìm nghệ sĩ khác"
+        "cta": "Tìm nghệ sĩ khác",
+        "subject": "Yêu cầu đặt lịch bị từ chối — Fgrapher"
       },
       "bookingCancelled": {
         "heading": "Lịch hẹn đã bị hủy",
         "body": "{otherPartyName} đã hủy lịch {serviceName} vào {dateLabel} lúc {timeLabel}.",
-        "cta": "Xem lịch hẹn"
+        "cta": "Xem lịch hẹn",
+        "subject": "Lịch hẹn đã bị hủy — Fgrapher"
       },
       "bookingReminder": {
         "heading": "Lịch hẹn vào ngày mai",
         "body": "Nhắc nhở: buổi {serviceName} của bạn với {otherPartyName} diễn ra vào {dateLabel} lúc {timeLabel} — chưa đầy 24 giờ nữa.",
-        "cta": "Xem lịch hẹn"
+        "cta": "Xem lịch hẹn",
+        "subject": "Nhắc lịch hẹn ngày mai — Fgrapher"
       },
       "bookingCompleted": {
         "heading": "Buổi chụp của bạn thế nào?",
         "body": "Buổi {serviceName} của bạn với {otherPartyName} đã được đánh dấu hoàn thành. Hãy để lại đánh giá để giúp những khách hàng khác.",
-        "cta": "Viết đánh giá"
+        "cta": "Viết đánh giá",
+        "subject": "Buổi chụp đã hoàn thành — Fgrapher"
       },
       "welcomeSubscription": {
         "heading": "Chào mừng đến với Fgrapher Pro!",
@@ -2242,12 +2251,14 @@
       "newReview": {
         "heading": "Đánh giá mới",
         "body": "{reviewerName} đã để lại cho bạn đánh giá {rating} sao.",
-        "cta": "Xem & phản hồi"
+        "cta": "Xem & phản hồi",
+        "subject": "Bạn có đánh giá mới — Fgrapher"
       },
       "reviewResponse": {
         "heading": "Có phản hồi mới cho đánh giá của bạn",
         "body": "{providerName} đã phản hồi đánh giá của bạn.",
-        "cta": "Xem phản hồi"
+        "cta": "Xem phản hồi",
+        "subject": "Có phản hồi cho đánh giá của bạn — Fgrapher"
       },
       "mediaApproved": {
         "heading": "Ảnh của bạn đã được duyệt",
@@ -2281,6 +2292,168 @@
       },
       "paymentNeedsReview": {
         "body": "Chúng tôi đã nhận được thanh toán của bạn nhưng chưa thể kích hoạt gói tự động — đội ngũ hỗ trợ sẽ liên hệ để xử lý trong thời gian sớm nhất."
+      },
+      "bookingRescheduleProposed": {
+        "heading": "Đề xuất đổi lịch hẹn",
+        "body": "{otherPartyName} đề xuất dời buổi {serviceName} sang {dateLabel} lúc {timeLabel}. Vui lòng phản hồi để chấp nhận hoặc từ chối.",
+        "cta": "Xem đề xuất",
+        "subject": "Đề xuất đổi lịch hẹn — cần phản hồi — Fgrapher"
+      },
+      "bookingRescheduleAccepted": {
+        "heading": "Đề xuất đổi lịch được chấp nhận",
+        "body": "{otherPartyName} đã đồng ý đổi buổi {serviceName} sang {dateLabel} lúc {timeLabel}. Lịch của bạn đã được cập nhật.",
+        "cta": "Xem lịch hẹn",
+        "subject": "Đổi lịch hẹn đã được chấp nhận — Fgrapher"
+      },
+      "bookingRescheduleDeclined": {
+        "heading": "Đề xuất đổi lịch bị từ chối",
+        "body": "{otherPartyName} đã từ chối đề xuất đổi thời gian cho buổi {serviceName}. Lịch hẹn giữ nguyên như cũ.",
+        "cta": "Xem lịch hẹn",
+        "subject": "Đề xuất đổi lịch bị từ chối — Fgrapher"
+      },
+      "bookingExpired": {
+        "heading": "Yêu cầu đặt lịch đã hết hạn",
+        "bodyCustomer": "Yêu cầu đặt buổi {serviceName} với {otherPartyName} đã hết hạn do không được phản hồi trong thời hạn. Bạn có thể gửi yêu cầu mới hoặc chọn nhà cung cấp khác.",
+        "bodyProvider": "Một yêu cầu đặt buổi {serviceName} từ {otherPartyName} đã hết hạn do chưa được phản hồi kịp thời.",
+        "cta": "Đặt lịch lại",
+        "subject": "Yêu cầu đặt lịch đã hết hạn — Fgrapher"
+      },
+      "bookingRelatedCancelled": {
+        "heading": "Một công việc liên quan đã bị hủy",
+        "body": "Lịch hẹn của khách mà công việc {serviceName} của bạn gắn kèm đã bị hủy. Lịch của bạn không bị ảnh hưởng — bạn có thể tự quyết định có hủy theo hay không.",
+        "cta": "Xem lịch hẹn",
+        "subject": "Công việc liên quan đã bị hủy — Fgrapher"
+      },
+      "newMessage": {
+        "heading": "Tin nhắn mới từ {senderName}",
+        "body": "{senderName} đã gửi cho bạn một tin nhắn: {preview}",
+        "cta": "Trả lời",
+        "subject": "Bạn có tin nhắn mới — Fgrapher"
+      },
+      "requestNewOffer": {
+        "heading": "Có đề nghị mới cho yêu cầu của bạn",
+        "body": "Yêu cầu “{requestTitle}” ({requestCode}) vừa nhận được một đề nghị mới. Xem và phản hồi để chốt nhà cung cấp.",
+        "cta": "Xem đề nghị",
+        "subject": "Đề nghị mới cho yêu cầu của bạn — Fgrapher"
+      },
+      "requestOfferAccepted": {
+        "heading": "Đề nghị của bạn đã được chấp nhận",
+        "body": "Khách hàng đã chọn đề nghị của bạn cho yêu cầu “{requestTitle}” ({requestCode}). Kiểm tra lịch đặt mới để xác nhận chi tiết.",
+        "cta": "Xem lịch đặt",
+        "subject": "Đề nghị của bạn đã được chấp nhận — Fgrapher"
+      },
+      "requestOfferDeclined": {
+        "heading": "Yêu cầu đã chọn nhà cung cấp khác",
+        "body": "Đề nghị của bạn cho yêu cầu “{requestTitle}” ({requestCode}) không được chọn lần này. Tiếp tục theo dõi các yêu cầu phù hợp khác.",
+        "cta": "Xem yêu cầu phù hợp",
+        "subject": "Cập nhật về đề nghị của bạn — Fgrapher"
+      },
+      "requestNoOffers": {
+        "heading": "Chưa có đề nghị nào cho yêu cầu của bạn",
+        "body": "Yêu cầu “{requestTitle}” ({requestCode}) chưa nhận được đề nghị nào sau 48 giờ. Cân nhắc nới ngân sách, bổ sung mô tả hoặc đặt lịch trực tiếp.",
+        "cta": "Chỉnh sửa yêu cầu",
+        "subject": "Yêu cầu của bạn chưa có đề nghị — Fgrapher"
+      }
+    },
+    "notifications": {
+      "booking": {
+        "request": {
+          "title": "Yêu cầu đặt lịch mới",
+          "message": "{otherPartyName} đã yêu cầu {serviceName} vào {dateLabel}"
+        },
+        "confirmed": {
+          "title": "Đã xác nhận lịch hẹn",
+          "message": "{otherPartyName} đã xác nhận {serviceName} vào {dateLabel}"
+        },
+        "declined": {
+          "title": "Lịch hẹn bị từ chối",
+          "message": "{otherPartyName} đã từ chối yêu cầu {serviceName} của bạn"
+        },
+        "cancelled": {
+          "title": "Lịch hẹn đã bị hủy",
+          "message": "{otherPartyName} đã hủy {serviceName} vào {dateLabel}"
+        },
+        "reminder": {
+          "title": "Lịch hẹn vào ngày mai",
+          "message": "Buổi {serviceName} của bạn với {otherPartyName} diễn ra ngày mai lúc {timeLabel}"
+        },
+        "completed": {
+          "title": "Đã hoàn thành lịch hẹn",
+          "message": "Buổi {serviceName} của bạn đã được đánh dấu hoàn thành — hãy để lại đánh giá"
+        },
+        "rescheduleProposed": {
+          "title": "Có đề xuất thời gian mới",
+          "message": "{otherPartyName} đề xuất dời lịch sang {dateLabel} lúc {timeLabel}"
+        },
+        "rescheduleAccepted": {
+          "title": "Đề xuất đổi lịch được chấp nhận",
+          "message": "Thời gian bạn đề xuất cho {serviceName} đã được chấp nhận"
+        },
+        "rescheduleDeclined": {
+          "title": "Đề xuất đổi lịch bị từ chối",
+          "message": "Thời gian bạn đề xuất cho {serviceName} đã bị từ chối"
+        },
+        "expiredCustomer": {
+          "title": "Yêu cầu đặt lịch đã hết hạn",
+          "message": "Yêu cầu {serviceName} với {otherPartyName} đã hết hạn do không được phản hồi"
+        },
+        "expiredProvider": {
+          "title": "Yêu cầu đặt lịch đã hết hạn",
+          "message": "Một yêu cầu {serviceName} từ {otherPartyName} đã hết hạn"
+        },
+        "noShow": {
+          "title": "Đã ghi nhận vắng mặt",
+          "message": "Buổi {serviceName} của bạn đã bị đánh dấu là vắng mặt"
+        },
+        "relatedCancelled": {
+          "title": "Công việc liên quan đã bị hủy",
+          "message": "Lịch của khách mà công việc này gắn kèm đã bị hủy. Lịch của bạn không bị ảnh hưởng — bạn có thể tự quyết định có hủy hay không."
+        }
+      },
+      "review": {
+        "new": {
+          "title": "Đánh giá mới",
+          "message": "{reviewerName} đã để lại cho bạn đánh giá {rating} sao"
+        },
+        "response": {
+          "title": "Có phản hồi cho đánh giá của bạn",
+          "message": "{providerName} đã phản hồi đánh giá của bạn"
+        }
+      },
+      "fallback": {
+        "service": "một buổi chụp",
+        "person": "ai đó"
+      },
+      "message": {
+        "title": "Tin nhắn mới từ {senderName}",
+        "body": "{senderName}: {preview}",
+        "imagePreview": "Đã gửi một ảnh"
+      },
+      "request": {
+        "newMatch": {
+          "title": "Có yêu cầu mới phù hợp với bạn",
+          "message": "“{title}” ({code}) đang tìm nhà cung cấp — xem chi tiết và gửi đề nghị."
+        },
+        "newOffer": {
+          "title": "Có đề nghị mới",
+          "message": "Yêu cầu “{title}” ({code}) vừa nhận được một đề nghị mới."
+        },
+        "offerAccepted": {
+          "title": "Đề nghị của bạn đã được chấp nhận",
+          "message": "Yêu cầu “{title}” ({code}) đã chọn bạn — kiểm tra lịch đặt mới."
+        },
+        "offerNotChosen": {
+          "title": "Yêu cầu đã chọn nhà cung cấp khác",
+          "message": "Yêu cầu “{title}” ({code}) đã chọn một đề nghị khác."
+        },
+        "offerDeclined": {
+          "title": "Đề nghị đã bị từ chối",
+          "message": "Đề nghị của bạn cho yêu cầu “{title}” ({code}) đã bị từ chối."
+        },
+        "noOffers": {
+          "title": "Chưa có nhà cung cấp nào chào giá",
+          "message": "Yêu cầu “{title}” ({code}) chưa nhận được đề nghị nào sau 48 giờ. Cân nhắc nới ngân sách hoặc đặt lịch trực tiếp."
+        }
       }
     }
   },

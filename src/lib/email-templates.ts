@@ -223,6 +223,145 @@ export function bookingReminderEmailHtml(
   return bookingEmail("bookingReminder", props);
 }
 
+export function bookingRescheduleProposedEmailHtml(
+  props: BookingEmailBase & { t: EmailT },
+) {
+  return bookingEmail("bookingRescheduleProposed", props);
+}
+
+export function bookingRescheduleAcceptedEmailHtml(
+  props: BookingEmailBase & { t: EmailT },
+) {
+  return bookingEmail("bookingRescheduleAccepted", props);
+}
+
+export function bookingRescheduleDeclinedEmailHtml({
+  t,
+  otherPartyName,
+  serviceName,
+  bookingUrl,
+}: BookingEmailBase & { t: EmailT }) {
+  return bookingEmailShell({
+    t,
+    heading: t("bookingRescheduleDeclined.heading"),
+    body: t("bookingRescheduleDeclined.body", {
+      otherPartyName: strong(otherPartyName),
+      serviceName: strong(serviceName),
+    }),
+    ctaLabel: t("bookingRescheduleDeclined.cta"),
+    ctaUrl: bookingUrl,
+  });
+}
+
+export function bookingExpiredEmailHtml({
+  t,
+  recipientRole,
+  otherPartyName,
+  serviceName,
+  bookingUrl,
+}: BookingEmailBase & { t: EmailT; recipientRole: "customer" | "provider" }) {
+  const key =
+    recipientRole === "customer"
+      ? "bookingExpired.bodyCustomer"
+      : "bookingExpired.bodyProvider";
+  return bookingEmailShell({
+    t,
+    heading: t("bookingExpired.heading"),
+    body: t(key, {
+      otherPartyName: strong(otherPartyName),
+      serviceName: strong(serviceName),
+    }),
+    ctaLabel: t("bookingExpired.cta"),
+    ctaUrl: bookingUrl,
+  });
+}
+
+export function bookingRelatedCancelledEmailHtml({
+  t,
+  serviceName,
+  bookingUrl,
+}: {
+  t: EmailT;
+  serviceName: string;
+  bookingUrl: string;
+}) {
+  return bookingEmailShell({
+    t,
+    heading: t("bookingRelatedCancelled.heading"),
+    body: t("bookingRelatedCancelled.body", {
+      serviceName: strong(serviceName),
+    }),
+    ctaLabel: t("bookingRelatedCancelled.cta"),
+    ctaUrl: bookingUrl,
+  });
+}
+
+// --- Messaging ---------------------------------------------------------
+
+export function newMessageEmailHtml({
+  t,
+  senderName,
+  preview,
+  conversationUrl,
+}: {
+  t: EmailT;
+  senderName: string;
+  preview: string;
+  conversationUrl: string;
+}) {
+  return bookingEmailShell({
+    t,
+    heading: t("newMessage.heading", { senderName: escapeHtml(senderName) }),
+    body: t("newMessage.body", {
+      senderName: strong(senderName),
+      preview: strong(preview),
+    }),
+    ctaLabel: t("newMessage.cta"),
+    ctaUrl: conversationUrl,
+  });
+}
+
+// --- Reverse marketplace / service requests --------------------------
+
+interface ServiceRequestEmailBase {
+  t: EmailT;
+  requestTitle: string;
+  requestCode: string;
+  requestUrl: string;
+}
+
+function serviceRequestEmail(
+  kind: string,
+  { t, requestTitle, requestCode, requestUrl }: ServiceRequestEmailBase,
+) {
+  return bookingEmailShell({
+    t,
+    heading: t(`${kind}.heading`),
+    body: t(`${kind}.body`, {
+      requestTitle: strong(requestTitle),
+      requestCode: escapeHtml(requestCode),
+    }),
+    ctaLabel: t(`${kind}.cta`),
+    ctaUrl: requestUrl,
+  });
+}
+
+export function requestNewOfferEmailHtml(props: ServiceRequestEmailBase) {
+  return serviceRequestEmail("requestNewOffer", props);
+}
+
+export function requestOfferAcceptedEmailHtml(props: ServiceRequestEmailBase) {
+  return serviceRequestEmail("requestOfferAccepted", props);
+}
+
+export function requestOfferDeclinedEmailHtml(props: ServiceRequestEmailBase) {
+  return serviceRequestEmail("requestOfferDeclined", props);
+}
+
+export function requestNoOffersEmailHtml(props: ServiceRequestEmailBase) {
+  return serviceRequestEmail("requestNoOffers", props);
+}
+
 export function bookingCompletedEmailHtml({
   t,
   otherPartyName,

@@ -1,3 +1,5 @@
+import { createHash } from "crypto";
+
 import { Resend } from "resend";
 
 import { env } from "@/lib/env";
@@ -30,6 +32,13 @@ export interface DeliverInput {
   to: string;
   subject: string;
   html: string;
+  /**
+   * Forwarded to Resend as the `Idempotency-Key` header (SDK v6+). A
+   * provider "sent" that our DB fails to finalize can be retried by the
+   * cron without Resend actually sending a second copy — Resend dedupes on
+   * this key for ~24h. Pass the outbox row's `idempotencyKey`.
+   */
+  idempotencyKey?: string;
 }
 
 export type DeliverResult =
@@ -50,6 +59,15 @@ function isRetryable(message: string): boolean {
   return !NON_RETRYABLE_PATTERNS.some((pattern) => pattern.test(message));
 }
 
+// Resend caps the Idempotency-Key header (≤ 256 chars). Our event keys can
+// exceed that (a bulk media approval concatenates every media id), so hash
+// anything long — still stable per event, still unique.
+function providerIdempotencyKey(key: string): string {
+  return key.length <= 250
+    ? key
+    : `k_${createHash("sha256").update(key).digest("hex")}`;
+}
+
 /**
  * Hands one email to Resend. Never throws — every failure comes back as a
  * `delivered: false` result so the caller decides whether to queue, retry
@@ -64,6 +82,7 @@ export async function deliverEmail({
   to,
   subject,
   html,
+  idempotencyKey,
 }: DeliverInput): Promise<DeliverResult> {
   if (!resend) {
     return {
@@ -82,14 +101,19 @@ export async function deliverEmail({
   const recipient = redirected ? testInbox! : to;
 
   try {
-    const result = await resend.emails.send({
-      from: FROM_ADDRESS,
-      to: recipient,
-      // Plain text, not HTML — a subject line is never parsed as markup,
-      // so escaping it here only mangles the address it's meant to show.
-      subject: redirected ? `[staging → ${to}] ${subject}` : subject,
-      html,
-    });
+    const result = await resend.emails.send(
+      {
+        from: FROM_ADDRESS,
+        to: recipient,
+        // Plain text, not HTML — a subject line is never parsed as markup,
+        // so escaping it here only mangles the address it's meant to show.
+        subject: redirected ? `[staging → ${to}] ${subject}` : subject,
+        html,
+      },
+      idempotencyKey
+        ? { idempotencyKey: providerIdempotencyKey(idempotencyKey) }
+        : undefined,
+    );
 
     if (result.error) {
       const message = result.error.message || "unknown_provider_error";

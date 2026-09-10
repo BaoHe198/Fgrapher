@@ -4,8 +4,12 @@ import type {
   ServiceRequestStatus,
 } from "@prisma/client";
 
+import { getTranslations } from "next-intl/server";
+
+import { appUrl } from "@/lib/app-url";
 import { features } from "@/lib/features";
 import { db } from "@/lib/db";
+import { requestNoOffersEmailHtml } from "@/lib/email";
 import { notify } from "@/services/notification";
 import { notifyMatchingProviders } from "@/services/request-offers";
 
@@ -453,13 +457,32 @@ export async function nudgeUnansweredRequests() {
     select: { id: true, code: true, customerId: true, title: true },
   });
 
+  // Cron-triggered — no request context, explicit "vi" locale.
+  const [emailT, nt] = await Promise.all([
+    getTranslations({ locale: "vi", namespace: "libServices.email" }),
+    getTranslations({ locale: "vi", namespace: "libServices.notifications" }),
+  ]);
+
   for (const request of stale) {
     await notify({
       userId: request.customerId,
       type: "REQUEST_NO_OFFERS_48H",
-      title: "Chưa có provider nào chào giá",
-      message: `Yêu cầu "${request.title}" (${request.code}) chưa nhận được đề nghị nào sau 48 giờ. Cân nhắc nới ngân sách hoặc đặt lịch trực tiếp.`,
+      title: nt("request.noOffers.title"),
+      message: nt("request.noOffers.message", {
+        title: request.title,
+        code: request.code,
+      }),
       data: { requestId: request.id },
+      email: {
+        subject: emailT("requestNoOffers.subject"),
+        html: requestNoOffersEmailHtml({
+          t: emailT,
+          requestTitle: request.title,
+          requestCode: request.code,
+          requestUrl: appUrl(`/dashboard/requests/${request.id}`),
+        }),
+        dedupe: [request.id, "NUDGE"],
+      },
     });
     await db.serviceRequest.update({
       where: { id: request.id },

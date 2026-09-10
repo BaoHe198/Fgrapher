@@ -741,6 +741,7 @@ export async function moderateMedia({
               reason: reason ?? "",
               portfolioUrl,
             }),
+            dedupe: [row.id, "MEDIA_REJECTED"],
           },
         }),
       ),
@@ -793,6 +794,9 @@ export async function moderateMedia({
             count: group.mediaIds.length,
             albumTitle: group.albumTitle,
           }),
+          // Distinct per media set so re-approving newly added photos in
+          // the same album still notifies.
+          dedupe: ["MEDIA_APPROVED", ...[...group.mediaIds].sort()],
         },
       }),
     ),

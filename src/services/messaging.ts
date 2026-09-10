@@ -1,4 +1,9 @@
+import { getTranslations } from "next-intl/server";
+
+import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
+import { newMessageEmailHtml } from "@/lib/email";
+import { messagePreview } from "@/lib/notifications";
 import { notify } from "@/services/notification";
 
 const PAGE_SIZE = 20;
@@ -254,12 +259,39 @@ export async function sendMessage({
   // credentials this project doesn't have) — the chat panel polls for new
   // messages instead. This just handles the "recipient isn't looking"
   // case: in-app + email notification, same as any other notify() call.
+  const nt = await getTranslations("libServices.notifications");
+  const senderName = sender?.firstName ?? sender?.name ?? nt("fallback.person");
+  const preview =
+    type === "image" ? nt("message.imagePreview") : messagePreview(content);
+
+  // Email only for real person-to-person messages, and at most once per
+  // conversation per recipient per 15 minutes (NOTIFICATION_POLICY's
+  // throttleMs) so a rapid back-and-forth doesn't become an inbox flood.
+  // System "booking_link" messages are covered by the booking email.
+  const emailable = type === "text" || type === "image";
+  const emailT = emailable ? await getTranslations("libServices.email") : null;
+
   await notify({
     userId: receiverId,
     type: "NEW_MESSAGE",
-    title: `New message from ${sender?.firstName ?? sender?.name ?? "someone"}`,
-    message: type === "image" ? "Sent a photo" : content.slice(0, 140),
+    title: nt("message.title", { senderName }),
+    message: nt("message.body", { senderName, preview }),
     data: { conversationId },
+    email:
+      emailable && emailT
+        ? {
+            subject: emailT("newMessage.subject"),
+            html: newMessageEmailHtml({
+              t: emailT,
+              senderName,
+              preview,
+              conversationUrl: appUrl(
+                `/dashboard/messages?c=${conversationId}`,
+              ),
+            }),
+            dedupe: [conversationId],
+          }
+        : undefined,
   });
 
   return message;

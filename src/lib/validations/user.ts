@@ -45,6 +45,10 @@ export const NOTIFICATION_KEYS = [
   "bookingCancelled",
   "bookingReminder",
   "newMessage",
+  // Reverse-marketplace: new matching request, a new offer on your
+  // request, an offer accepted/declined, the 48h no-offers nudge. See
+  // lib/notifications.ts's NOTIFICATION_POLICY.
+  "serviceRequests",
   "newFollower",
   "newReview",
   "productUpdates",

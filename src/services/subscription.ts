@@ -170,6 +170,7 @@ export async function handleCheckoutCompleted(
         roleNames: results.map((r) => roleT(r.role)),
         billingUrl: billingUrl(),
       }),
+      dedupe: [subscriptionId, "WELCOME"],
     },
   });
 }
@@ -206,6 +207,7 @@ export async function handleSubscriptionUpdated(
             : "the end of the period",
           billingUrl: billingUrl(),
         }),
+        dedupe: [subscription.id, "CANCELLING"],
       },
     });
   }
@@ -264,6 +266,7 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
         periodEndLabel: periodEnd ? periodEnd.toDateString() : "—",
         invoiceUrl: invoice.hosted_invoice_url ?? billingUrl(),
       }),
+      dedupe: [invoice.id ?? subscriptionId, "RECEIPT"],
     },
   });
 }
@@ -301,6 +304,7 @@ export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
         graceEndsLabel: graceEndsAt.toDateString(),
         billingUrl: billingUrl(),
       }),
+      dedupe: [invoice.id ?? subscriptionId, "PAYMENT_FAILED"],
     },
   });
 }
@@ -343,6 +347,7 @@ export async function handleSubscriptionDeleted(
         t: await getEmailT(),
         billingUrl: billingUrl(),
       }),
+      dedupe: [subscription.id, "CANCELLED"],
     },
   });
 }

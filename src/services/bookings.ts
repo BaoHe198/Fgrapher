@@ -5,10 +5,16 @@ import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
   bookingCancelledEmailHtml,
+  bookingCompletedEmailHtml,
   bookingConfirmedEmailHtml,
   bookingDeclinedEmailHtml,
+  bookingExpiredEmailHtml,
+  bookingRelatedCancelledEmailHtml,
   bookingReminderEmailHtml,
   bookingRequestEmailHtml,
+  bookingRescheduleAcceptedEmailHtml,
+  bookingRescheduleDeclinedEmailHtml,
+  bookingRescheduleProposedEmailHtml,
 } from "@/lib/email";
 import { formatDate } from "@/lib/format";
 import { isSlotBookable } from "@/services/availability";
@@ -26,15 +32,20 @@ import type { CreateBookingInput } from "@/lib/validations/booking";
 // { locale: "vi" } explicitly, matching this platform's Vietnamese-first
 // default (CLAUDE.md rule 10).
 //
-// TODO(i18n): this file's own notify() title/message string literals
-// (BOOKING_REQUEST, BOOKING_CONFIRMED, etc.) are still hardcoded English —
-// out of scope for this pass, which only had to satisfy lib/email.ts's now-
-// required `t` param. A future pass should add a "libServices.bookings"
-// namespace and thread it through those call sites the same way.
 function getEmailT(locale?: "vi") {
   return locale
     ? getTranslations({ locale, namespace: "libServices.email" })
     : getTranslations("libServices.email");
+}
+
+// In-app notification title/message copy — namespace "libServices.
+// notifications". Same request-vs-cron locale split as getEmailT: the
+// EXPIRED transition (system actor) and sendBookingReminders (daily cron)
+// have no request context and pass { locale: "vi" }.
+function getNotifyT(locale?: "vi") {
+  return locale
+    ? getTranslations({ locale, namespace: "libServices.notifications" })
+    : getTranslations("libServices.notifications");
 }
 
 const PAGE_SIZE = 20;
@@ -447,22 +458,31 @@ export async function createBooking(
   });
 
   const createEmailT = await getEmailT();
+  const createNotifyT = await getNotifyT();
+  const requestServiceName =
+    booking.service?.name ?? createNotifyT("fallback.service");
   await notify({
     userId: booking.providerId,
     type: "BOOKING_REQUEST",
-    title: "New booking request",
-    message: `${partyName(booking.customer)} requested ${booking.service?.name ?? "a session"} on ${dateLabel(booking.date)}`,
+    title: createNotifyT("booking.request.title"),
+    message: createNotifyT("booking.request.message", {
+      otherPartyName: partyName(booking.customer),
+      serviceName: requestServiceName,
+      dateLabel: dateLabel(booking.date),
+      timeLabel: booking.startTime,
+    }),
     data: { bookingId: booking.id },
     email: {
-      subject: `New booking request — Fgrapher`,
+      subject: createEmailT("bookingRequest.subject"),
       html: bookingRequestEmailHtml({
         t: createEmailT,
         otherPartyName: partyName(booking.customer),
-        serviceName: booking.service?.name ?? "a session",
+        serviceName: requestServiceName,
         dateLabel: dateLabel(booking.date),
         timeLabel: booking.startTime,
         bookingUrl: bookingUrlFor(booking.id),
       }),
+      dedupe: [booking.id, "REQUEST"],
     },
   });
 
@@ -598,50 +618,61 @@ export async function transitionBooking({
   if (actorId !== null) {
     const recipient = isProvider ? updated.customer : updated.provider;
     const actor = isProvider ? updated.provider : updated.customer;
-    const serviceName = updated.service?.name ?? "a session";
+    const emailT = await getEmailT();
+    const nt = await getNotifyT();
+    const serviceName = updated.service?.name ?? nt("fallback.service");
     const emailArgs = {
-      t: await getEmailT(),
+      t: emailT,
       otherPartyName: partyName(actor),
       serviceName,
       dateLabel: dateLabel(updated.date),
       timeLabel: updated.startTime,
       bookingUrl: bookingUrlFor(updated.id),
     };
+    const notifyValues = {
+      otherPartyName: partyName(actor),
+      serviceName,
+      dateLabel: dateLabel(updated.date),
+      timeLabel: updated.startTime,
+    };
 
     if (toStatus === "CONFIRMED") {
       await notify({
         userId: recipient.id,
         type: "BOOKING_CONFIRMED",
-        title: "Booking confirmed",
-        message: `${emailArgs.otherPartyName} confirmed ${serviceName} on ${emailArgs.dateLabel}`,
+        title: nt("booking.confirmed.title"),
+        message: nt("booking.confirmed.message", notifyValues),
         data: { bookingId: updated.id },
         email: {
-          subject: "Booking confirmed — Fgrapher",
+          subject: emailT("bookingConfirmed.subject"),
           html: bookingConfirmedEmailHtml(emailArgs),
+          dedupe: [updated.id, "CONFIRMED"],
         },
       });
     } else if (toStatus === "DECLINED") {
       await notify({
         userId: recipient.id,
         type: "BOOKING_DECLINED",
-        title: "Booking declined",
-        message: `${emailArgs.otherPartyName} declined your request for ${serviceName}`,
+        title: nt("booking.declined.title"),
+        message: nt("booking.declined.message", notifyValues),
         data: { bookingId: updated.id },
         email: {
-          subject: "Booking declined — Fgrapher",
+          subject: emailT("bookingDeclined.subject"),
           html: bookingDeclinedEmailHtml(emailArgs),
+          dedupe: [updated.id, "DECLINED"],
         },
       });
     } else if (toStatus === "CANCELLED") {
       await notify({
         userId: recipient.id,
         type: "BOOKING_CANCELLED",
-        title: "Booking cancelled",
-        message: `${emailArgs.otherPartyName} cancelled ${serviceName} on ${emailArgs.dateLabel}`,
+        title: nt("booking.cancelled.title"),
+        message: nt("booking.cancelled.message", notifyValues),
         data: { bookingId: updated.id },
         email: {
-          subject: "Booking cancelled — Fgrapher",
+          subject: emailT("bookingCancelled.subject"),
           html: bookingCancelledEmailHtml(emailArgs),
+          dedupe: [updated.id, "CANCELLED"],
         },
       });
 
@@ -654,42 +685,79 @@ export async function transitionBooking({
         await notify({
           userId: child.providerId,
           type: "BOOKING_CANCELLED",
-          title: "Related job cancelled",
-          message: `The client booking this job was attached to was cancelled. Your booking is unaffected — you can decide whether to cancel it too.`,
+          title: nt("booking.relatedCancelled.title"),
+          message: nt("booking.relatedCancelled.message"),
           data: { bookingId: child.id, relatedBookingId: updated.id },
+          email: {
+            subject: emailT("bookingRelatedCancelled.subject"),
+            html: bookingRelatedCancelledEmailHtml({
+              t: emailT,
+              serviceName,
+              bookingUrl: bookingUrlFor(child.id),
+            }),
+            dedupe: [child.id, "RELATED_CANCELLED", updated.id],
+          },
         });
       }
     } else if (toStatus === "COMPLETED") {
       await notify({
         userId: recipient.id,
         type: "BOOKING_COMPLETED",
-        title: "Booking completed",
-        message: `Your ${serviceName} session is marked complete — leave a review`,
+        title: nt("booking.completed.title"),
+        message: nt("booking.completed.message", notifyValues),
         data: { bookingId: updated.id },
+        email: {
+          subject: emailT("bookingCompleted.subject"),
+          html: bookingCompletedEmailHtml(emailArgs),
+          dedupe: [updated.id, "COMPLETED"],
+        },
       });
     } else if (toStatus === "NO_SHOW") {
+      // Reputational/informational — in-app only, no email.
       await notify({
         userId: recipient.id,
         type: "BOOKING_CANCELLED",
-        title: "Marked as no-show",
-        message: `Your ${serviceName} booking was marked as a no-show`,
+        title: nt("booking.noShow.title"),
+        message: nt("booking.noShow.message", notifyValues),
         data: { bookingId: updated.id },
       });
     }
   } else if (toStatus === "EXPIRED") {
-    // System-triggered — notify both parties, not just "the other one".
+    // System-triggered (cron) — no request context, explicit "vi" locale.
+    const emailT = await getEmailT("vi");
+    const nt = await getNotifyT("vi");
+    const serviceName = updated.service?.name ?? nt("fallback.service");
     await notify({
       userId: updated.customerId,
       type: "BOOKING_CANCELLED",
-      title: "Booking request expired",
-      message: `Your request for ${updated.service?.name ?? "a session"} with ${partyName(updated.provider)} expired without a response`,
+      title: nt("booking.expiredCustomer.title"),
+      message: nt("booking.expiredCustomer.message", {
+        otherPartyName: partyName(updated.provider),
+        serviceName,
+      }),
       data: { bookingId: updated.id },
+      email: {
+        subject: emailT("bookingExpired.subject"),
+        html: bookingExpiredEmailHtml({
+          t: emailT,
+          recipientRole: "customer",
+          otherPartyName: partyName(updated.provider),
+          serviceName,
+          dateLabel: dateLabel(updated.date),
+          timeLabel: updated.startTime,
+          bookingUrl: bookingUrlFor(updated.id),
+        }),
+        dedupe: [updated.id, "EXPIRED"],
+      },
     });
     await notify({
       userId: updated.providerId,
       type: "BOOKING_CANCELLED",
-      title: "Booking request expired",
-      message: `A request from ${partyName(updated.customer)} for ${updated.service?.name ?? "a session"} expired`,
+      title: nt("booking.expiredProvider.title"),
+      message: nt("booking.expiredProvider.message", {
+        otherPartyName: partyName(updated.customer),
+        serviceName,
+      }),
       data: { bookingId: updated.id },
     });
   }
@@ -744,12 +812,35 @@ export async function proposeReschedule({
 
   const recipient = isProvider ? updated.customer : updated.provider;
   const actor = isProvider ? updated.provider : updated.customer;
+  const emailT = await getEmailT();
+  const nt = await getNotifyT();
+  const serviceName = updated.service?.name ?? nt("fallback.service");
+  const proposedDateLabel = dateLabel(updated.rescheduleProposedDate!);
   await notify({
     userId: recipient.id,
     type: "BOOKING_RESCHEDULE_PROPOSED",
-    title: "New time proposed",
-    message: `${partyName(actor)} proposed rescheduling to ${dateLabel(updated.rescheduleProposedDate!)} at ${startTime}`,
+    title: nt("booking.rescheduleProposed.title"),
+    message: nt("booking.rescheduleProposed.message", {
+      otherPartyName: partyName(actor),
+      serviceName,
+      dateLabel: proposedDateLabel,
+      timeLabel: startTime,
+    }),
     data: { bookingId: updated.id },
+    email: {
+      subject: emailT("bookingRescheduleProposed.subject"),
+      html: bookingRescheduleProposedEmailHtml({
+        t: emailT,
+        otherPartyName: partyName(actor),
+        serviceName,
+        dateLabel: proposedDateLabel,
+        timeLabel: startTime,
+        bookingUrl: bookingUrlFor(updated.id),
+      }),
+      // The proposed slot is part of the event identity — re-proposing a
+      // different time is a new notification, not a suppressed duplicate.
+      dedupe: [updated.id, "RESCHEDULE_PROPOSED", date, startTime],
+    },
   });
 
   return updated;
@@ -785,39 +876,52 @@ export async function sendBookingReminders() {
   // explicit "vi" default (CLAUDE.md rule 10), same as transitionBooking's
   // system-actor (EXPIRED) branch.
   const reminderEmailT = await getEmailT("vi");
+  const nt = await getNotifyT("vi");
 
   for (const booking of bookings) {
+    const serviceName = booking.service?.name ?? nt("fallback.service");
     const args = (recipientIsProvider: boolean) => ({
       t: reminderEmailT,
       otherPartyName: partyName(
         recipientIsProvider ? booking.customer : booking.provider,
       ),
-      serviceName: booking.service?.name ?? "a session",
+      serviceName,
       dateLabel: dateLabel(booking.date),
       timeLabel: booking.startTime,
       bookingUrl: bookingUrlFor(booking.id),
     });
+    const message = (recipientIsProvider: boolean) =>
+      nt("booking.reminder.message", {
+        otherPartyName: partyName(
+          recipientIsProvider ? booking.customer : booking.provider,
+        ),
+        serviceName,
+        dateLabel: dateLabel(booking.date),
+        timeLabel: booking.startTime,
+      });
 
     await notify({
       userId: booking.customerId,
       type: "BOOKING_REMINDER",
-      title: "Booking tomorrow",
-      message: `Your ${booking.service?.name ?? "session"} with ${partyName(booking.provider)} is tomorrow at ${booking.startTime}`,
+      title: nt("booking.reminder.title"),
+      message: message(false),
       data: { bookingId: booking.id },
       email: {
-        subject: "Booking tomorrow — Fgrapher",
+        subject: reminderEmailT("bookingReminder.subject"),
         html: bookingReminderEmailHtml(args(false)),
+        dedupe: [booking.id, "REMINDER"],
       },
     });
     await notify({
       userId: booking.providerId,
       type: "BOOKING_REMINDER",
-      title: "Booking tomorrow",
-      message: `Your ${booking.service?.name ?? "session"} with ${partyName(booking.customer)} is tomorrow at ${booking.startTime}`,
+      title: nt("booking.reminder.title"),
+      message: message(true),
       data: { bookingId: booking.id },
       email: {
-        subject: "Booking tomorrow — Fgrapher",
+        subject: reminderEmailT("bookingReminder.subject"),
         html: bookingReminderEmailHtml(args(true)),
+        dedupe: [booking.id, "REMINDER"],
       },
     });
 
@@ -907,14 +1011,43 @@ export async function respondToReschedule({
     booking.rescheduleProposedBy === booking.providerId
       ? updated.provider
       : updated.customer;
+  const responder =
+    booking.rescheduleProposedBy === booking.providerId
+      ? updated.customer
+      : updated.provider;
+  const emailT = await getEmailT();
+  const nt = await getNotifyT();
+  const serviceName = updated.service?.name ?? nt("fallback.service");
+  const rescheduleArgs = {
+    t: emailT,
+    otherPartyName: partyName(responder),
+    serviceName,
+    dateLabel: dateLabel(updated.date),
+    timeLabel: updated.startTime,
+    bookingUrl: bookingUrlFor(updated.id),
+  };
   await notify({
     userId: proposer.id,
     type: accept ? "BOOKING_CONFIRMED" : "BOOKING_DECLINED",
-    title: accept ? "Reschedule accepted" : "Reschedule declined",
+    title: accept
+      ? nt("booking.rescheduleAccepted.title")
+      : nt("booking.rescheduleDeclined.title"),
     message: accept
-      ? `Your proposed time for ${updated.service?.name ?? "the booking"} was accepted`
-      : `Your proposed new time for ${updated.service?.name ?? "the booking"} was declined`,
+      ? nt("booking.rescheduleAccepted.message", { serviceName })
+      : nt("booking.rescheduleDeclined.message", { serviceName }),
     data: { bookingId: updated.id },
+    email: {
+      subject: accept
+        ? emailT("bookingRescheduleAccepted.subject")
+        : emailT("bookingRescheduleDeclined.subject"),
+      html: accept
+        ? bookingRescheduleAcceptedEmailHtml(rescheduleArgs)
+        : bookingRescheduleDeclinedEmailHtml(rescheduleArgs),
+      dedupe: [
+        updated.id,
+        accept ? "RESCHEDULE_ACCEPTED" : "RESCHEDULE_DECLINED",
+      ],
+    },
   });
 
   return updated;

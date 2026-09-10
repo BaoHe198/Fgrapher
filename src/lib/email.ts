@@ -5,8 +5,12 @@ import {
 } from "@/lib/email-transport";
 import {
   enqueueEmail,
+  finalizeReservedEmail,
+  prismaThrottleReservationStore,
   recordFailedEmail,
   recordSentEmail,
+  reserveEmail,
+  reserveThrottledEmail,
 } from "@/services/email-outbox";
 
 // The templates themselves live in lib/email-templates.ts (pure, no env/db,
@@ -27,6 +31,12 @@ export interface SendEmailResult {
   error?: string;
   messageId?: string;
   outboxId?: string;
+  /**
+   * An email with the same idempotency key was already reserved or sent by
+   * another call, so this one sent nothing. Treated as accepted — the
+   * original owns delivery.
+   */
+  deduped?: boolean;
 }
 
 export interface SendEmailInput {
@@ -48,6 +58,13 @@ export interface SendEmailInput {
    * could still need it (see EmailOutbox.sensitive).
    */
   sensitive?: boolean;
+  /**
+   * Rolling-window throttle: at most one email per `scopeKey` per
+   * `windowMs`, enforced atomically (see reserveThrottledEmail). Takes
+   * precedence over `idempotencyKey` when both are set. Used for
+   * NEW_MESSAGE (`scopeKey` = conversation + recipient).
+   */
+  throttle?: { scopeKey: string; windowMs: number };
 }
 
 /**
@@ -66,7 +83,104 @@ export interface SendEmailInput {
  * included — so the table is a complete ledger of what the platform sent,
  * not just of what broke.
  */
-export async function sendEmail({
+export async function sendEmail(
+  input: SendEmailInput,
+): Promise<SendEmailResult> {
+  // A throttle or an event-scoped key means "at most one email for this
+  // event/window". Both reserve the outbox row *before* delivering, so two
+  // concurrent callers can't both pass a check and both send.
+  if (input.throttle || input.idempotencyKey) {
+    return sendReservedEmail(input);
+  }
+  return sendUnkeyedEmail(input);
+}
+
+async function sendReservedEmail(
+  input: SendEmailInput,
+): Promise<SendEmailResult> {
+  const { to, subject, html, idempotencyKey, sensitive, throttle } = input;
+
+  let reservation:
+    | { reserved: true; id: string; idempotencyKey: string }
+    | { reserved: false };
+  try {
+    if (throttle) {
+      reservation = await reserveThrottledEmail(
+        {
+          to,
+          subject,
+          html,
+          sensitive,
+          scopeKey: throttle.scopeKey,
+          windowMs: throttle.windowMs,
+        },
+        prismaThrottleReservationStore,
+      );
+    } else {
+      const r = await reserveEmail({
+        to,
+        subject,
+        html,
+        idempotencyKey: idempotencyKey!,
+        sensitive,
+      });
+      reservation = r.reserved
+        ? { reserved: true, id: r.id, idempotencyKey: idempotencyKey! }
+        : { reserved: false };
+    }
+  } catch (err) {
+    // The reserve write itself failed (DB down / lock contention). Do NOT
+    // fall back to an unkeyed send — that would defeat the very
+    // idempotency the caller asked for. Report it as not accepted; the
+    // caller's mutation is unaffected, and (for a throttled or retryable
+    // event) the next occurrence tries again.
+    const message = err instanceof Error ? err.message : String(err);
+    logEmailFailure("outbox reserve failed", message, to);
+    return { success: false, queued: false, error: "reserve_failed" };
+  }
+
+  if (!reservation.reserved) {
+    return { success: true, queued: false, deduped: true };
+  }
+
+  const outboxId = reservation.id;
+  const delivery = await deliverEmail({
+    to,
+    subject,
+    html,
+    idempotencyKey: reservation.idempotencyKey,
+  });
+
+  await safeRecord(async () => {
+    await finalizeReservedEmail({
+      id: outboxId,
+      sensitive: sensitive ?? false,
+      delivery,
+    });
+    return outboxId;
+  });
+
+  if (delivery.delivered) {
+    return {
+      success: true,
+      queued: false,
+      messageId: delivery.messageId,
+      outboxId,
+    };
+  }
+
+  logEmailFailure("immediate send failed", delivery.error, to);
+  return {
+    success: false,
+    // Retryable failures leave the row PENDING for the cron; a permanent
+    // rejection was written FAILED by finalizeReservedEmail.
+    queued: delivery.retryable,
+    error: delivery.error,
+    outboxId,
+  };
+}
+
+async function sendUnkeyedEmail({
   to,
   subject,
   html,

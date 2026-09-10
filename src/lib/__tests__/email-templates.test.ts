@@ -3,9 +3,13 @@ import { describe, it } from "node:test";
 
 import {
   bookingEmailShell,
+  bookingExpiredEmailHtml,
   bookingRequestEmailHtml,
+  bookingRescheduleProposedEmailHtml,
   mediaRejectedEmailHtml,
+  newMessageEmailHtml,
   newOrderEmailHtml,
+  requestNewOfferEmailHtml,
   resetPasswordEmailHtml,
   verifyEmailHtml,
 } from "@/lib/email-templates";
@@ -115,6 +119,65 @@ describe("user-controlled values are escaped", () => {
     });
     assert.ok(!html.includes('<a href="https://phish.example">'));
     assert.ok(!html.includes("<img src=x"));
+  });
+});
+
+describe("Task 4 templates — user-controlled values are escaped", () => {
+  it("escapes the sender name and preview in a new-message email", () => {
+    const html = newMessageEmailHtml({
+      t,
+      senderName: LINK_HIJACK,
+      preview: XSS,
+      conversationUrl: "https://fgrapher.test/dashboard/messages?c=1",
+    });
+    assert.ok(!html.includes('<a href="https://phish.example">'));
+    assert.ok(!html.includes("<img src=x"));
+  });
+
+  it("escapes the proposer name in a reschedule email", () => {
+    const html = bookingRescheduleProposedEmailHtml({
+      t,
+      otherPartyName: LINK_HIJACK,
+      serviceName: "Chụp cưới",
+      dateLabel: "12/09/2026",
+      timeLabel: "10:00",
+      bookingUrl: "https://fgrapher.test/dashboard/bookings/1",
+    });
+    assert.ok(!html.includes('<a href="https://phish.example">'));
+  });
+
+  it("escapes the request title and code in a service-request offer email", () => {
+    const html = requestNewOfferEmailHtml({
+      t,
+      requestTitle: XSS,
+      requestCode: '"><script>x</script>',
+      requestUrl: "https://fgrapher.test/dashboard/requests/1",
+    });
+    assert.ok(!html.includes("<img src=x"));
+    assert.ok(!html.includes("<script>"));
+  });
+
+  it("picks the customer vs provider body for an expired booking", () => {
+    const forCustomer = bookingExpiredEmailHtml({
+      t,
+      recipientRole: "customer",
+      otherPartyName: "Nguyễn Văn A",
+      serviceName: "Chụp cưới",
+      dateLabel: "12/09/2026",
+      timeLabel: "10:00",
+      bookingUrl: "https://fgrapher.test/dashboard/bookings/1",
+    });
+    const forProvider = bookingExpiredEmailHtml({
+      t,
+      recipientRole: "provider",
+      otherPartyName: "Nguyễn Văn A",
+      serviceName: "Chụp cưới",
+      dateLabel: "12/09/2026",
+      timeLabel: "10:00",
+      bookingUrl: "https://fgrapher.test/dashboard/bookings/1",
+    });
+    assert.ok(forCustomer.includes("bookingExpired.bodyCustomer"));
+    assert.ok(forProvider.includes("bookingExpired.bodyProvider"));
   });
 });
 

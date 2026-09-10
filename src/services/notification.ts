@@ -1,47 +1,46 @@
 import type { NotificationType, Prisma } from "@prisma/client";
 
-import { sendEmail, sendMarketingEmail } from "@/lib/email";
+import { sendEmail } from "@/lib/email";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
 import {
-  NOTIFICATION_KEYS,
-  type NotificationPreferences,
-} from "@/lib/validations/user";
-import { hasConsent } from "@/services/compliance";
+  NOTIFICATION_POLICY,
+  activeNotificationTypes as activeNotificationTypesFor,
+  makeFeatureGate,
+  resolveNotificationDelivery,
+} from "@/lib/notifications";
+import { emailIdempotencyKey } from "@/services/email-outbox-policy";
+import type { NotificationPreferences } from "@/lib/validations/user";
 
-// Maps each NotificationType to the user-facing preference key it's gated
-// by. Types with no dedicated toggle (likes/comments/billing) are always
-// sent in-app and never emailed — there's no key for them to opt out of
-// email noise, so email defaults to off rather than guessing.
-//
-// Every NotificationType currently defined (prisma/schema.prisma) is
-// transactional — tied to a booking, message, order, review, or
-// subscription event the recipient is directly a party to — so none of
-// them require ConsentPurpose.MARKETING. "productUpdates" and "tips" (the
-// "Marketing" group in dashboard/settings/notifications) have no
-// NotificationType wired to them yet; MARKETING_PREFERENCE_KEYS is where
-// the consent gate below applies once a promotional NotificationType is
-// added — do not add one without also updating that set.
-const PREFERENCE_KEY: Partial<
-  Record<NotificationType, (typeof NOTIFICATION_KEYS)[number]>
-> = {
-  BOOKING_REQUEST: "bookingRequest",
-  BOOKING_CONFIRMED: "bookingConfirmed",
-  BOOKING_DECLINED: "bookingCancelled",
-  BOOKING_CANCELLED: "bookingCancelled",
-  BOOKING_REMINDER: "bookingReminder",
-  BOOKING_RESCHEDULE_PROPOSED: "bookingRequest",
-  BOOKING_COMPLETED: "bookingConfirmed",
-  NEW_MESSAGE: "newMessage",
-  NEW_FOLLOWER: "newFollower",
-  NEW_REVIEW: "newReview",
-};
+// Feature-flag state is resolved here (server side) and passed into the
+// pure policy in lib/notifications.ts — that module must not import
+// lib/features.ts / lib/env.ts.
+const featureGate = makeFeatureGate({
+  marketplaceEnabled: features.marketplaceEnabled,
+  socialFeedEnabled: features.socialFeedEnabled,
+});
 
-const MARKETING_PREFERENCE_KEYS = new Set<(typeof NOTIFICATION_KEYS)[number]>([
-  "productUpdates",
-  "tips",
-]);
+// The channel matrix — which NotificationType writes an in-app row, which
+// may email, under which preference toggle, and which MVP feature it
+// belongs to — lives in lib/notifications.ts (pure, unit-tested,
+// documented in docs/ops/notification-matrix.md). This module is the thin
+// side-effecting layer: it reads the recipient, asks the policy what to
+// do, and performs the writes.
 
-const DEFAULT_CHANNELS = { email: true, inApp: true };
+interface NotifyEmail {
+  subject: string;
+  html: string;
+  /**
+   * Event-identifying parts, e.g. `[bookingId, "CONFIRMED"]`. The recipient
+   * id is always appended. Required whenever the policy says this type
+   * emails — `buildEmailDedupe` throws without it rather than send an
+   * un-deduplicated transactional email. For throttled types (NEW_MESSAGE)
+   * these parts form the rolling-window scope key.
+   */
+  dedupe?: string[];
+  /** The body embeds a credential — see EmailOutbox.sensitive. */
+  sensitive?: boolean;
+}
 
 interface NotifyInput {
   userId: string;
@@ -49,84 +48,120 @@ interface NotifyInput {
   title: string;
   message: string;
   data?: Prisma.InputJsonValue;
-  email?: { subject: string; html: string };
+  email?: NotifyEmail;
 }
 
-export async function notify({
-  userId,
-  type,
-  title,
-  message,
-  data,
-  email,
-}: NotifyInput) {
+/**
+ * Builds the `sendEmail` idempotency/throttle options for this event.
+ * - Throttled types (NEW_MESSAGE): a rolling-window reservation scoped to
+ *   the recipient + the dedupe parts (the conversation).
+ * - Everything else that emails: an event-scoped idempotency key,
+ *   recipient-appended so the same event to two parties stays distinct.
+ *
+ * Fails closed: a type that is going to send an email but has no
+ * `email.dedupe` is a programming error (it would send unkeyed, defeating
+ * idempotency), so this throws rather than silently sending.
+ */
+export function buildEmailDedupe(
+  type: NotificationType,
+  userId: string,
+  email: NotifyEmail,
+): {
+  idempotencyKey?: string;
+  throttle?: { scopeKey: string; windowMs: number };
+} {
+  const { emailScope, throttleMs } = NOTIFICATION_POLICY[type];
+
+  if (!emailScope) {
+    // Policy says this type never emails — deliver() shouldn't have called
+    // us. Guard anyway.
+    throw new Error(`notify: ${type} has no email policy but an email payload`);
+  }
+  if (!email.dedupe || email.dedupe.length === 0) {
+    throw new Error(
+      `notify: ${type} email is missing event identity (email.dedupe) — ` +
+        "refusing to send an un-deduplicated transactional email",
+    );
+  }
+
+  const scopeKey = [emailScope, ...email.dedupe, userId].join(":");
+  if (throttleMs) {
+    return { throttle: { scopeKey, windowMs: throttleMs } };
+  }
+  return {
+    idempotencyKey: emailIdempotencyKey(emailScope, ...email.dedupe, userId),
+  };
+}
+
+async function deliver(input: NotifyInput, forceEmail: boolean) {
+  const { userId, type, title, message, data, email } = input;
+
+  // Types belonging to a disabled feature (marketplace/social) are inert —
+  // no row, no email, not even for a "critical" forceEmail call — so a
+  // flag flip can't leave orphaned notifications.
+  if (!featureGate(NOTIFICATION_POLICY[type].feature)) return;
+
   const user = await db.user.findUnique({
     where: { id: userId },
     select: { email: true, notificationPreferences: true },
   });
   if (!user) return;
 
-  const prefKey = PREFERENCE_KEY[type];
   const prefs = user.notificationPreferences as NotificationPreferences | null;
-  const channels = prefKey
-    ? (prefs?.[prefKey] ?? DEFAULT_CHANNELS)
-    : { email: false, inApp: true };
+  const decision = resolveNotificationDelivery({
+    type,
+    prefs,
+    hasEmailPayload: Boolean(email),
+    isFeatureEnabled: featureGate,
+  });
 
-  if (channels.inApp) {
+  if (decision.createInApp || forceEmail) {
     await db.notification.create({
       data: { userId, type, title, message, data: data ?? undefined },
     });
   }
 
-  // Real-time delivery (Socket.io) is wired up in Phase 8 — until then the
-  // notification bell picks this up on its own poll/refetch.
+  // Real-time delivery (Socket.io) is deferred — the notification bell
+  // polls for this row.
 
-  if (channels.email && email) {
-    if (prefKey && MARKETING_PREFERENCE_KEYS.has(prefKey)) {
-      await sendMarketingEmail({
-        to: user.email,
-        subject: email.subject,
-        html: email.html,
-        hasMarketingConsent: await hasConsent(userId, "MARKETING"),
-      });
-    } else {
-      await sendEmail({
-        to: user.email,
-        subject: email.subject,
-        html: email.html,
-      });
-    }
-  }
-}
-
-// Billing/account events (welcome, payment failed, subscription ended) are
-// never preference-gated — same principle as password-reset emails: the
-// user needs to see these regardless of their notification settings.
-export async function notifyCritical({
-  userId,
-  type,
-  title,
-  message,
-  data,
-  email,
-}: NotifyInput) {
-  const user = await db.user.findUnique({
-    where: { id: userId },
-    select: { email: true },
-  });
-  if (!user) return;
-
-  await db.notification.create({
-    data: { userId, type, title, message, data: data ?? undefined },
-  });
-
-  if (email) {
+  if ((decision.sendEmail || forceEmail) && email) {
+    const { idempotencyKey, throttle } = buildEmailDedupe(type, userId, email);
     await sendEmail({
       to: user.email,
       subject: email.subject,
       html: email.html,
+      idempotencyKey,
+      throttle,
+      sensitive: email.sensitive,
     });
   }
+}
+
+/**
+ * In-app + (preference-gated) email notification. Honours the recipient's
+ * per-type channel settings; a type whose feature is disabled does
+ * nothing.
+ */
+export async function notify(input: NotifyInput) {
+  await deliver(input, false);
+}
+
+/**
+ * Account, billing, moderation and legal events (welcome, payment failed,
+ * subscription ended, media decision, role change). Delivered on every
+ * channel regardless of the recipient's notification settings — same
+ * principle as a password-reset email.
+ *
+ * Only accepts types the policy marks `email: "critical"`; anything else
+ * belongs on notify().
+ */
+export async function notifyCritical(input: NotifyInput) {
+  if (NOTIFICATION_POLICY[input.type].email !== "critical") {
+    throw new Error(
+      `notifyCritical called with non-critical type ${input.type} — use notify()`,
+    );
+  }
+  await deliver(input, true);
 }
 
 const NOTIFICATIONS_PAGE_SIZE = 20;
@@ -140,7 +175,15 @@ export async function listNotifications({
   unreadOnly: boolean;
   page: number;
 }) {
-  const where = { userId, ...(unreadOnly ? { readAt: null } : {}) };
+  // Gate disabled-feature types here, at the read boundary, so stale rows
+  // written before a flag was turned off never surface in the bell, the
+  // list, or the unread count.
+  const typeFilter = { type: { in: activeNotificationTypesFor(featureGate) } };
+  const where = {
+    userId,
+    ...typeFilter,
+    ...(unreadOnly ? { readAt: null } : {}),
+  };
 
   const [notifications, total, unreadCount] = await Promise.all([
     db.notification.findMany({
@@ -150,7 +193,7 @@ export async function listNotifications({
       take: NOTIFICATIONS_PAGE_SIZE,
     }),
     db.notification.count({ where }),
-    db.notification.count({ where: { userId, readAt: null } }),
+    db.notification.count({ where: { userId, ...typeFilter, readAt: null } }),
   ]);
 
   return {

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { features } from "@/lib/features";
 import { listNotifications } from "@/services/notification";
 
 import { NotificationsClient } from "./notifications-client";
@@ -20,5 +21,11 @@ export default async function NotificationsPage() {
     page: 1,
   });
 
-  return <NotificationsClient initialNotifications={notifications} />;
+  return (
+    <NotificationsClient
+      initialNotifications={notifications}
+      marketplaceEnabled={features.marketplaceEnabled}
+      socialFeedEnabled={features.socialFeedEnabled}
+    />
+  );
 }

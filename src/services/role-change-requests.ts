@@ -162,6 +162,7 @@ export async function reviewRoleChangeRequest({
           ctaLabel: emailT("roleChangeApproved.cta"),
           ctaUrl: `${process.env.NEXTAUTH_URL ?? ""}/dashboard/settings/roles`,
         }),
+        dedupe: [requestId, "APPROVED"],
       },
     });
   } else {
@@ -196,6 +197,7 @@ export async function reviewRoleChangeRequest({
           ctaLabel: emailT("roleChangeRejected.cta"),
           ctaUrl: `${process.env.NEXTAUTH_URL ?? ""}/dashboard/settings/roles`,
         }),
+        dedupe: [requestId, "REJECTED"],
       },
     });
   }
