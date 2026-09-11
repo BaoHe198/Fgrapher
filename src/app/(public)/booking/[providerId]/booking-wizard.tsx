@@ -4,7 +4,7 @@ import { Check, ChevronLeft, ChevronRight, Clock, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { startTransition, useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { ModelSafetyNotice } from "@/components/booking/model-safety-notice";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -133,6 +133,24 @@ export function BookingWizard({
   const storageKey = `booking-draft-${providerId}`;
 
   const [step, setStep] = useState(0);
+  const stepSettledRef = useRef(false);
+
+  // Every step is taller than the viewport on a phone, and the Back/Continue
+  // buttons sit at the bottom — so changing step left the scroll position down
+  // there and the new step opened already scrolled past its own heading,
+  // looking as though the page had skipped content.
+  //
+  // In an effect keyed on `step`, not in the click handler: the handler runs
+  // before React commits the new step, so scrolling there measures the
+  // outgoing layout. Skipping the first run keeps a fresh (or deep-linked)
+  // page where it loaded instead of yanking it.
+  useEffect(() => {
+    if (!stepSettledRef.current) {
+      stepSettledRef.current = true;
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
   const [draft, setDraft] = useState<Draft>(() =>
     emptyDraft(contactPhoneDefault),
   );

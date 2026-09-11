@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { formatDayMonth } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { resolvePartyName } from "@/lib/party-name";
 
 export interface ConversationSummary {
   id: string;
@@ -17,6 +18,7 @@ export interface ConversationSummary {
     firstName: string | null;
     avatar: string | null;
     username: string | null;
+    profiles?: { displayName: string | null }[] | null;
   };
   lastMessage: {
     content: string;
@@ -26,13 +28,6 @@ export interface ConversationSummary {
   } | null;
   lastMessageAt: string | null;
   unreadCount: number;
-}
-
-function partyName(
-  user: ConversationSummary["otherUser"],
-  unknownLabel: string,
-) {
-  return user.firstName ?? user.name ?? unknownLabel;
 }
 
 function relativeTime(
@@ -92,7 +87,7 @@ export function ConversationList({
     if (!query.trim()) return conversations;
     const q = query.toLowerCase();
     return conversations.filter((c) =>
-      partyName(c.otherUser, unknownLabel).toLowerCase().includes(q),
+      resolvePartyName(c.otherUser, unknownLabel).toLowerCase().includes(q),
     );
   }, [conversations, query, unknownLabel]);
 
@@ -142,7 +137,7 @@ export function ConversationList({
                     <AvatarImage src={conversation.otherUser.avatar} alt="" />
                   ) : null}
                   <AvatarFallback>
-                    {partyName(
+                    {resolvePartyName(
                       conversation.otherUser,
                       unknownLabel,
                     )[0]?.toUpperCase()}
@@ -152,7 +147,7 @@ export function ConversationList({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-body-md font-semibold! text-text-primary">
-                      {partyName(conversation.otherUser, unknownLabel)}
+                      {resolvePartyName(conversation.otherUser, unknownLabel)}
                     </span>
                   </div>
                   <p className="truncate text-body-sm text-text-secondary">

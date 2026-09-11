@@ -32,6 +32,7 @@ import {
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ReportModal } from "@/components/modals/report-modal";
 import { formatDate, formatDayMonthLong, formatTime } from "@/lib/format";
+import { resolvePartyName } from "@/lib/party-name";
 import { compressImageFile } from "@/lib/image-compression";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,7 @@ interface ChatPartner {
   firstName: string | null;
   avatar: string | null;
   username: string | null;
+  profiles?: { displayName: string | null }[] | null;
 }
 
 const BOOKING_STATUS_VARIANT: Record<
@@ -80,10 +82,6 @@ const BOOKING_STATUS_VARIANT: Record<
   NO_SHOW: "destructive",
   EXPIRED: "neutral",
 };
-
-function partyName(user: ChatPartner, unknownLabel: string) {
-  return user.firstName ?? user.name ?? unknownLabel;
-}
 
 function dateSeparatorLabel(
   date: Date,
@@ -312,11 +310,11 @@ export function ChatPanel({
             <AvatarImage src={otherUser.avatar} alt="" />
           ) : null}
           <AvatarFallback>
-            {partyName(otherUser, t("unknown"))[0]?.toUpperCase()}
+            {resolvePartyName(otherUser, t("unknown"))[0]?.toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <span className="flex-1 text-heading-sm text-text-primary">
-          {partyName(otherUser, t("unknown"))}
+          {resolvePartyName(otherUser, t("unknown"))}
         </span>
 
         <DropdownMenu>

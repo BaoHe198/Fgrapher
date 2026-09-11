@@ -15,6 +15,16 @@ const PARTY_SELECT = {
   firstName: true,
   avatar: true,
   username: true,
+  // A provider's public identity is their Profile.displayName, which is what
+  // /profile/[username] shows. Without it the chat UI fell back to the
+  // account holder's personal name and disagreed with their own profile —
+  // see lib/party-name.ts.
+  profiles: {
+    where: { isPublished: true },
+    select: { displayName: true },
+    orderBy: { role: "asc" },
+    take: 1,
+  },
 } as const;
 
 export class MessagingError extends Error {
