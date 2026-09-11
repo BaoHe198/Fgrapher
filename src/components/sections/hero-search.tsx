@@ -19,6 +19,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -368,10 +369,20 @@ export function HeroSearch({
                   </div>
                 ))}
               </div>
-              <Button variant="accent" size="lg" onClick={onSearch}>
-                <Search className="size-4" />
-                {t("hero.cta")}
-              </Button>
+              {/* SheetFooter, not a bare Button: SheetContent has no padding
+                  of its own (every child brings its own), so a bare child sits
+                  flush against the sheet's edges — including `bottom: 0`. On
+                  iOS Safari the bottom-most pixel row of the page is what the
+                  browser samples to tint the strip around its floating
+                  toolbar, so an edge-to-edge accent button painted the whole
+                  footer gold. The footer's padding keeps the sheet's own
+                  surface as the bottom-most colour. */}
+              <SheetFooter>
+                <Button variant="accent" size="lg" onClick={onSearch}>
+                  <Search className="size-4" />
+                  {t("hero.cta")}
+                </Button>
+              </SheetFooter>
             </SheetContent>
           </Sheet>
         </div>
