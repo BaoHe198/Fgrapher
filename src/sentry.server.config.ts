@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import {
   sentryDataCollection,
+  sentryIgnoreErrors,
   sentryTracesSampleRate,
 } from "@/lib/sentry-shared";
 
@@ -12,6 +13,9 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   tracesSampleRate: sentryTracesSampleRate,
   dataCollection: sentryDataCollection,
+  // Client-disconnect noise from streamed SSR responses — see
+  // sentryIgnoreErrors for why, and for what it costs to hide it.
+  ignoreErrors: sentryIgnoreErrors,
   // Vercel sets this automatically per deployment ("production" |
   // "preview" | "development") — no env var to configure ourselves.
   // Lets Sentry's dashboard filter production errors out from Preview's

@@ -2,6 +2,8 @@ import * as Sentry from "@sentry/nextjs";
 
 import {
   sentryDataCollection,
+  sentryDenyUrls,
+  sentryIgnoreErrors,
   sentryTracesSampleRate,
 } from "@/lib/sentry-shared";
 
@@ -20,6 +22,11 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   tracesSampleRate: sentryTracesSampleRate,
   dataCollection: sentryDataCollection,
+  // Browser extensions inject scripts into our page, so their crashes arrive
+  // here as if they were ours. Dropping by frame origin keeps our own errors
+  // reportable even when they look identical — see sentryDenyUrls.
+  denyUrls: sentryDenyUrls,
+  ignoreErrors: sentryIgnoreErrors,
   // Only populated if Vercel project settings → Environment Variables →
   // "Automatically expose System Environment Variables" is checked;
   // otherwise silently falls back to "development" here (harmless, just
