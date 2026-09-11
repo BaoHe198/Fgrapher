@@ -20,9 +20,9 @@ import {
   formatDayMonth,
   formatDurationHours,
   formatMonthYear,
-  formatWeekdayShort,
 } from "@/lib/format";
-import { formatCurrency, cn } from "@/lib/utils";
+import { WEEKDAY_SHORT_LABELS_VI } from "@/lib/constants";
+import { formatCurrency, cn, mondayFirstColumn } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
 const SHOOT_TYPE_OPTION_KEYS = [
@@ -110,12 +110,6 @@ function emptyDraft(contactPhoneDefault: string): Draft {
     wardrobeNotes: "",
     muaProvided: false,
   };
-}
-
-function startOfDay(date: Date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
 }
 
 function toLocalDateKey(date: Date) {
@@ -574,9 +568,22 @@ function StepDateTime({
 }) {
   const t = useTranslations("publicPages.booking");
   const serviceT = useTranslations("sharedComponents.service");
-  const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
+  // A real calendar month, not a rolling 28-day window. The window version
+  // paged by ±28 days under a "tháng 9 năm 2026" heading, so its columns were
+  // whatever weekdays the window happened to start on — Sunday landed in a
+  // different column on every page — and a page could run past the month it
+  // was labelled with (… 29, 30, 1 …).
+  const [monthCursor, setMonthCursor] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [days, setDays] = useState<DayAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const monthEnd = useMemo(
+    () => new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 0),
+    [monthCursor],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -585,9 +592,9 @@ function StepDateTime({
       ? `&serviceId=${selectedServiceId}`
       : "";
     fetch(
-      `/api/availability/${providerId}?from=${toLocalDateKey(weekStart)}&to=${toLocalDateKey(
-        new Date(weekStart.getTime() + 27 * 86_400_000),
-      )}${serviceParam}`,
+      `/api/availability/${providerId}?from=${toLocalDateKey(
+        monthCursor,
+      )}&to=${toLocalDateKey(monthEnd)}${serviceParam}`,
     )
       .then((res) => res.json())
       .then((body) => {
@@ -601,10 +608,44 @@ function StepDateTime({
     return () => {
       cancelled = true;
     };
-  }, [providerId, weekStart, selectedServiceId]);
+  }, [providerId, monthCursor, monthEnd, selectedServiceId]);
 
   const activeDay = days.find((d) => d.date === date);
   const today = toLocalDateKey(new Date());
+
+  const dayByDate = useMemo(
+    () => new Map(days.map((d) => [d.date, d])),
+    [days],
+  );
+
+  // Leading blanks so the 1st lands under its real weekday column, then one
+  // cell per day of the month. Monday-first, matching every other fixed grid
+  // in the app (see WEEK_STARTS_ON).
+  const cells = useMemo<(string | null)[]>(
+    () => [
+      ...Array.from(
+        { length: mondayFirstColumn(monthCursor.getDay()) },
+        () => null,
+      ),
+      ...Array.from({ length: monthEnd.getDate() }, (_, i) =>
+        toLocalDateKey(
+          new Date(monthCursor.getFullYear(), monthCursor.getMonth(), i + 1),
+        ),
+      ),
+    ],
+    [monthCursor, monthEnd],
+  );
+
+  // Nothing bookable is ever in a past month, so don't let the visitor page
+  // back into empty grids.
+  const atCurrentMonth =
+    monthCursor.getFullYear() === new Date().getFullYear() &&
+    monthCursor.getMonth() === new Date().getMonth();
+
+  const changeMonth = (delta: number) =>
+    setMonthCursor(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1),
+    );
 
   return (
     <div className="flex flex-col gap-4">
@@ -618,30 +659,31 @@ function StepDateTime({
             <button
               type="button"
               aria-label={t("stepDateTime.previous")}
-              onClick={() =>
-                setWeekStart(
-                  (prev) => new Date(prev.getTime() - 28 * 86_400_000),
-                )
-              }
-              className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
+              disabled={atCurrentMonth}
+              onClick={() => changeMonth(-1)}
+              className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken disabled:pointer-events-none disabled:opacity-30"
             >
               <ChevronLeft className="size-4" />
             </button>
             <span className="text-body-md font-semibold! text-text-primary">
-              {formatMonthYear(weekStart)}
+              {formatMonthYear(monthCursor)}
             </span>
             <button
               type="button"
               aria-label={t("stepDateTime.next")}
-              onClick={() =>
-                setWeekStart(
-                  (prev) => new Date(prev.getTime() + 28 * 86_400_000),
-                )
-              }
+              onClick={() => changeMonth(1)}
               className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
             >
               <ChevronRight className="size-4" />
             </button>
+          </div>
+
+          {/* Fixed weekday header — the per-cell labels the rolling window
+              needed are redundant once the columns mean something. */}
+          <div className="grid grid-cols-7 gap-2 text-center text-caption-upper tracking-[0.06em] text-text-tertiary">
+            {WEEKDAY_SHORT_LABELS_VI.map((label) => (
+              <span key={label}>{label}</span>
+            ))}
           </div>
 
           {isLoading ? (
@@ -650,30 +692,34 @@ function StepDateTime({
             </div>
           ) : (
             <div className="grid grid-cols-7 gap-2">
-              {days.map((day) => {
-                const d = new Date(day.date);
-                const isSelected = day.date === date;
-                const isToday = day.date === today;
+              {cells.map((dateKey, i) => {
+                if (!dateKey) return <span key={`empty-${i}`} aria-hidden />;
+                const day = dayByDate.get(dateKey);
+                // A day the availability window didn't cover (or one already
+                // past) is shown, but not selectable — leaving a hole in the
+                // month would break the columns this grid exists to fix.
+                const unavailable = !day || day.busy || dateKey < today;
+                const isSelected = dateKey === date;
+                const isToday = dateKey === today;
                 return (
                   <button
-                    key={day.date}
+                    key={dateKey}
                     type="button"
-                    disabled={day.busy}
-                    onClick={() => onSelectDate(day.date)}
+                    disabled={unavailable}
+                    onClick={() => onSelectDate(dateKey)}
                     className={cn(
                       "flex flex-col items-center gap-0.5 rounded-[var(--fg-radius-sm)] py-2.5 text-body-sm",
                       isSelected
                         ? "bg-brand-primary text-text-on-brand"
-                        : day.busy
+                        : unavailable
                           ? "cursor-not-allowed text-text-tertiary opacity-40"
                           : `cursor-pointer hover:bg-bg-sunken ${isToday ? "border border-brand-primary" : ""}`,
                     )}
                   >
-                    <span className="text-text-tertiary">
-                      {formatWeekdayShort(d)}
+                    <span className="font-semibold">
+                      {Number(dateKey.slice(8, 10))}
                     </span>
-                    <span className="font-semibold">{d.getUTCDate()}</span>
-                    {!day.busy && day.slots.some((s) => s.available) ? (
+                    {!unavailable && day.slots.some((s) => s.available) ? (
                       <span className="size-1 rounded-full bg-brand-primary" />
                     ) : null}
                   </button>
