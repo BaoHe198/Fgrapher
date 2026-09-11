@@ -52,24 +52,32 @@ export function ServicesTab({
         </Badge>
       ) : null}
       {services.map((service) => (
+        // Stacked on phones, side-by-side from `sm` up. It used to be a row at
+        // every width: on a 390px screen the price and button took ~180px, so
+        // a package description was squeezed into ~170px and wrapped every two
+        // or three words. The text column also had no `min-w-0`, so instead of
+        // shrinking it overflowed and ran underneath the price.
         <div
           key={service.id}
-          className="flex items-center justify-between rounded-[var(--fg-radius-md)] bg-surface-card p-[18px] shadow-[var(--shadow-sm)]"
+          className="flex flex-col gap-4 rounded-[var(--fg-radius-md)] bg-surface-card p-[18px] shadow-[var(--shadow-sm)] sm:flex-row sm:items-start sm:justify-between sm:gap-6"
         >
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col items-start gap-1.5">
             <span className="text-heading-sm text-text-primary">
               {service.name}
             </span>
             {service.description ? (
-              <p className="whitespace-pre-line text-body-sm text-text-secondary">
+              <p className="whitespace-pre-line text-body-sm leading-relaxed text-text-secondary">
                 {service.description}
               </p>
             ) : null}
-            <span className="w-fit rounded-full bg-bg-sunken px-2.5 py-0.5 text-body-sm text-text-tertiary">
+            <span className="rounded-full bg-bg-sunken px-2.5 py-0.5 text-body-sm text-text-tertiary">
               {formatDuration(service.duration)}
             </span>
           </div>
-          <div className="flex items-center gap-3.5">
+          {/* Phones: price left, button right on their own row under the text.
+              From `sm`: back beside the text, top-aligned — `items-center`
+              floated the price into the middle of a long description. */}
+          <div className="flex shrink-0 items-center justify-between gap-3.5 sm:justify-end">
             <span className="text-heading-sm text-text-primary">
               {service.price === 0
                 ? t("tfpCollab")

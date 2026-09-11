@@ -4,7 +4,7 @@ import type { MediaType, ProfileCategory, Role } from "@prisma/client";
 import { CalendarDays, Loader2, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BookingSidebar } from "@/components/profile/booking-sidebar";
 import { useMessaging } from "@/components/providers/messaging-provider";
@@ -108,6 +108,26 @@ export function ProfileInteractive({
     null,
   );
   const [isOpeningChat, setIsOpeningChat] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [sidebarInView, setSidebarInView] = useState(false);
+
+  // The sticky bar exists only to reach actions that are off-screen. Once the
+  // BookingSidebar itself is on screen it carries the same two actions, so
+  // showing both meant four buttons doing two things — and the sticky "Đặt
+  // lịch" was actively useless there, since all it does is scroll to the
+  // sidebar the visitor is already looking at. Hide it while the sidebar is
+  // visible. rootMargin trims the sticky bar's own height off the bottom of
+  // the viewport so the handover happens before the two can overlap.
+  useEffect(() => {
+    const el = sidebarRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setSidebarInView(entry?.isIntersecting ?? false),
+      { rootMargin: "0px 0px -96px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Jump straight to the booking page with this service pre-selected
   // (booking-wizard.tsx reads ?service= on mount) — scrolling to the
@@ -189,7 +209,7 @@ export function ProfileInteractive({
         </Tabs>
       </div>
 
-      <div id="booking-sidebar">
+      <div id="booking-sidebar" ref={sidebarRef}>
         <BookingSidebar
           providerId={providerId}
           firstName={firstName}
@@ -200,7 +220,7 @@ export function ProfileInteractive({
         />
       </div>
 
-      {isOwnProfile ? null : (
+      {isOwnProfile || sidebarInView ? null : (
         <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-border-subtle bg-bg-surface p-3 shadow-[var(--shadow-lg)] lg:hidden">
           <Button
             variant="secondary"
