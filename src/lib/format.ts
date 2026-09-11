@@ -82,11 +82,29 @@ export function formatMonthYear(value: Date | string | number) {
 }
 
 // "CN" / "T2" / "T3"... — day-of-week abbreviation for a calendar grid.
+//
+// NOT Intl's "vi-VN" short weekday: that returns "Thứ 2".."Thứ 7" for Monday
+// through Saturday but a bare "CN" for Sunday. In a grid-cols-7 day strip the
+// cells are ~30px wide on a phone, so "Thứ 2" wrapped at its space onto two
+// lines while "CN" stayed on one — which pushed the day number in the Sunday
+// cell ~22px above every other day's, and the column read as though it had
+// jumped out of the row. These labels are uniform, 2-3 characters, and
+// space-free, so no cell can wrap.
+//
+// Same vocabulary as WEEKDAY_SHORT_LABELS_VI in lib/constants (the fixed
+// Monday-first month-grid header); kept as its own Sunday-first array here
+// because importing constants would make lib/utils -> lib/format circular.
+const WEEKDAY_SHORT_VI = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"] as const;
+const WEEKDAY_EN_ORDER = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 export function formatWeekdayShort(value: Date | string | number) {
-  return new Intl.DateTimeFormat("vi-VN", {
+  // Resolve which weekday it is in Asia/Ho_Chi_Minh rather than trusting the
+  // runtime's own zone — same reason every other formatter here pins it.
+  const weekday = new Intl.DateTimeFormat("en-US", {
     timeZone: HCM_TIME_ZONE,
     weekday: "short",
   }).format(toDate(value));
+  return WEEKDAY_SHORT_VI[WEEKDAY_EN_ORDER.indexOf(weekday)] ?? weekday;
 }
 
 // "Chủ Nhật, 13 tháng 9" — long-form, no year (matches how a single

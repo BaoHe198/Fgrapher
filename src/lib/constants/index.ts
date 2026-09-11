@@ -71,12 +71,14 @@ export const KYC_REJECTION_REASONS = [
 // mondayFirstColumn() in lib/utils.ts for converting between the two.
 export const WEEK_STARTS_ON = 1;
 
-// Monday-first short labels for a fixed weekly grid header. Deliberately
-// its own constant rather than reusing formatWeekdayShort() (Intl
-// "vi-VN" short weekday, e.g. "Th 2") — that formatter is also used for
-// per-day labels on the rolling-window booking widgets, which isn't a
-// week-start bug (see F3 VIỆC 5's investigation notes) and shouldn't
-// change format there.
+// Monday-first short labels for a fixed weekly grid header. Its own constant
+// rather than reusing formatWeekdayShort() because that one is indexed by an
+// actual date, not by column position — this header has no dates to hand.
+//
+// The two now share a vocabulary: formatWeekdayShort() used to return Intl's
+// "vi-VN" short weekday ("Thứ 2".."Thứ 7", but "CN"), whose space made the
+// non-Sunday labels wrap in a narrow day strip. It emits these same compact
+// forms now, so every calendar in the app says T2..T7/CN.
 export const WEEKDAY_SHORT_LABELS_VI = [
   "T2",
   "T3",
