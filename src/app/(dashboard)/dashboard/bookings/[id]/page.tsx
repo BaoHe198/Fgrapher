@@ -24,7 +24,12 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { StarInput } from "@/components/ui/star-input";
 import { Textarea } from "@/components/ui/textarea";
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
-import { formatDate, formatDateTime, formatWeekdayShort } from "@/lib/format";
+import {
+  formatDate,
+  formatDateTime,
+  formatDurationHours,
+  formatWeekdayShort,
+} from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
@@ -77,6 +82,7 @@ const DECLINE_REASON_VALUES = [
 
 export default function BookingDetailPage() {
   const t = useTranslations("dashboardCore.bookingDetail");
+  const serviceT = useTranslations("sharedComponents.service");
   const tBookings = useTranslations("dashboardCore.bookings");
   const params = useParams<{ id: string }>();
   const { data: session } = useSession();
@@ -391,8 +397,8 @@ export default function BookingDetailPage() {
               [
                 t("fields.duration"),
                 booking.service
-                  ? t("fields.durationMinutes", {
-                      minutes: booking.service.duration,
+                  ? serviceT("durationHours", {
+                      hours: formatDurationHours(booking.service.duration),
                     })
                   : "—",
               ],

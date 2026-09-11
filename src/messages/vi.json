@@ -1556,12 +1556,11 @@
         "service": "Dịch vụ",
         "date": "Ngày",
         "time": "Giờ",
-        "duration": "Thời lượng",
+        "duration": "Thời gian buổi chụp",
         "location": "Địa điểm",
         "people": "Số người",
         "total": "Tổng tiền",
-        "customRequest": "Yêu cầu tùy chỉnh",
-        "durationMinutes": "{minutes} phút"
+        "customRequest": "Yêu cầu tùy chỉnh"
       },
       "locationLabel": {
         "PROVIDER": "Tại studio nhà cung cấp",
@@ -2508,8 +2507,7 @@
       "stepService": {
         "heading": "Bạn cần gì?",
         "describeLabel": "Mô tả điều bạn đang tìm kiếm",
-        "describePlaceholder": "Cho họ biết bạn cần buổi chụp, sự kiện hay sản phẩm như thế nào...",
-        "durationMin": "{duration} phút"
+        "describePlaceholder": "Cho họ biết bạn cần buổi chụp, sự kiện hay sản phẩm như thế nào..."
       },
       "stepDateTime": {
         "heading": "Khi nào phù hợp với bạn?",
@@ -2517,7 +2515,6 @@
         "next": "Sau",
         "localTimeNote": "Giờ hiển thị theo múi giờ của bạn · cần đặt trước ít nhất 24 giờ",
         "selectDatePrompt": "Chọn một ngày để xem khung giờ trống.",
-        "sessionDuration": "Thời lượng: {duration} phút",
         "noAvailability": "Không có lịch trống vào ngày này — hãy thử ngày khác.",
         "bookingWith": "Đặt lịch với {providerName}",
         "booking": "Đặt lịch"
@@ -2550,10 +2547,9 @@
         "rowService": "Dịch vụ",
         "rowDate": "Ngày",
         "rowTime": "Giờ",
-        "rowDuration": "Thời lượng",
+        "rowDuration": "Thời gian buổi chụp",
         "rowLocation": "Địa điểm",
         "rowPeople": "Số người",
-        "durationMin": "{duration} phút",
         "servicePrice": "Giá dịch vụ",
         "total": "Tổng cộng",
         "notesLabel": "Ghi chú",
@@ -2664,9 +2660,7 @@
         "empty": "Chưa có gói dịch vụ nào",
         "tfpAvailable": "Nhận hợp tác TFP",
         "tfpCollab": "TFP / Hợp tác",
-        "book": "Đặt lịch",
-        "durationMinutes": "{count} phút",
-        "durationHours": "{count} giờ"
+        "book": "Đặt lịch"
       },
       "reviewsTab": {
         "sortNewest": "Mới nhất",
@@ -3434,6 +3428,10 @@
       "title": "Tài khoản của bạn đã bị tạm khóa",
       "body": "Bạn không thể tiếp tục sử dụng Fgrapher lúc này. Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ đội ngũ hỗ trợ. Bạn sẽ được đăng xuất tự động.",
       "signOut": "Đăng xuất"
+    },
+    "service": {
+      "sessionDuration": "Thời gian buổi chụp: {hours} giờ",
+      "durationHours": "{hours} giờ"
     }
   }
 }

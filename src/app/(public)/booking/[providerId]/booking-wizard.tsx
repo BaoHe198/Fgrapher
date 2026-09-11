@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   formatDateLong,
   formatDayMonth,
+  formatDurationHours,
   formatMonthYear,
   formatWeekdayShort,
 } from "@/lib/format";
@@ -481,6 +482,7 @@ function StepService({
   onCustomRequest: (value: string) => void;
 }) {
   const t = useTranslations("publicPages.booking");
+  const serviceT = useTranslations("sharedComponents.service");
   return (
     <div className="flex flex-col gap-4">
       <h2 className="text-heading-lg text-text-primary">
@@ -504,33 +506,41 @@ function StepService({
           {services.map((service) => {
             const isSelected = service.id === selectedServiceId;
             return (
+              // Fully stacked: the name and the description each get the
+              // card's whole width, and duration/price share the last row.
+              // This used to be a single flex row with the price in its own
+              // column, which on a phone left the description ~43% of a card
+              // that is itself only ~260px wide inside the step's Card — so a
+              // package description wrapped every two or three words, and a
+              // longer name broke across three lines.
               <button
                 key={service.id}
                 type="button"
                 onClick={() => onSelect(service.id)}
                 className={cn(
-                  "flex items-start justify-between rounded-[var(--fg-radius-md)] border p-5 text-left transition-colors",
+                  "flex flex-col gap-1.5 rounded-[var(--fg-radius-md)] border p-5 text-left transition-colors",
                   isSelected
                     ? "border-brand-primary bg-success-bg ring-1 ring-brand-primary"
                     : "border-border-default bg-bg-surface",
                 )}
               >
-                <div className="flex flex-col gap-1">
-                  <span className="text-heading-sm text-text-primary">
-                    {service.name}
+                <span className="text-heading-sm text-text-primary">
+                  {service.name}
+                </span>
+                {service.description ? (
+                  <span className="whitespace-pre-line text-body-sm leading-relaxed text-text-secondary">
+                    {service.description}
                   </span>
-                  {service.description ? (
-                    <span className="whitespace-pre-line text-body-sm text-text-secondary">
-                      {service.description}
-                    </span>
-                  ) : null}
-                  <span className="flex items-center gap-1 text-body-sm text-text-tertiary">
-                    <Clock className="size-3.5" />
-                    {t("stepService.durationMin", {
-                      duration: service.duration,
-                    })}
-                  </span>
-                </div>
+                ) : null}
+                {/* Duration and price each get their own line. Sharing one
+                    row put a ~26-character label next to the price inside a
+                    ~220px card, which broke the label across three lines. */}
+                <span className="flex items-center gap-1 pt-0.5 text-body-sm text-text-tertiary">
+                  <Clock className="size-3.5 shrink-0" />
+                  {serviceT("sessionDuration", {
+                    hours: formatDurationHours(service.duration),
+                  })}
+                </span>
                 <span className="text-heading-sm font-bold! text-text-primary">
                   {formatCurrency(service.price, service.currency)}
                 </span>
@@ -563,6 +573,7 @@ function StepDateTime({
   onSelectTime: (time: string) => void;
 }) {
   const t = useTranslations("publicPages.booking");
+  const serviceT = useTranslations("sharedComponents.service");
   const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
   const [days, setDays] = useState<DayAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -687,7 +698,9 @@ function StepDateTime({
               </span>
               {duration ? (
                 <span className="text-body-sm text-text-tertiary">
-                  {t("stepDateTime.sessionDuration", { duration })}
+                  {serviceT("sessionDuration", {
+                    hours: formatDurationHours(duration),
+                  })}
                 </span>
               ) : null}
               {isLoading ? (
@@ -946,6 +959,7 @@ function StepReview({
   onAgree: (v: boolean) => void;
 }) {
   const t = useTranslations("publicPages.booking");
+  const serviceT = useTranslations("sharedComponents.service");
   const locationLabel = getLocationLabel(t);
   const rows: [string, string][] = [
     [
@@ -958,7 +972,9 @@ function StepReview({
     [
       t("stepReview.rowDuration"),
       service
-        ? t("stepReview.durationMin", { duration: service.duration })
+        ? serviceT("durationHours", {
+            hours: formatDurationHours(service.duration),
+          })
         : "—",
     ],
     [

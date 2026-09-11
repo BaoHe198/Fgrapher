@@ -24,6 +24,22 @@ export function formatNumber(value: number) {
   return new Intl.NumberFormat("vi-VN").format(value);
 }
 
+// "2" / "1,5" — Service.duration is stored in MINUTES, but a shoot length is
+// always shown to the user in HOURS. Every screen used to decide for itself:
+// the profile's services tab showed "2 giờ" while the booking wizard's
+// package picker showed "120 phút" for the very same service, and the
+// date step said "Thời lượng: 120 phút". This is the one place minutes
+// become hours, so they can't drift apart again.
+//
+// Fractions are real (a 90-minute package is 1,5 giờ), so one decimal is
+// kept and a whole number never shows a trailing ",0". vi-VN throughout,
+// same deliberate choice as every other formatter in this file.
+export function formatDurationHours(minutes: number) {
+  return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(
+    minutes / 60,
+  );
+}
+
 // "05/03/2026"
 export function formatDate(value: Date | string | number) {
   return new Intl.DateTimeFormat("vi-VN", {

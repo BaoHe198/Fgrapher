@@ -1556,12 +1556,11 @@
         "service": "Service",
         "date": "Date",
         "time": "Time",
-        "duration": "Duration",
+        "duration": "Session length",
         "location": "Location",
         "people": "People",
         "total": "Total",
-        "customRequest": "Custom request",
-        "durationMinutes": "{minutes} min"
+        "customRequest": "Custom request"
       },
       "locationLabel": {
         "PROVIDER": "At provider's studio",
@@ -2508,8 +2507,7 @@
       "stepService": {
         "heading": "What do you need?",
         "describeLabel": "Describe what you're looking for",
-        "describePlaceholder": "Tell them what kind of shoot, event, or product you need...",
-        "durationMin": "{duration} min"
+        "describePlaceholder": "Tell them what kind of shoot, event, or product you need..."
       },
       "stepDateTime": {
         "heading": "When works for you?",
@@ -2517,7 +2515,6 @@
         "next": "Next",
         "localTimeNote": "Times shown in your local time · needs at least 24 hours notice",
         "selectDatePrompt": "Select a date to see open times.",
-        "sessionDuration": "Session: {duration} min",
         "noAvailability": "No availability on this date — try another.",
         "bookingWith": "Booking with {providerName}",
         "booking": "Booking"
@@ -2550,10 +2547,9 @@
         "rowService": "Service",
         "rowDate": "Date",
         "rowTime": "Time",
-        "rowDuration": "Duration",
+        "rowDuration": "Session length",
         "rowLocation": "Location",
         "rowPeople": "People",
-        "durationMin": "{duration} min",
         "servicePrice": "Service price",
         "total": "Total",
         "notesLabel": "Notes",
@@ -2664,9 +2660,7 @@
         "empty": "No service packages listed",
         "tfpAvailable": "TFP available",
         "tfpCollab": "TFP / Collaboration",
-        "book": "Book",
-        "durationMinutes": "{count} min",
-        "durationHours": "{count}h"
+        "book": "Book"
       },
       "reviewsTab": {
         "sortNewest": "Newest",
@@ -3434,6 +3428,10 @@
       "title": "Your account has been suspended",
       "body": "You can't continue using Fgrapher right now. If you think this is a mistake, please contact support. You'll be signed out automatically.",
       "signOut": "Sign out"
+    },
+    "service": {
+      "sessionDuration": "Session length: {hours} h",
+      "durationHours": "{hours} h"
     }
   }
 }
