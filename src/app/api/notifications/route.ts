@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { listNotifications } from "@/services/notification";
+import {
+  countUnreadNotifications,
+  listNotifications,
+} from "@/services/notification";
 
 export async function GET(request: Request) {
   const t = await getTranslations("apiMessages.notifications");
@@ -12,6 +15,16 @@ export async function GET(request: Request) {
 
     const unreadOnly = searchParams.get("unread") === "true";
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
+
+    // The bell polls this on a timer while it is closed and only needs the
+    // badge number — see countUnreadNotifications for why that matters.
+    if (searchParams.get("countOnly") === "true") {
+      const unreadCount = await countUnreadNotifications(session.user.id);
+      return NextResponse.json(
+        { data: null, error: null, message: null, unreadCount },
+        { status: 200 },
+      );
+    }
 
     const result = await listNotifications({
       userId: session.user.id,

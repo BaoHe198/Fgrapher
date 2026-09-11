@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 
+import { usePolling } from "@/hooks/use-polling";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import {
   ConversationList,
@@ -39,13 +40,11 @@ export function MessagesClient({
       });
   };
 
-  useEffect(() => {
-    // The first page already arrived via SSR (see page.tsx) — the poll
-    // interval still starts fresh from here, just without a redundant
-    // immediate refetch on mount.
-    const interval = setInterval(loadConversations, 15_000);
-    return () => clearInterval(interval);
-  }, []);
+  // The first page already arrived via SSR (see page.tsx). usePolling would
+  // normally fetch immediately on mount, which here would just re-fetch what
+  // the server already sent — `skipInitialRun` keeps that saved round trip
+  // while still pausing on hidden tabs and catching up on resume.
+  usePolling(loadConversations, { intervalMs: 15_000, skipInitialRun: true });
 
   useEffect(() => {
     const to = searchParams.get("to");

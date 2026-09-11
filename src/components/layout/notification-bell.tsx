@@ -17,9 +17,11 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { usePolling } from "@/hooks/use-polling";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -99,8 +101,9 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Full page: the rows the dropdown renders, plus the badge count.
   const load = () => {
-    fetch("/api/notifications?page=1")
+    return fetch("/api/notifications?page=1")
       .then((res) => res.json())
       .then((body) => {
         startTransition(() => {
@@ -111,15 +114,29 @@ export function NotificationBell() {
       .catch(() => {});
   };
 
-  useEffect(() => {
-    load();
-    // Poll every 30s until Socket.io real-time delivery lands in Phase 8.
-    const interval = setInterval(load, 30_000);
-    return () => clearInterval(interval);
-  }, []);
+  // Badge only. While the dropdown is shut, its rows are not on screen and
+  // nothing reads them — fetching a whole page (findMany + two counts) to
+  // render one integer was three queries for nothing.
+  const loadCount = () => {
+    return fetch("/api/notifications?countOnly=true")
+      .then((res) => res.json())
+      .then((body) => {
+        startTransition(() => setUnreadCount(body.unreadCount ?? 0));
+      })
+      .catch(() => {});
+  };
+
+  // Poll every 30s until real-time delivery lands (see CLAUDE.md). Paused
+  // while the tab is hidden, and cheap while the dropdown is closed.
+  usePolling(isOpen ? load : loadCount, {
+    intervalMs: 30_000,
+    resetKey: isOpen ? "open" : "closed",
+  });
 
   const onOpenChange = (open: boolean) => {
     setIsOpen(open);
+    // Opening swaps the poller to the full read; fetch the rows straight away
+    // rather than showing whatever was last there until the next tick.
     if (open) load();
   };
 

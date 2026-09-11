@@ -166,6 +166,24 @@ export async function notifyCritical(input: NotifyInput) {
 
 const NOTIFICATIONS_PAGE_SIZE = 20;
 
+/**
+ * Just the unread badge number.
+ *
+ * The bell polls while closed purely to keep that badge honest, and used to
+ * call listNotifications() to get it — a findMany plus two counts, three
+ * queries, to render one integer. Same type gate as the list read, so a
+ * disabled feature's stale rows never inflate the badge either.
+ */
+export async function countUnreadNotifications(userId: string) {
+  return db.notification.count({
+    where: {
+      userId,
+      type: { in: activeNotificationTypesFor(featureGate) },
+      readAt: null,
+    },
+  });
+}
+
 export async function listNotifications({
   userId,
   unreadOnly,

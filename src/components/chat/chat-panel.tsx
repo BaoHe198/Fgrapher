@@ -17,6 +17,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useEffect, useRef, useState } from "react";
 
+import { isFreshResponse, shouldMarkRead } from "@/hooks/polling-policy";
+import { usePolling } from "@/hooks/use-polling";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -177,35 +180,56 @@ export function ChatPanel({
   // refs are.
   const isSendingRef = useRef(false);
 
-  const load = async (scrollToBottom: boolean) => {
+  // Monotonic request stamp. usePolling never overlaps its own runs, but a
+  // manual refresh (onSend, a conversation switch) can be in flight next to a
+  // scheduled one — whichever was asked for first must not be allowed to
+  // overwrite a newer answer.
+  const latestSeqRef = useRef(0);
+  // The first load for a conversation jumps to the newest message; later
+  // polls must not yank the view while someone is reading back through it.
+  const scrollOnNextLoadRef = useRef(true);
+
+  const load = async (scrollToBottom?: boolean) => {
+    const seq = ++latestSeqRef.current;
     const res = await fetch(`/api/conversations/${conversationId}/messages`);
     const body = await res.json();
+    if (!isFreshResponse(seq, latestSeqRef.current)) return;
+
+    const next: ChatMessage[] = body.data ?? [];
     startTransition(() => {
-      setMessages(body.data ?? []);
+      setMessages(next);
       setIsLoading(false);
     });
-    if (scrollToBottom) {
+    if (scrollToBottom ?? scrollOnNextLoadRef.current) {
+      scrollOnNextLoadRef.current = false;
       requestAnimationFrame(() =>
         bottomRef.current?.scrollIntoView({ block: "end" }),
       );
     }
-    fetch(`/api/conversations/${conversationId}/read`, { method: "PATCH" });
+
+    // Only when the other side has actually sent something unread. This used
+    // to run after every single load — a two-row write every 2s for as long
+    // as a conversation stayed open, overwhelmingly writing nothing.
+    if (shouldMarkRead(next, currentUserId)) {
+      fetch(`/api/conversations/${conversationId}/read`, { method: "PATCH" });
+    }
   };
 
   useEffect(() => {
     startTransition(() => setIsLoading(true));
-    load(true);
-    // No live transport (Pusher/Socket.io) in this environment — polling is
-    // the pragmatic stand-in while a conversation is open. 2s (was 4s) so
-    // incoming messages from the other side feel closer to real-time; the
-    // sender's own messages no longer wait on this poll at all (see onSend).
-    const interval = setInterval(() => load(false), 2000);
-    return () => clearInterval(interval);
-    // `load` is a fresh closure every render but only truly depends on
-    // conversationId, already listed — switching conversations reloads and
-    // restarts the polling interval for the new one.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Switching conversations invalidates anything still in flight for the
+    // previous one, and the new one should open at its newest message.
+    latestSeqRef.current++;
+    scrollOnNextLoadRef.current = true;
   }, [conversationId]);
+
+  // No live transport (Pusher/Socket.io) in this environment — polling is the
+  // pragmatic stand-in while a conversation is open. 2s so incoming messages
+  // feel close to real-time; the sender's own messages don't wait on it at
+  // all (see onSend). usePolling is what keeps that affordable: it runs the
+  // first fetch itself, stops entirely while the tab is hidden, never lets
+  // two requests overlap, and refetches the instant the tab comes back.
+  usePolling(load, { intervalMs: 2000, resetKey: conversationId });
 
   const onSend = async (
     overrides?: Partial<{ content: string; type: string; mediaUrl: string }>,

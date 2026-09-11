@@ -6,12 +6,12 @@ import {
   startTransition,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
 
 import { MessagingPopup } from "@/components/messaging/messaging-popup";
+import { usePolling } from "@/hooks/use-polling";
 
 interface MessagingContextValue {
   isOpen: boolean;
@@ -50,20 +50,22 @@ export function MessagingProvider({ children }: { children: React.ReactNode }) {
   >(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
+  const loadUnreadCount = useCallback(() => {
     if (status !== "authenticated") return;
-    const load = () => {
-      fetch("/api/conversations/unread-count")
-        .then((res) => res.json())
-        .then((body) => {
-          startTransition(() => setUnreadCount(body.data?.count ?? 0));
-        })
-        .catch(() => {});
-    };
-    load();
-    const interval = setInterval(load, 20_000);
-    return () => clearInterval(interval);
+    return fetch("/api/conversations/unread-count")
+      .then((res) => res.json())
+      .then((body) => {
+        startTransition(() => setUnreadCount(body.data?.count ?? 0));
+      })
+      .catch(() => {});
   }, [status]);
+
+  // A header badge nobody is looking at does not need refreshing; this used
+  // to keep counting every 20s in backgrounded tabs.
+  usePolling(loadUnreadCount, {
+    intervalMs: 20_000,
+    enabled: status === "authenticated",
+  });
 
   const open = useCallback((conversationId?: string) => {
     setIsOpen(true);

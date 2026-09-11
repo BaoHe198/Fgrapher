@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { startTransition, useEffect, useRef, useState } from "react";
 
+import { usePolling } from "@/hooks/use-polling";
+
 import { Button } from "@/components/ui/button";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import {
@@ -58,12 +60,12 @@ export function MessagingPopup({
       .catch(() => {});
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-    loadConversations();
-    const interval = setInterval(loadConversations, 15_000);
-    return () => clearInterval(interval);
-  }, [isOpen]);
+  // Paused while closed, minimized, or the tab is hidden; refreshes the
+  // moment any of those comes back (see usePolling).
+  usePolling(loadConversations, {
+    intervalMs: 15_000,
+    enabled: isOpen && !isMinimized,
+  });
 
   // open(conversationId) (e.g. from booking-sidebar's "Message" button,
   // which creates the conversation via POST /api/conversations right
@@ -188,65 +190,62 @@ export function MessagingPopup({
     </div>
   );
 
+  // ONE container, responsive — full-screen takeover below `sm`, floating
+  // panel from `sm` up. This used to be two sibling <div>s, each rendering
+  // `body`, with CSS hiding whichever didn't apply. CSS hides; it does not
+  // unmount — so an open conversation mounted TWO ChatPanels and every one of
+  // their polls, reads and renders happened twice. Minimizing didn't help
+  // either: the desktop branch dropped `body`, but the mobile one kept
+  // rendering it behind `sm:hidden`, so a "minimized" popup went on polling.
+  //
+  // aria-modal stays "false" at both sizes. The desktop panel is deliberately
+  // non-modal (it must not block the page), and the mobile takeover never
+  // marked the rest of the page inert either, so "true" was overclaiming.
+  // The Tab-cycle trap above is what actually contains focus.
   return (
-    <>
-      {/* Desktop / tablet — non-modal floating panel, >=sm only. */}
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="false"
-        aria-label={t("title")}
-        style={{ zIndex: Z_INDEX.messagingPanel }}
-        className={cn(
-          "fixed right-4 bottom-4 hidden w-[360px] flex-col overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card shadow-xl sm:flex",
-          isMinimized ? "h-auto" : "h-[520px]",
-        )}
-      >
-        {isMinimized ? (
-          <button
-            type="button"
-            onClick={onRestore}
-            className="flex items-center gap-2 px-3.5 py-2.5 text-left"
+    <div
+      ref={panelRef}
+      role="dialog"
+      aria-modal="false"
+      aria-label={t("title")}
+      style={{
+        zIndex: isMinimized ? Z_INDEX.messagingPanel : Z_INDEX.overlay,
+      }}
+      className={cn(
+        "fixed inset-0 flex flex-col bg-surface-card",
+        "sm:inset-auto sm:right-4 sm:bottom-4 sm:w-[360px] sm:overflow-hidden sm:rounded-[var(--fg-radius-lg)] sm:border sm:border-border-subtle sm:shadow-xl",
+        isMinimized ? "sm:h-auto" : "sm:h-[520px]",
+      )}
+    >
+      {isMinimized ? (
+        <button
+          type="button"
+          onClick={onRestore}
+          className="flex items-center gap-2 px-3.5 py-2.5 text-left"
+        >
+          <MessageCircle className="size-4 text-brand-primary" />
+          <span className="text-body-md font-semibold! text-text-primary">
+            {t("title")}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            aria-label={t("closeAria")}
+            className="ml-auto"
           >
-            <MessageCircle className="size-4 text-brand-primary" />
-            <span className="text-body-md font-semibold! text-text-primary">
-              {t("title")}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              aria-label={t("closeAria")}
-              className="ml-auto"
-            >
-              <X className="size-4" />
-            </Button>
-          </button>
-        ) : (
-          <>
-            {header}
-            <div className="min-h-0 flex-1">{body}</div>
-          </>
-        )}
-      </div>
-
-      {/* Mobile — full-screen takeover, <sm only. */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("title")}
-        style={{ zIndex: Z_INDEX.overlay }}
-        className={cn(
-          "fixed inset-0 flex flex-col bg-surface-card sm:hidden",
-          isMinimized && "hidden",
-        )}
-      >
-        {header}
-        <div className="min-h-0 flex-1">{body}</div>
-      </div>
-    </>
+            <X className="size-4" />
+          </Button>
+        </button>
+      ) : (
+        <>
+          {header}
+          <div className="min-h-0 flex-1">{body}</div>
+        </>
+      )}
+    </div>
   );
 }
