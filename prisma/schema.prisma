@@ -50,9 +50,14 @@ model User {
   // Hồ Chí Minh's 168 wards only, so most non-HCMC users won't have one
   // yet, and existing rows predate this field entirely.
   wardId                  String?
-  // Required at registration for the MODEL role (age gate — see
-  // services/age-gate.ts), private, never displayed. Profile pages only
-  // ever show a computed age RANGE, never this value or an exact age.
+  // Age gate (Prompt B3) — required at registration for EVERY account,
+  // not just MODEL, per CLAUDE.md's ràng buộc #4. Enforced by
+  // isAtLeast18() from lib/age-gate.ts, wired into both registerSchema
+  // (credentials signup) and completeProfileSchema (the equivalent step
+  // OAuth signups hit on first dashboard visit) in lib/validations/
+  // auth.ts. Private, never returned to the client or displayed: profile
+  // pages only ever show a computed age RANGE (getAgeRangeLabel), never
+  // this value or an exact age.
   dateOfBirth             DateTime? @db.Date
   // Provider-only: whether new booking requests are currently open.
   acceptingBookings       Boolean   @default(true)
@@ -318,9 +323,17 @@ enum Role {
   ADMIN
 }
 
-// Identity verification state for roles that need it (currently MODEL
-// only). UNVERIFIED is the default for every role — most roles never move
-// off it, since only MODEL's onboarding/publish flow reads this field.
+// Identity verification state, held per (user, role) on UserRole below.
+// Required for EVERY provider role, not just MODEL (Prompt B3 — see that
+// model's comment, and Luật Thương mại điện tử 122/2025's seller-
+// verification duty as read by CLAUDE.md's ràng buộc #5). Read
+// role-agnostically at every gate: setProfilePublished() (services/
+// public-profile.ts — the single write path for Profile.isPublished),
+// the RequestOffer create/accept paths, self-removal of a role
+// (/api/users/roles/[role]), the public "Verified" badge, and the
+// role-change-request flow. UNVERIFIED is the default; CUSTOMER/ADMIN
+// are the roles that legitimately stay there, since neither publishes a
+// profile nor receives bookings.
 enum VerificationStatus {
   UNVERIFIED
   PENDING
@@ -514,14 +527,14 @@ model Payment {
   // stripePaymentId was required+unique before this change; now optional
   // so non-Stripe rows can simply leave it null (a unique index allows
   // multiple NULLs in Postgres — existing Stripe rows are unaffected).
-  stripePaymentId String? @unique
+  stripePaymentId       String? @unique
   // Our own generated order/reference id, sent to MoMo/ZaloPay as their
   // order id, or the code a bank-transfer customer is asked to put in
   // their transfer message so an admin can match it against a bank
   // statement. This is what confirmMomoPayment/confirmZalopayPayment
   // look the row up by — MoMo/ZaloPay's IPN payload doesn't carry any ID
   // of ours other than the one we handed them at creation.
-  providerOrderId String? @unique
+  providerOrderId       String? @unique
   // MoMo's transId / ZaloPay's zp_trans_id — only known once the
   // provider actually confirms the payment, never set at intent-creation.
   providerTransactionId String?
@@ -1606,7 +1619,7 @@ model EmailVerificationToken {
   // tokens behind, so the promise that issuing a new link kills the old
   // one would be false. The constraint makes that a database guarantee
   // rather than a race the application usually wins.
-  userId String @unique
+  userId    String   @unique
   // SHA-256 of the token, never the token itself, so a leaked dump of
   // THIS table (or a read through an unrelated SQL injection) can't be
   // replayed to verify — and therefore take over — an account whose owner

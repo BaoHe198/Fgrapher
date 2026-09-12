@@ -43,10 +43,6 @@ Các chốt chặn thật trong code:
 - `services/request-offers.ts` — chỉ role `VERIFIED` mới gửi được báo giá
 - `services/bookings.ts` — `VERIFIED_ROLE_SELECT` dùng khi hiển thị vai trò provider
 
-Lưu ý: comment phía trên `enum VerificationStatus` trong `schema.prisma` còn viết
-"currently MODEL only" — **comment đó đã cũ**, code thật gate mọi role. Nếu có sửa
-vùng đó thì sửa luôn comment.
-
 Khi thêm role mới vào enum `Role`, mặc định coi là provider role phải xác minh,
 trừ khi người dùng nói rõ ngược lại. Hỏi lại nếu không chắc.
 
@@ -99,10 +95,15 @@ Quy tắc (khớp với `services/compliance.ts`):
 
 ### 3. Tuổi tối thiểu 18 — áp dụng cho mọi vai trò
 
-`dateOfBirth` là bắt buộc khi đăng ký, kiểm tra bằng `isAtLeast18()` trong
-`src/lib/validations/auth.ts` (cả schema client và server). Không phải chỉ role
-`MODEL`. Giá trị này là dữ liệu riêng tư — trang hồ sơ chỉ hiển thị **khoảng tuổi**,
-không bao giờ hiện ngày sinh hay tuổi chính xác.
+`dateOfBirth` là bắt buộc khi đăng ký, kiểm tra bằng `isAtLeast18()`
+(`src/lib/age-gate.ts`), gắn vào cả `registerSchema` (đăng ký bằng mật khẩu) lẫn
+`completeProfileSchema` (bước tương đương mà tài khoản Google phải làm ở lần vào
+dashboard đầu tiên) — cả hai trong `src/lib/validations/auth.ts`. Không phải chỉ
+role `MODEL`.
+
+Giá trị này là dữ liệu riêng tư — không bao giờ trả về client; trang hồ sơ chỉ
+hiển thị **khoảng tuổi** qua `getAgeRangeLabel()`, không bao giờ hiện ngày sinh
+hay tuổi chính xác.
 
 ### 4. Ảnh có người nhận diện được cần consent riêng
 
