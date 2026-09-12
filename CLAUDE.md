@@ -368,6 +368,23 @@ fresh look with real browser devtools, not headless/CDP testing.
 - Prefer Server Components — only add `"use client"` when truly needed
 - Commit messages: `type(scope): description` — e.g. `feat(auth): add Google OAuth provider`
 
+## Working with the project owner
+
+Set by the owner, 12/09/2026. These govern when to stop and ask, not what to build.
+
+- **Don't ask permission to run things.** Commands, test suites, builds,
+  throwaway scripts, browser measurements, local commits — just run them and
+  keep going. Being interrupted costs the owner more than a wrong command does.
+- **Do ask about solution direction.** Which approach to take, whether to accept
+  a scope that changes behaviour, a trade-off with real consequences — those are
+  the owner's call. Ask them _after_ finishing everything that doesn't depend on
+  the answer, not instead of working.
+- **"Don't ask" is not "don't tell".** Still report what was run, what was
+  measured, and what failed.
+- **Write the closing summary for a non-coder**, in Vietnamese: what changed and
+  why it matters, not the mechanics. Technical detail belongs in commit messages
+  and code comments, which are English as usual.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
