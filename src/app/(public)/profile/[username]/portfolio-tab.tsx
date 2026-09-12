@@ -33,6 +33,12 @@ interface MediaItem {
   url: string;
   type: MediaType;
   title: string | null;
+  // Used to lay the mosaic out at each photo's real aspect ratio. A
+  // photographer framed the shot; cropping it to a uniform tile throws
+  // away the composition they are being hired for. Nullable because rows
+  // predating the width/height columns exist.
+  width: number | null;
+  height: number | null;
 }
 
 interface AlbumItem {
@@ -157,6 +163,32 @@ function AlbumTile({
   );
 }
 
+function AlbumChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-body-sm whitespace-nowrap transition-colors",
+        active
+          ? "border-brand-primary bg-brand-primary text-text-on-brand"
+          : "border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary",
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
 interface PortfolioTabProps {
   albums: AlbumItem[];
   // Only present (non-null) when isOwnProfile — see profile-interactive.tsx.
@@ -183,6 +215,12 @@ export function PortfolioTab({
   const categoryT = useTranslations("profileCategory");
   const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  // Visitor-side album filter. null = every photo, which is the default:
+  // most visitors want to see the work, not pick a folder first.
+  const [activeAlbumId, setActiveAlbumId] = useState<string | null>(null);
+  // Index into visiblePhotos; null = closed. Separate from openAlbumId,
+  // which drives the owner grid's per-album preview.
+  const [photoIndex, setPhotoIndex] = useState<number | null>(null);
   const [localOwnerAlbums, setLocalOwnerAlbums] = useState(ownerAlbums ?? []);
   const [editingAlbum, setEditingAlbum] = useState<OwnerAlbum | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -201,6 +239,18 @@ export function PortfolioTab({
   }
 
   const openAlbum = albums.find((a) => a.id === openAlbumId) ?? null;
+
+  // Every approved photo, flattened across albums, each carrying the album
+  // it came from so the lightbox can still show that context.
+  const allPhotos = albums.flatMap((album) =>
+    album.media.map((media) => ({ ...media, album })),
+  );
+  const visiblePhotos =
+    activeAlbumId === null
+      ? allPhotos
+      : allPhotos.filter((photo) => photo.album.id === activeAlbumId);
+  const openPhoto =
+    photoIndex === null ? null : (visiblePhotos[photoIndex] ?? null);
 
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -282,53 +332,77 @@ export function PortfolioTab({
           </SortableContext>
         </DndContext>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {albums.map((album) => (
-            <button
-              key={album.id}
-              type="button"
-              onClick={() => {
-                setOpenAlbumId(album.id);
-                setLightboxIndex(0);
-              }}
-              className="group relative flex h-[200px] cursor-pointer flex-col justify-end overflow-hidden rounded-xl bg-bg-sunken text-left"
-            >
-              {album.coverMedia ? (
-                album.coverMedia.type === "VIDEO" ? (
-                  <video
-                    src={album.coverMedia.url}
-                    className="absolute inset-0 size-full object-cover"
-                    muted
-                  />
+        <>
+          {/* Album chips only earn their space once there is more than one
+              body of work to switch between. */}
+          {albums.length > 1 ? (
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              <AlbumChip
+                label={t("allAlbums")}
+                active={activeAlbumId === null}
+                onClick={() => setActiveAlbumId(null)}
+              />
+              {albums.map((album) => (
+                <AlbumChip
+                  key={album.id}
+                  label={album.title}
+                  active={activeAlbumId === album.id}
+                  onClick={() => setActiveAlbumId(album.id)}
+                />
+              ))}
+            </div>
+          ) : null}
+
+          {/* CSS columns, not a grid: every photo keeps its own aspect
+              ratio, so a portrait stays a portrait and nothing is cropped
+              to fit a tile. Two columns on a phone — one photo per screen
+              is not a portfolio, it is a slideshow. */}
+          <div className="columns-2 gap-3 sm:columns-3 [&>*]:mb-3">
+            {visiblePhotos.map((photo, index) => (
+              <button
+                key={photo.id}
+                type="button"
+                onClick={() => setPhotoIndex(index)}
+                aria-label={photo.title ?? t("photoAria")}
+                className="block w-full cursor-pointer overflow-hidden rounded-xl bg-bg-sunken break-inside-avoid focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:outline-none"
+              >
+                {photo.type === "VIDEO" ? (
+                  <video src={photo.url} className="w-full" muted playsInline />
                 ) : (
                   <Image
-                    src={buildMediaVariants(album.coverMedia.url).thumbnail}
-                    alt={album.title}
-                    fill
-                    className="object-cover transition-transform duration-150 group-hover:scale-105"
+                    src={buildMediaVariants(photo.url).medium}
+                    alt={photo.title ?? ""}
+                    width={photo.width ?? 800}
+                    height={photo.height ?? 1000}
+                    className="h-auto w-full"
+                    sizes="(min-width: 640px) 30vw, 45vw"
                     unoptimized
                   />
-                )
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ImageOff className="size-8 text-text-tertiary" />
-                </div>
-              )}
-              <div className="relative z-10 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
-                <p className="truncate text-body-sm font-semibold! text-white">
-                  {album.title}
-                </p>
-                <p className="text-body-sm text-white/80">
-                  {t("photoCount", { count: album.media.length })}
-                </p>
-              </div>
-            </button>
-          ))}
-        </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
       {isOwnProfile && !canEdit ? (
         <p className="text-body-sm text-text-tertiary">{t("upgradeHint")}</p>
+      ) : null}
+
+      {openPhoto ? (
+        <MediaLightbox
+          items={visiblePhotos}
+          index={photoIndex ?? 0}
+          onClose={() => setPhotoIndex(null)}
+          onIndexChange={setPhotoIndex}
+          title={openPhoto.album.title}
+          description={openPhoto.album.description}
+          categoryLabel={
+            openPhoto.album.category
+              ? categoryT(openPhoto.album.category)
+              : undefined
+          }
+        />
       ) : null}
 
       {openAlbum ? (

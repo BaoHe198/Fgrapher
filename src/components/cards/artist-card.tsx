@@ -80,7 +80,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
         className="group cursor-pointer overflow-hidden transition-shadow duration-150 hover:shadow-[var(--shadow-md)]"
       >
         <div
-          className="relative aspect-[3/4] w-full bg-bg-sunken"
+          className="relative aspect-[4/5] w-full bg-bg-sunken"
           onTouchStart={hasPhotos ? onTouchStart : undefined}
           onTouchEnd={hasPhotos ? onTouchEnd : undefined}
         >
@@ -166,12 +166,13 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
           ) : (
             <div
               className="flex size-full items-center justify-center"
-              style={{
-                background:
-                  "linear-gradient(135deg, var(--green-900), var(--green-500) 60%, var(--gold-300))",
-              }}
+              // Quiet on purpose: a provider with no work yet should not
+              // out-shout the ones with a portfolio. Was a saturated brand
+              // gradient, which made every empty card the brightest tile
+              // in the grid.
+              style={{ background: "var(--bg-sunken)" }}
             >
-              <Avatar className="size-[64px] border-2 border-white/50">
+              <Avatar className="size-[64px] border border-border-default">
                 {artist.avatar ? (
                   <AvatarImage src={artist.avatar} alt={artist.name} />
                 ) : null}
@@ -184,7 +185,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
                   {initial}
                 </AvatarFallback>
               </Avatar>
-              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-caption text-white/80">
+              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-caption text-text-tertiary">
                 {t("noPhotoLabel")}
               </span>
             </div>
@@ -222,8 +223,12 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
 
           <div className="flex flex-wrap gap-1">
             {visibleRoles.map((role) => (
-              <Badge key={role} variant="accent">
-                {role}
+              // min-w-0 + truncate: Badge is shrink-0 by default, and a long
+              // Vietnamese role name ("Chuyên viên trang điểm") overflowed
+              // the card at two-column mobile widths, getting clipped
+              // mid-word by the card's overflow-hidden.
+              <Badge key={role} variant="accent" className="min-w-0 shrink">
+                <span className="truncate">{role}</span>
               </Badge>
             ))}
             {extraRoleCount > 0 ? (

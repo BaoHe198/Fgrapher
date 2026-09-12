@@ -494,6 +494,15 @@ export const FEATURED_RATED_PROVIDER_WHERE = {
  * section, backfilled with the newest published providers when there aren't
  * enough reviewed ones yet — never pads with fake data.
  */
+// The landing page's featured strip is a shop window for a portfolio
+// marketplace: a card with nothing to show sells nobody. Providers with no
+// approved photo are excluded outright rather than padded in — the strip
+// showing three of four cards reading "no portfolio yet" was the first
+// thing a visitor saw.
+const HAS_APPROVED_MEDIA = {
+  some: { moderationStatus: "APPROVED", deletedAt: null },
+} satisfies Prisma.ProfileMediaListRelationFilter;
+
 async function getFeaturedProfilesUncached(limit = 4) {
   // A groupBy only returns groups that have at least one row, so every
   // entry here already has reviewCount >= 1. reviewedId is a User, so this
@@ -523,6 +532,7 @@ async function getFeaturedProfilesUncached(limit = 4) {
           user: PUBLIC_USER_FILTER,
           role: { in: SEARCHABLE_ROLES },
           userId: { in: rated.map((r) => r.reviewedId) },
+          media: HAS_APPROVED_MEDIA,
         },
         include: PROVIDER_INCLUDE,
       })
@@ -544,6 +554,7 @@ async function getFeaturedProfilesUncached(limit = 4) {
         user: PUBLIC_USER_FILTER,
         role: { in: SEARCHABLE_ROLES },
         userId: excludeUserIds.length ? { notIn: excludeUserIds } : undefined,
+        media: HAS_APPROVED_MEDIA,
       },
       orderBy: { createdAt: "desc" },
       take: needed * SEARCHABLE_ROLES.length,

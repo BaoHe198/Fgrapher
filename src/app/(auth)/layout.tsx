@@ -62,12 +62,13 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
               />
             </div>
           </div>
-          <blockquote className="relative flex max-w-[440px] flex-col gap-3">
-            <p className="text-heading-lg text-gold-50">
-              &ldquo;{t("quote")}&rdquo;
-            </p>
-            <span className="text-body-sm text-gold-300">{t("quoteBy")}</span>
-          </blockquote>
+          {/* Not a testimonial: Fgrapher has no users yet, so a quote
+              attributed to a "verified provider" would be invented. States
+              what the platform does instead, in its own voice. */}
+          <div className="relative flex max-w-[440px] flex-col gap-3">
+            <p className="text-heading-lg text-gold-50">{t("pitch")}</p>
+            <span className="text-body-sm text-gold-300">{t("pitchSub")}</span>
+          </div>
         </div>
       </div>
     </div>

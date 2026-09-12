@@ -337,6 +337,13 @@ export function BookingSidebar({
       >
         {t("bookNow")}
       </Button>
+      {/* The page's main action starts disabled, which on its own reads as
+          "broken" rather than "not yet". Say what is missing. */}
+      {!selectedDate || !selectedTime ? (
+        <p className="text-center text-body-sm text-text-tertiary">
+          {t("pickDateHint")}
+        </p>
+      ) : null}
       <Button
         variant="ghost"
         className="w-full"

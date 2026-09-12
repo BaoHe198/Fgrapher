@@ -23,9 +23,15 @@ import { useAccountMediaUpload } from "@/hooks/use-account-media-upload";
 
 export function ProfileCover({
   coverImage,
+  fallbackImage,
   isOwnProfile,
 }: {
   coverImage: string | null;
+  // A provider's own best approved photo, used when they haven't set a
+  // cover. A photographer's page whose largest element is a brand
+  // gradient is advertising the platform instead of their work — their
+  // portfolio is the one thing a visitor came to see.
+  fallbackImage: string | null;
   isOwnProfile: boolean;
 }) {
   const t = useTranslations("publicPages.profile.hero");
@@ -45,20 +51,31 @@ export function ProfileCover({
     initialCoverImage: coverImage,
   });
 
-  const displayCover = isOwnProfile ? liveCoverImage : coverImage;
+  const chosenCover = (isOwnProfile ? liveCoverImage : coverImage) ?? null;
+  const displayCover = chosenCover ?? fallbackImage;
+  // A real photo behind the avatar and action buttons needs a scrim to
+  // keep them legible; the brand gradient was already dark enough not to.
+  // Only when we fell back — an owner-chosen cover is their composition
+  // to frame, so it is left untouched.
+  const needsScrim = !chosenCover && Boolean(fallbackImage);
 
   return (
     <div className="relative h-[200px] w-full sm:h-[240px]">
       {displayCover ? (
-        <Image
-          src={displayCover}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-          unoptimized={isOwnProfile}
-        />
+        <>
+          <Image
+            src={displayCover}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+            unoptimized={isOwnProfile}
+          />
+          {needsScrim ? (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/10" />
+          ) : null}
+        </>
       ) : (
         <div
           className="size-full"

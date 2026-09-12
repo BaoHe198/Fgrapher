@@ -96,7 +96,6 @@
     "travelWilling": "Willing to travel"
   },
   "hero": {
-    "eyebrow": "THE PLATFORM FOR VISUAL CREATORS",
     "title": "Find the artist who'll capture your best memories",
     "sub": "Finding the right photographer, videographer, make-up artist, model, or studio isn't always easy. Fgrapher helps you meet the right person — matched on style, budget, and distance — then invites you to leave an honest review after every session.",
     "searchPh": "Search artists or studios",
@@ -117,9 +116,9 @@
   },
   "home": {
     "featured": "Featured on Fgrapher",
-    "seeAll": "See all →",
+    "seeAll": "See all",
     "studios": "Studios for rent",
-    "browseStudios": "Browse studios →",
+    "browseStudios": "Browse studios",
     "f1t": "Discover",
     "f1b": "Filter by role, city, price and availability — every profile is a portfolio first.",
     "f2t": "Book",
@@ -131,9 +130,9 @@
     "ctaBtn": "Become a provider"
   },
   "foot": {
-    "discover": "DISCOVER",
-    "providers": "PROVIDERS",
-    "company": "COMPANY",
+    "discover": "Discover",
+    "providers": "For providers",
+    "company": "Company",
     "pricing": "Pricing",
     "tools": "Booking tools",
     "sell": "Sell gear",
@@ -448,14 +447,14 @@
   },
   "accountFlows": {
     "authLayout": {
-      "quote": "Fgrapher put my portfolio in front of the right clients. I book twice as many sessions now.",
-      "quoteBy": "Verified provider on Fgrapher",
       "imageAlt": {
         "photographer": "Photographer at work",
         "videographer": "Videographer filming with professional camera gear",
         "makeupArtist": "Make-up artist applying makeup on a client",
         "studio": "Professional studio lighting"
-      }
+      },
+      "pitch": "Your profile is a portfolio, not a form.",
+      "pitchSub": "Clients see your work, read real reviews, and pick a date — all on one page."
     },
     "login": {
       "metaTitle": "Sign in or create an account — Fgrapher",
@@ -481,12 +480,12 @@
       "genericError": "Something went wrong. Please try again.",
       "title": "Create your account",
       "subtitle": "Join Fgrapher and start booking or getting booked.",
-      "iAmA": "I AM A",
+      "iAmA": "I am a",
       "customerLabel": "Customer",
       "customerDesc": "Book artists and buy gear",
       "providerLabel": "Creative pro",
       "providerDesc": "Get booked and sell",
-      "whatDoYouOffer": "WHAT DO YOU OFFER?",
+      "whatDoYouOffer": "What do you offer?",
       "changeLaterNote": "You can change this later. Customer access is always free.",
       "billingNotice": "Free during this stage. If Fgrapher introduces fees in the future, we'll give at least 30 days' notice.",
       "contentGuidelinesConfirm": "I confirm I'm 18 or older and agree to the ",
@@ -2586,7 +2585,7 @@
       },
       "headingWithRoleCity": "{role}s in {city}",
       "headingDefault": "Browse artists",
-      "resultsCount": "{count} results · {sort}",
+      "resultsCount": "{count} results, sorted by {sort}",
       "filterAvailableNow": "Available now",
       "filterInstantBook": "Instant book",
       "filterTopRated": "Top rated",
@@ -2671,7 +2670,9 @@
         "editAlbumAria": "Edit album",
         "newAlbumTile": "New album",
         "draftBadge": "Not public yet",
-        "upgradeHint": "Renew your subscription to create new albums."
+        "upgradeHint": "Renew your subscription to create new albums.",
+        "allAlbums": "All",
+        "photoAria": "View larger"
       },
       "servicesTab": {
         "empty": "No service packages listed",
@@ -2712,7 +2713,8 @@
         "availabilityDialogTitle": "Availability",
         "fullCalendarLink": "Manage in full calendar",
         "stickyMessage": "Message",
-        "stickyBook": "Book now"
+        "stickyBook": "Book now",
+        "pickDateHint": "Pick a date and time to continue."
       },
       "hero": {
         "editCoverAria": "Edit cover photo",
@@ -2721,7 +2723,7 @@
       },
       "albumEditDialog": {
         "title": "Edit album",
-        "managePhotosLink": "Manage photos →"
+        "managePhotosLink": "Manage photos"
       }
     },
     "roleProvinceLanding": {
@@ -2797,7 +2799,7 @@
     "pricing": {
       "pageTitle": "Pricing — Fgrapher",
       "freeDuringLaunch": "Everything is free during our launch period. We'll give at least 30 days' notice before we start charging.",
-      "eyebrow": "PRICING",
+      "eyebrow": "Pricing",
       "heroTitle": "Plans that grow with your craft",
       "heroSub": "One flat subscription per role, billed in VND — no commission on bookings, ever.",
       "billingToggle": {

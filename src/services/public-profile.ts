@@ -143,13 +143,14 @@ async function getPublicProfileUserUncached(username: string) {
           // reads directly via db.profileMedia.findMany with no filter,
           // deliberately not through this function.
           //
-          // take: 1 — this flat list's only consumer is page.tsx's
-          // `activeProfile.media[0]?.url` og:image fallback; the real
-          // portfolio display reads albums[].media below instead. Was
-          // fetching every approved photo on a profile just to use the
-          // first one.
+          // take: 1 — this flat list's two consumers both want exactly
+          // one photo: page.tsx's og:image, and the cover-banner fallback
+          // (ProfileCover) that shows a provider's own best shot instead
+          // of a brand gradient. The portfolio display itself reads
+          // albums[].media below. Was fetching every approved photo on a
+          // profile just to use the first one.
           media: {
-            where: { moderationStatus: "APPROVED" },
+            where: { moderationStatus: "APPROVED", deletedAt: null },
             orderBy: { order: "asc" },
             take: 1,
           },

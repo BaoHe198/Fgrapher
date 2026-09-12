@@ -261,7 +261,11 @@ export default async function PublicProfilePage({
           counted, and a Server Component cannot set one — so the count is
           reported by this beacon after mount instead of inline here. */}
       {isOwnProfile ? null : <ProfileViewBeacon profileId={activeProfile.id} />}
-      <ProfileCover coverImage={user.coverImage} isOwnProfile={isOwnProfile} />
+      <ProfileCover
+        coverImage={user.coverImage}
+        fallbackImage={activeProfile.media[0]?.url ?? null}
+        isOwnProfile={isOwnProfile}
+      />
 
       <div className="mx-auto w-full max-w-[1440px] px-4 pb-[72px] sm:px-8">
         <div className="flex flex-col gap-[18px] pt-4">

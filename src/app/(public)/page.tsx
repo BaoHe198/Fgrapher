@@ -64,9 +64,6 @@ export default async function LandingPage() {
         <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-8 py-16 max-md:px-5">
           <div className="grid grid-cols-[1.05fr_1fr] items-center gap-14 max-lg:grid-cols-1">
             <div className="flex flex-col gap-[22px]">
-              <span className="text-caption-upper tracking-[0.14em] text-gold-300">
-                {t("hero.eyebrow")}
-              </span>
               <h1 className="m-0 text-display-lg tracking-[-0.02em] sm:text-display-xl lg:text-display-2xl">
                 {t("hero.title")}
               </h1>
@@ -135,7 +132,7 @@ export default async function LandingPage() {
             actionLabel={t("home.seeAll")}
             actionHref="/browse"
           />
-          <div className="grid grid-cols-4 gap-5 max-lg:grid-cols-2 max-md:grid-cols-1">
+          <div className="grid grid-cols-4 gap-5 max-lg:grid-cols-2 max-md:grid-cols-2 max-md:gap-3">
             {featuredProfiles.map((profile) => (
               <ArtistCard
                 key={profile.userId}

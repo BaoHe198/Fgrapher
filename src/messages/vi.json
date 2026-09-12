@@ -96,7 +96,6 @@
     "travelWilling": "Sẵn sàng di chuyển"
   },
   "hero": {
-    "eyebrow": "NỀN TẢNG CHO NGƯỜI SÁNG TẠO HÌNH ẢNH",
     "title": "Tìm nghệ sĩ giúp bạn lưu giữ những kỷ niệm đẹp nhất",
     "sub": "Tìm một nhiếp ảnh gia, quay phim, chuyên viên trang điểm, người mẫu hay studio ưng ý đôi khi không dễ. Fgrapher giúp bạn gặp đúng người — phù hợp cả phong cách, ngân sách lẫn khoảng cách — rồi mời bạn để lại vài dòng đánh giá thật sau mỗi buổi hẹn.",
     "searchPh": "Tìm nghệ sĩ hoặc studio",
@@ -117,9 +116,9 @@
   },
   "home": {
     "featured": "Nổi bật trên Fgrapher",
-    "seeAll": "Xem tất cả →",
+    "seeAll": "Xem tất cả",
     "studios": "Studio cho thuê",
-    "browseStudios": "Xem studio →",
+    "browseStudios": "Xem studio",
     "f1t": "Khám phá",
     "f1b": "Lọc theo vai trò, thành phố, giá và lịch trống — mỗi hồ sơ trước hết là một portfolio.",
     "f2t": "Đặt lịch",
@@ -131,9 +130,9 @@
     "ctaBtn": "Trở thành nhà cung cấp"
   },
   "foot": {
-    "discover": "KHÁM PHÁ",
-    "providers": "NHÀ CUNG CẤP",
-    "company": "CÔNG TY",
+    "discover": "Khám phá",
+    "providers": "Nhà cung cấp",
+    "company": "Công ty",
     "pricing": "Bảng giá",
     "tools": "Công cụ đặt lịch",
     "sell": "Bán thiết bị",
@@ -448,14 +447,14 @@
   },
   "accountFlows": {
     "authLayout": {
-      "quote": "Fgrapher đưa portfolio của tôi đến đúng khách hàng. Giờ tôi nhận được gấp đôi số lượt đặt lịch.",
-      "quoteBy": "Nhà cung cấp đã xác minh trên Fgrapher",
       "imageAlt": {
         "photographer": "Nhiếp ảnh gia đang tác nghiệp",
         "videographer": "Quay phim đang ghi hình bằng máy quay chuyên nghiệp",
         "makeupArtist": "Chuyên viên trang điểm đang trang điểm cho khách",
         "studio": "Ánh sáng studio chuyên nghiệp"
-      }
+      },
+      "pitch": "Hồ sơ của bạn là một portfolio, không phải một bản khai.",
+      "pitchSub": "Khách xem ảnh bạn chụp, đọc đánh giá thật, rồi chọn ngày — tất cả trên một trang."
     },
     "login": {
       "metaTitle": "Đăng nhập hoặc tạo tài khoản — Fgrapher",
@@ -481,12 +480,12 @@
       "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
       "title": "Tạo tài khoản",
       "subtitle": "Tham gia Fgrapher để bắt đầu đặt lịch hoặc nhận đặt lịch.",
-      "iAmA": "TÔI LÀ",
+      "iAmA": "Tôi là",
       "customerLabel": "Khách hàng",
       "customerDesc": "Đặt lịch nghệ sĩ và mua thiết bị",
       "providerLabel": "Nhà sáng tạo chuyên nghiệp",
       "providerDesc": "Nhận đặt lịch và bán hàng",
-      "whatDoYouOffer": "BẠN CUNG CẤP DỊCH VỤ GÌ?",
+      "whatDoYouOffer": "Bạn cung cấp dịch vụ gì?",
       "changeLaterNote": "Bạn có thể thay đổi sau. Quyền truy cập của khách hàng luôn miễn phí.",
       "billingNotice": "Miễn phí trong giai đoạn hiện tại. Nếu Fgrapher áp dụng phí trong tương lai, chúng tôi sẽ thông báo trước ít nhất 30 ngày.",
       "contentGuidelinesConfirm": "Tôi xác nhận đã đủ 18 tuổi trở lên và đồng ý với ",
@@ -2586,7 +2585,7 @@
       },
       "headingWithRoleCity": "{role} tại {city}",
       "headingDefault": "Khám phá nghệ sĩ",
-      "resultsCount": "{count} kết quả · {sort}",
+      "resultsCount": "{count} kết quả, sắp xếp theo {sort}",
       "filterAvailableNow": "Đang rảnh",
       "filterInstantBook": "Đặt lịch tức thì",
       "filterTopRated": "Đánh giá cao nhất",
@@ -2671,7 +2670,9 @@
         "editAlbumAria": "Sửa album",
         "newAlbumTile": "Album mới",
         "draftBadge": "Chưa công khai",
-        "upgradeHint": "Gia hạn gói để tạo album mới."
+        "upgradeHint": "Gia hạn gói để tạo album mới.",
+        "allAlbums": "Tất cả",
+        "photoAria": "Xem ảnh lớn"
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
@@ -2712,7 +2713,8 @@
         "availabilityDialogTitle": "Lịch trống",
         "fullCalendarLink": "Quản lý trong lịch đầy đủ",
         "stickyMessage": "Nhắn tin",
-        "stickyBook": "Đặt lịch"
+        "stickyBook": "Đặt lịch",
+        "pickDateHint": "Chọn ngày và giờ để tiếp tục."
       },
       "hero": {
         "editCoverAria": "Sửa ảnh bìa",
@@ -2721,7 +2723,7 @@
       },
       "albumEditDialog": {
         "title": "Chỉnh sửa album",
-        "managePhotosLink": "Quản lý ảnh →"
+        "managePhotosLink": "Quản lý ảnh"
       }
     },
     "roleProvinceLanding": {
@@ -2797,7 +2799,7 @@
     "pricing": {
       "pageTitle": "Bảng giá — Fgrapher",
       "freeDuringLaunch": "Miễn phí toàn bộ trong giai đoạn khởi động. Chúng tôi sẽ thông báo trước ít nhất 30 ngày trước khi bắt đầu thu phí.",
-      "eyebrow": "BẢNG GIÁ",
+      "eyebrow": "Bảng giá",
       "heroTitle": "Gói dịch vụ đồng hành cùng nghề của bạn",
       "heroSub": "Một mức phí cố định cho mỗi vai trò, tính bằng VND — không thu hoa hồng trên đơn đặt lịch, không bao giờ.",
       "billingToggle": {

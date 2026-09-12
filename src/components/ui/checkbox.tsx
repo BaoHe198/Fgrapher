@@ -10,6 +10,10 @@ interface CheckboxProps extends CheckboxPrimitive.Root.Props {
   label?: React.ReactNode;
 }
 
+// Deliberately NOT --fg-radius-sm (8px): on an 18px box that is 89% of a
+// full circle, which made every checkbox read as a radio button — i.e. as
+// "pick one of these", exactly the wrong affordance for the three
+// independent data-processing consents on /register.
 function Checkbox({ className, id, label, ...props }: CheckboxProps) {
   const generatedId = React.useId();
   const checkboxId = id ?? generatedId;
@@ -19,7 +23,7 @@ function Checkbox({ className, id, label, ...props }: CheckboxProps) {
       id={checkboxId}
       data-slot="checkbox"
       className={cn(
-        "peer relative flex size-[18px] shrink-0 items-center justify-center rounded-[var(--fg-radius-sm)] border border-border-default bg-bg-surface transition-colors outline-none group-has-disabled/field:opacity-50 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger aria-invalid:ring-2 aria-invalid:ring-danger/20 data-checked:border-brand-primary data-checked:bg-brand-primary data-checked:text-text-on-brand",
+        "peer relative flex size-[18px] shrink-0 items-center justify-center rounded-[4px] border border-border-default bg-bg-surface transition-colors outline-none group-has-disabled/field:opacity-50 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger aria-invalid:ring-2 aria-invalid:ring-danger/20 data-checked:border-brand-primary data-checked:bg-brand-primary data-checked:text-text-on-brand",
         className,
       )}
       {...props}
@@ -36,7 +40,10 @@ function Checkbox({ className, id, label, ...props }: CheckboxProps) {
   if (!label) return box;
 
   return (
-    <label htmlFor={checkboxId} className="inline-flex cursor-pointer items-center gap-2">
+    <label
+      htmlFor={checkboxId}
+      className="inline-flex cursor-pointer items-center gap-2"
+    >
       {box}
       <span className="text-body-sm text-text-secondary">{label}</span>
     </label>

@@ -48,7 +48,7 @@ export function Footer() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            <span className="text-body-sm font-semibold! text-text-primary">
               {t("foot.discover")}
             </span>
             {discoverRoles.map((role) => (
@@ -63,7 +63,7 @@ export function Footer() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            <span className="text-body-sm font-semibold! text-text-primary">
               {t("foot.providers")}
             </span>
             {providerLinks.map((link) => (
@@ -78,7 +78,7 @@ export function Footer() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            <span className="text-body-sm font-semibold! text-text-primary">
               {t("foot.company")}
             </span>
             {COMPANY_LINKS.map((link) => (

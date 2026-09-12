@@ -344,6 +344,110 @@ const ALL_WEEK_DAYS = [0, 1, 2, 3, 4, 5, 6];
 // Upsert-based and idempotent, unlike the delete-then-recreate USERS
 // seeding below, since Ward rows may already be referenced by real
 // (non-seed) User rows by the time this is re-run in dev.
+// Portfolio photos for the seeded providers. Fgrapher is a portfolio
+// marketplace, so a seed with no photos left every surface that matters —
+// the featured strip, /browse, the profile mosaic — showing placeholder
+// tiles, which made the app impossible to evaluate (and looked broken).
+//
+// Unsplash source URLs, deliberately varied in aspect ratio so the
+// profile's masonry grid is exercised by portraits and landscapes rather
+// than a uniform set. Not uploaded through Cloudinary: seeding must work
+// with no credentials configured, and next.config.ts already allows this
+// host. Real uploads take the normal PENDING -> APPROVED path; these are
+// seeded APPROVED so the public pages have something to show.
+const PORTFOLIO_PHOTOS: Record<
+  string,
+  { url: string; w: number; h: number }[]
+> = {
+  PHOTOGRAPHER: [
+    { url: "photo-1519741497674-611481863552", w: 800, h: 1200 },
+    { url: "photo-1606216794074-735e91aa2c92", w: 800, h: 533 },
+    { url: "photo-1511285560929-80b456fea0bc", w: 800, h: 1000 },
+    { url: "photo-1583939003579-730e3918a45a", w: 800, h: 1200 },
+    { url: "photo-1520854221256-17451cc331bf", w: 800, h: 533 },
+    { url: "photo-1522673607200-164d1b6ce486", w: 800, h: 1067 },
+  ],
+  VIDEOGRAPHER: [
+    { url: "photo-1492691527719-9d1e07e534b4", w: 800, h: 533 },
+    { url: "photo-1478720568477-152d9b164e26", w: 800, h: 1200 },
+    { url: "photo-1574717024653-61fd2cf4d44d", w: 800, h: 533 },
+    { url: "photo-1579165466991-467135ad3110", w: 800, h: 1000 },
+  ],
+  MAKEUP_ARTIST: [
+    { url: "photo-1487412947147-5cebf100ffc2", w: 800, h: 1200 },
+    { url: "photo-1522335789203-aabd1fc54bc9", w: 800, h: 533 },
+    { url: "photo-1512496015851-a90fb38ba796", w: 800, h: 1000 },
+    { url: "photo-1596462502278-27bfdc403348", w: 800, h: 1200 },
+  ],
+  STUDIO: [
+    { url: "photo-1598300042247-d088f8ab3a91", w: 800, h: 533 },
+    { url: "photo-1595079676339-1534801ad6cf", w: 800, h: 1000 },
+    { url: "photo-1560250097-0b93528c311a", w: 800, h: 533 },
+  ],
+  MODEL: [
+    { url: "photo-1524504388940-b1c1722653e1", w: 800, h: 1200 },
+    { url: "photo-1529626455594-4ff0802cfb7e", w: 800, h: 1000 },
+    { url: "photo-1503342217505-b0a15ec3261c", w: 800, h: 1200 },
+    { url: "photo-1502823403499-6ccfcf4fb453", w: 800, h: 533 },
+  ],
+};
+
+const ALBUM_TITLES: Record<string, string> = {
+  PHOTOGRAPHER: "Ảnh cưới & chân dung",
+  VIDEOGRAPHER: "Phóng sự cưới",
+  MAKEUP_ARTIST: "Trang điểm cô dâu",
+  STUDIO: "Không gian studio",
+  MODEL: "Ảnh thời trang",
+};
+
+const ALBUM_CATEGORIES: Record<string, ProfileCategory> = {
+  PHOTOGRAPHER: "WEDDING",
+  VIDEOGRAPHER: "WEDDING",
+  MAKEUP_ARTIST: "BRIDAL",
+  STUDIO: "INDOOR",
+  MODEL: "FASHION_MODEL",
+};
+
+async function seedPortfolio(profileId: string, role: string) {
+  const photos = PORTFOLIO_PHOTOS[role];
+  if (!photos) return;
+
+  const album = await db.album.create({
+    data: {
+      profileId,
+      title: ALBUM_TITLES[role] ?? "Portfolio",
+      category: ALBUM_CATEGORIES[role],
+      isPublished: true,
+      sortOrder: 0,
+    },
+  });
+
+  const created = await Promise.all(
+    photos.map((photo, index) =>
+      db.profileMedia.create({
+        data: {
+          profileId,
+          albumId: album.id,
+          url: `https://images.unsplash.com/${photo.url}?q=80&w=${photo.w}&auto=format&fit=crop`,
+          type: "IMAGE",
+          order: index,
+          width: photo.w,
+          height: photo.h,
+          moderationStatus: "APPROVED",
+          moderatedAt: new Date(),
+          // The image-rights checkbox a real upload cannot skip.
+          rightsConfirmedAt: new Date(),
+        },
+      }),
+    ),
+  );
+
+  await db.album.update({
+    where: { id: album.id },
+    data: { coverMediaId: created[0]?.id },
+  });
+}
+
 async function seedGeography() {
   let wardCount = 0;
 
@@ -556,6 +660,8 @@ async function main() {
           isPublished: true,
         },
       });
+
+      await seedPortfolio(profile.id, profileSeed.role);
 
       if (profileSeed.services && profileSeed.services.length > 0) {
         await db.service.createMany({

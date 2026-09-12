@@ -283,7 +283,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
                     {result.data.map((profile) => (
                       <ArtistCard
                         key={profile.userId}
@@ -360,7 +360,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   <h2 className="text-heading-md text-text-primary">
                     {t("nationwideSection.heading")}
                   </h2>
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
                     {result.nationwide.map((profile) => (
                       <ArtistCard
                         key={profile.userId}

@@ -38,7 +38,14 @@ interface ProfileInteractiveProps {
     description: string | null;
     category: ProfileCategory | null;
     coverMedia: { id: string; url: string; type: MediaType } | null;
-    media: { id: string; url: string; type: MediaType; title: string | null }[];
+    media: {
+      id: string;
+      url: string;
+      type: MediaType;
+      title: string | null;
+      width: number | null;
+      height: number | null;
+    }[];
   }[];
   // Only present (non-null) when isOwnProfile — everything the owner has,
   // unfiltered by isPublished/moderation (unlike `albums` above). See
