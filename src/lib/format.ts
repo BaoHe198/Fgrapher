@@ -107,16 +107,23 @@ export function formatWeekdayShort(value: Date | string | number) {
   return WEEKDAY_SHORT_VI[WEEKDAY_EN_ORDER.indexOf(weekday)] ?? weekday;
 }
 
-// "Chủ Nhật, 13 tháng 9" — long-form, no year (matches how a single
-// upcoming booking date reads more naturally than the numeric dd/MM/yyyy
-// form used everywhere else).
+// "Chủ Nhật, 13/09/2026" — the weekday, then the same dd/MM/yyyy every other
+// date in the app uses.
+//
+// This used to read "Chủ Nhật, 13 tháng 9": long-form and deliberately without
+// a year, on the reasoning that an upcoming booking date reads more naturally
+// that way. Two problems with that in practice. It was the one date display
+// that didn't match CLAUDE.md rule 10's dd/MM/yyyy, and on the booking
+// confirmation screen — where you are about to commit money and time — a date
+// with no year is exactly the wrong place to be breezy. The weekday stays,
+// because "is that a Sunday?" is the thing people actually check.
 export function formatDateLong(value: Date | string | number) {
-  return new Intl.DateTimeFormat("vi-VN", {
+  const date = toDate(value);
+  const weekday = new Intl.DateTimeFormat("vi-VN", {
     timeZone: HCM_TIME_ZONE,
     weekday: "long",
-    day: "numeric",
-    month: "long",
-  }).format(toDate(value));
+  }).format(date);
+  return `${weekday}, ${formatDate(date)}`;
 }
 
 // "13 thg 9" — compact day+month, no year/weekday (dropdown option labels).
