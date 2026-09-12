@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CurrencyInput } from "@/components/ui/currency-input";
-import { Input } from "@/components/ui/input";
+import { DateField } from "@/components/ui/date-field";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/format";
@@ -225,12 +225,11 @@ export function OpportunityDetail({
           onChange={setProposedPrice}
         />
         {request.isDateFlexible ? (
-          <Input
+          <DateField
             label={t("proposedDateLabel")}
-            type="date"
             value={proposedDate}
             disabled={!isEditable}
-            onChange={(e) => setProposedDate(e.target.value)}
+            onChange={setProposedDate}
           />
         ) : null}
         <div className="flex flex-col gap-1.5">

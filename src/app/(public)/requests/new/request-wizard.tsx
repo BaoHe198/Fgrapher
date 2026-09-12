@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CurrencyInput } from "@/components/ui/currency-input";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Tag } from "@/components/ui/tag";
@@ -420,29 +421,26 @@ export function RequestWizard({
             />
             {form.isDateFlexible ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Input
+                <DateField
                   label={t("dateRangeStartLabel")}
-                  type="date"
                   value={form.dateRangeStart}
-                  onChange={(e) => update("dateRangeStart", e.target.value)}
+                  onChange={(value) => update("dateRangeStart", value)}
                   aria-invalid={dateRangeInvalid}
                 />
-                <Input
+                <DateField
                   label={t("dateRangeEndLabel")}
-                  type="date"
                   value={form.dateRangeEnd}
-                  onChange={(e) => update("dateRangeEnd", e.target.value)}
+                  onChange={(value) => update("dateRangeEnd", value)}
                   error={
                     dateRangeInvalid ? t("dateRangeOrderError") : undefined
                   }
                 />
               </div>
             ) : (
-              <Input
+              <DateField
                 label={t("shootDateLabel")}
-                type="date"
                 value={form.shootDate}
-                onChange={(e) => update("shootDate", e.target.value)}
+                onChange={(value) => update("shootDate", value)}
               />
             )}
           </div>

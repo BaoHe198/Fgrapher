@@ -440,6 +440,10 @@
         "excellent": "Excellent"
       },
       "starAriaLabel": "{count} star"
+    },
+    "dateField": {
+      "openPicker": "Pick a date from the calendar",
+      "placeholder": "dd/mm/yyyy"
     }
   },
   "accountFlows": {
@@ -805,7 +809,9 @@
           "colAction": "Action",
           "colTarget": "Target",
           "systemActor": "System",
-          "empty": "No audit log entries"
+          "empty": "No audit log entries",
+          "fromLabel": "From date",
+          "toLabel": "To date"
         },
         "consent": {
           "purposeService": "Service (mandatory)",

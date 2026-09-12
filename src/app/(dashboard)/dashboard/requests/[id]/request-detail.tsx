@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { toast } from "@/components/ui/toast";
@@ -391,11 +392,10 @@ export function RequestDetail({
             <DialogTitle>{t("acceptDialogTitle")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
-            <Input
+            <DateField
               label={t("acceptDateLabel")}
-              type="date"
               value={acceptDate}
-              onChange={(e) => setAcceptDate(e.target.value)}
+              onChange={setAcceptDate}
             />
             <Input
               label={t("acceptTimeLabel")}

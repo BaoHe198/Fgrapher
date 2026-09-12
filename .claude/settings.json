@@ -20,7 +20,15 @@
       "Bash(grep -o '.\\\\{80\\\\}scrollIntoView.\\\\{0,120\\\\}' .next/dev/static/chunks/src_0erdk7_._.js)",
       "Bash(ls -t ~/.claude/projects/*/*.jsonl 2>/dev/null | head -50 | wc -l; echo \"--- projects ---\"; ls -d ~/.claude/projects/*/ 2>/dev/null | head)",
       "Read(//Users/heducthienbao/.claude/projects/**)",
-      "Bash(pnpm exec *)"
+      "Bash(pnpm exec *)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e \"console.log\\(Object.keys\\(require\\('./src/messages/vi.json'\\)\\)\\)\")",
+      "Bash(node -e \"const d=require\\('./src/messages/vi.json'\\); console.log\\(JSON.stringify\\(d.sharedComponents,null,1\\).slice\\(0,1200\\)\\)\")",
+      "Bash(node -e \"const d=require\\('./src/messages/vi.json'\\); console.log\\(Object.keys\\(d.uiKit\\)\\); console.log\\(JSON.stringify\\(d.uiKit.sheet\\), JSON.stringify\\(d.uiKit.dialog\\)\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const d=require\\('./src/messages/vi.json'\\); console.log\\(JSON.stringify\\(d.accountFlows.admin.compliance.auditLog,null,1\\)\\)\")",
+      "Bash(curl -s http://localhost:3000/register)",
+      "Bash(grep -o 'aria-label=\"[^\"]\\\\{0,40\\\\}\"')"
     ]
   }
 }

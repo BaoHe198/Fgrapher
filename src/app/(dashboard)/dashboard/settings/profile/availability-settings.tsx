@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 
@@ -208,11 +209,10 @@ export function AvailabilitySettings() {
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <Input
-            type="date"
+          <DateField
             aria-label={t("blockedDateLabel")}
             value={newBlockedDate}
-            onChange={(e) => setNewBlockedDate(e.target.value)}
+            onChange={setNewBlockedDate}
             className="w-44"
           />
           <Button size="sm" variant="secondary" onClick={addBlockedDate}>

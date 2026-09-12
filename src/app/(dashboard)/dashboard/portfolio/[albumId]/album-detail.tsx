@@ -32,6 +32,7 @@ import { useState } from "react";
 import { UploadMediaModal } from "@/components/modals/upload-media-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
@@ -285,13 +286,10 @@ export function AlbumDetail({
               })),
             ]}
           />
-          <Input
+          <DateField
             label={t("shootDateLabel")}
-            type="date"
             value={meta.shootDate?.slice(0, 10) ?? ""}
-            onChange={(e) =>
-              setMeta((p) => ({ ...p, shootDate: e.target.value }))
-            }
+            onChange={(value) => setMeta((p) => ({ ...p, shootDate: value }))}
           />
         </div>
         <div className="flex items-center gap-3">

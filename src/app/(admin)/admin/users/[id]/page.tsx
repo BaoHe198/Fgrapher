@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
@@ -273,11 +274,10 @@ export default function AdminUserDetailPage() {
                 value={planName}
                 onChange={(e) => setPlanName(e.target.value)}
               />
-              <Input
+              <DateField
                 label="Hết hạn"
-                type="date"
                 value={planExpiresAt}
-                onChange={(e) => setPlanExpiresAt(e.target.value)}
+                onChange={setPlanExpiresAt}
               />
             </div>
             <Textarea

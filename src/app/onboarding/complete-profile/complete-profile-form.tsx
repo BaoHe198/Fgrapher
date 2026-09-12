@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { DateField } from "@/components/ui/date-field";
 import {
   getCompleteProfileSchema,
   type CompleteProfileInput,
@@ -25,7 +25,6 @@ export function CompleteProfileForm() {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
-    register,
     handleSubmit,
     setValue,
     watch,
@@ -74,11 +73,18 @@ export function CompleteProfileForm() {
         </div>
       ) : null}
 
-      <Input
+      <DateField
         label="Ngày sinh"
-        type="date"
         error={errors.dateOfBirth?.message}
-        {...register("dateOfBirth")}
+        // Controlled, so not register()-able — same watch/setValue pairing the
+        // consent checkboxes below already use.
+        value={watch("dateOfBirth") ?? ""}
+        onChange={(value) =>
+          setValue("dateOfBirth", value, {
+            shouldValidate: true,
+            shouldDirty: true,
+          })
+        }
       />
 
       <div className="flex flex-col gap-2.5 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">

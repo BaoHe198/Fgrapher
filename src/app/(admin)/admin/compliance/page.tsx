@@ -8,6 +8,7 @@ import { startTransition, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
@@ -307,16 +308,16 @@ function AuditLogPanel() {
           placeholder={t("actionPlaceholder")}
           className="w-56"
         />
-        <Input
-          type="date"
+        <DateField
+          aria-label={t("fromLabel")}
           value={from}
-          onChange={(e) => setFrom(e.target.value)}
+          onChange={setFrom}
           className="w-44"
         />
-        <Input
-          type="date"
+        <DateField
+          aria-label={t("toLabel")}
           value={to}
-          onChange={(e) => setTo(e.target.value)}
+          onChange={setTo}
           className="w-44"
         />
       </div>

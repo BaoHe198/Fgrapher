@@ -12,6 +12,7 @@ import { ResendVerificationForm } from "@/app/(auth)/verify-email/verify-email-p
 import { SocialRow } from "@/components/auth/social-row";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { Radio } from "@/components/ui/radio";
 import { PAID_ROLES } from "@/lib/constants";
@@ -366,11 +367,19 @@ export function RegisterForm({
           error={errors.email?.message}
           {...register("email")}
         />
-        <Input
+        <DateField
           label={t("dobLabel")}
-          type="date"
           error={errors.dateOfBirth?.message}
-          {...register("dateOfBirth")}
+          // DateField is controlled, so it can't be wired with register();
+          // same watch/setValue pairing the consent checkboxes in this form
+          // already use.
+          value={watch("dateOfBirth") ?? ""}
+          onChange={(value) =>
+            setValue("dateOfBirth", value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
         />
         <div className="flex flex-col gap-1.5">
           <Input

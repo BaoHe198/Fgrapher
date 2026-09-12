@@ -12,10 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { Radio } from "@/components/ui/radio";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { formatDate } from "@/lib/format";
 
 export interface BlockedDateRow {
   id: string;
@@ -105,7 +107,7 @@ export function BlockDayDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t("title", { date: dateString })}</DialogTitle>
+          <DialogTitle>{t("title", { date: formatDate(date) })}</DialogTitle>
         </DialogHeader>
 
         {existingBlock ? (
@@ -176,13 +178,16 @@ export function BlockDayDialog({
 
             {mode === "RANGE_DATES" ? (
               <div className="flex items-center gap-2">
-                <Input value={dateString} disabled className="w-40" />
+                {/* The "from" end is the day the dialog was opened on and
+                    can't be changed here — shown formatted, not as the raw
+                    yyyy-MM-dd key it is in the payload. */}
+                <Input value={formatDate(date)} disabled className="w-40" />
                 <span className="text-text-tertiary">{t("dateRangeTo")}</span>
-                <Input
-                  type="date"
+                <DateField
                   value={toDate}
                   min={dateString}
-                  onChange={(e) => setToDate(e.target.value)}
+                  onChange={setToDate}
+                  aria-label={t("dateRangeTo")}
                   className="w-40"
                 />
               </div>

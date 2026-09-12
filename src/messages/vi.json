@@ -440,6 +440,10 @@
         "excellent": "Xuất sắc"
       },
       "starAriaLabel": "{count} sao"
+    },
+    "dateField": {
+      "openPicker": "Chọn ngày từ lịch",
+      "placeholder": "dd/mm/yyyy"
     }
   },
   "accountFlows": {
@@ -805,7 +809,9 @@
           "colAction": "Hành động",
           "colTarget": "Đối tượng",
           "systemActor": "Hệ thống",
-          "empty": "Không có mục nhật ký nào"
+          "empty": "Không có mục nhật ký nào",
+          "fromLabel": "Từ ngày",
+          "toLabel": "Đến ngày"
         },
         "consent": {
           "purposeService": "Dịch vụ (bắt buộc)",

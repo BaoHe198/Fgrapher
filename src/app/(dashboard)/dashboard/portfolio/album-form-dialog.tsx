@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
@@ -142,11 +143,10 @@ export function AlbumFormDialog({
               })),
             ]}
           />
-          <Input
+          <DateField
             label={t("shootDateLabel")}
-            type="date"
             value={shootDate}
-            onChange={(e) => setShootDate(e.target.value)}
+            onChange={setShootDate}
           />
           {error ? <p className="text-body-sm text-danger">{error}</p> : null}
         </div>

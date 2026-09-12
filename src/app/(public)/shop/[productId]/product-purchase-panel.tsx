@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { DateField } from "@/components/ui/date-field";
 import { toast } from "@/components/ui/toast";
 import { calculateRentalDays } from "@/lib/pricing";
 import { formatCurrency } from "@/lib/utils";
@@ -206,19 +206,17 @@ export function ProductPurchasePanel({
           </span>
 
           <div className="flex gap-2">
-            <Input
+            <DateField
               label="Pickup date"
-              type="date"
               min={todayDateKey()}
               value={rentalStart}
-              onChange={(e) => setRentalStart(e.target.value)}
+              onChange={setRentalStart}
             />
-            <Input
+            <DateField
               label="Return date"
-              type="date"
               min={rentalStart || todayDateKey()}
               value={rentalEnd}
-              onChange={(e) => setRentalEnd(e.target.value)}
+              onChange={setRentalEnd}
             />
           </div>
 
