@@ -16,11 +16,12 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, ImageOff, Pencil, Plus } from "lucide-react";
+import { GripVertical, Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
+import { FrameMark } from "@/components/brand/frame-mark";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { buildMediaVariants } from "@/lib/media-variants";
 import { cn } from "@/lib/utils";
@@ -119,7 +120,7 @@ function AlbumTile({
           )
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <ImageOff className="size-8 text-text-tertiary" />
+            <FrameMark size={34} className="text-text-tertiary" />
           </div>
         )}
       </button>
@@ -232,9 +233,10 @@ export function PortfolioTab({
 
   if (!showOwnerGrid && albums.length === 0) {
     return (
-      <p className="py-12 text-center text-body-md text-text-secondary">
-        {t("empty")}
-      </p>
+      <div className="flex flex-col items-center gap-3 py-12 text-center">
+        <FrameMark size={44} className="text-text-tertiary" />
+        <p className="text-body-md text-text-secondary">{t("empty")}</p>
+      </div>
     );
   }
 

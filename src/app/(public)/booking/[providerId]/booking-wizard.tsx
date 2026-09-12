@@ -292,8 +292,26 @@ export function BookingWizard({
     return (
       <div className="mx-auto max-w-[900px] px-8 py-10">
         <Card className="flex flex-col items-center gap-4 py-16 text-center">
-          <div className="flex size-16 items-center justify-center rounded-full bg-success-bg">
-            <Check className="size-8 text-success" />
+          {/* Hand-drawn tick rather than the static <Check/> icon: this is
+              the moment the request actually leaves, and it is the one
+              point in the customer flow worth marking. The ring settles,
+              then the stroke draws. */}
+          <div className="animate-settle-in flex size-16 items-center justify-center rounded-full bg-success-bg">
+            <svg
+              viewBox="0 0 24 24"
+              className="size-8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                className="animate-draw-check text-success"
+                d="M4 12.5l5 5L20 7"
+              />
+            </svg>
           </div>
           <h2 className="text-heading-lg text-text-primary">
             {t("success.heading")}

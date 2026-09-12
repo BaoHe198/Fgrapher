@@ -474,6 +474,40 @@
   animation: fg-develop 900ms ease-out both;
 }
 
+/* Booking confirmation (booking-wizard.tsx). The one moment in the
+   customer flow worth marking: the request has actually left. The ring
+   settles first, then the tick draws itself — motion that reports what
+   changed, not decoration. Both are neutralised by the reduced-motion
+   rule below. */
+@keyframes fg-settle-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fg-draw-check {
+  from {
+    stroke-dashoffset: 30;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@utility animate-settle-in {
+  animation: fg-settle-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility animate-draw-check {
+  stroke-dasharray: 30;
+  animation: fg-draw-check 420ms cubic-bezier(0.65, 0, 0.35, 1) 220ms both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

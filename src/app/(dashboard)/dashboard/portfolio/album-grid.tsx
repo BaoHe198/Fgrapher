@@ -16,7 +16,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, ImageOff, Plus, Trash2, Upload } from "lucide-react";
+import { GripVertical, Plus, Trash2, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { buildMediaVariants } from "@/lib/media-variants";
+import { FrameMark } from "@/components/brand/frame-mark";
 import { cn } from "@/lib/utils";
 
 export interface AlbumCard {
@@ -89,7 +90,7 @@ function SortableAlbumCard({
             )
           ) : (
             <div className="flex size-full items-center justify-center">
-              <ImageOff className="size-8 text-text-tertiary" />
+              <FrameMark size={34} className="text-text-tertiary" />
             </div>
           )}
         </Link>
@@ -207,7 +208,7 @@ export function AlbumGrid({
 
       {albums.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <ImageOff className="size-10 text-text-tertiary" />
+          <FrameMark size={48} className="text-text-tertiary" />
           <p className="text-body-md font-semibold! text-text-primary">
             {t("empty.title")}
           </p>
