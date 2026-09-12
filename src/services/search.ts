@@ -528,8 +528,13 @@ export async function getHeroPhotos(limit = 8) {
       type: "IMAGE",
       profile: {
         isPublished: true,
-        role: { in: SEARCHABLE_ROLES },
+        // Ordered isPublished -> user -> role like every other public
+        // query in this file. cache.test.ts asserts on that shape: an
+        // `isPublished: true` followed straight by `role` is how a query
+        // that forgot the owner filter looks, and the guard cannot tell
+        // that apart from one that merely ordered its keys differently.
         user: PUBLIC_USER_FILTER,
+        role: { in: SEARCHABLE_ROLES },
       },
     },
     orderBy: { createdAt: "desc" },
