@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm test)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx prisma validate)",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__list_migrations",
+      "mcp__supabase__get_advisors",
+      "mcp__supabase__get_project_url",
+      "Bash(rg -v '^--$')",
+      "Bash(node --input-type=module -e ' *)",
+      "Bash(git log *)",
+      "Bash(node /tmp/dt.mjs)",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)",
+      "Bash(grep -o 'goToStep[^;]\\\\{0,240\\\\}' .next/dev/static/chunks/src_0erdk7_._.js)",
+      "Bash(grep -o '.\\\\{80\\\\}scrollIntoView.\\\\{0,120\\\\}' .next/dev/static/chunks/src_0erdk7_._.js)",
+      "Bash(ls -t ~/.claude/projects/*/*.jsonl 2>/dev/null | head -50 | wc -l; echo \"--- projects ---\"; ls -d ~/.claude/projects/*/ 2>/dev/null | head)",
+      "Read(//Users/heducthienbao/.claude/projects/**)"
+    ]
+  }
+}

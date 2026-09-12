@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { CartItemRow } from "@/components/cart/cart-item-row";
 import { cartTotals, groupByShop } from "@/components/cart/cart-utils";
+import { termsChunk } from "@/components/legal/terms-link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -122,7 +123,7 @@ export function CheckoutContent() {
           <Checkbox
             checked={agreed}
             onCheckedChange={(checked) => setAgreed(checked === true)}
-            label={t("agreeTerms")}
+            label={t.rich("agreeTerms", { terms: termsChunk })}
           />
         </div>
 

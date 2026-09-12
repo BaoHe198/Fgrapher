@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { ModelSafetyNotice } from "@/components/booking/model-safety-notice";
+import { termsChunk } from "@/components/legal/terms-link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -1146,7 +1147,7 @@ function StepReview({
       <Checkbox
         checked={agreed}
         onCheckedChange={(checked) => onAgree(checked === true)}
-        label={t("stepReview.agreeTerms")}
+        label={t.rich("stepReview.agreeTerms", { terms: termsChunk })}
       />
     </div>
   );

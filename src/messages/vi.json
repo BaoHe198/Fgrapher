@@ -2554,7 +2554,7 @@
         "total": "Tổng cộng",
         "notesLabel": "Ghi chú",
         "cancellationNotice": "Miễn phí hủy trước 48 giờ so với buổi hẹn. Hủy trong vòng 24 giờ có thể bị tính phí khi tính năng thanh toán được bật.",
-        "agreeTerms": "Tôi đồng ý với điều khoản đặt lịch"
+        "agreeTerms": "Tôi đồng ý với <terms>điều khoản đặt lịch</terms>"
       }
     },
     "browse": {
@@ -2745,7 +2745,7 @@
         "pickupNote": "Liên hệ cửa hàng sau khi đơn hàng được xác nhận để sắp xếp nhận hàng."
       },
       "reviewOrder": "Xem lại đơn hàng",
-      "agreeTerms": "Tôi đồng ý với điều khoản mua/thuê",
+      "agreeTerms": "Tôi đồng ý với <terms>điều khoản mua/thuê</terms>",
       "orderSummary": "Tóm tắt đơn hàng",
       "subtotal": "Tạm tính",
       "deposits": "Tiền đặt cọc",

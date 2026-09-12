@@ -2554,7 +2554,7 @@
         "total": "Total",
         "notesLabel": "Notes",
         "cancellationNotice": "Free cancellation up to 48 hours before your session. Cancelling within 24 hours may be subject to a fee once payments are enabled.",
-        "agreeTerms": "I agree to the booking terms"
+        "agreeTerms": "I agree to the <terms>booking terms</terms>"
       }
     },
     "browse": {
@@ -2745,7 +2745,7 @@
         "pickupNote": "Contact the shop after your order is confirmed to arrange pickup."
       },
       "reviewOrder": "Review your order",
-      "agreeTerms": "I agree to the terms of sale/rental",
+      "agreeTerms": "I agree to the <terms>terms of sale/rental</terms>",
       "orderSummary": "Order summary",
       "subtotal": "Subtotal",
       "deposits": "Deposits",
