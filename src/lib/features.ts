@@ -41,4 +41,8 @@ export const features = {
   momoEnabled: env.MOMO_ENABLED,
   zalopayEnabled: env.ZALOPAY_ENABLED,
   bankTransferEnabled: env.BANK_TRANSFER_ENABLED,
+  // Tier-1 automated image moderation via OpenAI (services/moderation.ts).
+  // Read together with isContentModerationConfigured() — on without a key
+  // falls back to the human queue rather than pretending to scan.
+  contentModerationEnabled: env.CONTENT_MODERATION_ENABLED,
 } as const;

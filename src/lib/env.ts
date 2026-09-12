@@ -67,6 +67,13 @@ const serverSchema = z.object({
   TWILIO_AUTH_TOKEN: z.string().optional(),
   TWILIO_VERIFY_SERVICE_SID: z.string().optional(),
 
+  // Tier-1 automated image moderation (lib/openai-moderation.ts). Used
+  // for nothing else — this is not a general-purpose LLM key, and no
+  // other code path should start using it as one without the project
+  // owner deciding that separately. The Moderation endpoint is free and
+  // exempt from usage limits.
+  OPENAI_API_KEY: z.string().optional(),
+
   RESEND_API_KEY: z.string().optional(),
   // NOT a bare z.string().email(): the documented Resend "from" format —
   // and this app's own fallback — is the display-name form
@@ -132,6 +139,13 @@ const serverSchema = z.object({
   // an automatic side effect of enabling a payment method. See
   // src/lib/features.ts's freeRoleGrantEnabled comment.
   FREE_ROLE_GRANT_ENABLED: booleanFlag("true"),
+  // Tier-1 automated image moderation. Defaults OFF: turning it on sends
+  // every uploaded portfolio image to OpenAI (US), which is a personal-
+  // data transfer decision for the project owner to make deliberately,
+  // not a default — see docs/ops/content-moderation.md. Off (or without
+  // OPENAI_API_KEY) every upload goes to the human queue exactly as
+  // before, so this never gates the feature working, only its automation.
+  CONTENT_MODERATION_ENABLED: booleanFlag("false"),
 });
 
 const publicSchema = z.object({
