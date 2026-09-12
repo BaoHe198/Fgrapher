@@ -7,8 +7,9 @@ Every portfolio upload has always landed in the human queue at
 approves it (`ProfileMedia.moderationStatus`, enforced at the query layer by
 `services/search.ts` and at publish time by `setProfilePublished()`).
 
-Tier 1 does not change that contract. It only removes clear violations from the
-queue before a human ever sees them:
+Tier 1 does not change that contract. It gets a clear violation off the public
+profile immediately instead of waiting for the queue — but the photo stays in
+the queue either way, so a human always has the last word:
 
 ```
 upload → ProfileMedia created (PENDING)
