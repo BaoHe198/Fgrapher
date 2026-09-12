@@ -1,68 +1,99 @@
 ---
 name: fgrapher-seo-landing
-description: Sinh nội dung và cấu trúc trang landing SEO của Fgrapher theo tổ hợp tỉnh/thành × role (ví dụ "chụp ảnh cưới tại Đà Nẵng"). BẮT BUỘC dùng skill này khi viết hoặc sửa landing page, metadata, tiêu đề trang, mô tả danh mục, breadcrumb, sitemap, structured data, nội dung marketing theo địa phương, hoặc bất kỳ trang nào có URL dạng /{role}/{tinh}. Cũng dùng khi được yêu cầu "viết nội dung cho trang X", "làm SEO", hay tạo template trang danh sách provider theo khu vực.
+description: Sinh nội dung và cấu trúc trang landing SEO của Fgrapher theo tổ hợp tỉnh/thành × role (ví dụ "photographer tại TP. Hồ Chí Minh"). BẮT BUỘC dùng skill này khi viết hoặc sửa trang /{roleSlug}/{provinceSlug}, metadata, tiêu đề trang, mô tả danh mục, breadcrumb, sitemap, structured data, hoặc nội dung marketing theo địa phương. Cũng dùng khi được yêu cầu "viết nội dung cho trang X", "làm SEO", hay tạo template trang danh sách provider theo khu vực.
 ---
 
 # Fgrapher — Landing page SEO theo tỉnh × role
 
-Mục tiêu: 34 tỉnh × ~5 role ≈ 170 trang, nhất quán về cấu trúc, **không phải**
-doorway page nhân bản nội dung.
+## Hiện trạng — đọc trước khi đề xuất bất cứ gì
+
+Trang **đã tồn tại**: `src/app/(public)/[roleSlug]/[provinceSlug]/page.tsx` (~170 dòng).
+Đây là cái cần sửa, không phải viết mới.
+
+| Thứ       | Thực tế trong repo                                                                     |
+| --------- | -------------------------------------------------------------------------------------- |
+| URL       | `/{roleSlug}/{provinceSlug}` — ví dụ `/photographer/tp-ho-chi-minh`                    |
+| Role slug | `ROLE_SLUGS` trong `src/lib/constants/index.ts` — **slug tiếng Anh**, 6 role           |
+| Tỉnh slug | `Province.code` (không có field `slug`) — xem skill `fgrapher-schema`                  |
+| Dữ liệu   | `searchProfiles({ roles, city: province.code, limit: 24 })` (`services/search.ts`)     |
+| Metadata  | catalog `publicPages.roleProvinceLanding` trong `src/messages/{vi,en}.json`            |
+| JSON-LD   | `CollectionPage` + `ItemList` — **chưa có** `BreadcrumbList`, **chưa có** `FAQPage`    |
+| Sitemap   | `src/app/sitemap.ts` — liệt kê **mọi** tổ hợp (role × tỉnh)                            |
+| Render    | Dynamic, cố ý **không** `generateStaticParams()` — đọc comment đầu file để biết vì sao |
+
+**Số trang hiện tại là 6, không phải 170.** Chỉ 1 tỉnh được seed (Hồ Chí Minh) ×
+6 role slug. `CAMERA_SHOP` còn bị loại thêm khi `MARKETPLACE_ENABLED=false` → thực
+tế là 5. Đừng viết plan, nội dung hay ước lượng dựa trên "34 tỉnh".
 
 ## Nguyên tắc số một: không tạo trang rỗng
 
-Google phạt trang mỏng và trang chỉ khác nhau ở tên địa danh. Vì vậy:
+Google phạt trang mỏng và trang chỉ khác nhau ở tên địa danh.
 
-- **Chỉ render trang khi tỉnh đó có ít nhất 3 provider đã duyệt cho role đó.**
-  Dưới ngưỡng → trả 404, hoặc redirect về trang role toàn quốc. Không noindex một
-  trang rỗng rồi để đó.
-- Ngưỡng này là tham số cấu hình (`MIN_PROVIDERS_FOR_LANDING`), không hardcode.
-- Sitemap chỉ chứa trang đạt ngưỡng.
+**Khoảng cách so với hiện trạng — đây là việc cần làm, chưa phải việc đã có:**
 
-## URL và metadata
+- Hiện tại trang **không** 404 khi không có provider nào — nó render empty state
+  (`publicPages.roleProvinceLanding.empty`) kèm link về `/browse`
+- Hiện tại **không có** hằng số ngưỡng nào
+- `sitemap.ts` hiện **đưa mọi tổ hợp vào sitemap**, kể cả tổ hợp rỗng
 
-Cấu trúc URL:
+Hướng đúng khi được giao làm phần này:
+
+- Chỉ render khi tỉnh đó có **≥ N provider đã publish** cho role đó; dưới ngưỡng →
+  404 hoặc redirect về trang role toàn quốc. Không noindex một trang rỗng rồi để đó.
+- N là hằng số cấu hình (`MIN_PROVIDERS_FOR_LANDING` trong `src/lib/constants/index.ts`),
+  không hardcode rải rác
+- `sitemap.ts` phải dùng **cùng** một điều kiện đó, không được lệch
+- Empty state hiện tại vẫn hữu ích cho người dùng vào thẳng URL — giữ nó, chỉ
+  đừng để Google index
+
+## Metadata
+
+Template hiện tại nằm trong catalog i18n, không hardcode trong `.tsx`:
 
 ```
-/{role-slug}/{province-slug}
-ví dụ: /chup-anh-cuoi/da-nang
-       /trang-diem-co-dau/ho-chi-minh
+metaTitle:       "{role} tại {province} — Fgrapher"
+metaDescription: "Tìm và đặt lịch {role} uy tín tại {province}. ..."
 ```
 
-- Slug tiếng Việt không dấu, chữ thường, gạch ngang
-- Slug lấy từ bảng `Province`, không hardcode (xem skill `fgrapher-schema`)
-- Không dùng query param cho tỉnh (`?province=`) — không SEO được
+Khi cải thiện:
 
-Metadata:
+- `<title>` ≤ 60 ký tự nếu có thể; ưu tiên cắt phần brand
+- `<meta description>` 140–160 ký tự, nêu **số provider thật và khoảng giá thật**
+  thay vì câu chung chung — nghĩa là phải truyền số từ query vào message, không
+  viết cứng trong catalog
+- `canonical` đã có (`alternates.canonical`), trỏ về chính nó
+- `hreflang`: **không áp dụng.** App dùng next-intl theo cookie, không có segment
+  `[locale]` trong URL (xem `src/i18n/`), nên một URL phục vụ cả EN lẫn VI — không
+  có URL riêng theo ngôn ngữ để khai báo.
+- **Mọi chuỗi mới phải vào cả `vi.json` và `en.json`**, không hardcode tiếng Việt
+  trong component
 
-- `<title>`: `{Role} tại {Tỉnh} — {N}+ {role} đã xác minh | Fgrapher` (≤ 60 ký tự
-  nếu có thể; ưu tiên cắt phần brand)
-- `<meta description>`: 140–160 ký tự, nêu số lượng provider thật và khoảng giá
-  thật, không nói chung chung
-- `canonical` trỏ về chính nó; nếu có phân trang, `rel=next/prev`
-- `hreflang`: chưa cần, MVP chỉ tiếng Việt
+## Cấu trúc trang — thứ tự mục tiêu
 
-## Cấu trúc trang — thứ tự cố định
+Hiện trang mới có mục 1, 2, 3. Các mục còn lại là việc chưa làm:
 
-1. **H1**: `{Role} tại {Tỉnh}` — đúng một H1, không nhồi từ khoá
+1. **H1**: `{Role} tại {Tỉnh}` — đúng một H1, không nhồi từ khoá ✅ đã có
 2. **Đoạn mở** (60–100 từ): số provider đang hoạt động, khoảng giá thực tế, các
-   khu vực/phường phổ biến trong tỉnh đó
-3. **Danh sách provider**: tối thiểu 6 card, ảnh đã `APPROVED`, có badge đã xác minh
+   phường/khu vực phổ biến — ⚠️ hiện là câu template cố định, chưa có số thật
+3. **Danh sách provider**: `ArtistCard`, tối đa 24 ✅ đã có
 4. **Khối nội dung địa phương** (H2): những gì _chỉ đúng với tỉnh này_ — địa điểm
-   chụp phổ biến, mùa đẹp, mức giá vùng. Đây là phần chống trùng lặp.
-5. **FAQ** (H2, 3–5 câu): câu hỏi thật, có structured data `FAQPage`
-6. **Liên kết nội bộ**: các tỉnh lân cận cùng role + các role khác cùng tỉnh
-7. **CTA**: đăng yêu cầu / trở thành provider
+   chụp phổ biến, mùa đẹp, mức giá vùng. Đây là phần chống trùng lặp. ❌ chưa có
+5. **FAQ** (H2, 3–5 câu) + structured data `FAQPage` ❌ chưa có
+6. **Liên kết nội bộ**: tỉnh lân cận cùng role + role khác cùng tỉnh ❌ chưa có
+   (lưu ý: chỉ có 1 tỉnh nên "tỉnh lân cận" hiện chưa dựng được)
+7. **CTA**: đăng yêu cầu (`ServiceRequest`) / trở thành provider ❌ chưa có
 
 ## Chống trùng lặp — quy tắc bắt buộc
 
 Mỗi trang phải có **tối thiểu 150 từ nội dung duy nhất** không xuất hiện ở trang
-tỉnh khác. Đặc biệt là khối số 4.
+tỉnh khác, chủ yếu ở mục 4.
 
-Cách tạo nội dung duy nhất — ưu tiên dữ liệu thật trước, viết tay sau:
+Ưu tiên dữ liệu thật trước, viết tay sau:
 
-- Số liệu lấy từ DB: số provider, khoảng giá p25–p75 thực tế, số booking hoàn thành
-- Địa điểm: lấy từ dữ liệu provider tự khai, không bịa
-- Nếu chưa có dữ liệu thật cho một tỉnh → trang đó chưa đạt ngưỡng, đừng render
+- Số liệu lấy từ DB: số provider đã publish, khoảng giá p25–p75 từ `Profile.priceMin/priceMax`,
+  số booking `COMPLETED`
+- Địa điểm: lấy từ dữ liệu provider tự khai (`Profile.address`, `Ward.name`), không bịa
+- Nếu chưa có dữ liệu thật cho một tỉnh → tỉnh đó chưa đạt ngưỡng, đừng render
 
 **Không được làm:**
 
@@ -72,39 +103,49 @@ Cách tạo nội dung duy nhất — ưu tiên dữ liệu thật trước, vi�
 - Nhồi từ khoá: mật độ từ khoá chính giữ dưới 2%
 
 Nếu được yêu cầu sinh nội dung cho tỉnh chưa có dữ liệu, **nói rõ là chưa đủ dữ
-liệu** thay vì viết nội dung nghe hay nhưng sai.
+liệu** thay vì viết nội dung nghe hay nhưng sai. Với repo hiện tại, điều này đúng
+với **mọi tỉnh trừ Hồ Chí Minh** — và HCMC cũng chỉ có dữ liệu seed.
 
 ## Structured data
 
-Mỗi trang cần JSON-LD:
+Dùng `jsonLdScriptProps()` từ `src/lib/utils.ts` (pattern chung của repo, xem
+thêm trang `/profile/[username]` và `/shop/[productId]`).
 
-- `BreadcrumbList`
-- `FAQPage` (nếu có khối FAQ)
-- `ItemList` cho danh sách provider
-- Không dùng `LocalBusiness` cho Fgrapher trên trang tỉnh — Fgrapher không có cơ
-  sở tại tỉnh đó. Dùng cho từng provider nếu họ có địa chỉ thật đã xác minh.
+- `CollectionPage` + `ItemList` ✅ đã có
+- `BreadcrumbList` ❌ nên thêm
+- `FAQPage` ❌ thêm cùng lúc với khối FAQ, không thêm schema cho nội dung không tồn tại
+- **Không** dùng `LocalBusiness` cho Fgrapher trên trang tỉnh — Fgrapher không có
+  cơ sở tại tỉnh đó. Dùng cho từng provider nếu họ có địa chỉ thật đã xác minh.
 
 ## Ảnh
 
-- Chỉ dùng ảnh `ProfileMedia.moderationStatus === APPROVED`
+- Chỉ ảnh `ProfileMedia.moderationStatus === APPROVED` — `services/search.ts` đã
+  lọc sẵn ở tầng query, đừng bypass bằng query Prisma riêng
 - `alt` mô tả nội dung thật của ảnh, không nhồi từ khoá
-- Ảnh có người nhận diện được phải có bản ghi consent (xem `fgrapher-compliance`)
+- Ảnh có người nhận diện được phải có `rightsConfirmedAt` (xem `fgrapher-compliance`)
 - Lazy load tất cả trừ ảnh đầu tiên; ảnh đầu ưu tiên `priority`
+- Cloudinary chưa từng round-trip thật qua `next/image` trong môi trường này
+  (xem CLAUDE.md) — kiểm tra bằng mắt khi có credential thật, đừng mặc định là chạy
 
 ## Giọng văn
 
 - Tiếng Việt tự nhiên, xưng "Fgrapher", gọi người đọc là "bạn"
 - Câu ngắn. Không dùng sáo ngữ marketing ("giải pháp toàn diện", "hàng đầu Việt Nam")
 - Nêu con số cụ thể thay vì tính từ
-- Không hứa điều platform không đảm bảo được (MVP chưa có thanh toán, chưa có giao
-  file, nên đừng viết "thanh toán an toàn qua Fgrapher")
+- Tiền định dạng `"1.500.000₫"` qua `formatCurrency()`, ngày `dd/MM/yyyy` (CLAUDE.md mục 10)
+- Không hứa điều platform không đảm bảo được: MVP **chưa bật** thanh toán online
+  (`BILLING_ENABLED`/`MOMO_ENABLED`/`ZALOPAY_ENABLED`/`BANK_TRANSFER_ENABLED` đều
+  `false`) và **không có** giao file qua platform — nên đừng viết "thanh toán an
+  toàn qua Fgrapher" hay "nhận ảnh ngay trên Fgrapher"
 
 ## Checklist trước khi publish một batch trang
 
-- [ ] Mọi trang đều đạt ngưỡng provider tối thiểu?
+- [ ] Mọi trang đều đạt ngưỡng provider tối thiểu (khi ngưỡng đã được dựng)?
+- [ ] `sitemap.ts` dùng đúng cùng điều kiện với trang, không lệch?
 - [ ] Mỗi trang có ≥150 từ nội dung duy nhất?
 - [ ] Số liệu lấy từ DB, không bịa?
-- [ ] Slug khớp với bảng `Province`?
-- [ ] Không có ảnh `PENDING`/`REJECTED` lọt ra ngoài?
-- [ ] Sitemap đã cập nhật, chỉ chứa trang đạt ngưỡng?
-- [ ] Không có tuyên bố về tính năng chưa tồn tại (thanh toán, giao file)?
+- [ ] Slug role khớp `ROLE_SLUGS`, slug tỉnh khớp `Province.code`?
+- [ ] Chuỗi mới đã có đủ trong cả `vi.json` và `en.json`?
+- [ ] Không có ảnh `PENDING`/`REJECTED`/`AUTO_REJECTED` lọt ra ngoài?
+- [ ] Không có structured data mô tả khối nội dung chưa tồn tại trên trang?
+- [ ] Không có tuyên bố về tính năng đang tắt sau feature flag?
