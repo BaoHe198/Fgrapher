@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tag } from "@/components/ui/tag";
 import { ProfileActions } from "@/components/profile/profile-actions";
+import { ProfileViewBeacon } from "@/components/profile/profile-view-beacon";
 import { auth } from "@/lib/auth";
 import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
@@ -22,7 +23,6 @@ import {
   getProfileReviewStats,
   getPublicProfileUser,
   getShopProducts,
-  incrementProfileView,
 } from "@/services/public-profile";
 
 import { ProfileAvatar, ProfileCover } from "./profile-hero";
@@ -132,9 +132,6 @@ export default async function PublicProfilePage({
     user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
   const session = await auth();
   const isOwnProfile = session?.user?.id === user.id;
-  if (!isOwnProfile) {
-    incrementProfileView(activeProfile.id);
-  }
 
   const [reviews, reviewStats, products, followerCount, ownerAlbums] =
     await Promise.all([
@@ -260,6 +257,10 @@ export default async function PublicProfilePage({
   return (
     <div className="flex flex-col">
       <script {...jsonLdScriptProps(jsonLd)} />
+      {/* Counting a view needs a cookie to remember this visitor was already
+          counted, and a Server Component cannot set one — so the count is
+          reported by this beacon after mount instead of inline here. */}
+      {isOwnProfile ? null : <ProfileViewBeacon profileId={activeProfile.id} />}
       <ProfileCover coverImage={user.coverImage} isOwnProfile={isOwnProfile} />
 
       <div className="mx-auto w-full max-w-[1440px] px-4 pb-[72px] sm:px-8">

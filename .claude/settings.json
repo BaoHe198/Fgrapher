@@ -19,7 +19,8 @@
       "Bash(grep -o 'goToStep[^;]\\\\{0,240\\\\}' .next/dev/static/chunks/src_0erdk7_._.js)",
       "Bash(grep -o '.\\\\{80\\\\}scrollIntoView.\\\\{0,120\\\\}' .next/dev/static/chunks/src_0erdk7_._.js)",
       "Bash(ls -t ~/.claude/projects/*/*.jsonl 2>/dev/null | head -50 | wc -l; echo \"--- projects ---\"; ls -d ~/.claude/projects/*/ 2>/dev/null | head)",
-      "Read(//Users/heducthienbao/.claude/projects/**)"
+      "Read(//Users/heducthienbao/.claude/projects/**)",
+      "Bash(pnpm exec *)"
     ]
   }
 }

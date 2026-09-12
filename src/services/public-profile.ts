@@ -342,8 +342,12 @@ export async function getShopProducts(userId: string) {
   });
 }
 
+// Called only from POST /api/profiles/view, which owns the "is this actually
+// a new view?" decision (cookie-based, one per browser per profile per day)
+// and the owner check. Do not call this from a page — that is what made the
+// counter tick on every refresh and every crawler fetch.
 export function incrementProfileView(profileId: string) {
-  // Fire-and-forget — never block the page render on an analytics write.
+  // Fire-and-forget — never block the response on an analytics write.
   void db.profile
     .update({ where: { id: profileId }, data: { viewCount: { increment: 1 } } })
     .catch(() => {});
