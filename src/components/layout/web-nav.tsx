@@ -182,14 +182,30 @@ export function WebNav({
         </div>
       </div>
 
-      {/* Mobile row (<640px) — logo + hamburger, everything else moves into a Sheet */}
-      <div className="flex h-[72px] items-center justify-between px-4 sm:hidden">
+      {/* Mobile row (<640px) — logo + hamburger, everything else moves into
+          a Sheet. Signing up is the exception: burying the only way to
+          create an account behind a hamburger left a phone visitor with no
+          visible next step anywhere above the page footer. Signed-in users
+          keep the plain hamburger — their entry points are already in it. */}
+      <div className="flex h-[72px] items-center justify-between gap-2 px-4 sm:hidden">
         <LogoFull />
-        <MobileNavSheet
-          session={session}
-          isAuthenticated={isAuthenticated}
-          marketplaceEnabled={marketplaceEnabled}
-        />
+        <div className="flex items-center gap-1">
+          {isAuthenticated ? null : (
+            <Button
+              variant="accent"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/login" />}
+            >
+              {t("authCta")}
+            </Button>
+          )}
+          <MobileNavSheet
+            session={session}
+            isAuthenticated={isAuthenticated}
+            marketplaceEnabled={marketplaceEnabled}
+          />
+        </div>
       </div>
     </header>
   );

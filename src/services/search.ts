@@ -77,8 +77,13 @@ const PROVIDER_INCLUDE = {
   // Prompt G5, VIỆC 3 — the card carousel shows up to 5 photos; per
   // profile here (groupProfilesByUser then slices the merged total to 5
   // too, since one person can hold several role-profiles).
+  // deletedAt: null is not optional here — a photo the provider moved to
+  // the trash (Prompt G3 soft delete) keeps its APPROVED status until the
+  // purge cron removes it 7 days later, so filtering on moderation alone
+  // kept showing deleted photos on browse cards for a week. The public
+  // profile query already filters both; this one did not.
   media: {
-    where: { moderationStatus: "APPROVED" as const },
+    where: { moderationStatus: "APPROVED" as const, deletedAt: null },
     orderBy: { order: "asc" as const },
     take: 5,
   },
@@ -291,6 +296,20 @@ async function resolveProviderCards(
   }
 
   return results.sort((a, b) => {
+    // Providers with a portfolio always rank above providers without one,
+    // whatever sort is chosen. On a marketplace whose whole product is
+    // seeing someone's work, a card with no photo can't be evaluated at
+    // any price or rating, so it belongs at the end of the list rather
+    // than scattered through it. The chosen sort still fully orders
+    // *within* each group — this only decides which group comes first.
+    //
+    // Safe to do in memory: this function sorts the complete matched set
+    // and searchProfilesUncached paginates the sorted array afterwards,
+    // so the ordering is stable across pages.
+    const aHasPhotos = a.media.length > 0;
+    const bHasPhotos = b.media.length > 0;
+    if (aHasPhotos !== bHasPhotos) return aHasPhotos ? -1 : 1;
+
     switch (sort) {
       case "price_asc":
         return (a.priceMin ?? Infinity) - (b.priceMin ?? Infinity);

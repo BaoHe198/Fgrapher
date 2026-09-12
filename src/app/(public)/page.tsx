@@ -62,12 +62,19 @@ export default async function LandingPage() {
       {/* SECTION 1 — HERO */}
       <section className="relative bg-green-900 text-gold-50">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-8 py-16 max-md:px-5">
-          <div className="grid grid-cols-[1.05fr_1fr] items-center gap-14 max-lg:grid-cols-1">
-            <div className="flex flex-col gap-[22px]">
+          {/* Below lg both wrappers collapse to `contents`, so the heading,
+              the paragraph and the search box below become direct children
+              of this section's flex column and can be reordered. On a phone
+              the intro paragraph runs five lines and pushed the search box —
+              the only thing on this page anyone came to use — off the bottom
+              of the screen; it now sits directly under the headline, with
+              the paragraph after it. Desktop keeps the two-column layout. */}
+          <div className="grid grid-cols-[1.05fr_1fr] items-center gap-14 max-lg:contents">
+            <div className="flex flex-col gap-[22px] max-lg:contents">
               <h1 className="m-0 text-display-lg tracking-[-0.02em] sm:text-display-xl lg:text-display-2xl">
                 {t("hero.title")}
               </h1>
-              <p className="max-w-[460px] text-body-lg text-green-200">
+              <p className="max-w-[460px] text-body-lg text-green-200 max-lg:order-2">
                 {t("hero.sub")}
               </p>
             </div>
@@ -120,7 +127,9 @@ export default async function LandingPage() {
               at 5 filters + a search button, the dropdown box needs more
               room than the 2-column split above leaves it to fit them on
               one row. */}
-          <HeroSearch marketplaceEnabled={features.marketplaceEnabled} />
+          <div className="max-lg:order-1">
+            <HeroSearch marketplaceEnabled={features.marketplaceEnabled} />
+          </div>
         </div>
       </section>
 
