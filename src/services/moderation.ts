@@ -1,4 +1,3 @@
-import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import {
@@ -103,18 +102,20 @@ export const contentScanner: ContentScanner =
     ? new OpenAIModerationScanner()
     : new MockScanner();
 
-// Points added to User.violationPoints per AUTO_REJECTED upload — the
-// 3-strikes account-suspension policy documented on /guidelines treats 3
-// as the auto-suspend threshold, so a single flagged upload is one strike.
-const VIOLATION_POINTS_PER_AUTO_REJECT = 1;
-const SUSPENSION_THRESHOLD = 3;
-
 // Runs right after a ProfileMedia row is created (see /api/portfolio's
-// POST handler) — scans it and, if flagged, immediately moves it to
-// AUTO_REJECTED and adds a strike to the uploader's account, auto-
-// suspending at the 3-strike threshold. Anything not flagged is left
-// PENDING for the human queue (/admin/moderation) — this function never
-// sets APPROVED itself.
+// POST handler) — scans it and, if flagged, moves it to AUTO_REJECTED so
+// it can't reach the public profile. Anything not flagged is left PENDING
+// for the human queue (/admin/moderation); this function never sets
+// APPROVED itself.
+//
+// It deliberately does NOT add a violation point or suspend anyone. The
+// project owner's call (12/09/2026): an automated scanner may hide a
+// photo, but only a human may penalise an account — three points are an
+// account suspension, and a model's mistake should never cost a real
+// photographer their livelihood with nobody having looked. Strikes are
+// awarded by moderateMedia() in services/admin.ts, on an admin's own
+// reject. An AUTO_REJECTED photo a provider disputes is re-examined by an
+// admin there, and that's where a penalty (if any) comes from.
 export async function runModeration(mediaId: string) {
   const media = await db.profileMedia.findUniqueOrThrow({
     where: { id: mediaId },
@@ -137,11 +138,6 @@ export async function runModeration(mediaId: string) {
     },
   });
 
-  const user = await db.user.update({
-    where: { id: media.profile.userId },
-    data: { violationPoints: { increment: VIOLATION_POINTS_PER_AUTO_REJECT } },
-  });
-
   await logAudit({
     action: "MEDIA_AUTO_REJECTED",
     targetType: "profile_media",
@@ -149,26 +145,6 @@ export async function runModeration(mediaId: string) {
     metadata: {
       userId: media.profile.userId,
       reason: result.reason,
-      violationPoints: user.violationPoints,
     },
   });
-
-  if (user.violationPoints >= SUSPENSION_THRESHOLD && !user.isSuspended) {
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        isSuspended: true,
-        suspendedReason:
-          "Automatic suspension — 3 content violations (see /guidelines)",
-      },
-    });
-    await logAudit({
-      action: "USER_AUTO_SUSPENDED",
-      targetType: "user",
-      targetId: user.id,
-      metadata: { violationPoints: user.violationPoints },
-    });
-    // Suspension is meant to take the account out of public view.
-    await revalidatePublicProfile(user.id);
-  }
 }

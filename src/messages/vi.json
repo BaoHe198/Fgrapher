@@ -766,7 +766,9 @@
         "emptyFiltered": "Không có nội dung nào đang chờ với vai trò này",
         "viewLarge": "Xem ảnh lớn",
         "waitingSince": "Chờ {time}",
-        "albumLabel": "Album: {title}"
+        "albumLabel": "Album: {title}",
+        "autoFlaggedBadge": "Máy đã ẩn",
+        "autoFlaggedReason": "Hệ thống tự động ẩn: {reason}. Đã ẩn khỏi công khai — bạn xác nhận hoặc bỏ ẩn. Chỉ khi bạn từ chối thì tài khoản mới bị tính điểm vi phạm."
       },
       "compliance": {
         "title": "Tuân thủ dữ liệu",
@@ -2988,7 +2990,7 @@
       },
       "violations": {
         "heading": "4. Quy trình xử lý vi phạm — 3 lần khóa tài khoản",
-        "body": "Mỗi lần một ảnh bị từ chối vì vi phạm tiêu chuẩn nội dung (dù do hệ thống tự động phát hiện hay do đội ngũ kiểm duyệt), tài khoản của bạn nhận một điểm vi phạm. Đến điểm vi phạm thứ 3, tài khoản sẽ tự động bị tạm khóa. Trường hợp vi phạm nghiêm trọng (ví dụ nghi ngờ liên quan đến người dưới 18 tuổi) có thể bị khóa ngay từ lần đầu và báo cáo cho cơ quan chức năng khi pháp luật yêu cầu."
+        "body": "Ảnh bị hệ thống tự động phát hiện là có vấn đề sẽ được ẩn ngay và chuyển cho đội ngũ kiểm duyệt xem lại — riêng việc bị hệ thống ẩn không tính là vi phạm. Điểm vi phạm chỉ do người thật quyết định: mỗi lần đội ngũ kiểm duyệt từ chối ảnh của bạn, tài khoản nhận một điểm vi phạm. Đến điểm vi phạm thứ 3, tài khoản sẽ tự động bị tạm khóa. Trường hợp vi phạm nghiêm trọng (ví dụ nghi ngờ liên quan đến người dưới 18 tuổi) có thể bị khóa ngay từ lần đầu và báo cáo cho cơ quan chức năng khi pháp luật yêu cầu."
       },
       "appeals": {
         "heading": "5. Khiếu nại khi ảnh bị từ chối",

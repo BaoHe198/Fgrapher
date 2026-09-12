@@ -350,9 +350,15 @@ describe("public-result mutations invalidate the cache", () => {
     "src/services/reviews.ts": { profileCalls: 4 },
     // updateAlbum, reorderAlbums, deleteAlbum, restoreAlbum, restoreMedia
     "src/services/albums.ts": { profileCalls: 5 },
-    // moderateMedia (approve+reject), reviewVerification, suspend/unsuspend/softDelete
-    "src/services/admin.ts": { profileCalls: 5 },
-    "src/services/moderation.ts": { profileCalls: 1 },
+    // moderateMedia (approve+reject), reviewVerification, suspend/unsuspend/
+    // softDelete, applyViolationStrikes' 3-strike auto-suspension
+    "src/services/admin.ts": { profileCalls: 6 },
+    // src/services/moderation.ts deliberately has NO entry. runModeration()
+    // only ever moves a just-uploaded row from PENDING to AUTO_REJECTED, and
+    // PENDING was never public in the first place, so nothing cached changes.
+    // It used to suspend accounts too — that moved to admin.ts (a machine may
+    // hide a photo, only a human may penalise an account), and the
+    // revalidation moved with it.
     "src/services/role-change-requests.ts": { profileCalls: 1 },
     // handleSubscriptionDeleted
     "src/services/subscription.ts": { profileCalls: 1 },

@@ -649,9 +649,16 @@ export async function getConsentStats() {
 
 // Content moderation (Prompt B5, docs/guides/
 // fgrapher-danh-gia-va-prompt-sua-doi.md).
+// AUTO_REJECTED is in the queue alongside PENDING, not filtered out: the
+// automated scanner (services/moderation.ts) only ever HIDES a photo, it
+// never penalises the account, so a human still has to confirm or
+// overturn the call. Without this the scanner's decision would be final
+// with nobody having looked — which is what the project owner's
+// 12/09/2026 decision rules out, and what /guidelines promises users.
+// Rejecting one here is what actually awards the violation point.
 export async function listPendingMedia() {
   return db.profileMedia.findMany({
-    where: { moderationStatus: "PENDING" },
+    where: { moderationStatus: { in: ["PENDING", "AUTO_REJECTED"] } },
     include: {
       profile: {
         select: {
@@ -674,6 +681,61 @@ export async function listPendingMedia() {
     orderBy: { createdAt: "asc" },
     take: MODERATION_PAGE_SIZE,
   });
+}
+
+// The 3-strikes policy on /guidelines. Only ever reached from an admin's
+// own reject — the automated scanner deliberately awards nothing (see
+// services/moderation.ts's runModeration comment for the project owner's
+// reasoning): a machine may hide a photo, only a human may penalise an
+// account.
+const SUSPENSION_THRESHOLD = 3;
+
+// One strike per user per reject ACTION, not per photo. An admin
+// selecting a whole album and rejecting it is one moderation decision
+// about one batch; counting it per-photo would mean a single click on a
+// 20-photo album instantly suspends an account seven times over, which is
+// not what "three violations" means to anyone reading the policy.
+async function applyViolationStrikes(
+  userIds: string[],
+  adminId: string,
+  reason?: string,
+) {
+  for (const userId of userIds) {
+    const user = await db.user.update({
+      where: { id: userId },
+      data: { violationPoints: { increment: 1 } },
+    });
+
+    await logAudit({
+      actorId: adminId,
+      action: "USER_VIOLATION_POINT_ADDED",
+      targetType: "user",
+      targetId: userId,
+      metadata: { violationPoints: user.violationPoints, reason },
+    });
+
+    if (user.violationPoints < SUSPENSION_THRESHOLD || user.isSuspended) {
+      continue;
+    }
+
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        isSuspended: true,
+        suspendedReason:
+          "Automatic suspension — 3 content violations (see /guidelines)",
+      },
+    });
+    await logAudit({
+      actorId: adminId,
+      action: "USER_AUTO_SUSPENDED",
+      targetType: "user",
+      targetId: userId,
+      metadata: { violationPoints: user.violationPoints },
+    });
+    // Suspension is meant to take the account out of public view.
+    await revalidatePublicProfile(userId);
+  }
 }
 
 // Bulk-capable — a single approve/reject can cover many tiles at once
@@ -746,6 +808,12 @@ export async function moderateMedia({
   const portfolioUrl = portfolioUrlFor();
 
   if (action === "reject") {
+    await applyViolationStrikes(
+      [...new Set(rows.map((row) => row.profile.userId))],
+      adminId,
+      reason,
+    );
+
     // Each rejected photo needs its own reason surfaced, so this stays
     // one notification per photo.
     await Promise.all(

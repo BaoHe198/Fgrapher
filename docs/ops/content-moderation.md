@@ -15,16 +15,18 @@ upload → ProfileMedia created (PENDING)
        → runModeration() [fire-and-forget]
            → OpenAI omni-moderation-latest
                → score ≥ 0.9 on sexual | violence/graphic
-                     → AUTO_REJECTED + 1 violation point
-                        (3 points = automatic account suspension)
+                     → AUTO_REJECTED (hidden), no penalty
+                        → still listed in the admin queue, badged
+                          "auto-hidden", for a human to confirm or overturn
                → anything else, or the scan couldn't run
-                     → stays PENDING → human queue
+                     → stays PENDING → admin queue
 ```
 
-**Tier 1 never approves anything.** The worst case of a wrong automated answer
-is extra work for a human, never unreviewed content going public. This is the
-property the whole design rests on, and `services/__tests__/moderation.test.ts`
-asserts it directly.
+**Tier 1 never approves anything, and never penalises anyone.** The worst case
+of a wrong automated answer is extra work for a human, never unreviewed content
+going public and never a photographer punished by a model's mistake. Those are
+the two properties the whole design rests on, and
+`services/__tests__/moderation.test.ts` asserts the first directly.
 
 ## What it cannot do — read this before trusting it
 
@@ -47,17 +49,37 @@ Also not covered:
   extracts frames.
 - **Anything below the threshold.** By design; see below.
 
+## Who can penalise an account
+
+Only a human. Project owner's decision, 12/09/2026.
+
+`runModeration()` hides a photo and does nothing else — no violation point, no
+suspension. Violation points are awarded by `applyViolationStrikes()` in
+`services/admin.ts`, reached only from an admin's own reject in the queue, and
+three of those still auto-suspend as `/guidelines` says.
+
+One strike per user per **reject action**, not per photo: an admin selecting a
+whole album and rejecting it is one moderation decision about one batch, and
+counting per-photo would mean a single click on a 20-photo album suspends an
+account seven times over.
+
+This is why `listPendingMedia()` returns `AUTO_REJECTED` rows alongside
+`PENDING` ones — the photo is already hidden, but a human still confirms or
+overturns the machine's call, and it's their reject that carries a consequence.
+Without that the scanner's decision would be final with nobody having looked.
+
 ## Why the threshold is 0.9 and not OpenAI's own `flagged`
 
 The API returns its own `flagged` boolean, calibrated to catch borderline
-content. That calibration is right for "show this to a human" and much too eager
-for what an auto-reject actually does here: it adds a violation point, and three
-points automatically suspend the provider's account.
+content. That calibration is right for "show this to a human" and too eager for
+hiding a working photographer's portfolio photo on the spot — an auto-hide is
+reversible, but it is still their livelihood off their profile until an admin
+gets to the queue.
 
 So the policy reads `category_scores` and requires ≥ 0.9, ignoring `flagged`
-entirely. A lower threshold would buy fewer admin reviews at the price of
-wrongly suspending real photographers. The constant is `AUTO_REJECT_THRESHOLD`
-in `services/moderation.ts`.
+entirely. Everything below still reaches the same human, just without being
+hidden first. The constant is `AUTO_REJECT_THRESHOLD` in
+`services/moderation.ts`.
 
 Only `sexual` and `violence/graphic` are auto-reject grounds. The `self-harm`
 categories are deliberately left to humans — on a photography platform they fire
@@ -127,10 +149,18 @@ that's why there's a 10s timeout at all.
 | Upload call site          | `src/app/api/portfolio/route.ts`            |
 | Avatar/cover call site    | `src/app/api/users/me/route.ts`             |
 
-Every auto-reject writes an `AuditLog` row (`MEDIA_AUTO_REJECTED`) with the
-category and score in `metadata`, and an automatic suspension writes
-`USER_AUTO_SUSPENDED`. Those are the rows to read when a provider disputes a
-rejection.
+Audit trail, in the order it accumulates for a disputed photo:
+
+| Event                       | `AuditLog.action`            | Written by                |
+| --------------------------- | ---------------------------- | ------------------------- |
+| Machine hid the photo       | `MEDIA_AUTO_REJECTED`        | `runModeration()`         |
+| Admin rejected it           | `MEDIA_REJECTED`             | `moderateMedia()`         |
+| Admin's reject cost a point | `USER_VIOLATION_POINT_ADDED` | `applyViolationStrikes()` |
+| Third point suspended them  | `USER_AUTO_SUSPENDED`        | `applyViolationStrikes()` |
+
+`MEDIA_AUTO_REJECTED` carries the category and score in `metadata`. A photo with
+that row but no `MEDIA_REJECTED` after it was hidden by the machine and never
+confirmed by a human — which is a queue backlog, not a decision.
 
 ## Never send KYC images here
 

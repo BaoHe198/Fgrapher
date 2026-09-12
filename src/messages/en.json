@@ -766,7 +766,9 @@
         "emptyFiltered": "Nothing pending for this role",
         "viewLarge": "View full size",
         "waitingSince": "Waiting {time}",
-        "albumLabel": "Album: {title}"
+        "albumLabel": "Album: {title}",
+        "autoFlaggedBadge": "Auto-hidden",
+        "autoFlaggedReason": "Hidden by the automated scan: {reason}. Already off the public profile — confirm or overturn. Only your rejection awards a violation point."
       },
       "compliance": {
         "title": "Compliance",
@@ -2988,7 +2990,7 @@
       },
       "violations": {
         "heading": "4. Violation process — a 3-strike suspension",
-        "body": "Each time a photo is rejected for violating content standards (whether caught by automated scanning or by the moderation team), your account gets one violation point. At the third point, the account is automatically suspended. Serious violations (e.g. suspected involvement of someone under 18) can result in an immediate suspension and a report to authorities where the law requires it."
+        "body": "A photo our automated scan flags is hidden straight away and sent to the moderation team for a second look — being hidden by the scan alone is not a violation. Violation points are only ever awarded by a person: each time the moderation team rejects your photos, your account gets one violation point. At the third point, the account is automatically suspended. Serious violations (e.g. suspected involvement of someone under 18) can result in an immediate suspension and a report to authorities where the law requires it."
       },
       "appeals": {
         "heading": "5. Appealing a rejected photo",
