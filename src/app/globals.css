@@ -453,6 +453,27 @@
   }
 }
 
+/* The landing hero's contact sheet (components/sections/hero-contact-sheet.tsx).
+   A photograph coming up in a developing tray: it arrives flat and
+   desaturated and lifts to full contrast, rather than sliding in from an
+   edge. Frames stagger via an inline animation-delay so the sheet
+   develops one frame at a time. Neutralised by the
+   prefers-reduced-motion rule at the bottom of this file. */
+@keyframes fg-develop {
+  from {
+    opacity: 0;
+    filter: saturate(0.35) contrast(0.85);
+  }
+  to {
+    opacity: 1;
+    filter: saturate(1) contrast(1);
+  }
+}
+
+@utility animate-develop {
+  animation: fg-develop 900ms ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

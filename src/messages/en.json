@@ -2794,7 +2794,8 @@
         "step2Desc": "Message the artist, pick a slot, and confirm your booking online.",
         "step3Title": "Get your shoot",
         "step3Desc": "Meet up and get creative with the artist you booked."
-      }
+      },
+      "heroPhotoAlt": "Work by {name}"
     },
     "pricing": {
       "pageTitle": "Pricing — Fgrapher",

@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { CalendarCheck, Search, ShoppingBag } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 
 import { ArtistCard } from "@/components/cards/artist-card";
+import { HeroContactSheet } from "@/components/sections/hero-contact-sheet";
 import { HeroSearch } from "@/components/sections/hero-search";
 import { Button } from "@/components/ui/button";
 import { SectionHead } from "@/components/ui/section-head";
 import { features } from "@/lib/features";
 import { formatCurrency } from "@/lib/utils";
-import { getFeaturedProfiles } from "@/services/search";
+import { getFeaturedProfiles, getHeroPhotos } from "@/services/search";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo.home");
@@ -29,6 +29,28 @@ export async function generateMetadata(): Promise<Metadata> {
 // phase-1 Step 6 invented this 3-step section — there is no corresponding
 // content in the design's real i18n strings (window.FG_STRINGS). Now
 // wired to publicPages.landing per CLAUDE.md rule #10 (full Vietnamese UI).
+// Used only until real approved portfolio photos exist — see heroPhotos
+// below. Kept as the original four so the hero never renders empty on a
+// brand-new install.
+const FALLBACK_HERO_PHOTOS = [
+  {
+    url: "https://images.unsplash.com/photo-1497316730643-415fac54a2af?q=80&w=800&auto=format&fit=crop",
+    altKey: "hero.imageAlt.photographer",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1622336889416-8d790ad807d7?q=80&w=800&auto=format&fit=crop",
+    altKey: "hero.imageAlt.makeupArtist",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1497015289639-54688650d173?q=80&w=800&auto=format&fit=crop",
+    altKey: "hero.imageAlt.videographer",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1617463874381-85b513b3e991?q=80&w=800&auto=format&fit=crop",
+    altKey: "hero.imageAlt.studio",
+  },
+] as const;
+
 const HOW_IT_WORKS_KEYS = [
   { titleKey: "howItWorks.step1Title", descKey: "howItWorks.step1Desc" },
   { titleKey: "howItWorks.step2Title", descKey: "howItWorks.step2Desc" },
@@ -55,7 +77,32 @@ export default async function LandingPage() {
       : []),
   ];
 
-  const featuredProfiles = await getFeaturedProfiles(4);
+  const [featuredProfiles, realHeroPhotos] = await Promise.all([
+    getFeaturedProfiles(4),
+    getHeroPhotos(8),
+  ]);
+
+  // The contact sheet wants eight photos: four frames, each with a second
+  // photograph to change to. Below that it shows what exists and simply
+  // never changes — correct behaviour for a young marketplace, and it
+  // fills in on its own as providers upload.
+  //
+  // Stock photographs are the fallback, not the default: a hero
+  // advertising work nobody on the platform did is the most valuable
+  // screen on the site spent on a lie. They only appear while there is
+  // genuinely nothing real to show.
+  const heroPhotos = [
+    ...realHeroPhotos.map((photo) => ({
+      url: photo.url,
+      alt: photo.credit
+        ? tLanding("heroPhotoAlt", { name: photo.credit })
+        : t("hero.imageAlt.photographer"),
+    })),
+    ...FALLBACK_HERO_PHOTOS.map((photo) => ({
+      url: photo.url,
+      alt: t(photo.altKey),
+    })),
+  ].slice(0, 8);
 
   return (
     <>
@@ -79,48 +126,7 @@ export default async function LandingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 max-lg:hidden">
-              <div className="flex flex-col gap-3">
-                <div className="relative h-[200px] overflow-hidden rounded-2xl">
-                  <Image
-                    src="https://images.unsplash.com/photo-1497316730643-415fac54a2af?q=80&w=800&auto=format&fit=crop"
-                    alt={t("hero.imageAlt.photographer")}
-                    fill
-                    sizes="(min-width: 1024px) 300px, 0px"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="relative h-[140px] overflow-hidden rounded-2xl">
-                  <Image
-                    src="https://images.unsplash.com/photo-1622336889416-8d790ad807d7?q=80&w=800&auto=format&fit=crop"
-                    alt={t("hero.imageAlt.makeupArtist")}
-                    fill
-                    sizes="(min-width: 1024px) 300px, 0px"
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-3 pt-[34px]">
-                <div className="relative h-[150px] overflow-hidden rounded-2xl">
-                  <Image
-                    src="https://images.unsplash.com/photo-1497015289639-54688650d173?q=80&w=800&auto=format&fit=crop"
-                    alt={t("hero.imageAlt.videographer")}
-                    fill
-                    sizes="(min-width: 1024px) 300px, 0px"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="relative h-[190px] overflow-hidden rounded-2xl">
-                  <Image
-                    src="https://images.unsplash.com/photo-1617463874381-85b513b3e991?q=80&w=800&auto=format&fit=crop"
-                    alt={t("hero.imageAlt.studio")}
-                    fill
-                    sizes="(min-width: 1024px) 300px, 0px"
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            </div>
+            <HeroContactSheet photos={heroPhotos} />
           </div>
 
           {/* Full hero width rather than confined to the left text column —

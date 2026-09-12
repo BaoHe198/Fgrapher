@@ -509,6 +509,75 @@ export const FEATURED_RATED_PROVIDER_WHERE = {
 } satisfies Prisma.ReviewWhereInput;
 
 /**
+ * Photos for the landing hero's contact sheet. The hero used to advertise
+ * four stock photographs, which is the single most valuable piece of
+ * screen real estate on the site spent on work nobody on the platform
+ * did. These are real approved portfolio photos from published providers
+ * — the hero becomes a window onto the actual inventory, and it improves
+ * on its own as the marketplace fills up.
+ *
+ * Newest first so a provider who just joined is visible rather than
+ * buried behind whoever happened to sign up first. Capped at two per
+ * provider so one prolific portfolio can't fill the whole sheet.
+ */
+export async function getHeroPhotos(limit = 8) {
+  const rows = await db.profileMedia.findMany({
+    where: {
+      moderationStatus: "APPROVED",
+      deletedAt: null,
+      type: "IMAGE",
+      profile: {
+        isPublished: true,
+        role: { in: SEARCHABLE_ROLES },
+        user: PUBLIC_USER_FILTER,
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit * 6,
+    select: {
+      id: true,
+      url: true,
+      width: true,
+      height: true,
+      profile: {
+        select: {
+          userId: true,
+          displayName: true,
+          user: { select: { name: true } },
+        },
+      },
+    },
+  });
+
+  // Every frame in the contact sheet is wider than it is tall, and
+  // object-cover on a portrait shot in a landscape frame crops to
+  // somebody's chin. Landscape photos go in first; portraits only fill
+  // what's left over, so a thin marketplace still gets a full sheet.
+  const isLandscape = (r: (typeof rows)[number]) =>
+    r.width !== null && r.height !== null && r.width >= r.height;
+  const ordered = [
+    ...rows.filter(isLandscape),
+    ...rows.filter((r) => !isLandscape(r)),
+  ];
+
+  const perProvider = new Map<string, number>();
+  const picked: { id: string; url: string; credit: string | null }[] = [];
+  for (const row of ordered) {
+    const key = row.profile.userId;
+    const used = perProvider.get(key) ?? 0;
+    if (used >= 2) continue;
+    perProvider.set(key, used + 1);
+    picked.push({
+      id: row.id,
+      url: row.url,
+      credit: row.profile.displayName ?? row.profile.user.name,
+    });
+    if (picked.length >= limit) break;
+  }
+  return picked;
+}
+
+/**
  * Top-rated published providers for the landing page's "Featured near you"
  * section, backfilled with the newest published providers when there aren't
  * enough reviewed ones yet — never pads with fake data.

@@ -2794,7 +2794,8 @@
         "step2Desc": "Nhắn tin cho nghệ sĩ, chọn khung giờ và xác nhận đặt lịch trực tuyến.",
         "step3Title": "Tận hưởng buổi chụp",
         "step3Desc": "Gặp gỡ và sáng tạo cùng nghệ sĩ bạn đã chọn."
-      }
+      },
+      "heroPhotoAlt": "Tác phẩm của {name}"
     },
     "pricing": {
       "pageTitle": "Bảng giá — Fgrapher",
