@@ -995,6 +995,50 @@ function getLocationLabel(
   };
 }
 
+// Every label/value line in the review card goes through this, so they can't
+// drift apart again. The rows used to be written inline twice with different
+// type: the detail rows as small-grey label + medium-semibold value, the
+// price rows as medium-secondary label + medium-regular value.
+//
+// Two flex bugs went with that. The label had no `shrink-0`, so a long value
+// squeezed it until it broke across lines — "Địa điểm" rendered as "Địa" /
+// "điểm". And the value had no `text-right`, so the moment it wrapped its
+// lines aligned left while every single-line value above stayed right,
+// breaking the column. `items-baseline` sits the two different type sizes on
+// the same line rather than on their box tops.
+function ReviewRow({
+  label,
+  value,
+  total = false,
+}: {
+  label: string;
+  value: string;
+  total?: boolean;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 py-2.5">
+      <span
+        className={cn(
+          "shrink-0",
+          total
+            ? "text-heading-md font-bold! text-text-primary"
+            : "text-body-sm text-text-tertiary",
+        )}
+      >
+        {label}
+      </span>
+      <span
+        className={cn(
+          "min-w-0 text-right break-words text-text-primary",
+          total ? "text-heading-md font-bold!" : "text-body-md font-semibold!",
+        )}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
 function StepReview({
   providerName,
   providerAvatar,
@@ -1068,29 +1112,21 @@ function StepReview({
 
       <div className="flex flex-col divide-y divide-border-subtle border-y border-border-subtle">
         {rows.map(([label, value]) => (
-          <div key={label} className="flex justify-between py-2.5">
-            <span className="text-body-sm text-text-tertiary">{label}</span>
-            <span className="text-body-md font-semibold! text-text-primary">
-              {value}
-            </span>
-          </div>
+          <ReviewRow key={label} label={label} value={value} />
         ))}
       </div>
 
       {service ? (
         <div className="flex flex-col divide-y divide-border-subtle border-b border-border-subtle">
-          <div className="flex justify-between py-2.5 text-body-md">
-            <span className="text-text-secondary">
-              {t("stepReview.servicePrice")}
-            </span>
-            <span className="text-text-primary">
-              {formatCurrency(service.price, service.currency)}
-            </span>
-          </div>
-          <div className="flex justify-between py-2.5 text-heading-md font-bold! text-text-primary">
-            <span>{t("stepReview.total")}</span>
-            <span>{formatCurrency(service.price, service.currency)}</span>
-          </div>
+          <ReviewRow
+            label={t("stepReview.servicePrice")}
+            value={formatCurrency(service.price, service.currency)}
+          />
+          <ReviewRow
+            label={t("stepReview.total")}
+            value={formatCurrency(service.price, service.currency)}
+            total
+          />
         </div>
       ) : null}
 
