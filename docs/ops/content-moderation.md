@@ -1,90 +1,120 @@
-# Content moderation — tier 1 (automated) + tier 2 (human)
+# Content moderation — an automated filter in front of a human queue
 
 ## The shape of it
 
-Every portfolio upload has always landed in the human queue at
-`/admin/moderation` as `PENDING`, and nothing becomes public until an admin
-approves it (`ProfileMedia.moderationStatus`, enforced at the query layer by
+Every portfolio upload lands in the queue at `/admin/moderation` as `PENDING`,
+and nothing becomes public until an admin approves it
+(`ProfileMedia.moderationStatus`, enforced at the query layer by
 `services/search.ts` and at publish time by `setProfilePublished()`).
 
-Tier 1 does not change that contract. It gets a clear violation off the public
-profile immediately instead of waiting for the queue — but the photo stays in
-the queue either way, so a human always has the last word:
+The automated tier does not change that in any way. **It sorts the queue. It
+does not decide anything.**
 
 ```
 upload → ProfileMedia created (PENDING)
        → runModeration() [fire-and-forget]
-           → OpenAI omni-moderation-latest
+           → OpenAI omni-moderation-latest, on a 512px derivative
                → score ≥ 0.9 on sexual | violence/graphic
-                     → AUTO_REJECTED (hidden), no penalty
-                        → still listed in the admin queue, badged
-                          "auto-hidden", for a human to confirm or overturn
+                     → autoFlagReason + autoFlaggedAt set
+                        → still PENDING, just first in the admin queue,
+                          badged with the category and score
                → anything else, or the scan couldn't run
-                     → stays PENDING → admin queue
+                     → nothing written at all
 ```
 
-**Tier 1 never approves anything, and never penalises anyone.** The worst case
-of a wrong automated answer is extra work for a human, never unreviewed content
-going public and never a photographer punished by a model's mistake. Those are
-the two properties the whole design rests on, and
-`services/__tests__/moderation.test.ts` asserts the first directly.
+Three properties hold by construction, and are what the design is for:
 
-## What it cannot do — read this before trusting it
+1. **It never approves anything.** Only an admin can.
+2. **It never hides or rejects anything.** A flagged photo is exactly as pending
+   as every other upload.
+3. **It never penalises anyone.** Violation points come from one deliberate
+   admin action, described below.
 
-`sexual/minors` is a **text-only** category in OpenAI's Moderation API. It is
-not evaluated for image input at all. So this scanner **cannot detect a minor in
-a photo** — the single case CLAUDE.md's ràng buộc #3 and #4 care most about, and
-the one behind the "Appears to be a minor" report reason.
-
-That detection remains entirely with human review and user reports. Enabling
-tier 1 must not be read as covering it.
-
-Categories OpenAI does evaluate for images: `sexual`, `violence`,
-`violence/graphic`, `self-harm`, `self-harm/intent`, `self-harm/instructions`.
-Source: <https://developers.openai.com/api/docs/guides/moderation>
-
-Also not covered:
-
-- **Videos.** `ProfileMedia.type === "VIDEO"` skips the scanner entirely and
-  goes straight to a human — the endpoint takes images only, and nothing here
-  extracts frames.
-- **Anything below the threshold.** By design; see below.
+The worst case of a wrong automated answer is an admin looking at an ordinary
+photo slightly sooner than they otherwise would.
 
 ## Who can penalise an account
 
-Only a human. Project owner's decision, 12/09/2026.
+Only an admin, by hand, at `/admin/users/[id]` → "Record a violation" →
+`addViolationPoint()` in `services/admin.ts`. Project owner's decision,
+12/09/2026.
 
-`runModeration()` hides a photo and does nothing else — no violation point, no
-suspension. Violation points are awarded by `applyViolationStrikes()` in
-`services/admin.ts`, reached only from an admin's own reject in the queue, and
-three of those still auto-suspend as `/guidelines` says.
+Specifically **not** penalties:
 
-One strike per user per **reject action**, not per photo: an admin selecting a
-whole album and rejecting it is one moderation decision about one batch, and
-counting per-photo would mean a single click on a 20-photo album suspends an
-account seven times over.
+- the scanner flagging a photo — it only reorders the queue
+- an admin **rejecting** a photo in `moderateMedia()` — that hides the photo and
+  emails the provider the reason, and stops there
 
-This is why `listPendingMedia()` returns `AUTO_REJECTED` rows alongside
-`PENDING` ones — the photo is already hidden, but a human still confirms or
-overturns the machine's call, and it's their reject that carries a consequence.
-Without that the scanner's decision would be final with nobody having looked.
+The intended sequence is: scan flags → admin reviews → admin rejects if it
+breaks the rules → admin contacts and warns the provider → **only then**, if
+warranted, the admin records a violation. A rejected photo is usually a
+misunderstanding about the rules rather than misconduct, so the two are not the
+same click.
 
-## Why the threshold is 0.9 and not OpenAI's own `flagged`
+A reason is required to record one, and it goes into `AuditLog` — a point nobody
+can later explain is worthless when the provider appeals.
 
-The API returns its own `flagged` boolean, calibrated to catch borderline
-content. That calibration is right for "show this to a human" and too eager for
-hiding a working photographer's portfolio photo on the spot — an auto-hide is
-reversible, but it is still their livelihood off their profile until an admin
-gets to the queue.
+The third point still suspends the account automatically, because that is what
+`/guidelines` tells users happens. It is not a surprise to the admin either: the
+current count and an explicit "this would be the 3rd" warning sit next to the
+button, and "Clear all points" and "Unsuspend" are both one click away.
 
-So the policy reads `category_scores` and requires ≥ 0.9, ignoring `flagged`
-entirely. Everything below still reaches the same human, just without being
-hidden first. The constant is `AUTO_REJECT_THRESHOLD` in
-`services/moderation.ts`.
+## What crosses the border, and what doesn't
 
-Only `sexual` and `violence/graphic` are auto-reject grounds. The `self-harm`
-categories are deliberately left to humans — on a photography platform they fire
-on scars and documentary/medical imagery far more often than on real violations.
+The scanner is sent **a 512px Cloudinary derivative, never the uploaded
+original** — `buildMediaVariants(url).moderation` in `lib/media-variants.ts`.
+
+That matters for two reasons:
+
+- **No metadata travels.** A Cloudinary transformation re-encodes the file, so
+  no EXIF goes with it — no GPS coordinates of where the shoot happened, no
+  camera serial, no capture timestamp.
+- **512px classifies but doesn't identify.** It is ample for "is this sexual or
+  graphic" and far too small to be useful for recognising a person.
+
+What this does **not** do is make the transfer stop being a transfer. See below.
+
+## Where the data actually lives (checked, not assumed)
+
+| Component      | Region                                              |
+| -------------- | --------------------------------------------------- |
+| App compute    | Singapore — `vercel.json` `"regions": ["sin1"]`     |
+| Database       | Singapore — Supabase `aws-0-ap-southeast-1`         |
+| Image storage  | Cloudinary — **region not verified from this repo** |
+| Automated scan | OpenAI, United States                               |
+
+So the app and its database are already deliberately close to Vietnam, not in
+the US. Cloudinary's region depends on the account and could not be confirmed
+from the code — worth checking in the Cloudinary console, because if portfolio
+images are already stored in the US, that is a far larger and more permanent
+transfer than a 512px copy sent for a moderation verdict.
+
+**Honest limit: no amount of code moves the OpenAI call inside Vietnam.** The
+options that genuinely would are infrastructure decisions, not code changes:
+
+1. **A Vietnamese moderation vendor** (VNPT, FPT.AI both offer content
+   moderation). The `ContentScanner` interface in `services/moderation.ts`
+   exists exactly so a second implementation can drop in beside
+   `OpenAIModerationScanner` without touching a single call site. This is the
+   cleanest path if residency has to hold.
+2. **A self-hosted classifier** (an ONNX NSFW model) running on infrastructure
+   in Vietnam. Removes the third party entirely; adds hosting the app doesn't
+   currently have.
+3. **Leave the automated tier off.** The human queue works exactly as it always
+   has — this whole feature only reorders it.
+
+## Before enabling — the consent question
+
+`ConsentPurpose` has no purpose covering "sending your uploads to a third-party
+content classifier". `SERVICE` is the only one that could be stretched to fit,
+and stretching it is the bundling that skill `fgrapher-compliance` §2 says is
+invalid.
+
+If this is switched on for real users, the honest move is a new
+`ConsentPurpose` value plus matching privacy-policy text naming OpenAI as a
+processor — not a reinterpretation of an existing purpose. That is a lawyer's
+call informed by the project owner, which is why the flag defaults to `false`
+rather than because the code is unfinished.
 
 ## Turning it on
 
@@ -93,80 +123,99 @@ OPENAI_API_KEY="sk-..."
 CONTENT_MODERATION_ENABLED="true"
 ```
 
-Both are required. The flag on without a key falls back to `MockScanner` (the
-old everything-to-humans behaviour) rather than silently scanning nothing while
-looking enabled — `services/moderation.ts` checks both.
+Both are required. The flag on without a key falls back to `MockScanner` rather
+than silently scanning nothing while looking enabled —
+`services/moderation.ts` checks both.
 
 The Moderation endpoint is free and does not count toward API usage limits, so
 there is no per-upload cost to weigh.
 
-## Before enabling — the personal-data question
+## What it cannot detect — read this before trusting it
 
-Turning this on sends **every uploaded portfolio image to OpenAI in the United
-States**. Those images contain identifiable people, most of whom are not
-Fgrapher users (they're the photographer's clients).
+`sexual/minors` is a **text-only** category in OpenAI's Moderation API. It is
+not evaluated for image input at all. So this scanner **cannot detect a minor in
+a photo** — the single case CLAUDE.md's ràng buộc #3 and #4 care most about, and
+the one behind the "Appears to be a minor" report reason.
 
-Two things follow, and neither is settled in code:
+That detection is entirely human review and user reports. An automated tier
+existing must not be read as covering it.
 
-1. **Consent.** `ConsentPurpose` has no purpose covering third-party content
-   moderation. `SERVICE` is the only one that could be stretched to fit, and
-   stretching it is exactly the bundling that skill `fgrapher-compliance` §2
-   says is invalid. If this is enabled for real users, the honest move is a new
-   purpose (and the privacy policy text to match), not a reinterpretation of an
-   existing one.
-2. **Cross-border transfer.** Same class of question as the KYC images already
-   sitting in Cloudinary (see `fgrapher-compliance` §6). A decision for the
-   project owner, informed by a lawyer — not something a feature flag's default
-   should quietly make.
+Categories OpenAI does evaluate for images: `sexual`, `violence`,
+`violence/graphic`, `self-harm`, `self-harm/intent`, `self-harm/instructions`.
+Source: <https://developers.openai.com/api/docs/guides/moderation>
 
-The flag defaults to `false` for these reasons, not because the code is
-unfinished.
+Also never flagged:
+
+- **Videos.** `ProfileMedia.type === "VIDEO"` skips the scan entirely — the
+  endpoint takes images only and nothing here extracts frames.
+- **Anything below 0.9.** See the threshold note below.
+
+## Why the threshold is 0.9 and not OpenAI's own `flagged`
+
+The API returns its own `flagged` boolean, calibrated to catch borderline
+content. Since a flag now only reorders a queue, a false positive is cheap — but
+a queue where half the uploads are "urgent" is a queue with no signal in it, and
+the admin stops trusting the badge. 0.9 keeps the badge meaningful.
+
+Only `sexual` and `violence/graphic` are flagging grounds. The `self-harm`
+categories are deliberately excluded — on a photography platform they fire on
+scars and documentary/medical imagery far more often than on real violations.
+
+The constants are `AUTO_FLAG_THRESHOLD` and `AUTO_FLAG_CATEGORIES` in
+`services/moderation.ts`.
 
 ## Failure behaviour
 
-Every failure path returns "unknown", which routes to the human queue:
+Every failure path means "no flag written", which leaves the photo in the queue
+in plain date order — exactly where it would have been with no scanner at all:
 
-| Situation                              | Result                       |
-| -------------------------------------- | ---------------------------- |
-| No API key / flag off                  | `needs_review` (MockScanner) |
-| Network error, non-2xx, malformed JSON | `needs_review`               |
-| Timeout (10s)                          | `needs_review`               |
-| Non-`http(s)` URL (blob:, data:)       | `needs_review`               |
-| Video                                  | `needs_review`               |
+| Situation                              | Result  |
+| -------------------------------------- | ------- |
+| No API key / flag off                  | no flag |
+| Network error, non-2xx, malformed JSON | no flag |
+| Timeout (10s)                          | no flag |
+| Non-`http(s)` URL (blob:, data:)       | no flag |
+| Video                                  | no flag |
 
 The portfolio upload path calls `runModeration()` fire-and-forget, so none of
-this can block or fail an upload. The avatar/cover path
-(`/api/users/me` PATCH) awaits the scan inline and returns 422 on a flag —
-that's why there's a 10s timeout at all.
+this can block or fail an upload.
+
+One exception worth knowing: the **avatar/cover** path (`/api/users/me` PATCH)
+still awaits the scan inline and refuses the upload with a 422 if it flags.
+Avatars deliberately skip the moderation queue entirely (they appear
+immediately), so there is no human step to defer to — without the inline check
+they would be completely unmoderated. Refusing an upload is not a penalty:
+nothing is recorded, and the user simply picks another photo. That is why there
+is a 10s timeout.
 
 ## Where things are
 
-| Thing                     | File                                        |
-| ------------------------- | ------------------------------------------- |
-| HTTP client               | `src/lib/openai-moderation.ts`              |
-| Policy + scanner + wiring | `src/services/moderation.ts`                |
-| Policy tests              | `src/services/__tests__/moderation.test.ts` |
-| Human queue               | `src/app/(admin)/admin/moderation/`         |
-| Upload call site          | `src/app/api/portfolio/route.ts`            |
-| Avatar/cover call site    | `src/app/api/users/me/route.ts`             |
+| Thing                     | File                                          |
+| ------------------------- | --------------------------------------------- |
+| HTTP client               | `src/lib/openai-moderation.ts`                |
+| Downscaled derivative     | `src/lib/media-variants.ts` (`.moderation`)   |
+| Policy + scanner + wiring | `src/services/moderation.ts`                  |
+| Violation points          | `src/services/admin.ts` (`addViolationPoint`) |
+| Tests                     | `src/services/__tests__/moderation.test.ts`   |
+| Human queue               | `src/app/(admin)/admin/moderation/`           |
+| Admin violation UI        | `src/app/(admin)/admin/users/[id]/`           |
+| Upload call site          | `src/app/api/portfolio/route.ts`              |
+| Avatar/cover call site    | `src/app/api/users/me/route.ts`               |
 
-Audit trail, in the order it accumulates for a disputed photo:
+Audit trail:
 
-| Event                       | `AuditLog.action`            | Written by                |
-| --------------------------- | ---------------------------- | ------------------------- |
-| Machine hid the photo       | `MEDIA_AUTO_REJECTED`        | `runModeration()`         |
-| Admin rejected it           | `MEDIA_REJECTED`             | `moderateMedia()`         |
-| Admin's reject cost a point | `USER_VIOLATION_POINT_ADDED` | `applyViolationStrikes()` |
-| Third point suspended them  | `USER_AUTO_SUSPENDED`        | `applyViolationStrikes()` |
-
-`MEDIA_AUTO_REJECTED` carries the category and score in `metadata`. A photo with
-that row but no `MEDIA_REJECTED` after it was hidden by the machine and never
-confirmed by a human — which is a queue backlog, not a decision.
+| Event                   | `AuditLog.action`                   | Written by               |
+| ----------------------- | ----------------------------------- | ------------------------ |
+| Scan flagged a photo    | `MEDIA_AUTO_FLAGGED`                | `runModeration()`        |
+| Admin approved/rejected | `MEDIA_APPROVED` / `MEDIA_REJECTED` | `moderateMedia()`        |
+| Admin recorded a point  | `USER_VIOLATION_POINT_ADDED`        | `addViolationPoint()`    |
+| Third point suspended   | `USER_AUTO_SUSPENDED`               | `addViolationPoint()`    |
+| Admin cleared points    | `USER_VIOLATION_POINTS_CLEARED`     | `clearViolationPoints()` |
 
 ## Never send KYC images here
 
 ID and selfie images live in a separate Cloudinary folder with `authenticated`
-delivery and are reachable only through short-lived signed URLs
+delivery, reachable only through short-lived signed URLs
 (`generateKycSignedUrl`). They must never be passed to this scanner. The URL
 guard in `moderateImageUrl()` is not what protects that — the fact that nothing
 calls it with a KYC URL is. Keep it that way.

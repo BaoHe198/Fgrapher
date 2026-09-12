@@ -67,7 +67,7 @@ const serverSchema = z.object({
   TWILIO_AUTH_TOKEN: z.string().optional(),
   TWILIO_VERIFY_SERVICE_SID: z.string().optional(),
 
-  // Tier-1 automated image moderation (lib/openai-moderation.ts). Used
+  // Automated moderation-queue sorting (lib/openai-moderation.ts). Used
   // for nothing else — this is not a general-purpose LLM key, and no
   // other code path should start using it as one without the project
   // owner deciding that separately. The Moderation endpoint is free and
@@ -139,12 +139,13 @@ const serverSchema = z.object({
   // an automatic side effect of enabling a payment method. See
   // src/lib/features.ts's freeRoleGrantEnabled comment.
   FREE_ROLE_GRANT_ENABLED: booleanFlag("true"),
-  // Tier-1 automated image moderation. Defaults OFF: turning it on sends
-  // every uploaded portfolio image to OpenAI (US), which is a personal-
-  // data transfer decision for the project owner to make deliberately,
-  // not a default — see docs/ops/content-moderation.md. Off (or without
-  // OPENAI_API_KEY) every upload goes to the human queue exactly as
-  // before, so this never gates the feature working, only its automation.
+  // Automated moderation-queue sorting. Defaults OFF: turning it on sends
+  // a downscaled copy of every portfolio image to OpenAI (US), which is a
+  // personal-data transfer decision for the project owner to make
+  // deliberately, not a default — see docs/ops/content-moderation.md.
+  // Off (or without OPENAI_API_KEY) every upload still reaches the same
+  // human queue in the same order it always did — the scan only sorts
+  // that queue, so this gates an optimisation, never the feature itself.
   CONTENT_MODERATION_ENABLED: booleanFlag("false"),
 });
 

@@ -11,6 +11,20 @@ export const adminUserActionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("verify") }),
   z.object({ action: z.literal("delete") }),
   z.object({ action: z.literal("notes"), notes: z.string().max(2000) }),
+  // Recording a violation is a deliberate act taken AFTER the admin has
+  // contacted and warned the provider — never a side effect of rejecting
+  // a photo, and never something the automated scanner can trigger
+  // (project owner's decision, 12/09/2026). The reason is required
+  // precisely because a point that nobody can later explain is worthless
+  // when the provider appeals — and the third point suspends the account.
+  z.object({
+    action: z.literal("add_violation"),
+    reason: z.string().min(1).max(500),
+  }),
+  z.object({
+    action: z.literal("clear_violations"),
+    reason: z.string().max(500).optional(),
+  }),
   // Manual plan assignment while BILLING_ENABLED=false — see CLAUDE.md
   // and services/subscription.ts's assignManualPlan.
   z.object({

@@ -354,11 +354,11 @@ describe("public-result mutations invalidate the cache", () => {
     // softDelete, applyViolationStrikes' 3-strike auto-suspension
     "src/services/admin.ts": { profileCalls: 6 },
     // src/services/moderation.ts deliberately has NO entry. runModeration()
-    // only ever moves a just-uploaded row from PENDING to AUTO_REJECTED, and
-    // PENDING was never public in the first place, so nothing cached changes.
-    // It used to suspend accounts too — that moved to admin.ts (a machine may
-    // hide a photo, only a human may penalise an account), and the
-    // revalidation moved with it.
+    // only writes autoFlagReason/autoFlaggedAt on a row that stays PENDING,
+    // and PENDING was never public, so nothing cached can change. The
+    // account suspension that used to live there moved to admin.ts's
+    // addViolationPoint() — a machine sorts the queue, only a human
+    // penalises an account — and the revalidation moved with it.
     "src/services/role-change-requests.ts": { profileCalls: 1 },
     // handleSubscriptionDeleted
     "src/services/subscription.ts": { profileCalls: 1 },

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { buildMediaVariants } from "@/lib/media-variants";
 import type { ModerationScores } from "@/lib/openai-moderation";
 import {
   type ContentScanner,
@@ -84,6 +85,30 @@ describe("verdictFromScores", () => {
         `unexpected verdict ${verdict}`,
       );
     }
+  });
+});
+
+describe("what actually crosses the border", () => {
+  const original =
+    "https://res.cloudinary.com/demo/image/upload/v1/portfolio/shot.jpg";
+
+  it("sends a 512px derivative, never the uploaded original", () => {
+    const { moderation } = buildMediaVariants(original);
+    assert.match(moderation, /c_limit,w_512/);
+    assert.notEqual(moderation, original);
+  });
+
+  it("sends a transformed URL, so no EXIF/GPS rides along", () => {
+    // A Cloudinary transformation re-encodes the file; the derivative
+    // carries none of the original's metadata. The assertion that matters
+    // is simply that we never hand over the untransformed original.
+    const { moderation } = buildMediaVariants(original);
+    assert.ok(moderation.includes("/upload/c_limit,w_512"));
+  });
+
+  it("falls back to the original only when the URL is not Cloudinary's", () => {
+    const foreign = "https://example.com/a.jpg";
+    assert.equal(buildMediaVariants(foreign).moderation, foreign);
   });
 });
 

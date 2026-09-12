@@ -758,6 +758,17 @@ model ProfileMedia {
   moderatedAt       DateTime?
   rightsConfirmedAt DateTime?
 
+  // Tier-1 automated scan (services/moderation.ts + lib/openai-moderation.ts).
+  // The scanner SORTS the queue, it does not decide: a flagged photo stays
+  // PENDING like any other and simply surfaces first at /admin/moderation,
+  // carrying the category+score that flagged it. It is never hidden,
+  // rejected, or penalised on a machine's say-so — project owner's
+  // decision, 12/09/2026. Null on every row the scan cleared or never saw
+  // (scanner off, video, API failure), which is also why absence of a flag
+  // means nothing on its own.
+  autoFlagReason String?
+  autoFlaggedAt  DateTime?
+
   // Prompt G3 (docs/guides/fgrapher-prompt-dot-2.md) — soft delete: set on
   // both direct single-photo delete and cascaded from an album delete
   // (see Album.deletedAt). Hidden from every normal read path
@@ -823,6 +834,13 @@ enum ModerationStatus {
   PENDING
   APPROVED
   REJECTED
+  // Nothing writes this. It dates from Prompt B5's original design, where
+  // an automated scanner was meant to reject outright; the scanner that
+  // actually shipped only sorts the review queue (see ProfileMedia's
+  // autoFlagReason and services/moderation.ts), so every photo is decided
+  // by a human and lands on APPROVED or REJECTED. Kept because dropping a
+  // Postgres enum value is a destructive migration for no gain, and
+  // album-detail.tsx still maps it for display if a row ever had it.
   AUTO_REJECTED
 }
 

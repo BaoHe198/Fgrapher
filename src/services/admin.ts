@@ -649,16 +649,9 @@ export async function getConsentStats() {
 
 // Content moderation (Prompt B5, docs/guides/
 // fgrapher-danh-gia-va-prompt-sua-doi.md).
-// AUTO_REJECTED is in the queue alongside PENDING, not filtered out: the
-// automated scanner (services/moderation.ts) only ever HIDES a photo, it
-// never penalises the account, so a human still has to confirm or
-// overturn the call. Without this the scanner's decision would be final
-// with nobody having looked — which is what the project owner's
-// 12/09/2026 decision rules out, and what /guidelines promises users.
-// Rejecting one here is what actually awards the violation point.
 export async function listPendingMedia() {
   return db.profileMedia.findMany({
-    where: { moderationStatus: { in: ["PENDING", "AUTO_REJECTED"] } },
+    where: { moderationStatus: "PENDING" },
     include: {
       profile: {
         select: {
@@ -676,66 +669,107 @@ export async function listPendingMedia() {
       // which shoot/category a pending photo was grouped under.
       album: { select: { id: true, title: true } },
     },
-    // Oldest first — surfaces anything approaching/past the 24h SLA badge
-    // shown on /admin/moderation.
-    orderBy: { createdAt: "asc" },
+    // What the tier-1 scanner is FOR: photos it flagged come first, so the
+    // admin's attention lands on the likely violations before the routine
+    // uploads. Everything is PENDING either way — the scan sorts the
+    // queue, it doesn't shorten it (services/moderation.ts). Within each
+    // group, oldest first, which is what the 24h SLA badge on
+    // /admin/moderation measures against.
+    orderBy: [
+      { autoFlaggedAt: { sort: "desc", nulls: "last" } },
+      { createdAt: "asc" },
+    ],
     take: MODERATION_PAGE_SIZE,
   });
 }
 
-// The 3-strikes policy on /guidelines. Only ever reached from an admin's
-// own reject — the automated scanner deliberately awards nothing (see
-// services/moderation.ts's runModeration comment for the project owner's
-// reasoning): a machine may hide a photo, only a human may penalise an
-// account.
+// The 3-strikes threshold published on /guidelines.
 const SUSPENSION_THRESHOLD = 3;
 
-// One strike per user per reject ACTION, not per photo. An admin
-// selecting a whole album and rejecting it is one moderation decision
-// about one batch; counting it per-photo would mean a single click on a
-// 20-photo album instantly suspends an account seven times over, which is
-// not what "three violations" means to anyone reading the policy.
-async function applyViolationStrikes(
-  userIds: string[],
-  adminId: string,
-  reason?: string,
-) {
-  for (const userId of userIds) {
-    const user = await db.user.update({
-      where: { id: userId },
-      data: { violationPoints: { increment: 1 } },
-    });
+// Records one violation against an account. Reached ONLY from the admin
+// user-detail page's explicit "record a violation" action — never from a
+// photo rejection, and never from the automated scanner. Project owner's
+// decision, 12/09/2026: the admin contacts and warns the provider first,
+// then records the violation as a separate deliberate act.
+//
+// The third one still suspends automatically, because that is what
+// /guidelines tells users will happen. It is not a surprise to the admin
+// either: the current count is shown next to the button before they press
+// it, and unsuspending is one click away.
+export async function addViolationPoint({
+  userId,
+  adminId,
+  reason,
+}: {
+  userId: string;
+  adminId: string;
+  reason: string;
+}) {
+  const user = await db.user.update({
+    where: { id: userId },
+    data: { violationPoints: { increment: 1 } },
+  });
 
-    await logAudit({
-      actorId: adminId,
-      action: "USER_VIOLATION_POINT_ADDED",
-      targetType: "user",
-      targetId: userId,
-      metadata: { violationPoints: user.violationPoints, reason },
-    });
+  await logAudit({
+    actorId: adminId,
+    action: "USER_VIOLATION_POINT_ADDED",
+    targetType: "user",
+    targetId: userId,
+    metadata: { violationPoints: user.violationPoints, reason },
+  });
 
-    if (user.violationPoints < SUSPENSION_THRESHOLD || user.isSuspended) {
-      continue;
-    }
-
-    await db.user.update({
-      where: { id: userId },
-      data: {
-        isSuspended: true,
-        suspendedReason:
-          "Automatic suspension — 3 content violations (see /guidelines)",
-      },
-    });
-    await logAudit({
-      actorId: adminId,
-      action: "USER_AUTO_SUSPENDED",
-      targetType: "user",
-      targetId: userId,
-      metadata: { violationPoints: user.violationPoints },
-    });
-    // Suspension is meant to take the account out of public view.
-    await revalidatePublicProfile(userId);
+  if (user.violationPoints < SUSPENSION_THRESHOLD || user.isSuspended) {
+    return user;
   }
+
+  const suspended = await db.user.update({
+    where: { id: userId },
+    data: {
+      isSuspended: true,
+      suspendedReason:
+        "Automatic suspension — 3 content violations (see /guidelines)",
+    },
+  });
+  await logAudit({
+    actorId: adminId,
+    action: "USER_AUTO_SUSPENDED",
+    targetType: "user",
+    targetId: userId,
+    metadata: { violationPoints: suspended.violationPoints },
+  });
+  // Suspension is meant to take the account out of public view.
+  await revalidatePublicProfile(userId);
+
+  return suspended;
+}
+
+// Wipes the violation counter — for when a provider appealed successfully,
+// or points were recorded in error. Unsuspending is a separate action on
+// purpose (unsuspendUser), so clearing the count never silently lets a
+// suspended account back in without an admin saying so.
+export async function clearViolationPoints({
+  userId,
+  adminId,
+  reason,
+}: {
+  userId: string;
+  adminId: string;
+  reason?: string;
+}) {
+  const user = await db.user.update({
+    where: { id: userId },
+    data: { violationPoints: 0 },
+  });
+
+  await logAudit({
+    actorId: adminId,
+    action: "USER_VIOLATION_POINTS_CLEARED",
+    targetType: "user",
+    targetId: userId,
+    metadata: { reason },
+  });
+
+  return user;
 }
 
 // Bulk-capable — a single approve/reject can cover many tiles at once
@@ -808,11 +842,12 @@ export async function moderateMedia({
   const portfolioUrl = portfolioUrlFor();
 
   if (action === "reject") {
-    await applyViolationStrikes(
-      [...new Set(rows.map((row) => row.profile.userId))],
-      adminId,
-      reason,
-    );
+    // Rejecting a photo does NOT record a violation against the account.
+    // Project owner's decision, 12/09/2026: a violation point is recorded
+    // by a separate, deliberate admin action (addViolationPoint below),
+    // after the admin has actually contacted and warned the provider —
+    // a rejected photo is often a misunderstanding about the rules, not
+    // misconduct, and the two shouldn't be the same click.
 
     // Each rejected photo needs its own reason surfaced, so this stays
     // one notification per photo.

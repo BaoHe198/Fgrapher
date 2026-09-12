@@ -694,7 +694,16 @@
         "bookingsSummary": "{customerCount} lượt đặt với vai trò khách hàng, {providerCount} lượt với vai trò nhà cung cấp.",
         "suspendDialogTitle": "Tạm khóa tài khoản này?",
         "suspendReasonPlaceholder": "Lý do tạm khóa",
-        "cancel": "Hủy"
+        "cancel": "Hủy",
+        "violations": {
+          "heading": "Điểm vi phạm",
+          "count": "Hiện có {count} điểm vi phạm.",
+          "hint": "Chỉ ghi nhận sau khi đã liên lạc và nhắc nhở nhà cung cấp. Từ chối một ảnh KHÔNG tự cộng điểm.",
+          "nextWillSuspend": "Cảnh báo: đây sẽ là điểm vi phạm thứ 3 — tài khoản sẽ bị tạm khoá ngay khi bạn ghi nhận.",
+          "reasonPlaceholder": "Lý do (bắt buộc khi ghi nhận vi phạm — lưu vào nhật ký)",
+          "add": "Ghi nhận vi phạm",
+          "clear": "Xoá hết điểm"
+        }
       },
       "reports": {
         "title": "Báo cáo",
@@ -767,8 +776,8 @@
         "viewLarge": "Xem ảnh lớn",
         "waitingSince": "Chờ {time}",
         "albumLabel": "Album: {title}",
-        "autoFlaggedBadge": "Máy đã ẩn",
-        "autoFlaggedReason": "Hệ thống tự động ẩn: {reason}. Đã ẩn khỏi công khai — bạn xác nhận hoặc bỏ ẩn. Chỉ khi bạn từ chối thì tài khoản mới bị tính điểm vi phạm."
+        "autoFlaggedBadge": "Máy đánh dấu",
+        "autoFlaggedReason": "Hệ thống tự động đánh dấu: {reason}. Đây chỉ là gợi ý để bạn xem trước — ảnh vẫn đang chờ duyệt như mọi ảnh khác."
       },
       "compliance": {
         "title": "Tuân thủ dữ liệu",
@@ -2990,7 +2999,7 @@
       },
       "violations": {
         "heading": "4. Quy trình xử lý vi phạm — 3 lần khóa tài khoản",
-        "body": "Ảnh bị hệ thống tự động phát hiện là có vấn đề sẽ được ẩn ngay và chuyển cho đội ngũ kiểm duyệt xem lại — riêng việc bị hệ thống ẩn không tính là vi phạm. Điểm vi phạm chỉ do người thật quyết định: mỗi lần đội ngũ kiểm duyệt từ chối ảnh của bạn, tài khoản nhận một điểm vi phạm. Đến điểm vi phạm thứ 3, tài khoản sẽ tự động bị tạm khóa. Trường hợp vi phạm nghiêm trọng (ví dụ nghi ngờ liên quan đến người dưới 18 tuổi) có thể bị khóa ngay từ lần đầu và báo cáo cho cơ quan chức năng khi pháp luật yêu cầu."
+        "body": "Ảnh bị hệ thống tự động đánh dấu sẽ được ưu tiên đưa lên đầu hàng chờ để đội ngũ kiểm duyệt xem trước — bản thân việc bị đánh dấu không phải là vi phạm, và không ảnh nào bị ẩn vì máy nói vậy. Mọi quyết định đều do người thật: đội ngũ kiểm duyệt sẽ duyệt hoặc từ chối ảnh. Nếu ảnh bị từ chối, chúng tôi liên lạc và nhắc nhở bạn trước; điểm vi phạm chỉ được ghi nhận sau đó, và chỉ do quản trị viên ghi nhận. Đến điểm vi phạm thứ 3, tài khoản sẽ tự động bị tạm khóa. Trường hợp vi phạm nghiêm trọng (ví dụ nghi ngờ liên quan đến người dưới 18 tuổi) có thể bị khóa ngay từ lần đầu và báo cáo cho cơ quan chức năng khi pháp luật yêu cầu."
       },
       "appeals": {
         "heading": "5. Khiếu nại khi ảnh bị từ chối",

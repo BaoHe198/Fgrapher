@@ -5,6 +5,8 @@ import { logAdminAction, requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
 import { adminUserActionSchema } from "@/lib/validations/admin";
 import {
+  addViolationPoint,
+  clearViolationPoints,
   getAdminUserDetail,
   softDeleteAdminUser,
   suspendUser,
@@ -87,6 +89,22 @@ export async function PATCH(
         break;
       case "notes":
         user = await updateAdminNotes(id, parsed.data.notes);
+        break;
+      case "add_violation":
+        await addViolationPoint({
+          userId: id,
+          adminId: session.user.id,
+          reason: parsed.data.reason,
+        });
+        user = await getAdminUserDetail(id);
+        break;
+      case "clear_violations":
+        await clearViolationPoints({
+          userId: id,
+          adminId: session.user.id,
+          reason: parsed.data.reason,
+        });
+        user = await getAdminUserDetail(id);
         break;
       case "assign_plan":
         await assignManualPlan({

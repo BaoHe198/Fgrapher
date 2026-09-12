@@ -66,6 +66,7 @@ export default function AdminUserDetailPage() {
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [suspendReason, setSuspendReason] = useState("");
   const [notes, setNotes] = useState("");
+  const [violationReason, setViolationReason] = useState("");
   const [planRole, setPlanRole] = useState<Role>(PAID_ROLES[0]);
   const [planName, setPlanName] = useState("FREE");
   const [planExpiresAt, setPlanExpiresAt] = useState(defaultExpiryDate());
@@ -230,6 +231,55 @@ export default function AdminUserDetailPage() {
                   </span>
                 </div>
               ))}
+            </Card>
+
+            <Card className="flex flex-col gap-2">
+              <span className="text-body-sm font-semibold! text-text-primary">
+                {t("violations.heading")}
+              </span>
+              <span className="text-body-sm text-text-secondary">
+                {t("violations.count", { count: user.violationPoints })}
+              </span>
+              {/* Deliberately a separate act from rejecting a photo, taken
+                  after the admin has contacted the provider — see
+                  services/admin.ts's addViolationPoint. */}
+              <span className="text-body-sm text-text-tertiary">
+                {user.violationPoints >= 2
+                  ? t("violations.nextWillSuspend")
+                  : t("violations.hint")}
+              </span>
+              <Textarea
+                rows={2}
+                placeholder={t("violations.reasonPlaceholder")}
+                value={violationReason}
+                onChange={(e) => setViolationReason(e.target.value)}
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="w-fit"
+                  disabled={busy || !violationReason.trim()}
+                  onClick={() =>
+                    runAction("add_violation", { reason: violationReason })
+                  }
+                >
+                  {t("violations.add")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="w-fit"
+                  disabled={busy || user.violationPoints === 0}
+                  onClick={() =>
+                    runAction("clear_violations", {
+                      reason: violationReason || undefined,
+                    })
+                  }
+                >
+                  {t("violations.clear")}
+                </Button>
+              </div>
             </Card>
 
             <Card className="flex flex-col gap-2">

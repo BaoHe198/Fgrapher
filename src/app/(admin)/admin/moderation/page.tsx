@@ -31,11 +31,10 @@ interface MediaRow {
   url: string;
   type: "IMAGE" | "VIDEO";
   createdAt: string;
-  // AUTO_REJECTED = already hidden from the public by the automated scan,
-  // waiting here for a human to confirm or overturn it (services/admin.ts's
-  // listPendingMedia). moderationNote carries the scanner's category+score.
-  moderationStatus: "PENDING" | "AUTO_REJECTED";
-  moderationNote: string | null;
+  // Set when the tier-1 scan thought this one worth looking at first — the
+  // category and score it gave. Everything in this queue is PENDING; the
+  // flag sorts it, nothing more (services/moderation.ts).
+  autoFlagReason: string | null;
   profile: {
     role: string;
     displayName: string | null;
@@ -284,7 +283,7 @@ export default function AdminModerationPage() {
                           className="object-cover"
                         />
                       )}
-                      {item.moderationStatus === "AUTO_REJECTED" ? (
+                      {item.autoFlagReason ? (
                         <Badge
                           variant="destructive"
                           className="absolute top-1.5 left-1.5"
@@ -337,13 +336,12 @@ export default function AdminModerationPage() {
                           time: formatRelativeTime(new Date(item.createdAt)),
                         })}
                       </span>
-                      {item.moderationStatus === "AUTO_REJECTED" ? (
-                        // Already hidden from the public — the reviewer's
-                        // job here is to confirm or overturn, and only
-                        // their reject awards a violation point.
+                      {item.autoFlagReason ? (
+                        // A hint about where to look first, not a verdict —
+                        // the photo is as PENDING as everything else here.
                         <span className="text-body-sm text-danger">
                           {t("autoFlaggedReason", {
-                            reason: item.moderationNote ?? "—",
+                            reason: item.autoFlagReason,
                           })}
                         </span>
                       ) : null}

@@ -694,7 +694,16 @@
         "bookingsSummary": "{customerCount} bookings as customer, {providerCount} as provider.",
         "suspendDialogTitle": "Suspend this account?",
         "suspendReasonPlaceholder": "Reason for suspension",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "violations": {
+          "heading": "Violation points",
+          "count": "Currently {count} violation point(s).",
+          "hint": "Record one only after contacting and warning the provider. Rejecting a photo does NOT add a point.",
+          "nextWillSuspend": "Warning: this would be the 3rd violation — the account is suspended as soon as you record it.",
+          "reasonPlaceholder": "Reason (required to record a violation — kept in the audit log)",
+          "add": "Record a violation",
+          "clear": "Clear all points"
+        }
       },
       "reports": {
         "title": "Reports",
@@ -767,8 +776,8 @@
         "viewLarge": "View full size",
         "waitingSince": "Waiting {time}",
         "albumLabel": "Album: {title}",
-        "autoFlaggedBadge": "Auto-hidden",
-        "autoFlaggedReason": "Hidden by the automated scan: {reason}. Already off the public profile — confirm or overturn. Only your rejection awards a violation point."
+        "autoFlaggedBadge": "Flagged by scan",
+        "autoFlaggedReason": "Flagged by the automated scan: {reason}. A hint about where to look first — the photo is still pending like any other."
       },
       "compliance": {
         "title": "Compliance",
@@ -2990,7 +2999,7 @@
       },
       "violations": {
         "heading": "4. Violation process — a 3-strike suspension",
-        "body": "A photo our automated scan flags is hidden straight away and sent to the moderation team for a second look — being hidden by the scan alone is not a violation. Violation points are only ever awarded by a person: each time the moderation team rejects your photos, your account gets one violation point. At the third point, the account is automatically suspended. Serious violations (e.g. suspected involvement of someone under 18) can result in an immediate suspension and a report to authorities where the law requires it."
+        "body": "A photo our automated scan marks is moved to the front of the review queue so the moderation team looks at it first — being marked is not itself a violation, and no photo is hidden because a machine said so. Every decision is a person's: the moderation team approves or rejects the photo. If it is rejected, we contact and warn you first; a violation point is only recorded after that, and only by an administrator. At the third point, the account is automatically suspended. Serious violations (e.g. suspected involvement of someone under 18) can result in an immediate suspension and a report to authorities where the law requires it."
       },
       "appeals": {
         "heading": "5. Appealing a rejected photo",

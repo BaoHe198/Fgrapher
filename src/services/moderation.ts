@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
+import { buildMediaVariants } from "@/lib/media-variants";
 import {
   type ImageCategory,
   type ModerationScores,
@@ -39,24 +40,23 @@ export class MockScanner implements ContentScanner {
   }
 }
 
-// Auto-reject only above this score, NOT on OpenAI's own `flagged`
-// boolean. `flagged` uses OpenAI's calibration, which is tuned to catch
-// borderline content — appropriate for "show a human", far too eager for
-// an action that costs a provider a violation point and auto-suspends
-// their account at three (see VIOLATION_POINTS_PER_AUTO_REJECT below).
-// Anything under this still reaches a human; the only thing a lower
-// threshold would buy is fewer admin reviews, at the price of wrongly
-// suspending real photographers.
-const AUTO_REJECT_THRESHOLD = 0.9;
+// Flag only above this score, NOT on OpenAI's own `flagged` boolean,
+// which is calibrated to catch borderline content. A false positive is
+// cheap here — it just moves an ordinary photo up the queue — but a queue
+// where half the uploads wear an "attention" badge is a queue with no
+// signal left in it, and the admin stops trusting the badge entirely.
+// 0.9 is what keeps it meaning something.
+const AUTO_FLAG_THRESHOLD = 0.9;
 
-// Only these two are grounds for an automatic reject on a photography
-// portfolio: sexual content (CLAUDE.md ràng buộc #3 — no nude/sexy/
+// Only these two are worth pulling to the front of a photography
+// portfolio queue: sexual content (CLAUDE.md ràng buộc #3 — no nude/sexy/
 // boudoir category exists at all, so it's out of scope for the product,
 // not a judgement call) and graphic violence. The self-harm categories
-// are left to humans deliberately — on a photography platform they fire
-// on things like scars or medical imagery in documentary work far more
-// often than on actual violating content.
-const AUTO_REJECT_CATEGORIES: ImageCategory[] = ["sexual", "violence/graphic"];
+// are excluded deliberately — on a photography platform they fire on
+// things like scars or medical imagery in documentary work far more often
+// than on actual violating content, so including them would be most of
+// the noise for almost none of the signal.
+const AUTO_FLAG_CATEGORIES: ImageCategory[] = ["sexual", "violence/graphic"];
 
 // Pure, so the policy can be tested without touching the network — see
 // services/__tests__/moderation.test.ts. `scores` null means the scan
@@ -65,9 +65,9 @@ const AUTO_REJECT_CATEGORIES: ImageCategory[] = ["sexual", "violence/graphic"];
 export function verdictFromScores(scores: ModerationScores | null): ScanResult {
   if (!scores) return { verdict: "needs_review" };
 
-  for (const category of AUTO_REJECT_CATEGORIES) {
+  for (const category of AUTO_FLAG_CATEGORIES) {
     const score = scores.scores[category];
-    if (score !== undefined && score >= AUTO_REJECT_THRESHOLD) {
+    if (score !== undefined && score >= AUTO_FLAG_THRESHOLD) {
       return {
         verdict: "flagged",
         reason: `Automated scan: ${category} (${score.toFixed(2)})`,
@@ -78,11 +78,9 @@ export function verdictFromScores(scores: ModerationScores | null): ScanResult {
   return { verdict: "needs_review" };
 }
 
-// Tier 1 of a two-tier pipeline: this never approves anything. It either
-// rejects outright (high-confidence violation) or defers to the human
-// queue at /admin/moderation, which is where every upload already went
-// before this existed. Adding it can only ever take work off the queue,
-// never let something through unreviewed.
+// A filter in front of the human queue, never a decision. "flagged" here
+// means "an admin should look at this one first" — it is not a verdict,
+// and runModeration() acts on it by writing a sort key and nothing else.
 export class OpenAIModerationScanner implements ContentScanner {
   async scan(input: ScanInput): Promise<ScanResult> {
     // The endpoint takes images only. A video would need frame extraction
@@ -90,7 +88,13 @@ export class OpenAIModerationScanner implements ContentScanner {
     // human, same as before.
     if (input.type === "VIDEO") return { verdict: "needs_review" };
 
-    return verdictFromScores(await moderateImageUrl(input.url));
+    // Never the original. buildMediaVariants().moderation is a 512px
+    // Cloudinary derivative with no EXIF — enough to classify, not enough
+    // to identify, and no GPS/camera metadata leaves with it. See that
+    // field's comment and docs/ops/content-moderation.md.
+    const url = buildMediaVariants(input.url).moderation;
+
+    return verdictFromScores(await moderateImageUrl(url));
   }
 }
 
@@ -103,19 +107,18 @@ export const contentScanner: ContentScanner =
     : new MockScanner();
 
 // Runs right after a ProfileMedia row is created (see /api/portfolio's
-// POST handler) — scans it and, if flagged, moves it to AUTO_REJECTED so
-// it can't reach the public profile. Anything not flagged is left PENDING
-// for the human queue (/admin/moderation); this function never sets
-// APPROVED itself.
+// POST handler). The scanner's entire job is to SORT the admin's queue:
+// a flagged photo stays PENDING like every other upload and just surfaces
+// first at /admin/moderation, carrying the category+score that flagged it.
 //
-// It deliberately does NOT add a violation point or suspend anyone. The
-// project owner's call (12/09/2026): an automated scanner may hide a
-// photo, but only a human may penalise an account — three points are an
-// account suspension, and a model's mistake should never cost a real
-// photographer their livelihood with nobody having looked. Strikes are
-// awarded by moderateMedia() in services/admin.ts, on an admin's own
-// reject. An AUTO_REJECTED photo a provider disputes is re-examined by an
-// admin there, and that's where a penalty (if any) comes from.
+// It does not hide, reject, or penalise anything — project owner's
+// decision, 12/09/2026. A machine narrows down what a person looks at
+// first; a person decides what happens, and a separate deliberate admin
+// action (after actually contacting the provider) is what records a
+// violation. See services/admin.ts's addViolationPoint().
+//
+// Nothing here changes what is public: an upload is PENDING either way,
+// and PENDING was never public.
 export async function runModeration(mediaId: string) {
   const media = await db.profileMedia.findUniqueOrThrow({
     where: { id: mediaId },
@@ -132,14 +135,13 @@ export async function runModeration(mediaId: string) {
   await db.profileMedia.update({
     where: { id: mediaId },
     data: {
-      moderationStatus: "AUTO_REJECTED",
-      moderationNote: result.reason ?? "Flagged by automated content scan",
-      moderatedAt: new Date(),
+      autoFlagReason: result.reason ?? "Flagged by automated content scan",
+      autoFlaggedAt: new Date(),
     },
   });
 
   await logAudit({
-    action: "MEDIA_AUTO_REJECTED",
+    action: "MEDIA_AUTO_FLAGGED",
     targetType: "profile_media",
     targetId: mediaId,
     metadata: {
