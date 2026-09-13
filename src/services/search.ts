@@ -325,6 +325,37 @@ async function resolveProviderCards(
   });
 }
 
+/**
+ * Which province a provider is in, for the /browse province filter.
+ *
+ * Resolved the same way services/bookings.ts resolves it when a booking is
+ * created — the profile's own province first, then the owner's personal
+ * ward's province — so search and booking can no longer disagree about
+ * where someone is.
+ *
+ * They did disagree. This used to read Profile.provinceId and service areas
+ * only, while the card itself displays User.location, which is derived from
+ * the owner's personal ward. A provider who set their ward in account
+ * settings but never set a province on the profile was shown on the card as
+ * being in Hồ Chí Minh and then vanished the moment someone filtered by Hồ
+ * Chí Minh. Nothing about that is visible to the provider, who would simply
+ * get fewer bookings.
+ *
+ * The fallback only applies when the profile has NO province of its own
+ * (`provinceId: null`). A provider who lives in Hồ Chí Minh but explicitly
+ * listed their profile under Đà Nẵng meant Đà Nẵng, and must not be pulled
+ * back into Hồ Chí Minh results by their home address.
+ */
+export function provinceMatch(provinceId: string): Prisma.ProfileWhereInput {
+  return {
+    OR: [
+      { provinceId },
+      { serviceAreas: { some: { provinceId } } },
+      { provinceId: null, user: { ward: { provinceId } } },
+    ],
+  };
+}
+
 async function searchProfilesUncached(params: SearchParams) {
   const page = Math.max(1, params.page ?? 1);
   const limit = params.limit ?? PAGE_SIZE_DEFAULT;
@@ -351,17 +382,7 @@ async function searchProfilesUncached(params: SearchParams) {
 
   const baseWhere = buildBaseWhere(params);
   const withProvince: Prisma.ProfileWhereInput = province
-    ? {
-        AND: [
-          baseWhere,
-          {
-            OR: [
-              { provinceId: province.id },
-              { serviceAreas: { some: { provinceId: province.id } } },
-            ],
-          },
-        ],
-      }
+    ? { AND: [baseWhere, provinceMatch(province.id)] }
     : baseWhere;
 
   // Ward is strictly more specific than a service area (ProfileServiceArea

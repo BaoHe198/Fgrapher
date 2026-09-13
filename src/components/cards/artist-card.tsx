@@ -74,10 +74,19 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
   };
 
   return (
-    <Link href={`/profile/${artist.username}`} onClick={onClick}>
+    // block + h-full on the link, flex column on the card: every card in a
+    // grid row stretches to the tallest one and pins its price to the
+    // bottom. A bare <Link> is inline, so the card inside it could never
+    // fill the row, and one provider with a two-line name or an extra role
+    // badge made their card visibly taller than its neighbours.
+    <Link
+      href={`/profile/${artist.username}`}
+      onClick={onClick}
+      className="block h-full"
+    >
       <Card
         padding={false}
-        className="group cursor-pointer overflow-hidden transition-shadow duration-150 hover:shadow-[var(--shadow-md)]"
+        className="group flex h-full cursor-pointer flex-col overflow-hidden transition-shadow duration-150 hover:shadow-[var(--shadow-md)]"
       >
         <div
           className="relative aspect-[4/5] w-full bg-bg-sunken"
@@ -198,7 +207,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-2 p-4">
+        <div className="flex flex-1 flex-col gap-2 p-4">
           <div className="flex min-w-0 items-center gap-2">
             {/* Prompt G5, VIỆC 2 — placed next to the name rather than
                 overlapping the image, since the carousel's dot indicators
@@ -214,14 +223,31 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
                 {initial}
               </AvatarFallback>
             </Avatar>
-            <div className="flex min-h-[2.5rem] min-w-0 flex-1 items-center">
+            {/* min-h-[2lh]: always two lines' worth of height, whether the
+                name needs one line or two (line-clamp-2 caps it there). Was a
+                fixed 2.5rem, which is less than two lines of text-heading-sm
+                (1.0625rem × 1.5 ≈ 3.19rem), so a wrapping name still pushed
+                its card taller.
+
+                The reserved height lives on this wrapper, not the text, and
+                the wrapper carries text-heading-sm purely so `lh` resolves
+                to the name's line-height (and can't drift from the type
+                scale). items-center then centres a one-line name in the
+                box — putting min-h on the span instead left short names at
+                the top while the avatar beside them centred, so the two sat
+                visibly out of line. */}
+            <div className="flex min-h-[2lh] min-w-0 flex-1 items-center text-heading-sm">
               <span className="line-clamp-2 text-heading-sm font-semibold! text-text-primary">
                 {artist.name}
               </span>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-1">
+          {/* One row, never wrapping — a second row of badges is the other
+              way a card got taller than its neighbours. Each role badge
+              truncates on its own; the "+N" count must not, so it keeps
+              shrink-0. */}
+          <div className="flex min-w-0 flex-nowrap gap-1 overflow-hidden">
             {visibleRoles.map((role) => (
               // min-w-0 + truncate: Badge is shrink-0 by default, and a long
               // Vietnamese role name ("Chuyên viên trang điểm") overflowed
@@ -232,7 +258,9 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
               </Badge>
             ))}
             {extraRoleCount > 0 ? (
-              <Badge variant="neutral">+{extraRoleCount}</Badge>
+              <Badge variant="neutral" className="shrink-0">
+                +{extraRoleCount}
+              </Badge>
             ) : null}
           </div>
 
@@ -247,7 +275,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
             hideCountWhenZero
           />
 
-          <span className="text-body-md font-semibold! text-text-primary">
+          <span className="mt-auto pt-1 text-body-md font-semibold! text-text-primary">
             {artist.price}
           </span>
         </div>
