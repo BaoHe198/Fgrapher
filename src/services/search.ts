@@ -356,6 +356,41 @@ export function provinceMatch(provinceId: string): Prisma.ProfileWhereInput {
   };
 }
 
+/**
+ * Which ward a provider is in, for the /browse ward filter. Same shape and
+ * same reasoning as provinceMatch() above.
+ *
+ * This used to match `profile.wardId === ward OR profile.wardId === null`,
+ * treating "the profile has no ward" as "matches every ward". That was
+ * meant for providers whose location is genuinely unknown, but it also
+ * caught providers whose ward IS known — from their personal account —
+ * and simply wasn't copied onto the profile. Reported by the project owner:
+ * filtering by Phường An Đông returned a provider whose own card reads
+ * Phường Bến Thành. No one on the platform is in An Đông; the right answer
+ * was zero results.
+ *
+ * Now three branches, in the order they're trusted:
+ *
+ *  1. The profile's own ward.
+ *  2. No profile ward → the owner's personal ward. A provider known to be
+ *     in Bến Thành no longer turns up for An Đông.
+ *  3. No ward on either → location genuinely unknown, still included. This
+ *     is the original author's deliberate choice, kept: plenty of real
+ *     providers (e.g. ones who roam a whole city) never set a ward, and
+ *     dropping them from every ward search was producing false negatives.
+ *     Nothing on their card contradicts the filter, because there's no
+ *     ward on it to contradict.
+ */
+export function wardMatch(wardId: string): Prisma.ProfileWhereInput {
+  return {
+    OR: [
+      { wardId },
+      { wardId: null, user: { wardId } },
+      { wardId: null, user: { wardId: null } },
+    ],
+  };
+}
+
 async function searchProfilesUncached(params: SearchParams) {
   const page = Math.max(1, params.page ?? 1);
   const limit = params.limit ?? PAGE_SIZE_DEFAULT;
@@ -385,20 +420,8 @@ async function searchProfilesUncached(params: SearchParams) {
     ? { AND: [baseWhere, provinceMatch(province.id)] }
     : baseWhere;
 
-  // Ward is strictly more specific than a service area (ProfileServiceArea
-  // has no ward granularity). A provider with no wardId set isn't known to
-  // be *outside* the searched ward — the field is optional and plenty of
-  // real providers (e.g. ones who roam an entire city) never set it — so
-  // excluding them entirely on a ward search produced false negatives.
-  // Keep exact-ward matches first-class, but don't drop ward-unset
-  // providers who already matched on province.
   const primaryWhere: Prisma.ProfileWhereInput = params.wardId
-    ? {
-        AND: [
-          withProvince,
-          { OR: [{ wardId: params.wardId }, { wardId: null }] },
-        ],
-      }
+    ? { AND: [withProvince, wardMatch(params.wardId)] }
     : withProvince;
 
   const results = await resolveProviderCards(
