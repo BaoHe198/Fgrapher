@@ -70,8 +70,12 @@ export async function setProfilePublished(
   // here," so unlike other roles (where provinceId is a nice-to-have for
   // search filtering), a Studio without a specific address + province +
   // ward is unusable for customers deciding whether to book. Other roles
-  // stay optional here — search.ts still works for them without it (falls
-  // back to the free-text city filter).
+  // stay optional here — search.ts's provinceMatch() falls back to the
+  // owner's personal ward's province when a profile has none, the same
+  // resolution services/bookings.ts uses. (This comment previously claimed
+  // a fallback to "the free-text city filter" that no longer existed, which
+  // is how a provider set only by personal ward went missing from province
+  // searches unnoticed.)
   if (isPublished && role === "STUDIO") {
     if (!profile.address || !profile.provinceId || !profile.wardId) {
       throw new ProfileMissingLocationError(t("missingLocation"));
