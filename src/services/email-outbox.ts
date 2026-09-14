@@ -3,9 +3,17 @@ import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { deliverEmail, logEmailFailure } from "@/lib/email-transport";
 import {
+  type CredentialStore,
+  type OutboxRowWrite,
+  claimCredentialRow,
+  prismaCredentialStore,
+  settleCredentialRow,
+} from "@/services/credential-email";
+import {
   MAX_ATTEMPTS,
   STALE_LOCK_MS,
   oneOffIdempotencyKey,
+  parseCredentialEmailKey,
   resolveAttemptOutcome,
 } from "@/services/email-outbox-policy";
 
@@ -190,18 +198,31 @@ export const prismaThrottleReservationStore: ThrottleReservationStore = {
  * Resolves a row reserved by reserveEmail() to its terminal (or, for a
  * retryable failure, next-attempt) state. Mirrors the per-row update in
  * processEmailOutbox so the immediate and retry paths converge.
+ *
+ * Returns "superseded" when a retryable failure was not queued because the
+ * credential in the email is no longer the account's live one.
  */
-export async function finalizeReservedEmail({
-  id,
-  sensitive,
-  delivery,
-}: {
-  id: string;
-  sensitive: boolean;
-  delivery:
-    | { delivered: true; messageId?: string }
-    | { delivered: false; error: string; retryable: boolean };
-}): Promise<void> {
+export async function finalizeReservedEmail(
+  {
+    id,
+    idempotencyKey,
+    sensitive,
+    delivery,
+  }: {
+    id: string;
+    /**
+     * The row's key. A credential email's key identifies its issuance, and
+     * a retryable failure is only queued while that issuance is still live
+     * (see services/credential-email.ts).
+     */
+    idempotencyKey?: string;
+    sensitive: boolean;
+    delivery:
+      | { delivered: true; messageId?: string }
+      | { delivered: false; error: string; retryable: boolean };
+  },
+  credentialStore: CredentialStore = prismaCredentialStore,
+): Promise<"written" | "superseded"> {
   const outcome = resolveAttemptOutcome({
     attempts: 1,
     error: delivery.delivered ? undefined : delivery.error,
@@ -209,18 +230,24 @@ export async function finalizeReservedEmail({
   });
   const isTerminal = outcome.status === "SENT" || outcome.status === "FAILED";
 
-  await db.emailOutbox.update({
-    where: { id },
-    data: {
-      status: outcome.status,
-      nextAttemptAt: outcome.nextAttemptAt,
-      sentAt: outcome.sentAt,
-      lockedAt: null,
-      ...(sensitive && isTerminal ? { html: null } : {}),
-      providerId: delivery.delivered ? (delivery.messageId ?? null) : null,
-      lastError: delivery.delivered ? null : delivery.error,
-    },
-  });
+  const write: OutboxRowWrite = {
+    status: outcome.status,
+    nextAttemptAt: outcome.nextAttemptAt,
+    sentAt: outcome.sentAt,
+    lockedAt: null,
+    ...(sensitive && isTerminal ? { html: null } : {}),
+    providerId: delivery.delivered ? (delivery.messageId ?? null) : null,
+    lastError: delivery.delivered ? null : delivery.error,
+  };
+
+  const issuance = idempotencyKey
+    ? parseCredentialEmailKey(idempotencyKey)
+    : null;
+  if (issuance) {
+    return settleCredentialRow({ id, issuance, write }, credentialStore);
+  }
+  await db.emailOutbox.update({ where: { id }, data: write });
+  return "written";
 }
 
 /**
@@ -367,6 +394,12 @@ export interface ProcessOutboxResult {
   requeued: number;
   reclaimed: number;
   skipped: number;
+  /**
+   * Credential emails (verification / password reset) not sent because a
+   * newer link was issued, or the credential expired or was used, since they
+   * were queued. Recorded FAILED with SUPERSEDED_ERROR.
+   */
+  superseded: number;
 }
 
 /**
@@ -390,7 +423,7 @@ export async function processEmailOutbox(): Promise<ProcessOutboxResult> {
     },
     orderBy: { nextAttemptAt: "asc" },
     take: BATCH_SIZE,
-    select: { id: true },
+    select: { id: true, idempotencyKey: true },
   });
 
   const result: ProcessOutboxResult = {
@@ -400,31 +433,54 @@ export async function processEmailOutbox(): Promise<ProcessOutboxResult> {
     requeued: 0,
     reclaimed,
     skipped: 0,
+    superseded: 0,
   };
 
-  for (const { id } of due) {
+  for (const { id, idempotencyKey } of due) {
+    const issuance = parseCredentialEmailKey(idempotencyKey);
+
+    if (issuance) {
+      // A credential email is only claimed while its link is still the live
+      // one — checked under the issuance lock, so it also catches rows that
+      // came back to PENDING through crash recovery rather than settle.
+      const claimed = await claimCredentialRow(
+        { id, issuance, startedAt },
+        prismaCredentialStore,
+      );
+      if (claimed === "superseded") {
+        result.superseded += 1;
+        continue;
+      }
+      if (claimed === "skipped") {
+        result.skipped += 1;
+        continue;
+      }
+    }
+
     // Claim: only succeeds while the row is still PENDING and still due.
     // The attempt is counted here, not after the send, so a crash between
     // claiming and recording still burns an attempt — a poison message
     // can't loop forever once stale-lock recovery returns it to PENDING.
-    const claim = await db.emailOutbox.updateMany({
-      where: {
-        id,
-        status: "PENDING",
-        nextAttemptAt: { lte: startedAt },
-        attempts: { lt: MAX_ATTEMPTS },
-      },
-      data: {
-        status: "SENDING",
-        lockedAt: new Date(),
-        attempts: { increment: 1 },
-      },
-    });
+    if (!issuance) {
+      const claim = await db.emailOutbox.updateMany({
+        where: {
+          id,
+          status: "PENDING",
+          nextAttemptAt: { lte: startedAt },
+          attempts: { lt: MAX_ATTEMPTS },
+        },
+        data: {
+          status: "SENDING",
+          lockedAt: new Date(),
+          attempts: { increment: 1 },
+        },
+      });
 
-    if (claim.count !== 1) {
-      // Another concurrent run took it.
-      result.skipped += 1;
-      continue;
+      if (claim.count !== 1) {
+        // Another concurrent run took it.
+        result.skipped += 1;
+        continue;
+      }
     }
 
     // Each row is isolated: one row's provider or database error must not
@@ -486,23 +542,35 @@ export async function processEmailOutbox(): Promise<ProcessOutboxResult> {
       const isTerminal =
         outcome.status === "SENT" || outcome.status === "FAILED";
 
-      await db.emailOutbox.update({
-        where: { id },
-        data: {
-          status: outcome.status,
-          nextAttemptAt: outcome.nextAttemptAt,
-          sentAt: outcome.sentAt,
-          lockedAt: null,
-          // Scrub the credential the moment it can no longer be needed for
-          // a retry, so a durable queue doesn't become a durable store of
-          // live reset/verification links.
-          ...(email.sensitive && isTerminal ? { html: null } : {}),
-          providerId: delivery.delivered ? (delivery.messageId ?? null) : null,
-          // Cleared on success so a row that eventually delivered doesn't
-          // keep reading as broken.
-          lastError: delivery.delivered ? null : delivery.error,
-        },
-      });
+      const write: OutboxRowWrite = {
+        status: outcome.status,
+        nextAttemptAt: outcome.nextAttemptAt,
+        sentAt: outcome.sentAt,
+        lockedAt: null,
+        // Scrub the credential the moment it can no longer be needed for
+        // a retry, so a durable queue doesn't become a durable store of
+        // live reset/verification links.
+        ...(email.sensitive && isTerminal ? { html: null } : {}),
+        providerId: delivery.delivered ? (delivery.messageId ?? null) : null,
+        // Cleared on success so a row that eventually delivered doesn't
+        // keep reading as broken.
+        lastError: delivery.delivered ? null : delivery.error,
+      };
+
+      if (issuance) {
+        // Re-queued only if a newer link wasn't issued while this attempt
+        // was on the wire.
+        const settled = await settleCredentialRow(
+          { id, issuance, write },
+          prismaCredentialStore,
+        );
+        if (settled === "superseded") {
+          result.superseded += 1;
+          continue;
+        }
+      } else {
+        await db.emailOutbox.update({ where: { id }, data: write });
+      }
 
       result.processed += 1;
       if (outcome.status === "SENT") result.sent += 1;

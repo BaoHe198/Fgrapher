@@ -1,7 +1,5 @@
 import crypto from "crypto";
 
-import { Prisma } from "@prisma/client";
-
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
 import { sendEmail, verifyEmailHtml } from "@/lib/email";
@@ -10,7 +8,11 @@ import {
   pendingPaidRoles,
 } from "@/lib/onboarding-destination";
 import { buildVerificationPath } from "@/lib/verification-link";
-import { emailIdempotencyKey } from "@/services/email-outbox-policy";
+import {
+  issueCredential,
+  prismaCredentialStore,
+} from "@/services/credential-email";
+import { credentialEmailKey } from "@/services/email-outbox-policy";
 
 // Credential signups must prove they control the address they registered
 // with before they can sign in. OAuth is unaffected: Google has already
@@ -103,7 +105,16 @@ export async function sendVerificationEmail({
       //
       // The hash is no more sensitive here than the row already is — the
       // outbox stores the rendered email, which contains the raw link.
-      idempotencyKey: emailIdempotencyKey("email-verification", tokenHash),
+      //
+      // It is a credential key: it also names the account, so issuing a newer
+      // link can cancel this one's queued retry, and a retry can check it is
+      // still the live link before it is queued or sent
+      // (services/credential-email.ts).
+      idempotencyKey: credentialEmailKey({
+        type: "email-verification",
+        accountId: userId,
+        issuanceId: tokenHash,
+      }),
       // The body contains the raw verification link.
       sensitive: true,
     });
@@ -169,30 +180,21 @@ export interface EmailVerificationStore {
 }
 
 const prismaStore: EmailVerificationStore = {
+  // Issued through issueCredential, which writes the token and cancels any
+  // retry still queued for the previous link in one transaction under the
+  // per-user issuance lock. That lock serialises concurrent resends, which
+  // is also what used to need a P2002 retry around a racing upsert.
   issue: async ({ userId, tokenHash, expiresAt }) => {
-    const write = () =>
-      db.emailVerificationToken.upsert({
-        where: { userId },
-        create: { userId, tokenHash, expiresAt },
-        update: { tokenHash, expiresAt, createdAt: new Date() },
-        select: { id: true, expiresAt: true },
-      });
-
-    try {
-      return await write();
-    } catch (err) {
-      // Prisma only compiles an upsert to a single INSERT … ON CONFLICT
-      // when the shape allows it; otherwise it reads first and can lose a
-      // race to a concurrent insert. Retrying resolves that against the
-      // row that now exists.
-      if (
-        err instanceof Prisma.PrismaClientKnownRequestError &&
-        err.code === "P2002"
-      ) {
-        return write();
-      }
-      throw err;
+    const { tokenRowId } = await issueCredential(
+      { type: "email-verification", userId, tokenHash, expiresAt },
+      prismaCredentialStore,
+    );
+    if (!tokenRowId) {
+      // The verification upsert always returns its row; reaching this means
+      // the store implementation changed underneath us.
+      throw new Error("issueCredential returned no verification token row");
     }
+    return { id: tokenRowId, expiresAt };
   },
 
   findByHash: (tokenHash) =>

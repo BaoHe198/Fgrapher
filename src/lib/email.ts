@@ -144,6 +144,7 @@ async function sendReservedEmail(
   }
 
   const outboxId = reservation.id;
+  let superseded = false;
   const delivery = await deliverEmail({
     to,
     subject,
@@ -152,11 +153,13 @@ async function sendReservedEmail(
   });
 
   await safeRecord(async () => {
-    await finalizeReservedEmail({
+    const settled = await finalizeReservedEmail({
       id: outboxId,
+      idempotencyKey: reservation.idempotencyKey,
       sensitive: sensitive ?? false,
       delivery,
     });
+    superseded = settled === "superseded";
     return outboxId;
   });
 
@@ -173,8 +176,9 @@ async function sendReservedEmail(
   return {
     success: false,
     // Retryable failures leave the row PENDING for the cron; a permanent
-    // rejection was written FAILED by finalizeReservedEmail.
-    queued: delivery.retryable,
+    // rejection was written FAILED by finalizeReservedEmail, and so was a
+    // credential email whose link a newer one replaced mid-attempt.
+    queued: delivery.retryable && !superseded,
     error: delivery.error,
     outboxId,
   };

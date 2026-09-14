@@ -1,19 +1,15 @@
-import crypto from "crypto";
-
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
-import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
-import { resetPasswordEmailHtml, sendEmail } from "@/lib/email";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendPasswordResetEmail } from "@/services/password-reset";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Enter a valid email address"),
 });
 
-const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 // Keyed by IP, not email — the endpoint always reports success regardless
 // of whether the account exists (see below), so this can't be used to
 // enumerate registered emails; it's purely a cap on how many reset emails
@@ -57,39 +53,11 @@ export async function POST(request: Request) {
   const user = await db.user.findUnique({ where: { email } });
 
   // Always report success, even if no account exists, so this endpoint
-  // can't be used to enumerate registered emails.
+  // can't be used to enumerate registered emails. sendPasswordResetEmail
+  // never throws, so a failure issuing or sending the link can't turn into
+  // a 500 that only registered addresses would ever produce.
   if (user) {
-    const token = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + RESET_TOKEN_TTL_MS);
-
-    await db.verificationToken.deleteMany({ where: { identifier: email } });
-    await db.verificationToken.create({
-      data: { identifier: email, token, expires },
-    });
-
-    // appUrl(), not `process.env.NEXTAUTH_URL` — that var is deliberately
-    // unset on Vercel Preview (see lib/env.ts), which made this produce the
-    // literal string "undefined/reset-password?token=…".
-    const resetUrl = appUrl(`/reset-password?token=${token}`);
-    const result = await sendEmail({
-      to: email,
-      // Vietnamese-first, matching resetPasswordEmailHtml's own copy
-      // (CLAUDE.md rule 10) — the subject was the last English string left
-      // in this flow.
-      subject: "Đặt lại mật khẩu Fgrapher",
-      html: resetPasswordEmailHtml({ resetUrl }),
-      // The body contains the raw reset link.
-      sensitive: true,
-      // No idempotency key on purpose: asking for a second reset link is a
-      // legitimate repeat of a *new* event, and each request mints a fresh
-      // token, so every call must actually send.
-    });
-
-    if (!result.success && !result.queued) {
-      console.error("[Password Reset] Email send failed", {
-        error: result.error,
-      });
-    }
+    await sendPasswordResetEmail({ userId: user.id, email: user.email });
   }
 
   return NextResponse.json(

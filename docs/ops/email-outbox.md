@@ -96,6 +96,52 @@ Password reset has a second, pre-existing exposure this does not address:
 `VerificationToken` stores its reset token in the clear. That is tracked
 separately.
 
+### Only the newest credential link is retried
+
+Requesting a new verification or reset link replaces the token, which kills
+the old link. The old email may still be `PENDING` for retry, and the cron
+would otherwise deliver that dead link, often _after_ the good one. The
+invariant is: **for one credential type on one account, only the newest
+issuance's email can be queued for retry.** The code is in
+`services/credential-email.ts`.
+
+- Credential emails use the key `credential:<type>:<userId>:<sha256(token)>`.
+  `<type>` is `email-verification` or `password-reset`. The key names the
+  account without a schema change and never contains the raw token.
+- Issuing a link writes the token and cancels that account's `PENDING` rows
+  of that type in one transaction. The transaction holds a Postgres advisory
+  lock per (type, account).
+- Two steps re-check, under the same lock, that the link is still the live,
+  unexpired token:
+  - a failed attempt, before it is queued;
+  - the cron, before it claims a row.
+
+  An older request whose send was still in flight therefore cannot re-queue
+  itself after a newer one. The same holds for a row that stale-lock
+  recovery puts back into `PENDING`. A link that has expired or has already
+  been used is not retried either.
+
+- A cancelled row becomes `FAILED`, its body is cleared, and its
+  `lastError` is `credential_no_longer_current`. The cron reports these rows
+  as `superseded`.
+- Nothing else is ever touched: not `SENDING` rows, other accounts, the other
+  credential type, or any non-credential email.
+
+Known limits:
+
+- **In-flight attempts.** An attempt already on the wire when a newer link
+  is issued may still deliver once. It is never retried.
+- **Old-format rows.** Rows queued before this change aren't recognised:
+  `email-verification:<hash>` keys, or unkeyed resets. They run out within
+  the retry budget or the token TTL.
+
+```sql
+-- Credential emails cancelled because a newer link replaced them
+SELECT "idempotencyKey", "updatedAt" FROM "email_outbox"
+WHERE "lastError" = 'credential_no_longer_current'
+ORDER BY "updatedAt" DESC LIMIT 20;
+```
+
 ### Concurrency
 
 `processEmailOutbox()` is safe to run concurrently. Each row is claimed

@@ -93,6 +93,76 @@ export function emailIdempotencyKey(scope: string, ...parts: string[]): string {
   return `${scope}:${parts.join(":")}`;
 }
 
+// --- Credential emails -------------------------------------------------
+//
+// A verification or password-reset link is only worth delivering while it
+// is the account's live credential. Issuing a new one kills the old token,
+// but a retryable failure leaves the old email PENDING in the outbox, and
+// the cron would later deliver a link that no longer works.
+//
+// The outbox has no column saying which account or credential a row
+// belongs to, and this is solved without adding one: the idempotency key
+// carries it. `credential:<type>:<accountId>:<issuanceId>` lets every row
+// for one credential type on one account be found by prefix, and lets the
+// sender re-check, from the key alone, whether its issuance is still live.
+
+export const CREDENTIAL_EMAIL_TYPES = [
+  "email-verification",
+  "password-reset",
+] as const;
+export type CredentialEmailType = (typeof CREDENTIAL_EMAIL_TYPES)[number];
+
+export interface CredentialIssuance {
+  type: CredentialEmailType;
+  /** The user id. */
+  accountId: string;
+  /** Identifies one issuance — a hash of that issuance's token, never the token. */
+  issuanceId: string;
+}
+
+const CREDENTIAL_KEY_PREFIX = "credential";
+
+function assertKeyPart(name: string, value: string) {
+  // A ':' inside a part would let one account's prefix match another's key
+  // (and break parsing), so the scoping guarantee depends on refusing it.
+  if (!value || value.includes(":")) {
+    throw new Error(
+      `credential email key: invalid ${name} ${JSON.stringify(value)}`,
+    );
+  }
+}
+
+/** The trailing ':' is load-bearing: account `u1` must not match `u10`. */
+export function credentialScopePrefix(
+  type: CredentialEmailType,
+  accountId: string,
+): string {
+  assertKeyPart("accountId", accountId);
+  return `${CREDENTIAL_KEY_PREFIX}:${type}:${accountId}:`;
+}
+
+export function credentialEmailKey(issuance: CredentialIssuance): string {
+  assertKeyPart("issuanceId", issuance.issuanceId);
+  return (
+    credentialScopePrefix(issuance.type, issuance.accountId) +
+    issuance.issuanceId
+  );
+}
+
+/** The issuance a key belongs to, or null for any non-credential email. */
+export function parseCredentialEmailKey(
+  key: string,
+): CredentialIssuance | null {
+  const parts = key.split(":");
+  if (parts.length !== 4 || parts[0] !== CREDENTIAL_KEY_PREFIX) return null;
+  const [, type, accountId, issuanceId] = parts;
+  if (!(CREDENTIAL_EMAIL_TYPES as readonly string[]).includes(type)) {
+    return null;
+  }
+  if (!accountId || !issuanceId) return null;
+  return { type: type as CredentialEmailType, accountId, issuanceId };
+}
+
 /**
  * Key for an email with no natural event identity. Random by design: an
  * enqueue that doesn't opt into deduplication must always produce a new
