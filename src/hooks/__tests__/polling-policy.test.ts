@@ -236,3 +236,31 @@ describe("the notification bell stays cheap while closed", () => {
     );
   });
 });
+
+describe("the notification bell fetches full rows exactly once on open", () => {
+  const bell = codeOnly(read("src/components/layout/notification-bell.tsx"));
+
+  // The bug: onOpenChange called load() directly on open, AND usePolling's
+  // resetKey switch (isOpen ? "open" : "closed", right above onOpenChange)
+  // already fetches load() immediately the moment isOpen flips — see
+  // usePolling's own docstring on resetKey. That was two full
+  // `/api/notifications?page=1` requests for one click.
+  it("onOpenChange only flips state — it must not call load() itself", () => {
+    const start = bell.indexOf("const onOpenChange");
+    assert.ok(start !== -1, "onOpenChange not found");
+    const end = bell.indexOf("\n  };", start);
+    const body = bell.slice(start, end);
+    assert.doesNotMatch(
+      body,
+      /\bload\(\)/,
+      "onOpenChange calls load() directly — usePolling's resetKey change " +
+        "already fetches on open, so this duplicates the request",
+    );
+  });
+
+  it("still relies on the resetKey switch to fetch immediately on open", () => {
+    // The mechanism onOpenChange leans on instead of calling load() itself.
+    assert.match(bell, /usePolling\(isOpen \? load : loadCount, \{/);
+    assert.match(bell, /resetKey:\s*isOpen \? "open" : "closed"/);
+  });
+});

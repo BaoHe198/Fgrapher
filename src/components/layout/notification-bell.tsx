@@ -128,16 +128,23 @@ export function NotificationBell() {
 
   // Poll every 30s until real-time delivery lands (see CLAUDE.md). Paused
   // while the tab is hidden, and cheap while the dropdown is closed.
+  // Switching `resetKey` (open <-> closed) restarts the schedule AND fetches
+  // immediately on its own — see usePolling's docstring — which is what
+  // gives both directions their immediate refresh below: `load` (full rows)
+  // the moment it opens, `loadCount` (badge only) the moment it closes.
   usePolling(isOpen ? load : loadCount, {
     intervalMs: 30_000,
     resetKey: isOpen ? "open" : "closed",
   });
 
+  // Deliberately just the state flip. This used to also call load() here on
+  // open, "so the rows show up straight away instead of waiting for the next
+  // tick" — but the resetKey switch above already does exactly that the
+  // moment `isOpen` flips, so the explicit call fired a second, redundant
+  // `/api/notifications?page=1` for every single open. Don't add it back;
+  // the close path never needed one for loadCount, and open doesn't either.
   const onOpenChange = (open: boolean) => {
     setIsOpen(open);
-    // Opening swaps the poller to the full read; fetch the rows straight away
-    // rather than showing whatever was last there until the next tick.
-    if (open) load();
   };
 
   const onClickNotification = async (notification: Notification) => {
