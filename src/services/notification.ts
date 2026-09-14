@@ -5,9 +5,11 @@ import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import {
   NOTIFICATION_POLICY,
+  type BatchRecipient,
   activeNotificationTypes as activeNotificationTypesFor,
   makeFeatureGate,
   resolveNotificationDelivery,
+  selectInAppRecipients,
 } from "@/lib/notifications";
 import { emailIdempotencyKey } from "@/services/email-outbox-policy";
 import type { NotificationPreferences } from "@/lib/validations/user";
@@ -162,6 +164,89 @@ export async function notifyCritical(input: NotifyInput) {
     );
   }
   await deliver(input, true);
+}
+
+// Rows per createMany statement. Postgres caps a statement at 65,535 bind
+// parameters and each row binds 5, so a single unbounded insert would fail
+// outright somewhere past ~13,000 recipients. 500 keeps every statement far
+// from that while a realistic broadcast (verified providers for one role in
+// one area) is still a single statement.
+export const NOTIFICATION_BATCH_SIZE = 500;
+
+export interface InAppBatchWriter {
+  createMany(
+    rows: Prisma.NotificationCreateManyInput[],
+  ): Promise<{ count: number }>;
+}
+
+const prismaBatchWriter: InAppBatchWriter = {
+  createMany: (rows) => db.notification.createMany({ data: rows }),
+};
+
+/** A batch write that failed part-way. `created` rows are already stored. */
+export class NotificationBatchError extends Error {
+  constructor(
+    public readonly created: number,
+    public readonly cause: unknown,
+  ) {
+    super(`In-app notification batch failed after ${created} row(s)`);
+    this.name = "NotificationBatchError";
+  }
+}
+
+/**
+ * In-app-only broadcast of one message to many recipients, for types whose
+ * policy never emails (REQUEST_NEW_MATCH). The caller supplies each
+ * recipient's preferences, already loaded in the same query that found
+ * them, so this performs no reads at all — just one createMany per
+ * NOTIFICATION_BATCH_SIZE rows.
+ *
+ * Replaces a notify() per recipient, which was a user read plus a single
+ * insert each, awaited one after another: 2N round-trips for N recipients.
+ * Who receives a row is decided by selectInAppRecipients, i.e. the same
+ * policy call notify() makes, so the feature gate and each person's in-app
+ * toggle are unchanged.
+ *
+ * Throws NotificationBatchError on a failed write (with how many rows made
+ * it in first). Deciding whether that should fail anything is the caller's
+ * business, not this function's.
+ */
+export async function notifyInAppBatch(
+  input: {
+    type: NotificationType;
+    recipients: readonly BatchRecipient[];
+    title: string;
+    message: string;
+    data?: Prisma.InputJsonValue;
+  },
+  writer: InAppBatchWriter = prismaBatchWriter,
+): Promise<{ eligible: number; created: number }> {
+  const userIds = selectInAppRecipients({
+    type: input.type,
+    recipients: input.recipients,
+    isFeatureEnabled: featureGate,
+  });
+
+  let created = 0;
+  for (let i = 0; i < userIds.length; i += NOTIFICATION_BATCH_SIZE) {
+    const rows = userIds
+      .slice(i, i + NOTIFICATION_BATCH_SIZE)
+      .map((userId) => ({
+        userId,
+        type: input.type,
+        title: input.title,
+        message: input.message,
+        data: input.data ?? undefined,
+      }));
+    try {
+      const result = await writer.createMany(rows);
+      created += result.count;
+    } catch (error) {
+      throw new NotificationBatchError(created, error);
+    }
+  }
+
+  return { eligible: userIds.length, created };
 }
 
 const NOTIFICATIONS_PAGE_SIZE = 20;

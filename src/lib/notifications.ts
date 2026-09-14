@@ -351,6 +351,58 @@ export function resolveNotificationDelivery({
   };
 }
 
+export interface BatchRecipient {
+  userId: string;
+  prefs: NotificationPreferences | null | undefined;
+}
+
+/**
+ * Which recipients of an in-app-only broadcast get a row. The pure half of
+ * notifyInAppBatch (services/notification.ts).
+ *
+ * Every recipient goes through resolveNotificationDelivery — the exact
+ * decision notify() makes one user at a time — so the feature gate and each
+ * person's in-app toggle behave identically on the batch path; the batch
+ * path only changes how many queries it takes, never who gets notified.
+ *
+ * Fails closed for any type that can email. A batch path that silently
+ * skipped the email channel would drop emails someone opted into, so a type
+ * with an email policy has to keep using notify(), which delivers both.
+ * Recipients are de-duplicated (first occurrence wins) so one person can
+ * never receive the same broadcast twice.
+ */
+export function selectInAppRecipients({
+  type,
+  recipients,
+  isFeatureEnabled,
+}: {
+  type: NotificationType;
+  recipients: readonly BatchRecipient[];
+  isFeatureEnabled: FeatureGate;
+}): string[] {
+  if (NOTIFICATION_POLICY[type].email !== "none") {
+    throw new Error(
+      `selectInAppRecipients: ${type} has an email policy — batch delivery ` +
+        "is in-app only and would drop that email; use notify() instead",
+    );
+  }
+
+  const selected: string[] = [];
+  const seen = new Set<string>();
+  for (const { userId, prefs } of recipients) {
+    if (seen.has(userId)) continue;
+    seen.add(userId);
+    const { createInApp } = resolveNotificationDelivery({
+      type,
+      prefs,
+      hasEmailPayload: false,
+      isFeatureEnabled,
+    });
+    if (createInApp) selected.push(userId);
+  }
+  return selected;
+}
+
 /**
  * Whether `now` still falls inside the throttle window opened by an email
  * sent at `lastSentAt`. The boundary is exclusive on the window end: a

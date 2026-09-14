@@ -154,10 +154,15 @@ export async function createServiceRequest(
   });
 
   // Ràng buộc #3 (yêu cầu không ai nhận) — thông báo chủ động ngay khi
-  // đăng, không đợi cron. Fire-and-forget: a matching/notification hiccup
-  // must never fail the request creation itself.
+  // đăng, không đợi cron.
+  //
+  // Awaited, not fire-and-forget: on serverless the function can be frozen
+  // once the response is sent, so un-awaited work may never run. It cannot
+  // fail the creation either — notifyMatchingProviders never rejects; a
+  // delivery failure comes back as a reported `failed` outcome while the
+  // request, already committed above, is returned as created.
   if (!input.isDraft) {
-    void notifyMatchingProviders(request).catch(() => {});
+    await notifyMatchingProviders(request);
   }
 
   return request;
@@ -281,7 +286,10 @@ export async function publishDraftServiceRequest(
     include: { references: true },
   });
 
-  void notifyMatchingProviders(published).catch(() => {});
+  // Same completion policy as createServiceRequest: awaited so it actually
+  // runs, and never rejects, so a delivery failure is reported rather than
+  // turned into a failed publish of a request that is already live.
+  await notifyMatchingProviders(published);
 
   return published;
 }

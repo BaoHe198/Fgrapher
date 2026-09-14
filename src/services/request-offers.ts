@@ -1,4 +1,9 @@
-import type { RequestOfferStatus, Role, ServiceRequest } from "@prisma/client";
+import type {
+  Prisma,
+  RequestOfferStatus,
+  Role,
+  ServiceRequest,
+} from "@prisma/client";
 
 import { getTranslations } from "next-intl/server";
 
@@ -9,10 +14,16 @@ import {
   requestOfferAcceptedEmailHtml,
   requestOfferDeclinedEmailHtml,
 } from "@/lib/email";
+import type { BatchRecipient } from "@/lib/notifications";
+import type { NotificationPreferences } from "@/lib/validations/user";
 import { referenceUrlsForBooking } from "@/lib/validations/reference-media";
 import { logAudit } from "@/services/compliance";
 import { BookingActionError, createBooking } from "@/services/bookings";
-import { notify } from "@/services/notification";
+import {
+  NotificationBatchError,
+  notify,
+  notifyInAppBatch,
+} from "@/services/notification";
 
 function requestUrlFor(requestId: string) {
   return appUrl(`/dashboard/requests/${requestId}`);
@@ -25,8 +36,10 @@ function getRequestEmailT() {
 }
 
 // In-app notification copy — namespace "libServices.notifications". Offer
-// events run in a request context; notifyMatchingProviders is
-// fire-and-forget (no request scope) and passes { locale: "vi" }.
+// events use the request's locale. notifyMatchingProviders passes
+// { locale: "vi" } explicitly: its recipients are providers, not the person
+// whose request is being handled, so that request's locale must not decide
+// the language every matched provider reads.
 function getRequestNotifyT(locale?: "vi") {
   return locale
     ? getTranslations({ locale, namespace: "libServices.notifications" })
@@ -55,12 +68,17 @@ export class OfferNotFoundError extends OfferError {
 // gói trả phí đang active — quyết định của chủ dự án, mở cho provider trải
 // nghiệm ở giai đoạn MVP (chỉ role + xác minh danh tính là bắt buộc, vì lý
 // do pháp lý/an toàn không thể bỏ).
-async function findMatchingProviderIds(request: {
+//
+// Returns each candidate's notification preferences with them, read in the
+// same query that finds them — so broadcasting to N providers needs no
+// per-provider preference lookup afterwards. (userRole is @@unique on
+// [userId, role], so a provider appears at most once.)
+async function findMatchingRecipients(request: {
   role: Role;
   provinceId: string;
   shootDate: Date | null;
   isDateFlexible: boolean;
-}) {
+}): Promise<BatchRecipient[]> {
   const candidates = await db.userRole.findMany({
     where: {
       role: request.role,
@@ -81,12 +99,20 @@ async function findMatchingProviderIds(request: {
         },
       },
     },
-    select: { userId: true },
+    select: {
+      userId: true,
+      user: { select: { notificationPreferences: true } },
+    },
   });
 
-  if (candidates.length === 0) return [];
+  const recipients: BatchRecipient[] = candidates.map((c) => ({
+    userId: c.userId,
+    prefs: c.user.notificationPreferences as NotificationPreferences | null,
+  }));
+
+  if (recipients.length === 0) return [];
   if (request.isDateFlexible || !request.shootDate) {
-    return candidates.map((c) => c.userId);
+    return recipients;
   }
 
   // Whole-day availability check — a best-effort filter (the request has
@@ -97,7 +123,7 @@ async function findMatchingProviderIds(request: {
   // candidate loop — this runs on every new service request, against
   // every verified provider for that role/area.
   const shootDate = request.shootDate;
-  const candidateIds = candidates.map((c) => c.userId);
+  const candidateIds = recipients.map((r) => r.userId);
   const [blockedRows, confirmedRows] = await Promise.all([
     db.blockedDate.findMany({
       where: {
@@ -121,38 +147,142 @@ async function findMatchingProviderIds(request: {
     ...blockedRows.map((r) => r.userId),
     ...confirmedRows.map((r) => r.providerId),
   ]);
-  return candidateIds.filter((id) => !unavailableIds.has(id));
+  return recipients.filter((r) => !unavailableIds.has(r.userId));
 }
 
-// Ràng buộc #3 — thông báo chủ động cho provider phù hợp ngay khi có yêu
-// cầu mới. Gọi từ services/service-requests.ts's createServiceRequest,
-// fire-and-forget — không được để một lỗi thông báo làm hỏng việc tạo yêu
-// cầu.
-export async function notifyMatchingProviders(
-  request: Pick<
-    ServiceRequest,
-    | "id"
-    | "code"
-    | "title"
-    | "role"
-    | "provinceId"
-    | "shootDate"
-    | "isDateFlexible"
-  >,
-) {
-  const providerIds = await findMatchingProviderIds(request);
-  const nt = await getRequestNotifyT("vi");
-  for (const userId of providerIds) {
-    await notify({
-      userId,
-      type: "REQUEST_NEW_MATCH",
+type MatchableRequest = Pick<
+  ServiceRequest,
+  | "id"
+  | "code"
+  | "title"
+  | "role"
+  | "provinceId"
+  | "shootDate"
+  | "isDateFlexible"
+>;
+
+export type RequestMatchStage = "match" | "compose" | "write";
+
+export type RequestMatchOutcome =
+  | { status: "delivered"; matched: number; created: number }
+  | {
+      status: "failed";
+      stage: RequestMatchStage;
+      /** Rows stored before the failure (a batch can fail part-way). */
+      created: number;
+      error: unknown;
+    };
+
+export interface RequestMatchDeps {
+  findRecipients: (request: MatchableRequest) => Promise<BatchRecipient[]>;
+  composeText: (
+    request: MatchableRequest,
+  ) => Promise<{ title: string; message: string }>;
+  writeInApp: typeof notifyInAppBatch;
+  report: (
+    request: MatchableRequest,
+    outcome: Extract<RequestMatchOutcome, { status: "failed" }>,
+  ) => void;
+}
+
+const defaultRequestMatchDeps: RequestMatchDeps = {
+  findRecipients: findMatchingRecipients,
+  composeText: async (request) => {
+    const nt = await getRequestNotifyT("vi");
+    return {
       title: nt("request.newMatch.title"),
       message: nt("request.newMatch.message", {
         title: request.title,
         code: request.code,
       }),
-      data: { requestId: request.id },
+    };
+  },
+  writeInApp: (input) => notifyInAppBatch(input),
+  // A handled failure still has to be seen. console.error is how the rest
+  // of the service layer surfaces a handled failure (lib/email-transport.ts,
+  // lib/cache.ts, services/email-verification.ts): it lands in the Vercel
+  // runtime logs, which docs/ops/VAN-HANH-PRODUCTION.md §2 names as the
+  // place to look for errors until an alerting service is set up. The tag
+  // and requestId make a missed broadcast findable for a specific request.
+  report: (request, outcome) => {
+    console.error("[Service Request] Matched-provider notifications failed", {
+      requestId: request.id,
+      code: request.code,
+      stage: outcome.stage,
+      created: outcome.created,
+      error: outcome.error,
     });
+  },
+};
+
+// Ràng buộc #3 — thông báo chủ động cho provider phù hợp ngay khi có yêu
+// cầu mới đăng (tạo mới hoặc đăng từ bản nháp).
+//
+// Delivery: one query finds the matching providers together with their
+// notification preferences (plus the two batched availability queries when
+// the date is fixed), then one createMany per NOTIFICATION_BATCH_SIZE rows.
+// It used to be notify() per provider, awaited in turn: a preference read and
+// an insert each, 2N round-trips for N providers. Who gets a row is
+// unchanged — selectInAppRecipients applies the same feature gate and
+// per-person in-app toggle notify() did. REQUEST_NEW_MATCH never emails.
+//
+// Completion policy, deliberately:
+//  - Callers AWAIT this. It used to run as `void …catch(() => {})` after the
+//    response was built, and on serverless the function can be frozen or
+//    killed as soon as the response is sent, so the broadcast could simply
+//    never happen — with the error swallowed, nobody would ever know.
+//  - It never rejects. A failure at any stage becomes a returned
+//    `{ status: "failed" }` outcome, so a caller that has already committed
+//    the request can't be made to report that as a failed creation — the
+//    request exists and the customer must not be told otherwise (a retry
+//    would post a duplicate).
+//  - Every failure is reported (see defaultRequestMatchDeps.report) and the
+//    outcome is returned, so it's observable rather than silent.
+export async function notifyMatchingProviders(
+  request: MatchableRequest,
+  // Any subset can be swapped (tests); the rest stay real, so a test can
+  // fail one stage and still observe the real reporter.
+  overrides: Partial<RequestMatchDeps> = {},
+): Promise<RequestMatchOutcome> {
+  const deps: RequestMatchDeps = { ...defaultRequestMatchDeps, ...overrides };
+  let stage: RequestMatchStage = "match";
+  try {
+    const recipients = await deps.findRecipients(request);
+    if (recipients.length === 0) {
+      return { status: "delivered", matched: 0, created: 0 };
+    }
+
+    stage = "compose";
+    const { title, message } = await deps.composeText(request);
+
+    stage = "write";
+    const data: Prisma.InputJsonValue = { requestId: request.id };
+    const result = await deps.writeInApp({
+      type: "REQUEST_NEW_MATCH",
+      recipients,
+      title,
+      message,
+      data,
+    });
+    return {
+      status: "delivered",
+      matched: recipients.length,
+      created: result.created,
+    };
+  } catch (error) {
+    const outcome = {
+      status: "failed" as const,
+      stage,
+      // Only the write stage can have stored anything before failing.
+      created: error instanceof NotificationBatchError ? error.created : 0,
+      error,
+    };
+    try {
+      deps.report(request, outcome);
+    } catch {
+      // Reporting must not turn a handled failure into a thrown one.
+    }
+    return outcome;
   }
 }
 
