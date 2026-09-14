@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
+import { ReferenceMediaGallery } from "@/components/media/reference-media-gallery";
 import { ReviewModal } from "@/components/modals/review-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -448,6 +449,16 @@ export default function BookingDetailPage() {
               <p className="whitespace-pre-line text-body-md text-text-primary">
                 {booking.notes}
               </p>
+            </Card>
+          ) : null}
+
+          {/* The customer's reference photos/videos. Booking.referenceImages
+              has been accepted by the API and stored since before this page
+              existed, but nothing ever displayed it — a provider could never
+              have seen what someone attached. Shown to both parties. */}
+          {booking.referenceImages.length > 0 ? (
+            <Card>
+              <ReferenceMediaGallery urls={booking.referenceImages} />
             </Card>
           ) : null}
 

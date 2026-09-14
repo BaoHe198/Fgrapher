@@ -1169,7 +1169,6 @@
       "budgetHint": "Không bắt buộc, nhưng giúp provider chào giá phù hợp hơn.",
       "titleLabel": "Tiêu đề yêu cầu",
       "descriptionLabel": "Mô tả concept",
-      "referencesLabel": "Ảnh tham khảo",
       "uploadUnavailable": "Tính năng tải ảnh chưa khả dụng",
       "uploadFailed": "Không thể tải ảnh lên",
       "reviewDateFlexible": "Linh hoạt: {start} — {end}",
@@ -3452,6 +3451,22 @@
     "service": {
       "sessionDuration": "Thời gian buổi chụp: {hours} giờ",
       "durationHours": "{hours} giờ"
+    },
+    "referenceMedia": {
+      "label": "Ảnh/Video tham khảo",
+      "hint": "Ảnh hoặc video mẫu cho phong cách bạn muốn. Tối đa {max} tệp; mỗi video không quá {videoMb}MB.",
+      "add": "Thêm ảnh hoặc video tham khảo",
+      "remove": "Xoá tệp này",
+      "video": "Video",
+      "count": "{count}/{max}",
+      "uploadingPercent": "Đang tải lên {percent}%",
+      "errorTooLarge": "Video \"{name}\" lớn hơn {videoMb}MB. Hãy cắt ngắn hoặc chọn video khác.",
+      "errorUnsupported": "\"{name}\" không phải ảnh hoặc video được hỗ trợ (JPG, PNG, WebP, GIF, MP4, MOV, WebM).",
+      "errorUnavailable": "Chưa thể tải tệp lên lúc này. Thử lại sau.",
+      "errorFailed": "Tải \"{name}\" lên không thành công. Thử lại.",
+      "errorLimit": "Chỉ thêm được tối đa {max} tệp. Đã bỏ qua {skipped} tệp.",
+      "viewPhoto": "Xem ảnh lớn",
+      "viewVideo": "Phát video"
     }
   }
 }

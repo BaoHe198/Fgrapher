@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
+import { ReferenceMediaGallery } from "@/components/media/reference-media-gallery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -185,19 +186,9 @@ export function OpportunityDetail({
           </div>
         </div>
 
-        {request.references.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {request.references.map((ref) => (
-              // eslint-disable-next-line @next/next/no-img-element -- brief reference thumbnail
-              <img
-                key={ref.mediaUrl}
-                src={ref.mediaUrl}
-                alt=""
-                className="size-16 rounded-[var(--fg-radius-sm)] object-cover"
-              />
-            ))}
-          </div>
-        ) : null}
+        <ReferenceMediaGallery
+          urls={request.references.map((ref) => ref.mediaUrl)}
+        />
 
         <p className="text-body-sm text-text-tertiary">
           {t("addressHiddenNote")}

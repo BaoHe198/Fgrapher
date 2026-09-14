@@ -23,7 +23,17 @@ export async function POST(request: Request) {
     // all (a bank-transfer submission is specifically how someone WITHOUT
     // a paid role yet gets one — requiring one first would be circular).
     const body = await request.json().catch(() => ({}));
-    const openPurposes = new Set(["chat", "request", "account", "payment"]);
+    // "booking" = reference photos/videos a customer attaches when booking
+    // a provider. Same reasoning as "request": it's the customer describing
+    // what they want, not content being sold, so any signed-in account may
+    // upload — most bookers are CUSTOMER-only and hold no paid role.
+    const openPurposes = new Set([
+      "chat",
+      "request",
+      "booking",
+      "account",
+      "payment",
+    ]);
     const purpose = openPurposes.has(body?.purpose)
       ? body.purpose
       : "portfolio";

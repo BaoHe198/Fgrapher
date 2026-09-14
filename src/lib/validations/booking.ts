@@ -1,6 +1,11 @@
 import { Role } from "@prisma/client";
 import { z } from "zod";
 
+import {
+  MAX_REFERENCE_MEDIA,
+  referenceMediaUrlSchema,
+} from "@/lib/validations/reference-media";
+
 // EXPIRED is deliberately excluded — that transition only ever happens
 // via the /api/cron/expire-bookings cron (system actor), never a human
 // request; see services/bookings.ts's transitionBooking.
@@ -31,7 +36,12 @@ export const createBookingSchema = z.object({
   numberOfPeople: z.coerce.number().int().min(1).max(999).optional(),
   notes: z.string().max(1000).optional(),
   contactPhone: z.string().max(30).optional(),
-  referenceImages: z.array(z.string().url()).max(5).optional(),
+  // Photos or videos (see lib/media-kind.ts). Limit shared with
+  // service requests — see validations/reference-media.ts.
+  referenceImages: z
+    .array(referenceMediaUrlSchema)
+    .max(MAX_REFERENCE_MEDIA)
+    .optional(),
   // Crew-hire (Prompt B7, VIỆC 1) — "Gắn vào đơn khách hàng".
   parentBookingId: z.string().min(1).optional(),
   // Which of the requester's own roles they're booking as — "CUSTOMER"
@@ -73,7 +83,12 @@ export function getCreateBookingSchema(t: (key: string) => string) {
     numberOfPeople: z.coerce.number().int().min(1).max(999).optional(),
     notes: z.string().max(1000).optional(),
     contactPhone: z.string().max(30).optional(),
-    referenceImages: z.array(z.string().url()).max(5).optional(),
+    // Photos or videos (see lib/media-kind.ts). Limit shared with
+    // service requests — see validations/reference-media.ts.
+    referenceImages: z
+      .array(referenceMediaUrlSchema)
+      .max(MAX_REFERENCE_MEDIA)
+      .optional(),
     parentBookingId: z.string().min(1).optional(),
     requesterRole: z.enum(Role).optional(),
   });

@@ -9,6 +9,7 @@ import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { ModelSafetyNotice } from "@/components/booking/model-safety-notice";
 import { termsChunk } from "@/components/legal/terms-link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ReferenceMediaField } from "@/components/forms/reference-media-field";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,6 +24,7 @@ import {
   formatMonthYear,
 } from "@/lib/format";
 import { WEEKDAY_SHORT_LABELS_VI } from "@/lib/constants";
+import { MAX_REFERENCE_MEDIA } from "@/lib/validations/reference-media";
 import { formatCurrency, cn, mondayFirstColumn } from "@/lib/utils";
 import type { DayAvailability } from "@/services/availability";
 
@@ -75,6 +77,8 @@ interface Draft {
   locationAddress: string;
   numberOfPeople: string;
   notes: string;
+  // Uploaded reference photo/video URLs — sent as Booking.referenceImages.
+  referenceMedia: string[];
   contactPhone: string;
   agreed: boolean;
   // Model-booking-specific — see docs/guides/fgrapher-prompts-batch-2.md
@@ -104,6 +108,7 @@ function emptyDraft(contactPhoneDefault: string): Draft {
     locationAddress: "",
     numberOfPeople: "",
     notes: "",
+    referenceMedia: [],
     contactPhone: contactPhoneDefault,
     agreed: false,
     shootType: "",
@@ -185,7 +190,12 @@ export function BookingWizard({
       if (hasUrlPrefill) {
         setDraft((prev) => ({ ...prev, ...fromUrl }));
       } else if (saved) {
-        setDraft(JSON.parse(saved));
+        // Merged over a fresh draft, not used as-is: a draft saved before a
+        // field existed (referenceMedia, added later) would otherwise come
+        // back without it, and the details step would crash reading
+        // `undefined.map` for anyone who had a booking half-filled at the
+        // moment this shipped.
+        setDraft({ ...emptyDraft(contactPhoneDefault), ...JSON.parse(saved) });
       }
       setHydrated(true);
     });
@@ -271,6 +281,8 @@ export function BookingWizard({
           : undefined,
         notes: notesParts.length > 0 ? notesParts.join("\n\n") : undefined,
         contactPhone: draft.contactPhone,
+        referenceImages:
+          draft.referenceMedia.length > 0 ? draft.referenceMedia : undefined,
         parentBookingId: parentBookingId ?? undefined,
         requesterRole: parentBookingId ? requesterCrewRole : undefined,
       }),
@@ -380,6 +392,7 @@ export function BookingWizard({
             locationAddress={draft.locationAddress}
             numberOfPeople={draft.numberOfPeople}
             notes={draft.notes}
+            referenceMedia={draft.referenceMedia}
             contactPhone={draft.contactPhone}
             isModel={isModel}
             shootType={draft.shootType}
@@ -836,6 +849,7 @@ function StepDetails({
   locationAddress,
   numberOfPeople,
   notes,
+  referenceMedia,
   contactPhone,
   isModel,
   shootType,
@@ -852,6 +866,7 @@ function StepDetails({
   locationAddress: string;
   numberOfPeople: string;
   notes: string;
+  referenceMedia: string[];
   contactPhone: string;
   isModel?: boolean;
   shootType: string;
@@ -993,6 +1008,21 @@ function StepDetails({
           placeholder={t("stepDetails.notesPlaceholder")}
         />
       </div>
+
+      {/* Directly under the notes, whose placeholder already asks for
+          "phong cách tham khảo" — showing the look is faster and far less
+          ambiguous than describing it. */}
+      <ReferenceMediaField
+        purpose="booking"
+        max={MAX_REFERENCE_MEDIA}
+        value={referenceMedia.map((url) => ({ url }))}
+        onChange={(next) =>
+          onChange(
+            "referenceMedia",
+            next.map((item) => item.url),
+          )
+        }
+      />
 
       <Input
         label={t("stepDetails.contactPhoneLabel")}

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ReferenceMediaGallery } from "@/components/media/reference-media-gallery";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -242,19 +243,9 @@ export function RequestDetail({
           </div>
         </div>
 
-        {request.references.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {request.references.map((ref) => (
-              // eslint-disable-next-line @next/next/no-img-element -- brief reference thumbnail
-              <img
-                key={ref.mediaUrl}
-                src={ref.mediaUrl}
-                alt=""
-                className="size-16 rounded-[var(--fg-radius-sm)] object-cover"
-              />
-            ))}
-          </div>
-        ) : null}
+        <ReferenceMediaGallery
+          urls={request.references.map((ref) => ref.mediaUrl)}
+        />
 
         {canManage ? (
           <Button

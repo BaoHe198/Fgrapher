@@ -200,6 +200,24 @@ export async function processDeletion(userId: string, requestId?: string) {
     // ProfileMedia + Service cascade-delete from their parent Profile —
     // see those models' onDelete: Cascade in the schema.
     db.profile.deleteMany({ where: { userId } }),
+    // Reference photos/videos the customer attached — their own content,
+    // very often pictures of people. The bookings themselves are kept (see
+    // this function's header: the provider needs the record of the job),
+    // which used to mean the attached media stayed with them too, linked
+    // and viewable, after the account that uploaded it was deleted. The
+    // booking survives; the customer's media does not.
+    //
+    // This removes the links, not the files: nothing in processDeletion
+    // deletes Cloudinary assets (portfolio media included — the cascade
+    // above drops rows, not files). Tracked as a known gap in
+    // docs/ops/Fgrapher-checklist-viec-thu-cong.xlsx.
+    db.booking.updateMany({
+      where: { customerId: userId },
+      data: { referenceImages: [] },
+    }),
+    db.serviceRequestReference.deleteMany({
+      where: { request: { customerId: userId } },
+    }),
     db.user.update({
       where: { id: userId },
       data: {

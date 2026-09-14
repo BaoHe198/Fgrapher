@@ -2,6 +2,10 @@ import { ProfileCategory, Role } from "@prisma/client";
 import { z } from "zod";
 
 import { locationTypeSchema } from "@/lib/validations/booking";
+import {
+  MAX_REFERENCE_MEDIA,
+  referenceMediaUrlSchema,
+} from "@/lib/validations/reference-media";
 
 const serviceRequestFields = z.object({
   title: z.string().min(3).max(120),
@@ -31,11 +35,20 @@ const serviceRequestFields = z.object({
   detailedAddress: z.string().max(300).optional(),
   budgetMin: z.coerce.number().positive().optional(),
   budgetMax: z.coerce.number().positive().optional(),
+  // Photos or videos (mediaUrl holds either — see lib/media-kind.ts). Only
+  // Cloudinary delivery URLs: these are rendered for every provider who
+  // opens the request, so an arbitrary URL here would be loaded into all of
+  // their browsers. The upload field only ever produces Cloudinary URLs.
   references: z
     .array(
-      z.object({ mediaUrl: z.string().url(), publicId: z.string().optional() }),
+      z.object({
+        mediaUrl: referenceMediaUrlSchema,
+        publicId: z.string().optional(),
+      }),
     )
-    .max(10)
+    // Shared with the booking schema — a request's references become the
+    // booking's when an offer is accepted. See validations/reference-media.ts.
+    .max(MAX_REFERENCE_MEDIA)
     .optional(),
   isDraft: z.boolean().default(false),
 });

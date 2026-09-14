@@ -1169,7 +1169,6 @@
       "budgetHint": "Optional, but helps providers quote a fitting price.",
       "titleLabel": "Request title",
       "descriptionLabel": "Describe the concept",
-      "referencesLabel": "Reference photos",
       "uploadUnavailable": "Photo upload isn't available yet",
       "uploadFailed": "Couldn't upload the photo",
       "reviewDateFlexible": "Flexible: {start} — {end}",
@@ -3452,6 +3451,22 @@
     "service": {
       "sessionDuration": "Session length: {hours} h",
       "durationHours": "{hours} h"
+    },
+    "referenceMedia": {
+      "label": "Reference photos & videos",
+      "hint": "Photos or videos showing the style you want. Up to {max} files; each video {videoMb}MB at most.",
+      "add": "Add a reference photo or video",
+      "remove": "Remove this file",
+      "video": "Video",
+      "count": "{count}/{max}",
+      "uploadingPercent": "Uploading {percent}%",
+      "errorTooLarge": "Video \"{name}\" is larger than {videoMb}MB. Trim it or pick another.",
+      "errorUnsupported": "\"{name}\" isn't a supported photo or video (JPG, PNG, WebP, GIF, MP4, MOV, WebM).",
+      "errorUnavailable": "Uploads aren't available right now. Try again later.",
+      "errorFailed": "Couldn't upload \"{name}\". Try again.",
+      "errorLimit": "You can add up to {max} files. Skipped {skipped}.",
+      "viewPhoto": "View photo",
+      "viewVideo": "Play video"
     }
   }
 }

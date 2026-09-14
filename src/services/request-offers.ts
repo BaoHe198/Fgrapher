@@ -9,6 +9,7 @@ import {
   requestOfferAcceptedEmailHtml,
   requestOfferDeclinedEmailHtml,
 } from "@/lib/email";
+import { referenceUrlsForBooking } from "@/lib/validations/reference-media";
 import { logAudit } from "@/services/compliance";
 import { BookingActionError, createBooking } from "@/services/bookings";
 import { notify } from "@/services/notification";
@@ -408,7 +409,7 @@ export async function acceptOffer(
 ) {
   const offer = await db.requestOffer.findUnique({
     where: { id: offerId },
-    include: { request: true },
+    include: { request: { include: { references: true } } },
   });
   if (!offer) throw new OfferNotFoundError();
   if (offer.request.customerId !== customerId) {
@@ -432,7 +433,14 @@ export async function acceptOffer(
       locationType: input.locationType,
       locationAddress: offer.request.detailedAddress ?? undefined,
       notes: offer.request.description ?? undefined,
-      referenceImages: undefined,
+      // Carried over with the description and address. Was hardcoded to
+      // `undefined`, so a customer who attached reference photos/videos to
+      // their request watched them vanish from the booking the moment they
+      // accepted an offer — the one point where the provider actually needs
+      // them. Every reference fits: request and booking share one limit
+      // (MAX_REFERENCE_MEDIA), so nothing is dropped and the result is always
+      // valid booking input. Pinned by reference-media-policy.test.ts.
+      referenceImages: referenceUrlsForBooking(offer.request.references),
     });
   } catch (err) {
     if (err instanceof BookingActionError) {

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProfileCategory, Role } from "@prisma/client";
-import { ChevronLeft, ChevronRight, Loader2, Upload, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
@@ -17,17 +17,14 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Tag } from "@/components/ui/tag";
 import { Textarea } from "@/components/ui/textarea";
+import { ReferenceMediaField } from "@/components/forms/reference-media-field";
 import { toast } from "@/components/ui/toast";
 import { CATEGORIES_BY_ROLE, PROVIDER_ROLES } from "@/lib/constants";
-import { compressImageFile } from "@/lib/image-compression";
 import { formatCurrency } from "@/lib/utils";
+import { MAX_REFERENCE_MEDIA } from "@/lib/validations/reference-media";
 
 const MAX_CATEGORIES = 5;
 
-// Reference photos are just visual context for a provider reviewing a
-// request — not something anyone views at full resolution.
-const REFERENCE_UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
-const REFERENCE_UPLOAD_MAX_DIMENSION = 1600;
 const STEP_KEYS = [
   "who",
   "when",
@@ -144,7 +141,6 @@ export function RequestWizard({
   const [error, setError] = useState<string | null>(null);
   const [isVerifiedNow, setIsVerifiedNow] = useState(phoneVerified);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [wards, setWards] = useState<WardOption[]>([]);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
@@ -254,62 +250,6 @@ export function RequestWizard({
 
     toast.add({ title: t("posted"), type: "success" });
     router.push(`/dashboard/requests/${body.data.id}`);
-  };
-
-  const uploadReference = async (file: File) => {
-    setIsUploading(true);
-    const sigRes = await fetch("/api/upload/signature", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ purpose: "request" }),
-    });
-    const sigBody = await sigRes.json();
-    if (!sigRes.ok) {
-      setIsUploading(false);
-      setError(sigBody.message ?? t("uploadUnavailable"));
-      return;
-    }
-
-    const compressed = await compressImageFile(file, {
-      maxBytes: REFERENCE_UPLOAD_MAX_BYTES,
-      maxDimension: REFERENCE_UPLOAD_MAX_DIMENSION,
-    });
-
-    const formData = new FormData();
-    formData.append("file", compressed);
-    formData.append("api_key", sigBody.data.apiKey);
-    formData.append("timestamp", String(sigBody.data.timestamp));
-    formData.append("signature", sigBody.data.signature);
-    formData.append("folder", sigBody.data.folder);
-    formData.append("transformation", sigBody.data.transformation);
-    formData.append("allowed_formats", sigBody.data.allowedFormats);
-
-    const uploadRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${sigBody.data.cloudName}/auto/upload`,
-      { method: "POST", body: formData },
-    );
-    const uploadBody = await uploadRes.json();
-    setIsUploading(false);
-
-    if (!uploadRes.ok) {
-      setError(t("uploadFailed"));
-      return;
-    }
-
-    setForm((prev) => ({
-      ...prev,
-      references: [
-        ...prev.references,
-        { mediaUrl: uploadBody.secure_url, publicId: uploadBody.public_id },
-      ],
-    }));
-  };
-
-  const removeReference = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      references: prev.references.filter((_, i) => i !== index),
-    }));
   };
 
   // Both are optional fields (the app never requires a preferred window
@@ -528,51 +468,23 @@ export function RequestWizard({
                 onChange={(e) => update("description", e.target.value)}
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-body-sm font-semibold! text-text-primary">
-                {t("referencesLabel")}
-              </span>
-              <div className="flex flex-wrap gap-2.5">
-                {form.references.map((ref, index) => (
-                  <div
-                    key={ref.mediaUrl}
-                    className="relative size-20 overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element -- brief reference thumbnail, not worth next/image's config here */}
-                    <img
-                      src={ref.mediaUrl}
-                      alt=""
-                      className="size-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeReference(index)}
-                      className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-black/50 text-white"
-                    >
-                      <X className="size-3" />
-                    </button>
-                  </div>
-                ))}
-                <label className="flex size-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-[var(--fg-radius-sm)] border-2 border-dashed border-border-default text-text-tertiary">
-                  {isUploading ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Upload className="size-4" />
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={isUploading || form.references.length >= 10}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void uploadReference(file);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-              </div>
-            </div>
+            <ReferenceMediaField
+              purpose="request"
+              max={MAX_REFERENCE_MEDIA}
+              value={form.references.map((ref) => ({
+                url: ref.mediaUrl,
+                publicId: ref.publicId,
+              }))}
+              onChange={(next) =>
+                setForm((prev) => ({
+                  ...prev,
+                  references: next.map((item) => ({
+                    mediaUrl: item.url,
+                    publicId: item.publicId,
+                  })),
+                }))
+              }
+            />
           </div>
         ) : null}
 
