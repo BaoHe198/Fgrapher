@@ -5,10 +5,14 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect } from "react";
 
+import { type MediaKind, mediaKindFromUrl } from "@/lib/media-kind";
 import { buildMediaVariants } from "@/lib/media-variants";
 
 interface MediaLightboxProps {
-  items: { url: string; title?: string | null }[];
+  // `type` is optional: portfolio media carries its own, while reference
+  // media (bookings, service requests) only ever stored a URL, so those
+  // fall back to reading the kind from the URL itself.
+  items: { url: string; title?: string | null; type?: MediaKind }[];
   index: number;
   onClose: () => void;
   onIndexChange: (index: number) => void;
@@ -97,14 +101,34 @@ export function MediaLightbox({
         className="relative max-h-[85vh] max-w-[85vw]"
         onClick={(e) => e.stopPropagation()}
       >
-        <Image
-          src={buildMediaVariants(current.url).large}
-          alt={current.title ?? ""}
-          width={1200}
-          height={800}
-          unoptimized
-          className="max-h-[85vh] w-auto rounded-lg object-contain"
-        />
+        {(current.type ?? mediaKindFromUrl(current.url)) === "VIDEO" ? (
+          // This lightbox used to render every item as an <Image>. Portfolio
+          // albums can contain videos, so opening one showed a broken image
+          // — never noticed because CSP was also refusing to load Cloudinary
+          // video at all (see media-src in next.config.ts).
+          //
+          // The raw URL, not buildMediaVariants(): those variants append
+          // f_webp, which turns a video into a failed image request.
+          // key={url} remounts the element when navigating between two
+          // videos, so the previous one doesn't keep playing underneath.
+          <video
+            key={current.url}
+            src={current.url}
+            controls
+            autoPlay
+            playsInline
+            className="max-h-[85vh] max-w-[85vw] rounded-lg bg-black"
+          />
+        ) : (
+          <Image
+            src={buildMediaVariants(current.url).large}
+            alt={current.title ?? ""}
+            width={1200}
+            height={800}
+            unoptimized
+            className="max-h-[85vh] w-auto rounded-lg object-contain"
+          />
+        )}
       </div>
 
       {items.length > 1 ? (

@@ -34,11 +34,19 @@ const isDev = process.env.NODE_ENV === "development";
 // — org ID is the wildcard segment, region (us/de) is fixed per Sentry
 // account, so all three cover any account regardless of which region a
 // real DSN ends up using.
+//
+// media-src was missing entirely, so <video> fell back to default-src 'self'
+// and every Cloudinary video was refused. Portfolio videos have been
+// uploadable all along and never once played in a browser — a silent
+// failure, confirmed by a securitypolicyviolation event ("media-src blocked
+// https://res.cloudinary.com/...") before this line was added. blob: covers
+// previewing a picked video file locally before it's uploaded.
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com;
+  media-src 'self' blob: https://res.cloudinary.com;
   font-src 'self' data:;
   connect-src 'self' https://api.cloudinary.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io;
   object-src 'none';
