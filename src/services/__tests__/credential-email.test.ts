@@ -19,6 +19,9 @@ import {
   isResetIssuanceCurrent,
   isVerificationIssuanceCurrent,
   issueCredential,
+  resetIssuanceIdOf,
+  resetTokenRowData,
+  storedResetToken,
 } from "@/services/credential-email";
 import { finalizeReservedEmail } from "@/services/email-outbox";
 import {
@@ -108,7 +111,7 @@ function makeWorld() {
       return verification.get(accountId)?.tokenHash ?? null;
     }
     const t = reset.find((r) => r.identifier === emails.get(accountId));
-    return t ? hashCredentialToken(t.token) : null;
+    return t ? resetIssuanceIdOf(t.token) : null;
   }
 
   function opsFor(scopeKey: string): CredentialLockedOps {
@@ -129,11 +132,7 @@ function makeWorld() {
           if (reset[i].identifier === write.identifier) reset.splice(i, 1);
         }
         await tick();
-        reset.push({
-          identifier: write.identifier,
-          token: write.token,
-          expires: write.expires,
-        });
+        reset.push(resetTokenRowData(write));
         return { id: null };
       },
       async isCurrent(issuance, now) {
@@ -283,7 +282,7 @@ function writeFor(
     type,
     userId,
     identifier: `${userId}@example.com`,
-    token,
+    tokenHash: hashCredentialToken(token),
     expires: new Date(Date.now() + ttlMs),
   };
 }
@@ -705,7 +704,11 @@ describe("sendPasswordResetEmail", () => {
     });
     assert.ok(!sent[0].idempotencyKey!.includes(token), "raw token in key");
     assert.equal(world.reset.length, 1);
-    assert.equal(world.reset[0].token, token);
+    assert.equal(
+      world.reset[0].token,
+      storedResetToken(hashCredentialToken(token)),
+    );
+    assert.ok(!world.reset[0].token.includes(token), "raw token stored");
   });
 
   it("a second request cancels the first request's queued retry", async () => {
@@ -805,6 +808,18 @@ describe("credential guards are wired into the real paths", () => {
     const src = codeOnly("src/services/password-reset.ts");
     assert.match(src, /issueCredential\(/);
     assert.match(src, /idempotencyKey: credentialEmailKey\(issuance\)/);
+  });
+
+  it("the Prisma store writes reset rows through resetTokenRowData only", () => {
+    const src = codeOnly("src/services/credential-email.ts");
+    assert.equal(
+      src.match(/verificationToken\.(create|upsert|update)\b/g)?.length,
+      1,
+    );
+    assert.match(
+      src,
+      /verificationToken\.create\(\{\s*data: resetTokenRowData\(write\),?\s*\}\)/,
+    );
   });
 
   it("verification issues under the lock and sends with a credential key", () => {

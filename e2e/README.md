@@ -65,13 +65,14 @@ end-to-end check and starts bridging a gap directly via Prisma
   that state correctly.
 - **Uploading portfolio media** (`provider-onboarding.spec.ts`) mocks the
   two network calls that leave first-party code (`POST /api/upload/
-  signature` and the Cloudinary upload itself) while exercising every real
+signature` and the Cloudinary upload itself) while exercising every real
   line of app code around them, including the actual
   `POST /api/portfolio` write.
-- **Password reset** reads the reset token directly from the
-  `VerificationToken` table instead of an inbox — `sendEmail()` no-ops
-  silently when Resend isn't configured, but it still writes the token to
-  the database either way.
+- **Password reset** can't read the link from an inbox (`sendEmail()`
+  no-ops silently when Resend isn't configured) or from the database
+  (`VerificationToken` stores only a hash). After submitting the form it
+  mints a known token with `issuePasswordResetToken` — the same issuance
+  the form used — and visits that link.
 - **A profile appearing in search** requires `Profile.isPublished: true`.
   This one isn't a third-party-credential gap — it's a genuine gap in the
   app itself: grepping every read/write of that field turns up no UI

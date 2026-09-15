@@ -1,15 +1,48 @@
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 import { appUrl } from "@/lib/app-url";
+import { db } from "@/lib/db";
 import { resetPasswordEmailHtml, sendEmail } from "@/lib/email";
 import {
   type CredentialStore,
+  hashCredentialToken,
   issueCredential,
   prismaCredentialStore,
+  storedResetToken,
 } from "@/services/credential-email";
-import { credentialEmailKey } from "@/services/email-outbox-policy";
+import {
+  type CredentialIssuance,
+  credentialEmailKey,
+} from "@/services/email-outbox-policy";
 
 export const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+
+/**
+ * Mints a reset token for an account and makes it the live one. Only its
+ * hash is stored (see resetTokenRowData); the raw token is returned for the
+ * link and exists nowhere else.
+ */
+export async function issuePasswordResetToken(
+  { userId, email }: { userId: string; email: string },
+  deps: { store?: CredentialStore; now?: () => number } = {},
+): Promise<{ rawToken: string; issuance: CredentialIssuance }> {
+  const store = deps.store ?? prismaCredentialStore;
+  const now = deps.now ?? Date.now;
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const { issuance } = await issueCredential(
+    {
+      type: "password-reset",
+      userId,
+      identifier: email,
+      tokenHash: hashCredentialToken(rawToken),
+      expires: new Date(now() + RESET_TOKEN_TTL_MS),
+    },
+    store,
+  );
+  return { rawToken, issuance };
+}
 
 /**
  * Issues a password-reset token for an existing account and emails the link.
@@ -36,21 +69,12 @@ export async function sendPasswordResetEmail(
     now?: () => number;
   } = {},
 ): Promise<{ accepted: boolean }> {
-  const store = deps.store ?? prismaCredentialStore;
   const send = deps.send ?? sendEmail;
-  const now = deps.now ?? Date.now;
 
   try {
-    const token = crypto.randomBytes(32).toString("hex");
-    const { issuance } = await issueCredential(
-      {
-        type: "password-reset",
-        userId,
-        identifier: email,
-        token,
-        expires: new Date(now() + RESET_TOKEN_TTL_MS),
-      },
-      store,
+    const { rawToken, issuance } = await issuePasswordResetToken(
+      { userId, email },
+      deps,
     );
 
     const result = await send({
@@ -61,7 +85,7 @@ export async function sendPasswordResetEmail(
       // appUrl(), not `process.env.NEXTAUTH_URL` — that var is deliberately
       // unset on Vercel Preview (see lib/env.ts).
       html: resetPasswordEmailHtml({
-        resetUrl: appUrl(`/reset-password?token=${token}`),
+        resetUrl: appUrl(`/reset-password?token=${rawToken}`),
       }),
       // The body contains the raw reset link.
       sensitive: true,
@@ -83,4 +107,119 @@ export async function sendPasswordResetEmail(
     });
     return { accepted: false };
   }
+}
+
+// --- Completing a reset ----------------------------------------------------
+
+/**
+ * The shape every reset token has ever been minted in (32 random bytes,
+ * hex). Only a submission in this shape is looked up raw, which is what
+ * keeps the legacy fallback from matching a hashed row: a stored value is
+ * `sha256:…` and can never equal bare hex.
+ */
+const RAW_RESET_TOKEN = /^[0-9a-f]{64}$/;
+
+interface StoredResetToken {
+  identifier: string;
+  token: string;
+  expires: Date;
+}
+
+/**
+ * The two database operations completion needs, behind an interface so
+ * one-time use can be tested against genuinely interleaved callers without
+ * a live Postgres.
+ */
+export interface PasswordResetCompletionStore {
+  /** The row whose VerificationToken.token is exactly `storedToken`. */
+  find(storedToken: string): Promise<StoredResetToken | null>;
+  /**
+   * Deletes the row — only if it is still there and unexpired at `now` —
+   * and sets the account's password, in one transaction. Returns false if
+   * nothing was deleted. MUST be atomic: the delete is what arbitrates
+   * concurrent completions, so it has to be the thing that succeeds once.
+   */
+  consume(input: {
+    storedToken: string;
+    identifier: string;
+    passwordHash: string;
+    now: Date;
+  }): Promise<boolean>;
+}
+
+export const prismaPasswordResetCompletionStore: PasswordResetCompletionStore =
+  {
+    find: (storedToken) =>
+      db.verificationToken.findUnique({ where: { token: storedToken } }),
+
+    consume: ({ storedToken, identifier, passwordHash, now }) =>
+      db.$transaction(async (tx) => {
+        // deleteMany, not delete: under READ COMMITTED a second concurrent
+        // delete of the same row blocks until the first commits and then
+        // matches nothing, so exactly one caller sees count === 1. (The
+        // old `delete` made the loser throw — a 500 instead of "invalid".)
+        // The expiry filter re-checks after the slow bcrypt hash.
+        const { count } = await tx.verificationToken.deleteMany({
+          where: { token: storedToken, identifier, expires: { gte: now } },
+        });
+        if (count !== 1) return false;
+
+        // A changed password kills every other outstanding reset link for
+        // the address. Normally there is at most one; rows from before
+        // issuance was serialised (including legacy raw rows) may not be.
+        await tx.verificationToken.deleteMany({ where: { identifier } });
+        await tx.user.update({
+          where: { email: identifier },
+          data: { passwordHash },
+        });
+        return true;
+      }),
+  };
+
+export type CompletePasswordResetResult =
+  { status: "updated" } | { status: "invalid" };
+
+/**
+ * Sets a new password with a reset token. Single-use and replay-safe.
+ *
+ * Unknown, expired, already-used and malformed tokens all come back as the
+ * same `invalid`, which says nothing about whether an account exists.
+ */
+export async function completePasswordReset(
+  { rawToken, password }: { rawToken: string; password: string },
+  deps: {
+    store?: PasswordResetCompletionStore;
+    hashPassword?: (password: string) => Promise<string>;
+    now?: () => Date;
+  } = {},
+): Promise<CompletePasswordResetResult> {
+  const store = deps.store ?? prismaPasswordResetCompletionStore;
+  const hashPassword =
+    deps.hashPassword ?? ((plain: string) => bcrypt.hash(plain, 12));
+  const now = deps.now ?? (() => new Date());
+
+  if (!rawToken) return { status: "invalid" };
+
+  let record = await store.find(
+    storedResetToken(hashCredentialToken(rawToken)),
+  );
+
+  // LEGACY: links emailed before tokens were hashed are stored raw. Remove
+  // this fallback once hashing has been deployed for RESET_TOKEN_TTL_MS —
+  // no legacy row can pass the expiry check after that.
+  if (!record && RAW_RESET_TOKEN.test(rawToken)) {
+    record = await store.find(rawToken);
+  }
+
+  if (!record || record.expires < now()) return { status: "invalid" };
+
+  const passwordHash = await hashPassword(password);
+  const consumed = await store.consume({
+    storedToken: record.token,
+    identifier: record.identifier,
+    passwordHash,
+    now: now(),
+  });
+
+  return consumed ? { status: "updated" } : { status: "invalid" };
 }

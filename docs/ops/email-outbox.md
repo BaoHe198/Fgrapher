@@ -92,9 +92,17 @@ is the effective bound for a stuck row. It is not zero. Treat database
 backups of this table accordingly, and prefer `sensitive` on any future
 email that carries a token.
 
-Password reset has a second, pre-existing exposure this does not address:
-`VerificationToken` stores its reset token in the clear. That is tracked
-separately.
+The token tables themselves hold only hashes. `EmailVerificationToken`
+always has; `VerificationToken` (password reset) stores `sha256:<hex>` of
+the reset token since 15/09/2026. Rows written before that hold the raw
+token, and reset completion still accepts them — looked up raw only when no
+hashed row matches and the submission is bare 64-char hex, which a
+prefixed stored value can never be, and consumed on use like any other.
+With a 1-hour TTL no legacy row can still be valid an hour after deploy;
+the fallback in `completePasswordReset` (`services/password-reset.ts`,
+marked `LEGACY`) can be deleted any time after that. Expired legacy rows
+still sit in the table until the account's next reset request replaces
+them — useless as links, but raw values at rest.
 
 ### Only the newest credential link is retried
 

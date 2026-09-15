@@ -1,9 +1,8 @@
-import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
-import { db } from "@/lib/db";
+import { completePasswordReset } from "@/services/password-reset";
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, "Missing reset token"),
@@ -27,9 +26,9 @@ export async function POST(request: Request) {
   }
 
   const { token, password } = parsed.data;
-  const record = await db.verificationToken.findUnique({ where: { token } });
+  const result = await completePasswordReset({ rawToken: token, password });
 
-  if (!record || record.expires < new Date()) {
+  if (result.status === "invalid") {
     return NextResponse.json(
       {
         data: null,
@@ -39,16 +38,6 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  await db.$transaction([
-    db.user.update({
-      where: { email: record.identifier },
-      data: { passwordHash },
-    }),
-    db.verificationToken.delete({ where: { token } }),
-  ]);
 
   return NextResponse.json(
     { data: null, error: null, message: t("passwordUpdated") },

@@ -59,7 +59,8 @@ export type CredentialTokenWrite =
       userId: string;
       /** The address the token is filed under (VerificationToken.identifier). */
       identifier: string;
-      token: string;
+      /** SHA-256 of the raw token. The raw token never reaches the store. */
+      tokenHash: string;
       expires: Date;
     };
 
@@ -105,10 +106,48 @@ export function issuanceFor(write: CredentialTokenWrite): CredentialIssuance {
   return {
     type: write.type,
     accountId: write.userId,
-    issuanceId:
-      write.type === "email-verification"
-        ? write.tokenHash
-        : hashCredentialToken(write.token),
+    issuanceId: write.tokenHash,
+  };
+}
+
+// --- Password-reset token storage ----------------------------------------
+//
+// VerificationToken.token holds `sha256:<hex digest>` of the raw reset
+// token, so a dump of the table can't be replayed to take over an account.
+//
+// The prefix is what makes the legacy fallback safe. Rows written before
+// hashing hold the raw token itself — the same 64 hex characters a digest
+// is — so without a marker "look the submitted value up raw" would also
+// match a hashed row when handed its digest straight out of a dump. With
+// it, a raw-format submission (bare hex) can never equal a hashed row.
+
+export const RESET_TOKEN_HASH_PREFIX = "sha256:";
+
+/** The VerificationToken.token value for a reset token with this hash. */
+export function storedResetToken(tokenHash: string): string {
+  return `${RESET_TOKEN_HASH_PREFIX}${tokenHash}`;
+}
+
+/**
+ * The issuance id (token hash) a stored reset token belongs to, in either
+ * format: hashed rows carry it, legacy raw rows are hashed on the spot.
+ * No legacy row can still be live RESET_TOKEN_TTL_MS after deploy: each is
+ * replaced on the account's next issuance or has expired by then.
+ */
+export function resetIssuanceIdOf(storedToken: string): string {
+  return storedToken.startsWith(RESET_TOKEN_HASH_PREFIX)
+    ? storedToken.slice(RESET_TOKEN_HASH_PREFIX.length)
+    : hashCredentialToken(storedToken);
+}
+
+/** The VerificationToken row a reset issuance writes. Never the raw token. */
+export function resetTokenRowData(
+  write: Extract<CredentialTokenWrite, { type: "password-reset" }>,
+): { identifier: string; token: string; expires: Date } {
+  return {
+    identifier: write.identifier,
+    token: storedResetToken(write.tokenHash),
+    expires: write.expires,
   };
 }
 
@@ -170,7 +209,7 @@ export function isVerificationIssuanceCurrent(
   );
 }
 
-/** A reset issuance is live while an unexpired token under the account's address hashes to it. */
+/** A reset issuance is live while an unexpired token under the account's address belongs to it. */
 export function isResetIssuanceCurrent(
   stored: readonly { token: string; expires: Date }[],
   issuance: CredentialIssuance,
@@ -179,7 +218,7 @@ export function isResetIssuanceCurrent(
   return stored.some(
     (t) =>
       t.expires.getTime() > now.getTime() &&
-      hashCredentialToken(t.token) === issuance.issuanceId,
+      resetIssuanceIdOf(t.token) === issuance.issuanceId,
   );
 }
 
@@ -316,11 +355,7 @@ export const prismaCredentialStore: CredentialStore = {
             where: { identifier: write.identifier },
           });
           await tx.verificationToken.create({
-            data: {
-              identifier: write.identifier,
-              token: write.token,
-              expires: write.expires,
-            },
+            data: resetTokenRowData(write),
           });
           return { id: null };
         },
