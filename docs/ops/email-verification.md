@@ -1,197 +1,169 @@
-# Email verification (credential signups)
+# Xác minh email cho tài khoản đăng ký bằng mật khẩu
 
-An account created with an email and password must prove it controls that
-address before it can sign in. OAuth signups are unaffected: Google has
-already verified the address and the Prisma adapter stamps
-`users.emailVerified` when the account is linked.
+## Hiểu nhanh
 
-## The gate
+Người đăng ký bằng email và mật khẩu phải bấm liên kết trong email để chứng minh
+họ sở hữu địa chỉ đó, rồi mới được đăng nhập. Người đăng ký bằng Google OAuth
+không cần bước này vì Google đã xác minh email; Prisma adapter sẽ điền
+`users.emailVerified` khi liên kết tài khoản.
 
-`src/lib/auth.ts`, credentials `authorize()`:
+## Chốt chặn khi đăng nhập
 
+Logic nằm trong `authorize()` tại `src/lib/auth.ts`:
+
+```text
+Mật khẩu đúng?
+  ├─ Không → trả về “sai email hoặc mật khẩu”
+  └─ Có → emailVerified đã có giá trị?
+           ├─ Không → báo email chưa xác minh
+           └─ Có → cho đăng nhập
 ```
-password verified?  ──no──▶ null → "wrong email or password"
-        │yes
-emailVerified set?  ──no──▶ throw EmailNotVerifiedError
-        │yes                  → /login?error=CredentialsSignin
-      sign in                          &code=email_not_verified
-```
 
-The unverified check runs **after** `bcrypt.compare`, so the distinct error
-is only ever shown to someone who already holds valid credentials for that
-account. It therefore leaks nothing usable — and showing everyone else
-"wrong email or password" would send a legitimate user off to reset a
-password that was never the problem.
+Hệ thống chỉ báo “email chưa xác minh” **sau khi mật khẩu đã đúng**. Vì vậy người
+lạ không thể dùng thông báo này để dò xem một địa chỉ có tài khoản hay không.
 
-The `signIn` callback repeats the `emailVerified` check as defence in
-depth, so a future provider or code path can't bypass the gate by
-returning a user object directly.
+Callback `signIn` kiểm tra `emailVerified` thêm lần nữa. Đây là “defence in
+depth”: nếu sau này có code đăng nhập mới bỏ qua `authorize()`, lớp thứ hai vẫn
+chặn tài khoản chưa xác minh.
 
-## Flow
+## Luồng từ đăng ký đến xác minh
 
-1. `POST /api/auth/register` creates the user **without**
-   `emailVerified`, records consent, grants free roles, then calls
-   `sendVerificationEmail()`. It returns
+1. `POST /api/auth/register` tạo user nhưng chưa điền `emailVerified`, lưu bằng
+   chứng đồng ý và cấp role miễn phí.
+2. API gọi `sendVerificationEmail()` và trả
    `{ data: { verificationRequired: true } }`.
-2. The register form shows "check your inbox" rather than signing in
-   (which the gate would refuse).
-3. The user opens `/verify-email?token=…`, which posts to
+3. Giao diện yêu cầu người dùng kiểm tra hộp thư thay vì tự đăng nhập.
+4. Người dùng mở `/verify-email?token=…`; trang gọi
    `POST /api/auth/verify-email`.
-4. `verifyEmailToken()` consumes the token and stamps `emailVerified`.
-5. `POST /api/auth/resend-verification` issues a new link on demand.
+5. `verifyEmailToken()` tiêu thụ token và điền `emailVerified`.
+6. Nếu cần, `POST /api/auth/resend-verification` tạo liên kết mới.
 
-A send failure never fails registration: `sendVerificationEmail()` swallows
-its own errors, and the email is queued in the outbox for retry. The
-account exists either way; the user can always ask for a new link.
+Gửi email lỗi không làm đăng ký thất bại. `sendVerificationEmail()` tự xử lý lỗi
+và outbox sẽ retry. Tài khoản đã tồn tại, người dùng luôn có thể xin gửi lại.
 
-## Tokens
+## Token xác minh được bảo vệ thế nào?
 
-| Property  | Value                                           |
-| --------- | ----------------------------------------------- |
-| Size      | 32 random bytes, hex (256 bits)                 |
-| Stored as | SHA-256 hash (`tokenHash`), never the raw value |
-| TTL       | 24 hours                                        |
-| Per user  | **At most one** — `userId` is `UNIQUE`          |
-| Use       | Single-use, consumed by the delete itself       |
+| Thuộc tính         | Giá trị                                                |
+| ------------------ | ------------------------------------------------------ |
+| Độ dài             | 32 byte ngẫu nhiên, biểu diễn thành chuỗi hex 256 bit  |
+| Lưu trong database | Chỉ lưu SHA-256 tại `tokenHash`, không lưu token gốc   |
+| Thời hạn           | 24 giờ                                                 |
+| Số token mỗi user  | Tối đa một, nhờ `UNIQUE(userId)`                       |
+| Số lần dùng        | Một lần; thao tác xoá token chính là thao tác tiêu thụ |
 
-### Consumption is a delete, not a read-then-write
+Token gốc chỉ có trong URL gửi cho người dùng. Nếu database token bị đọc trộm,
+kẻ xấu chỉ thấy hash và không thể dùng hash làm liên kết xác minh.
 
-`verifyEmailToken()` arbitrates on `deleteMany` inside a transaction and
-only stamps `emailVerified` if that delete matched exactly one row. Under
-Postgres' READ COMMITTED, a second concurrent delete of the same row
-blocks until the first commits and then matches nothing, so exactly one
-request can consume a token. This matters in practice: mail clients
-prefetch links, and people double-click.
+### Vì sao phải “xoá để dùng”?
 
-A request that loses that race **re-reads** the account's verification
-state before reporting. It says `already_verified` only if the account
-really is verified, and `invalid` otherwise — a token can also vanish for
-reasons that verify nobody (an admin purge, an account-deletion cascade),
-and telling that user to go and sign in would be a lie.
+Không nên đọc token trước rồi mới xoá ở bước sau. Nếu hai request đến cùng lúc,
+cả hai có thể cùng đọc thấy token còn hợp lệ. Fgrapher dùng `deleteMany` trong
+transaction làm điểm phân xử: request đầu xoá được một dòng; request sau chờ
+request đầu commit rồi không xoá được dòng nào. Chỉ request xoá được đúng một
+dòng mới xác minh user.
 
-Replaying a spent token returns `invalid`, which is indistinguishable from
-a wrong token — so a token can't be used to probe which accounts exist.
+Mail client có thể tự mở trước liên kết để kiểm tra an toàn, và người dùng có thể
+bấm đúp, nên xử lý đồng thời không phải trường hợp lý thuyết.
 
-### One token per user, and what it costs
+Nếu một request thua cuộc đua, hệ thống đọc lại trạng thái user. Nó chỉ trả
+`already_verified` nếu user thật sự đã được xác minh; nếu token biến mất vì admin
+xoá hoặc tài khoản bị xoá, kết quả là `invalid`.
 
-Issuing a link invalidates the previous one. That's a database guarantee
-(`UNIQUE(userId)` plus an upsert), not something the application races
-for: delete-then-insert would let two overlapping resends leave two live
-tokens.
+### Vì sao chỉ có một token mỗi người?
 
-**The UX cost:** if a user requests several links in quick succession,
-only the newest works. Someone who then clicks the _first_ email gets
-"invalid link". Mitigations in place:
+Mỗi lần gửi lại sẽ làm liên kết cũ mất hiệu lực. Database bảo đảm điều này bằng
+`UNIQUE(userId)` và upsert dưới lock; đây không chỉ là kiểm tra ở giao diện.
 
-- the resend button is disabled while in flight and after a successful
-  request, so the common double-click can't produce two links;
-- the resend endpoint allows 3 per address per hour and 5 per IP;
-- the invalid/expired page explains the link is wrong or already used and
-  offers a fresh one, rather than dead-ending.
+Đổi lại, nếu người dùng xin nhiều email rồi bấm email đầu tiên, họ sẽ thấy “liên
+kết không hợp lệ”. Dự án giảm tình huống đó bằng cách:
 
-Accepting this was deliberate. The alternative — keeping several tokens
-live per user — widens the window in which a leaked older link still works,
-for a problem that a clear error message handles.
+- khoá nút gửi lại khi request đang chạy và sau khi gửi thành công;
+- giới hạn 3 lần mỗi địa chỉ/giờ và 5 lần mỗi IP;
+- trang lỗi có nút xin liên kết mới.
 
-## Where the user lands afterwards
+Cho nhiều token cũ cùng sống sẽ tiện hơn một chút nhưng tăng thời gian một liên
+kết bị lộ còn sử dụng được, nên dự án chọn chỉ giữ token mới nhất.
 
-Registration used to build `/onboarding/billing?roles=…&interval=…` and
-hand it to `signIn()` as a `callbackUrl`. Requiring verification broke
-that: registration no longer signs anyone in, so the destination was
-computed and discarded. A paid provider would verify, sign in, land on
-`/dashboard` with an inactive role, and never be prompted to pay.
+## Sau khi xác minh, người dùng đi đâu?
 
-It was never durable anyway — anyone who closed the billing page and signed
-in again later hit the same dead end, because the destination only ever
-existed inside one navigation.
+Trước đây trang đăng ký tự tạo đường dẫn thanh toán và đưa cho `signIn()`. Khi
+thêm xác minh email, đăng ký không còn tự đăng nhập nên đường dẫn đó bị mất. Giải
+pháp hiện tại là **tính lại đích đến từ database**, không tin một URL do người
+dùng truyền vào:
 
-So the destination is now **derived, not carried**:
+- API xác minh đọc các provider role chưa kích hoạt của tài khoản và trả về
+  đường dẫn `next` phù hợp.
+- Trang thành công dẫn tới `/login?callbackUrl=<next>`.
+- Cả server và client đều kiểm tra bằng `isSafeInternalPath()` để URL bên ngoài
+  không thể trở thành nơi chuyển hướng.
 
-- `POST /api/auth/verify-email` returns a `next` path built from the
-  account's own still-inactive paid roles, read from the database. Nothing
-  about it can be steered by whoever holds the link.
-- The success panel links to `/login?callbackUrl=<next>`.
-- The path is checked with `isSafeInternalPath()` on both sides before it
-  becomes a `callbackUrl`. NextAuth's `redirect` callback enforces
-  same-origin too; this is the belt to those braces.
+Chu kỳ thanh toán `month` hoặc `year` là lựa chọn giao diện chưa lưu trong
+database nên được mang theo liên kết email. Giá trị lạ được đổi về tháng thay vì
+làm xác minh thất bại. Thông tin này được giữ qua đăng ký, trang kiểm tra hộp thư,
+gửi lại và prompt ở trang đăng nhập.
 
-The one thing that _is_ carried is the billing period (`month`/`year`),
-because it is a UI choice made before signup that never reaches the
-database, and there is nowhere to persist a preference for an account with
-no subscription yet. It rides the verification link, so it survives the trip
-through the inbox even onto another device, and is normalised on the way
-back in — a mangled value falls back to monthly rather than blocking
-verification.
+Khi `BILLING_ENABLED=false`, đích đến luôn là `/dashboard` vì role đã được cấp
+gói miễn phí. Cơ chế trên sẽ có tác dụng khi billing được bật.
 
-The period is carried at **every** point that knows it, not just the first
-send: registration, the "check your inbox" panel, the /verify-email page's
-own resend, and the login page's unverified prompt. The last of those is
-the awkward one — NextAuth's redirect keeps only its own error params, so
-the period travels in `sessionStorage` alongside the attempted address and
-is read-and-cleared together with it. Missing it on a **resend** would have
-been the worst place to miss it: resend is exactly what a year-plan signup
-reaches for when their first email never arrives.
+## Chống dò tài khoản qua API
 
-**While `BILLING_ENABLED` is false — today's configuration, and permanently
-so for Stripe — all of this resolves to `/dashboard`**, because
-registration already granted a free plan for every paid role. The path
-matters the moment billing is switched on.
+`POST /api/auth/resend-verification` luôn trả cùng HTTP 200 và cùng thông báo cho
+mọi trường hợp: email không tồn tại, đã xác minh, bị đình chỉ, đã xoá mềm, chỉ dùng
+OAuth hoặc vượt rate limit. Người gọi không thể phân biệt địa chỉ có tài khoản
+hay không.
 
-## Enumeration
+Khoá rate limit được chuyển về chữ thường. Việc tìm user thử khớp chính xác trước,
+sau đó mới tìm không phân biệt hoa thường vì hệ thống cũ chưa chuẩn hoá toàn bộ
+email. Sửa triệt để cần migration và quyết định xử lý dữ liệu hiện có.
 
-`POST /api/auth/resend-verification` returns the same 200 and the same
-message for every input: unknown address, already verified, suspended,
-soft-deleted, OAuth-only, or over the per-address rate limit. Nothing in
-the response, the status code, or the presence of an error distinguishes a
-registered address from an unregistered one.
-
-The per-address rate-limit key is lower-cased so case variants of one
-address can't multiply the budget. The **lookup** is not lower-cased:
-nothing in this codebase normalises addresses on the way in, so an account
-registered as `Bao@Example.com` is stored and looked up that way. The
-resend path tries an exact match first and falls back to a
-case-insensitive one. Normalising addresses repo-wide is the real fix and
-needs a migration plus a decision about existing rows — see the technical
-debt register.
-
-## Operations
+## Kiểm tra vận hành bằng SQL
 
 ```sql
--- Accounts stuck unverified
+-- Số tài khoản dùng mật khẩu nhưng chưa xác minh
 SELECT count(*) FROM "users"
 WHERE "emailVerified" IS NULL AND "passwordHash" IS NOT NULL
   AND "deletedAt" IS NULL;
 
--- Outstanding tokens, oldest first
+-- Các token còn tồn tại, token cũ nhất trước
 SELECT "userId", "createdAt", "expiresAt"
 FROM "email_verification_tokens"
 ORDER BY "createdAt";
 
--- Did the link actually go out? (see docs/ops/email-outbox.md)
+-- Email xác minh gần đây đã gửi hay chưa
 SELECT "to", "status", "attempts", "sentAt", "lastError"
 FROM "email_outbox"
-WHERE "idempotencyKey" LIKE 'email-verification:%'
+WHERE "idempotencyKey" LIKE 'credential:email-verification:%'
 ORDER BY "createdAt" DESC LIMIT 20;
 ```
 
-Expired tokens are deleted when someone tries to use one. There is no
-sweeper cron for tokens nobody ever clicks — they're small and harmless,
-but the table grows slowly. Worth adding alongside the outbox retention
-job.
+Token hết hạn được xoá khi có người thử dùng. Chưa có cron dọn token hết hạn chưa
+từng được bấm, nên bảng sẽ tăng chậm theo thời gian.
 
-## Verify a user by hand
+## Xác minh thủ công
 
-Only when someone genuinely can't receive email:
+Chỉ làm khi người dùng thật sự không thể nhận email:
 
 ```sql
 UPDATE "users" SET "emailVerified" = now() WHERE "email" = '<address>';
 DELETE FROM "email_verification_tokens" WHERE "userId" = '<id>';
 ```
 
-## Not exercised end-to-end
+Ưu tiên dùng công cụ admin khi có, vì sửa SQL trực tiếp dễ nhập sai và thường
+không tạo audit log.
 
-Same caveat as every external integration in this repo: no verification
-email has ever been delivered by a live Resend account here. The logic is
-covered by `src/services/__tests__/email-verification.test.ts` (including
-the concurrency and replay cases), and every path has been type-checked,
-but the round trip through a real inbox has not been run.
+## Phần chưa kiểm tra end-to-end
+
+Luồng logic đã có test, gồm concurrent request và replay, nhưng repo này chưa gửi
+email xác minh qua tài khoản Resend thật rồi bấm từ hộp thư thật. Trước khi có
+người dùng, cần chạy một vòng hoàn chỉnh trên production hoặc staging bằng domain
+gửi email đã xác minh.
+
+## Từ ngữ cần nhớ
+
+- **Credential:** thông tin dùng để chứng minh danh tính, như mật khẩu hoặc token.
+- **Token:** chuỗi bí mật có thời hạn, dùng để thực hiện một thao tác.
+- **Hash:** dấu vân tay một chiều; kiểm tra được giống nhau nhưng khó khôi phục dữ
+  liệu gốc.
+- **Replay:** dùng lại token đã tiêu thụ.
+- **Enumeration:** dò xem email nào có tài khoản bằng khác biệt trong phản hồi.
+- **Defence in depth:** nhiều lớp kiểm tra độc lập bảo vệ cùng một mục tiêu.

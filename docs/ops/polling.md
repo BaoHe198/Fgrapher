@@ -1,97 +1,103 @@
-# Polling
+# Cơ chế cập nhật dữ liệu định kỳ (polling)
 
-There is no realtime transport in this app (no Pusher/Socket.io — see
-CLAUDE.md). Messages, conversation lists, unread badges and the notification
-bell all refresh on a timer. This is the policy those timers follow and what it
-costs.
+## Hiểu nhanh
 
-## The rule
+Fgrapher chưa dùng kết nối thời gian thực như Pusher, WebSocket hay Socket.io.
+Thay vào đó, khi người dùng đang mở trang, trình duyệt sẽ hỏi máy chủ theo chu kỳ:
+“Có tin nhắn hoặc thông báo mới không?”. Cách hỏi lặp lại này gọi là **polling**.
 
-Every interval-driven refresh goes through `usePolling`
-(`src/hooks/use-polling.ts`). Nothing calls `setInterval` directly; a test
-guards that (`src/hooks/__tests__/polling-policy.test.ts`).
+Polling dễ vận hành, nhưng nếu làm không cẩn thận sẽ tạo rất nhiều request và truy
+vấn database không cần thiết. Tài liệu này mô tả quy tắc chung của dự án để tránh
+lãng phí đó.
 
-The decisions live in `src/hooks/polling-policy.ts`, kept pure and
-dependency-free so they can be unit-tested without a DOM — same split as
-`services/email-outbox-policy.ts`. The hook is only the wiring.
+## Quy tắc chung
 
-| Rule                                                   | Function               | Why                                                                                                                     |
-| ------------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Stop while the tab is hidden                           | `canPoll`              | Nobody is looking. A backgrounded tab costs nothing.                                                                    |
-| Never run two requests for the same data at once       | `canPoll` (`inFlight`) | The next run is scheduled after the previous **settles**, not on a fixed grid, so responses cannot arrive out of order. |
-| Refresh the moment the tab comes back                  | `shouldCatchUp`        | Waiting out an interval would show data frozen since the user left — possibly hours.                                    |
-| Drop a response overtaken by a newer request           | `isFreshResponse`      | Scheduled runs never overlap, but a manual refresh (send, conversation switch) can race one.                            |
-| Only PATCH `/read` when something is unread **for us** | `shouldMarkRead`       | It is a two-row write. See below.                                                                                       |
+Mọi phần cần cập nhật theo chu kỳ phải dùng hook `usePolling` tại
+`src/hooks/use-polling.ts`. Không component nào được tự tạo `setInterval`. Test tại
+`src/hooks/__tests__/polling-policy.test.ts` sẽ phát hiện nếu quy tắc này bị phá.
 
-Options: `enabled` pauses a poller entirely (panel closed/minimized);
-`resetKey` restarts it and fetches immediately (a new conversation id);
-`skipInitialRun` skips only the first fetch, for callers whose data already
-arrived with the server-rendered page.
+Phần quyết định nằm trong `src/hooks/polling-policy.ts`. Đây là các hàm thuần,
+không phụ thuộc trình duyệt, nên dễ kiểm tra bằng unit test. Hook `usePolling` chỉ
+chịu trách nhiệm nối các quy tắc đó với giao diện.
 
-**One consequence worth knowing:** because the interval is measured from when
-the previous response settles, the effective rate is `interval + latency`. A
-"2s" chat poll is ~2.2s against a fast server and ~4s against a slow one. That
-is the price of never overlapping, and it is the right trade — the old fixed
-grid simply stacked requests when the server was slow.
+| Quy tắc                                         | Hàm liên quan           | Lý do dễ hiểu                                                                           |
+| ----------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------- |
+| Dừng khi tab bị ẩn                              | `canPoll`               | Không ai đang nhìn, tiếp tục hỏi chỉ tốn tài nguyên.                                    |
+| Không chạy hai request cùng lúc                 | `canPoll` và `inFlight` | Request cũ phải xong rồi mới lên lịch request mới, tránh kết quả cũ ghi đè kết quả mới. |
+| Vừa quay lại tab thì cập nhật ngay              | `shouldCatchUp`         | Người dùng không phải chờ hết chu kỳ mới thấy dữ liệu mới.                              |
+| Bỏ kết quả đã lỗi thời                          | `isFreshResponse`       | Một lần tải thủ công có thể “đua” với lần tải tự động; chỉ kết quả mới nhất được dùng.  |
+| Chỉ đánh dấu đã đọc khi thật sự có tin chưa đọc | `shouldMarkRead`        | Mỗi lần đánh dấu cần hai thao tác ghi database.                                         |
 
-## What was wrong before
+Các tuỳ chọn thường gặp:
 
-- **The messaging popup rendered its body twice.** Desktop and mobile were two
-  sibling trees, each rendering the same `{body}`, with CSS hiding whichever
-  did not apply. CSS hides; it does not unmount — so an open conversation
-  mounted **two** `ChatPanel`s and doubled every poll. Minimizing did not help:
-  the desktop branch dropped the body, the mobile one kept rendering it behind
-  `sm:hidden`.
-- **`PATCH /read` fired after every single load** — every 2 seconds for as long
-  as a conversation stayed open, almost always writing nothing. Each call is
-  `$transaction([conversationParticipant.update, message.updateMany])`, two
-  row-writes.
-- **Everything kept polling in hidden tabs**, including the 2s chat loop.
-- **The bell fetched a whole page to render one integer.**
-  `GET /api/notifications?page=1` is `findMany` + two `count`s — three queries
-  — and while the dropdown is closed only `unreadCount` is read.
-  `?countOnly=true` now answers with a single `count`.
+- `enabled`: bật hoặc tạm dừng polling, ví dụ dừng khi cửa sổ chat đóng.
+- `resetKey`: đổi đối tượng đang theo dõi và tải lại ngay, ví dụ chuyển hội thoại.
+- `skipInitialRun`: bỏ lần gọi đầu tiên khi trang đã nhận sẵn dữ liệu từ server.
 
-## Measured
+Khoảng cách thực tế giữa hai lần gọi bằng `interval + thời gian phản hồi`. Ví dụ,
+polling 2 giây với request mất 0,2 giây sẽ chạy khoảng 2,2 giây/lần. Nếu server
+chậm 2 giây thì thành khoảng 4 giây/lần. Việc này có chủ đích: hệ thống ưu tiên
+không chồng request hơn là cố bám đúng đồng hồ.
 
-Chromium via Playwright against the dev server, signed in as a seed account on
-`/dashboard/messages` with a conversation open, counting same-origin `/api/*`
-requests over a 20-second window. Identical script and conversation on both
-sides; "before" is the same tree with the change stashed.
+## Các lỗi đã từng tồn tại
 
-| 20s window                             | Before                 | After |
-| -------------------------------------- | ---------------------- | ----- |
-| **Tab visible**, conversation open     | **22**                 | **8** |
-| — `…/messages`                         | 10                     | 5     |
-| — `…/read` (2 row-writes each)         | **10**                 | **1** |
-| — `/api/conversations`                 | 1                      | 1     |
-| — `/api/conversations/unread-count`    | 1                      | 1     |
-| **Tab hidden**, same page              | **25**                 | **0** |
-| — `…/read` in a tab nobody is watching | 11 (**22 row-writes**) | 0     |
+- Popup tin nhắn từng render đồng thời hai cây giao diện desktop và mobile, rồi
+  chỉ ẩn một cây bằng CSS. CSS chỉ làm phần tử không nhìn thấy; component vẫn tồn
+  tại và vẫn polling. Vì vậy một hội thoại tạo hai `ChatPanel` và gấp đôi request.
+- `PATCH /read` từng chạy sau mọi lần tải tin nhắn, khoảng hai giây/lần, kể cả khi
+  không có gì mới. Mỗi lần gọi thực hiện hai thao tác ghi database.
+- Tab chạy nền vẫn tiếp tục polling.
+- Chuông thông báo từng tải cả danh sách chỉ để hiện một con số. Endpoint đầy đủ
+  cần một `findMany` và hai `count`; endpoint `?countOnly=true` hiện chỉ cần một
+  `count` khi menu đang đóng.
 
-On resume the after-state refetches conversations, messages, the unread count
-and the notification count within ~1s, rather than waiting out its 15/20/30s
-intervals — the before-state only refetched messages.
+## Kết quả đo
 
-Caveats, stated plainly:
+Phép đo dùng Chromium qua Playwright, chạy trên server phát triển, đăng nhập bằng
+tài khoản mẫu và mở một hội thoại trong 20 giây.
 
-- The visible-tab `…/messages` drop (10 → 5) is partly the dev server's
-  latency showing up in `interval + latency`. On a fast server that gap
-  narrows. The **hidden-tab** drop (25 → 0) and the **`/read`** drop (10 → 1,
-  11 → 0) are structural and do not depend on latency.
-- These are request counts, not server CPU. The `/read` and bell numbers
-  translate directly into database operations (2 writes per `/read`; 3 queries
-  → 1 for a closed bell); the rest are one query each.
-- Measured on dev data (a handful of conversations). Request _counts_ per
-  client do not change with data volume; per-request cost does.
+| Tình huống trong 20 giây            |                   Trước khi tối ưu | Sau khi tối ưu |
+| ----------------------------------- | ---------------------------------: | -------------: |
+| Tab đang mở, hội thoại đang xem     |                         22 request |      8 request |
+| Request lấy tin nhắn                |                                 10 |              5 |
+| Request đánh dấu đã đọc             |                                 10 |              1 |
+| Lấy danh sách hội thoại             |                                  1 |              1 |
+| Lấy tổng số chưa đọc                |                                  1 |              1 |
+| Tab bị ẩn                           |                                 25 |              0 |
+| Ghi trạng thái đã đọc khi tab bị ẩn | 11 request, tương đương 22 lần ghi |              0 |
 
-## Adding a poller
+Khi quay lại tab, danh sách hội thoại, tin nhắn và số thông báo được cập nhật
+trong khoảng một giây.
+
+Các con số cần được hiểu đúng:
+
+- Mức giảm 10 xuống 5 request tin nhắn một phần đến từ độ trễ của dev server.
+  Trên server nhanh, chênh lệch này có thể nhỏ hơn.
+- Mức giảm về 0 khi tab ẩn và giảm request `/read` là thay đổi cấu trúc, không
+  phụ thuộc server nhanh hay chậm.
+- Đây là số request, không phải phép đo CPU. Tuy vậy, request `/read` và chuông
+  thông báo có thể quy đổi trực tiếp thành số lần đọc/ghi database.
+- Dữ liệu thử còn ít. Số request mỗi trình duyệt không đổi khi dữ liệu tăng,
+  nhưng mỗi request có thể nặng hơn.
+
+## Khi thêm polling mới
+
+Ví dụ:
 
 ```ts
 usePolling(load, { intervalMs: 15_000, enabled: isPanelOpen });
 ```
 
-Pass `enabled` for anything that can be closed, minimized or otherwise not on
-screen — the visibility gate only knows about the browser tab, not about your
-component being behind a collapsed panel. If the data is already on screen from
-SSR, add `skipInitialRun: true`.
+Hãy truyền `enabled` nếu phần giao diện có thể đóng hoặc thu nhỏ. Cơ chế kiểm tra
+tab chỉ biết người dùng có đang nhìn trình duyệt hay không; nó không biết panel
+bên trong đang bị đóng. Nếu dữ liệu ban đầu đã được server render, thêm
+`skipInitialRun: true` để tránh tải lại ngay cùng một dữ liệu.
+
+## Từ ngữ cần nhớ
+
+- **Request:** một lần trình duyệt gọi máy chủ.
+- **Polling:** gọi lại request theo chu kỳ để tìm dữ liệu mới.
+- **In flight:** request đã gửi nhưng chưa có kết quả.
+- **Race condition:** hai tác vụ chạy gần nhau và kết quả phụ thuộc tác vụ nào
+  hoàn tất trước.
+- **Hook:** hàm React đóng gói logic dùng lại giữa các component.

@@ -61,6 +61,7 @@ const request = {
   id: "req_1",
   code: "YC-0001",
   title: "Chụp ảnh cưới",
+  customerId: "customer_1",
   role: "PHOTOGRAPHER",
   provinceId: "prov_hcm",
   shootDate: null,

@@ -23,7 +23,7 @@ function Checkbox({ className, id, label, ...props }: CheckboxProps) {
       id={checkboxId}
       data-slot="checkbox"
       className={cn(
-        "peer relative flex size-[18px] shrink-0 items-center justify-center rounded-[4px] border border-border-default bg-bg-surface transition-colors outline-none group-has-disabled/field:opacity-50 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger aria-invalid:ring-2 aria-invalid:ring-danger/20 data-checked:border-brand-primary data-checked:bg-brand-primary data-checked:text-text-on-brand",
+        "peer relative flex size-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-border-default bg-bg-surface transition-[border-color,background-color,box-shadow] outline-none group-has-disabled/field:opacity-50 after:absolute after:-inset-x-3 after:-inset-y-2 hover:border-brand-primary hover:shadow-[0_0_0_3px_var(--color-success-bg)] focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger aria-invalid:ring-2 aria-invalid:ring-danger/20 data-checked:border-brand-primary data-checked:bg-brand-primary data-checked:text-text-on-brand",
         className,
       )}
       {...props}

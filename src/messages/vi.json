@@ -930,6 +930,7 @@
       "invalidInput": "Dữ liệu không hợp lệ",
       "loadFailed": "Không thể tải dữ liệu",
       "offerSent": "Đã gửi đề nghị",
+      "ownRequestForbidden": "Bạn không thể gửi đề nghị cho yêu cầu của chính mình",
       "offerFailed": "Không thể gửi đề nghị",
       "offerUpdated": "Đã cập nhật đề nghị",
       "offerUpdateFailed": "Không thể cập nhật đề nghị",
@@ -1303,6 +1304,7 @@
       },
       "budgetNotSet": "Chưa đặt ngân sách",
       "flexible": "Ngày linh hoạt",
+      "yourRequest": "Yêu cầu của bạn",
       "offerCount": "{count, plural, =0 {Chưa có ai chào} other {# đề nghị}}"
     },
     "myOffers": {
@@ -2182,7 +2184,10 @@
     },
     "email": {
       "footer": {
-        "manageNotifications": "Quản lý tùy chọn thông báo"
+        "manageNotifications": "Quản lý tùy chọn thông báo",
+        "notificationLabel": "Thông báo từ Fgrapher",
+        "brandTagline": "Kết nối những ý tưởng sáng tạo",
+        "automaticNotice": "Đây là email tự động từ Fgrapher. Vui lòng không trả lời email này."
       },
       "bookingRequest": {
         "heading": "Yêu cầu đặt lịch mới",
@@ -2340,7 +2345,7 @@
       },
       "newMessage": {
         "heading": "Tin nhắn mới từ {senderName}",
-        "body": "{senderName} đã gửi cho bạn một tin nhắn: {preview}",
+        "bodyIntro": "{senderName} vừa gửi cho bạn một tin nhắn mới:",
         "cta": "Trả lời",
         "subject": "Bạn có tin nhắn mới — Fgrapher"
       },

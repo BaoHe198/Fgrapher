@@ -1,7 +1,15 @@
 "use client";
 
 import type { ProfileCategory, RequestOfferStatus, Role } from "@prisma/client";
-import { ArrowLeft, BadgeCheck, Loader2, MessageCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  CalendarDays,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  WalletCards,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,7 +31,12 @@ import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { toast } from "@/components/ui/toast";
-import { avatarFallbackColor, cn, formatCurrency } from "@/lib/utils";
+import {
+  avatarFallbackColor,
+  cn,
+  formatBudgetRange,
+  formatCurrency,
+} from "@/lib/utils";
 import { formatDate } from "@/lib/format";
 
 interface OfferView {
@@ -173,7 +186,7 @@ export function RequestDetail({
         {backLabel}
       </Link>
 
-      <Card className="flex flex-col gap-3">
+      <Card className="flex flex-col gap-4 border border-border-subtle">
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className="text-heading-md text-text-primary">{request.title}</p>
@@ -208,38 +221,46 @@ export function RequestDetail({
         ) : null}
 
         <div className="grid grid-cols-1 gap-3 text-body-sm sm:grid-cols-3">
-          <div>
-            <span className="text-text-tertiary">{t("whenLabel")}</span>
-            <p className="font-semibold text-text-primary">
-              {request.isDateFlexible
-                ? t("flexibleRange", {
-                    start: request.dateRangeStart
-                      ? formatDate(request.dateRangeStart)
-                      : "?",
-                    end: request.dateRangeEnd
-                      ? formatDate(request.dateRangeEnd)
-                      : "?",
-                  })
-                : request.shootDate
-                  ? formatDate(request.shootDate)
-                  : "—"}
-            </p>
+          <div className="flex gap-2.5 rounded-[var(--fg-radius-md)] bg-bg-sunken p-3.5">
+            <CalendarDays className="mt-0.5 size-4 shrink-0 text-text-secondary" />
+            <div className="min-w-0">
+              <span className="text-text-tertiary">{t("whenLabel")}</span>
+              <p className="font-semibold text-text-primary">
+                {request.isDateFlexible
+                  ? t("flexibleRange", {
+                      start: request.dateRangeStart
+                        ? formatDate(request.dateRangeStart)
+                        : "?",
+                      end: request.dateRangeEnd
+                        ? formatDate(request.dateRangeEnd)
+                        : "?",
+                    })
+                  : request.shootDate
+                    ? formatDate(request.shootDate)
+                    : "—"}
+              </p>
+            </div>
           </div>
-          <div>
-            <span className="text-text-tertiary">{t("whereLabel")}</span>
-            <p className="font-semibold text-text-primary">
-              {request.ward ? `${request.ward}, ` : ""}
-              {request.province}
-              {request.areaNote ? ` — ${request.areaNote}` : ""}
-            </p>
+          <div className="flex gap-2.5 rounded-[var(--fg-radius-md)] bg-info-bg p-3.5">
+            <MapPin className="mt-0.5 size-4 shrink-0 text-info" />
+            <div className="min-w-0">
+              <span className="text-info">{t("whereLabel")}</span>
+              <p className="font-semibold text-text-primary">
+                {request.ward ? `${request.ward}, ` : ""}
+                {request.province}
+                {request.areaNote ? ` — ${request.areaNote}` : ""}
+              </p>
+            </div>
           </div>
-          <div>
-            <span className="text-text-tertiary">{t("budgetLabel")}</span>
-            <p className="font-semibold text-text-primary">
-              {request.budgetMin || request.budgetMax
-                ? `${formatCurrency(request.budgetMin ?? 0)} – ${formatCurrency(request.budgetMax ?? 0)}`
-                : t("budgetNotSet")}
-            </p>
+          <div className="flex gap-2.5 rounded-[var(--fg-radius-md)] bg-gold-100 p-3.5 text-gold-800">
+            <WalletCards className="mt-0.5 size-4 shrink-0" />
+            <div className="min-w-0">
+              <span>{t("budgetLabel")}</span>
+              <p className="font-bold!">
+                {formatBudgetRange(request.budgetMin, request.budgetMax) ??
+                  t("budgetNotSet")}
+              </p>
+            </div>
           </div>
         </div>
 

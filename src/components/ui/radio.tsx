@@ -4,11 +4,21 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface RadioProps extends Omit<React.ComponentProps<"input">, "type" | "size"> {
+interface RadioProps extends Omit<
+  React.ComponentProps<"input">,
+  "type" | "size"
+> {
   label?: React.ReactNode;
 }
 
-function Radio({ className, id, label, checked, disabled, ...props }: RadioProps) {
+function Radio({
+  className,
+  id,
+  label,
+  checked,
+  disabled,
+  ...props
+}: RadioProps) {
   const generatedId = React.useId();
   const radioId = id ?? generatedId;
 
@@ -19,7 +29,7 @@ function Radio({ className, id, label, checked, disabled, ...props }: RadioProps
         type="radio"
         checked={checked}
         disabled={disabled}
-        className="peer absolute inset-0 m-0 size-full cursor-pointer appearance-none rounded-full border border-border-default bg-bg-surface outline-none transition-colors checked:border-brand-primary focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="peer absolute inset-0 m-0 size-full cursor-pointer appearance-none rounded-full border border-border-default bg-bg-surface outline-none transition-[border-color,box-shadow] hover:border-brand-primary hover:shadow-[0_0_0_3px_var(--color-success-bg)] checked:border-brand-primary focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50"
         {...props}
       />
       <span

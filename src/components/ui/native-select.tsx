@@ -40,7 +40,7 @@ function NativeSelect({
         onChange={(event) => onChange?.(event.target.value)}
         aria-invalid={ariaInvalid ?? Boolean(error)}
         className={cn(
-          "h-auto w-full min-w-0 appearance-none rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 pr-10 text-body-md text-text-primary outline-none transition-colors focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger",
+          "h-auto w-full min-w-0 cursor-pointer appearance-none rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 pr-10 text-body-md text-text-primary outline-none transition-[border-color,box-shadow,background-color] hover:border-border-strong hover:bg-bg-sunken focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger",
           className,
         )}
         {...props}

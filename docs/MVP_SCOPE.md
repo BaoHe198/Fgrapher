@@ -1,132 +1,162 @@
-# MVP Scope
+# Phạm vi MVP của Fgrapher
 
-Kết quả đọc dự án cho `docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md`
-Prompt B0. Liệt kê file nào thuộc MVP, file nào sẽ bị ẩn sau feature flag
-(Prompt B1/B6), file nào là code chết. Không xóa gì ở đây — chỉ inventory.
+Tài liệu này phân biệt phần đang phục vụ MVP, phần có code nhưng đang tắt và phần chưa
+xây. Nó giúp tránh vô tình quảng bá hoặc vận hành một tính năng chưa sẵn sàng.
 
-## Tóm tắt kiến trúc hiện tại (Việc 1 của B0)
+Nguồn kiểm tra:
 
-Next.js 16 App Router, tách tầng rõ ràng: route handler (`src/app/api/*`)
-chỉ validate + gọi service, business logic nằm ở `src/services/*` (13
-file, một domain một file), Zod schema ở `src/lib/validations/*`. Auth qua
-NextAuth v5, session JWT, role/subscription check qua
-`src/lib/auth-helpers.ts`. Đa vai trò trên một tài khoản qua bảng nối
-`UserRole` (cờ `active`, `@@unique([userId, role])`), mỗi vai trò trả phí
-có `Profile` riêng (`@@unique([userId, role])`). Tìm kiếm qua
-`services/search.ts`, không có cache layer. i18n qua next-intl, cookie-based
-(không có segment `[locale]`). Thanh toán qua Stripe (subscription +
-marketplace), webhook 5 event. Không có real-time thật — polling
-(4s/15s/30s). Đã có age-gate (`lib/age-gate.ts`) và verification queue
-(`UserRole.verificationStatus`) nhưng chỉ áp dụng cho `MODEL`.
+- `src/lib/env.ts` và `src/lib/features.ts`: feature flag;
+- `docs/FEATURES.md`: hành vi hiện tại;
+- code/test: nguồn quyết định cuối cùng.
 
-**Business logic lọt ra ngoài tầng service** — không tìm thấy trường hợp
-đáng kể nào; quy ước tách tầng được giữ nhất quán trong toàn bộ 68 route.
+## 1. Mục tiêu MVP
 
-## Vai trò
+MVP tập trung vào việc giúp khách tìm và làm việc với người cung cấp dịch vụ sáng tạo:
 
-| Vai trò                                                                                 | MVP?                                                                                                                               |
-| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `CUSTOMER`, `PHOTOGRAPHER`, `VIDEOGRAPHER`, `MAKEUP_ARTIST`, `MODEL`, `STUDIO`, `ADMIN` | ✅ Trong phạm vi                                                                                                                   |
-| `CAMERA_SHOP`                                                                           | ⏸️ Ẩn sau `MARKETPLACE_ENABLED` — giữ trong enum `Role` (không xóa, tránh vỡ dữ liệu), ẩn khỏi UI chọn vai trò và bộ lọc `/browse` |
+1. đăng ký và xác minh tài khoản;
+2. tạo vai trò/hồ sơ;
+3. KYC và kiểm duyệt media;
+4. tìm kiếm nhà cung cấp;
+5. đặt lịch hoặc đăng yêu cầu dịch vụ;
+6. nhắn tin;
+7. đánh giá sau booking;
+8. admin vận hành nền tảng.
 
-## MVP — giữ nguyên, tiếp tục phát triển
+## 2. Vai trò
 
-- Auth: `src/lib/auth.ts`, `(auth)/login/*`, `/api/auth/*`
-- Hồ sơ + portfolio: `services/public-profile.ts`, `(public)/profile/*`,
-  `(dashboard)/dashboard/settings/profile/*`
-- Tìm kiếm/browse: `services/search.ts`, `(public)/browse/*` — sẽ sửa ở B4
-  để thêm lọc tỉnh
-- Đặt lịch: `services/bookings.ts`, `services/availability.ts`,
-  `(public)/booking/*`, `(dashboard)/dashboard/bookings/*`,
-  `(dashboard)/dashboard/calendar/*` — sẽ mở rộng ở B7
-- Nhắn tin: `services/messaging.ts`, `components/chat/*`
-- Đánh giá: `services/reviews.ts`
-- Thông báo: `services/notification.ts` — **lưu ý**: `NotificationType`
-  có sẵn các giá trị thuộc marketplace (`NEW_ORDER`, `ORDER_CONFIRMED`,
-  `ORDER_SHIPPED`, `ORDER_DELIVERED`, `ORDER_CANCELLED`) và mạng xã hội
-  (`NEW_FOLLOWER`, `NEW_LIKE`, `NEW_COMMENT`) — B6 cần đảm bảo các loại
-  này không phát sinh mới khi cờ tắt, dù enum vẫn giữ nguyên
-- Admin: `services/admin.ts`, `(admin)/admin/*`
-- Model role safety đã có: `lib/age-gate.ts` (B3 sẽ mở rộng ra mọi vai
-  trò), `UserRole.verificationStatus` (B3 sẽ mở rộng), `/guidelines`,
-  báo cáo ưu tiên cao trong `services/admin.ts`
+| Vai trò         | Trong MVP? | Ghi chú                                   |
+| --------------- | ---------- | ----------------------------------------- |
+| `CUSTOMER`      | Có         | Tìm, booking, đăng yêu cầu                |
+| `PHOTOGRAPHER`  | Có         | Hồ sơ và dịch vụ                          |
+| `VIDEOGRAPHER`  | Có         | Hồ sơ và dịch vụ                          |
+| `MAKEUP_ARTIST` | Có         | Hồ sơ và dịch vụ                          |
+| `MODEL`         | Có         | Có yêu cầu tuổi/KYC/an toàn riêng         |
+| `STUDIO`        | Có         | Hồ sơ và dịch vụ                          |
+| `ADMIN`         | Có         | Chỉ cấp thủ công, không phải role tự chọn |
+| `CAMERA_SHOP`   | Tắt        | Thuộc marketplace                         |
 
-## Sẽ ẩn sau `MARKETPLACE_ENABLED` (Prompt B6)
+Role vẫn có thể tồn tại trong enum/database khi feature tắt để giữ dữ liệu và tránh
+migration phá huỷ. Server phải chặn tạo mới và bề mặt công khai tương ứng.
 
-- Model: `Product`, `ProductImage`, `Order`, `OrderItem`, `CartItem`,
-  `DepositStatus`
-- Service: `services/marketplace.ts`, `services/orders.ts`
-- Trang: `/shop`, `/shop/[productId]`, `/cart`, `/checkout`,
-  `/checkout/success`, `(dashboard)/dashboard/listings/*`,
-  `(dashboard)/dashboard/orders/*`, `(dashboard)/dashboard/shop-orders`
-- API: `/api/products/*`, `/api/shop-products/*`, `/api/cart/*`,
-  `/api/orders/*`
-- Vai trò `CAMERA_SHOP` (giữ trong enum, ẩn khỏi UI)
-- 12 biến `STRIPE_PRICE_CAMERA_SHOP_*`/role khác liên quan checkout —
-  chồng chéo với `BILLING_ENABLED` bên dưới, B1 và B6 cần phối hợp không
-  ẩn hai lần hoặc xung đột
+## 3. Phần đang nằm trong MVP
 
-## Sẽ ẩn sau `SOCIAL_FEED_ENABLED` (Prompt B6)
+- Auth: credentials, Google OAuth, email verification, password reset.
+- Age gate, consent và tài khoản nhiều vai trò.
+- Hồ sơ công khai, location/vùng phục vụ và publish gate.
+- Album/portfolio, Cloudinary, moderation và thùng rác.
+- Browse/search và saved profile.
+- Dịch vụ, availability, blocked date và booking.
+- Service request, matching và offer.
+- Messaging bằng polling, block/report.
+- Review gắn với booking.
+- Notification trong app và email outbox.
+- KYC/verification, retention và audit.
+- Admin cho user, report, moderation, verification, compliance.
+- Cache có kiểm soát cho một số dữ liệu công khai.
+- Test, CI, deploy và vận hành production.
 
-- Model: `Post`, `PostMedia`, `Like`, `Comment`, `Follow`
-- **Lưu ý quan trọng cho B6**: `Follow` **không** phải tính năng tách
-  biệt như `Post` — nút Follow nằm ngay trong `ProfileActions`
-  (`components/profile/profile-actions.tsx`), hiển thị trên **mọi** trang
-  hồ sơ, không phải một trang feed riêng. Ẩn `Follow` nghĩa là phải sửa
-  `ProfileActions` để bỏ nút đó đi (hoặc ẩn có điều kiện theo cờ), không
-  chỉ chặn route — không có route `/post/*` hay `/feed` nào tồn tại để
-  chặn theo kiểu `notFound()` như marketplace.
-- Không tìm thấy trang feed (`/feed`, `/post/*`) nào đã được xây — có vẻ
-  các model này được tạo sẵn trong schema từ giai đoạn đầu nhưng UI feed
-  chưa từng triển khai. Xác nhận lại ở B6 bằng cách grep UI trước khi giả
-  định "ẩn" — có thể chỉ cần ẩn `Follow` trong `ProfileActions`.
+## 4. Marketplace đang tắt
 
-## Sẽ ẩn sau `BILLING_ENABLED` (Prompt B1)
+`MARKETPLACE_ENABLED=false` mặc định.
 
-- `lib/stripe.ts`, `services/subscription.ts` (phần gọi Stripe — model
-  `Subscription`/`SubscriptionStatus` vẫn dùng cho gán gói thủ công, giữ
-  nguyên không ẩn)
-- API: `/api/stripe/*` (6 route), `/api/webhooks/stripe`
-- Trang: `/onboarding/billing`, `(dashboard)/dashboard/settings/billing`
-- 12 biến `STRIPE_PRICE_<ROLE>_*`, `STRIPE_SECRET_KEY`,
-  `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-- Model `WebhookEvent` — giữ nguyên trong schema, không còn đường ghi
-  mới khi cờ tắt. Model `Payment` thì KHÔNG còn đúng câu này nữa kể từ
-  07/09/2026 — xem mục ngay dưới đây, các cổng thanh toán nội địa vẫn
-  ghi vào `Payment` dù `BILLING_ENABLED=false`.
+Phần giữ lại trong code/schema:
 
-## Sẽ ẩn sau `MOMO_ENABLED` / `ZALOPAY_ENABLED` / `BANK_TRANSFER_ENABLED`
+- `Product`, `ProductImage`, `CartItem`, `Order`, `OrderItem`;
+- service/API sản phẩm, cart, order;
+- trang `/shop`, `/cart`, `/checkout`;
+- dashboard listings/orders;
+- role CAMERA_SHOP.
 
-(bổ sung 07/09/2026 — xem CLAUDE.md "Ràng buộc bắt buộc" #2)
+Khi tắt:
 
-Độc lập với `BILLING_ENABLED` ở trên — 3 cờ riêng, mặc định tắt, không
-liên quan gì tới Stripe.
+- page và API bị chặn;
+- role không được tự tạo;
+- browse/pricing/navigation không hiển thị;
+- sitemap/count/notification không đưa dữ liệu marketplace vào.
 
-- `lib/momo.ts`, `lib/zalopay.ts`, `lib/bank-transfer.ts`,
-  `services/payments.ts`
-- API: `/api/payments/{momo,zalopay,bank-transfer}/*`,
-  `/api/webhooks/{momo,zalopay}`, `/api/admin/payments/*`
-- Trang: `/admin/payments`; `(dashboard)/dashboard/settings/billing` khi
-  `BILLING_ENABLED=false` hiển thị UI chọn cổng thanh toán này thay vì
-  thông báo "chưa bật" như trước
-- Cron: `subscription-renewal-reminders`, `expire-payment-intents`
-- Biến môi trường: `MOMO_PARTNER_CODE`/`MOMO_ACCESS_KEY`/
-  `MOMO_SECRET_KEY`, `ZALOPAY_APP_ID`/`ZALOPAY_KEY1`/`ZALOPAY_KEY2`,
-  `NEXT_PUBLIC_BANK_TRANSFER_ACCOUNT_NUMBER`/`_ACCOUNT_NAME`/
-  `_BANK_NAME`
-- Model `Payment` — mở rộng thêm `provider`/`providerOrderId`/
-  `providerTransactionId`/`role`/`interval`/`proofUrl`/`reviewedBy`/
-  `reviewedAt`/`reviewNote`, `stripePaymentId` đổi từ bắt buộc sang tuỳ
-  chọn. Enum `PaymentStatus` thêm `PENDING`/`AWAITING_REVIEW`, enum mới
-  `PaymentProvider`. Chưa có kiểm thử với thông tin merchant thật của
-  MoMo/ZaloPay — mới xác minh bằng sandbox, xem `src/lib/momo.ts`/
-  `src/lib/zalopay.ts` để biết chi tiết.
+Không bật trước khi có thanh toán/payout, hoàn tiền, giao nhận, tranh chấp, điều
+khoản và quy trình vận hành shop.
 
-## Chưa xây (không phải code chết, chỉ là chưa có)
+## 5. Social feed đang tắt
 
-- Giao ảnh/video cho khách qua nền tảng — không tìm thấy model hay route
-  nào cho việc này trong codebase hiện tại. Không phải "ẩn", là "chưa
-  làm" — nằm ngoài phạm vi MVP theo tài liệu nguồn.
-- Toàn bộ tầng tuân thủ pháp luật (Consent, AuditLog, DataRequest,
-  Province/Ward, moderation status trên `ProfileMedia`) — sẽ xây ở
-  B2/B3/B4/B5, chưa tồn tại tính tới thời điểm viết tài liệu này.
+`SOCIAL_FEED_ENABLED=false` mặc định.
+
+Schema/code có thể còn `Post`, `PostMedia`, `Like`, `Comment`, `Follow`. Khi
+tắt, nút follow và API liên quan không hoạt động; dữ liệu cũ không đi vào UI/count.
+
+Saved profile là tính năng riêng, không được vô tình tắt cùng follow.
+
+## 6. Stripe billing đang tắt
+
+`BILLING_ENABLED=false` mặc định vì điều kiện merchant tại Việt Nam. Code Stripe
+được giữ sau flag:
+
+- checkout/portal/cancel/resume/invoices;
+- webhook Stripe;
+- price/credential env;
+- UI billing Stripe.
+
+Không dùng Stripe code đang tồn tại như bằng chứng dịch vụ có thể thu tiền hợp pháp
+tại Việt Nam.
+
+## 7. Cấp gói miễn phí
+
+`FREE_ROLE_GRANT_ENABLED` là policy độc lập. Khi bật, role mới có thể nhận gói miễn
+phí thay vì bắt thanh toán. Tách flag này khỏi `BILLING_ENABLED` để khi bổ sung cổng
+Việt Nam, việc Stripe tắt không vô tình tiếp tục cấp miễn phí.
+
+## 8. Thanh toán Việt Nam đang tắt
+
+Các flag độc lập:
+
+- `MOMO_ENABLED`;
+- `ZALOPAY_ENABLED`;
+- `BANK_TRANSFER_ENABLED`.
+
+Code gồm payment intent, API/webhook, trang admin đối soát, cron hết hạn/nhắc gia hạn
+và field provider transaction. Mặc định không thu tiền.
+
+Chỉ bật sau khi có merchant credential thật, kiểm tra chữ ký, đối soát, hoàn tiền,
+support và test production có kiểm soát.
+
+## 9. Kiểm duyệt tự động đang tắt
+
+`CONTENT_MODERATION_ENABLED=false` mặc định. Hàng chờ người duyệt vẫn hoạt động.
+Khi bật, máy quét chỉ đánh dấu/ưu tiên; con người quyết định. Cần consent/căn cứ rõ
+trước khi gửi ảnh sang dịch vụ AI ngoài. Không gửi KYC.
+
+## 10. Xác minh điện thoại
+
+`PHONE_VERIFICATION_REQUIRED` điều khiển gate SMS trước khi đăng service request.
+Twilio có chi phí; endpoint phải chống spam/SMS toll fraud. Dev bypass không hoạt
+động ở production.
+
+## 11. Phần chưa xây hoặc chưa hoàn thiện vận hành
+
+- giao file ảnh/video cuối cùng cho khách qua nền tảng;
+- realtime WebSocket quy mô lớn;
+- payout tự động cho shop;
+- quy trình pháp lý đã được luật sư xác nhận hoàn toàn;
+- một số cấu hình production như Sentry, uptime, email domain hoặc backup tuỳ trạng
+  thái tài khoản thật.
+
+Checklist thủ công là nguồn theo dõi các việc vận hành còn lại.
+
+## 12. Quy tắc khi thêm tính năng
+
+1. Xác định có thuộc MVP không.
+2. Nếu chưa sẵn sàng, tạo flag server-side.
+3. Chặn page, API, role, search/count, sitemap và notification.
+4. Không quảng bá trong landing/metadata/email.
+5. Viết điều kiện bật: pháp lý, credential, test và vận hành.
+6. Cập nhật file này cùng `docs/FEATURES.md`.
+
+## 13. Những điều không được suy ra
+
+- Có model/table không có nghĩa tính năng đang bật.
+- Có nút ẩn không có nghĩa API đã an toàn.
+- Code build được không có nghĩa quy trình kinh doanh đã sẵn sàng.
+- Sandbox thành công không chứng minh production/merchant hợp lệ.
+- Feature flag tắt không tự động xử lý dữ liệu cũ nếu query không lọc.
+
+Xem `docs/ops/Fgrapher-checklist-viec-thu-cong.xlsx` để theo dõi việc ngoài code.

@@ -1,221 +1,206 @@
-# Content moderation — an automated filter in front of a human queue
+# Kiểm duyệt nội dung: máy lọc trước, con người quyết định
 
-## The shape of it
+## Hiểu nhanh
 
-Every portfolio upload lands in the queue at `/admin/moderation` as `PENDING`,
-and nothing becomes public until an admin approves it
-(`ProfileMedia.moderationStatus`, enforced at the query layer by
-`services/search.ts` and at publish time by `setProfilePublished()`).
+Mọi ảnh portfolio mới đều vào hàng chờ `/admin/moderation` với trạng thái
+`PENDING` (đang chờ). Ảnh chỉ được công khai sau khi admin duyệt. Điều này được
+kiểm tra ở cả lúc tìm kiếm (`services/search.ts`) và lúc công khai hồ sơ
+(`setProfilePublished()`).
 
-The automated tier does not change that in any way. **It sorts the queue. It
-does not decide anything.**
+Bộ quét tự động chỉ giúp **xếp ảnh đáng ngờ lên đầu hàng chờ**. Nó không có quyền
+duyệt, từ chối hay phạt tài khoản.
 
+```text
+Người dùng tải ảnh
+  → tạo ProfileMedia ở trạng thái PENDING
+  → runModeration() chạy nền
+  → gửi bản ảnh 512px cho OpenAI omni-moderation-latest
+     → điểm sexual hoặc violence/graphic từ 0,9 trở lên
+        → ghi lý do và thời điểm gắn cờ
+        → ảnh vẫn PENDING, nhưng được đưa lên đầu hàng chờ của admin
+     → điểm thấp hơn hoặc quét lỗi
+        → không ghi cờ; ảnh vẫn chờ admin như bình thường
 ```
-upload → ProfileMedia created (PENDING)
-       → runModeration() [fire-and-forget]
-           → OpenAI omni-moderation-latest, on a 512px derivative
-               → score ≥ 0.9 on sexual | violence/graphic
-                     → autoFlagReason + autoFlaggedAt set
-                        → still PENDING, just first in the admin queue,
-                          badged with the category and score
-               → anything else, or the scan couldn't run
-                     → nothing written at all
-```
 
-Three properties hold by construction, and are what the design is for:
+Ba nguyên tắc không được thay đổi:
 
-1. **It never approves anything.** Only an admin can.
-2. **It never hides or rejects anything.** A flagged photo is exactly as pending
-   as every other upload.
-3. **It never penalises anyone.** Violation points come from one deliberate
-   admin action, described below.
+1. Máy không bao giờ tự duyệt ảnh.
+2. Máy không tự ẩn hoặc từ chối ảnh.
+3. Máy không tự phạt người dùng.
 
-The worst case of a wrong automated answer is an admin looking at an ordinary
-photo slightly sooner than they otherwise would.
+Nếu máy đoán sai, hậu quả lớn nhất chỉ là admin xem một ảnh bình thường sớm hơn.
 
-## Who can penalise an account
+## Ai có quyền phạt tài khoản?
 
-Only an admin, by hand, at `/admin/users/[id]` → "Record a violation" →
-`addViolationPoint()` in `services/admin.ts`. Project owner's decision,
-12/09/2026.
+Chỉ admin có thể ghi điểm vi phạm tại `/admin/users/[id]` bằng thao tác “Ghi nhận
+vi phạm”, gọi `addViolationPoint()` trong `services/admin.ts`.
 
-Specifically **not** penalties:
+Các việc sau **không phải hình phạt**:
 
-- the scanner flagging a photo — it only reorders the queue
-- an admin **rejecting** a photo in `moderateMedia()` — that hides the photo and
-  emails the provider the reason, and stops there
+- máy gắn cờ ảnh, vì việc này chỉ đổi thứ tự hàng chờ;
+- admin từ chối ảnh trong `moderateMedia()`, vì thao tác này chỉ ẩn ảnh và gửi lý
+  do cho provider.
 
-The intended sequence is: scan flags → admin reviews → admin rejects if it
-breaks the rules → admin contacts and warns the provider → **only then**, if
-warranted, the admin records a violation. A rejected photo is usually a
-misunderstanding about the rules rather than misconduct, so the two are not the
-same click.
+Quy trình mong muốn là: máy gắn cờ → admin xem → admin từ chối nếu vi phạm →
+admin liên hệ, cảnh báo → khi thật sự cần mới ghi điểm vi phạm. Một ảnh bị từ chối
+có thể chỉ do người dùng hiểu sai quy định, nên không được đồng nhất với hành vi
+xấu.
 
-A reason is required to record one, and it goes into `AuditLog` — a point nobody
-can later explain is worthless when the provider appeals.
+Khi ghi điểm, admin bắt buộc nhập lý do. Lý do được lưu trong `AuditLog` để sau
+này giải thích được khi provider khiếu nại. Điểm thứ ba tự đình chỉ tài khoản,
+đúng với nội dung trang `/guidelines`. Giao diện luôn cảnh báo rõ trước khi admin
+tạo điểm thứ ba; admin cũng có thể xoá điểm hoặc bỏ đình chỉ.
 
-The third point still suspends the account automatically, because that is what
-`/guidelines` tells users happens. It is not a surprise to the admin either: the
-current count and an explicit "this would be the 3rd" warning sit next to the
-button, and "Clear all points" and "Unsuspend" are both one click away.
+## Dữ liệu nào được gửi ra ngoài?
 
-## What crosses the border, and what doesn't
+OpenAI chỉ nhận **bản thu nhỏ 512px do Cloudinary tạo lại**, không nhận file gốc.
+URL được tạo bởi `buildMediaVariants(url).moderation` trong
+`lib/media-variants.ts`.
 
-The scanner is sent **a 512px Cloudinary derivative, never the uploaded
-original** — `buildMediaVariants(url).moderation` in `lib/media-variants.ts`.
+Điều này giảm dữ liệu gửi đi:
 
-That matters for two reasons:
+- Cloudinary mã hoá lại ảnh nên metadata EXIF không đi kèm: không có GPS, số
+  serial máy ảnh hoặc thời điểm chụp.
+- 512px đủ để phân loại nội dung, nhưng khó dùng để nhận diện một người.
 
-- **No metadata travels.** A Cloudinary transformation re-encodes the file, so
-  no EXIF goes with it — no GPS coordinates of where the shoot happened, no
-  camera serial, no capture timestamp.
-- **512px classifies but doesn't identify.** It is ample for "is this sexual or
-  graphic" and far too small to be useful for recognising a person.
+Tuy vậy, đây vẫn là việc chuyển dữ liệu cho bên thứ ba. Thu nhỏ ảnh không làm
+cho nghĩa vụ về quyền riêng tư biến mất.
 
-What this does **not** do is make the transfer stop being a transfer. See below.
+## Dữ liệu đang nằm ở đâu?
 
-## Where the data actually lives (checked, not assumed)
+| Thành phần              | Khu vực đã xác nhận                                           |
+| ----------------------- | ------------------------------------------------------------- |
+| Máy chủ ứng dụng Vercel | Singapore, cấu hình `sin1`                                    |
+| Database Supabase       | Singapore, `ap-southeast-1`                                   |
+| Kho ảnh Cloudinary      | Chưa xác nhận được từ code; phải xem trong Cloudinary Console |
+| Dịch vụ quét OpenAI     | Hoa Kỳ                                                        |
 
-| Component      | Region                                              |
-| -------------- | --------------------------------------------------- |
-| App compute    | Singapore — `vercel.json` `"regions": ["sin1"]`     |
-| Database       | Singapore — Supabase `aws-0-ap-southeast-1`         |
-| Image storage  | Cloudinary — **region not verified from this repo** |
-| Automated scan | OpenAI, United States                               |
+Ứng dụng và database đã đặt gần Việt Nam. Khu vực Cloudinary phụ thuộc tài khoản
+và cần kiểm tra thủ công. Nếu ảnh gốc đang lưu ở Hoa Kỳ thì đó là luồng dữ liệu
+lớn và lâu dài hơn nhiều so với bản 512px dùng để quét.
 
-So the app and its database are already deliberately close to Vietnam, not in
-the US. Cloudinary's region depends on the account and could not be confirmed
-from the code — worth checking in the Cloudinary console, because if portfolio
-images are already stored in the US, that is a far larger and more permanent
-transfer than a 512px copy sent for a moderation verdict.
+Code không thể làm OpenAI chạy tại Việt Nam. Nếu dữ liệu bắt buộc ở trong nước,
+có ba lựa chọn thật sự:
 
-**Honest limit: no amount of code moves the OpenAI call inside Vietnam.** The
-options that genuinely would are infrastructure decisions, not code changes:
+1. Dùng nhà cung cấp Việt Nam như VNPT hoặc FPT.AI. Interface `ContentScanner`
+   cho phép thêm nhà cung cấp mới mà không sửa các nơi gọi.
+2. Tự vận hành model phân loại trên hạ tầng tại Việt Nam. Cách này bỏ bên thứ ba
+   nhưng tạo thêm chi phí và trách nhiệm vận hành máy chủ.
+3. Tắt quét tự động. Hàng chờ admin vẫn hoạt động như trước.
 
-1. **A Vietnamese moderation vendor** (VNPT, FPT.AI both offer content
-   moderation). The `ContentScanner` interface in `services/moderation.ts`
-   exists exactly so a second implementation can drop in beside
-   `OpenAIModerationScanner` without touching a single call site. This is the
-   cleanest path if residency has to hold.
-2. **A self-hosted classifier** (an ONNX NSFW model) running on infrastructure
-   in Vietnam. Removes the third party entirely; adds hosting the app doesn't
-   currently have.
-3. **Leave the automated tier off.** The human queue works exactly as it always
-   has — this whole feature only reorders it.
+## Việc đồng ý xử lý dữ liệu trước khi bật
 
-## Before enabling — the consent question
+`ConsentPurpose` hiện chưa có mục riêng cho việc gửi ảnh tới dịch vụ phân loại
+nội dung của bên thứ ba. Không nên gộp việc này vào mục `SERVICE` vì người dùng
+cần được biết rõ ảnh được gửi cho ai và để làm gì.
 
-`ConsentPurpose` has no purpose covering "sending your uploads to a third-party
-content classifier". `SERVICE` is the only one that could be stretched to fit,
-and stretching it is the bundling that skill `fgrapher-compliance` §2 says is
-invalid.
+Trước khi bật cho người dùng thật, cần:
 
-If this is switched on for real users, the honest move is a new
-`ConsentPurpose` value plus matching privacy-policy text naming OpenAI as a
-processor — not a reinterpretation of an existing purpose. That is a lawyer's
-call informed by the project owner, which is why the flag defaults to `false`
-rather than because the code is unfinished.
+- thêm một mục đích đồng ý riêng trong `ConsentPurpose`;
+- cập nhật chính sách quyền riêng tư, nêu rõ OpenAI là bên xử lý dữ liệu;
+- để chủ dự án và luật sư xác nhận nội dung.
 
-## Turning it on
+Vì vậy `CONTENT_MODERATION_ENABLED` mặc định là `false`. Đây là quyết định tuân
+thủ dữ liệu, không phải vì code chưa hoàn thành.
+
+## Cách bật
 
 ```bash
 OPENAI_API_KEY="sk-..."
 CONTENT_MODERATION_ENABLED="true"
 ```
 
-Both are required. The flag on without a key falls back to `MockScanner` rather
-than silently scanning nothing while looking enabled —
-`services/moderation.ts` checks both.
+Cần đủ cả hai biến. Nếu bật flag nhưng thiếu API key, hệ thống dùng
+`MockScanner`, tức là không tự gắn cờ và vẫn để admin duyệt thủ công.
 
-The Moderation endpoint is free and does not count toward API usage limits, so
-there is no per-upload cost to weigh.
+Endpoint Moderation của OpenAI hiện không tính phí và không trừ hạn mức API,
+nhưng chính sách nhà cung cấp có thể thay đổi; cần kiểm tra lại trước khi bật.
 
-## What it cannot detect — read this before trusting it
+## Những gì bộ quét không phát hiện được
 
-`sexual/minors` is a **text-only** category in OpenAI's Moderation API. It is
-not evaluated for image input at all. So this scanner **cannot detect a minor in
-a photo** — the single case CLAUDE.md's ràng buộc #3 and #4 care most about, and
-the one behind the "Appears to be a minor" report reason.
+Điều quan trọng nhất: `sexual/minors` là nhóm chỉ hỗ trợ văn bản trong API
+Moderation, không áp dụng cho ảnh. Vì vậy hệ thống **không thể tự phát hiện người
+chưa thành niên trong ảnh**. Việc này hoàn toàn phụ thuộc vào admin và báo cáo từ
+người dùng.
 
-That detection is entirely human review and user reports. An automated tier
-existing must not be read as covering it.
+Các nhóm OpenAI có thể đánh giá trên ảnh gồm `sexual`, `violence`,
+`violence/graphic`, `self-harm`, `self-harm/intent` và
+`self-harm/instructions`. Tài liệu nguồn:
+<https://developers.openai.com/api/docs/guides/moderation>.
 
-Categories OpenAI does evaluate for images: `sexual`, `violence`,
-`violence/graphic`, `self-harm`, `self-harm/intent`, `self-harm/instructions`.
-Source: <https://developers.openai.com/api/docs/guides/moderation>
+Hệ thống cũng không tự gắn cờ:
 
-Also never flagged:
+- video, vì hiện không trích frame để quét;
+- ảnh có điểm dưới 0,9;
+- nhóm self-harm, vì ảnh sẹo, tài liệu y khoa hoặc ảnh phóng sự dễ bị báo nhầm.
 
-- **Videos.** `ProfileMedia.type === "VIDEO"` skips the scan entirely — the
-  endpoint takes images only and nothing here extracts frames.
-- **Anything below 0.9.** See the threshold note below.
+## Vì sao ngưỡng là 0,9?
 
-## Why the threshold is 0.9 and not OpenAI's own `flagged`
+API có cờ `flagged` riêng, nhưng cờ này nhạy và có thể bắt nhiều trường hợp ranh
+giới. Nếu quá nhiều ảnh đều bị đánh dấu “khẩn cấp”, admin sẽ mất niềm tin vào
+hàng chờ. Ngưỡng 0,9 giúp nhãn ưu tiên có ý nghĩa hơn.
 
-The API returns its own `flagged` boolean, calibrated to catch borderline
-content. Since a flag now only reorders a queue, a false positive is cheap — but
-a queue where half the uploads are "urgent" is a queue with no signal in it, and
-the admin stops trusting the badge. 0.9 keeps the badge meaningful.
-
-Only `sexual` and `violence/graphic` are flagging grounds. The `self-harm`
-categories are deliberately excluded — on a photography platform they fire on
-scars and documentary/medical imagery far more often than on real violations.
-
-The constants are `AUTO_FLAG_THRESHOLD` and `AUTO_FLAG_CATEGORIES` in
+Chỉ `sexual` và `violence/graphic` được dùng để gắn cờ. Hằng số tương ứng là
+`AUTO_FLAG_THRESHOLD` và `AUTO_FLAG_CATEGORIES` trong
 `services/moderation.ts`.
 
-## Failure behaviour
+## Khi quét bị lỗi
 
-Every failure path means "no flag written", which leaves the photo in the queue
-in plain date order — exactly where it would have been with no scanner at all:
+Mọi lỗi đều dẫn đến cùng kết quả: không ghi cờ, ảnh vẫn nằm trong hàng chờ theo
+thứ tự thời gian.
 
-| Situation                              | Result  |
-| -------------------------------------- | ------- |
-| No API key / flag off                  | no flag |
-| Network error, non-2xx, malformed JSON | no flag |
-| Timeout (10s)                          | no flag |
-| Non-`http(s)` URL (blob:, data:)       | no flag |
-| Video                                  | no flag |
+| Tình huống                               | Kết quả      |
+| ---------------------------------------- | ------------ |
+| Thiếu API key hoặc feature flag đang tắt | Không gắn cờ |
+| Lỗi mạng, HTTP lỗi hoặc JSON sai         | Không gắn cờ |
+| Quá 10 giây                              | Không gắn cờ |
+| URL không phải `http(s)`                 | Không gắn cờ |
+| File video                               | Không gắn cờ |
 
-The portfolio upload path calls `runModeration()` fire-and-forget, so none of
-this can block or fail an upload.
+Upload portfolio gọi `runModeration()` theo kiểu chạy nền nên lỗi quét không làm
+upload thất bại.
 
-One exception worth knowing: the **avatar/cover** path (`/api/users/me` PATCH)
-still awaits the scan inline and refuses the upload with a 422 if it flags.
-Avatars deliberately skip the moderation queue entirely (they appear
-immediately), so there is no human step to defer to — without the inline check
-they would be completely unmoderated. Refusing an upload is not a penalty:
-nothing is recorded, and the user simply picks another photo. That is why there
-is a 10s timeout.
+Avatar và ảnh bìa là ngoại lệ: endpoint `/api/users/me` chờ kết quả quét ngay và
+từ chối với HTTP 422 nếu ảnh bị gắn cờ. Hai loại ảnh này xuất hiện ngay, không đi
+qua hàng chờ admin; vì vậy cần kiểm tra trước khi cho hiển thị. Việc từ chối upload
+không tạo điểm phạt, người dùng chỉ cần chọn ảnh khác.
 
-## Where things are
+## File và màn hình liên quan
 
-| Thing                     | File                                          |
-| ------------------------- | --------------------------------------------- |
-| HTTP client               | `src/lib/openai-moderation.ts`                |
-| Downscaled derivative     | `src/lib/media-variants.ts` (`.moderation`)   |
-| Policy + scanner + wiring | `src/services/moderation.ts`                  |
-| Violation points          | `src/services/admin.ts` (`addViolationPoint`) |
-| Tests                     | `src/services/__tests__/moderation.test.ts`   |
-| Human queue               | `src/app/(admin)/admin/moderation/`           |
-| Admin violation UI        | `src/app/(admin)/admin/users/[id]/`           |
-| Upload call site          | `src/app/api/portfolio/route.ts`              |
-| Avatar/cover call site    | `src/app/api/users/me/route.ts`               |
+| Thành phần         | Vị trí                                      |
+| ------------------ | ------------------------------------------- |
+| Client gọi OpenAI  | `src/lib/openai-moderation.ts`              |
+| Tạo bản ảnh nhỏ    | `src/lib/media-variants.ts`                 |
+| Policy và scanner  | `src/services/moderation.ts`                |
+| Điểm vi phạm       | `src/services/admin.ts`                     |
+| Test               | `src/services/__tests__/moderation.test.ts` |
+| Hàng chờ admin     | `src/app/(admin)/admin/moderation/`         |
+| Giao diện ghi điểm | `src/app/(admin)/admin/users/[id]/`         |
+| Upload portfolio   | `src/app/api/portfolio/route.ts`            |
+| Avatar và ảnh bìa  | `src/app/api/users/me/route.ts`             |
 
-Audit trail:
+Các sự kiện audit được ghi như sau:
 
-| Event                   | `AuditLog.action`                   | Written by               |
-| ----------------------- | ----------------------------------- | ------------------------ |
-| Scan flagged a photo    | `MEDIA_AUTO_FLAGGED`                | `runModeration()`        |
-| Admin approved/rejected | `MEDIA_APPROVED` / `MEDIA_REJECTED` | `moderateMedia()`        |
-| Admin recorded a point  | `USER_VIOLATION_POINT_ADDED`        | `addViolationPoint()`    |
-| Third point suspended   | `USER_AUTO_SUSPENDED`               | `addViolationPoint()`    |
-| Admin cleared points    | `USER_VIOLATION_POINTS_CLEARED`     | `clearViolationPoints()` |
+| Sự kiện                        | `AuditLog.action`                  | Hàm ghi                  |
+| ------------------------------ | ---------------------------------- | ------------------------ |
+| Máy gắn cờ ảnh                 | `MEDIA_AUTO_FLAGGED`               | `runModeration()`        |
+| Admin duyệt hoặc từ chối       | `MEDIA_APPROVED`, `MEDIA_REJECTED` | `moderateMedia()`        |
+| Admin ghi điểm                 | `USER_VIOLATION_POINT_ADDED`       | `addViolationPoint()`    |
+| Điểm thứ ba đình chỉ tài khoản | `USER_AUTO_SUSPENDED`              | `addViolationPoint()`    |
+| Admin xoá điểm                 | `USER_VIOLATION_POINTS_CLEARED`    | `clearViolationPoints()` |
 
-## Never send KYC images here
+## Tuyệt đối không gửi ảnh KYC
 
-ID and selfie images live in a separate Cloudinary folder with `authenticated`
-delivery, reachable only through short-lived signed URLs
-(`generateKycSignedUrl`). They must never be passed to this scanner. The URL
-guard in `moderateImageUrl()` is not what protects that — the fact that nothing
-calls it with a KYC URL is. Keep it that way.
+Ảnh giấy tờ và ảnh selfie xác minh danh tính nằm trong thư mục Cloudinary riêng,
+không công khai, chỉ truy cập qua URL ký có thời hạn ngắn. Không được đưa các URL
+KYC vào bộ quét này. Lớp bảo vệ hiện tại là không có nơi nào gọi scanner với URL
+KYC; phải giữ nguyên ranh giới đó.
+
+## Từ ngữ cần nhớ
+
+- **Moderation:** kiểm duyệt nội dung.
+- **Classifier/scanner:** chương trình chấm điểm, phân loại nội dung.
+- **Derivative:** bản ảnh được tạo lại với kích thước hoặc chất lượng khác.
+- **EXIF:** metadata có thể chứa thiết bị, thời gian và GPS của ảnh.
+- **KYC:** xác minh danh tính bằng giấy tờ và ảnh khuôn mặt.
+- **Audit log:** nhật ký ghi ai đã làm gì và khi nào.

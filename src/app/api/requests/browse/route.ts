@@ -9,7 +9,7 @@ import { listBrowsableRequests } from "@/services/service-requests";
 export async function GET(request: Request) {
   const t = await getTranslations("apiMessages.serviceRequests");
   try {
-    await requireAuth();
+    const session = await requireAuth();
 
     const { searchParams } = new URL(request.url);
     const roleParam = searchParams.get("role");
@@ -20,7 +20,10 @@ export async function GET(request: Request) {
     const provinceId = searchParams.get("provinceId") ?? undefined;
     const wardId = searchParams.get("wardId") ?? undefined;
 
-    const requests = await listBrowsableRequests({ role, provinceId, wardId });
+    const requests = await listBrowsableRequests(
+      { role, provinceId, wardId },
+      session.user.id,
+    );
 
     return NextResponse.json(
       { data: requests, error: null, message: null },

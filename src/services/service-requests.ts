@@ -376,17 +376,21 @@ export async function cancelServiceRequest(
 // Top-nav "Danh sách yêu cầu" — a system-wide, filterable browse of every
 // open request, distinct from listOpportunitiesForProvider's strict
 // auto-match feed (verified role + service area + same-day availability).
-// Here the provider picks their own filters, so no pre-conditions on the
-// viewer are enforced — matches getOpportunityDetail's own "viewing is
-// open, only createOffer gates on verification" stance.
+// Here the provider picks their own filters, so role/verification/profile
+// pre-conditions are not enforced. A viewer's own requests remain visible
+// for a complete system-wide list, but are marked so the UI routes them to
+// customer management rather than the offer form.
 export interface BrowsableRequestFilters {
   role?: Role;
   provinceId?: string;
   wardId?: string;
 }
 
-export async function listBrowsableRequests(filters: BrowsableRequestFilters) {
-  return db.serviceRequest.findMany({
+export async function listBrowsableRequests(
+  filters: BrowsableRequestFilters,
+  viewerId: string,
+) {
+  const requests = await db.serviceRequest.findMany({
     where: {
       isDraft: false,
       status: { in: OPEN_STATUSES },
@@ -395,7 +399,17 @@ export async function listBrowsableRequests(filters: BrowsableRequestFilters) {
       ...(filters.wardId ? { wardId: filters.wardId } : {}),
     },
     orderBy: { createdAt: "desc" },
-    include: {
+    select: {
+      id: true,
+      code: true,
+      customerId: true,
+      title: true,
+      role: true,
+      budgetMin: true,
+      budgetMax: true,
+      isDateFlexible: true,
+      shootDate: true,
+      createdAt: true,
       province: { select: { name: true } },
       ward: { select: { name: true } },
       _count: { select: { offers: true } },
@@ -404,6 +418,11 @@ export async function listBrowsableRequests(filters: BrowsableRequestFilters) {
     // unbounded fetch of every open request nationwide.
     take: 50,
   });
+
+  return requests.map(({ customerId, ...request }) => ({
+    ...request,
+    isOwner: customerId === viewerId,
+  }));
 }
 
 // Ràng buộc #3 — "Trang quản trị hiện các yêu cầu chưa ai nhận để đội

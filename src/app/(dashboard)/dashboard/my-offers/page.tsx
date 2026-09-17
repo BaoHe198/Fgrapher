@@ -56,7 +56,7 @@ export default async function MyOffersPage() {
               key={offer.id}
               href={`/dashboard/opportunities/${offer.request.id}?role=${offer.request.role}`}
             >
-              <Card className="flex flex-col gap-2 transition-shadow duration-150 hover:shadow-[var(--shadow-md)]">
+              <Card interactive className="flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate text-body-md font-semibold! text-text-primary">

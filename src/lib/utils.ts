@@ -115,6 +115,19 @@ export function formatCurrency(amount: number, _currency = "VND") {
   return formatVND(amount);
 }
 
+/** Formats optional request budgets without inventing a zero-value bound. */
+export function formatBudgetRange(
+  minimum: number | null | undefined,
+  maximum: number | null | undefined,
+) {
+  if (minimum != null && maximum != null) {
+    return `${formatCurrency(minimum)} – ${formatCurrency(maximum)}`;
+  }
+  if (minimum != null) return `${formatCurrency(minimum)}+`;
+  if (maximum != null) return `≤ ${formatCurrency(maximum)}`;
+  return null;
+}
+
 // Converts a JS Date.getUTCDay() value (0=Sunday..6=Saturday) into a
 // Monday-first grid column (Monday=0..Sunday=6) — see WEEK_STARTS_ON's
 // comment in lib/constants for why the stored numbering itself never

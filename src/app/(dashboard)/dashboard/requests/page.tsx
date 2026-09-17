@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus, Send } from "lucide-react";
+import { CalendarDays, MapPin, Plus, Send, WalletCards } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { formatDate } from "@/lib/format";
-import { formatCurrency } from "@/lib/utils";
+import { formatBudgetRange } from "@/lib/utils";
 import { listCustomerRequests } from "@/services/service-requests";
 
 const STATUS_VARIANT: Record<
@@ -76,7 +76,7 @@ export default async function ServiceRequestsPage() {
         <div className="flex flex-col gap-3">
           {requests.map((request) => (
             <Link key={request.id} href={`/dashboard/requests/${request.id}`}>
-              <Card className="flex flex-col gap-2 transition-shadow duration-150 hover:shadow-[var(--shadow-md)]">
+              <Card interactive className="flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate text-body-md font-semibold! text-text-primary">
@@ -84,8 +84,7 @@ export default async function ServiceRequestsPage() {
                       {request.title}
                     </p>
                     <p className="text-body-sm text-text-tertiary">
-                      {request.code} · {roleT(request.role)} ·{" "}
-                      {request.province.name}
+                      {request.code} · {roleT(request.role)}
                     </p>
                   </div>
                   <Badge
@@ -100,18 +99,24 @@ export default async function ServiceRequestsPage() {
                       : statusT(request.status)}
                   </Badge>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-body-sm text-text-secondary">
-                  <span>
-                    {request.budgetMin || request.budgetMax
-                      ? `${formatCurrency(request.budgetMin ?? 0)} – ${formatCurrency(request.budgetMax ?? 0)}`
-                      : t("budgetNotSet")}
+                <div className="flex flex-wrap items-center gap-2 text-body-sm font-semibold!">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-100 px-3 py-1.5 text-gold-800">
+                    <WalletCards className="size-4" />
+                    {formatBudgetRange(request.budgetMin, request.budgetMax) ??
+                      t("budgetNotSet")}
                   </span>
-                  <span>·</span>
-                  <span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-info-bg px-3 py-1.5 text-info">
+                    <MapPin className="size-4" />
+                    {request.ward ? `${request.ward.name}, ` : ""}
+                    {request.province.name}
+                  </span>
+                  <span className="ml-auto text-text-secondary">
                     {t("offerCount", { count: request._count.offers })}
                   </span>
-                  <span>·</span>
-                  <span>{formatDate(request.createdAt)}</span>
+                  <span className="inline-flex items-center gap-1.5 text-text-tertiary">
+                    <CalendarDays className="size-4" />
+                    {formatDate(request.createdAt)}
+                  </span>
                 </div>
               </Card>
             </Link>

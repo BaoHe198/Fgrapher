@@ -1,87 +1,97 @@
-# Pre-launch audit — feature flags & cron jobs
+# Báo cáo lịch sử: feature flag và cron trước khi ra mắt
 
-Scope: `BILLING_ENABLED`, `MARKETPLACE_ENABLED`, `SOCIAL_FEED_ENABLED` feature
-flags (read-only audit) and every Vercel cron job. All findings below were
-verified by reading the actual file/line cited — nothing here is inferred
-from docs alone.
+> Báo cáo ghi lại code tại thời điểm audit. Hãy xem `src/lib/features.ts`,
+> `vercel.json` và route hiện tại để biết trạng thái mới nhất.
 
-## Part 1 — Feature Flags
+## 1. Cách audit feature flag
 
-### BILLING_ENABLED (default false)
+Một flag chỉ an toàn khi được kiểm tra ở mọi đường vào:
 
-| Path                      | Verdict   | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. Direct page navigation | **Gated** | `src/app/(dashboard)/dashboard/settings/billing/page.tsx:21` — renders a "currently free" replacement instead of Stripe UI when off (not a 404, deliberately — links to this page stay valid). `src/app/onboarding/billing/page.tsx:29` redirects straight to `/dashboard` when off.                                                                                                                                                                                                       |
-| 2. Direct API calls       | **Gated** | Every route under `/api/stripe/*` and `/api/webhooks/stripe` checks `features.billingEnabled` and returns 404 before doing anything: `src/app/api/stripe/checkout/route.ts:19`, `.../portal/route.ts:13`, `.../cancel/route.ts:13`, `.../resume/route.ts:13`, `.../invoices/route.ts:10`, `src/app/api/webhooks/stripe/route.ts:23`. `src/app/api/auth/register/route.ts:140` correctly branches on `!features.billingEnabled` to call `assignFreePlan` instead of routing through Stripe. |
-| 3. Stale links            | **OK**    | `billingUrl` links used in subscription emails (`src/lib/email.ts`) point at `/dashboard/settings/billing`, which always renders (flag-aware content, not a 404) — an already-sent email never links to a dead page. `sitemap.ts` has no billing-related entries to leak.                                                                                                                                                                                                                  |
-| 4. Nav/UI leaks           | **OK**    | No Stripe/billing UI found rendered outside the gated page; pricing page (`src/app/(public)/pricing/pricing-content.tsx`) receives `billingEnabled` and adjusts copy accordingly (not independently reviewed line-by-line beyond confirming the prop is threaded through, but no unguarded Stripe checkout button was found elsewhere).                                                                                                                                                    |
+1. điều hướng trực tiếp tới trang;
+2. gọi API trực tiếp;
+3. link cũ trong email/sitemap;
+4. menu, count, notification và dữ liệu liên quan;
+5. luồng tạo role/profile ở server.
 
-**Severity: Info.** No leak found for this flag through any of the 4 paths.
+Chỉ ẩn nút không đủ vì người dùng có thể tự gửi HTTP request.
 
-### MARKETPLACE_ENABLED (default false)
+## 2. `BILLING_ENABLED`
 
-| Path                      | Verdict                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Direct page navigation | **Gated**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `/shop`, `/shop/[productId]`, `/cart`, `/checkout`, `/checkout/success` all call `notFound()` when off (`src/app/(public)/shop/page.tsx:18-19`, `shop/[productId]/page.tsx:39-40`, `cart/page.tsx:8-9`, `checkout/page.tsx:8-9`, `checkout/success/page.tsx:8-9`) and produce a real 404 because the `(public)` route group has no `loading.tsx` sibling. Dashboard pages (`/dashboard/listings*`, `/dashboard/orders*`, `/dashboard/shop-orders`) also call `notFound()` at the page level (e.g. `dashboard/listings/page.tsx:15-16`) **and** are additionally gated in `src/proxy.ts:39-47` (`MARKETPLACE_DASHBOARD_PREFIXES`), which is required because `(dashboard)/loading.tsx` exists (confirmed present) and would otherwise commit a 200 status before the page's own `notFound()` runs — this is a correctly-reasoned belt-and-suspenders fix, not redundant. |
-| 2. Direct API calls       | **Leak found (Critical) — see below.** Every `/api/products*`, `/api/shop-products*`, `/api/cart*`, `/api/orders*` route does check `features.marketplaceEnabled` and 404s correctly (verified in `products/route.ts:20,57`, `products/[id]/route.ts:14,44,103`, `products/[id]/duplicate/route.ts:12`, `shop-products/route.ts:9`, `shop-products/[id]/route.ts:11`, `cart/route.ts:12,44`, `cart/[id]/route.ts:19,82`, `orders/route.ts:21`, `orders/[id]/route.ts:14`, `orders/[id]/status/route.ts:15`, `orders/[id]/return/route.ts:15`, `orders/checkout/route.ts:13`). **However**, the _role itself_ is not gated: |
-| 3. Stale links            | **OK**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `src/app/sitemap.ts:33-37,44-47` correctly omits `/shop` and all `/shop/[id]` product entries when the flag is off. No email template links to shop/cart/checkout URLs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 4. Nav/UI leaks           | **Gated in UI, but role is reachable server-side (see below)**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | `CAMERA_SHOP` is correctly filtered out of: registration role picker (`src/app/(auth)/register/register-form.tsx:61-63`, and the `?role=` preselect at line 68-70 is checked against the already-filtered list, so `/login?mode=register&role=CAMERA_SHOP` can't bypass it either), pricing page (`pricing-content.tsx:117`), browse filter sidebar (`src/components/browse/filter-sidebar.tsx:141`), footer discover-roles list (`src/components/layout/footer.tsx:34`), landing-page hero search role chips (`src/components/sections/hero-search.tsx:32`), and the generic role-selection form (`src/components/forms/role-selection-form.tsx:54`).                                                                                                                                                                                                                  |
+Kết quả lúc audit: phần Stripe được chặn khá đầy đủ.
 
-**Critical finding — MARKETPLACE_ENABLED role/profile can be created and made publicly searchable entirely via API, flag off or not:**
+- Trang billing hiển thị nội dung thay thế khi tắt.
+- Onboarding bỏ qua bước Stripe.
+- API Stripe và webhook trả 404 khi flag tắt.
+- Đăng ký chuyển sang gói miễn phí theo policy lúc đó.
+- Link cũ vẫn trỏ tới một trang hợp lệ thay vì trang chết.
 
-1. `src/lib/validations/auth.ts:27-34,48` — `registerSchema`'s `roles` field is `z.array(z.enum(PAID_ROLE_VALUES))` where `PAID_ROLE_VALUES` includes `"CAMERA_SHOP"` unconditionally. `src/app/api/auth/register/route.ts` never checks `features.marketplaceEnabled` before accepting it into `roles`/`uniqueRoles` (only `billingEnabled` is checked, at line 140). A direct `POST /api/auth/register` with `roles: ["CAMERA_SHOP"]` creates the `UserRole` row, and because `BILLING_ENABLED` is also off by default, line 140-142 immediately calls `assignFreePlan(user.id, ["CAMERA_SHOP"])` → `assignManualPlan` (`src/services/subscription.ts:356-390`) sets `active: true` and an `ACTIVE` `FREE` subscription. **The account now genuinely holds an active, paid-equivalent CAMERA_SHOP role, with zero flag check anywhere in this path.**
-2. `src/app/api/users/roles/route.ts:7-37` (the "add a role later" endpoint used by `/dashboard/settings/roles`) is worse: `updateRolesSchema` (`src/lib/validations/user.ts:4-6`) is `z.array(z.enum(Role))` — **the full Prisma `Role` enum**, not `PAID_ROLE_VALUES`. `Role` includes `CAMERA_SHOP` **and `ADMIN`** (`prisma/schema.prisma:280-294`, where the `ADMIN` comment explicitly says "Not selectable at registration — granted manually via `scripts/make-admin.ts`"). The route does `db.userRole.upsert(... create: { ..., active: true })` with no role allow-list, no flag check, no admin check at all. **Any authenticated user can `POST /api/users/roles` with `{"roles":["ADMIN"]}` and self-grant an active ADMIN role.** This is outside this audit's flag scope but is a critical privilege-escalation bug discovered on the same code path and is too severe not to report immediately.
-3. Once the `CAMERA_SHOP` `UserRole` exists, `PATCH /api/profiles/[role]` (`src/app/api/profiles/[role]/route.ts:66-77`) and `PATCH /api/profiles/[role]/publish` (`src/app/api/profiles/[role]/publish/route.ts:23-34`) only check `session.user.roles.includes(role)` — no `marketplaceEnabled` check — so a `CAMERA_SHOP` profile can be created and published (subject to the normal identity-verification and approved-media gates, which are real friction but unrelated to this flag).
-4. `src/services/search.ts` and `src/app/api/search/route.ts:12` have no `marketplaceEnabled` filter at all. `PAID_ROLES` (`src/lib/constants/index.ts:40-`) includes `CAMERA_SHOP` and is the default role filter when no `roles` query param is given (`search.ts:129`). A published `CAMERA_SHOP` profile from step 3 **would appear in default `/browse` / `/api/search` results** even with the flag off, and `?roles=CAMERA_SHOP` can be requested directly regardless of what the UI's filter checkboxes offer.
+Điểm cần nhớ: `BILLING_ENABLED` chỉ nói về Stripe. Việc cấp miễn phí và các cổng
+Việt Nam phải có flag riêng; không suy ra “Stripe tắt” đồng nghĩa “mọi role đều
+miễn phí”.
 
-Net effect: the marketplace **product/cart/order/checkout machinery** is solidly gated (path 1–3 all clean), but the **CAMERA_SHOP role and its profile/search surface are not gated at the API layer at all** — only the UI hides the option. A determined user reaches everything up to (but not including) actual product listing/selling, entirely through direct API calls.
+## 3. `MARKETPLACE_ENABLED`
 
-### SOCIAL_FEED_ENABLED (default false)
+Trang sản phẩm, giỏ hàng, checkout và phần lớn API marketplace đã được chặn. Tuy
+nhiên audit tìm thấy lỗ hổng ở đường tạo role:
 
-| Path                      | Verdict      | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Direct page navigation | **N/A / OK** | No dedicated page exists for Follow (it's a button on the public profile page, not a route), and `Post`/`Like`/`Comment` have zero UI or routes per `docs/FEATURES.md` §9a — confirmed no matching page files found. Nothing to gate.                                                                                                                                                                                                                                                  |
-| 2. Direct API calls       | **Gated**    | `src/app/api/follows/route.ts:14` (POST) and `:73` (DELETE) both check `features.socialFeedEnabled` and 404. `src/app/api/follows/status/route.ts` is intentionally _not_ wholesale-gated (it also serves the always-on "Save profile" feature) but correctly branches the Follow half of the query on `features.socialFeedEnabled` at line 32, defaulting to `null`/not-following when off (verified by reading the full file). No routes exist for `Post`/`Like`/`Comment` to check. |
-| 3. Stale links            | **OK**       | No sitemap or email entries reference follow/social pages.                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| 4. Nav/UI leaks           | **Gated**    | Follow button + follower count hidden via `socialFeedEnabled` prop threaded from `src/app/(public)/profile/[username]/page.tsx:91-93,257` into `src/components/profile/profile-actions.tsx:105` (button only renders `{socialFeedEnabled ? ... : null}`). The follower-count DB query itself is also skipped when off (`page.tsx:95-96`, `Promise.resolve(0)` fallback), so no follower count is computed or exposed at all while off.                                                 |
+- validation server từng chấp nhận `CAMERA_SHOP` dù flag tắt;
+- endpoint đổi role từng nhận cả enum `Role`;
+- cùng endpoint có thể nhận `ADMIN`, tạo lỗi nâng quyền nghiêm trọng;
+- profile CAMERA_SHOP có thể được tạo/publish và xuất hiện trong search.
 
-**Severity: Info.** No leak found for this flag through any of the 4 paths — this is the cleanest-gated of the three.
+Điều này tách thành hai vấn đề:
 
----
+1. máy móc shop đã tắt;
+2. role/profile đại diện cho shop chưa bị chặn ở mọi server path.
 
-## Part 2 — Cron Jobs
+Checklist đúng:
 
-`vercel.json` registers exactly 3 crons; all 3 have a matching route file, and no cron-shaped code was found anywhere else in the codebase without a matching `vercel.json` entry (grepped for "cron", "daily", "nightly", "scheduled" outside `src/app/api/cron/`; the one other match — a "cleanup logic" comment in `src/services/compliance.ts:232-235` — is synchronous cleanup run inline during account deletion, not a scheduled job, so it's not an orphan).
+- lọc role ở validation và service;
+- cấm ADMIN tuyệt đối trong endpoint tự phục vụ;
+- kiểm tra flag khi đăng ký, thêm/đổi role, tạo/publish profile và search;
+- loại dữ liệu khỏi count/sitemap/notification khi tắt;
+- có test API trực tiếp cho flag off.
 
-| Route                                           | Registered?         | Schedule                  | `CRON_SECRET` check | What it does                                                                                                                         |
-| ----------------------------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/app/api/cron/booking-reminders/route.ts`   | Yes (`vercel.json`) | `0 9 * * *` (daily 09:00) | See finding below   | Emails both parties of any `CONFIRMED` booking happening tomorrow, once (guarded by `reminderSentAt`), via `sendBookingReminders()`. |
-| `src/app/api/cron/purge-kyc-documents/route.ts` | Yes (`vercel.json`) | `0 3 * * *` (daily 03:00) | See finding below   | Deletes identity-verification documents older than the 90-day retention window via `purgeExpiredKycDocuments()`.                     |
-| `src/app/api/cron/expire-bookings/route.ts`     | Yes (`vercel.json`) | `0 * * * *` (hourly)      | See finding below   | Auto-transitions stale `PENDING` bookings to `EXPIRED` via `expireBookings()`.                                                       |
+## 4. `SOCIAL_FEED_ENABLED`
 
-No dead `vercel.json` entries (all 3 paths resolve to a real route file) and no orphaned cron-shaped code found.
+Tại thời điểm audit, follow/social chưa có nhiều bề mặt và các phần đã tồn tại được
+chặn tương đối rõ. Khi phát triển thêm post/like/comment, phải lặp lại audit qua
+trang, API, search/count, thông báo và dữ liệu cũ.
 
-**High-severity finding — all 3 cron routes fail open if `CRON_SECRET` is unset:**
+## 5. Cron
 
-All three routes use the identical pattern (`expire-bookings/route.ts:6-15`, `purge-kyc-documents/route.ts:6-15`, `booking-reminders/route.ts:6-8`):
+Audit kiểm tra các công việc Vercel chạy theo lịch và phát hiện hai loại rủi ro.
 
-```ts
-const authHeader = request.headers.get("authorization");
-if (
-  process.env.CRON_SECRET &&
-  authHeader !== `Bearer ${process.env.CRON_SECRET}`
-) {
-  return NextResponse.json({ ... }, { status: 401 });
-}
-```
+### Secret thiếu nhưng route vẫn chạy
 
-The `process.env.CRON_SECRET &&` short-circuit means the auth check is **skipped entirely, not enforced, when `CRON_SECRET` is unset** — these routes are unauthenticated-by-default rather than secure-by-default. `src/lib/env.ts:54` declares `CRON_SECRET: z.string().optional()` (no required-in-production branch), and `.env.example:100` ships it as an empty string. If a human forgets to set `CRON_SECRET` in the Vercel Production environment (a real risk called out generically in CLAUDE.md's "Current phase" section — this project has shipped several integrations that were only ever type-checked, never live-tested end-to-end), all three endpoints become publicly callable by anyone with the URL: an attacker could force-purge KYC documents early, spam booking-reminder emails, or force-expire bookings, with no credential required. Recommend either making `CRON_SECRET` required in `serverSchema` for `APP_ENV !== "development"`, or flipping each check to fail closed (`if (!process.env.CRON_SECRET || authHeader !== ...)`).
+Guard điều kiện cũ bỏ qua auth khi `CRON_SECRET` không được cấu hình. Mọi cron phải
+trả 401/500 khi thiếu secret thay vì coi đó là môi trường không cần bảo vệ.
 
----
+### Lịch chạy không khớp gói Vercel
 
-## Summary of what needs action before launch
+Vercel Hobby giới hạn lịch cron. Một job cần chạy mỗi vài phút có thể thực tế chỉ
+chạy mỗi ngày hoặc không được chấp nhận. Với email retry, lịch quá thưa làm email
+chậm nhiều giờ.
 
-1. **Critical** — `POST /api/users/roles` allows any authenticated user to self-grant `ADMIN` (or any `Role` enum value) with zero validation (`src/app/api/users/roles/route.ts`, `src/lib/validations/user.ts:4-6`). Unrelated to the flag audit's original scope but found on the same code path and must be fixed immediately regardless of the flags work.
-2. **Critical** — `MARKETPLACE_ENABLED=false` does not stop a `CAMERA_SHOP` role + active FREE subscription from being created via `POST /api/auth/register` or `POST /api/users/roles`, nor does it stop that role's profile from being published and appearing in `/browse`/`/api/search` results. Only the product/cart/order/checkout surface is actually gated. Needs a `features.marketplaceEnabled` check added at: register route's role filtering, `/api/users/roles`, and ideally also `search.ts`'s default role list / `/api/profiles/[role]/publish` as defense in depth.
-3. **High** — All 3 cron routes (`expire-bookings`, `purge-kyc-documents`, `booking-reminders`) fail open (no auth at all) if `CRON_SECRET` is not set in the deployment environment. Fix the short-circuit logic and/or make the env var required outside development.
-4. **Info** — `BILLING_ENABLED` and `SOCIAL_FEED_ENABLED` are both cleanly gated across all 4 checked paths; no action needed.
+Cần chọn rõ:
+
+- nâng gói Vercel;
+- dùng scheduler ngoài gọi endpoint có secret;
+- hoặc chấp nhận lịch thưa và cập nhật SLA/tài liệu.
+
+## 6. Checklist thêm cron mới
+
+- [ ] Route bắt buộc `CRON_SECRET` và fail closed.
+- [ ] Job an toàn khi chạy lặp.
+- [ ] Hai lần chạy đồng thời không xử lý cùng dòng hai lần.
+- [ ] Query có batch/limit, không quét vô hạn.
+- [ ] Có log số dòng thành công/thất bại nhưng không log secret.
+- [ ] Lịch phù hợp giới hạn gói deploy.
+- [ ] Có cảnh báo nếu nhiều lần liên tiếp không chạy hoặc lỗi.
+- [ ] `vercel.json` và tài liệu vận hành cùng một lịch.
+
+## 7. Kết luận
+
+Feature flag là ranh giới nghiệp vụ phía server, không phải mẹo ẩn giao diện. Cron
+là API production có quyền thay đổi dữ liệu, nên cần auth, idempotency, giới hạn tài
+nguyên và giám sát giống các endpoint nhạy cảm khác.

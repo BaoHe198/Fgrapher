@@ -451,6 +451,61 @@
   html {
     @apply font-sans;
   }
+  button:not(:disabled),
+  summary,
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  a[href] {
+    transition-property: color, opacity, filter, text-decoration-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  /* Raw interactive elements still exist in feature-level screens. This
+     fallback gives them visible feedback. The independent scale property
+     preserves transforms used to position gallery and carousel controls. */
+  @media (hover: hover) {
+    button:not(:disabled):not([data-slot="button"]),
+    summary,
+    [role="button"]:not([aria-disabled="true"]):not([data-interactive="true"]) {
+      transition-property:
+        color, background-color, border-color, box-shadow, opacity, filter,
+        scale;
+      transition-duration: 150ms;
+      transition-timing-function: ease;
+    }
+
+    button:not(:disabled):not([data-slot="button"]):hover,
+    summary:hover,
+    [role="button"]:not([aria-disabled="true"]):not(
+        [data-interactive="true"]
+      ):hover {
+      filter: brightness(1.12);
+      scale: 1.04;
+    }
+
+    a[href]:not(:has([data-interactive="true"])):hover {
+      filter: brightness(1.14);
+    }
+  }
+
+  button:not(:disabled):not([data-slot="button"]):active,
+  summary:active,
+  [role="button"]:not([aria-disabled="true"]):not(
+      [data-interactive="true"]
+    ):active {
+    opacity: 0.72;
+    scale: 0.97;
+  }
+
+  a[href]:active {
+    opacity: 0.72;
+  }
 }
 
 /* The landing hero's contact sheet (components/sections/hero-contact-sheet.tsx).
@@ -472,6 +527,79 @@
 
 @utility animate-develop {
   animation: fg-develop 900ms ease-out both;
+}
+
+/* Provider-card carousel. Incoming and outgoing media overlap during the
+   transition, preventing a background flash while keeping only two assets
+   mounted at once. */
+@keyframes fg-provider-slide-enter-next {
+  from {
+    opacity: 0;
+    transform: translateX(9%) scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes fg-provider-slide-exit-next {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-7%) scale(0.985);
+  }
+}
+
+@keyframes fg-provider-slide-enter-previous {
+  from {
+    opacity: 0;
+    transform: translateX(-9%) scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes fg-provider-slide-exit-previous {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(7%) scale(0.985);
+  }
+}
+
+.fg-provider-slide-enter-next,
+.fg-provider-slide-enter-previous,
+.fg-provider-slide-exit-next,
+.fg-provider-slide-exit-previous {
+  will-change: transform, opacity;
+  animation-duration: 460ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+.fg-provider-slide-enter-next {
+  animation-name: fg-provider-slide-enter-next;
+}
+
+.fg-provider-slide-exit-next {
+  animation-name: fg-provider-slide-exit-next;
+}
+
+.fg-provider-slide-enter-previous {
+  animation-name: fg-provider-slide-enter-previous;
+}
+
+.fg-provider-slide-exit-previous {
+  animation-name: fg-provider-slide-exit-previous;
 }
 
 /* Booking confirmation (booking-wizard.tsx). The one moment in the

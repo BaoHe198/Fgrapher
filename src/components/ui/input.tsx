@@ -31,7 +31,7 @@ function Input({
       data-slot="input"
       aria-invalid={ariaInvalid ?? Boolean(error)}
       className={cn(
-        "h-auto w-full min-w-0 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none transition-colors placeholder:text-text-tertiary focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger",
+        "h-auto w-full min-w-0 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none transition-[border-color,box-shadow,background-color] placeholder:text-text-tertiary hover:border-border-strong focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger",
         className,
       )}
       {...props}

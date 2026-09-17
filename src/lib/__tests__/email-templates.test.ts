@@ -44,6 +44,22 @@ describe("escapeHtml", () => {
 });
 
 describe("bookingEmailShell", () => {
+  it("renders a responsive, table-based branded email shell", () => {
+    const html = bookingEmailShell({
+      t,
+      heading: "Thông báo mới",
+      body: "Nội dung",
+      ctaLabel: "Xem ngay",
+      ctaUrl: "https://fgrapher.test/dashboard",
+    });
+
+    assert.ok(html.startsWith("<!doctype html>"));
+    assert.ok(html.includes('role="presentation"'));
+    assert.ok(html.includes('name="viewport"'));
+    assert.ok(html.includes("Fgrapher"));
+    assert.ok(html.includes("Thông báo mới"));
+  });
+
   it("escapes the CTA url so it cannot break out of the href", () => {
     const html = bookingEmailShell({
       t,
@@ -67,7 +83,7 @@ describe("bookingEmailShell", () => {
 
   it("omits the CTA entirely when it has no url", () => {
     const html = bookingEmailShell({ t, heading: "h", body: "b" });
-    assert.ok(!html.includes("<a\n"));
+    assert.ok(!html.includes("&nbsp;&nbsp;→"));
   });
 });
 
@@ -189,6 +205,8 @@ describe("emailHtmlToText", () => {
     });
     const text = emailHtmlToText(html);
     assert.ok(!text.includes("<"));
+    assert.ok(!text.includes("@media"));
+    assert.ok(!text.includes("fg-email-wrap"));
     assert.ok(text.includes("https://fgrapher.test/verify-email?token=abc"));
     assert.ok(text.includes("Xác minh email"));
   });

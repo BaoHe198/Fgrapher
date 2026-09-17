@@ -1,187 +1,98 @@
-# Fgrapher — Development Guides
+# Hướng dẫn lịch sử xây dựng Fgrapher
 
-Bộ hướng dẫn đầy đủ từ Phase 1 đến Phase 12, mỗi phase có prompts sẵn để paste vào Claude Code.
+Thư mục này lưu kế hoạch và prompt từng dùng để xây dự án qua nhiều giai đoạn. Nó
+giúp hiểu ý định ban đầu và lý do một số quyết định được đưa ra.
 
----
+**Không dùng guide Phase làm nguồn hiện trạng.** Nhiều nội dung đã thay đổi, ví dụ:
 
-## Cách sử dụng
+- Stripe bị tắt theo điều kiện kinh doanh tại Việt Nam;
+- messaging dùng polling thay vì Socket.io;
+- marketplace và social feed nằm sau feature flag;
+- dự án đã có thêm Model, thanh toán Việt Nam, outbox email, cache và nhiều chốt bảo
+  mật không có trong kế hoạch ban đầu.
 
-### 1. Copy design reference vào project
+Nguồn hiện hành:
 
-```bash
-mkdir -p docs/design-reference
-cp Fgrapher_Web_UI_Kit.html docs/design-reference/
+1. `CLAUDE.md`: ràng buộc bắt buộc.
+2. `docs/FEATURES.md`: tính năng đang có.
+3. `docs/ARCHITECTURE.md`: kiến trúc hiện tại.
+4. `docs/MVP_SCOPE.md`: phạm vi đang bật/tắt.
+5. `docs/ops`: vận hành production.
+6. Code và test: nguồn quyết định cuối cùng.
+
+## Danh sách giai đoạn
+
+| Giai đoạn | Mục tiêu lịch sử                         | File                       |
+| --------- | ---------------------------------------- | -------------------------- |
+| 1         | Landing page, navigation và design token | `phase-1-landing-nav.md`   |
+| 2         | Đăng nhập, đăng ký và quên mật khẩu      | `phase-2-auth.md`          |
+| 3         | Khung dashboard và các khu quản lý       | `phase-3-dashboard.md`     |
+| 4         | Hồ sơ công khai và portfolio             | `phase-4-profiles.md`      |
+| 5         | Tìm kiếm và khám phá nhà cung cấp        | `phase-5-browse-search.md` |
+| 6         | Đặt lịch và lịch rảnh                    | `phase-6-booking.md`       |
+| 7         | Gói và thanh toán                        | `phase-7-payments.md`      |
+| 8         | Tin nhắn                                 | `phase-8-messaging.md`     |
+| 9         | Marketplace thiết bị                     | `phase-9-marketplace.md`   |
+| 10        | Đánh giá                                 | `phase-10-reviews.md`      |
+| 11        | i18n, hiệu năng, SEO và accessibility    | `phase-11-polish.md`       |
+| 12        | Admin và chuẩn bị ra mắt                 | `phase-12-admin-launch.md` |
+
+## Cách đọc một guide cũ
+
+Mỗi guide đã được viết lại bằng tiếng Việt theo bốn phần:
+
+1. mục tiêu;
+2. những thành phần đã dự kiến;
+3. kiến thức kỹ thuật cần hiểu;
+4. điểm nào đã thay đổi so với hiện trạng.
+
+Tên file, route, API và biến môi trường được giữ nguyên để tra cứu code. Những đoạn
+prompt dài bằng tiếng Anh trước đây đã được rút thành yêu cầu rõ ràng; Git vẫn giữ
+lịch sử nếu cần xem nguyên bản.
+
+## Tóm tắt hệ thống thiết kế
+
+- Xanh rừng là màu chính; vàng ấm là màu nhấn.
+- Nền trắng/kem ấm, dark mode có palette riêng.
+- Bề rộng nội dung lớn nhất khoảng 1240 px.
+- Navigation cao khoảng 72 px.
+- Dashboard sidebar khoảng 232 px; browse filter khoảng 268 px.
+- Card bo 12–16 px; button/badge thường bo nhiều.
+- Bricolage Grotesque cho display; Plus Jakarta Sans cho nội dung.
+
+Giá trị chính xác nằm trong `docs/design-reference/design-tokens.md` và
+`src/app/globals.css`.
+
+## Khi giao việc cho Claude Code
+
+Một task tốt nên có:
+
+- vấn đề hiện tại và cách tái hiện;
+- hành vi mong đợi;
+- file hoặc luồng liên quan;
+- ràng buộc không được phá;
+- kiểm tra cần chạy;
+- yêu cầu báo cáo file thay đổi và rủi ro.
+
+Ví dụ:
+
+```text
+Lỗi: khi bấm nhiều bộ lọc liên tiếp ở /browse, lựa chọn trước bị mất.
+
+Hãy lần theo state và router navigation trong filter sidebar, sửa để các lần cập
+nhật nhanh được gộp đúng. Giữ URL là nguồn có thể chia sẻ, không tăng số request
+không cần thiết. Thêm kiểm tra tập trung cho click liên tiếp và chạy lint,
+typecheck, test liên quan.
 ```
 
-### 2. Mở Claude Code trong project
+Tránh prompt quá rộng như “làm toàn bộ phase” vì khó review và dễ sửa ngoài phạm
+vi. Chia theo hành vi có thể kiểm tra.
 
-```bash
-cd your-project
-claude
-```
+## Quy trình dùng tài liệu lịch sử an toàn
 
-### 3. Đầu mỗi session, cho Claude Code đọc design
-
-```
-Read docs/design-reference/Fgrapher_Web_UI_Kit.html — this is my design
-system export. Extract the color tokens, typography scale, spacing,
-and component patterns. Use this as the visual reference for everything
-I ask you to build. Also read CLAUDE.md for project conventions.
-```
-
-### 4. Làm theo từng guide
-
-Mỗi guide có các Step. Với mỗi Step:
-1. Đọc phần mô tả để hiểu mục tiêu
-2. Copy prompt trong khối code
-3. Paste vào Claude Code
-4. Review kết quả, chạy `pnpm dev` kiểm tra
-5. Nếu chưa đúng, mô tả cụ thể chỗ cần sửa
-
-**Đừng chạy nhiều Step cùng lúc.** Làm xong một Step, kiểm tra, rồi mới sang Step tiếp theo.
-
----
-
-## Danh sách các Phase
-
-| # | Phase | Thời gian | File | Design |
-|---|-------|-----------|------|--------|
-| 1 | Landing & Navigation | 1 tuần | `phase-1-landing-nav.md` | LandingScreen, WebNav |
-| 2 | Authentication | 1 tuần | `phase-2-auth.md` | AuthScreens |
-| 3 | Dashboard | 2 tuần | `phase-3-dashboard.md` | DashboardScreen |
-| 4 | Public Profiles | 2 tuần | `phase-4-profiles.md` | WebProfileScreen |
-| 5 | Browse & Search | 2 tuần | `phase-5-browse-search.md` | BrowseScreen |
-| — | **MVP LAUNCH** | — | — | — |
-| 6 | Booking Flow | 2 tuần | `phase-6-booking.md` | BookingFlowScreen |
-| 7 | Subscription & Payments | 2 tuần | `phase-7-payments.md` | SubscriptionScreen |
-| 8 | Messaging | 2 tuần | `phase-8-messaging.md` | ChatDock |
-| 9 | Marketplace | 2 tuần | `phase-9-marketplace.md` | Listings + Gear tabs |
-| 10 | Reviews & Ratings | 1 tuần | `phase-10-reviews.md` | Reviews tab |
-| 11 | Polish & Performance | 2 tuần | `phase-11-polish.md` | i18n.js |
-| 12 | Admin & Launch | 1-2 tuần | `phase-12-admin-launch.md` | — |
-
-**Tổng: khoảng 20 tuần** nếu làm full-time. Có thể soft launch sau Phase 5 (tuần 8).
-
----
-
-## Design system tóm tắt
-
-Lấy từ Claude Design của bạn:
-
-**Colors:**
-- Brand green (hue 168): `--green-50` → `--green-950`
-- Brand gold (hue 38): `--gold-50` → `--gold-900`
-- Warm greige neutrals (hue 30): `--neutral-0` → `--neutral-950`
-- Primary: `var(--green-800)` · Accent: `var(--gold-400)`
-- Dark mode: đầy đủ, scale neutral đảo ngược
-
-**Layout:**
-- Max width: 1240px
-- Page padding: 32px
-- Nav height: 72px (sticky, blur)
-- Dashboard sidebar: 232px · Browse sidebar: 268px
-- Card gaps: 20px · Section gaps: 32px
-
-**Logo:** Dual Lens — hai hình vuông bo góc chồng nhau (#123832 + #C9A66B)
-
-**Tagline:** Find Your Artist
-
----
-
-## Thứ tự ưu tiên nếu muốn launch nhanh
-
-Nếu bạn muốn ra mắt sớm nhất có thể, làm theo thứ tự này:
-
-**Tối thiểu (6-8 tuần):**
-1. Phase 1 — Landing
-2. Phase 2 — Auth
-3. Phase 4 — Profiles (bỏ qua Phase 3 dashboard phức tạp, làm bản đơn giản)
-4. Phase 5 — Browse
-
-Ở mức này users có thể đăng ký, tạo profile, được tìm thấy. Liên hệ qua thông tin trên profile (chưa cần booking online).
-
-**Sau đó thêm dần:**
-5. Phase 7 — Payments (để bắt đầu có doanh thu)
-6. Phase 6 — Booking
-7. Phase 8 — Messaging
-8. Phase 3 — Dashboard đầy đủ
-9. Phase 10 — Reviews
-10. Phase 9 — Marketplace
-11. Phase 11-12 — Polish & Launch
-
----
-
-## Tips khi làm việc với Claude Code
-
-**Prompt tốt:**
-```
-Create the booking calendar component. Show a 7-day strip matching
-the design in WebProfileScreen: day-of-week labels above day numbers,
-busy days grayed at 40% opacity with a dot indicator, selected day
-uses bg-brand-primary with text-on-brand. Fetch availability from
-/api/availability/[providerId]. Use date-fns for date handling.
-```
-
-**Prompt kém:**
-```
-Make the booking calendar
-```
-
-**Khi kết quả không đúng:**
-```
-The calendar is close but three things are off:
-1. The selected day should use bg-brand-primary, not bg-green-500
-2. Busy days need the small dot indicator below the number
-3. The strip should start on Monday, not Sunday
-Fix these without changing anything else.
-```
-
-**Khi gặp lỗi:**
-```
-/fix The search page returns 0 results even though there are 30
-published profiles in the database. Check the Prisma query in
-/api/search and the where clause construction.
-```
-
-**Kiểm tra định kỳ:**
-```
-/review src/app/api
-```
-
----
-
-## Cấu trúc project tham khảo
-
-```
-fgrapher/
-├── CLAUDE.md                    # Project context cho Claude Code
-├── .claude/
-│   ├── commands/                # Custom slash commands
-│   └── skills/                  # Domain knowledge skills
-├── docs/
-│   ├── design-reference/        # Claude Design export
-│   └── guides/                  # Các file phase guide này
-├── prisma/
-│   ├── schema.prisma
-│   ├── migrations/
-│   └── seed.ts
-├── src/
-│   ├── app/
-│   │   ├── (public)/            # Landing, browse, profile, shop
-│   │   ├── (auth)/              # Login, register, reset
-│   │   ├── (dashboard)/         # Dashboard, settings, bookings
-│   │   ├── (admin)/             # Admin panel
-│   │   └── api/                 # API routes
-│   ├── components/
-│   │   ├── ui/                  # Primitives
-│   │   ├── layout/              # Nav, sidebar, footer
-│   │   ├── cards/               # ArtistCard, ProductCard, PostCard
-│   │   ├── modals/              # Dialogs
-│   │   └── [domain]/            # Feature-specific components
-│   ├── lib/                     # db, auth, stripe, cloudinary, utils
-│   ├── services/                # Business logic
-│   ├── hooks/                   # Custom React hooks
-│   ├── messages/                # en.json, vi.json
-│   └── types/
-└── public/
-```
+1. Đọc mục tiêu trong guide.
+2. So với `docs/FEATURES.md` và code hiện tại.
+3. Bỏ yêu cầu đã lỗi thời.
+4. Tạo task nhỏ, có tiêu chí hoàn thành.
+5. Review diff và chạy kiểm tra.
+6. Cập nhật tài liệu hiện hành, không chỉ guide lịch sử.

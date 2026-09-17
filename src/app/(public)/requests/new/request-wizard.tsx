@@ -1,7 +1,13 @@
 "use client";
 
 import type { ProfileCategory, Role } from "@prisma/client";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  MapPin,
+  WalletCards,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
@@ -20,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ReferenceMediaField } from "@/components/forms/reference-media-field";
 import { toast } from "@/components/ui/toast";
 import { CATEGORIES_BY_ROLE, PROVIDER_ROLES } from "@/lib/constants";
-import { formatCurrency } from "@/lib/utils";
+import { formatBudgetRange } from "@/lib/utils";
 import { MAX_REFERENCE_MEDIA } from "@/lib/validations/reference-media";
 
 const MAX_CATEGORIES = 5;
@@ -528,30 +534,37 @@ export function RequestWizard({
                   : form.shootDate || "—"}
               </span>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="font-semibold text-text-primary">
-                {t("steps.where")}
-              </span>
-              <span className="text-text-secondary">
-                {wards.find((w) => w.id === form.wardId)?.name
-                  ? `${wards.find((w) => w.id === form.wardId)?.name}, `
-                  : ""}
-                {provinces.find((p) => p.id === form.provinceId)?.name ?? "—"}
-                {form.areaNote ? ` — ${form.areaNote}` : ""}
-              </span>
+            <div className="flex gap-2.5 rounded-[var(--fg-radius-md)] bg-info-bg p-3.5">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-info" />
+              <div className="flex min-w-0 flex-col gap-1">
+                <span className="font-semibold text-info">
+                  {t("steps.where")}
+                </span>
+                <span className="text-text-primary">
+                  {wards.find((w) => w.id === form.wardId)?.name
+                    ? `${wards.find((w) => w.id === form.wardId)?.name}, `
+                    : ""}
+                  {provinces.find((p) => p.id === form.provinceId)?.name ?? "—"}
+                  {form.areaNote ? ` — ${form.areaNote}` : ""}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="font-semibold text-text-primary">
-                {t("steps.budget")}
-              </span>
-              <span className="text-text-secondary">
-                {/* budgetInvalid should be unreachable here — canContinue
+            <div className="flex gap-2.5 rounded-[var(--fg-radius-md)] bg-gold-100 p-3.5 text-gold-800">
+              <WalletCards className="mt-0.5 size-4 shrink-0" />
+              <div className="flex min-w-0 flex-col gap-1">
+                <span className="font-semibold">{t("steps.budget")}</span>
+                <span className="font-bold!">
+                  {/* budgetInvalid should be unreachable here — canContinue
                     blocks leaving step 3 while it's true — but review
                     must never show an inverted range regardless. */}
-                {(form.budgetMin || form.budgetMax) && !budgetInvalid
-                  ? `${formatCurrency(Number(form.budgetMin) || 0)} – ${formatCurrency(Number(form.budgetMax) || 0)}`
-                  : t("budgetNotSet")}
-              </span>
+                  {(form.budgetMin || form.budgetMax) && !budgetInvalid
+                    ? formatBudgetRange(
+                        form.budgetMin ? Number(form.budgetMin) : null,
+                        form.budgetMax ? Number(form.budgetMax) : null,
+                      )
+                    : t("budgetNotSet")}
+                </span>
+              </div>
             </div>
             {!isVerifiedNow ? (
               <div className="rounded-[var(--fg-radius-md)] bg-warning-bg p-3 text-warning">

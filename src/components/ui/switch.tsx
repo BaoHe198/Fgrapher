@@ -4,13 +4,24 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface SwitchProps extends Omit<React.ComponentProps<"input">, "type" | "onChange"> {
+interface SwitchProps extends Omit<
+  React.ComponentProps<"input">,
+  "type" | "onChange"
+> {
   label?: React.ReactNode;
   checked?: boolean;
   onChange?: (checked: boolean) => void;
 }
 
-function Switch({ className, id, label, checked, disabled, onChange, ...props }: SwitchProps) {
+function Switch({
+  className,
+  id,
+  label,
+  checked,
+  disabled,
+  onChange,
+  ...props
+}: SwitchProps) {
   const generatedId = React.useId();
   const switchId = id ?? generatedId;
 
@@ -29,7 +40,7 @@ function Switch({ className, id, label, checked, disabled, onChange, ...props }:
       <span
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute inset-0 rounded-full bg-neutral-300 transition-colors duration-150 peer-checked:bg-brand-primary peer-focus-visible:ring-2 peer-focus-visible:ring-gold-500/20 peer-disabled:opacity-50",
+          "pointer-events-none absolute inset-0 rounded-full bg-neutral-300 transition-[background-color,box-shadow] duration-150 peer-hover:bg-neutral-400 peer-hover:shadow-[0_0_0_3px_var(--color-success-bg)] peer-checked:bg-brand-primary peer-checked:peer-hover:bg-green-400 peer-focus-visible:ring-2 peer-focus-visible:ring-gold-500/20 peer-disabled:opacity-50",
           className,
         )}
       />

@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/format";
-import { formatCurrency } from "@/lib/utils";
+import { formatBudgetRange } from "@/lib/utils";
 import { listUnclaimedRequests } from "@/services/service-requests";
 
 export default async function AdminServiceRequestsPage() {
@@ -66,9 +66,8 @@ export default async function AdminServiceRequestsPage() {
                   </span>
                   <span>·</span>
                   <span>
-                    {request.budgetMin || request.budgetMax
-                      ? `${formatCurrency(request.budgetMin ?? 0)} – ${formatCurrency(request.budgetMax ?? 0)}`
-                      : t("budgetNotSet")}
+                    {formatBudgetRange(request.budgetMin, request.budgetMax) ??
+                      t("budgetNotSet")}
                   </span>
                   <span>·</span>
                   <span>{formatDateTime(request.createdAt)}</span>

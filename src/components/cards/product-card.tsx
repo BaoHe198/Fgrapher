@@ -37,10 +37,7 @@ export async function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/shop/${product.id}`}>
-      <Card
-        padding={false}
-        className="cursor-pointer overflow-hidden transition-shadow duration-150 hover:shadow-[var(--shadow-md)]"
-      >
+      <Card padding={false} interactive>
         <div className="relative aspect-[4/3] w-full">
           {product.images[0] ? (
             <Image

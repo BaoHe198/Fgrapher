@@ -1,6 +1,6 @@
 import type { Role } from "@prisma/client";
 import type { Metadata } from "next";
-import { Handshake } from "lucide-react";
+import { CalendarDays, Handshake, MapPin, WalletCards } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -11,7 +11,7 @@ import { Tag } from "@/components/ui/tag";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
-import { formatCurrency } from "@/lib/utils";
+import { formatBudgetRange } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
 import { listOpportunitiesForProvider } from "@/services/request-offers";
 
@@ -102,14 +102,14 @@ export default async function OpportunitiesPage({
                 key={request.id}
                 href={`/dashboard/opportunities/${request.id}?role=${activeRole}`}
               >
-                <Card className="flex flex-col gap-2 transition-shadow duration-150 hover:shadow-[var(--shadow-md)]">
+                <Card interactive className="flex flex-col gap-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="truncate text-body-md font-semibold! text-text-primary">
                         {request.title}
                       </p>
                       <p className="text-body-sm text-text-tertiary">
-                        {request.code} · {request.province.name}
+                        {request.code}
                       </p>
                     </div>
                     {myOffer ? (
@@ -128,22 +128,28 @@ export default async function OpportunitiesPage({
                       </span>
                     ))}
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-body-sm text-text-secondary">
-                    <span>
-                      {request.budgetMin || request.budgetMax
-                        ? `${formatCurrency(request.budgetMin ?? 0)} – ${formatCurrency(request.budgetMax ?? 0)}`
-                        : t("budgetNotSet")}
+                  <div className="flex flex-wrap items-center gap-2 text-body-sm font-semibold!">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-100 px-3 py-1.5 text-gold-800">
+                      <WalletCards className="size-4" />
+                      {formatBudgetRange(
+                        request.budgetMin,
+                        request.budgetMax,
+                      ) ?? t("budgetNotSet")}
                     </span>
-                    <span>·</span>
-                    <span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-info-bg px-3 py-1.5 text-info">
+                      <MapPin className="size-4" />
+                      {request.ward ? `${request.ward.name}, ` : ""}
+                      {request.province.name}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-bg-sunken px-3 py-1.5 text-text-secondary">
+                      <CalendarDays className="size-4" />
                       {request.isDateFlexible
                         ? t("flexible")
                         : request.shootDate
                           ? formatDate(request.shootDate)
                           : "—"}
                     </span>
-                    <span>·</span>
-                    <span>
+                    <span className="ml-auto text-text-tertiary">
                       {t("offerCount", { count: request._count.offers })}
                     </span>
                   </div>

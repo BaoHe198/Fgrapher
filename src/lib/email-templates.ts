@@ -52,6 +52,8 @@ const HTML_ENTITIES: Record<string, string> = {
  */
 export function emailHtmlToText(html: string): string {
   return html
+    .replace(/<head\b[^>]*>[\s\S]*?<\/head>/gi, "")
+    .replace(/<div\b[^>]*data-email-preheader[^>]*>[\s\S]*?<\/div>/gi, "")
     .replace(
       /<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
       (_m, href, label) => {
@@ -70,7 +72,7 @@ export function emailHtmlToText(html: string): string {
 }
 
 interface ShellOptions {
-  t: EmailT;
+  t?: EmailT;
   heading: string;
   /**
    * Pre-composed HTML — the one parameter that is intentionally NOT
@@ -81,6 +83,10 @@ interface ShellOptions {
   body: string;
   ctaLabel?: string;
   ctaUrl?: string;
+  /** Safe, pre-composed HTML rendered below the primary CTA. */
+  postscript?: string;
+  footerLinkLabel?: string;
+  footerLinkUrl?: string;
 }
 
 // Shared shell for booking emails — kept as plain template-literal HTML
@@ -96,36 +102,95 @@ export function bookingEmailShell({
   body,
   ctaLabel,
   ctaUrl,
+  postscript,
+  footerLinkLabel,
+  footerLinkUrl,
 }: ShellOptions) {
+  const escapedHeading = escapeHtml(heading);
+  const footerLabel =
+    footerLinkLabel ?? t?.("footer.manageNotifications") ?? "Mở Fgrapher";
+  const footerUrl =
+    footerLinkUrl ?? appUrl("/dashboard/settings/notifications");
+  const notificationLabel =
+    t?.("footer.notificationLabel") ?? "Thông báo từ Fgrapher";
+  const brandTagline =
+    t?.("footer.brandTagline") ?? "Kết nối những ý tưởng sáng tạo";
+  const automaticNotice =
+    t?.("footer.automaticNotice") ??
+    "Đây là email tự động từ Fgrapher. Vui lòng không trả lời email này.";
   const cta =
     ctaLabel && ctaUrl
-      ? `<a
-          href="${escapeHtml(ctaUrl)}"
-          style="display: inline-block; background-color: hsl(38 44% 52%); color: hsl(30 15% 11%); font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 12px; text-decoration: none;"
-        >
-          ${escapeHtml(ctaLabel)}
-        </a>`
+      ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 28px 0 0;">
+          <tr>
+            <td bgcolor="#d5aa63" style="border-radius: 12px; box-shadow: 0 6px 16px rgba(91, 66, 29, 0.18);">
+              <a href="${escapeHtml(ctaUrl)}" style="display: inline-block; color: #211b16; font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: 700; line-height: 20px; padding: 14px 24px; text-decoration: none;">
+                ${escapeHtml(ctaLabel)}&nbsp;&nbsp;→
+              </a>
+            </td>
+          </tr>
+        </table>`
       : "";
 
-  return `
-    <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
-      <div style="background-color: hsl(168 58% 15%); padding: 32px 24px; text-align: center;">
-        <span style="color: #ffffff; font-size: 20px; font-weight: 700;">Fgrapher</span>
-      </div>
-      <div style="padding: 32px 24px; background-color: #ffffff;">
-        <h1 style="font-size: 20px; margin: 0 0 12px; color: hsl(30 15% 11%);">${escapeHtml(heading)}</h1>
-        <div style="font-size: 14px; line-height: 1.6; color: hsl(30 8% 38%); margin: 0 0 24px;">
-          ${body}
-        </div>
-        ${cta}
-      </div>
-      <div style="padding: 16px 24px; background-color: hsl(30 20% 97%); text-align: center;">
-        <a href="${escapeHtml(appUrl("/dashboard/settings/notifications"))}" style="font-size: 12px; color: hsl(30 7% 52%);">
-          ${escapeHtml(t("footer.manageNotifications"))}
-        </a>
-      </div>
-    </div>
-  `;
+  return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title>${escapedHeading}</title>
+    <style>
+      @media only screen and (max-width: 620px) {
+        .fg-email-wrap { padding: 16px 10px !important; }
+        .fg-email-header, .fg-email-content { padding-left: 24px !important; padding-right: 24px !important; }
+        .fg-email-heading { font-size: 24px !important; line-height: 31px !important; }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f2f5f4; color: #211b16;">
+    <div data-email-preheader style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: transparent; mso-hide: all;">${escapedHeading}&nbsp;·&nbsp;Fgrapher</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f2f5f4">
+      <tr>
+        <td class="fg-email-wrap" align="center" style="padding: 36px 12px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; max-width: 600px; border: 1px solid #dfe6e3; border-radius: 20px; background-color: #ffffff; box-shadow: 0 12px 32px rgba(18, 59, 50, 0.09); overflow: hidden;">
+            <tr>
+              <td class="fg-email-header" bgcolor="#123b32" style="padding: 24px 36px; border-bottom: 4px solid #d5aa63;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td width="42" height="42" align="center" valign="middle" bgcolor="#d5aa63" style="width: 42px; height: 42px; border-radius: 11px; color: #123b32; font-family: Arial, Helvetica, sans-serif; font-size: 21px; font-weight: 800;">F</td>
+                    <td style="padding-left: 13px;">
+                      <div style="color: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 21px; font-weight: 750; line-height: 25px;">Fgrapher</div>
+                      <div style="color: #b9d2ca; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 18px;">${escapeHtml(brandTagline)}</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="fg-email-content" style="padding: 40px 40px 36px;">
+                <div style="margin: 0 0 12px; color: #8a682f; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; line-height: 16px; text-transform: uppercase;">${escapeHtml(notificationLabel)}</div>
+                <h1 class="fg-email-heading" style="margin: 0 0 18px; color: #211b16; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: 750; letter-spacing: -0.4px; line-height: 36px;">${escapedHeading}</h1>
+                <div style="height: 3px; width: 48px; margin: 0 0 24px; border-radius: 2px; background-color: #d5aa63;"></div>
+                <div style="margin: 0; color: #5e5751; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 25px;">
+                  ${body}
+                </div>
+                ${cta}
+                ${postscript ?? ""}
+              </td>
+            </tr>
+            <tr>
+              <td bgcolor="#f8faf9" style="padding: 24px 40px; border-top: 1px solid #e7ecea; text-align: center;">
+                <p style="margin: 0 0 8px; color: #88827c; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 18px;">${escapeHtml(automaticNotice)}</p>
+                <a href="${escapeHtml(footerUrl)}" style="color: #246f5f; font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: 700; line-height: 18px; text-decoration: underline; text-underline-offset: 3px;">${escapeHtml(footerLabel)}</a>
+              </td>
+            </tr>
+          </table>
+          <p style="margin: 18px 0 0; color: #9a958f; font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 16px; text-align: center;">Fgrapher · ${escapeHtml(brandTagline)}</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 }
 
 // TODO(i18n): this function's only caller (src/app/api/auth/forgot-password/
@@ -141,29 +206,15 @@ export function bookingEmailShell({
 // rest of this file.
 export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
   const escapedUrl = escapeHtml(resetUrl);
-  return `
-    <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
-      <div style="background-color: hsl(168 58% 15%); padding: 32px 24px; text-align: center;">
-        <span style="color: #ffffff; font-size: 20px; font-weight: 700;">Fgrapher</span>
-      </div>
-      <div style="padding: 32px 24px; background-color: #ffffff;">
-        <h1 style="font-size: 20px; margin: 0 0 12px; color: hsl(30 15% 11%);">Đặt lại mật khẩu</h1>
-        <p style="font-size: 14px; line-height: 1.5; color: hsl(30 8% 38%); margin: 0 0 24px;">
-          Chúng tôi nhận được yêu cầu đặt lại mật khẩu Fgrapher của bạn. Liên kết này hết hạn sau 1 giờ.
-          Nếu bạn không yêu cầu điều này, bạn có thể bỏ qua email này.
-        </p>
-        <a
-          href="${escapedUrl}"
-          style="display: inline-block; background-color: hsl(38 44% 52%); color: hsl(30 15% 11%); font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 12px; text-decoration: none;"
-        >
-          Đặt lại mật khẩu
-        </a>
-        <p style="font-size: 12px; line-height: 1.5; color: hsl(30 7% 52%); margin: 24px 0 0; word-break: break-all;">
-          Hoặc sao chép liên kết này: ${escapedUrl}
-        </p>
-      </div>
-    </div>
-  `;
+  return bookingEmailShell({
+    heading: "Đặt lại mật khẩu",
+    body: `<p style="margin: 0;">Chúng tôi nhận được yêu cầu đặt lại mật khẩu Fgrapher của bạn. Liên kết này hết hạn sau <strong style="color: #211b16;">1 giờ</strong>. Nếu bạn không yêu cầu điều này, bạn có thể bỏ qua email.</p>`,
+    ctaLabel: "Đặt lại mật khẩu",
+    ctaUrl: resetUrl,
+    postscript: `<p style="margin: 24px 0 0; padding-top: 20px; border-top: 1px solid #e7ecea; color: #88827c; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 19px; word-break: break-all;">Nút không hoạt động? Sao chép liên kết này vào trình duyệt:<br><span style="color: #246f5f;">${escapedUrl}</span></p>`,
+    footerLinkLabel: "Truy cập Fgrapher",
+    footerLinkUrl: appUrl("/"),
+  });
 }
 
 // Same hardcoded-Vietnamese rationale as resetPasswordEmailHtml above: the
@@ -172,30 +223,15 @@ export function resetPasswordEmailHtml({ resetUrl }: { resetUrl: string }) {
 // and therefore no resolved locale.
 export function verifyEmailHtml({ verifyUrl }: { verifyUrl: string }) {
   const escapedUrl = escapeHtml(verifyUrl);
-  return `
-    <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
-      <div style="background-color: hsl(168 58% 15%); padding: 32px 24px; text-align: center;">
-        <span style="color: #ffffff; font-size: 20px; font-weight: 700;">Fgrapher</span>
-      </div>
-      <div style="padding: 32px 24px; background-color: #ffffff;">
-        <h1 style="font-size: 20px; margin: 0 0 12px; color: hsl(30 15% 11%);">Xác minh email của bạn</h1>
-        <p style="font-size: 14px; line-height: 1.5; color: hsl(30 8% 38%); margin: 0 0 24px;">
-          Cảm ơn bạn đã đăng ký Fgrapher. Nhấn nút bên dưới để xác minh địa chỉ email và kích hoạt tài khoản.
-          Liên kết này hết hạn sau 24 giờ.
-          Nếu bạn không tạo tài khoản Fgrapher, bạn có thể bỏ qua email này.
-        </p>
-        <a
-          href="${escapedUrl}"
-          style="display: inline-block; background-color: hsl(38 44% 52%); color: hsl(30 15% 11%); font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 12px; text-decoration: none;"
-        >
-          Xác minh email
-        </a>
-        <p style="font-size: 12px; line-height: 1.5; color: hsl(30 7% 52%); margin: 24px 0 0; word-break: break-all;">
-          Hoặc sao chép liên kết này: ${escapedUrl}
-        </p>
-      </div>
-    </div>
-  `;
+  return bookingEmailShell({
+    heading: "Xác minh email của bạn",
+    body: `<p style="margin: 0;">Cảm ơn bạn đã đăng ký Fgrapher. Xác minh địa chỉ email để kích hoạt tài khoản và bắt đầu sử dụng nền tảng. Liên kết này hết hạn sau <strong style="color: #211b16;">24 giờ</strong>.</p><p style="margin: 14px 0 0; color: #88827c; font-size: 13px; line-height: 21px;">Nếu bạn không tạo tài khoản Fgrapher, bạn có thể bỏ qua email này.</p>`,
+    ctaLabel: "Xác minh email",
+    ctaUrl: verifyUrl,
+    postscript: `<p style="margin: 24px 0 0; padding-top: 20px; border-top: 1px solid #e7ecea; color: #88827c; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 19px; word-break: break-all;">Nút không hoạt động? Sao chép liên kết này vào trình duyệt:<br><span style="color: #246f5f;">${escapedUrl}</span></p>`,
+    footerLinkLabel: "Truy cập Fgrapher",
+    footerLinkUrl: appUrl("/"),
+  });
 }
 
 interface BookingEmailBase {
@@ -350,10 +386,9 @@ export function newMessageEmailHtml({
   return bookingEmailShell({
     t,
     heading: t("newMessage.heading", { senderName: escapeHtml(senderName) }),
-    body: t("newMessage.body", {
+    body: `<p style="margin: 0 0 16px;">${t("newMessage.bodyIntro", {
       senderName: strong(senderName),
-      preview: strong(preview),
-    }),
+    })}</p><div style="padding: 16px 18px; border-left: 4px solid #d5aa63; border-radius: 0 12px 12px 0; background-color: #f5f8f7; color: #302a25; font-size: 15px; font-weight: 600; line-height: 23px;">“${escapeHtml(preview)}”</div>`,
     ctaLabel: t("newMessage.cta"),
     ctaUrl: conversationUrl,
   });

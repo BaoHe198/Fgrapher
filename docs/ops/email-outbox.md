@@ -1,296 +1,235 @@
-# Email Outbox & Retry Strategy
+# Hàng đợi email và cơ chế gửi lại
 
-## Overview
+## Hiểu nhanh
 
-Every transactional email goes through a database-backed outbox. The
-outbox exists for two reasons: a provider outage must never turn a
-successful mutation (a booking, a signup, a password reset) into an HTTP
-500, and there must be a durable record of what the platform sent.
+Mọi email nghiệp vụ của Fgrapher đi qua một bảng trong database gọi là
+`email_outbox`. Có thể hình dung đây là “sổ gửi thư kiêm hàng chờ”. Nó giải quyết
+hai vấn đề:
 
-The table is a **complete ledger**, not a failure queue: emails delivered
-on the first attempt are recorded too.
+1. Resend tạm thời lỗi không được làm thao tác chính như đăng ký hoặc đặt lịch
+   trả HTTP 500.
+2. Hệ thống cần biết đã cố gửi email nào, thành công hay thất bại.
 
-## Architecture
+Outbox ghi cả email thành công ở lần đầu, không chỉ email lỗi.
 
-### `email_outbox`
+## Bảng `email_outbox`
 
-| Column           | Meaning                                                            |
-| ---------------- | ------------------------------------------------------------------ |
-| `idempotencyKey` | Unique. **Event-scoped** — see below. Never a hash of the content. |
-| `to`             | Recipient address                                                  |
-| `subject`        | Subject line                                                       |
-| `html`           | Body. **Nullable** — scrubbed once it can no longer be sent        |
-| `sensitive`      | The body embeds a credential (see below)                           |
-| `status`         | `PENDING` \| `SENDING` \| `SENT` \| `FAILED`                       |
-| `attempts`       | Delivery attempts made (0–5)                                       |
-| `nextAttemptAt`  | When to try next. **Null on terminal rows** (`SENT`/`FAILED`)      |
-| `lockedAt`       | When the current `SENDING` claim was taken                         |
-| `providerId`     | Resend message id, once delivered                                  |
-| `lastError`      | Most recent error. Cleared on success                              |
-| `sentAt`         | Delivery time (`SENT` only)                                        |
+| Cột              | Ý nghĩa dễ hiểu                                                          |
+| ---------------- | ------------------------------------------------------------------------ |
+| `idempotencyKey` | Khoá duy nhất đại diện cho sự kiện gây ra email; dùng để chống gửi trùng |
+| `to`             | Địa chỉ nhận                                                             |
+| `subject`        | Tiêu đề                                                                  |
+| `html`           | Nội dung; có thể bị xoá sau khi không cần gửi lại                        |
+| `sensitive`      | Đánh dấu nội dung chứa token hoặc liên kết bí mật                        |
+| `status`         | `PENDING`, `SENDING`, `SENT` hoặc `FAILED`                               |
+| `attempts`       | Số lần đã thử gửi, tối đa 5                                              |
+| `nextAttemptAt`  | Thời điểm sớm nhất được thử lại; rỗng khi đã kết thúc                    |
+| `lockedAt`       | Thời điểm một worker nhận xử lý dòng này                                 |
+| `providerId`     | Mã email do Resend trả về                                                |
+| `lastError`      | Lỗi gần nhất; xoá khi gửi thành công                                     |
+| `sentAt`         | Thời điểm Resend chấp nhận email                                         |
 
-### Flow
+Trạng thái có thể hiểu như sau:
 
-1. **Immediate attempt** — `sendEmail()` hands the email to Resend.
-   - Delivered → a `SENT` row is written (`attempts = 1`, `providerId`,
-     `sentAt`) and the caller gets `{ success: true }`.
-   - Permanently rejected (malformed address, unverified sending domain)
-     → a `FAILED` row is written. Retrying cannot fix these, so no
-     attempts are burned on them.
-   - Temporarily failed → a `PENDING` row is queued and the caller gets
-     `{ success: false, queued: true }`.
-2. **Async retry** — the `/api/cron/email-retry` cron claims due rows one at
-   a time and re-sends them. Its frequency is plan-dependent (see "Cron
-   configuration" below): on the current Vercel **Hobby** plan it runs
-   **once a day**, so the backoff schedule below is effectively "one retry
-   per day, up to five days" rather than the ~15 minutes it describes.
+```text
+PENDING (đang chờ)
+  → SENDING (một worker đã nhận)
+      → SENT (Resend đã chấp nhận)
+      → PENDING (lỗi tạm thời, chờ retry)
+      → FAILED (lỗi vĩnh viễn hoặc đã thử đủ 5 lần)
+```
 
-`sendEmail()` never throws and never fails the caller's mutation. It does
-report honestly: **`success || queued` means accepted.** Treat
-`success: false, queued: true` as a normal outcome, not an error.
+## Luồng gửi
 
-### Idempotency is event-scoped
+### Lần đầu
 
-`idempotencyKey` identifies **the event that caused the email**, e.g.
-`email-verification:<tokenId>`. Build it with
-`emailIdempotencyKey(scope, ...parts)` from
-`src/services/email-outbox-policy.ts`.
+`sendEmail()` đặt chỗ cho sự kiện rồi thử gửi ngay:
 
-It must never be derived from the message content. Two legitimately
-distinct emails routinely read identically — a second booking reminder for
-the same booking, the same contact-form message sent twice, a re-requested
-verification link — and a content hash collapses them into one row. Since
-that row is usually already `SENT`, the second email is dropped forever
-rather than merely delayed.
+- Resend chấp nhận: ghi `SENT`, `attempts=1`, `providerId`, `sentAt`; caller nhận
+  `success: true`.
+- Resend từ chối vĩnh viễn, ví dụ email sai hoặc domain gửi chưa xác minh: ghi
+  `FAILED`, không thử lại.
+- Lỗi tạm thời, ví dụ mạng hoặc Resend gián đoạn: ghi `PENDING`; caller nhận
+  `success: false, queued: true`.
 
-**Omitting the key always sends.** An enqueue with no key gets a fresh
-random one, so "no key" can never silently mean "deduplicate".
+`sendEmail()` không ném lỗi làm hỏng thao tác nghiệp vụ. Cách đọc kết quả là:
+`success || queued` nghĩa là hệ thống đã nhận trách nhiệm xử lý email.
 
-### Credential-bearing bodies
+### Gửi lại bằng cron
 
-The outbox stores the _rendered_ email. Password-reset and
-email-verification emails embed a live token in that body, so an outbox
-that kept every body forever would be a durable store of working
-account-takeover links — which would undo the point of hashing the token
-in `email_verification_tokens`.
+Cron gọi `GET /api/cron/email-retry`, nhận từng dòng đến hạn, đổi sang `SENDING`
+rồi gửi. Lịch hiện tại trên Vercel Hobby là **một lần mỗi ngày**, nên email chờ
+có thể không được thử lại cho tới ngày hôm sau.
 
-Callers that send such an email pass `sensitive: true`. For those rows:
+## Chống gửi trùng bằng idempotency key
 
-- delivered on the first attempt → the body is **never written**;
-- reaching a terminal state (`SENT`/`FAILED`) on retry → the body is
-  **cleared** in the same update;
-- queued for retry → the body **is stored**, because retrying needs it.
+`idempotencyKey` phải đại diện cho **sự kiện**, không phải nội dung email. Ví dụ:
 
-**Residual risk, stated plainly:** a credential-bearing body is readable in
-the database for as long as the row is `PENDING` or `SENDING`. That window
-is bounded by the retry budget (five attempts — ~15 minutes on a 5-minute
-cron, but up to **~4 days** on the current daily cron, see "Cron
-configuration") and, past that, by the token's own TTL — 1 hour for
-password reset, 24 hours for email verification — after which the link is
-useless even if read. On the daily schedule the TTL, not the retry budget,
-is the effective bound for a stuck row. It is not zero. Treat database
-backups of this table accordingly, and prefer `sensitive` on any future
-email that carries a token.
+```text
+booking-reminder:<bookingId>:<recipientId>
+```
 
-The token tables themselves hold only hashes. `EmailVerificationToken`
-always has; `VerificationToken` (password reset) stores `sha256:<hex>` of
-the reset token since 15/09/2026. Rows written before that hold the raw
-token, and reset completion still accepts them — looked up raw only when no
-hashed row matches and the submission is bare 64-char hex, which a
-prefixed stored value can never be, and consumed on use like any other.
-With a 1-hour TTL no legacy row can still be valid an hour after deploy;
-the fallback in `completePasswordReset` (`services/password-reset.ts`,
-marked `LEGACY`) can be deleted any time after that. Expired legacy rows
-still sit in the table until the account's next reset request replaces
-them — useless as links, but raw values at rest.
+Hai email hợp lệ có thể có nội dung giống hệt nhau. Nếu dùng hash nội dung làm
+khoá, lần gửi sau sẽ bị nhầm là trùng và mất vĩnh viễn. Khi không truyền khoá,
+outbox tạo một khoá ngẫu nhiên mới, nghĩa là luôn gửi như một sự kiện mới.
 
-### Only the newest credential link is retried
+Khoá được gửi sang Resend qua `Idempotency-Key`. Nếu Resend đã nhận thư nhưng app
+chết trước khi cập nhật database, retry trong khoảng 24 giờ vẫn không gửi trùng.
 
-Requesting a new verification or reset link replaces the token, which kills
-the old link. The old email may still be `PENDING` for retry, and the cron
-would otherwise deliver that dead link, often _after_ the good one. The
-invariant is: **for one credential type on one account, only the newest
-issuance's email can be queued for retry.** The code is in
+## Email chứa token bí mật
+
+Email xác minh và đặt lại mật khẩu chứa liên kết có token. Caller phải truyền
+`sensitive: true` để giảm thời gian token nằm trong outbox:
+
+- gửi thành công ngay: không lưu body;
+- kết thúc ở `SENT` hoặc `FAILED`: xoá body trong cùng lần cập nhật;
+- cần retry: tạm lưu body vì không có nội dung thì không thể gửi lại.
+
+Rủi ro còn lại là body có thể đọc được khi dòng ở `PENDING` hoặc `SENDING`. Với
+cron hằng ngày, token hết hạn mới là giới hạn thực tế: reset mật khẩu sống 1 giờ,
+xác minh email sống 24 giờ. Cần bảo vệ backup của bảng này như dữ liệu nhạy cảm.
+
+### Token được lưu ở bảng riêng
+
+- `EmailVerificationToken` chỉ lưu SHA-256.
+- `VerificationToken` cho reset mật khẩu lưu dạng `sha256:<hex>` từ 15/09/2026.
+- Dòng reset cũ có thể còn token gốc. `completePasswordReset()` chỉ thử dạng cũ
+  khi không tìm thấy hash và input là chuỗi hex 64 ký tự. Token cũ được xoá khi
+  dùng. Vì TTL chỉ một giờ, sau một giờ deploy không còn link cũ hợp lệ; phần
+  fallback đánh dấu `LEGACY` có thể xoá sau giai đoạn chuyển tiếp.
+
+## Chỉ retry liên kết credential mới nhất
+
+Xin liên kết mới sẽ làm token cũ mất hiệu lực. Nếu email cũ còn `PENDING`, cron
+không được gửi liên kết chết đó sau email mới.
+
+Quy tắc của hệ thống: với mỗi loại credential và mỗi tài khoản, chỉ email thuộc
+lần cấp token mới nhất được chờ retry. Logic nằm trong
 `services/credential-email.ts`.
 
-- Credential emails use the key `credential:<type>:<userId>:<sha256(token)>`.
-  `<type>` is `email-verification` or `password-reset`. The key names the
-  account without a schema change and never contains the raw token.
-- Issuing a link writes the token and cancels that account's `PENDING` rows
-  of that type in one transaction. The transaction holds a Postgres advisory
-  lock per (type, account).
-- Two steps re-check, under the same lock, that the link is still the live,
-  unexpired token:
-  - a failed attempt, before it is queued;
-  - the cron, before it claims a row.
+- Khoá có dạng
+  `credential:<email-verification|password-reset>:<userId>:<sha256(token)>`.
+- Khi cấp token mới, hệ thống ghi token và huỷ các dòng `PENDING` cũ trong cùng
+  transaction, dưới Postgres advisory lock theo loại và user.
+- Trước khi đưa một lần gửi lỗi trở lại hàng chờ và trước khi cron nhận dòng,
+  hệ thống kiểm tra token có còn là token đang sống hay không.
+- Dòng bị thay thế chuyển thành `FAILED`, body bị xoá và `lastError` là
+  `credential_no_longer_current`.
+- Không đụng tới dòng `SENDING`, tài khoản khác, loại credential khác hoặc email
+  thường.
 
-  An older request whose send was still in flight therefore cannot re-queue
-  itself after a newer one. The same holds for a row that stale-lock
-  recovery puts back into `PENDING`. A link that has expired or has already
-  been used is not retried either.
-
-- A cancelled row becomes `FAILED`, its body is cleared, and its
-  `lastError` is `credential_no_longer_current`. The cron reports these rows
-  as `superseded`.
-- Nothing else is ever touched: not `SENDING` rows, other accounts, the other
-  credential type, or any non-credential email.
-
-Known limits:
-
-- **In-flight attempts.** An attempt already on the wire when a newer link
-  is issued may still deliver once. It is never retried.
-- **Old-format rows.** Rows queued before this change aren't recognised:
-  `email-verification:<hash>` keys, or unkeyed resets. They run out within
-  the retry budget or the token TTL.
+Giới hạn: một email đã nằm trên đường truyền khi token mới được cấp vẫn có thể
+đến hộp thư một lần, nhưng sẽ không được retry. Dòng tạo trước cơ chế khoá mới
+cũng không được nhận diện, nhưng sẽ hết hạn theo token hoặc hết số lần thử.
 
 ```sql
--- Credential emails cancelled because a newer link replaced them
+-- Các email credential bị huỷ vì có liên kết mới hơn
 SELECT "idempotencyKey", "updatedAt" FROM "email_outbox"
 WHERE "lastError" = 'credential_no_longer_current'
 ORDER BY "updatedAt" DESC LIMIT 20;
 ```
 
-### Concurrency
+## An toàn khi nhiều cron chạy cùng lúc
 
-`processEmailOutbox()` is safe to run concurrently. Each row is claimed
-with a conditional `updateMany` that only matches while the row is still
-`PENDING` and still due; the winner moves it to `SENDING` and increments
-`attempts` in the same statement. A second overlapping run matches zero
-rows and skips.
+Mỗi dòng được nhận bằng một `updateMany` có điều kiện: chỉ đổi từ `PENDING` sang
+`SENDING` nếu vẫn đến hạn. Hai cron cùng thấy một dòng thì chỉ một cron cập nhật
+được; cron kia thấy `count=0` và bỏ qua.
 
-Rows stuck in `SENDING` for more than 10 minutes (a run killed mid-send,
-a frozen lambda) are returned to `PENDING` at the start of the next run.
+Dòng ở `SENDING` quá 10 phút được coi là worker đã chết và trả về `PENDING` ở
+lần cron sau. Số lần thử tăng ngay khi nhận dòng, nên một email gây crash liên
+tục không thể lặp vô hạn.
 
-The attempt is counted at claim time, not after the send, so a process
-that dies mid-delivery still burns an attempt — a poison message can't
-loop forever.
+## Lịch chờ giữa các lần thử
 
-## Backoff schedule
+| Lần thử | Thời gian chờ tối thiểu | Tổng thời gian lý thuyết |
+| ------: | ----------------------: | -----------------------: |
+|       1 |                gửi ngay |                        0 |
+|       2 |                  1 phút |                   1 phút |
+|       3 |                  2 phút |                   3 phút |
+|       4 |                  4 phút |                   7 phút |
+|       5 |                  8 phút |                  15 phút |
 
-| Attempt | Wait before it | Cumulative |
-| ------- | -------------- | ---------- |
-| 1       | immediate      | 0          |
-| 2       | 1 min          | 1 min      |
-| 3       | 2 min          | 3 min      |
-| 4       | 4 min          | 7 min      |
-| 5       | 8 min          | 15 min     |
+Sau lần thứ năm, dòng thành `FAILED` và `nextAttemptAt=NULL`.
 
-After 5 attempts the row is marked `FAILED` with `nextAttemptAt = NULL`.
-The schedule lives in `getBackoffMs()` and is covered by
-`src/services/__tests__/email-outbox-policy.test.ts`.
+Đây chỉ là thời điểm **không được gửi trước**. Email thực tế được thử ở lần cron
+đầu tiên sau mốc đó. Với cron năm phút, bảng trên gần đúng. Với cron hằng ngày,
+mỗi lần retry cách nhau khoảng một ngày và lỗi kéo dài sẽ mất khoảng bốn ngày để
+thành `FAILED`.
 
-**The cron tick is the real floor on every wait.** `nextAttemptAt` is only
-a "not before" time — a retry happens on the first cron run _after_ it, not
-at it. On a 5-minute cron the 1/2/4/8-minute curve above is roughly honest.
-On the **daily** cron the curve collapses: every `nextAttemptAt` is already
-in the past by the next run, so a persistently-failing email gets exactly
-one retry per day and takes **~4 days** (attempt 1 immediate, attempts 2–5
-on four subsequent daily runs) to reach `FAILED`. A transient provider
-outage that clears within a day is still absorbed; a first-attempt failure
-for an email the user is waiting on (verification, password reset) is not
-retried until the next day.
-
-## Cron configuration
+## Cấu hình cron hiện tại
 
 ```json
 { "path": "/api/cron/email-retry", "schedule": "0 1 * * *" }
 ```
 
-**This is once a day (01:00–01:59 UTC), not every 5 minutes.** Vercel's
-**Hobby** plan rejects any cron more frequent than daily _at deployment
-time_ — `*/5 * * * *` failed every production build, which is why nothing
-deployed between the outbox landing and commit `5bb3353`. Hobby also gives
-no timing precision better than the hour (`0 1 * * *` fires anywhere in the
-1am hour).
+Lịch này chạy một lần trong khung 01:00–01:59 UTC. Gói Vercel Hobby không cho
+cron thường xuyên hơn một lần/ngày và không bảo đảm chính xác tới phút.
 
-To restore prompt draining, either:
+Muốn retry nhanh hơn có hai lựa chọn:
 
-- **Upgrade to Vercel Pro** and set the schedule back to `*/5 * * * *`, or
-- **Drive `/api/cron/email-retry` from an external scheduler** (GitHub
-  Actions `schedule:`, Upstash QStash, cron-job.org, a Supabase
-  `pg_cron` + `net.http_get`) hitting the deployed URL every few minutes
-  with the `Authorization: Bearer $CRON_SECRET` header. No code change is
-  needed: it is a plain authenticated GET, and `processEmailOutbox()` is
-  already safe to run concurrently (see "Concurrency" above), so an
-  external caller and the `vercel.json` cron can both hit it.
+1. Nâng lên Vercel Pro và dùng `*/5 * * * *`.
+2. Dùng scheduler bên ngoài như GitHub Actions, Upstash QStash, cron-job.org
+   hoặc Supabase `pg_cron` gọi endpoint mỗi vài phút.
 
-**Interaction with Resend's idempotency window:** each delivery attempt
-forwards the outbox row's `idempotencyKey` to Resend as `Idempotency-Key`,
-which Resend honours for **~24 hours**. That guards the one crash-recovery
-case — a row Resend accepted but our DB failed to finalise, later requeued
-by the stale-lock sweep — against a double send. On the 5-minute cron the
-requeue lands well inside 24h; on the **daily** cron it lands ~24h later,
-at or past the edge of Resend's retention, so that single guarantee is
-weakened. The exposure is narrow (a rare compound failure, and the cost is
-one duplicate email, never data loss), but it is a second reason to prefer
-a sub-daily schedule.
+Scheduler phải gửi header:
 
-Vercel Cron issues a **GET** and authenticates with an
-**`Authorization: Bearer $CRON_SECRET`** header. There is no
-`X-Cron-Secret` header and Vercel does not add one. The route uses the
-shared `requireCronSecret()` helper, same as every other cron in
-`vercel.json` (which fails **closed** when `CRON_SECRET` is unset outside
-development — see `src/lib/auth-helpers.ts`).
+```text
+Authorization: Bearer <CRON_SECRET>
+```
 
-Manual invocation:
+Vercel không gửi `X-Cron-Secret`. Route dùng `requireCronSecret()` và từ chối khi
+thiếu secret ngoài môi trường development.
+
+Gọi thủ công:
 
 ```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://<host>/api/cron/email-retry
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  https://<host>/api/cron/email-retry
 ```
 
-Response:
+Kết quả gồm số dòng đã xử lý, gửi thành công, thất bại, xếp lại hàng, thu hồi
+lock, bỏ qua và bị thay thế (`superseded`).
 
-```json
-{
-  "data": {
-    "processed": 4,
-    "sent": 3,
-    "failed": 0,
-    "requeued": 1,
-    "reclaimed": 0,
-    "skipped": 0,
-    "stats": { "pending": 1, "sending": 0, "sent": 145, "failed": 2 }
-  },
-  "error": null,
-  "message": null
-}
-```
+Resend chỉ nhớ idempotency key khoảng 24 giờ. Với cron hằng ngày, trường hợp hiếm
+“Resend đã nhận nhưng database chưa kịp ghi” có thể retry đúng ranh giới 24 giờ;
+đây là thêm một lý do nên dùng lịch ngắn hơn khi có điều kiện.
 
-## Operations
+## Câu lệnh kiểm tra vận hành
 
-`to` and `status` are reserved words in Postgres — quote every identifier.
+Trong PostgreSQL, `to` và `status` là từ đặc biệt nên phải đặt trong dấu ngoặc
+kép.
 
 ```sql
--- Queue health
+-- Số dòng theo trạng thái
 SELECT "status", count(*) FROM "email_outbox" GROUP BY "status";
 
--- Most recent permanent failures
+-- 20 lỗi vĩnh viễn gần nhất
 SELECT "id", "to", "subject", "lastError", "attempts", "createdAt"
 FROM "email_outbox"
 WHERE "status" = 'FAILED'
-ORDER BY "updatedAt" DESC
-LIMIT 20;
+ORDER BY "updatedAt" DESC LIMIT 20;
 
--- Claims that never completed (should be empty; recovered automatically
--- after 10 minutes)
+-- Dòng SENDING bị kẹt quá 10 phút; bình thường phải rỗng
 SELECT "id", "to", "attempts", "lockedAt"
 FROM "email_outbox"
-WHERE "status" = 'SENDING' AND "lockedAt" < now() - interval '10 minutes';
+WHERE "status" = 'SENDING'
+  AND "lockedAt" < now() - interval '10 minutes';
 
--- Credential-bearing bodies still readable (should be small, short-lived)
+-- Body nhạy cảm còn đọc được; số lượng nên ít và tồn tại ngắn
 SELECT "id", "to", "status", "attempts", "createdAt"
 FROM "email_outbox"
 WHERE "sensitive" AND "html" IS NOT NULL;
 
--- Did a specific signup's email go out?
+-- Email xác minh gần đây
 SELECT "status", "attempts", "sentAt", "lastError"
 FROM "email_outbox"
-WHERE "idempotencyKey" LIKE 'email-verification:%'
-ORDER BY "createdAt" DESC
-LIMIT 20;
+WHERE "idempotencyKey" LIKE 'credential:email-verification:%'
+ORDER BY "createdAt" DESC LIMIT 20;
 ```
 
-### Manual retry
+### Cho một email chạy lại thủ công
+
+Chỉ làm sau khi đã đọc `lastError` và chắc chắn nguyên nhân đã được sửa:
 
 ```sql
 UPDATE "email_outbox"
@@ -299,65 +238,66 @@ SET "status" = 'PENDING', "attempts" = 0, "nextAttemptAt" = now(),
 WHERE "id" = '<email_id>';
 ```
 
-### Cleanup
+Không retry thủ công dòng credential đã bị thay thế; liên kết trong đó không còn
+hợp lệ. Hãy yêu cầu người dùng xin liên kết mới.
 
-Bodies are stored in full, so the table grows with volume. Delivered rows
-older than 90 days can go:
+### Dọn dữ liệu cũ
 
 ```sql
 DELETE FROM "email_outbox"
-WHERE "status" = 'SENT' AND "sentAt" < now() - interval '90 days';
+WHERE "status" = 'SENT'
+  AND "sentAt" < now() - interval '90 days';
 ```
 
-There is no cron for this yet — see "Not done" below.
+Hiện chưa có cron dọn tự động. Trước khi bật, cần chốt chính sách lưu trữ và yêu
+cầu audit với người phụ trách pháp lý.
 
-## Adding a call site
+## Khi thêm nơi gửi email mới
 
 ```ts
-import { sendEmail } from "@/lib/email";
-import { emailIdempotencyKey } from "@/services/email-outbox-policy";
-
 const result = await sendEmail({
   to: user.email,
   subject: "…",
-  html: someTemplate({ … }),
-  // Only when the same event can fire this send twice:
+  html: someTemplate({/* dữ liệu */}),
   idempotencyKey: emailIdempotencyKey("booking-reminder", booking.id),
 });
 
 if (!result.success && !result.queued) {
-  // Nothing will retry this. Rare — log it.
+  // Không có gì sẽ retry; cần ghi log.
 }
 ```
 
-Pass `sensitive: true` whenever the body contains a token or a one-time
-link.
+- Chỉ dùng cùng khoá cho cùng một sự kiện.
+- Thêm `sensitive: true` nếu body có token hoặc liên kết dùng một lần.
+- `enqueueEmail()` bỏ lần gửi ngay và đưa thẳng vào hàng chờ; phù hợp cho tác vụ
+  hàng loạt chạy nền.
 
-`enqueueEmail()` from `@/services/email-outbox` skips the immediate
-attempt and queues directly; use it for bulk background work where a
-per-row round-trip to Resend inside the request isn't wanted.
+## Xử lý sự cố thường gặp
 
-## Troubleshooting
+**Không email nào gửi được:** kiểm tra `RESEND_API_KEY`. Khi thiếu key, dòng được
+giữ ở `PENDING` để gửi sau, không bị đốt thành lỗi vĩnh viễn.
 
-**Nothing is sending at all.** Check `RESEND_API_KEY` is set. Without it
-`deliverEmail()` reports `resend_not_configured` as _retryable_ on
-purpose: rows accumulate in `PENDING` and drain once the key is added,
-rather than being burned.
+**Dòng nằm ở PENDING nhưng attempts không tăng:** cron không tới endpoint. Kiểm
+tra `CRON_SECRET` và Vercel Logs xem có HTTP 401.
 
-**Rows sit in `PENDING` and `attempts` never rises.** The cron isn't
-reaching the route. Verify `CRON_SECRET` is set in the Vercel project, and
-check the cron log for 401s.
+**FAILED ngay ở attempts=1:** lỗi vĩnh viễn. Đọc `lastError`; thường là địa chỉ
+sai hoặc domain gửi chưa xác minh.
 
-**`FAILED` at `attempts = 1`.** A permanent rejection. Read `lastError` —
-usually an invalid recipient or an unverified sending domain.
+## Phần chưa hoàn thiện
 
-## Not done
+- Chưa có màn hình quản trị outbox; hiện phải dùng SQL.
+- Chưa có Resend webhook nên bounce/complaint không quay về database. `SENT` chỉ
+  có nghĩa Resend đã nhận, không bảo đảm thư vào inbox.
+- Chưa có cron dọn dòng `SENT` cũ.
+- Chưa giới hạn tốc độ theo từng người nhận.
+- Chưa chạy end-to-end bằng tài khoản Resend thật.
 
-- No dashboard for viewing/retrying failed emails (SQL above is the tool).
-- No Resend webhook, so bounces and complaints aren't reflected back into
-  the table — a `SENT` row means "the provider accepted it", not "it
-  reached the inbox".
-- No retention cron for old `SENT` rows.
-- No per-recipient rate limiting.
-- **Never exercised against live Resend credentials** — same caveat as
-  every other external integration in this repo (see CLAUDE.md).
+## Từ ngữ cần nhớ
+
+- **Outbox:** bảng lưu việc cần gửi và lịch sử gửi.
+- **Retry:** thử lại sau khi lỗi tạm thời.
+- **Backoff:** tăng thời gian chờ sau mỗi lần thất bại.
+- **Idempotency:** xử lý lặp cùng sự kiện nhưng chỉ tạo một kết quả.
+- **Worker:** tiến trình nhận một công việc từ hàng chờ.
+- **Terminal state:** trạng thái kết thúc, ở đây là `SENT` hoặc `FAILED`.
+- **Advisory lock:** khoá phối hợp do ứng dụng yêu cầu PostgreSQL giữ tạm thời.

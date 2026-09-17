@@ -62,6 +62,39 @@ export class OfferNotFoundError extends OfferError {
   }
 }
 
+export class OwnRequestOfferError extends OfferError {
+  constructor() {
+    super("You cannot send an offer to your own request", 403);
+    this.name = "OwnRequestOfferError";
+  }
+}
+
+/**
+ * Central server-side policy for creating an offer. Kept independent from
+ * the database call so every direct/API caller gets the same ownership and
+ * request-state checks, and the business rule can be tested without a live DB.
+ */
+type OfferableRequest = Pick<
+  ServiceRequest,
+  "customerId" | "isDraft" | "role" | "status"
+>;
+
+export function assertProviderMayOffer(
+  request: OfferableRequest | null,
+  providerId: string,
+  role: Role,
+): asserts request is OfferableRequest {
+  if (!request || request.isDraft || request.role !== role) {
+    throw new OfferNotFoundError();
+  }
+  if (request.customerId === providerId) {
+    throw new OwnRequestOfferError();
+  }
+  if (request.status !== "OPEN" && request.status !== "HAS_OFFERS") {
+    throw new OfferError("This request is no longer accepting offers", 400);
+  }
+}
+
 // Lọc cứng (thiết kế đã duyệt, mục 03) — mọi điều kiện đều phải đạt để một
 // provider được coi là ứng viên, dùng chung cho cả feed "Yêu cầu phù hợp"
 // lẫn danh sách nhận thông báo chủ động khi có yêu cầu mới. KHÔNG lọc theo
@@ -74,6 +107,7 @@ export class OfferNotFoundError extends OfferError {
 // per-provider preference lookup afterwards. (userRole is @@unique on
 // [userId, role], so a provider appears at most once.)
 async function findMatchingRecipients(request: {
+  customerId: string;
   role: Role;
   provinceId: string;
   shootDate: Date | null;
@@ -81,6 +115,7 @@ async function findMatchingRecipients(request: {
 }): Promise<BatchRecipient[]> {
   const candidates = await db.userRole.findMany({
     where: {
+      userId: { not: request.customerId },
       role: request.role,
       active: true,
       verificationStatus: "VERIFIED",
@@ -155,6 +190,7 @@ type MatchableRequest = Pick<
   | "id"
   | "code"
   | "title"
+  | "customerId"
   | "role"
   | "provinceId"
   | "shootDate"
@@ -307,6 +343,7 @@ export async function listOpportunitiesForProvider(userId: string, role: Role) {
 
   return db.serviceRequest.findMany({
     where: {
+      customerId: { not: userId },
       role,
       isDraft: false,
       status: { in: ["OPEN", "HAS_OFFERS"] },
@@ -355,6 +392,9 @@ export async function getOpportunityDetail(
   });
   if (!request || request.isDraft) throw new OfferNotFoundError();
   if (request.role !== role) throw new OfferNotFoundError();
+  // A customer may also have a verified provider role. Their own request
+  // must never become an opportunity, even through a copied detail URL.
+  if (request.customerId === providerId) throw new OfferNotFoundError();
 
   // Ràng buộc #1 — "Ghi AuditLog mỗi lần một provider xem chi tiết yêu
   // cầu." detailedAddress is never selected above, so there's nothing to
@@ -391,12 +431,7 @@ export async function createOffer(
   const request = await db.serviceRequest.findUnique({
     where: { id: requestId },
   });
-  if (!request || request.isDraft || request.role !== role) {
-    throw new OfferNotFoundError();
-  }
-  if (request.status !== "OPEN" && request.status !== "HAS_OFFERS") {
-    throw new OfferError("This request is no longer accepting offers", 400);
-  }
+  assertProviderMayOffer(request, providerId, role);
 
   const existing = await db.requestOffer.findUnique({
     where: { requestId_providerId: { requestId, providerId } },

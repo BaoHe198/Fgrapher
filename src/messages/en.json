@@ -930,6 +930,7 @@
       "invalidInput": "Invalid input",
       "loadFailed": "Couldn't load data",
       "offerSent": "Offer sent",
+      "ownRequestForbidden": "You cannot send an offer to your own request",
       "offerFailed": "Couldn't send the offer",
       "offerUpdated": "Offer updated",
       "offerUpdateFailed": "Couldn't update the offer",
@@ -1303,6 +1304,7 @@
       },
       "budgetNotSet": "No budget set",
       "flexible": "Flexible date",
+      "yourRequest": "Your request",
       "offerCount": "{count, plural, =0 {No offers yet} other {# offers}}"
     },
     "myOffers": {
@@ -2182,7 +2184,10 @@
     },
     "email": {
       "footer": {
-        "manageNotifications": "Manage notification preferences"
+        "manageNotifications": "Manage notification preferences",
+        "notificationLabel": "A notification from Fgrapher",
+        "brandTagline": "Connecting creative ideas",
+        "automaticNotice": "This is an automated email from Fgrapher. Please do not reply to this message."
       },
       "bookingRequest": {
         "heading": "New booking request",
@@ -2340,7 +2345,7 @@
       },
       "newMessage": {
         "heading": "New message from {senderName}",
-        "body": "{senderName} sent you a message: {preview}",
+        "bodyIntro": "{senderName} just sent you a new message:",
         "cta": "Reply",
         "subject": "You have a new message — Fgrapher"
       },

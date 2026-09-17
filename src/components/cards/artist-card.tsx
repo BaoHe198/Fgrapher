@@ -14,6 +14,7 @@ import { avatarFallbackColor, cn } from "@/lib/utils";
 
 const MAX_VISIBLE_ROLES = 2;
 const SWIPE_THRESHOLD_PX = 40;
+type SlideDirection = -1 | 1;
 
 interface ArtistCardProps {
   artist: {
@@ -37,7 +38,11 @@ interface ArtistCardProps {
 
 export function ArtistCard({ artist, onClick }: ArtistCardProps) {
   const t = useTranslations("sharedComponents.artistCard");
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [{ activeIndex, previousIndex, direction }, setCarousel] = useState<{
+    activeIndex: number;
+    previousIndex: number | null;
+    direction: SlideDirection;
+  }>({ activeIndex: 0, previousIndex: null, direction: 1 });
   // Tracks photo URLs that failed to load (e.g. a transient Cloudinary/
   // image-optimizer hiccup) so that slide falls back to the same "no
   // photo" treatment below instead of a bare broken-image icon.
@@ -47,21 +52,35 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
   const photos = artist.media.slice(0, 5);
   const hasPhotos = photos.length > 0;
   const activePhoto = photos[activeIndex];
-  const activePhotoFailed = activePhoto
-    ? failedUrls.has(activePhoto.url)
-    : false;
+  const previousPhoto =
+    previousIndex === null ? undefined : photos[previousIndex];
   const initial = artist.name[0]?.toUpperCase() ?? "?";
   const visibleRoles = artist.roles.slice(0, MAX_VISIBLE_ROLES);
   const extraRoleCount = artist.roles.length - visibleRoles.length;
 
-  const goTo = (index: number) => {
-    setActiveIndex(((index % photos.length) + photos.length) % photos.length);
+  const goTo = (index: number, requestedDirection?: SlideDirection) => {
+    setCarousel((current) => {
+      const nextIndex =
+        ((index % photos.length) + photos.length) % photos.length;
+      if (nextIndex === current.activeIndex) return current;
+
+      return {
+        activeIndex: nextIndex,
+        previousIndex: current.activeIndex,
+        direction:
+          requestedDirection ?? (nextIndex > current.activeIndex ? 1 : -1),
+      };
+    });
   };
 
-  const stopAndGo = (e: React.MouseEvent, index: number) => {
+  const stopAndGo = (
+    e: React.MouseEvent,
+    index: number,
+    requestedDirection?: SlideDirection,
+  ) => {
     e.preventDefault();
     e.stopPropagation();
-    goTo(index);
+    goTo(index, requestedDirection);
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -70,7 +89,50 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
   const onTouchEnd = (e: React.TouchEvent) => {
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
-    goTo(delta < 0 ? activeIndex + 1 : activeIndex - 1);
+    goTo(delta < 0 ? activeIndex + 1 : activeIndex - 1, delta < 0 ? 1 : -1);
+  };
+
+  const renderPhoto = (photo: (typeof photos)[number]) => {
+    if (failedUrls.has(photo.url)) {
+      return (
+        <div
+          className="flex size-full items-center justify-center"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--green-900), var(--green-500) 60%, var(--gold-300))",
+          }}
+        >
+          <Avatar className="size-[64px] border-2 border-white/50">
+            {artist.avatar ? (
+              <AvatarImage src={artist.avatar} alt={artist.name} />
+            ) : null}
+            <AvatarFallback
+              className={cn(
+                "text-heading-md text-white",
+                avatarFallbackColor(artist.name),
+              )}
+            >
+              {initial}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      );
+    }
+
+    if (photo.type === "VIDEO") {
+      return <video src={photo.url} className="size-full object-cover" muted />;
+    }
+
+    return (
+      <Image
+        src={photo.url}
+        alt={artist.name}
+        fill
+        sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+        className="object-cover"
+        onError={() => setFailedUrls((prev) => new Set(prev).add(photo.url))}
+      />
+    );
   };
 
   return (
@@ -86,7 +148,8 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
     >
       <Card
         padding={false}
-        className="group flex h-full cursor-pointer flex-col overflow-hidden transition-shadow duration-150 hover:shadow-[var(--shadow-md)]"
+        interactive
+        className="group flex h-full flex-col overflow-hidden"
       >
         <div
           className="relative aspect-[4/5] w-full bg-bg-sunken"
@@ -95,67 +158,60 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
         >
           {hasPhotos ? (
             <>
-              {activePhotoFailed ? (
+              {previousPhoto ? (
                 <div
-                  className="flex size-full items-center justify-center"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, var(--green-900), var(--green-500) 60%, var(--gold-300))",
-                  }}
-                >
-                  <Avatar className="size-[64px] border-2 border-white/50">
-                    {artist.avatar ? (
-                      <AvatarImage src={artist.avatar} alt={artist.name} />
-                    ) : null}
-                    <AvatarFallback
-                      className={cn(
-                        "text-heading-md text-white",
-                        avatarFallbackColor(artist.name),
-                      )}
-                    >
-                      {initial}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              ) : activePhoto.type === "VIDEO" ? (
-                <video
-                  src={activePhoto.url}
-                  className="size-full object-cover"
-                  muted
-                />
-              ) : (
-                <Image
-                  key={activePhoto.url}
-                  src={activePhoto.url}
-                  alt={artist.name}
-                  fill
-                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
-                  className="object-cover"
-                  onError={() =>
-                    setFailedUrls((prev) => new Set(prev).add(activePhoto.url))
+                  key={`previous-${previousPhoto.url}`}
+                  aria-hidden="true"
+                  onAnimationEnd={() =>
+                    setCarousel((current) =>
+                      current.previousIndex === previousIndex
+                        ? { ...current, previousIndex: null }
+                        : current,
+                    )
                   }
-                />
-              )}
+                  className={cn(
+                    "absolute inset-0",
+                    direction === 1
+                      ? "fg-provider-slide-exit-next"
+                      : "fg-provider-slide-exit-previous",
+                  )}
+                >
+                  {renderPhoto(previousPhoto)}
+                </div>
+              ) : null}
+
+              <div
+                key={`active-${activePhoto.url}`}
+                className={cn(
+                  "absolute inset-0 z-10",
+                  previousPhoto &&
+                    (direction === 1
+                      ? "fg-provider-slide-enter-next"
+                      : "fg-provider-slide-enter-previous"),
+                )}
+              >
+                {renderPhoto(activePhoto)}
+              </div>
 
               {photos.length > 1 ? (
                 <>
                   <button
                     type="button"
-                    onClick={(e) => stopAndGo(e, activeIndex - 1)}
+                    onClick={(e) => stopAndGo(e, activeIndex - 1, -1)}
                     aria-label={t("previousPhoto")}
-                    className="absolute top-1/2 left-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100"
+                    className="absolute top-1/2 left-2 z-20 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-[background-color,opacity,box-shadow] duration-200 hover:bg-black/60 hover:opacity-100 hover:shadow-[0_2px_8px_rgba(0,0,0,0.4)] focus-visible:opacity-100"
                   >
                     <ChevronLeft className="size-4" />
                   </button>
                   <button
                     type="button"
-                    onClick={(e) => stopAndGo(e, activeIndex + 1)}
+                    onClick={(e) => stopAndGo(e, activeIndex + 1, 1)}
                     aria-label={t("nextPhoto")}
-                    className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100"
+                    className="absolute top-1/2 right-2 z-20 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-[background-color,opacity,box-shadow] duration-200 hover:bg-black/60 hover:opacity-100 hover:shadow-[0_2px_8px_rgba(0,0,0,0.4)] focus-visible:opacity-100"
                   >
                     <ChevronRight className="size-4" />
                   </button>
-                  <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-black/25 px-2 py-1.5">
+                  <div className="absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/25 px-2 py-1.5">
                     {photos.map((photo, index) => (
                       <button
                         key={photo.url}
@@ -163,8 +219,8 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
                         onClick={(e) => stopAndGo(e, index)}
                         aria-label={t("viewPhoto", { index: index + 1 })}
                         className={cn(
-                          "size-1.5 rounded-full bg-white/60 transition-colors duration-150",
-                          index === activeIndex && "bg-white",
+                          "h-1.5 w-1.5 rounded-full bg-white/60 transition-[width,background-color,opacity] duration-300 ease-out hover:bg-white/90",
+                          index === activeIndex && "w-4 bg-white",
                         )}
                       />
                     ))}
@@ -201,7 +257,7 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
           )}
 
           {artist.nationwideLabel ? (
-            <Badge variant="neutral" className="absolute top-2 left-2">
+            <Badge variant="neutral" className="absolute top-2 left-2 z-20">
               {artist.nationwideLabel}
             </Badge>
           ) : null}

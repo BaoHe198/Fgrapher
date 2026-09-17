@@ -5,8 +5,9 @@ website hằng ngày nhưng không trực tiếp viết code. Nó trả lời: l
 đang lỗi, nhận lỗi từ người dùng thế nào, sửa ra sao, kiểm tra gì trước khi đưa
 lên, đưa lên bằng cách nào, và quay lui ra sao khi hỏng.
 
-Các tài liệu kỹ thuật sâu hơn nằm cùng thư mục `docs/` và **viết bằng tiếng Anh**
-vì chúng dành cho lập trình viên. Tài liệu này không chép lại chúng, chỉ chỉ chỗ:
+Các tài liệu kỹ thuật sâu hơn nằm cùng thư mục `docs/`. Nhóm tài liệu trong
+`docs/ops/` đã được viết bằng tiếng Việt; tên hàm, tên cột và câu lệnh vẫn giữ
+nguyên để có thể đối chiếu với code. Tài liệu này không chép lại chúng, chỉ chỉ chỗ:
 
 | Cần biết gì                                                                       | Đọc file nào                                     |
 | --------------------------------------------------------------------------------- | ------------------------------------------------ |
@@ -22,7 +23,7 @@ vì chúng dành cho lập trình viên. Tài liệu này không chép lại ch�
 
 Nhầm lẫn ở đây là nguồn gốc của gần như mọi sự cố nghiêm trọng.
 
-| Môi trường     | Địa chỉ                           | Database                                  | Ai thấy          |
+| Môi trường     | Địa chỉ                           | Database (cơ sở dữ liệu)                  | Ai thấy          |
 | -------------- | --------------------------------- | ----------------------------------------- | ---------------- |
 | **Máy local**  | `localhost:3000`                  | `fgrapher-dev`                            | Chỉ mình anh     |
 | **Preview**    | Link Vercel tự sinh cho mỗi nhánh | `fgrapher-dev` (**dùng chung với local**) | Ai có link       |
@@ -50,7 +51,7 @@ mục này cần viết lại.
 
 ### Cho tới lúc đó — cách xem thủ công
 
-1. **Nhật ký lỗi:** Vercel → chọn project → tab **Logs** → lọc `Error`.
+1. **Nhật ký lỗi:** Vercel → chọn project → tab **Logs** (nhật ký) → lọc `Error`.
    Đây là nơi duy nhất thấy lỗi thật đang xảy ra.
 2. **Bảng điều khiển quản trị:** vào `/admin`. Xem số người dùng mới, đơn đặt
    lịch, thanh toán lỗi, báo cáo vi phạm chờ xử lý.
@@ -133,9 +134,9 @@ Lập trình viên chạy đủ bốn lệnh này, **cả bốn đều phải s�
 
 | Lệnh             | Bắt lỗi gì                                                            |
 | ---------------- | --------------------------------------------------------------------- |
-| `pnpm lint`      | Lỗi quy ước code                                                      |
+| `pnpm lint`      | Lỗi quy ước và mẫu code dễ gây sai                                    |
 | `pnpm typecheck` | Gọi sai tên, sai kiểu dữ liệu — bắt được rất nhiều lỗi trước khi chạy |
-| `pnpm test`      | Logic nghiệp vụ bị phá (hiện có 265 bài test)                         |
+| `pnpm test`      | Logic nghiệp vụ bị phá; số lượng test tăng dần theo dự án             |
 | `pnpm build`     | Code không đóng gói được, tức là production sẽ sập                    |
 
 Ngoài ra, khi đẩy lên GitHub sẽ **tự chạy thêm** bộ test giao diện (Playwright)
@@ -225,6 +226,7 @@ Quy trình giống sửa lỗi, thêm ba điều:
 
 ### Dùng công tắc tính năng (feature flag)
 
+Feature flag là một biến cấu hình cho phép bật/tắt tính năng mà không sửa code.
 Tính năng lớn nên đưa lên **ở trạng thái tắt**, bật sau bằng biến môi trường.
 Ưu điểm: nếu hỏng thì **tắt đi** thay vì phải quay lui cả đợt deploy.
 
@@ -285,6 +287,23 @@ Viết ra để sau này bổ sung, không phải để lờ đi:
   khi có người dùng thật phụ thuộc vào hệ thống.
 - **Chế độ bảo trì:** chưa có nút bật trang "đang bảo trì". Cách nhanh nhất hiện
   nay là quay lui deploy hoặc chặn ở tầng Vercel.
+
+---
+
+## 13. Từ ngữ cần nhớ
+
+- **Local:** bản web chạy trên máy của người phát triển.
+- **Preview:** bản xem trước do Vercel tạo để kiểm tra trước khi công khai.
+- **Production:** bản thật người dùng đang sử dụng.
+- **Deploy:** đưa một phiên bản code lên môi trường chạy.
+- **Rollback/quay lui:** đưa production trở về phiên bản tốt trước đó.
+- **Database:** nơi lưu dữ liệu lâu dài như user, booking và tin nhắn.
+- **Migration:** bản hướng dẫn có phiên bản để đổi cấu trúc database.
+- **Log:** nhật ký do hệ thống ghi để điều tra sự cố.
+- **Uptime:** khoảng thời gian website hoạt động bình thường.
+- **Feature flag:** công tắc cấu hình dùng để bật/tắt một tính năng.
+- **Soft delete/xoá mềm:** đánh dấu là đã xoá nhưng chưa xoá vật lý ngay, để còn
+  xử lý khôi phục, audit hoặc yêu cầu pháp lý.
 
 ---
 
