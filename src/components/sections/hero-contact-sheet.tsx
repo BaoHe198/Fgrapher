@@ -133,13 +133,9 @@ export function HeroContactSheet({ photos }: { photos: HeroPhoto[] }) {
                           : "object-cover transition-opacity duration-[900ms] ease-out"
                       }
                       style={{
-                        // Bias the crop toward the upper third. These are
-                        // whatever photographs providers uploaded, not art
-                        // directed for this grid, and object-cover's default
-                        // centre crop lands on a chin or a torso far more
-                        // often than on a face. Cannot be solved properly
-                        // without subject detection; this is the heuristic
-                        // that costs nothing.
+                        // Bias the crop toward the upper third so portrait
+                        // and landscape artwork share a consistent focal
+                        // area inside the staggered frames.
                         objectPosition: "center 30%",
                         opacity: isVisible ? 1 : 0,
                         animationDelay:

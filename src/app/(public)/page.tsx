@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { SectionHead } from "@/components/ui/section-head";
 import { features } from "@/lib/features";
 import { formatCurrency } from "@/lib/utils";
-import { getFeaturedProfiles, getHeroPhotos } from "@/services/search";
+import { getFeaturedProfiles } from "@/services/search";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo.home");
@@ -26,27 +26,25 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// phase-1 Step 6 invented this 3-step section — there is no corresponding
-// content in the design's real i18n strings (window.FG_STRINGS). Now
-// wired to publicPages.landing per CLAUDE.md rule #10 (full Vietnamese UI).
-// Used only until real approved portfolio photos exist — see heroPhotos
-// below. Kept as the original four so the hero never renders empty on a
-// brand-new install.
-const FALLBACK_HERO_PHOTOS = [
+// Hero artwork is deliberately isolated from provider/customer uploads.
+// Replace these files in public/images/hero-professions/ when the brand has
+// new artwork; the landing page must never source this area from portfolio
+// media or any other user-owned content.
+const HERO_PHOTOS = [
   {
-    url: "https://images.unsplash.com/photo-1497316730643-415fac54a2af?q=80&w=800&auto=format&fit=crop",
+    url: "/images/hero-professions/photographer.jpg",
     altKey: "hero.imageAlt.photographer",
   },
   {
-    url: "https://images.unsplash.com/photo-1622336889416-8d790ad807d7?q=80&w=800&auto=format&fit=crop",
+    url: "/images/hero-professions/makeup-artist.jpg",
     altKey: "hero.imageAlt.makeupArtist",
   },
   {
-    url: "https://images.unsplash.com/photo-1497015289639-54688650d173?q=80&w=800&auto=format&fit=crop",
+    url: "/images/hero-professions/videographer.jpg",
     altKey: "hero.imageAlt.videographer",
   },
   {
-    url: "https://images.unsplash.com/photo-1617463874381-85b513b3e991?q=80&w=800&auto=format&fit=crop",
+    url: "/images/hero-professions/studio.jpg",
     altKey: "hero.imageAlt.studio",
   },
 ] as const;
@@ -77,32 +75,11 @@ export default async function LandingPage() {
       : []),
   ];
 
-  const [featuredProfiles, realHeroPhotos] = await Promise.all([
-    getFeaturedProfiles(4),
-    getHeroPhotos(8),
-  ]);
-
-  // The contact sheet wants eight photos: four frames, each with a second
-  // photograph to change to. Below that it shows what exists and simply
-  // never changes — correct behaviour for a young marketplace, and it
-  // fills in on its own as providers upload.
-  //
-  // Stock photographs are the fallback, not the default: a hero
-  // advertising work nobody on the platform did is the most valuable
-  // screen on the site spent on a lie. They only appear while there is
-  // genuinely nothing real to show.
-  const heroPhotos = [
-    ...realHeroPhotos.map((photo) => ({
-      url: photo.url,
-      alt: photo.credit
-        ? tLanding("heroPhotoAlt", { name: photo.credit })
-        : t("hero.imageAlt.photographer"),
-    })),
-    ...FALLBACK_HERO_PHOTOS.map((photo) => ({
-      url: photo.url,
-      alt: t(photo.altKey),
-    })),
-  ].slice(0, 8);
+  const featuredProfiles = await getFeaturedProfiles(4);
+  const heroPhotos = HERO_PHOTOS.map((photo) => ({
+    url: photo.url,
+    alt: t(photo.altKey),
+  }));
 
   return (
     <>
