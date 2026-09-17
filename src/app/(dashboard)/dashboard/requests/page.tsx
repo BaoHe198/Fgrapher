@@ -17,11 +17,13 @@ const STATUS_VARIANT: Record<
   string,
   "warning" | "success" | "neutral" | "destructive"
 > = {
+  PENDING_REVIEW: "warning",
   OPEN: "warning",
   HAS_OFFERS: "warning",
   FULFILLED: "success",
   EXPIRED: "neutral",
   CANCELLED: "destructive",
+  REJECTED: "destructive",
 };
 
 export async function generateMetadata(): Promise<Metadata> {

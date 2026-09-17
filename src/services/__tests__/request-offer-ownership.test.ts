@@ -61,6 +61,20 @@ describe("quyền gửi đề nghị cho yêu cầu dịch vụ", () => {
       (error: unknown) => error instanceof OfferError && error.status === 400,
     );
   });
+
+  it("không cho gửi đề nghị khi yêu cầu đang chờ duyệt hoặc bị từ chối", () => {
+    for (const status of ["PENDING_REVIEW", "REJECTED"] as const) {
+      assert.throws(
+        () =>
+          assertProviderMayOffer(
+            { ...openRequest, status },
+            "provider_2",
+            "PHOTOGRAPHER",
+          ),
+        (error: unknown) => error instanceof OfferError && error.status === 400,
+      );
+    }
+  });
 });
 
 // These checks pin the read paths too. The owner must not receive or act on
@@ -96,7 +110,7 @@ describe("phân biệt yêu cầu của chính mình trong các luồng provider
       "export async function listBrowsableRequests",
     );
     const browseEnd = browseService.indexOf(
-      "export async function listUnclaimedRequests",
+      "export async function listServiceRequestsForAdmin",
       browseStart,
     );
     const browseFunction = browseService.slice(browseStart, browseEnd);
@@ -113,7 +127,7 @@ describe("phân biệt yêu cầu của chính mình trong các luồng provider
       "export async function listBrowsableRequests",
     );
     const browseEnd = browseService.indexOf(
-      "export async function listUnclaimedRequests",
+      "export async function listServiceRequestsForAdmin",
       browseStart,
     );
     const browseFunction = browseService.slice(browseStart, browseEnd);

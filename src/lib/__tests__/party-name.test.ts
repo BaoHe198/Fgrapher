@@ -150,4 +150,11 @@ describe("service requests use the same public naming rule", () => {
     );
     assert.match(service, /provider:[\s\S]{0,500}profiles:/);
   });
+
+  it("shows the request owner's profile name on the browse list", () => {
+    const client = read("src/app/(public)/requests/browse-requests-client.tsx");
+    const service = read("src/services/service-requests.ts");
+    assert.match(client, /request\.customerDisplayName/);
+    assert.match(service, /customerDisplayName:\s*resolvePartyName\(customer/);
+  });
 });

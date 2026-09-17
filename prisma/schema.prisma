@@ -1403,11 +1403,13 @@ model Review {
 // per-role quantity. A request is either fulfilled or it isn't.
 
 enum ServiceRequestStatus {
+  PENDING_REVIEW
   OPEN
   HAS_OFFERS
   FULFILLED
   EXPIRED
   CANCELLED
+  REJECTED
 }
 
 enum RequestOfferStatus {
@@ -1451,13 +1453,19 @@ model ServiceRequest {
   budgetMax Float?
   currency  String @default("VND")
 
-  status             ServiceRequestStatus @default(OPEN)
+  // A submitted request is private until an admin approves its concept,
+  // categories and reference media. Drafts are additionally hidden by
+  // isDraft; approved requests move to OPEN and start their seven-day TTL.
+  status             ServiceRequestStatus @default(PENDING_REVIEW)
+  moderationReason   String?              @db.Text
+  moderatedAt        DateTime?
   // Set once, when an offer is accepted — the single source of truth for
   // "which offer fulfilled this request," mirrored by the resulting
   // Booking's own id for convenience.
   fulfilledByOfferId String?              @unique
   bookingId          String?              @unique
-  // 7 days from creation (ràng buộc #2) — the cron in
+  // 7 days from admin approval (drafts/pending rows receive a provisional
+  // value that is reset on approval; ràng buộc #2) — the cron in
   // /api/cron/expire-service-requests moves anything still OPEN/
   // HAS_OFFERS past this to EXPIRED. Never touches FULFILLED/CANCELLED.
   expiresAt          DateTime

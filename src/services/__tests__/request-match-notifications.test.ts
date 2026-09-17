@@ -352,12 +352,38 @@ const codeOnly = (rel: string) =>
     .map((line) => line.replace(/\/\/.*$/, ""))
     .join("\n");
 
-describe("completion policy is wired, not just available", () => {
+describe("approval controls when matching providers are notified", () => {
   const callers = codeOnly("src/services/service-requests.ts");
 
-  it("both create and publish await delivery", () => {
+  it("notifies exactly once, after admin approval", () => {
     const awaited = callers.match(/await notifyMatchingProviders\(/g) ?? [];
-    assert.equal(awaited.length, 2);
+    assert.equal(awaited.length, 1);
+
+    const createStart = callers.indexOf(
+      "export async function createServiceRequest",
+    );
+    const publishStart = callers.indexOf(
+      "export async function publishDraftServiceRequest",
+    );
+    const reviewStart = callers.indexOf(
+      "export async function reviewServiceRequest",
+    );
+    const listStart = callers.indexOf(
+      "export async function listCustomerRequests",
+    );
+
+    assert.doesNotMatch(
+      callers.slice(createStart, publishStart),
+      /notifyMatchingProviders\(/,
+    );
+    assert.doesNotMatch(
+      callers.slice(publishStart, reviewStart),
+      /notifyMatchingProviders\(/,
+    );
+    assert.match(
+      callers.slice(reviewStart, listStart),
+      /await notifyMatchingProviders\(/,
+    );
   });
 
   it("no caller detaches it or swallows its errors", () => {

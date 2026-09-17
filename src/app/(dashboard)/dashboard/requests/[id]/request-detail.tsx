@@ -72,6 +72,7 @@ interface RequestView {
   areaNote: string | null;
   budgetMin: number | null;
   budgetMax: number | null;
+  moderationReason: string | null;
   references: { mediaUrl: string }[];
   offers: OfferView[];
 }
@@ -174,7 +175,9 @@ export function RequestDetail({
     }
   };
 
-  const canManage = status === "OPEN" || status === "HAS_OFFERS";
+  const canManage =
+    status === "PENDING_REVIEW" || status === "OPEN" || status === "HAS_OFFERS";
+  const showOffers = status !== "PENDING_REVIEW" && status !== "REJECTED";
 
   return (
     <div className="flex flex-col gap-5">
@@ -196,7 +199,9 @@ export function RequestDetail({
             variant={
               status === "FULFILLED"
                 ? "success"
-                : status === "CANCELLED" || status === "EXPIRED"
+                : status === "CANCELLED" ||
+                    status === "EXPIRED" ||
+                    status === "REJECTED"
                   ? "destructive"
                   : "warning"
             }
@@ -218,6 +223,29 @@ export function RequestDetail({
           <p className="text-body-sm text-text-secondary">
             {request.description}
           </p>
+        ) : null}
+
+        {status === "PENDING_REVIEW" ? (
+          <div className="rounded-[var(--fg-radius-md)] border border-warning/30 bg-warning-bg p-3 text-body-sm text-text-secondary">
+            <p className="font-semibold! text-text-primary">
+              {t("pendingReviewTitle")}
+            </p>
+            <p>{t("pendingReviewBody")}</p>
+          </div>
+        ) : null}
+
+        {status === "REJECTED" ? (
+          <div className="rounded-[var(--fg-radius-md)] border border-danger/30 bg-danger-bg p-3 text-body-sm text-text-secondary">
+            <p className="font-semibold! text-danger">{t("rejectedTitle")}</p>
+            <p>{t("rejectedBody")}</p>
+            {request.moderationReason ? (
+              <p className="mt-1 font-semibold! text-text-primary">
+                {t("rejectionReason", {
+                  reason: request.moderationReason,
+                })}
+              </p>
+            ) : null}
+          </div>
         ) : null}
 
         <div className="grid grid-cols-1 gap-3 text-body-sm sm:grid-cols-3">
@@ -282,118 +310,120 @@ export function RequestDetail({
         ) : null}
       </Card>
 
-      <div className="flex flex-col gap-3">
-        <p className="text-body-sm font-semibold! text-text-secondary">
-          {t("offersCount", { count: offers.length })}
-        </p>
+      {showOffers ? (
+        <div className="flex flex-col gap-3">
+          <p className="text-body-sm font-semibold! text-text-secondary">
+            {t("offersCount", { count: offers.length })}
+          </p>
 
-        {offers.length === 0 ? (
-          <Card className="py-10 text-center text-body-sm text-text-secondary">
-            {t("noOffers")}
-          </Card>
-        ) : (
-          offers.map((offer) => (
-            <Card key={offer.id} className="flex flex-col gap-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <Avatar>
-                    {offer.provider.avatar ? (
-                      <AvatarImage
-                        src={offer.provider.avatar}
-                        alt={offer.provider.name}
-                      />
-                    ) : null}
-                    <AvatarFallback
-                      className={cn(
-                        "text-white",
-                        avatarFallbackColor(offer.provider.name),
-                      )}
-                    >
-                      {offer.provider.name[0]?.toUpperCase() ?? "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-body-md font-semibold! text-text-primary">
-                        {offer.provider.name}
-                      </span>
-                      {offer.provider.verified ? (
-                        <BadgeCheck className="size-4 text-brand-primary" />
+          {offers.length === 0 ? (
+            <Card className="py-10 text-center text-body-sm text-text-secondary">
+              {t("noOffers")}
+            </Card>
+          ) : (
+            offers.map((offer) => (
+              <Card key={offer.id} className="flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar>
+                      {offer.provider.avatar ? (
+                        <AvatarImage
+                          src={offer.provider.avatar}
+                          alt={offer.provider.name}
+                        />
                       ) : null}
+                      <AvatarFallback
+                        className={cn(
+                          "text-white",
+                          avatarFallbackColor(offer.provider.name),
+                        )}
+                      >
+                        {offer.provider.name[0]?.toUpperCase() ?? "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-body-md font-semibold! text-text-primary">
+                          {offer.provider.name}
+                        </span>
+                        {offer.provider.verified ? (
+                          <BadgeCheck className="size-4 text-brand-primary" />
+                        ) : null}
+                      </div>
+                      <span className="text-body-sm text-text-tertiary">
+                        {formatDate(offer.createdAt)}
+                      </span>
                     </div>
-                    <span className="text-body-sm text-text-tertiary">
-                      {formatDate(offer.createdAt)}
-                    </span>
                   </div>
+                  <Badge variant={OFFER_STATUS_VARIANT[offer.status]}>
+                    {t(`offerStatus.${offer.status}`)}
+                  </Badge>
                 </div>
-                <Badge variant={OFFER_STATUS_VARIANT[offer.status]}>
-                  {t(`offerStatus.${offer.status}`)}
-                </Badge>
-              </div>
 
-              <p className="text-body-lg font-semibold! text-text-primary">
-                {formatCurrency(offer.proposedPrice)}
-              </p>
-              {offer.message ? (
-                <p className="text-body-sm text-text-secondary">
-                  {offer.message}
+                <p className="text-body-lg font-semibold! text-text-primary">
+                  {formatCurrency(offer.proposedPrice)}
                 </p>
-              ) : null}
+                {offer.message ? (
+                  <p className="text-body-sm text-text-secondary">
+                    {offer.message}
+                  </p>
+                ) : null}
 
-              <div className="flex flex-wrap items-center gap-2">
-                {offer.provider.username ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  {offer.provider.username ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      nativeButton={false}
+                      render={
+                        <Link href={`/profile/${offer.provider.username}`} />
+                      }
+                    >
+                      {t("viewProfile")}
+                    </Button>
+                  ) : null}
                   <Button
                     variant="secondary"
                     size="sm"
                     nativeButton={false}
                     render={
-                      <Link href={`/profile/${offer.provider.username}`} />
+                      <Link
+                        href={`/dashboard/messages?to=${offer.provider.id}`}
+                      />
                     }
                   >
-                    {t("viewProfile")}
+                    <MessageCircle className="size-4" />
+                    {t("message")}
                   </Button>
-                ) : null}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  nativeButton={false}
-                  render={
-                    <Link
-                      href={`/dashboard/messages?to=${offer.provider.id}`}
-                    />
-                  }
-                >
-                  <MessageCircle className="size-4" />
-                  {t("message")}
-                </Button>
-                {offer.status === "PENDING" && canManage ? (
-                  <>
-                    <Button
-                      variant="accent"
-                      size="sm"
-                      onClick={() => openAccept(offer)}
-                    >
-                      {t("accept")}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-danger"
-                      disabled={busyOfferId === offer.id}
-                      onClick={() => decline(offer.id)}
-                    >
-                      {busyOfferId === offer.id ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : null}
-                      {t("decline")}
-                    </Button>
-                  </>
-                ) : null}
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
+                  {offer.status === "PENDING" && canManage ? (
+                    <>
+                      <Button
+                        variant="accent"
+                        size="sm"
+                        onClick={() => openAccept(offer)}
+                      >
+                        {t("accept")}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-danger"
+                        disabled={busyOfferId === offer.id}
+                        onClick={() => decline(offer.id)}
+                      >
+                        {busyOfferId === offer.id ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : null}
+                        {t("decline")}
+                      </Button>
+                    </>
+                  ) : null}
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+      ) : null}
 
       <Dialog
         open={acceptingOffer !== null}

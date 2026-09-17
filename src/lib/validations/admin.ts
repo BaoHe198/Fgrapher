@@ -54,6 +54,14 @@ export const reviewRoleChangeRequestSchema = z.discriminatedUnion("action", [
   }),
 ]);
 
+export const reviewServiceRequestSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("approve") }),
+  z.object({
+    action: z.literal("reject"),
+    reason: z.string().trim().min(3).max(1000),
+  }),
+]);
+
 export const processDataRequestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("complete") }),
   z.object({ action: z.literal("reject"), note: z.string().min(1) }),

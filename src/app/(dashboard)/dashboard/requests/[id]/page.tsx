@@ -55,6 +55,7 @@ export default async function ServiceRequestDetailPage({
         areaNote: request.areaNote,
         budgetMin: request.budgetMin,
         budgetMax: request.budgetMax,
+        moderationReason: request.moderationReason,
         references: request.references,
         offers: request.offers.map((offer) => ({
           id: offer.id,

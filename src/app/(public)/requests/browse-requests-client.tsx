@@ -31,6 +31,7 @@ interface BrowsableRequest {
   isDateFlexible: boolean;
   shootDate: string | null;
   createdAt: string;
+  customerDisplayName: string;
   isOwner: boolean;
   _count: { offers: number };
 }
@@ -77,21 +78,32 @@ export function BrowseRequestsClient({
   }, [provinceId, provinces]);
 
   useEffect(() => {
+    const controller = new AbortController();
     startTransition(() => setIsLoading(true));
     const params = new URLSearchParams();
     if (role) params.set("role", role);
     if (provinceId) params.set("provinceId", provinceId);
     if (wardId) params.set("wardId", wardId);
 
-    fetch(`/api/requests/browse?${params.toString()}`)
+    fetch(`/api/requests/browse?${params.toString()}`, {
+      signal: controller.signal,
+    })
       .then((res) => res.json())
       .then((body) => {
-        startTransition(() => {
-          setRequests(body.data ?? []);
-          setIsLoading(false);
-        });
+        setRequests(Array.isArray(body.data) ? body.data : []);
+        setIsLoading(false);
       })
-      .catch(() => startTransition(() => setIsLoading(false)));
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setIsLoading(false);
+      });
+
+    // Changing several filters quickly used to leave older requests in
+    // flight. A slower empty response could arrive after a newer non-empty
+    // response and replace the list with the empty state.
+    return () => controller.abort();
   }, [role, provinceId, wardId]);
 
   const filters = (
@@ -187,7 +199,12 @@ export function BrowseRequestsClient({
                           {request.title}
                         </p>
                         <p className="text-body-sm text-text-tertiary">
-                          {request.code} · {roleT(request.role)}
+                          {request.code} · {roleT(request.role)} ·{" "}
+                          {t("postedBy", {
+                            name:
+                              request.customerDisplayName ||
+                              t("unknownRequester"),
+                          })}
                         </p>
                       </div>
                       <div className="flex shrink-0 flex-wrap justify-end gap-1.5">

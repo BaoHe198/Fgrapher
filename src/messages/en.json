@@ -614,7 +614,7 @@
         "roleChangeRequests": "Role changes",
         "moderation": "Moderation",
         "compliance": "Compliance",
-        "serviceRequests": "Unclaimed requests",
+        "serviceRequests": "Request moderation",
         "payments": "Payments",
         "openMenu": "Open admin menu",
         "menuTitle": "Admin menu",
@@ -832,9 +832,20 @@
         }
       },
       "serviceRequests": {
-        "title": "Unclaimed requests",
-        "description": "Open requests with no offers yet — ops can proactively reach out to matching providers.",
-        "empty": "No requests waiting — every open request already has at least one offer.",
+        "title": "Request moderation",
+        "description": "Review the content, categories, and reference media before a request is shown to providers.",
+        "pendingHeading": "Awaiting review ({count})",
+        "pendingEmpty": "No requests are awaiting review.",
+        "unclaimedHeading": "Approved with no offers ({count})",
+        "unclaimedEmpty": "Every open request already has at least one offer.",
+        "submittedBy": "Posted by: {name}",
+        "referencesLabel": "Reference photos/videos to review",
+        "rejectionReasonPlaceholder": "Rejection reason (required and visible to the requester)",
+        "approve": "Approve and publish",
+        "reject": "Reject",
+        "approvedToast": "Request approved and published",
+        "rejectedToast": "Request rejected",
+        "reviewFailed": "Couldn't review the request",
         "hoursOpen": "{hours}h with no offers",
         "budgetNotSet": "No budget set"
       },
@@ -916,14 +927,14 @@
     "serviceRequests": {
       "invalidInput": "Invalid input",
       "loadFailed": "Couldn't load requests",
-      "created": "Request posted",
-      "createFailed": "Couldn't post the request",
+      "created": "Request sent for review",
+      "createFailed": "Couldn't send the request for review",
       "saved": "Draft saved",
       "saveFailed": "Couldn't save",
       "cancelled": "Request cancelled",
       "cancelFailed": "Couldn't cancel the request",
-      "published": "Request posted",
-      "publishFailed": "Couldn't post the request"
+      "published": "Request sent for review",
+      "publishFailed": "Couldn't send the request for review"
     },
     "offers": {
       "roleRequired": "Missing role",
@@ -1011,7 +1022,11 @@
       "paymentUpdated": "Payment updated.",
       "paymentNotFound": "Payment not found.",
       "paymentAlreadyReviewed": "This payment has already been reviewed.",
-      "paymentUpdateFailed": "Couldn't update the payment."
+      "paymentUpdateFailed": "Couldn't update the payment.",
+      "serviceRequestReviewed": "Request reviewed",
+      "serviceRequestNotFound": "Request not found",
+      "serviceRequestAlreadyReviewed": "This request has already been reviewed",
+      "serviceRequestReviewFailed": "Couldn't review the request"
     },
     "auth": {
       "invalidInput": "Invalid input",
@@ -1139,7 +1154,7 @@
   "dashboardCore": {
     "requestWizard": {
       "heading": "Post a request",
-      "subheading": "Describe what you need — matching providers will send you offers.",
+      "subheading": "Describe what you need. Once an admin approves it, matching providers can send you offers.",
       "stepLabel": "Step {current}/{total}",
       "steps": {
         "who": "Who do you need?",
@@ -1179,9 +1194,9 @@
       "back": "Back",
       "saveDraft": "Save draft",
       "continue": "Continue",
-      "post": "Post request",
+      "post": "Submit for review",
       "draftSaved": "Draft saved",
-      "posted": "Request posted",
+      "posted": "Request sent for admin review",
       "genericError": "Something went wrong, please try again",
       "dateRangeOrderError": "Start date can't be after the end date",
       "budgetOrderError": "Minimum budget can't be greater than the maximum",
@@ -1199,11 +1214,13 @@
       "budgetNotSet": "No budget set",
       "offerCount": "{count, plural, =0 {No offers yet} one {# offer} other {# offers}}",
       "status": {
+        "PENDING_REVIEW": "Awaiting review",
         "OPEN": "Open",
         "HAS_OFFERS": "Has offers",
         "FULFILLED": "Fulfilled",
         "EXPIRED": "Expired",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "REJECTED": "Rejected"
       },
       "detail": {
         "back": "Back to my requests",
@@ -1212,6 +1229,11 @@
         "budgetLabel": "Budget",
         "budgetNotSet": "Not set",
         "flexibleRange": "Flexible: {start} — {end}",
+        "pendingReviewTitle": "Request awaiting moderation",
+        "pendingReviewBody": "Providers cannot see it yet. An admin will review the content and reference media before publishing it.",
+        "rejectedTitle": "Request rejected",
+        "rejectedBody": "This content is not displayed in the request list.",
+        "rejectionReason": "Reason: {reason}",
         "cancelRequest": "Cancel request",
         "cancelConfirm": "Cancel this request? Every pending offer will be automatically declined.",
         "cancelledToast": "Request cancelled",
@@ -1305,6 +1327,8 @@
       "budgetNotSet": "No budget set",
       "flexible": "Flexible date",
       "yourRequest": "Your request",
+      "postedBy": "Posted by {name}",
+      "unknownRequester": "User",
       "offerCount": "{count, plural, =0 {No offers yet} other {# offers}}"
     },
     "myOffers": {

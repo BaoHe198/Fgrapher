@@ -10,6 +10,7 @@ import { appUrl } from "@/lib/app-url";
 import { features } from "@/lib/features";
 import { db } from "@/lib/db";
 import { requestNoOffersEmailHtml } from "@/lib/email";
+import { resolvePartyName } from "@/lib/party-name";
 import { notify } from "@/services/notification";
 import { notifyMatchingProviders } from "@/services/request-offers";
 
@@ -21,6 +22,10 @@ export const REQUEST_TTL_DAYS = 7;
 const MAX_OPEN_REQUESTS_PER_CUSTOMER = 3;
 const NO_OFFERS_NUDGE_HOURS = 48;
 const OPEN_STATUSES: ServiceRequestStatus[] = ["OPEN", "HAS_OFFERS"];
+const ACTIVE_REQUEST_STATUSES: ServiceRequestStatus[] = [
+  "PENDING_REVIEW",
+  ...OPEN_STATUSES,
+];
 
 export class ServiceRequestError extends Error {
   constructor(
@@ -41,6 +46,16 @@ export class ServiceRequestNotFoundError extends ServiceRequestError {
 export class ServiceRequestNotOwnedError extends ServiceRequestError {
   constructor() {
     super("You don't own this request", 403);
+  }
+}
+
+export class ServiceRequestReviewError extends Error {
+  constructor(
+    message: "not_found" | "already_reviewed",
+    public status: 404 | 409,
+  ) {
+    super(message);
+    this.name = "ServiceRequestReviewError";
   }
 }
 
@@ -102,7 +117,11 @@ export async function createServiceRequest(
     }
 
     const openCount = await db.serviceRequest.count({
-      where: { customerId, status: { in: OPEN_STATUSES }, isDraft: false },
+      where: {
+        customerId,
+        status: { in: ACTIVE_REQUEST_STATUSES },
+        isDraft: false,
+      },
     });
     if (openCount >= MAX_OPEN_REQUESTS_PER_CUSTOMER) {
       throw new ServiceRequestError(
@@ -139,6 +158,7 @@ export async function createServiceRequest(
       detailedAddress: input.detailedAddress,
       budgetMin: input.budgetMin,
       budgetMax: input.budgetMax,
+      status: input.isDraft ? "OPEN" : "PENDING_REVIEW",
       isDraft: input.isDraft,
       expiresAt,
       references: input.references?.length
@@ -153,18 +173,8 @@ export async function createServiceRequest(
     include: { references: true },
   });
 
-  // Ràng buộc #3 (yêu cầu không ai nhận) — thông báo chủ động ngay khi
-  // đăng, không đợi cron.
-  //
-  // Awaited, not fire-and-forget: on serverless the function can be frozen
-  // once the response is sent, so un-awaited work may never run. It cannot
-  // fail the creation either — notifyMatchingProviders never rejects; a
-  // delivery failure comes back as a reported `failed` outcome while the
-  // request, already committed above, is returned as created.
-  if (!input.isDraft) {
-    await notifyMatchingProviders(request);
-  }
-
+  // A submitted request stays private until reviewServiceRequest approves
+  // it. Matching providers are notified at approval time, never here.
   return request;
 }
 
@@ -268,7 +278,11 @@ export async function publishDraftServiceRequest(
   }
 
   const openCount = await db.serviceRequest.count({
-    where: { customerId, status: { in: OPEN_STATUSES }, isDraft: false },
+    where: {
+      customerId,
+      status: { in: ACTIVE_REQUEST_STATUSES },
+      isDraft: false,
+    },
   });
   if (openCount >= MAX_OPEN_REQUESTS_PER_CUSTOMER) {
     throw new ServiceRequestError(
@@ -281,17 +295,77 @@ export async function publishDraftServiceRequest(
     where: { id: requestId },
     data: {
       isDraft: false,
-      expiresAt: new Date(Date.now() + REQUEST_TTL_DAYS * 24 * 60 * 60 * 1000),
+      status: "PENDING_REVIEW",
+      moderationReason: null,
+      moderatedAt: null,
     },
     include: { references: true },
   });
 
-  // Same completion policy as createServiceRequest: awaited so it actually
-  // runs, and never rejects, so a delivery failure is reported rather than
-  // turned into a failed publish of a request that is already live.
-  await notifyMatchingProviders(published);
-
   return published;
+}
+
+/**
+ * Admin gate for public service requests. updateMany makes the transition
+ * conditional, so two reviewers cannot both approve/reject the same row and
+ * an approval notification is emitted at most once.
+ */
+export async function reviewServiceRequest({
+  requestId,
+  action,
+  reason,
+}: {
+  requestId: string;
+  action: "approve" | "reject";
+  reason?: string;
+}) {
+  const exists = await db.serviceRequest.findUnique({
+    where: { id: requestId },
+    select: { id: true },
+  });
+  if (!exists) throw new ServiceRequestReviewError("not_found", 404);
+
+  const moderatedAt = new Date();
+  const update = await db.serviceRequest.updateMany({
+    where: {
+      id: requestId,
+      isDraft: false,
+      status: "PENDING_REVIEW",
+    },
+    data:
+      action === "approve"
+        ? {
+            status: "OPEN",
+            moderationReason: null,
+            moderatedAt,
+            expiresAt: new Date(
+              moderatedAt.getTime() + REQUEST_TTL_DAYS * 24 * 60 * 60 * 1000,
+            ),
+          }
+        : {
+            status: "REJECTED",
+            moderationReason: reason,
+            moderatedAt,
+          },
+  });
+
+  if (update.count !== 1) {
+    throw new ServiceRequestReviewError("already_reviewed", 409);
+  }
+
+  const reviewed = await db.serviceRequest.findUniqueOrThrow({
+    where: { id: requestId },
+    include: { references: true },
+  });
+
+  if (action === "approve") {
+    // Awaited so serverless cannot freeze before delivery. The broadcaster
+    // reports failures but never rejects, so an already-approved request is
+    // never presented to the admin as if the status change had failed.
+    await notifyMatchingProviders(reviewed);
+  }
+
+  return reviewed;
 }
 
 export async function listCustomerRequests(customerId: string) {
@@ -361,7 +435,7 @@ export async function cancelServiceRequest(
   if (!request) throw new ServiceRequestNotFoundError();
   if (request.customerId !== customerId)
     throw new ServiceRequestNotOwnedError();
-  if (request.status === "FULFILLED" || request.status === "CANCELLED") {
+  if (!ACTIVE_REQUEST_STATUSES.includes(request.status)) {
     throw new ServiceRequestError("This request can't be cancelled", 400);
   }
 
@@ -414,35 +488,10 @@ export async function listBrowsableRequests(
       isDateFlexible: true,
       shootDate: true,
       createdAt: true,
-      province: { select: { name: true } },
-      ward: { select: { name: true } },
-      _count: { select: { offers: true } },
-    },
-    // No pagination UI on /requests (browse) yet — caps an otherwise-
-    // unbounded fetch of every open request nationwide.
-    take: 50,
-  });
-
-  return requests.map(({ customerId, ...request }) => ({
-    ...request,
-    isOwner: customerId === viewerId,
-  }));
-}
-
-// Ràng buộc #3 — "Trang quản trị hiện các yêu cầu chưa ai nhận để đội
-// vận hành can thiệp thủ công." OPEN (not HAS_OFFERS) already means zero
-// offers, since a request leaves OPEN the moment its first offer arrives
-// — see createOffer in services/request-offers.ts.
-export async function listUnclaimedRequests() {
-  return db.serviceRequest.findMany({
-    where: { status: "OPEN", isDraft: false },
-    orderBy: { createdAt: "asc" },
-    include: {
       customer: {
         select: {
           firstName: true,
           name: true,
-          email: true,
           username: true,
           profiles: {
             where: { isPublished: true },
@@ -453,8 +502,62 @@ export async function listUnclaimedRequests() {
       },
       province: { select: { name: true } },
       ward: { select: { name: true } },
+      _count: { select: { offers: true } },
     },
+    // No pagination UI on /requests (browse) yet — caps an otherwise-
+    // unbounded fetch of every open request nationwide.
+    take: 50,
   });
+
+  return requests.map(({ customerId, customer, ...request }) => ({
+    ...request,
+    customerDisplayName: resolvePartyName(customer, ""),
+    isOwner: customerId === viewerId,
+  }));
+}
+
+// Admin queue combines requests awaiting a content decision with approved
+// requests that still have no offers. OPEN (not HAS_OFFERS) already means
+// zero offers because the first offer moves a request to HAS_OFFERS.
+export async function listServiceRequestsForAdmin() {
+  const include = {
+    customer: {
+      select: {
+        firstName: true,
+        name: true,
+        email: true,
+        username: true,
+        profiles: {
+          where: { isPublished: true },
+          select: { displayName: true, role: true },
+          orderBy: { role: "asc" as const },
+        },
+      },
+    },
+    province: { select: { name: true } },
+    ward: { select: { name: true } },
+    references: { select: { mediaUrl: true } },
+  };
+
+  // Keep the two limits independent. A large backlog of old, approved
+  // requests must never consume the result cap and hide newer moderation
+  // work from admins.
+  const [pending, unclaimed] = await Promise.all([
+    db.serviceRequest.findMany({
+      where: { isDraft: false, status: "PENDING_REVIEW" },
+      orderBy: { createdAt: "asc" },
+      include,
+      take: 100,
+    }),
+    db.serviceRequest.findMany({
+      where: { isDraft: false, status: "OPEN" },
+      orderBy: { createdAt: "asc" },
+      include,
+      take: 100,
+    }),
+  ]);
+
+  return { pending, unclaimed };
 }
 
 // Called by /api/cron/expire-service-requests — never touches a FULFILLED

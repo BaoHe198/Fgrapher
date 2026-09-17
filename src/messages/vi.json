@@ -614,7 +614,7 @@
         "roleChangeRequests": "Đổi vai trò",
         "moderation": "Kiểm duyệt",
         "compliance": "Tuân thủ dữ liệu",
-        "serviceRequests": "Yêu cầu chưa ai nhận",
+        "serviceRequests": "Kiểm duyệt yêu cầu",
         "payments": "Thanh toán",
         "openMenu": "Mở menu quản trị",
         "menuTitle": "Menu quản trị",
@@ -832,9 +832,20 @@
         }
       },
       "serviceRequests": {
-        "title": "Yêu cầu chưa ai nhận",
-        "description": "Các yêu cầu đang mở, chưa nhận được đề nghị nào — đội vận hành có thể chủ động liên hệ provider phù hợp.",
-        "empty": "Không có yêu cầu nào đang chờ — mọi yêu cầu mở đều đã có ít nhất một đề nghị.",
+        "title": "Kiểm duyệt yêu cầu",
+        "description": "Kiểm tra nội dung, thể loại và ảnh tham khảo trước khi yêu cầu được hiển thị cho provider.",
+        "pendingHeading": "Chờ duyệt ({count})",
+        "pendingEmpty": "Không có yêu cầu nào đang chờ duyệt.",
+        "unclaimedHeading": "Đã duyệt nhưng chưa có đề nghị ({count})",
+        "unclaimedEmpty": "Mọi yêu cầu đang mở đều đã có ít nhất một đề nghị.",
+        "submittedBy": "Người đăng: {name}",
+        "referencesLabel": "Ảnh/video tham khảo cần kiểm tra",
+        "rejectionReasonPlaceholder": "Lý do từ chối (bắt buộc, người đăng sẽ nhìn thấy)",
+        "approve": "Duyệt và đăng",
+        "reject": "Từ chối",
+        "approvedToast": "Đã duyệt và đăng yêu cầu",
+        "rejectedToast": "Đã từ chối yêu cầu",
+        "reviewFailed": "Không thể xử lý yêu cầu",
         "hoursOpen": "{hours} giờ chưa ai nhận",
         "budgetNotSet": "Chưa đặt ngân sách"
       },
@@ -916,14 +927,14 @@
     "serviceRequests": {
       "invalidInput": "Dữ liệu không hợp lệ",
       "loadFailed": "Không thể tải yêu cầu",
-      "created": "Đã đăng yêu cầu",
-      "createFailed": "Không thể đăng yêu cầu",
+      "created": "Đã gửi yêu cầu để duyệt",
+      "createFailed": "Không thể gửi yêu cầu để duyệt",
       "saved": "Đã lưu nháp",
       "saveFailed": "Không thể lưu",
       "cancelled": "Đã hủy yêu cầu",
       "cancelFailed": "Không thể hủy yêu cầu",
-      "published": "Đã đăng yêu cầu",
-      "publishFailed": "Không thể đăng yêu cầu"
+      "published": "Đã gửi yêu cầu để duyệt",
+      "publishFailed": "Không thể gửi yêu cầu để duyệt"
     },
     "offers": {
       "roleRequired": "Thiếu thông tin vai trò",
@@ -1011,7 +1022,11 @@
       "paymentUpdated": "Đã cập nhật thanh toán.",
       "paymentNotFound": "Không tìm thấy khoản thanh toán.",
       "paymentAlreadyReviewed": "Khoản thanh toán này đã được xử lý.",
-      "paymentUpdateFailed": "Không thể cập nhật thanh toán."
+      "paymentUpdateFailed": "Không thể cập nhật thanh toán.",
+      "serviceRequestReviewed": "Đã xử lý yêu cầu",
+      "serviceRequestNotFound": "Không tìm thấy yêu cầu",
+      "serviceRequestAlreadyReviewed": "Yêu cầu này đã được xử lý",
+      "serviceRequestReviewFailed": "Không thể xử lý yêu cầu"
     },
     "auth": {
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -1139,7 +1154,7 @@
   "dashboardCore": {
     "requestWizard": {
       "heading": "Đăng yêu cầu",
-      "subheading": "Mô tả nhu cầu của bạn, các provider phù hợp sẽ chủ động gửi đề nghị.",
+      "subheading": "Mô tả nhu cầu của bạn. Sau khi quản trị viên duyệt, các provider phù hợp sẽ có thể gửi đề nghị.",
       "stepLabel": "Bước {current}/{total}",
       "steps": {
         "who": "Cần những ai?",
@@ -1179,9 +1194,9 @@
       "back": "Quay lại",
       "saveDraft": "Lưu nháp",
       "continue": "Tiếp tục",
-      "post": "Đăng yêu cầu",
+      "post": "Gửi duyệt",
       "draftSaved": "Đã lưu nháp",
-      "posted": "Đã đăng yêu cầu",
+      "posted": "Đã gửi yêu cầu để quản trị viên duyệt",
       "genericError": "Có lỗi xảy ra, vui lòng thử lại",
       "dateRangeOrderError": "Ngày bắt đầu không được sau ngày kết thúc",
       "budgetOrderError": "Ngân sách tối thiểu không được lớn hơn ngân sách tối đa",
@@ -1199,11 +1214,13 @@
       "budgetNotSet": "Chưa đặt ngân sách",
       "offerCount": "{count, plural, =0 {Chưa có đề nghị} other {# đề nghị}}",
       "status": {
+        "PENDING_REVIEW": "Chờ duyệt",
         "OPEN": "Đang mở",
         "HAS_OFFERS": "Có đề nghị",
         "FULFILLED": "Đã hoàn tất",
         "EXPIRED": "Đã hết hạn",
-        "CANCELLED": "Đã hủy"
+        "CANCELLED": "Đã hủy",
+        "REJECTED": "Không được duyệt"
       },
       "detail": {
         "back": "Quay lại danh sách yêu cầu",
@@ -1212,6 +1229,11 @@
         "budgetLabel": "Ngân sách",
         "budgetNotSet": "Chưa đặt",
         "flexibleRange": "Linh hoạt: {start} — {end}",
+        "pendingReviewTitle": "Yêu cầu đang chờ kiểm duyệt",
+        "pendingReviewBody": "Yêu cầu chưa hiển thị cho provider. Quản trị viên sẽ kiểm tra nội dung và ảnh tham khảo trước khi đăng.",
+        "rejectedTitle": "Yêu cầu không được duyệt",
+        "rejectedBody": "Nội dung này không được hiển thị trong danh sách yêu cầu.",
+        "rejectionReason": "Lý do: {reason}",
         "cancelRequest": "Hủy yêu cầu",
         "cancelConfirm": "Hủy yêu cầu này? Mọi đề nghị đang chờ sẽ tự động bị từ chối.",
         "cancelledToast": "Đã hủy yêu cầu",
@@ -1305,6 +1327,8 @@
       "budgetNotSet": "Chưa đặt ngân sách",
       "flexible": "Ngày linh hoạt",
       "yourRequest": "Yêu cầu của bạn",
+      "postedBy": "Đăng bởi {name}",
+      "unknownRequester": "Người dùng",
       "offerCount": "{count, plural, =0 {Chưa có ai chào} other {# đề nghị}}"
     },
     "myOffers": {
