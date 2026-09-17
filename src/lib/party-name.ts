@@ -16,15 +16,27 @@ export interface NamedParty {
   firstName: string | null;
   username?: string | null;
   /**
-   * The party's published profiles, newest-selected-first — only
-   * `displayName` is needed. Absent for a plain customer, who has no provider
-   * profile and is therefore known by their account name.
+   * The party's published profiles. `role` lets a request prefer the public
+   * identity for the role being hired. Absent for a plain customer, who has
+   * no provider profile and is therefore known by their account name.
    */
-  profiles?: { displayName: string | null }[] | null;
+  profiles?: { displayName: string | null; role?: string }[] | null;
 }
 
-export function resolvePartyName(party: NamedParty, fallback: string): string {
-  const displayName = party.profiles?.find((p) => p.displayName)?.displayName;
+export function resolvePartyName(
+  party: NamedParty,
+  fallback: string,
+  preferredRole?: string,
+): string {
+  const profiles = party.profiles ?? [];
+  const displayName =
+    profiles.find(
+      (profile) =>
+        profile.displayName &&
+        preferredRole !== undefined &&
+        profile.role === preferredRole,
+    )?.displayName ??
+    profiles.find((profile) => profile.displayName)?.displayName;
   return (
     displayName ?? party.firstName ?? party.name ?? party.username ?? fallback
   );

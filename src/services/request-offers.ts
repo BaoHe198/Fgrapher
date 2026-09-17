@@ -377,7 +377,20 @@ export async function getOpportunityDetail(
       province: { select: { name: true } },
       ward: { select: { name: true } },
       references: true,
-      customer: { select: { firstName: true, name: true } },
+      customer: {
+        select: {
+          firstName: true,
+          name: true,
+          username: true,
+          // OAuth stores the Google account name on User.name. Public UI
+          // must prefer the provider identity chosen in Profile.displayName.
+          profiles: {
+            where: { isPublished: true },
+            select: { displayName: true, role: true },
+            orderBy: { role: "asc" },
+          },
+        },
+      },
       offers: {
         where: { providerId },
         select: {

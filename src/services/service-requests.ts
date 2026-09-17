@@ -330,6 +330,10 @@ export async function getServiceRequestForCustomer(
               name: true,
               avatar: true,
               username: true,
+              profiles: {
+                where: { isPublished: true },
+                select: { displayName: true, role: true },
+              },
               // Not filtered by the request's own role here — the UI
               // matches request.role against this list itself, since a
               // provider can hold several roles and only one is relevant
@@ -434,7 +438,19 @@ export async function listUnclaimedRequests() {
     where: { status: "OPEN", isDraft: false },
     orderBy: { createdAt: "asc" },
     include: {
-      customer: { select: { firstName: true, name: true, email: true } },
+      customer: {
+        select: {
+          firstName: true,
+          name: true,
+          email: true,
+          username: true,
+          profiles: {
+            where: { isPublished: true },
+            select: { displayName: true, role: true },
+            orderBy: { role: "asc" },
+          },
+        },
+      },
       province: { select: { name: true } },
       ward: { select: { name: true } },
     },

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { resolvePartyName } from "@/lib/party-name";
 import {
   ServiceRequestError,
   getServiceRequestForCustomer,
@@ -64,7 +65,7 @@ export default async function ServiceRequestDetailPage({
           createdAt: offer.createdAt.toISOString(),
           provider: {
             id: offer.provider.id,
-            name: offer.provider.firstName ?? offer.provider.name ?? "",
+            name: resolvePartyName(offer.provider, "", request.role),
             avatar: offer.provider.avatar,
             username: offer.provider.username,
             verified: offer.provider.roles.some(

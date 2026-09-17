@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { resolvePartyName } from "@/lib/party-name";
 import { OfferError, getOpportunityDetail } from "@/services/request-offers";
 
 import { OpportunityDetail } from "./opportunity-detail";
@@ -54,7 +55,7 @@ export default async function OpportunityDetailPage({
         budgetMin: request.budgetMin,
         budgetMax: request.budgetMax,
         references: request.references,
-        customerName: request.customer.firstName ?? request.customer.name ?? "",
+        customerName: resolvePartyName(request.customer, ""),
       }}
       myOffer={
         myOffer

@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/format";
+import { resolvePartyName } from "@/lib/party-name";
 import { formatBudgetRange } from "@/lib/utils";
 import { listUnclaimedRequests } from "@/services/service-requests";
 
@@ -60,9 +61,7 @@ export default async function AdminServiceRequestsPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-body-sm text-text-secondary">
                   <span>
-                    {request.customer.firstName ??
-                      request.customer.name ??
-                      request.customer.email}
+                    {resolvePartyName(request.customer, request.customer.email)}
                   </span>
                   <span>·</span>
                   <span>

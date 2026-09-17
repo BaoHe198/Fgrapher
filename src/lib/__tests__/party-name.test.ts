@@ -63,6 +63,24 @@ describe("resolvePartyName", () => {
     );
   });
 
+  it("prefers the display name for the role involved in a request", () => {
+    assert.equal(
+      resolvePartyName(
+        {
+          name: "Google Account Name",
+          firstName: "Google",
+          profiles: [
+            { role: "PHOTOGRAPHER", displayName: "Bao Photography" },
+            { role: "VIDEOGRAPHER", displayName: "Bao Films" },
+          ],
+        },
+        fallback,
+        "VIDEOGRAPHER",
+      ),
+      "Bao Films",
+    );
+  });
+
   it("treats a missing profiles field the same as none", () => {
     // Callers that never select profiles (older payloads) must still work.
     assert.equal(
@@ -109,5 +127,27 @@ describe("the chat UI has no private copy of the naming rule", () => {
     const src = read("src/services/messaging.ts");
     assert.match(src, /profiles:\s*\{[\s\S]{0,200}displayName:\s*true/);
     assert.match(src, /isPublished:\s*true/);
+  });
+});
+
+describe("service requests use the same public naming rule", () => {
+  it("shows the request owner's profile name to providers", () => {
+    const page = read(
+      "src/app/(dashboard)/dashboard/opportunities/[id]/page.tsx",
+    );
+    const service = read("src/services/request-offers.ts");
+    assert.match(page, /resolvePartyName\(request\.customer/);
+    assert.match(service, /customer:[\s\S]{0,500}profiles:/);
+    assert.match(service, /profiles:[\s\S]{0,200}isPublished:\s*true/);
+  });
+
+  it("shows each offer provider's display name for the requested role", () => {
+    const page = read("src/app/(dashboard)/dashboard/requests/[id]/page.tsx");
+    const service = read("src/services/service-requests.ts");
+    assert.match(
+      page,
+      /resolvePartyName\(offer\.provider,\s*"",\s*request\.role\)/,
+    );
+    assert.match(service, /provider:[\s\S]{0,500}profiles:/);
   });
 });
