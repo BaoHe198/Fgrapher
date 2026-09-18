@@ -6,7 +6,7 @@ import {
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-import { PROVINCE_REGISTRY } from "./data/provinces-registry";
+import { seedGeography } from "./seed-geography";
 
 const db = new PrismaClient();
 
@@ -43,9 +43,8 @@ interface ProfileSeed {
 interface UserSeed {
   email: string;
   location: string;
-  // Prompt B4/B8 — name from prisma/data/hcmc-wards.ts, resolved to a real
-  // Ward id in main() once seedGeography() has run. HCMC-only for now, so
-  // every seed user lives here rather than a fabricated non-HCMC address.
+  // Name from the geography registry, resolved to a real Ward id in main()
+  // once seedGeography() has run. Demo users currently live in HCMC.
   wardName: string;
   username: string;
   firstName: string;
@@ -338,12 +337,6 @@ const USERS: UserSeed[] = [
 // availability-settings.tsx's DEFAULT_SCHEDULE).
 const ALL_WEEK_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
-// Prompt B4/B8 — real administrative geography, one entry per province in
-// PROVINCE_REGISTRY (see prisma/data/provinces-registry.ts for how to add
-// more once the project owner supplies data for provinces beyond HCMC).
-// Upsert-based and idempotent, unlike the delete-then-recreate USERS
-// seeding below, since Ward rows may already be referenced by real
-// (non-seed) User rows by the time this is re-run in dev.
 // Portfolio photos for the seeded providers. Fgrapher is a portfolio
 // marketplace, so a seed with no photos left every surface that matters —
 // the featured strip, /browse, the profile mosaic — showing placeholder
@@ -448,36 +441,8 @@ async function seedPortfolio(profileId: string, role: string) {
   });
 }
 
-async function seedGeography() {
-  let wardCount = 0;
-
-  for (const { province: provinceData, wards } of PROVINCE_REGISTRY) {
-    const province = await db.province.upsert({
-      where: { code: provinceData.code },
-      create: provinceData,
-      update: { name: provinceData.name },
-    });
-
-    for (const [index, name] of wards.entries()) {
-      const code = String(index + 1).padStart(3, "0");
-      await db.ward.upsert({
-        where: { provinceId_code: { provinceId: province.id, code } },
-        create: { provinceId: province.id, code, name },
-        update: { name },
-      });
-    }
-
-    wardCount += wards.length;
-    console.log(`Seeded province ${province.name} (${wards.length} wards)`);
-  }
-
-  console.log(
-    `Seeded ${PROVINCE_REGISTRY.length} province(s) and ${wardCount} wards total`,
-  );
-}
-
 async function main() {
-  await seedGeography();
+  await seedGeography(db);
 
   const wards = await db.ward.findMany({
     select: { id: true, name: true, provinceId: true },
@@ -646,7 +611,10 @@ async function main() {
           categories: profileSeed.categories ?? [],
           priceMin: profileSeed.priceMin,
           priceMax: profileSeed.priceMax,
-          address: profileSeed.address,
+          // Every provider profile now needs a private detailed address.
+          // Demo profiles without a role-specific studio address reuse the
+          // seed user's full address.
+          address: profileSeed.address ?? seedUser.location,
           area: profileSeed.area,
           amenities: profileSeed.amenities ?? [],
           shopName: profileSeed.shopName,

@@ -74,7 +74,26 @@ một bước nếu production vẫn có request đang chạy.
 Không sửa trực tiếp bảng `_prisma_migrations` bằng SQL nếu Prisma đã có lệnh
 `migrate resolve` cho việc đó.
 
-## 6. Checklist trước khi đưa migration lên production
+## 6. Cập nhật dữ liệu tỉnh/thành và phường/xã
+
+Dữ liệu nguồn được lưu tại
+`prisma/data/sources/vietnam-sap-nhap-phuong-xa.xlsx`. Khi thay file nguồn, chạy:
+
+```bash
+python3 scripts/import-vietnam-geography.py
+pnpm exec prettier --write prisma/data/nationwide-wards.ts
+pnpm db:seed:geography
+```
+
+Script đầu tiên kiểm tra đủ 34 tỉnh/thành và 3.321 phường/xã rồi sinh lại file
+TypeScript. Lệnh seed chỉ thêm dòng còn thiếu và cập nhật tên theo mã ổn định; nó
+không xoá địa giới cũ vì các tài khoản đang hoạt động có thể còn tham chiếu đến đó.
+
+Workflow production tự chạy seed địa giới khi `prisma/data`,
+`prisma/seed-geography.ts` hoặc `scripts/seed-geography.ts` thay đổi. Bước này vẫn
+phải được duyệt trong GitHub Environment `production`, giống migration cấu trúc.
+
+## 7. Checklist trước khi đưa migration lên production
 
 - [ ] Đã đọc toàn bộ SQL được sinh ra.
 - [ ] Đã thử trên database dev và Preview.

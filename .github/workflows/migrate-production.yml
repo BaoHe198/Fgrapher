@@ -34,7 +34,7 @@ jobs:
           # the tip commit vs its immediate parent.
           fetch-depth: 0
 
-      - name: Check whether migrations changed
+      - name: Check whether migrations or geography data changed
         id: check
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force }}" = "true" ]; then
@@ -47,7 +47,11 @@ jobs:
           # it as changed to be safe rather than silently skipping.
           if [ "$before" = "0000000000000000000000000000000000000000" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-          elif git diff --name-only "$before" "${{ github.sha }}" -- prisma/migrations | grep -q .; then
+          elif git diff --name-only "$before" "${{ github.sha }}" -- \
+            prisma/migrations \
+            prisma/data \
+            prisma/seed-geography.ts \
+            scripts/seed-geography.ts | grep -q .; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -110,9 +114,9 @@ jobs:
           echo "## Migrations applied to production" >> "$GITHUB_STEP_SUMMARY"
           npx prisma migrate status >> "$GITHUB_STEP_SUMMARY" || true
 
-      - name: No migration changes
+      - name: No migration or geography changes
         if: steps.check.outputs.changed == 'false'
-        run: echo "No changes under prisma/migrations/ in this push — skipping." >> "$GITHUB_STEP_SUMMARY"
+        run: echo "No migration or geography reference-data changes in this push — skipping." >> "$GITHUB_STEP_SUMMARY"
 
 # One-time manual setup required (not done by this workflow):
 #   GitHub → Settings → Environments → New environment → name it
