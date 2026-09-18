@@ -234,9 +234,6 @@ function UserMenu({
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem render={<Link href="/dashboard/settings/profile" />}>
-          {t("profile")}
-        </DropdownMenuItem>
         <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
           {t("settings")}
         </DropdownMenuItem>
@@ -376,13 +373,6 @@ function MobileNavSheet({
               className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
             >
               {ts("notifications")}
-            </Link>
-            <Link
-              href="/dashboard/settings/profile"
-              onClick={() => setOpen(false)}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
-            >
-              {t("profile")}
             </Link>
             <Link
               href="/dashboard/settings"
