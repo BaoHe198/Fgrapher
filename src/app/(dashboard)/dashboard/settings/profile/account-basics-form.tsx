@@ -6,9 +6,16 @@ import { startTransition, useEffect, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
+import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 
 interface WardOption {
   id: string;
+  name: string;
+}
+
+interface ProvinceOption {
+  id: string;
+  code: string;
   name: string;
 }
 
@@ -16,26 +23,49 @@ export function AccountBasicsForm({
   initialName,
   initialUsername,
   initialWardId,
+  initialProvinceId,
   showDisplayName,
 }: {
   initialName: string | null;
   initialUsername: string | null;
   initialWardId: string | null;
+  initialProvinceId: string | null;
   showDisplayName: boolean;
 }) {
   const t = useTranslations("dashboardSettings.profile.basics");
   const [name, setName] = useState(initialName ?? "");
   const [username, setUsername] = useState(initialUsername ?? "");
   const [wardId, setWardId] = useState(initialWardId ?? "");
+  const [provinceId, setProvinceId] = useState(initialProvinceId ?? "");
+  const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
   const [wards, setWards] = useState<WardOption[]>([]);
 
   useEffect(() => {
-    // HCMC-only today (see prisma/data/hcmc-wards.ts) — no provinceCode
-    // filter needed until a second province is seeded.
-    fetch("/api/geography/wards")
+    fetch(provincesApiPath())
       .then((res) => res.json())
-      .then((body) => startTransition(() => setWards(body.data ?? [])));
+      .then((body) => startTransition(() => setProvinces(body.data ?? [])));
   }, []);
+
+  const provinceCode = provinces.find(
+    (province) => province.id === provinceId,
+  )?.code;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    if (!provinceCode) {
+      startTransition(() => setWards([]));
+      return () => controller.abort();
+    }
+    fetch(wardsApiPath(provinceCode), { signal: controller.signal })
+      .then((res) => res.json())
+      .then((body) => startTransition(() => setWards(body.data ?? [])))
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          startTransition(() => setWards([]));
+        }
+      });
+    return () => controller.abort();
+  }, [provinceCode]);
 
   const saveWard = async (value: string) => {
     startTransition(() => setWardId(value));
@@ -137,15 +167,38 @@ export function AccountBasicsForm({
         ) : null}
       </div>
 
-      <NativeSelect
-        label={t("wardLabel")}
-        value={wardId}
-        onChange={saveWard}
-        options={[
-          { value: "", label: t("wardNotSelected") },
-          ...wards.map((ward) => ({ value: ward.id, label: ward.name })),
-        ]}
-      />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <NativeSelect
+          label={t("provinceLabel")}
+          value={provinceId}
+          onChange={(value) => {
+            setProvinceId(value);
+            void saveWard("");
+          }}
+          options={[
+            { value: "", label: t("provinceNotSelected") },
+            ...provinces.map((province) => ({
+              value: province.id,
+              label: province.name,
+            })),
+          ]}
+        />
+        <NativeSelect
+          label={t("wardLabel")}
+          value={wardId}
+          onChange={saveWard}
+          disabled={!provinceId}
+          options={[
+            {
+              value: "",
+              label: provinceId
+                ? t("wardNotSelected")
+                : t("wardHelperNoProvince"),
+            },
+            ...wards.map((ward) => ({ value: ward.id, label: ward.name })),
+          ]}
+        />
+      </div>
     </div>
   );
 }

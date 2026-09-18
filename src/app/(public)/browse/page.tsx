@@ -295,7 +295,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                             t("unnamed"),
                           username: profile.user.username ?? "",
                           roles: profile.roles.map((role) => roleT(role)),
-                          city: profile.user.location ?? "",
+                          city: profile.location,
                           rating:
                             profile.avgRating > 0
                               ? profile.avgRating.toFixed(1)
@@ -372,7 +372,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                             t("unnamed"),
                           username: profile.user.username ?? "",
                           roles: profile.roles.map((role) => roleT(role)),
-                          city: profile.user.location ?? "",
+                          city: profile.location,
                           rating:
                             profile.avgRating > 0
                               ? profile.avgRating.toFixed(1)

@@ -25,6 +25,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { CATEGORIES_BY_ROLE, PAID_ROLES } from "@/lib/constants";
+import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 
 interface ProvinceOption {
   id: string;
@@ -99,21 +100,17 @@ export function HeroSearch({
   // Real Province rows (Prompt B4), not a hardcoded list (CLAUDE.md mục 9)
   // — same data source as /browse's own city filter.
   useEffect(() => {
-    fetch("/api/geography/provinces")
+    fetch(provincesApiPath())
       .then((res) => res.json())
       .then((body) => startTransition(() => setProvinces(body.data ?? [])));
   }, []);
 
-  // Ward coverage is HCMC-only today (see prisma/data/hcmc-wards.ts) — most
-  // provinces resolve to an empty list here.
   useEffect(() => {
     if (!provinceCode) {
       startTransition(() => setWards([]));
       return;
     }
-    fetch(
-      `/api/geography/wards?provinceCode=${encodeURIComponent(provinceCode)}`,
-    )
+    fetch(wardsApiPath(provinceCode))
       .then((res) => res.json())
       .then((body) => startTransition(() => setWards(body.data ?? [])))
       .catch(() => startTransition(() => setWards([])));

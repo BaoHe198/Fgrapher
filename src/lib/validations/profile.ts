@@ -20,7 +20,7 @@ export const updateProfileSchema = z.object({
   priceMin: z.number().nonnegative().optional(),
   priceMax: z.number().nonnegative().optional(),
   categories: z.array(z.enum(ProfileCategory)).optional(),
-  address: z.string().max(200).optional(),
+  address: z.string().trim().min(5).max(200),
   area: z.number().positive().optional(),
   amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
   shopName: z.string().max(120).optional(),
@@ -36,13 +36,8 @@ export const updateProfileSchema = z.object({
   agencyName: z.string().max(120).optional(),
   hideExactLocation: z.boolean().optional(),
   requireDepositBeforeContact: z.boolean().optional(),
-  // Prompt B4, VIỆC 3 — provinceId/wardId nullable via z.string().nullable()
-  // rather than .optional(): the API route's "undefined means leave
-  // unchanged" convention (see profile-settings-form.tsx's onSave comment)
-  // still needs a way to explicitly clear a previously-set province/ward,
-  // e.g. switching to "phục vụ toàn quốc" only.
-  provinceId: z.string().nullable().optional(),
-  wardId: z.string().nullable().optional(),
+  provinceId: z.string().min(1),
+  wardId: z.string().min(1),
   servesNationwide: z.boolean().optional(),
 });
 
@@ -69,7 +64,7 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     priceMin: z.number().nonnegative().optional(),
     priceMax: z.number().nonnegative().optional(),
     categories: z.array(z.enum(ProfileCategory)).optional(),
-    address: z.string().max(200).optional(),
+    address: z.string().trim().min(5, t("addressRequired")).max(200),
     area: z.number().positive().optional(),
     amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
     shopName: z.string().max(120).optional(),
@@ -84,8 +79,8 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     agencyName: z.string().max(120).optional(),
     hideExactLocation: z.boolean().optional(),
     requireDepositBeforeContact: z.boolean().optional(),
-    provinceId: z.string().nullable().optional(),
-    wardId: z.string().nullable().optional(),
+    provinceId: z.string().min(1, t("provinceRequired")),
+    wardId: z.string().min(1, t("wardRequired")),
     servesNationwide: z.boolean().optional(),
   });
 }

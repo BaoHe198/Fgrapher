@@ -25,6 +25,7 @@ export default async function ProfileSettingsPage() {
   const t = await getTranslations("dashboardSettings.profile.sections");
   const user = await db.user.findUniqueOrThrow({
     where: { id: session.user.id },
+    include: { ward: { select: { provinceId: true } } },
   });
   const providerRoles = session.user.roles.filter((role) =>
     (PAID_ROLES as string[]).includes(role),
@@ -56,6 +57,7 @@ export default async function ProfileSettingsPage() {
               initialName={user.name}
               initialUsername={user.username}
               initialWardId={user.wardId}
+              initialProvinceId={user.ward?.provinceId ?? null}
               // Anyone with a provider role already sets a "Tên hiển thị"
               // per role below (RoleProfileSwitcher, backed by
               // Profile.displayName) — showing a second, account-level

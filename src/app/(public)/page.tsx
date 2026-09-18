@@ -136,7 +136,7 @@ export default async function LandingPage() {
                     tLanding("unnamed"),
                   username: profile.user.username ?? "",
                   roles: profile.roles.map((role) => t(`role.${role}`)),
-                  city: profile.user.location ?? "",
+                  city: profile.location,
                   rating:
                     profile.avgRating > 0
                       ? profile.avgRating.toFixed(1)

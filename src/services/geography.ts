@@ -7,7 +7,7 @@ import {
 } from "@/lib/cache";
 
 // Prompt B4/B8 — real administrative geography, queried from the Province/
-// Ward tables (see prisma/schema.prisma and prisma/data/hcmc-wards.ts).
+// Ward tables (see prisma/schema.prisma and prisma/data/nationwide-wards.ts).
 // CLAUDE.md mục 9 forbids hardcoding this list in application code — every
 // caller (registration, profile settings, browse filters) must go through
 // here, never a local constants array.

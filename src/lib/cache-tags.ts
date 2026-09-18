@@ -40,7 +40,7 @@ export const profileUserTag = (userId: string) => `profile:user:${userId}`;
  * Bumping orphans every entry at once, which is cheap: everything but geography
  * has a ≤10-minute TTL, and geography is three small queries.
  */
-export const CACHE_KEY_VERSION = "v1";
+export const CACHE_KEY_VERSION = "v2";
 
 /** Revalidate seconds per cached read. Kept together so the policy is legible. */
 export const CACHE_TTL = {

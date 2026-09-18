@@ -31,10 +31,8 @@ model User {
   coverImage              String?
   bio                     String?
   phone                   String?
-  // Free-text display location — kept for backward compatibility with
-  // existing rows and as a fallback while wardId coverage is still
-  // HCMC-only (Prompt B8/B4). Prefer wardId for anything that needs real
-  // filtering/sorting; location is display-only going forward.
+  // Free-text display location kept for backward compatibility. Prefer
+  // wardId for filtering/sorting; location is display-only going forward.
   location                String?
   latitude                Float?
   longitude               Float?
@@ -123,14 +121,10 @@ model User {
 }
 
 // ============================================================================
-// GEOGRAPHY (Prompt B4/B8) — real Vietnamese administrative units, never
-// hardcoded in application code (CLAUDE.md mục 9). Seeded from
-// prisma/data/hcmc-wards.ts, sourced verbatim from the post-2025-merger
-// ward list the project owner supplied — coverage starts with Hồ Chí Minh
-// only; other provinces are added the same way once their real ward data
-// is available. Two-level (Province -> Ward) even though only one Province
-// row exists today, so adding the next province is a seed change, not a
-// schema change.
+// GEOGRAPHY (Prompt B4/B8) — all 34 Vietnamese province-level units and
+// 3,321 wards after the 2025 merger. Seeded from the workbook preserved in
+// prisma/data/sources through prisma/data/nationwide-wards.ts. Application
+// code reads these tables rather than maintaining hardcoded UI lists.
 // ============================================================================
 
 model Province {
@@ -629,7 +623,8 @@ model Profile {
   priceMin                    Float?
   priceMax                    Float?
   currency                    String           @default("VND")
-  // Studio-specific
+  // Private detailed address for every provider profile (house/street).
+  // Public surfaces show only the related province + ward names.
   address                     String?
   area                        Float? // square meters
   amenities                   String[] // e.g., ["wifi", "ac", "parking", "changing_room"]
@@ -637,9 +632,9 @@ model Profile {
   shopName                    String?
   // Địa giới hành chính (Prompt B4) — where this specific role/profile is
   // based, distinct from User.wardId (the person's personal/account
-  // location). A photographer could live in one province but run their
-  // studio profile out of another. Nullable: existing profiles predate
-  // this field and the onboarding flow (Prompt B4 VIỆC 3) that sets it.
+  // location). A photographer could live in one province but operate this
+  // role elsewhere. Nullable at DB level for legacy rows/draft editing;
+  // every provider must supply province, ward and address before publishing.
   provinceId                  String?
   wardId                      String?
   // Provider explicitly takes bookings from anywhere in the country (e.g.
@@ -1442,9 +1437,8 @@ model ServiceRequest {
   // ACCEPTED (see services/request-offers.ts's acceptOffer — it's the
   // only place detailedAddress is ever read for a non-owner).
   provinceId      String
-  // Optional — Ward coverage is HCMC-only today (Prompt B8/B4), so most
-  // provinces have no rows to pick from yet. areaNote remains the free-text
-  // fallback for everywhere else.
+  // Optional for historical requests created before nationwide ward support.
+  // New requests should store a real Ward reference.
   wardId          String?
   areaNote        String?
   detailedAddress String?

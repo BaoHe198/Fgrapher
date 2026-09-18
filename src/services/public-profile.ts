@@ -66,20 +66,15 @@ export async function setProfilePublished(
     throw new ProfileMissingCategoryError(t("missingCategory"));
   }
 
-  // Prompt B4, VIỆC 3 — a Studio's whole value proposition is "come shoot
-  // here," so unlike other roles (where provinceId is a nice-to-have for
-  // search filtering), a Studio without a specific address + province +
-  // ward is unusable for customers deciding whether to book. Other roles
-  // stay optional here — search.ts's provinceMatch() falls back to the
-  // owner's personal ward's province when a profile has none, the same
-  // resolution services/bookings.ts uses. (This comment previously claimed
-  // a fallback to "the free-text city filter" that no longer existed, which
-  // is how a provider set only by personal ward went missing from province
-  // searches unnoticed.)
-  if (isPublished && role === "STUDIO") {
-    if (!profile.address || !profile.provinceId || !profile.wardId) {
-      throw new ProfileMissingLocationError(t("missingLocation"));
-    }
+  // Every provider supplies a private detailed address plus a province and
+  // ward before publishing. Public reads deliberately expose only the two
+  // administrative names; the exact address remains available to the owner
+  // and workflows that explicitly need it.
+  if (
+    isPublished &&
+    (!profile.address?.trim() || !profile.provinceId || !profile.wardId)
+  ) {
+    throw new ProfileMissingLocationError(t("missingLocation"));
   }
 
   const updated = await db.profile.update({
@@ -130,7 +125,12 @@ async function getPublicProfileUserUncached(username: string) {
       firstName: true,
       avatar: true,
       coverImage: true,
-      location: true,
+      ward: {
+        select: {
+          name: true,
+          province: { select: { name: true } },
+        },
+      },
       acceptingBookings: true,
       // Never rendered directly — only ever passed through
       // getAgeRangeLabel() to compute a bucketed range, MODEL role only.
@@ -142,6 +142,13 @@ async function getPublicProfileUserUncached(username: string) {
         // tab/title order regardless of which profile was created first.
         orderBy: { role: "asc" },
         include: {
+          province: { select: { name: true } },
+          ward: {
+            select: {
+              name: true,
+              province: { select: { name: true } },
+            },
+          },
           // Prompt B5, VIỆC 5 — public viewers only ever see moderated,
           // approved media. The owner's own view (dashboard/portfolio)
           // reads directly via db.profileMedia.findMany with no filter,
@@ -210,23 +217,31 @@ async function getPublicProfileUserUncached(username: string) {
 
   return {
     ...user,
-    profiles: user.profiles.map((profile) => ({
-      ...profile,
-      albums: profile.albums.map((album) => {
-        const cover =
-          album.coverMedia &&
-          album.coverMedia.moderationStatus === "APPROVED" &&
-          !album.coverMedia.deletedAt
-            ? album.coverMedia
-            : (album.media[0] ?? null);
-        return {
-          ...album,
-          coverMedia: cover
-            ? { id: cover.id, url: cover.url, type: cover.type }
-            : null,
-        };
-      }),
-    })),
+    profiles: user.profiles.map((profile) => {
+      // `Profile.address` is the provider's private street-level address.
+      // Remove it at the public service boundary so a future Client
+      // Component cannot expose it accidentally by spreading this object.
+      const { address, ...publicProfile } = profile;
+      void address;
+
+      return {
+        ...publicProfile,
+        albums: profile.albums.map((album) => {
+          const cover =
+            album.coverMedia &&
+            album.coverMedia.moderationStatus === "APPROVED" &&
+            !album.coverMedia.deletedAt
+              ? album.coverMedia
+              : (album.media[0] ?? null);
+          return {
+            ...album,
+            coverMedia: cover
+              ? { id: cover.id, url: cover.url, type: cover.type }
+              : null,
+          };
+        }),
+      };
+    }),
   };
 }
 

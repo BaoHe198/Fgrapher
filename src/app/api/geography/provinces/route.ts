@@ -4,9 +4,7 @@ import { GEOGRAPHY_CACHE_CONTROL } from "@/lib/cache";
 import { listProvinces } from "@/services/geography";
 
 // Public, unauthenticated — same reasoning as /api/geography/wards. Backs
-// the browse-filter city dropdown, which used to be a hardcoded 8-city
-// list (CLAUDE.md mục 9 forbids that); today this returns exactly one row
-// (Thành phố Hồ Chí Minh) until more provinces' real ward data is seeded.
+// the browse-filter province dropdown from the nationwide reference tables.
 export async function GET() {
   const provinces = await listProvinces();
 

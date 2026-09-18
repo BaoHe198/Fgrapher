@@ -15,6 +15,7 @@ import {
   EXPERIENCE_LEVELS,
   PAID_ROLES,
 } from "@/lib/constants";
+import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 
 import { useBrowseFilterNavigation } from "./browse-filter-context";
 
@@ -162,28 +163,21 @@ export function FilterSidebar({
   const [filters, setFilters] = useState<FilterState>(() =>
     filterStateFromParams(searchParams),
   );
-  // Real Province rows, not a hardcoded list (CLAUDE.md mục 9) — today
-  // this is just Thành phố Hồ Chí Minh until more provinces' real ward
-  // data is seeded (see prisma/data/hcmc-wards.ts).
+  // Real nationwide Province/Ward rows, never a hardcoded UI list.
   const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
   useEffect(() => {
-    fetch("/api/geography/provinces")
+    fetch(provincesApiPath())
       .then((res) => res.json())
       .then((body) => startTransition(() => setProvinces(body.data ?? [])));
   }, []);
 
-  // Ward coverage is HCMC-only today (see prisma/data/hcmc-wards.ts) — most
-  // provinces resolve to an empty list here, so the select below falls back
-  // to "all wards" rather than hiding.
   const [wards, setWards] = useState<WardOption[]>([]);
   useEffect(() => {
     if (!filters.city) {
       startTransition(() => setWards([]));
       return;
     }
-    fetch(
-      `/api/geography/wards?provinceCode=${encodeURIComponent(filters.city)}`,
-    )
+    fetch(wardsApiPath(filters.city))
       .then((res) => res.json())
       .then((body) => startTransition(() => setWards(body.data ?? [])))
       .catch(() => startTransition(() => setWards([])));

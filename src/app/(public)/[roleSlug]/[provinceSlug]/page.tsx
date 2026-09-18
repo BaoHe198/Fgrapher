@@ -145,7 +145,7 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
                   tBrowse("unnamed"),
                 username: profile.user.username ?? "",
                 roles: profile.roles.map((role) => roleT(role)),
-                city: profile.user.location ?? "",
+                city: profile.location,
                 rating:
                   profile.avgRating > 0
                     ? profile.avgRating.toFixed(1)

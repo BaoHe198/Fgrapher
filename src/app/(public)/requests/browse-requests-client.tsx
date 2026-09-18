@@ -17,6 +17,7 @@ import { Card } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
 import { PROVIDER_ROLES } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
+import { wardsApiPath } from "@/lib/geography-client";
 import { cn, formatBudgetRange } from "@/lib/utils";
 
 interface BrowsableRequest {
@@ -60,18 +61,13 @@ export function BrowseRequestsClient({
   const [requests, setRequests] = useState<BrowsableRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Ward coverage is HCMC-only today (see prisma/data/hcmc-wards.ts) — most
-  // provinces resolve to an empty list here, so the select below just falls
-  // back to "all wards" rather than hiding.
   useEffect(() => {
     const province = provinces.find((p) => p.id === provinceId);
     if (!province) {
       startTransition(() => setWards([]));
       return;
     }
-    fetch(
-      `/api/geography/wards?provinceCode=${encodeURIComponent(province.code)}`,
-    )
+    fetch(wardsApiPath(province.code))
       .then((res) => res.json())
       .then((body) => startTransition(() => setWards(body.data ?? [])))
       .catch(() => startTransition(() => setWards([])));

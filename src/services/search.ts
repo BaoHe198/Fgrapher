@@ -8,6 +8,7 @@ import type {
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
+import { formatAdministrativeLocation } from "@/lib/location";
 import {
   CACHE_KEY_VERSION,
   CACHE_TAGS,
@@ -69,7 +70,19 @@ const PROVIDER_INCLUDE = {
       name: true,
       username: true,
       avatar: true,
-      location: true,
+      ward: {
+        select: {
+          name: true,
+          province: { select: { name: true } },
+        },
+      },
+    },
+  },
+  province: { select: { name: true } },
+  ward: {
+    select: {
+      name: true,
+      province: { select: { name: true } },
     },
   },
   // Prompt B5, VIỆC 5 — public search must never surface unmoderated
@@ -137,10 +150,20 @@ function groupProfilesByUser(
       (latest, p) => (p.createdAt > latest ? p.createdAt : latest),
       userProfiles[0].createdAt,
     );
+    const locatedProfile =
+      userProfiles.find((profile) => profile.ward || profile.province) ??
+      userProfiles[0];
+    const location = formatAdministrativeLocation(
+      locatedProfile,
+      locatedProfile.wardId || locatedProfile.provinceId
+        ? undefined
+        : { ward: locatedProfile.user.ward },
+    );
 
     return {
       userId: userProfiles[0].userId,
       user: userProfiles[0].user,
+      location,
       roles: userProfiles.map((p) => p.role),
       displayName: userProfiles.find((p) => p.displayName)?.displayName ?? null,
       priceMin,

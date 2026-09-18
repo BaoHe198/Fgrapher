@@ -98,13 +98,28 @@ export async function PATCH(
       );
     }
 
+    const ward = await db.ward.findUnique({
+      where: { id: parsed.data.wardId },
+      select: { provinceId: true },
+    });
+    if (!ward || ward.provinceId !== parsed.data.provinceId) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "validation_error",
+          message: t("invalidLocation"),
+        },
+        { status: 400 },
+      );
+    }
+
     const profile = await db.profile.upsert({
       where: { userId_role: { userId: session.user.id, role: role as Role } },
       create: { userId: session.user.id, role: role as Role, ...parsed.data },
       update: parsed.data,
     });
 
-    // Categories (and, for STUDIO, location) are two of the requirements
+    // Categories and location are requirements
     // gating auto-publish (see tryAutoPublish) — saving them here may be
     // the last one this profile was waiting on.
     await tryAutoPublish(session.user.id, role as Role);

@@ -14,6 +14,7 @@ import { auth } from "@/lib/auth";
 import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
+import { formatAdministrativeLocation } from "@/lib/location";
 import type { ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
@@ -169,6 +170,12 @@ export default async function PublicProfilePage({
     : false;
 
   const displayName = activeProfile.displayName ?? user.name ?? username;
+  const profileLocation = formatAdministrativeLocation(
+    activeProfile,
+    activeProfile.wardId || activeProfile.provinceId
+      ? undefined
+      : { ward: user.ward },
+  );
   const firstName = user.firstName ?? displayName.split(" ")[0];
   const isVerified =
     user.roles.find((r) => r.role === activeProfile.role)
@@ -240,8 +247,8 @@ export default async function PublicProfilePage({
     name: displayName,
     image: user.avatar ?? undefined,
     description: activeProfile.description ?? undefined,
-    address: user.location
-      ? { "@type": "PostalAddress", addressLocality: user.location }
+    address: profileLocation
+      ? { "@type": "PostalAddress", addressLocality: profileLocation }
       : undefined,
     ...(reviewStats.count > 0
       ? {
@@ -314,12 +321,12 @@ export default async function PublicProfilePage({
                     reviews={reviewStats.count}
                   />
                 </div>
-                {user.location || ageRangeLabel ? (
+                {profileLocation || ageRangeLabel ? (
                   <div className="flex items-center gap-1.5 text-body-sm text-text-secondary">
-                    {user.location ? (
+                    {profileLocation ? (
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="size-3.5" />
-                        {user.location}
+                        {profileLocation}
                       </span>
                     ) : null}
                     {ageRangeLabel ? (

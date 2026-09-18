@@ -8,6 +8,7 @@ import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatVND } from "@/lib/format";
+import { formatAdministrativeLocation } from "@/lib/location";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("dashboardCore.saved");
@@ -36,6 +37,19 @@ export default async function SavedProfilesPage() {
           firstName: true,
           lastName: true,
           avatar: true,
+          ward: {
+            select: {
+              name: true,
+              province: { select: { name: true } },
+            },
+          },
+        },
+      },
+      province: { select: { name: true } },
+      ward: {
+        select: {
+          name: true,
+          province: { select: { name: true } },
         },
       },
       // Prompt G5 — the artist card's no-photo/carousel treatment needs
@@ -97,7 +111,12 @@ export default async function SavedProfilesPage() {
                     profile.displayName ?? profile.user.name ?? t("unnamed"),
                   username: profile.user.username ?? "",
                   roles: [roleT(profile.role)],
-                  city: profile.address ?? "",
+                  city: formatAdministrativeLocation(
+                    profile,
+                    profile.wardId || profile.provinceId
+                      ? undefined
+                      : { ward: profile.user.ward },
+                  ),
                   rating: stats.avg > 0 ? stats.avg.toFixed(1) : t("newBadge"),
                   reviews: stats.count,
                   price: profile.priceMin

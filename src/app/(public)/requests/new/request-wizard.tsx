@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ReferenceMediaField } from "@/components/forms/reference-media-field";
 import { toast } from "@/components/ui/toast";
 import { CATEGORIES_BY_ROLE, PROVIDER_ROLES } from "@/lib/constants";
+import { wardsApiPath } from "@/lib/geography-client";
 import { formatBudgetRange } from "@/lib/utils";
 import { MAX_REFERENCE_MEDIA } from "@/lib/validations/reference-media";
 
@@ -152,18 +153,15 @@ export function RequestWizard({
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  // Ward coverage is HCMC-only today (see prisma/data/hcmc-wards.ts) — most
-  // provinces resolve to an empty list here, which the select below handles
-  // by falling back to a "not available" placeholder rather than hiding.
+  // Wards are loaded only for the selected province to keep the nationwide
+  // dataset out of the initial page payload.
   useEffect(() => {
     const province = provinces.find((p) => p.id === form.provinceId);
     if (!province) {
       startTransition(() => setWards([]));
       return;
     }
-    fetch(
-      `/api/geography/wards?provinceCode=${encodeURIComponent(province.code)}`,
-    )
+    fetch(wardsApiPath(province.code))
       .then((res) => res.json())
       .then((body) => startTransition(() => setWards(body.data ?? [])))
       .catch(() => startTransition(() => setWards([])));

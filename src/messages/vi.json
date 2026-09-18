@@ -892,6 +892,7 @@
       "unknownRole": "Vai trò không xác định",
       "noRole": "Bạn không có vai trò này",
       "invalidInput": "Dữ liệu không hợp lệ",
+      "invalidLocation": "Phường/xã không thuộc tỉnh/thành đã chọn",
       "updated": "Đã cập nhật hồ sơ",
       "loadFailed": "Không thể tải hồ sơ",
       "updateFailed": "Không thể cập nhật hồ sơ"
@@ -2003,8 +2004,11 @@
         "usernameLabel": "Tên người dùng",
         "usernameHint": "Dùng cho đường dẫn hồ sơ của bạn (vd: fgrapher.vn/profile/tenban) — chỉ chữ không dấu, số và dấu gạch dưới. Muốn hiển thị tên có dấu, hãy dùng mục \"Tên hiển thị\".",
         "usernameTaken": "Tên người dùng này đã được sử dụng",
+        "provinceLabel": "Tỉnh/thành",
+        "provinceNotSelected": "Chưa chọn",
         "wardLabel": "Phường/xã",
-        "wardNotSelected": "Chưa chọn"
+        "wardNotSelected": "Chưa chọn",
+        "wardHelperNoProvince": "Chọn tỉnh/thành trước"
       },
       "location": {
         "title": "Khu vực hoạt động",
@@ -2017,7 +2021,11 @@
         "nationwideHelper": "Hồ sơ sẽ xuất hiện trong kết quả tìm kiếm ở mọi tỉnh/thành, kèm nhãn \"Nhận job toàn quốc\"",
         "extraAreasLabel": "Tỉnh/thành phục vụ thêm (tùy chọn)",
         "extraAreasHelper": "Ngoài tỉnh/thành chính ở trên, chọn thêm các tỉnh/thành khác bạn cũng nhận job",
-        "studioRequiredNote": "Studio bắt buộc có địa chỉ, tỉnh/thành, và phường/xã cụ thể trước khi công khai hồ sơ"
+        "requiredNote": "Mọi provider cần cung cấp đủ tỉnh/thành, phường/xã và địa chỉ chi tiết trước khi hồ sơ được công khai.",
+        "addressPlaceholder": "Số nhà, tên đường hoặc thôn/ấp",
+        "addressPrivacy": "Địa chỉ chi tiết được lưu riêng tư. Trên hồ sơ và kết quả tìm kiếm chỉ hiển thị tỉnh/thành và phường/xã.",
+        "requiredError": "Vui lòng nhập đủ tỉnh/thành, phường/xã và địa chỉ chi tiết.",
+        "saveFailed": "Không thể lưu hồ sơ, vui lòng thử lại."
       },
       "editor": {
         "liveStatus": "Đang hoạt động — hiển thị trong tìm kiếm",
@@ -2026,7 +2034,7 @@
         "notVerifiedNoteBefore": "Bạn có thể tiếp tục chỉnh sửa hồ sơ này ở chế độ nháp. Sau khi",
         "verifiedLinkText": "danh tính được xác minh",
         "notVerifiedNoteAfter": ", có ít nhất 1 ảnh được duyệt và chọn danh mục sở trường, hồ sơ sẽ tự động hiển thị trong tìm kiếm.",
-        "autoPublishNote": "Hồ sơ sẽ tự động hiển thị trong tìm kiếm ngay khi bạn có ít nhất 1 ảnh portfolio được duyệt và đã chọn danh mục sở trường.",
+        "autoPublishNote": "Hồ sơ sẽ tự động hiển thị trong tìm kiếm khi có địa chỉ đầy đủ, ít nhất 1 ảnh portfolio được duyệt và đã chọn danh mục sở trường.",
         "displayNameLabel": "Tên hiển thị",
         "descriptionLabel": "Mô tả",
         "categoriesLabel": "Danh mục",
@@ -2034,7 +2042,7 @@
         "categoriesRequiredHint": "Chọn ít nhất 1 danh mục trước khi công khai hồ sơ",
         "minPriceLabel": "Giá tối thiểu",
         "maxPriceLabel": "Giá tối đa",
-        "addressLabel": "Địa chỉ",
+        "addressLabel": "Địa chỉ chi tiết",
         "areaLabel": "Diện tích (m²)",
         "amenitiesLabel": "Tiện ích",
         "amenities": {
@@ -2161,7 +2169,10 @@
         "bothPricesRequired": "Vui lòng nhập cả giá bán và giá thuê"
       },
       "profile": {
-        "displayNameRequired": "Vui lòng nhập tên hiển thị"
+        "displayNameRequired": "Vui lòng nhập tên hiển thị",
+        "addressRequired": "Vui lòng nhập địa chỉ chi tiết",
+        "provinceRequired": "Vui lòng chọn tỉnh/thành",
+        "wardRequired": "Vui lòng chọn phường/xã"
       },
       "review": {
         "contentTooShort": "Vui lòng chia sẻ chi tiết hơn (tối thiểu 20 ký tự)"
@@ -2204,7 +2215,7 @@
       "notFound": "Hãy lưu thông tin hồ sơ trước khi công khai",
       "noApprovedMedia": "Hãy tải lên ít nhất một ảnh portfolio đã được duyệt trước khi công khai",
       "missingCategory": "Hãy chọn ít nhất một danh mục sở trường trước khi công khai",
-      "missingLocation": "Hãy thêm địa chỉ, tỉnh/thành và phường/xã cụ thể trước khi công khai hồ sơ studio"
+      "missingLocation": "Hãy thêm địa chỉ chi tiết, tỉnh/thành và phường/xã trước khi công khai hồ sơ"
     },
     "email": {
       "footer": {
@@ -3257,10 +3268,10 @@
       "sortPriceDesc": "Giá: cao đến thấp",
       "sortNewest": "Mới nhất",
       "sortMostReviewed": "Nhiều đánh giá nhất",
-      "cityLabel": "Tỉnh/thành",
-      "allCities": "Tất cả tỉnh/thành",
-      "wardLabel": "Phường/xã",
-      "allWards": "Tất cả phường/xã",
+      "cityLabel": "Tỉnh/Thành",
+      "allCities": "Tất cả Tỉnh/Thành",
+      "wardLabel": "Phường/Xã",
+      "allWards": "Tất cả Phường/Xã",
       "budgetLabel": "Ngân sách",
       "budgetAny": "Tất cả",
       "budgetUnder2m": "Dưới 2 triệu",

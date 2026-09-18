@@ -892,6 +892,7 @@
       "unknownRole": "Unknown role",
       "noRole": "You don't have this role",
       "invalidInput": "Invalid input",
+      "invalidLocation": "The ward does not belong to the selected province",
       "updated": "Profile updated",
       "loadFailed": "Failed to load profile",
       "updateFailed": "Failed to update profile"
@@ -2003,8 +2004,11 @@
         "usernameLabel": "Username",
         "usernameHint": "Used for your profile URL (e.g. fgrapher.vn/profile/yourname) — unaccented letters, numbers, and underscores only. For a name with diacritics, use \"Display name\".",
         "usernameTaken": "That username is taken",
+        "provinceLabel": "Province/city",
+        "provinceNotSelected": "Not selected",
         "wardLabel": "Ward",
-        "wardNotSelected": "Not selected"
+        "wardNotSelected": "Not selected",
+        "wardHelperNoProvince": "Choose a province first"
       },
       "location": {
         "title": "Service area",
@@ -2017,7 +2021,11 @@
         "nationwideHelper": "Your profile will show up in every province's search results, labeled \"Accepts nationwide bookings\"",
         "extraAreasLabel": "Additional provinces served (optional)",
         "extraAreasHelper": "Besides your main province above, pick other provinces you also take bookings in",
-        "studioRequiredNote": "A specific address, province, and ward are required before publishing a studio profile"
+        "requiredNote": "Every provider must supply a province, ward, and detailed address before the profile can go live.",
+        "addressPlaceholder": "House number, street, village, or hamlet",
+        "addressPrivacy": "Your detailed address stays private. Public profiles and search results show only the province and ward.",
+        "requiredError": "Enter a province, ward, and detailed address.",
+        "saveFailed": "Couldn't save the profile. Please try again."
       },
       "editor": {
         "liveStatus": "Live — visible in search",
@@ -2026,7 +2034,7 @@
         "notVerifiedNoteBefore": "You can keep editing this profile as a draft. Once",
         "verifiedLinkText": "your identity is verified",
         "notVerifiedNoteAfter": ", you have at least 1 approved photo, and you've chosen a specialty category, this profile will automatically appear in search.",
-        "autoPublishNote": "This profile will automatically appear in search as soon as you have at least 1 approved portfolio photo and a specialty category chosen.",
+        "autoPublishNote": "This profile will automatically appear in search once its address is complete, it has at least 1 approved portfolio photo, and a specialty category is chosen.",
         "displayNameLabel": "Display name",
         "descriptionLabel": "Description",
         "categoriesLabel": "Categories",
@@ -2034,7 +2042,7 @@
         "categoriesRequiredHint": "Choose at least 1 category before publishing your profile",
         "minPriceLabel": "Min price",
         "maxPriceLabel": "Max price",
-        "addressLabel": "Address",
+        "addressLabel": "Detailed address",
         "areaLabel": "Area (sqm)",
         "amenitiesLabel": "Amenities",
         "amenities": {
@@ -2161,7 +2169,10 @@
         "bothPricesRequired": "Enter both a sale price and a rental price"
       },
       "profile": {
-        "displayNameRequired": "Enter a display name"
+        "displayNameRequired": "Enter a display name",
+        "addressRequired": "Enter a detailed address",
+        "provinceRequired": "Select a province",
+        "wardRequired": "Select a ward"
       },
       "review": {
         "contentTooShort": "Share a bit more detail (at least 20 characters)"
@@ -2204,7 +2215,7 @@
       "notFound": "Save your profile details before publishing",
       "noApprovedMedia": "Upload at least one approved portfolio photo before publishing",
       "missingCategory": "Choose at least one specialty category before publishing",
-      "missingLocation": "Add a specific address, province, and ward before publishing a studio profile"
+      "missingLocation": "Add a detailed address, province, and ward before publishing the profile"
     },
     "email": {
       "footer": {
@@ -3257,8 +3268,8 @@
       "sortPriceDesc": "Price: high to low",
       "sortNewest": "Newest",
       "sortMostReviewed": "Most reviewed",
-      "cityLabel": "City",
-      "allCities": "All cities",
+      "cityLabel": "Province/City",
+      "allCities": "All provinces/cities",
       "wardLabel": "Ward",
       "allWards": "All wards",
       "budgetLabel": "Budget",

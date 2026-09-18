@@ -20,6 +20,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { Tag } from "@/components/ui/tag";
 import { CATEGORIES_BY_ROLE, EXPERIENCE_LEVELS } from "@/lib/constants";
+import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
 import { ServicesManager } from "./services-manager";
@@ -122,6 +123,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [isPublished, setIsPublished] = useState(false);
   const [verificationStatus, setVerificationStatus] =
     useState<VerificationStatus | null>(null);
@@ -153,11 +155,9 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
     };
   }, [role]);
 
-  // Real Province/Ward rows (Prompt B4), not a hardcoded list (CLAUDE.md
-  // mục 9) — today this is just Thành phố Hồ Chí Minh until more
-  // provinces' real data is seeded (see prisma/data/provinces-registry.ts).
+  // Real nationwide Province/Ward rows, never a hardcoded UI list.
   useEffect(() => {
-    fetch("/api/geography/provinces")
+    fetch(provincesApiPath())
       .then((res) => res.json())
       .then((body) => startTransition(() => setProvinces(body.data ?? [])));
   }, []);
@@ -171,9 +171,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       startTransition(() => setWards([]));
       return;
     }
-    fetch(
-      `/api/geography/wards?provinceCode=${encodeURIComponent(selectedProvinceCode)}`,
-    )
+    fetch(wardsApiPath(selectedProvinceCode))
       .then((res) => res.json())
       .then((body) => startTransition(() => setWards(body.data ?? [])));
   }, [selectedProvinceCode]);
@@ -207,11 +205,20 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   };
 
   const onSave = async () => {
-    setIsSaving(true);
     setSaved(false);
+    setSaveError(null);
+    if (
+      values.address.trim().length < 5 ||
+      !values.provinceId ||
+      !values.wardId
+    ) {
+      setSaveError(t("requiredError"));
+      return;
+    }
+    setIsSaving(true);
 
-    const [profileRes] = await Promise.all([
-      fetch(`/api/profiles/${role}`, {
+    try {
+      const profileRes = await fetch(`/api/profiles/${role}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -224,7 +231,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           priceMin: values.priceMin ? Number(values.priceMin) : undefined,
           priceMax: values.priceMax ? Number(values.priceMax) : undefined,
           categories: values.categories,
-          address: values.address || undefined,
+          address: values.address.trim(),
           area: values.area ? Number(values.area) : undefined,
           amenities: values.amenities,
           shopName: values.shopName || undefined,
@@ -243,33 +250,37 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           agencyName: values.agencyName || undefined,
           hideExactLocation: values.hideExactLocation,
           requireDepositBeforeContact: values.requireDepositBeforeContact,
-          // `|| null`, not `|| undefined` — unlike the free-text fields
-          // above, clearing the province/ward select must actually clear
-          // the stored value (undefined would mean "leave unchanged" and
-          // a cleared dropdown could never unset it).
-          provinceId: values.provinceId || null,
-          wardId: values.wardId || null,
+          provinceId: values.provinceId,
+          wardId: values.wardId,
           servesNationwide: values.servesNationwide,
         }),
-      }),
-      fetch(`/api/profiles/${role}/service-areas`, {
+      });
+
+      const profileBody = await profileRes.json();
+      if (!profileRes.ok) {
+        setSaveError(profileBody.message ?? t("saveFailed"));
+        return;
+      }
+
+      const areasRes = await fetch(`/api/profiles/${role}/service-areas`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provinceIds: extraProvinceIds }),
-      }),
-    ]);
-
-    // Saving categories/location can be the last thing tryAutoPublish
-    // (server-side, in the PATCH route) was waiting on — reflect the
-    // result immediately instead of leaving the status card stale until
-    // the next full page load.
-    const profileBody = await profileRes.json();
-    if (profileBody.data) {
-      setIsPublished(Boolean(profileBody.data.isPublished));
+      });
+      if (!areasRes.ok) {
+        const areasBody = await areasRes.json().catch(() => null);
+        setSaveError(areasBody?.message ?? t("saveFailed"));
+        return;
+      }
+      if (profileBody.data) {
+        setIsPublished(Boolean(profileBody.data.isPublished));
+      }
+      setSaved(true);
+    } catch {
+      setSaveError(t("saveFailed"));
+    } finally {
+      setIsSaving(false);
     }
-
-    setIsSaving(false);
-    setSaved(true);
   };
 
   const toggleExtraProvince = (provinceId: string) => {
@@ -391,11 +402,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
           {t("title")}
         </span>
-        {role === "STUDIO" ? (
-          <p className="text-body-sm text-text-tertiary">
-            {t("studioRequiredNote")}
-          </p>
-        ) : null}
+        <p className="text-body-sm text-text-tertiary">{t("requiredNote")}</p>
         <div className="grid grid-cols-2 gap-3">
           <NativeSelect
             label={t("provinceLabel")}
@@ -425,6 +432,14 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             ]}
           />
         </div>
+
+        <Input
+          label={tEditor("addressLabel")}
+          value={values.address}
+          onChange={(e) => set("address", e.target.value)}
+          placeholder={t("addressPlaceholder")}
+        />
+        <p className="text-body-sm text-text-tertiary">{t("addressPrivacy")}</p>
 
         <Switch
           label={t("nationwideLabel")}
@@ -462,11 +477,6 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       {role === "STUDIO" ? (
         <>
-          <Input
-            label={tEditor("addressLabel")}
-            value={values.address}
-            onChange={(e) => set("address", e.target.value)}
-          />
           <Input
             label={tEditor("areaLabel")}
             type="number"
@@ -635,6 +645,9 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         </Button>
         {saved ? (
           <span className="text-body-sm text-success">{tEditor("saved")}</span>
+        ) : null}
+        {saveError ? (
+          <span className="text-body-sm text-danger">{saveError}</span>
         ) : null}
       </div>
     </div>
