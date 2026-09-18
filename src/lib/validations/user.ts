@@ -44,6 +44,7 @@ export const NOTIFICATION_KEYS = [
   "bookingConfirmed",
   "bookingCancelled",
   "bookingReminder",
+  "availabilityReminder",
   "newMessage",
   // Reverse-marketplace: new matching request, a new offer on your
   // request, an offer accepted/declined, the 48h no-offers nudge. See

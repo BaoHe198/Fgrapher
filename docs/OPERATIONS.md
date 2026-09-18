@@ -93,6 +93,22 @@ Khi người dùng báo không nhận mail:
 Không gửi token/reset link qua chat hỗ trợ. Xem `docs/ops/email-outbox.md` và
 `docs/ops/email-verification.md`.
 
+### Nhắc provider cập nhật lịch bận
+
+Cron `GET /api/cron/availability-reminders` chạy lúc 00:30 UTC, tức 07:30 giờ
+Việt Nam. Cron chỉ nhắc tài khoản provider đang hoạt động, đã xác minh, có hồ sơ
+công khai và đang bật nhận lịch. Thông báo mở thẳng `/dashboard/calendar` để họ
+kiểm tra hôm nay và 7 ngày tới.
+
+Mỗi provider chỉ có một thông báo và một email cho mỗi ngày. Nếu Vercel chạy lại
+cron, mã định danh theo ngày ngăn gửi trùng. Provider có thể tắt riêng email hoặc
+thông báo trong web ở phần Cài đặt thông báo.
+
+Khi kiểm tra thủ công trên production, luôn gửi header
+`Authorization: Bearer <CRON_SECRET>`. Không gọi route này không có secret; local
+development cho phép bỏ secret để tiện thử và có thể tạo thông báo thật trong
+database dev.
+
 ## 5. Thanh toán
 
 Phần này chỉ áp dụng cho phương thức đã được bật.

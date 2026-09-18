@@ -1592,7 +1592,8 @@
         "client": "Khách hàng",
         "provider": "Nhà cung cấp",
         "viewProfile": "Xem hồ sơ",
-        "message": "Nhắn tin"
+        "message": "Nhắn tin",
+        "openZalo": "Mở Zalo"
       },
       "fields": {
         "service": "Dịch vụ",
@@ -1988,6 +1989,7 @@
         "bookingConfirmed": "Đã xác nhận đặt lịch",
         "bookingCancelled": "Đã hủy đặt lịch",
         "bookingReminder": "Nhắc lịch sắp tới",
+        "availabilityReminder": "Nhắc cập nhật lịch bận",
         "newMessage": "Tin nhắn mới",
         "newFollower": "Người theo dõi mới",
         "newReview": "Đánh giá mới",
@@ -2076,6 +2078,8 @@
         "instagramLabel": "Instagram",
         "facebookLabel": "Facebook",
         "tiktokLabel": "TikTok",
+        "zaloUrlLabel": "Liên kết nhắn tin Zalo",
+        "zaloUrlHelper": "Chỉ khách hàng đã gửi yêu cầu đặt lịch thành công mới thấy liên kết này. Hãy dán liên kết https://zalo.me/... từ tài khoản Zalo của bạn.",
         "saveChanges": "Lưu thay đổi",
         "saved": "Đã lưu"
       },
@@ -2112,6 +2116,9 @@
       },
       "availability": {
         "weeklySchedule": "Lịch làm việc hàng tuần",
+        "reminderTitle": "Nhắc cập nhật lịch lúc 07:30 mỗi ngày",
+        "reminderDescription": "Bạn sẽ nhận thông báo để kiểm tra lịch bận hôm nay và 7 ngày tới, giúp khách hàng tránh đặt nhầm giờ bạn không rảnh.",
+        "openCalendar": "Mở lịch bận chi tiết",
         "days": {
           "sun": "Chủ nhật",
           "mon": "Thứ hai",
@@ -2172,7 +2179,8 @@
         "displayNameRequired": "Vui lòng nhập tên hiển thị",
         "addressRequired": "Vui lòng nhập địa chỉ chi tiết",
         "provinceRequired": "Vui lòng chọn tỉnh/thành",
-        "wardRequired": "Vui lòng chọn phường/xã"
+        "wardRequired": "Vui lòng chọn phường/xã",
+        "zaloUrlInvalid": "Vui lòng nhập liên kết HTTPS chính thức từ zalo.me"
       },
       "review": {
         "contentTooShort": "Vui lòng chia sẻ chi tiết hơn (tối thiểu 20 ký tự)"
@@ -2253,6 +2261,12 @@
         "body": "Nhắc nhở: buổi {serviceName} của bạn với {otherPartyName} diễn ra vào {dateLabel} lúc {timeLabel} — chưa đầy 24 giờ nữa.",
         "cta": "Xem lịch hẹn",
         "subject": "Nhắc lịch hẹn ngày mai — Fgrapher"
+      },
+      "availabilityReminder": {
+        "heading": "Kiểm tra lịch bận hôm nay",
+        "body": "Hãy dành một phút cập nhật lịch bận hôm nay và 7 ngày tới để khách hàng không đặt nhầm vào thời gian bạn đã có việc.",
+        "cta": "Cập nhật lịch bận",
+        "subject": "Nhắc cập nhật lịch bận hôm nay — Fgrapher"
       },
       "bookingCompleted": {
         "heading": "Buổi chụp của bạn thế nào?",
@@ -2464,6 +2478,10 @@
           "message": "Lịch của khách mà công việc này gắn kèm đã bị hủy. Lịch của bạn không bị ảnh hưởng — bạn có thể tự quyết định có hủy hay không."
         }
       },
+      "availabilityReminder": {
+        "title": "Kiểm tra lịch bận hôm nay",
+        "message": "Cập nhật lịch bận hôm nay và 7 ngày tới để tránh khách hàng đặt nhầm thời gian."
+      },
       "review": {
         "new": {
           "title": "Đánh giá mới",
@@ -2549,6 +2567,8 @@
       "success": {
         "heading": "Đã gửi yêu cầu đặt lịch!",
         "body": "{providerName} sẽ phản hồi trong vòng 24 giờ. Chúng tôi sẽ gửi email ngay khi họ xác nhận.",
+        "zaloNote": "Bạn có thể mở Zalo để trao đổi thêm với {providerName} về lịch hẹn vừa gửi.",
+        "openZalo": "Nhắn qua Zalo",
         "viewBookings": "Xem lịch đặt của tôi",
         "browseMore": "Khám phá thêm nghệ sĩ"
       },

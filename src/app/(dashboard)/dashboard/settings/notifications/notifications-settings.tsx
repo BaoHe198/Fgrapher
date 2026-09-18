@@ -29,6 +29,7 @@ const BASE_GROUPS: {
       "bookingConfirmed",
       "bookingCancelled",
       "bookingReminder",
+      "availabilityReminder",
     ],
   },
   { titleKey: "messages", keys: ["newMessage"] },

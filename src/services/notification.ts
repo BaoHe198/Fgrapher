@@ -45,6 +45,8 @@ interface NotifyEmail {
 }
 
 interface NotifyInput {
+  /** Stable id for retryable cron events that must create at most one row. */
+  notificationId?: string;
   userId: string;
   type: NotificationType;
   title: string;
@@ -96,7 +98,7 @@ export function buildEmailDedupe(
 }
 
 async function deliver(input: NotifyInput, forceEmail: boolean) {
-  const { userId, type, title, message, data, email } = input;
+  const { notificationId, userId, type, title, message, data, email } = input;
 
   // Types belonging to a disabled feature (marketplace/social) are inert —
   // no row, no email, not even for a "critical" forceEmail call — so a
@@ -118,9 +120,18 @@ async function deliver(input: NotifyInput, forceEmail: boolean) {
   });
 
   if (decision.createInApp || forceEmail) {
-    await db.notification.create({
-      data: { userId, type, title, message, data: data ?? undefined },
-    });
+    const row = { userId, type, title, message, data: data ?? undefined };
+    if (notificationId) {
+      // A Vercel cron can be retried or invoked manually. A deterministic id
+      // makes that retry a no-op without marking a reminder unread again.
+      await db.notification.upsert({
+        where: { id: notificationId },
+        create: { id: notificationId, ...row },
+        update: {},
+      });
+    } else {
+      await db.notification.create({ data: row });
+    }
   }
 
   // Real-time delivery (Socket.io) is deferred — the notification bell

@@ -297,6 +297,22 @@ export function bookingReminderEmailHtml(
   return bookingEmail("bookingReminder", props);
 }
 
+export function availabilityReminderEmailHtml({
+  t,
+  calendarUrl,
+}: {
+  t: EmailT;
+  calendarUrl: string;
+}) {
+  return bookingEmailShell({
+    t,
+    heading: t("availabilityReminder.heading"),
+    body: t("availabilityReminder.body"),
+    ctaLabel: t("availabilityReminder.cta"),
+    ctaUrl: calendarUrl,
+  });
+}
+
 export function bookingRescheduleProposedEmailHtml(
   props: BookingEmailBase & { t: EmailT },
 ) {

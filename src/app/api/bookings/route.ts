@@ -84,7 +84,14 @@ export async function POST(request: Request) {
     const booking = await createBooking(session.user.id, parsed.data);
 
     return NextResponse.json(
-      { data: booking, error: null, message: t("requestSent") },
+      {
+        data: {
+          id: booking.id,
+          providerZaloUrl: booking.providerZaloUrl,
+        },
+        error: null,
+        message: t("requestSent"),
+      },
       { status: 201 },
     );
   } catch (err) {

@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2, X } from "lucide-react";
+import { CalendarClock, Loader2, X } from "lucide-react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
@@ -125,6 +126,24 @@ export function AvailabilitySettings() {
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex items-start gap-3 rounded-xl border border-info/25 bg-info-bg p-4">
+        <CalendarClock className="mt-0.5 size-5 shrink-0 text-info" />
+        <div className="flex flex-col gap-1">
+          <p className="text-body-sm font-medium text-text-primary">
+            {t("reminderTitle")}
+          </p>
+          <p className="text-body-sm text-text-secondary">
+            {t("reminderDescription")}
+          </p>
+          <Link
+            href="/dashboard/calendar"
+            className="mt-1 w-fit text-body-sm font-medium text-info underline-offset-4 hover:underline"
+          >
+            {t("openCalendar")}
+          </Link>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-2">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
           {t("weeklySchedule")}

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  availabilityReminderEmailHtml,
   bookingEmailShell,
   bookingExpiredEmailHtml,
   bookingRequestEmailHtml,
@@ -84,6 +85,17 @@ describe("bookingEmailShell", () => {
   it("omits the CTA entirely when it has no url", () => {
     const html = bookingEmailShell({ t, heading: "h", body: "b" });
     assert.ok(!html.includes("&nbsp;&nbsp;→"));
+  });
+});
+
+describe("availabilityReminderEmailHtml", () => {
+  it("links providers directly to their calendar", () => {
+    const html = availabilityReminderEmailHtml({
+      t,
+      calendarUrl: "https://fgrapher.test/dashboard/calendar",
+    });
+    assert.ok(html.includes("availabilityReminder.heading"));
+    assert.ok(html.includes("https://fgrapher.test/dashboard/calendar"));
   });
 });
 

@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, ChevronLeft, ChevronRight, Clock, Loader2 } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Loader2,
+  MessageCircle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -164,6 +171,7 @@ export function BookingWizard({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [providerZaloUrl, setProviderZaloUrl] = useState<string | null>(null);
   // Crew-hire (Prompt B7, VIỆC 1) — "Gắn vào đơn khách hàng".
   const [parentBookingOptions, setParentBookingOptions] = useState<
     ParentBookingOption[]
@@ -298,6 +306,7 @@ export function BookingWizard({
 
     sessionStorage.removeItem(storageKey);
     setBookingId(body.data.id);
+    setProviderZaloUrl(body.data.providerZaloUrl ?? null);
   };
 
   if (bookingId) {
@@ -331,9 +340,30 @@ export function BookingWizard({
           <p className="max-w-md text-body-md text-text-secondary">
             {t("success.body", { providerName })}
           </p>
-          <div className="flex gap-3">
+          {providerZaloUrl ? (
+            <div className="flex max-w-lg flex-col items-center gap-3 rounded-[var(--fg-radius-lg)] border border-info/25 bg-info-bg px-5 py-4">
+              <p className="text-body-sm text-text-secondary">
+                {t("success.zaloNote", { providerName })}
+              </p>
+              <Button
+                variant="accent"
+                nativeButton={false}
+                render={
+                  <a
+                    href={providerZaloUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                }
+              >
+                <MessageCircle className="size-4" />
+                {t("success.openZalo")}
+              </Button>
+            </div>
+          ) : null}
+          <div className="flex flex-wrap justify-center gap-3">
             <Button
-              variant="accent"
+              variant={providerZaloUrl ? "secondary" : "accent"}
               nativeButton={false}
               render={<Link href="/dashboard/bookings" />}
             >

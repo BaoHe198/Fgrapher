@@ -1,6 +1,8 @@
 import { ExperienceLevel, ProfileCategory } from "@prisma/client";
 import { z } from "zod";
 
+import { isValidZaloUrl, normalizeZaloUrl } from "@/lib/zalo";
+
 export const AMENITY_OPTIONS = [
   "wifi",
   "ac",
@@ -10,6 +12,17 @@ export const AMENITY_OPTIONS = [
   "restroom",
 ] as const;
 
+function zaloUrlSchema(message: string) {
+  return z
+    .string()
+    .trim()
+    .max(300)
+    .refine(isValidZaloUrl, message)
+    .transform(normalizeZaloUrl)
+    .nullable()
+    .optional();
+}
+
 export const updateProfileSchema = z.object({
   displayName: z.string().min(2, "Enter a display name").optional(),
   description: z.string().max(1000).optional(),
@@ -17,6 +30,7 @@ export const updateProfileSchema = z.object({
   instagram: z.string().max(60).optional(),
   facebook: z.string().max(60).optional(),
   tiktok: z.string().max(60).optional(),
+  zaloUrl: zaloUrlSchema("Enter an official https://zalo.me link"),
   priceMin: z.number().nonnegative().optional(),
   priceMax: z.number().nonnegative().optional(),
   categories: z.array(z.enum(ProfileCategory)).optional(),
@@ -61,6 +75,7 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     instagram: z.string().max(60).optional(),
     facebook: z.string().max(60).optional(),
     tiktok: z.string().max(60).optional(),
+    zaloUrl: zaloUrlSchema(t("zaloUrlInvalid")),
     priceMin: z.number().nonnegative().optional(),
     priceMax: z.number().nonnegative().optional(),
     categories: z.array(z.enum(ProfileCategory)).optional(),

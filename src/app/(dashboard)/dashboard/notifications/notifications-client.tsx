@@ -45,6 +45,7 @@ function typeGroup(
     BOOKING_DECLINED: "BOOKINGS",
     BOOKING_CANCELLED: "BOOKINGS",
     BOOKING_REMINDER: "BOOKINGS",
+    AVAILABILITY_REMINDER: "BOOKINGS",
     BOOKING_RESCHEDULE_PROPOSED: "BOOKINGS",
     BOOKING_COMPLETED: "BOOKINGS",
     NEW_MESSAGE: "MESSAGES",
@@ -92,7 +93,9 @@ function notificationHref(notification: Notification) {
   const data = notification.data as {
     bookingId?: string;
     orderId?: string;
+    href?: string;
   } | null;
+  if (data?.href?.startsWith("/dashboard/")) return data.href;
   if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
   if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
   return "/dashboard/notifications";

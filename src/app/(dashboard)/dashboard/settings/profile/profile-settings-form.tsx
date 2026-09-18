@@ -54,6 +54,7 @@ interface ProfileFormValues {
   instagram: string;
   facebook: string;
   tiktok: string;
+  zaloUrl: string;
   priceMin: string;
   priceMax: string;
   categories: ProfileCategory[];
@@ -87,6 +88,7 @@ function toFormValues(
     instagram: (profile?.instagram as string) ?? "",
     facebook: (profile?.facebook as string) ?? "",
     tiktok: (profile?.tiktok as string) ?? "",
+    zaloUrl: (profile?.zaloUrl as string) ?? "",
     priceMin: profile?.priceMin != null ? String(profile.priceMin) : "",
     priceMax: profile?.priceMax != null ? String(profile.priceMax) : "",
     categories: (profile?.categories as ProfileCategory[]) ?? [],
@@ -228,6 +230,9 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           instagram: values.instagram || undefined,
           facebook: values.facebook || undefined,
           tiktok: values.tiktok || undefined,
+          // An explicit null lets the provider remove a previously saved
+          // contact link. The API normalizes and allowlists Zalo hosts.
+          zaloUrl: values.zaloUrl.trim() || null,
           priceMin: values.priceMin ? Number(values.priceMin) : undefined,
           priceMax: values.priceMax ? Number(values.priceMax) : undefined,
           categories: values.categories,
@@ -636,6 +641,19 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           value={values.tiktok}
           onChange={(e) => set("tiktok", e.target.value)}
         />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Input
+          label={tEditor("zaloUrlLabel")}
+          type="url"
+          value={values.zaloUrl}
+          onChange={(e) => set("zaloUrl", e.target.value)}
+          placeholder="https://zalo.me/..."
+        />
+        <p className="text-body-sm text-text-tertiary">
+          {tEditor("zaloUrlHelper")}
+        </p>
       </div>
 
       <div className="flex items-center gap-3 border-t border-border-subtle pt-4">

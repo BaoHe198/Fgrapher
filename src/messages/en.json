@@ -1592,7 +1592,8 @@
         "client": "Client",
         "provider": "Provider",
         "viewProfile": "View profile",
-        "message": "Message"
+        "message": "Message",
+        "openZalo": "Open Zalo"
       },
       "fields": {
         "service": "Service",
@@ -1988,6 +1989,7 @@
         "bookingConfirmed": "Booking confirmed",
         "bookingCancelled": "Booking cancelled",
         "bookingReminder": "Upcoming booking reminder",
+        "availabilityReminder": "Availability update reminder",
         "newMessage": "New message",
         "newFollower": "New follower",
         "newReview": "New review",
@@ -2076,6 +2078,8 @@
         "instagramLabel": "Instagram",
         "facebookLabel": "Facebook",
         "tiktokLabel": "TikTok",
+        "zaloUrlLabel": "Zalo message link",
+        "zaloUrlHelper": "Only customers who successfully submit a booking can see this link. Paste an official https://zalo.me/... link from your Zalo account.",
         "saveChanges": "Save changes",
         "saved": "Saved"
       },
@@ -2112,6 +2116,9 @@
       },
       "availability": {
         "weeklySchedule": "Weekly schedule",
+        "reminderTitle": "Daily availability reminder at 07:30",
+        "reminderDescription": "You will receive a reminder to review today and the next 7 days so customers do not book you while you are busy.",
+        "openCalendar": "Open detailed calendar",
         "days": {
           "sun": "Sunday",
           "mon": "Monday",
@@ -2172,7 +2179,8 @@
         "displayNameRequired": "Enter a display name",
         "addressRequired": "Enter a detailed address",
         "provinceRequired": "Select a province",
-        "wardRequired": "Select a ward"
+        "wardRequired": "Select a ward",
+        "zaloUrlInvalid": "Enter an official HTTPS link from zalo.me"
       },
       "review": {
         "contentTooShort": "Share a bit more detail (at least 20 characters)"
@@ -2253,6 +2261,12 @@
         "body": "Reminder: your {serviceName} session with {otherPartyName} is on {dateLabel} at {timeLabel} — less than 24 hours away.",
         "cta": "View booking",
         "subject": "Booking reminder — tomorrow — Fgrapher"
+      },
+      "availabilityReminder": {
+        "heading": "Check today's availability",
+        "body": "Take a minute to update your busy times for today and the next 7 days so customers cannot book a time when you are unavailable.",
+        "cta": "Update availability",
+        "subject": "Update today's availability — Fgrapher"
       },
       "bookingCompleted": {
         "heading": "How was your session?",
@@ -2464,6 +2478,10 @@
           "message": "The client booking this job was attached to was cancelled. Your booking is unaffected — you can decide whether to cancel it too."
         }
       },
+      "availabilityReminder": {
+        "title": "Check today's availability",
+        "message": "Update your busy times for today and the next 7 days to prevent accidental bookings."
+      },
       "review": {
         "new": {
           "title": "New review",
@@ -2549,6 +2567,8 @@
       "success": {
         "heading": "Booking request sent!",
         "body": "{providerName} will respond within 24 hours. We'll email you as soon as they confirm.",
+        "zaloNote": "You can open Zalo to discuss the booking you just submitted with {providerName}.",
+        "openZalo": "Message on Zalo",
         "viewBookings": "View my bookings",
         "browseMore": "Browse more artists"
       },

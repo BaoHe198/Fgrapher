@@ -27,7 +27,11 @@ export default async function SavedProfilesPage() {
   });
 
   const profiles = await db.profile.findMany({
-    where: { id: { in: saved.map((s) => s.profileId) } },
+    where: {
+      id: { in: saved.map((s) => s.profileId) },
+      isPublished: true,
+      user: { deletedAt: null, isSuspended: false },
+    },
     include: {
       user: {
         select: {

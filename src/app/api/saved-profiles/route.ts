@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { omitPrivateProfileFields } from "@/lib/profile-privacy";
 
 const saveSchema = z.object({ profileId: z.string().min(1) });
 
@@ -18,11 +19,26 @@ export async function GET() {
     });
 
     const profiles = await db.profile.findMany({
-      where: { id: { in: saved.map((s) => s.profileId) } },
-      include: { user: { select: { username: true, name: true, firstName: true, avatar: true } } },
+      where: {
+        id: { in: saved.map((s) => s.profileId) },
+        isPublished: true,
+        user: { deletedAt: null, isSuspended: false },
+      },
+      include: {
+        user: {
+          select: { username: true, name: true, firstName: true, avatar: true },
+        },
+      },
     });
 
-    return NextResponse.json({ data: profiles, error: null, message: null }, { status: 200 });
+    // Saving a public profile does not count as a booking. Keep the private
+    // street address and post-booking Zalo contact out of this legacy list.
+    const publicProfiles = profiles.map(omitPrivateProfileFields);
+
+    return NextResponse.json(
+      { data: publicProfiles, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -31,7 +47,11 @@ export async function GET() {
       );
     }
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to load saved profiles" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to load saved profiles",
+      },
       { status: 500 },
     );
   }
@@ -51,13 +71,19 @@ export async function POST(request: Request) {
 
     await db.savedProfile.upsert({
       where: {
-        userId_profileId: { userId: session.user.id, profileId: parsed.data.profileId },
+        userId_profileId: {
+          userId: session.user.id,
+          profileId: parsed.data.profileId,
+        },
       },
       create: { userId: session.user.id, profileId: parsed.data.profileId },
       update: {},
     });
 
-    return NextResponse.json({ data: null, error: null, message: "Saved" }, { status: 201 });
+    return NextResponse.json(
+      { data: null, error: null, message: "Saved" },
+      { status: 201 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -84,9 +110,14 @@ export async function DELETE(request: Request) {
       );
     }
 
-    await db.savedProfile.deleteMany({ where: { userId: session.user.id, profileId } });
+    await db.savedProfile.deleteMany({
+      where: { userId: session.user.id, profileId },
+    });
 
-    return NextResponse.json({ data: null, error: null, message: "Removed" }, { status: 200 });
+    return NextResponse.json(
+      { data: null, error: null, message: "Removed" },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -95,7 +126,11 @@ export async function DELETE(request: Request) {
       );
     }
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to remove saved profile" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to remove saved profile",
+      },
       { status: 500 },
     );
   }

@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { weeklyAvailabilitySchema } from "@/lib/validations/availability";
+import { vietnamDateStart } from "@/lib/vietnam-date";
 
 export async function GET() {
   const t = await getTranslations("apiMessages.availability");
@@ -16,7 +17,10 @@ export async function GET() {
         orderBy: { dayOfWeek: "asc" },
       }),
       db.blockedDate.findMany({
-        where: { userId: session.user.id, date: { gte: new Date() } },
+        where: {
+          userId: session.user.id,
+          date: { gte: vietnamDateStart() },
+        },
         orderBy: { date: "asc" },
       }),
     ]);

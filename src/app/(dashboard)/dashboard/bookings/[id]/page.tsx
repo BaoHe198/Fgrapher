@@ -1,7 +1,13 @@
 "use client";
 
 import type { Booking, BookingStatus, Service, User } from "@prisma/client";
-import { AlertTriangle, ArrowLeft, Loader2, MapPin } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Loader2,
+  MapPin,
+  MessageCircle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -59,6 +65,7 @@ type BookingDetail = Booking & {
   }[];
   // Anti-spam/safety (Prompt B7, VIỆC 4).
   isFirstBookingBetweenParties: boolean;
+  providerZaloUrl: string | null;
 };
 
 const STATUS_VARIANT: Record<
@@ -307,7 +314,7 @@ export default function BookingDetailPage() {
             {booking.rescheduleProposedStartTime}
           </span>
           {!proposedByMe ? (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
               <Button
                 size="sm"
                 variant="accent"
@@ -376,6 +383,23 @@ export default function BookingDetailPage() {
               >
                 {t("otherParty.message")}
               </Button>
+              {!viewerIsProvider && booking.providerZaloUrl ? (
+                <Button
+                  size="sm"
+                  variant="accent"
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={booking.providerZaloUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    />
+                  }
+                >
+                  <MessageCircle className="size-4" />
+                  {t("otherParty.openZalo")}
+                </Button>
+              ) : null}
             </div>
           </Card>
 

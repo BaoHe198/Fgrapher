@@ -101,6 +101,13 @@ export const NOTIFICATION_POLICY: Record<
     preferenceKey: "bookingReminder",
     emailScope: "booking-reminder",
   },
+  AVAILABILITY_REMINDER: {
+    feature: "core",
+    inApp: true,
+    email: "preference",
+    preferenceKey: "availabilityReminder",
+    emailScope: "availability-reminder",
+  },
   BOOKING_RESCHEDULE_PROPOSED: {
     feature: "core",
     inApp: true,

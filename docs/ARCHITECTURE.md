@@ -179,9 +179,10 @@ Email dùng bảng outbox để tách thao tác gửi mạng khỏi nghiệp v�
 lỗi tạm thời, cron `email-retry` thử lại với backoff. Token bí mật không được lưu
 nguyên văn trong payload hàng đợi.
 
-Các cron còn xử lý nhắc lịch, hết hạn booking/yêu cầu/gói, tài liệu KYC và media
-trong thùng rác. Mọi cron production phải fail closed khi thiếu hoặc sai
-`CRON_SECRET`, và phải an toàn nếu hai lần chạy chồng nhau.
+Các cron còn xử lý nhắc provider cập nhật lịch bận lúc 07:30 giờ Việt Nam, nhắc
+lịch hẹn, hết hạn booking/yêu cầu/gói, tài liệu KYC và media trong thùng rác. Mọi
+cron production phải fail closed khi thiếu hoặc sai `CRON_SECRET`, và phải an
+toàn nếu hai lần chạy chồng nhau.
 
 ## 10. Cache và hiệu năng
 

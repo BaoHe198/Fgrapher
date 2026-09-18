@@ -37,6 +37,7 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   BOOKING_DECLINED: CalendarX,
   BOOKING_CANCELLED: CalendarX,
   BOOKING_REMINDER: Calendar,
+  AVAILABILITY_REMINDER: Calendar,
   BOOKING_RESCHEDULE_PROPOSED: Calendar,
   BOOKING_COMPLETED: CalendarCheck,
   NEW_MESSAGE: MessageCircle,
@@ -88,7 +89,9 @@ function notificationHref(notification: Notification) {
   const data = notification.data as {
     bookingId?: string;
     orderId?: string;
+    href?: string;
   } | null;
+  if (data?.href?.startsWith("/dashboard/")) return data.href;
   if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
   if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
   return "/dashboard/notifications";

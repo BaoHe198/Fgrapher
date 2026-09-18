@@ -10,6 +10,10 @@
       "schedule": "0 9 * * *"
     },
     {
+      "path": "/api/cron/availability-reminders",
+      "schedule": "30 0 * * *"
+    },
+    {
       "path": "/api/cron/purge-kyc-documents",
       "schedule": "0 3 * * *"
     },

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
+import { omitPrivateProfileFields } from "@/lib/profile-privacy";
 import {
   CACHE_KEY_VERSION,
   CACHE_TTL,
@@ -218,11 +219,10 @@ async function getPublicProfileUserUncached(username: string) {
   return {
     ...user,
     profiles: user.profiles.map((profile) => {
-      // `Profile.address` is the provider's private street-level address.
-      // Remove it at the public service boundary so a future Client
-      // Component cannot expose it accidentally by spreading this object.
-      const { address, ...publicProfile } = profile;
-      void address;
+      // Street-level address and the provider's post-booking Zalo contact
+      // are private. Remove both at the public service boundary so a future
+      // Client Component cannot expose them by spreading this object.
+      const publicProfile = omitPrivateProfileFields(profile);
 
       return {
         ...publicProfile,
@@ -263,7 +263,12 @@ export async function getPublicProfileUser(username: string) {
 export async function getProviderForBooking(providerId: string) {
   return db.user.findFirst({
     // A suspended provider can't take new bookings.
-    where: { id: providerId, deletedAt: null, isSuspended: false },
+    where: {
+      id: providerId,
+      deletedAt: null,
+      isSuspended: false,
+      acceptingBookings: true,
+    },
     select: {
       id: true,
       firstName: true,

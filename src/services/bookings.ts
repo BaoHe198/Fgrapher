@@ -1,4 +1,4 @@
-import type { BookingStatus } from "@prisma/client";
+import type { BookingStatus, Role } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
@@ -17,6 +17,7 @@ import {
   bookingRescheduleProposedEmailHtml,
 } from "@/lib/email";
 import { formatDate } from "@/lib/format";
+import { normalizeZaloUrl } from "@/lib/zalo";
 import { isSlotBookable } from "@/services/availability";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
@@ -267,21 +268,38 @@ export async function getBookingDetail(bookingId: string, userId: string) {
   // regardless of who was customer/provider in the prior booking(s), so
   // two people who've worked together before (in either direction) don't
   // see the notice again.
-  const priorBookingCount = await db.booking.count({
-    where: {
-      id: { not: booking.id },
-      OR: [
-        { customerId: booking.customerId, providerId: booking.providerId },
-        { customerId: booking.providerId, providerId: booking.customerId },
-      ],
-    },
-  });
+  const [priorBookingCount, providerContact] = await Promise.all([
+    db.booking.count({
+      where: {
+        id: { not: booking.id },
+        OR: [
+          { customerId: booking.customerId, providerId: booking.providerId },
+          { customerId: booking.providerId, providerId: booking.customerId },
+        ],
+      },
+    }),
+    viewerIsProvider
+      ? Promise.resolve(null)
+      : db.profile.findFirst({
+          where: {
+            userId: booking.providerId,
+            isPublished: true,
+            ...(booking.recipientRole ? { role: booking.recipientRole } : {}),
+            zaloUrl: { not: null },
+          },
+          select: { zaloUrl: true },
+          orderBy: { createdAt: "asc" },
+        }),
+  ]);
 
   return {
     ...booking,
     contactPhone: contactInfoVisible ? booking.contactPhone : null,
     locationAddress: contactInfoVisible ? booking.locationAddress : null,
     isFirstBookingBetweenParties: priorBookingCount === 0,
+    providerZaloUrl: providerContact?.zaloUrl
+      ? normalizeZaloUrl(providerContact.zaloUrl)
+      : null,
   };
 }
 
@@ -297,7 +315,7 @@ export class BookingActionError extends Error {
 
 export async function createBooking(
   customerId: string,
-  input: CreateBookingInput,
+  input: CreateBookingInput & { trustedRecipientRole?: Role },
 ) {
   if (input.providerId === customerId) {
     throw new BookingActionError("You can't book yourself", 400);
@@ -326,8 +344,15 @@ export async function createBooking(
   }
 
   const service = input.serviceId
-    ? await db.service.findUnique({
-        where: { id: input.serviceId },
+    ? await db.service.findFirst({
+        where: {
+          id: input.serviceId,
+          isActive: true,
+          profile: {
+            userId: input.providerId,
+            isPublished: true,
+          },
+        },
         include: { profile: { select: { role: true } } },
       })
     : null;
@@ -356,8 +381,14 @@ export async function createBooking(
     }
   }
 
-  const provider = await db.user.findUnique({
-    where: { id: input.providerId },
+  const recipientRole = service?.profile.role ?? input.trustedRecipientRole;
+  const provider = await db.user.findFirst({
+    where: {
+      id: input.providerId,
+      deletedAt: null,
+      isSuspended: false,
+      acceptingBookings: true,
+    },
     select: {
       location: true,
       ward: { select: { provinceId: true } },
@@ -367,16 +398,22 @@ export async function createBooking(
       // when the profile hasn't set one (Prompt B4 VIỆC 3 onboarding not
       // yet completed for that profile).
       profiles: {
-        where: service?.profile.role ? { role: service.profile.role } : {},
-        select: { provinceId: true },
+        where: {
+          isPublished: true,
+          ...(recipientRole ? { role: recipientRole } : {}),
+        },
+        select: { provinceId: true, zaloUrl: true },
+        orderBy: { createdAt: "asc" },
         take: 1,
       },
     },
   });
+  if (!provider || provider.profiles.length === 0) {
+    throw new BookingActionError("Provider is not accepting bookings", 404);
+  }
+  const providerProfile = provider.profiles[0];
   const providerProvinceId =
-    provider?.profiles[0]?.provinceId ??
-    provider?.ward?.provinceId ??
-    undefined;
+    providerProfile.provinceId ?? provider.ward?.provinceId ?? undefined;
 
   const duration = service?.duration ?? 60;
   const startMinutes =
@@ -451,7 +488,7 @@ export async function createBooking(
         provinceId: providerProvinceId,
         parentBookingId: input.parentBookingId,
         requesterRole: input.requesterRole ?? "CUSTOMER",
-        recipientRole: service?.profile.role,
+        recipientRole,
       },
       include: BOOKING_INCLUDE,
     });
@@ -498,7 +535,15 @@ export async function createBooking(
     bookingId: booking.id,
   });
 
-  return booking;
+  // The provider explicitly opts in on the published role profile involved
+  // in this booking. This value leaves the service only after the booking row
+  // exists, so pre-booking and anonymous reads cannot obtain it.
+  return {
+    ...booking,
+    providerZaloUrl: providerProfile.zaloUrl
+      ? normalizeZaloUrl(providerProfile.zaloUrl)
+      : null,
+  };
 }
 
 // Prompt B7, VIỆC 3 — the single source of truth for which status moves

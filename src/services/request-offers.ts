@@ -619,6 +619,9 @@ export async function acceptOffer(
       // (MAX_REFERENCE_MEDIA), so nothing is dropped and the result is always
       // valid booking input. Pinned by reference-media-policy.test.ts.
       referenceImages: referenceUrlsForBooking(offer.request.references),
+      // Server-trusted role from the moderated request. Public booking input
+      // never accepts this field; it selects the role through its service.
+      trustedRecipientRole: offer.request.role,
     });
   } catch (err) {
     if (err instanceof BookingActionError) {
