@@ -619,6 +619,9 @@ model Profile {
   instagram                   String?
   facebook                    String?
   tiktok                      String?
+  // Private contact link. Returned only to the customer after a booking is
+  // created; never included in public profile/search responses.
+  zaloUrl                     String?
   // Pricing
   priceMin                    Float?
   priceMax                    Float?
@@ -1540,6 +1543,7 @@ enum NotificationType {
   BOOKING_DECLINED
   BOOKING_CANCELLED
   BOOKING_REMINDER
+  AVAILABILITY_REMINDER
   BOOKING_RESCHEDULE_PROPOSED
   BOOKING_COMPLETED
   NEW_MESSAGE
