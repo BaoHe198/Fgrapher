@@ -23,6 +23,7 @@
   },
   "nav": {
     "browse": "Search",
+    "fmap": "Fmap",
     "studios": "Studios",
     "shop": "Shop",
     "createRequest": "Create request",
@@ -38,6 +39,54 @@
     "signout": "Sign out",
     "messages": "Messages",
     "messagesAria": "Open messages"
+  },
+  "fmap": {
+    "title": "Fmap — find providers by area and availability",
+    "subtitle": "Choose a time and map area to find providers who are available.",
+    "searchArea": "Search this area",
+    "truncated": "Zoom in to see more results",
+    "context": "Available {date}, {start}–{end}",
+    "marker": { "from": "From {price}", "contact": "Contact" },
+    "filters": {
+      "summary": "{date} · {start}–{end} · {role}",
+      "myLocation": "My location",
+      "province": "Province/City",
+      "chooseProvince": "Choose a province",
+      "provinceEmpty": "No providers on Fmap in this province yet.",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "invalidTime": "End time must be after start time",
+      "role": "Provider",
+      "category": "Category",
+      "allCategories": "All categories",
+      "search": "Search Fmap",
+      "searching": "Searching...",
+      "mapHint": "You can also pan or zoom the map, then choose “Search this area”."
+    },
+    "empty": {
+      "title": "No matching providers yet",
+      "body": "Try another time, service, or a wider search area.",
+      "changeTime": "Change time",
+      "expandArea": "Expand search area",
+      "changeService": "Change service"
+    },
+    "preview": {
+      "close": "Close provider preview",
+      "loading": "Loading provider...",
+      "verified": "Verified",
+      "newProvider": "New",
+      "startingPrice": "Starting at",
+      "contact": "Contact",
+      "available": "Available at your selected time",
+      "viewProfile": "View profile",
+      "book": "Book"
+    },
+    "errors": {
+      "search": "Fmap results could not be loaded. Please try again.",
+      "geolocationUnavailable": "This browser does not support location.",
+      "geolocationDenied": "Location was unavailable. You can still pan the map to choose an area."
+    }
   },
   "role": {
     "PHOTOGRAPHER": "Photographer",
@@ -2071,6 +2120,11 @@
           "hideExactLocationLabel": "Show city only — hide exact location",
           "requireDepositLabel": "Require a deposit before sharing my contact details"
         },
+        "privacySettings": {
+          "title": "Position on Fmap",
+          "hideExactLocationLabel": "Blur my position on Fmap (recommended)",
+          "hideExactLocationHelper": "When on, the map shows an approximate point a few hundred metres away instead of your exact address. Only turn off for a studio or shop open to the public."
+        },
         "shopNameLabel": "Shop name",
         "servicesNeedSaveFirst": "Save your profile details (e.g. pick a specialty category) first, then come back here to add packages.",
         "websiteLabel": "Website",
@@ -2542,6 +2596,12 @@
       "backToBookings": "Back to bookings"
     },
     "booking": {
+      "fmapContext": {
+        "banner": "From Fmap: you searched {date}, {start}–{end}.",
+        "bannerShort": "You came from Fmap.",
+        "notesLine": "Preferred time window (from Fmap): {start}–{end}",
+        "notesCategory": "Category: {category}"
+      },
       "pageTitle": "Book a session — Fgrapher",
       "fallbackProviderName": "this provider",
       "shootTypeOptions": {

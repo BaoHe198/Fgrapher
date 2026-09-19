@@ -117,6 +117,12 @@ Giao diện tìm kiếm:
 Dữ liệu địa lý lấy từ bảng Province/Ward, không hardcode danh sách tỉnh thành trong
 component.
 
+**Fmap** (`/fmap`) là cách tìm thứ hai, trên bản đồ: khách chọn khu vực (GPS, tỉnh/thành
+hoặc kéo bản đồ), ngày giờ, vai trò và thể loại, và chỉ thấy provider **đang rảnh** vào
+khung giờ đó. Marker hiện avatar, icon vai trò và giá khởi điểm; bấm vào mở thẻ xem nhanh
+với nút "Xem hồ sơ" và "Đặt lịch" (trang đặt lịch nhận sẵn ngày giờ đã chọn). Vị trí
+provider mặc định được làm mờ. Chi tiết: `docs/ops/fmap.md`.
+
 ## 7. Dịch vụ và lịch rảnh
 
 Nhà cung cấp có thể tạo dịch vụ với tên, mô tả, thời lượng và giá. Availability kết

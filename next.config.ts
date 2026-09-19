@@ -35,6 +35,12 @@ const isDev = process.env.NODE_ENV === "development";
 // account, so all three cover any account regardless of which region a
 // real DSN ends up using.
 //
+// Fmap loads map styles/tiles from MapTiler in configured environments and
+// OpenFreeMap (keyless vector tiles) as the fallback. MapLibre also
+// creates a blob-backed worker, so worker-src must explicitly allow blob:.
+// Browser geolocation is restricted to this origin by Permissions-Policy;
+// Fmap requests it only after the visitor clicks "My location".
+//
 // media-src was missing entirely, so <video> fell back to default-src 'self'
 // and every Cloudinary video was refused. Portfolio videos have been
 // uploadable all along and never once played in a browser — a silent
@@ -45,10 +51,11 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com;
+  img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com https://api.maptiler.com https://tiles.openfreemap.org;
   media-src 'self' blob: https://res.cloudinary.com;
   font-src 'self' data:;
-  connect-src 'self' https://api.cloudinary.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io;
+  connect-src 'self' https://api.cloudinary.com https://api.maptiler.com https://tiles.openfreemap.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io;
+  worker-src 'self' blob:;
   object-src 'none';
   base-uri 'self';
   form-action 'self';
@@ -65,7 +72,7 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=()",
+    value: "camera=(), microphone=(), geolocation=(self), payment=()",
   },
   // No `preload` — that's a long-lived commitment to a public browser list
   // that's slow to reverse. Plain HSTS is still enforced by every browser

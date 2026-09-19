@@ -105,7 +105,7 @@ function toFormValues(
     travelWilling: (profile?.travelWilling as boolean) ?? false,
     agencyRepresented: (profile?.agencyRepresented as boolean) ?? false,
     agencyName: (profile?.agencyName as string) ?? "",
-    hideExactLocation: (profile?.hideExactLocation as boolean) ?? false,
+    hideExactLocation: (profile?.hideExactLocation as boolean) ?? true,
     requireDepositBeforeContact:
       (profile?.requireDepositBeforeContact as boolean) ?? false,
     provinceId: (profile?.provinceId as string) ?? "",
@@ -582,17 +582,30 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             {tEditor("modelDetails.privacyTitle")}
           </span>
           <Checkbox
-            checked={values.hideExactLocation}
-            onCheckedChange={(checked) => set("hideExactLocation", checked)}
-            label={tEditor("modelDetails.hideExactLocationLabel")}
-          />
-          <Checkbox
             checked={values.requireDepositBeforeContact}
             onCheckedChange={(checked) =>
               set("requireDepositBeforeContact", checked)
             }
             label={tEditor("modelDetails.requireDepositLabel")}
           />
+        </div>
+      ) : null}
+
+      {/* Fmap marker privacy — applies to every provider role, not only
+          MODEL, since every published provider can appear on the map. */}
+      {role !== "CAMERA_SHOP" ? (
+        <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
+          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            {tEditor("privacySettings.title")}
+          </span>
+          <Checkbox
+            checked={values.hideExactLocation}
+            onCheckedChange={(checked) => set("hideExactLocation", checked)}
+            label={tEditor("privacySettings.hideExactLocationLabel")}
+          />
+          <p className="text-body-sm text-text-tertiary">
+            {tEditor("privacySettings.hideExactLocationHelper")}
+          </p>
         </div>
       ) : null}
 

@@ -602,6 +602,12 @@ enum ProfileCategory {
   ALTERNATIVE
 }
 
+enum GeocodingStatus {
+  PENDING
+  READY
+  FAILED
+}
+
 enum ExperienceLevel {
   NEW
   INTERMEDIATE
@@ -665,13 +671,21 @@ model Profile {
   // to MODEL at the schema level, matching how other role-specific fields
   // on this model work). Content guidelines acceptance lives on UserRole
   // instead — see that model's comment for why.
-  hideExactLocation           Boolean          @default(false)
+  hideExactLocation           Boolean          @default(true)
   // Withholds contactPhone/locationAddress from the other party on a
   // booking until Booking.depositPaid is set. No Stripe payment flow
   // exists for bookings today (only for marketplace orders) — until one
   // is built, depositPaid is a manual flag a provider sets by hand, not
   // an automatic payment gate. See the Booking field's comment.
   requireDepositBeforeContact Boolean          @default(false)
+  // Fixed service/business position used by Fmap. The detailed address and
+  // exact coordinates stay server-side; public marker coordinates pass
+  // through the privacy transform in services/fmap.ts.
+  latitude                    Float?
+  longitude                   Float?
+  geocodedAt                  DateTime?
+  geocodeAddressHash          String?
+  geocodingStatus             GeocodingStatus  @default(PENDING)
   // Meta
   isPublished                 Boolean          @default(false)
   viewCount                   Int              @default(0)
@@ -694,6 +708,7 @@ model Profile {
   @@index([role, isPublished, provinceId])
   @@index([provinceId, priceMin])
   @@index([wardId])
+  @@index([latitude, longitude])
   @@map("profiles")
 }
 
@@ -993,6 +1008,7 @@ model Booking {
 
   @@index([customerId])
   @@index([providerId, status])
+  @@index([providerId, date, status])
   @@index([date])
   @@index([parentBookingId])
   @@index([status, expiresAt])

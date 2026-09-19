@@ -33,20 +33,22 @@ dashboard Vercel hoặc dịch vụ quản lý secret phù hợp.
 
 ## 3. Những biến quan trọng
 
-| Biến                                           | Dev/Preview                            | Production                       | Có bí mật?                                            |
-| ---------------------------------------------- | -------------------------------------- | -------------------------------- | ----------------------------------------------------- |
-| `DATABASE_URL`                                 | Kết nối pool tới `fgrapher-dev`        | Kết nối pool tới `fgrapher-prod` | Có                                                    |
-| `DIRECT_URL`                                   | Kết nối trực tiếp tới dev              | Kết nối trực tiếp tới production | Có                                                    |
-| `NEXTAUTH_SECRET`                              | Khoá riêng cho dev                     | Khoá khác hoàn toàn dev          | Có                                                    |
-| `NEXTAUTH_URL`                                 | `http://localhost:3000` khi chạy local | URL website thật                 | Không                                                 |
-| `APP_ENV`                                      | `development`                          | `production`                     | Không                                                 |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`    | OAuth app thử nghiệm hoặc để trống     | OAuth app production             | Secret là bí mật                                      |
-| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`            | Cloud dev hoặc dùng thư mục dev        | Cloud/thư mục production         | Không                                                 |
-| `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Credential dev                         | Credential production            | Secret là bí mật                                      |
-| `RESEND_API_KEY`                               | Có thể để trống để không gửi thật      | Khoá gửi email thật              | Có                                                    |
-| `CRON_SECRET`                                  | Tuỳ nhu cầu local                      | Bắt buộc                         | Có                                                    |
-| `NEXT_PUBLIC_SENTRY_DSN`                       | Có thể dùng project dev                | Project production               | Không phải secret, nhưng phải đúng project/môi trường |
-| `NEXT_PUBLIC_APP_URL`                          | `http://localhost:3000`                | URL website thật                 | Không                                                 |
+| Biến                                           | Dev/Preview                             | Production                       | Có bí mật?                                            |
+| ---------------------------------------------- | --------------------------------------- | -------------------------------- | ----------------------------------------------------- |
+| `DATABASE_URL`                                 | Kết nối pool tới `fgrapher-dev`         | Kết nối pool tới `fgrapher-prod` | Có                                                    |
+| `DIRECT_URL`                                   | Kết nối trực tiếp tới dev               | Kết nối trực tiếp tới production | Có                                                    |
+| `NEXTAUTH_SECRET`                              | Khoá riêng cho dev                      | Khoá khác hoàn toàn dev          | Có                                                    |
+| `NEXTAUTH_URL`                                 | `http://localhost:3000` khi chạy local  | URL website thật                 | Không                                                 |
+| `APP_ENV`                                      | `development`                           | `production`                     | Không                                                 |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`    | OAuth app thử nghiệm hoặc để trống      | OAuth app production             | Secret là bí mật                                      |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`            | Cloud dev hoặc dùng thư mục dev         | Cloud/thư mục production         | Không                                                 |
+| `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Credential dev                          | Credential production            | Secret là bí mật                                      |
+| `RESEND_API_KEY`                               | Có thể để trống để không gửi thật       | Khoá gửi email thật              | Có                                                    |
+| `MAPTILER_API_KEY`                             | Có thể để trống; provider chưa lên Fmap | Khoá MapTiler thật để lấy tọa độ | Có                                                    |
+| `NEXT_PUBLIC_MAP_STYLE_URL`                    | Để trống: dùng OpenFreeMap miễn phí     | URL style bản đồ trả phí nếu cần | Không                                                 |
+| `CRON_SECRET`                                  | Tuỳ nhu cầu local                       | Bắt buộc                         | Có                                                    |
+| `NEXT_PUBLIC_SENTRY_DSN`                       | Có thể dùng project dev                 | Project production               | Không phải secret, nhưng phải đúng project/môi trường |
+| `NEXT_PUBLIC_APP_URL`                          | `http://localhost:3000`                 | URL website thật                 | Không                                                 |
 
 Các biến thanh toán và feature flag nằm trong `.env.example` và `src/lib/env.ts`.
 Stripe, MoMo, ZaloPay và chuyển khoản chỉ được bật khi chủ dự án đã hoàn tất điều

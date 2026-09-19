@@ -6,6 +6,7 @@ import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { getUpdateProfileSchema } from "@/lib/validations/profile";
+import { buildGeocodeAddressHash, forwardGeocode } from "@/services/geocoding";
 import { tryAutoPublish } from "@/services/public-profile";
 
 export async function GET(
@@ -98,10 +99,20 @@ export async function PATCH(
       );
     }
 
-    const ward = await db.ward.findUnique({
-      where: { id: parsed.data.wardId },
-      select: { provinceId: true },
-    });
+    const [ward, existingProfile] = await Promise.all([
+      db.ward.findUnique({
+        where: { id: parsed.data.wardId },
+        select: {
+          name: true,
+          provinceId: true,
+          province: { select: { name: true } },
+        },
+      }),
+      db.profile.findUnique({
+        where: { userId_role: { userId: session.user.id, role: role as Role } },
+        select: { geocodeAddressHash: true },
+      }),
+    ]);
     if (!ward || ward.provinceId !== parsed.data.provinceId) {
       return NextResponse.json(
         {
@@ -113,10 +124,45 @@ export async function PATCH(
       );
     }
 
+    const geocodeInput = {
+      address: parsed.data.address,
+      ward: ward.name,
+      province: ward.province.name,
+    };
+    const geocodeAddressHash = buildGeocodeAddressHash(geocodeInput);
+    const locationChanged =
+      existingProfile?.geocodeAddressHash !== geocodeAddressHash;
+    const geocode = locationChanged ? await forwardGeocode(geocodeInput) : null;
+    const geocodingData = locationChanged
+      ? geocode?.success
+        ? {
+            latitude: geocode.latitude,
+            longitude: geocode.longitude,
+            geocodedAt: new Date(),
+            geocodeAddressHash,
+            geocodingStatus: "READY" as const,
+          }
+        : {
+            // An old coordinate is worse than no marker after an address
+            // change. Store the new hash even on failure so editing an
+            // unrelated profile field does not repeatedly call MapTiler.
+            latitude: null,
+            longitude: null,
+            geocodedAt: null,
+            geocodeAddressHash,
+            geocodingStatus: "FAILED" as const,
+          }
+      : {};
+
     const profile = await db.profile.upsert({
       where: { userId_role: { userId: session.user.id, role: role as Role } },
-      create: { userId: session.user.id, role: role as Role, ...parsed.data },
-      update: parsed.data,
+      create: {
+        userId: session.user.id,
+        role: role as Role,
+        ...parsed.data,
+        ...geocodingData,
+      },
+      update: { ...parsed.data, ...geocodingData },
     });
 
     // Categories and location are requirements

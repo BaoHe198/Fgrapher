@@ -147,6 +147,9 @@ const serverSchema = z.object({
   // human queue in the same order it always did — the scan only sorts
   // that queue, so this gates an optimisation, never the feature itself.
   CONTENT_MODERATION_ENABLED: booleanFlag("false"),
+  // MapTiler forward geocoding for fixed provider service locations.
+  // No-ops gracefully without it, same as other integrations above.
+  MAPTILER_API_KEY: z.string().optional(),
 });
 
 const publicSchema = z.object({
@@ -176,6 +179,8 @@ const publicSchema = z.object({
   NEXT_PUBLIC_BANK_TRANSFER_ACCOUNT_NUMBER: z.string().optional(),
   NEXT_PUBLIC_BANK_TRANSFER_ACCOUNT_NAME: z.string().optional(),
   NEXT_PUBLIC_BANK_TRANSFER_BANK_NAME: z.string().optional(),
+  // Read from the Fmap client bundle, so this must remain public.
+  NEXT_PUBLIC_MAP_STYLE_URL: z.string().optional(),
 });
 
 const fullSchema = serverSchema.merge(publicSchema);

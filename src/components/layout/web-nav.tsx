@@ -45,6 +45,7 @@ const WIDE_BREAKPOINT = 1180;
 // prominently to someone who isn't signed in.
 const NAV_LINKS = [
   { href: "/browse", labelKey: "browse" as const, alwaysVisible: true },
+  { href: "/fmap", labelKey: "fmap" as const, alwaysVisible: true },
   { href: "/shop", labelKey: "shop" as const, alwaysVisible: false },
   {
     href: "/requests/new",

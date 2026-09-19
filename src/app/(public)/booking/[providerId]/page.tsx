@@ -15,15 +15,36 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BookingFlowPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ providerId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const t = await getTranslations("publicPages.booking");
   const { providerId } = await params;
 
   const session = await auth();
   if (!session?.user) {
-    redirect(`/login?callbackUrl=/booking/${providerId}`);
+    // Keep the prefill context (e.g. from Fmap) across the login bounce —
+    // only known keys, so the callback URL can't be used to smuggle others.
+    const incoming = await searchParams;
+    const query = new URLSearchParams();
+    for (const key of [
+      "service",
+      "date",
+      "time",
+      "end",
+      "category",
+      "source",
+    ]) {
+      const value = incoming[key];
+      if (typeof value === "string") query.set(key, value);
+    }
+    const callbackPath =
+      query.size > 0
+        ? `/booking/${providerId}?${query}`
+        : `/booking/${providerId}`;
+    redirect(`/login?callbackUrl=${encodeURIComponent(callbackPath)}`);
   }
 
   // A provider can't book themselves — createBooking() already rejects
