@@ -4,29 +4,45 @@ import { BadgeCheck, CalendarCheck, MapPin, Star, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatDurationHours, formatVND } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { formatVND } from "@/lib/format";
 import type { FmapProviderPreview } from "@/services/fmap";
+
+interface FmapProviderPreviewCardProps {
+  preview: FmapProviderPreview | null;
+  loading: boolean;
+  error: boolean;
+  onRetry: () => void;
+  bookingHref: string | null;
+  onClose: () => void;
+}
 
 export function FmapProviderPreviewCard({
   preview,
   loading,
+  error,
+  onRetry,
   bookingHref,
   onClose,
-}: {
-  preview: FmapProviderPreview | null;
-  loading: boolean;
-  bookingHref: string | null;
-  onClose: () => void;
-}) {
+}: FmapProviderPreviewCardProps) {
   const t = useTranslations("fmap");
   const roleT = useTranslations("role");
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
   return (
-    <aside className="absolute right-3 bottom-3 left-3 z-10 rounded-[var(--fg-radius-xl)] border border-border-default bg-bg-surface shadow-[var(--shadow-xl)] sm:top-3 sm:right-3 sm:bottom-auto sm:left-auto sm:w-[370px] max-h-[70%] overflow-y-auto">
+    <aside className="absolute right-3 bottom-3 left-3 z-10 max-h-[70%] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-default bg-bg-surface shadow-[var(--shadow-xl)] sm:top-3 sm:right-3 sm:bottom-auto sm:left-auto sm:max-h-[calc(100%-1.5rem)] sm:w-[370px]">
       <Button
         type="button"
         variant="secondary"
@@ -37,9 +53,28 @@ export function FmapProviderPreviewCard({
       >
         <X />
       </Button>
-      {loading || !preview ? (
-        <div className="flex h-52 items-center justify-center text-body-md text-text-secondary">
-          {t("preview.loading")}
+
+      {error ? (
+        <div className="flex h-52 flex-col items-center justify-center gap-3 p-4 text-center">
+          <p className="text-body-md text-text-secondary">
+            {t("preview.error")}
+          </p>
+          <Button type="button" variant="secondary" size="sm" onClick={onRetry}>
+            {t("preview.retry")}
+          </Button>
+        </div>
+      ) : loading || !preview ? (
+        <div className="space-y-3 p-4 pr-14">
+          <div className="flex items-center gap-3">
+            <Skeleton className="size-12 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-3 w-1/3" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-9 w-full" />
+          <span className="sr-only">{t("preview.loading")}</span>
         </div>
       ) : (
         <>
@@ -55,7 +90,7 @@ export function FmapProviderPreviewCard({
             </div>
           ) : null}
           <div className="p-4">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 pr-10">
               <Avatar className="size-12 border border-border-default">
                 <AvatarImage src={preview.avatar ?? undefined} alt="" />
                 <AvatarFallback>
@@ -63,7 +98,7 @@ export function FmapProviderPreviewCard({
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <h2 className="flex items-center gap-1.5 text-title-md text-text-primary">
+                <h2 className="flex min-w-0 items-center gap-1.5 text-title-md text-text-primary">
                   <span className="truncate">{preview.displayName}</span>
                   <BadgeCheck
                     className="size-4 shrink-0 text-success"
@@ -79,8 +114,9 @@ export function FmapProviderPreviewCard({
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-body-sm text-text-secondary">
               <span className="flex items-center gap-1">
                 <Star className="size-4 fill-gold-400 text-gold-500" />
-                {preview.rating?.toFixed(1) ?? t("preview.newProvider")} (
-                {preview.reviewCount})
+                {preview.reviewCount === 0 || preview.rating == null
+                  ? t("preview.newProvider")
+                  : `${preview.rating.toFixed(1)} (${preview.reviewCount})`}
               </span>
               {preview.location ? (
                 <span className="flex items-center gap-1">
@@ -88,6 +124,7 @@ export function FmapProviderPreviewCard({
                 </span>
               ) : null}
             </div>
+
             <div className="mt-3 flex items-center justify-between rounded-[var(--fg-radius-md)] bg-gold-50 px-3 py-2 text-neutral-900 dark:bg-gold-900/30 dark:text-gold-100">
               <span className="text-body-sm">{t("preview.startingPrice")}</span>
               <strong>
@@ -99,11 +136,31 @@ export function FmapProviderPreviewCard({
             <p className="mt-2 flex items-center gap-1.5 text-body-sm font-semibold text-success">
               <CalendarCheck className="size-4" /> {t("preview.available")}
             </p>
+
             {preview.description ? (
-              <p className="mt-2 line-clamp-2 text-body-sm text-text-secondary hidden sm:block">
+              <p className="mt-2 hidden text-body-sm text-text-secondary sm:line-clamp-2">
                 {preview.description}
               </p>
             ) : null}
+
+            {preview.services.length > 0 ? (
+              <ul className="mt-3 hidden space-y-1 text-body-sm sm:block">
+                {preview.services.map((service) => (
+                  <li key={service.id} className="flex justify-between gap-3">
+                    <span className="truncate text-text-secondary">
+                      {service.name} ·{" "}
+                      {t("preview.hours", {
+                        hours: formatDurationHours(service.duration),
+                      })}
+                    </span>
+                    <span className="shrink-0 font-semibold text-text-primary">
+                      {formatVND(service.price)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
             <div className="mt-4 grid grid-cols-2 gap-2">
               {preview.username ? (
                 <Link

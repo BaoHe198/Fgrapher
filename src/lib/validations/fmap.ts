@@ -36,6 +36,7 @@ export const fmapSearchSchema = z
       .min(1)
       .max(FMAP_PROVIDER_ROLES.length),
     categories: z.array(z.enum(ProfileCategory)).max(20).default([]),
+    wardId: z.string().min(1).max(64).optional(),
   })
   .superRefine((value, context) => {
     if (value.north <= value.south) {

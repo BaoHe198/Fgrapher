@@ -36,6 +36,7 @@ export async function GET(request: Request) {
     end: searchParams.get("end"),
     roles: roles.length > 0 ? roles : [...FMAP_PROVIDER_ROLES],
     categories: parseCommaSeparated(searchParams.get("categories")),
+    wardId: searchParams.get("wardId") || undefined,
   });
 
   if (!parsed.success) {

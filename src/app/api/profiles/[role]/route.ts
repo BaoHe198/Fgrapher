@@ -110,7 +110,7 @@ export async function PATCH(
       }),
       db.profile.findUnique({
         where: { userId_role: { userId: session.user.id, role: role as Role } },
-        select: { geocodeAddressHash: true },
+        select: { geocodeAddressHash: true, geocodingStatus: true },
       }),
     ]);
     if (!ward || ward.provinceId !== parsed.data.provinceId) {
@@ -132,27 +132,39 @@ export async function PATCH(
     const geocodeAddressHash = buildGeocodeAddressHash(geocodeInput);
     const locationChanged =
       existingProfile?.geocodeAddressHash !== geocodeAddressHash;
+    // A profile geocoded before address hashing existed has READY
+    // coordinates but no hash; its address is not known to have changed.
+    const legacyReadyPoint =
+      existingProfile?.geocodeAddressHash == null &&
+      existingProfile?.geocodingStatus === "READY";
     const geocode = locationChanged ? await forwardGeocode(geocodeInput) : null;
-    const geocodingData = locationChanged
-      ? geocode?.success
-        ? {
-            latitude: geocode.latitude,
-            longitude: geocode.longitude,
-            geocodedAt: new Date(),
-            geocodeAddressHash,
-            geocodingStatus: "READY" as const,
-          }
-        : {
-            // An old coordinate is worse than no marker after an address
-            // change. Store the new hash even on failure so editing an
-            // unrelated profile field does not repeatedly call MapTiler.
-            latitude: null,
-            longitude: null,
-            geocodedAt: null,
-            geocodeAddressHash,
-            geocodingStatus: "FAILED" as const,
-          }
-      : {};
+    let geocodingData = {};
+    if (geocode?.success) {
+      geocodingData = {
+        latitude: geocode.latitude,
+        longitude: geocode.longitude,
+        geocodedAt: new Date(),
+        geocodeAddressHash,
+        geocodingStatus: "READY" as const,
+      };
+    } else if (geocode && !legacyReadyPoint) {
+      // The address really changed: an old coordinate is worse than no
+      // marker. Store the new hash so unrelated edits don't re-call
+      // MapTiler; PENDING (not FAILED) when no key is configured, so the
+      // backfill script picks it up once one is.
+      geocodingData = {
+        latitude: null,
+        longitude: null,
+        geocodedAt: null,
+        geocodeAddressHash,
+        geocodingStatus:
+          geocode.reason === "not_configured"
+            ? ("PENDING" as const)
+            : ("FAILED" as const),
+      };
+    }
+    // legacyReadyPoint + failed geocode: keep the existing point and leave
+    // the hash null so a later save (or the backfill) retries.
 
     const profile = await db.profile.upsert({
       where: { userId_role: { userId: session.user.id, role: role as Role } },

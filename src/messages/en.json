@@ -46,7 +46,10 @@
     "searchArea": "Search this area",
     "truncated": "Zoom in to see more results",
     "context": "Available {date}, {start}–{end}",
-    "marker": { "from": "From {price}", "contact": "Contact" },
+    "marker": {
+      "from": "From {price}",
+      "contact": "Contact"
+    },
     "filters": {
       "summary": "{date} · {start}–{end} · {role}",
       "myLocation": "My location",
@@ -62,7 +65,13 @@
       "allCategories": "All categories",
       "search": "Search Fmap",
       "searching": "Searching...",
-      "mapHint": "You can also pan or zoom the map, then choose “Search this area”."
+      "mapHint": "You can also pan or zoom the map, then choose “Search this area”.",
+      "ward": "Ward",
+      "allWards": "All wards",
+      "wardNeedsProvince": "Choose a province first",
+      "areaTitle": "Area",
+      "whenTitle": "Time & service",
+      "wardEmpty": "No providers on Fmap in this ward yet."
     },
     "empty": {
       "title": "No matching providers yet",
@@ -80,12 +89,22 @@
       "contact": "Contact",
       "available": "Available at your selected time",
       "viewProfile": "View profile",
-      "book": "Book"
+      "book": "Book",
+      "error": "Couldn't load this provider.",
+      "retry": "Try again",
+      "hours": "{hours} h"
     },
     "errors": {
       "search": "Fmap results could not be loaded. Please try again.",
       "geolocationUnavailable": "This browser does not support location.",
-      "geolocationDenied": "Location was unavailable. You can still pan the map to choose an area."
+      "geolocationDenied": "Location was unavailable. You can still pan the map to choose an area.",
+      "tooLarge": "This area is too large. Zoom in on the map and search again.",
+      "timeRange": "The time window must be between 30 minutes and 12 hours.",
+      "missingDate": "Please pick a date."
+    },
+    "cluster": {
+      "title": "{count} providers at this spot",
+      "close": "Close list"
     }
   },
   "role": {
@@ -2694,6 +2713,7 @@
     "browse": {
       "pageTitle": "Browse artists — Fgrapher",
       "pageDescription": "Find and compare identity-verified photographers, videographers, make-up artists, and studios across Vietnam. Filter by province, budget, and rating.",
+      "viewOnMap": "View on map",
       "sortLabels": {
         "rating": "Top rated",
         "priceAsc": "Price: low to high",

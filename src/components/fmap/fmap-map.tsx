@@ -23,6 +23,8 @@ const SOURCE_ID = "fmap-providers";
 const CLUSTERS_LAYER = "fmap-clusters";
 const CLUSTER_COUNT_LAYER = "fmap-cluster-count";
 const UNCLUSTERED_LAYER = "fmap-unclustered";
+const MAX_ZOOM = 18;
+const CLUSTER_LIST_LIMIT = 50;
 
 const roleIconPaths: Record<FmapMarker["role"], string[]> = {
   PHOTOGRAPHER: [
@@ -132,11 +134,19 @@ function markerElement(
   labels: MarkerLabels,
   selected: boolean,
 ) {
+  // MapLibre positions the element it is given with an inline transform, so
+  // that element must never move itself: a hover lift on it pushed the box
+  // out from under the pointer, un-hovered, dropped back, and looped —
+  // visible as jitter. The wrapper keeps a fixed hit area and owns :hover;
+  // only the inner button lifts.
+  const wrapper = document.createElement("div");
+  wrapper.className = "group";
+  if (selected) wrapper.dataset.selected = "true";
+
   const button = document.createElement("button");
   button.type = "button";
   button.className =
-    "group relative flex cursor-pointer flex-col items-center rounded-full outline-none transition-transform duration-200 hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-gold-400";
-  if (selected) button.dataset.selected = "true";
+    "relative flex cursor-pointer flex-col items-center rounded-full outline-none transition-transform duration-200 group-hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-gold-400";
   button.setAttribute(
     "aria-label",
     `${marker.displayName}, ${priceLabel(marker.startingPrice, marker.currency, labels)}`,
@@ -172,7 +182,8 @@ function markerElement(
   price.textContent = priceLabel(marker.startingPrice, marker.currency, labels);
 
   button.append(roleBadge, frame, price);
-  return button;
+  wrapper.appendChild(button);
+  return wrapper;
 }
 
 export function FmapMap({
@@ -182,6 +193,7 @@ export function FmapMap({
   fitRequest,
   onBoundsChange,
   onSelectProvider,
+  onSelectCluster,
   labels,
 }: {
   markers: FmapMarker[];
@@ -190,6 +202,8 @@ export function FmapMap({
   fitRequest: { bounds: FmapBounds; nonce: number } | null;
   onBoundsChange: (bounds: FmapBounds) => void;
   onSelectProvider: (profileId: string) => void;
+  /** Providers that share one spot and can't be split by zooming. */
+  onSelectCluster: (profileIds: string[]) => void;
   labels: MarkerLabels;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -198,6 +212,7 @@ export function FmapMap({
   const dataRef = useRef(markers);
   const boundsCallbackRef = useRef(onBoundsChange);
   const selectCallbackRef = useRef(onSelectProvider);
+  const clusterCallbackRef = useRef(onSelectCluster);
   const labelsRef = useRef(labels);
   const selectedRef = useRef(selectedProfileId);
 
@@ -205,9 +220,17 @@ export function FmapMap({
     dataRef.current = markers;
     boundsCallbackRef.current = onBoundsChange;
     selectCallbackRef.current = onSelectProvider;
+    clusterCallbackRef.current = onSelectCluster;
     labelsRef.current = labels;
     selectedRef.current = selectedProfileId;
-  }, [markers, onBoundsChange, onSelectProvider, labels, selectedProfileId]);
+  }, [
+    markers,
+    onBoundsChange,
+    onSelectProvider,
+    onSelectCluster,
+    labels,
+    selectedProfileId,
+  ]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -218,7 +241,7 @@ export function FmapMap({
       center: [106.7009, 10.7769],
       zoom: 11,
       minZoom: 5,
-      maxZoom: 18,
+      maxZoom: MAX_ZOOM,
       attributionControl: false,
     });
     mapRef.current = map;
@@ -281,7 +304,10 @@ export function FmapMap({
           })),
         },
         cluster: true,
-        clusterMaxZoom: 14,
+        // Cluster up to one step below maxZoom: providers still sharing a
+        // cluster there are at (almost) the same spot and get a list
+        // instead of overlapping, unclickable markers.
+        clusterMaxZoom: MAX_ZOOM - 1,
         clusterRadius: 64,
       });
       map.addLayer({
@@ -303,6 +329,9 @@ export function FmapMap({
         filter: ["has", "point_count"],
         layout: {
           "text-field": ["get", "point_count_abbreviated"],
+          // Both OpenFreeMap and MapTiler serve Noto Sans; MapLibre's
+          // default (Open Sans / Arial Unicode) 404s on OpenFreeMap.
+          "text-font": ["Noto Sans Bold"],
           "text-size": 13,
         },
         paint: { "text-color": "#ffffff" },
@@ -325,6 +354,19 @@ export function FmapMap({
       if (clusterId == null) return;
       const source = map.getSource(SOURCE_ID) as GeoJSONSource;
       const zoom = await source.getClusterExpansionZoom(clusterId);
+      if (zoom > MAX_ZOOM - 1) {
+        const leaves = await source.getClusterLeaves(
+          clusterId,
+          CLUSTER_LIST_LIMIT,
+          0,
+        );
+        clusterCallbackRef.current(
+          leaves
+            .map((leaf) => leaf.properties?.profileId as string | undefined)
+            .filter((id): id is string => Boolean(id)),
+        );
+        return;
+      }
       if (feature.geometry.type === "Point") {
         map.easeTo({
           center: feature.geometry.coordinates as [number, number],
@@ -342,7 +384,16 @@ export function FmapMap({
       boundsCallbackRef.current(toBounds(map.getBounds()));
       refreshDomMarkers();
     });
-    map.on("render", refreshDomMarkers);
+    // "render" fires every animation frame while panning; querying rendered
+    // features that often is wasted work, so sync at most every 120 ms.
+    // moveend above still does a final exact sync.
+    let lastSync = 0;
+    map.on("render", () => {
+      const now = performance.now();
+      if (now - lastSync < 120) return;
+      lastSync = now;
+      refreshDomMarkers();
+    });
     const domMarkers = domMarkersRef.current;
 
     return () => {

@@ -46,7 +46,10 @@
     "searchArea": "Tìm trong khu vực này",
     "truncated": "Hãy phóng to bản đồ để xem thêm kết quả",
     "context": "Rảnh {date}, {start}–{end}",
-    "marker": { "from": "Từ {price}", "contact": "Liên hệ" },
+    "marker": {
+      "from": "Từ {price}",
+      "contact": "Liên hệ"
+    },
     "filters": {
       "summary": "{date} · {start}–{end} · {role}",
       "myLocation": "Vị trí của tôi",
@@ -62,7 +65,13 @@
       "allCategories": "Tất cả thể loại",
       "search": "Tìm trên Fmap",
       "searching": "Đang tìm...",
-      "mapHint": "Bạn cũng có thể kéo và thu phóng bản đồ, sau đó chọn “Tìm trong khu vực này”."
+      "mapHint": "Bạn cũng có thể kéo và thu phóng bản đồ, sau đó chọn “Tìm trong khu vực này”.",
+      "ward": "Phường/Xã",
+      "allWards": "Tất cả phường/xã",
+      "wardNeedsProvince": "Chọn tỉnh/thành trước",
+      "areaTitle": "Khu vực",
+      "whenTitle": "Thời gian & dịch vụ",
+      "wardEmpty": "Phường/xã này chưa có nhà cung cấp nào trên Fmap."
     },
     "empty": {
       "title": "Chưa có nhà cung cấp phù hợp",
@@ -80,12 +89,22 @@
       "contact": "Liên hệ",
       "available": "Đang sẵn lịch vào thời gian bạn chọn",
       "viewProfile": "Xem hồ sơ",
-      "book": "Đặt lịch"
+      "book": "Đặt lịch",
+      "error": "Không tải được thông tin nhà cung cấp.",
+      "retry": "Thử lại",
+      "hours": "{hours} giờ"
     },
     "errors": {
       "search": "Không thể tải kết quả Fmap. Vui lòng thử lại.",
       "geolocationUnavailable": "Trình duyệt này không hỗ trợ định vị.",
-      "geolocationDenied": "Không lấy được vị trí. Bạn vẫn có thể kéo bản đồ để chọn khu vực."
+      "geolocationDenied": "Không lấy được vị trí. Bạn vẫn có thể kéo bản đồ để chọn khu vực.",
+      "tooLarge": "Khu vực đang xem quá rộng. Hãy phóng to bản đồ rồi tìm lại.",
+      "timeRange": "Khung giờ phải dài từ 30 phút đến 12 tiếng.",
+      "missingDate": "Hãy chọn ngày."
+    },
+    "cluster": {
+      "title": "{count} nhà cung cấp ở cùng vị trí",
+      "close": "Đóng danh sách"
     }
   },
   "role": {
@@ -2694,6 +2713,7 @@
     "browse": {
       "pageTitle": "Khám phá nghệ sĩ — Fgrapher",
       "pageDescription": "Tìm và so sánh nhiếp ảnh gia, quay phim, chuyên viên trang điểm, studio đã xác minh danh tính khắp Việt Nam. Lọc theo tỉnh/thành, ngân sách, đánh giá.",
+      "viewOnMap": "Xem trên bản đồ",
       "sortLabels": {
         "rating": "Đánh giá cao nhất",
         "priceAsc": "Giá: thấp đến cao",

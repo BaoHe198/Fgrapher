@@ -9,6 +9,10 @@ import { timeToMinutes } from "@/services/availability";
 
 export const MAX_FMAP_MARKERS = 250;
 export const PROVINCE_BOUNDS_PADDING_DEG = 0.05; // ~5 km
+// Largest blur offset (650 m) plus headroom, in degrees of latitude. The DB
+// query is widened by this much so that blurred markers whose private point
+// sits just outside the viewport are still considered.
+const BLUR_MARGIN_DEG = 0.007;
 const MAX_SPATIAL_CANDIDATES = 600;
 const DEFAULT_BOOKING_MINUTES = 60;
 const BLOCKING_BOOKING_STATUSES: BookingStatus[] = ["PENDING", "CONFIRMED"];
@@ -192,13 +196,28 @@ export async function findAvailableProvidersOnMap(
 ): Promise<{ markers: FmapMarker[]; truncated: boolean }> {
   const date = new Date(`${input.date}T00:00:00.000Z`);
   const dayOfWeek = date.getUTCDay();
+  const lngMargin =
+    BLUR_MARGIN_DEG /
+    Math.max(
+      Math.cos((((input.north + input.south) / 2) * Math.PI) / 180),
+      0.1,
+    );
 
-  const candidates = await db.profile.findMany({
+  const found = await db.profile.findMany({
     where: {
       isPublished: true,
       geocodingStatus: "READY",
-      latitude: { not: null, gte: input.south, lte: input.north },
-      longitude: { not: null, gte: input.west, lte: input.east },
+      latitude: {
+        not: null,
+        gte: input.south - BLUR_MARGIN_DEG,
+        lte: input.north + BLUR_MARGIN_DEG,
+      },
+      longitude: {
+        not: null,
+        gte: input.west - lngMargin,
+        lte: input.east + lngMargin,
+      },
+      ...(input.wardId ? { wardId: input.wardId } : {}),
       ...(input.categories.length > 0
         ? { categories: { hasSome: input.categories } }
         : {}),
@@ -235,7 +254,29 @@ export async function findAvailableProvidersOnMap(
     take: MAX_SPATIAL_CANDIDATES + 1,
   });
 
-  const spatiallyTruncated = candidates.length > MAX_SPATIAL_CANDIDATES;
+  // Viewport membership is decided on the PUBLIC point only. Filtering on
+  // the private point let anyone shrink the box around a blurred provider
+  // until it pinpointed their real address.
+  const candidates = found
+    .map((profile) => ({
+      ...profile,
+      publicPoint: profile.hideExactLocation
+        ? obfuscateCoordinates(
+            profile.id,
+            profile.latitude!,
+            profile.longitude!,
+          )
+        : { latitude: profile.latitude!, longitude: profile.longitude! },
+    }))
+    .filter(
+      ({ publicPoint }) =>
+        publicPoint.latitude >= input.south &&
+        publicPoint.latitude <= input.north &&
+        publicPoint.longitude >= input.west &&
+        publicPoint.longitude <= input.east,
+    );
+
+  const spatiallyTruncated = found.length > MAX_SPATIAL_CANDIDATES;
   const boundedCandidates = candidates.slice(0, MAX_SPATIAL_CANDIDATES);
   if (boundedCandidates.length === 0) return { markers: [], truncated: false };
 
@@ -295,22 +336,19 @@ export async function findAvailableProvidersOnMap(
     )
     .sort(
       (a, b) =>
-        distanceSquaredFromCentre(a.latitude!, a.longitude!, input) -
-        distanceSquaredFromCentre(b.latitude!, b.longitude!, input),
+        distanceSquaredFromCentre(
+          a.publicPoint.latitude,
+          a.publicPoint.longitude,
+          input,
+        ) -
+        distanceSquaredFromCentre(
+          b.publicPoint.latitude,
+          b.publicPoint.longitude,
+          input,
+        ),
     );
 
   const markers = available.slice(0, MAX_FMAP_MARKERS).map((profile) => {
-    const privatePoint = {
-      latitude: profile.latitude!,
-      longitude: profile.longitude!,
-    };
-    const publicPoint = profile.hideExactLocation
-      ? obfuscateCoordinates(
-          profile.id,
-          privatePoint.latitude,
-          privatePoint.longitude,
-        )
-      : privatePoint;
     const fullName = [profile.user.firstName, profile.user.lastName]
       .filter(Boolean)
       .join(" ");
@@ -327,7 +365,7 @@ export async function findAvailableProvidersOnMap(
       categories: profile.categories,
       startingPrice: profile.priceMin,
       currency: profile.currency,
-      ...publicPoint,
+      ...profile.publicPoint,
     };
   });
 
@@ -473,10 +511,12 @@ export function paddedBounds(
  */
 export async function getProvinceProviderBounds(
   provinceId: string,
+  wardId?: string,
 ): Promise<MapBounds | null> {
   const result = await db.profile.aggregate({
     where: {
       provinceId,
+      ...(wardId ? { wardId } : {}),
       isPublished: true,
       geocodingStatus: "READY",
       latitude: { not: null },

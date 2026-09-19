@@ -6,23 +6,24 @@ Fmap trả lời câu hỏi: ai cung cấp dịch vụ tôi cần, gần khu v�
 
 ## Luồng hoạt động
 
-1. Khách chọn khu vực: nút "Vị trí của tôi" (dùng GPS, không bắt buộc), chọn tỉnh/thành, hoặc kéo bản đồ rồi bấm "Tìm trong khu vực này".
-2. Chọn ngày, giờ bắt đầu/kết thúc, vai trò, thể loại. Trên điện thoại, bộ lọc thu gọn thành một dòng tóm tắt.
+1. Khách chọn khu vực: nút "Vị trí của tôi" (dùng GPS, không bắt buộc), chọn tỉnh/thành và (tuỳ chọn) phường/xã, hoặc kéo bản đồ rồi bấm "Tìm trong khu vực này". Chọn tỉnh/phường thì bản đồ tự thu phóng tới nơi có provider và tìm luôn; chọn phường thì kết quả chỉ gồm provider ở phường đó.
+2. Chọn ngày, giờ bắt đầu/kết thúc (danh sách 24 giờ, bước 30 phút), vai trò, thể loại. Đổi bất kỳ mục nào thì bản đồ tự tìm lại sau 0,4 giây. Khung giờ phải dài 30 phút – 12 tiếng; sai thì báo ngay dưới bộ lọc thay vì gửi yêu cầu. Trên điện thoại, bộ lọc thu gọn thành một dòng tóm tắt.
 3. API `GET /api/fmap/providers` lọc theo khung bản đồ, vai trò, thể loại, rồi loại provider không rảnh: lịch tuần, ngày bận, booking PENDING/CONFIRMED, và quy định đặt trước tối thiểu 24 giờ.
-4. Marker hiện avatar, icon vai trò, giá khởi điểm; nhiều provider gần nhau gom thành cụm có số.
+4. Marker hiện avatar, icon vai trò, giá khởi điểm; nhiều provider gần nhau gom thành cụm có số. Bấm cụm để phóng to; nếu các provider ở gần như cùng một chỗ (không tách được dù phóng tối đa) thì hiện danh sách để chọn.
 5. Bấm marker mở thẻ xem nhanh (`GET /api/fmap/providers/[profileId]`), bản đồ vẫn nhìn thấy phía sau.
 6. "Xem hồ sơ" hoặc "Đặt lịch". Trang đặt lịch nhận sẵn ngày, giờ, khung giờ mong muốn và thể loại; khách chưa đăng nhập vẫn giữ các thông tin này sau khi đăng nhập.
 7. Không có kết quả: hiện gợi ý "Đổi thời gian", "Mở rộng khu vực", "Đổi dịch vụ".
 
 ## Lấy tọa độ (geocoding)
 
-Geocoding = đổi địa chỉ dạng chữ thành vĩ độ/kinh độ. Chỉ chạy khi provider lưu hồ sơ và địa chỉ thật sự đổi (so bằng mã băm `geocodeAddressHash`), không chạy mỗi lần mở bản đồ. Dùng MapTiler (`MAPTILER_API_KEY`, chỉ ở server). Thiếu key thì bỏ qua êm: hồ sơ vẫn lưu được nhưng chưa hiện trên Fmap (`geocodingStatus` = PENDING hoặc FAILED). Hồ sơ đã có từ trước: chạy `pnpm db:backfill:coordinates --dry-run` để xem trước, bỏ `--dry-run` để chạy thật, thêm `--retry-failed` để thử lại hồ sơ lỗi, `--limit=N` để giới hạn số hồ sơ. Phải export `MAPTILER_API_KEY` trong terminal trước khi chạy. Chạy trên dev trước, production sau (theo `docs/MIGRATIONS.md`). Script không in địa chỉ ra màn hình.
+Geocoding = đổi địa chỉ dạng chữ thành vĩ độ/kinh độ. Lưu hồ sơ không làm mất tọa độ đang có khi dịch vụ geocoding chưa cấu hình hoặc lỗi tạm thời; chỉ khi địa chỉ thật sự đổi thì tọa độ cũ mới bị bỏ (trạng thái PENDING nếu chưa có key, FAILED nếu lỗi). Chỉ chạy khi provider lưu hồ sơ và địa chỉ thật sự đổi (so bằng mã băm `geocodeAddressHash`), không chạy mỗi lần mở bản đồ. Dùng MapTiler (`MAPTILER_API_KEY`, chỉ ở server). Thiếu key thì bỏ qua êm: hồ sơ vẫn lưu được nhưng chưa hiện trên Fmap (`geocodingStatus` = PENDING hoặc FAILED). Hồ sơ đã có từ trước: chạy `pnpm db:backfill:coordinates --dry-run` để xem trước, bỏ `--dry-run` để chạy thật, thêm `--retry-failed` để thử lại hồ sơ lỗi, `--limit=N` để giới hạn số hồ sơ. Phải export `MAPTILER_API_KEY` trong terminal trước khi chạy. Chạy trên dev trước, production sau (theo `docs/MIGRATIONS.md`). Script không in địa chỉ ra màn hình.
 
 ## Quyền riêng tư
 
 - Tọa độ chính xác chỉ nằm ở server.
 - Mặc định mọi provider bật "Làm mờ vị trí trên Fmap": marker lệch cố định 300–650 m, tính bằng HMAC với `NEXTAUTH_SECRET` nên không đảo ngược được. Provider tắt được trong Cài đặt hồ sơ nếu là studio/cửa hàng mở cửa công khai.
-- Khi khách chọn tỉnh, khung bản đồ được nới rộng khoảng 5 km và làm tròn, để tỉnh chỉ có 1 provider cũng không lộ địa chỉ.
+- Việc "provider có nằm trong khung bản đồ không" được quyết định bằng **vị trí đã làm mờ**, không phải vị trí thật. (Trước đây lọc bằng vị trí thật nên có thể thu nhỏ khung dần để dò ra đúng nhà — đã sửa.) Máy chủ lấy rộng hơn khung khoảng 800 m rồi lọc lại theo vị trí công khai.
+- Khi khách chọn tỉnh/phường, khung bản đồ được nới rộng khoảng 5 km và làm tròn, để nơi chỉ có 1 provider cũng không lộ địa chỉ.
 - API không bao giờ trả địa chỉ chi tiết, số điện thoại hay Zalo.
 - Tọa độ GPS của khách không được gửi đi; máy chủ chỉ nhận khung bản đồ đang xem (một vùng rộng vài km).
 

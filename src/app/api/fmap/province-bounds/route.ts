@@ -23,10 +23,16 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const provinceId = searchParams.get("provinceId");
-
-  const validatedProvinceId = z.string().min(1).max(64).safeParse(provinceId);
-  if (!validatedProvinceId.success) {
+  const parsed = z
+    .object({
+      provinceId: z.string().min(1).max(64),
+      wardId: z.string().min(1).max(64).optional(),
+    })
+    .safeParse({
+      provinceId: searchParams.get("provinceId"),
+      wardId: searchParams.get("wardId") || undefined,
+    });
+  if (!parsed.success) {
     return NextResponse.json(
       { data: null, error: "invalid_query", message: "Invalid province" },
       { status: 400 },
@@ -34,7 +40,10 @@ export async function GET(request: Request) {
   }
 
   try {
-    const bounds = await getProvinceProviderBounds(validatedProvinceId.data);
+    const bounds = await getProvinceProviderBounds(
+      parsed.data.provinceId,
+      parsed.data.wardId,
+    );
     return NextResponse.json(
       { data: bounds, error: null, message: null },
       {

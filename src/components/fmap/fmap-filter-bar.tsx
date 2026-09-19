@@ -2,9 +2,9 @@
 
 import type { ProfileCategory } from "@prisma/client";
 import {
+  ChevronDown,
   LocateFixed,
   Search,
-  ChevronDown,
   SlidersHorizontal,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -12,15 +12,16 @@ import { startTransition, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/components/ui/date-field";
-import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
-import { provincesApiPath } from "@/lib/geography-client";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 import { formatDate, vietnamDateKey } from "@/lib/format";
+import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 import { cn } from "@/lib/utils";
+import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
 
 export type FmapFilterValue = {
+  provinceId: string;
+  wardId: string;
   date: string;
   start: string;
   end: string;
@@ -28,35 +29,54 @@ export type FmapFilterValue = {
   category: "" | ProfileCategory;
 };
 
+interface ProvinceOption {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface WardOption {
+  id: string;
+  name: string;
+}
+
+// Half-hour steps as a select rather than <input type="time">: the native
+// control renders 12-hour "09:00 AM" on English-locale devices and yields an
+// empty value while half-typed, which reached the API as an invalid search.
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
+  const hours = String(Math.floor(index / 2)).padStart(2, "0");
+  const time = `${hours}:${index % 2 ? "30" : "00"}`;
+  return { value: time, label: time };
+});
+
+interface FmapFilterBarProps {
+  value: FmapFilterValue;
+  onChange: (next: FmapFilterValue) => void;
+  onSearch: () => void;
+  onUseLocation: () => void;
+  isLoading: boolean;
+  /** Translated reason the current filters can't be searched, if any. */
+  invalidReason: string | null;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+}
+
 export function FmapFilterBar({
   value,
   onChange,
   onSearch,
   onUseLocation,
   isLoading,
-  provinceId,
-  onProvinceChange,
+  invalidReason,
   expanded,
   onExpandedChange,
-}: {
-  value: FmapFilterValue;
-  onChange: (next: FmapFilterValue) => void;
-  onSearch: () => void;
-  onUseLocation: () => void;
-  isLoading: boolean;
-  provinceId: string;
-  onProvinceChange: (provinceId: string) => void;
-  expanded: boolean;
-  onExpandedChange: (expanded: boolean) => void;
-}) {
+}: FmapFilterBarProps) {
   const t = useTranslations("fmap");
   const roleT = useTranslations("role");
   const categoryT = useTranslations("profileCategory");
   const today = vietnamDateKey();
-  const invalidTime = value.end <= value.start;
-  const [provinces, setProvinces] = useState<{ id: string; name: string }[]>(
-    [],
-  );
+  const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
+  const [wards, setWards] = useState<WardOption[]>([]);
 
   useEffect(() => {
     fetch(provincesApiPath())
@@ -65,13 +85,31 @@ export function FmapFilterBar({
       .catch(() => {});
   }, []);
 
+  const provinceCode =
+    provinces.find((province) => province.id === value.provinceId)?.code ?? "";
+  useEffect(() => {
+    if (!provinceCode) {
+      startTransition(() => setWards([]));
+      return;
+    }
+    fetch(wardsApiPath(provinceCode))
+      .then((res) => res.json())
+      .then((body) => startTransition(() => setWards(body.data ?? [])))
+      .catch(() => {});
+  }, [provinceCode]);
+
   const categoryOptions = CATEGORIES_BY_ROLE[value.role] ?? [];
+  const searchDisabled = isLoading || invalidReason != null;
+  const sectionTitle =
+    "text-caption-upper tracking-[0.08em] text-text-tertiary sm:col-span-2 lg:col-span-12";
 
   return (
     <div
       id="fmap-filters"
       className="rounded-[var(--fg-radius-xl)] border border-border-default bg-bg-surface p-3 shadow-[var(--shadow-lg)] sm:p-4"
     >
+      {/* Phones: one summary line; the full form opens on demand so the map
+          stays above the fold. */}
       <div className="flex items-center gap-2 sm:hidden">
         <button
           type="button"
@@ -101,110 +139,144 @@ export function FmapFilterBar({
           type="button"
           size="icon-sm"
           aria-label={t("filters.search")}
-          disabled={isLoading || invalidTime || !value.date}
+          disabled={searchDisabled}
           onClick={onSearch}
         >
           <Search />
         </Button>
       </div>
+
       <div
         className={cn(
           expanded ? "mt-3 grid" : "hidden",
-          "gap-3 sm:mt-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 lg:items-end 2xl:grid-cols-[auto_1.1fr_1fr_1.4fr_1.1fr_1.1fr_auto]",
+          "grid-cols-1 gap-3 sm:mt-0 sm:grid sm:grid-cols-2 lg:grid-cols-12 lg:items-end",
         )}
       >
+        <p className={sectionTitle}>{t("filters.areaTitle")}</p>
+        <div className="lg:col-span-4">
+          <NativeSelect
+            label={t("filters.province")}
+            value={value.provinceId}
+            options={[
+              { value: "", label: t("filters.chooseProvince") },
+              ...provinces.map((province) => ({
+                value: province.id,
+                label: province.name,
+              })),
+            ]}
+            onChange={(provinceId) =>
+              onChange({ ...value, provinceId, wardId: "" })
+            }
+          />
+        </div>
+        <div className="lg:col-span-4">
+          <NativeSelect
+            label={t("filters.ward")}
+            value={value.wardId}
+            disabled={!value.provinceId}
+            options={[
+              {
+                value: "",
+                label: value.provinceId
+                  ? t("filters.allWards")
+                  : t("filters.wardNeedsProvince"),
+              },
+              ...wards.map((ward) => ({ value: ward.id, label: ward.name })),
+            ]}
+            onChange={(wardId) => onChange({ ...value, wardId })}
+          />
+        </div>
         <Button
           type="button"
           variant="secondary"
           onClick={onUseLocation}
-          className="h-[46px]"
+          className="h-[46px] sm:col-span-2 lg:col-span-4"
         >
           <LocateFixed />
           {t("filters.myLocation")}
         </Button>
-        <NativeSelect
-          label={t("filters.province")}
-          value={provinceId}
-          options={[
-            { value: "", label: t("filters.chooseProvince") },
-            ...provinces.map((province) => ({
-              value: province.id,
-              label: province.name,
-            })),
-          ]}
-          onChange={onProvinceChange}
-        />
-        <DateField
-          label={t("filters.date")}
-          min={today}
-          value={value.date}
-          onChange={(date) => onChange({ ...value, date })}
-        />
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            type="time"
+
+        <div className="my-1 h-px bg-border-subtle sm:col-span-2 lg:col-span-12" />
+
+        <p className={sectionTitle}>{t("filters.whenTitle")}</p>
+        <div className="sm:col-span-2 lg:col-span-3">
+          <DateField
+            label={t("filters.date")}
+            min={today}
+            value={value.date}
+            onChange={(date) => onChange({ ...value, date })}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:col-span-2 lg:col-span-3">
+          <NativeSelect
             label={t("filters.start")}
             value={value.start}
-            onChange={(event) =>
-              onChange({ ...value, start: event.target.value })
-            }
+            options={TIME_OPTIONS}
+            onChange={(start) => onChange({ ...value, start })}
           />
-          <Input
-            type="time"
+          <NativeSelect
             label={t("filters.end")}
-            min={value.start}
             value={value.end}
-            error={invalidTime ? t("filters.invalidTime") : undefined}
-            onChange={(event) =>
-              onChange({ ...value, end: event.target.value })
+            options={TIME_OPTIONS}
+            onChange={(end) => onChange({ ...value, end })}
+          />
+        </div>
+        <div className="lg:col-span-2">
+          <NativeSelect
+            label={t("filters.role")}
+            value={value.role}
+            options={FMAP_PROVIDER_ROLES.map((role) => ({
+              value: role,
+              label: roleT(role),
+            }))}
+            onChange={(role) =>
+              onChange({
+                ...value,
+                role: role as FmapFilterValue["role"],
+                category: "",
+              })
             }
           />
         </div>
-        <NativeSelect
-          label={t("filters.role")}
-          value={value.role}
-          options={FMAP_PROVIDER_ROLES.map((role) => ({
-            value: role,
-            label: roleT(role),
-          }))}
-          onChange={(role) =>
-            onChange({
-              ...value,
-              role: role as FmapFilterValue["role"],
-              category: "",
-            })
-          }
-        />
-        <NativeSelect
-          label={t("filters.category")}
-          value={value.category}
-          options={[
-            { value: "", label: t("filters.allCategories") },
-            ...categoryOptions.map((category) => ({
-              value: category,
-              label: categoryT(category),
-            })),
-          ]}
-          onChange={(category) =>
-            onChange({
-              ...value,
-              category: category as FmapFilterValue["category"],
-            })
-          }
-        />
+        <div className="lg:col-span-2">
+          <NativeSelect
+            label={t("filters.category")}
+            value={value.category}
+            options={[
+              { value: "", label: t("filters.allCategories") },
+              ...categoryOptions.map((category) => ({
+                value: category,
+                label: categoryT(category),
+              })),
+            ]}
+            onChange={(category) =>
+              onChange({
+                ...value,
+                category: category as FmapFilterValue["category"],
+              })
+            }
+          />
+        </div>
         <Button
           type="button"
-          className="h-[46px]"
-          disabled={isLoading || invalidTime || !value.date}
+          className="h-[46px] sm:col-span-2 lg:col-span-2"
+          disabled={searchDisabled}
           onClick={onSearch}
         >
           <Search />
           {isLoading ? t("filters.searching") : t("filters.search")}
         </Button>
       </div>
-      <p className="mt-2 hidden sm:block text-body-sm text-text-tertiary">
-        {t("filters.mapHint")}
-      </p>
+
+      {invalidReason ? (
+        <p role="alert" className="mt-2 text-body-sm text-danger">
+          {invalidReason}
+        </p>
+      ) : (
+        <p className="mt-2 hidden text-body-sm text-text-tertiary sm:block">
+          {t("filters.mapHint")}
+        </p>
+      )}
     </div>
   );
 }
