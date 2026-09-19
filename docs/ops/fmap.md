@@ -6,7 +6,7 @@ Fmap trả lời câu hỏi: ai cung cấp dịch vụ tôi cần, gần khu v�
 
 ## Luồng hoạt động
 
-1. Khách chọn khu vực: nút "Vị trí của tôi" (dùng GPS, không bắt buộc), chọn tỉnh/thành và (tuỳ chọn) phường/xã, hoặc kéo bản đồ rồi bấm "Tìm trong khu vực này". Chọn tỉnh/phường thì bản đồ tự thu phóng tới nơi có provider và tìm luôn; chọn phường thì kết quả chỉ gồm provider ở phường đó.
+1. Khách chọn khu vực: nút "Vị trí của tôi" (dùng GPS, không bắt buộc), chọn tỉnh/thành và (tuỳ chọn) phường/xã, hoặc kéo bản đồ rồi bấm "Tìm trong khu vực này". Chọn tỉnh/phường thì bản đồ tự thu phóng tới nơi có provider và tìm luôn; chọn phường thì kết quả chỉ gồm provider ở phường đó. Danh sách phường/xã chỉ hiện những phường đang có provider của vai trò đã chọn, kèm số lượng (`GET /api/fmap/ward-counts`); đổi vai trò mà phường đang chọn không còn ai thì bộ lọc phường tự bỏ.
 2. Chọn ngày, giờ bắt đầu/kết thúc (danh sách 24 giờ, bước 30 phút), vai trò, thể loại. Đổi bất kỳ mục nào thì bản đồ tự tìm lại sau 0,4 giây. Khung giờ phải dài 30 phút – 12 tiếng; sai thì báo ngay dưới bộ lọc thay vì gửi yêu cầu. Trên điện thoại, bộ lọc thu gọn thành một dòng tóm tắt.
 3. API `GET /api/fmap/providers` lọc theo khung bản đồ, vai trò, thể loại, rồi loại provider không rảnh: lịch tuần, ngày bận, booking PENDING/CONFIRMED, và quy định đặt trước tối thiểu 24 giờ.
 4. Marker hiện avatar, icon vai trò, giá khởi điểm; nhiều provider gần nhau gom thành cụm có số. Bấm cụm để phóng to; nếu các provider ở gần như cùng một chỗ (không tách được dù phóng tối đa) thì hiện danh sách để chọn.

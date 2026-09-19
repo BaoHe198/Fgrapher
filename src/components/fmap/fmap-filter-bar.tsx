@@ -77,6 +77,9 @@ export function FmapFilterBar({
   const today = vietnamDateKey();
   const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
   const [wards, setWards] = useState<WardOption[]>([]);
+  const [wardCounts, setWardCounts] = useState<Map<string, number> | null>(
+    null,
+  );
 
   useEffect(() => {
     fetch(provincesApiPath())
@@ -97,6 +100,44 @@ export function FmapFilterBar({
       .then((body) => startTransition(() => setWards(body.data ?? [])))
       .catch(() => {});
   }, [provinceCode]);
+
+  // Only wards that currently have providers of the chosen role are
+  // offered: most wards have none, and picking one used to leave every
+  // later search (time change, pan) stuck on "no providers".
+  useEffect(() => {
+    if (!value.provinceId) {
+      startTransition(() => setWardCounts(null));
+      return;
+    }
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      provinceId: value.provinceId,
+      roles: value.role,
+    });
+    fetch(`/api/fmap/ward-counts?${params}`, { signal: controller.signal })
+      .then((res) => res.json())
+      .then((body: { data: { wardId: string; count: number }[] | null }) =>
+        startTransition(() =>
+          setWardCounts(
+            new Map((body.data ?? []).map((row) => [row.wardId, row.count])),
+          ),
+        ),
+      )
+      .catch(() => {});
+    return () => controller.abort();
+  }, [value.provinceId, value.role]);
+
+  const wardOptions = wardCounts
+    ? wards.filter((ward) => wardCounts.has(ward.id))
+    : [];
+
+  // A role change can empty the chosen ward; drop the filter rather than
+  // keep searching somewhere with nobody of that role.
+  const staleWard =
+    value.wardId !== "" && wardCounts !== null && !wardCounts.has(value.wardId);
+  useEffect(() => {
+    if (staleWard) startTransition(() => onChange({ ...value, wardId: "" }));
+  }, [staleWard, onChange, value]);
 
   const categoryOptions = CATEGORIES_BY_ROLE[value.role] ?? [];
   const searchDisabled = isLoading || invalidReason != null;
@@ -173,15 +214,23 @@ export function FmapFilterBar({
           <NativeSelect
             label={t("filters.ward")}
             value={value.wardId}
-            disabled={!value.provinceId}
+            disabled={!value.provinceId || wardOptions.length === 0}
             options={[
               {
                 value: "",
-                label: value.provinceId
-                  ? t("filters.allWards")
-                  : t("filters.wardNeedsProvince"),
+                label: !value.provinceId
+                  ? t("filters.wardNeedsProvince")
+                  : wardCounts && wardOptions.length === 0
+                    ? t("filters.noWardsWithProviders")
+                    : t("filters.allWards"),
               },
-              ...wards.map((ward) => ({ value: ward.id, label: ward.name })),
+              ...wardOptions.map((ward) => ({
+                value: ward.id,
+                label: t("filters.wardOption", {
+                  name: ward.name,
+                  count: wardCounts?.get(ward.id) ?? 0,
+                }),
+              })),
             ]}
             onChange={(wardId) => onChange({ ...value, wardId })}
           />

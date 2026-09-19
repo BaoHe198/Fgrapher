@@ -6,15 +6,18 @@ import {
   FMAP_PROVIDER_ROLES,
   parseCommaSeparated,
 } from "@/lib/validations/fmap";
-import { getProvinceProviderBounds } from "@/services/fmap";
+import { getWardProviderCounts } from "@/services/fmap";
 
-const PROVINCE_BOUNDS_RATE_LIMIT = { max: 120, windowMs: 60 * 1000 };
+const WARD_COUNTS_RATE_LIMIT = { max: 120, windowMs: 60 * 1000 };
 
+// Per-ward provider counts for the Fmap ward picker, so it only lists wards
+// that can actually return someone. Counts ignore availability (that
+// depends on the chosen time) — they answer "is anyone based here at all".
 export async function GET(request: Request) {
   const ip = getClientIp(request);
   const rateLimit = checkRateLimit(
-    `fmap-province:${ip}`,
-    PROVINCE_BOUNDS_RATE_LIMIT,
+    `fmap-ward-counts:${ip}`,
+    WARD_COUNTS_RATE_LIMIT,
   );
   if (!rateLimit.allowed) {
     return NextResponse.json(
@@ -27,17 +30,15 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const rolesParam = parseCommaSeparated(searchParams.get("roles"));
+  const roles = parseCommaSeparated(searchParams.get("roles"));
   const parsed = z
     .object({
       provinceId: z.string().min(1).max(64),
-      wardId: z.string().min(1).max(64).optional(),
       roles: z.array(z.enum(FMAP_PROVIDER_ROLES)).min(1),
     })
     .safeParse({
       provinceId: searchParams.get("provinceId"),
-      wardId: searchParams.get("wardId") || undefined,
-      roles: rolesParam.length > 0 ? rolesParam : [...FMAP_PROVIDER_ROLES],
+      roles: roles.length > 0 ? roles : [...FMAP_PROVIDER_ROLES],
     });
   if (!parsed.success) {
     return NextResponse.json(
@@ -47,23 +48,22 @@ export async function GET(request: Request) {
   }
 
   try {
-    const bounds = await getProvinceProviderBounds(
+    const counts = await getWardProviderCounts(
       parsed.data.provinceId,
-      parsed.data.wardId,
       parsed.data.roles,
     );
     return NextResponse.json(
-      { data: bounds, error: null, message: null },
+      { data: counts, error: null, message: null },
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, max-age=300, stale-while-revalidate=600",
+          "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
         },
       },
     );
   } catch {
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Province lookup failed" },
+      { data: null, error: "server_error", message: "Ward lookup failed" },
       { status: 500 },
     );
   }

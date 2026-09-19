@@ -190,6 +190,24 @@ function roleVerificationFilter(
   }));
 }
 
+/**
+ * Profiles that may appear on Fmap for the given roles, before any
+ * location or availability check. Shared by the search, the area bounds
+ * and the per-ward counts so the three can never disagree.
+ */
+function fmapEligibleWhere(
+  roles: FmapSearchInput["roles"],
+): Prisma.ProfileWhereInput {
+  return {
+    isPublished: true,
+    geocodingStatus: "READY",
+    latitude: { not: null },
+    longitude: { not: null },
+    OR: roleVerificationFilter(roles),
+    user: { deletedAt: null, isSuspended: false, acceptingBookings: true },
+  };
+}
+
 export async function findAvailableProvidersOnMap(
   input: FmapSearchInput,
   viewerUserId?: string,
@@ -205,8 +223,7 @@ export async function findAvailableProvidersOnMap(
 
   const found = await db.profile.findMany({
     where: {
-      isPublished: true,
-      geocodingStatus: "READY",
+      ...fmapEligibleWhere(input.roles),
       latitude: {
         not: null,
         gte: input.south - BLUR_MARGIN_DEG,
@@ -222,12 +239,6 @@ export async function findAvailableProvidersOnMap(
         ? { categories: { hasSome: input.categories } }
         : {}),
       ...(viewerUserId ? { userId: { not: viewerUserId } } : {}),
-      OR: roleVerificationFilter(input.roles),
-      user: {
-        deletedAt: null,
-        isSuspended: false,
-        acceptingBookings: true,
-      },
     },
     select: {
       id: true,
@@ -511,17 +522,14 @@ export function paddedBounds(
  */
 export async function getProvinceProviderBounds(
   provinceId: string,
-  wardId?: string,
+  wardId: string | undefined,
+  roles: FmapSearchInput["roles"],
 ): Promise<MapBounds | null> {
   const result = await db.profile.aggregate({
     where: {
+      ...fmapEligibleWhere(roles),
       provinceId,
       ...(wardId ? { wardId } : {}),
-      isPublished: true,
-      geocodingStatus: "READY",
-      latitude: { not: null },
-      longitude: { not: null },
-      user: { deletedAt: null, isSuspended: false },
     },
     _min: { latitude: true, longitude: true },
     _max: { latitude: true, longitude: true },
@@ -539,4 +547,23 @@ export async function getProvinceProviderBounds(
     { latitude: min.latitude, longitude: min.longitude },
     { latitude: max.latitude, longitude: max.longitude },
   ]);
+}
+
+/**
+ * How many Fmap-eligible providers of the given roles each ward of a
+ * province has, so the ward picker only offers wards that can return
+ * something. Wards without providers are simply absent.
+ */
+export async function getWardProviderCounts(
+  provinceId: string,
+  roles: FmapSearchInput["roles"],
+): Promise<{ wardId: string; count: number }[]> {
+  const groups = await db.profile.groupBy({
+    by: ["wardId"],
+    where: { ...fmapEligibleWhere(roles), provinceId, wardId: { not: null } },
+    _count: { _all: true },
+  });
+  return groups.flatMap((group) =>
+    group.wardId ? [{ wardId: group.wardId, count: group._count._all }] : [],
+  );
 }

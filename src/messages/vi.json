@@ -71,14 +71,17 @@
       "wardNeedsProvince": "Chọn tỉnh/thành trước",
       "areaTitle": "Khu vực",
       "whenTitle": "Thời gian & dịch vụ",
-      "wardEmpty": "Phường/xã này chưa có nhà cung cấp nào trên Fmap."
+      "wardEmpty": "Phường/xã này chưa có nhà cung cấp nào trên Fmap.",
+      "wardOption": "{name} ({count})",
+      "noWardsWithProviders": "Chưa có phường/xã nào có nhà cung cấp"
     },
     "empty": {
       "title": "Chưa có nhà cung cấp phù hợp",
       "body": "Hãy thử đổi thời gian, dịch vụ hoặc mở rộng khu vực tìm kiếm.",
       "changeTime": "Đổi thời gian",
       "expandArea": "Mở rộng khu vực",
-      "changeService": "Đổi dịch vụ"
+      "changeService": "Đổi dịch vụ",
+      "clearWard": "Bỏ lọc phường/xã"
     },
     "preview": {
       "close": "Đóng thông tin nhà cung cấp",

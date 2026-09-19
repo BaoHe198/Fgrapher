@@ -230,7 +230,10 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   useEffect(() => {
     if (!provinceId) return;
     const controller = new AbortController();
-    const params = new URLSearchParams({ provinceId });
+    const params = new URLSearchParams({
+      provinceId,
+      roles: filtersRef.current.role,
+    });
     if (wardId) params.set("wardId", wardId);
     startTransition(() => setNotice(null));
     fetch(`/api/fmap/province-bounds?${params}`, { signal: controller.signal })
@@ -238,6 +241,10 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
         const body = (await response.json()) as { data: FmapBounds | null };
         if (!response.ok) throw new Error("area_lookup_failed");
         if (!body.data) {
+          // Nothing to show here: clear the previous area's markers rather
+          // than leave them on screen under a "no providers" notice.
+          setMarkers([]);
+          setSearchedFor(null);
           setNotice({
             tone: "info",
             text: wardId ? t("filters.wardEmpty") : t("filters.provinceEmpty"),
@@ -479,6 +486,18 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
               >
                 {t("empty.changeService")}
               </Button>
+              {filters.wardId ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    setFilters((previous) => ({ ...previous, wardId: "" }))
+                  }
+                >
+                  {t("empty.clearWard")}
+                </Button>
+              ) : null}
             </div>
           </div>
         ) : null}

@@ -71,14 +71,17 @@
       "wardNeedsProvince": "Choose a province first",
       "areaTitle": "Area",
       "whenTitle": "Time & service",
-      "wardEmpty": "No providers on Fmap in this ward yet."
+      "wardEmpty": "No providers on Fmap in this ward yet.",
+      "wardOption": "{name} ({count})",
+      "noWardsWithProviders": "No wards with providers yet"
     },
     "empty": {
       "title": "No matching providers yet",
       "body": "Try another time, service, or a wider search area.",
       "changeTime": "Change time",
       "expandArea": "Expand search area",
-      "changeService": "Change service"
+      "changeService": "Change service",
+      "clearWard": "Clear ward filter"
     },
     "preview": {
       "close": "Close provider preview",
