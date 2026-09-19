@@ -2097,7 +2097,11 @@
         "addressPlaceholder": "Số nhà, tên đường hoặc thôn/ấp",
         "addressPrivacy": "Địa chỉ chi tiết được lưu riêng tư. Trên hồ sơ và kết quả tìm kiếm chỉ hiển thị tỉnh/thành và phường/xã.",
         "requiredError": "Vui lòng nhập đủ tỉnh/thành, phường/xã và địa chỉ chi tiết.",
-        "saveFailed": "Không thể lưu hồ sơ, vui lòng thử lại."
+        "saveFailed": "Không thể lưu hồ sơ, vui lòng thử lại.",
+        "addressSuggestHint": "Gõ ít nhất 3 ký tự rồi chọn địa chỉ trong danh sách gợi ý để vị trí trên Fmap chính xác.",
+        "addressSuggestUnavailable": "Gợi ý địa chỉ chưa được bật. Hệ thống sẽ tự tìm vị trí khi bạn lưu.",
+        "addressPinned": "Đã xác định vị trí chính xác trên bản đồ. Bấm Lưu để cập nhật.",
+        "fmapNotVisible": "Hồ sơ của bạn chưa hiện trên Fmap vì chưa xác định được vị trí. Hãy chọn địa chỉ trong danh sách gợi ý rồi bấm Lưu."
       },
       "editor": {
         "liveStatus": "Đang hoạt động — hiển thị trong tìm kiếm",

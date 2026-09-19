@@ -124,8 +124,11 @@ export async function PATCH(
       );
     }
 
+    // addressPoint is not a Profile column — it only feeds the geocoding
+    // fields below, so it must not reach the upsert.
+    const { addressPoint, ...profileData } = parsed.data;
     const geocodeInput = {
-      address: parsed.data.address,
+      address: profileData.address,
       ward: ward.name,
       province: ward.province.name,
     };
@@ -137,7 +140,13 @@ export async function PATCH(
     const legacyReadyPoint =
       existingProfile?.geocodeAddressHash == null &&
       existingProfile?.geocodingStatus === "READY";
-    const geocode = locationChanged ? await forwardGeocode(geocodeInput) : null;
+    // A point picked from the autocomplete list is the provider confirming
+    // exactly where they are — use it as-is instead of re-geocoding text.
+    const geocode = addressPoint
+      ? { success: true as const, ...addressPoint }
+      : locationChanged
+        ? await forwardGeocode(geocodeInput)
+        : null;
     let geocodingData = {};
     if (geocode?.success) {
       geocodingData = {
@@ -171,10 +180,10 @@ export async function PATCH(
       create: {
         userId: session.user.id,
         role: role as Role,
-        ...parsed.data,
+        ...profileData,
         ...geocodingData,
       },
-      update: { ...parsed.data, ...geocodingData },
+      update: { ...profileData, ...geocodingData },
     });
 
     // Categories and location are requirements

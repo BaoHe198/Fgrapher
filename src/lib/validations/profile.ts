@@ -23,6 +23,15 @@ function zaloUrlSchema(message: string) {
     .optional();
 }
 
+// Coordinates of an address the provider picked from the autocomplete
+// list. Bounded to Vietnam; it only ever places the provider's own marker.
+const addressPointSchema = z
+  .object({
+    latitude: z.number().min(8).max(24),
+    longitude: z.number().min(102).max(110),
+  })
+  .optional();
+
 export const updateProfileSchema = z.object({
   displayName: z.string().min(2, "Enter a display name").optional(),
   description: z.string().max(1000).optional(),
@@ -35,6 +44,7 @@ export const updateProfileSchema = z.object({
   priceMax: z.number().nonnegative().optional(),
   categories: z.array(z.enum(ProfileCategory)).optional(),
   address: z.string().trim().min(5).max(200),
+  addressPoint: addressPointSchema,
   area: z.number().positive().optional(),
   amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
   shopName: z.string().max(120).optional(),
@@ -80,6 +90,7 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     priceMax: z.number().nonnegative().optional(),
     categories: z.array(z.enum(ProfileCategory)).optional(),
     address: z.string().trim().min(5, t("addressRequired")).max(200),
+    addressPoint: addressPointSchema,
     area: z.number().positive().optional(),
     amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
     shopName: z.string().max(120).optional(),

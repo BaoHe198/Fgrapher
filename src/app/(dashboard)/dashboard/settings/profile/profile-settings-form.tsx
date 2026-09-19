@@ -17,6 +17,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
+import {
+  AddressAutocomplete,
+  type AddressPoint,
+} from "@/components/forms/address-autocomplete";
 import { Switch } from "@/components/ui/switch";
 import { Tag } from "@/components/ui/tag";
 import { CATEGORIES_BY_ROLE, EXPERIENCE_LEVELS } from "@/lib/constants";
@@ -132,6 +136,10 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
   const [wards, setWards] = useState<WardOption[]>([]);
   const [extraProvinceIds, setExtraProvinceIds] = useState<string[]>([]);
+  // Exact point of an autocomplete suggestion the provider picked this
+  // session; null means "geocode the typed text on save".
+  const [addressPoint, setAddressPoint] = useState<AddressPoint | null>(null);
+  const [geocodingStatus, setGeocodingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -140,6 +148,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       .then((body) => {
         if (!cancelled) {
           setValues(toFormValues(body.data));
+          setGeocodingStatus(body.data?.geocodingStatus ?? null);
           setProfileId(body.data?.id ?? null);
           setServices(body.data?.services ?? []);
           setExtraProvinceIds(
@@ -237,6 +246,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           priceMax: values.priceMax ? Number(values.priceMax) : undefined,
           categories: values.categories,
           address: values.address.trim(),
+          addressPoint: addressPoint ?? undefined,
           area: values.area ? Number(values.area) : undefined,
           amenities: values.amenities,
           shopName: values.shopName || undefined,
@@ -279,6 +289,8 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       }
       if (profileBody.data) {
         setIsPublished(Boolean(profileBody.data.isPublished));
+        setGeocodingStatus(profileBody.data.geocodingStatus ?? null);
+        setAddressPoint(null);
       }
       setSaved(true);
     } catch {
@@ -438,12 +450,27 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           />
         </div>
 
-        <Input
+        <AddressAutocomplete
           label={tEditor("addressLabel")}
-          value={values.address}
-          onChange={(e) => set("address", e.target.value)}
           placeholder={t("addressPlaceholder")}
+          value={values.address}
+          point={addressPoint}
+          provinceId={values.provinceId}
+          wardId={values.wardId}
+          areaNames={[
+            provinces.find((p) => p.id === values.provinceId)?.name ?? "",
+            wards.find((w) => w.id === values.wardId)?.name ?? "",
+          ].filter(Boolean)}
+          onChange={(address, point) => {
+            set("address", address);
+            setAddressPoint(point);
+          }}
         />
+        {geocodingStatus && geocodingStatus !== "READY" && !addressPoint ? (
+          <p className="rounded-[var(--fg-radius-md)] bg-warning-bg px-3 py-2 text-body-sm text-warning">
+            {t("fmapNotVisible")}
+          </p>
+        ) : null}
         <p className="text-body-sm text-text-tertiary">{t("addressPrivacy")}</p>
 
         <Switch

@@ -2097,7 +2097,11 @@
         "addressPlaceholder": "House number, street, village, or hamlet",
         "addressPrivacy": "Your detailed address stays private. Public profiles and search results show only the province and ward.",
         "requiredError": "Enter a province, ward, and detailed address.",
-        "saveFailed": "Couldn't save the profile. Please try again."
+        "saveFailed": "Couldn't save the profile. Please try again.",
+        "addressSuggestHint": "Type at least 3 characters and pick an address from the suggestions so your Fmap position is exact.",
+        "addressSuggestUnavailable": "Address suggestions aren't enabled yet. We'll locate the address when you save.",
+        "addressPinned": "Exact map position set. Save to update it.",
+        "fmapNotVisible": "Your profile isn't on Fmap yet because its location couldn't be determined. Pick your address from the suggestions, then save."
       },
       "editor": {
         "liveStatus": "Live — visible in search",
