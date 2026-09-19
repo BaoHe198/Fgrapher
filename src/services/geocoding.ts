@@ -125,6 +125,20 @@ export type SuggestResult =
   | { success: false; reason: GeocodeFailureReason };
 
 export const MIN_SUGGEST_QUERY_LENGTH = 3;
+// MapTiler answers an address query with administrative areas too ("Phường
+// Thủ Đức"). Picking one would store a ward centroid as the provider's
+// address, so only street-level and finer results are offered.
+const ADMINISTRATIVE_PLACE_TYPES = new Set([
+  "country",
+  "region",
+  "subregion",
+  "county",
+  "joint_municipality",
+  "joint_submunicipality",
+  "municipality",
+  "municipal_district",
+  "postal_code",
+]);
 const MAX_SUGGESTIONS = 5;
 
 /**
@@ -177,6 +191,7 @@ export async function suggestAddresses(
       features?: Array<{
         id?: unknown;
         place_name?: unknown;
+        place_type?: unknown;
         geometry?: { coordinates?: unknown };
       }>;
     };
@@ -189,6 +204,12 @@ export async function suggestAddresses(
         i++
       ) {
         const feature = data.features[i];
+        const placeTypes = Array.isArray(feature.place_type)
+          ? feature.place_type.map(String)
+          : [];
+        if (placeTypes.some((type) => ADMINISTRATIVE_PLACE_TYPES.has(type))) {
+          continue;
+        }
         if (
           feature.geometry?.type === "Point" &&
           isCoordinatePair(feature.geometry.coordinates) &&

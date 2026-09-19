@@ -236,4 +236,38 @@ describe("suggestAddresses", () => {
     });
     assert.deepEqual(result, { success: false, reason: "upstream_error" });
   });
+
+  it("drops administrative results so a ward centroid can't be picked", async () => {
+    const result = await suggestAddresses("Nguyễn Huệ", context, {
+      apiKey: "test-key",
+      fetchImpl: async () =>
+        response({
+          features: [
+            {
+              id: "ward",
+              place_name: "Phường Thủ Đức, Việt Nam",
+              place_type: ["municipal_district"],
+              geometry: { type: "Point", coordinates: [106.75, 10.85] },
+            },
+            {
+              id: "street",
+              place_name: "Đại lộ Nguyễn Huệ, 71006 Phường Sài Gòn, Việt Nam",
+              place_type: ["street"],
+              geometry: { type: "Point", coordinates: [106.7019, 10.7743] },
+            },
+          ],
+        }),
+    });
+    assert.deepEqual(result, {
+      success: true,
+      suggestions: [
+        {
+          id: "street",
+          label: "Đại lộ Nguyễn Huệ, 71006 Phường Sài Gòn, Việt Nam",
+          longitude: 106.7019,
+          latitude: 10.7743,
+        },
+      ],
+    });
+  });
 });

@@ -2101,7 +2101,8 @@
         "addressSuggestHint": "Type at least 3 characters and pick an address from the suggestions so your Fmap position is exact.",
         "addressSuggestUnavailable": "Address suggestions aren't enabled yet. We'll locate the address when you save.",
         "addressPinned": "Exact map position set. Save to update it.",
-        "fmapNotVisible": "Your profile isn't on Fmap yet because its location couldn't be determined. Pick your address from the suggestions, then save."
+        "fmapNotVisible": "Your profile isn't on Fmap yet because its location couldn't be determined. Pick your address from the suggestions, then save.",
+        "addressOtherWard": "Position set, but this address is in {ward}. Check the Ward field above."
       },
       "editor": {
         "liveStatus": "Live — visible in search",

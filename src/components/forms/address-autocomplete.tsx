@@ -33,10 +33,23 @@ interface AddressAutocompleteProps {
 const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_MS = 300;
 
-// "12 Nguyễn Huệ, Phường Sài Gòn, Hồ Chí Minh, Việt Nam" -> "12 Nguyễn Huệ":
-// ward and province already have their own fields, so only the street part
-// belongs in the detailed-address box.
-function streetPart(label: string, areaNames: string[]) {
+// House/alley number as typed, e.g. "12", "12A", "134/5B".
+const HOUSE_NUMBER = /^\d+[A-Za-z]?(?:\/\d+[A-Za-z]?)*\b/;
+// A trailing administrative segment of a MapTiler label, with or without
+// its postcode: "71006 Phường Sài Gòn", "Thành phố Hồ Chí Minh", "Việt Nam".
+const AREA_SEGMENT =
+  /^(?:\d{5,6}\s+)?(?:phường|xã|thị trấn|quận|huyện|thị xã|thành phố|tỉnh|đặc khu)\b/i;
+// The ward a suggestion sits in, used to flag a mismatch with the form.
+const WARD_IN_LABEL = /(?:phường|xã|thị trấn)\s+[^,]+/i;
+
+/**
+ * "12 Nguyễn Huệ, Phường Sài Gòn, Hồ Chí Minh, Việt Nam" -> "12 Nguyễn Huệ":
+ * ward and province have their own fields, so only the street part belongs
+ * in the detailed-address box. MapTiler usually answers at street level
+ * ("Võ Văn Ngân, 70000 Phường Thủ Đức"), so the house number the provider
+ * typed is kept in front of it.
+ */
+function streetPart(label: string, areaNames: string[], typed: string) {
   const areas = areaNames.map((name) => name.toLowerCase());
   const parts = label.split(",").map((part) => part.trim());
   while (parts.length > 1) {
@@ -44,11 +57,16 @@ function streetPart(label: string, areaNames: string[]) {
     const isArea =
       last === "việt nam" ||
       last === "vietnam" ||
+      AREA_SEGMENT.test(last) ||
       areas.some((area) => area.includes(last) || last.includes(area));
     if (!isArea) break;
     parts.pop();
   }
-  return parts.join(", ");
+  const street = parts.join(", ");
+  const houseNumber = typed.trim().match(HOUSE_NUMBER)?.[0];
+  return houseNumber && !HOUSE_NUMBER.test(street)
+    ? `${houseNumber} ${street}`
+    : street;
 }
 
 /**
@@ -76,6 +94,7 @@ export function AddressAutocomplete({
   const [unavailable, setUnavailable] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [query, setQuery] = useState("");
+  const [otherWard, setOtherWard] = useState<string | null>(null);
   const blurTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -112,7 +131,18 @@ export function AddressAutocomplete({
   }, [query, provinceId, wardId, unavailable]);
 
   const pick = (suggestion: Suggestion) => {
-    onChange(streetPart(suggestion.label, areaNames), {
+    // MapTiler can answer with a street in a different ward; the marker
+    // would then sit outside the ward the provider selected above.
+    const labelWard = suggestion.label.match(WARD_IN_LABEL)?.[0].trim();
+    const selectedWard = areaNames[1]?.trim().toLowerCase();
+    setOtherWard(
+      labelWard &&
+        selectedWard &&
+        !labelWard.toLowerCase().includes(selectedWard)
+        ? labelWard
+        : null,
+    );
+    onChange(streetPart(suggestion.label, areaNames, value), {
       latitude: suggestion.latitude,
       longitude: suggestion.longitude,
     });
@@ -138,6 +168,7 @@ export function AddressAutocomplete({
         autoComplete="off"
         onChange={(event) => {
           // Any manual edit invalidates the picked point.
+          setOtherWard(null);
           onChange(event.target.value, null);
           setQuery(event.target.value);
         }}
@@ -208,7 +239,9 @@ export function AddressAutocomplete({
           <Check className="size-3.5" />
         ) : null}
         {point
-          ? t("addressPinned")
+          ? otherWard
+            ? t("addressOtherWard", { ward: otherWard })
+            : t("addressPinned")
           : unavailable
             ? t("addressSuggestUnavailable")
             : t("addressSuggestHint")}
