@@ -12,9 +12,13 @@ export interface AddressPoint {
   longitude: number;
 }
 
-interface Suggestion extends AddressPoint {
+interface Suggestion {
   id: string;
   label: string;
+  // Absent for providers whose autocomplete has no coordinates (Goong):
+  // the point is fetched from /api/geocoding/place when one is picked.
+  latitude?: number;
+  longitude?: number;
 }
 
 interface AddressAutocompleteProps {
@@ -95,6 +99,7 @@ export function AddressAutocomplete({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [query, setQuery] = useState("");
   const [otherWard, setOtherWard] = useState<string | null>(null);
+  const [resolveFailed, setResolveFailed] = useState(false);
   const blurTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -130,7 +135,7 @@ export function AddressAutocomplete({
     };
   }, [query, provinceId, wardId, unavailable]);
 
-  const pick = (suggestion: Suggestion) => {
+  const pick = async (suggestion: Suggestion) => {
     // MapTiler can answer with a street in a different ward; the marker
     // would then sit outside the ward the provider selected above.
     const labelWard = suggestion.label.match(WARD_IN_LABEL)?.[0].trim();
@@ -142,12 +147,33 @@ export function AddressAutocomplete({
         ? labelWard
         : null,
     );
-    onChange(streetPart(suggestion.label, areaNames, value), {
-      latitude: suggestion.latitude,
-      longitude: suggestion.longitude,
-    });
+    const address = streetPart(suggestion.label, areaNames, value);
     setOpen(false);
     setSuggestions([]);
+    setResolveFailed(false);
+
+    if (suggestion.latitude != null && suggestion.longitude != null) {
+      onChange(address, {
+        latitude: suggestion.latitude,
+        longitude: suggestion.longitude,
+      });
+      return;
+    }
+    // Goong: resolve the picked place id into a point.
+    onChange(address, null);
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/geocoding/place?id=${encodeURIComponent(suggestion.id)}`,
+      );
+      const body = (await response.json()) as { data: AddressPoint | null };
+      if (response.ok && body.data) onChange(address, body.data);
+      else setResolveFailed(true);
+    } catch {
+      setResolveFailed(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const showList = open && suggestions.length > 0;
@@ -169,6 +195,7 @@ export function AddressAutocomplete({
         onChange={(event) => {
           // Any manual edit invalidates the picked point.
           setOtherWard(null);
+          setResolveFailed(false);
           onChange(event.target.value, null);
           setQuery(event.target.value);
         }}
@@ -188,7 +215,7 @@ export function AddressAutocomplete({
             );
           } else if (event.key === "Enter" && activeIndex >= 0) {
             event.preventDefault();
-            pick(suggestions[activeIndex]);
+            void pick(suggestions[activeIndex]);
           } else if (event.key === "Escape") {
             setOpen(false);
           }
@@ -212,7 +239,7 @@ export function AddressAutocomplete({
                 // before the click lands.
                 event.preventDefault();
                 if (blurTimer.current) window.clearTimeout(blurTimer.current);
-                pick(suggestion);
+                void pick(suggestion);
               }}
               className={cn(
                 "flex cursor-pointer items-start gap-2 rounded-[var(--fg-radius-sm)] px-2 py-2 text-body-sm text-text-primary hover:bg-bg-sunken",
@@ -229,7 +256,11 @@ export function AddressAutocomplete({
       <p
         className={cn(
           "mt-1.5 flex items-center gap-1.5 text-body-sm",
-          point ? "text-success" : "text-text-tertiary",
+          resolveFailed
+            ? "text-danger"
+            : point
+              ? "text-success"
+              : "text-text-tertiary",
         )}
         aria-live="polite"
       >
@@ -238,13 +269,15 @@ export function AddressAutocomplete({
         ) : point ? (
           <Check className="size-3.5" />
         ) : null}
-        {point
-          ? otherWard
-            ? t("addressOtherWard", { ward: otherWard })
-            : t("addressPinned")
-          : unavailable
-            ? t("addressSuggestUnavailable")
-            : t("addressSuggestHint")}
+        {resolveFailed
+          ? t("addressResolveFailed")
+          : point
+            ? otherWard
+              ? t("addressOtherWard", { ward: otherWard })
+              : t("addressPinned")
+            : unavailable
+              ? t("addressSuggestUnavailable")
+              : t("addressSuggestHint")}
       </p>
     </div>
   );

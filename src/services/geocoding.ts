@@ -1,24 +1,31 @@
 import { createHash } from "node:crypto";
 
+import {
+  goongForwardGeocode,
+  resolveGoongPlace,
+  suggestGoongAddresses,
+} from "@/services/goong";
+import {
+  joinAddressParts,
+  MIN_SUGGEST_QUERY_LENGTH,
+  type AddressSuggestion,
+  type GeocodeAddress,
+  type GeocodeFailureReason,
+  type GeocodeResult,
+  type SuggestResult,
+} from "@/services/geocoding-types";
+
+export {
+  MIN_SUGGEST_QUERY_LENGTH,
+  type AddressSuggestion,
+  type GeocodeAddress,
+  type GeocodeFailureReason,
+  type GeocodeResult,
+  type SuggestResult,
+};
+
 const MAPTILER_GEOCODING_URL = "https://api.maptiler.com/geocoding";
 const DEFAULT_TIMEOUT_MS = 5_000;
-
-export interface GeocodeAddress {
-  address: string;
-  ward: string;
-  province: string;
-}
-
-export type GeocodeFailureReason =
-  | "not_configured"
-  | "timeout"
-  | "upstream_error"
-  | "not_found"
-  | "invalid_response";
-
-export type GeocodeResult =
-  | { success: true; latitude: number; longitude: number }
-  | { success: false; reason: GeocodeFailureReason };
 
 interface MapTilerFeatureCollection {
   features?: Array<{
@@ -58,7 +65,7 @@ function isCoordinatePair(value: unknown): value is [number, number] {
   );
 }
 
-export async function forwardGeocode(
+export async function maptilerForwardGeocode(
   input: GeocodeAddress,
   options: ForwardGeocodeOptions = {},
 ): Promise<GeocodeResult> {
@@ -113,18 +120,6 @@ export async function forwardGeocode(
   }
 }
 
-export interface AddressSuggestion {
-  id: string;
-  label: string; // MapTiler `place_name`, e.g. "12 Nguyễn Huệ, Phường Sài Gòn, Hồ Chí Minh, Việt Nam"
-  latitude: number;
-  longitude: number;
-}
-
-export type SuggestResult =
-  | { success: true; suggestions: AddressSuggestion[] }
-  | { success: false; reason: GeocodeFailureReason };
-
-export const MIN_SUGGEST_QUERY_LENGTH = 3;
 // MapTiler answers an address query with administrative areas too ("Phường
 // Thủ Đức"). Picking one would store a ward centroid as the provider's
 // address, so only street-level and finer results are offered.
@@ -146,7 +141,7 @@ const MAX_SUGGESTIONS = 5;
  * province names already chosen in the form) is appended to the query so
  * suggestions stay in the right place; results are limited to Vietnam.
  */
-export async function suggestAddresses(
+async function suggestMapTilerAddresses(
   query: string,
   context: { ward?: string; province?: string },
   options: ForwardGeocodeOptions = {},
@@ -155,15 +150,7 @@ export async function suggestAddresses(
   if (!apiKey) return { success: false, reason: "not_configured" };
 
   const trimmedQuery = query.trim();
-  if (trimmedQuery.length < MIN_SUGGEST_QUERY_LENGTH) {
-    return { success: true, suggestions: [] };
-  }
-
-  // Build the search text like forwardGeocode does
-  const parts = [trimmedQuery, context.ward, context.province]
-    .map((part) => part?.trim())
-    .filter(Boolean);
-  const text = parts.join(", ");
+  const text = joinAddressParts([trimmedQuery, context.ward, context.province]);
 
   const url = new URL(
     `${MAPTILER_GEOCODING_URL}/${encodeURIComponent(text)}.json`,
@@ -236,4 +223,52 @@ export async function suggestAddresses(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/**
+ * Which provider answers address lookups. Goong (a Vietnamese provider)
+ * resolves Vietnamese addresses down to house numbers and alleys, which
+ * MapTiler does not, so it wins whenever its key is configured. MapTiler
+ * stays as the fallback and keeps serving the map tiles either way.
+ */
+function activeProvider(): "goong" | "maptiler" {
+  const configured = process.env.GEOCODING_PROVIDER?.trim().toLowerCase();
+  if (configured === "goong" || configured === "maptiler") return configured;
+  return process.env.GOONG_API_KEY ? "goong" : "maptiler";
+}
+
+export async function forwardGeocode(
+  input: GeocodeAddress,
+  options: ForwardGeocodeOptions = {},
+): Promise<GeocodeResult> {
+  return activeProvider() === "goong"
+    ? goongForwardGeocode(input, options)
+    : maptilerForwardGeocode(input, options);
+}
+
+export async function suggestAddresses(
+  query: string,
+  context: { ward?: string; province?: string },
+  options: ForwardGeocodeOptions = {},
+): Promise<SuggestResult> {
+  if (query.trim().length < MIN_SUGGEST_QUERY_LENGTH) {
+    return { success: true, suggestions: [] };
+  }
+  return activeProvider() === "goong"
+    ? suggestGoongAddresses(query, context, options)
+    : suggestMapTilerAddresses(query, context, options);
+}
+
+/**
+ * Coordinates for a suggestion whose autocomplete entry had none (Goong).
+ * MapTiler suggestions already carry their point, so there is nothing to
+ * resolve there.
+ */
+export async function resolveSuggestion(
+  suggestionId: string,
+  options: ForwardGeocodeOptions = {},
+): Promise<GeocodeResult> {
+  return activeProvider() === "goong"
+    ? resolveGoongPlace(suggestionId, options)
+    : { success: false, reason: "not_found" };
 }

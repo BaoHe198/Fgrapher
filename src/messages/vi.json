@@ -2102,7 +2102,8 @@
         "addressSuggestUnavailable": "Gợi ý địa chỉ chưa được bật. Hệ thống sẽ tự tìm vị trí khi bạn lưu.",
         "addressPinned": "Đã xác định vị trí chính xác trên bản đồ. Bấm Lưu để cập nhật.",
         "fmapNotVisible": "Hồ sơ của bạn chưa hiện trên Fmap vì chưa xác định được vị trí. Hãy chọn địa chỉ trong danh sách gợi ý rồi bấm Lưu.",
-        "addressOtherWard": "Đã ghim vị trí, nhưng địa chỉ này thuộc {ward}. Hãy kiểm tra lại ô Phường/Xã ở trên."
+        "addressOtherWard": "Đã ghim vị trí, nhưng địa chỉ này thuộc {ward}. Hãy kiểm tra lại ô Phường/Xã ở trên.",
+        "addressResolveFailed": "Không lấy được tọa độ của địa chỉ này. Hãy chọn gợi ý khác hoặc bấm Lưu để hệ thống tự tìm."
       },
       "editor": {
         "liveStatus": "Đang hoạt động — hiển thị trong tìm kiếm",

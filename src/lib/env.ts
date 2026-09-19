@@ -150,6 +150,11 @@ const serverSchema = z.object({
   // MapTiler forward geocoding for fixed provider service locations.
   // No-ops gracefully without it, same as other integrations above.
   MAPTILER_API_KEY: z.string().optional(),
+  // Goong (goong.io) — Vietnamese address autocomplete/geocoding. When set
+  // it takes over address lookups from MapTiler, which keeps serving map
+  // tiles. GEOCODING_PROVIDER forces one of them for testing.
+  GOONG_API_KEY: z.string().optional(),
+  GEOCODING_PROVIDER: z.enum(["maptiler", "goong"]).optional(),
 });
 
 const publicSchema = z.object({

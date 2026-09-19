@@ -2102,7 +2102,8 @@
         "addressSuggestUnavailable": "Address suggestions aren't enabled yet. We'll locate the address when you save.",
         "addressPinned": "Exact map position set. Save to update it.",
         "fmapNotVisible": "Your profile isn't on Fmap yet because its location couldn't be determined. Pick your address from the suggestions, then save.",
-        "addressOtherWard": "Position set, but this address is in {ward}. Check the Ward field above."
+        "addressOtherWard": "Position set, but this address is in {ward}. Check the Ward field above.",
+        "addressResolveFailed": "Couldn't get coordinates for that address. Pick another suggestion, or save and we'll locate it."
       },
       "editor": {
         "liveStatus": "Live — visible in search",
