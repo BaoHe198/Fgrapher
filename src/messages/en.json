@@ -23,6 +23,7 @@
   },
   "nav": {
     "browse": "Search",
+    "fmap": "Fmap",
     "studios": "Studios",
     "shop": "Shop",
     "createRequest": "Create request",
@@ -38,6 +39,76 @@
     "signout": "Sign out",
     "messages": "Messages",
     "messagesAria": "Open messages"
+  },
+  "fmap": {
+    "title": "Fmap — find providers by area and availability",
+    "subtitle": "Choose a time and map area to find providers who are available.",
+    "searchArea": "Search this area",
+    "truncated": "Zoom in to see more results",
+    "context": "Available {date}, {start}–{end}",
+    "marker": {
+      "from": "From {price}",
+      "contact": "Contact"
+    },
+    "filters": {
+      "summary": "{date} · {start}–{end} · {role}",
+      "myLocation": "My location",
+      "province": "Province/City",
+      "chooseProvince": "Choose a province",
+      "provinceEmpty": "No providers on Fmap in this province yet.",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "invalidTime": "End time must be after start time",
+      "role": "Provider",
+      "category": "Category",
+      "allCategories": "All categories",
+      "search": "Search Fmap",
+      "searching": "Searching...",
+      "mapHint": "You can also pan or zoom the map, then choose “Search this area”.",
+      "ward": "Ward",
+      "allWards": "All wards",
+      "wardNeedsProvince": "Choose a province first",
+      "areaTitle": "Area",
+      "whenTitle": "Time & service",
+      "wardEmpty": "No providers on Fmap in this ward yet.",
+      "wardOption": "{name} ({count})",
+      "noWardsWithProviders": "No wards with providers yet"
+    },
+    "empty": {
+      "title": "No matching providers yet",
+      "body": "Try another time, service, or a wider search area.",
+      "changeTime": "Change time",
+      "expandArea": "Expand search area",
+      "changeService": "Change service",
+      "clearWard": "Clear ward filter"
+    },
+    "preview": {
+      "close": "Close provider preview",
+      "loading": "Loading provider...",
+      "verified": "Verified",
+      "newProvider": "New",
+      "startingPrice": "Starting at",
+      "contact": "Contact",
+      "available": "Available at your selected time",
+      "viewProfile": "View profile",
+      "book": "Book",
+      "error": "Couldn't load this provider.",
+      "retry": "Try again",
+      "hours": "{hours} h"
+    },
+    "errors": {
+      "search": "Fmap results could not be loaded. Please try again.",
+      "geolocationUnavailable": "This browser does not support location.",
+      "geolocationDenied": "Location was unavailable. You can still pan the map to choose an area.",
+      "tooLarge": "This area is too large. Zoom in on the map and search again.",
+      "timeRange": "The time window must be between 30 minutes and 12 hours.",
+      "missingDate": "Please pick a date."
+    },
+    "cluster": {
+      "title": "{count} providers at this spot",
+      "close": "Close list"
+    }
   },
   "role": {
     "PHOTOGRAPHER": "Photographer",
@@ -2026,7 +2097,13 @@
         "addressPlaceholder": "House number, street, village, or hamlet",
         "addressPrivacy": "Your detailed address stays private. Public profiles and search results show only the province and ward.",
         "requiredError": "Enter a province, ward, and detailed address.",
-        "saveFailed": "Couldn't save the profile. Please try again."
+        "saveFailed": "Couldn't save the profile. Please try again.",
+        "addressSuggestHint": "Type at least 3 characters and pick an address from the suggestions so your Fmap position is exact.",
+        "addressSuggestUnavailable": "Address suggestions aren't enabled yet. We'll locate the address when you save.",
+        "addressPinned": "Exact map position set. Save to update it.",
+        "fmapNotVisible": "Your profile isn't on Fmap yet because its location couldn't be determined. Pick your address from the suggestions, then save.",
+        "addressOtherWard": "Position set, but this address is in {ward}. Check the Ward field above.",
+        "addressResolveFailed": "Couldn't get coordinates for that address. Pick another suggestion, or save and we'll locate it."
       },
       "editor": {
         "liveStatus": "Live — visible in search",
@@ -2070,6 +2147,11 @@
           "privacyTitle": "Privacy",
           "hideExactLocationLabel": "Show city only — hide exact location",
           "requireDepositLabel": "Require a deposit before sharing my contact details"
+        },
+        "privacySettings": {
+          "title": "Position on Fmap",
+          "hideExactLocationLabel": "Blur my position on Fmap (recommended)",
+          "hideExactLocationHelper": "When on, the map shows an approximate point a few hundred metres away instead of your exact address. Only turn off for a studio or shop open to the public."
         },
         "shopNameLabel": "Shop name",
         "servicesNeedSaveFirst": "Save your profile details (e.g. pick a specialty category) first, then come back here to add packages.",
@@ -2542,6 +2624,12 @@
       "backToBookings": "Back to bookings"
     },
     "booking": {
+      "fmapContext": {
+        "banner": "From Fmap: you searched {date}, {start}–{end}.",
+        "bannerShort": "You came from Fmap.",
+        "notesLine": "Preferred time window (from Fmap): {start}–{end}",
+        "notesCategory": "Category: {category}"
+      },
       "pageTitle": "Book a session — Fgrapher",
       "fallbackProviderName": "this provider",
       "shootTypeOptions": {
@@ -2634,6 +2722,7 @@
     "browse": {
       "pageTitle": "Browse artists — Fgrapher",
       "pageDescription": "Find and compare identity-verified photographers, videographers, make-up artists, and studios across Vietnam. Filter by province, budget, and rating.",
+      "viewOnMap": "View on map",
       "sortLabels": {
         "rating": "Top rated",
         "priceAsc": "Price: low to high",

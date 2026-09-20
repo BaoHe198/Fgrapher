@@ -60,3 +60,6 @@ dev.pid
 /playwright/.cache/
 e2e/visual/**/*-snapshots/*-actual.png
 e2e/visual/**/*-snapshots/*-diff.png
+
+# Copied from node_modules by scripts/copy-maplibre-worker.mjs (postinstall)
+/public/vendor/maplibre-gl/

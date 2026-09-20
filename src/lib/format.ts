@@ -40,6 +40,20 @@ export function formatDurationHours(minutes: number) {
   );
 }
 
+// "2026-03-05" — today's calendar date in Vietnam (optionally shifted by
+// whole days), in the yyyy-MM-dd shape date inputs and APIs exchange.
+// en-CA is used only because it formats as yyyy-MM-dd; the timezone is what
+// matters — a visitor's own clock could otherwise be a day off.
+export function vietnamDateKey(offsetDays = 0) {
+  const shifted = new Date(Date.now() + offsetDays * 24 * 60 * 60 * 1000);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: HCM_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(shifted);
+}
+
 // "05/03/2026"
 export function formatDate(value: Date | string | number) {
   return new Intl.DateTimeFormat("vi-VN", {

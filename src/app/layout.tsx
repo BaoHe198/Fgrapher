@@ -11,6 +11,7 @@ import { MessagingProvider } from "@/components/providers/messaging-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { EnvironmentBanner } from "@/components/layout/environment-banner";
 import { Toaster } from "@/components/ui/toast";
+import { auth } from "@/lib/auth";
 import "./globals.css";
 
 const fontBody = Plus_Jakarta_Sans({
@@ -57,6 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const session = await auth();
 
   return (
     <html
@@ -74,7 +76,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <AuthProvider>
+            <AuthProvider session={session}>
               <MessagingProvider>
                 <Toaster>{children}</Toaster>
               </MessagingProvider>

@@ -1,5 +1,5 @@
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
-import { SearchX } from "lucide-react";
+import { MapIcon, SearchX } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -10,11 +10,12 @@ import { MobileFilterSheet } from "@/components/browse/mobile-filter-sheet";
 import { ResultsPane } from "@/components/browse/results-pane";
 import { SearchInput } from "@/components/browse/search-input";
 import { WaitlistForm } from "@/components/browse/waitlist-form";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
 import { features } from "@/lib/features";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { searchProfiles, type SortOption } from "@/services/search";
+import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
 
 interface BrowsePageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -76,6 +77,20 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const roles = params.roles?.split(",").filter(Boolean) as Role[] | undefined;
   const categories = params.categories?.split(",").filter(Boolean) as
     ProfileCategory[] | undefined;
+
+  // Carry a single role/category over to the map view so switching views
+  // keeps the customer's context.
+  const fmapParams = new URLSearchParams();
+  const fmapRole = roles?.length === 1 ? roles[0] : undefined;
+  if (
+    fmapRole &&
+    (FMAP_PROVIDER_ROLES as readonly string[]).includes(fmapRole)
+  ) {
+    fmapParams.set("role", fmapRole);
+  }
+  if (categories?.length === 1) fmapParams.set("category", categories[0]);
+  const fmapHref = fmapParams.size > 0 ? `/fmap?${fmapParams}` : "/fmap";
+
   const sort = (params.sort as SortOption) ?? "rating";
   const page = params.page ? Number(params.page) : 1;
 
@@ -207,6 +222,17 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                <Link
+                  href={fmapHref}
+                  className={cn(
+                    buttonVariants({ variant: "secondary", size: "md" }),
+                    "shrink-0",
+                  )}
+                >
+                  <MapIcon className="size-4" />
+                  <span className="hidden sm:inline">{t("viewOnMap")}</span>
+                  <span className="sr-only sm:hidden">{t("viewOnMap")}</span>
+                </Link>
                 <SearchInput
                   className="w-full sm:w-64"
                   marketplaceEnabled={features.marketplaceEnabled}

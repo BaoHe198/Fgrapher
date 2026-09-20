@@ -23,6 +23,7 @@
   },
   "nav": {
     "browse": "Tìm kiếm",
+    "fmap": "Fmap",
     "studios": "Studio",
     "shop": "Cửa hàng",
     "createRequest": "Tạo yêu cầu",
@@ -38,6 +39,76 @@
     "signout": "Đăng xuất",
     "messages": "Tin nhắn",
     "messagesAria": "Mở tin nhắn"
+  },
+  "fmap": {
+    "title": "Fmap — tìm nhà cung cấp theo khu vực và lịch trống",
+    "subtitle": "Chọn thời gian và khu vực trên bản đồ để tìm nhà cung cấp đang sẵn lịch.",
+    "searchArea": "Tìm trong khu vực này",
+    "truncated": "Hãy phóng to bản đồ để xem thêm kết quả",
+    "context": "Rảnh {date}, {start}–{end}",
+    "marker": {
+      "from": "Từ {price}",
+      "contact": "Liên hệ"
+    },
+    "filters": {
+      "summary": "{date} · {start}–{end} · {role}",
+      "myLocation": "Vị trí của tôi",
+      "province": "Tỉnh/Thành",
+      "chooseProvince": "Chọn tỉnh/thành",
+      "provinceEmpty": "Tỉnh/thành này chưa có nhà cung cấp nào trên Fmap.",
+      "date": "Ngày",
+      "start": "Bắt đầu",
+      "end": "Kết thúc",
+      "invalidTime": "Giờ kết thúc phải sau giờ bắt đầu",
+      "role": "Nhà cung cấp",
+      "category": "Thể loại",
+      "allCategories": "Tất cả thể loại",
+      "search": "Tìm trên Fmap",
+      "searching": "Đang tìm...",
+      "mapHint": "Bạn cũng có thể kéo và thu phóng bản đồ, sau đó chọn “Tìm trong khu vực này”.",
+      "ward": "Phường/Xã",
+      "allWards": "Tất cả phường/xã",
+      "wardNeedsProvince": "Chọn tỉnh/thành trước",
+      "areaTitle": "Khu vực",
+      "whenTitle": "Thời gian & dịch vụ",
+      "wardEmpty": "Phường/xã này chưa có nhà cung cấp nào trên Fmap.",
+      "wardOption": "{name} ({count})",
+      "noWardsWithProviders": "Chưa có phường/xã nào có nhà cung cấp"
+    },
+    "empty": {
+      "title": "Chưa có nhà cung cấp phù hợp",
+      "body": "Hãy thử đổi thời gian, dịch vụ hoặc mở rộng khu vực tìm kiếm.",
+      "changeTime": "Đổi thời gian",
+      "expandArea": "Mở rộng khu vực",
+      "changeService": "Đổi dịch vụ",
+      "clearWard": "Bỏ lọc phường/xã"
+    },
+    "preview": {
+      "close": "Đóng thông tin nhà cung cấp",
+      "loading": "Đang tải thông tin...",
+      "verified": "Đã xác minh",
+      "newProvider": "Mới",
+      "startingPrice": "Giá từ",
+      "contact": "Liên hệ",
+      "available": "Đang sẵn lịch vào thời gian bạn chọn",
+      "viewProfile": "Xem hồ sơ",
+      "book": "Đặt lịch",
+      "error": "Không tải được thông tin nhà cung cấp.",
+      "retry": "Thử lại",
+      "hours": "{hours} giờ"
+    },
+    "errors": {
+      "search": "Không thể tải kết quả Fmap. Vui lòng thử lại.",
+      "geolocationUnavailable": "Trình duyệt này không hỗ trợ định vị.",
+      "geolocationDenied": "Không lấy được vị trí. Bạn vẫn có thể kéo bản đồ để chọn khu vực.",
+      "tooLarge": "Khu vực đang xem quá rộng. Hãy phóng to bản đồ rồi tìm lại.",
+      "timeRange": "Khung giờ phải dài từ 30 phút đến 12 tiếng.",
+      "missingDate": "Hãy chọn ngày."
+    },
+    "cluster": {
+      "title": "{count} nhà cung cấp ở cùng vị trí",
+      "close": "Đóng danh sách"
+    }
   },
   "role": {
     "PHOTOGRAPHER": "Nhiếp ảnh gia",
@@ -2026,7 +2097,13 @@
         "addressPlaceholder": "Số nhà, tên đường hoặc thôn/ấp",
         "addressPrivacy": "Địa chỉ chi tiết được lưu riêng tư. Trên hồ sơ và kết quả tìm kiếm chỉ hiển thị tỉnh/thành và phường/xã.",
         "requiredError": "Vui lòng nhập đủ tỉnh/thành, phường/xã và địa chỉ chi tiết.",
-        "saveFailed": "Không thể lưu hồ sơ, vui lòng thử lại."
+        "saveFailed": "Không thể lưu hồ sơ, vui lòng thử lại.",
+        "addressSuggestHint": "Gõ ít nhất 3 ký tự rồi chọn địa chỉ trong danh sách gợi ý để vị trí trên Fmap chính xác.",
+        "addressSuggestUnavailable": "Gợi ý địa chỉ chưa được bật. Hệ thống sẽ tự tìm vị trí khi bạn lưu.",
+        "addressPinned": "Đã xác định vị trí chính xác trên bản đồ. Bấm Lưu để cập nhật.",
+        "fmapNotVisible": "Hồ sơ của bạn chưa hiện trên Fmap vì chưa xác định được vị trí. Hãy chọn địa chỉ trong danh sách gợi ý rồi bấm Lưu.",
+        "addressOtherWard": "Đã ghim vị trí, nhưng địa chỉ này thuộc {ward}. Hãy kiểm tra lại ô Phường/Xã ở trên.",
+        "addressResolveFailed": "Không lấy được tọa độ của địa chỉ này. Hãy chọn gợi ý khác hoặc bấm Lưu để hệ thống tự tìm."
       },
       "editor": {
         "liveStatus": "Đang hoạt động — hiển thị trong tìm kiếm",
@@ -2070,6 +2147,11 @@
           "privacyTitle": "Quyền riêng tư",
           "hideExactLocationLabel": "Chỉ hiện thành phố — ẩn vị trí chính xác",
           "requireDepositLabel": "Yêu cầu đặt cọc trước khi chia sẻ thông tin liên hệ"
+        },
+        "privacySettings": {
+          "title": "Vị trí trên Fmap",
+          "hideExactLocationLabel": "Làm mờ vị trí của tôi trên Fmap (khuyến nghị)",
+          "hideExactLocationHelper": "Khi bật, bản đồ chỉ hiện vị trí gần đúng (lệch vài trăm mét) thay vì đúng địa chỉ của bạn. Chỉ nên tắt nếu đây là studio/cửa hàng mở cửa công khai."
         },
         "shopNameLabel": "Tên cửa hàng",
         "servicesNeedSaveFirst": "Lưu thông tin hồ sơ (vd: chọn danh mục sở trường) rồi quay lại đây để thêm gói dịch vụ.",
@@ -2542,6 +2624,12 @@
       "backToBookings": "Về danh sách lịch đặt"
     },
     "booking": {
+      "fmapContext": {
+        "banner": "Từ Fmap: bạn tìm lịch ngày {date}, {start}–{end}.",
+        "bannerShort": "Bạn đến từ Fmap.",
+        "notesLine": "Khung giờ mong muốn (từ Fmap): {start}–{end}",
+        "notesCategory": "Thể loại: {category}"
+      },
       "pageTitle": "Đặt lịch chụp — Fgrapher",
       "fallbackProviderName": "nhà cung cấp này",
       "shootTypeOptions": {
@@ -2634,6 +2722,7 @@
     "browse": {
       "pageTitle": "Khám phá nghệ sĩ — Fgrapher",
       "pageDescription": "Tìm và so sánh nhiếp ảnh gia, quay phim, chuyên viên trang điểm, studio đã xác minh danh tính khắp Việt Nam. Lọc theo tỉnh/thành, ngân sách, đánh giá.",
+      "viewOnMap": "Xem trên bản đồ",
       "sortLabels": {
         "rating": "Đánh giá cao nhất",
         "priceAsc": "Giá: thấp đến cao",

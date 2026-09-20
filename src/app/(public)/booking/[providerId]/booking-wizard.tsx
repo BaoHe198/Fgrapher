@@ -25,6 +25,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  formatDate,
   formatDateLong,
   formatDayMonth,
   formatDurationHours,
@@ -143,6 +144,27 @@ export function BookingWizard({
 }: BookingWizardProps) {
   const t = useTranslations("publicPages.booking");
   const searchParams = useSearchParams();
+  const categoryT = useTranslations("profileCategory");
+  // Search context carried over from /fmap. Bookings only store a start
+  // time, so the requested end and category travel as a banner + note.
+  const fmapContext = useMemo(() => {
+    if (searchParams.get("source") !== "fmap") return null;
+    const pick = (key: string, pattern: RegExp) => {
+      const value = searchParams.get(key);
+      return value && pattern.test(value) ? value : null;
+    };
+    const time = /^([01]\d|2[0-3]):[0-5]\d$/;
+    return {
+      date: pick("date", /^\d{4}-\d{2}-\d{2}$/),
+      start: pick("time", time),
+      end: pick("end", time),
+      category: pick("category", /^[A-Z_]{2,40}$/),
+    };
+  }, [searchParams]);
+  const fmapCategoryLabel =
+    fmapContext?.category && categoryT.has(fmapContext.category)
+      ? categoryT(fmapContext.category)
+      : null;
   const storageKey = `booking-draft-${providerId}`;
 
   const [step, setStep] = useState(0);
@@ -196,7 +218,27 @@ export function BookingWizard({
 
     startTransition(() => {
       if (hasUrlPrefill) {
-        setDraft((prev) => ({ ...prev, ...fromUrl }));
+        const fmapNotes =
+          fmapContext?.start && fmapContext.end
+            ? [
+                t("fmapContext.notesLine", {
+                  start: fmapContext.start,
+                  end: fmapContext.end,
+                }),
+                fmapCategoryLabel
+                  ? t("fmapContext.notesCategory", {
+                      category: fmapCategoryLabel,
+                    })
+                  : null,
+              ]
+                .filter(Boolean)
+                .join("\n")
+            : "";
+        setDraft((prev) => ({
+          ...prev,
+          ...fromUrl,
+          notes: prev.notes || fmapNotes,
+        }));
       } else if (saved) {
         // Merged over a fresh draft, not used as-is: a draft saved before a
         // field existed (referenceMedia, added later) would otherwise come
@@ -390,6 +432,18 @@ export function BookingWizard({
           -only one still gives the page an actual name. */}
       <h1 className="sr-only">{t("pageTitle")}</h1>
       <ProgressIndicator step={step} />
+      {fmapContext ? (
+        <div className="mb-4 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-sunken px-4 py-3 text-body-sm text-text-secondary">
+          {fmapContext.date && fmapContext.start && fmapContext.end
+            ? t("fmapContext.banner", {
+                date: formatDate(`${fmapContext.date}T00:00:00.000Z`),
+                start: fmapContext.start,
+                end: fmapContext.end,
+              })
+            : t("fmapContext.bannerShort")}
+          {fmapCategoryLabel ? ` · ${fmapCategoryLabel}` : null}
+        </div>
+      ) : null}
 
       <Card className="p-8">
         {step === 0 ? (
