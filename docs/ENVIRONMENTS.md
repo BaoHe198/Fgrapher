@@ -57,6 +57,29 @@ kiện kinh doanh, credential và quy trình vận hành tương ứng.
 Tiền tố `NEXT_PUBLIC_` nghĩa là giá trị có thể được gửi xuống trình duyệt. Không
 bao giờ đặt mật khẩu, API secret hoặc khoá riêng vào biến có tiền tố này.
 
+### Chuỗi kết nối phải kèm `pgbouncer=true`
+
+Trên Vercel, `DATABASE_URL` dùng Transaction pooler của Supabase (cổng 6543).
+Kiểu kết nối này dùng chung một connection cho nhiều request, nên Prisma phải
+được báo trước, nếu không sẽ lỗi:
+
+```
+ERROR 42P05: prepared statement "s0" already exists
+```
+
+Lỗi xuất hiện đúng ở các truy vấn mới triển khai (20/09/2026, các API Fmap),
+còn API cũ vẫn chạy, nên rất dễ tưởng nhầm là lỗi code mới.
+
+Chuỗi đúng cho Vercel (cả Production và Preview):
+
+```
+postgresql://...:6543/postgres?pgbouncer=true&connection_limit=1
+```
+
+`DIRECT_URL` (Session pooler, cổng 5432) giữ nguyên, không thêm tham số này.
+Máy local chạy một tiến trình duy nhất nên không gặp lỗi — đừng dựa vào việc
+"local chạy được" để kết luận production ổn.
+
 ## 4. Hành vi khác nhau theo `APP_ENV`
 
 - Môi trường không phải production hiển thị thanh cảnh báo để tránh nhầm dữ liệu.
