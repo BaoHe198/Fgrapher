@@ -14,6 +14,7 @@ import {
   reviveDates,
 } from "@/lib/cache-tags";
 import {
+  SEARCHABLE_ROLES,
   FEATURED_RATED_PROVIDER_WHERE,
   PUBLIC_USER_FILTER,
 } from "@/services/search";
@@ -280,11 +281,14 @@ describe("featured strip ranks only eligible providers", () => {
       Array.isArray(shown.role.in) && shown.role.in.length > 0,
       "the searchable-role list must be a non-empty allow-list",
     );
-    // CAMERA_SHOP is dormant behind MARKETPLACE_ENABLED, which defaults off.
-    assert.ok(
-      !(shown.role.in as readonly string[]).includes("CAMERA_SHOP"),
-      "a role that cannot appear in search must not be able to win a featured slot",
-    );
+    // The featured strip must use the same allow-list /browse does — a role
+    // that can't appear in search can't win a featured slot either. The
+    // shop roles are behind MARKETPLACE_ENABLED, so this follows the flag
+    // rather than assuming it is off (it is on since the marketplace
+    // reopened, 21/09/2026).
+    const featured = new Set(shown.role.in as readonly string[]);
+    const searchable = new Set(SEARCHABLE_ROLES as readonly string[]);
+    assert.deepEqual(featured, searchable);
   });
 
   it("review.groupBy applies that filter before `take`, not after", () => {

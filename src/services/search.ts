@@ -23,7 +23,9 @@ import {
 // role that's dormant behind that flag (see CLAUDE.md's MVP scope).
 // Computed once at module load, same pattern already used client-side
 // in hero-search.tsx/filter-sidebar.tsx.
-const SEARCHABLE_ROLES = features.marketplaceEnabled
+// Exported so tests can assert the featured strip uses this same list
+// rather than hardcoding which roles are dormant.
+export const SEARCHABLE_ROLES = features.marketplaceEnabled
   ? PAID_ROLES
   : PAID_ROLES.filter((role) => role !== "CAMERA_SHOP");
 
