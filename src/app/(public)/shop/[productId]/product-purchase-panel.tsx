@@ -11,13 +11,15 @@ import { Card } from "@/components/ui/card";
 import { DateField } from "@/components/ui/date-field";
 import { toast } from "@/components/ui/toast";
 import { calculateRentalDays } from "@/lib/pricing";
+import { useTranslations } from "next-intl";
+
 import { formatCurrency } from "@/lib/utils";
 
-const CONDITION_LABEL: Record<ProductCondition, string> = {
-  NEW: "New",
-  LIKE_NEW: "Like new",
-  GOOD: "Good",
-  FAIR: "Fair",
+const CONDITION_KEY: Record<ProductCondition, string> = {
+  NEW: "conditionNew",
+  LIKE_NEW: "conditionLikeNew",
+  GOOD: "conditionGood",
+  FAIR: "conditionFair",
 };
 
 interface Product {
@@ -48,6 +50,7 @@ export function ProductPurchasePanel({
   const [mode, setMode] = useState<"SALE" | "RENT">(
     product.type === "RENT" ? "RENT" : "SALE",
   );
+  const t = useTranslations("publicPages.productDetail");
   const [quantity, setQuantity] = useState(1);
   const [rentalStart, setRentalStart] = useState("");
   const [rentalEnd, setRentalEnd] = useState("");
@@ -68,7 +71,7 @@ export function ProductPurchasePanel({
   const addToCart = async (redirectToCheckout: boolean) => {
     setError(null);
     if (mode === "RENT" && (!rentalStart || !rentalEnd || rentalDays <= 0)) {
-      setError("Pick a valid pickup and return date");
+      setError(t("invalidDates"));
       return;
     }
 
@@ -88,14 +91,14 @@ export function ProductPurchasePanel({
     setIsSubmitting(false);
 
     if (!res.ok) {
-      setError(body.message ?? "Couldn't add to cart");
+      setError(body.message ?? t("addFailed"));
       return;
     }
 
     if (redirectToCheckout) {
       router.push("/cart");
     } else {
-      toast.add({ title: "Added to cart", type: "success" });
+      toast.add({ title: t("addedToCart"), type: "success" });
     }
   };
 
@@ -103,16 +106,16 @@ export function ProductPurchasePanel({
     <Card className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
         {product.type !== "RENT" ? (
-          <Badge variant="neutral">For sale</Badge>
+          <Badge variant="neutral">{t("forSale")}</Badge>
         ) : null}
         {product.type !== "SALE" ? (
-          <Badge variant="accent">Rental</Badge>
+          <Badge variant="accent">{t("rental")}</Badge>
         ) : null}
       </div>
 
       <h1 className="text-display-sm text-text-primary">{product.name}</h1>
       <Badge variant="neutral" className="w-fit">
-        {CONDITION_LABEL[product.condition]}
+        {t(CONDITION_KEY[product.condition])}
       </Badge>
 
       {product.type === "BOTH" ? (
@@ -128,7 +131,7 @@ export function ProductPurchasePanel({
                   : "text-text-secondary"
               }`}
             >
-              {m === "SALE" ? "Buy" : "Rent"}
+              {m === "SALE" ? t("buy") : t("rent")}
             </button>
           ))}
         </div>
@@ -146,7 +149,7 @@ export function ProductPurchasePanel({
             </Badge>
           ) : (
             <Badge variant="destructive" className="w-fit">
-              Out of stock
+              {t("outOfStock")}
             </Badge>
           )}
 
@@ -171,7 +174,7 @@ export function ProductPurchasePanel({
           </div>
 
           <div className="flex justify-between text-body-md">
-            <span className="text-text-secondary">Total</span>
+            <span className="text-text-secondary">{t("total")}</span>
             <span className="font-semibold text-text-primary">
               {formatCurrency(saleTotal, product.currency)}
             </span>
@@ -187,7 +190,7 @@ export function ProductPurchasePanel({
             onClick={() => addToCart(false)}
           >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            Add to cart
+            {t("addToCart")}
           </Button>
           <Button
             variant="secondary"
@@ -195,7 +198,7 @@ export function ProductPurchasePanel({
             disabled={product.stock === 0 || isSubmitting}
             onClick={() => addToCart(true)}
           >
-            Buy now
+            {t("buyNow")}
           </Button>
         </>
       ) : (
@@ -207,13 +210,13 @@ export function ProductPurchasePanel({
 
           <div className="flex gap-2">
             <DateField
-              label="Pickup date"
+              label={t("pickupDate")}
               min={todayDateKey()}
               value={rentalStart}
               onChange={setRentalStart}
             />
             <DateField
-              label="Return date"
+              label={t("returnDate")}
               min={rentalStart || todayDateKey()}
               value={rentalEnd}
               onChange={setRentalEnd}
@@ -224,7 +227,7 @@ export function ProductPurchasePanel({
             <div className="flex flex-col gap-1.5 border-t border-border-subtle pt-3 text-body-sm">
               <div className="flex justify-between">
                 <span className="text-text-secondary">
-                  {rentalDays} days ×{" "}
+                  {t("rentalDays", { days: rentalDays })}{" "}
                   {formatCurrency(product.rentalPrice ?? 0, product.currency)}
                 </span>
                 <span className="text-text-primary">
@@ -234,7 +237,7 @@ export function ProductPurchasePanel({
               {product.depositAmount ? (
                 <div className="flex justify-between">
                   <span className="text-text-secondary">
-                    Deposit (refunded on return)
+                    {t("depositNote")}
                   </span>
                   <span className="text-text-primary">
                     {formatCurrency(product.depositAmount, product.currency)}
@@ -242,7 +245,7 @@ export function ProductPurchasePanel({
                 </div>
               ) : null}
               <div className="flex justify-between text-heading-sm font-bold! text-text-primary">
-                <span>Total</span>
+                <span>{t("total")}</span>
                 <span>
                   {formatCurrency(
                     rentalSubtotal + (product.depositAmount ?? 0),
@@ -263,23 +266,23 @@ export function ProductPurchasePanel({
             onClick={() => addToCart(false)}
           >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            Request rental
+            {t("requestRental")}
           </Button>
         </>
       )}
 
       <div className="flex flex-col gap-2 border-t border-border-subtle pt-3 text-body-sm text-text-secondary">
         <span className="flex items-center gap-2">
-          <Shield className="size-4" /> Buyer protection
+          <Shield className="size-4" /> {t("paymentByShop")}
         </span>
         <span className="flex items-center gap-2">
           <Truck className="size-4" />
           {shopLocation
-            ? `Ships from ${shopLocation}`
-            : "Shipping or pickup available"}
+            ? t("shipsFrom", { location: shopLocation })
+            : t("shippingOrPickup")}
         </span>
         <span className="flex items-center gap-2">
-          <RotateCcw className="size-4" /> 7-day return policy
+          <RotateCcw className="size-4" /> {t("returnPolicyByShop")}
         </span>
       </div>
     </Card>

@@ -1940,7 +1940,14 @@
         "keepOrder": "Keep order"
       },
       "deliveryFee": "Delivery fee",
-      "pickupAddress": "Collection address"
+      "pickupAddress": "Collection address",
+      "reviewTitle": "Rate what you received",
+      "reviewPrompt": "How was {name}?",
+      "ratingLabel": "Rating",
+      "commentLabel": "Comment (optional)",
+      "reviewSubmit": "Post review",
+      "reviewSubmitted": "Thanks for your review",
+      "reviewFailed": "Could not post the review"
     }
   },
   "dashboardSettings": {
@@ -3498,7 +3505,11 @@
       "conditionNew": "New",
       "conditionLikeNew": "Like new",
       "conditionGood": "Good",
-      "conditionFair": "Fair"
+      "conditionFair": "Fair",
+      "reviewsTitle": "Product reviews",
+      "noReviews": "No reviews yet",
+      "ratingSummary": "{average} · {count} reviews",
+      "shopReply": "Shop replied:"
     }
   },
   "sharedComponents": {

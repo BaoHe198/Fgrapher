@@ -17,6 +17,7 @@ import {
 } from "@/lib/email";
 import { createOrderCheckoutSession, refundPayment } from "@/lib/stripe";
 import { notify } from "@/services/notification";
+import { pendingReviewsForOrder } from "@/services/product-reviews";
 
 const PAGE_SIZE = 20;
 
@@ -492,7 +493,14 @@ export async function getOrderDetail(orderId: string, userId: string) {
       ? await shopPickupAddress(order.shopId)
       : null;
 
-  return { ...order, pickupAddress };
+  // Which items this customer may still review — only for the customer;
+  // the shop sees its own orders here too.
+  const reviewableItems =
+    order.customerId === userId
+      ? await pendingReviewsForOrder(order.id, userId)
+      : [];
+
+  return { ...order, pickupAddress, reviewableItems };
 }
 
 async function shopPickupAddress(shopId: string) {

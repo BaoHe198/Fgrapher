@@ -12,6 +12,10 @@ import { StarRating } from "@/components/ui/star-rating";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
 import { getProductDetail } from "@/services/marketplace";
+import {
+  getProductRating,
+  listProductReviews,
+} from "@/services/product-reviews";
 
 import { ProductGallery } from "./product-gallery";
 import { ProductPurchasePanel } from "./product-purchase-panel";
@@ -77,6 +81,11 @@ export default async function ProductDetailPage({
     },
   };
 
+  const [rating, reviews] = await Promise.all([
+    getProductRating(product.id),
+    listProductReviews(product.id),
+  ]);
+
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-8">
       <script {...jsonLdScriptProps(jsonLd)} />
@@ -95,6 +104,51 @@ export default async function ProductDetailPage({
               </p>
             </div>
           ) : null}
+
+          <div className="flex flex-col gap-3">
+            <h2 className="text-heading-lg text-text-primary">
+              {t("reviewsTitle")}
+            </h2>
+            {reviews.length === 0 ? (
+              <p className="text-body-md text-text-secondary">
+                {t("noReviews")}
+              </p>
+            ) : (
+              <>
+                <StarRating
+                  rating={rating.average.toFixed(1)}
+                  reviews={rating.count}
+                />
+                <div className="flex flex-col gap-3">
+                  {reviews.map((review) => (
+                    <Card key={review.id} className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-body-md font-semibold! text-text-primary">
+                          {review.reviewer.firstName ??
+                            review.reviewer.name ??
+                            ""}
+                        </span>
+                        <StarRating
+                          rating={String(review.rating)}
+                          reviews={0}
+                        />
+                      </div>
+                      {review.content ? (
+                        <p className="whitespace-pre-wrap text-body-md text-text-secondary">
+                          {review.content}
+                        </p>
+                      ) : null}
+                      {review.response ? (
+                        <p className="text-body-sm text-text-tertiary">
+                          {t("shopReply")} {review.response}
+                        </p>
+                      ) : null}
+                    </Card>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
 
           <Card className="flex flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">

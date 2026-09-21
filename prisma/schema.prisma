@@ -94,6 +94,8 @@ model User {
   bookingsAsProvider       Booking[]                 @relation("provider")
   reviews                  Review[]                  @relation("reviewer")
   receivedReviews          Review[]                  @relation("reviewed")
+  productReviews           ProductReview[]           @relation("productReviewer")
+  receivedProductReviews   ProductReview[]           @relation("productReviewed")
   products                 Product[]
   orders                   Order[]
   shopOrders               Order[]                   @relation("shopOrders")
@@ -1219,6 +1221,7 @@ model Product {
   images     ProductImage[]
   orderItems OrderItem[]
   cartItems  CartItem[]
+  reviews    ProductReview[]
 
   @@index([userId, isActive])
   @@index([category])
@@ -1308,6 +1311,7 @@ model Order {
   customer User        @relation(fields: [customerId], references: [id])
   shop     User        @relation("shopOrders", fields: [shopId], references: [id])
   items    OrderItem[]
+  reviews  ProductReview[]
 
   @@index([customerId])
   @@index([shopId, status])
@@ -1478,6 +1482,41 @@ model AdminAction {
 // ============================================================================
 // REVIEWS
 // ============================================================================
+
+/// A review of one product from one order.
+///
+/// Deliberately a separate table from `Review`, which is bound to a
+/// `Booking` by a required unique key and whose service layer assumes a
+/// booking everywhere. Widening that model to mean two things would have
+/// touched every review query for the sake of sharing four columns. The
+/// two ratings also answer different questions — "was the shoot good?" vs
+/// "was the gear as described?" — so keeping a provider's booking rating
+/// and their shop rating apart is honest, not just convenient.
+model ProductReview {
+  id          String    @id @default(cuid())
+  orderId     String
+  productId   String
+  reviewerId  String
+  shopId      String
+  rating      Int // 1-5
+  content     String?   @db.Text
+  response    String?   @db.Text // the shop's reply
+  respondedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reviewer User    @relation("productReviewer", fields: [reviewerId], references: [id])
+  shop     User    @relation("productReviewed", fields: [shopId], references: [id])
+
+  /// One review per product per order: buying the same lens twice earns a
+  /// second review, reviewing the same order twice does not.
+  @@unique([orderId, productId])
+  @@index([productId, rating])
+  @@index([shopId])
+  @@map("product_reviews")
+}
 
 model Review {
   id          String    @id @default(cuid())

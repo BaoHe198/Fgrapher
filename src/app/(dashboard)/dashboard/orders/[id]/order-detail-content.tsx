@@ -8,7 +8,7 @@ import type {
   ProductImage,
   User,
 } from "@prisma/client";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 
@@ -37,6 +38,7 @@ type OrderDetail = Order & {
   // Only present once the shop has confirmed a collection order — see
   // getOrderDetail's PICKUP_ADDRESS_VISIBLE_IN.
   pickupAddress: string | null;
+  reviewableItems: { productId: string; name: string }[];
   items: (OrderItem & {
     product: Pick<Product, "name" | "type"> & {
       images: Pick<ProductImage, "url">[];
@@ -208,6 +210,23 @@ export function OrderDetailContent() {
               </div>
             ))}
           </Card>
+
+          {order.reviewableItems.length > 0 ? (
+            <Card className="flex flex-col gap-3">
+              <span className="text-body-md font-semibold! text-text-primary">
+                {t("reviewTitle")}
+              </span>
+              {order.reviewableItems.map((item) => (
+                <ProductReviewForm
+                  key={item.productId}
+                  orderId={order.id}
+                  productId={item.productId}
+                  name={item.name}
+                  onDone={load}
+                />
+              ))}
+            </Card>
+          ) : null}
 
           {order.pickupAddress ? (
             <Card className="flex flex-col gap-1.5">
@@ -409,6 +428,87 @@ export function OrderDetailContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+/**
+ * One product's review form. Kept inline rather than in its own file: it is
+ * only ever rendered here, and it is the order screen that knows which items
+ * are eligible (services/product-reviews.ts decides that server-side).
+ */
+function ProductReviewForm({
+  orderId,
+  productId,
+  name,
+  onDone,
+}: {
+  orderId: string;
+  productId: string;
+  name: string;
+  onDone: () => void;
+}) {
+  const t = useTranslations("dashboardCore.orderDetail");
+  const [rating, setRating] = useState(5);
+  const [content, setContent] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    setBusy(true);
+    setError(null);
+    const res = await fetch("/api/product-reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId,
+        productId,
+        rating,
+        content: content || undefined,
+      }),
+    });
+    const body = await res.json();
+    setBusy(false);
+    if (!res.ok) {
+      setError(body.message ?? t("reviewFailed"));
+      return;
+    }
+    toast.add({ title: t("reviewSubmitted"), type: "success" });
+    onDone();
+  };
+
+  return (
+    <div className="flex flex-col gap-2 rounded-[var(--fg-radius-sm)] border border-border-default p-3">
+      <span className="text-body-sm text-text-secondary">
+        {t("reviewPrompt", { name })}
+      </span>
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((value) => (
+          <button
+            key={value}
+            type="button"
+            aria-label={`${t("ratingLabel")} ${value}`}
+            onClick={() => setRating(value)}
+            className={
+              value <= rating ? "text-brand-primary" : "text-text-tertiary"
+            }
+          >
+            <Star className="size-5" />
+          </button>
+        ))}
+      </div>
+      <Textarea
+        aria-label={t("commentLabel")}
+        placeholder={t("commentLabel")}
+        rows={3}
+        value={content}
+        onChange={(event) => setContent(event.target.value)}
+      />
+      {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+      <Button variant="accent" size="sm" disabled={busy} onClick={submit}>
+        {busy ? <Loader2 className="size-4 animate-spin" /> : null}
+        {t("reviewSubmit")}
+      </Button>
     </div>
   );
 }

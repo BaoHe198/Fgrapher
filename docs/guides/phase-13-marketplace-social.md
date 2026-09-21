@@ -149,6 +149,17 @@ migration đánh dấu là đã duyệt để không làm trắng các shop đan
 
 ### 13A.6 Hoàn thiện trải nghiệm
 
+**Đã xong 21/09/2026**: lọc theo tỉnh/thành của người bán; toàn bộ trang Chợ,
+trang sản phẩm và panel mua hàng đã chuyển sang tiếng Việt (trước đó hardcode
+tiếng Anh); **đánh giá sản phẩm** (bảng `ProductReview` riêng, đánh giá được
+sau khi *giao xong* với đơn mua và sau khi *trả đồ* với đơn thuê, mỗi sản phẩm
+một lần trên mỗi đơn); **nhắc trả đồ** trước hạn một ngày bằng cron. Trang
+riêng của shop dùng luôn hồ sơ provider sẵn có (tab Thiết bị).
+
+Đồng thời sửa một chỗ nói sai: panel mua hàng trước đây ghi "Buyer protection"
+và "7-day return policy" — nền tảng không có hai thứ đó, shop tự thu tiền và
+tự quy định đổi trả.
+
 - Trang Chợ: tìm theo tỉnh/thành, phường/xã, thể loại, khoảng giá, cho thuê/bán.
 - Trang của từng shop (gộp với hồ sơ provider sẵn có).
 - Đánh giá sau khi trả đồ, dùng lại hệ thống đánh giá của booking.

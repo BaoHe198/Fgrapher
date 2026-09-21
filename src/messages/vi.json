@@ -1940,7 +1940,14 @@
         "keepOrder": "Giữ đơn hàng"
       },
       "deliveryFee": "Phí giao hàng",
-      "pickupAddress": "Địa chỉ nhận hàng tại cửa hàng"
+      "pickupAddress": "Địa chỉ nhận hàng tại cửa hàng",
+      "reviewTitle": "Đánh giá sản phẩm",
+      "reviewPrompt": "Bạn thấy {name} thế nào?",
+      "ratingLabel": "Số sao",
+      "commentLabel": "Nhận xét (không bắt buộc)",
+      "reviewSubmit": "Gửi đánh giá",
+      "reviewSubmitted": "Cảm ơn bạn đã đánh giá",
+      "reviewFailed": "Không gửi được đánh giá"
     }
   },
   "dashboardSettings": {
@@ -3498,7 +3505,11 @@
       "conditionNew": "Mới",
       "conditionLikeNew": "Như mới",
       "conditionGood": "Tốt",
-      "conditionFair": "Khá"
+      "conditionFair": "Khá",
+      "reviewsTitle": "Đánh giá sản phẩm",
+      "noReviews": "Chưa có đánh giá nào",
+      "ratingSummary": "{average} · {count} đánh giá",
+      "shopReply": "Shop phản hồi:"
     }
   },
   "sharedComponents": {
