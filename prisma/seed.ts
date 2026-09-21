@@ -137,6 +137,23 @@ const STUDIO_SERVICES: ServiceSeed[] = [
   },
 ];
 
+const COSTUME_SERVICES: ServiceSeed[] = [
+  {
+    name: "Thuê áo dài 1 ngày",
+    description:
+      "Áo dài truyền thống, kèm phụ kiện cơ bản. Nhận và trả tại shop.",
+    duration: 480,
+    price: 500_000,
+  },
+  {
+    name: "Thuê váy cưới 2 ngày",
+    description:
+      "Váy cưới dáng công chúa hoặc đuôi cá, gồm chỉnh sửa vừa người.",
+    duration: 960,
+    price: 2_500_000,
+  },
+];
+
 const USERS: UserSeed[] = [
   {
     email: "photographer@test.com",
@@ -275,6 +292,28 @@ const USERS: UserSeed[] = [
         shoeSize: "39",
         experienceLevel: "EXPERIENCED",
         travelWilling: true,
+      },
+    ],
+  },
+  {
+    email: "costume@test.com",
+    location: "Phường Tân Định, Thành phố Hồ Chí Minh",
+    wardName: "Phường Tân Định",
+    username: "aodaithanhtam",
+    firstName: "Thanh Tâm",
+    lastName: "Lê",
+    roles: ["COSTUME_SHOP", "CUSTOMER"],
+    dateOfBirth: "1990-11-02",
+    profiles: [
+      {
+        role: "COSTUME_SHOP",
+        displayName: "Thanh Tâm Costume",
+        description:
+          "Shop cho thuê áo dài, váy cưới và trang phục dạ hội tại Thành phố Hồ Chí Minh. Nhận đặt lịch thử đồ và giao tận nơi trong nội thành.",
+        categories: ["AO_DAI", "WEDDING_DRESS", "EVENING_GOWN"],
+        priceMin: 500_000,
+        priceMax: 3_500_000,
+        services: COSTUME_SERVICES,
       },
     ],
   },

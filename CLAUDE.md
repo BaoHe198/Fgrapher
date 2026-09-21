@@ -22,7 +22,7 @@ thật. Đang thu hẹp phạm vi về MVP theo kế hoạch trong
 ### Trong phạm vi MVP
 
 Vai trò: `CUSTOMER`, `PHOTOGRAPHER`, `VIDEOGRAPHER`, `MAKEUP_ARTIST`,
-`MODEL`, `STUDIO`, `ADMIN`.
+`MODEL`, `STUDIO`, `COSTUME_SHOP`, `ADMIN`.
 Tính năng: hồ sơ + portfolio, tìm kiếm toàn quốc theo tỉnh, lịch + đặt
 lịch, nhắn tin, đánh giá, thông báo, quản trị, tuân thủ dữ liệu cá nhân.
 
@@ -173,6 +173,7 @@ post-launch. Roles determine UI visibility, permissions, and billing:
 | MAKEUP_ARTIST | Yes (monthly) | Yes        | Receives bookings    | Portfolio + services    |
 | STUDIO        | Yes (monthly) | Yes        | Receives bookings    | Location + amenities    |
 | CAMERA_SHOP   | Yes (monthly) | Yes        | Sells/rents products | Shop + product listings |
+| COSTUME_SHOP  | Yes (monthly) | Yes        | Receives bookings    | Shop + rental packages  |
 | CUSTOMER      | No (free)     | No         | Books/purchases only | Minimal profile         |
 
 ### API conventions

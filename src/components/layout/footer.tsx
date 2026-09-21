@@ -11,6 +11,7 @@ const DISCOVER_ROLES = [
   "STUDIO",
   "CAMERA_SHOP",
   "MODEL",
+  "COSTUME_SHOP",
 ] as const;
 
 const PROVIDER_LINKS = [
