@@ -22,12 +22,16 @@
     }
   },
   "nav": {
-    "browse": "Tìm kiếm",
-    "fmap": "Fmap",
+    "browse": "Tìm kiếm F",
+    "fmap": "Bản đồ F",
     "studios": "Studio",
     "shop": "Cửa hàng",
-    "createRequest": "Tạo yêu cầu",
-    "browseRequests": "Danh sách yêu cầu",
+    "createRequest": "Tạo Booking",
+    "browseRequests": "Danh sách Booking",
+    "booking": "Đặt lịch F",
+    "market": "Chợ F",
+    "community": "Cộng đồng F",
+    "introduce": "Giới thiệu F",
     "providers": "Dành cho nhà cung cấp",
     "dashboard": "Bảng điều khiển",
     "signin": "Đăng nhập",
@@ -3572,8 +3576,8 @@
       "calendar": "Lịch làm việc",
       "reviews": "Đánh giá",
       "portfolio": "Portfolio",
-      "myRequests": "Yêu cầu của tôi",
-      "opportunities": "Yêu cầu phù hợp",
+      "myRequests": "Booking của tôi",
+      "opportunities": "Booking phù hợp",
       "myOffers": "Đề nghị đã gửi",
       "listings": "Tin đăng",
       "shopOrders": "Đơn hàng cửa hàng",
@@ -3588,7 +3592,8 @@
       "managePlan": "Quản lý gói",
       "openMenu": "Mở menu bảng điều khiển",
       "menuTitle": "Menu bảng điều khiển",
-      "menuDescription": "Điều hướng bảng điều khiển"
+      "menuDescription": "Điều hướng bảng điều khiển",
+      "createBooking": "Tạo Booking"
     },
     "suspendedAccountNotice": {
       "title": "Tài khoản của bạn đã bị tạm khóa",

@@ -43,22 +43,18 @@ const WIDE_BREAKPOINT = 1180;
 // are spliced out for logged-out visitors, same reasoning as hiding the
 // dashboard button itself — a link into /dashboard/* isn't useful to show
 // prominently to someone who isn't signed in.
+// Tạo Booking now lives only in the dashboard sidebar
 const NAV_LINKS = [
   { href: "/browse", labelKey: "browse" as const, alwaysVisible: true },
   { href: "/fmap", labelKey: "fmap" as const, alwaysVisible: true },
-  { href: "/shop", labelKey: "shop" as const, alwaysVisible: false },
-  {
-    href: "/requests/new",
-    labelKey: "createRequest" as const,
-    alwaysVisible: false,
-    authOnly: true,
-  },
   {
     href: "/requests",
-    labelKey: "browseRequests" as const,
-    alwaysVisible: false,
+    labelKey: "booking" as const,
+    alwaysVisible: true,
     authOnly: true,
   },
+  { href: "/shop", labelKey: "market" as const, alwaysVisible: false },
+  { href: "/about", labelKey: "introduce" as const, alwaysVisible: true },
 ];
 
 function subscribeResize(callback: () => void) {

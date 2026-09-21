@@ -22,12 +22,16 @@
     }
   },
   "nav": {
-    "browse": "Search",
+    "browse": "Ffinding",
     "fmap": "Fmap",
     "studios": "Studios",
     "shop": "Shop",
-    "createRequest": "Create request",
-    "browseRequests": "Browse requests",
+    "createRequest": "Create booking",
+    "browseRequests": "Booking list",
+    "booking": "FBooking",
+    "market": "Fmarket",
+    "community": "Fcommunity",
+    "introduce": "FIntroduce",
     "providers": "For providers",
     "dashboard": "Dashboard",
     "signin": "Sign in",
@@ -3572,8 +3576,8 @@
       "calendar": "Calendar",
       "reviews": "Reviews",
       "portfolio": "Portfolio",
-      "myRequests": "My requests",
-      "opportunities": "Matching requests",
+      "myRequests": "My bookings",
+      "opportunities": "Matching bookings",
       "myOffers": "Offers sent",
       "listings": "Listings",
       "shopOrders": "Shop orders",
@@ -3588,7 +3592,8 @@
       "managePlan": "Manage plan",
       "openMenu": "Open dashboard menu",
       "menuTitle": "Dashboard menu",
-      "menuDescription": "Dashboard navigation"
+      "menuDescription": "Dashboard navigation",
+      "createBooking": "Create booking"
     },
     "suspendedAccountNotice": {
       "title": "Your account has been suspended",

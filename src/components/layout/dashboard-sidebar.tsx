@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Package,
   PanelLeft,
+  Plus,
   Send,
   Settings,
   Shield,
@@ -89,6 +90,7 @@ export function DashboardSidebar({
           },
         ]
       : []),
+    { href: "/requests/new", label: t("createBooking"), icon: Plus },
     { href: "/dashboard/requests", label: t("myRequests"), icon: Send },
     ...(canReceiveBookings
       ? [
