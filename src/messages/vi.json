@@ -1795,7 +1795,8 @@
         "body": "Thêm vai trò Cửa hàng máy ảnh để bán hoặc cho thuê thiết bị trên Fgrapher.",
         "cta": "Thêm vai trò"
       },
-      "pageTitle": "Sản phẩm"
+      "pageTitle": "Sản phẩm",
+      "photoPending": "Ảnh đang chờ kiểm duyệt"
     },
     "home": {
       "greeting": {
@@ -3436,6 +3437,37 @@
             ]
           }
         ]
+      }
+    },
+    "shop": {
+      "heading": "Thiết bị quay chụp",
+      "count": "{count} tin · {sort}",
+      "emptyTitle": "Không tìm thấy thiết bị nào",
+      "emptyBody": "Thử bớt bộ lọc lại xem sao.",
+      "clearAll": "Xoá hết bộ lọc",
+      "prev": "Trang trước",
+      "next": "Xem thêm",
+      "filters": {
+        "sortNewest": "Mới nhất",
+        "sortPriceAsc": "Giá thấp đến cao",
+        "sortPriceDesc": "Giá cao đến thấp",
+        "type": "Hình thức",
+        "typeAll": "Tất cả",
+        "typeSale": "Bán",
+        "typeRent": "Cho thuê",
+        "category": "Thể loại",
+        "condition": "Tình trạng",
+        "conditionNew": "Mới",
+        "conditionLikeNew": "Như mới",
+        "conditionGood": "Tốt",
+        "conditionFair": "Khá",
+        "price": "Giá",
+        "min": "Thấp nhất",
+        "max": "Cao nhất",
+        "inStockOnly": "Chỉ hàng còn sẵn",
+        "province": "Khu vực người bán",
+        "provinceAll": "Mọi tỉnh/thành",
+        "reset": "Đặt lại bộ lọc"
       }
     }
   },

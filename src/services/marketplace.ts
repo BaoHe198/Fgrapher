@@ -12,6 +12,11 @@ export interface ShopSearchParams {
   priceMin?: number;
   priceMax?: number;
   inStockOnly?: boolean;
+  // Where the seller is based. Gear is collected or shipped from the
+  // seller's own address, so "near me" is a real filter here, not a nicety.
+  // Filters on the SELLER's profile, not on the product.
+  provinceId?: string;
+  wardId?: string;
   sort?: "newest" | "price_asc" | "price_desc";
   page?: number;
 }
@@ -39,6 +44,17 @@ export async function searchProducts(params: ShopSearchParams) {
   }
   if (params.inStockOnly) {
     where.stock = { gt: 0 };
+  }
+  if (params.provinceId || params.wardId) {
+    where.user = {
+      profiles: {
+        some: {
+          role: { in: SELLER_ROLES },
+          ...(params.provinceId ? { provinceId: params.provinceId } : {}),
+          ...(params.wardId ? { wardId: params.wardId } : {}),
+        },
+      },
+    };
   }
   if (params.priceMin !== undefined || params.priceMax !== undefined) {
     const field = priceField(params.type);

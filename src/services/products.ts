@@ -27,7 +27,13 @@ export async function listProducts({
   return db.product.findMany({
     where,
     orderBy: { createdAt: "desc" },
-    include: { images: { orderBy: { order: "asc" }, take: 1 } },
+    include: {
+      images: {
+        orderBy: { order: "asc" },
+        take: 1,
+        select: { url: true, moderationStatus: true },
+      },
+    },
   });
 }
 

@@ -28,7 +28,7 @@ interface ProductRow {
   rentalPrice: number | null;
   currency: string;
   stock: number;
-  images: { url: string }[];
+  images: { url: string; moderationStatus: string }[];
 }
 
 const FILTER_VALUES: ListingFilter[] = ["ALL", "SALE", "RENT", "OUT_OF_STOCK"];
@@ -159,6 +159,12 @@ export function ListingsList() {
                   <p className="text-heading-sm text-text-primary">
                     {product.name}
                   </p>
+                  {product.images[0] &&
+                  product.images[0].moderationStatus !== "APPROVED" ? (
+                    <p className="text-body-sm text-text-tertiary">
+                      {t("photoPending")}
+                    </p>
+                  ) : null}
                   <p className="text-body-sm text-text-secondary">
                     {product.stock > 0
                       ? t("inStock", { count: product.stock })

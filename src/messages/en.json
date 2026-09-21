@@ -1795,7 +1795,8 @@
         "body": "Add the Camera Shop role to sell or rent out gear on Fgrapher.",
         "cta": "Add a role"
       },
-      "pageTitle": "Listings"
+      "pageTitle": "Listings",
+      "photoPending": "Photo awaiting moderation"
     },
     "home": {
       "greeting": {
@@ -3436,6 +3437,37 @@
             ]
           }
         ]
+      }
+    },
+    "shop": {
+      "heading": "Camera gear",
+      "count": "{count} items · {sort}",
+      "emptyTitle": "No gear found",
+      "emptyBody": "Try adjusting your filters.",
+      "clearAll": "Clear all filters",
+      "prev": "Previous",
+      "next": "Load more",
+      "filters": {
+        "sortNewest": "Newest",
+        "sortPriceAsc": "Price: low to high",
+        "sortPriceDesc": "Price: high to low",
+        "type": "Type",
+        "typeAll": "All",
+        "typeSale": "For sale",
+        "typeRent": "For rent",
+        "category": "Category",
+        "condition": "Condition",
+        "conditionNew": "New",
+        "conditionLikeNew": "Like new",
+        "conditionGood": "Good",
+        "conditionFair": "Fair",
+        "price": "Price",
+        "min": "Min",
+        "max": "Max",
+        "inStockOnly": "In stock only",
+        "province": "Seller area",
+        "provinceAll": "All provinces",
+        "reset": "Reset filters"
       }
     }
   },

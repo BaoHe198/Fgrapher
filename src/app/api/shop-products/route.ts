@@ -30,6 +30,8 @@ export async function GET(request: Request) {
     priceMin: priceMin ? Number(priceMin) : undefined,
     priceMax: priceMax ? Number(priceMax) : undefined,
     inStockOnly: searchParams.get("inStockOnly") === "true",
+    provinceId: searchParams.get("provinceId") ?? undefined,
+    wardId: searchParams.get("wardId") ?? undefined,
     sort: sort === "price_asc" || sort === "price_desc" ? sort : "newest",
     page,
   });

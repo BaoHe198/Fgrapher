@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -10,24 +11,30 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { PRODUCT_CATEGORIES } from "@/lib/validations/product";
 
-const CONDITIONS = [
-  { value: "NEW", label: "New" },
-  { value: "LIKE_NEW", label: "Like new" },
-  { value: "GOOD", label: "Good" },
-  { value: "FAIR", label: "Fair" },
-];
+const CONDITIONS = ["NEW", "LIKE_NEW", "GOOD", "FAIR"] as const;
+const SORT_VALUES = ["newest", "price_asc", "price_desc"] as const;
 
-const SORT_OPTIONS = [
-  { value: "newest", label: "Newest" },
-  { value: "price_asc", label: "Price: low to high" },
-  { value: "price_desc", label: "Price: high to low" },
-];
+const CONDITION_KEY: Record<(typeof CONDITIONS)[number], string> = {
+  NEW: "conditionNew",
+  LIKE_NEW: "conditionLikeNew",
+  GOOD: "conditionGood",
+  FAIR: "conditionFair",
+};
+
+const SORT_KEY: Record<(typeof SORT_VALUES)[number], string> = {
+  newest: "sortNewest",
+  price_asc: "sortPriceAsc",
+  price_desc: "sortPriceDesc",
+};
 
 export function ShopFilters({
   categoryCounts,
+  provinces,
 }: {
   categoryCounts: Record<string, number>;
+  provinces: { id: string; name: string }[];
 }) {
+  const t = useTranslations("publicPages.shop.filters");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -39,6 +46,7 @@ export function ShopFilters({
     searchParams.get("condition")?.split(",").filter(Boolean) ?? [];
   const inStockOnly = searchParams.get("inStockOnly") === "true";
   const sort = searchParams.get("sort") ?? "newest";
+  const provinceId = searchParams.get("provinceId") ?? "";
 
   const [priceMin, setPriceMin] = useState(searchParams.get("priceMin") ?? "");
   const [priceMax, setPriceMax] = useState(searchParams.get("priceMax") ?? "");
@@ -66,26 +74,49 @@ export function ShopFilters({
         <NativeSelect
           value={sort}
           onChange={(value) => update((params) => params.set("sort", value))}
-          options={SORT_OPTIONS}
+          options={SORT_VALUES.map((value) => ({
+            value,
+            label: t(SORT_KEY[value]),
+          }))}
         />
       </div>
 
       <div className="flex flex-col gap-2.5">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Type
+          {t("province")}
+        </span>
+        <NativeSelect
+          value={provinceId}
+          onChange={(value) =>
+            update((params) =>
+              value
+                ? params.set("provinceId", value)
+                : params.delete("provinceId"),
+            )
+          }
+          options={[
+            { value: "", label: t("provinceAll") },
+            ...provinces.map((p) => ({ value: p.id, label: p.name })),
+          ]}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2.5">
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          {t("type")}
         </span>
         <Radio
-          label="All"
+          label={t("typeAll")}
           checked={type === ""}
           onChange={() => update((params) => params.delete("type"))}
         />
         <Radio
-          label="For sale"
+          label={t("typeSale")}
           checked={type === "SALE"}
           onChange={() => update((params) => params.set("type", "SALE"))}
         />
         <Radio
-          label="For rent"
+          label={t("typeRent")}
           checked={type === "RENT"}
           onChange={() => update((params) => params.set("type", "RENT"))}
         />
@@ -93,7 +124,7 @@ export function ShopFilters({
 
       <div className="flex flex-col gap-2.5">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Category
+          {t("category")}
         </span>
         {PRODUCT_CATEGORIES.map((category) => (
           <Checkbox
@@ -109,15 +140,15 @@ export function ShopFilters({
 
       <div className="flex flex-col gap-2.5">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Condition
+          {t("condition")}
         </span>
-        {CONDITIONS.map((c) => (
+        {CONDITIONS.map((value) => (
           <Checkbox
-            key={c.value}
-            label={c.label}
-            checked={conditions.includes(c.value)}
+            key={value}
+            label={t(CONDITION_KEY[value])}
+            checked={conditions.includes(value)}
             onCheckedChange={() =>
-              toggleListValue("condition", c.value, conditions)
+              toggleListValue("condition", value, conditions)
             }
           />
         ))}
@@ -125,11 +156,11 @@ export function ShopFilters({
 
       <div className="flex flex-col gap-2.5">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          Price
+          {t("price")}
         </span>
         <div className="flex items-center gap-2">
           <CurrencyInput
-            placeholder="Min"
+            placeholder={t("min")}
             value={priceMin}
             onChange={setPriceMin}
             onBlur={() =>
@@ -142,7 +173,7 @@ export function ShopFilters({
           />
           <span className="text-text-tertiary">–</span>
           <CurrencyInput
-            placeholder="Max"
+            placeholder={t("max")}
             value={priceMax}
             onChange={setPriceMax}
             onBlur={() =>
@@ -157,7 +188,7 @@ export function ShopFilters({
       </div>
 
       <Checkbox
-        label="In stock only"
+        label={t("inStockOnly")}
         checked={inStockOnly}
         onCheckedChange={(checked) =>
           update((params) =>
@@ -177,7 +208,7 @@ export function ShopFilters({
           router.push(pathname);
         }}
       >
-        Reset filters
+        {t("reset")}
       </Button>
     </div>
   );

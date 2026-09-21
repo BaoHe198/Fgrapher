@@ -1,10 +1,12 @@
 import { SearchX } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/cards/product-card";
 import { ShopFilters } from "@/components/shop/shop-filters";
 import { Button } from "@/components/ui/button";
+import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import { searchProducts } from "@/services/marketplace";
 
@@ -12,13 +14,17 @@ interface ShopPageProps {
   searchParams: Promise<Record<string, string | undefined>>;
 }
 
-export const metadata = { title: "Camera gear — Fgrapher" };
+export async function generateMetadata() {
+  const t = await getTranslations("publicPages.shop");
+  return { title: `${t("heading")} — Fgrapher` };
+}
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   if (!features.marketplaceEnabled) {
     notFound();
   }
 
+  const t = await getTranslations("publicPages.shop");
   const params = await searchParams;
 
   const type =
@@ -32,6 +38,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       : "newest";
   const page = params.page ? Number(params.page) : 1;
 
+  // Seller areas for the location filter. Provinces are seeded reference
+  // data (CLAUDE.md rule 9 — never hardcode them in a component).
+  const provinces = await db.province.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+
   const result = await searchProducts({
     type,
     category,
@@ -39,6 +52,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     priceMin: params.priceMin ? Number(params.priceMin) : undefined,
     priceMax: params.priceMax ? Number(params.priceMax) : undefined,
     inStockOnly: params.inStockOnly === "true",
+    provinceId: params.provinceId || undefined,
+    wardId: params.wardId || undefined,
     sort,
     page,
   });
@@ -49,23 +64,25 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   const sortLabel =
     sort === "price_asc"
-      ? "Price: low to high"
+      ? t("filters.sortPriceAsc")
       : sort === "price_desc"
-        ? "Price: high to low"
-        : "Newest";
+        ? t("filters.sortPriceDesc")
+        : t("filters.sortNewest");
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 pt-8 pb-[72px] sm:px-8">
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[268px_1fr]">
         <div className="hidden lg:block">
-          <ShopFilters categoryCounts={categoryCounts} />
+          <ShopFilters categoryCounts={categoryCounts} provinces={provinces} />
         </div>
 
         <div className="min-w-0">
           <div className="mb-5">
-            <h1 className="text-display-md text-text-primary">Camera gear</h1>
+            <h1 className="text-display-md text-text-primary">
+              {t("heading")}
+            </h1>
             <p className="text-body-md text-text-secondary">
-              {result.total} items · {sortLabel}
+              {t("count", { count: result.total, sort: sortLabel })}
             </p>
           </div>
 
@@ -73,10 +90,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <div className="flex flex-col items-center gap-3 py-20 text-center">
               <SearchX className="size-12 text-text-tertiary" />
               <p className="text-body-lg font-semibold! text-text-primary">
-                No gear found
+                {t("emptyTitle")}
               </p>
               <p className="text-body-md text-text-secondary">
-                Try adjusting your filters.
+                {t("emptyBody")}
               </p>
               <Button
                 variant="secondary"
@@ -84,7 +101,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 nativeButton={false}
                 render={<Link href="/shop" />}
               >
-                Clear all filters
+                {t("clearAll")}
               </Button>
             </div>
           ) : (
@@ -108,7 +125,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         />
                       }
                     >
-                      Previous
+                      {t("prev")}
                     </Button>
                   ) : null}
                   {page < result.totalPages ? (
@@ -122,7 +139,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         />
                       }
                     >
-                      Load more
+                      {t("next")}
                     </Button>
                   ) : null}
                 </div>
