@@ -122,7 +122,8 @@
     "CAMERA_SHOP": "Camera Shop",
     "MODEL": "Model",
     "CUSTOMER": "Customer",
-    "ADMIN": "Admin"
+    "ADMIN": "Admin",
+    "COSTUME_SHOP": "Costume Rental"
   },
   "profileCategory": {
     "WEDDING": "Wedding",
@@ -156,7 +157,15 @@
     "PLUS_SIZE": "Plus size",
     "PETITE": "Petite",
     "MATURE": "Mature",
-    "ALTERNATIVE": "Alternative"
+    "ALTERNATIVE": "Alternative",
+    "AO_DAI": "Áo dài",
+    "WEDDING_DRESS": "Wedding dress",
+    "MENSWEAR": "Menswear",
+    "EVENING_GOWN": "Evening gown",
+    "HISTORICAL": "Historical costume",
+    "COSPLAY": "Cosplay",
+    "KIDSWEAR": "Kidswear",
+    "ACCESSORIES": "Accessories"
   },
   "experienceLevel": {
     "NEW": "New",
@@ -2163,7 +2172,7 @@
         "facebookLabel": "Facebook",
         "tiktokLabel": "TikTok",
         "zaloUrlLabel": "Zalo message link",
-        "zaloUrlHelper": "Only customers who successfully submit a booking can see this link. Paste an official https://zalo.me/... link from your Zalo account.",
+        "zaloUrlHelper": "Only customers whose booking request went through see this link. Paste your Zalo link: https://zalo.me/..., chat.zalo.me, or the QR link (zaloapp.com/qr/...).",
         "saveChanges": "Save changes",
         "saved": "Saved"
       },
@@ -2264,7 +2273,7 @@
         "addressRequired": "Enter a detailed address",
         "provinceRequired": "Select a province",
         "wardRequired": "Select a ward",
-        "zaloUrlInvalid": "Enter an official HTTPS link from zalo.me"
+        "zaloUrlInvalid": "The link must come from Zalo: zalo.me, chat.zalo.me, qr.zalo.me or zaloapp.com/qr/..."
       },
       "review": {
         "contentTooShort": "Share a bit more detail (at least 20 characters)"

@@ -122,7 +122,8 @@
     "CAMERA_SHOP": "Cửa hàng máy ảnh",
     "MODEL": "Người mẫu",
     "CUSTOMER": "Khách hàng",
-    "ADMIN": "Quản trị viên"
+    "ADMIN": "Quản trị viên",
+    "COSTUME_SHOP": "Shop cho thuê trang phục"
   },
   "profileCategory": {
     "WEDDING": "Cưới",
@@ -156,7 +157,15 @@
     "PLUS_SIZE": "Ngoại cỡ",
     "PETITE": "Dáng nhỏ nhắn",
     "MATURE": "Trung niên",
-    "ALTERNATIVE": "Phong cách khác"
+    "ALTERNATIVE": "Phong cách khác",
+    "AO_DAI": "Áo dài",
+    "WEDDING_DRESS": "Váy cưới",
+    "MENSWEAR": "Vest & đồ nam",
+    "EVENING_GOWN": "Dạ hội",
+    "HISTORICAL": "Cổ trang",
+    "COSPLAY": "Cosplay",
+    "KIDSWEAR": "Trẻ em",
+    "ACCESSORIES": "Phụ kiện"
   },
   "experienceLevel": {
     "NEW": "Mới bắt đầu",
@@ -2163,7 +2172,7 @@
         "facebookLabel": "Facebook",
         "tiktokLabel": "TikTok",
         "zaloUrlLabel": "Liên kết nhắn tin Zalo",
-        "zaloUrlHelper": "Chỉ khách hàng đã gửi yêu cầu đặt lịch thành công mới thấy liên kết này. Hãy dán liên kết https://zalo.me/... từ tài khoản Zalo của bạn.",
+        "zaloUrlHelper": "Chỉ khách hàng đã gửi yêu cầu đặt lịch thành công mới thấy liên kết này. Dán liên kết Zalo của bạn: https://zalo.me/..., chat.zalo.me hoặc link từ mã QR (zaloapp.com/qr/...).",
         "saveChanges": "Lưu thay đổi",
         "saved": "Đã lưu"
       },
@@ -2264,7 +2273,7 @@
         "addressRequired": "Vui lòng nhập địa chỉ chi tiết",
         "provinceRequired": "Vui lòng chọn tỉnh/thành",
         "wardRequired": "Vui lòng chọn phường/xã",
-        "zaloUrlInvalid": "Vui lòng nhập liên kết HTTPS chính thức từ zalo.me"
+        "zaloUrlInvalid": "Liên kết phải từ Zalo: zalo.me, chat.zalo.me, qr.zalo.me hoặc zaloapp.com/qr/..."
       },
       "review": {
         "contentTooShort": "Vui lòng chia sẻ chi tiết hơn (tối thiểu 20 ký tự)"
