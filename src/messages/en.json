@@ -3469,6 +3469,36 @@
         "provinceAll": "All provinces",
         "reset": "Reset filters"
       }
+    },
+    "productDetail": {
+      "description": "Description",
+      "moreFromShop": "More from this shop",
+      "notFound": "Not found",
+      "productNotFound": "Product not found",
+      "forSale": "For sale",
+      "rental": "Rental",
+      "buy": "Buy",
+      "rent": "Rent",
+      "outOfStock": "Out of stock",
+      "addToCart": "Add to cart",
+      "buyNow": "Buy now",
+      "requestRental": "Request rental",
+      "total": "Total",
+      "pickupDate": "Pickup date",
+      "returnDate": "Return date",
+      "invalidDates": "Pick a valid pickup and return date",
+      "addFailed": "Couldn't add to cart",
+      "addedToCart": "Added to cart",
+      "rentalDays": "{days} days ×",
+      "depositNote": "Deposit (collected by the shop, returned when you bring the item back)",
+      "shipsFrom": "Ships from {location}",
+      "shippingOrPickup": "Shipping or pickup available",
+      "paymentByShop": "The shop collects payment and handles delivery with you directly",
+      "returnPolicyByShop": "Return terms are set by the shop",
+      "conditionNew": "New",
+      "conditionLikeNew": "Like new",
+      "conditionGood": "Good",
+      "conditionFair": "Fair"
     }
   },
   "sharedComponents": {

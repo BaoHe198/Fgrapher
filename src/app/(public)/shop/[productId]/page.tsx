@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/cards/product-card";
@@ -20,11 +21,17 @@ export async function generateMetadata({
 }: {
   params: Promise<{ productId: string }>;
 }): Promise<Metadata> {
-  if (!features.marketplaceEnabled) return { title: "Not found — Fgrapher" };
+  if (!features.marketplaceEnabled)
+    return {
+      title: `${(await getTranslations("publicPages.productDetail"))("notFound")} — Fgrapher`,
+    };
 
   const { productId } = await params;
   const result = await getProductDetail(productId);
-  if (!result) return { title: "Product not found — Fgrapher" };
+  if (!result)
+    return {
+      title: `${(await getTranslations("publicPages.productDetail"))("productNotFound")} — Fgrapher`,
+    };
   return {
     title: `${result.product.name} — Fgrapher`,
     description: result.product.description ?? undefined,
@@ -37,6 +44,7 @@ export default async function ProductDetailPage({
 }: {
   params: Promise<{ productId: string }>;
 }) {
+  const t = await getTranslations("publicPages.productDetail");
   if (!features.marketplaceEnabled) {
     notFound();
   }
@@ -79,7 +87,9 @@ export default async function ProductDetailPage({
 
           {product.description ? (
             <div className="flex flex-col gap-2">
-              <h2 className="text-heading-lg text-text-primary">Description</h2>
+              <h2 className="text-heading-lg text-text-primary">
+                {t("description")}
+              </h2>
               <p className="whitespace-pre-wrap text-body-md text-text-secondary">
                 {product.description}
               </p>
@@ -149,7 +159,7 @@ export default async function ProductDetailPage({
 
       {related.length > 0 ? (
         <div className="mt-12">
-          <SectionHead title="More from this shop" />
+          <SectionHead title={t("moreFromShop")} />
           <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {related.map((p) => (
               <ProductCard

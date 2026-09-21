@@ -711,3 +711,48 @@ export async function flagOverdueRentals(now = new Date()) {
 
   return count;
 }
+
+/**
+ * Reminds customers the day before a rental is due back. Runs daily from
+ * /api/cron/rental-return-reminders, which is also why the window is a whole
+ * calendar day rather than "24 hours from now": a cron that slips by a few
+ * minutes must not skip somebody's reminder.
+ */
+export async function sendRentalReturnReminders(now = new Date()) {
+  const startOfTomorrow = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1,
+  );
+  const endOfTomorrow = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 2,
+  );
+
+  const orders = await db.order.findMany({
+    where: {
+      status: { in: ["DELIVERED", "PICKED_UP"] },
+      items: {
+        some: {
+          type: "RENT",
+          returnedAt: null,
+          rentalEnd: { gte: startOfTomorrow, lt: endOfTomorrow },
+        },
+      },
+    },
+    select: { id: true, customerId: true },
+  });
+
+  for (const order of orders) {
+    await notify({
+      userId: order.customerId,
+      type: "ORDER_DELIVERED",
+      title: "Rental due back tomorrow",
+      message: `Order #${order.id.slice(-8)} is due back tomorrow. Contact the shop to arrange the return.`,
+      data: { orderId: order.id },
+    });
+  }
+
+  return orders.length;
+}

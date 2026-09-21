@@ -3469,6 +3469,36 @@
         "provinceAll": "Mọi tỉnh/thành",
         "reset": "Đặt lại bộ lọc"
       }
+    },
+    "productDetail": {
+      "description": "Mô tả",
+      "moreFromShop": "Tin khác của shop này",
+      "notFound": "Không tìm thấy",
+      "productNotFound": "Không tìm thấy sản phẩm",
+      "forSale": "Bán",
+      "rental": "Cho thuê",
+      "buy": "Mua",
+      "rent": "Thuê",
+      "outOfStock": "Hết hàng",
+      "addToCart": "Thêm vào giỏ",
+      "buyNow": "Mua ngay",
+      "requestRental": "Gửi yêu cầu thuê",
+      "total": "Tổng cộng",
+      "pickupDate": "Ngày nhận",
+      "returnDate": "Ngày trả",
+      "invalidDates": "Chọn ngày nhận và ngày trả hợp lệ",
+      "addFailed": "Không thêm được vào giỏ",
+      "addedToCart": "Đã thêm vào giỏ hàng",
+      "rentalDays": "{days} ngày ×",
+      "depositNote": "Tiền cọc (shop thu, hoàn lại khi trả đồ)",
+      "shipsFrom": "Giao từ {location}",
+      "shippingOrPickup": "Có giao hàng hoặc tự đến lấy",
+      "paymentByShop": "Shop trực tiếp thu tiền và giao nhận với bạn",
+      "returnPolicyByShop": "Điều kiện đổi trả do shop quy định",
+      "conditionNew": "Mới",
+      "conditionLikeNew": "Như mới",
+      "conditionGood": "Tốt",
+      "conditionFair": "Khá"
     }
   },
   "sharedComponents": {
