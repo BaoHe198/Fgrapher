@@ -4,7 +4,10 @@ export const createServiceSchema = z.object({
   profileId: z.string().min(1),
   name: z.string().min(2, "Enter a service name"),
   description: z.string().max(500).optional(),
-  duration: z.number().int().positive("Enter a duration in minutes"),
+  // Kept server-side only: one booking occupies this many minutes of the
+  // provider's calendar. Providers no longer set it (project owner,
+  // 21/09/2026) — they state the timing in the description instead.
+  duration: z.number().int().positive().default(60),
   price: z.number().positive("Enter a price"),
   isActive: z.boolean().default(true),
 });
@@ -24,7 +27,10 @@ export function getCreateServiceSchema(t: (key: string) => string) {
     profileId: z.string().min(1),
     name: z.string().min(2, t("nameRequired")),
     description: z.string().max(500).optional(),
-    duration: z.number().int().positive(t("durationRequired")),
+    // Kept server-side only: one booking occupies this many minutes of the
+    // provider's calendar. Providers no longer set it (project owner,
+    // 21/09/2026) — they state the timing in the description instead.
+    duration: z.number().int().positive().default(60),
     price: z.number().positive(t("priceRequired")),
     isActive: z.boolean().default(true),
   });

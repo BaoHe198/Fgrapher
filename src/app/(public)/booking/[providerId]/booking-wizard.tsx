@@ -4,7 +4,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Loader2,
   MessageCircle,
 } from "lucide-react";
@@ -28,7 +27,6 @@ import {
   formatDate,
   formatDateLong,
   formatDayMonth,
-  formatDurationHours,
   formatMonthYear,
 } from "@/lib/format";
 import { WEEKDAY_SHORT_LABELS_VI } from "@/lib/constants";
@@ -461,7 +459,6 @@ export function BookingWizard({
             providerId={providerId}
             providerName={providerName}
             selectedServiceId={draft.serviceId}
-            duration={selectedService?.duration}
             date={draft.date}
             time={draft.time}
             onSelectDate={(d) => update("date", d)}
@@ -610,7 +607,6 @@ function StepService({
   onCustomRequest: (value: string) => void;
 }) {
   const t = useTranslations("publicPages.booking");
-  const serviceT = useTranslations("sharedComponents.service");
   return (
     <div className="flex flex-col gap-4">
       <h2 className="text-heading-lg text-text-primary">
@@ -663,12 +659,6 @@ function StepService({
                 {/* Duration and price each get their own line. Sharing one
                     row put a ~26-character label next to the price inside a
                     ~220px card, which broke the label across three lines. */}
-                <span className="flex items-center gap-1 pt-0.5 text-body-sm text-text-tertiary">
-                  <Clock className="size-3.5 shrink-0" />
-                  {serviceT("sessionDuration", {
-                    hours: formatDurationHours(service.duration),
-                  })}
-                </span>
                 <span className="text-heading-sm font-bold! text-text-primary">
                   {formatCurrency(service.price, service.currency)}
                 </span>
@@ -685,7 +675,6 @@ function StepDateTime({
   providerId,
   providerName,
   selectedServiceId,
-  duration,
   date,
   time,
   onSelectDate,
@@ -694,14 +683,12 @@ function StepDateTime({
   providerId: string;
   providerName: string;
   selectedServiceId: string | null;
-  duration: number | undefined;
   date: string | null;
   time: string | null;
   onSelectDate: (date: string) => void;
   onSelectTime: (time: string) => void;
 }) {
   const t = useTranslations("publicPages.booking");
-  const serviceT = useTranslations("sharedComponents.service");
   // A real calendar month, not a rolling 28-day window. The window version
   // paged by ±28 days under a "tháng 9 năm 2026" heading, so its columns were
   // whatever weekdays the window happened to start on — Sunday landed in a
@@ -876,13 +863,6 @@ function StepDateTime({
               <span className="text-body-sm font-semibold! text-text-primary">
                 {formatDateLong(date)}
               </span>
-              {duration ? (
-                <span className="text-body-sm text-text-tertiary">
-                  {serviceT("sessionDuration", {
-                    hours: formatDurationHours(duration),
-                  })}
-                </span>
-              ) : null}
               {isLoading ? (
                 <div className="flex justify-center py-4">
                   <Loader2 className="size-4 animate-spin text-text-tertiary" />
@@ -1200,7 +1180,6 @@ function StepReview({
   onAgree: (v: boolean) => void;
 }) {
   const t = useTranslations("publicPages.booking");
-  const serviceT = useTranslations("sharedComponents.service");
   const locationLabel = getLocationLabel(t);
   const rows: [string, string][] = [
     [
@@ -1210,14 +1189,7 @@ function StepReview({
     ],
     [t("stepReview.rowDate"), date ? formatDateLong(date) : "—"],
     [t("stepReview.rowTime"), time ?? "—"],
-    [
-      t("stepReview.rowDuration"),
-      service
-        ? serviceT("durationHours", {
-            hours: formatDurationHours(service.duration),
-          })
-        : "—",
-    ],
+    [t("stepReview.rowDuration"), "—"],
     [
       t("stepReview.rowLocation"),
       locationType === "PROVIDER"

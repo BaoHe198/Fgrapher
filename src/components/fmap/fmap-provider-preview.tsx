@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDurationHours, formatVND } from "@/lib/format";
+import { formatVND } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { FmapProviderPreview } from "@/services/fmap";
 
@@ -148,10 +148,7 @@ export function FmapProviderPreviewCard({
                 {preview.services.map((service) => (
                   <li key={service.id} className="flex justify-between gap-3">
                     <span className="truncate text-text-secondary">
-                      {service.name} ·{" "}
-                      {t("preview.hours", {
-                        hours: formatDurationHours(service.duration),
-                      })}
+                      {service.name}
                     </span>
                     <span className="shrink-0 font-semibold text-text-primary">
                       {formatVND(service.price)}

@@ -4,14 +4,12 @@ import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDurationHours } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 
 interface ServiceItem {
   id: string;
   name: string;
   description: string | null;
-  duration: number;
   price: number;
   currency: string;
 }
@@ -28,7 +26,6 @@ export function ServicesTab({
   isOwnProfile: boolean;
 }) {
   const t = useTranslations("publicPages.profile.servicesTab");
-  const serviceT = useTranslations("sharedComponents.service");
 
   if (services.length === 0) {
     return (
@@ -64,11 +61,6 @@ export function ServicesTab({
                 {service.description}
               </p>
             ) : null}
-            <span className="rounded-full bg-bg-sunken px-2.5 py-0.5 text-body-sm text-text-tertiary">
-              {serviceT("sessionDuration", {
-                hours: formatDurationHours(service.duration),
-              })}
-            </span>
           </div>
           {/* Phones: price left, button right on their own row under the text.
               From `sm`: back beside the text, top-aligned — `items-center`

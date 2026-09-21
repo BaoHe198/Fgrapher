@@ -31,7 +31,6 @@ interface ServiceItem {
 interface ServiceDraft {
   name: string;
   description: string;
-  duration: string;
   price: string;
   isActive: boolean;
 }
@@ -39,7 +38,6 @@ interface ServiceDraft {
 const EMPTY_DRAFT: ServiceDraft = {
   name: "",
   description: "",
-  duration: "60",
   price: "",
   isActive: true,
 };
@@ -69,7 +67,6 @@ export function ServicesManager({
     setDraft({
       name: service.name,
       description: service.description ?? "",
-      duration: String(service.duration),
       price: String(service.price),
       isActive: service.isActive,
     });
@@ -81,7 +78,6 @@ export function ServicesManager({
     const payload = {
       name: draft.name,
       description: draft.description || undefined,
-      duration: Number(draft.duration),
       price: Number(draft.price),
       isActive: draft.isActive,
     };
@@ -142,8 +138,7 @@ export function ServicesManager({
                   {service.name} {!service.isActive ? t("inactive") : ""}
                 </p>
                 <p className="text-body-sm text-text-secondary">
-                  {formatCurrency(service.price, service.currency)} ·{" "}
-                  {service.duration} {t("minutesSuffix")}
+                  {formatCurrency(service.price, service.currency)}
                 </p>
               </div>
               <div className="flex gap-1">
@@ -197,18 +192,15 @@ export function ServicesManager({
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Input
-                label={t("durationLabel")}
-                type="number"
-                value={draft.duration}
-                onChange={(e) =>
-                  setDraft({ ...draft, duration: e.target.value })
-                }
-              />
               <CurrencyInput
                 label={t("priceLabel")}
                 value={draft.price}
                 onChange={(digits) => setDraft({ ...draft, price: digits })}
+              />
+              <Switch
+                label={t("activeLabel")}
+                checked={draft.isActive}
+                onChange={(value) => setDraft({ ...draft, isActive: value })}
               />
             </div>
             <Switch
