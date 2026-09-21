@@ -125,6 +125,12 @@ export const PROVIDER_ROLES: Role[] = [
   "COSTUME_SHOP",
 ];
 
+// Roles allowed to list marketplace products. The costume rental shop
+// joined the camera shop here when the marketplace reopened (project owner,
+// 21/09/2026) — both sell/rent physical items, unlike the booking-only
+// provider roles.
+export const SELLER_ROLES: Role[] = ["CAMERA_SHOP", "COSTUME_SHOP"];
+
 export const ROLE_LABELS: Record<Role, string> = {
   PHOTOGRAPHER: "Photographer",
   VIDEOGRAPHER: "Videographer",

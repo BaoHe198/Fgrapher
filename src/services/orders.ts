@@ -25,7 +25,7 @@ function partyName(party: { firstName: string | null; name: string | null }) {
 export class OrderError extends Error {
   constructor(
     message: string,
-    public status: 400 | 403 | 404,
+    public status: 400 | 403 | 404 | 409,
   ) {
     super(message);
     this.name = "OrderError";
@@ -86,22 +86,15 @@ export async function createCheckoutSessionForCart(
   return session;
 }
 
-// Called from the checkout.session.completed webhook — orders are created
-// fresh from the live cart at payment-completion time (not pre-created at
-// checkout start) so an abandoned checkout never leaves an orphaned order.
+// Called from the checkout.session.completed webhook. Kept for the Stripe
+// path, which is dormant (CLAUDE.md rule 1) — the live flow is
+// placeOrdersFromCart below.
 export async function createOrdersFromCheckout(
   session: Stripe.Checkout.Session,
 ) {
   const userId = session.metadata?.userId;
   if (!userId || session.metadata?.orderType !== "marketplace") return [];
 
-  const cart = await db.cartItem.findMany({
-    where: { userId },
-    include: { product: true },
-  });
-  if (cart.length === 0) return [];
-
-  const deliveryMethod = session.metadata?.deliveryMethod ?? "PICKUP";
   const shippingAddress = session.customer_details?.address
     ? [
         session.customer_details.address.line1,
@@ -112,6 +105,40 @@ export async function createOrdersFromCheckout(
         .filter(Boolean)
         .join(", ")
     : null;
+
+  return createOrdersForCart(userId, {
+    deliveryMethod:
+      session.metadata?.deliveryMethod === "SHIP" ? "SHIP" : "PICKUP",
+    shippingAddress,
+    stripePaymentId:
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : null,
+  });
+}
+
+/**
+ * Turns the customer's cart into one order per shop. Money is settled
+ * between the customer and the shop directly (project owner, 21/09/2026:
+ * the shop collects the rental deposit itself for MVP), so nothing here
+ * charges a card — the order records what was agreed and both sides get
+ * notified.
+ */
+async function createOrdersForCart(
+  userId: string,
+  options: {
+    deliveryMethod: "SHIP" | "PICKUP";
+    shippingAddress: string | null;
+    stripePaymentId: string | null;
+  },
+) {
+  const { deliveryMethod, shippingAddress } = options;
+
+  const cart = await db.cartItem.findMany({
+    where: { userId },
+    include: { product: true },
+  });
+  if (cart.length === 0) return [];
 
   const byShop = new Map<string, typeof cart>();
   for (const item of cart) {
@@ -150,10 +177,9 @@ export async function createOrdersFromCheckout(
         rentalStart: item.rentalStart,
         rentalEnd: item.rentalEnd,
         depositAmount: item.type === "RENT" ? item.product.depositAmount : null,
-        depositStatus:
-          item.type === "RENT" && item.product.depositAmount
-            ? ("HELD" as const)
-            : null,
+        // The shop collects the deposit in person, so the platform never
+        // holds it; the amount is recorded for both sides to agree on.
+        depositStatus: null,
       };
     });
 
@@ -166,10 +192,7 @@ export async function createOrdersFromCheckout(
           currency,
           deliveryMethod,
           shippingAddress,
-          stripePaymentId:
-            typeof session.payment_intent === "string"
-              ? session.payment_intent
-              : null,
+          stripePaymentId: options.stripePaymentId,
           items: { create: orderItemsData },
         },
         include: {
@@ -245,6 +268,112 @@ export async function createOrdersFromCheckout(
   await db.cartItem.deleteMany({ where: { userId } });
 
   return orders;
+}
+
+/** Orders that still tie a rental up: anything not cancelled or returned. */
+const ACTIVE_RENTAL_STATUSES: OrderStatus[] = [
+  "PENDING",
+  "CONFIRMED",
+  "SHIPPED",
+  "DELIVERED",
+];
+
+/**
+ * Rejects a rental whose dates overlap one the same item already has. Two
+ * customers renting the same dress on the same weekend is the failure this
+ * marketplace cannot ship without.
+ */
+export async function findRentalConflicts(
+  items: {
+    productId: string;
+    rentalStart: Date | null;
+    rentalEnd: Date | null;
+  }[],
+) {
+  const rentals = items.filter(
+    (item) => item.rentalStart != null && item.rentalEnd != null,
+  );
+  if (rentals.length === 0) return [];
+
+  const clashing = await db.orderItem.findMany({
+    where: {
+      productId: { in: rentals.map((item) => item.productId) },
+      type: "RENT",
+      order: { status: { in: ACTIVE_RENTAL_STATUSES } },
+    },
+    select: {
+      productId: true,
+      rentalStart: true,
+      rentalEnd: true,
+      product: { select: { name: true } },
+    },
+  });
+
+  const conflicts: { productId: string; productName: string }[] = [];
+  for (const wanted of rentals) {
+    const clash = clashing.find(
+      (taken) =>
+        taken.productId === wanted.productId &&
+        taken.rentalStart != null &&
+        taken.rentalEnd != null &&
+        // Half-open ranges: returning on the day the next rental starts is
+        // fine, overlapping by a day is not.
+        wanted.rentalStart! < taken.rentalEnd &&
+        taken.rentalStart < wanted.rentalEnd!,
+    );
+    if (clash) {
+      conflicts.push({
+        productId: wanted.productId,
+        productName: clash.product.name,
+      });
+    }
+  }
+  return conflicts;
+}
+
+/**
+ * The live "place order" path: no payment provider involved. The customer
+ * confirms what they want, each shop gets an order to accept, and payment
+ * (including any rental deposit) happens between them — on delivery, on
+ * pickup, or by transfer. See docs/guides/phase-13-marketplace-social.md.
+ */
+export async function placeOrdersFromCart(
+  userId: string,
+  options: {
+    deliveryMethod: "SHIP" | "PICKUP";
+    shippingAddress?: string | null;
+  },
+) {
+  const cart = await db.cartItem.findMany({
+    where: { userId },
+    include: { product: { select: { name: true, stock: true } } },
+  });
+  if (cart.length === 0) throw new OrderError("Your cart is empty", 400);
+
+  if (options.deliveryMethod === "SHIP" && !options.shippingAddress?.trim()) {
+    throw new OrderError("A delivery address is required", 400);
+  }
+
+  const outOfStock = cart.find(
+    (item) => item.type === "SALE" && item.product.stock < item.quantity,
+  );
+  if (outOfStock) {
+    throw new OrderError(`${outOfStock.product.name} is out of stock`, 409);
+  }
+
+  const conflicts = await findRentalConflicts(cart);
+  if (conflicts.length > 0) {
+    throw new OrderError(
+      `${conflicts[0].productName} is already rented for those dates`,
+      409,
+    );
+  }
+
+  return createOrdersForCart(userId, {
+    deliveryMethod: options.deliveryMethod,
+    shippingAddress: options.shippingAddress?.trim() || null,
+    stripePaymentId: null,
+  });
 }
 
 const ORDER_INCLUDE = {

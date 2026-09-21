@@ -1,5 +1,7 @@
 import { ShoppingBag } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+
+import { SELLER_ROLES } from "@/lib/constants";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -23,7 +25,7 @@ export default async function ListingsPage() {
 
   const t = await getTranslations("dashboardCore.listings");
 
-  if (!session.user.roles.includes("CAMERA_SHOP")) {
+  if (!SELLER_ROLES.some((role) => session.user.roles.includes(role))) {
     return (
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
         <ShoppingBag className="size-12 text-text-tertiary" />

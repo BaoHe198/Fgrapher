@@ -3,9 +3,8 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
-import { StripeNotConfiguredError } from "@/lib/stripe";
 import { checkoutSchema } from "@/lib/validations/marketplace";
-import { createCheckoutSessionForCart, OrderError } from "@/services/orders";
+import { OrderError, placeOrdersFromCart } from "@/services/orders";
 
 // Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function POST(request: Request) {
@@ -32,14 +31,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const checkoutSession = await createCheckoutSessionForCart(
-      session.user.id,
-      parsed.data.deliveryMethod,
-    );
+    const orders = await placeOrdersFromCart(session.user.id, {
+      deliveryMethod: parsed.data.deliveryMethod,
+      shippingAddress: parsed.data.shippingAddress,
+    });
 
     return NextResponse.json(
-      { data: { url: checkoutSession.url }, error: null, message: null },
-      { status: 200 },
+      {
+        data: { orderIds: orders.map((order) => order.id) },
+        error: null,
+        message: null,
+      },
+      { status: 201 },
     );
   } catch (err) {
     if (err instanceof AuthError) {
@@ -54,13 +57,6 @@ export async function POST(request: Request) {
         { status: err.status },
       );
     }
-    if (err instanceof StripeNotConfiguredError) {
-      return NextResponse.json(
-        { data: null, error: "not_configured", message: err.message },
-        { status: 503 },
-      );
-    }
-
     return NextResponse.json(
       {
         data: null,

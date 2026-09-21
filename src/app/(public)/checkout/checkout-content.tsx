@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { CartItemRow } from "@/components/cart/cart-item-row";
@@ -10,6 +11,7 @@ import { termsChunk } from "@/components/legal/terms-link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Radio } from "@/components/ui/radio";
 import { useCart } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
@@ -23,6 +25,8 @@ export function CheckoutContent() {
   const [deliveryMethod, setDeliveryMethod] = useState<"SHIP" | "PICKUP">(
     "SHIP",
   );
+  const router = useRouter();
+  const [shippingAddress, setShippingAddress] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,21 +37,19 @@ export function CheckoutContent() {
     const res = await fetch("/api/orders/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deliveryMethod }),
+      body: JSON.stringify({ deliveryMethod, shippingAddress }),
     });
     const body = await res.json();
     setIsSubmitting(false);
 
-    if (!res.ok || !body.data?.url) {
-      setError(
-        body.error === "not_configured"
-          ? t("paymentsNotConfigured")
-          : (body.message ?? t("genericError")),
-      );
+    if (!res.ok) {
+      setError(body.message ?? t("genericError"));
       return;
     }
 
-    window.location.href = body.data.url;
+    // No payment provider in the loop — the shop settles with the customer
+    // directly — so the order exists the moment this returns.
+    router.push("/dashboard/orders");
   };
 
   if (isLoading) {
@@ -89,9 +91,17 @@ export function CheckoutContent() {
               onChange={() => setDeliveryMethod("PICKUP")}
             />
             {deliveryMethod === "SHIP" ? (
-              <p className="text-body-sm text-text-tertiary">
-                {t("deliveryMethod.shipNote")}
-              </p>
+              <>
+                <Input
+                  label={t("deliveryMethod.addressLabel")}
+                  placeholder={t("deliveryMethod.addressPlaceholder")}
+                  value={shippingAddress}
+                  onChange={(event) => setShippingAddress(event.target.value)}
+                />
+                <p className="text-body-sm text-text-tertiary">
+                  {t("deliveryMethod.shipNote")}
+                </p>
+              </>
             ) : (
               <p className="text-body-sm text-text-tertiary">
                 {t("deliveryMethod.pickupNote")}

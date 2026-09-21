@@ -5,6 +5,7 @@ import {
   requireActiveSubscription,
   requireAuth,
 } from "@/lib/auth-helpers";
+import { SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { productSchema } from "@/lib/validations/product";
 import {
@@ -63,7 +64,22 @@ export async function POST(request: Request) {
 
   try {
     const session = await requireAuth();
-    await requireActiveSubscription(session.user.id, "CAMERA_SHOP");
+    // Either shop role may list; whichever one this account holds must have
+    // an active subscription.
+    const sellerRole = SELLER_ROLES.find((role) =>
+      session.user.roles.includes(role),
+    );
+    if (!sellerRole) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "forbidden",
+          message: "A shop role is required to list products",
+        },
+        { status: 403 },
+      );
+    }
+    await requireActiveSubscription(session.user.id, sellerRole);
 
     const body = await request.json();
     const parsed = productSchema.safeParse(body);

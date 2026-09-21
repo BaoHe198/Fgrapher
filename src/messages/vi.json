@@ -2920,7 +2920,9 @@
         "shipToMe": "Giao đến tôi",
         "pickupAtShop": "Nhận tại cửa hàng",
         "shipNote": "Bạn sẽ nhập địa chỉ giao hàng ở bước tiếp theo.",
-        "pickupNote": "Liên hệ cửa hàng sau khi đơn hàng được xác nhận để sắp xếp nhận hàng."
+        "pickupNote": "Liên hệ cửa hàng sau khi đơn hàng được xác nhận để sắp xếp nhận hàng.",
+        "addressLabel": "Địa chỉ nhận hàng",
+        "addressPlaceholder": "Số nhà, đường, phường/xã, tỉnh/thành"
       },
       "reviewOrder": "Xem lại đơn hàng",
       "agreeTerms": "Tôi đồng ý với <terms>điều khoản mua/thuê</terms>",

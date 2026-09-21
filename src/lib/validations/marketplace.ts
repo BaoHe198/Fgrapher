@@ -22,6 +22,10 @@ export const updateCartItemSchema = z.object({
 
 export const checkoutSchema = z.object({
   deliveryMethod: z.enum(["SHIP", "PICKUP"]),
+  // Required for SHIP; the service rejects an empty one. Collected here
+  // because payment (and therefore Stripe's address step) is gone — the
+  // shop delivers and collects the money itself.
+  shippingAddress: z.string().trim().max(300).optional(),
 });
 
 export const updateOrderStatusSchema = z.object({

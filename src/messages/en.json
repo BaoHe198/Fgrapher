@@ -2920,7 +2920,9 @@
         "shipToMe": "Ship to me",
         "pickupAtShop": "Pick up at shop",
         "shipNote": "You'll enter your shipping address on the next step.",
-        "pickupNote": "Contact the shop after your order is confirmed to arrange pickup."
+        "pickupNote": "Contact the shop after your order is confirmed to arrange pickup.",
+        "addressLabel": "Delivery address",
+        "addressPlaceholder": "Street, ward, province"
       },
       "reviewOrder": "Review your order",
       "agreeTerms": "I agree to the <terms>terms of sale/rental</terms>",
