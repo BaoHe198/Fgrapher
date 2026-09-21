@@ -122,6 +122,11 @@ công**, cộng thêm **COD/trả khi nhận** cho đơn giao tận nơi.
   thuê theo ngày, tiền cọc, size/màu. Khách xem rồi đặt lịch hoặc liên hệ,
   không đi qua giỏ hàng. Ảnh phải qua kiểm duyệt như ảnh portfolio.
 
+**Đã làm xong 21/09/2026**: bảng `CostumeItem`, API `/api/costumes`, màn quản lý
+trong "Hồ sơ theo vai trò" và tab "Trang phục" trên hồ sơ công khai. Ảnh dùng
+lại bảng `ProfileMedia` nên đi đúng luồng kiểm duyệt sẵn có: bộ nào ảnh chưa
+duyệt thì chủ shop vẫn thấy (kèm ghi chú) nhưng khách không thấy.
+
 ### 13A.4 Giao nhận
 
 - Hai lựa chọn: **tự đến lấy tại shop** (dùng địa chỉ trong hồ sơ, đã có trên Fmap)

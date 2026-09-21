@@ -203,11 +203,6 @@ export function ServicesManager({
                 onChange={(value) => setDraft({ ...draft, isActive: value })}
               />
             </div>
-            <Switch
-              label={t("activeLabel")}
-              checked={draft.isActive}
-              onChange={(value) => setDraft({ ...draft, isActive: value })}
-            />
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setModalOpen(false)}>

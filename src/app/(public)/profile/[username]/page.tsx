@@ -27,6 +27,8 @@ import {
 } from "@/services/public-profile";
 
 import { ProfileAvatar, ProfileCover } from "./profile-hero";
+import { listPublicCostumes } from "@/services/costumes";
+
 import { ProfileInteractive } from "./profile-interactive";
 
 function joinRoleLabels(
@@ -134,7 +136,7 @@ export default async function PublicProfilePage({
   const session = await auth();
   const isOwnProfile = session?.user?.id === user.id;
 
-  const [reviews, reviewStats, products, followerCount, ownerAlbums] =
+  const [reviews, reviewStats, products, followerCount, ownerAlbums, costumes] =
     await Promise.all([
       getProfileReviews(user.id),
       getProfileReviewStats(user.id),
@@ -151,6 +153,11 @@ export default async function PublicProfilePage({
       // moderation. Same call dashboard/portfolio/page.tsx makes for its
       // own owner-only view.
       isOwnProfile ? listAlbums(activeProfile.id) : Promise.resolve(null),
+      // A costume shop's outfit catalogue. Not behind MARKETPLACE_ENABLED:
+      // outfits live here, not on Chợ F (project owner, 21/09/2026).
+      activeProfile.role === "COSTUME_SHOP"
+        ? listPublicCostumes(activeProfile.id)
+        : Promise.resolve([]),
     ]);
 
   // Album creation (POST /api/albums) requires an active subscription
@@ -389,10 +396,10 @@ export default async function PublicProfilePage({
             profileId={activeProfile.id}
             role={activeProfile.role}
             firstName={firstName}
-            hasGear={
-              features.marketplaceEnabled &&
-              user.profiles.some((p) => p.role === "CAMERA_SHOP")
-            }
+            // Chợ F is open to every gear owner now, not only camera shops,
+            // so the tab follows the listings themselves.
+            hasGear={features.marketplaceEnabled && products.length > 0}
+            costumes={costumes}
             albums={activeProfile.albums}
             ownerAlbums={
               ownerAlbums?.map((a) => ({

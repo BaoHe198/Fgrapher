@@ -31,6 +31,28 @@ export async function GET(
         include: {
           services: { orderBy: { createdAt: "asc" } },
           serviceAreas: { select: { provinceId: true } },
+          // The costume catalogue and the photos it can attach. Every role
+          // gets these two lists; only COSTUME_SHOP renders them, and a
+          // profile's own photo list is small (plan-capped).
+          costumes: {
+            where: { deletedAt: null },
+            orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+            include: {
+              media: {
+                select: { id: true, url: true, moderationStatus: true },
+              },
+            },
+          },
+          media: {
+            where: { deletedAt: null },
+            orderBy: { order: "asc" },
+            select: {
+              id: true,
+              url: true,
+              title: true,
+              moderationStatus: true,
+            },
+          },
         },
       }),
       db.userRole.findUnique({

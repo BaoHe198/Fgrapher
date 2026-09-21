@@ -2288,6 +2288,36 @@
         "basics": "Basic information",
         "roleProfile": "Role profile",
         "availability": "Availability"
+      },
+      "costumes": {
+        "title": "Costume rentals",
+        "helper": "Each outfit appears on your public profile with its photo and price. Customers book or message you — these are not sold through Chợ F.",
+        "add": "Add outfit",
+        "addTitle": "Add an outfit",
+        "editTitle": "Edit outfit",
+        "empty": "No outfits yet",
+        "inactive": "(hidden)",
+        "perDay": "{price}/day",
+        "deposit": "deposit {amount}",
+        "photoPending": "The photo is awaiting moderation, so this outfit is not public yet.",
+        "nameLabel": "Outfit name",
+        "categoryLabel": "Category",
+        "categoryNone": "Uncategorised",
+        "priceLabel": "Daily rental price",
+        "depositLabel": "Deposit (leave empty if none)",
+        "sizeLabel": "Size",
+        "colorLabel": "Colour",
+        "photoLabel": "Photo",
+        "photoNone": "No photo yet",
+        "photoNumbered": "Photo {index}",
+        "photoHelper": "Pick one of your uploaded portfolio photos. A new photo must clear moderation before it appears publicly.",
+        "descriptionLabel": "Description",
+        "activeLabel": "Available to rent",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saveFailed": "Could not save, please try again",
+        "editAria": "Edit {name}",
+        "deleteAria": "Delete {name}"
       }
     }
   },
@@ -2836,7 +2866,9 @@
       "tabs": {
         "portfolio": "Portfolio",
         "services": "Services",
-        "reviews": "Reviews"
+        "reviews": "Reviews",
+        "costumes": "Costumes",
+        "gear": "Gear"
       },
       "status": {
         "available": "Available",
@@ -2937,6 +2969,12 @@
       "albumEditDialog": {
         "title": "Edit album",
         "managePhotosLink": "Manage photos"
+      },
+      "costumesTab": {
+        "empty": "No costumes listed yet",
+        "note": "Prices are per day. Contact or book the shop to reserve — these are not sold through the cart.",
+        "perDay": "{price}/day",
+        "deposit": "Deposit {amount}"
       }
     },
     "roleProvinceLanding": {

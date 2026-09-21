@@ -719,6 +719,7 @@ model Profile {
   media        ProfileMedia[]
   albums       Album[]
   serviceAreas ProfileServiceArea[]
+  costumes     CostumeItem[]
 
   @@unique([userId, role])
   @@index([role, isPublished])
@@ -814,15 +815,57 @@ model ProfileMedia {
   // "Thùng rác" screen until then.
   deletedAt DateTime?
 
-  profile       Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  album         Album?  @relation("AlbumMedia", fields: [albumId], references: [id], onDelete: SetNull)
-  coverOfAlbums Album[] @relation("AlbumCover")
+  profile       Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  album         Album?        @relation("AlbumMedia", fields: [albumId], references: [id], onDelete: SetNull)
+  coverOfAlbums Album[]       @relation("AlbumCover")
+  costumeItems  CostumeItem[]
 
   @@index([profileId, order])
   @@index([moderationStatus, createdAt])
   @@index([albumId])
   @@index([deletedAt])
   @@map("profile_media")
+}
+
+/// One outfit in a costume shop's catalogue.
+///
+/// Deliberately NOT a `Product`: Chợ F sells photo/video equipment only
+/// (project owner, 21/09/2026), and outfits are shown on the shop's own
+/// profile, where the customer books or contacts rather than adding to a
+/// cart. Keeping them out of `Product` is what makes that structural
+/// instead of a filter somebody can forget.
+///
+/// The photo is a `ProfileMedia` row rather than a URL column, so an outfit
+/// photo goes through the existing upload, rights-confirmation, moderation
+/// queue and trash exactly like a portfolio photo (CLAUDE.md rule 8). An
+/// item whose photo is not APPROVED yet is hidden from the public profile
+/// but still visible to its owner.
+model CostumeItem {
+  id                String           @id @default(cuid())
+  profileId         String
+  mediaId           String?
+  name              String
+  description       String?          @db.Text
+  category          ProfileCategory?
+  /// Rental price per day, VND. The shop collects payment and the deposit
+  /// itself — the platform records the figures, it never holds the money.
+  rentalPricePerDay Float
+  depositAmount     Float?
+  size              String?
+  color             String?
+  isActive          Boolean          @default(true)
+  sortOrder         Int              @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  /// Soft delete, same contract as ProfileMedia.deletedAt.
+  deletedAt         DateTime?
+
+  profile Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  media   ProfileMedia? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+
+  @@index([profileId, sortOrder])
+  @@index([deletedAt])
+  @@map("costume_items")
 }
 
 model Album {

@@ -2288,6 +2288,36 @@
         "basics": "Thông tin cơ bản",
         "roleProfile": "Hồ sơ theo vai trò",
         "availability": "Lịch trống"
+      },
+      "costumes": {
+        "title": "Trang phục cho thuê",
+        "helper": "Mỗi bộ đồ hiển thị trên hồ sơ công khai của bạn kèm ảnh và giá. Khách xem rồi đặt lịch hoặc nhắn tin — không bán qua Chợ F.",
+        "add": "Thêm bộ đồ",
+        "addTitle": "Thêm bộ trang phục",
+        "editTitle": "Sửa bộ trang phục",
+        "empty": "Chưa có bộ trang phục nào",
+        "inactive": "(đang ẩn)",
+        "perDay": "{price}/ngày",
+        "deposit": "cọc {amount}",
+        "photoPending": "Ảnh đang chờ kiểm duyệt nên bộ này chưa hiện công khai.",
+        "nameLabel": "Tên bộ đồ",
+        "categoryLabel": "Thể loại",
+        "categoryNone": "Không phân loại",
+        "priceLabel": "Giá thuê mỗi ngày",
+        "depositLabel": "Tiền cọc (để trống nếu không thu)",
+        "sizeLabel": "Size",
+        "colorLabel": "Màu",
+        "photoLabel": "Ảnh",
+        "photoNone": "Chưa gắn ảnh",
+        "photoNumbered": "Ảnh số {index}",
+        "photoHelper": "Chọn từ ảnh portfolio đã tải lên. Ảnh mới phải qua kiểm duyệt trước khi hiện công khai.",
+        "descriptionLabel": "Mô tả",
+        "activeLabel": "Đang cho thuê",
+        "cancel": "Huỷ",
+        "save": "Lưu",
+        "saveFailed": "Không lưu được, vui lòng thử lại",
+        "editAria": "Sửa {name}",
+        "deleteAria": "Xoá {name}"
       }
     }
   },
@@ -2836,7 +2866,9 @@
       "tabs": {
         "portfolio": "Portfolio",
         "services": "Dịch vụ",
-        "reviews": "Đánh giá"
+        "reviews": "Đánh giá",
+        "costumes": "Trang phục",
+        "gear": "Thiết bị"
       },
       "status": {
         "available": "Đang nhận đơn",
@@ -2937,6 +2969,12 @@
       "albumEditDialog": {
         "title": "Chỉnh sửa album",
         "managePhotosLink": "Quản lý ảnh"
+      },
+      "costumesTab": {
+        "empty": "Chưa có trang phục nào",
+        "note": "Giá thuê theo ngày. Liên hệ hoặc đặt lịch với shop để giữ đồ — không đặt qua giỏ hàng.",
+        "perDay": "{price}/ngày",
+        "deposit": "Cọc {amount}"
       }
     },
     "roleProvinceLanding": {
