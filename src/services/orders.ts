@@ -460,6 +460,22 @@ export async function listOrders({
   };
 }
 
+/**
+ * When a collection order reveals the shop's exact street address to its
+ * customer. Profile.address is private, and a pending order is just
+ * somebody's cart — the address opens up once the shop has accepted the
+ * order and the customer genuinely has to travel to it (project owner,
+ * 21/09/2026). Deliberately excludes PENDING and CANCELLED.
+ */
+const PICKUP_ADDRESS_VISIBLE_IN: OrderStatus[] = [
+  "CONFIRMED",
+  "SHIPPED",
+  "DELIVERED",
+  "PICKED_UP",
+  "OVERDUE",
+  "RETURNED",
+];
+
 export async function getOrderDetail(orderId: string, userId: string) {
   const order = await db.order.findUnique({
     where: { id: orderId },
@@ -467,7 +483,33 @@ export async function getOrderDetail(orderId: string, userId: string) {
   });
   if (!order || (order.customerId !== userId && order.shopId !== userId))
     return null;
-  return order;
+
+  // Fetched separately rather than through ORDER_INCLUDE, which listOrders
+  // also uses — an address must not ride along in a list response.
+  const pickupAddress =
+    order.deliveryMethod === "PICKUP" &&
+    PICKUP_ADDRESS_VISIBLE_IN.includes(order.status)
+      ? await shopPickupAddress(order.shopId)
+      : null;
+
+  return { ...order, pickupAddress };
+}
+
+async function shopPickupAddress(shopId: string) {
+  const profile = await db.profile.findFirst({
+    where: { userId: shopId, role: { in: SELLER_ROLES } },
+    select: {
+      address: true,
+      ward: { select: { name: true } },
+      province: { select: { name: true } },
+    },
+  });
+  if (!profile) return null;
+  return (
+    [profile.address, profile.ward?.name, profile.province?.name]
+      .filter(Boolean)
+      .join(", ") || null
+  );
 }
 
 const NOTIFICATION_TYPE_FOR_STATUS: Partial<

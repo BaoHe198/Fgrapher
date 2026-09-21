@@ -34,6 +34,9 @@ type Party = Pick<User, "id" | "name" | "firstName" | "avatar" | "email">;
 type OrderDetail = Order & {
   customer: Party;
   shop: Party;
+  // Only present once the shop has confirmed a collection order — see
+  // getOrderDetail's PICKUP_ADDRESS_VISIBLE_IN.
+  pickupAddress: string | null;
   items: (OrderItem & {
     product: Pick<Product, "name" | "type"> & {
       images: Pick<ProductImage, "url">[];
@@ -205,6 +208,17 @@ export function OrderDetailContent() {
               </div>
             ))}
           </Card>
+
+          {order.pickupAddress ? (
+            <Card className="flex flex-col gap-1.5">
+              <span className="text-body-sm text-text-tertiary">
+                {t("pickupAddress")}
+              </span>
+              <p className="text-body-md text-text-primary">
+                {order.pickupAddress}
+              </p>
+            </Card>
+          ) : null}
 
           {order.deliveryFee ? (
             <Card className="flex flex-row items-center justify-between gap-1.5">
