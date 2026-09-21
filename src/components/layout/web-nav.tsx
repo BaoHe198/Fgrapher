@@ -54,6 +54,11 @@ const NAV_LINKS = [
     authOnly: true,
   },
   { href: "/shop", labelKey: "market" as const, alwaysVisible: false },
+  {
+    href: "/community",
+    labelKey: "community" as const,
+    alwaysVisible: false,
+  },
   { href: "/about", labelKey: "introduce" as const, alwaysVisible: true },
 ];
 
@@ -72,8 +77,10 @@ function useIsWide() {
 
 export function WebNav({
   marketplaceEnabled,
+  socialFeedEnabled,
 }: {
   marketplaceEnabled: boolean;
+  socialFeedEnabled: boolean;
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
@@ -85,6 +92,7 @@ export function WebNav({
   const navLinks = NAV_LINKS.filter(
     (link) =>
       (marketplaceEnabled || link.href !== "/shop") &&
+      (socialFeedEnabled || link.href !== "/community") &&
       (!link.authOnly || isAuthenticated),
   );
   const links = isWide
@@ -201,6 +209,7 @@ export function WebNav({
             session={session}
             isAuthenticated={isAuthenticated}
             marketplaceEnabled={marketplaceEnabled}
+            socialFeedEnabled={socialFeedEnabled}
           />
         </div>
       </div>
@@ -253,10 +262,12 @@ function MobileNavSheet({
   session,
   isAuthenticated,
   marketplaceEnabled,
+  socialFeedEnabled,
 }: {
   session: ReturnType<typeof useSession>["data"];
   isAuthenticated: boolean;
   marketplaceEnabled: boolean;
+  socialFeedEnabled: boolean;
 }) {
   const t = useTranslations("nav");
   const ts = useTranslations("sharedComponents.webNav");
@@ -266,6 +277,7 @@ function MobileNavSheet({
   const navLinks = NAV_LINKS.filter(
     (link) =>
       (marketplaceEnabled || link.href !== "/shop") &&
+      (socialFeedEnabled || link.href !== "/community") &&
       (!link.authOnly || isAuthenticated),
   );
 

@@ -78,7 +78,20 @@ export async function createPost({
         })),
       },
     },
-    include: { media: true },
+    include: {
+      media: true,
+      // The composer renders the new post straight away, so it needs the
+      // same author shape the feed returns.
+      user: {
+        select: {
+          id: true,
+          name: true,
+          firstName: true,
+          username: true,
+          avatar: true,
+        },
+      },
+    },
   });
 
   // Fire-and-forget, like the portfolio and product upload paths: every

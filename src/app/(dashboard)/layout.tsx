@@ -58,7 +58,10 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <WebNav marketplaceEnabled={features.marketplaceEnabled} />
+      <WebNav
+        marketplaceEnabled={features.marketplaceEnabled}
+        socialFeedEnabled={features.socialFeedEnabled}
+      />
       <PastDueBanner userId={session.user.id} />
       <ReviewReminderBanner userId={session.user.id} />
 

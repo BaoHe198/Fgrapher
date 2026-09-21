@@ -28,6 +28,7 @@ import {
 
 import { ProfileAvatar, ProfileCover } from "./profile-hero";
 import { listPublicCostumes } from "@/services/costumes";
+import { listUserPosts } from "@/services/posts";
 
 import { ProfileInteractive } from "./profile-interactive";
 
@@ -136,29 +137,39 @@ export default async function PublicProfilePage({
   const session = await auth();
   const isOwnProfile = session?.user?.id === user.id;
 
-  const [reviews, reviewStats, products, followerCount, ownerAlbums, costumes] =
-    await Promise.all([
-      getProfileReviews(user.id),
-      getProfileReviewStats(user.id),
-      features.marketplaceEnabled
-        ? getShopProducts(user.id)
-        : Promise.resolve([]),
-      features.socialFeedEnabled
-        ? db.follow.count({ where: { followingId: user.id } })
-        : Promise.resolve(0),
-      // getPublicProfileUser's activeProfile.albums (below) is filtered to
-      // isPublished albums with at least one APPROVED photo — correct for
-      // what a visitor sees, but the owner needs to see and reorder
-      // everything they have, including drafts and albums still pending
-      // moderation. Same call dashboard/portfolio/page.tsx makes for its
-      // own owner-only view.
-      isOwnProfile ? listAlbums(activeProfile.id) : Promise.resolve(null),
-      // A costume shop's outfit catalogue. Not behind MARKETPLACE_ENABLED:
-      // outfits live here, not on Chợ F (project owner, 21/09/2026).
-      activeProfile.role === "COSTUME_SHOP"
-        ? listPublicCostumes(activeProfile.id)
-        : Promise.resolve([]),
-    ]);
+  const [
+    reviews,
+    reviewStats,
+    products,
+    followerCount,
+    ownerAlbums,
+    costumes,
+    posts,
+  ] = await Promise.all([
+    getProfileReviews(user.id),
+    getProfileReviewStats(user.id),
+    features.marketplaceEnabled
+      ? getShopProducts(user.id)
+      : Promise.resolve([]),
+    features.socialFeedEnabled
+      ? db.follow.count({ where: { followingId: user.id } })
+      : Promise.resolve(0),
+    // getPublicProfileUser's activeProfile.albums (below) is filtered to
+    // isPublished albums with at least one APPROVED photo — correct for
+    // what a visitor sees, but the owner needs to see and reorder
+    // everything they have, including drafts and albums still pending
+    // moderation. Same call dashboard/portfolio/page.tsx makes for its
+    // own owner-only view.
+    isOwnProfile ? listAlbums(activeProfile.id) : Promise.resolve(null),
+    // A costume shop's outfit catalogue. Not behind MARKETPLACE_ENABLED:
+    // outfits live here, not on Chợ F (project owner, 21/09/2026).
+    activeProfile.role === "COSTUME_SHOP"
+      ? listPublicCostumes(activeProfile.id)
+      : Promise.resolve([]),
+    features.socialFeedEnabled
+      ? listUserPosts(user.id, session?.user?.id ?? null)
+      : Promise.resolve([]),
+  ]);
 
   // Album creation (POST /api/albums) requires an active subscription
   // server-side; dashboard/portfolio/page.tsx already hides its whole
@@ -400,6 +411,7 @@ export default async function PublicProfilePage({
             // so the tab follows the listings themselves.
             hasGear={features.marketplaceEnabled && products.length > 0}
             costumes={costumes}
+            posts={posts}
             albums={activeProfile.albums}
             ownerAlbums={
               ownerAlbums?.map((a) => ({

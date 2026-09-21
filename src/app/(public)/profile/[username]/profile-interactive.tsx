@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 
 import { CostumesTab, type PublicCostume } from "./costumes-tab";
+import { PostsTab, type ProfilePost } from "./posts-tab";
 import { GearTab } from "./gear-tab";
 import { PortfolioTab } from "./portfolio-tab";
 import { ReviewsTab } from "./reviews-tab";
@@ -34,6 +35,7 @@ interface ProfileInteractiveProps {
   firstName: string;
   hasGear: boolean;
   costumes: PublicCostume[];
+  posts: ProfilePost[];
   albums: {
     id: string;
     title: string;
@@ -99,6 +101,7 @@ export function ProfileInteractive({
   firstName,
   hasGear,
   costumes,
+  posts,
   albums,
   ownerAlbums,
   canEditPortfolio,
@@ -187,6 +190,9 @@ export function ProfileInteractive({
             {costumes.length > 0 ? (
               <TabsTab value="costumes">{t("costumes")}</TabsTab>
             ) : null}
+            {posts.length > 0 ? (
+              <TabsTab value="posts">{t("posts")}</TabsTab>
+            ) : null}
             {hasGear ? <TabsTab value="gear">{t("gear")}</TabsTab> : null}
           </TabsList>
           <TabsPanel value="portfolio" className="mt-6">
@@ -217,6 +223,11 @@ export function ProfileInteractive({
           {costumes.length > 0 ? (
             <TabsPanel value="costumes" className="mt-6">
               <CostumesTab costumes={costumes} />
+            </TabsPanel>
+          ) : null}
+          {posts.length > 0 ? (
+            <TabsPanel value="posts" className="mt-6">
+              <PostsTab posts={posts} />
             </TabsPanel>
           ) : null}
           {hasGear ? (

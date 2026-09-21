@@ -2876,7 +2876,8 @@
         "services": "Services",
         "reviews": "Reviews",
         "costumes": "Costumes",
-        "gear": "Gear"
+        "gear": "Gear",
+        "posts": "Posts"
       },
       "status": {
         "available": "Available",
@@ -2983,6 +2984,10 @@
         "note": "Prices are per day. Contact or book the shop to reserve — these are not sold through the cart.",
         "perDay": "{price}/day",
         "deposit": "Deposit {amount}"
+      },
+      "postsTab": {
+        "empty": "No posts yet",
+        "stats": "{likes} likes · {comments} comments"
       }
     },
     "roleProvinceLanding": {
@@ -3510,6 +3515,27 @@
       "noReviews": "No reviews yet",
       "ratingSummary": "{average} · {count} reviews",
       "shopReply": "Shop replied:"
+    },
+    "community": {
+      "heading": "Community",
+      "subtitle": "Posts from the photography community",
+      "tabDiscover": "Discover",
+      "tabFollowing": "Following",
+      "composerPlaceholder": "Share something with the community...",
+      "publish": "Post",
+      "publishing": "Posting...",
+      "publishFailed": "Could not publish",
+      "empty": "No posts yet",
+      "emptyFollowing": "You aren't following anyone yet, or they haven't posted. Try Discover.",
+      "loadMore": "Load more",
+      "comments": "{count} comments",
+      "likes": "{count} likes",
+      "commentPlaceholder": "Write a comment...",
+      "send": "Send",
+      "delete": "Delete post",
+      "deleteConfirm": "Delete this post?",
+      "loginToPost": "Sign in to post and interact",
+      "photoPending": "Photo awaiting moderation"
     }
   },
   "sharedComponents": {

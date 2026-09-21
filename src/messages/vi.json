@@ -2876,7 +2876,8 @@
         "services": "Dịch vụ",
         "reviews": "Đánh giá",
         "costumes": "Trang phục",
-        "gear": "Thiết bị"
+        "gear": "Thiết bị",
+        "posts": "Bài đăng"
       },
       "status": {
         "available": "Đang nhận đơn",
@@ -2983,6 +2984,10 @@
         "note": "Giá thuê theo ngày. Liên hệ hoặc đặt lịch với shop để giữ đồ — không đặt qua giỏ hàng.",
         "perDay": "{price}/ngày",
         "deposit": "Cọc {amount}"
+      },
+      "postsTab": {
+        "empty": "Chưa có bài đăng nào",
+        "stats": "{likes} lượt thích · {comments} bình luận"
       }
     },
     "roleProvinceLanding": {
@@ -3510,6 +3515,27 @@
       "noReviews": "Chưa có đánh giá nào",
       "ratingSummary": "{average} · {count} đánh giá",
       "shopReply": "Shop phản hồi:"
+    },
+    "community": {
+      "heading": "Cộng đồng F",
+      "subtitle": "Bài đăng từ cộng đồng nhiếp ảnh",
+      "tabDiscover": "Khám phá",
+      "tabFollowing": "Đang theo dõi",
+      "composerPlaceholder": "Chia sẻ điều gì đó với cộng đồng...",
+      "publish": "Đăng bài",
+      "publishing": "Đang đăng...",
+      "publishFailed": "Không đăng được bài",
+      "empty": "Chưa có bài đăng nào",
+      "emptyFollowing": "Bạn chưa theo dõi ai, hoặc họ chưa đăng gì. Thử tab Khám phá.",
+      "loadMore": "Xem thêm",
+      "comments": "{count} bình luận",
+      "likes": "{count} lượt thích",
+      "commentPlaceholder": "Viết bình luận...",
+      "send": "Gửi",
+      "delete": "Xoá bài",
+      "deleteConfirm": "Xoá bài đăng này?",
+      "loginToPost": "Đăng nhập để đăng bài và tương tác",
+      "photoPending": "Ảnh đang chờ kiểm duyệt"
     }
   },
   "sharedComponents": {

@@ -9,7 +9,10 @@ export default function PublicLayout({
 }) {
   return (
     <div className="flex min-h-full flex-col">
-      <WebNav marketplaceEnabled={features.marketplaceEnabled} />
+      <WebNav
+        marketplaceEnabled={features.marketplaceEnabled}
+        socialFeedEnabled={features.socialFeedEnabled}
+      />
       <main id="main-content" className="flex-1">
         {children}
       </main>
