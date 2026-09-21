@@ -3,6 +3,11 @@ import { getTranslations } from "next-intl/server";
 import type Stripe from "stripe";
 
 import { db } from "@/lib/db";
+import {
+  ACTIVE_RENTAL_STATUSES,
+  checkOrderTransition,
+  ORDER_STATUS_LABEL as STATUS_LABEL,
+} from "@/lib/order-status";
 import { calculateRentalDays } from "@/lib/pricing";
 import {
   newOrderEmailHtml,
@@ -270,14 +275,6 @@ async function createOrdersForCart(
   return orders;
 }
 
-/** Orders that still tie a rental up: anything not cancelled or returned. */
-const ACTIVE_RENTAL_STATUSES: OrderStatus[] = [
-  "PENDING",
-  "CONFIRMED",
-  "SHIPPED",
-  "DELIVERED",
-];
-
 /**
  * Rejects a rental whose dates overlap one the same item already has. Two
  * customers renting the same dress on the same weekend is the failure this
@@ -449,15 +446,6 @@ export async function getOrderDetail(orderId: string, userId: string) {
   return order;
 }
 
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  PENDING: "pending",
-  CONFIRMED: "confirmed",
-  SHIPPED: "shipped",
-  DELIVERED: "delivered",
-  CANCELLED: "cancelled",
-  RETURNED: "returned",
-};
-
 const NOTIFICATION_TYPE_FOR_STATUS: Partial<
   Record<
     OrderStatus,
@@ -498,6 +486,13 @@ export async function updateOrderStatus({
   if (status !== "CANCELLED" && !isShop) {
     throw new OrderError("Only the shop can update this order's status", 403);
   }
+
+  const transition = checkOrderTransition(
+    order.status,
+    status,
+    order.items.some((item) => item.type === "RENT"),
+  );
+  if (!transition.ok) throw new OrderError(transition.reason, 409);
 
   const updated = await db.order.update({
     where: { id: orderId },
@@ -559,6 +554,7 @@ export async function markRentalReturned(
   userId: string,
   deductDeposit: boolean,
   note?: string,
+  fees?: { lateFeeAmount?: number; damageFeeAmount?: number },
 ) {
   const order = await db.order.findUnique({
     where: { id: orderId },
@@ -567,14 +563,33 @@ export async function markRentalReturned(
   if (!order || order.shopId !== userId)
     throw new OrderError("Order not found", 404);
 
+  const transition = checkOrderTransition(
+    order.status,
+    "RETURNED",
+    order.items.some((item) => item.type === "RENT"),
+  );
+  if (!transition.ok) throw new OrderError(transition.reason, 409);
+
+  const returnedAt = new Date();
+
   await db.orderItem.updateMany({
     where: { orderId, type: "RENT" },
-    data: { depositStatus: deductDeposit ? "DEDUCTED" : "REFUNDED" },
+    data: {
+      returnedAt,
+      // The deposit is held by the shop, not the platform (project owner,
+      // 21/09/2026) — this records what the shop says it did with it.
+      depositStatus: deductDeposit ? "DEDUCTED" : "REFUNDED",
+    },
   });
 
   await db.order.update({
     where: { id: orderId },
-    data: { status: "RETURNED" },
+    data: {
+      status: "RETURNED",
+      lateFeeAmount: fees?.lateFeeAmount ?? null,
+      damageFeeAmount: fees?.damageFeeAmount ?? null,
+      returnNote: note ?? null,
+    },
   });
 
   await notify({
@@ -588,4 +603,45 @@ export async function markRentalReturned(
   });
 
   return order;
+}
+
+/**
+ * Flags rentals whose window has passed while the item is still out. Only the
+ * cron calls this — a shop never clicks "overdue", the same way nobody clicks
+ * "expired" on a booking. Returns how many orders were flagged.
+ */
+export async function flagOverdueRentals(now = new Date()) {
+  const candidates = await db.order.findMany({
+    where: {
+      status: { in: ["DELIVERED", "PICKED_UP"] },
+      items: {
+        some: { type: "RENT", returnedAt: null, rentalEnd: { lt: now } },
+      },
+    },
+    select: { id: true },
+  });
+
+  if (candidates.length === 0) return 0;
+
+  const { count } = await db.order.updateMany({
+    where: { id: { in: candidates.map((order) => order.id) } },
+    data: { status: "OVERDUE" },
+  });
+
+  for (const order of candidates) {
+    const detail = await db.order.findUnique({
+      where: { id: order.id },
+      select: { customerId: true },
+    });
+    if (!detail) continue;
+    await notify({
+      userId: detail.customerId,
+      type: "ORDER_DELIVERED",
+      title: "Rental overdue",
+      message: `Order #${order.id.slice(-8)} is past its return date. Please contact the shop to return it.`,
+      data: { orderId: order.id },
+    });
+  }
+
+  return count;
 }

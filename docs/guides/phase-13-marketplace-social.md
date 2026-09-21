@@ -43,6 +43,26 @@ Toàn bộ nằm sau cờ `MARKETPLACE_ENABLED=false`:
 - Ảnh sản phẩm **chưa qua kiểm duyệt** như ảnh portfolio.
 - Chưa có đánh giá sản phẩm/shop, chưa có thông báo đơn hàng.
 
+### Đã làm xong (cập nhật 21/09/2026)
+
+- **Bỏ Stripe khỏi luồng đặt đơn**: đặt đơn bằng `placeOrdersFromCart()`, đơn
+  tạo ở trạng thái chờ, **shop tự thu tiền cọc** (quyết định của chủ dự án) —
+  nền tảng chỉ ghi nhận, không giữ tiền. Code Stripe cũ còn nguyên sau cờ.
+- **Thuê theo ngày**: `OrderItem` đã có `rentalStart`/`rentalEnd`/`returnedAt`;
+  hai khách không thuê được cùng một món trùng ngày (`findRentalConflicts`).
+- **Trạng thái thuê**: thêm `PICKED_UP` (khách đã lấy) và `OVERDUE` (quá hạn
+  trả). Quá hạn do cron `/api/cron/flag-overdue-rentals` đặt lúc 2h sáng, không
+  ai bấm tay.
+- **Luật chuyển trạng thái đơn**: trước đây đơn nhảy từ trạng thái nào sang
+  trạng thái nào cũng được; nay đi qua bảng `VALID_ORDER_TRANSITIONS` trong
+  `src/lib/order-status.ts`, giống cách booking làm.
+- **Phí trễ / hư hỏng**: ghi nhận số tiền trên đơn (`lateFeeAmount`,
+  `damageFeeAmount`, `returnNote`), không tự động trừ tiền ai.
+- **Sản phẩm trang phục**: đã có 8 thể loại riêng cho shop trang phục.
+
+Còn lại của 13A: phí giao hàng, kiểm duyệt ảnh sản phẩm, đánh giá sản phẩm,
+trang shop, thông báo đơn hàng, đăng ký Bộ Công Thương, bật cờ trên Vercel.
+
 ### Cộng đồng — gần như chưa có
 
 | Đã có                                    | Chưa có                                              |

@@ -1195,6 +1195,11 @@ enum OrderStatus {
   CONFIRMED
   SHIPPED
   DELIVERED
+  // Rental-only leg: the customer has the item (PICKED_UP), and the rental
+  // window has passed without it coming back (OVERDUE, set by
+  // /api/cron/flag-overdue-rentals, never by a person clicking).
+  PICKED_UP
+  OVERDUE
   CANCELLED
   RETURNED
 }
@@ -1222,6 +1227,11 @@ model Order {
   trackingCarrier String?
   cancelReason    String?
   notes           String?
+  // Rental settlement. Recorded only — no money moves through the platform,
+  // the shop collects and settles these itself (project owner, 21/09/2026).
+  lateFeeAmount   Float?
+  damageFeeAmount Float?
+  returnNote      String?     @db.Text
   stripePaymentId String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -1244,6 +1254,7 @@ model OrderItem {
   type          ProductType // SALE or RENT
   rentalStart   DateTime?
   rentalEnd     DateTime?
+  returnedAt    DateTime?
   depositAmount Float?
   depositStatus DepositStatus?
 

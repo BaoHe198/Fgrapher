@@ -29,7 +29,17 @@ export const checkoutSchema = z.object({
 });
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(["CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"]),
+  // PICKED_UP is the rental leg where the customer collects at the shop.
+  // OVERDUE and RETURNED are deliberately absent: OVERDUE is only ever set by
+  // the cron, RETURNED only through POST /api/orders/[id]/return, which also
+  // settles the deposit.
+  status: z.enum([
+    "CONFIRMED",
+    "SHIPPED",
+    "DELIVERED",
+    "PICKED_UP",
+    "CANCELLED",
+  ]),
   trackingNumber: z.string().max(100).optional(),
   trackingCarrier: z.string().max(100).optional(),
   cancelReason: z.string().max(500).optional(),
@@ -38,6 +48,9 @@ export const updateOrderStatusSchema = z.object({
 export const returnRentalSchema = z.object({
   deductDeposit: z.boolean(),
   note: z.string().max(500).optional(),
+  // Recorded only — the shop settles these with the customer directly.
+  lateFeeAmount: z.number().nonnegative().max(1_000_000_000).optional(),
+  damageFeeAmount: z.number().nonnegative().max(1_000_000_000).optional(),
 });
 
 // Translated variant — see validations/auth.ts's getLoginSchema comment.

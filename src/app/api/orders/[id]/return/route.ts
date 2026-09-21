@@ -36,6 +36,10 @@ export async function POST(
       session.user.id,
       parsed.data.deductDeposit,
       parsed.data.note,
+      {
+        lateFeeAmount: parsed.data.lateFeeAmount,
+        damageFeeAmount: parsed.data.damageFeeAmount,
+      },
     );
 
     return NextResponse.json(
