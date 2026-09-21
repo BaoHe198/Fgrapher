@@ -31,6 +31,8 @@ const TAB_VALUES: (OrderStatus | "ALL")[] = [
   "CONFIRMED",
   "SHIPPED",
   "DELIVERED",
+  "PICKED_UP",
+  "OVERDUE",
   "CANCELLED",
 ];
 
@@ -42,6 +44,8 @@ const STATUS_VARIANT: Record<
   CONFIRMED: "success",
   SHIPPED: "success",
   DELIVERED: "neutral",
+  PICKED_UP: "success",
+  OVERDUE: "destructive",
   CANCELLED: "destructive",
   RETURNED: "neutral",
 };

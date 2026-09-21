@@ -1830,6 +1830,39 @@
       "selectConversationHint": "Choose from the list to start chatting",
       "pageTitle": "Messages"
     },
+    "shopOrders": {
+      "title": "Shop orders",
+      "tabs": {
+        "ALL": "All",
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "PICKED_UP": "Picked up",
+        "OVERDUE": "Overdue",
+        "CANCELLED": "Cancelled"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "PICKED_UP": "Picked up",
+        "OVERDUE": "Overdue",
+        "CANCELLED": "Cancelled",
+        "RETURNED": "Returned"
+      },
+      "columns": {
+        "customer": "Customer",
+        "items": "Items",
+        "total": "Total",
+        "date": "Ordered",
+        "status": "Status"
+      },
+      "empty": "No orders yet",
+      "customerFallback": "Customer",
+      "view": "View"
+    },
     "customerOrders": {
       "title": "My orders",
       "tabs": {
@@ -1844,6 +1877,8 @@
         "CONFIRMED": "Confirmed",
         "SHIPPED": "Shipped",
         "DELIVERED": "Delivered",
+        "PICKED_UP": "Picked up",
+        "OVERDUE": "Overdue",
         "CANCELLED": "Cancelled",
         "RETURNED": "Returned"
       },
@@ -1859,6 +1894,8 @@
         "CONFIRMED": "Confirmed",
         "SHIPPED": "Shipped",
         "DELIVERED": "Delivered",
+        "PICKED_UP": "Picked up",
+        "OVERDUE": "Overdue",
         "CANCELLED": "Cancelled",
         "RETURNED": "Returned"
       },

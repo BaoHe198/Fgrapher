@@ -49,6 +49,8 @@ const STATUS_VARIANT: Record<
   CONFIRMED: "success",
   SHIPPED: "success",
   DELIVERED: "neutral",
+  PICKED_UP: "success",
+  OVERDUE: "destructive",
   CANCELLED: "destructive",
   RETURNED: "neutral",
 };

@@ -1830,6 +1830,39 @@
       "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin",
       "pageTitle": "Tin nhắn"
     },
+    "shopOrders": {
+      "title": "Đơn hàng cửa hàng",
+      "tabs": {
+        "ALL": "Tất cả",
+        "PENDING": "Đang xử lý",
+        "CONFIRMED": "Đã xác nhận",
+        "SHIPPED": "Đang giao",
+        "DELIVERED": "Đã giao",
+        "PICKED_UP": "Đã lấy hàng",
+        "OVERDUE": "Quá hạn trả",
+        "CANCELLED": "Đã hủy"
+      },
+      "status": {
+        "PENDING": "Đang xử lý",
+        "CONFIRMED": "Đã xác nhận",
+        "SHIPPED": "Đang giao",
+        "DELIVERED": "Đã giao",
+        "PICKED_UP": "Đã lấy hàng",
+        "OVERDUE": "Quá hạn trả",
+        "CANCELLED": "Đã hủy",
+        "RETURNED": "Đã hoàn trả"
+      },
+      "columns": {
+        "customer": "Khách hàng",
+        "items": "Sản phẩm",
+        "total": "Tổng tiền",
+        "date": "Ngày đặt",
+        "status": "Trạng thái"
+      },
+      "empty": "Chưa có đơn hàng nào",
+      "customerFallback": "Khách hàng",
+      "view": "Xem"
+    },
     "customerOrders": {
       "title": "Đơn hàng của tôi",
       "tabs": {
@@ -1844,6 +1877,8 @@
         "CONFIRMED": "Đã xác nhận",
         "SHIPPED": "Đang giao",
         "DELIVERED": "Đã giao",
+        "PICKED_UP": "Đã lấy hàng",
+        "OVERDUE": "Quá hạn trả",
         "CANCELLED": "Đã hủy",
         "RETURNED": "Đã hoàn trả"
       },
@@ -1859,6 +1894,8 @@
         "CONFIRMED": "Đã xác nhận",
         "SHIPPED": "Đang giao",
         "DELIVERED": "Đã giao",
+        "PICKED_UP": "Đã lấy hàng",
+        "OVERDUE": "Quá hạn trả",
         "CANCELLED": "Đã hủy",
         "RETURNED": "Đã hoàn trả"
       },
