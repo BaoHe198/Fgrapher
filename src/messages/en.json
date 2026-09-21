@@ -3536,7 +3536,8 @@
       "deleteConfirm": "Delete this post?",
       "loginToPost": "Sign in to post and interact",
       "pendingBanner": "{count} of your posts are waiting on photo moderation. They go public once the photos are approved.",
-      "submittedForReview": "Post submitted. Its photos are awaiting moderation and it will appear once approved."
+      "submittedForReview": "Post submitted. Its photos are awaiting moderation and it will appear once approved.",
+      "report": "Report post"
     }
   },
   "sharedComponents": {
@@ -3704,7 +3705,8 @@
         "Inappropriate content": "Inappropriate content",
         "Appears to be a minor": "Appears to be a minor",
         "Other": "Other"
-      }
+      },
+      "targetPost": "this post"
     },
     "chatPanel": {
       "unknown": "Unknown",

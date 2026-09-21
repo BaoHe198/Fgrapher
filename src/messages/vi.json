@@ -3536,7 +3536,8 @@
       "deleteConfirm": "Xoá bài đăng này?",
       "loginToPost": "Đăng nhập để đăng bài và tương tác",
       "pendingBanner": "{count} bài của bạn đang chờ kiểm duyệt ảnh. Bài chỉ hiện công khai sau khi ảnh được duyệt.",
-      "submittedForReview": "Đã gửi bài. Ảnh đang chờ kiểm duyệt, bài sẽ hiện sau khi được duyệt."
+      "submittedForReview": "Đã gửi bài. Ảnh đang chờ kiểm duyệt, bài sẽ hiện sau khi được duyệt.",
+      "report": "Báo cáo bài đăng"
     }
   },
   "sharedComponents": {
@@ -3704,7 +3705,8 @@
         "Inappropriate content": "Nội dung không phù hợp",
         "Appears to be a minor": "Nghi ngờ dưới 18 tuổi",
         "Other": "Khác"
-      }
+      },
+      "targetPost": "bài đăng này"
     },
     "chatPanel": {
       "unknown": "Người dùng ẩn danh",

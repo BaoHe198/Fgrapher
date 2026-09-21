@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Loader2, MessageCircle, Trash2 } from "lucide-react";
+import { Flag, Heart, Loader2, MessageCircle, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import {
   ProductImageUploader,
   type ProductImage,
 } from "@/components/forms/product-image-uploader";
+import { ReportModal } from "@/components/modals/report-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -45,12 +46,9 @@ function authorName(user: FeedPost["user"]) {
   return user.firstName ?? user.name ?? "";
 }
 
-export function CommunityFeed({
-  isAuthenticated,
-}: {
-  isAuthenticated: boolean;
-}) {
+export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
   const t = useTranslations("publicPages.community");
+  const isAuthenticated = viewerId !== null;
   const [tab, setTab] = useState<"discover" | "following">("discover");
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -130,7 +128,7 @@ export function CommunityFeed({
             <PostCard
               key={post.id}
               post={post}
-              isAuthenticated={isAuthenticated}
+              viewerId={viewerId}
               onDeleted={(id) =>
                 setPosts((prev) => prev.filter((p) => p.id !== id))
               }
@@ -241,14 +239,17 @@ function PostComposer({
 
 function PostCard({
   post,
-  isAuthenticated,
+  viewerId,
   onDeleted,
 }: {
   post: FeedPost;
-  isAuthenticated: boolean;
+  viewerId: string | null;
   onDeleted: (postId: string) => void;
 }) {
   const t = useTranslations("publicPages.community");
+  const isAuthenticated = viewerId !== null;
+  const isOwnPost = viewerId === post.user.id;
+  const [reportOpen, setReportOpen] = useState(false);
   const [liked, setLiked] = useState(post.likedByViewer);
   const [likeCount, setLikeCount] = useState(post.likeCount);
   const [commentCount, setCommentCount] = useState(post.commentCount);
@@ -327,14 +328,28 @@ function PostCard({
             {formatRelativeTime(new Date(post.createdAt))}
           </span>
         </div>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          aria-label={t("delete")}
-          onClick={remove}
-        >
-          <Trash2 className="size-4" />
-        </Button>
+        {/* The API refuses a delete from anyone but the author; the button
+            was showing to everyone regardless, which promised something it
+            would not do. Other people get the report action instead. */}
+        {isOwnPost ? (
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            aria-label={t("delete")}
+            onClick={remove}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        ) : isAuthenticated ? (
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            aria-label={t("report")}
+            onClick={() => setReportOpen(true)}
+          >
+            <Flag className="size-4" />
+          </Button>
+        ) : null}
       </div>
 
       {post.caption ? (
@@ -411,6 +426,13 @@ function PostCard({
           ) : null}
         </div>
       ) : null}
+
+      <ReportModal
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        targetType="post"
+        targetId={post.id}
+      />
     </Card>
   );
 }

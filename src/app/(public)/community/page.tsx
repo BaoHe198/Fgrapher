@@ -24,7 +24,7 @@ export default async function CommunityPage() {
         <h1 className="text-display-md text-text-primary">{t("heading")}</h1>
         <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
       </div>
-      <CommunityFeed isAuthenticated={Boolean(session?.user)} />
+      <CommunityFeed viewerId={session?.user?.id ?? null} />
     </div>
   );
 }

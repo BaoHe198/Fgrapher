@@ -21,7 +21,7 @@ export const respondSchema = z.object({
 });
 
 export const reportSchema = z.object({
-  targetType: z.enum(["review", "user", "message", "product"]),
+  targetType: z.enum(["review", "user", "message", "product", "post"]),
   targetId: z.string().min(1),
   reason: z.enum(REPORT_REASONS),
   description: z.string().max(1000).optional(),

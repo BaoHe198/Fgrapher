@@ -22,7 +22,7 @@ const REASONS: string[] = [...REPORT_REASONS];
 interface ReportModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetType: "review" | "user" | "message" | "product";
+  targetType: "review" | "user" | "message" | "product" | "post";
   targetId: string;
 }
 
@@ -31,6 +31,7 @@ const TARGET_KEY = {
   user: "targetUser",
   message: "targetMessage",
   product: "targetProduct",
+  post: "targetPost",
 } as const;
 
 export function ReportModal({

@@ -180,6 +180,17 @@ tự quy định đổi trả.
 
 ## 4. Giai đoạn 13B — Cộng đồng F
 
+**Trạng thái 22/09/2026: đã chạy được, đang sau cờ `SOCIAL_FEED_ENABLED`.**
+Xong: API bài đăng, trang `/community` với hai tab (phân trang bằng con trỏ),
+soạn bài kèm ảnh, thích/bình luận, chống spam đếm từ CSDL (10 bài & 30 bình
+luận mỗi giờ), kiểm duyệt ảnh bài đăng dùng chung hàng chờ admin, thông báo
+khi có người thích/bình luận, tab "Bài đăng" trên hồ sơ, nút báo cáo bài.
+Bài có ảnh chưa duyệt bị **ẩn hoàn toàn** và tác giả thấy dòng nhắc "đang chờ
+kiểm duyệt" (quyết định của chủ dự án, 22/09/2026).
+
+Chưa làm: trang chi tiết một bài đăng (hiện bình luận mở ngay trong bảng tin),
+theo dõi/bỏ theo dõi ngay trên thẻ bài, và bật cờ trên Vercel.
+
 1. **API bài đăng**: tạo/sửa/xoá, tối đa N ảnh, mô tả, gắn hồ sơ provider.
 2. **Bảng tin**: hai tab "Đang theo dõi" và "Khám phá", phân trang kiểu cuộn vô hạn
    bằng con trỏ (không dùng offset, tránh chậm khi dữ liệu lớn).
