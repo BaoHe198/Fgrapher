@@ -17,6 +17,8 @@ module.exports = {
         "profile",
         "messaging",
         "marketplace",
+        // Cộng đồng F — posts, feed, likes, comments, follows (phase 13B).
+        "social",
         "reviews",
         "admin",
         "model",

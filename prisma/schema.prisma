@@ -1112,12 +1112,23 @@ model Post {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
+  /// Kept in step with Like/Comment rows inside the same transaction that
+  /// writes them. Counting on every feed read is the thing that makes a
+  /// social feed slow once it has any data in it, and the feed shows these
+  /// numbers on every card.
+  likeCount    Int @default(0)
+  commentCount Int @default(0)
+
   user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   media    PostMedia[]
   likes    Like[]
   comments Comment[]
 
   @@index([userId, createdAt])
+  /// The discover feed pages by (createdAt, id) rather than by offset, so a
+  /// post arriving mid-scroll cannot shift somebody onto a page they have
+  /// already seen.
+  @@index([createdAt, id])
   @@map("posts")
 }
 
@@ -1131,9 +1142,21 @@ model PostMedia {
   width    Int?
   height   Int?
 
+  /// Same pre-publication contract as portfolio and product photos
+  /// (CLAUDE.md rule 8). A post with no approved media is not public, so
+  /// the gate is on the post's media, not on the post row.
+  moderationStatus ModerationStatus @default(PENDING)
+  moderationNote   String?
+  moderatedBy      String?
+  moderatedAt      DateTime?
+  autoFlagReason   String?
+  autoFlaggedAt    DateTime?
+  createdAt        DateTime         @default(now())
+
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId, order])
+  @@index([moderationStatus, createdAt])
   @@map("post_media")
 }
 

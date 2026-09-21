@@ -9,7 +9,11 @@ import { revalidatePublicProfile } from "@/lib/cache";
 import { generateKycSignedUrl } from "@/lib/cloudinary";
 import { mediaApprovedEmailHtml, mediaRejectedEmailHtml } from "@/lib/email";
 import { db } from "@/lib/db";
-import { KYC_PURGE_AFTER_DAYS, SELLER_ROLES } from "@/lib/constants";
+import {
+  KYC_PURGE_AFTER_DAYS,
+  PAID_ROLES,
+  SELLER_ROLES,
+} from "@/lib/constants";
 import { ROLE_PLANS } from "@/lib/constants/plans";
 import { logAudit, processDeletion } from "@/services/compliance";
 import { notifyCritical } from "@/services/notification";
@@ -820,6 +824,134 @@ export async function moderateProductImages({
   );
 
   return imageIds.length;
+}
+
+/**
+ * Community post photos awaiting review. Third source for the one admin
+ * queue, shaped like the other two.
+ */
+export async function listPendingPostMedia() {
+  const media = await db.postMedia.findMany({
+    where: { moderationStatus: "PENDING", post: { deletedAt: null } },
+    include: {
+      post: {
+        select: {
+          id: true,
+          caption: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              firstName: true,
+              email: true,
+              profiles: {
+                where: { role: { in: PAID_ROLES } },
+                select: { role: true, displayName: true },
+                take: 1,
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: [
+      { autoFlaggedAt: { sort: "desc", nulls: "last" } },
+      { createdAt: "asc" },
+    ],
+    take: MODERATION_PAGE_SIZE,
+  });
+
+  return media.map((item) => {
+    const author = item.post.user;
+    const profile = author.profiles[0];
+    return {
+      kind: "post" as const,
+      id: item.id,
+      url: item.url,
+      publicId: item.publicId,
+      type: item.type,
+      createdAt: item.createdAt,
+      autoFlagReason: item.autoFlagReason,
+      postCaption: item.post.caption,
+      profile: {
+        role: profile?.role ?? "CUSTOMER",
+        displayName: profile?.displayName ?? null,
+        user: {
+          name: author.name,
+          firstName: author.firstName,
+          email: author.email,
+        },
+      },
+      album: null,
+    };
+  });
+}
+
+/**
+ * Approve or reject post photos. A rejected photo takes its post out of the
+ * feed on its own — a post is public only while it has an approved photo —
+ * so there is nothing to delete here.
+ */
+export async function moderatePostMedia({
+  mediaIds,
+  adminId,
+  action,
+  reason,
+}: {
+  mediaIds: string[];
+  adminId: string;
+  action: "approve" | "reject";
+  reason?: string;
+}) {
+  const status = action === "approve" ? "APPROVED" : "REJECTED";
+
+  const rows = await db.postMedia.findMany({
+    where: { id: { in: mediaIds } },
+    select: { id: true, post: { select: { id: true, userId: true } } },
+  });
+
+  await db.postMedia.updateMany({
+    where: { id: { in: mediaIds } },
+    data: {
+      moderationStatus: status,
+      moderationNote: action === "reject" ? reason : null,
+      moderatedBy: adminId,
+      moderatedAt: new Date(),
+    },
+  });
+
+  await Promise.all(
+    rows.map((row) =>
+      logAudit({
+        actorId: adminId,
+        action: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
+        targetType: "post_media",
+        targetId: row.id,
+        metadata: reason ? { reason } : undefined,
+      }),
+    ),
+  );
+
+  const t = await getEmailT();
+  await Promise.all(
+    rows.map((row) =>
+      notifyCritical({
+        userId: row.post.userId,
+        type: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
+        title:
+          action === "approve"
+            ? t("mediaApproved.heading")
+            : t("mediaRejected.heading"),
+        message:
+          action === "approve"
+            ? t("mediaApproved.body", { count: 1 })
+            : t("mediaRejected.body", { reason: reason ?? "" }),
+        data: { postId: row.post.id },
+      }),
+    ),
+  );
+
+  return mediaIds.length;
 }
 
 // The 3-strikes threshold published on /guidelines.

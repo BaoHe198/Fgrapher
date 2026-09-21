@@ -7,8 +7,10 @@ import { AuthError } from "@/lib/auth-helpers";
 import { moderateMediaSchema } from "@/lib/validations/admin";
 import {
   listPendingMedia,
+  listPendingPostMedia,
   listPendingProductImages,
   moderateMedia,
+  moderatePostMedia,
   moderateProductImages,
 } from "@/services/admin";
 
@@ -20,14 +22,16 @@ export async function GET() {
     // one review job, so they come back as one queue: auto-flagged first
     // (that is what the tier-1 scan is for), then oldest first, which is
     // what the SLA badge measures against.
-    const [media, productImages] = await Promise.all([
+    const [media, productImages, postMedia] = await Promise.all([
       listPendingMedia(),
       listPendingProductImages(),
+      listPendingPostMedia(),
     ]);
 
     const queue = [
       ...media.map((row) => ({ ...row, kind: "profile" as const })),
       ...productImages,
+      ...postMedia,
     ].sort((a, b) => {
       if (Boolean(a.autoFlagReason) !== Boolean(b.autoFlagReason)) {
         return a.autoFlagReason ? -1 : 1;
@@ -81,14 +85,31 @@ export async function PATCH(request: Request) {
 
     // One queue, two tables: split the selection by where each id actually
     // lives instead of trusting a client-supplied label.
-    const productRows = await db.productImage.findMany({
-      where: { id: { in: parsed.data.mediaIds } },
-      select: { id: true },
-    });
+    const [productRows, postRows] = await Promise.all([
+      db.productImage.findMany({
+        where: { id: { in: parsed.data.mediaIds } },
+        select: { id: true },
+      }),
+      db.postMedia.findMany({
+        where: { id: { in: parsed.data.mediaIds } },
+        select: { id: true },
+      }),
+    ]);
     const productIds = new Set(productRows.map((row) => row.id));
-    const profileIds = parsed.data.mediaIds.filter((id) => !productIds.has(id));
+    const postIds = new Set(postRows.map((row) => row.id));
+    const profileIds = parsed.data.mediaIds.filter(
+      (id) => !productIds.has(id) && !postIds.has(id),
+    );
 
     let count = 0;
+    if (postIds.size > 0) {
+      count += await moderatePostMedia({
+        mediaIds: [...postIds],
+        adminId: session.user.id,
+        action: parsed.data.action,
+        reason,
+      });
+    }
     if (profileIds.length > 0) {
       count += await moderateMedia({
         mediaIds: profileIds,
@@ -109,7 +130,12 @@ export async function PATCH(request: Request) {
     await logAdminAction({
       adminId: session.user.id,
       action: `media_${parsed.data.action}`,
-      targetType: productIds.size > 0 ? "product_image" : "profile_media",
+      targetType:
+        productIds.size > 0
+          ? "product_image"
+          : postIds.size > 0
+            ? "post_media"
+            : "profile_media",
       targetId: parsed.data.mediaIds.join(","),
       details: parsed.data,
     });

@@ -190,3 +190,39 @@ export async function runProductImageModeration(imageId: string) {
     metadata: { userId: image.product.userId, reason: result.reason },
   });
 }
+
+/** Same tier-1 scan for a community post's photo. Sort key only. */
+export async function runPostMediaModeration(mediaId: string) {
+  const media = await db.postMedia.findUniqueOrThrow({
+    where: { id: mediaId },
+    select: {
+      id: true,
+      url: true,
+      publicId: true,
+      type: true,
+      post: { select: { userId: true } },
+    },
+  });
+
+  const result = await contentScanner.scan({
+    url: media.url,
+    publicId: media.publicId,
+    type: media.type,
+  });
+  if (result.verdict !== "flagged") return;
+
+  await db.postMedia.update({
+    where: { id: mediaId },
+    data: {
+      autoFlagReason: result.reason ?? "Flagged by automated content scan",
+      autoFlaggedAt: new Date(),
+    },
+  });
+
+  await logAudit({
+    action: "MEDIA_AUTO_FLAGGED",
+    targetType: "post_media",
+    targetId: mediaId,
+    metadata: { userId: media.post.userId, reason: result.reason },
+  });
+}
