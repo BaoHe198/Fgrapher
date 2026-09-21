@@ -32,7 +32,12 @@ export function ProductGallery({
         onClick={() => setLightboxOpen(true)}
         className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--fg-radius-lg)]"
       >
-        <Image src={images[activeIndex].url} alt={name} fill className="object-cover" />
+        <Image
+          src={images[activeIndex].url}
+          alt={name}
+          fill
+          className="object-cover"
+        />
       </button>
 
       {images.length > 1 ? (

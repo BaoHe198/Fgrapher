@@ -28,7 +28,23 @@
       "Bash(node -e ' *)",
       "Bash(node -e \"const d=require\\('./src/messages/vi.json'\\); console.log\\(JSON.stringify\\(d.accountFlows.admin.compliance.auditLog,null,1\\)\\)\")",
       "Bash(curl -s http://localhost:3000/register)",
-      "Bash(grep -o 'aria-label=\"[^\"]\\\\{0,40\\\\}\"')"
+      "Bash(grep -o 'aria-label=\"[^\"]\\\\{0,40\\\\}\"')",
+      "Read(//Users/heducthienbao/Downloads/**)",
+      "Bash(mkdir -p fgrapher-compliance fgrapher-schema fgrapher-seo-landing)",
+      "Bash(cp ~/Downloads/SKILL.md fgrapher-compliance/SKILL.md)",
+      "Bash(cp ~/Downloads/SKILL2.md fgrapher-schema/SKILL.md)",
+      "Bash(cp ~/Downloads/SKILL3.md fgrapher-seo-landing/SKILL.md)",
+      "Edit(/.claude/skills/fgrapher-compliance/**)",
+      "Edit(/.claude/skills/fgrapher-schema/**)",
+      "Edit(/.claude/skills/fgrapher-seo-landing/**)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebSearch",
+      "WebFetch(domain:developers.openai.com)",
+      "Bash(grep -E \"^/Users.*\\\\.\\(ts|tsx\\)$\")",
+      "Bash(curl -s -o /dev/null -w \"localhost:3000 -> %{http_code}\\\\n\" --max-time 8 http://localhost:3000/)",
+      "Bash(lsof -iTCP:3000 -sTCP:LISTEN -n -P)",
+      "Bash(awk '{print \"process:\", $1, \"pid:\", $2}')",
+      "Bash(break)"
     ]
   }
 }

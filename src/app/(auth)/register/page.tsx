@@ -9,7 +9,9 @@ interface RegisterRedirectProps {
 // deleted) so existing bookmarks/links, and any external links pointing at
 // /register, keep working — it just forwards straight through, carrying
 // every query param (role, interval, callbackUrl, ...) along with it.
-export default async function RegisterRedirectPage({ searchParams }: RegisterRedirectProps) {
+export default async function RegisterRedirectPage({
+  searchParams,
+}: RegisterRedirectProps) {
   const params = await searchParams;
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {

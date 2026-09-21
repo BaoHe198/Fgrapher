@@ -4,7 +4,10 @@ import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { updateReviewSchema } from "@/lib/validations/review";
 import { ReviewError, updateReview } from "@/services/reviews";
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -21,9 +24,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       );
     }
 
-    const review = await updateReview({ reviewId: id, userId: session.user.id, ...parsed.data });
+    const review = await updateReview({
+      reviewId: id,
+      userId: session.user.id,
+      ...parsed.data,
+    });
 
-    return NextResponse.json({ data: review, error: null, message: "Review updated" }, { status: 200 });
+    return NextResponse.json(
+      { data: review, error: null, message: "Review updated" },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(

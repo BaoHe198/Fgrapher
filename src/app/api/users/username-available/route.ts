@@ -19,7 +19,10 @@ export async function GET(request: Request) {
     const existing = await db.user.findUnique({ where: { username: value } });
     const available = !existing || existing.id === session.user.id;
 
-    return NextResponse.json({ data: { available }, error: null, message: null }, { status: 200 });
+    return NextResponse.json(
+      { data: { available }, error: null, message: null },
+      { status: 200 },
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return NextResponse.json(
@@ -29,7 +32,11 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to check username" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to check username",
+      },
       { status: 500 },
     );
   }

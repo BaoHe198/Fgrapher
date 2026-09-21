@@ -20,7 +20,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const review = await createReview({ reviewerId: session.user.id, ...parsed.data });
+    const review = await createReview({
+      reviewerId: session.user.id,
+      ...parsed.data,
+    });
 
     return NextResponse.json(
       { data: review, error: null, message: "Review posted" },

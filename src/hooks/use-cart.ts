@@ -10,7 +10,12 @@ export interface CartItemWithProduct {
   rentalEnd: string | null;
   product: Product & {
     images: ProductImage[];
-    user: { id: string; name: string | null; firstName: string | null; profiles: { shopName: string | null }[] };
+    user: {
+      id: string;
+      name: string | null;
+      firstName: string | null;
+      profiles: { shopName: string | null }[];
+    };
   };
 }
 
@@ -32,7 +37,9 @@ export function useCart() {
   }, [load]);
 
   const updateQuantity = async (id: string, quantity: number) => {
-    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity } : item)),
+    );
     await fetch(`/api/cart/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -48,5 +55,12 @@ export function useCart() {
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  return { items, isLoading, itemCount, reload: load, updateQuantity, removeItem };
+  return {
+    items,
+    isLoading,
+    itemCount,
+    reload: load,
+    updateQuantity,
+    removeItem,
+  };
 }

@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
-import { getProviderReviewStats, listProviderReviews } from "@/services/reviews";
+import {
+  getProviderReviewStats,
+  listProviderReviews,
+} from "@/services/reviews";
 
 import { ReviewsDashboardContent } from "./reviews-dashboard-content";
 

@@ -23,7 +23,9 @@ export async function POST(request: Request) {
 
     // Priority is derived server-side from the reason, never accepted from
     // the client — a reporter can't self-elevate a report's priority.
-    const priority = (HIGH_PRIORITY_REPORT_REASONS as string[]).includes(parsed.data.reason)
+    const priority = (HIGH_PRIORITY_REPORT_REASONS as string[]).includes(
+      parsed.data.reason,
+    )
       ? "HIGH"
       : "NORMAL";
 

@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { respondSchema } from "@/lib/validations/review";
-import { respondToReview, ReviewError, updateReviewResponse } from "@/services/reviews";
+import {
+  respondToReview,
+  ReviewError,
+  updateReviewResponse,
+} from "@/services/reviews";
 
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -12,7 +19,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const parsed = respondSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "A response is required" },
+        {
+          data: null,
+          error: "validation_error",
+          message: "A response is required",
+        },
         { status: 400 },
       );
     }
@@ -48,7 +59,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 }
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await requireAuth();
     const { id } = await params;
@@ -56,7 +70,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const parsed = respondSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "validation_error", message: "A response is required" },
+        {
+          data: null,
+          error: "validation_error",
+          message: "A response is required",
+        },
         { status: 400 },
       );
     }
@@ -86,7 +104,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update response" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to update response",
+      },
       { status: 500 },
     );
   }

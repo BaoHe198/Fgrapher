@@ -28,16 +28,24 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "no_password",
-          message: "This account signs in with a social provider and has no password to change",
+          message:
+            "This account signs in with a social provider and has no password to change",
         },
         { status: 400 },
       );
     }
 
-    const isValid = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
+    const isValid = await bcrypt.compare(
+      parsed.data.currentPassword,
+      user.passwordHash,
+    );
     if (!isValid) {
       return NextResponse.json(
-        { data: null, error: "invalid_password", message: "Current password is incorrect" },
+        {
+          data: null,
+          error: "invalid_password",
+          message: "Current password is incorrect",
+        },
         { status: 400 },
       );
     }
@@ -58,7 +66,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data: null, error: "server_error", message: "Failed to update password" },
+      {
+        data: null,
+        error: "server_error",
+        message: "Failed to update password",
+      },
       { status: 500 },
     );
   }
