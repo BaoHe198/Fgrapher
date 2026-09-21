@@ -273,10 +273,12 @@ export async function getProviderForBooking(providerId: string) {
       id: true,
       firstName: true,
       name: true,
+      username: true,
       avatar: true,
       profiles: {
         where: { isPublished: true, role: { in: PAID_ROLES } },
         select: {
+          displayName: true,
           role: true,
           services: { where: { isActive: true }, orderBy: { price: "asc" } },
         },

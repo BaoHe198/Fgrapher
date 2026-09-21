@@ -1,7 +1,7 @@
 import type { BookingStatus, Role } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
-import { MIN_NOTICE_HOURS } from "@/lib/constants";
+import { MIN_NOTICE_HOURS, PAID_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
   bookingCancelledEmailHtml,
@@ -242,7 +242,17 @@ export async function getBookingDetail(bookingId: string, userId: string) {
           date: true,
           providerId: true,
           recipientRole: true,
-          provider: { select: { firstName: true, name: true } },
+          provider: {
+            select: {
+              firstName: true,
+              name: true,
+              username: true,
+              profiles: {
+                where: { role: { in: PAID_ROLES } },
+                select: { displayName: true, role: true },
+              },
+            },
+          },
         },
       },
     },

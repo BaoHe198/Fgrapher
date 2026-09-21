@@ -4,6 +4,7 @@ import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { newReviewEmailHtml, reviewResponseEmailHtml } from "@/lib/email";
 import { notify } from "@/services/notification";
+import { PAID_ROLES } from "@/lib/constants";
 
 const EDIT_WINDOW_DAYS = 7;
 const RESPONSE_EDIT_WINDOW_HOURS = 24;
@@ -75,7 +76,17 @@ export async function getUnreviewedCompletedBookings(userId: string) {
       review: null,
     },
     include: {
-      provider: { select: { firstName: true, name: true } },
+      provider: {
+        select: {
+          firstName: true,
+          name: true,
+          username: true,
+          profiles: {
+            where: { role: { in: PAID_ROLES } },
+            select: { displayName: true, role: true },
+          },
+        },
+      },
       service: { select: { name: true } },
     },
     orderBy: { completedAt: "asc" },

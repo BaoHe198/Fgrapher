@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { getUnreviewedCompletedBookings } from "@/services/reviews";
+import { resolvePartyName } from "@/lib/party-name";
 
 import { ReviewReminderBannerClient } from "./review-reminder-banner-client";
 
@@ -22,7 +23,7 @@ export async function ReviewReminderBanner({ userId }: { userId: string }) {
     <ReviewReminderBannerClient
       message={t("message", {
         count: bookings.length,
-        provider: oldest.provider.firstName ?? oldest.provider.name ?? "",
+        provider: resolvePartyName(oldest.provider, ""),
       })}
       ctaLabel={t("cta")}
       dismissLabel={t("dismiss")}

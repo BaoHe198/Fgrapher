@@ -38,6 +38,7 @@ import {
   formatWeekdayShort,
 } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
+import { resolvePartyName } from "@/lib/party-name";
 import type { DayAvailability } from "@/services/availability";
 
 type Party = Pick<User, "id" | "name" | "firstName" | "avatar" | "username"> & {
@@ -61,7 +62,12 @@ type BookingDetail = Booking & {
     date: string;
     providerId: string;
     recipientRole: string | null;
-    provider: { firstName: string | null; name: string | null };
+    provider: {
+      firstName: string | null;
+      name: string | null;
+      username: string | null;
+      profiles: { displayName: string | null; role: string }[];
+    };
   }[];
   // Anti-spam/safety (Prompt B7, VIỆC 4).
   isFirstBookingBetweenParties: boolean;
@@ -289,9 +295,7 @@ export default function BookingDetailPage() {
                 href={`/dashboard/bookings/${child.id}`}
                 className="text-body-sm text-text-link hover:underline"
               >
-                {child.provider.firstName ??
-                  child.provider.name ??
-                  t("crewHire.unknown")}
+                {resolvePartyName(child.provider, t("crewHire.unknown"))}
                 {child.recipientRole ? ` — ${child.recipientRole}` : ""}
               </Link>
               <Badge variant="neutral">

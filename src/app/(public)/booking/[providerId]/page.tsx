@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getProviderForBooking } from "@/services/public-profile";
+import { resolvePartyName } from "@/lib/party-name";
 
 import { BookingWizard } from "./booking-wizard";
 
@@ -104,9 +105,7 @@ export default async function BookingFlowPage({
   return (
     <BookingWizard
       providerId={provider.id}
-      providerName={
-        provider.firstName ?? provider.name ?? t("fallbackProviderName")
-      }
+      providerName={resolvePartyName(provider, t("fallbackProviderName"))}
       providerAvatar={provider.avatar}
       services={services}
       contactPhoneDefault={customer?.phone ?? ""}

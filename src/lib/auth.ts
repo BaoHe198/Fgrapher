@@ -9,6 +9,8 @@ import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth-errors";
 import { db } from "@/lib/db";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations/auth";
+import { PAID_ROLES } from "@/lib/constants";
+import { resolvePartyName } from "@/lib/party-name";
 
 // Two layers: per-IP catches a scripted credential-stuffing loop trying
 // many different accounts from one source; per-email catches someone
@@ -154,11 +156,28 @@ const {
 
       // Fetched per-request (not baked into the JWT at sign-in) so that role
       // changes — onboarding, subscription changes — show up without a re-login.
-      const roles = await db.userRole.findMany({
-        where: { userId: token.id, active: true },
-        select: { role: true },
+      const account = await db.user.findUnique({
+        where: { id: token.id },
+        select: {
+          name: true,
+          firstName: true,
+          username: true,
+          roles: { where: { active: true }, select: { role: true } },
+          profiles: {
+            where: { role: { in: PAID_ROLES } },
+            select: { displayName: true, role: true },
+          },
+        },
       });
-      session.user.roles = roles.map((r) => r.role);
+
+      session.user.roles = account?.roles.map((r) => r.role) ?? [];
+      // The header, user menu and messaging popup read session.user.name, so
+      // it holds the public display name (Profile.displayName) — the same
+      // name the public profile and chat show. The account holder's personal
+      // name stays in the database for admin, billing and verification.
+      if (account) {
+        session.user.name = resolvePartyName(account, session.user.name ?? "");
+      }
 
       return session;
     },
