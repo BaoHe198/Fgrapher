@@ -23,7 +23,11 @@ import {
 } from "@/components/forms/address-autocomplete";
 import { Switch } from "@/components/ui/switch";
 import { Tag } from "@/components/ui/tag";
-import { CATEGORIES_BY_ROLE, EXPERIENCE_LEVELS } from "@/lib/constants";
+import {
+  CATEGORIES_BY_ROLE,
+  EXPERIENCE_LEVELS,
+  SELLER_ROLES,
+} from "@/lib/constants";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
@@ -66,6 +70,7 @@ interface ProfileFormValues {
   area: string;
   amenities: string[];
   shopName: string;
+  deliveryFee: string;
   height: string;
   measurements: string;
   hairColor: string;
@@ -100,6 +105,8 @@ function toFormValues(
     area: profile?.area != null ? String(profile.area) : "",
     amenities: (profile?.amenities as string[]) ?? [],
     shopName: (profile?.shopName as string) ?? "",
+    deliveryFee:
+      profile?.deliveryFee != null ? String(profile.deliveryFee) : "",
     height: profile?.height != null ? String(profile.height) : "",
     measurements: (profile?.measurements as string) ?? "",
     hairColor: (profile?.hairColor as string) ?? "",
@@ -250,6 +257,10 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           area: values.area ? Number(values.area) : undefined,
           amenities: values.amenities,
           shopName: values.shopName || undefined,
+          // Empty means "this shop does not deliver", which is not the same
+          // as a 0 fee — see lib/pricing.ts's resolveDeliveryFee.
+          deliveryFee:
+            values.deliveryFee === "" ? undefined : Number(values.deliveryFee),
           height: values.height ? Number(values.height) : undefined,
           measurements: values.measurements || undefined,
           hairColor: values.hairColor || undefined,
@@ -636,12 +647,24 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         </div>
       ) : null}
 
-      {role === "CAMERA_SHOP" ? (
-        <Input
-          label={tEditor("shopNameLabel")}
-          value={values.shopName}
-          onChange={(e) => set("shopName", e.target.value)}
-        />
+      {(SELLER_ROLES as readonly string[]).includes(role) ? (
+        <div className="flex flex-col gap-2">
+          <Input
+            label={tEditor("shopNameLabel")}
+            value={values.shopName}
+            onChange={(e) => set("shopName", e.target.value)}
+          />
+          <Input
+            type="number"
+            min={0}
+            label={tEditor("deliveryFeeLabel")}
+            value={values.deliveryFee}
+            onChange={(e) => set("deliveryFee", e.target.value)}
+          />
+          <p className="text-body-sm text-text-tertiary">
+            {tEditor("deliveryFeeHelper")}
+          </p>
+        </div>
       ) : null}
 
       {role !== "CAMERA_SHOP" ? (

@@ -60,8 +60,17 @@ Toàn bộ nằm sau cờ `MARKETPLACE_ENABLED=false`:
   `damageFeeAmount`, `returnNote`), không tự động trừ tiền ai.
 - **Sản phẩm trang phục**: đã có 8 thể loại riêng cho shop trang phục.
 
-Còn lại của 13A: phí giao hàng, kiểm duyệt ảnh sản phẩm, đánh giá sản phẩm,
-trang shop, thông báo đơn hàng, đăng ký Bộ Công Thương, bật cờ trên Vercel.
+- **Giao nhận**: shop tự đặt **phí giao hàng cố định** trong hồ sơ. Bỏ trống =
+  shop không giao, khách chỉ còn lựa chọn tự đến lấy (khác với phí 0đ = giao
+  miễn phí). Phí được chốt lại trên đơn lúc đặt, shop đổi giá sau không làm
+  thay đổi đơn cũ. Khi chọn tự đến lấy, khách thấy **phường/xã + tỉnh** của
+  shop; địa chỉ chi tiết vẫn riêng tư, shop gửi sau khi xác nhận đơn.
+- **Sửa lỗi kèm theo**: tên cửa hàng và giỏ hàng trước đây chỉ tra theo
+  `CAMERA_SHOP`, nên shop trang phục bị mất tên; ô "Tên cửa hàng" cũng chỉ
+  hiện cho shop máy ảnh nên shop trang phục không đặt tên được.
+
+Còn lại của 13A: kiểm duyệt ảnh sản phẩm, đánh giá sản phẩm, trang shop,
+thông báo đơn hàng, đăng ký Bộ Công Thương, bật cờ trên Vercel.
 
 ### Cộng đồng — gần như chưa có
 

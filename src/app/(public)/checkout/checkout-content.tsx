@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { CartItemRow } from "@/components/cart/cart-item-row";
-import { cartTotals, groupByShop } from "@/components/cart/cart-utils";
+import {
+  cartTotals,
+  deliveryTotals,
+  groupByShop,
+} from "@/components/cart/cart-utils";
 import { termsChunk } from "@/components/legal/terms-link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -30,6 +34,10 @@ export function CheckoutContent() {
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const delivery = deliveryTotals(groups, deliveryMethod);
+  const canDeliver = delivery.undeliverable.length === 0;
+  const grandTotal = totals.total + delivery.fee;
 
   const onCheckout = async () => {
     setError(null);
@@ -98,14 +106,37 @@ export function CheckoutContent() {
                   value={shippingAddress}
                   onChange={(event) => setShippingAddress(event.target.value)}
                 />
-                <p className="text-body-sm text-text-tertiary">
-                  {t("deliveryMethod.shipNote")}
-                </p>
+                {canDeliver ? (
+                  <p className="text-body-sm text-text-tertiary">
+                    {t("deliveryMethod.shipNote")}
+                  </p>
+                ) : (
+                  <p className="text-body-sm text-danger">
+                    {t("deliveryMethod.noDelivery", {
+                      shops: delivery.undeliverable.join(", "),
+                    })}
+                  </p>
+                )}
               </>
             ) : (
-              <p className="text-body-sm text-text-tertiary">
-                {t("deliveryMethod.pickupNote")}
-              </p>
+              <>
+                {groups
+                  .filter((group) => group.pickupArea)
+                  .map((group) => (
+                    <p
+                      key={group.shopId}
+                      className="text-body-sm text-text-secondary"
+                    >
+                      {group.shopName} —{" "}
+                      {t("deliveryMethod.pickupArea", {
+                        area: group.pickupArea ?? "",
+                      })}
+                    </p>
+                  ))}
+                <p className="text-body-sm text-text-tertiary">
+                  {t("deliveryMethod.pickupNote")}
+                </p>
+              </>
             )}
           </Card>
 
@@ -155,10 +186,18 @@ export function CheckoutContent() {
               </span>
             </div>
           ) : null}
+          {deliveryMethod === "SHIP" && canDeliver ? (
+            <div className="flex justify-between text-body-sm">
+              <span className="text-text-secondary">{t("deliveryFee")}</span>
+              <span className="text-text-primary">
+                {formatCurrency(delivery.fee)}
+              </span>
+            </div>
+          ) : null}
           <p className="text-body-sm text-text-tertiary">{t("shippingNote")}</p>
           <div className="flex justify-between border-t border-border-subtle pt-3 text-heading-sm font-bold! text-text-primary">
             <span>{t("total")}</span>
-            <span>{formatCurrency(totals.total)}</span>
+            <span>{formatCurrency(grandTotal)}</span>
           </div>
 
           {error ? <p className="text-body-sm text-danger">{error}</p> : null}
@@ -167,7 +206,7 @@ export function CheckoutContent() {
             variant="accent"
             size="lg"
             className="w-full"
-            disabled={!agreed || isSubmitting}
+            disabled={!agreed || isSubmitting || !canDeliver}
             onClick={onCheckout}
           >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}

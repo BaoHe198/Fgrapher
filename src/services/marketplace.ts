@@ -1,5 +1,6 @@
 import type { Prisma, ProductCondition, ProductType } from "@prisma/client";
 
+import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 
 const PAGE_SIZE = 24;
@@ -62,7 +63,15 @@ export async function searchProducts(params: ShopSearchParams) {
       take: PAGE_SIZE,
       include: {
         images: { orderBy: { order: "asc" }, take: 1 },
-        user: { select: { id: true, name: true, firstName: true, avatar: true, username: true } },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            firstName: true,
+            avatar: true,
+            username: true,
+          },
+        },
       },
     }),
     db.product.count({ where }),
@@ -78,7 +87,12 @@ export async function searchProducts(params: ShopSearchParams) {
     total,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
-    facets: { categories: categoryCounts.map((c) => ({ category: c.category, count: c._count })) },
+    facets: {
+      categories: categoryCounts.map((c) => ({
+        category: c.category,
+        count: c._count,
+      })),
+    },
   };
 }
 
@@ -96,8 +110,15 @@ export async function getProductDetail(id: string) {
           username: true,
           location: true,
           profiles: {
-            where: { role: "CAMERA_SHOP" },
-            select: { shopName: true },
+            // Both seller roles list products — a costume shop's name went
+            // missing here while this filtered on CAMERA_SHOP alone.
+            where: { role: { in: SELLER_ROLES } },
+            select: {
+              shopName: true,
+              deliveryFee: true,
+              province: { select: { name: true } },
+              ward: { select: { name: true } },
+            },
             take: 1,
           },
         },
@@ -108,7 +129,12 @@ export async function getProductDetail(id: string) {
 
   const [related, reviewStats] = await Promise.all([
     db.product.findMany({
-      where: { userId: product.userId, isActive: true, deletedAt: null, id: { not: product.id } },
+      where: {
+        userId: product.userId,
+        isActive: true,
+        deletedAt: null,
+        id: { not: product.id },
+      },
       take: 4,
       orderBy: { createdAt: "desc" },
       include: { images: { orderBy: { order: "asc" }, take: 1 } },
@@ -138,7 +164,23 @@ export async function getCart(userId: string) {
       product: {
         include: {
           images: { orderBy: { order: "asc" }, take: 1 },
-          user: { select: { id: true, name: true, firstName: true, profiles: { where: { role: "CAMERA_SHOP" }, select: { shopName: true }, take: 1 } } },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              firstName: true,
+              profiles: {
+                where: { role: { in: SELLER_ROLES } },
+                select: {
+                  shopName: true,
+                  deliveryFee: true,
+                  province: { select: { name: true } },
+                  ward: { select: { name: true } },
+                },
+                take: 1,
+              },
+            },
+          },
         },
       },
     },
@@ -171,7 +213,9 @@ export async function addToCart({
   rentalStart?: Date;
   rentalEnd?: Date;
 }) {
-  const product = await db.product.findUnique({ where: { id: productId, isActive: true, deletedAt: null } });
+  const product = await db.product.findUnique({
+    where: { id: productId, isActive: true, deletedAt: null },
+  });
   if (!product) throw new CartError("Product not found", 404);
 
   if (type === "SALE" && product.stock < quantity) {
@@ -190,7 +234,8 @@ export async function addToCart({
         rentalEnd: { gt: rentalStart },
       },
     });
-    if (overlapping) throw new CartError("This item is already booked for those dates", 400);
+    if (overlapping)
+      throw new CartError("This item is already booked for those dates", 400);
   }
 
   const existing = await db.cartItem.findFirst({
@@ -215,9 +260,17 @@ export async function addToCart({
   });
 }
 
-export async function updateCartItemQuantity(id: string, userId: string, quantity: number) {
-  const item = await db.cartItem.findUnique({ where: { id }, include: { product: true } });
-  if (!item || item.userId !== userId) throw new CartError("Cart item not found", 404);
+export async function updateCartItemQuantity(
+  id: string,
+  userId: string,
+  quantity: number,
+) {
+  const item = await db.cartItem.findUnique({
+    where: { id },
+    include: { product: true },
+  });
+  if (!item || item.userId !== userId)
+    throw new CartError("Cart item not found", 404);
 
   if (item.type === "SALE" && item.product.stock < quantity) {
     throw new CartError("Not enough stock available", 400);

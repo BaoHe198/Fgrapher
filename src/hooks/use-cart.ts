@@ -14,7 +14,14 @@ export interface CartItemWithProduct {
       id: string;
       name: string | null;
       firstName: string | null;
-      profiles: { shopName: string | null }[];
+      profiles: {
+        shopName: string | null;
+        // null = this shop does not deliver at all, which is different from
+        // a 0 fee (free delivery) — see lib/pricing.ts's resolveDeliveryFee.
+        deliveryFee: number | null;
+        province: { name: string } | null;
+        ward: { name: string } | null;
+      }[];
     };
   };
 }

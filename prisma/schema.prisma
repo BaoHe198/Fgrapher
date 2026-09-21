@@ -651,8 +651,13 @@ model Profile {
   address                     String?
   area                        Float? // square meters
   amenities                   String[] // e.g., ["wifi", "ac", "parking", "changing_room"]
-  // Camera Shop specific
+  // Camera Shop / Costume Shop specific
   shopName                    String?
+  // Flat delivery fee this shop charges per order when the customer picks
+  // "ship to me". null means the shop does not deliver — the customer can
+  // only collect at the shop's address. The platform never handles this
+  // money; it is recorded so both sides agree on the total up front.
+  deliveryFee                 Float?
   // Địa giới hành chính (Prompt B4) — where this specific role/profile is
   // based, distinct from User.wardId (the person's personal/account
   // location). A photographer could live in one province but operate this
@@ -1223,6 +1228,10 @@ model Order {
   currency        String      @default("VND")
   deliveryMethod  String? // SHIP | PICKUP
   shippingAddress String?     @db.Text
+  // Snapshot of the shop's delivery fee at the time of ordering, already
+  // included in totalPrice — a later change to the shop's fee must not
+  // silently change what an existing order says it costs.
+  deliveryFee     Float?
   trackingNumber  String?
   trackingCarrier String?
   cancelReason    String?

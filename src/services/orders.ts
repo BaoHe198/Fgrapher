@@ -2,13 +2,14 @@ import type { OrderStatus } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import type Stripe from "stripe";
 
+import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
   ACTIVE_RENTAL_STATUSES,
   checkOrderTransition,
   ORDER_STATUS_LABEL as STATUS_LABEL,
 } from "@/lib/order-status";
-import { calculateRentalDays } from "@/lib/pricing";
+import { calculateRentalDays, resolveDeliveryFee } from "@/lib/pricing";
 import {
   newOrderEmailHtml,
   orderConfirmationEmailHtml,
@@ -153,11 +154,33 @@ async function createOrdersForCart(
   }
 
   const customer = await db.user.findUnique({ where: { id: userId } });
+
+  // One lookup for every shop in the cart rather than one per order.
+  const shopProfiles = await db.profile.findMany({
+    where: { userId: { in: [...byShop.keys()] }, role: { in: SELLER_ROLES } },
+    select: { userId: true, deliveryFee: true },
+  });
+  const deliveryFeeByShop = new Map(
+    shopProfiles.map((profile) => [profile.userId, profile.deliveryFee]),
+  );
+
   const orders = [];
 
   for (const [shopId, items] of byShop) {
     const currency = items[0].product.currency;
     let totalPrice = 0;
+
+    const delivery = resolveDeliveryFee(
+      deliveryMethod,
+      deliveryFeeByShop.get(shopId),
+    );
+    if (!delivery.ok) {
+      throw new OrderError(
+        "This shop does not deliver — choose collection at the shop instead",
+        409,
+      );
+    }
+    totalPrice += delivery.fee;
 
     const orderItemsData = items.map((item) => {
       const unitPrice =
@@ -197,6 +220,7 @@ async function createOrdersForCart(
           currency,
           deliveryMethod,
           shippingAddress,
+          deliveryFee: delivery.fee,
           stripePaymentId: options.stripePaymentId,
           items: { create: orderItemsData },
         },

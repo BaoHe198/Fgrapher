@@ -1924,7 +1924,8 @@
         "body": "Payment will be refunded and stock restored.",
         "reasonPlaceholder": "Reason (optional)",
         "keepOrder": "Keep order"
-      }
+      },
+      "deliveryFee": "Delivery fee"
     }
   },
   "dashboardSettings": {
@@ -2203,6 +2204,8 @@
           "hideExactLocationHelper": "When on, the map shows an approximate point a few hundred metres away instead of your exact address. Only turn off for a studio or shop open to the public."
         },
         "shopNameLabel": "Shop name",
+        "deliveryFeeLabel": "Delivery fee (₫ per order)",
+        "deliveryFeeHelper": "Leave empty if your shop does not deliver — customers will only be offered collection at the shop. Enter 0 for free delivery.",
         "servicesNeedSaveFirst": "Save your profile details (e.g. pick a specialty category) first, then come back here to add packages.",
         "websiteLabel": "Website",
         "instagramLabel": "Instagram",
@@ -2956,19 +2959,22 @@
         "heading": "Delivery method",
         "shipToMe": "Ship to me",
         "pickupAtShop": "Pick up at shop",
-        "shipNote": "You'll enter your shipping address on the next step.",
-        "pickupNote": "Contact the shop after your order is confirmed to arrange pickup.",
+        "shipNote": "The fee is set by the shop and is already included in the total.",
+        "pickupNote": "The shop sends its exact address once it confirms the order.",
         "addressLabel": "Delivery address",
-        "addressPlaceholder": "Street, ward, province"
+        "addressPlaceholder": "Street, ward, province",
+        "pickupArea": "Collect in: {area}",
+        "noDelivery": "{shops}: this shop does not deliver. Please choose collection at the shop."
       },
       "reviewOrder": "Review your order",
       "agreeTerms": "I agree to the <terms>terms of sale/rental</terms>",
       "orderSummary": "Order summary",
       "subtotal": "Subtotal",
       "deposits": "Deposits",
-      "shippingNote": "Shipping calculated at checkout",
+      "shippingNote": "The shop collects payment on delivery or when you collect.",
       "total": "Total",
-      "continueToPayment": "Continue to payment"
+      "continueToPayment": "Continue to payment",
+      "deliveryFee": "Delivery fee"
     },
     "checkoutSuccess": {
       "settingUp": "Setting up your order...",

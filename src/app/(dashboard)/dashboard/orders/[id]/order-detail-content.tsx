@@ -206,6 +206,17 @@ export function OrderDetailContent() {
             ))}
           </Card>
 
+          {order.deliveryFee ? (
+            <Card className="flex flex-row items-center justify-between gap-1.5">
+              <span className="text-body-sm text-text-tertiary">
+                {t("deliveryFee")}
+              </span>
+              <p className="text-body-md text-text-primary">
+                {formatCurrency(order.deliveryFee, order.currency)}
+              </p>
+            </Card>
+          ) : null}
+
           {order.shippingAddress ? (
             <Card className="flex flex-col gap-1.5">
               <span className="text-body-sm text-text-tertiary">

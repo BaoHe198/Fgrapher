@@ -1924,7 +1924,8 @@
         "body": "Khoản thanh toán sẽ được hoàn lại và tồn kho sẽ được khôi phục.",
         "reasonPlaceholder": "Lý do (không bắt buộc)",
         "keepOrder": "Giữ đơn hàng"
-      }
+      },
+      "deliveryFee": "Phí giao hàng"
     }
   },
   "dashboardSettings": {
@@ -2203,6 +2204,8 @@
           "hideExactLocationHelper": "Khi bật, bản đồ chỉ hiện vị trí gần đúng (lệch vài trăm mét) thay vì đúng địa chỉ của bạn. Chỉ nên tắt nếu đây là studio/cửa hàng mở cửa công khai."
         },
         "shopNameLabel": "Tên cửa hàng",
+        "deliveryFeeLabel": "Phí giao hàng (₫/đơn)",
+        "deliveryFeeHelper": "Để trống nếu cửa hàng không giao hàng — khách sẽ chỉ có lựa chọn tự đến lấy. Nhập 0 nghĩa là giao miễn phí.",
         "servicesNeedSaveFirst": "Lưu thông tin hồ sơ (vd: chọn danh mục sở trường) rồi quay lại đây để thêm gói dịch vụ.",
         "websiteLabel": "Website",
         "instagramLabel": "Instagram",
@@ -2956,19 +2959,22 @@
         "heading": "Phương thức giao hàng",
         "shipToMe": "Giao đến tôi",
         "pickupAtShop": "Nhận tại cửa hàng",
-        "shipNote": "Bạn sẽ nhập địa chỉ giao hàng ở bước tiếp theo.",
-        "pickupNote": "Liên hệ cửa hàng sau khi đơn hàng được xác nhận để sắp xếp nhận hàng.",
+        "shipNote": "Phí giao do cửa hàng quy định và đã được tính vào tổng cộng.",
+        "pickupNote": "Cửa hàng sẽ gửi địa chỉ chi tiết sau khi xác nhận đơn.",
         "addressLabel": "Địa chỉ nhận hàng",
-        "addressPlaceholder": "Số nhà, đường, phường/xã, tỉnh/thành"
+        "addressPlaceholder": "Số nhà, đường, phường/xã, tỉnh/thành",
+        "pickupArea": "Nhận tại: {area}",
+        "noDelivery": "{shops}: cửa hàng không giao hàng. Vui lòng chọn nhận tại cửa hàng."
       },
       "reviewOrder": "Xem lại đơn hàng",
       "agreeTerms": "Tôi đồng ý với <terms>điều khoản mua/thuê</terms>",
       "orderSummary": "Tóm tắt đơn hàng",
       "subtotal": "Tạm tính",
       "deposits": "Tiền đặt cọc",
-      "shippingNote": "Phí vận chuyển sẽ được tính khi thanh toán",
+      "shippingNote": "Cửa hàng thu tiền trực tiếp khi giao hoặc khi bạn đến nhận.",
       "total": "Tổng cộng",
-      "continueToPayment": "Tiếp tục thanh toán"
+      "continueToPayment": "Tiếp tục thanh toán",
+      "deliveryFee": "Phí giao hàng"
     },
     "checkoutSuccess": {
       "settingUp": "Đang xử lý đơn hàng của bạn...",

@@ -48,6 +48,7 @@ export const updateProfileSchema = z.object({
   area: z.number().positive().optional(),
   amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
   shopName: z.string().max(120).optional(),
+  deliveryFee: z.number().nonnegative().max(100_000_000).optional(),
   // Model-specific — see prisma/schema.prisma's Profile model comment.
   height: z.number().int().positive().max(300).optional(),
   measurements: z.string().max(60).optional(),
@@ -94,6 +95,7 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     area: z.number().positive().optional(),
     amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
     shopName: z.string().max(120).optional(),
+    deliveryFee: z.number().nonnegative().max(100_000_000).optional(),
     height: z.number().int().positive().max(300).optional(),
     measurements: z.string().max(60).optional(),
     hairColor: z.string().max(40).optional(),
