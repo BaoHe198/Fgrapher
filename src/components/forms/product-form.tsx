@@ -17,9 +17,8 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { Switch } from "@/components/ui/switch";
-import { useUserRoles } from "@/hooks/use-user-roles";
 import {
-  PRODUCT_CATEGORIES_BY_ROLE,
+  PRODUCT_CATEGORIES,
   productSchema,
   type ProductInput,
 } from "@/lib/validations/product";
@@ -31,11 +30,8 @@ interface ProductFormProps {
 
 export function ProductForm({ productId, defaultValues }: ProductFormProps) {
   const t = useTranslations("uiKit.productForm");
-  const { roles } = useUserRoles();
-  // A camera shop picks gear categories, a costume shop picks outfit ones.
-  const categoryOptions = roles.includes("COSTUME_SHOP")
-    ? PRODUCT_CATEGORIES_BY_ROLE.COSTUME_SHOP
-    : PRODUCT_CATEGORIES_BY_ROLE.CAMERA_SHOP;
+  // Chợ F lists photo/video equipment only, so every seller picks from the
+  // same list (project owner, 21/09/2026).
   const tCondition = useTranslations("uiKit.condition");
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -58,7 +54,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
     defaultValues: {
       name: "",
       description: "",
-      category: categoryOptions[0],
+      category: PRODUCT_CATEGORIES[0],
       type: "SALE",
       condition: "NEW",
       stock: 1,
@@ -123,7 +119,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
         render={({ field }) => (
           <NativeSelect
             label={t("categoryLabel")}
-            options={categoryOptions.map((c) => ({ value: c, label: c }))}
+            options={PRODUCT_CATEGORIES.map((c) => ({ value: c, label: c }))}
             value={field.value}
             onChange={field.onChange}
           />

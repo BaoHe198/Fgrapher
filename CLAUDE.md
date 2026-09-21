@@ -166,15 +166,24 @@ coexists. This keeps launch simpler
 identity for now) — revisit if multi-role providers become a real need
 post-launch. Roles determine UI visibility, permissions, and billing:
 
-| Role          | Paid          | Can upload | Can sell/book        | Profile type            |
-| ------------- | ------------- | ---------- | -------------------- | ----------------------- |
-| PHOTOGRAPHER  | Yes (monthly) | Yes        | Receives bookings    | Portfolio + services    |
-| VIDEOGRAPHER  | Yes (monthly) | Yes        | Receives bookings    | Portfolio + services    |
-| MAKEUP_ARTIST | Yes (monthly) | Yes        | Receives bookings    | Portfolio + services    |
-| STUDIO        | Yes (monthly) | Yes        | Receives bookings    | Location + amenities    |
-| CAMERA_SHOP   | Yes (monthly) | Yes        | Sells/rents products | Shop + product listings |
-| COSTUME_SHOP  | Yes (monthly) | Yes        | Receives bookings    | Shop + rental packages  |
-| CUSTOMER      | No (free)     | No         | Books/purchases only | Minimal profile         |
+| Role          | Paid          | Can upload | Can sell/book         | Profile type             |
+| ------------- | ------------- | ---------- | --------------------- | ------------------------ |
+| PHOTOGRAPHER  | Yes (monthly) | Yes        | Bookings + equipment  | Portfolio + services     |
+| VIDEOGRAPHER  | Yes (monthly) | Yes        | Bookings + equipment  | Portfolio + services     |
+| MAKEUP_ARTIST | Yes (monthly) | Yes        | Receives bookings     | Portfolio + services     |
+| STUDIO        | Yes (monthly) | Yes        | Bookings + equipment  | Location + amenities     |
+| CAMERA_SHOP   | Yes (monthly) | Yes        | Sells/rents equipment | Shop + product listings  |
+| COSTUME_SHOP  | Yes (monthly) | Yes        | Receives bookings     | Shop + costume catalogue |
+| CUSTOMER      | No (free)     | No         | Books/purchases only  | Minimal profile          |
+
+**Chợ F (marketplace) sells and rents PHOTO/VIDEO EQUIPMENT only** (project
+owner, 21/09/2026). `SELLER_ROLES` — who may list there — is therefore
+`CAMERA_SHOP`, `PHOTOGRAPHER`, `VIDEOGRAPHER`, `STUDIO`: everyone who owns
+gear, not only shops. `COSTUME_SHOP` is deliberately **not** a seller: it
+shows its outfits (photo, daily rental price, deposit) on its own profile,
+and takes bookings like any other provider. Do not re-add costume categories
+to `validations/product.ts`. `SHOP_ROLES` is a separate, smaller set — the
+roles that trade under a business name and so get a shop name field.
 
 ### API conventions
 

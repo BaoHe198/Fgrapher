@@ -125,11 +125,23 @@ export const PROVIDER_ROLES: Role[] = [
   "COSTUME_SHOP",
 ];
 
-// Roles allowed to list marketplace products. The costume rental shop
-// joined the camera shop here when the marketplace reopened (project owner,
-// 21/09/2026) — both sell/rent physical items, unlike the booking-only
-// provider roles.
-export const SELLER_ROLES: Role[] = ["CAMERA_SHOP", "COSTUME_SHOP"];
+// Roles allowed to list on Chợ F. The marketplace sells and rents
+// PHOTO/VIDEO EQUIPMENT only (project owner, 21/09/2026), so it is open to
+// everyone who owns gear — camera shops plus the crews themselves — and
+// closed to the costume shop, which shows its outfits in its own profile
+// instead (see COSTUME_SHOP in docs/guides/phase-13-marketplace-social.md).
+export const SELLER_ROLES: Role[] = [
+  "CAMERA_SHOP",
+  "PHOTOGRAPHER",
+  "VIDEOGRAPHER",
+  "STUDIO",
+];
+
+// Roles that present themselves as a business rather than a person, and so
+// get a shop name on their profile. Not the same set as SELLER_ROLES: a
+// costume shop is a shop that does not list on Chợ F, and a photographer
+// lists on Chợ F under their own name.
+export const SHOP_ROLES: Role[] = ["CAMERA_SHOP", "COSTUME_SHOP"];
 
 export const ROLE_LABELS: Record<Role, string> = {
   PHOTOGRAPHER: "Photographer",

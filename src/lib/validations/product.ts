@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-// Camera shops rent gear, costume shops rent outfits — the picker shows the
-// list matching the seller's role (project owner, 21/09/2026), and the schema
-// accepts either so one endpoint serves both.
+// Chợ F is photo/video equipment only (project owner, 21/09/2026). Costume
+// rentals are not products: a costume shop lists its outfits on its own
+// profile instead, so there is one category list, not one per role.
 export const CAMERA_PRODUCT_CATEGORIES = [
   "Camera body",
   "Lens",
@@ -13,26 +13,7 @@ export const CAMERA_PRODUCT_CATEGORIES = [
   "Other",
 ] as const;
 
-export const COSTUME_PRODUCT_CATEGORIES = [
-  "Áo dài",
-  "Váy cưới",
-  "Vest & đồ nam",
-  "Dạ hội",
-  "Cổ trang",
-  "Cosplay",
-  "Trẻ em",
-  "Phụ kiện",
-] as const;
-
-export const PRODUCT_CATEGORIES = [
-  ...CAMERA_PRODUCT_CATEGORIES,
-  ...COSTUME_PRODUCT_CATEGORIES,
-] as const;
-
-export const PRODUCT_CATEGORIES_BY_ROLE = {
-  CAMERA_SHOP: CAMERA_PRODUCT_CATEGORIES,
-  COSTUME_SHOP: COSTUME_PRODUCT_CATEGORIES,
-} as const;
+export const PRODUCT_CATEGORIES = CAMERA_PRODUCT_CATEGORIES;
 
 export const productSchema = z
   .object({

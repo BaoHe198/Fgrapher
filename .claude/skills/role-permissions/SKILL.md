@@ -101,3 +101,16 @@ entirely through bookings.
 
 Categories: AO_DAI, WEDDING_DRESS, MENSWEAR, EVENING_GOWN, HISTORICAL,
 COSPLAY, KIDSWEAR, ACCESSORIES. Seed account: `costume@test.com`.
+
+## Chợ F — who may list products (21/09/2026)
+
+The marketplace sells and rents **photo/video equipment only**. `SELLER_ROLES`
+in `src/lib/constants/index.ts` is `CAMERA_SHOP`, `PHOTOGRAPHER`,
+`VIDEOGRAPHER`, `STUDIO` — gear owners, not just shops. Every STUDIO may list;
+there is no "has a shooting crew" flag and the project owner decided not to add
+one (a studio with no spare gear simply lists nothing).
+
+`COSTUME_SHOP` may **not** list products. Its outfits live on its own profile
+as a costume catalogue (photo + daily rental price + deposit), and it receives
+bookings like any other provider. `SHOP_ROLES` (`CAMERA_SHOP`, `COSTUME_SHOP`)
+is the separate, smaller set of roles that trade under a business name.

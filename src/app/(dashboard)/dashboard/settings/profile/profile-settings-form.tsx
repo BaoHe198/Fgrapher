@@ -27,6 +27,7 @@ import {
   CATEGORIES_BY_ROLE,
   EXPERIENCE_LEVELS,
   SELLER_ROLES,
+  SHOP_ROLES,
 } from "@/lib/constants";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
@@ -647,13 +648,19 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         </div>
       ) : null}
 
+      {/* A shop trades under a business name; a photographer lists gear
+          under their own. The delivery fee follows who can list on Chợ F,
+          which is a different set — see SELLER_ROLES vs SHOP_ROLES. */}
+      {(SHOP_ROLES as readonly string[]).includes(role) ? (
+        <Input
+          label={tEditor("shopNameLabel")}
+          value={values.shopName}
+          onChange={(e) => set("shopName", e.target.value)}
+        />
+      ) : null}
+
       {(SELLER_ROLES as readonly string[]).includes(role) ? (
         <div className="flex flex-col gap-2">
-          <Input
-            label={tEditor("shopNameLabel")}
-            value={values.shopName}
-            onChange={(e) => set("shopName", e.target.value)}
-          />
           <Input
             type="number"
             min={0}

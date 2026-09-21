@@ -12,6 +12,13 @@ Vai trò **Shop cho thuê trang phục** (`COSTUME_SHOP`, thêm ngày 21/09/2026
 đăng từng bộ trang phục để khách thuê, không chỉ nhận đặt lịch. Đó là lý do trực
 tiếp mở lại phần Chợ. Cộng đồng làm sau để giữ người dùng quay lại.
 
+> **Điều chỉnh phạm vi, 21/09/2026 (chủ dự án).** Chợ F **chỉ bán và cho thuê
+> trang thiết bị quay chụp**. Shop trang phục **không đăng lên Chợ F** — trang
+> phục nằm trong hồ sơ của shop (ảnh + giá thuê/ngày + tiền cọc), cùng bảng giá
+> dịch vụ. Người được đăng lên Chợ F: **Nhiếp ảnh gia, Quay phim, Studio và Cửa
+> hàng máy ảnh** (mọi studio đều được, không phân biệt có đội ngũ hay không).
+> Phần cho thuê theo ngày đã xây vẫn dùng nguyên — nay áp cho thiết bị.
+
 Hai mục menu "Chợ F" và "Cộng đồng F" đã có sẵn tên nhưng **chưa hiện**, chỉ bật
 khi phần tương ứng chạy được.
 
@@ -105,13 +112,15 @@ công**, cộng thêm **COD/trả khi nhận** cho đơn giao tận nơi.
 - Trạng thái đơn bổ sung cho thuê: `PICKED_UP` (khách đã lấy) và `OVERDUE` (quá hạn trả).
 - Phí trễ và mất/hỏng: chỉ ghi nhận số tiền, không tự trừ tiền.
 
-### 13A.3 Sản phẩm cho shop trang phục
+### 13A.3 ~~Sản phẩm cho shop trang phục~~ → Mục "Trang phục" trong hồ sơ
 
-- `Product.category` chuyển sang dùng enum `ProfileCategory` phần trang phục
-  (Áo dài, Váy cưới, Vest & đồ nam, Dạ hội, Cổ trang, Cosplay, Trẻ em, Phụ kiện).
-- Thêm trường size, màu, tình trạng đồ.
-- Quyền đăng sản phẩm: `CAMERA_SHOP` và `COSTUME_SHOP` (hiện API chỉ cho phép
-  `CAMERA_SHOP`).
+**Đã đổi hướng 21/09/2026.** Trang phục không còn là "sản phẩm" trên Chợ.
+
+- Chợ F: bỏ toàn bộ thể loại trang phục, chỉ còn thể loại thiết bị. Quyền đăng
+  mở cho `CAMERA_SHOP`, `PHOTOGRAPHER`, `VIDEOGRAPHER`, `STUDIO`.
+- Hồ sơ shop trang phục: thêm mục **Trang phục** — mỗi bộ gồm ảnh, tên, giá
+  thuê theo ngày, tiền cọc, size/màu. Khách xem rồi đặt lịch hoặc liên hệ,
+  không đi qua giỏ hàng. Ảnh phải qua kiểm duyệt như ảnh portfolio.
 
 ### 13A.4 Giao nhận
 

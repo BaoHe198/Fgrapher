@@ -74,7 +74,8 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "forbidden",
-          message: "A shop role is required to list products",
+          message:
+            "Chợ F lists photo and video equipment — only a camera shop, photographer, videographer or studio can list here",
         },
         { status: 403 },
       );

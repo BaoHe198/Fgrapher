@@ -16,7 +16,8 @@ export default async function NewProductPage() {
   if (!session?.user) redirect("/login?callbackUrl=/dashboard/listings/new");
 
   const t = await getTranslations("dashboardCore.listings");
-  // Whichever shop role this account holds — camera shop or costume rental.
+  // Whichever gear-owning role this account holds: Chợ F lists photo/video
+  // equipment, so a photographer or studio sells here too, not just a shop.
   const sellerRole = SELLER_ROLES.find((role) =>
     session.user.roles.includes(role),
   );
