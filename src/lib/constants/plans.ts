@@ -61,6 +61,7 @@ export const ROLE_PLANS: Partial<Record<Role, RolePlan>> = {
   // Priced the same as Make-up Artist per the product decision in
   // docs/guides/fgrapher-prompts-batch-2.md §3a.
   MODEL: plan("MODEL", 390_000, "MODEL"),
+  COSTUME_SHOP: plan("COSTUME_SHOP", 490_000, "COSTUME_SHOP"),
 };
 
 export function priceIdForRole(role: Role, interval: BillingInterval) {

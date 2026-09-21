@@ -7,6 +7,7 @@ export const FMAP_PROVIDER_ROLES = [
   "MAKEUP_ARTIST",
   "STUDIO",
   "MODEL",
+  "COSTUME_SHOP",
 ] as const;
 
 const coordinate = z.coerce.number().finite();

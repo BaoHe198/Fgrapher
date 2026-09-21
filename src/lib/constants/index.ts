@@ -110,6 +110,7 @@ export const PAID_ROLES: Role[] = [
   "MAKEUP_ARTIST",
   "STUDIO",
   "CAMERA_SHOP",
+  "COSTUME_SHOP",
   "MODEL",
 ];
 
@@ -121,6 +122,7 @@ export const PROVIDER_ROLES: Role[] = [
   "MAKEUP_ARTIST",
   "STUDIO",
   "MODEL",
+  "COSTUME_SHOP",
 ];
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -129,6 +131,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   MAKEUP_ARTIST: "Make-up Artist",
   STUDIO: "Studio",
   CAMERA_SHOP: "Camera Shop",
+  COSTUME_SHOP: "Costume Rental",
   MODEL: "Model",
   CUSTOMER: "Customer",
   ADMIN: "Admin",
@@ -145,6 +148,7 @@ export const ROLE_SLUGS: Partial<Record<Role, string>> = {
   MAKEUP_ARTIST: "makeup-artist",
   STUDIO: "studio",
   CAMERA_SHOP: "camera-shop",
+  COSTUME_SHOP: "costume-rental",
   MODEL: "model",
 };
 
@@ -211,6 +215,16 @@ export const CATEGORIES_BY_ROLE: Partial<Record<Role, ProfileCategory[]>> = {
     "MATURE",
     "ALTERNATIVE",
   ],
+  COSTUME_SHOP: [
+    "AO_DAI",
+    "WEDDING_DRESS",
+    "MENSWEAR",
+    "EVENING_GOWN",
+    "HISTORICAL",
+    "COSPLAY",
+    "KIDSWEAR",
+    "ACCESSORIES",
+  ],
 };
 
 export const CATEGORY_LABELS: Record<ProfileCategory, string> = {
@@ -246,6 +260,14 @@ export const CATEGORY_LABELS: Record<ProfileCategory, string> = {
   PETITE: "Petite",
   MATURE: "Mature",
   ALTERNATIVE: "Alternative",
+  AO_DAI: "Áo dài",
+  WEDDING_DRESS: "Wedding dress",
+  MENSWEAR: "Menswear",
+  EVENING_GOWN: "Evening gown",
+  HISTORICAL: "Historical costume",
+  COSPLAY: "Cosplay",
+  KIDSWEAR: "Kidswear",
+  ACCESSORIES: "Accessories",
 };
 
 export const EXPERIENCE_LEVEL_LABELS: Record<ExperienceLevel, string> = {
@@ -275,7 +297,10 @@ export const BOOKABLE_ROLES_BY_ROLE: Partial<Record<Role, Role[]>> = {
     "MAKEUP_ARTIST",
     "STUDIO",
     "MODEL",
+    "COSTUME_SHOP",
   ],
-  PHOTOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL"],
-  VIDEOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL"],
+  PHOTOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL", "COSTUME_SHOP"],
+  VIDEOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL", "COSTUME_SHOP"],
+  STUDIO: ["COSTUME_SHOP"],
+  MODEL: ["COSTUME_SHOP"],
 };

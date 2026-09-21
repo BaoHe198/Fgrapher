@@ -9,6 +9,7 @@ export const checkoutSchema = z.object({
         "MAKEUP_ARTIST",
         "STUDIO",
         "CAMERA_SHOP",
+        "COSTUME_SHOP",
         "MODEL",
       ]),
     )

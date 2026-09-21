@@ -90,6 +90,7 @@ const COMPARISON_MATRIX: Record<Role, boolean[]> = {
   MAKEUP_ARTIST: [true, true, true, true, true, true],
   STUDIO: [true, true, true, true, false, false],
   CAMERA_SHOP: [true, false, true, false, false, false],
+  COSTUME_SHOP: [true, true, true, true, false, false],
   // Full Model plan card (§3c) still pending — this keeps the comparison
   // table's type exhaustive in the meantime, same row shape as Make-up
   // Artist since Model has identical capabilities (see role-permissions).
