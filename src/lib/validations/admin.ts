@@ -67,6 +67,10 @@ export const processDataRequestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("reject"), note: z.string().min(1) }),
 ]);
 
+// The queue mixes portfolio photos (ProfileMedia) and marketplace listing
+// photos (ProductImage), and an admin's "select all, approve" can span both.
+// The route works out which table each id belongs to rather than asking the
+// client to tag them — one less thing a caller can get wrong.
 export const moderateMediaSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("approve"),

@@ -364,7 +364,13 @@ export async function getProfileReviews(userId: string) {
 export async function getShopProducts(userId: string) {
   return db.product.findMany({
     where: { userId, isActive: true, deletedAt: null },
-    include: { images: { orderBy: { order: "asc" }, take: 1 } },
+    include: {
+      images: {
+        where: { moderationStatus: "APPROVED" },
+        orderBy: { order: "asc" },
+        take: 1,
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 }

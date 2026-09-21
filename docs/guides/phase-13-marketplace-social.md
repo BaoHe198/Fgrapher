@@ -135,7 +135,15 @@ duyệt thì chủ shop vẫn thấy (kèm ghi chú) nhưng khách không thấy
 
 ### 13A.5 Kiểm duyệt và an toàn
 
-- Ảnh sản phẩm đi qua đúng luồng kiểm duyệt như ảnh portfolio.
+**Ảnh sản phẩm: xong 21/09/2026.** `ProductImage` có bộ cột kiểm duyệt riêng
+(không trộn vào `ProfileMedia`, vì ảnh bán hàng không phải ảnh portfolio và
+không được hiện trong tab portfolio của chủ shop). Ảnh mới mặc định *chờ
+duyệt* và không hiện trên Chợ, trang sản phẩm hay tab Thiết bị cho tới khi
+admin duyệt. Admin chỉ nhìn **một hàng chờ**: API tự nhận biết ảnh thuộc bảng
+nào, nên chọn gộp cả hai loại rồi duyệt một lần vẫn đúng. Ảnh cũ đã được
+migration đánh dấu là đã duyệt để không làm trắng các shop đang có.
+
+- ~~Ảnh sản phẩm đi qua đúng luồng kiểm duyệt như ảnh portfolio.~~
 - Cấm các mặt hàng không phù hợp; thêm lý do báo cáo cho sản phẩm.
 - Shop phải xác minh danh tính trước khi đăng bán, giống mọi vai trò provider.
 

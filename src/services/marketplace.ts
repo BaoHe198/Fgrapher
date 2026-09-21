@@ -62,7 +62,11 @@ export async function searchProducts(params: ShopSearchParams) {
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       include: {
-        images: { orderBy: { order: "asc" }, take: 1 },
+        images: {
+          where: { moderationStatus: "APPROVED" },
+          orderBy: { order: "asc" },
+          take: 1,
+        },
         user: {
           select: {
             id: true,
@@ -100,7 +104,10 @@ export async function getProductDetail(id: string) {
   const product = await db.product.findUnique({
     where: { id, isActive: true, deletedAt: null },
     include: {
-      images: { orderBy: { order: "asc" } },
+      images: {
+        where: { moderationStatus: "APPROVED" },
+        orderBy: { order: "asc" },
+      },
       user: {
         select: {
           id: true,
@@ -163,7 +170,11 @@ export async function getCart(userId: string) {
     include: {
       product: {
         include: {
-          images: { orderBy: { order: "asc" }, take: 1 },
+          images: {
+            where: { moderationStatus: "APPROVED" },
+            orderBy: { order: "asc" },
+            take: 1,
+          },
           user: {
             select: {
               id: true,

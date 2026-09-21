@@ -1231,10 +1231,27 @@ model ProductImage {
   url       String
   publicId  String?
   order     Int     @default(0)
+  // Needed by the moderation queue: it sorts oldest-first and measures the
+  // review SLA from here, the way ProfileMedia.createdAt does.
+  createdAt DateTime @default(now())
+
+  // Same pre-publication moderation contract as ProfileMedia (CLAUDE.md
+  // rule 8): a new image is PENDING and is not shown to the public until an
+  // admin approves it. Kept as its own columns rather than reusing
+  // ProfileMedia, because a product photo is not portfolio work and must not
+  // appear in the owner's portfolio tab. The admin queue reads both tables
+  // and presents them as one list.
+  moderationStatus ModerationStatus @default(PENDING)
+  moderationNote   String?
+  moderatedBy      String? // admin userId
+  moderatedAt      DateTime?
+  autoFlagReason   String?
+  autoFlaggedAt    DateTime?
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, order])
+  @@index([moderationStatus, id])
   @@map("product_images")
 }
 

@@ -9,7 +9,7 @@ import { revalidatePublicProfile } from "@/lib/cache";
 import { generateKycSignedUrl } from "@/lib/cloudinary";
 import { mediaApprovedEmailHtml, mediaRejectedEmailHtml } from "@/lib/email";
 import { db } from "@/lib/db";
-import { KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
+import { KYC_PURGE_AFTER_DAYS, SELLER_ROLES } from "@/lib/constants";
 import { ROLE_PLANS } from "@/lib/constants/plans";
 import { logAudit, processDeletion } from "@/services/compliance";
 import { notifyCritical } from "@/services/notification";
@@ -681,6 +681,145 @@ export async function listPendingMedia() {
     ],
     take: MODERATION_PAGE_SIZE,
   });
+}
+
+/**
+ * Product photos awaiting review. They live in their own table (a product
+ * photo is not portfolio work), but the admin reviews one queue, so this
+ * returns rows shaped like listPendingMedia's and the API merges the two.
+ */
+export async function listPendingProductImages() {
+  const images = await db.productImage.findMany({
+    where: { moderationStatus: "PENDING" },
+    include: {
+      product: {
+        select: {
+          id: true,
+          name: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              firstName: true,
+              email: true,
+              profiles: {
+                where: { role: { in: SELLER_ROLES } },
+                select: { role: true, displayName: true, shopName: true },
+                take: 1,
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: [
+      { autoFlaggedAt: { sort: "desc", nulls: "last" } },
+      { createdAt: "asc" },
+    ],
+    take: MODERATION_PAGE_SIZE,
+  });
+
+  return images.map((image) => {
+    const seller = image.product.user;
+    const profile = seller.profiles[0];
+    return {
+      kind: "product" as const,
+      id: image.id,
+      url: image.url,
+      publicId: image.publicId,
+      type: "IMAGE" as const,
+      createdAt: image.createdAt,
+      autoFlagReason: image.autoFlagReason,
+      productName: image.product.name,
+      profile: {
+        role: profile?.role ?? "CAMERA_SHOP",
+        displayName: profile?.shopName ?? profile?.displayName ?? null,
+        user: {
+          name: seller.name,
+          firstName: seller.firstName,
+          email: seller.email,
+        },
+      },
+      album: null,
+    };
+  });
+}
+
+/**
+ * Approve or reject product photos. Deliberately simpler than
+ * moderateMedia: there are no albums to group by, and a shop needs to know
+ * per photo which listing is being held up, so one notification per photo.
+ */
+export async function moderateProductImages({
+  imageIds,
+  adminId,
+  action,
+  reason,
+}: {
+  imageIds: string[];
+  adminId: string;
+  action: "approve" | "reject";
+  reason?: string;
+}) {
+  const status = action === "approve" ? "APPROVED" : "REJECTED";
+
+  const rows = await db.productImage.findMany({
+    where: { id: { in: imageIds } },
+    select: {
+      id: true,
+      product: { select: { id: true, name: true, userId: true } },
+    },
+  });
+
+  await db.productImage.updateMany({
+    where: { id: { in: imageIds } },
+    data: {
+      moderationStatus: status,
+      moderationNote: action === "reject" ? reason : null,
+      moderatedBy: adminId,
+      moderatedAt: new Date(),
+    },
+  });
+
+  await Promise.all(
+    rows.map((row) =>
+      logAudit({
+        actorId: adminId,
+        action: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
+        targetType: "product_image",
+        targetId: row.id,
+        metadata: reason ? { reason } : undefined,
+      }),
+    ),
+  );
+
+  // The gear tab on a public profile renders these.
+  await Promise.all(
+    [...new Set(rows.map((row) => row.product.userId))].map((userId) =>
+      revalidatePublicProfile(userId),
+    ),
+  );
+
+  const t = await getEmailT();
+  await Promise.all(
+    rows.map((row) =>
+      notifyCritical({
+        userId: row.product.userId,
+        type: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
+        title:
+          action === "approve"
+            ? t("mediaApproved.heading")
+            : t("mediaRejected.heading"),
+        message:
+          action === "approve"
+            ? t("mediaApproved.body", { count: 1 })
+            : t("mediaRejected.body", { reason: reason ?? "" }),
+        data: { productId: row.product.id },
+      }),
+    ),
+  );
+
+  return imageIds.length;
 }
 
 // The 3-strikes threshold published on /guidelines.

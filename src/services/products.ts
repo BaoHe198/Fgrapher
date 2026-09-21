@@ -2,15 +2,26 @@ import type { ProductType } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import type { ProductInput } from "@/lib/validations/product";
+import { runProductImageModeration } from "@/services/moderation";
 
 export type ListingFilter = "ALL" | "SALE" | "RENT" | "OUT_OF_STOCK";
 
-export async function listProducts({ userId, filter }: { userId: string; filter: ListingFilter }) {
+export async function listProducts({
+  userId,
+  filter,
+}: {
+  userId: string;
+  filter: ListingFilter;
+}) {
   const where =
     filter === "OUT_OF_STOCK"
       ? { userId, deletedAt: null, stock: 0 }
       : filter === "SALE" || filter === "RENT"
-        ? { userId, deletedAt: null, type: { in: [filter, "BOTH"] as ProductType[] } }
+        ? {
+            userId,
+            deletedAt: null,
+            type: { in: [filter, "BOTH"] as ProductType[] },
+          }
         : { userId, deletedAt: null };
 
   return db.product.findMany({
@@ -21,7 +32,7 @@ export async function listProducts({ userId, filter }: { userId: string; filter:
 }
 
 export async function createProduct(userId: string, input: ProductInput) {
-  return db.product.create({
+  const product = await db.product.create({
     data: {
       userId,
       name: input.name,
@@ -34,13 +45,28 @@ export async function createProduct(userId: string, input: ProductInput) {
       condition: input.condition,
       stock: input.stock,
       isActive: input.isActive,
-      images: { create: input.images.map((img, index) => ({ ...img, order: index })) },
+      images: {
+        create: input.images.map((img, index) => ({ ...img, order: index })),
+      },
     },
     include: { images: true },
   });
+
+  // Fire-and-forget tier-1 scan, exactly as POST /api/portfolio does: every
+  // image is PENDING regardless, the scan only decides what the admin sees
+  // first (services/moderation.ts).
+  for (const image of product.images) {
+    void runProductImageModeration(image.id);
+  }
+
+  return product;
 }
 
-export async function updateProduct(id: string, userId: string, input: ProductInput) {
+export async function updateProduct(
+  id: string,
+  userId: string,
+  input: ProductInput,
+) {
   const existing = await db.product.findUnique({ where: { id } });
   if (!existing || existing.userId !== userId) {
     return null;
@@ -61,7 +87,9 @@ export async function updateProduct(id: string, userId: string, input: ProductIn
         condition: input.condition,
         stock: input.stock,
         isActive: input.isActive,
-        images: { create: input.images.map((img, index) => ({ ...img, order: index })) },
+        images: {
+          create: input.images.map((img, index) => ({ ...img, order: index })),
+        },
       },
       include: { images: true },
     });
@@ -74,12 +102,18 @@ export async function deleteProduct(id: string, userId: string) {
     return false;
   }
 
-  await db.product.update({ where: { id }, data: { deletedAt: new Date(), isActive: false } });
+  await db.product.update({
+    where: { id },
+    data: { deletedAt: new Date(), isActive: false },
+  });
   return true;
 }
 
 export async function duplicateProduct(id: string, userId: string) {
-  const existing = await db.product.findUnique({ where: { id }, include: { images: true } });
+  const existing = await db.product.findUnique({
+    where: { id },
+    include: { images: true },
+  });
   if (!existing || existing.userId !== userId) {
     return null;
   }

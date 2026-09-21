@@ -150,3 +150,43 @@ export async function runModeration(mediaId: string) {
     },
   });
 }
+
+/**
+ * Same tier-1 scan for a marketplace listing photo. Like runModeration it
+ * only writes a sort key: a flagged photo is not hidden, rejected or
+ * penalised on a machine's say-so — it simply reaches the admin first. The
+ * photo was already PENDING and PENDING was never public.
+ */
+export async function runProductImageModeration(imageId: string) {
+  const image = await db.productImage.findUniqueOrThrow({
+    where: { id: imageId },
+    select: {
+      id: true,
+      url: true,
+      publicId: true,
+      product: { select: { userId: true } },
+    },
+  });
+
+  const result = await contentScanner.scan({
+    url: image.url,
+    publicId: image.publicId,
+    type: "IMAGE",
+  });
+  if (result.verdict !== "flagged") return;
+
+  await db.productImage.update({
+    where: { id: imageId },
+    data: {
+      autoFlagReason: result.reason ?? "Flagged by automated content scan",
+      autoFlaggedAt: new Date(),
+    },
+  });
+
+  await logAudit({
+    action: "MEDIA_AUTO_FLAGGED",
+    targetType: "product_image",
+    targetId: imageId,
+    metadata: { userId: image.product.userId, reason: result.reason },
+  });
+}
