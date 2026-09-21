@@ -367,3 +367,22 @@ export async function listUserPosts(userId: string, viewerId: string | null) {
     likedByViewer: likedIds.has(post.id),
   }));
 }
+
+/**
+ * How many of this author's own posts are waiting on photo moderation.
+ *
+ * A post whose photos are all still PENDING is not in anybody's feed —
+ * including its author's. Showing the author a text-only version of it
+ * would read as "published", so the feed tells them plainly that it is
+ * held for review instead (project owner, 22/09/2026).
+ */
+export async function countPendingPosts(userId: string) {
+  return db.post.count({
+    where: {
+      userId,
+      deletedAt: null,
+      media: { some: {} },
+      NOT: { media: { some: { moderationStatus: "APPROVED" } } },
+    },
+  });
+}

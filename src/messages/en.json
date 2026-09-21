@@ -3535,7 +3535,8 @@
       "delete": "Delete post",
       "deleteConfirm": "Delete this post?",
       "loginToPost": "Sign in to post and interact",
-      "photoPending": "Photo awaiting moderation"
+      "pendingBanner": "{count} of your posts are waiting on photo moderation. They go public once the photos are approved.",
+      "submittedForReview": "Post submitted. Its photos are awaiting moderation and it will appear once approved."
     }
   },
   "sharedComponents": {

@@ -3535,7 +3535,8 @@
       "delete": "Xoá bài",
       "deleteConfirm": "Xoá bài đăng này?",
       "loginToPost": "Đăng nhập để đăng bài và tương tác",
-      "photoPending": "Ảnh đang chờ kiểm duyệt"
+      "pendingBanner": "{count} bài của bạn đang chờ kiểm duyệt ảnh. Bài chỉ hiện công khai sau khi ảnh được duyệt.",
+      "submittedForReview": "Đã gửi bài. Ảnh đang chờ kiểm duyệt, bài sẽ hiện sau khi được duyệt."
     }
   },
   "sharedComponents": {

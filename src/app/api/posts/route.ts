@@ -4,7 +4,12 @@ import { auth } from "@/lib/auth";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
 import { createPostSchema } from "@/lib/validations/post";
-import { createPost, listFeed, PostError } from "@/services/posts";
+import {
+  countPendingPosts,
+  createPost,
+  listFeed,
+  PostError,
+} from "@/services/posts";
 
 // Dormant while SOCIAL_FEED_ENABLED=false — see CLAUDE.md.
 function socialOff() {
@@ -22,16 +27,17 @@ export async function GET(request: Request) {
     searchParams.get("tab") === "following" ? "following" : "discover";
   const session = await auth();
 
-  const result = await listFeed({
-    viewerId: session?.user?.id ?? null,
-    tab,
-    cursor: searchParams.get("cursor"),
-  });
+  const viewerId = session?.user?.id ?? null;
+  const [result, pendingCount] = await Promise.all([
+    listFeed({ viewerId, tab, cursor: searchParams.get("cursor") }),
+    viewerId ? countPendingPosts(viewerId) : Promise.resolve(0),
+  ]);
 
   return NextResponse.json(
     {
       data: result.data,
       nextCursor: result.nextCursor,
+      pendingCount,
       error: null,
       message: null,
     },

@@ -54,6 +54,7 @@ export function CommunityFeed({
   const [tab, setTab] = useState<"discover" | "following">("discover");
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(
@@ -68,6 +69,7 @@ export function CommunityFeed({
           nextCursor ? [...prev, ...(body.data ?? [])] : (body.data ?? []),
         );
         setCursor(body.nextCursor ?? null);
+        setPendingCount(body.pendingCount ?? 0);
         setIsLoading(false);
       });
     },
@@ -80,9 +82,21 @@ export function CommunityFeed({
 
   return (
     <div className="flex flex-col gap-5">
+      {pendingCount > 0 ? (
+        <Card className="border-brand-primary text-body-sm text-text-secondary">
+          {t("pendingBanner", { count: pendingCount })}
+        </Card>
+      ) : null}
+
       {isAuthenticated ? (
         <PostComposer
-          onCreated={(post) => setPosts((prev) => [post, ...prev])}
+          onPublished={(post) => {
+            // A post with photos is not in anybody's feed until those are
+            // approved, so it must not appear in the author's either — the
+            // banner says where it went instead.
+            if (post) setPosts((prev) => [post, ...prev]);
+            else setPendingCount((count) => count + 1);
+          }}
         />
       ) : (
         <Card className="text-body-md text-text-secondary">
@@ -142,7 +156,12 @@ export function CommunityFeed({
   );
 }
 
-function PostComposer({ onCreated }: { onCreated: (post: FeedPost) => void }) {
+function PostComposer({
+  onPublished,
+}: {
+  /** The new post when it is already public, or null when it is held for review. */
+  onPublished: (post: FeedPost | null) => void;
+}) {
   const t = useTranslations("publicPages.community");
   const [caption, setCaption] = useState("");
   // Reuses the product uploader: it is a generic compress-then-upload
@@ -150,10 +169,12 @@ function PostComposer({ onCreated }: { onCreated: (post: FeedPost) => void }) {
   const [images, setImages] = useState<ProductImage[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const submit = async () => {
     setBusy(true);
     setError(null);
+    setNotice(null);
     const res = await fetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -172,17 +193,21 @@ function PostComposer({ onCreated }: { onCreated: (post: FeedPost) => void }) {
       setError(body.message ?? t("publishFailed"));
       return;
     }
+    const heldForReview = images.length > 0;
     setCaption("");
     setImages([]);
-    onCreated({
-      ...body.data,
-      likeCount: 0,
-      commentCount: 0,
-      likedByViewer: false,
-      // A freshly uploaded photo is still PENDING, so the new card shows the
-      // text only — exactly what every other viewer sees until it is approved.
-      media: [],
-    });
+    setNotice(heldForReview ? t("submittedForReview") : null);
+    onPublished(
+      heldForReview
+        ? null
+        : {
+            ...body.data,
+            likeCount: 0,
+            commentCount: 0,
+            likedByViewer: false,
+            media: [],
+          },
+    );
   };
 
   return (
@@ -195,8 +220,8 @@ function PostComposer({ onCreated }: { onCreated: (post: FeedPost) => void }) {
         onChange={(event) => setCaption(event.target.value)}
       />
       <ProductImageUploader images={images} onChange={setImages} />
-      {images.length > 0 ? (
-        <p className="text-body-sm text-text-tertiary">{t("photoPending")}</p>
+      {notice ? (
+        <p className="text-body-sm text-text-secondary">{notice}</p>
       ) : null}
       {error ? <p className="text-body-sm text-danger">{error}</p> : null}
       <div className="flex justify-end">
