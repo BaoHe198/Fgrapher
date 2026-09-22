@@ -2,6 +2,13 @@
 
 Social-media-style booking & marketplace platform for the photography/videography industry.
 
+## Coding agent và Local AI
+
+Đọc `AGENTS.md` trước khi nhận task. Quy trình giao việc cho local worker, cách
+chọn profile Daily/Heavy và mẫu prompt bắt buộc nằm tại
+`docs/ops/local-ai-worker.md`. Local worker chỉ triển khai trong worktree riêng;
+Claude chịu trách nhiệm chia task, review diff và validation cuối.
+
 ## Phạm vi MVP & Ràng buộc bắt buộc
 
 > Phần này bằng tiếng Việt có chủ đích — giữ nguyên văn theo bản gốc

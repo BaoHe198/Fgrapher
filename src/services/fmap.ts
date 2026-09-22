@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 
-import type { BookingStatus, Prisma } from "@prisma/client";
+import type { BookingStatus, Prisma, ServiceKind } from "@prisma/client";
 
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -60,6 +60,8 @@ export interface FmapProviderPreview {
   avatar: string | null;
   coverUrl: string | null;
   role: FmapMarker["role"];
+  /** What they can be hired for, beyond what the role is called. */
+  serviceKinds: ServiceKind[];
   categories: string[];
   startingPrice: number | null;
   currency: string;
@@ -402,6 +404,7 @@ export async function getFmapProviderPreview(
       id: true,
       userId: true,
       role: true,
+      serviceKinds: true,
       displayName: true,
       description: true,
       categories: true,
@@ -465,6 +468,7 @@ export async function getFmapProviderPreview(
   return {
     profileId: profile.id,
     providerId: profile.userId,
+    serviceKinds: profile.serviceKinds,
     username: profile.user.username,
     displayName:
       profile.displayName ??

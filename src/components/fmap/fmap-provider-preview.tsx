@@ -2,6 +2,8 @@
 
 import { BadgeCheck, CalendarCheck, MapPin, Star, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { serviceKindsForRole } from "@/lib/constants/service-matrix";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -32,6 +34,7 @@ export function FmapProviderPreviewCard({
 }: FmapProviderPreviewCardProps) {
   const t = useTranslations("fmap");
   const roleT = useTranslations("role");
+  const serviceKindT = useTranslations("serviceKind");
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -106,7 +109,17 @@ export function FmapProviderPreviewCard({
                   />
                 </h2>
                 <p className="text-body-sm text-text-secondary">
-                  {roleT(preview.role)}
+                  {/* Role, then anything extra they can be hired for: a
+                      studio that also shoots says so here rather than
+                      looking like a bare room for rent. */}
+                  {[
+                    roleT(preview.role),
+                    ...(preview.serviceKinds ?? [])
+                      .filter(
+                        (kind) => serviceKindsForRole(preview.role)[0] !== kind,
+                      )
+                      .map((kind) => serviceKindT(kind)),
+                  ].join(" · ")}
                 </p>
               </div>
             </div>

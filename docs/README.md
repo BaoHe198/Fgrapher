@@ -23,6 +23,10 @@ Nếu mới làm quen dự án, hãy đọc theo thứ tự này:
 | `PRE_LAUNCH_REVIEW.md` | Xem lần rà soát trước launch                        |
 | `REVIEW-2026-09-08.md` | Xem audit có mốc ngày cụ thể                        |
 
+Hướng dẫn giao task cho AI chạy trên máy nằm tại
+`ops/local-ai-worker.md`. Coding agent bắt đầu từ `../AGENTS.md` để biết thứ tự
+đọc tài liệu và giới hạn quyền.
+
 ## Thư mục
 
 ### `ops/`
