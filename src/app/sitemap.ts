@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
-import { PAID_ROLES, PROVIDER_ROLES, ROLE_SLUGS } from "@/lib/constants";
+import { DISCOVERABLE_ROLES, PAID_ROLES, ROLE_SLUGS } from "@/lib/constants";
 import { features } from "@/lib/features";
 
 const STATIC_ROUTES = [
@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const roleSlugs = Object.entries(ROLE_SLUGS).filter(([role]) =>
-    PROVIDER_ROLES.includes(role as (typeof PROVIDER_ROLES)[number]),
+    DISCOVERABLE_ROLES.includes(role as (typeof DISCOVERABLE_ROLES)[number]),
   );
   const landingEntries: MetadataRoute.Sitemap = roleSlugs.flatMap(
     ([, roleSlug]) =>

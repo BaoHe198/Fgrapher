@@ -6,7 +6,8 @@ import type {
 } from "@prisma/client";
 
 import { db } from "@/lib/db";
-import { PROVIDER_ROLES } from "@/lib/constants";
+import { DISCOVERABLE_ROLES } from "@/lib/constants";
+import { features } from "@/lib/features";
 import { formatAdministrativeLocation } from "@/lib/location";
 import {
   CACHE_KEY_VERSION,
@@ -16,9 +17,15 @@ import {
   unstable_cache,
 } from "@/lib/cache";
 
-// Provider discovery is for bookable services. Product shops are found
-// through Chợ F and never consume a provider-search result slot.
-export const SEARCHABLE_ROLES = PROVIDER_ROLES;
+// Who a customer can find in Ffinding. A costume shop belongs here even
+// though it takes no bookings: search plus a message is the only route to it.
+// The camera shop is the one role gated on Chợ F being open.
+// Providers + the costume shop always; the camera shop only while Chợ F is
+// on. Exported so the featured strip and its test use this same list instead
+// of each hardcoding which roles are dormant.
+export const SEARCHABLE_ROLES: Role[] = features.marketplaceEnabled
+  ? [...DISCOVERABLE_ROLES, "CAMERA_SHOP"]
+  : DISCOVERABLE_ROLES;
 
 export type SortOption =
   "rating" | "price_asc" | "price_desc" | "newest" | "reviews";
@@ -126,7 +133,8 @@ function groupProfilesByUser(
     // insertion order, so a person's role badges/tabs are consistent
     // regardless of which profile they created first.
     const userProfiles = [...rawUserProfiles].sort(
-      (a, b) => PROVIDER_ROLES.indexOf(a.role) - PROVIDER_ROLES.indexOf(b.role),
+      (a, b) =>
+        DISCOVERABLE_ROLES.indexOf(a.role) - DISCOVERABLE_ROLES.indexOf(b.role),
     );
     const stats = statsByUser.get(userProfiles[0].userId) ?? {
       avg: 0,

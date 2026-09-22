@@ -127,6 +127,15 @@ export const PROVIDER_ROLES: Role[] = [
   "MODEL",
 ];
 
+// Roles a customer can discover in Ffinding, in the browse filters, in the
+// footer and on a landing page. Providers plus the costume shop: a costume
+// shop has no calendar and no Chợ F listing, so being findable in search and
+// contacted by message is the ONLY way a customer reaches it (project owner,
+// 22/09/2026). CAMERA_SHOP is not here — it is added only while Chợ F is on,
+// by the one caller that can read the flag, because a camera shop with no
+// listings has nothing to show a searcher.
+export const DISCOVERABLE_ROLES: Role[] = [...PROVIDER_ROLES, "COSTUME_SHOP"];
+
 // Roles allowed to upload profile photos. A camera shop is out — its images
 // are ProductImage rows managed from Listings. COSTUME_SHOP is IN even though
 // it is not a provider: every outfit in its catalogue points at a

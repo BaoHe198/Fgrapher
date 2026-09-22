@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { LogoFull } from "@/components/brand/logo-full";
-import { PROVIDER_ROLES } from "@/lib/constants";
+import { DISCOVERABLE_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 
 const PROVIDER_LINKS = [
@@ -21,7 +21,9 @@ const COMPANY_LINKS = [
 
 export function Footer() {
   const t = useTranslations();
-  const discoverRoles = PROVIDER_ROLES;
+  const discoverRoles = features.marketplaceEnabled
+    ? [...DISCOVERABLE_ROLES, "CAMERA_SHOP" as const]
+    : DISCOVERABLE_ROLES;
   const providerLinks = features.marketplaceEnabled
     ? PROVIDER_LINKS
     : PROVIDER_LINKS.filter((link) => link.labelKey !== "sell");
