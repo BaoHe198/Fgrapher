@@ -103,3 +103,48 @@ Trước khi chạy migration hoặc reset:
 4. Với production, chỉ chạy quy trình deploy migration đã được duyệt.
 
 Xem thêm `docs/MIGRATIONS.md` và `docs/ops/VAN-HANH-PRODUCTION.md`.
+
+## `prisma migrate` báo P1002 "timed out" — thường KHÔNG phải mất mạng
+
+Lỗi này đọc như mất kết nối, nên rất dễ đi kiểm DNS, firewall, Supabase status
+rồi không tìm ra gì. Nguyên nhân thường gặp khác hẳn:
+
+```
+Context: Timed out trying to acquire a postgres advisory lock
+         (SELECT pg_advisory_lock(72707369)). Timeout: 10000ms.
+```
+
+`prisma migrate` **lấy một advisory lock ở tầng session** trước khi chạy. Nếu
+một lần migrate trước bị ngắt giữa đường — bị kill, hết timeout, đóng máy — thì
+session của nó có thể **vẫn sống trong pooler của Supabase ở trạng thái idle và
+vẫn giữ khoá đó**. Mọi lần migrate sau chờ 10 giây rồi bỏ.
+
+Xảy ra thật ngày 22/09/2026: một session giữ khoá **6 giờ 22 phút**, câu lệnh
+cuối của nó là `DROP DATABASE IF EXISTS "prisma_migrate_shadow_db_…"`. Trong
+suốt thời gian đó mọi migration đều thất bại, còn truy vấn thường vẫn chạy bình
+thường — chính sự bất đối xứng đó là dấu hiệu nhận biết.
+
+### Cách xử lý
+
+```bash
+# 1. Kiểm tra kết nối thường trước: nếu truy vấn chạy được mà migrate thì không,
+#    vấn đề gần như chắc chắn là khoá, không phải mạng.
+npx tsx scripts/db-migrate-unlock.ts
+
+# 2. Nếu báo có session bỏ dở đang giữ khoá:
+npx tsx scripts/db-migrate-unlock.ts --terminate
+```
+
+Script chỉ ngắt session **vừa idle vừa giữ khoá quá một giờ**. Session đang
+`active` là migration của người khác đang chạy thật — ngắt nó là cách chắc chắn
+nhất để có một schema áp dụng nửa vời.
+
+### Phòng tránh
+
+- **Đừng kill `prisma migrate` đang chạy.** Qua pooler nó chậm (tạo shadow
+  database mất vài phút), nhưng kill giữa đường chính là thứ tạo ra khoá treo.
+- Khi deploy dùng `prisma migrate deploy` — nó không tạo shadow database nên
+  nhẹ hơn `migrate dev` nhiều.
+- Nếu `migrate dev` vẫn kẹt ở bước shadow database, cấu hình
+  `shadowDatabaseUrl` trỏ tới một database riêng thay vì để Prisma tự tạo/xoá
+  trên chính project.
