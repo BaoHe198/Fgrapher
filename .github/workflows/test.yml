@@ -61,6 +61,10 @@ jobs:
       NEXTAUTH_SECRET: ci-test-secret-not-used-anywhere-real
       NEXTAUTH_URL: http://localhost:3000
       AUTH_TRUST_HOST: "true"
+      # The suite logs in far more than the production ceiling of 20 per IP
+      # allows, all from 127.0.0.1 — see src/lib/auth.ts.
+      LOGIN_IP_RATE_LIMIT_MAX: "100000"
+      LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
     steps:
       - uses: actions/checkout@v4
 
@@ -128,6 +132,10 @@ jobs:
       NEXTAUTH_SECRET: ci-test-secret-not-used-anywhere-real
       NEXTAUTH_URL: http://localhost:3000
       AUTH_TRUST_HOST: "true"
+      # The suite logs in far more than the production ceiling of 20 per IP
+      # allows, all from 127.0.0.1 — see src/lib/auth.ts.
+      LOGIN_IP_RATE_LIMIT_MAX: "100000"
+      LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
     steps:
       - uses: actions/checkout@v4
 
@@ -239,6 +247,10 @@ jobs:
       NEXTAUTH_SECRET: ci-test-secret-not-used-anywhere-real
       NEXTAUTH_URL: http://localhost:3000
       AUTH_TRUST_HOST: "true"
+      # The suite logs in far more than the production ceiling of 20 per IP
+      # allows, all from 127.0.0.1 — see src/lib/auth.ts.
+      LOGIN_IP_RATE_LIMIT_MAX: "100000"
+      LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
     steps:
       - uses: actions/checkout@v4
 

@@ -25,8 +25,28 @@ import { resolvePartyName } from "@/lib/party-name";
 // brute-forcing (or credential-stuffing) one specific account while
 // rotating IPs. Neither existed before — authorize() ran a straight
 // bcrypt.compare with no attempt limit at all.
-const LOGIN_IP_RATE_LIMIT = { max: 20, windowMs: 10 * 60 * 1000 };
-const LOGIN_EMAIL_RATE_LIMIT = { max: 8, windowMs: 10 * 60 * 1000 };
+//
+// Overridable because the e2e suite signs in far more than 20 times from
+// 127.0.0.1 in a single run, so with the production numbers everything
+// after roughly the 20th login fails — and it fails as CredentialsSignin,
+// indistinguishable from a wrong password, which sends you looking for an
+// authentication bug that isn't there. Raising the ceiling in e2e/.env.test
+// keeps the limiter itself on the code path (it is still consulted, still
+// counts, and its own unit tests cover the boundary) rather than stubbing
+// it out. Unset everywhere else, which is what production and dev run.
+const limitFromEnv = (name: string, fallback: number) => {
+  const parsed = Number(process.env[name]);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const LOGIN_IP_RATE_LIMIT = {
+  max: limitFromEnv("LOGIN_IP_RATE_LIMIT_MAX", 20),
+  windowMs: 10 * 60 * 1000,
+};
+const LOGIN_EMAIL_RATE_LIMIT = {
+  max: limitFromEnv("LOGIN_EMAIL_RATE_LIMIT_MAX", 8),
+  windowMs: 10 * 60 * 1000,
+};
 
 /**
  * Signals a correct password on an account whose email is still

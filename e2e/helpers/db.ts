@@ -31,6 +31,15 @@ export async function createUser(opts: {
       location: opts.location,
       passwordHash,
       emailVerified: new Date(),
+      // Required, not cosmetic: the dashboard layout redirects any user
+      // without a dateOfBirth to /onboarding/complete-profile (the gap
+      // Google OAuth signups leave, since they skip the age gate in
+      // /api/auth/register). A fixture user missing it never reaches
+      // /dashboard, which is where practically every spec starts — so
+      // omitting this failed 33 of 34 tests at the login helper, and the
+      // failure looked like broken authentication rather than an
+      // onboarding redirect.
+      dateOfBirth: new Date("1995-01-01"),
     },
   });
 
