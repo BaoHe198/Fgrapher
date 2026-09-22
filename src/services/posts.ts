@@ -623,6 +623,7 @@ export async function countPendingPosts(userId: string) {
  */
 export async function getPost(postId: string, viewerId: string | null) {
   const post = await db.post.findFirst({
+    relationLoadStrategy: "join",
     where: {
       id: postId,
       deletedAt: null,
