@@ -662,6 +662,19 @@ async function main() {
         },
       });
 
+      // The ProfileServiceArea row that mirrors Profile.provinceId. Real
+      // onboarding writes it too (syncPrimaryServiceArea, called from
+      // PATCH /api/profiles/[role]); without it here, every seeded provider
+      // is on the map in their province and matched to no request in it —
+      // the exact state QA-03 found on the dev database.
+      await db.profileServiceArea.create({
+        data: {
+          profileId: profile.id,
+          provinceId: ward.provinceId,
+          isPrimary: true,
+        },
+      });
+
       await seedPortfolio(profile.id, profileSeed.role);
 
       if (profileSeed.services && profileSeed.services.length > 0) {

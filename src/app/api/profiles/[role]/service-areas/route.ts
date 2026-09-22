@@ -48,7 +48,7 @@ export async function PUT(
 
     const profile = await db.profile.findUnique({
       where: { userId_role: { userId: session.user.id, role: role as Role } },
-      select: { id: true },
+      select: { id: true, provinceId: true },
     });
     if (!profile) {
       return NextResponse.json(
@@ -61,7 +61,18 @@ export async function PUT(
       );
     }
 
-    const provinceIds = Array.from(new Set(parsed.data.provinceIds));
+    // This panel chooses the EXTRA provinces a provider covers. The one
+    // their profile is based in is not theirs to remove here — it is set by
+    // the address on the profile, it is what /browse and Fmap already place
+    // them in, and dropping it would put the two back out of step (QA-03).
+    // It is always re-added, flagged isPrimary so a later address change can
+    // tell it apart from a province the provider picked deliberately.
+    const extraProvinceIds = Array.from(
+      new Set(parsed.data.provinceIds),
+    ).filter((id) => id !== profile.provinceId);
+    const provinceIds = profile.provinceId
+      ? [profile.provinceId, ...extraProvinceIds]
+      : extraProvinceIds;
 
     // Replace-the-set, not a diff — this route always receives the full
     // desired list from the client (a multi-select), so a delete-then-
@@ -74,6 +85,7 @@ export async function PUT(
               data: provinceIds.map((provinceId) => ({
                 profileId: profile.id,
                 provinceId,
+                isPrimary: provinceId === profile.provinceId,
               })),
               skipDuplicates: true,
             }),
