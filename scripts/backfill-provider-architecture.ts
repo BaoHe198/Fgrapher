@@ -145,80 +145,11 @@ async function backfillResources() {
   );
 }
 
-async function backfillAvailability() {
-  const rules = await db.availability.findMany();
-  const blocks = await db.blockedDate.findMany();
-
-  // Keyed on userId in the old tables, so the lookup goes through the owner.
-  // One provider profile per account — the owner's decision — means one
-  // resource per user.
-  const byUser = await resourceOwnerMap();
-
-  let ruleCount = 0;
-  let orphanRules = 0;
-  for (const rule of rules) {
-    const known = byUser.has(rule.userId);
-    const resourceId = byUser.get(rule.userId) ?? null;
-    if (!known) {
-      orphanRules++;
-      continue;
-    }
-    ruleCount++;
-    if (!DRY_RUN && resourceId) {
-      const exists = await db.availabilityRule.findFirst({
-        where: {
-          resourceId,
-          dayOfWeek: rule.dayOfWeek,
-          startTime: rule.startTime,
-          endTime: rule.endTime,
-        },
-      });
-      if (!exists) {
-        await db.availabilityRule.create({
-          data: {
-            resourceId,
-            dayOfWeek: rule.dayOfWeek,
-            startTime: rule.startTime,
-            endTime: rule.endTime,
-            isActive: rule.isActive,
-          },
-        });
-      }
-    }
-  }
-
-  let blockCount = 0;
-  let orphanBlocks = 0;
-  for (const block of blocks) {
-    const known = byUser.has(block.userId);
-    const resourceId = byUser.get(block.userId) ?? null;
-    if (!known) {
-      orphanBlocks++;
-      continue;
-    }
-    const startAt = vnLocalToInstant(block.date, block.startTime ?? "00:00");
-    const endAt = vnLocalToInstant(block.date, block.endTime ?? "23:59");
-    if (!startAt || !endAt) continue;
-    blockCount++;
-    if (!DRY_RUN && resourceId) {
-      const exists = await db.availabilityBlock.findFirst({
-        where: { resourceId, startAt, endAt },
-      });
-      if (!exists) {
-        await db.availabilityBlock.create({
-          data: { resourceId, startAt, endAt, reason: block.reason },
-        });
-      }
-    }
-  }
-
-  note(
-    `AvailabilityRule: ${ruleCount}/${rules.length} chuyển được${orphanRules ? `, ${orphanRules} không tìm thấy hồ sơ` : ""}`,
-  );
-  note(
-    `AvailabilityBlock: ${blockCount}/${blocks.length} chuyển được${orphanBlocks ? `, ${orphanBlocks} không tìm thấy hồ sơ` : ""}`,
-  );
-}
+// backfillAvailability() used to live here. The weekly-hours and blocked-date
+// move now happens in SQL inside
+// 20260922110000_drop_legacy_calendar/migration.sql, because that migration
+// drops the tables it reads: a script cannot be asked to run between two
+// migrations on production, but a migration can do both in one transaction.
 
 async function backfillBookingInstants() {
   const bookings = await db.booking.findMany({
@@ -357,7 +288,6 @@ async function main() {
   await backfillServiceKinds();
   await backfillProfileServiceKinds();
   await backfillResources();
-  await backfillAvailability();
   await backfillBookingInstants();
   await backfillAllocations();
   await backfillVenues();

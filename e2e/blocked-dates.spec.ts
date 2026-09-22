@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { listBlocks, upsertBlock } from "../src/services/resource-calendar";
+
 import { login } from "./helpers/auth";
 import {
   createPublishedProfile,
@@ -57,11 +59,8 @@ test("a whole-day blocked date can't be booked via direct API call", async ({
   });
 
   const targetDate = nextWeekday(2); // a Tuesday, inside the Mon-Fri fixture availability
-  await db.blockedDate.create({
-    data: {
-      userId: provider.id,
-      date: new Date(`${targetDate}T00:00:00.000Z`),
-    },
+  await upsertBlock(provider.id, {
+    date: new Date(`${targetDate}T00:00:00.000Z`),
   });
 
   const customer = await createUser({
@@ -140,14 +139,13 @@ test("provider can't block a date that already has a CONFIRMED booking", async (
 
   expect(response.status()).toBe(409);
 
-  const blocked = await db.blockedDate.findUnique({
-    where: {
-      userId_date: {
-        userId: provider.id,
-        date: new Date(`${targetDate}T00:00:00.000Z`),
-      },
-    },
-  });
+  const dayStart = new Date(`${targetDate}T00:00:00.000Z`);
+  const blocks = await listBlocks(
+    provider.id,
+    new Date(dayStart.getTime() - 86_400_000),
+    new Date(dayStart.getTime() + 86_400_000),
+  );
+  const blocked = blocks.find((b) => b.dateKey === targetDate) ?? null;
   expect(blocked).toBeNull();
 
   // Cleanup isn't strictly required (each run uses fresh timestamped

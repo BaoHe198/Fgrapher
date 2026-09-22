@@ -425,7 +425,7 @@ dòng, nên Phase 2 thêm `BookingItem` và giữ `serviceId` cũ làm dòng đ�
 | 10. Onboarding + bảng điều khiển dịch vụ | **Xong** — ô "Loại dịch vụ" trong form gói |
 | 11. Hồ sơ, card, bộ lọc, Fmap | **Xong phần card + bộ lọc**; Fmap vẫn dùng icon theo vai trò (đủ dùng) |
 | 12. Landing theo dịch vụ | **Hoãn sang Phase 1.5** theo quyết định #8 |
-| 13. Contract (xoá bảng/cột cũ) | **Chờ chủ dự án xác nhận bằng văn bản** |
+| 13. Contract — xoá bảng lịch cũ | **Xong 22/09/2026** — chủ dự án đã xác nhận; đã sao lưu trước, đã xoá `availabilities` và `blocked_dates` |
 
 **Bằng chứng mục tiêu chính đã đạt.** Tìm kiếm "Chụp ảnh" trên dữ liệu dev trả về:
 
@@ -440,10 +440,16 @@ lý do tồn tại của cả thay đổi này.
 
 ## Còn nợ lại (không chặn việc dùng)
 
-- `Availability` và `BlockedDate` vẫn còn trong database, không ai đọc/ghi nữa.
-- Ba chỗ vẫn dùng `date` + `"HH:mm"` song song với `startAt`/`endAt` trên
-  `Booking`; xoá cột cũ là việc của bước 13.
+- `Booking` vẫn giữ song song `date` + `"HH:mm"` **và** `startAt`/`endAt`. Cột
+  cũ vẫn **đang được đọc/ghi thật** (kiểm tra trùng giờ, trang chi tiết
+  booking, đổi lịch), nên chưa xoá được — đó là một đợt riêng, không nằm trong
+  "xoá bảng lịch cũ" mà chủ dự án đã đồng ý.
 - Trang landing theo dịch vụ (quyết định #8: Phase 1.5).
+
+## Sao lưu trước khi xoá
+
+`/Users/heducthienbao/Documents/fgrapher-backups/legacy-calendar-<mốc>.json`
+— 49 dòng lịch tuần, 1 ngày bận, và cả giờ cũ lẫn giờ mới của 8 booking.
 
 ---
 

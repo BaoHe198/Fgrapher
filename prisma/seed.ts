@@ -8,6 +8,7 @@ import {
 import bcrypt from "bcryptjs";
 
 import { serviceKindsForRole } from "../src/lib/constants/service-matrix";
+import { replaceWeeklyRules } from "../src/services/resource-calendar";
 
 import { seedGeography } from "./seed-geography";
 
@@ -509,12 +510,6 @@ async function main() {
   if (existing.length > 0) {
     const existingIds = existing.map((u) => u.id);
 
-    // Availability has no FK relation to User in the schema, so it isn't
-    // covered by cascade delete — clean it up explicitly before removing users.
-    await db.availability.deleteMany({
-      where: { userId: { in: existingIds } },
-    });
-
     // Same story for Review -> Booking, and Booking.customer/provider have
     // no onDelete: Cascade (a Restrict FK by default) — delete reviews then
     // bookings referencing these seed users first, or the user delete below
@@ -632,17 +627,6 @@ async function main() {
         }),
     );
 
-    if (seedUser.profiles && seedUser.profiles.length > 0) {
-      await db.availability.createMany({
-        data: ALL_WEEK_DAYS.map((dayOfWeek) => ({
-          userId: user.id,
-          dayOfWeek,
-          startTime: "09:00",
-          endTime: "17:00",
-        })),
-      });
-    }
-
     for (const profileSeed of seedUser.profiles ?? []) {
       const profile = await db.profile.create({
         data: {
@@ -702,6 +686,20 @@ async function main() {
           });
         }
       }
+    }
+
+    // After the profiles, not before: a calendar hangs off a profile's
+    // BookableResource now, so there is nothing to attach it to until the
+    // profile exists.
+    if (seedUser.profiles && seedUser.profiles.length > 0) {
+      await replaceWeeklyRules(
+        user.id,
+        ALL_WEEK_DAYS.map((dayOfWeek) => ({
+          dayOfWeek,
+          startTime: "09:00",
+          endTime: "17:00",
+        })),
+      );
     }
 
     console.log(`Seeded ${seedUser.email} (${seedUser.roles.join(", ")})`);

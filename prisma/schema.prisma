@@ -1133,37 +1133,7 @@ model Service {
   @@map("services")
 }
 
-model Availability {
-  id        String   @id @default(cuid())
-  userId    String
-  dayOfWeek Int // 0=Sunday, 6=Saturday
-  startTime String // "09:00"
-  endTime   String // "17:00"
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@index([userId, dayOfWeek])
-  @@map("availabilities")
-}
-
-model BlockedDate {
-  id     String   @id @default(cuid())
-  userId String
-  date   DateTime @db.Date
-  reason String?
-
-  // Both null = the whole day is blocked. Both set ("HH:MM") = only that
-  // window is blocked — the rest of the day's weekly Availability windows
-  // stay bookable. One row per date (see @@unique below), so a single date
-  // can carry at most one whole-day block OR one time-range block, not
-  // several disjoint ranges — a deliberate scope limit (Prompt F3, VIỆC 1).
-  startTime String?
-  endTime   String?
-
-  @@unique([userId, date])
-  @@map("blocked_dates")
-}
 
 enum BookingStatus {
   PENDING

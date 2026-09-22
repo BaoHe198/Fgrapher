@@ -1,5 +1,6 @@
 import { PrismaClient, type Role } from "@prisma/client";
 import { serviceKindsForRole } from "../../src/lib/constants/service-matrix";
+import { replaceWeeklyRules } from "../../src/services/resource-calendar";
 import bcrypt from "bcryptjs";
 
 // Dedicated client for test-fixture setup/teardown — same DATABASE_URL the
@@ -64,20 +65,20 @@ export async function activatePaidRole(userId: string, role: Role) {
   });
 }
 
-// Mon-Fri 09:00-17:00, matching prisma/seed.ts's WEEKDAYS pattern. Without
-// this, a provider has zero bookable slots regardless of anything else
-// being set up correctly — Availability is keyed by userId, not profileId.
+// Mon-Fri 09:00-17:00, matching prisma/seed.ts. Without this a provider has
+// zero bookable slots however well everything else is set up. Must run AFTER
+// the provider's profile exists: the calendar hangs off that profile's
+// BookableResource.
 export async function seedWeekdayAvailability(userId: string) {
   const WEEKDAYS = [1, 2, 3, 4, 5];
-  await db.availability.createMany({
-    data: WEEKDAYS.map((dayOfWeek) => ({
-      userId,
+  await replaceWeeklyRules(
+    userId,
+    WEEKDAYS.map((dayOfWeek) => ({
       dayOfWeek,
       startTime: "09:00",
       endTime: "17:00",
-      isActive: true,
     })),
-  });
+  );
 }
 
 export async function createPublishedProfile(opts: {
