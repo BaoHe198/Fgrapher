@@ -46,6 +46,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   });
 
   const result = await searchProducts({
+    sellerId: params.sellerId || undefined,
     type,
     category,
     condition,

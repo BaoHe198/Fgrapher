@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { listBlockedDates } from "@/services/availability";
 import { listBookingsForRange } from "@/services/bookings";
@@ -11,6 +12,9 @@ export default async function CalendarPage() {
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
+  }
+  if (!session.user.roles.some((role) => PROVIDER_ROLES.includes(role))) {
+    redirect("/dashboard");
   }
 
   const now = new Date();

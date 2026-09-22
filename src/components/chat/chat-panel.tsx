@@ -148,6 +148,7 @@ export function ChatPanel({
   currentUserId,
   otherUser,
   onBack,
+  initialDraft,
   // The full /dashboard/messages page shows the conversation list alongside
   // the chat at lg+ (so the back button there is redundant and stays
   // lg:hidden), but the floating MessagingPopup is a single narrow panel at
@@ -159,12 +160,13 @@ export function ChatPanel({
   currentUserId: string;
   otherUser: ChatPartner;
   onBack?: () => void;
+  initialDraft?: string;
   alwaysShowBack?: boolean;
 }) {
   const t = useTranslations("sharedComponents.chatPanel");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(initialDraft ?? "");
   const [sending, setSending] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);

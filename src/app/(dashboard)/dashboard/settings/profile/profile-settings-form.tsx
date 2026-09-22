@@ -26,17 +26,13 @@ import { Tag } from "@/components/ui/tag";
 import {
   CATEGORIES_BY_ROLE,
   EXPERIENCE_LEVELS,
+  PROVIDER_ROLES,
   SELLER_ROLES,
   SHOP_ROLES,
 } from "@/lib/constants";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
-import {
-  CostumesManager,
-  type CostumeItem,
-  type CostumeMedia,
-} from "./costumes-manager";
 import { ServicesManager } from "./services-manager";
 
 interface ServiceItem {
@@ -139,8 +135,6 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   const [values, setValues] = useState<ProfileFormValues>(toFormValues(null));
   const [profileId, setProfileId] = useState<string | null>(null);
   const [services, setServices] = useState<ServiceItem[]>([]);
-  const [costumes, setCostumes] = useState<CostumeItem[]>([]);
-  const [profileMedia, setProfileMedia] = useState<CostumeMedia[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -166,8 +160,6 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           setGeocodingStatus(body.data?.geocodingStatus ?? null);
           setProfileId(body.data?.id ?? null);
           setServices(body.data?.services ?? []);
-          setCostumes(body.data?.costumes ?? []);
-          setProfileMedia(body.data?.media ?? []);
           setExtraProvinceIds(
             ((body.data?.serviceAreas as { provinceId: string }[]) ?? []).map(
               (a) => a.provinceId,
@@ -494,37 +486,41 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         ) : null}
         <p className="text-body-sm text-text-tertiary">{t("addressPrivacy")}</p>
 
-        <Switch
-          label={t("nationwideLabel")}
-          checked={values.servesNationwide}
-          onChange={(next) => set("servesNationwide", next)}
-        />
-        <p className="text-body-sm text-text-tertiary">
-          {t("nationwideHelper")}
-        </p>
-
-        {provinces.length > 1 ? (
-          <div className="flex flex-col gap-2">
-            <span className="text-body-sm font-semibold! text-text-primary">
-              {t("extraAreasLabel")}
-            </span>
+        {PROVIDER_ROLES.includes(role) ? (
+          <>
+            <Switch
+              label={t("nationwideLabel")}
+              checked={values.servesNationwide}
+              onChange={(next) => set("servesNationwide", next)}
+            />
             <p className="text-body-sm text-text-tertiary">
-              {t("extraAreasHelper")}
+              {t("nationwideHelper")}
             </p>
-            <div className="flex flex-wrap gap-2">
-              {provinces
-                .filter((p) => p.id !== values.provinceId)
-                .map((p) => (
-                  <Tag
-                    key={p.id}
-                    selected={extraProvinceIds.includes(p.id)}
-                    onClick={() => toggleExtraProvince(p.id)}
-                  >
-                    {p.name}
-                  </Tag>
-                ))}
-            </div>
-          </div>
+
+            {provinces.length > 1 ? (
+              <div className="flex flex-col gap-2">
+                <span className="text-body-sm font-semibold! text-text-primary">
+                  {t("extraAreasLabel")}
+                </span>
+                <p className="text-body-sm text-text-tertiary">
+                  {t("extraAreasHelper")}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {provinces
+                    .filter((p) => p.id !== values.provinceId)
+                    .map((p) => (
+                      <Tag
+                        key={p.id}
+                        selected={extraProvinceIds.includes(p.id)}
+                        onClick={() => toggleExtraProvince(p.id)}
+                      >
+                        {p.name}
+                      </Tag>
+                    ))}
+                </div>
+              </div>
+            ) : null}
+          </>
         ) : null}
       </div>
 
@@ -641,7 +637,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       {/* Fmap marker privacy — applies to every provider role, not only
           MODEL, since every published provider can appear on the map. */}
-      {role !== "CAMERA_SHOP" ? (
+      {PROVIDER_ROLES.includes(role) ? (
         <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
             {tEditor("privacySettings.title")}
@@ -657,9 +653,8 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         </div>
       ) : null}
 
-      {/* A shop trades under a business name; a photographer lists gear
-          under their own. The delivery fee follows who can list on Chợ F,
-          which is a different set — see SELLER_ROLES vs SHOP_ROLES. */}
+      {/* Product shops trade under a business name and configure pickup or
+          delivery details here; their inventory lives under Listings. */}
       {(SHOP_ROLES as readonly string[]).includes(role) ? (
         <Input
           label={tEditor("shopNameLabel")}
@@ -683,17 +678,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         </div>
       ) : null}
 
-      {/* Outfits are a costume shop's catalogue, shown on its own profile.
-          They are deliberately not Chợ F products — see SELLER_ROLES. */}
-      {role === "COSTUME_SHOP" && profileId ? (
-        <CostumesManager
-          profileId={profileId}
-          initialCostumes={costumes}
-          availableMedia={profileMedia}
-        />
-      ) : null}
-
-      {role !== "CAMERA_SHOP" ? (
+      {PROVIDER_ROLES.includes(role) ? (
         profileId ? (
           <ServicesManager profileId={profileId} initialServices={services} />
         ) : (

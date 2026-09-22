@@ -33,6 +33,7 @@ export function getCheckoutSchema(t: (key: string) => string) {
           "MAKEUP_ARTIST",
           "STUDIO",
           "CAMERA_SHOP",
+          "COSTUME_SHOP",
           "MODEL",
         ]),
       )

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Role } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -18,20 +19,24 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { Switch } from "@/components/ui/switch";
 import {
-  PRODUCT_CATEGORIES,
+  productCategoriesForRole,
   productSchema,
   type ProductInput,
 } from "@/lib/validations/product";
 
 interface ProductFormProps {
   productId?: string;
+  sellerRole: Role;
   defaultValues?: Partial<ProductInput>;
 }
 
-export function ProductForm({ productId, defaultValues }: ProductFormProps) {
+export function ProductForm({
+  productId,
+  sellerRole,
+  defaultValues,
+}: ProductFormProps) {
   const t = useTranslations("uiKit.productForm");
-  // Chợ F lists photo/video equipment only, so every seller picks from the
-  // same list (project owner, 21/09/2026).
+  const productCategories = productCategoriesForRole(sellerRole);
   const tCondition = useTranslations("uiKit.condition");
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -54,7 +59,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
     defaultValues: {
       name: "",
       description: "",
-      category: PRODUCT_CATEGORIES[0],
+      category: productCategories[0],
       type: "SALE",
       condition: "NEW",
       stock: 1,
@@ -119,7 +124,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
         render={({ field }) => (
           <NativeSelect
             label={t("categoryLabel")}
-            options={PRODUCT_CATEGORIES.map((c) => ({ value: c, label: c }))}
+            options={productCategories.map((c) => ({ value: c, label: c }))}
             value={field.value}
             onChange={field.onChange}
           />

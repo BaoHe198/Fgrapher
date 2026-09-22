@@ -15,7 +15,7 @@ import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
 import { formatAdministrativeLocation } from "@/lib/location";
-import type { ROLE_LABELS } from "@/lib/constants";
+import { PORTFOLIO_ROLES, SHOP_ROLES, type ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
 import { listAlbums } from "@/services/albums";
@@ -25,11 +25,9 @@ import {
   getPublicProfileUser,
   getShopProducts,
 } from "@/services/public-profile";
-
-import { ProfileAvatar, ProfileCover } from "./profile-hero";
-import { listPublicCostumes } from "@/services/costumes";
 import { listUserPosts } from "@/services/posts";
 
+import { ProfileAvatar, ProfileCover } from "./profile-hero";
 import { ProfileInteractive } from "./profile-interactive";
 
 function joinRoleLabels(
@@ -143,13 +141,12 @@ export default async function PublicProfilePage({
     products,
     followerCount,
     ownerAlbums,
-    costumes,
     posts,
   ] = await Promise.all([
     getProfileReviews(user.id),
     getProfileReviewStats(user.id),
     features.marketplaceEnabled
-      ? getShopProducts(user.id)
+      ? getShopProducts(user.id, activeProfile.role)
       : Promise.resolve([]),
     features.socialFeedEnabled
       ? db.follow.count({ where: { followingId: user.id } })
@@ -160,12 +157,9 @@ export default async function PublicProfilePage({
     // everything they have, including drafts and albums still pending
     // moderation. Same call dashboard/portfolio/page.tsx makes for its
     // own owner-only view.
-    isOwnProfile ? listAlbums(activeProfile.id) : Promise.resolve(null),
-    // A costume shop's outfit catalogue. Not behind MARKETPLACE_ENABLED:
-    // outfits live here, not on Chợ F (project owner, 21/09/2026).
-    activeProfile.role === "COSTUME_SHOP"
-      ? listPublicCostumes(activeProfile.id)
-      : Promise.resolve([]),
+    isOwnProfile && PORTFOLIO_ROLES.includes(activeProfile.role)
+      ? listAlbums(activeProfile.id)
+      : Promise.resolve(null),
     features.socialFeedEnabled
       ? listUserPosts(user.id, session?.user?.id ?? null)
       : Promise.resolve([]),
@@ -181,11 +175,12 @@ export default async function PublicProfilePage({
   // already 404s this whole page for everyone including the owner — this
   // only matters for the narrow window between actual expiry and the
   // next daily cron run.
-  const canEditPortfolio = isOwnProfile
-    ? await requireActiveSubscription(user.id, activeProfile.role)
-        .then(() => true)
-        .catch(() => false)
-    : false;
+  const canEditPortfolio =
+    isOwnProfile && PORTFOLIO_ROLES.includes(activeProfile.role)
+      ? await requireActiveSubscription(user.id, activeProfile.role)
+          .then(() => true)
+          .catch(() => false)
+      : false;
 
   const displayName = activeProfile.displayName ?? user.name ?? username;
   const profileLocation = formatAdministrativeLocation(
@@ -324,13 +319,15 @@ export default async function PublicProfilePage({
                   ) : (
                     <Badge variant="accent">{roleT(activeProfile.role)}</Badge>
                   )}
-                  <Badge
-                    variant={user.acceptingBookings ? "success" : "warning"}
-                  >
-                    {user.acceptingBookings
-                      ? t("status.available")
-                      : t("status.bookedOut")}
-                  </Badge>
+                  {SHOP_ROLES.includes(activeProfile.role) ? null : (
+                    <Badge
+                      variant={user.acceptingBookings ? "success" : "warning"}
+                    >
+                      {user.acceptingBookings
+                        ? t("status.available")
+                        : t("status.bookedOut")}
+                    </Badge>
+                  )}
                   {isVerified ? (
                     <Badge variant="accent">{t("status.verified")}</Badge>
                   ) : null}
@@ -409,8 +406,10 @@ export default async function PublicProfilePage({
             firstName={firstName}
             // Chợ F is open to every gear owner now, not only camera shops,
             // so the tab follows the listings themselves.
-            hasGear={features.marketplaceEnabled && products.length > 0}
-            costumes={costumes}
+            hasGear={
+              features.marketplaceEnabled &&
+              (SHOP_ROLES.includes(activeProfile.role) || products.length > 0)
+            }
             posts={posts}
             albums={activeProfile.albums}
             ownerAlbums={

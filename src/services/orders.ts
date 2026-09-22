@@ -48,6 +48,12 @@ export async function createCheckoutSessionForCart(
     include: { product: true },
   });
   if (cart.length === 0) throw new OrderError("Your cart is empty", 400);
+  if (cart.some((item) => item.type === "RENT")) {
+    throw new OrderError(
+      "Rental items must be arranged directly with the shop by message",
+      400,
+    );
+  }
 
   const customer = await db.user.findUniqueOrThrow({ where: { id: userId } });
   const currency = cart[0].product.currency;
@@ -371,6 +377,12 @@ export async function placeOrdersFromCart(
     include: { product: { select: { name: true, stock: true } } },
   });
   if (cart.length === 0) throw new OrderError("Your cart is empty", 400);
+  if (cart.some((item) => item.type === "RENT")) {
+    throw new OrderError(
+      "Rental items must be arranged directly with the shop by message",
+      400,
+    );
+  }
 
   if (options.deliveryMethod === "SHIP" && !options.shippingAddress?.trim()) {
     throw new OrderError("A delivery address is required", 400);

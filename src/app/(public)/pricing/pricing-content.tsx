@@ -7,6 +7,7 @@ import {
   Check,
   type LucideIcon,
   Sparkles,
+  Shirt,
   ShoppingBag,
   UserRound,
   Video,
@@ -71,6 +72,12 @@ const PLANS: Plan[] = [
     descriptionKey: "plans.cameraShop.description",
     featuresKey: "plans.cameraShop.features",
   },
+  {
+    role: "COSTUME_SHOP",
+    icon: Shirt,
+    descriptionKey: "plans.costumeShop.description",
+    featuresKey: "plans.costumeShop.features",
+  },
 ];
 
 const FAQ_KEYS = [
@@ -89,8 +96,8 @@ const COMPARISON_MATRIX: Record<Role, boolean[]> = {
   VIDEOGRAPHER: [true, true, true, true, true, true],
   MAKEUP_ARTIST: [true, true, true, true, true, true],
   STUDIO: [true, true, true, true, false, false],
-  CAMERA_SHOP: [true, false, true, false, false, false],
-  COSTUME_SHOP: [true, true, true, true, false, false],
+  CAMERA_SHOP: [true, false, true, true, true, false],
+  COSTUME_SHOP: [true, false, true, true, true, false],
   // Full Model plan card (§3c) still pending — this keeps the comparison
   // table's type exhaustive in the meantime, same row shape as Make-up
   // Artist since Model has identical capabilities (see role-permissions).
@@ -115,7 +122,9 @@ export function PricingContent({
   const [yearly, setYearly] = useState(false);
   const plans = marketplaceEnabled
     ? PLANS
-    : PLANS.filter((plan) => plan.role !== "CAMERA_SHOP");
+    : PLANS.filter(
+        (plan) => plan.role !== "CAMERA_SHOP" && plan.role !== "COSTUME_SHOP",
+      );
 
   const billingToggleLabels = {
     Monthly: t("billingToggle.monthly"),

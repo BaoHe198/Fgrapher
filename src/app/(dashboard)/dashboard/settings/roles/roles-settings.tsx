@@ -31,7 +31,7 @@ import {
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { PAID_ROLES } from "@/lib/constants";
+import { PAID_ROLES, SHOP_ROLES } from "@/lib/constants";
 
 interface VerificationInfo {
   role: Role;
@@ -92,15 +92,14 @@ export function RolesSettings({
   // an account already holds one, hide the option to add another entirely
   // rather than letting them pick a second. The API route enforces this
   // too, this is just so the option never shows up to begin with.
-  // CAMERA_SHOP additionally stays hidden while the marketplace is out of
-  // MVP scope.
+  // Product-only shops stay hidden while Chợ F is disabled.
   const availableRoles =
     activeRoles.length > 0
       ? []
       : PAID_ROLES.filter(
           (r) =>
             !currentRoles.includes(r) &&
-            (marketplaceEnabled || r !== "CAMERA_SHOP"),
+            (marketplaceEnabled || !SHOP_ROLES.includes(r)),
         );
   const verificationByRole = new Map(verifications.map((v) => [v.role, v]));
 
@@ -199,7 +198,7 @@ export function RolesSettings({
     ? PAID_ROLES.filter(
         (r) =>
           r !== changeRequestRole &&
-          (marketplaceEnabled || r !== "CAMERA_SHOP"),
+          (marketplaceEnabled || !SHOP_ROLES.includes(r)),
       )
     : [];
 

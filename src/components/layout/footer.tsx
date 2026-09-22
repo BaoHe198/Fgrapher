@@ -2,17 +2,8 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { LogoFull } from "@/components/brand/logo-full";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
-
-const DISCOVER_ROLES = [
-  "PHOTOGRAPHER",
-  "VIDEOGRAPHER",
-  "MAKEUP_ARTIST",
-  "STUDIO",
-  "CAMERA_SHOP",
-  "MODEL",
-  "COSTUME_SHOP",
-] as const;
 
 const PROVIDER_LINKS = [
   { labelKey: "pricing", href: "/pricing" },
@@ -30,9 +21,7 @@ const COMPANY_LINKS = [
 
 export function Footer() {
   const t = useTranslations();
-  const discoverRoles = features.marketplaceEnabled
-    ? DISCOVER_ROLES
-    : DISCOVER_ROLES.filter((role) => role !== "CAMERA_SHOP");
+  const discoverRoles = PROVIDER_ROLES;
   const providerLinks = features.marketplaceEnabled
     ? PROVIDER_LINKS
     : PROVIDER_LINKS.filter((link) => link.labelKey !== "sell");

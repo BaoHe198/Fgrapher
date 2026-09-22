@@ -3,14 +3,19 @@ import { NextResponse } from "next/server";
 import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { updateServiceSchema } from "@/lib/validations/service";
 
 async function assertOwnedService(id: string, userId: string) {
   const service = await db.service.findUnique({
     where: { id },
-    include: { profile: { select: { userId: true } } },
+    include: { profile: { select: { userId: true, role: true } } },
   });
-  return service && service.profile.userId === userId ? service : null;
+  return service &&
+    service.profile.userId === userId &&
+    PROVIDER_ROLES.includes(service.profile.role)
+    ? service
+    : null;
 }
 
 export async function PATCH(

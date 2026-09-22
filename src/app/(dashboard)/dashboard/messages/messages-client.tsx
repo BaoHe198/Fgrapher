@@ -29,6 +29,14 @@ export function MessagesClient({
     useState<ConversationSummary[]>(initialConversations);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const startedRef = useRef(false);
+  const productId = searchParams.get("product");
+  const productName = searchParams.get("productName");
+  const rentalDraft = productId
+    ? t("rentalDraft", {
+        product: productName || productId,
+        url: `/shop/${productId}`,
+      })
+    : undefined;
 
   const loadConversations = () => {
     fetch("/api/conversations")
@@ -61,7 +69,10 @@ export function MessagesClient({
         .then((body) => {
           if (body.data?.id) {
             setSelectedId(body.data.id);
-            router.replace(`/dashboard/messages?c=${body.data.id}`);
+            const nextParams = new URLSearchParams({ c: body.data.id });
+            if (productId) nextParams.set("product", productId);
+            if (productName) nextParams.set("productName", productName);
+            router.replace(`/dashboard/messages?${nextParams.toString()}`);
             loadConversations();
           }
         });
@@ -132,10 +143,11 @@ export function MessagesClient({
         >
           {selectedConversation ? (
             <ChatPanel
-              key={selectedConversation.id}
+              key={`${selectedConversation.id}:${productId ?? ""}`}
               conversationId={selectedConversation.id}
               currentUserId={session.user.id}
               otherUser={selectedConversation.otherUser}
+              initialDraft={rentalDraft}
               onBack={onBack}
             />
           ) : (

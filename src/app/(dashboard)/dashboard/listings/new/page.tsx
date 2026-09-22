@@ -16,8 +16,7 @@ export default async function NewProductPage() {
   if (!session?.user) redirect("/login?callbackUrl=/dashboard/listings/new");
 
   const t = await getTranslations("dashboardCore.listings");
-  // Whichever gear-owning role this account holds: Chợ F lists photo/video
-  // equipment, so a photographer or studio sells here too, not just a shop.
+  // MVP permits one paid role per account, so this resolves to one shop.
   const sellerRole = SELLER_ROLES.find((role) =>
     session.user.roles.includes(role),
   );
@@ -33,7 +32,7 @@ export default async function NewProductPage() {
         fallbackTitle={t("gate.fallbackTitle")}
         fallbackText={t("gate.fallbackText")}
       >
-        <ProductForm />
+        <ProductForm sellerRole={sellerRole} />
       </SubscriptionGate>
     </div>
   );

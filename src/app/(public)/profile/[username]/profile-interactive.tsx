@@ -9,9 +9,10 @@ import { useEffect, useRef, useState } from "react";
 import { BookingSidebar } from "@/components/profile/booking-sidebar";
 import { useMessaging } from "@/components/providers/messaging-provider";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+import { SHOP_ROLES } from "@/lib/constants";
 
-import { CostumesTab, type PublicCostume } from "./costumes-tab";
 import { PostsTab, type ProfilePost } from "./posts-tab";
 import { GearTab } from "./gear-tab";
 import { PortfolioTab } from "./portfolio-tab";
@@ -34,7 +35,6 @@ interface ProfileInteractiveProps {
   role: Role;
   firstName: string;
   hasGear: boolean;
-  costumes: PublicCostume[];
   posts: ProfilePost[];
   albums: {
     id: string;
@@ -100,7 +100,6 @@ export function ProfileInteractive({
   role,
   firstName,
   hasGear,
-  costumes,
   posts,
   albums,
   ownerAlbums,
@@ -116,7 +115,8 @@ export function ProfileInteractive({
   const stickyT = useTranslations("publicPages.profile.bookingSidebar");
   const router = useRouter();
   const messaging = useMessaging();
-  const [tab, setTab] = useState("portfolio");
+  const isShop = SHOP_ROLES.includes(role);
+  const [tab, setTab] = useState(isShop ? "gear" : "portfolio");
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
@@ -184,45 +184,52 @@ export function ProfileInteractive({
       <div className="min-w-0">
         <Tabs value={tab} onValueChange={(v) => setTab(v as string)}>
           <TabsList>
-            <TabsTab value="portfolio">{t("portfolio")}</TabsTab>
-            <TabsTab value="services">{t("services")}</TabsTab>
-            <TabsTab value="reviews">{t("reviews")}</TabsTab>
-            {costumes.length > 0 ? (
-              <TabsTab value="costumes">{t("costumes")}</TabsTab>
+            {isShop ? null : (
+              <>
+                <TabsTab value="portfolio">{t("portfolio")}</TabsTab>
+                <TabsTab value="services">{t("services")}</TabsTab>
+                <TabsTab value="reviews">{t("reviews")}</TabsTab>
+              </>
+            )}
+            {hasGear ? (
+              <TabsTab value="gear">{t(isShop ? "products" : "gear")}</TabsTab>
             ) : null}
             {posts.length > 0 ? (
               <TabsTab value="posts">{t("posts")}</TabsTab>
             ) : null}
-            {hasGear ? <TabsTab value="gear">{t("gear")}</TabsTab> : null}
           </TabsList>
-          <TabsPanel value="portfolio" className="mt-6">
-            <PortfolioTab
-              albums={albums}
-              ownerAlbums={ownerAlbums}
-              profileId={profileId}
-              role={role}
-              isOwnProfile={isOwnProfile}
-              canEdit={canEditPortfolio}
-            />
-          </TabsPanel>
-          <TabsPanel value="services" className="mt-6">
-            <ServicesTab
-              services={services}
-              onBook={onBook}
-              offersTfp={offersTfp}
-              isOwnProfile={isOwnProfile}
-            />
-          </TabsPanel>
-          <TabsPanel value="reviews" className="mt-6">
-            <ReviewsTab
-              providerId={providerId}
-              reviews={reviews}
-              stats={reviewStats}
-            />
-          </TabsPanel>
-          {costumes.length > 0 ? (
-            <TabsPanel value="costumes" className="mt-6">
-              <CostumesTab costumes={costumes} />
+          {isShop ? null : (
+            <>
+              <TabsPanel value="portfolio" className="mt-6">
+                <PortfolioTab
+                  albums={albums}
+                  ownerAlbums={ownerAlbums}
+                  profileId={profileId}
+                  role={role}
+                  isOwnProfile={isOwnProfile}
+                  canEdit={canEditPortfolio}
+                />
+              </TabsPanel>
+              <TabsPanel value="services" className="mt-6">
+                <ServicesTab
+                  services={services}
+                  onBook={onBook}
+                  offersTfp={offersTfp}
+                  isOwnProfile={isOwnProfile}
+                />
+              </TabsPanel>
+              <TabsPanel value="reviews" className="mt-6">
+                <ReviewsTab
+                  providerId={providerId}
+                  reviews={reviews}
+                  stats={reviewStats}
+                />
+              </TabsPanel>
+            </>
+          )}
+          {hasGear ? (
+            <TabsPanel value="gear" className="mt-6">
+              <GearTab products={products} />
             </TabsPanel>
           ) : null}
           {posts.length > 0 ? (
@@ -230,23 +237,42 @@ export function ProfileInteractive({
               <PostsTab posts={posts} />
             </TabsPanel>
           ) : null}
-          {hasGear ? (
-            <TabsPanel value="gear" className="mt-6">
-              <GearTab products={products} />
-            </TabsPanel>
-          ) : null}
         </Tabs>
       </div>
 
       <div id="booking-sidebar" ref={sidebarRef}>
-        <BookingSidebar
-          providerId={providerId}
-          firstName={firstName}
-          services={services}
-          selectedServiceId={selectedServiceId}
-          onServiceChange={setSelectedServiceId}
-          isOwnProfile={isOwnProfile}
-        />
+        {isShop ? (
+          <Card className="sticky top-[104px] flex flex-col gap-3">
+            <h3 className="text-heading-lg text-text-primary">{firstName}</h3>
+            <p className="text-body-sm text-text-secondary">
+              {stickyT("shopMessageHelp")}
+            </p>
+            {isOwnProfile ? null : (
+              <Button
+                variant="accent"
+                className="w-full"
+                disabled={isOpeningChat}
+                onClick={onStickyMessage}
+              >
+                {isOpeningChat ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <MessageCircle className="size-4" />
+                )}
+                {stickyT("stickyMessage")}
+              </Button>
+            )}
+          </Card>
+        ) : (
+          <BookingSidebar
+            providerId={providerId}
+            firstName={firstName}
+            services={services}
+            selectedServiceId={selectedServiceId}
+            onServiceChange={setSelectedServiceId}
+            isOwnProfile={isOwnProfile}
+          />
+        )}
       </div>
 
       {isOwnProfile || sidebarInView ? null : (
@@ -264,18 +290,20 @@ export function ProfileInteractive({
             )}
             {stickyT("stickyMessage")}
           </Button>
-          <Button
-            variant="accent"
-            className="flex-1"
-            onClick={() =>
-              document
-                .getElementById("booking-sidebar")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
-          >
-            <CalendarDays className="size-4" />
-            {stickyT("stickyBook")}
-          </Button>
+          {isShop ? null : (
+            <Button
+              variant="accent"
+              className="flex-1"
+              onClick={() =>
+                document
+                  .getElementById("booking-sidebar")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+            >
+              <CalendarDays className="size-4" />
+              {stickyT("stickyBook")}
+            </Button>
+          )}
         </div>
       )}
     </div>

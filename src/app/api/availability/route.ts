@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { weeklyAvailabilitySchema } from "@/lib/validations/availability";
 import { vietnamDateStart } from "@/lib/vietnam-date";
@@ -10,6 +11,12 @@ export async function GET() {
   const t = await getTranslations("apiMessages.availability");
   try {
     const session = await requireAuth();
+    if (!session.user.roles.some((role) => PROVIDER_ROLES.includes(role))) {
+      return NextResponse.json(
+        { data: null, error: "forbidden", message: t("loadFailed") },
+        { status: 403 },
+      );
+    }
 
     const [schedule, blockedDates] = await Promise.all([
       db.availability.findMany({
@@ -48,6 +55,12 @@ export async function PUT(request: Request) {
   const t = await getTranslations("apiMessages.availability");
   try {
     const session = await requireAuth();
+    if (!session.user.roles.some((role) => PROVIDER_ROLES.includes(role))) {
+      return NextResponse.json(
+        { data: null, error: "forbidden", message: t("updateFailed") },
+        { status: 403 },
+      );
+    }
 
     const body = await request.json();
     const parsed = weeklyAvailabilitySchema.safeParse(body);

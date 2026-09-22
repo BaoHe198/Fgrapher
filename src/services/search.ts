@@ -6,8 +6,7 @@ import type {
 } from "@prisma/client";
 
 import { db } from "@/lib/db";
-import { PAID_ROLES } from "@/lib/constants";
-import { features } from "@/lib/features";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { formatAdministrativeLocation } from "@/lib/location";
 import {
   CACHE_KEY_VERSION,
@@ -17,17 +16,9 @@ import {
   unstable_cache,
 } from "@/lib/cache";
 
-// QA: /browse results and facets included CAMERA_SHOP even with the
-// marketplace off (features.marketplaceEnabled=false) — this file used
-// the raw PAID_ROLES constant everywhere instead of excluding the one
-// role that's dormant behind that flag (see CLAUDE.md's MVP scope).
-// Computed once at module load, same pattern already used client-side
-// in hero-search.tsx/filter-sidebar.tsx.
-// Exported so tests can assert the featured strip uses this same list
-// rather than hardcoding which roles are dormant.
-export const SEARCHABLE_ROLES = features.marketplaceEnabled
-  ? PAID_ROLES
-  : PAID_ROLES.filter((role) => role !== "CAMERA_SHOP");
+// Provider discovery is for bookable services. Product shops are found
+// through Chợ F and never consume a provider-search result slot.
+export const SEARCHABLE_ROLES = PROVIDER_ROLES;
 
 export type SortOption =
   "rating" | "price_asc" | "price_desc" | "newest" | "reviews";
@@ -135,7 +126,7 @@ function groupProfilesByUser(
     // insertion order, so a person's role badges/tabs are consistent
     // regardless of which profile they created first.
     const userProfiles = [...rawUserProfiles].sort(
-      (a, b) => PAID_ROLES.indexOf(a.role) - PAID_ROLES.indexOf(b.role),
+      (a, b) => PROVIDER_ROLES.indexOf(a.role) - PROVIDER_ROLES.indexOf(b.role),
     );
     const stats = statsByUser.get(userProfiles[0].userId) ?? {
       avg: 0,

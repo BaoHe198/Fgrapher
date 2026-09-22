@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { appUrl } from "@/lib/app-url";
-import { PAID_ROLES } from "@/lib/constants";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { availabilityReminderEmailHtml } from "@/lib/email";
 import { vietnamDateKey } from "@/lib/vietnam-date";
@@ -23,12 +23,12 @@ export async function sendAvailabilityUpdateReminders(now = new Date()) {
       roles: {
         some: {
           active: true,
-          role: { in: PAID_ROLES },
+          role: { in: PROVIDER_ROLES },
           verificationStatus: "VERIFIED",
         },
       },
       profiles: {
-        some: { isPublished: true, role: { in: PAID_ROLES } },
+        some: { isPublished: true, role: { in: PROVIDER_ROLES } },
       },
     },
     select: { id: true },

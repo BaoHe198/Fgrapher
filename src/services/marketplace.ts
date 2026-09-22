@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 const PAGE_SIZE = 24;
 
 export interface ShopSearchParams {
+  sellerId?: string;
   type?: "SALE" | "RENT";
   category?: string[];
   condition?: ProductCondition[];
@@ -31,6 +32,7 @@ export async function searchProducts(params: ShopSearchParams) {
   const where: Prisma.ProductWhereInput = {
     isActive: true,
     deletedAt: null,
+    ...(params.sellerId ? { userId: params.sellerId } : {}),
   };
 
   if (params.type) {
@@ -245,26 +247,16 @@ export async function addToCart({
   });
   if (!product) throw new CartError("Product not found", 404);
 
+  if (type === "RENT") {
+    throw new CartError(
+      "Rentals are arranged directly with the shop by message",
+      400,
+    );
+  }
+
   if (type === "SALE" && product.stock < quantity) {
     throw new CartError("Not enough stock available", 400);
   }
-  if (type === "RENT" && (!rentalStart || !rentalEnd)) {
-    throw new CartError("Rental dates are required", 400);
-  }
-  if (type === "RENT" && rentalStart && rentalEnd) {
-    const overlapping = await db.orderItem.findFirst({
-      where: {
-        productId,
-        type: "RENT",
-        order: { status: { in: ["PENDING", "CONFIRMED", "SHIPPED"] } },
-        rentalStart: { lt: rentalEnd },
-        rentalEnd: { gt: rentalStart },
-      },
-    });
-    if (overlapping)
-      throw new CartError("This item is already booked for those dates", 400);
-  }
-
   const existing = await db.cartItem.findFirst({
     where: {
       userId,

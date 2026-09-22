@@ -314,10 +314,9 @@ enum Role {
   MAKEUP_ARTIST
   STUDIO
   CAMERA_SHOP
-  // Costume/outfit rental shop (project owner, 21/09/2026). Takes bookings
-  // like a studio — a rental is booked for a date — and, unlike the other
-  // provider roles, may also list rental products once the marketplace is
-  // reopened for it. Bookable by customers and by every provider role.
+  // Costume/outfit shop. Publishes products on Chợ F; rental dates and the
+  // deposit are agreed directly in messaging, without Booking/Availability
+  // or a platform rental checkout during MVP.
   COSTUME_SHOP
   // Booked BY photographers/videographers for shoots — the reverse
   // direction of the Customer -> Provider flow, same shape as
@@ -1206,7 +1205,7 @@ model Follow {
 }
 
 // ============================================================================
-// MARKETPLACE (Camera Shop)
+// MARKETPLACE (Camera Shop + Costume Shop)
 // ============================================================================
 
 enum ProductType {

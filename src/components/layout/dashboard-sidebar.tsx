@@ -53,14 +53,8 @@ export function DashboardSidebar({
   const t = useTranslations("sharedComponents.dashboardSidebar");
   const roleT = useTranslations("role");
   const pathname = usePathname();
-  const {
-    roles,
-    canUpload,
-    canSell,
-    canReceiveBookings,
-    isCustomerOnly,
-    hasRole,
-  } = useUserRoles();
+  const { roles, canUpload, canSell, canReceiveBookings, hasRole } =
+    useUserRoles();
   const isAdmin = hasRole("ADMIN");
   const unreadMessages = useMessaging().unreadCount;
 
@@ -68,7 +62,7 @@ export function DashboardSidebar({
     { href: "/dashboard", label: t("overview"), icon: LayoutDashboard },
     {
       href: "/dashboard/bookings",
-      label: isCustomerOnly ? t("myBookings") : t("bookings"),
+      label: canReceiveBookings ? t("bookings") : t("myBookings"),
       icon: Calendar,
     },
     ...(canReceiveBookings

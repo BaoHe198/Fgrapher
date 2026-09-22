@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { ProductForm } from "@/components/forms/product-form";
 import { auth } from "@/lib/auth";
+import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import type { PRODUCT_CATEGORIES } from "@/lib/validations/product";
@@ -30,6 +31,10 @@ export default async function EditProductPage({
   if (!product || product.deletedAt || product.userId !== session.user.id) {
     notFound();
   }
+  const sellerRole = SELLER_ROLES.find((role) =>
+    session.user.roles.includes(role),
+  );
+  if (!sellerRole) notFound();
 
   const t = await getTranslations("dashboardCore.listings");
 
@@ -40,6 +45,7 @@ export default async function EditProductPage({
       </h1>
       <ProductForm
         productId={product.id}
+        sellerRole={sellerRole}
         defaultValues={{
           name: product.name,
           description: product.description ?? "",

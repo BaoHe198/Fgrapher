@@ -1,8 +1,6 @@
+import type { Role } from "@prisma/client";
 import { z } from "zod";
 
-// Chợ F is photo/video equipment only (project owner, 21/09/2026). Costume
-// rentals are not products: a costume shop lists its outfits on its own
-// profile instead, so there is one category list, not one per role.
 export const CAMERA_PRODUCT_CATEGORIES = [
   "Camera body",
   "Lens",
@@ -13,7 +11,34 @@ export const CAMERA_PRODUCT_CATEGORIES = [
   "Other",
 ] as const;
 
-export const PRODUCT_CATEGORIES = CAMERA_PRODUCT_CATEGORIES;
+export const COSTUME_PRODUCT_CATEGORIES = [
+  "Ao dai",
+  "Wedding dress",
+  "Menswear",
+  "Evening gown",
+  "Historical costume",
+  "Cosplay",
+  "Kidswear",
+  "Accessories",
+  "Other costume",
+] as const;
+
+export const PRODUCT_CATEGORIES = [
+  ...CAMERA_PRODUCT_CATEGORIES,
+  ...COSTUME_PRODUCT_CATEGORIES,
+] as const;
+
+export function productCategoriesForRole(role: Role) {
+  return role === "COSTUME_SHOP"
+    ? COSTUME_PRODUCT_CATEGORIES
+    : CAMERA_PRODUCT_CATEGORIES;
+}
+
+export function productCategoryAllowedForRole(role: Role, category: string) {
+  return (productCategoriesForRole(role) as readonly string[]).includes(
+    category,
+  );
+}
 
 export const productSchema = z
   .object({

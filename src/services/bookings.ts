@@ -1,7 +1,12 @@
 import type { BookingStatus, Role } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
-import { MIN_NOTICE_HOURS, PAID_ROLES } from "@/lib/constants";
+import {
+  BOOKABLE_ROLES_BY_ROLE,
+  MIN_NOTICE_HOURS,
+  PAID_ROLES,
+  PROVIDER_ROLES,
+} from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
   bookingCancelledEmailHtml,
@@ -391,7 +396,7 @@ export async function createBooking(
     }
   }
 
-  const recipientRole = service?.profile.role ?? input.trustedRecipientRole;
+  let recipientRole = service?.profile.role ?? input.trustedRecipientRole;
   const provider = await db.user.findFirst({
     where: {
       id: input.providerId,
@@ -410,9 +415,9 @@ export async function createBooking(
       profiles: {
         where: {
           isPublished: true,
-          ...(recipientRole ? { role: recipientRole } : {}),
+          role: recipientRole ? recipientRole : { in: PROVIDER_ROLES },
         },
-        select: { provinceId: true, zaloUrl: true },
+        select: { provinceId: true, zaloUrl: true, role: true },
         orderBy: { createdAt: "asc" },
         take: 1,
       },
@@ -422,6 +427,41 @@ export async function createBooking(
     throw new BookingActionError("Provider is not accepting bookings", 404);
   }
   const providerProfile = provider.profiles[0];
+  recipientRole ??= providerProfile.role;
+
+  if (!PROVIDER_ROLES.includes(recipientRole)) {
+    throw new BookingActionError("This role does not accept bookings", 400);
+  }
+
+  const requesterRole = input.requesterRole ?? "CUSTOMER";
+  if (requesterRole !== "CUSTOMER") {
+    const ownsRequesterRole = await db.userRole.findFirst({
+      where: { userId: customerId, role: requesterRole, active: true },
+      select: { id: true },
+    });
+    if (!ownsRequesterRole) {
+      throw new BookingActionError("You cannot book as this role", 403);
+    }
+    if (!input.parentBookingId) {
+      throw new BookingActionError(
+        "Provider-role bookings must be linked to a confirmed customer booking",
+        400,
+      );
+    }
+  } else if (input.parentBookingId) {
+    throw new BookingActionError(
+      "A crew booking must use your provider role",
+      400,
+    );
+  }
+
+  const allowedTargets = BOOKABLE_ROLES_BY_ROLE[requesterRole] ?? [];
+  if (!allowedTargets.includes(recipientRole)) {
+    throw new BookingActionError(
+      "This role combination is not allowed for bookings",
+      403,
+    );
+  }
   const providerProvinceId =
     providerProfile.provinceId ?? provider.ward?.provinceId ?? undefined;
 
@@ -497,7 +537,7 @@ export async function createBooking(
         expiresAt: new Date(Date.now() + BOOKING_EXPIRY_HOURS * 60 * 60 * 1000),
         provinceId: providerProvinceId,
         parentBookingId: input.parentBookingId,
-        requesterRole: input.requesterRole ?? "CUSTOMER",
+        requesterRole,
         recipientRole,
       },
       include: BOOKING_INCLUDE,

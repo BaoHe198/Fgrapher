@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
-import { CURRENT_POLICY_VERSION } from "@/lib/constants";
+import { CURRENT_POLICY_VERSION, SHOP_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRegisterSchema } from "@/lib/validations/auth";
@@ -63,12 +63,12 @@ export async function POST(request: Request) {
     interval,
   } = parsed.data;
 
-  // registerSchema's role list can't read the runtime feature flag (it's
-  // built at module scope), so CAMERA_SHOP is checked here instead — the
-  // registration UI already hides it while MARKETPLACE_ENABLED=false (see
-  // CLAUDE.md), but a direct API call could otherwise still create an
-  // active-looking CAMERA_SHOP role and a publishable, searchable profile.
-  if (!features.marketplaceEnabled && roles.includes("CAMERA_SHOP")) {
+  // The schema cannot read the runtime flag, so enforce product-only shop
+  // roles here as well as hiding them in the registration UI.
+  if (
+    !features.marketplaceEnabled &&
+    roles.some((role) => SHOP_ROLES.includes(role))
+  ) {
     return NextResponse.json(
       {
         data: null,

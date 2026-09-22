@@ -7,7 +7,10 @@ import {
 } from "@/lib/auth-helpers";
 import { SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
-import { productSchema } from "@/lib/validations/product";
+import {
+  productCategoryAllowedForRole,
+  productSchema,
+} from "@/lib/validations/product";
 import {
   createProduct,
   listProducts,
@@ -64,8 +67,8 @@ export async function POST(request: Request) {
 
   try {
     const session = await requireAuth();
-    // Either shop role may list; whichever one this account holds must have
-    // an active subscription.
+    // Product-capable roles publish inventory. Buying remains available to
+    // every authenticated account through the cart and messaging flows.
     const sellerRole = SELLER_ROLES.find((role) =>
       session.user.roles.includes(role),
     );
@@ -74,8 +77,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "forbidden",
-          message:
-            "Chợ F lists photo and video equipment — only a camera shop, photographer, videographer or studio can list here",
+          message: "This role cannot publish products on Chợ F",
         },
         { status: 403 },
       );
@@ -90,6 +92,16 @@ export async function POST(request: Request) {
           data: null,
           error: "validation_error",
           message: parsed.error.issues[0]?.message ?? "Invalid input",
+        },
+        { status: 400 },
+      );
+    }
+    if (!productCategoryAllowedForRole(sellerRole, parsed.data.category)) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "validation_error",
+          message: "This category is not available for your shop role",
         },
         { status: 400 },
       );

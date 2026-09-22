@@ -7,6 +7,7 @@ import {
   requireAuth,
 } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { PORTFOLIO_ROLES } from "@/lib/constants";
 import { createAlbumSchema } from "@/lib/validations/album";
 import { createAlbum, listAlbums } from "@/services/albums";
 
@@ -64,6 +65,12 @@ export async function POST(request: Request) {
       where: { id: parsed.data.profileId },
     });
     if (!profile || profile.userId !== session.user.id) {
+      return NextResponse.json(
+        { data: null, error: "forbidden", message: t("profileNotOwned") },
+        { status: 403 },
+      );
+    }
+    if (!PORTFOLIO_ROLES.includes(profile.role)) {
       return NextResponse.json(
         { data: null, error: "forbidden", message: t("profileNotOwned") },
         { status: 403 },

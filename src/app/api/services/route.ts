@@ -7,6 +7,7 @@ import {
   requireAuth,
 } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { createServiceSchema } from "@/lib/validations/service";
 
 export async function POST(request: Request) {
@@ -35,6 +36,17 @@ export async function POST(request: Request) {
           data: null,
           error: "forbidden",
           message: "This profile does not belong to you",
+        },
+        { status: 403 },
+      );
+    }
+
+    if (!PROVIDER_ROLES.includes(profile.role)) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "forbidden",
+          message: "This role does not offer bookable services",
         },
         { status: 403 },
       );

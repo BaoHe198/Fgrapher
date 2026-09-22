@@ -114,33 +114,32 @@ export const PAID_ROLES: Role[] = [
   "MODEL",
 ];
 
-// Roles that get a portfolio + booking-based nav section, as opposed to
-// CAMERA_SHOP's product/order-based section.
+// Roles that sell a creative service and therefore participate in the
+// portfolio, availability, booking, Fmap and opportunity flows. Product
+// shops deliberately stay out of this set: rentals are arranged by message.
 export const PROVIDER_ROLES: Role[] = [
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",
   "MAKEUP_ARTIST",
   "STUDIO",
   "MODEL",
-  "COSTUME_SHOP",
 ];
 
-// Roles allowed to list on Chợ F. The marketplace sells and rents
-// PHOTO/VIDEO EQUIPMENT only (project owner, 21/09/2026), so it is open to
-// everyone who owns gear — camera shops plus the crews themselves — and
-// closed to the costume shop, which shows its outfits in its own profile
-// instead (see COSTUME_SHOP in docs/guides/phase-13-marketplace-social.md).
+// Roles with a visual body of work. Shop images belong to ProductImage and
+// are managed from Listings, so they must never leak into portfolio flows.
+export const PORTFOLIO_ROLES: Role[] = [...PROVIDER_ROLES];
+
+// Shops and creative teams that own inventory may publish products. Every
+// authenticated account can buy; rentals continue in direct messaging.
 export const SELLER_ROLES: Role[] = [
   "CAMERA_SHOP",
+  "COSTUME_SHOP",
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",
   "STUDIO",
 ];
 
-// Roles that present themselves as a business rather than a person, and so
-// get a shop name on their profile. Not the same set as SELLER_ROLES: a
-// costume shop is a shop that does not list on Chợ F, and a photographer
-// lists on Chợ F under their own name.
+// Roles that present themselves as a business rather than a person.
 export const SHOP_ROLES: Role[] = ["CAMERA_SHOP", "COSTUME_SHOP"];
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -233,16 +232,6 @@ export const CATEGORIES_BY_ROLE: Partial<Record<Role, ProfileCategory[]>> = {
     "MATURE",
     "ALTERNATIVE",
   ],
-  COSTUME_SHOP: [
-    "AO_DAI",
-    "WEDDING_DRESS",
-    "MENSWEAR",
-    "EVENING_GOWN",
-    "HISTORICAL",
-    "COSPLAY",
-    "KIDSWEAR",
-    "ACCESSORIES",
-  ],
 };
 
 export const CATEGORY_LABELS: Record<ProfileCategory, string> = {
@@ -315,10 +304,7 @@ export const BOOKABLE_ROLES_BY_ROLE: Partial<Record<Role, Role[]>> = {
     "MAKEUP_ARTIST",
     "STUDIO",
     "MODEL",
-    "COSTUME_SHOP",
   ],
-  PHOTOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL", "COSTUME_SHOP"],
-  VIDEOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL", "COSTUME_SHOP"],
-  STUDIO: ["COSTUME_SHOP"],
-  MODEL: ["COSTUME_SHOP"],
+  PHOTOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL"],
+  VIDEOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL"],
 };

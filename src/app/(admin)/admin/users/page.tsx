@@ -26,6 +26,8 @@ export default function AdminUsersPage() {
         "MAKEUP_ARTIST",
         "STUDIO",
         "CAMERA_SHOP",
+        "COSTUME_SHOP",
+        "MODEL",
         "CUSTOMER",
         "ADMIN",
       ] as Role[]

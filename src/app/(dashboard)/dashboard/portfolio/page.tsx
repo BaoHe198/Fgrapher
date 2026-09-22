@@ -11,7 +11,7 @@ import { SectionHead } from "@/components/ui/section-head";
 import { Tag } from "@/components/ui/tag";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { PAID_ROLES } from "@/lib/constants";
+import { PORTFOLIO_ROLES } from "@/lib/constants";
 import { listAlbums } from "@/services/albums";
 
 import { AlbumGrid } from "./album-grid";
@@ -34,7 +34,9 @@ export default async function PortfolioPage({
     redirect("/login");
   }
 
-  const canUpload = session.user.roles.some((role) => role !== "CUSTOMER");
+  const canUpload = session.user.roles.some((role) =>
+    PORTFOLIO_ROLES.includes(role),
+  );
   if (!canUpload) {
     return (
       <Card className="flex flex-col items-center gap-3 py-16 text-center">
@@ -58,7 +60,7 @@ export default async function PortfolioPage({
   }
 
   const profiles = await db.profile.findMany({
-    where: { userId: session.user.id, role: { in: PAID_ROLES } },
+    where: { userId: session.user.id, role: { in: PORTFOLIO_ROLES } },
     orderBy: { createdAt: "asc" },
   });
 

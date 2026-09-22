@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { requireAuth, AuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
-import { PAID_ROLES } from "@/lib/constants";
+import { PAID_ROLES, SHOP_ROLES } from "@/lib/constants";
 import { updateRolesSchema } from "@/lib/validations/user";
 import { assignFreePlan } from "@/services/subscription";
 
@@ -26,14 +26,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // updateRolesSchema can't read the runtime feature flag (it's built at
-    // module scope), so CAMERA_SHOP is checked here instead — the roles UI
-    // already hides it while MARKETPLACE_ENABLED=false (see CLAUDE.md), but
-    // a direct API call could otherwise still grant an active-looking
-    // CAMERA_SHOP role and a publishable, searchable profile.
+    // updateRolesSchema cannot read the runtime feature flag, so enforce
+    // product-only shop roles here as well as hiding them in the UI.
     if (
       !features.marketplaceEnabled &&
-      parsed.data.roles.includes("CAMERA_SHOP")
+      parsed.data.roles.some((role) => SHOP_ROLES.includes(role))
     ) {
       return NextResponse.json(
         {

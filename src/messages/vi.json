@@ -490,6 +490,14 @@
           "label": "Cửa hàng máy ảnh",
           "description": "Cho thuê hoặc bán thiết bị của bạn"
         },
+        "costumeShop": {
+          "label": "Cửa hàng trang phục",
+          "description": "Đăng trang phục bán hoặc cho thuê trên Chợ F"
+        },
+        "model": {
+          "label": "Người mẫu",
+          "description": "Giới thiệu portfolio và nhận lịch chụp"
+        },
         "customer": {
           "label": "Khách hàng",
           "description": "Tìm và đặt lịch nhân sự sáng tạo"
@@ -1842,6 +1850,7 @@
     "messages": {
       "selectConversation": "Chọn một cuộc trò chuyện",
       "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin",
+      "rentalDraft": "Chào shop, tôi muốn thuê {product}. Sản phẩm: {url}",
       "pageTitle": "Tin nhắn"
     },
     "shopOrders": {
@@ -2877,7 +2886,8 @@
         "reviews": "Đánh giá",
         "costumes": "Trang phục",
         "gear": "Thiết bị",
-        "posts": "Bài đăng"
+        "posts": "Bài đăng",
+        "products": "Sản phẩm"
       },
       "status": {
         "available": "Đang nhận đơn",
@@ -2967,8 +2977,16 @@
         "availabilityDialogTitle": "Lịch trống",
         "fullCalendarLink": "Quản lý trong lịch đầy đủ",
         "stickyMessage": "Nhắn tin",
+        "shopMessageHelp": "Trao đổi trực tiếp với shop về tình trạng sản phẩm, ngày thuê và tiền cọc.",
         "stickyBook": "Đặt lịch",
         "pickDateHint": "Chọn ngày và giờ để tiếp tục."
+      },
+      "productTab": {
+        "empty": "Shop chưa đăng sản phẩm nào",
+        "rental": "Cho thuê",
+        "forSale": "Bán",
+        "day": "ngày",
+        "viewAll": "Xem toàn bộ Chợ F"
       },
       "hero": {
         "editCoverAria": "Sửa ảnh bìa",
@@ -3167,6 +3185,17 @@
             "Đăng sản phẩm không giới hạn",
             "Quản lý cho thuê & bán hàng",
             "Quản lý đơn hàng",
+            "Theo dõi tồn kho",
+            "Nhắn tin với khách hàng"
+          ]
+        },
+        "costumeShop": {
+          "description": "Bán và cho thuê trang phục cho buổi chụp, sự kiện.",
+          "features": [
+            "Hồ sơ cửa hàng",
+            "Đăng sản phẩm không giới hạn",
+            "Khách nhắn tin trực tiếp để thuê",
+            "Tiền cọc thỏa thuận tại shop",
             "Theo dõi tồn kho",
             "Nhắn tin với khách hàng"
           ]
@@ -3495,6 +3524,10 @@
       "addToCart": "Thêm vào giỏ",
       "buyNow": "Mua ngay",
       "requestRental": "Gửi yêu cầu thuê",
+      "messageToRent": "Nhắn tin để thuê",
+      "rentalMessageHelp": "Ngày thuê, tình trạng còn hàng và tiền cọc được bạn thỏa thuận trực tiếp với shop. Fgrapher không thu tiền cọc cho giao dịch này.",
+      "depositReference": "Tiền cọc tham khảo tại shop",
+      "day": "ngày",
       "total": "Tổng cộng",
       "pickupDate": "Ngày nhận",
       "returnDate": "Ngày trả",
@@ -3514,7 +3547,8 @@
       "reviewsTitle": "Đánh giá sản phẩm",
       "noReviews": "Chưa có đánh giá nào",
       "ratingSummary": "{average} · {count} đánh giá",
-      "shopReply": "Shop phản hồi:"
+      "shopReply": "Shop phản hồi:",
+      "viewShopProducts": "Xem sản phẩm của shop"
     },
     "community": {
       "heading": "Cộng đồng F",

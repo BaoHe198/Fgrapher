@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
-import { PAID_ROLES, ROLE_SLUGS } from "@/lib/constants";
+import { PAID_ROLES, PROVIDER_ROLES, ROLE_SLUGS } from "@/lib/constants";
 import { features } from "@/lib/features";
 
 const STATIC_ROUTES = [
@@ -70,8 +70,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const roleSlugs = Object.entries(ROLE_SLUGS).filter(
-    ([role]) => role !== "CAMERA_SHOP" || features.marketplaceEnabled,
+  const roleSlugs = Object.entries(ROLE_SLUGS).filter(([role]) =>
+    PROVIDER_ROLES.includes(role as (typeof PROVIDER_ROLES)[number]),
   );
   const landingEntries: MetadataRoute.Sitemap = roleSlugs.flatMap(
     ([, roleSlug]) =>

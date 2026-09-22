@@ -5,8 +5,7 @@ import { notFound } from "next/navigation";
 
 import { ArtistCard } from "@/components/cards/artist-card";
 import { db } from "@/lib/db";
-import { SLUG_TO_ROLE } from "@/lib/constants";
-import { features } from "@/lib/features";
+import { PROVIDER_ROLES, SLUG_TO_ROLE } from "@/lib/constants";
 import { formatCurrency, jsonLdScriptProps } from "@/lib/utils";
 import { searchProfiles } from "@/services/search";
 
@@ -30,8 +29,7 @@ interface PageProps {
 // is lost.
 async function resolveParams(roleSlug: string, provinceSlug: string) {
   const role = SLUG_TO_ROLE[roleSlug];
-  if (!role) return null;
-  if (role === "CAMERA_SHOP" && !features.marketplaceEnabled) return null;
+  if (!role || !PROVIDER_ROLES.includes(role)) return null;
 
   const province = await db.province.findUnique({
     where: { code: provinceSlug },

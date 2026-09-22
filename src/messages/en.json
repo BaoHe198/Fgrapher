@@ -490,6 +490,14 @@
           "label": "Camera Shop",
           "description": "Rent or sell your equipment"
         },
+        "costumeShop": {
+          "label": "Costume Shop",
+          "description": "List costumes for sale or rent on Chợ F"
+        },
+        "model": {
+          "label": "Model",
+          "description": "Showcase your portfolio and accept shoots"
+        },
         "customer": {
           "label": "Customer",
           "description": "Find and book creative talent"
@@ -1842,6 +1850,7 @@
     "messages": {
       "selectConversation": "Select a conversation",
       "selectConversationHint": "Choose from the list to start chatting",
+      "rentalDraft": "Hi, I'd like to rent {product}. Product: {url}",
       "pageTitle": "Messages"
     },
     "shopOrders": {
@@ -2877,7 +2886,8 @@
         "reviews": "Reviews",
         "costumes": "Costumes",
         "gear": "Gear",
-        "posts": "Posts"
+        "posts": "Posts",
+        "products": "Products"
       },
       "status": {
         "available": "Available",
@@ -2967,8 +2977,16 @@
         "availabilityDialogTitle": "Availability",
         "fullCalendarLink": "Manage in full calendar",
         "stickyMessage": "Message",
+        "shopMessageHelp": "Contact the shop directly about availability, rental dates and the deposit.",
         "stickyBook": "Book now",
         "pickDateHint": "Pick a date and time to continue."
+      },
+      "productTab": {
+        "empty": "This shop has not listed any products yet",
+        "rental": "Rental",
+        "forSale": "For sale",
+        "day": "day",
+        "viewAll": "View all of Chợ F"
       },
       "hero": {
         "editCoverAria": "Edit cover photo",
@@ -3167,6 +3185,17 @@
             "Unlimited product listings",
             "Rental & sale management",
             "Order management",
+            "Inventory tracking",
+            "Client messaging"
+          ]
+        },
+        "costumeShop": {
+          "description": "Sell and rent costumes for shoots and events.",
+          "features": [
+            "Shop profile",
+            "Unlimited product listings",
+            "Customers message directly to rent",
+            "Deposit arranged at the shop",
             "Inventory tracking",
             "Client messaging"
           ]
@@ -3495,6 +3524,10 @@
       "addToCart": "Add to cart",
       "buyNow": "Buy now",
       "requestRental": "Request rental",
+      "messageToRent": "Message to rent",
+      "rentalMessageHelp": "Arrange rental dates, availability and the deposit directly with the shop. Fgrapher does not collect the deposit for this transaction.",
+      "depositReference": "Reference deposit at the shop",
+      "day": "day",
       "total": "Total",
       "pickupDate": "Pickup date",
       "returnDate": "Return date",
@@ -3514,7 +3547,8 @@
       "reviewsTitle": "Product reviews",
       "noReviews": "No reviews yet",
       "ratingSummary": "{average} · {count} reviews",
-      "shopReply": "Shop replied:"
+      "shopReply": "Shop replied:",
+      "viewShopProducts": "View shop products"
     },
     "community": {
       "heading": "Community",

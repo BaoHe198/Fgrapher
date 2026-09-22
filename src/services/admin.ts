@@ -804,6 +804,22 @@ export async function moderateProductImages({
     ),
   );
 
+  // An approved product photo is the shop equivalent of an approved
+  // portfolio image. It can complete the shop profile's publish checklist.
+  if (action === "approve") {
+    const sellerRoles = await db.userRole.findMany({
+      where: {
+        userId: { in: [...new Set(rows.map((row) => row.product.userId))] },
+        active: true,
+        role: { in: SELLER_ROLES },
+      },
+      select: { userId: true, role: true },
+    });
+    await Promise.all(
+      sellerRoles.map(({ userId, role }) => tryAutoPublish(userId, role)),
+    );
+  }
+
   const t = await getEmailT();
   await Promise.all(
     rows.map((row) =>

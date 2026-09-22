@@ -9,6 +9,7 @@ const PAID_ROLE_VALUES = [
   "MAKEUP_ARTIST",
   "STUDIO",
   "CAMERA_SHOP",
+  "COSTUME_SHOP",
   "MODEL",
 ] as const;
 

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
@@ -16,10 +17,11 @@ interface ProductItem {
 }
 
 export function GearTab({ products }: { products: ProductItem[] }) {
+  const t = useTranslations("publicPages.profile.productTab");
   if (products.length === 0) {
     return (
       <p className="py-12 text-center text-body-md text-text-secondary">
-        No gear listed yet
+        {t("empty")}
       </p>
     );
   }
@@ -48,14 +50,14 @@ export function GearTab({ products }: { products: ProductItem[] }) {
             </div>
             <div className="flex flex-col gap-1.5 p-3.5">
               <Badge variant={product.type === "RENT" ? "accent" : "neutral"}>
-                {product.type === "RENT" ? "Rental" : "For sale"}
+                {product.type === "RENT" ? t("rental") : t("forSale")}
               </Badge>
               <span className="text-heading-sm text-text-primary">
                 {product.name}
               </span>
               <span className="text-body-md font-semibold! text-text-primary">
                 {product.type === "RENT"
-                  ? `${formatCurrency(product.rentalPrice ?? 0, product.currency)}/day`
+                  ? `${formatCurrency(product.rentalPrice ?? 0, product.currency)}/${t("day")}`
                   : formatCurrency(product.price ?? 0, product.currency)}
               </span>
             </div>
@@ -67,7 +69,7 @@ export function GearTab({ products }: { products: ProductItem[] }) {
         href="/shop"
         className="self-center text-body-md font-semibold! text-text-link"
       >
-        View all gear
+        {t("viewAll")}
       </Link>
     </div>
   );

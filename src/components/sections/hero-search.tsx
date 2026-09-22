@@ -24,7 +24,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { CATEGORIES_BY_ROLE, PAID_ROLES } from "@/lib/constants";
+import { CATEGORIES_BY_ROLE, PROVIDER_ROLES } from "@/lib/constants";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 
 interface ProvinceOption {
@@ -92,9 +92,8 @@ export function HeroSearch({
   const [wards, setWards] = useState<WardOption[]>([]);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
-  const roleOptions = PAID_ROLES.filter(
-    (r) => marketplaceEnabled || r !== "CAMERA_SHOP",
-  );
+  void marketplaceEnabled;
+  const roleOptions = PROVIDER_ROLES;
   const categoryOptions = role ? (CATEGORIES_BY_ROLE[role] ?? []) : [];
 
   // Real Province rows (Prompt B4), not a hardcoded list (CLAUDE.md mục 9)

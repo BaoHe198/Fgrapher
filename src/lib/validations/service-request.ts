@@ -1,4 +1,4 @@
-import { ProfileCategory, Role } from "@prisma/client";
+import { ProfileCategory } from "@prisma/client";
 import { z } from "zod";
 
 import { locationTypeSchema } from "@/lib/validations/booking";
@@ -10,7 +10,15 @@ import {
 const serviceRequestFields = z.object({
   title: z.string().min(3).max(120),
   description: z.string().max(2000).optional(),
-  role: z.enum(Role),
+  // Requests target bookable creative services. Shops are contacted from a
+  // product listing, while CUSTOMER/ADMIN are never request recipients.
+  role: z.enum([
+    "PHOTOGRAPHER",
+    "VIDEOGRAPHER",
+    "MAKEUP_ARTIST",
+    "STUDIO",
+    "MODEL",
+  ]),
   categories: z.array(z.enum(ProfileCategory)).max(5).default([]),
   shootDate: z
     .string()

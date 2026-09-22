@@ -13,7 +13,7 @@ import { toast } from "@/components/ui/toast";
 import {
   CATEGORIES_BY_ROLE,
   EXPERIENCE_LEVELS,
-  PAID_ROLES,
+  PROVIDER_ROLES,
 } from "@/lib/constants";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 
@@ -153,9 +153,8 @@ export function FilterSidebar({
     { value: "4.5", label: t("rating45Plus") },
   ];
   const router = useRouter();
-  const roleFilterOptions = marketplaceEnabled
-    ? PAID_ROLES
-    : PAID_ROLES.filter((role) => role !== "CAMERA_SHOP");
+  void marketplaceEnabled;
+  const roleFilterOptions = PROVIDER_ROLES;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const runNavigation = useBrowseFilterNavigation();

@@ -2,8 +2,9 @@ import type { Role } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
-import { PAID_ROLES } from "@/lib/constants";
+import { PAID_ROLES, PROVIDER_ROLES, SHOP_ROLES } from "@/lib/constants";
 import { omitPrivateProfileFields } from "@/lib/profile-privacy";
+import { productCategoriesForRole } from "@/lib/validations/product";
 import {
   CACHE_KEY_VERSION,
   CACHE_TTL,
@@ -50,10 +51,24 @@ export async function setProfilePublished(
   }
 
   if (isPublished) {
-    const approvedMedia = await db.profileMedia.findFirst({
-      where: { profileId: profile.id, moderationStatus: "APPROVED" },
-      select: { id: true },
-    });
+    const isShop = SHOP_ROLES.includes(role);
+    const approvedMedia = isShop
+      ? await db.productImage.findFirst({
+          where: {
+            moderationStatus: "APPROVED",
+            product: {
+              userId,
+              isActive: true,
+              deletedAt: null,
+              category: { in: [...productCategoriesForRole(role)] },
+            },
+          },
+          select: { id: true },
+        })
+      : await db.profileMedia.findFirst({
+          where: { profileId: profile.id, moderationStatus: "APPROVED" },
+          select: { id: true },
+        });
     if (!approvedMedia) {
       throw new ProfileHasNoApprovedMediaError(t("noApprovedMedia"));
     }
@@ -63,7 +78,11 @@ export async function setProfilePublished(
   // khai hồ sơ": specialty categories are how both the search filter
   // (G4) and the public profile page (VIỆC 5) let clients find the right
   // provider, so a profile with none of those set isn't ready to go live.
-  if (isPublished && profile.categories.length === 0) {
+  if (
+    isPublished &&
+    !SHOP_ROLES.includes(role) &&
+    profile.categories.length === 0
+  ) {
     throw new ProfileMissingCategoryError(t("missingCategory"));
   }
 
@@ -276,7 +295,7 @@ export async function getProviderForBooking(providerId: string) {
       username: true,
       avatar: true,
       profiles: {
-        where: { isPublished: true, role: { in: PAID_ROLES } },
+        where: { isPublished: true, role: { in: PROVIDER_ROLES } },
         select: {
           displayName: true,
           role: true,
@@ -361,9 +380,16 @@ export async function getProfileReviews(userId: string) {
 // and product create/update/delete + order stock decrements are not wired
 // into revalidatePublicProfile — caching this would serve stale inventory.
 // Revisit together with the marketplace feature flag.
-export async function getShopProducts(userId: string) {
+export async function getShopProducts(userId: string, role?: Role) {
   return db.product.findMany({
-    where: { userId, isActive: true, deletedAt: null },
+    where: {
+      userId,
+      isActive: true,
+      deletedAt: null,
+      ...(role && SHOP_ROLES.includes(role)
+        ? { category: { in: [...productCategoriesForRole(role)] } }
+        : {}),
+    },
     include: {
       images: {
         where: { moderationStatus: "APPROVED" },

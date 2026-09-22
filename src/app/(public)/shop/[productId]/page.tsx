@@ -169,16 +169,14 @@ export default async function ProductDetailPage({
               </div>
             </div>
             <div className="flex gap-2">
-              {product.user.username ? (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  nativeButton={false}
-                  render={<Link href={`/profile/${product.user.username}`} />}
-                >
-                  View shop
-                </Button>
-              ) : null}
+              <Button
+                size="sm"
+                variant="secondary"
+                nativeButton={false}
+                render={<Link href={`/shop?sellerId=${product.user.id}`} />}
+              >
+                {t("viewShopProducts")}
+              </Button>
               <Button
                 size="sm"
                 variant="secondary"
@@ -206,6 +204,7 @@ export default async function ProductDetailPage({
               condition: product.condition,
               stock: product.stock,
             }}
+            shopId={product.user.id}
             shopLocation={product.user.location}
           />
         </div>

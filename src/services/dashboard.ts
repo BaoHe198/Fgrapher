@@ -19,9 +19,7 @@ export interface CustomerStats {
 }
 
 export function isProviderRoleSet(roles: Role[]) {
-  return roles.some(
-    (role) => PROVIDER_ROLES.includes(role) || role === "CAMERA_SHOP",
-  );
+  return roles.some((role) => PROVIDER_ROLES.includes(role));
 }
 
 export async function getProviderStats(userId: string): Promise<ProviderStats> {

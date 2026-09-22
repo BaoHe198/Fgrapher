@@ -1,16 +1,15 @@
 "use client";
 
 import type { ProductCondition, ProductType } from "@prisma/client";
-import { Loader2, RotateCcw, Shield, Truck } from "lucide-react";
+import { Loader2, MessageCircle, RotateCcw, Shield, Truck } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { DateField } from "@/components/ui/date-field";
 import { toast } from "@/components/ui/toast";
-import { calculateRentalDays } from "@/lib/pricing";
 import { useTranslations } from "next-intl";
 
 import { formatCurrency } from "@/lib/utils";
@@ -34,16 +33,13 @@ interface Product {
   stock: number;
 }
 
-function todayDateKey() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-}
-
 export function ProductPurchasePanel({
   product,
+  shopId,
   shopLocation,
 }: {
   product: Product;
+  shopId: string;
   shopLocation: string | null;
 }) {
   const router = useRouter();
@@ -52,29 +48,13 @@ export function ProductPurchasePanel({
   );
   const t = useTranslations("publicPages.productDetail");
   const [quantity, setQuantity] = useState(1);
-  const [rentalStart, setRentalStart] = useState("");
-  const [rentalEnd, setRentalEnd] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Floor of 0, not 1 — before both dates are picked (or if they're equal)
-  // this is a live pre-purchase preview, and should show ₫0 rather than
-  // charge for a day the user hasn't actually selected yet. The real order
-  // (services/orders.ts) floors at 1, as it must once a purchase is real.
-  const rentalDays =
-    rentalStart && rentalEnd
-      ? Math.max(0, calculateRentalDays(rentalStart, rentalEnd))
-      : 0;
-  const rentalSubtotal = rentalDays * (product.rentalPrice ?? 0);
   const saleTotal = (product.price ?? 0) * quantity;
 
   const addToCart = async (redirectToCheckout: boolean) => {
     setError(null);
-    if (mode === "RENT" && (!rentalStart || !rentalEnd || rentalDays <= 0)) {
-      setError(t("invalidDates"));
-      return;
-    }
-
     setIsSubmitting(true);
     const res = await fetch("/api/cart", {
       method: "POST",
@@ -83,8 +63,6 @@ export function ProductPurchasePanel({
         productId: product.id,
         quantity: mode === "SALE" ? quantity : 1,
         type: mode,
-        rentalStart: mode === "RENT" ? rentalStart : undefined,
-        rentalEnd: mode === "RENT" ? rentalEnd : undefined,
       }),
     });
     const body = await res.json();
@@ -203,70 +181,41 @@ export function ProductPurchasePanel({
         </>
       ) : (
         <>
-          <span className="text-body-md text-text-primary">
+          <span className="text-display-md text-text-primary">
             {formatCurrency(product.rentalPrice ?? 0, product.currency)}
-            <span className="text-body-sm text-text-secondary">/day</span>
+            <span className="text-body-sm text-text-secondary">
+              /{t("day")}
+            </span>
           </span>
 
-          <div className="flex gap-2">
-            <DateField
-              label={t("pickupDate")}
-              min={todayDateKey()}
-              value={rentalStart}
-              onChange={setRentalStart}
-            />
-            <DateField
-              label={t("returnDate")}
-              min={rentalStart || todayDateKey()}
-              value={rentalEnd}
-              onChange={setRentalEnd}
-            />
-          </div>
-
-          {rentalDays > 0 ? (
-            <div className="flex flex-col gap-1.5 border-t border-border-subtle pt-3 text-body-sm">
-              <div className="flex justify-between">
-                <span className="text-text-secondary">
-                  {t("rentalDays", { days: rentalDays })}{" "}
-                  {formatCurrency(product.rentalPrice ?? 0, product.currency)}
-                </span>
-                <span className="text-text-primary">
-                  {formatCurrency(rentalSubtotal, product.currency)}
-                </span>
-              </div>
-              {product.depositAmount ? (
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">
-                    {t("depositNote")}
-                  </span>
-                  <span className="text-text-primary">
-                    {formatCurrency(product.depositAmount, product.currency)}
-                  </span>
-                </div>
-              ) : null}
-              <div className="flex justify-between text-heading-sm font-bold! text-text-primary">
-                <span>{t("total")}</span>
-                <span>
-                  {formatCurrency(
-                    rentalSubtotal + (product.depositAmount ?? 0),
-                    product.currency,
-                  )}
-                </span>
-              </div>
+          {product.depositAmount ? (
+            <div className="flex justify-between rounded-[var(--fg-radius-md)] bg-bg-sunken p-3 text-body-sm">
+              <span className="text-text-secondary">
+                {t("depositReference")}
+              </span>
+              <span className="font-semibold text-text-primary">
+                {formatCurrency(product.depositAmount, product.currency)}
+              </span>
             </div>
           ) : null}
 
-          {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+          <p className="text-body-sm text-text-secondary">
+            {t("rentalMessageHelp")}
+          </p>
 
           <Button
             variant="accent"
             size="lg"
             className="w-full"
-            disabled={isSubmitting}
-            onClick={() => addToCart(false)}
+            nativeButton={false}
+            render={
+              <Link
+                href={`/dashboard/messages?to=${shopId}&product=${product.id}&productName=${encodeURIComponent(product.name)}`}
+              />
+            }
           >
-            {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            {t("requestRental")}
+            <MessageCircle className="size-4" />
+            {t("messageToRent")}
           </Button>
         </>
       )}

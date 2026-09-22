@@ -7,6 +7,7 @@ import {
   Loader2,
   Palette,
   ShoppingBag,
+  Shirt,
   User,
   Video,
   type LucideIcon,
@@ -20,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PAID_ROLES } from "@/lib/constants";
+import { PAID_ROLES, SHOP_ROLES } from "@/lib/constants";
 import { cn, formatCurrency } from "@/lib/utils";
 
 interface RoleOption {
@@ -35,6 +36,8 @@ const ROLE_OPTIONS: RoleOption[] = [
   { role: "MAKEUP_ARTIST", key: "makeupArtist", icon: Palette },
   { role: "STUDIO", key: "studio", icon: Building2 },
   { role: "CAMERA_SHOP", key: "cameraShop", icon: ShoppingBag },
+  { role: "COSTUME_SHOP", key: "costumeShop", icon: Shirt },
+  { role: "MODEL", key: "model", icon: User },
   { role: "CUSTOMER", key: "customer", icon: User },
 ];
 
@@ -51,7 +54,7 @@ export function RoleSelectionForm({
   const router = useRouter();
   const roleOptions = marketplaceEnabled
     ? ROLE_OPTIONS
-    : ROLE_OPTIONS.filter((option) => option.role !== "CAMERA_SHOP");
+    : ROLE_OPTIONS.filter((option) => !SHOP_ROLES.includes(option.role));
   const [selected, setSelected] = useState<Set<Role>>(new Set(["CUSTOMER"]));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);

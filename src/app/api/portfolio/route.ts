@@ -7,6 +7,7 @@ import {
   requireAuth,
 } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { PORTFOLIO_ROLES } from "@/lib/constants";
 import { ROLE_PLANS } from "@/lib/constants/plans";
 import { getCreatePortfolioMediaSchema } from "@/lib/validations/portfolio";
 import { runModeration } from "@/services/moderation";
@@ -41,6 +42,17 @@ export async function POST(request: Request) {
           data: null,
           error: "forbidden",
           message: t("profileNotOwned"),
+        },
+        { status: 403 },
+      );
+    }
+
+    if (!PORTFOLIO_ROLES.includes(profile.role)) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "forbidden",
+          message: "This role uses product listings instead of a portfolio",
         },
         { status: 403 },
       );

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
-import { productSchema } from "@/lib/validations/product";
+import {
+  productCategoryAllowedForRole,
+  productSchema,
+} from "@/lib/validations/product";
 import { deleteProduct, updateProduct } from "@/services/products";
 
 // Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
@@ -51,6 +55,15 @@ export async function PATCH(
   try {
     const session = await requireAuth();
     const { id } = await params;
+    const sellerRole = SELLER_ROLES.find((role) =>
+      session.user.roles.includes(role),
+    );
+    if (!sellerRole) {
+      return NextResponse.json(
+        { data: null, error: "forbidden", message: "Seller role required" },
+        { status: 403 },
+      );
+    }
 
     const body = await request.json();
     const parsed = productSchema.safeParse(body);
@@ -60,6 +73,16 @@ export async function PATCH(
           data: null,
           error: "validation_error",
           message: parsed.error.issues[0]?.message ?? "Invalid input",
+        },
+        { status: 400 },
+      );
+    }
+    if (!productCategoryAllowedForRole(sellerRole, parsed.data.category)) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "validation_error",
+          message: "This category is not available for your shop role",
         },
         { status: 400 },
       );
