@@ -9,6 +9,11 @@ import {
 } from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
+  holdSlot,
+  isOverlapViolation,
+  releaseSlot,
+} from "@/services/booking-allocation";
+import {
   bookingCancelledEmailHtml,
   bookingCompletedEmailHtml,
   bookingConfirmedEmailHtml,
@@ -338,6 +343,11 @@ export async function createBooking(
 
   const date = new Date(`${input.date}T00:00:00.000Z`);
   const slotInstant = Date.parse(`${input.date}T${input.startTime}:00.000Z`);
+  // Real instants for the hold and for everything that comes after the
+  // legacy date + "HH:mm" columns are retired. Vietnam is UTC+7 with no
+  // daylight saving, so this is a fixed offset — see
+  // scripts/backfill-provider-architecture.ts, which uses the same rule.
+  const startAt = new Date(slotInstant - 7 * 3_600_000);
   if (slotInstant < Date.now() + MIN_NOTICE_HOURS * 60 * 60 * 1000) {
     throw new BookingActionError(
       `Bookings need at least ${MIN_NOTICE_HOURS} hours notice`,
@@ -470,6 +480,8 @@ export async function createBooking(
     Number(input.startTime.slice(0, 2)) * 60 + Number(input.startTime.slice(3));
   const endMinutes = startMinutes + duration;
   const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+  // Same fixed UTC+7 conversion as startAt above.
+  const endInstant = new Date(startAt.getTime() + duration * 60_000);
 
   // Server-side gate (Prompt F3, VIỆC 4) — the booking widget already
   // disables blocked/unavailable slots client-side, but that's UI-only; a
@@ -518,7 +530,7 @@ export async function createBooking(
     // No BookingStatusHistory row here — that table records transitions
     // (see transitionBooking below), and creation isn't one; the row's
     // own createdAt is the "requested" timestamp.
-    return tx.booking.create({
+    const created = await tx.booking.create({
       data: {
         customerId,
         providerId: input.providerId,
@@ -539,9 +551,34 @@ export async function createBooking(
         parentBookingId: input.parentBookingId,
         requesterRole,
         recipientRole,
+        startAt,
+        endAt: endInstant,
       },
       include: BOOKING_INCLUDE,
     });
+
+    // The hold goes in the SAME transaction as the booking: a booking that
+    // exists without its hold is a booking the database is not protecting.
+    // The check above can still be raced — two requests can both read an
+    // empty slot — and this is what actually decides the winner.
+    try {
+      await holdSlot(tx, {
+        bookingId: created.id,
+        providerId: input.providerId,
+        startAt,
+        endAt: endInstant,
+      });
+    } catch (error) {
+      if (isOverlapViolation(error)) {
+        throw new BookingActionError(
+          "That time slot was just booked — pick another",
+          409,
+        );
+      }
+      throw error;
+    }
+
+    return created;
   });
 
   const createEmailT = await getEmailT();
@@ -692,8 +729,12 @@ export async function transitionBooking({
   }
 
   const fromStatus = booking.status;
-  const [updated] = await db.$transaction([
-    db.booking.update({
+  // Every status this can move to except CONFIRMED releases the slot, and
+  // CONFIRMED keeps the hold it already has. Done in the same transaction as
+  // the status change, so the hold and the status can never disagree.
+  const releasesHold = toStatus !== "CONFIRMED";
+  const updated = await db.$transaction(async (tx) => {
+    const row = await tx.booking.update({
       where: { id: bookingId },
       data: {
         status: toStatus,
@@ -704,11 +745,13 @@ export async function transitionBooking({
         ...(toStatus === "COMPLETED" ? { completedAt: new Date() } : {}),
       },
       include: BOOKING_INCLUDE,
-    }),
-    db.bookingStatusHistory.create({
+    });
+    await tx.bookingStatusHistory.create({
       data: { bookingId, fromStatus, toStatus, actorId, note },
-    }),
-  ]);
+    });
+    if (releasesHold) await releaseSlot(bookingId, tx);
+    return row;
+  });
 
   if (actorId !== null) {
     const recipient = isProvider ? updated.customer : updated.provider;
@@ -1081,6 +1124,24 @@ export async function respondToReschedule({
     );
   }
 
+  // Accepting a reschedule moves the slot, so the hold has to move with it —
+  // otherwise the database would still be protecting the old window and
+  // leaving the new one open to a second booking.
+  const movedStartAt = accept
+    ? new Date(
+        Date.parse(
+          `${booking.rescheduleProposedDate!.toISOString().slice(0, 10)}T${booking.rescheduleProposedStartTime!}:00.000Z`,
+        ) -
+          7 * 3_600_000,
+      )
+    : null;
+  const movedEndAt =
+    accept && movedStartAt
+      ? new Date(
+          movedStartAt.getTime() + (booking.service?.duration ?? 60) * 60_000,
+        )
+      : null;
+
   const updated = await db.booking.update({
     where: { id: bookingId },
     data: accept
@@ -1088,6 +1149,8 @@ export async function respondToReschedule({
           date: booking.rescheduleProposedDate!,
           startTime: booking.rescheduleProposedStartTime!,
           endTime: booking.rescheduleProposedEndTime ?? booking.endTime,
+          startAt: movedStartAt,
+          endAt: movedEndAt,
           rescheduleProposedDate: null,
           rescheduleProposedStartTime: null,
           rescheduleProposedEndTime: null,
@@ -1101,6 +1164,23 @@ export async function respondToReschedule({
         },
     include: BOOKING_INCLUDE,
   });
+
+  if (accept && movedStartAt && movedEndAt) {
+    try {
+      await db.bookingAllocation.updateMany({
+        where: { bookingId },
+        data: { startAt: movedStartAt, endAt: movedEndAt },
+      });
+    } catch (error) {
+      if (isOverlapViolation(error)) {
+        throw new BookingActionError(
+          "That new time was just taken — propose another",
+          409,
+        );
+      }
+      throw error;
+    }
+  }
 
   const proposer =
     booking.rescheduleProposedBy === booking.providerId

@@ -3638,7 +3638,8 @@
       "ratingAny": "Any",
       "rating4Plus": "4+ stars",
       "rating45Plus": "4.5+ stars",
-      "resetFilters": "Reset filters"
+      "resetFilters": "Reset filters",
+      "serviceLabel": "Service"
     },
     "mobileFilterSheet": {
       "filtersButton": "Filters",
@@ -3866,5 +3867,12 @@
       "viewPhoto": "View photo",
       "viewVideo": "Play video"
     }
+  },
+  "serviceKind": {
+    "PHOTOGRAPHY": "Photography",
+    "VIDEOGRAPHY": "Videography",
+    "VENUE_RENTAL": "Venue rental",
+    "MAKEUP": "Make-up",
+    "MODELING": "Modelling"
   }
 }

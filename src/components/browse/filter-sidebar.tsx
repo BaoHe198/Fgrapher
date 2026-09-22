@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { SERVICE_KINDS } from "@/lib/constants/service-matrix";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
@@ -51,6 +52,7 @@ const NAVIGATE_DEBOUNCE_MS = 200;
 
 interface FilterState {
   roles: Role[];
+  serviceKinds: string[];
   sort: string;
   city: string;
   ward: string;
@@ -68,6 +70,8 @@ function filterStateFromParams(searchParams: URLSearchParams): FilterState {
   return {
     roles: (searchParams.get("roles")?.split(",").filter(Boolean) ??
       []) as Role[],
+    serviceKinds:
+      searchParams.get("services")?.split(",").filter(Boolean) ?? [],
     sort: searchParams.get("sort") ?? "rating",
     city: searchParams.get("city") ?? "",
     ward: searchParams.get("ward") ?? "",
@@ -89,6 +93,8 @@ function filterStateFromParams(searchParams: URLSearchParams): FilterState {
 function filterStateToQuery(filters: FilterState): string {
   const params = new URLSearchParams();
   if (filters.roles.length > 0) params.set("roles", filters.roles.join(","));
+  if (filters.serviceKinds.length > 0)
+    params.set("services", filters.serviceKinds.join(","));
   if (filters.sort !== "rating") params.set("sort", filters.sort);
   if (filters.city) params.set("city", filters.city);
   if (filters.city && filters.ward) params.set("ward", filters.ward);
@@ -129,6 +135,7 @@ export function FilterSidebar({
 }: FilterSidebarProps) {
   const t = useTranslations("sharedComponents.filterSidebar");
   const roleT = useTranslations("role");
+  const serviceKindT = useTranslations("serviceKind");
   const categoryT = useTranslations("profileCategory");
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<Role>>(new Set());
@@ -233,6 +240,18 @@ export function FilterSidebar({
     scheduleNavigate(next, immediate);
   };
 
+  // What the customer wants DONE, which is a different question from what
+  // the provider is called — a studio with a crew offers PHOTOGRAPHY, so
+  // filtering by that has to reach it.
+  const toggleServiceKind = (kind: string) => {
+    const current = filtersRef.current.serviceKinds;
+    applyFilters({
+      serviceKinds: current.includes(kind)
+        ? current.filter((k) => k !== kind)
+        : [...current, kind],
+    });
+  };
+
   const toggleRole = (role: Role) => {
     const current = filtersRef.current.roles;
     const roles = current.includes(role)
@@ -302,6 +321,7 @@ export function FilterSidebar({
   const resetFilters = () => {
     const empty: FilterState = {
       roles: [],
+      serviceKinds: [],
       sort: "rating",
       city: "",
       ward: "",
@@ -374,6 +394,22 @@ export function FilterSidebar({
 
   return (
     <div className="sticky top-[104px] flex flex-col gap-[22px] rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-sm)]">
+      <div className="flex flex-col gap-2.5">
+        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          {t("serviceLabel")}
+        </span>
+        <div className="flex flex-col gap-2.5">
+          {SERVICE_KINDS.map((kind) => (
+            <Checkbox
+              key={kind}
+              checked={filters.serviceKinds.includes(kind)}
+              onCheckedChange={() => toggleServiceKind(kind)}
+              label={serviceKindT(kind)}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-2.5">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
           {t("roleLabel")}

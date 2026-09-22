@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 
 import { PUBLIC_SEARCH_CACHE_CONTROL } from "@/lib/cache";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import type { ServiceKind } from "@prisma/client";
+
 import { searchProfiles, type SortOption } from "@/services/search";
 
 const VALID_SORTS: SortOption[] = [
@@ -36,6 +38,10 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
   const q = searchParams.get("q") ?? undefined;
+  const serviceKinds = searchParams
+    .get("services")
+    ?.split(",")
+    .filter(Boolean) as ServiceKind[] | undefined;
   const roles = searchParams.get("roles")?.split(",").filter(Boolean) as
     Role[] | undefined;
   const city = searchParams.get("city") ?? undefined;
@@ -61,6 +67,7 @@ export async function GET(request: Request) {
   const result = await searchProfiles({
     q,
     roles,
+    serviceKinds,
     city,
     minPrice,
     maxPrice,

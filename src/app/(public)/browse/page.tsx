@@ -14,6 +14,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
 import { features } from "@/lib/features";
 import { cn, formatCurrency } from "@/lib/utils";
+import type { ServiceKind } from "@prisma/client";
+
 import { searchProfiles, type SortOption } from "@/services/search";
 import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
 
@@ -75,6 +77,8 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const params = await searchParams;
 
   const roles = params.roles?.split(",").filter(Boolean) as Role[] | undefined;
+  const serviceKinds = params.services?.split(",").filter(Boolean) as
+    ServiceKind[] | undefined;
   const categories = params.categories?.split(",").filter(Boolean) as
     ProfileCategory[] | undefined;
 
@@ -100,6 +104,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const result = await searchProfiles({
     q: params.q,
     roles,
+    serviceKinds,
     city: params.city,
     wardId: params.ward,
     minPrice: params.minPrice ? Number(params.minPrice) : undefined,

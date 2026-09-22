@@ -3638,7 +3638,8 @@
       "ratingAny": "Tất cả",
       "rating4Plus": "Từ 4 sao",
       "rating45Plus": "Từ 4.5 sao",
-      "resetFilters": "Đặt lại bộ lọc"
+      "resetFilters": "Đặt lại bộ lọc",
+      "serviceLabel": "Dịch vụ"
     },
     "mobileFilterSheet": {
       "filtersButton": "Bộ lọc",
@@ -3866,5 +3867,12 @@
       "viewPhoto": "Xem ảnh lớn",
       "viewVideo": "Phát video"
     }
+  },
+  "serviceKind": {
+    "PHOTOGRAPHY": "Chụp ảnh",
+    "VIDEOGRAPHY": "Quay phim",
+    "VENUE_RENTAL": "Cho thuê không gian",
+    "MAKEUP": "Trang điểm",
+    "MODELING": "Làm mẫu"
   }
 }

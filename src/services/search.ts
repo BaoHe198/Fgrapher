@@ -3,6 +3,7 @@ import type {
   Prisma,
   ProfileCategory,
   Role,
+  ServiceKind,
 } from "@prisma/client";
 
 import { db } from "@/lib/db";
@@ -33,6 +34,13 @@ export type SortOption =
 export interface SearchParams {
   q?: string;
   roles?: Role[];
+  /**
+   * What the customer wants done, which is not the same question as who the
+   * provider is. Filtering on this is the whole reason the column exists: a
+   * search for PHOTOGRAPHY has to return the studio with a shooting crew as
+   * well as the freelance photographer, and no role filter can express that.
+   */
+  serviceKinds?: ServiceKind[];
   city?: string;
   wardId?: string;
   minPrice?: number;
@@ -210,6 +218,9 @@ function buildBaseWhere(params: SearchParams): Prisma.ProfileWhereInput {
     role: {
       in: requestedRoles ?? SEARCHABLE_ROLES,
     },
+    ...(params.serviceKinds && params.serviceKinds.length > 0
+      ? { serviceKinds: { hasSome: params.serviceKinds } }
+      : {}),
     ...(params.categories && params.categories.length > 0
       ? { categories: { hasSome: params.categories } }
       : {}),
