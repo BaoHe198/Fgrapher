@@ -114,8 +114,10 @@ Quy tắc:
 - `code` **không phải** mã hành chính GSO chính thức — đợt sáp nhập 2025 đã
   đổi/bỏ các mã đó và dự án chưa có bảng ánh xạ đáng tin. Đừng khẳng định ngược lại.
 - **Không hardcode** tên tỉnh trong code hay component (CLAUDE.md mục 9). Luôn join.
-- **Hiện chỉ seed 1 tỉnh: Hồ Chí Minh** (168 phường) — `prisma/data/provinces-registry.ts`
-  và `prisma/data/hcmc-wards.ts`. Thêm tỉnh = sửa seed, **không** sửa schema.
+- **Đã seed toàn quốc: 34 tỉnh/thành, 3.321 phường/xã** (kiểm tra trên DB dev
+  22/09/2026) — `prisma/data/provinces-registry.ts` và
+  `prisma/data/nationwide-wards.ts` (`hcmc-wards.ts` là bản cũ chỉ có HCM, giữ
+  lại cho lịch sử). Thêm/sửa địa danh = sửa seed, **không** sửa schema.
   Đừng viết code hay nội dung giả định "34 tỉnh đã có dữ liệu".
 - Provider phục vụ nhiều tỉnh → bảng nối `ProfileServiceArea` (`profileId`,
   `provinceId`, `isPrimary`), song song với `Profile.provinceId`/`wardId` là nơi
