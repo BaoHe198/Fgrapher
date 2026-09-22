@@ -114,23 +114,26 @@ export const PAID_ROLES: Role[] = [
   "MODEL",
 ];
 
-// Roles that participate in the portfolio, availability, booking, Fmap and
-// opportunity flows. CAMERA_SHOP stays out: it sells gear through Chợ F and
-// takes orders, not bookings. COSTUME_SHOP is IN — a costume rental is booked
-// for a date, and its outfit catalogue hangs off its profile photos (project
-// owner, 21/09/2026, reconfirmed 22/09/2026).
+// Roles that participate in the availability, booking, Fmap and opportunity
+// flows. Neither shop role is here (project owner, 22/09/2026): a camera shop
+// takes orders through Chợ F, and a costume shop is contacted by message —
+// the customer picks an outfit from its catalogue and the dates, price and
+// deposit are agreed in the chat, not on a calendar.
 export const PROVIDER_ROLES: Role[] = [
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",
   "MAKEUP_ARTIST",
   "STUDIO",
   "MODEL",
-  "COSTUME_SHOP",
 ];
 
-// Roles with a visual body of work. Shop images belong to ProductImage and
-// are managed from Listings, so they must never leak into portfolio flows.
-export const PORTFOLIO_ROLES: Role[] = [...PROVIDER_ROLES];
+// Roles allowed to upload profile photos. A camera shop is out — its images
+// are ProductImage rows managed from Listings. COSTUME_SHOP is IN even though
+// it is not a provider: every outfit in its catalogue points at a
+// ProfileMedia row, which is what puts outfit photos through the same
+// moderation queue as portfolio photos. Its *public profile* shows no
+// portfolio tab — only the catalogue (project owner, 22/09/2026).
+export const PORTFOLIO_ROLES: Role[] = [...PROVIDER_ROLES, "COSTUME_SHOP"];
 
 // Roles allowed to list on Chợ F, which carries photo/video EQUIPMENT only:
 // the camera shop plus the crews who own gear. COSTUME_SHOP is deliberately
@@ -319,11 +322,7 @@ export const BOOKABLE_ROLES_BY_ROLE: Partial<Record<Role, Role[]>> = {
     "MAKEUP_ARTIST",
     "STUDIO",
     "MODEL",
-    "COSTUME_SHOP",
   ],
-  PHOTOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL", "COSTUME_SHOP"],
-  VIDEOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL", "COSTUME_SHOP"],
-  // A costume rental is the one thing a studio or a model books for a shoot.
-  STUDIO: ["COSTUME_SHOP"],
-  MODEL: ["COSTUME_SHOP"],
+  PHOTOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL"],
+  VIDEOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL"],
 };

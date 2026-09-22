@@ -31,12 +31,22 @@ export function MessagesClient({
   const startedRef = useRef(false);
   const productId = searchParams.get("product");
   const productName = searchParams.get("productName");
+  // An outfit has no product page of its own — the catalogue lives on the
+  // shop's profile, so the draft links there instead.
+  const costumeId = searchParams.get("costume");
+  const costumeName = searchParams.get("costumeName");
+  const shopUsername = searchParams.get("shop");
   const rentalDraft = productId
     ? t("rentalDraft", {
         product: productName || productId,
         url: `/shop/${productId}`,
       })
-    : undefined;
+    : costumeId
+      ? t("costumeDraft", {
+          costume: costumeName || costumeId,
+          url: shopUsername ? `/profile/${shopUsername}` : "",
+        })
+      : undefined;
 
   const loadConversations = () => {
     fetch("/api/conversations")
@@ -72,6 +82,9 @@ export function MessagesClient({
             const nextParams = new URLSearchParams({ c: body.data.id });
             if (productId) nextParams.set("product", productId);
             if (productName) nextParams.set("productName", productName);
+            if (costumeId) nextParams.set("costume", costumeId);
+            if (costumeName) nextParams.set("costumeName", costumeName);
+            if (shopUsername) nextParams.set("shop", shopUsername);
             router.replace(`/dashboard/messages?${nextParams.toString()}`);
             loadConversations();
           }
@@ -143,7 +156,7 @@ export function MessagesClient({
         >
           {selectedConversation ? (
             <ChatPanel
-              key={`${selectedConversation.id}:${productId ?? ""}`}
+              key={`${selectedConversation.id}:${productId ?? costumeId ?? ""}`}
               conversationId={selectedConversation.id}
               currentUserId={session.user.id}
               otherUser={selectedConversation.otherUser}

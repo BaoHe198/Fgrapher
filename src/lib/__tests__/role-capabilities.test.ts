@@ -34,19 +34,26 @@ describe("role capability boundaries", () => {
     }
   });
 
-  it("keeps the costume shop off Chợ F but inside the booking flows", () => {
+  it("keeps the costume shop off Chợ F and off the booking flows", () => {
+    // Its profile is a catalogue: pick an outfit, message the shop, agree
+    // the dates and deposit in the chat (project owner, 22/09/2026).
     assert.equal(SELLER_ROLES.includes("COSTUME_SHOP"), false);
-    assert.ok(PROVIDER_ROLES.includes("COSTUME_SHOP"));
+    assert.equal(PROVIDER_ROLES.includes("COSTUME_SHOP"), false);
+    for (const targets of Object.values(BOOKABLE_ROLES_BY_ROLE)) {
+      assert.equal(targets?.includes("COSTUME_SHOP"), false);
+    }
+  });
+
+  it("still lets the costume shop upload photos, unlike the camera shop", () => {
+    // Every outfit points at a ProfileMedia row, which is what puts outfit
+    // photos through the portfolio moderation queue. The public profile
+    // shows no portfolio tab — only the catalogue.
     assert.ok(PORTFOLIO_ROLES.includes("COSTUME_SHOP"));
-    // Customers and every crew role can book a costume rental.
-    assert.ok(BOOKABLE_ROLES_BY_ROLE.CUSTOMER?.includes("COSTUME_SHOP"));
-    assert.ok(BOOKABLE_ROLES_BY_ROLE.PHOTOGRAPHER?.includes("COSTUME_SHOP"));
-    assert.ok(BOOKABLE_ROLES_BY_ROLE.STUDIO?.includes("COSTUME_SHOP"));
+    assert.equal(PORTFOLIO_ROLES.includes("CAMERA_SHOP"), false);
   });
 
   it("still calls both of them shops, for naming and shop-name purposes", () => {
     assert.deepEqual(SHOP_ROLES, ["CAMERA_SHOP", "COSTUME_SHOP"]);
-    assert.deepEqual(PORTFOLIO_ROLES, PROVIDER_ROLES);
   });
 
   it("carries only equipment categories on Chợ F", () => {

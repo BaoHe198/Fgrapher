@@ -413,6 +413,7 @@ export default async function PublicProfilePage({
 
           <ProfileInteractive
             providerId={user.id}
+            username={username}
             profileId={activeProfile.id}
             role={activeProfile.role}
             firstName={firstName}

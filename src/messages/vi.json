@@ -1851,7 +1851,8 @@
       "selectConversation": "Chọn một cuộc trò chuyện",
       "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin",
       "rentalDraft": "Chào shop, tôi muốn thuê {product}. Sản phẩm: {url}",
-      "pageTitle": "Tin nhắn"
+      "pageTitle": "Tin nhắn",
+      "costumeDraft": "Chào shop, tôi muốn thuê {costume}. Xem tại: {url}"
     },
     "shopOrders": {
       "title": "Đơn hàng cửa hàng",
@@ -2999,9 +3000,10 @@
       },
       "costumesTab": {
         "empty": "Chưa có trang phục nào",
-        "note": "Giá thuê theo ngày. Liên hệ hoặc đặt lịch với shop để giữ đồ — không đặt qua giỏ hàng.",
+        "note": "Giá thuê theo ngày. Chọn bộ bạn thích rồi nhắn tin cho shop để thống nhất ngày thuê và tiền cọc.",
         "perDay": "{price}/ngày",
-        "deposit": "Cọc {amount}"
+        "deposit": "Cọc {amount}",
+        "messageToRent": "Nhắn tin để thuê"
       },
       "postsTab": {
         "empty": "Chưa có bài đăng nào",

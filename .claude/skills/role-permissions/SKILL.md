@@ -110,7 +110,12 @@ in `src/lib/constants/index.ts` is `CAMERA_SHOP`, `PHOTOGRAPHER`,
 there is no "has a shooting crew" flag and the project owner decided not to add
 one (a studio with no spare gear simply lists nothing).
 
-`COSTUME_SHOP` may **not** list products. Its outfits live on its own profile
-as a costume catalogue (photo + daily rental price + deposit), and it receives
-bookings like any other provider. `SHOP_ROLES` (`CAMERA_SHOP`, `COSTUME_SHOP`)
-is the separate, smaller set of roles that trade under a business name.
+`COSTUME_SHOP` may **not** list products, and (updated 22/09/2026) does **not**
+receive bookings either. Its public profile is exactly one tab — the outfit
+catalogue (photo + daily rental price + deposit) — and renting is arranged in
+messaging: the visitor presses "Nhắn tin để thuê" and the dates, price and
+deposit are agreed in the chat. So it is absent from `PROVIDER_ROLES` and from
+`BOOKABLE_ROLES_BY_ROLE`, present in `PORTFOLIO_ROLES` (outfit photos are
+`ProfileMedia` rows, which is how they reach the moderation queue), and
+present in `SHOP_ROLES` (`CAMERA_SHOP`, `COSTUME_SHOP`) — the roles that trade
+under a business name.

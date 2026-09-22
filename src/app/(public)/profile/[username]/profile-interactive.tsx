@@ -32,6 +32,7 @@ interface OwnerAlbum {
 
 interface ProfileInteractiveProps {
   providerId: string;
+  username: string | null;
   profileId: string;
   role: Role;
   firstName: string;
@@ -98,6 +99,7 @@ interface ProfileInteractiveProps {
 
 export function ProfileInteractive({
   providerId,
+  username,
   profileId,
   role,
   firstName,
@@ -123,7 +125,12 @@ export function ProfileInteractive({
   // a portfolio) that also keeps an outfit catalogue, so it must NOT take the
   // product-shop layout even though SHOP_ROLES contains it.
   const isProductShop = !PROVIDER_ROLES.includes(role);
-  const [tab, setTab] = useState(isProductShop ? "gear" : "portfolio");
+  // A costume shop's profile IS its catalogue: no portfolio, no services, no
+  // calendar — the visitor picks an outfit and messages the shop (project
+  // owner, 22/09/2026).
+  const [tab, setTab] = useState(
+    costumes.length > 0 ? "costumes" : isProductShop ? "gear" : "portfolio",
+  );
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
@@ -246,7 +253,12 @@ export function ProfileInteractive({
           ) : null}
           {costumes.length > 0 ? (
             <TabsPanel value="costumes" className="mt-6">
-              <CostumesTab costumes={costumes} />
+              <CostumesTab
+                costumes={costumes}
+                shopUserId={providerId}
+                shopUsername={username}
+                isOwnProfile={isOwnProfile}
+              />
             </TabsPanel>
           ) : null}
           {posts.length > 0 ? (

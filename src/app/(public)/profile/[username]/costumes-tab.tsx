@@ -1,7 +1,10 @@
-import Image from "next/image";
+import { MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { formatCurrency } from "@/lib/utils";
 
@@ -17,7 +20,17 @@ export interface PublicCostume {
   media: { url: string } | null;
 }
 
-export function CostumesTab({ costumes }: { costumes: PublicCostume[] }) {
+export function CostumesTab({
+  costumes,
+  shopUserId,
+  shopUsername,
+  isOwnProfile,
+}: {
+  costumes: PublicCostume[];
+  shopUserId: string;
+  shopUsername: string | null;
+  isOwnProfile: boolean;
+}) {
   const t = useTranslations("publicPages.profile.costumesTab");
   const categoryT = useTranslations("profileCategory");
 
@@ -79,6 +92,25 @@ export function CostumesTab({ costumes }: { costumes: PublicCostume[] }) {
                   {costume.description}
                 </p>
               ) : null}
+              {/* Renting is agreed in the chat — dates, price and deposit are
+                  between the customer and the shop, not on a calendar
+                  (project owner, 22/09/2026). The message is prefilled with
+                  the outfit, but the customer still presses send. */}
+              {isOwnProfile ? null : (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  nativeButton={false}
+                  render={
+                    <Link
+                      href={`/dashboard/messages?to=${shopUserId}&costume=${costume.id}&costumeName=${encodeURIComponent(costume.name)}${shopUsername ? `&shop=${shopUsername}` : ""}`}
+                    />
+                  }
+                >
+                  <MessageCircle className="size-4" />
+                  {t("messageToRent")}
+                </Button>
+              )}
             </div>
           </div>
         ))}

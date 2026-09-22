@@ -1851,7 +1851,8 @@
       "selectConversation": "Select a conversation",
       "selectConversationHint": "Choose from the list to start chatting",
       "rentalDraft": "Hi, I'd like to rent {product}. Product: {url}",
-      "pageTitle": "Messages"
+      "pageTitle": "Messages",
+      "costumeDraft": "Hi, I would like to rent {costume}. See it at: {url}"
     },
     "shopOrders": {
       "title": "Shop orders",
@@ -2999,9 +3000,10 @@
       },
       "costumesTab": {
         "empty": "No costumes listed yet",
-        "note": "Prices are per day. Contact or book the shop to reserve — these are not sold through the cart.",
+        "note": "Prices are per day. Pick an outfit and message the shop to agree the dates and the deposit.",
         "perDay": "{price}/day",
-        "deposit": "Deposit {amount}"
+        "deposit": "Deposit {amount}",
+        "messageToRent": "Message to rent"
       },
       "postsTab": {
         "empty": "No posts yet",
