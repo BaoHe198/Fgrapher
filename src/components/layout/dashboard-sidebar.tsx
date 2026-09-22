@@ -14,6 +14,7 @@ import {
   Send,
   Settings,
   Shield,
+  Shirt,
   ShoppingBag,
   Star,
   type LucideIcon,
@@ -97,6 +98,20 @@ export function DashboardSidebar({
             href: "/dashboard/my-offers",
             label: t("myOffers"),
             icon: Handshake,
+          },
+        ]
+      : []),
+    // A costume shop rents out outfits through chat, so it has no Chợ F
+    // listings page — its catalogue lives in Settings → Profile. That is
+    // the right architecture (CLAUDE.md, 22/09/2026) but it had no visible
+    // way in, and /dashboard/listings told the role it could not sell, so
+    // it read as "this role cannot post anything" (QA-06).
+    ...(hasRole("COSTUME_SHOP")
+      ? [
+          {
+            href: "/dashboard/settings/profile?section=roleProfile#costumes",
+            label: t("costumes"),
+            icon: Shirt,
           },
         ]
       : []),

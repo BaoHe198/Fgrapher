@@ -1814,9 +1814,12 @@
         "fallbackText": "Kích hoạt gói Cửa hàng máy ảnh để đăng bán sản phẩm."
       },
       "roleRequired": {
-        "title": "Cần có vai trò Cửa hàng máy ảnh",
-        "body": "Thêm vai trò Cửa hàng máy ảnh để bán hoặc cho thuê thiết bị trên Fgrapher.",
-        "cta": "Thêm vai trò"
+        "title": "Vai trò này chưa bán được trên Chợ F",
+        "body": "Chợ F dành cho thiết bị chụp ảnh, quay phim — các vai trò Cửa hàng máy ảnh, Nhiếp ảnh gia, Quay phim và Studio đăng tin được ở đây.",
+        "cta": "Xem vai trò của tôi",
+        "costumeShopTitle": "Trang phục không đăng ở Chợ F",
+        "costumeShopBody": "Cửa hàng trang phục quản lý danh mục trang phục ngay trên hồ sơ, khách xem rồi nhắn tin để thuê.",
+        "costumeShopCta": "Quản lý trang phục"
       },
       "pageTitle": "Sản phẩm",
       "photoPending": "Ảnh đang chờ kiểm duyệt"
@@ -2325,7 +2328,7 @@
       },
       "costumes": {
         "title": "Trang phục cho thuê",
-        "helper": "Mỗi bộ đồ hiển thị trên hồ sơ công khai của bạn kèm ảnh và giá. Khách xem rồi đặt lịch hoặc nhắn tin — không bán qua Chợ F.",
+        "helper": "Mỗi bộ đồ hiển thị trên hồ sơ công khai của bạn kèm ảnh, giá thuê theo ngày và tiền cọc. Khách xem rồi nhắn tin để thuê — không đặt lịch, không bán qua Chợ F.",
         "add": "Thêm bộ đồ",
         "addTitle": "Thêm bộ trang phục",
         "editTitle": "Sửa bộ trang phục",
@@ -3918,6 +3921,7 @@
       "myRequests": "Booking của tôi",
       "opportunities": "Booking phù hợp",
       "myOffers": "Đề nghị đã gửi",
+      "costumes": "Trang phục của tôi",
       "listings": "Tin đăng",
       "shopOrders": "Đơn hàng cửa hàng",
       "myOrders": "Đơn hàng của tôi",
