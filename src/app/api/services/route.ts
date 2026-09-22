@@ -8,7 +8,9 @@ import {
 } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
+import { serviceKindAllowedForRole } from "@/lib/constants/service-matrix";
 import { createServiceSchema } from "@/lib/validations/service";
+import { syncProfileServiceKinds } from "@/services/profile-service-kinds";
 
 export async function POST(request: Request) {
   try {
@@ -52,9 +54,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // A role may only offer the services its matrix allows: a make-up artist
+    // cannot list a venue, a photographer cannot list modelling. Checked here
+    // rather than in the schema because it depends on the profile's role,
+    // which the schema cannot see.
+    if (!serviceKindAllowedForRole(profile.role, parsed.data.kind)) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "forbidden",
+          message: "This role cannot offer that service",
+        },
+        { status: 403 },
+      );
+    }
+
     await requireActiveSubscription(session.user.id, profile.role);
 
     const service = await db.service.create({ data: parsed.data });
+
+    // serviceKinds on the profile is what search filters on, so it is
+    // rewritten from the packages in the same request that changed them.
+    await syncProfileServiceKinds(profile.id);
 
     // Services show on the public profile's Services tab and the booking page.
     await revalidatePublicProfile(session.user.id);

@@ -82,30 +82,12 @@ async function resourceOwnerMap() {
 }
 
 async function backfillServiceKinds() {
-  const services = await db.service.findMany({
-    where: { kind: null },
-    select: { id: true, name: true, profile: { select: { role: true } } },
-  });
-
-  const byKind = new Map<string, number>();
-  let unmapped = 0;
-  for (const service of services) {
-    const kind = SERVICE_KIND_BY_ROLE[service.profile.role];
-    if (!kind) {
-      unmapped++;
-      continue;
-    }
-    byKind.set(kind, (byKind.get(kind) ?? 0) + 1);
-    if (!DRY_RUN) {
-      await db.service.update({ where: { id: service.id }, data: { kind } });
-    }
-  }
-
-  note(
-    `Service.kind: ${services.length} cần gán → ${[...byKind]
-      .map(([k, n]) => `${k}=${n}`)
-      .join(", ")}${unmapped ? `, KHÔNG MAP ĐƯỢC=${unmapped}` : ""}`,
-  );
+  // Nothing to do any more: `Service.kind` is NOT NULL as of
+  // 20260922044000_require_service_kind_and_no_overlap, and that migration
+  // fills every existing row before requiring the column. The branch is kept
+  // as a note rather than deleted so the report still accounts for the step.
+  const total = await db.service.count();
+  note(`Service.kind: đã bắt buộc ở tầng DB, ${total} gói đều có loại`);
 }
 
 async function backfillProfileServiceKinds() {

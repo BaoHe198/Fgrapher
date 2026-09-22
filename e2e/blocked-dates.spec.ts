@@ -46,6 +46,7 @@ test("a whole-day blocked date can't be booked via direct API call", async ({
   const service = await db.service.create({
     data: {
       profileId: profile.id,
+      kind: "PHOTOGRAPHY",
       name: "Portrait Session",
       description: "E2E fixture service.",
       duration: 60,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { revalidatePublicProfile } from "@/lib/cache";
+import { syncProfileServiceKinds } from "@/services/profile-service-kinds";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
@@ -52,6 +53,10 @@ export async function PATCH(
       data: parsed.data,
     });
 
+    // Deactivating or retyping a package changes what the profile offers,
+    // and search filters on the copy held on Profile.serviceKinds.
+    await syncProfileServiceKinds(owned.profileId);
+    await syncProfileServiceKinds(owned.profileId);
     await revalidatePublicProfile(session.user.id);
 
     return NextResponse.json(

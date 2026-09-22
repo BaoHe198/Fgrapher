@@ -786,6 +786,8 @@ model Profile {
 
   @@unique([userId, role])
   @@index([role, isPublished])
+  /// "Who does PHOTOGRAPHY in this province" is the hot search query.
+  @@index([provinceId, isPublished])
   @@index([userId])
   // Prompt B4 VIỆC 6 — common browse-filter combinations.
   @@index([role, isPublished, provinceId])
@@ -896,8 +898,12 @@ model BookingAllocation {
   id         String   @id @default(cuid())
   bookingId  String
   resourceId String
-  startAt    DateTime
-  endAt      DateTime
+  /// timestamptz, unlike the rest of the schema's timestamp(3) columns: the
+  /// overlap constraint below builds a tstzrange over these, and Postgres
+  /// will only index that expression if no implicit timezone cast is
+  /// involved. Everything is still stored in UTC.
+  startAt    DateTime @db.Timestamptz(3)
+  endAt      DateTime @db.Timestamptz(3)
   createdAt  DateTime @default(now())
 
   booking  Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
@@ -1101,10 +1107,10 @@ enum ModerationStatus {
 model Service {
   id          String   @id @default(cuid())
   profileId   String
-  /// Nullable only until the backfill has run — see
-  /// scripts/backfill-provider-architecture.ts. Every new Service must carry
-  /// a kind, validated against service-matrix.ts.
-  kind        ServiceKind?
+  /// What this package is: a shoot, a film, venue hire, make-up. Required —
+  /// validated against src/lib/constants/service-matrix.ts, which decides
+  /// which kinds a given role may offer.
+  kind        ServiceKind
   name        String
   description String?  @db.Text
   duration    Int // minutes

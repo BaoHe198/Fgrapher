@@ -1,4 +1,5 @@
 import { PrismaClient, type Role } from "@prisma/client";
+import { serviceKindsForRole } from "../../src/lib/constants/service-matrix";
 import bcrypt from "bcryptjs";
 
 // Dedicated client for test-fixture setup/teardown — same DATABASE_URL the
@@ -112,6 +113,9 @@ export async function createPublishedProfile(opts: {
     await db.service.create({
       data: {
         profileId: profile.id,
+        // Derived from the role, same as the seed: a test profile offers the
+        // one kind its role implies.
+        kind: serviceKindsForRole(opts.role)[0] ?? "PHOTOGRAPHY",
         name: service.name,
         description: service.description,
         duration: service.duration,

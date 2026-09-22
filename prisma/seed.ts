@@ -6,6 +6,8 @@ import {
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+import { serviceKindsForRole } from "../src/lib/constants/service-matrix";
+
 import { seedGeography } from "./seed-geography";
 
 const db = new PrismaClient();
@@ -345,7 +347,11 @@ const USERS: UserSeed[] = [
     firstName: "Thanh Tùng",
     lastName: "Bùi",
     dateOfBirth: "1993-12-01",
-    roles: ["PHOTOGRAPHER", "VIDEOGRAPHER", "CUSTOMER"],
+    // One provider identity per account (project owner, 22/09/2026). This
+    // account used to hold PHOTOGRAPHER + VIDEOGRAPHER, which is the shape
+    // that decision removes; a photographer who also films says so with a
+    // VIDEOGRAPHY service on their one profile instead.
+    roles: ["PHOTOGRAPHER", "CUSTOMER"],
     profiles: [
       {
         role: "PHOTOGRAPHER",
@@ -356,16 +362,6 @@ const USERS: UserSeed[] = [
         priceMin: 1_500_000,
         priceMax: 10_000_000,
         services: PHOTOGRAPHER_SERVICES,
-      },
-      {
-        role: "VIDEOGRAPHER",
-        displayName: "Thanh Tùng Films",
-        description:
-          "Dựng video trong ngày cho tiệc cưới và sự kiện doanh nghiệp.",
-        categories: ["WEDDING", "CORPORATE"],
-        priceMin: 4_000_000,
-        priceMax: 18_000_000,
-        services: VIDEOGRAPHER_SERVICES,
       },
     ],
   },
@@ -671,15 +667,27 @@ async function main() {
       await seedPortfolio(profile.id, profileSeed.role);
 
       if (profileSeed.services && profileSeed.services.length > 0) {
-        await db.service.createMany({
-          data: profileSeed.services.map((service) => ({
-            profileId: profile.id,
-            name: service.name,
-            description: service.description,
-            duration: service.duration,
-            price: service.price,
-          })),
-        });
+        // The kind comes from the role rather than being repeated on every
+        // seeded package: each role in this file offers exactly one kind,
+        // and the cross-selling cases (a photographer who also films) are
+        // not what the seed is demonstrating.
+        const kind = serviceKindsForRole(profileSeed.role)[0];
+        if (kind) {
+          await db.service.createMany({
+            data: profileSeed.services.map((service) => ({
+              profileId: profile.id,
+              kind,
+              name: service.name,
+              description: service.description,
+              duration: service.duration,
+              price: service.price,
+            })),
+          });
+          await db.profile.update({
+            where: { id: profile.id },
+            data: { serviceKinds: [kind] },
+          });
+        }
       }
     }
 
