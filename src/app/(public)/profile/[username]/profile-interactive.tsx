@@ -37,6 +37,7 @@ interface ProfileInteractiveProps {
   role: Role;
   firstName: string;
   hasGear: boolean;
+  viewerId: string | null;
   posts: ProfilePost[];
   costumes: PublicCostume[];
   albums: {
@@ -53,6 +54,12 @@ interface ProfileInteractiveProps {
       width: number | null;
       height: number | null;
     }[];
+    socialPost: {
+      id: string;
+      likeCount: number;
+      commentCount: number;
+      likedByViewer: boolean;
+    } | null;
   }[];
   // Only present (non-null) when isOwnProfile — everything the owner has,
   // unfiltered by isPublished/moderation (unlike `albums` above). See
@@ -104,6 +111,7 @@ export function ProfileInteractive({
   role,
   firstName,
   hasGear,
+  viewerId,
   posts,
   costumes,
   albums,
@@ -225,6 +233,7 @@ export function ProfileInteractive({
                   ownerAlbums={ownerAlbums}
                   profileId={profileId}
                   role={role}
+                  viewerId={viewerId}
                   isOwnProfile={isOwnProfile}
                   canEdit={canEditPortfolio}
                 />

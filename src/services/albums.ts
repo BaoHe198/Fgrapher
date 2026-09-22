@@ -70,20 +70,37 @@ export async function createAlbum(
     shootDate?: string;
   },
 ) {
-  const maxOrder = await db.album.aggregate({
-    where: { profileId, deletedAt: null },
-    _max: { sortOrder: true },
-  });
+  return db.$transaction(async (tx) => {
+    const [profile, maxOrder] = await Promise.all([
+      tx.profile.findUnique({
+        where: { id: profileId },
+        select: { userId: true },
+      }),
+      tx.album.aggregate({
+        where: { profileId, deletedAt: null },
+        _max: { sortOrder: true },
+      }),
+    ]);
+    if (!profile) throw new AlbumNotFoundError("Profile not found");
 
-  return db.album.create({
-    data: {
-      profileId,
-      title: data.title,
-      description: data.description,
-      category: data.category as never,
-      shootDate: data.shootDate ? new Date(data.shootDate) : undefined,
-      sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,
-    },
+    const album = await tx.album.create({
+      data: {
+        profileId,
+        title: data.title,
+        description: data.description,
+        category: data.category as never,
+        shootDate: data.shootDate ? new Date(data.shootDate) : undefined,
+        sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,
+      },
+    });
+    await tx.post.create({
+      data: {
+        userId: profile.userId,
+        kind: "PORTFOLIO_ALBUM",
+        albumId: album.id,
+      },
+    });
+    return album;
   });
 }
 

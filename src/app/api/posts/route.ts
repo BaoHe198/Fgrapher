@@ -7,6 +7,7 @@ import { createPostSchema } from "@/lib/validations/post";
 import {
   countPendingPosts,
   createPost,
+  type FeedFilter,
   listFeed,
   PostError,
 } from "@/services/posts";
@@ -25,11 +26,22 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const tab =
     searchParams.get("tab") === "following" ? "following" : "discover";
+  const requestedFilter = searchParams.get("filter");
+  const filter: FeedFilter = ["posts", "portfolio", "bookings"].includes(
+    requestedFilter ?? "",
+  )
+    ? (requestedFilter as FeedFilter)
+    : "all";
   const session = await auth();
 
   const viewerId = session?.user?.id ?? null;
   const [result, pendingCount] = await Promise.all([
-    listFeed({ viewerId, tab, cursor: searchParams.get("cursor") }),
+    listFeed({
+      viewerId,
+      tab,
+      filter,
+      cursor: searchParams.get("cursor"),
+    }),
     viewerId ? countPendingPosts(viewerId) : Promise.resolve(0),
   ]);
 

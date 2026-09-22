@@ -30,7 +30,7 @@ import {
   getShopProducts,
 } from "@/services/public-profile";
 import { listPublicCostumes } from "@/services/costumes";
-import { listUserPosts } from "@/services/posts";
+import { listAlbumSocialState, listUserPosts } from "@/services/posts";
 
 import { ProfileAvatar, ProfileCover } from "./profile-hero";
 import { ProfileInteractive } from "./profile-interactive";
@@ -148,6 +148,7 @@ export default async function PublicProfilePage({
     ownerAlbums,
     posts,
     costumes,
+    albumSocialState,
   ] = await Promise.all([
     getProfileReviews(user.id),
     getProfileReviewStats(user.id),
@@ -175,7 +176,16 @@ export default async function PublicProfilePage({
     activeProfile.role === "COSTUME_SHOP"
       ? listPublicCostumes(activeProfile.id)
       : Promise.resolve([]),
+    features.socialFeedEnabled
+      ? listAlbumSocialState(
+          activeProfile.albums.map((album) => album.id),
+          session?.user?.id ?? null,
+        )
+      : Promise.resolve([]),
   ]);
+  const albumSocialById = new Map(
+    albumSocialState.map((state) => [state.albumId, state]),
+  );
 
   // Album creation (POST /api/albums) requires an active subscription
   // server-side; dashboard/portfolio/page.tsx already hides its whole
@@ -427,7 +437,11 @@ export default async function PublicProfilePage({
             }
             posts={posts}
             costumes={costumes}
-            albums={activeProfile.albums}
+            viewerId={session?.user?.id ?? null}
+            albums={activeProfile.albums.map((album) => ({
+              ...album,
+              socialPost: albumSocialById.get(album.id) ?? null,
+            }))}
             ownerAlbums={
               ownerAlbums?.map((a) => ({
                 id: a.id,

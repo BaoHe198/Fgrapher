@@ -17,6 +17,7 @@ import {
 import { ROLE_PLANS } from "@/lib/constants/plans";
 import { logAudit, processDeletion } from "@/services/compliance";
 import { notifyCritical } from "@/services/notification";
+import { ensureAlbumSocialPost } from "@/services/posts";
 import { tryAutoPublish } from "@/services/public-profile";
 
 // Reads the requesting admin's locale cookie, same as the other
@@ -1160,6 +1161,15 @@ export async function moderateMedia({
     );
     return mediaIds.length;
   }
+
+  // Album creation normally creates this row. Reconcile it here as well so
+  // an interrupted upload/create request cannot leave an approved album out
+  // of Community F permanently.
+  await Promise.all(
+    [...new Set(rows.flatMap((row) => (row.album ? [row.album.id] : [])))].map(
+      ensureAlbumSocialPost,
+    ),
+  );
 
   // Approving a batch (an admin's "select all, approve") used to fire one
   // identical "your photo was approved" notification + email per photo —

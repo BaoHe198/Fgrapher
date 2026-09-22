@@ -19,10 +19,16 @@ export default async function CommunityPage() {
   const session = await auth();
 
   return (
-    <div className="mx-auto max-w-[720px] px-4 py-8 sm:px-8">
-      <div className="mb-6 flex flex-col gap-1">
-        <h1 className="text-display-md text-text-primary">{t("heading")}</h1>
-        <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
+    <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-8 sm:py-8">
+      <div className="relative mb-6 overflow-hidden rounded-[var(--fg-radius-xl)] border border-border-subtle bg-brand-primary px-5 py-6 text-text-on-brand sm:px-8 sm:py-8">
+        <div className="pointer-events-none absolute -top-20 -right-16 size-56 rounded-full bg-gold-400/20 blur-3xl" />
+        <div className="relative max-w-2xl">
+          <p className="mb-2 text-body-sm font-semibold! tracking-wide text-gold-300 uppercase">
+            {t("eyebrow")}
+          </p>
+          <h1 className="text-display-md">{t("heading")}</h1>
+          <p className="mt-2 text-body-md text-white/75">{t("subtitle")}</p>
+        </div>
       </div>
       <CommunityFeed viewerId={session?.user?.id ?? null} />
     </div>

@@ -23,6 +23,7 @@ import { useState } from "react";
 
 import { FrameMark } from "@/components/brand/frame-mark";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
+import { PostEngagement } from "@/components/social/post-engagement";
 import { buildMediaVariants } from "@/lib/media-variants";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +50,12 @@ interface AlbumItem {
   category: ProfileCategory | null;
   coverMedia: { id: string; url: string; type: MediaType } | null;
   media: MediaItem[];
+  socialPost: {
+    id: string;
+    likeCount: number;
+    commentCount: number;
+    likedByViewer: boolean;
+  } | null;
 }
 
 interface OwnerAlbum {
@@ -196,6 +203,7 @@ interface PortfolioTabProps {
   ownerAlbums: OwnerAlbum[] | null;
   profileId: string;
   role: Role;
+  viewerId: string | null;
   isOwnProfile: boolean;
   // Gates only the "+ new album" tile — POST /api/albums is the one album
   // action that actually requires an active subscription server-side;
@@ -209,6 +217,7 @@ export function PortfolioTab({
   ownerAlbums,
   profileId,
   role,
+  viewerId,
   isOwnProfile,
   canEdit,
 }: PortfolioTabProps) {
@@ -251,6 +260,10 @@ export function PortfolioTab({
     activeAlbumId === null
       ? allPhotos
       : allPhotos.filter((photo) => photo.album.id === activeAlbumId);
+  const visibleAlbums =
+    activeAlbumId === null
+      ? albums
+      : albums.filter((album) => album.id === activeAlbumId);
   const openPhoto =
     photoIndex === null ? null : (visiblePhotos[photoIndex] ?? null);
 
@@ -355,33 +368,67 @@ export function PortfolioTab({
             </div>
           ) : null}
 
-          {/* CSS columns, not a grid: every photo keeps its own aspect
-              ratio, so a portrait stays a portrait and nothing is cropped
-              to fit a tile. Two columns on a phone — one photo per screen
-              is not a portfolio, it is a slideshow. */}
-          <div className="columns-2 gap-3 sm:columns-3 [&>*]:mb-3">
-            {visiblePhotos.map((photo, index) => (
-              <button
-                key={photo.id}
-                type="button"
-                onClick={() => setPhotoIndex(index)}
-                aria-label={photo.title ?? t("photoAria")}
-                className="block w-full cursor-pointer overflow-hidden rounded-xl bg-bg-sunken break-inside-avoid focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:outline-none"
-              >
-                {photo.type === "VIDEO" ? (
-                  <video src={photo.url} className="w-full" muted playsInline />
-                ) : (
-                  <Image
-                    src={buildMediaVariants(photo.url).medium}
-                    alt={photo.title ?? ""}
-                    width={photo.width ?? 800}
-                    height={photo.height ?? 1000}
-                    className="h-auto w-full"
-                    sizes="(min-width: 640px) 30vw, 45vw"
-                    unoptimized
+          <div className="flex flex-col gap-8">
+            {visibleAlbums.map((album) => (
+              <section key={album.id} className="flex flex-col gap-3">
+                <div>
+                  <h3 className="text-heading-md text-text-primary">
+                    {album.title}
+                  </h3>
+                  {album.description ? (
+                    <p className="mt-1 text-body-sm text-text-secondary">
+                      {album.description}
+                    </p>
+                  ) : null}
+                </div>
+                {/* Each album is also one Community post. Keeping the
+                    album together here makes its engagement unambiguous. */}
+                <div className="columns-2 gap-3 sm:columns-3 [&>*]:mb-3">
+                  {album.media.map((photo) => (
+                    <button
+                      key={photo.id}
+                      type="button"
+                      onClick={() =>
+                        setPhotoIndex(
+                          visiblePhotos.findIndex(
+                            (item) => item.id === photo.id,
+                          ),
+                        )
+                      }
+                      aria-label={photo.title ?? t("photoAria")}
+                      className="block w-full cursor-pointer overflow-hidden rounded-xl bg-bg-sunken break-inside-avoid focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:outline-none"
+                    >
+                      {photo.type === "VIDEO" ? (
+                        <video
+                          src={photo.url}
+                          className="w-full"
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <Image
+                          src={buildMediaVariants(photo.url).medium}
+                          alt={photo.title ?? ""}
+                          width={photo.width ?? 800}
+                          height={photo.height ?? 1000}
+                          className="h-auto w-full"
+                          sizes="(min-width: 640px) 30vw, 45vw"
+                          unoptimized
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {album.socialPost ? (
+                  <PostEngagement
+                    postId={album.socialPost.id}
+                    viewerId={viewerId}
+                    initialLiked={album.socialPost.likedByViewer}
+                    initialLikeCount={album.socialPost.likeCount}
+                    initialCommentCount={album.socialPost.commentCount}
                   />
-                )}
-              </button>
+                ) : null}
+              </section>
             ))}
           </div>
         </>
