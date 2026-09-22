@@ -16,13 +16,22 @@ import { AccountMedia } from "./account-media";
 import { AvailabilitySettings } from "./availability-settings";
 import { RoleProfileSwitcher } from "./role-profile-switcher";
 
-export default async function ProfileSettingsPage() {
+export default async function ProfileSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string }>;
+}) {
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
   }
 
   const t = await getTranslations("dashboardSettings.profile.sections");
+  // Deep links into a section, so a sidebar entry can land on the thing it
+  // names instead of on a page where every panel is collapsed — a costume
+  // shop's outfit catalogue lives inside "roleProfile" and had no way in
+  // other than knowing to expand it (QA-06).
+  const { section } = await searchParams;
   const user = await db.user.findUniqueOrThrow({
     where: { id: session.user.id },
     include: { ward: { select: { provinceId: true } } },
@@ -44,7 +53,10 @@ export default async function ProfileSettingsPage() {
   // "Thông tin cơ bản" defaults open since it's what most visits are for;
   // the others are one click away, never hidden.
   return (
-    <Accordion defaultValue={["basics"]} className="flex flex-col">
+    <Accordion
+      defaultValue={section === "roleProfile" ? ["roleProfile"] : ["basics"]}
+      className="flex flex-col"
+    >
       <AccordionItem value="basics">
         <AccordionTrigger>{t("basics")}</AccordionTrigger>
         <AccordionPanel>

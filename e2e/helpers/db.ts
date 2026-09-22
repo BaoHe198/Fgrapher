@@ -104,6 +104,13 @@ export async function createPublishedProfile(opts: {
     duration: number;
     price: number;
   }[];
+  /**
+   * Where this provider is based. Set it when a spec depends on being
+   * matched by province — the opportunity feed and the new-request
+   * broadcast both need it, and a fixture without it is matched nowhere.
+   */
+  provinceId?: string;
+  wardId?: string;
 }) {
   // There's no UI path that sets Profile.isPublished (see e2e/README.md) —
   // this fixture stands in for what a real admin/ops process would do.
@@ -117,7 +124,19 @@ export async function createPublishedProfile(opts: {
       priceMax: opts.priceMax ?? 5_000_000,
       currency: "VND",
       deliveryFee: opts.deliveryFee,
+      provinceId: opts.provinceId,
+      wardId: opts.wardId,
       isPublished: true,
+      // Mirrors what PATCH /api/profiles/[role] does via
+      // syncPrimaryServiceArea — see the Profile.provinceId comment in
+      // schema.prisma for why both have to exist.
+      ...(opts.provinceId
+        ? {
+            serviceAreas: {
+              create: { provinceId: opts.provinceId, isPrimary: true },
+            },
+          }
+        : {}),
     },
   });
 

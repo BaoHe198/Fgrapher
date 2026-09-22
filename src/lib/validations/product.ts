@@ -18,6 +18,47 @@ export const CAMERA_PRODUCT_CATEGORIES = [
 // not one per role.
 export const PRODUCT_CATEGORIES = CAMERA_PRODUCT_CATEGORIES;
 
+export type ProductCategory = (typeof CAMERA_PRODUCT_CATEGORIES)[number];
+
+/**
+ * Category strings that exist in the database but are not values a client
+ * can send, mapped to what they mean.
+ *
+ * Product.category is a plain String column, and the seed wrote Vietnamese
+ * display labels into it ("Thân máy", "Ống kính", …) while every validator,
+ * form and query here has always used the English codes above. Nothing
+ * rejected the mismatch, so the rows simply fell out of any query that
+ * filtered on the canonical list: Văn Long Camera's five products showed up
+ * on /shop and in /dashboard/listings, and the Sản phẩm tab of its own
+ * public profile said the shop had posted nothing (QA-04, 22/09/2026).
+ *
+ * 20260922150000_normalize_legacy_product_categories rewrites the rows, so
+ * this map should have nothing left to do on a migrated database. It stays
+ * because a String column with no constraint has no way to prove that, and
+ * because a query that quietly drops rows is exactly how this went unnoticed
+ * for as long as it did.
+ */
+export const LEGACY_PRODUCT_CATEGORY_ALIASES: Record<string, ProductCategory> =
+  {
+    "Thân máy": "Camera body",
+    "Ống kính": "Lens",
+    "Ánh sáng": "Lighting",
+    "Âm thanh": "Audio",
+    "Phụ kiện hỗ trợ": "Support",
+    "Phụ kiện": "Accessory",
+    Khác: "Other",
+  };
+
+/** The canonical value a stored category means, or null if unrecognised. */
+export function normalizeProductCategory(
+  value: string,
+): ProductCategory | null {
+  if ((CAMERA_PRODUCT_CATEGORIES as readonly string[]).includes(value)) {
+    return value as ProductCategory;
+  }
+  return LEGACY_PRODUCT_CATEGORY_ALIASES[value] ?? null;
+}
+
 /**
  * Kept as a per-role function even though every seller role currently gets
  * the same list: the two product routes validate the category against the
@@ -26,6 +67,21 @@ export const PRODUCT_CATEGORIES = CAMERA_PRODUCT_CATEGORIES;
  */
 export function productCategoriesForRole(_role: Role) {
   return CAMERA_PRODUCT_CATEGORIES;
+}
+
+/**
+ * Every string a `category` filter should accept for these canonical
+ * categories — the canonical values plus any legacy label that means one of
+ * them. For WHERE clauses only; never offer these as choices.
+ */
+export function productCategoryQueryValues(
+  categories: readonly string[],
+): string[] {
+  const wanted = new Set(categories);
+  const aliases = Object.entries(LEGACY_PRODUCT_CATEGORY_ALIASES)
+    .filter(([, canonical]) => wanted.has(canonical))
+    .map(([legacy]) => legacy);
+  return [...new Set([...categories, ...aliases])];
 }
 
 export function productCategoryAllowedForRole(role: Role, category: string) {

@@ -4,7 +4,10 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { PAID_ROLES, PROVIDER_ROLES, SHOP_ROLES } from "@/lib/constants";
 import { omitPrivateProfileFields } from "@/lib/profile-privacy";
-import { productCategoriesForRole } from "@/lib/validations/product";
+import {
+  productCategoriesForRole,
+  productCategoryQueryValues,
+} from "@/lib/validations/product";
 import {
   CACHE_KEY_VERSION,
   CACHE_TTL,
@@ -60,7 +63,9 @@ export async function setProfilePublished(
               userId,
               isActive: true,
               deletedAt: null,
-              category: { in: [...productCategoriesForRole(role)] },
+              category: {
+                in: productCategoryQueryValues(productCategoriesForRole(role)),
+              },
             },
           },
           select: { id: true },
@@ -388,7 +393,11 @@ export async function getShopProducts(userId: string, role?: Role) {
       isActive: true,
       deletedAt: null,
       ...(role && SHOP_ROLES.includes(role)
-        ? { category: { in: [...productCategoriesForRole(role)] } }
+        ? {
+            category: {
+              in: productCategoryQueryValues(productCategoriesForRole(role)),
+            },
+          }
         : {}),
     },
     include: {

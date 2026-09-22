@@ -2,8 +2,14 @@
 
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
+
+import { useSharedFilterParams } from "@/components/filters/filter-params-provider";
+import { setOrDelete } from "@/lib/filter-params";
+
+// Long enough that typing a word is one navigation, short enough that the
+// results follow the keystrokes rather than a submit.
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function SearchInput({
   className,
@@ -17,36 +23,40 @@ export function SearchInput({
   marketplaceEnabled: boolean;
 }) {
   const t = useTranslations("sharedComponents.searchInput");
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("q") ?? "");
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Shared with the filter sidebar: this box used to push its own query
+  // string built from the committed URL while the sidebar pushed one built
+  // from a FilterState with no `q` in it, so whichever moved last erased
+  // the other (QA-01).
+  const { params, navigate } = useSharedFilterParams();
+  const urlQuery = params.get("q") ?? "";
+
+  const [value, setValue] = useState(urlQuery);
+  // The keyword we ourselves put into the URL. Without it the effect below
+  // cannot tell "our debounced push landed" from "the visitor pressed
+  // back", and resyncing on the former overwrites letters typed since.
+  const pushedRef = useRef(urlQuery);
 
   useEffect(() => {
-    startTransition(() => {
-      setValue(searchParams.get("q") ?? "");
-    });
-  }, [searchParams]);
+    if (urlQuery === pushedRef.current) return;
+    pushedRef.current = urlQuery;
+    startTransition(() => setValue(urlQuery));
+  }, [urlQuery]);
 
-  const pushQuery = (q: string) => {
-    const next = new URLSearchParams(searchParams.toString());
-    if (q) next.set("q", q);
-    else next.delete("q");
-    next.delete("page");
-    router.push(`${pathname}?${next.toString()}`);
+  const pushQuery = (q: string, { immediate = false } = {}) => {
+    pushedRef.current = q;
+    navigate((next) => setOrDelete(next, "q", q), {
+      debounceMs: immediate ? 0 : SEARCH_DEBOUNCE_MS,
+    });
   };
 
   const onChange = (next: string) => {
     setValue(next);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => pushQuery(next), 300);
+    pushQuery(next);
   };
 
   const onClear = () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
     setValue("");
-    pushQuery("");
+    pushQuery("", { immediate: true });
   };
 
   return (

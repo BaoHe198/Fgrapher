@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { getUpdateProfileSchema } from "@/lib/validations/profile";
 import { buildGeocodeAddressHash, forwardGeocode } from "@/services/geocoding";
 import { tryAutoPublish } from "@/services/public-profile";
+import { syncPrimaryServiceArea } from "@/services/service-areas";
 
 export async function GET(
   _request: Request,
@@ -207,6 +208,14 @@ export async function PATCH(
       },
       update: { ...profileData, ...geocodingData },
     });
+
+    // Mirrors the profile's own province into ProfileServiceArea, which is
+    // what the "Yêu cầu phù hợp" feed and the new-request broadcast read.
+    // Before this, saving a profile in TP.HCM put a provider on the map
+    // there and left them matched to nothing there (QA-03) — they had to
+    // find the separate "Khu vực phục vụ" panel and re-enter their own
+    // province for anything to reach them.
+    await syncPrimaryServiceArea(profile.id, profile.provinceId);
 
     // Categories and location are requirements
     // gating auto-publish (see tryAutoPublish) — saving them here may be

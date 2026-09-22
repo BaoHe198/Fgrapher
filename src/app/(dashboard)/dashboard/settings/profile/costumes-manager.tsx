@@ -168,7 +168,12 @@ export function CostumesManager({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    // The sidebar's "Trang phục của tôi" link lands here. A costume shop has
+    // no Chợ F listings page of its own (outfits are a profile catalogue,
+    // not products), so without an anchor the entry point to this was a
+    // section buried in the profile form — QA-06 read that as the role
+    // having no way to post anything at all.
+    <div id="costumes" className="flex scroll-mt-24 flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
           {t("title")}

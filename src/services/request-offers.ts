@@ -19,6 +19,11 @@ import type { BatchRecipient } from "@/lib/notifications";
 import type { NotificationPreferences } from "@/lib/validations/user";
 import { referenceUrlsForBooking } from "@/lib/validations/reference-media";
 import { logAudit } from "@/services/compliance";
+import {
+  SERVICE_AREA_SELECT,
+  profileProvinceIds,
+  providerCoversProvince,
+} from "@/services/service-areas";
 import { BookingActionError, createBooking } from "@/services/bookings";
 import {
   NotificationBatchError,
@@ -127,10 +132,11 @@ async function findMatchingRecipients(request: {
           some: {
             role: request.role,
             isPublished: true,
-            OR: [
-              { servesNationwide: true },
-              { serviceAreas: { some: { provinceId: request.provinceId } } },
-            ],
+            // The same notion of "in this province" that /browse and Fmap
+            // use. A provider who set a province on their profile but never
+            // opened the "Khu vực phục vụ" panel used to be invisible here
+            // while appearing on the map in that very province (QA-03).
+            ...providerCoversProvince(request.provinceId),
           },
         },
       },
@@ -325,14 +331,14 @@ export async function listOpportunitiesForProvider(userId: string, role: Role) {
 
   const profile = await db.profile.findUnique({
     where: { userId_role: { userId, role } },
-    select: {
-      servesNationwide: true,
-      serviceAreas: { select: { provinceId: true } },
-    },
+    select: SERVICE_AREA_SELECT,
   });
   if (!profile) return [];
 
-  const provinceIds = profile.serviceAreas.map((a) => a.provinceId);
+  // Resolved the same way /browse and Fmap resolve it, so a provider can no
+  // longer be shown in a province by one surface and told there is nothing
+  // for them there by another (QA-03).
+  const provinceIds = profileProvinceIds(profile);
 
   return db.serviceRequest.findMany({
     where: {

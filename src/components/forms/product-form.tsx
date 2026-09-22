@@ -38,6 +38,7 @@ export function ProductForm({
   const t = useTranslations("uiKit.productForm");
   const productCategories = productCategoriesForRole(sellerRole);
   const tCondition = useTranslations("uiKit.condition");
+  const tCategory = useTranslations("productCategory");
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -124,7 +125,10 @@ export function ProductForm({
         render={({ field }) => (
           <NativeSelect
             label={t("categoryLabel")}
-            options={productCategories.map((c) => ({ value: c, label: c }))}
+            options={productCategories.map((c) => ({
+              value: c,
+              label: tCategory(c),
+            }))}
             value={field.value}
             onChange={field.onChange}
           />

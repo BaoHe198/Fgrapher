@@ -2,6 +2,10 @@ import type { Prisma, ProductCondition, ProductType } from "@prisma/client";
 
 import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
+import {
+  normalizeProductCategory,
+  productCategoryQueryValues,
+} from "@/lib/validations/product";
 
 const PAGE_SIZE = 24;
 
@@ -48,7 +52,10 @@ export async function searchProducts(params: ShopSearchParams) {
     where.type = { in: [params.type, "BOTH"] };
   }
   if (params.category?.length) {
-    where.category = { in: params.category };
+    // Accepts the legacy label for each requested category too, so a
+    // database that still holds un-migrated rows filters the same way a
+    // migrated one does (see LEGACY_PRODUCT_CATEGORY_ALIASES).
+    where.category = { in: productCategoryQueryValues(params.category) };
   }
   if (params.condition?.length) {
     where.condition = { in: params.condition };
@@ -120,10 +127,17 @@ export async function searchProducts(params: ShopSearchParams) {
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
     facets: {
-      categories: categoryCounts.map((c) => ({
-        category: c.category,
-        count: c._count,
-      })),
+      // Counted under the canonical name, so a legacy row is counted on the
+      // checkbox that would actually return it. An unrecognised category is
+      // kept as-is rather than dropped: a count nobody can click is still
+      // better than a product the facet pretends does not exist.
+      categories: Object.entries(
+        categoryCounts.reduce<Record<string, number>>((acc, c) => {
+          const key = normalizeProductCategory(c.category) ?? c.category;
+          acc[key] = (acc[key] ?? 0) + c._count;
+          return acc;
+        }, {}),
+      ).map(([category, count]) => ({ category, count })),
     },
   };
 }

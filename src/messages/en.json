@@ -167,6 +167,15 @@
     "KIDSWEAR": "Kidswear",
     "ACCESSORIES": "Accessories"
   },
+  "productCategory": {
+    "Camera body": "Camera body",
+    "Lens": "Lens",
+    "Lighting": "Lighting",
+    "Audio": "Audio",
+    "Support": "Support",
+    "Accessory": "Accessory",
+    "Other": "Other"
+  },
   "experienceLevel": {
     "NEW": "New",
     "INTERMEDIATE": "Intermediate",
@@ -1805,9 +1814,12 @@
         "fallbackText": "Activate your Camera Shop subscription to list products."
       },
       "roleRequired": {
-        "title": "Listings need the Camera Shop role",
-        "body": "Add the Camera Shop role to sell or rent out gear on Fgrapher.",
-        "cta": "Add a role"
+        "title": "This role cannot sell on Chợ F",
+        "body": "Chợ F is for photo and video equipment — the Camera shop, Photographer, Videographer and Studio roles can list here.",
+        "cta": "View my roles",
+        "costumeShopTitle": "Outfits are not listed on Chợ F",
+        "costumeShopBody": "A costume shop manages its outfit catalogue on its own profile; visitors browse it and message you to rent.",
+        "costumeShopCta": "Manage outfits"
       },
       "pageTitle": "Listings",
       "photoPending": "Photo awaiting moderation"
@@ -2316,7 +2328,7 @@
       },
       "costumes": {
         "title": "Costume rentals",
-        "helper": "Each outfit appears on your public profile with its photo and price. Customers book or message you — these are not sold through Chợ F.",
+        "helper": "Each outfit appears on your public profile with its photo, daily price and deposit. Customers message you to rent it — there is no booking, and outfits are not sold through Chợ F.",
         "add": "Add outfit",
         "addTitle": "Add an outfit",
         "editTitle": "Edit outfit",
@@ -2854,6 +2866,7 @@
       "headingWithRoleCity": "{role}s in {city}",
       "headingDefault": "Browse artists",
       "resultsCount": "{count} results, sorted by {sort}",
+      "updatingResults": "Updating results…",
       "filterAvailableNow": "Available now",
       "filterInstantBook": "Instant book",
       "filterTopRated": "Top rated",
@@ -3492,6 +3505,7 @@
     "shop": {
       "heading": "Camera gear",
       "count": "{count} items · {sort}",
+      "updatingResults": "Updating results…",
       "emptyTitle": "No gear found",
       "emptyBody": "Try adjusting your filters.",
       "clearAll": "Clear all filters",
@@ -3559,7 +3573,10 @@
       "noReviews": "No reviews yet",
       "ratingSummary": "{average} · {count} reviews",
       "shopReply": "Shop replied:",
-      "viewShopProducts": "View shop products"
+      "viewShopProducts": "View shop products",
+      "newShopBadge": "New",
+      "messageShop": "Message shop",
+      "inStock": "{count} in stock"
     },
     "community": {
       "heading": "Community",
@@ -3904,6 +3921,7 @@
       "myRequests": "My bookings",
       "opportunities": "Matching bookings",
       "myOffers": "Offers sent",
+      "costumes": "My outfits",
       "listings": "Listings",
       "shopOrders": "Shop orders",
       "myOrders": "My orders",

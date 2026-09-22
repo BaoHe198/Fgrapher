@@ -123,7 +123,7 @@ export function ProductPurchasePanel({
 
           {product.stock > 0 ? (
             <Badge variant="success" className="w-fit">
-              {product.stock} in stock
+              {t("inStock", { count: product.stock })}
             </Badge>
           ) : (
             <Badge variant="destructive" className="w-fit">

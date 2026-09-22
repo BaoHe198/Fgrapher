@@ -1,8 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
+import { useSharedFilterParams } from "@/components/filters/filter-params-provider";
+import { setOrDelete } from "@/lib/filter-params";
 import { PRODUCT_CATEGORIES } from "@/lib/validations/product";
 
 const CONDITIONS = ["NEW", "LIKE_NEW", "GOOD", "FAIR"] as const;
@@ -36,47 +37,90 @@ export function ShopFilters({
   provinces: { id: string; name: string }[];
 }) {
   const t = useTranslations("publicPages.shop.filters");
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  // Category values are stored codes, not display text — see
+  // lib/validations/product.ts. The VI UI showed them raw ("Camera body",
+  // "Lens") because nothing ever translated them (QA-05).
+  const categoryT = useTranslations("productCategory");
+  // One controller for every control on this panel. Each one used to build
+  // its own query string from the URL the browser had committed, so a
+  // control touched before the previous navigation landed silently erased
+  // it — typing "Canon" and then clicking "Cho thuê" (blur and click are
+  // one gesture) threw the keyword away while the box still showed it
+  // (QA-02, 22/09/2026). Now every change is applied on top of the latest
+  // intent instead.
+  const { params, isPending, navigate, reset } = useSharedFilterParams();
 
-  const type = searchParams.get("type") ?? "";
-  const categories =
-    searchParams.get("category")?.split(",").filter(Boolean) ?? [];
-  const conditions =
-    searchParams.get("condition")?.split(",").filter(Boolean) ?? [];
-  const inStockOnly = searchParams.get("inStockOnly") === "true";
-  const sort = searchParams.get("sort") ?? "newest";
-  const provinceId = searchParams.get("provinceId") ?? "";
+  const type = params.get("type") ?? "";
+  const categories = params.get("category")?.split(",").filter(Boolean) ?? [];
+  const conditions = params.get("condition")?.split(",").filter(Boolean) ?? [];
+  const inStockOnly = params.get("inStockOnly") === "true";
+  const sort = params.get("sort") ?? "newest";
+  const provinceId = params.get("provinceId") ?? "";
 
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
-  const [priceMin, setPriceMin] = useState(searchParams.get("priceMin") ?? "");
-  const [priceMax, setPriceMax] = useState(searchParams.get("priceMax") ?? "");
+  const urlQuery = params.get("q") ?? "";
+  const urlPriceMin = params.get("priceMin") ?? "";
+  const urlPriceMax = params.get("priceMax") ?? "";
 
-  const update = (mutate: (params: URLSearchParams) => void) => {
-    const params = new URLSearchParams(searchParams.toString());
-    mutate(params);
-    params.delete("page");
-    router.push(`${pathname}?${params.toString()}`);
-  };
+  // These three are typed into, so they keep a draft of their own between
+  // keystrokes. They still have to follow the URL when it moves for a
+  // reason they didn't cause — back/forward, or the reset button — which
+  // they never did before: going back left "Canon" sitting in a box that
+  // was no longer filtering anything.
+  const [query, setQuery] = useState(urlQuery);
+  const [priceMin, setPriceMin] = useState(urlPriceMin);
+  const [priceMax, setPriceMax] = useState(urlPriceMax);
+  const syncedRef = useRef({
+    q: urlQuery,
+    priceMin: urlPriceMin,
+    priceMax: urlPriceMax,
+  });
 
-  const toggleListValue = (key: string, value: string, current: string[]) => {
-    update((params) => {
-      const next = current.includes(value)
+  useEffect(() => {
+    const synced = syncedRef.current;
+    if (
+      synced.q === urlQuery &&
+      synced.priceMin === urlPriceMin &&
+      synced.priceMax === urlPriceMax
+    ) {
+      return;
+    }
+    syncedRef.current = {
+      q: urlQuery,
+      priceMin: urlPriceMin,
+      priceMax: urlPriceMax,
+    };
+    startTransition(() => {
+      setQuery(urlQuery);
+      setPriceMin(urlPriceMin);
+      setPriceMax(urlPriceMax);
+    });
+  }, [urlQuery, urlPriceMin, urlPriceMax]);
+
+  const update = (mutate: (params: URLSearchParams) => void) =>
+    navigate(mutate);
+
+  // Reads the key's current values out of `next` (the latest intent) rather
+  // than out of the render snapshot, so two checkboxes ticked in quick
+  // succession both survive instead of the second overwriting the first.
+  const toggleListValue = (key: string, value: string) => {
+    update((next) => {
+      const current = next.get(key)?.split(",").filter(Boolean) ?? [];
+      const values = current.includes(value)
         ? current.filter((v) => v !== value)
         : [...current, value];
-      if (next.length) params.set(key, next.join(","));
-      else params.delete(key);
+      setOrDelete(next, key, values.join(","));
     });
   };
 
-  const applyQuery = () =>
-    update((params) =>
-      query.trim() ? params.set("q", query.trim()) : params.delete("q"),
-    );
+  const applyQuery = () => {
+    const trimmed = query.trim();
+    if (trimmed === urlQuery) return;
+    syncedRef.current = { ...syncedRef.current, q: trimmed };
+    update((next) => setOrDelete(next, "q", trimmed));
+  };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6" aria-busy={isPending}>
       {/* Submitting on Enter rather than on every keystroke: each change is a
           router.push, so typing would queue one navigation per letter. */}
       <form
@@ -97,7 +141,7 @@ export function ShopFilters({
       <div className="flex items-center justify-between">
         <NativeSelect
           value={sort}
-          onChange={(value) => update((params) => params.set("sort", value))}
+          onChange={(value) => update((next) => next.set("sort", value))}
           options={SORT_VALUES.map((value) => ({
             value,
             label: t(SORT_KEY[value]),
@@ -112,11 +156,7 @@ export function ShopFilters({
         <NativeSelect
           value={provinceId}
           onChange={(value) =>
-            update((params) =>
-              value
-                ? params.set("provinceId", value)
-                : params.delete("provinceId"),
-            )
+            update((next) => setOrDelete(next, "provinceId", value))
           }
           options={[
             { value: "", label: t("provinceAll") },
@@ -132,17 +172,17 @@ export function ShopFilters({
         <Radio
           label={t("typeAll")}
           checked={type === ""}
-          onChange={() => update((params) => params.delete("type"))}
+          onChange={() => update((next) => next.delete("type"))}
         />
         <Radio
           label={t("typeSale")}
           checked={type === "SALE"}
-          onChange={() => update((params) => params.set("type", "SALE"))}
+          onChange={() => update((next) => next.set("type", "SALE"))}
         />
         <Radio
           label={t("typeRent")}
           checked={type === "RENT"}
-          onChange={() => update((params) => params.set("type", "RENT"))}
+          onChange={() => update((next) => next.set("type", "RENT"))}
         />
       </div>
 
@@ -153,11 +193,9 @@ export function ShopFilters({
         {PRODUCT_CATEGORIES.map((category) => (
           <Checkbox
             key={category}
-            label={`${category}${categoryCounts[category] ? ` (${categoryCounts[category]})` : ""}`}
+            label={`${categoryT(category)}${categoryCounts[category] ? ` (${categoryCounts[category]})` : ""}`}
             checked={categories.includes(category)}
-            onCheckedChange={() =>
-              toggleListValue("category", category, categories)
-            }
+            onCheckedChange={() => toggleListValue("category", category)}
           />
         ))}
       </div>
@@ -171,9 +209,7 @@ export function ShopFilters({
             key={value}
             label={t(CONDITION_KEY[value])}
             checked={conditions.includes(value)}
-            onCheckedChange={() =>
-              toggleListValue("condition", value, conditions)
-            }
+            onCheckedChange={() => toggleListValue("condition", value)}
           />
         ))}
       </div>
@@ -187,26 +223,22 @@ export function ShopFilters({
             placeholder={t("min")}
             value={priceMin}
             onChange={setPriceMin}
-            onBlur={() =>
-              update((params) =>
-                priceMin
-                  ? params.set("priceMin", priceMin)
-                  : params.delete("priceMin"),
-              )
-            }
+            onBlur={() => {
+              if (priceMin === urlPriceMin) return;
+              syncedRef.current = { ...syncedRef.current, priceMin };
+              update((next) => setOrDelete(next, "priceMin", priceMin));
+            }}
           />
           <span className="text-text-tertiary">–</span>
           <CurrencyInput
             placeholder={t("max")}
             value={priceMax}
             onChange={setPriceMax}
-            onBlur={() =>
-              update((params) =>
-                priceMax
-                  ? params.set("priceMax", priceMax)
-                  : params.delete("priceMax"),
-              )
-            }
+            onBlur={() => {
+              if (priceMax === urlPriceMax) return;
+              syncedRef.current = { ...syncedRef.current, priceMax };
+              update((next) => setOrDelete(next, "priceMax", priceMax));
+            }}
           />
         </div>
       </div>
@@ -215,10 +247,8 @@ export function ShopFilters({
         label={t("inStockOnly")}
         checked={inStockOnly}
         onCheckedChange={(checked) =>
-          update((params) =>
-            checked
-              ? params.set("inStockOnly", "true")
-              : params.delete("inStockOnly"),
+          update((next) =>
+            setOrDelete(next, "inStockOnly", checked ? "true" : ""),
           )
         }
       />
@@ -227,10 +257,11 @@ export function ShopFilters({
         variant="ghost"
         size="sm"
         onClick={() => {
+          syncedRef.current = { q: "", priceMin: "", priceMax: "" };
           setQuery("");
           setPriceMin("");
           setPriceMax("");
-          router.push(pathname);
+          reset();
         }}
       >
         {t("reset")}

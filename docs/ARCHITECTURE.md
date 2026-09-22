@@ -115,6 +115,32 @@ erDiagram
 Một người có nhiều vai trò nhưng vẫn chỉ có một tài khoản. Việc tách bảng tránh
 nhân đôi email, mật khẩu và thông tin chung.
 
+### Nhà cung cấp ở tỉnh nào
+
+Có hai cột cùng trả lời câu hỏi này, và chúng **phải khớp nhau**:
+
+- `Profile.provinceId` — nơi hồ sơ này đóng đô, do form hồ sơ ghi.
+- `ProfileServiceArea` — danh sách tỉnh hồ sơ phục vụ. Dòng có
+  `isPrimary = true` là bản sao của `Profile.provinceId`; các dòng còn lại là
+  tỉnh provider tự chọn thêm ở mục "Khu vực phục vụ".
+
+Ai đọc cái nào không quan trọng, miễn là cả hai cùng nói một điều. Trước
+22/09/2026 thì không: `/browse` và Fmap đọc `Profile.provinceId`, còn feed
+"Yêu cầu phù hợp" và thông báo yêu cầu mới chỉ đọc `ProfileServiceArea` —
+mà chưa từng có dòng nào được ghi vào bảng đó. Hậu quả: một nhiếp ảnh gia đã
+xác minh ở TP.HCM hiện đúng trên bản đồ TP.HCM nhưng được báo là không có yêu
+cầu phù hợp nào ở TP.HCM (QA-03).
+
+Cách giữ khớp, cả hai lớp:
+
+- Ghi: `syncPrimaryServiceArea()` (`src/services/service-areas.ts`) chạy mỗi
+  lần lưu hồ sơ; route "Khu vực phục vụ" luôn giữ lại tỉnh chính.
+- Đọc: `profileProvinceIds()` và `providerCoversProvince()` trong cùng file
+  coi `Profile.provinceId` là nguồn có thẩm quyền, nên một dòng thiếu cũng
+  không giấu được provider. `providerCoversProvince()` được dựng **từ**
+  `provinceMatch()` của `services/search.ts` chứ không viết lại, để hai bên
+  không lệch nhau lần nữa.
+
 ### Các cơ chế bảo vệ dữ liệu
 
 - Primary key nhận diện duy nhất một dòng.
