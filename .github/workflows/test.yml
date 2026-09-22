@@ -65,6 +65,13 @@ jobs:
       # allows, all from 127.0.0.1 — see src/lib/auth.ts.
       LOGIN_IP_RATE_LIMIT_MAX: "100000"
       LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
+      # requireCronSecret() fails closed outside development.
+      CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
+      # Flagged-off-by-default features whose specs exercise the real
+      # thing. Stripe stays unconfigured on purpose.
+      BILLING_ENABLED: "true"
+      MARKETPLACE_ENABLED: "true"
+      SOCIAL_FEED_ENABLED: "true"
     steps:
       - uses: actions/checkout@v4
 
@@ -136,6 +143,13 @@ jobs:
       # allows, all from 127.0.0.1 — see src/lib/auth.ts.
       LOGIN_IP_RATE_LIMIT_MAX: "100000"
       LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
+      # requireCronSecret() fails closed outside development.
+      CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
+      # Flagged-off-by-default features whose specs exercise the real
+      # thing. Stripe stays unconfigured on purpose.
+      BILLING_ENABLED: "true"
+      MARKETPLACE_ENABLED: "true"
+      SOCIAL_FEED_ENABLED: "true"
     steps:
       - uses: actions/checkout@v4
 
@@ -251,6 +265,13 @@ jobs:
       # allows, all from 127.0.0.1 — see src/lib/auth.ts.
       LOGIN_IP_RATE_LIMIT_MAX: "100000"
       LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
+      # requireCronSecret() fails closed outside development.
+      CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
+      # Flagged-off-by-default features whose specs exercise the real
+      # thing. Stripe stays unconfigured on purpose.
+      BILLING_ENABLED: "true"
+      MARKETPLACE_ENABLED: "true"
+      SOCIAL_FEED_ENABLED: "true"
     steps:
       - uses: actions/checkout@v4
 

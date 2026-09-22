@@ -477,7 +477,13 @@ test.describe("auto-expiry", () => {
       expiresAt: new Date(Date.now() + 60 * 60_000),
     });
 
-    const res = await request.get("/api/cron/expire-bookings");
+    // requireCronSecret() fails closed outside development, and the e2e
+    // server is a production build — an unauthenticated call is a 401 by
+    // design, not a bug. Sending the header is what the real Vercel cron
+    // does, so this exercises the authorized path rather than a hole.
+    const res = await request.get("/api/cron/expire-bookings", {
+      headers: { authorization: `Bearer ${process.env.CRON_SECRET}` },
+    });
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(body.data.expiredCount).toBeGreaterThanOrEqual(1);

@@ -21,7 +21,7 @@ test("user resets their password end to end", async ({ page }) => {
   });
 
   await page.goto("/forgot-password");
-  await page.getByLabel("Email").fill(email);
+  await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
   await page.getByRole("button", { name: "Send reset link" }).click();
   await expect(page.getByText(/check your inbox/i)).toBeVisible({
     timeout: 10_000,
@@ -50,7 +50,9 @@ test("user resets their password end to end", async ({ page }) => {
   const loginForm = page.locator("form");
 
   // Old password no longer works.
-  await loginForm.getByLabel("Email").fill(email);
+  await loginForm
+    .getByRole("textbox", { name: "Email", exact: true })
+    .fill(email);
   await loginForm.getByLabel("Password").fill(TEST_PASSWORD);
   await loginForm.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByText("Invalid email or password")).toBeVisible({
@@ -60,7 +62,9 @@ test("user resets their password end to end", async ({ page }) => {
   // New password does. The failed attempt above redirected to
   // /login?error=... (a full page load), clearing the email field, so it
   // needs refilling too.
-  await loginForm.getByLabel("Email").fill(email);
+  await loginForm
+    .getByRole("textbox", { name: "Email", exact: true })
+    .fill(email);
   await loginForm.getByLabel("Password").fill(newPassword);
   await loginForm.getByRole("button", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
