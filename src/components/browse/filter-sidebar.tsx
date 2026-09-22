@@ -2,8 +2,7 @@
 
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { startTransition, useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { SERVICE_KINDS } from "@/lib/constants/service-matrix";
@@ -17,8 +16,15 @@ import {
   DISCOVERABLE_ROLES,
 } from "@/lib/constants";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
+import {
+  categoriesStillValid,
+  clearBrowseFilters,
+  readBrowseFilters,
+  writeBrowseFilters,
+  type BrowseFilterState,
+} from "@/lib/browse-filters";
 
-import { useBrowseFilterNavigation } from "./browse-filter-context";
+import { useSharedFilterParams } from "@/components/filters/filter-params-provider";
 
 // Roles that have a specialty-category list at all (CAMERA_SHOP doesn't).
 const STYLE_ROLES = Object.keys(CATEGORIES_BY_ROLE) as Role[];
@@ -49,78 +55,6 @@ interface WardOption {
 // navigation is debounced by this much so a burst of clicks (e.g. checking
 // 3 roles in a row) produces one navigation instead of one per click.
 const NAVIGATE_DEBOUNCE_MS = 200;
-
-interface FilterState {
-  roles: Role[];
-  serviceKinds: string[];
-  sort: string;
-  city: string;
-  ward: string;
-  minPrice: string;
-  maxPrice: string;
-  minRating: string;
-  categories: ProfileCategory[];
-  heightMin: string;
-  heightMax: string;
-  experienceLevel: ExperienceLevel[];
-  travelWilling: boolean;
-}
-
-function filterStateFromParams(searchParams: URLSearchParams): FilterState {
-  return {
-    roles: (searchParams.get("roles")?.split(",").filter(Boolean) ??
-      []) as Role[],
-    serviceKinds:
-      searchParams.get("services")?.split(",").filter(Boolean) ?? [],
-    sort: searchParams.get("sort") ?? "rating",
-    city: searchParams.get("city") ?? "",
-    ward: searchParams.get("ward") ?? "",
-    minPrice: searchParams.get("minPrice") ?? "",
-    maxPrice: searchParams.get("maxPrice") ?? "",
-    minRating: searchParams.get("minRating") ?? "",
-    categories: (searchParams.get("categories")?.split(",").filter(Boolean) ??
-      []) as ProfileCategory[],
-    heightMin: searchParams.get("heightMin") ?? "",
-    heightMax: searchParams.get("heightMax") ?? "",
-    experienceLevel: (searchParams
-      .get("experienceLevel")
-      ?.split(",")
-      .filter(Boolean) ?? []) as ExperienceLevel[],
-    travelWilling: searchParams.get("travelWilling") === "1",
-  };
-}
-
-function filterStateToQuery(filters: FilterState): string {
-  const params = new URLSearchParams();
-  if (filters.roles.length > 0) params.set("roles", filters.roles.join(","));
-  if (filters.serviceKinds.length > 0)
-    params.set("services", filters.serviceKinds.join(","));
-  if (filters.sort !== "rating") params.set("sort", filters.sort);
-  if (filters.city) params.set("city", filters.city);
-  if (filters.city && filters.ward) params.set("ward", filters.ward);
-  if (filters.minPrice) params.set("minPrice", filters.minPrice);
-  if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
-  if (filters.minRating) params.set("minRating", filters.minRating);
-  // Categories are valid with 0, 1, or 2+ roles selected (the sidebar
-  // renders checkboxes in all three cases, and the backend filters on
-  // category independently of role) — unlike the MODEL-only fields below,
-  // this isn't gated to a single role.
-  if (filters.categories.length > 0)
-    params.set("categories", filters.categories.join(","));
-  // MODEL-specific filters only apply when scoped to that one role — drop
-  // them from the URL entirely otherwise so switching roles doesn't leave
-  // a stale, invisible filter narrowing results.
-  if (filters.roles.length === 1) {
-    if (filters.roles[0] === "MODEL") {
-      if (filters.heightMin) params.set("heightMin", filters.heightMin);
-      if (filters.heightMax) params.set("heightMax", filters.heightMax);
-      if (filters.experienceLevel.length > 0)
-        params.set("experienceLevel", filters.experienceLevel.join(","));
-      if (filters.travelWilling) params.set("travelWilling", "1");
-    }
-  }
-  return params.toString();
-}
 
 interface FilterSidebarProps {
   roleCounts: Record<string, number>;
@@ -159,17 +93,15 @@ export function FilterSidebar({
     { value: "4", label: t("rating4Plus") },
     { value: "4.5", label: t("rating45Plus") },
   ];
-  const router = useRouter();
   const roleFilterOptions = marketplaceEnabled
     ? [...DISCOVERABLE_ROLES, "CAMERA_SHOP" as const]
     : DISCOVERABLE_ROLES;
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const runNavigation = useBrowseFilterNavigation();
-
-  const [filters, setFilters] = useState<FilterState>(() =>
-    filterStateFromParams(searchParams),
-  );
+  // The page's single source of truth for the query string, shared with the
+  // search box and with the other copy of this sidebar inside the mobile
+  // filter sheet. `params` is optimistic, so a checkbox reflects the click
+  // immediately even while the results are still being fetched.
+  const { params, navigate } = useSharedFilterParams();
+  const filters = readBrowseFilters(params);
   // Real nationwide Province/Ward rows, never a hardcoded UI list.
   const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
   useEffect(() => {
@@ -189,124 +121,96 @@ export function FilterSidebar({
       .then((body) => startTransition(() => setWards(body.data ?? [])))
       .catch(() => startTransition(() => setWards([])));
   }, [filters.city]);
-  // Mirrors `filters` synchronously (state updates are batched/async, this
-  // isn't) so a click reads the freshest local intent even if it fires
-  // before React has re-rendered from the previous click. Written only in
-  // event handlers/effects below, never during render.
-  const filtersRef = useRef(filters);
-
-  // What we last pushed ourselves, so the resync effect below can tell "the
-  // URL changed because our own navigation caught up" apart from "the URL
-  // changed for an external reason" (back/forward button, a direct link).
-  const lastPushedRef = useRef(filterStateToQuery(filters));
-  const navigateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const current = searchParams.toString();
-    if (current === lastPushedRef.current) return;
-    lastPushedRef.current = current;
-    const next = filterStateFromParams(searchParams);
-    filtersRef.current = next;
-    setFilters(next);
-  }, [searchParams]);
-
-  useEffect(() => {
-    return () => {
-      if (navigateTimerRef.current) clearTimeout(navigateTimerRef.current);
-    };
-  }, []);
-
-  const scheduleNavigate = (next: FilterState, immediate = false) => {
-    if (navigateTimerRef.current) clearTimeout(navigateTimerRef.current);
-
-    const push = () => {
-      const query = filterStateToQuery(next);
-      lastPushedRef.current = query;
-      runNavigation(() => {
-        router.push(query ? `${pathname}?${query}` : pathname, {
-          scroll: false,
-        });
-      });
-    };
-
-    if (immediate) push();
-    else navigateTimerRef.current = setTimeout(push, NAVIGATE_DEBOUNCE_MS);
-  };
-
-  const applyFilters = (patch: Partial<FilterState>, immediate = false) => {
-    const next = { ...filtersRef.current, ...patch };
-    filtersRef.current = next;
-    setFilters(next);
-    scheduleNavigate(next, immediate);
+  // Every handler below mutates only the keys it owns, on top of the
+  // controller's latest intent — never a whole query string rebuilt from a
+  // snapshot. That is what keeps the search keyword (and any future param
+  // this sidebar knows nothing about) alive across a filter click.
+  const applyFilters = (
+    patch: Partial<BrowseFilterState>,
+    immediate = false,
+  ) => {
+    navigate(
+      (next) =>
+        writeBrowseFilters(next, { ...readBrowseFilters(next), ...patch }),
+      { debounceMs: immediate ? 0 : NAVIGATE_DEBOUNCE_MS },
+    );
   };
 
   // What the customer wants DONE, which is a different question from what
   // the provider is called — a studio with a crew offers PHOTOGRAPHY, so
   // filtering by that has to reach it.
   const toggleServiceKind = (kind: string) => {
-    const current = filtersRef.current.serviceKinds;
-    applyFilters({
-      serviceKinds: current.includes(kind)
-        ? current.filter((k) => k !== kind)
-        : [...current, kind],
-    });
+    navigate(
+      (next) => {
+        const current = readBrowseFilters(next);
+        writeBrowseFilters(next, {
+          ...current,
+          serviceKinds: current.serviceKinds.includes(kind)
+            ? current.serviceKinds.filter((k) => k !== kind)
+            : [...current.serviceKinds, kind],
+        });
+      },
+      { debounceMs: NAVIGATE_DEBOUNCE_MS },
+    );
   };
 
   const toggleRole = (role: Role) => {
-    const current = filtersRef.current.roles;
-    const roles = current.includes(role)
-      ? current.filter((r) => r !== role)
-      : [...current, role];
+    let dropped = 0;
+    navigate(
+      (next) => {
+        const current = readBrowseFilters(next);
+        const roles = current.roles.includes(role)
+          ? current.roles.filter((r) => r !== role)
+          : [...current.roles, role];
 
-    // Prompt G4, VIỆC 1 — categories now stay meaningful for 0 or 2+
-    // selected roles too (see the render logic below), so only drop a
-    // selected category that's no longer valid for ANY currently-selected
-    // role, and tell the user when that happens instead of silently
-    // clearing it.
-    const validCategories = new Set(
-      roles.flatMap((r) => CATEGORIES_BY_ROLE[r] ?? []),
+        // Prompt G4, VIỆC 1 — categories now stay meaningful for 0 or 2+
+        // selected roles too (see the render logic below), so only drop a
+        // selected category that's no longer valid for ANY currently-
+        // selected role, and tell the user when that happens instead of
+        // silently clearing it.
+        const categories = categoriesStillValid(roles, current.categories);
+        dropped = current.categories.length - categories.length;
+
+        // Height/experience/travel are MODEL-only; writeBrowseFilters drops
+        // them from the URL itself once the selection is no longer that one
+        // role, so there is nothing to clear by hand here.
+        writeBrowseFilters(next, { ...current, roles, categories });
+      },
+      { debounceMs: NAVIGATE_DEBOUNCE_MS },
     );
-    const currentCategories = filtersRef.current.categories;
-    const categories =
-      roles.length === 0
-        ? []
-        : currentCategories.filter((c) => validCategories.has(c));
-    const droppedCount = currentCategories.length - categories.length;
-    if (droppedCount > 0) {
+    if (dropped > 0) {
       toast.add({ title: t("categoriesClearedNotice"), type: "info" });
     }
-
-    const singleRole = roles.length === 1 ? roles[0] : null;
-    applyFilters({
-      roles,
-      categories,
-      // Height/experience/travel are MODEL-only and only apply when
-      // scoped to exactly that one role.
-      ...(singleRole === "MODEL"
-        ? {}
-        : {
-            heightMin: "",
-            heightMax: "",
-            experienceLevel: [],
-            travelWilling: false,
-          }),
-    });
   };
 
   const toggleCategory = (category: ProfileCategory) => {
-    const current = filtersRef.current.categories;
-    const categories = current.includes(category)
-      ? current.filter((c) => c !== category)
-      : [...current, category];
-    applyFilters({ categories });
+    navigate(
+      (next) => {
+        const current = readBrowseFilters(next);
+        writeBrowseFilters(next, {
+          ...current,
+          categories: current.categories.includes(category)
+            ? current.categories.filter((c) => c !== category)
+            : [...current.categories, category],
+        });
+      },
+      { debounceMs: NAVIGATE_DEBOUNCE_MS },
+    );
   };
 
   const toggleExperienceLevel = (level: ExperienceLevel) => {
-    const current = filtersRef.current.experienceLevel;
-    const experienceLevel = current.includes(level)
-      ? current.filter((l) => l !== level)
-      : [...current, level];
-    applyFilters({ experienceLevel });
+    navigate(
+      (next) => {
+        const current = readBrowseFilters(next);
+        writeBrowseFilters(next, {
+          ...current,
+          experienceLevel: current.experienceLevel.includes(level)
+            ? current.experienceLevel.filter((l) => l !== level)
+            : [...current.experienceLevel, level],
+        });
+      },
+      { debounceMs: NAVIGATE_DEBOUNCE_MS },
+    );
   };
 
   const onBudgetChange = (value: string) => {
@@ -318,25 +222,10 @@ export function FilterSidebar({
     applyFilters({ minPrice: min || "", maxPrice: max || "" });
   };
 
+  // Clears the sidebar's own criteria. The search keyword is the search
+  // box's to clear (it has its own ✕), so this no longer silently wipes it.
   const resetFilters = () => {
-    const empty: FilterState = {
-      roles: [],
-      serviceKinds: [],
-      sort: "rating",
-      city: "",
-      ward: "",
-      minPrice: "",
-      maxPrice: "",
-      minRating: "",
-      categories: [],
-      heightMin: "",
-      heightMax: "",
-      experienceLevel: [],
-      travelWilling: false,
-    };
-    filtersRef.current = empty;
-    setFilters(empty);
-    scheduleNavigate(empty, true);
+    navigate((next) => clearBrowseFilters(next));
   };
 
   const toggleGroupExpand = (role: Role) => {

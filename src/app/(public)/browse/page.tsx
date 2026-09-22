@@ -4,10 +4,12 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { ArtistCard } from "@/components/cards/artist-card";
-import { BrowseFilterProvider } from "@/components/browse/browse-filter-context";
 import { FilterSidebar } from "@/components/browse/filter-sidebar";
+import {
+  FilterParamsProvider,
+  FilterResultsPane,
+} from "@/components/filters/filter-params-provider";
 import { MobileFilterSheet } from "@/components/browse/mobile-filter-sheet";
-import { ResultsPane } from "@/components/browse/results-pane";
 import { SearchInput } from "@/components/browse/search-input";
 import { WaitlistForm } from "@/components/browse/waitlist-form";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -207,7 +209,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 pt-8 pb-[72px] sm:px-8">
-      <BrowseFilterProvider>
+      <FilterParamsProvider>
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[268px_1fr]">
           <div className="hidden lg:block">
             <FilterSidebar
@@ -264,7 +266,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               </Tag>
             </div>
 
-            <ResultsPane>
+            <FilterResultsPane label={t("updatingResults")}>
               {result.data.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-20 text-center">
                   <SearchX className="size-12 text-text-tertiary" />
@@ -457,10 +459,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   </div>
                 </div>
               ) : null}
-            </ResultsPane>
+            </FilterResultsPane>
           </div>
         </div>
-      </BrowseFilterProvider>
+      </FilterParamsProvider>
     </div>
   );
 }

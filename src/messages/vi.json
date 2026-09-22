@@ -2854,6 +2854,7 @@
       "headingWithRoleCity": "{role} tại {city}",
       "headingDefault": "Khám phá nghệ sĩ",
       "resultsCount": "{count} kết quả, sắp xếp theo {sort}",
+      "updatingResults": "Đang cập nhật kết quả…",
       "filterAvailableNow": "Đang rảnh",
       "filterInstantBook": "Đặt lịch tức thì",
       "filterTopRated": "Đánh giá cao nhất",
@@ -3492,6 +3493,7 @@
     "shop": {
       "heading": "Thiết bị quay chụp",
       "count": "{count} tin · {sort}",
+      "updatingResults": "Đang cập nhật kết quả…",
       "emptyTitle": "Không tìm thấy thiết bị nào",
       "emptyBody": "Thử bớt bộ lọc lại xem sao.",
       "clearAll": "Xoá hết bộ lọc",
