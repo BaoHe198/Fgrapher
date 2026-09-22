@@ -326,36 +326,54 @@ export async function reviewServiceRequest({
   if (!exists) throw new ServiceRequestReviewError("not_found", 404);
 
   const moderatedAt = new Date();
-  const update = await db.serviceRequest.updateMany({
-    where: {
-      id: requestId,
-      isDraft: false,
-      status: "PENDING_REVIEW",
-    },
-    data:
-      action === "approve"
-        ? {
-            status: "OPEN",
-            moderationReason: null,
-            moderatedAt,
-            expiresAt: new Date(
-              moderatedAt.getTime() + REQUEST_TTL_DAYS * 24 * 60 * 60 * 1000,
-            ),
-          }
-        : {
-            status: "REJECTED",
-            moderationReason: reason,
-            moderatedAt,
-          },
-  });
+  const reviewed = await db.$transaction(async (tx) => {
+    const update = await tx.serviceRequest.updateMany({
+      where: {
+        id: requestId,
+        isDraft: false,
+        status: "PENDING_REVIEW",
+      },
+      data:
+        action === "approve"
+          ? {
+              status: "OPEN",
+              moderationReason: null,
+              moderatedAt,
+              expiresAt: new Date(
+                moderatedAt.getTime() + REQUEST_TTL_DAYS * 24 * 60 * 60 * 1000,
+              ),
+            }
+          : {
+              status: "REJECTED",
+              moderationReason: reason,
+              moderatedAt,
+            },
+    });
 
-  if (update.count !== 1) {
-    throw new ServiceRequestReviewError("already_reviewed", 409);
-  }
+    if (update.count !== 1) {
+      throw new ServiceRequestReviewError("already_reviewed", 409);
+    }
 
-  const reviewed = await db.serviceRequest.findUniqueOrThrow({
-    where: { id: requestId },
-    include: { references: true },
+    const row = await tx.serviceRequest.findUniqueOrThrow({
+      where: { id: requestId },
+      include: { references: true },
+    });
+
+    // Approval and its Community identity are atomic: an approved request
+    // can never be left out of the feed by a partial serverless execution.
+    if (action === "approve") {
+      await tx.post.upsert({
+        where: { serviceRequestId: row.id },
+        create: {
+          userId: row.customerId,
+          kind: "SERVICE_REQUEST",
+          serviceRequestId: row.id,
+        },
+        update: { deletedAt: null },
+      });
+    }
+
+    return row;
   });
 
   if (action === "approve") {

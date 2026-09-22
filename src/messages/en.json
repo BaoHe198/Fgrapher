@@ -3556,7 +3556,7 @@
     },
     "community": {
       "heading": "Community",
-      "subtitle": "Posts from the photography community",
+      "subtitle": "Discover work, share stories, and find the right crew for your next shoot.",
       "tabDiscover": "Discover",
       "tabFollowing": "Following",
       "composerPlaceholder": "Share something with the community...",
@@ -3575,7 +3575,78 @@
       "loginToPost": "Sign in to post and interact",
       "pendingBanner": "{count} of your posts are waiting on photo moderation. They go public once the photos are approved.",
       "submittedForReview": "Post submitted. Its photos are awaiting moderation and it will appear once approved.",
-      "report": "Report post"
+      "report": "Report post",
+      "eyebrow": "Fgrapher's creative space",
+      "noComments": "No comments yet. Start the conversation.",
+      "loginToInteract": "Sign in to like and comment",
+      "filter": {
+        "all": "All",
+        "posts": "Stories",
+        "portfolio": "Portfolio",
+        "bookings": "F Booking"
+      },
+      "communityNoteTitle": "One community, many ways to connect",
+      "communityNoteBody": "Public albums and approved requests appear here automatically. Likes and comments stay in sync with Portfolio.",
+      "quickActions": "Quick actions",
+      "createBooking": "Create an F Booking",
+      "uploadPortfolio": "Publish a Portfolio album",
+      "bookingHelpTitle": "Looking for a crew?",
+      "bookingHelpBody": "Post what you need, receive offers from the right professionals, and choose one in the post.",
+      "viewBookings": "Browse F Bookings",
+      "createPost": "Create a post",
+      "addPhoto": "Add photos",
+      "postKind": {
+        "STANDARD": "Community post",
+        "PORTFOLIO_ALBUM": "Portfolio album",
+        "SERVICE_REQUEST": "F Booking"
+      },
+      "bookingBadge": "Looking for collaborators",
+      "requestStatus": {
+        "PENDING_REVIEW": "Under review",
+        "OPEN": "Accepting offers",
+        "HAS_OFFERS": "Offers received",
+        "FULFILLED": "Provider selected",
+        "EXPIRED": "Expired",
+        "CANCELLED": "Cancelled",
+        "REJECTED": "Not approved"
+      },
+      "whenLabel": "When",
+      "whereLabel": "Area",
+      "budgetLabel": "Budget",
+      "flexibleDate": "{start} – {end}",
+      "notSet": "Not specified",
+      "offer": {
+        "count": "{count} offers",
+        "edit": "Edit offer",
+        "send": "Send offer",
+        "genericError": "Could not complete this action. Please try again.",
+        "price": "Proposed price",
+        "date": "Proposed date",
+        "message": "Introduce yourself and explain how you can help...",
+        "submit": "Send offer",
+        "status": {
+          "PENDING": "Pending",
+          "ACCEPTED": "Selected",
+          "DECLINED": "Not selected",
+          "WITHDRAWN": "Withdrawn"
+        },
+        "received": "Offers received",
+        "accept": "Accept",
+        "decline": "Decline",
+        "acceptTitle": "Confirm the booking with this provider",
+        "bookingDate": "Booking date",
+        "bookingTime": "Start time",
+        "location": "Location",
+        "locationType": {
+          "OUTDOOR": "External location",
+          "PROVIDER": "Provider's location",
+          "CUSTOMER": "Customer's location"
+        },
+        "cancel": "Cancel",
+        "confirmAccept": "Accept and create booking"
+      },
+      "loadFailed": "Could not load the feed. Please try again.",
+      "retry": "Try again"
     }
   },
   "sharedComponents": {

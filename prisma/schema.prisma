@@ -1074,6 +1074,7 @@ model Album {
   profile    Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
   media      ProfileMedia[] @relation("AlbumMedia")
   coverMedia ProfileMedia?  @relation("AlbumCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  socialPost Post?
 
   @@index([profileId, sortOrder])
   @@index([deletedAt])
@@ -1288,13 +1289,22 @@ model BookingStatusHistory {
 // SOCIAL FEED
 // ============================================================================
 
+enum PostKind {
+  STANDARD
+  PORTFOLIO_ALBUM
+  SERVICE_REQUEST
+}
+
 model Post {
-  id        String    @id @default(cuid())
-  userId    String
-  caption   String?   @db.Text
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id               String    @id @default(cuid())
+  userId           String
+  kind             PostKind  @default(STANDARD)
+  caption          String?   @db.Text
+  albumId          String?   @unique
+  serviceRequestId String?   @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
 
   /// Kept in step with Like/Comment rows inside the same transaction that
   /// writes them. Counting on every feed read is the thing that makes a
@@ -1303,12 +1313,15 @@ model Post {
   likeCount    Int @default(0)
   commentCount Int @default(0)
 
-  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  media    PostMedia[]
-  likes    Like[]
-  comments Comment[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  album          Album?          @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  serviceRequest ServiceRequest? @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  media          PostMedia[]
+  likes          Like[]
+  comments       Comment[]
 
   @@index([userId, createdAt])
+  @@index([kind, createdAt, id])
   /// The discover feed pages by (createdAt, id) rather than by offset, so a
   /// post arriving mid-scroll cannot shift somebody onto a page they have
   /// already seen.
@@ -1424,7 +1437,7 @@ model Product {
   updatedAt     DateTime         @updatedAt
   deletedAt     DateTime?
 
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   images     ProductImage[]
   orderItems OrderItem[]
   cartItems  CartItem[]
@@ -1436,11 +1449,11 @@ model Product {
 }
 
 model ProductImage {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   productId String
   url       String
   publicId  String?
-  order     Int     @default(0)
+  order     Int      @default(0)
   // Needed by the moderation queue: it sorts oldest-first and measures the
   // review SLA from here, the way ProfileMedia.createdAt does.
   createdAt DateTime @default(now())
@@ -1515,8 +1528,8 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  customer User        @relation(fields: [customerId], references: [id])
-  shop     User        @relation("shopOrders", fields: [shopId], references: [id])
+  customer User            @relation(fields: [customerId], references: [id])
+  shop     User            @relation("shopOrders", fields: [shopId], references: [id])
   items    OrderItem[]
   reviews  ProductReview[]
 
@@ -1835,6 +1848,7 @@ model ServiceRequest {
   booking        Booking?                  @relation(fields: [bookingId], references: [id])
   references     ServiceRequestReference[]
   offers         RequestOffer[]            @relation("requestOffers")
+  socialPost     Post?
 
   @@index([customerId, status])
   @@index([role, provinceId, status])

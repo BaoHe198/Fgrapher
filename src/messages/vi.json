@@ -3556,7 +3556,7 @@
     },
     "community": {
       "heading": "Cộng đồng F",
-      "subtitle": "Bài đăng từ cộng đồng nhiếp ảnh",
+      "subtitle": "Khám phá tác phẩm, chia sẻ câu chuyện và tìm ekip cho buổi chụp tiếp theo.",
       "tabDiscover": "Khám phá",
       "tabFollowing": "Đang theo dõi",
       "composerPlaceholder": "Chia sẻ điều gì đó với cộng đồng...",
@@ -3575,7 +3575,78 @@
       "loginToPost": "Đăng nhập để đăng bài và tương tác",
       "pendingBanner": "{count} bài của bạn đang chờ kiểm duyệt ảnh. Bài chỉ hiện công khai sau khi ảnh được duyệt.",
       "submittedForReview": "Đã gửi bài. Ảnh đang chờ kiểm duyệt, bài sẽ hiện sau khi được duyệt.",
-      "report": "Báo cáo bài đăng"
+      "report": "Báo cáo bài đăng",
+      "eyebrow": "Không gian sáng tạo của Fgrapher",
+      "noComments": "Chưa có bình luận. Hãy bắt đầu cuộc trò chuyện.",
+      "loginToInteract": "Đăng nhập để thích và bình luận",
+      "filter": {
+        "all": "Tất cả",
+        "posts": "Chia sẻ",
+        "portfolio": "Portfolio",
+        "bookings": "F Booking"
+      },
+      "communityNoteTitle": "Một cộng đồng, nhiều cách kết nối",
+      "communityNoteBody": "Album công khai và yêu cầu đã được duyệt sẽ tự động xuất hiện tại đây. Lượt thích và bình luận được đồng bộ với Portfolio.",
+      "quickActions": "Thao tác nhanh",
+      "createBooking": "Tạo F Booking",
+      "uploadPortfolio": "Đăng album Portfolio",
+      "bookingHelpTitle": "Bạn đang tìm một ekip?",
+      "bookingHelpBody": "Đăng nhu cầu, nhận đề nghị từ đúng chuyên môn và chọn người phù hợp ngay trong bài viết.",
+      "viewBookings": "Xem danh sách F Booking",
+      "createPost": "Tạo bài viết",
+      "addPhoto": "Thêm ảnh",
+      "postKind": {
+        "STANDARD": "Bài chia sẻ",
+        "PORTFOLIO_ALBUM": "Album Portfolio",
+        "SERVICE_REQUEST": "F Booking"
+      },
+      "bookingBadge": "Đang tìm cộng tác",
+      "requestStatus": {
+        "PENDING_REVIEW": "Chờ duyệt",
+        "OPEN": "Đang nhận đề nghị",
+        "HAS_OFFERS": "Đã có đề nghị",
+        "FULFILLED": "Đã chọn provider",
+        "EXPIRED": "Đã hết hạn",
+        "CANCELLED": "Đã hủy",
+        "REJECTED": "Không được duyệt"
+      },
+      "whenLabel": "Thời gian",
+      "whereLabel": "Khu vực",
+      "budgetLabel": "Ngân sách",
+      "flexibleDate": "{start} – {end}",
+      "notSet": "Chưa xác định",
+      "offer": {
+        "count": "{count} đề nghị",
+        "edit": "Sửa đề nghị",
+        "send": "Gửi đề nghị",
+        "genericError": "Không thể thực hiện. Vui lòng thử lại.",
+        "price": "Giá đề xuất",
+        "date": "Ngày đề xuất",
+        "message": "Giới thiệu ngắn và cách bạn có thể hỗ trợ...",
+        "submit": "Gửi đề nghị",
+        "status": {
+          "PENDING": "Đang chờ",
+          "ACCEPTED": "Đã được chọn",
+          "DECLINED": "Không được chọn",
+          "WITHDRAWN": "Đã rút"
+        },
+        "received": "Đề nghị đã nhận",
+        "accept": "Chấp nhận",
+        "decline": "Từ chối",
+        "acceptTitle": "Xác nhận lịch với provider",
+        "bookingDate": "Ngày thực hiện",
+        "bookingTime": "Giờ bắt đầu",
+        "location": "Địa điểm",
+        "locationType": {
+          "OUTDOOR": "Địa điểm bên ngoài",
+          "PROVIDER": "Tại địa điểm của provider",
+          "CUSTOMER": "Tại địa điểm của khách hàng"
+        },
+        "cancel": "Hủy",
+        "confirmAccept": "Chấp nhận và tạo lịch"
+      },
+      "loadFailed": "Không tải được bảng tin. Vui lòng thử lại.",
+      "retry": "Thử lại"
     }
   },
   "sharedComponents": {
