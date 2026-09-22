@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { Role } from "@prisma/client";
+import type { LegalEntityType, Role } from "@prisma/client";
 
 import { deleteKycAsset, isCloudinaryConfigured } from "@/lib/cloudinary";
 import { CURRENT_POLICY_VERSION, KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
@@ -19,6 +19,9 @@ function hashIdNumber(idNumber: string) {
 interface SubmitVerificationInput {
   userId: string;
   role: Role;
+  legalEntityType: LegalEntityType;
+  businessDocUrl?: string;
+  businessDocPublicId?: string;
   idNumber: string;
   idFrontUrl: string;
   idFrontPublicId: string;
@@ -33,6 +36,9 @@ interface SubmitVerificationInput {
 export async function submitVerification({
   userId,
   role,
+  legalEntityType,
+  businessDocUrl,
+  businessDocPublicId,
   idNumber,
   idFrontUrl,
   idFrontPublicId,
@@ -62,6 +68,13 @@ export async function submitVerification({
     where: { id: userRole.id },
     data: {
       verificationStatus: "PENDING",
+      // Recorded with the submission, not asked again later: what the
+      // provider declares here is what the reviewer checks the documents
+      // against.
+      legalEntityType,
+      legalEntityConfirmedAt: new Date(),
+      verificationBusinessDocUrl: businessDocUrl ?? null,
+      verificationBusinessDocPublicId: businessDocPublicId ?? null,
       verificationIdUrl: idFrontUrl,
       verificationIdPublicId: idFrontPublicId,
       verificationIdBackUrl: idBackUrl,
@@ -125,6 +138,7 @@ export async function purgeExpiredKycDocuments() {
       verificationIdPublicId: true,
       verificationIdBackPublicId: true,
       verificationSelfiePublicId: true,
+      verificationBusinessDocPublicId: true,
     },
   });
 
@@ -134,6 +148,9 @@ export async function purgeExpiredKycDocuments() {
         row.verificationIdPublicId,
         row.verificationIdBackPublicId,
         row.verificationSelfiePublicId,
+        // A business registration certificate is personal data on the same
+        // 90-day clock as the ID card — it must not outlive it.
+        row.verificationBusinessDocPublicId,
       ]
         .filter((publicId): publicId is string => Boolean(publicId))
         .map((publicId) => deleteKycAsset(publicId)),
@@ -148,6 +165,8 @@ export async function purgeExpiredKycDocuments() {
         verificationIdBackPublicId: null,
         verificationSelfieUrl: null,
         verificationSelfiePublicId: null,
+        verificationBusinessDocUrl: null,
+        verificationBusinessDocPublicId: null,
         purgeAfter: null,
       },
     });

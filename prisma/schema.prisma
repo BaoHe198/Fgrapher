@@ -430,6 +430,12 @@ model UserRole {
   verificationIdBackPublicId  String?
   verificationSelfieUrl       String?
   verificationSelfiePublicId  String?
+  /// Business registration certificate, required only for a household
+  /// business or a company (Luật TMĐT 122/2025). A freelance individual
+  /// uploads nothing extra — see LegalEntityType. Purged on the same 90-day
+  /// clock as the ID documents.
+  verificationBusinessDocUrl      String?
+  verificationBusinessDocPublicId String?
   idNumberHash                String?
   purgeAfter                  DateTime?
   verifiedAt                  DateTime?

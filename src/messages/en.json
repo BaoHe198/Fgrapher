@@ -686,7 +686,13 @@
           "uploadFailedDetail": "Upload failed: {detail}",
           "submit": "Submit for review",
           "doLater": "Do this later",
-          "backToDashboard": "Back to dashboard"
+          "backToDashboard": "Back to dashboard",
+          "legalEntityLabel": "Legal form",
+          "legalEntityIndividual": "Freelance individual (ID card only)",
+          "legalEntityHousehold": "Household business",
+          "legalEntityCompany": "Company",
+          "businessDocLabel": "Business registration certificate",
+          "businessDocHelp": "A household business or company must upload its registration certificate. A freelance individual does not."
         }
       }
     },

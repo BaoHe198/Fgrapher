@@ -74,9 +74,10 @@ describe("role capability boundaries", () => {
     assert.ok(productCategoriesForRole("PHOTOGRAPHER").length > 0);
   });
 
-  it("allows Costume Shop to submit KYC", () => {
+  it("allows Costume Shop to submit KYC as an individual", () => {
     const parsed = submitVerificationSchema.safeParse({
       role: "COSTUME_SHOP",
+      legalEntityType: "INDIVIDUAL",
       fullName: "Nguyen Van A",
       idNumber: "123456789012",
       idFrontUrl: "https://example.com/front.jpg",
@@ -88,6 +89,48 @@ describe("role capability boundaries", () => {
       consentIdentityVerification: true,
     });
     assert.equal(parsed.success, true);
+  });
+
+  it("makes a business upload its registration, and an individual not", () => {
+    // Luật TMĐT 122/2025: what you owe depends on what you trade as. The
+    // owner's call (22/09/2026) is that a freelance individual is never
+    // asked for a business document.
+    const base = {
+      role: "PHOTOGRAPHER" as const,
+      fullName: "Nguyen Van A",
+      idNumber: "123456789012",
+      idFrontUrl: "https://example.com/front.jpg",
+      idFrontPublicId: "front",
+      idBackUrl: "https://example.com/back.jpg",
+      idBackPublicId: "back",
+      selfieUrl: "https://example.com/selfie.jpg",
+      selfiePublicId: "selfie",
+      consentIdentityVerification: true,
+    };
+
+    assert.equal(
+      submitVerificationSchema.safeParse({
+        ...base,
+        legalEntityType: "HOUSEHOLD_BUSINESS",
+      }).success,
+      false,
+    );
+    assert.equal(
+      submitVerificationSchema.safeParse({
+        ...base,
+        legalEntityType: "HOUSEHOLD_BUSINESS",
+        businessDocUrl: "https://example.com/dkkd.jpg",
+        businessDocPublicId: "dkkd",
+      }).success,
+      true,
+    );
+    assert.equal(
+      submitVerificationSchema.safeParse({
+        ...base,
+        legalEntityType: "INDIVIDUAL",
+      }).success,
+      true,
+    );
   });
 
   it("rejects shop roles as service-request recipients", () => {

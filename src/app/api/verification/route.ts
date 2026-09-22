@@ -36,10 +36,16 @@ export async function POST(request: Request) {
       idBackPublicId,
       selfieUrl,
       selfiePublicId,
+      legalEntityType,
+      businessDocUrl,
+      businessDocPublicId,
     } = parsed.data;
     const userRole = await submitVerification({
       userId: session.user.id,
       role,
+      legalEntityType,
+      businessDocUrl,
+      businessDocPublicId,
       idNumber,
       idFrontUrl,
       idFrontPublicId,

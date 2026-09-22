@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
+import { NativeSelect } from "@/components/ui/native-select";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -164,6 +166,12 @@ export function VerificationForm({
   const [idFront, setIdFront] = useState<File | null>(null);
   const [idBack, setIdBack] = useState<File | null>(null);
   const [selfie, setSelfie] = useState<File | null>(null);
+  // Freelance individual is the default because it is both the common case
+  // and the one that owes no extra paperwork (project owner, 22/09/2026).
+  const [legalEntityType, setLegalEntityType] = useState<
+    "INDIVIDUAL" | "HOUSEHOLD_BUSINESS" | "COMPANY"
+  >("INDIVIDUAL");
+  const [businessDoc, setBusinessDoc] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -202,12 +210,14 @@ export function VerificationForm({
     );
   }
 
+  const needsBusinessDoc = legalEntityType !== "INDIVIDUAL";
   const canSubmit =
     fullName.trim().length >= 2 &&
     idNumber.trim().length > 0 &&
     idFront &&
     idBack &&
     selfie &&
+    (!needsBusinessDoc || businessDoc) &&
     consent;
 
   const onSubmit = async () => {
@@ -225,10 +235,13 @@ export function VerificationForm({
         return;
       }
 
-      const [front, back, face] = await Promise.all([
+      const [front, back, face, businessDocUpload] = await Promise.all([
         uploadKycFile(idFront, sigBody.data),
         uploadKycFile(idBack, sigBody.data),
         uploadKycFile(selfie, sigBody.data),
+        businessDoc
+          ? uploadKycFile(businessDoc, sigBody.data)
+          : Promise.resolve(null),
       ]);
 
       const res = await fetch("/api/verification", {
@@ -244,6 +257,9 @@ export function VerificationForm({
           idBackPublicId: back.public_id,
           selfieUrl: face.secure_url,
           selfiePublicId: face.public_id,
+          legalEntityType,
+          businessDocUrl: businessDocUpload?.secure_url,
+          businessDocPublicId: businessDocUpload?.public_id,
           consentIdentityVerification: consent,
         }),
       });
@@ -318,6 +334,33 @@ export function VerificationForm({
           onChange={(e) => setIdNumber(e.target.value)}
           placeholder={t("idNumberPlaceholder")}
         />
+        <NativeSelect
+          label={t("legalEntityLabel")}
+          options={[
+            { value: "INDIVIDUAL", label: t("legalEntityIndividual") },
+            { value: "HOUSEHOLD_BUSINESS", label: t("legalEntityHousehold") },
+            { value: "COMPANY", label: t("legalEntityCompany") },
+          ]}
+          value={legalEntityType}
+          onChange={(value) =>
+            setLegalEntityType(
+              value as "INDIVIDUAL" | "HOUSEHOLD_BUSINESS" | "COMPANY",
+            )
+          }
+        />
+        {needsBusinessDoc ? (
+          <div className="flex flex-col gap-2">
+            <FileSlot
+              label={t("businessDocLabel")}
+              file={businessDoc}
+              onSelect={setBusinessDoc}
+              tapToSelectPhoto={t("tapToSelectPhoto")}
+            />
+            <p className="text-body-sm text-text-tertiary">
+              {t("businessDocHelp")}
+            </p>
+          </div>
+        ) : null}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <FileSlot
             label={t("idFrontLabel")}

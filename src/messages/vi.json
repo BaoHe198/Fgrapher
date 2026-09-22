@@ -686,7 +686,13 @@
           "uploadFailedDetail": "Tải lên thất bại: {detail}",
           "submit": "Gửi để xem xét",
           "doLater": "Để sau",
-          "backToDashboard": "Quay lại bảng điều khiển"
+          "backToDashboard": "Quay lại bảng điều khiển",
+          "legalEntityLabel": "Hình thức pháp lý",
+          "legalEntityIndividual": "Cá nhân tự do (chỉ cần CCCD)",
+          "legalEntityHousehold": "Hộ kinh doanh",
+          "legalEntityCompany": "Doanh nghiệp",
+          "businessDocLabel": "Giấy đăng ký kinh doanh",
+          "businessDocHelp": "Hộ kinh doanh và doanh nghiệp cần tải giấy đăng ký. Cá nhân tự do không cần."
         }
       }
     },
