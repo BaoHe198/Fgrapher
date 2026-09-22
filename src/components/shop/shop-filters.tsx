@@ -37,6 +37,10 @@ export function ShopFilters({
   provinces: { id: string; name: string }[];
 }) {
   const t = useTranslations("publicPages.shop.filters");
+  // Category values are stored codes, not display text — see
+  // lib/validations/product.ts. The VI UI showed them raw ("Camera body",
+  // "Lens") because nothing ever translated them (QA-05).
+  const categoryT = useTranslations("productCategory");
   // One controller for every control on this panel. Each one used to build
   // its own query string from the URL the browser had committed, so a
   // control touched before the previous navigation landed silently erased
@@ -189,7 +193,7 @@ export function ShopFilters({
         {PRODUCT_CATEGORIES.map((category) => (
           <Checkbox
             key={category}
-            label={`${category}${categoryCounts[category] ? ` (${categoryCounts[category]})` : ""}`}
+            label={`${categoryT(category)}${categoryCounts[category] ? ` (${categoryCounts[category]})` : ""}`}
             checked={categories.includes(category)}
             onCheckedChange={() => toggleListValue("category", category)}
           />

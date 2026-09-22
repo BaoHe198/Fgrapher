@@ -166,7 +166,9 @@ export default async function ProductDetailPage({
                   {shopName}
                 </span>
                 <StarRating
-                  rating={shopRating > 0 ? shopRating.toFixed(1) : "New"}
+                  rating={
+                    shopRating > 0 ? shopRating.toFixed(1) : t("newShopBadge")
+                  }
                   reviews={shopReviewCount}
                 />
               </div>
@@ -188,7 +190,7 @@ export default async function ProductDetailPage({
                   <Link href={`/dashboard/messages?to=${product.user.id}`} />
                 }
               >
-                Message
+                {t("messageShop")}
               </Button>
             </div>
           </Card>

@@ -167,6 +167,15 @@
     "KIDSWEAR": "Kidswear",
     "ACCESSORIES": "Accessories"
   },
+  "productCategory": {
+    "Camera body": "Camera body",
+    "Lens": "Lens",
+    "Lighting": "Lighting",
+    "Audio": "Audio",
+    "Support": "Support",
+    "Accessory": "Accessory",
+    "Other": "Other"
+  },
   "experienceLevel": {
     "NEW": "New",
     "INTERMEDIATE": "Intermediate",
@@ -3561,7 +3570,10 @@
       "noReviews": "No reviews yet",
       "ratingSummary": "{average} · {count} reviews",
       "shopReply": "Shop replied:",
-      "viewShopProducts": "View shop products"
+      "viewShopProducts": "View shop products",
+      "newShopBadge": "New",
+      "messageShop": "Message shop",
+      "inStock": "{count} in stock"
     },
     "community": {
       "heading": "Community",

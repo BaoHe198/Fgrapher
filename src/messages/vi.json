@@ -167,6 +167,15 @@
     "KIDSWEAR": "Trẻ em",
     "ACCESSORIES": "Phụ kiện"
   },
+  "productCategory": {
+    "Camera body": "Thân máy",
+    "Lens": "Ống kính",
+    "Lighting": "Ánh sáng",
+    "Audio": "Âm thanh",
+    "Support": "Phụ kiện hỗ trợ",
+    "Accessory": "Phụ kiện",
+    "Other": "Khác"
+  },
   "experienceLevel": {
     "NEW": "Mới bắt đầu",
     "INTERMEDIATE": "Trung cấp",
@@ -3561,7 +3570,10 @@
       "noReviews": "Chưa có đánh giá nào",
       "ratingSummary": "{average} · {count} đánh giá",
       "shopReply": "Shop phản hồi:",
-      "viewShopProducts": "Xem sản phẩm của shop"
+      "viewShopProducts": "Xem sản phẩm của shop",
+      "newShopBadge": "Mới",
+      "messageShop": "Nhắn tin cho shop",
+      "inStock": "Còn {count} sản phẩm"
     },
     "community": {
       "heading": "Cộng đồng F",
