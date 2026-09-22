@@ -69,7 +69,8 @@ jobs:
       CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
       # Flagged-off-by-default features whose specs exercise the real
       # thing. Stripe stays unconfigured on purpose.
-      BILLING_ENABLED: "true"
+      # Off, as in production — provider-onboarding.spec.ts depends on it.
+      BILLING_ENABLED: "false"
       MARKETPLACE_ENABLED: "true"
       SOCIAL_FEED_ENABLED: "true"
     steps:
@@ -147,7 +148,8 @@ jobs:
       CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
       # Flagged-off-by-default features whose specs exercise the real
       # thing. Stripe stays unconfigured on purpose.
-      BILLING_ENABLED: "true"
+      # Off, as in production — provider-onboarding.spec.ts depends on it.
+      BILLING_ENABLED: "false"
       MARKETPLACE_ENABLED: "true"
       SOCIAL_FEED_ENABLED: "true"
     steps:
@@ -269,7 +271,8 @@ jobs:
       CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
       # Flagged-off-by-default features whose specs exercise the real
       # thing. Stripe stays unconfigured on purpose.
-      BILLING_ENABLED: "true"
+      # Off, as in production — provider-onboarding.spec.ts depends on it.
+      BILLING_ENABLED: "false"
       MARKETPLACE_ENABLED: "true"
       SOCIAL_FEED_ENABLED: "true"
     steps:

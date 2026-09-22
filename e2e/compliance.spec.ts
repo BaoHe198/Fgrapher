@@ -31,7 +31,13 @@ test("registration records exactly 3 ConsentRecord rows, one per purpose", async
     })
     .check();
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+  // Registration no longer signs the user in — it ends on the "check your
+  // inbox" panel (docs/ops/email-verification.md). The consent rows this
+  // test is about are written by /api/auth/register either way, so there's
+  // nothing to verify an email for here.
+  await expect(page.getByText("Check your inbox")).toBeVisible({
+    timeout: 15_000,
+  });
 
   const user = await db.user.findUniqueOrThrow({ where: { email } });
   const records = await db.consentRecord.findMany({

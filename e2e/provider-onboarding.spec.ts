@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
+import { createEmailVerificationToken } from "../src/services/email-verification";
 import { db, TEST_PASSWORD } from "./helpers/db";
 
 // Register as provider -> role activates automatically -> create profile ->
@@ -43,7 +44,10 @@ test("provider registers, activates a role, builds a profile, and appears in sea
   // never submits.
   await page.getByLabel("Date of birth").fill("01/01/1995");
   await page.getByRole("button", { name: "Creative pro" }).click();
-  await page.getByRole("checkbox", { name: "Photographer" }).check();
+  // A radio, not a checkbox, since the MVP capped an account at one active
+  // provider role (CLAUDE.md) — picking a role now replaces the previous
+  // selection instead of adding to it.
+  await page.getByRole("radio", { name: "Photographer" }).check();
   await page
     .getByRole("checkbox", {
       name: /Tôi đồng ý cho Fgrapher xử lý dữ liệu cá nhân/,
@@ -51,9 +55,28 @@ test("provider registers, activates a role, builds a profile, and appears in sea
     .check();
   await page.getByRole("button", { name: "Create account" }).click();
 
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+  // Registration doesn't sign anyone in any more — a credential signup is
+  // created unverified and authorize() refuses it until the emailed link is
+  // clicked (docs/ops/email-verification.md). Same approach as
+  // auth-customer.spec.ts: mint a token through the real code path and hit
+  // the real /verify-email endpoint rather than flipping the column.
+  await expect(page.getByText("Check your inbox")).toBeVisible({
+    timeout: 15_000,
+  });
 
   const user = await db.user.findUniqueOrThrow({ where: { email } });
+  const { rawToken } = await createEmailVerificationToken(user.id);
+  await page.goto(`/verify-email?token=${rawToken}`);
+  await expect(
+    page.getByRole("heading", { name: "Email verified" }),
+  ).toBeVisible({ timeout: 15_000 });
+
+  await page.goto("/login");
+  await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
+  await page.getByLabel("Password").fill(TEST_PASSWORD);
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+
   const userRole = await db.userRole.findUniqueOrThrow({
     where: { userId_role: { userId: user.id, role: "PHOTOGRAPHER" } },
   });
