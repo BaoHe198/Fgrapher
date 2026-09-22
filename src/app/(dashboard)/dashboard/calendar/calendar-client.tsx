@@ -1,13 +1,10 @@
 "use client";
 
-import type {
-  Availability,
-  Booking,
-  BookingStatus,
-  User,
-} from "@prisma/client";
+import type { Booking, BookingStatus, User } from "@prisma/client";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import type { WeeklyRule } from "@/services/resource-calendar";
 import Link from "next/link";
 import {
   startTransition,
@@ -70,7 +67,9 @@ export function CalendarClient({
 }: {
   initialBookings: BookingRow[];
   initialBlockedDates: BlockedDateRow[];
-  initialWeeklySchedule: Availability[];
+  // Only the four fields the editor renders — the rows come from
+  // AvailabilityRule now, not the retired userId-keyed Availability table.
+  initialWeeklySchedule: WeeklyRule[];
 }) {
   const t = useTranslations("dashboardCore.calendar");
   const tBookings = useTranslations("dashboardCore.bookings");
@@ -95,7 +94,7 @@ export function CalendarClient({
   const [bookings, setBookings] = useState<BookingRow[]>(initialBookings);
   const [blockedDates, setBlockedDates] =
     useState<BlockedDateRow[]>(initialBlockedDates);
-  const [weeklySchedule, setWeeklySchedule] = useState<Availability[]>(
+  const [weeklySchedule, setWeeklySchedule] = useState<WeeklyRule[]>(
     initialWeeklySchedule,
   );
   const [isLoading, setIsLoading] = useState(false);

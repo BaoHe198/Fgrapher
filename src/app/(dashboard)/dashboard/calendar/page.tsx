@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { PROVIDER_ROLES } from "@/lib/constants";
-import { db } from "@/lib/db";
 import { listBlockedDates } from "@/services/availability";
+import { listWeeklyRules } from "@/services/resource-calendar";
 import { listBookingsForRange } from "@/services/bookings";
 
 import { CalendarClient } from "./calendar-client";
@@ -24,10 +24,7 @@ export default async function CalendarPage() {
   const [bookings, blockedDates, weeklySchedule] = await Promise.all([
     listBookingsForRange({ providerId: session.user.id, from, to }),
     listBlockedDates(session.user.id, from, to),
-    db.availability.findMany({
-      where: { userId: session.user.id },
-      orderBy: { dayOfWeek: "asc" },
-    }),
+    listWeeklyRules(session.user.id),
   ]);
 
   return (
@@ -35,7 +32,7 @@ export default async function CalendarPage() {
       initialBookings={bookings}
       initialBlockedDates={blockedDates.map((b) => ({
         id: b.id,
-        date: b.date.toISOString().slice(0, 10),
+        date: b.dateKey,
         reason: b.reason,
         startTime: b.startTime,
         endTime: b.endTime,

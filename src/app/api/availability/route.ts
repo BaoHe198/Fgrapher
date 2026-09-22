@@ -3,7 +3,11 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { PROVIDER_ROLES } from "@/lib/constants";
-import { db } from "@/lib/db";
+import {
+  listBlocks,
+  listWeeklyRules,
+  replaceWeeklyRules,
+} from "@/services/resource-calendar";
 import { weeklyAvailabilitySchema } from "@/lib/validations/availability";
 import { vietnamDateStart } from "@/lib/vietnam-date";
 
@@ -18,18 +22,13 @@ export async function GET() {
       );
     }
 
+    const from = vietnamDateStart();
+    // A year ahead: the editor shows upcoming blocks, and there is no point
+    // sending a provider blocks they set for two years' time.
+    const to = new Date(from.getTime() + 365 * 24 * 3_600_000);
     const [schedule, blockedDates] = await Promise.all([
-      db.availability.findMany({
-        where: { userId: session.user.id },
-        orderBy: { dayOfWeek: "asc" },
-      }),
-      db.blockedDate.findMany({
-        where: {
-          userId: session.user.id,
-          date: { gte: vietnamDateStart() },
-        },
-        orderBy: { date: "asc" },
-      }),
+      listWeeklyRules(session.user.id),
+      listBlocks(session.user.id, from, to),
     ]);
 
     return NextResponse.json(
@@ -75,20 +74,16 @@ export async function PUT(request: Request) {
       );
     }
 
-    await db.$transaction([
-      db.availability.deleteMany({ where: { userId: session.user.id } }),
-      db.availability.createMany({
-        data: parsed.data.schedule
-          .filter((day) => day.isActive)
-          .map((day) => ({
-            userId: session.user.id,
-            dayOfWeek: day.dayOfWeek,
-            startTime: day.startTime,
-            endTime: day.endTime,
-            isActive: true,
-          })),
-      }),
-    ]);
+    await replaceWeeklyRules(
+      session.user.id,
+      parsed.data.schedule
+        .filter((day) => day.isActive)
+        .map((day) => ({
+          dayOfWeek: day.dayOfWeek,
+          startTime: day.startTime,
+          endTime: day.endTime,
+        })),
+    );
 
     return NextResponse.json(
       { data: null, error: null, message: t("updated") },

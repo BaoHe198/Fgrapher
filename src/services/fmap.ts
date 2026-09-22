@@ -4,6 +4,10 @@ import type { BookingStatus, Prisma } from "@prisma/client";
 
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { db } from "@/lib/db";
+import {
+  blocksForProviders,
+  weeklyWindowsForProviders,
+} from "@/services/resource-calendar";
 import type { FmapSearchInput } from "@/lib/validations/fmap";
 import { timeToMinutes } from "@/services/availability";
 
@@ -295,14 +299,8 @@ export async function findAvailableProvidersOnMap(
     ...new Set(boundedCandidates.map((profile) => profile.userId)),
   ];
   const [weeklyWindows, blockedDates, bookings] = await Promise.all([
-    db.availability.findMany({
-      where: { userId: { in: providerIds }, dayOfWeek, isActive: true },
-      select: { userId: true, startTime: true, endTime: true },
-    }),
-    db.blockedDate.findMany({
-      where: { userId: { in: providerIds }, date },
-      select: { userId: true, startTime: true, endTime: true },
-    }),
+    weeklyWindowsForProviders(providerIds, dayOfWeek),
+    blocksForProviders(providerIds, date),
     db.booking.findMany({
       where: {
         providerId: { in: providerIds },

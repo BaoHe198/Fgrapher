@@ -9,6 +9,7 @@ import { getTranslations } from "next-intl/server";
 
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
+import { wholeDayBlockedProviders } from "@/services/resource-calendar";
 import {
   requestNewOfferEmailHtml,
   requestOfferAcceptedEmailHtml,
@@ -160,15 +161,7 @@ async function findMatchingRecipients(request: {
   const shootDate = request.shootDate;
   const candidateIds = recipients.map((r) => r.userId);
   const [blockedRows, confirmedRows] = await Promise.all([
-    db.blockedDate.findMany({
-      where: {
-        userId: { in: candidateIds },
-        date: shootDate,
-        startTime: null,
-        endTime: null,
-      },
-      select: { userId: true },
-    }),
+    wholeDayBlockedProviders(candidateIds, shootDate),
     db.booking.findMany({
       where: {
         providerId: { in: candidateIds },
@@ -179,7 +172,7 @@ async function findMatchingRecipients(request: {
     }),
   ]);
   const unavailableIds = new Set([
-    ...blockedRows.map((r) => r.userId),
+    ...blockedRows,
     ...confirmedRows.map((r) => r.providerId),
   ]);
   return recipients.filter((r) => !unavailableIds.has(r.userId));

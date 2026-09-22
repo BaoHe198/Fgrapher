@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { db } from "@/lib/db";
+import { upsertBlock } from "@/services/resource-calendar";
 import { createBlockedDateSchema } from "@/lib/validations/availability";
 import {
   findConfirmedBookingConflicts,
@@ -81,25 +81,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Explicit null (not undefined) so re-blocking a previously
-    // time-ranged date as a whole day actually clears the old range —
-    // Prisma's update skips undefined fields entirely rather than nulling
-    // them.
-    const blockedDate = await db.blockedDate.upsert({
-      where: { userId_date: { userId: session.user.id, date } },
-      create: {
-        userId: session.user.id,
-        date,
-        reason: parsed.data.reason,
-        startTime: parsed.data.startTime ?? null,
-        endTime: parsed.data.endTime ?? null,
-      },
-      update: {
-        reason: parsed.data.reason,
-        startTime: parsed.data.startTime ?? null,
-        endTime: parsed.data.endTime ?? null,
-      },
+    // upsertBlock replaces whatever covered that local day, which keeps the
+    // old "one row per date" contract: re-blocking a previously time-ranged
+    // day as a whole day clears the range rather than leaving both.
+    const blockedDate = await upsertBlock(session.user.id, {
+      date,
+      startTime: parsed.data.startTime ?? null,
+      endTime: parsed.data.endTime ?? null,
+      reason: parsed.data.reason,
     });
+    if (!blockedDate) {
+      return NextResponse.json(
+        { data: null, error: "forbidden", message: t("notFound") },
+        { status: 403 },
+      );
+    }
 
     return NextResponse.json(
       { data: blockedDate, error: null, message: t("blocked") },

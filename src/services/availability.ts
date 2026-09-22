@@ -1,5 +1,6 @@
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { listBlocks, listWeeklyRules } from "@/services/resource-calendar";
 
 // This module treats every date as a UTC-anchored calendar date (matching
 // Postgres `@db.Date` / Prisma's normalization of Booking.date and
@@ -49,10 +50,8 @@ export async function getProviderAvailability(
   to.setUTCDate(to.getUTCDate() + days);
 
   const [weekly, blockedDates, bookings] = await Promise.all([
-    db.availability.findMany({ where: { userId: providerId, isActive: true } }),
-    db.blockedDate.findMany({
-      where: { userId: providerId, date: { gte: from, lt: to } },
-    }),
+    listWeeklyRules(providerId),
+    listBlocks(providerId, from, to),
     db.booking.findMany({
       where: {
         providerId,
@@ -71,7 +70,7 @@ export async function getProviderAvailability(
   // is (see the BlockedDate schema comment — one row per date).
   const blockedByDate = new Map(
     blockedDates.map((b) => [
-      toDateKey(b.date),
+      b.dateKey,
       { startTime: b.startTime, endTime: b.endTime },
     ]),
   );
@@ -188,10 +187,7 @@ export async function findConfirmedBookingConflicts(
 }
 
 export async function listBlockedDates(userId: string, from: Date, to: Date) {
-  return db.blockedDate.findMany({
-    where: { userId, date: { gte: from, lt: to } },
-    orderBy: { date: "asc" },
-  });
+  return listBlocks(userId, from, to);
 }
 
 // Prompt F3, VIỆC 4 — the server-side gate createBooking() calls before

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { db } from "@/lib/db";
+import { upsertBlock } from "@/services/resource-calendar";
 import { blockDateRangeSchema } from "@/lib/validations/availability";
 import { findConfirmedBookingConflicts } from "@/services/availability";
 
@@ -69,23 +69,15 @@ export async function POST(request: Request) {
       );
     }
 
-    await db.$transaction(
-      dates.map((date) =>
-        db.blockedDate.upsert({
-          where: { userId_date: { userId: session.user.id, date } },
-          create: {
-            userId: session.user.id,
-            date,
-            reason: parsed.data.reason,
-          },
-          update: {
-            reason: parsed.data.reason,
-            startTime: null,
-            endTime: null,
-          },
-        }),
-      ),
-    );
+    // One at a time rather than one transaction: each day's block replaces
+    // whatever covered that day, and a range is a convenience over the same
+    // per-day contract, not a new one.
+    for (const date of dates) {
+      await upsertBlock(session.user.id, {
+        date,
+        reason: parsed.data.reason,
+      });
+    }
 
     return NextResponse.json(
       { data: { count: dates.length }, error: null, message: t("blocked") },

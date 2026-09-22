@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { db } from "@/lib/db";
+import { deleteBlock } from "@/services/resource-calendar";
 
 export async function DELETE(
   _request: Request,
@@ -13,15 +13,15 @@ export async function DELETE(
     const session = await requireAuth();
     const { id } = await params;
 
-    const blockedDate = await db.blockedDate.findUnique({ where: { id } });
-    if (!blockedDate || blockedDate.userId !== session.user.id) {
+    // deleteBlock only removes a block that belongs to this provider's own
+    // calendar, so ownership and deletion are one query rather than two.
+    const deleted = await deleteBlock(id, session.user.id);
+    if (!deleted) {
       return NextResponse.json(
         { data: null, error: "not_found", message: t("notFound") },
         { status: 404 },
       );
     }
-
-    await db.blockedDate.delete({ where: { id } });
 
     return NextResponse.json(
       { data: null, error: null, message: t("unblocked") },
