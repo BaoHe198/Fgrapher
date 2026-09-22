@@ -129,6 +129,7 @@ export async function tryAutoPublish(userId: string, role: Role) {
 
 async function getPublicProfileUserUncached(username: string) {
   const user = await db.user.findFirst({
+    relationLoadStrategy: "join",
     // A suspended or soft-deleted account is not public even if its Profile
     // rows are still `isPublished` (suspension/deletion doesn't unpublish).
     where: { username, deletedAt: null, isSuspended: false },

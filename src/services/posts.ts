@@ -429,6 +429,7 @@ export async function listFeed({
   }
 
   const posts = await db.post.findMany({
+    relationLoadStrategy: "join",
     where: { AND: and },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: FEED_PAGE_SIZE + 1,
@@ -593,6 +594,7 @@ export async function deletePost(postId: string, userId: string) {
 /** Ordinary authored posts for the profile's Posts tab. Album engagement is shown in Portfolio. */
 export async function listUserPosts(userId: string, viewerId: string | null) {
   const posts = await db.post.findMany({
+    relationLoadStrategy: "join",
     where: { AND: [PUBLIC_POST_WHERE, { userId, kind: "STANDARD" }] },
     orderBy: { createdAt: "desc" },
     take: FEED_PAGE_SIZE,
