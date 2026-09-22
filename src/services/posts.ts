@@ -386,3 +386,40 @@ export async function countPendingPosts(userId: string) {
     },
   });
 }
+
+/**
+ * One post by id, for its permalink. Applies the same visibility rule as
+ * the feed — a post whose only photo is still pending is not public — so a
+ * shared link cannot expose what the feed hides. The author sees their own
+ * either way, which is how they can check what is holding it up.
+ */
+export async function getPost(postId: string, viewerId: string | null) {
+  const post = await db.post.findFirst({
+    where: {
+      id: postId,
+      deletedAt: null,
+      // The author always sees their own — that is how they check what is
+      // holding a post up — while everyone else gets the feed's rule.
+      ...(viewerId
+        ? {
+            OR: [
+              { userId: viewerId },
+              { media: { none: {} } },
+              { media: { some: { moderationStatus: "APPROVED" as const } } },
+            ],
+          }
+        : { OR: PUBLIC_POST_WHERE.OR }),
+    },
+    select: FEED_SELECT,
+  });
+  if (!post) return null;
+
+  const liked = viewerId
+    ? await db.like.findUnique({
+        where: { userId_postId: { userId: viewerId, postId } },
+        select: { id: true },
+      })
+    : null;
+
+  return { ...post, likedByViewer: Boolean(liked) };
+}

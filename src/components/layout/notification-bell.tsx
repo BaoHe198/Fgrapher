@@ -89,11 +89,15 @@ function notificationHref(notification: Notification) {
   const data = notification.data as {
     bookingId?: string;
     orderId?: string;
+    postId?: string;
     href?: string;
   } | null;
   if (data?.href?.startsWith("/dashboard/")) return data.href;
   if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
   if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
+  // A like or a comment is only useful if it takes you to the post it is
+  // about; before this it landed on the notifications list.
+  if (data?.postId) return `/community/${data.postId}`;
   return "/dashboard/notifications";
 }
 
