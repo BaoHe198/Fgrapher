@@ -722,6 +722,11 @@ async function main() {
   await seedProducts();
 }
 
+// Categories use the canonical codes from lib/validations/product.ts, not
+// Vietnamese display labels. They used to be labels, which is how a shop
+// ended up with five products on /shop and an empty Sản phẩm tab on its own
+// profile (QA-04) — the profile query filters on the canonical list and the
+// marketplace one did not.
 async function seedProducts() {
   const shop = await db.user.findUniqueOrThrow({
     where: { email: "shop@test.com" },
@@ -732,7 +737,7 @@ async function seedProducts() {
       name: "Sony A7 IV Mirrorless Camera",
       description:
         "Thân máy mirrorless full-frame 33MP, đã qua sử dụng nhẹ, tặng kèm hai pin.",
-      category: "Thân máy",
+      category: "Camera body",
       type: "SALE" as const,
       price: 45_000_000,
       condition: "LIKE_NEW" as const,
@@ -742,7 +747,7 @@ async function seedProducts() {
       name: "Canon RF 24-70mm f/2.8L Lens",
       description:
         "Ống kính zoom tiêu chuẩn, tình trạng rất tốt, không mốc không trầy.",
-      category: "Ống kính",
+      category: "Lens",
       type: "SALE" as const,
       price: 38_000_000,
       condition: "GOOD" as const,
@@ -752,7 +757,7 @@ async function seedProducts() {
       name: "Godox AD200 Pro Flash Kit",
       description:
         "Bộ đèn flash di động kèm softbox và chân đèn. Có cho thuê theo ngày.",
-      category: "Ánh sáng",
+      category: "Lighting",
       type: "RENT" as const,
       rentalPrice: 350_000,
       depositAmount: 2_000_000,
@@ -763,7 +768,7 @@ async function seedProducts() {
       name: "DJI Ronin RS3 Gimbal",
       description:
         "Gimbal chống rung 3 trục cho máy ảnh mirrorless/DSLR. Bán hoặc cho thuê theo ngày.",
-      category: "Phụ kiện hỗ trợ",
+      category: "Support",
       type: "BOTH" as const,
       price: 12_000_000,
       rentalPrice: 500_000,
@@ -775,7 +780,7 @@ async function seedProducts() {
       name: "Rode Wireless GO II Mic Kit",
       description:
         "Bộ micro không dây cài áo nhỏ gọn, hai máy phát và một máy thu.",
-      category: "Âm thanh",
+      category: "Audio",
       type: "SALE" as const,
       price: 5_500_000,
       condition: "NEW" as const,
