@@ -124,3 +124,57 @@ Next cảnh báo ảnh Cloudinary ở vùng nhìn thấy đầu tiên có thể 
 - Dùng Sonnet cho QA-01, QA-02, QA-04, QA-05, QA-06; dùng Opus cho QA-03 vì có thay đổi quy tắc ghép, dữ liệu và migration/backfill.
 - Mỗi nhóm logic là một commit dễ review. Không push/deploy khi chưa có yêu cầu riêng.
 - Chạy lint/typecheck và targeted tests. Với các lỗi P0, bổ sung test bảo vệ đúng trường hợp tái hiện bên trên.
+
+---
+
+## Kết quả xử lý (nhánh `fix/qa-2026-09-22`)
+
+Mỗi mục được tái hiện lại trên máy trước khi sửa, và kiểm tra lại sau khi sửa
+bằng trình duyệt thật chạy với dữ liệu dev.
+
+| Mã    | Trạng thái | Commit                                                       | Ghi chú                                                                                                                                                                                           |
+| ----- | ---------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| QA-01 | Đã sửa     | `fix(search): one owner for the filter query…`               | Nguyên nhân không phải điều hướng. Thanh lọc ghi lại toàn bộ query string từ một object không có trường `q`, nên **mọi** lần bấm filter đều xoá từ khoá đang tìm.                                 |
+| QA-02 | Đã sửa     | cùng commit trên                                             | Cùng một loại lỗi trên `/shop`: mỗi ô lọc dựng query từ URL trình duyệt đã chốt, nên ô chạm sau ghi đè ô chạm trước. Không ổn định theo đúng nghĩa đen — tuỳ điều hướng trước đã về kịp hay chưa. |
+| QA-03 | Đã sửa     | `fix(search): match opportunities the same way…`             | Hai nguồn địa điểm đã hợp nhất, có migration backfill. Chi tiết bên dưới.                                                                                                                         |
+| QA-04 | Đã sửa     | `fix(marketplace): one spelling for a product category`      | Migration đổi nhãn tiếng Việt trong `Product.category` sang mã chuẩn; truy vấn vẫn chấp nhận nhãn cũ.                                                                                             |
+| QA-05 | Đã sửa     | `fix(i18n): translate the Chợ F labels…`                     | `New` hoá ra là nhãn "chưa có đánh giá" của shop chứ không phải tình trạng sản phẩm.                                                                                                              |
+| QA-06 | Đã sửa     | `feat(ui): give a costume shop a way into its own catalogue` | Catalogue giữ nguyên vị trí; chỉ thêm lối vào và sửa lại thông báo sai.                                                                                                                           |
+| QA-07 | Chưa làm   | —                                                            | Là quyết định sản phẩm, báo cáo cũng nói cần xác nhận UX trước.                                                                                                                                   |
+| QA-08 | Chưa làm   | —                                                            | Phụ thuộc quyết định ở QA-07/QA-03 (xem bên dưới).                                                                                                                                                |
+| QA-09 | Chưa làm   | —                                                            | Chưa đo LCP thật; `priority` đã có sẵn cho 4 thẻ đầu ở `/browse`.                                                                                                                                 |
+
+### QA-01 và QA-02 — điều đã tìm ra khác với giả thiết ban đầu
+
+Báo cáo mô tả "URL đổi nhưng lưới không đổi cho tới khi tải lại". Chạy lại thì
+URL và lưới **luôn** đổi cùng lúc: Next.js chỉ cập nhật thanh địa chỉ khi nội
+dung mới đã sẵn sàng. Thứ thật sự hỏng là từ khoá bị xoá âm thầm, nên kết quả
+sau khi bấm filter trông đúng như "bộ lọc không áp dụng" — ví dụ `?q=Thanh`
+(2 kết quả) + bấm "Mới nhất" → `?sort=newest` và 8 kết quả trở lại.
+
+Phần "danh sách cũ trông như kết quả mới" là thật và đã xử lý riêng: cả hai
+trang giờ hiện dòng "Đang cập nhật kết quả…" đè lên lưới cũ, thay vì chỉ làm mờ.
+
+### QA-03 — quyết định đã chọn
+
+Làm **cả hai** hướng báo cáo nêu, vì mỗi hướng một mình vẫn để hở:
+
+- Khi lưu hồ sơ, tỉnh chính được ghi luôn vào `ProfileServiceArea`
+  (`isPrimary = true`) — đúng điều comment trong `schema.prisma` đã hứa từ đầu
+  nhưng chưa dòng code nào thực hiện.
+- Khi ghép cơ hội, bộ lọc tỉnh được dựng **từ** `provinceMatch()` của `/browse`
+  chứ không viết lại, nên hai bên không thể lệch nhau lần nữa.
+
+Migration backfill dữ liệu sẵn có (8 hồ sơ trên dev), chỉ đụng dữ liệu, có câu
+lệnh hoàn tác ghi trong file.
+
+Không nới lỏng bất cứ chốt chặn nào: role phải đang hoạt động và đã xác minh
+danh tính, khách không thấy yêu cầu của chính mình, "không có khu vực nào" vẫn
+là "không ghép ở đâu cả" chứ không phải "toàn quốc".
+
+### QA-08 vẫn cần chủ dự án quyết
+
+Sau QA-03, provider được ghép theo **tỉnh**. Nếu khách bỏ trống phường/xã thì
+yêu cầu vẫn tới đúng provider trong tỉnh đó. Câu hỏi còn lại là có muốn ghi rõ
+"Phường/Xã (không bắt buộc)" hay bắt buộc chọn để ghép sát hơn — đây là lựa
+chọn nghiệp vụ, không phải lỗi.
