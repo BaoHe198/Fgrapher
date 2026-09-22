@@ -11,7 +11,16 @@ const PATTERNS = [
   { name: "Stripe test secret key", re: /sk_test_[A-Za-z0-9]+/ },
   { name: "Supabase personal access token", re: /sbp_[A-Za-z0-9]+/ },
   { name: "JWT", re: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/ },
-  { name: "Postgres connection string in DATABASE_URL", re: /DATABASE_URL\s*=\s*.?postgres/ },
+  {
+    name: "Postgres connection string in DATABASE_URL",
+    re: /DATABASE_URL\s*=\s*.?postgres/,
+    // A connection string whose host is the developer's own machine is not
+    // a secret — it grants nobody anything. e2e/.env.test.example and the
+    // e2e README both have to spell one out to be useful, and CI workflows
+    // hardcode the service container's. Narrow on purpose: the host must be
+    // loopback, so a real Supabase pooler host still trips the rule.
+    allow: (line) => /@(?:localhost|127\.0\.0\.1)[:/]/.test(line),
+  },
 ];
 
 const stagedFiles = execFileSync("git", ["diff", "--cached", "--name-only", "--diff-filter=ACM"])
@@ -40,8 +49,8 @@ for (const file of stagedFiles) {
 
   const lines = content.split("\n");
   lines.forEach((line, index) => {
-    for (const { name, re } of PATTERNS) {
-      if (re.test(line)) {
+    for (const { name, re, allow } of PATTERNS) {
+      if (re.test(line) && !allow?.(line)) {
         console.error(`\n🚫 Possible ${name} found in ${file}:${index + 1}`);
         console.error(`   ${line.trim().slice(0, 120)}`);
         found = true;

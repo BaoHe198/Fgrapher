@@ -25,6 +25,73 @@ CI (`.github/workflows/test.yml`) does the Postgres part differently — a
 GitHub Actions `postgres:16` service container, torn down automatically at
 the end of the job — but everything else is identical.
 
+### Without Docker (Homebrew Postgres on macOS)
+
+Same contract, different way of getting a throwaway Postgres. This is what
+the maintainer's machine runs, verified end to end on 22/09/2026:
+
+```bash
+brew install postgresql@17
+brew services start postgresql@17          # listens on 5432, not 5433
+pg_isready -h localhost -p 5432            # expect "accepting connections"
+
+# Homebrew creates a superuser named after your macOS account, not "postgres",
+# so create the role the connection string expects:
+psql -d postgres -c "create role postgres login superuser password 'postgres';"
+psql -d postgres -c "create database fgrapher_test owner postgres;"
+```
+
+Then `cp e2e/.env.test.example e2e/.env.test` and **change both `:5433` to
+`:5432`** — a native install owns the default port, whereas the Docker recipe
+above remaps to 5433 so it can sit next to one. `scripts/check-e2e-db-safety.mjs`
+validates the host and the database _name_, not the port, so either is fine.
+
+One extra step the Docker path doesn't need on a first run: apply the schema
+once before the first `pnpm test:e2e`.
+
+```bash
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fgrapher_test" \
+DIRECT_URL="postgresql://postgres:postgres@localhost:5432/fgrapher_test" \
+  pnpm exec prisma migrate deploy
+```
+
+This is needed because Playwright starts `webServer` (`pnpm build`) _before_
+`globalSetup` runs the reset, and `pnpm build` prerenders `/sitemap.xml`,
+which queries `Province`. Against a schema-less database that build fails with
+`P2021 The table public.provinces does not exist` — which looks like a code
+bug and isn't one. After the first run the schema persists, so this is
+genuinely once per machine (or after `dropdb fgrapher_test`).
+
+### Two traps worth knowing about
+
+**The dev server on port 3000.** `playwright.config.ts` has
+`reuseExistingServer: !CI`, so if the suite targeted port 3000 it would adopt
+a running `next dev` — a server wired to the **dev Supabase database** — right
+after `globalSetup` had reset the (separate) local test database. The suite
+would then read and write real dev data while looking like it passed. The
+local server therefore runs on **3100**; CI, which has no dev server, stays on 3000. `E2E_PORT` overrides it.
+
+**A `DATABASE_URL` exported in your shell.** `pnpm test:e2e` loads
+`e2e/.env.test` through `dotenv-cli`, and dotenv never overwrites a variable
+that is already set. If you ran `source .env.local` earlier in that terminal,
+the dev connection string wins and the safety guard stops the run. Use a fresh
+terminal, or:
+
+```bash
+env -u DATABASE_URL -u DIRECT_URL pnpm test:e2e
+```
+
+### If Prisma refuses with "invoked by Claude Code"
+
+Recent Prisma CLI versions detect an AI agent in the environment and block
+`migrate reset --force` — the command `e2e/global-setup.ts` runs — until a
+human consents. It is a blanket protection against an agent resetting a
+production database; it does not inspect the connection string, so pointing at
+`localhost/fgrapher_test` does not satisfy it. A human running `pnpm test:e2e`
+in their own terminal never sees it. An agent must ask first and then pass
+`PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION` with the exact text of that
+consent.
+
 ## Running against a preview deployment
 
 `playwright.config.ts` skips `globalSetup` and the local `webServer` entirely

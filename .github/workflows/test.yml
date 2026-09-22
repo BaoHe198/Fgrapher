@@ -77,6 +77,14 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
+      # Before the build, not just before the tests: `pnpm build` prerenders
+      # /sitemap.xml, which queries Province. Against the empty service
+      # container that fails the whole build with P2021. global-setup.ts
+      # resets and re-seeds afterwards, so this is purely to give the build
+      # a schema to read.
+      - name: Apply schema to the test database
+        run: pnpm exec prisma migrate deploy
+
       - name: Build
         run: pnpm build
 
@@ -135,6 +143,14 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
+
+      # Before the build, not just before the tests: `pnpm build` prerenders
+      # /sitemap.xml, which queries Province. Against the empty service
+      # container that fails the whole build with P2021. global-setup.ts
+      # resets and re-seeds afterwards, so this is purely to give the build
+      # a schema to read.
+      - name: Apply schema to the test database
+        run: pnpm exec prisma migrate deploy
 
       - name: Build
         run: pnpm build
@@ -238,6 +254,14 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
+
+      # Before the build, not just before the tests: `pnpm build` prerenders
+      # /sitemap.xml, which queries Province. Against the empty service
+      # container that fails the whole build with P2021. global-setup.ts
+      # resets and re-seeds afterwards, so this is purely to give the build
+      # a schema to read.
+      - name: Apply schema to the test database
+        run: pnpm exec prisma migrate deploy
 
       - name: Build
         run: pnpm build

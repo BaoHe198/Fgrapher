@@ -4,7 +4,17 @@ import { defineConfig, devices } from "@playwright/test";
 // Playwright drives that remote URL directly and never starts a local
 // server. Locally, BASE_URL is unset — Playwright starts `next start`
 // against whatever database `.env.test` points at (see e2e/README.md).
-const baseURL = process.env.BASE_URL ?? "http://localhost:3000";
+//
+// Port 3100, not 3000, deliberately: `next dev` owns 3000 on a developer's
+// machine, and `reuseExistingServer` below would happily adopt it — handing
+// the whole suite a server wired to the DEV database while global-setup had
+// just reset the (separate) test database. Tests would then read and write
+// real dev data. Using a port nothing else claims makes that impossible
+// instead of making it something you have to remember. Override with
+// E2E_PORT if 3100 is taken too. CI has no dev server and its workflow env
+// pins NEXTAUTH_URL to :3000, so CI keeps 3000 and stays byte-identical.
+const localPort = process.env.E2E_PORT ?? (process.env.CI ? "3000" : "3100");
+const baseURL = process.env.BASE_URL ?? `http://localhost:${localPort}`;
 const isRemoteTarget = Boolean(process.env.BASE_URL);
 
 export default defineConfig({
@@ -14,7 +24,10 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "html",
-  globalSetup: isRemoteTarget || process.env.SKIP_GLOBAL_SETUP ? undefined : "./e2e/global-setup.ts",
+  globalSetup:
+    isRemoteTarget || process.env.SKIP_GLOBAL_SETUP
+      ? undefined
+      : "./e2e/global-setup.ts",
   // Generous: messaging.spec.ts's cross-tab checks legitimately wait out a
   // real 4s poll interval plus real network latency to the database, which
   // can approach 30s on its own — not a flake to paper over.
@@ -67,6 +80,6 @@ export default defineConfig({
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,
-        env: { NODE_ENV: "production" },
+        env: { NODE_ENV: "production", PORT: localPort },
       },
 });
