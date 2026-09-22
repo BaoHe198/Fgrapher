@@ -63,3 +63,7 @@ e2e/visual/**/*-snapshots/*-diff.png
 
 # Copied from node_modules by scripts/copy-maplibre-worker.mjs (postinstall)
 /public/vendor/maplibre-gl/
+
+# Local git worktrees used to hand focused tasks to the local AI worker
+# (docs/ops/local-ai-worker.md). They are checkouts, not project files.
+.worktrees/
