@@ -3,6 +3,7 @@ import {
   type ExperienceLevel,
   type ProfileCategory,
   type Role,
+  type ServiceKind,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -19,6 +20,8 @@ interface ServiceSeed {
   description: string;
   duration: number;
   price: number;
+  /** Defaults to the one kind the profile's role implies. */
+  kind?: ServiceKind;
 }
 
 interface ProfileSeed {
@@ -136,6 +139,17 @@ const STUDIO_SERVICES: ServiceSeed[] = [
     description: "Thuê 8 tiếng, kèm phông cyclorama và bộ đèn cơ bản.",
     duration: 480,
     price: 2_800_000,
+  },
+  {
+    // The case the whole ServiceKind column exists for: a studio that also
+    // shoots. Before this, describing it needed a "Photography Studio" role;
+    // now it is a STUDIO with a PHOTOGRAPHY package, and a customer
+    // searching for photography finds it.
+    name: "Chụp ảnh sản phẩm tại studio",
+    description: "Ekip của studio chụp, gồm đèn và hậu kỳ cơ bản.",
+    duration: 240,
+    price: 3_500_000,
+    kind: "PHOTOGRAPHY",
   },
 ];
 
@@ -671,21 +685,20 @@ async function main() {
         // seeded package: each role in this file offers exactly one kind,
         // and the cross-selling cases (a photographer who also films) are
         // not what the seed is demonstrating.
-        const kind = serviceKindsForRole(profileSeed.role)[0];
-        if (kind) {
-          await db.service.createMany({
-            data: profileSeed.services.map((service) => ({
-              profileId: profile.id,
-              kind,
-              name: service.name,
-              description: service.description,
-              duration: service.duration,
-              price: service.price,
-            })),
-          });
+        const defaultKind = serviceKindsForRole(profileSeed.role)[0];
+        if (defaultKind) {
+          const rows = profileSeed.services.map((service) => ({
+            profileId: profile.id,
+            kind: service.kind ?? defaultKind,
+            name: service.name,
+            description: service.description,
+            duration: service.duration,
+            price: service.price,
+          }));
+          await db.service.createMany({ data: rows });
           await db.profile.update({
             where: { id: profile.id },
-            data: { serviceKinds: [kind] },
+            data: { serviceKinds: [...new Set(rows.map((r) => r.kind))] },
           });
         }
       }

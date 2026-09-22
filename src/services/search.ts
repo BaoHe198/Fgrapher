@@ -174,6 +174,10 @@ function groupProfilesByUser(
       user: userProfiles[0].user,
       location,
       roles: userProfiles.map((p) => p.role),
+      // What they can be hired for, which is the information a role label
+      // cannot carry — a STUDIO offering PHOTOGRAPHY is the case the whole
+      // ServiceKind column exists for.
+      serviceKinds: [...new Set(userProfiles.flatMap((p) => p.serviceKinds))],
       displayName: userProfiles.find((p) => p.displayName)?.displayName ?? null,
       priceMin,
       currency: userProfiles[0].currency,

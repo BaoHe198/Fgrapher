@@ -409,6 +409,44 @@ dòng, nên Phase 2 thêm `BookingItem` và giữ `serviceId` cũ làm dòng đ�
 
 ---
 
+# I-bis. Tiến độ thực tế (cập nhật 22/09/2026)
+
+| Bước | Trạng thái |
+|---|---|
+| 1. Dọn 53 fixture QA | **Xong** — còn 9 hồ sơ thật |
+| 2. Migration expand | **Xong** — 4 enum, 5 bảng mới, cột mới; không xoá gì |
+| 3. Backfill + báo cáo chạy thử | **Xong** — chủ dự án đã xem và duyệt |
+| 4. Siết `Service.kind`, index GIN, ràng buộc chống trùng | **Xong** — `btree_gist` chạy được trên Supabase, đã kiểm thử chặn thật |
+| 5. Ma trận dịch vụ + validate ở API | **Xong** — studio thêm gói chụp ảnh được, gói làm mẫu bị chặn 403 |
+| 6. Query layer đọc model mới | **Xong** — tìm kiếm lọc theo dịch vụ |
+| 7. Lịch + booking theo tài nguyên | **Xong** — 15 chỗ truy vấn qua `services/resource-calendar.ts`; booking giữ/nhả chỗ |
+| 8. Test chống đặt trùng | **Xong** — chồng giờ bị database từ chối, sát nhau vẫn cho |
+| 9. KYC theo hình thức pháp lý | **Xong** — cá nhân không cần giấy, hộ KD/doanh nghiệp bắt buộc |
+| 10. Onboarding + bảng điều khiển dịch vụ | **Xong** — ô "Loại dịch vụ" trong form gói |
+| 11. Hồ sơ, card, bộ lọc, Fmap | **Xong phần card + bộ lọc**; Fmap vẫn dùng icon theo vai trò (đủ dùng) |
+| 12. Landing theo dịch vụ | **Hoãn sang Phase 1.5** theo quyết định #8 |
+| 13. Contract (xoá bảng/cột cũ) | **Chờ chủ dự án xác nhận bằng văn bản** |
+
+**Bằng chứng mục tiêu chính đã đạt.** Tìm kiếm "Chụp ảnh" trên dữ liệu dev trả về:
+
+```
+Minh Anh Nhiếp Ảnh        [PHOTOGRAPHER] dịch vụ: PHOTOGRAPHY
+Đức Thịnh Creative Studio [STUDIO]       dịch vụ: VENUE_RENTAL, PHOTOGRAPHY
+Thanh Tùng Photography    [PHOTOGRAPHER] dịch vụ: PHOTOGRAPHY
+```
+
+Studio xuất hiện trong kết quả tìm "chụp ảnh" — trước đây không thể, và đó là
+lý do tồn tại của cả thay đổi này.
+
+## Còn nợ lại (không chặn việc dùng)
+
+- `Availability` và `BlockedDate` vẫn còn trong database, không ai đọc/ghi nữa.
+- Ba chỗ vẫn dùng `date` + `"HH:mm"` song song với `startAt`/`endAt` trên
+  `Booking`; xoá cột cũ là việc của bước 13.
+- Trang landing theo dịch vụ (quyết định #8: Phase 1.5).
+
+---
+
 # I. Thứ tự thực hiện
 
 Mỗi bước để hệ thống ở trạng thái chạy được.

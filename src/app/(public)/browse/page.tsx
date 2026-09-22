@@ -16,6 +16,7 @@ import { features } from "@/lib/features";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { ServiceKind } from "@prisma/client";
 
+import { serviceKindsForRole } from "@/lib/constants/service-matrix";
 import { searchProfiles, type SortOption } from "@/services/search";
 import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
 
@@ -66,6 +67,7 @@ export async function generateMetadata() {
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const t = await getTranslations("publicPages.browse");
   const roleT = await getTranslations("role");
+  const serviceKindT = await getTranslations("serviceKind");
   const SORT_LABELS: Record<string, string> = {
     rating: t("sortLabels.rating"),
     price_asc: t("sortLabels.priceAsc"),
@@ -325,7 +327,21 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                             profile.user.name ??
                             t("unnamed"),
                           username: profile.user.username ?? "",
-                          roles: profile.roles.map((role) => roleT(role)),
+                          // Role first, then anything extra they can be
+                          // hired for — a studio that also shoots reads
+                          // "Studio · Chụp ảnh" rather than just "Studio".
+                          roles: [
+                            ...profile.roles.map((role) => roleT(role)),
+                            ...profile.serviceKinds
+                              .filter(
+                                (kind) =>
+                                  !profile.roles.some(
+                                    (role) =>
+                                      serviceKindsForRole(role)[0] === kind,
+                                  ),
+                              )
+                              .map((kind) => serviceKindT(kind)),
+                          ],
                           city: profile.location,
                           rating:
                             profile.avgRating > 0
@@ -402,7 +418,21 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                             profile.user.name ??
                             t("unnamed"),
                           username: profile.user.username ?? "",
-                          roles: profile.roles.map((role) => roleT(role)),
+                          // Role first, then anything extra they can be
+                          // hired for — a studio that also shoots reads
+                          // "Studio · Chụp ảnh" rather than just "Studio".
+                          roles: [
+                            ...profile.roles.map((role) => roleT(role)),
+                            ...profile.serviceKinds
+                              .filter(
+                                (kind) =>
+                                  !profile.roles.some(
+                                    (role) =>
+                                      serviceKindsForRole(role)[0] === kind,
+                                  ),
+                              )
+                              .map((kind) => serviceKindT(kind)),
+                          ],
                           city: profile.location,
                           rating:
                             profile.avgRating > 0
