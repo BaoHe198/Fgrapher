@@ -102,6 +102,11 @@ export default async function globalSetup() {
     role: "CAMERA_SHOP",
     displayName: "Fixture Camera Shop",
     description: "Seeded E2E fixture shop.",
+    // A null deliveryFee means "this shop does not deliver", which disables
+    // the ship-to-me option and with it the Continue-to-payment button —
+    // correct behaviour, but it left marketplace.spec.ts unable to reach
+    // the checkout handoff it exists to test. The fixture shop delivers.
+    deliveryFee: 50_000,
   });
   await createProduct({
     userId: shop.id,

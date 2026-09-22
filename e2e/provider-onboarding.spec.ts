@@ -84,6 +84,10 @@ test("provider registers, activates a role, builds a profile, and appears in sea
 
   // --- Profile ---
   await page.goto("/dashboard/settings/profile");
+  // The editor is an accordion and only "Basic information" starts open —
+  // everything this test touches lives in the collapsed "Role profile"
+  // panel, so its fields are not just hidden, they are absent from the DOM.
+  await page.getByRole("button", { name: "Role profile" }).click();
   await page.getByLabel("Display name").fill("Provider Persona Photography");
   // The Description field's <label> has no htmlFor (a real accessibility
   // bug, confirmed by reading profile-settings-form.tsx — worth fixing

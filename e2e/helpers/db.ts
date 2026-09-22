@@ -97,6 +97,7 @@ export async function createPublishedProfile(opts: {
   description?: string;
   priceMin?: number;
   priceMax?: number;
+  deliveryFee?: number;
   services?: {
     name: string;
     description: string;
@@ -115,6 +116,7 @@ export async function createPublishedProfile(opts: {
       priceMin: opts.priceMin ?? 500_000,
       priceMax: opts.priceMax ?? 5_000_000,
       currency: "VND",
+      deliveryFee: opts.deliveryFee,
       isPublished: true,
     },
   });

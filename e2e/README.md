@@ -92,6 +92,41 @@ in their own terminal never sees it. An agent must ask first and then pass
 `PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION` with the exact text of that
 consent.
 
+## Known failures as of 22/09/2026
+
+First run of this suite since a local Postgres existed on any developer
+machine, so it had drifted from the app. 24 of 34 pass, 1 skips
+deliberately, 9 fail. None of the nine is an environment problem — they
+are the app having moved and the specs not following. Listed so the next
+person does not re-diagnose them:
+
+| Spec                          | What it hits                                                                                                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `booking-review` ×2           | Times out driving the booking flow — not yet triaged.                                                                                                               |
+| `compliance` (data & privacy) | `waitForEvent` on the data export never fires.                                                                                                                      |
+| `marketplace`                 | Reaches checkout and submits; the "payments aren't set up" notice never appears.                                                                                    |
+| `provider-onboarding`         | Fills the role profile, clicks Save changes, and no PATCH is sent — client-side validation almost certainly blocks it, since province/ward/address became required. |
+| `route-crawl` ×3              | See below.                                                                                                                                                          |
+
+### The route-crawl flake
+
+PHOTOGRAPHER, MODEL and ADMIN land on `/api/auth/error` instead of
+`/dashboard`, but only when the rest of the suite runs alongside them. All
+four pass when route-crawl runs on its own. What has been ruled out, so
+nobody repeats it:
+
+- **Not the login rate limiter.** Passing `LOGIN_IP_RATE_LIMIT_MAX` on the
+  command line for a full run changes nothing. (The override itself is
+  live — setting it to 2 fails every login after the second, exactly as
+  it should.)
+- **Not the jwt callback.** It is wrapped in try/catch and logs on
+  failure; the log stays empty through a failing run.
+- **Not worker count alone.** `--workers=4` still fails two of them.
+- **The server logs nothing** — no `[auth][error]`, no warning. Whatever
+  produces the error page does not reach Auth.js's error path, which
+  points at the sign-in POST itself failing or timing out client-side
+  rather than at an authentication decision.
+
 ## Running against a preview deployment
 
 `playwright.config.ts` skips `globalSetup` and the local `webServer` entirely

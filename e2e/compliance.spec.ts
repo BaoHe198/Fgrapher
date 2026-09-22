@@ -65,8 +65,13 @@ test("data & privacy settings: toggle consent, export data, request deletion", a
   // Toggling MARKETING on writes a new granted=true ConsentRecord row —
   // recordConsent always inserts, never updates in place (see
   // services/compliance.ts), so this reads back the latest row.
-  await page.getByRole("switch", { name: "Thông tin khuyến mại" }).click();
-  await expect(page.getByText("Đã cập nhật lựa chọn")).toBeVisible({
+  // English, not Vietnamese: defaultLocale is "vi", but the locale actually
+  // comes from the request's Accept-Language (src/proxy.ts) and Playwright's
+  // Chrome asks for en-US. The whole suite therefore drives the English UI —
+  // see e2e/README.md. The consent copy on /register is the exception; it is
+  // hardcoded Vietnamese for legal reasons regardless of locale.
+  await page.getByRole("switch", { name: "Marketing communications" }).click();
+  await expect(page.getByText("Preference updated")).toBeVisible({
     timeout: 10_000,
   });
   await expect

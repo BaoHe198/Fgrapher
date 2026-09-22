@@ -189,24 +189,39 @@ const {
       const synced = typeof token.syncedAt === "number" ? token.syncedAt : 0;
       const stale = Date.now() - synced > SESSION_SYNC_MS;
       if (token.id && (stale || trigger === "update")) {
-        const account = await db.user.findUnique({
-          where: { id: token.id },
-          select: {
-            name: true,
-            firstName: true,
-            username: true,
-            roles: { where: { active: true }, select: { role: true } },
-            profiles: {
-              where: { role: { in: PAID_ROLES } },
-              select: { displayName: true, role: true },
+        // Anything thrown from this callback is an Auth.js "Configuration"
+        // error: the request lands on /api/auth/error and the user is, for
+        // all practical purposes, signed out — by a refresh that was only
+        // meant to top up two cached fields they already have. A database
+        // blip under load is exactly when that is least acceptable. Keep the
+        // existing (slightly stale) values instead and leave syncedAt alone
+        // so the next request tries again. Reproduced as a real flake: the
+        // e2e suite's parallel logins hit /api/auth/error intermittently.
+        try {
+          const account = await db.user.findUnique({
+            where: { id: token.id },
+            select: {
+              name: true,
+              firstName: true,
+              username: true,
+              roles: { where: { active: true }, select: { role: true } },
+              profiles: {
+                where: { role: { in: PAID_ROLES } },
+                select: { displayName: true, role: true },
+              },
             },
-          },
-        });
-        token.roles = account?.roles.map((r) => r.role) ?? [];
-        token.displayName = account
-          ? resolvePartyName(account, (token.name as string) ?? "")
-          : ((token.name as string) ?? "");
-        token.syncedAt = Date.now();
+          });
+          token.roles = account?.roles.map((r) => r.role) ?? [];
+          token.displayName = account
+            ? resolvePartyName(account, (token.name as string) ?? "")
+            : ((token.name as string) ?? "");
+          token.syncedAt = Date.now();
+        } catch (error) {
+          console.error(
+            "[auth] session refresh failed, keeping cached token",
+            error,
+          );
+        }
       }
 
       return token;

@@ -13,9 +13,16 @@ import { createUser, TEST_PASSWORD } from "./helpers/db";
 
 const EXCLUDED_PREFIXES = ["/api/", "mailto:", "http://", "https://", "#"];
 
+// Navigation chrome only — header, sidebar, footer — which is what this
+// test is about. Collecting every a[href] on the page also swept up content
+// links, and since the suite runs fully parallel against one database, the
+// home page's profile cards could be a fixture another spec was still
+// building: the CUSTOMER crawl would fail on a /profile/modprovider... URL
+// belonging to the MODEL crawl. Scoping to landmarks removes that
+// cross-test coupling without weakening what the test actually guards.
 async function collectInternalLinks(page: import("@playwright/test").Page) {
   const hrefs = await page
-    .locator("a[href]")
+    .locator("header a[href], nav a[href], footer a[href]")
     .evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""));
   const unique = new Set(
     hrefs.filter(
