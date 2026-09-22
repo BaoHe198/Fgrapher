@@ -3510,7 +3510,9 @@
         "inStockOnly": "In stock only",
         "province": "Seller area",
         "provinceAll": "All provinces",
-        "reset": "Reset filters"
+        "reset": "Reset filters",
+        "searchLabel": "Search gear",
+        "searchPlaceholder": "Name, brand..."
       }
     },
     "productDetail": {

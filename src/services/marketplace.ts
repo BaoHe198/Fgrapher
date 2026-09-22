@@ -7,6 +7,8 @@ const PAGE_SIZE = 24;
 
 export interface ShopSearchParams {
   sellerId?: string;
+  /** Free-text match on the listing's name or description. */
+  q?: string;
   type?: "SALE" | "RENT";
   category?: string[];
   condition?: ProductCondition[];
@@ -35,6 +37,13 @@ export async function searchProducts(params: ShopSearchParams) {
     ...(params.sellerId ? { userId: params.sellerId } : {}),
   };
 
+  const q = params.q?.trim();
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+    ];
+  }
   if (params.type) {
     where.type = { in: [params.type, "BOTH"] };
   }

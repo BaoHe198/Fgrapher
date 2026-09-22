@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
@@ -48,6 +49,7 @@ export function ShopFilters({
   const sort = searchParams.get("sort") ?? "newest";
   const provinceId = searchParams.get("provinceId") ?? "";
 
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [priceMin, setPriceMin] = useState(searchParams.get("priceMin") ?? "");
   const [priceMax, setPriceMax] = useState(searchParams.get("priceMax") ?? "");
 
@@ -68,8 +70,30 @@ export function ShopFilters({
     });
   };
 
+  const applyQuery = () =>
+    update((params) =>
+      query.trim() ? params.set("q", query.trim()) : params.delete("q"),
+    );
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Submitting on Enter rather than on every keystroke: each change is a
+          router.push, so typing would queue one navigation per letter. */}
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          applyQuery();
+        }}
+      >
+        <Input
+          label={t("searchLabel")}
+          placeholder={t("searchPlaceholder")}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onBlur={applyQuery}
+        />
+      </form>
+
       <div className="flex items-center justify-between">
         <NativeSelect
           value={sort}
@@ -203,6 +227,7 @@ export function ShopFilters({
         variant="ghost"
         size="sm"
         onClick={() => {
+          setQuery("");
           setPriceMin("");
           setPriceMax("");
           router.push(pathname);

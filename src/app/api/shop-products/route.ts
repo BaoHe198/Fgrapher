@@ -24,6 +24,7 @@ export async function GET(request: Request) {
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
 
   const result = await searchProducts({
+    q: searchParams.get("q") ?? undefined,
     type: type === "SALE" || type === "RENT" ? type : undefined,
     category: category.length ? category : undefined,
     condition: condition.length ? condition : undefined,

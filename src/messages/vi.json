@@ -3510,7 +3510,9 @@
         "inStockOnly": "Chỉ hàng còn sẵn",
         "province": "Khu vực người bán",
         "provinceAll": "Mọi tỉnh/thành",
-        "reset": "Đặt lại bộ lọc"
+        "reset": "Đặt lại bộ lọc",
+        "searchLabel": "Tìm thiết bị",
+        "searchPlaceholder": "Tên thiết bị, hãng..."
       }
     },
     "productDetail": {

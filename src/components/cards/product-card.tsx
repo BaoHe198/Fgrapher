@@ -36,9 +36,12 @@ export async function ProductCard({ product }: ProductCardProps) {
   const outOfStock = product.type !== "RENT" && product.stock === 0;
 
   return (
-    <Link href={`/shop/${product.id}`}>
-      <Card padding={false} interactive>
-        <div className="relative aspect-[4/3] w-full">
+    // h-full on both, so every card in a grid row is the same height no
+    // matter how long its name is; the price and shop name then line up
+    // across the row via mt-auto below.
+    <Link href={`/shop/${product.id}`} className="h-full">
+      <Card padding={false} interactive className="flex h-full flex-col">
+        <div className="relative aspect-[4/3] w-full shrink-0">
           {product.images[0] ? (
             <Image
               src={product.images[0].url}
@@ -69,14 +72,14 @@ export async function ProductCard({ product }: ProductCardProps) {
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-1.5 p-3.5">
+        <div className="flex flex-1 flex-col gap-1.5 p-3.5">
           <span className="line-clamp-2 text-heading-sm text-text-primary">
             {product.name}
           </span>
           <Badge variant="neutral" className="w-fit">
             {CONDITION_LABEL[product.condition] ?? product.condition}
           </Badge>
-          <span className="text-body-md font-semibold! text-text-primary">
+          <span className="mt-auto text-body-md font-semibold! text-text-primary">
             {product.type === "RENT" && product.rentalPrice
               ? `${formatCurrency(product.rentalPrice, product.currency)}${t("perDay")}`
               : product.price
