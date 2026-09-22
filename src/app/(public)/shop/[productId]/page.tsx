@@ -54,7 +54,15 @@ export default async function ProductDetailPage({
   }
 
   const { productId } = await params;
-  const result = await getProductDetail(productId);
+  // All three only need the id, which the route already gives us, so they go
+  // out together. Run in sequence this page paid three round trips to
+  // Singapore before rendering anything; the ratings and the reviews do not
+  // depend on the product row.
+  const [result, rating, reviews] = await Promise.all([
+    getProductDetail(productId),
+    getProductRating(productId),
+    listProductReviews(productId),
+  ]);
   if (!result) notFound();
 
   const { product, related, shopRating, shopReviewCount } = result;
@@ -80,11 +88,6 @@ export default async function ProductDetailPage({
           : "https://schema.org/OutOfStock",
     },
   };
-
-  const [rating, reviews] = await Promise.all([
-    getProductRating(product.id),
-    listProductReviews(product.id),
-  ]);
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-8">

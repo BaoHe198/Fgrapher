@@ -317,9 +317,13 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
-                    {result.data.map((profile) => (
+                    {result.data.map((profile, index) => (
                       <ArtistCard
                         key={profile.userId}
+                        // The first row is above the fold on every viewport
+                        // width this grid supports, and one of those images
+                        // is the page's LCP.
+                        priority={index < 4}
                         artist={{
                           id: profile.userId,
                           name:

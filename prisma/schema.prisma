@@ -3,6 +3,15 @@
 
 generator client {
   provider = "prisma-client-js"
+  /// Lets a query with nested `include`s be fetched with LATERAL joins in ONE
+  /// statement instead of one statement per relation level.
+  ///
+  /// This matters more than it looks. Against Supabase's transaction pooler
+  /// Prisma cannot use prepared statements, so it wraps every single
+  /// operation in BEGIN / DEALLOCATE ALL / query / COMMIT — four round trips
+  /// for one read. The product page was issuing 18 statements and spending
+  /// 1.9s in the database, almost all of it latency rather than work.
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {

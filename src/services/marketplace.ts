@@ -84,6 +84,7 @@ export async function searchProducts(params: ShopSearchParams) {
 
   const [products, total, categoryCounts] = await Promise.all([
     db.product.findMany({
+      relationLoadStrategy: "join",
       where,
       orderBy,
       skip: (page - 1) * PAGE_SIZE,
@@ -129,6 +130,11 @@ export async function searchProducts(params: ShopSearchParams) {
 
 export async function getProductDetail(id: string) {
   const product = await db.product.findUnique({
+    // One LATERAL-joined statement instead of one per relation level. Against
+    // the transaction pooler each Prisma operation costs BEGIN / DEALLOCATE
+    // ALL / query / COMMIT, so the statement count is what this page pays
+    // for, not the work.
+    relationLoadStrategy: "join",
     where: { id, isActive: true, deletedAt: null },
     include: {
       images: {
@@ -192,6 +198,7 @@ type CartProductType = ProductType;
 
 export async function getCart(userId: string) {
   const items = await db.cartItem.findMany({
+    relationLoadStrategy: "join",
     where: { userId },
     orderBy: { createdAt: "asc" },
     include: {

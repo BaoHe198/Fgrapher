@@ -40,7 +40,10 @@ export const profileUserTag = (userId: string) => `profile:user:${userId}`;
  * Bumping orphans every entry at once, which is cheap: everything but geography
  * has a ≤10-minute TTL, and geography is three small queries.
  */
-export const CACHE_KEY_VERSION = "v2";
+// v3 (22/09/2026): searchProfiles began returning `serviceKinds`, and every
+// entry written before that kept being served without it — which crashed
+// /browse on a cache hit. Exactly the return-shape case described above.
+export const CACHE_KEY_VERSION = "v3";
 
 /** Revalidate seconds per cached read. Kept together so the policy is legible. */
 export const CACHE_TTL = {

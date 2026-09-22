@@ -32,6 +32,9 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
                 fill
                 sizes="(min-width: 1024px) 400px, 0px"
                 className="object-cover"
+                // The largest element on every auth page, so it should not
+                // wait for lazy-loading to notice it.
+                priority
               />
             </div>
             <div className="relative h-full w-full">

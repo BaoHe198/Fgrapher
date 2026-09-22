@@ -17,6 +17,8 @@ const SWIPE_THRESHOLD_PX = 40;
 type SlideDirection = -1 | 1;
 
 interface ArtistCardProps {
+  /** True for the first row of a grid — see the Image below. */
+  priority?: boolean;
   artist: {
     id: string;
     name: string;
@@ -36,7 +38,7 @@ interface ArtistCardProps {
   onClick?: () => void;
 }
 
-export function ArtistCard({ artist, onClick }: ArtistCardProps) {
+export function ArtistCard({ artist, onClick, priority }: ArtistCardProps) {
   const t = useTranslations("sharedComponents.artistCard");
   const [{ activeIndex, previousIndex, direction }, setCarousel] = useState<{
     activeIndex: number;
@@ -130,6 +132,10 @@ export function ArtistCard({ artist, onClick }: ArtistCardProps) {
         fill
         sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
         className="object-cover"
+        // Set by the grid for the first row only: one of those images is the
+        // LCP on /browse, and lazy-loading it costs the page its headline
+        // metric for nothing.
+        priority={priority}
         onError={() => setFailedUrls((prev) => new Set(prev).add(photo.url))}
       />
     );
