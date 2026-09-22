@@ -314,9 +314,11 @@ enum Role {
   MAKEUP_ARTIST
   STUDIO
   CAMERA_SHOP
-  // Costume/outfit shop. Publishes products on Chợ F; rental dates and the
-  // deposit are agreed directly in messaging, without Booking/Availability
-  // or a platform rental checkout during MVP.
+  // Costume/outfit rental shop (project owner, 21/09/2026, reconfirmed
+  // 22/09/2026). Takes bookings like a studio — a rental is booked for a
+  // date — and keeps its outfits as a CostumeItem catalogue on its own
+  // profile. It does NOT list on Chợ F, which carries photo/video equipment
+  // only. Bookable by customers and by every crew role.
   COSTUME_SHOP
   // Booked BY photographers/videographers for shoots — the reverse
   // direction of the Customer -> Provider flow, same shape as

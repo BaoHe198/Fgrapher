@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { requireAuth, AuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
-import { PAID_ROLES, SHOP_ROLES } from "@/lib/constants";
+import { PAID_ROLES, SELLER_ROLES } from "@/lib/constants";
 import { updateRolesSchema } from "@/lib/validations/user";
 import { assignFreePlan } from "@/services/subscription";
 
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     // product-only shop roles here as well as hiding them in the UI.
     if (
       !features.marketplaceEnabled &&
-      parsed.data.roles.some((role) => SHOP_ROLES.includes(role))
+      parsed.data.roles.some((role) => SELLER_ROLES.includes(role))
     ) {
       return NextResponse.json(
         {

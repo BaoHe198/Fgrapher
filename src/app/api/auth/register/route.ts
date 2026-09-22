@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
-import { CURRENT_POLICY_VERSION, SHOP_ROLES } from "@/lib/constants";
+import { CURRENT_POLICY_VERSION, SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRegisterSchema } from "@/lib/validations/auth";
@@ -63,11 +63,13 @@ export async function POST(request: Request) {
     interval,
   } = parsed.data;
 
-  // The schema cannot read the runtime flag, so enforce product-only shop
-  // roles here as well as hiding them in the registration UI.
+  // The schema cannot read the runtime flag, so enforce it here as well as
+  // hiding the role in the registration UI. Gated on SELLER_ROLES, not on
+  // SHOP_ROLES: a costume shop does not list on Chợ F at all, so it must
+  // stay registrable while the marketplace is off.
   if (
     !features.marketplaceEnabled &&
-    roles.some((role) => SHOP_ROLES.includes(role))
+    roles.some((role) => SELLER_ROLES.includes(role))
   ) {
     return NextResponse.json(
       {

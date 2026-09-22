@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { Radio } from "@/components/ui/radio";
-import { PAID_ROLES, SHOP_ROLES } from "@/lib/constants";
+import { PAID_ROLES, SELLER_ROLES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
   getRegisterSchema,
@@ -63,7 +63,7 @@ export function RegisterForm({
   );
   const PROVIDER_ROLE_OPTIONS = marketplaceEnabled
     ? ALL_PROVIDER_ROLE_OPTIONS
-    : ALL_PROVIDER_ROLE_OPTIONS.filter((role) => !SHOP_ROLES.includes(role));
+    : ALL_PROVIDER_ROLE_OPTIONS.filter((role) => !SELLER_ROLES.includes(role));
   // e.g. arriving from the pricing page's "Start 14-day trial" on a
   // specific role's card (/login?mode=register&role=PHOTOGRAPHER) —
   // pre-select "Creative pro" and that role rather than making the user

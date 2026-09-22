@@ -31,7 +31,7 @@ import {
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { PAID_ROLES, SHOP_ROLES } from "@/lib/constants";
+import { PAID_ROLES, SELLER_ROLES } from "@/lib/constants";
 
 interface VerificationInfo {
   role: Role;
@@ -99,7 +99,7 @@ export function RolesSettings({
       : PAID_ROLES.filter(
           (r) =>
             !currentRoles.includes(r) &&
-            (marketplaceEnabled || !SHOP_ROLES.includes(r)),
+            (marketplaceEnabled || !SELLER_ROLES.includes(r)),
         );
   const verificationByRole = new Map(verifications.map((v) => [v.role, v]));
 
@@ -198,7 +198,7 @@ export function RolesSettings({
     ? PAID_ROLES.filter(
         (r) =>
           r !== changeRequestRole &&
-          (marketplaceEnabled || !SHOP_ROLES.includes(r)),
+          (marketplaceEnabled || !SELLER_ROLES.includes(r)),
       )
     : [];
 

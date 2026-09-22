@@ -16,39 +16,55 @@ import { createServiceRequestSchema } from "@/lib/validations/service-request";
 import { submitVerificationSchema } from "@/lib/validations/verification";
 
 describe("role capability boundaries", () => {
-  it("keeps product shops out of portfolio and booking capabilities", () => {
+  // The two shop roles are NOT interchangeable, and the difference is the
+  // thing this file exists to pin down (project owner, 21/09/2026,
+  // reconfirmed 22/09/2026):
+  //
+  //   CAMERA_SHOP   sells gear on Chợ F. No portfolio, no services, no
+  //                 bookings — its profile is a product listing.
+  //   COSTUME_SHOP  is a provider: it takes bookings for a date and has a
+  //                 portfolio, and its outfits are a catalogue on its own
+  //                 profile, NOT products on Chợ F.
+  it("keeps the camera shop out of portfolio and booking capabilities", () => {
     assert.ok(SELLER_ROLES.includes("CAMERA_SHOP"));
-    assert.ok(SELLER_ROLES.includes("COSTUME_SHOP"));
-    assert.deepEqual(SHOP_ROLES, ["CAMERA_SHOP", "COSTUME_SHOP"]);
-    assert.deepEqual(PORTFOLIO_ROLES, PROVIDER_ROLES);
-
-    for (const shopRole of SHOP_ROLES) {
-      assert.equal(PROVIDER_ROLES.includes(shopRole), false);
-      assert.equal(PORTFOLIO_ROLES.includes(shopRole), false);
-      for (const targets of Object.values(BOOKABLE_ROLES_BY_ROLE)) {
-        assert.equal(targets?.includes(shopRole), false);
-      }
+    assert.equal(PROVIDER_ROLES.includes("CAMERA_SHOP"), false);
+    assert.equal(PORTFOLIO_ROLES.includes("CAMERA_SHOP"), false);
+    for (const targets of Object.values(BOOKABLE_ROLES_BY_ROLE)) {
+      assert.equal(targets?.includes("CAMERA_SHOP"), false);
     }
   });
 
-  it("keeps camera and costume product categories separated", () => {
+  it("keeps the costume shop off Chợ F but inside the booking flows", () => {
+    assert.equal(SELLER_ROLES.includes("COSTUME_SHOP"), false);
+    assert.ok(PROVIDER_ROLES.includes("COSTUME_SHOP"));
+    assert.ok(PORTFOLIO_ROLES.includes("COSTUME_SHOP"));
+    // Customers and every crew role can book a costume rental.
+    assert.ok(BOOKABLE_ROLES_BY_ROLE.CUSTOMER?.includes("COSTUME_SHOP"));
+    assert.ok(BOOKABLE_ROLES_BY_ROLE.PHOTOGRAPHER?.includes("COSTUME_SHOP"));
+    assert.ok(BOOKABLE_ROLES_BY_ROLE.STUDIO?.includes("COSTUME_SHOP"));
+  });
+
+  it("still calls both of them shops, for naming and shop-name purposes", () => {
+    assert.deepEqual(SHOP_ROLES, ["CAMERA_SHOP", "COSTUME_SHOP"]);
+    assert.deepEqual(PORTFOLIO_ROLES, PROVIDER_ROLES);
+  });
+
+  it("carries only equipment categories on Chợ F", () => {
     assert.equal(
       productCategoryAllowedForRole("CAMERA_SHOP", "Camera body"),
       true,
     );
+    // Outfit categories are not product categories at all any more — a
+    // costume shop cannot list on Chợ F, so nothing should accept one.
     assert.equal(
       productCategoryAllowedForRole("CAMERA_SHOP", "Wedding dress"),
       false,
     );
     assert.equal(
-      productCategoryAllowedForRole("COSTUME_SHOP", "Wedding dress"),
-      true,
-    );
-    assert.equal(
-      productCategoryAllowedForRole("COSTUME_SHOP", "Camera body"),
+      productCategoryAllowedForRole("PHOTOGRAPHER", "Wedding dress"),
       false,
     );
-    assert.ok(productCategoriesForRole("COSTUME_SHOP").length > 0);
+    assert.ok(productCategoriesForRole("PHOTOGRAPHER").length > 0);
   });
 
   it("allows Costume Shop to submit KYC", () => {

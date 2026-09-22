@@ -11,8 +11,9 @@ import { useMessaging } from "@/components/providers/messaging-provider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
-import { SHOP_ROLES } from "@/lib/constants";
+import { PROVIDER_ROLES } from "@/lib/constants";
 
+import { CostumesTab, type PublicCostume } from "./costumes-tab";
 import { PostsTab, type ProfilePost } from "./posts-tab";
 import { GearTab } from "./gear-tab";
 import { PortfolioTab } from "./portfolio-tab";
@@ -36,6 +37,7 @@ interface ProfileInteractiveProps {
   firstName: string;
   hasGear: boolean;
   posts: ProfilePost[];
+  costumes: PublicCostume[];
   albums: {
     id: string;
     title: string;
@@ -101,6 +103,7 @@ export function ProfileInteractive({
   firstName,
   hasGear,
   posts,
+  costumes,
   albums,
   ownerAlbums,
   canEditPortfolio,
@@ -115,8 +118,12 @@ export function ProfileInteractive({
   const stickyT = useTranslations("publicPages.profile.bookingSidebar");
   const router = useRouter();
   const messaging = useMessaging();
-  const isShop = SHOP_ROLES.includes(role);
-  const [tab, setTab] = useState(isShop ? "gear" : "portfolio");
+  // A camera shop has no portfolio, services or bookings — its profile is a
+  // product listing. A costume shop is a provider (it takes bookings and has
+  // a portfolio) that also keeps an outfit catalogue, so it must NOT take the
+  // product-shop layout even though SHOP_ROLES contains it.
+  const isProductShop = !PROVIDER_ROLES.includes(role);
+  const [tab, setTab] = useState(isProductShop ? "gear" : "portfolio");
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
@@ -184,7 +191,7 @@ export function ProfileInteractive({
       <div className="min-w-0">
         <Tabs value={tab} onValueChange={(v) => setTab(v as string)}>
           <TabsList>
-            {isShop ? null : (
+            {isProductShop ? null : (
               <>
                 <TabsTab value="portfolio">{t("portfolio")}</TabsTab>
                 <TabsTab value="services">{t("services")}</TabsTab>
@@ -192,13 +199,18 @@ export function ProfileInteractive({
               </>
             )}
             {hasGear ? (
-              <TabsTab value="gear">{t(isShop ? "products" : "gear")}</TabsTab>
+              <TabsTab value="gear">
+                {t(isProductShop ? "products" : "gear")}
+              </TabsTab>
+            ) : null}
+            {costumes.length > 0 ? (
+              <TabsTab value="costumes">{t("costumes")}</TabsTab>
             ) : null}
             {posts.length > 0 ? (
               <TabsTab value="posts">{t("posts")}</TabsTab>
             ) : null}
           </TabsList>
-          {isShop ? null : (
+          {isProductShop ? null : (
             <>
               <TabsPanel value="portfolio" className="mt-6">
                 <PortfolioTab
@@ -232,6 +244,11 @@ export function ProfileInteractive({
               <GearTab products={products} />
             </TabsPanel>
           ) : null}
+          {costumes.length > 0 ? (
+            <TabsPanel value="costumes" className="mt-6">
+              <CostumesTab costumes={costumes} />
+            </TabsPanel>
+          ) : null}
           {posts.length > 0 ? (
             <TabsPanel value="posts" className="mt-6">
               <PostsTab posts={posts} />
@@ -241,7 +258,7 @@ export function ProfileInteractive({
       </div>
 
       <div id="booking-sidebar" ref={sidebarRef}>
-        {isShop ? (
+        {isProductShop ? (
           <Card className="sticky top-[104px] flex flex-col gap-3">
             <h3 className="text-heading-lg text-text-primary">{firstName}</h3>
             <p className="text-body-sm text-text-secondary">
@@ -290,7 +307,7 @@ export function ProfileInteractive({
             )}
             {stickyT("stickyMessage")}
           </Button>
-          {isShop ? null : (
+          {isProductShop ? null : (
             <Button
               variant="accent"
               className="flex-1"

@@ -437,13 +437,11 @@ Tổng ước lượng: **13–16 phiên** cho bước 1–12, chưa tính bư�
 
 Xếp theo mức ảnh hưởng.
 
-1. **Shop trang phục: chốt một đường.** Ngày 21/09 anh yêu cầu shop trang phục
-   **không** lên Chợ F mà đăng trang phục trong hồ sơ; tôi đã làm xong
-   (`CostumeItem`, API, màn quản lý, tab "Trang phục"). Ngày 22/09 nhánh của
-   Codex vừa merge **đảo lại**: shop trang phục đăng sản phẩm trên Chợ F, catalog
-   cũ chỉ còn đọc/xoá. Hệ quả: `costumes-manager.tsx` và `costumes-tab.tsx` hiện
-   **không còn được file nào gọi** (code chết). Cần anh chốt để tôi hoặc xoá hẳn,
-   hoặc nối lại.
+1. ~~Shop trang phục: chốt một đường.~~ **Đã chốt 22/09/2026: shop trang phục
+   KHÔNG lên Chợ F.** Giữ mô hình 21/09 (catalog trang phục trong hồ sơ, shop
+   nhận booking), gỡ phần nhánh Codex đảo lại. Đã thực hiện — xem commit
+   "restore the costume shop's own catalogue". Kế hoạch này giả định mô hình
+   đó.
 2. **Có gỡ giới hạn "mỗi tài khoản một vai trò trả phí" không?** Model mới cho
    phép nhiều hồ sơ provider; giới hạn hiện tại là quyết định MVP của anh.
 3. **Hình thức pháp lý của provider cũ**: hỏi lại khi đăng nhập, hay chặn ở

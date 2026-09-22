@@ -33,6 +33,11 @@ import {
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
+import {
+  CostumesManager,
+  type CostumeItem,
+  type CostumeMedia,
+} from "./costumes-manager";
 import { ServicesManager } from "./services-manager";
 
 interface ServiceItem {
@@ -135,6 +140,8 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   const [values, setValues] = useState<ProfileFormValues>(toFormValues(null));
   const [profileId, setProfileId] = useState<string | null>(null);
   const [services, setServices] = useState<ServiceItem[]>([]);
+  const [costumes, setCostumes] = useState<CostumeItem[]>([]);
+  const [profileMedia, setProfileMedia] = useState<CostumeMedia[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -160,6 +167,8 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           setGeocodingStatus(body.data?.geocodingStatus ?? null);
           setProfileId(body.data?.id ?? null);
           setServices(body.data?.services ?? []);
+          setCostumes(body.data?.costumes ?? []);
+          setProfileMedia(body.data?.media ?? []);
           setExtraProvinceIds(
             ((body.data?.serviceAreas as { provinceId: string }[]) ?? []).map(
               (a) => a.provinceId,
@@ -676,6 +685,16 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             {tEditor("deliveryFeeHelper")}
           </p>
         </div>
+      ) : null}
+
+      {/* Outfits are a costume shop's catalogue, shown on its own profile.
+          They are deliberately NOT Chợ F products — see SELLER_ROLES. */}
+      {role === "COSTUME_SHOP" && profileId ? (
+        <CostumesManager
+          profileId={profileId}
+          initialCostumes={costumes}
+          availableMedia={profileMedia}
+        />
       ) : null}
 
       {PROVIDER_ROLES.includes(role) ? (

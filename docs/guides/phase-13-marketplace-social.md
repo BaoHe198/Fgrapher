@@ -12,6 +12,13 @@ Vai trò **Shop cho thuê trang phục** (`COSTUME_SHOP`, thêm ngày 21/09/2026
 đăng từng bộ trang phục để khách thuê, không chỉ nhận đặt lịch. Đó là lý do trực
 tiếp mở lại phần Chợ. Cộng đồng làm sau để giữ người dùng quay lại.
 
+> **Xác nhận lại 22/09/2026 (chủ dự án).** Nhánh `codex/role-capabilities-shops`
+> đã từng đảo lại chuyện này (cho shop trang phục đăng sản phẩm trên Chợ F).
+> Chủ dự án chốt giữ nguyên hướng 21/09: **shop trang phục không lên Chợ F**,
+> trang phục nằm trong hồ sơ. Những phần khác của nhánh đó vẫn giữ: cửa hàng
+> máy ảnh không dùng portfolio/booking, thuê thiết bị thương lượng qua tin
+> nhắn, và các chốt chặn giả mạo vai trò ở phía server.
+
 > **Điều chỉnh phạm vi, 21/09/2026 (chủ dự án).** Chợ F **chỉ bán và cho thuê
 > trang thiết bị quay chụp**. Shop trang phục **không đăng lên Chợ F** — trang
 > phục nằm trong hồ sơ của shop (ảnh + giá thuê/ngày + tiền cọc), cùng bảng giá

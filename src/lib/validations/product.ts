@@ -11,27 +11,21 @@ export const CAMERA_PRODUCT_CATEGORIES = [
   "Other",
 ] as const;
 
-export const COSTUME_PRODUCT_CATEGORIES = [
-  "Ao dai",
-  "Wedding dress",
-  "Menswear",
-  "Evening gown",
-  "Historical costume",
-  "Cosplay",
-  "Kidswear",
-  "Accessories",
-  "Other costume",
-] as const;
+// Chợ F lists photo/video EQUIPMENT only (project owner, 21/09/2026,
+// reconfirmed 22/09/2026 over the branch that had briefly reopened it to
+// outfits). A costume shop is not a seller here at all — its outfits live on
+// its own profile as a CostumeItem catalogue — so there is one category list,
+// not one per role.
+export const PRODUCT_CATEGORIES = CAMERA_PRODUCT_CATEGORIES;
 
-export const PRODUCT_CATEGORIES = [
-  ...CAMERA_PRODUCT_CATEGORIES,
-  ...COSTUME_PRODUCT_CATEGORIES,
-] as const;
-
-export function productCategoriesForRole(role: Role) {
-  return role === "COSTUME_SHOP"
-    ? COSTUME_PRODUCT_CATEGORIES
-    : CAMERA_PRODUCT_CATEGORIES;
+/**
+ * Kept as a per-role function even though every seller role currently gets
+ * the same list: the two product routes validate the category against the
+ * seller's role server-side, and that guard should not have to change shape
+ * the day a role does get its own categories.
+ */
+export function productCategoriesForRole(_role: Role) {
+  return CAMERA_PRODUCT_CATEGORIES;
 }
 
 export function productCategoryAllowedForRole(role: Role, category: string) {

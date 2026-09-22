@@ -15,7 +15,11 @@ import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
 import { formatAdministrativeLocation } from "@/lib/location";
-import { PORTFOLIO_ROLES, SHOP_ROLES, type ROLE_LABELS } from "@/lib/constants";
+import {
+  PORTFOLIO_ROLES,
+  PROVIDER_ROLES,
+  type ROLE_LABELS,
+} from "@/lib/constants";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
 import { listAlbums } from "@/services/albums";
@@ -25,6 +29,7 @@ import {
   getPublicProfileUser,
   getShopProducts,
 } from "@/services/public-profile";
+import { listPublicCostumes } from "@/services/costumes";
 import { listUserPosts } from "@/services/posts";
 
 import { ProfileAvatar, ProfileCover } from "./profile-hero";
@@ -142,6 +147,7 @@ export default async function PublicProfilePage({
     followerCount,
     ownerAlbums,
     posts,
+    costumes,
   ] = await Promise.all([
     getProfileReviews(user.id),
     getProfileReviewStats(user.id),
@@ -162,6 +168,12 @@ export default async function PublicProfilePage({
       : Promise.resolve(null),
     features.socialFeedEnabled
       ? listUserPosts(user.id, session?.user?.id ?? null)
+      : Promise.resolve([]),
+    // A costume shop's outfit catalogue. Not behind MARKETPLACE_ENABLED:
+    // outfits live here, not on Chợ F (project owner, 21/09/2026,
+    // reconfirmed 22/09/2026).
+    activeProfile.role === "COSTUME_SHOP"
+      ? listPublicCostumes(activeProfile.id)
       : Promise.resolve([]),
   ]);
 
@@ -319,7 +331,7 @@ export default async function PublicProfilePage({
                   ) : (
                     <Badge variant="accent">{roleT(activeProfile.role)}</Badge>
                   )}
-                  {SHOP_ROLES.includes(activeProfile.role) ? null : (
+                  {PROVIDER_ROLES.includes(activeProfile.role) ? (
                     <Badge
                       variant={user.acceptingBookings ? "success" : "warning"}
                     >
@@ -327,7 +339,7 @@ export default async function PublicProfilePage({
                         ? t("status.available")
                         : t("status.bookedOut")}
                     </Badge>
-                  )}
+                  ) : null}
                   {isVerified ? (
                     <Badge variant="accent">{t("status.verified")}</Badge>
                   ) : null}
@@ -404,13 +416,16 @@ export default async function PublicProfilePage({
             profileId={activeProfile.id}
             role={activeProfile.role}
             firstName={firstName}
-            // Chợ F is open to every gear owner now, not only camera shops,
-            // so the tab follows the listings themselves.
+            // Chợ F carries equipment from every gear owner, not only
+            // camera shops, so the tab follows the listings themselves. A
+            // camera shop keeps the tab even with nothing listed, because
+            // that tab IS its profile.
             hasGear={
               features.marketplaceEnabled &&
-              (SHOP_ROLES.includes(activeProfile.role) || products.length > 0)
+              (activeProfile.role === "CAMERA_SHOP" || products.length > 0)
             }
             posts={posts}
+            costumes={costumes}
             albums={activeProfile.albums}
             ownerAlbums={
               ownerAlbums?.map((a) => ({

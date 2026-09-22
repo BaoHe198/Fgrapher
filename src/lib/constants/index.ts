@@ -114,26 +114,31 @@ export const PAID_ROLES: Role[] = [
   "MODEL",
 ];
 
-// Roles that sell a creative service and therefore participate in the
-// portfolio, availability, booking, Fmap and opportunity flows. Product
-// shops deliberately stay out of this set: rentals are arranged by message.
+// Roles that participate in the portfolio, availability, booking, Fmap and
+// opportunity flows. CAMERA_SHOP stays out: it sells gear through Chợ F and
+// takes orders, not bookings. COSTUME_SHOP is IN — a costume rental is booked
+// for a date, and its outfit catalogue hangs off its profile photos (project
+// owner, 21/09/2026, reconfirmed 22/09/2026).
 export const PROVIDER_ROLES: Role[] = [
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",
   "MAKEUP_ARTIST",
   "STUDIO",
   "MODEL",
+  "COSTUME_SHOP",
 ];
 
 // Roles with a visual body of work. Shop images belong to ProductImage and
 // are managed from Listings, so they must never leak into portfolio flows.
 export const PORTFOLIO_ROLES: Role[] = [...PROVIDER_ROLES];
 
-// Shops and creative teams that own inventory may publish products. Every
-// authenticated account can buy; rentals continue in direct messaging.
+// Roles allowed to list on Chợ F, which carries photo/video EQUIPMENT only:
+// the camera shop plus the crews who own gear. COSTUME_SHOP is deliberately
+// absent — outfits are not products here, they are a catalogue on the shop's
+// own profile (project owner, 21/09/2026, reconfirmed 22/09/2026). Every
+// authenticated account can buy; gear rentals are arranged by message.
 export const SELLER_ROLES: Role[] = [
   "CAMERA_SHOP",
-  "COSTUME_SHOP",
   "PHOTOGRAPHER",
   "VIDEOGRAPHER",
   "STUDIO",
@@ -221,6 +226,16 @@ export const CATEGORIES_BY_ROLE: Partial<Record<Role, ProfileCategory[]>> = {
   ],
   MAKEUP_ARTIST: ["BRIDAL", "EDITORIAL", "SFX", "NATURAL", "GLAM"],
   STUDIO: ["INDOOR", "OUTDOOR", "ROOFTOP", "CYCLORAMA", "GREEN_SCREEN"],
+  COSTUME_SHOP: [
+    "AO_DAI",
+    "WEDDING_DRESS",
+    "MENSWEAR",
+    "EVENING_GOWN",
+    "HISTORICAL",
+    "COSPLAY",
+    "KIDSWEAR",
+    "ACCESSORIES",
+  ],
   MODEL: [
     "FASHION_MODEL",
     "COMMERCIAL_MODEL",
@@ -304,7 +319,11 @@ export const BOOKABLE_ROLES_BY_ROLE: Partial<Record<Role, Role[]>> = {
     "MAKEUP_ARTIST",
     "STUDIO",
     "MODEL",
+    "COSTUME_SHOP",
   ],
-  PHOTOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL"],
-  VIDEOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL"],
+  PHOTOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL", "COSTUME_SHOP"],
+  VIDEOGRAPHER: ["MAKEUP_ARTIST", "STUDIO", "MODEL", "COSTUME_SHOP"],
+  // A costume rental is the one thing a studio or a model books for a shoot.
+  STUDIO: ["COSTUME_SHOP"],
+  MODEL: ["COSTUME_SHOP"],
 };
