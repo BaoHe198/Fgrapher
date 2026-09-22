@@ -141,6 +141,7 @@ model Province {
 
   wards           Ward[]
   profiles        Profile[]
+  venues          Venue[]
   serviceAreas    ProfileServiceArea[]
   bookings        Booking[]
   waitlistEntries WaitlistEntry[]
@@ -162,6 +163,7 @@ model Ward {
   province        Province         @relation(fields: [provinceId], references: [id])
   users           User[]
   profiles        Profile[]
+  venues          Venue[]
   serviceRequests ServiceRequest[]
 
   @@unique([provinceId, code])
@@ -308,6 +310,51 @@ model DataRequest {
 // ROLES & SUBSCRIPTIONS
 // ============================================================================
 
+/// What a provider can be hired FOR, as opposed to what they are called.
+/// `Role` says who they are; this says what a customer can hire them to do,
+/// which is how a studio with a shooting crew gets described without
+/// inventing a "Photography Studio" role (project owner, 22/09/2026). The
+/// allowed combinations live in src/lib/constants/service-matrix.ts.
+enum ServiceKind {
+  PHOTOGRAPHY
+  VIDEOGRAPHY
+  VENUE_RENTAL
+  MAKEUP
+  MODELING
+}
+
+/// Legal form of the provider, which decides what KYC paperwork applies
+/// (Luật TMĐT 122/2025). A freelance individual needs nothing beyond the ID
+/// card already collected, so INDIVIDUAL is the default and is never asked
+/// for; a household business or a company must declare it and upload its
+/// registration certificate (project owner, 22/09/2026).
+enum LegalEntityType {
+  INDIVIDUAL
+  HOUSEHOLD_BUSINESS
+  COMPANY
+}
+
+/// Shown on the provider card. Stored rather than derived, because deriving
+/// it from the role is wrong for the case that matters: a studio that only
+/// rents out its space is not a "team" (project owner, 22/09/2026).
+enum OperatingMode {
+  SOLO
+  TEAM
+}
+
+/// What a booking actually occupies. Phase 1 creates exactly one
+/// PROVIDER_SELF resource per provider profile, so "is this provider free?"
+/// and "is this resource free?" are the same question. Phase 2 adds rooms,
+/// staff and equipment as extra rows — with no data migration, because
+/// availability and bookings already point at a resource rather than at a
+/// provider.
+enum ResourceType {
+  PROVIDER_SELF
+  ROOM
+  STAFF
+  EQUIPMENT
+}
+
 enum Role {
   PHOTOGRAPHER
   VIDEOGRAPHER
@@ -353,6 +400,11 @@ model UserRole {
   userId    String
   role      Role
   active    Boolean  @default(true)
+  /// Sits here rather than on Profile because KYC state
+  /// (verificationStatus, below) is what depends on it. null = not declared;
+  /// treated as INDIVIDUAL, which needs no paperwork beyond the ID card.
+  legalEntityType        LegalEntityType?
+  legalEntityConfirmedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -718,11 +770,19 @@ model Profile {
   province     Province?            @relation(fields: [provinceId], references: [id])
   ward         Ward?                @relation(fields: [wardId], references: [id])
   categories   ProfileCategory[]
+  /// Denormalised from Service.kind so search can filter on it without a
+  /// join. Rewritten in the same transaction that writes a Service.
+  serviceKinds  ServiceKind[]
+  /// null = the provider has not said yet. See OperatingMode's comment.
+  operatingMode OperatingMode?
+
   services     Service[]
   media        ProfileMedia[]
   albums       Album[]
   serviceAreas ProfileServiceArea[]
   costumes     CostumeItem[]
+  venues       Venue[]
+  resources    BookableResource[]
 
   @@unique([userId, role])
   @@index([role, isPublished])
@@ -741,6 +801,113 @@ model Profile {
 // isPrimary duplicates Profile.provinceId as a ProfileServiceArea row when
 // true, so "which provinces does this profile show up in" is always a
 // single query over this table rather than a union with Profile.provinceId.
+/// A fixed place of business: a studio's premises, a shop's counter. Shown
+/// publicly at full precision, unlike a freelancer's own address, which the
+/// Fmap blurs — this is a business address, not somebody's home.
+///
+/// A relation rather than columns on Profile because a studio with two
+/// branches is a Phase 2 certainty, and "one venue per provider" would have
+/// to be undone to get there.
+model Venue {
+  id         String    @id @default(cuid())
+  profileId  String
+  name       String?
+  address    String
+  provinceId String?
+  wardId     String?
+  latitude   Float?
+  longitude  Float?
+  isPrimary  Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  profile  Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  province Province? @relation(fields: [provinceId], references: [id])
+  ward     Ward?     @relation(fields: [wardId], references: [id])
+
+  @@index([profileId])
+  @@index([provinceId])
+  @@map("venues")
+}
+
+/// The thing a booking occupies. Phase 1: exactly one PROVIDER_SELF row per
+/// provider profile, created with the profile and backfilled for existing
+/// ones, so availability logic keeps the same meaning. Phase 2 adds rooms
+/// and staff as more rows — see ResourceType.
+model BookableResource {
+  id        String       @id @default(cuid())
+  profileId String
+  type      ResourceType @default(PROVIDER_SELF)
+  name      String?
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+
+  profile     Profile             @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  rules       AvailabilityRule[]
+  blocks      AvailabilityBlock[]
+  allocations BookingAllocation[]
+
+  @@index([profileId, isActive])
+  @@map("bookable_resources")
+}
+
+/// Weekly working hours, per resource. Replaces `Availability`, which was
+/// keyed on userId — that made the calendar belong to the person rather than
+/// to the thing being booked.
+model AvailabilityRule {
+  id         String   @id @default(cuid())
+  resourceId String
+  dayOfWeek  Int // 0=Sunday, 6=Saturday
+  startTime  String // "09:00", interpreted in Asia/Ho_Chi_Minh
+  endTime    String // "17:00"
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  resource BookableResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId, dayOfWeek])
+  @@map("availability_rules")
+}
+
+/// A manual "I am busy" window. Replaces `BlockedDate`, and stores real
+/// instants instead of a date plus an "HH:mm" string.
+model AvailabilityBlock {
+  id         String   @id @default(cuid())
+  resourceId String
+  startAt    DateTime
+  endAt      DateTime
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  resource BookableResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId, startAt])
+  @@map("availability_blocks")
+}
+
+/// The slice of a resource's time a booking holds. Rows exist only while the
+/// booking is actually holding the slot (PENDING or CONFIRMED); once it is
+/// cancelled, declined, expired or completed the allocation is deleted. That
+/// is what lets the overlap constraint be unconditional, which is the only
+/// form of it that cannot be got wrong.
+model BookingAllocation {
+  id         String   @id @default(cuid())
+  bookingId  String
+  resourceId String
+  startAt    DateTime
+  endAt      DateTime
+  createdAt  DateTime @default(now())
+
+  booking  Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  resource BookableResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId, startAt])
+  @@index([bookingId])
+  @@map("booking_allocations")
+}
+
 model ProfileServiceArea {
   profileId  String
   provinceId String
@@ -934,6 +1101,10 @@ enum ModerationStatus {
 model Service {
   id          String   @id @default(cuid())
   profileId   String
+  /// Nullable only until the backfill has run — see
+  /// scripts/backfill-provider-architecture.ts. Every new Service must carry
+  /// a kind, validated against service-matrix.ts.
+  kind        ServiceKind?
   name        String
   description String?  @db.Text
   duration    Int // minutes
@@ -1003,6 +1174,11 @@ model Booking {
   date           DateTime      @db.Date
   startTime      String // "10:00"
   endTime        String? // "12:00"
+  /// Real instants, added 22/09/2026. `date` + `startTime`/`endTime` above
+  /// are the legacy local-time representation, kept until the contract
+  /// migration removes them. Nullable only until the backfill has run.
+  startAt        DateTime?
+  endAt          DateTime?
   status         BookingStatus @default(PENDING)
   notes          String?       @db.Text
   totalPrice     Float?
@@ -1058,6 +1234,7 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  allocations    BookingAllocation[]
   customer       User                   @relation("customer", fields: [customerId], references: [id])
   provider       User                   @relation("provider", fields: [providerId], references: [id])
   service        Service?               @relation(fields: [serviceId], references: [id])

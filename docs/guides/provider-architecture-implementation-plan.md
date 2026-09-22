@@ -1,7 +1,7 @@
 # Kế hoạch kiến trúc Provider / Role / Service — bản trình duyệt
 
-Ngày: 22/09/2026. Người viết: Claude. Trạng thái: **chờ chủ dự án duyệt, chưa
-code dòng nào.** Đề bài: `docs/guides/fgrapher-provider-architecture-plan.md`.
+Ngày: 22/09/2026. Người viết: Claude. Trạng thái: **đã được chủ dự án duyệt**
+(7 quyết định ở mục J), đang thực hiện theo thứ tự ở mục I. Đề bài: `docs/guides/fgrapher-provider-architecture-plan.md`.
 
 Số liệu trong tài liệu này lấy từ **database dev thật** (`fgrapher-dev`) ngày
 22/09/2026, không phải ước lượng.
@@ -158,7 +158,7 @@ Về `VENUE_RENTAL` chỉ cho STUDIO: đồng ý cho Phase 1.
 
 ### 3. Operating Mode: lưu hay suy ra?
 
-**Đề xuất: lưu, nhưng cho phép trống.** Suy ra từ vai trò sai đúng ở ca mà chủ
+**Đã chốt: lưu, cho phép trống.** Suy ra từ vai trò sai đúng ở ca mà chủ
 dự án đã chỉ ra: studio chỉ cho thuê không gian không phải "đội ngũ". Cách làm:
 `operatingMode: OperatingMode?` (`SOLO | TEAM`), mặc định `SOLO` cho vai trò cá
 nhân, **null** cho STUDIO cho tới khi chủ studio tự khai. Card chỉ hiện nhãn
@@ -433,29 +433,51 @@ Tổng ước lượng: **13–16 phiên** cho bước 1–12, chưa tính bư�
 
 ---
 
-# J. Câu hỏi cần chủ dự án quyết
+# J. Quyết định đã chốt (chủ dự án, 22/09/2026)
 
-Xếp theo mức ảnh hưởng.
+| # | Câu hỏi | Quyết định |
+|---|---|---|
+| 1 | Shop trang phục lên Chợ F? | **Không.** Hồ sơ chỉ có tab "Trang phục", thuê thì nhắn tin. Đã làm xong. |
+| 2 | Giới hạn một vai trò trả phí? | **Giữ.** |
+| 3 | Hình thức pháp lý của provider cũ | **Banner nhắc.** Cá nhân tự do **không cần khai** (mặc định `INDIVIDUAL`, chỉ CCCD như hiện nay). Chỉ **hộ kinh doanh và doanh nghiệp** phải khai và nộp thêm giấy đăng ký. |
+| 4 | Lưu "Cá nhân / Đội ngũ"? | **Lưu**, cho phép để trống. |
+| 5 | Ma trận dịch vụ | **Làm lại theo tập vai trò hiện tại**, không dùng bảng trong đề bài. Chuyên viên trang điểm **không** nhận việc làm mẫu. |
+| 6 | Booking đổi sang mốc thời gian thật? | **Đổi.** |
+| 7 | Một tài khoản nhiều hồ sơ provider? | **Bỏ hẳn khái niệm nhiều vai trò.** Một tài khoản = một danh tính nhà cung cấp. Trường hợp "làm được nhiều việc" duy nhất là **Studio có dịch vụ quay chụp**, và nó được biểu diễn bằng **nhiều dịch vụ trên một hồ sơ**, không phải nhiều vai trò. |
+| 8 | Landing theo dịch vụ ở Phase 1? | **Để sau** (Phase 1.5), giữ nguyên đường dẫn theo vai trò. |
 
-1. ~~Shop trang phục: chốt một đường.~~ **Đã chốt 22/09/2026.** Hồ sơ shop
-   trang phục **chỉ có tab "Trang phục"**; không lên Chợ F, không portfolio,
-   không gói dịch vụ, không đặt lịch — thuê thì nhắn tin. Đã thực hiện. Kế
-   hoạch này giả định mô hình đó, nên `COSTUME_SHOP` **không** nằm trong nhóm
-   provider ở mục B (không có bookable resource, không có availability).
-2. **Có gỡ giới hạn "mỗi tài khoản một vai trò trả phí" không?** Model mới cho
-   phép nhiều hồ sơ provider; giới hạn hiện tại là quyết định MVP của anh.
-3. **Hình thức pháp lý của provider cũ**: hỏi lại khi đăng nhập, hay chặn ở
-   bước KYC? (Tôi đề xuất: banner nhắc, chỉ chặn khi họ muốn được duyệt hồ sơ.)
-4. **Có lưu Operating Mode không** — tôi đề xuất có, cho phép trống.
-5. **Ma trận dịch vụ**: giữ đúng bảng trong đề bài chứ? Riêng MUA có được nhận
-   `MODELING` không?
-6. **Đổi `Booking` sang mốc thời gian thật** — bắt buộc nếu muốn chống trùng ở
-   DB. Đồng ý chứ?
-7. **Tài khoản nhiều vai trò**: giữ hai hồ sơ riêng (đề xuất) hay gộp một hồ sơ
-   nhiều dịch vụ?
-8. **Có làm trang landing theo dịch vụ ở Phase 1 không**, hay để Phase 1.5 như
-   tôi đề xuất?
+## Ma trận dịch vụ đã chốt (thay bảng trong đề bài)
+
+| Vai trò | Dịch vụ được phép |
+|---|---|
+| PHOTOGRAPHER | `PHOTOGRAPHY`, `VIDEOGRAPHY` |
+| VIDEOGRAPHER | `VIDEOGRAPHY`, `PHOTOGRAPHY` |
+| MAKEUP_ARTIST | `MAKEUP` |
+| MODEL | `MODELING` |
+| STUDIO | `VENUE_RENTAL`, `PHOTOGRAPHY`, `VIDEOGRAPHY`, `MAKEUP` |
+| CAMERA_SHOP | — (bán trên Chợ F, không có dịch vụ) |
+| COSTUME_SHOP | — (catalog trang phục + nhắn tin, không có dịch vụ) |
+
+Đây chính là câu trả lời cho ca "studio có ekip chụp" trong đề bài: studio khai
+thêm `PHOTOGRAPHY`/`VIDEOGRAPHY` **trên hồ sơ studio của nó**, và tìm kiếm theo
+"chụp ảnh" sẽ trả về cả studio đó lẫn photographer tự do.
+
+## Điều gì thay đổi trong kế hoạch vì quyết định #7
+
+Bỏ nhiều-vai-trò làm **nhỏ** phần việc lại, không lớn thêm:
+
+- `Profile` vẫn là một dòng cho mỗi cặp (user, role) ở tầng DB — **không cần
+  migration** — nhưng tầng ứng dụng coi "hồ sơ nhà cung cấp của tôi" là **một**,
+  và không còn màn chuyển đổi giữa nhiều hồ sơ.
+- Một việc cần làm thêm: rà các chỗ đang render **danh sách** hồ sơ theo vai trò
+  của cùng một người (`profile-interactive.tsx` có tab theo vai trò,
+  `role-profile-switcher.tsx`, `search.ts` gộp nhiều profile của cùng userId
+  thành một card). Những chỗ đó đơn giản hoá được.
+- **Điểm cần anh xác nhận bằng một câu khi đọc:** vai trò `CUSTOMER` vẫn đi kèm
+  mọi tài khoản như hiện nay (đó là cách một provider tự đi đặt lịch người khác).
+  "Bỏ nhiều vai trò" tôi hiểu là **không có hai vai trò nhà cung cấp trên cùng
+  một tài khoản**, chứ không phải bỏ `CUSTOMER`.
 
 ---
 
-**Chưa code gì cho tới khi anh duyệt.**
+**Đã duyệt 22/09/2026. Bắt đầu theo thứ tự ở mục I.**
