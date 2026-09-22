@@ -42,6 +42,7 @@ import { ServicesManager } from "./services-manager";
 
 interface ServiceItem {
   id: string;
+  kind: string;
   name: string;
   description: string | null;
   duration: number;
@@ -699,7 +700,11 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       {PROVIDER_ROLES.includes(role) ? (
         profileId ? (
-          <ServicesManager profileId={profileId} initialServices={services} />
+          <ServicesManager
+            profileId={profileId}
+            role={role}
+            initialServices={services}
+          />
         ) : (
           // Profile rows are created lazily on first save — a role that
           // was just activated has none yet, so ServicesManager (which

@@ -4,6 +4,8 @@ import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import type { Role } from "@prisma/client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,12 +16,15 @@ import {
 } from "@/components/ui/dialog";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
+import { serviceKindsForRole } from "@/lib/constants/service-matrix";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/utils";
 
 interface ServiceItem {
   id: string;
+  kind: string;
   name: string;
   description: string | null;
   duration: number;
@@ -29,6 +34,7 @@ interface ServiceItem {
 }
 
 interface ServiceDraft {
+  kind: string;
   name: string;
   description: string;
   price: string;
@@ -36,6 +42,7 @@ interface ServiceDraft {
 }
 
 const EMPTY_DRAFT: ServiceDraft = {
+  kind: "",
   name: "",
   description: "",
   price: "",
@@ -44,12 +51,18 @@ const EMPTY_DRAFT: ServiceDraft = {
 
 export function ServicesManager({
   profileId,
+  role,
   initialServices,
 }: {
   profileId: string;
+  role: Role;
   initialServices: ServiceItem[];
 }) {
   const t = useTranslations("dashboardSettings.profile.services");
+  const serviceKindT = useTranslations("serviceKind");
+  // A role may only offer what the matrix allows — the API enforces the same
+  // rule, this just stops the provider picking something it will refuse.
+  const allowedKinds = serviceKindsForRole(role);
   const [services, setServices] = useState<ServiceItem[]>(initialServices);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -58,13 +71,14 @@ export function ServicesManager({
 
   const openCreate = () => {
     setEditingId(null);
-    setDraft(EMPTY_DRAFT);
+    setDraft({ ...EMPTY_DRAFT, kind: allowedKinds[0] ?? "" });
     setModalOpen(true);
   };
 
   const openEdit = (service: ServiceItem) => {
     setEditingId(service.id);
     setDraft({
+      kind: service.kind,
       name: service.name,
       description: service.description ?? "",
       price: String(service.price),
@@ -76,6 +90,7 @@ export function ServicesManager({
   const save = async () => {
     setIsSaving(true);
     const payload = {
+      kind: draft.kind,
       name: draft.name,
       description: draft.description || undefined,
       price: Number(draft.price),
@@ -138,6 +153,7 @@ export function ServicesManager({
                   {service.name} {!service.isActive ? t("inactive") : ""}
                 </p>
                 <p className="text-body-sm text-text-secondary">
+                  {serviceKindT(service.kind)} ·{" "}
                   {formatCurrency(service.price, service.currency)}
                 </p>
               </div>
@@ -172,6 +188,15 @@ export function ServicesManager({
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
+            <NativeSelect
+              label={t("kindLabel")}
+              options={allowedKinds.map((kind) => ({
+                value: kind,
+                label: serviceKindT(kind),
+              }))}
+              value={draft.kind}
+              onChange={(value) => setDraft({ ...draft, kind: value })}
+            />
             <Input
               label={t("nameLabel")}
               value={draft.name}
@@ -210,7 +235,7 @@ export function ServicesManager({
             </Button>
             <Button
               variant="accent"
-              disabled={isSaving || !draft.name || !draft.price}
+              disabled={isSaving || !draft.kind || !draft.name || !draft.price}
               onClick={save}
             >
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
