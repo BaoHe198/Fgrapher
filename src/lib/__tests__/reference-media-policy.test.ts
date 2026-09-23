@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { createBookingSchema } from "@/lib/validations/booking";
 import {
   MAX_REFERENCE_MEDIA,
-  referenceUrlsForBooking,
+  referenceMediaForBooking,
 } from "@/lib/validations/reference-media";
 import { createServiceRequestSchema } from "@/lib/validations/service-request";
 
@@ -20,7 +20,10 @@ const url = (i: number) =>
   `https://res.cloudinary.com/demo/image/upload/v1/fgrapher/request/ref-${i}.jpg`;
 
 const references = (count: number) =>
-  Array.from({ length: count }, (_, i) => ({ mediaUrl: url(i) }));
+  Array.from({ length: count }, (_, i) => ({
+    mediaUrl: url(i),
+    publicId: `fgrapher/request/customer-1/ref-${i}`,
+  }));
 
 const validRequest = (count: number) => ({
   title: "Chụp ảnh cưới ngoại cảnh",
@@ -30,7 +33,9 @@ const validRequest = (count: number) => ({
   references: references(count),
 });
 
-const validBooking = (referenceImages: string[]) => ({
+const validBooking = (
+  referenceImages: { url: string; publicId?: string }[],
+) => ({
   providerId: "provider-1",
   date: "2026-10-01",
   startTime: "10:00",
@@ -49,7 +54,7 @@ describe("reference media: one limit across request and booking", () => {
       );
 
       const booking = createBookingSchema.safeParse(
-        validBooking(referenceUrlsForBooking(request.data.references ?? [])),
+        validBooking(referenceMediaForBooking(request.data.references ?? [])),
       );
       assert.ok(
         booking.success,
@@ -63,8 +68,8 @@ describe("reference media: one limit across request and booking", () => {
   it("carries every reference across, dropping none", () => {
     const refs = references(MAX_REFERENCE_MEDIA);
     assert.deepEqual(
-      referenceUrlsForBooking(refs),
-      refs.map((r) => r.mediaUrl),
+      referenceMediaForBooking(refs),
+      refs.map((r) => ({ url: r.mediaUrl, publicId: r.publicId })),
     );
   });
 
@@ -76,7 +81,12 @@ describe("reference media: one limit across request and booking", () => {
     );
     assert.equal(
       createBookingSchema.safeParse(
-        validBooking(references(over).map((r) => r.mediaUrl)),
+        validBooking(
+          references(over).map((r) => ({
+            url: r.mediaUrl,
+            publicId: r.publicId,
+          })),
+        ),
       ).success,
       false,
     );
@@ -87,12 +97,14 @@ describe("reference media: one limit across request and booking", () => {
     assert.equal(
       createServiceRequestSchema.safeParse({
         ...validRequest(0),
-        references: [{ mediaUrl: foreign }],
+        references: [{ mediaUrl: foreign, publicId: "fgrapher/request/x" }],
       }).success,
       false,
     );
     assert.equal(
-      createBookingSchema.safeParse(validBooking([foreign])).success,
+      createBookingSchema.safeParse(
+        validBooking([{ url: foreign, publicId: "fgrapher/booking/x" }]),
+      ).success,
       false,
     );
   });

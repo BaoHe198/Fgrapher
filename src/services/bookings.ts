@@ -9,6 +9,11 @@ import {
 } from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
+  UploadVerificationError,
+  verifyReferenceMediaUpload,
+} from "@/lib/cloudinary";
+import { mediaKindFromUrl } from "@/lib/media-kind";
+import {
   holdSlot,
   isOverlapViolation,
   releaseSlot,
@@ -335,7 +340,13 @@ export class BookingActionError extends Error {
 
 export async function createBooking(
   customerId: string,
-  input: CreateBookingInput & { trustedRecipientRole?: Role },
+  input: Omit<CreateBookingInput, "referenceImages"> & {
+    referenceImages?: { url: string; publicId?: string }[];
+    trustedRecipientRole?: Role;
+    // Only acceptOffer may set this. Its media was already persisted in a
+    // ServiceRequest after server-side verification.
+    trustedReferenceMedia?: boolean;
+  },
 ) {
   if (input.providerId === customerId) {
     throw new BookingActionError("You can't book yourself", 400);
@@ -501,6 +512,34 @@ export async function createBooking(
     );
   }
 
+  if (!input.trustedReferenceMedia) {
+    for (const reference of input.referenceImages ?? []) {
+      if (!reference.publicId) {
+        throw new BookingActionError(
+          "Uploaded media could not be verified",
+          400,
+        );
+      }
+      try {
+        await verifyReferenceMediaUpload({
+          publicId: reference.publicId,
+          url: reference.url,
+          userId: customerId,
+          type: mediaKindFromUrl(reference.url),
+          purpose: "booking",
+        });
+      } catch (error) {
+        if (error instanceof UploadVerificationError) {
+          throw new BookingActionError(
+            "Uploaded media could not be verified",
+            400,
+          );
+        }
+        throw error;
+      }
+    }
+  }
+
   const booking = await db.$transaction(async (tx) => {
     // Race-condition guard: re-check for an overlapping PENDING/CONFIRMED
     // booking for this provider inside the transaction, right before
@@ -543,7 +582,7 @@ export async function createBooking(
         numberOfPeople: input.numberOfPeople,
         notes: input.notes,
         contactPhone: input.contactPhone,
-        referenceImages: input.referenceImages ?? [],
+        referenceImages: input.referenceImages?.map((item) => item.url) ?? [],
         totalPrice: service?.price,
         currency: service?.currency ?? "VND",
         expiresAt: new Date(Date.now() + BOOKING_EXPIRY_HOURS * 60 * 60 * 1000),

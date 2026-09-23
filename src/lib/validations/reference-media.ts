@@ -37,8 +37,11 @@ export const referenceMediaUrlSchema = z
  * offer is accepted. Extracted so the regression test exercises the exact
  * mapping acceptOffer uses, not a copy of it.
  */
-export function referenceUrlsForBooking(
-  references: readonly { mediaUrl: string }[],
-): string[] {
-  return references.map((ref) => ref.mediaUrl);
+export function referenceMediaForBooking(
+  references: readonly { mediaUrl: string; publicId: string | null }[],
+) {
+  return references.map((ref) => ({
+    url: ref.mediaUrl,
+    publicId: ref.publicId ?? undefined,
+  }));
 }
