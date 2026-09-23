@@ -2,6 +2,10 @@ import { getTranslations } from "next-intl/server";
 
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
+import {
+  UploadVerificationError,
+  verifyPurposeImageUpload,
+} from "@/lib/cloudinary";
 import { newMessageEmailHtml } from "@/lib/email";
 import { messagePreview } from "@/lib/notifications";
 import { notify } from "@/services/notification";
@@ -214,6 +218,7 @@ export async function sendMessage({
   content,
   type = "text",
   mediaUrl,
+  mediaPublicId,
   bookingId,
 }: {
   conversationId: string;
@@ -221,6 +226,7 @@ export async function sendMessage({
   content: string;
   type?: string;
   mediaUrl?: string;
+  mediaPublicId?: string;
   bookingId?: string;
 }) {
   await requireParticipant(conversationId, senderId);
@@ -239,6 +245,25 @@ export async function sendMessage({
 
   if (await isBlocked(senderId, receiverId)) {
     throw new MessagingError("You can't message this user", 403);
+  }
+
+  if (type === "image") {
+    if (!mediaUrl || !mediaPublicId) {
+      throw new MessagingError("Uploaded media could not be verified", 400);
+    }
+    try {
+      await verifyPurposeImageUpload({
+        publicId: mediaPublicId,
+        url: mediaUrl,
+        userId: senderId,
+        purpose: "chat",
+      });
+    } catch (error) {
+      if (error instanceof UploadVerificationError) {
+        throw new MessagingError("Uploaded media could not be verified", 400);
+      }
+      throw error;
+    }
   }
 
   const [message] = await db.$transaction([

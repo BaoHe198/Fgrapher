@@ -38,7 +38,8 @@ export function isCloudinaryConfigured() {
 const ALLOWED_UPLOAD_FORMATS = "jpg,jpeg,png,webp,gif,mp4,mov,webm";
 
 type PublicMediaType = "IMAGE" | "VIDEO";
-type PublicUploadPurpose = "portfolio" | "account" | "request" | "booking";
+type PublicUploadPurpose =
+  "portfolio" | "account" | "request" | "booking" | "chat" | "payment";
 type CloudinaryResource = {
   public_id?: unknown;
   secure_url?: unknown;
@@ -73,6 +74,12 @@ const ACCOUNT_IMAGE_UPLOAD_POLICY = {
   resourceType: "image",
 } as const;
 
+const CHAT_IMAGE_UPLOAD_POLICY = {
+  maxBytes: 2 * 1024 * 1024,
+  formats: new Set(["jpg", "jpeg", "png", "webp"]),
+  resourceType: "image",
+} as const;
+
 const REFERENCE_MEDIA_UPLOAD_POLICY = {
   IMAGE: {
     maxBytes: 2 * 1024 * 1024,
@@ -87,7 +94,10 @@ const REFERENCE_MEDIA_UPLOAD_POLICY = {
 } as const;
 
 function uploadPolicyFor(purpose: PublicUploadPurpose, type: PublicMediaType) {
-  if (purpose === "account") return ACCOUNT_IMAGE_UPLOAD_POLICY;
+  if (purpose === "account" || purpose === "payment") {
+    return ACCOUNT_IMAGE_UPLOAD_POLICY;
+  }
+  if (purpose === "chat") return CHAT_IMAGE_UPLOAD_POLICY;
   if (purpose === "request" || purpose === "booking") {
     return REFERENCE_MEDIA_UPLOAD_POLICY[type];
   }
@@ -219,6 +229,15 @@ export async function verifyReferenceMediaUpload(input: {
   purpose: "request" | "booking";
 }) {
   return verifyPublicUpload(input);
+}
+
+export async function verifyPurposeImageUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+  purpose: "chat" | "payment";
+}) {
+  return verifyPublicUpload({ ...input, type: "IMAGE" });
 }
 
 // Portfolio/product/chat images — public delivery type (the default).

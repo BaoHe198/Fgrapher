@@ -169,6 +169,7 @@ export async function PATCH(request: Request) {
       session.user.id,
       parsed.data.paymentId,
       parsed.data.proofUrl,
+      parsed.data.proofPublicId,
     );
 
     return NextResponse.json(

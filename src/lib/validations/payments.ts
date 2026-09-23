@@ -16,6 +16,7 @@ export const createPaymentIntentSchema = z.object({
 export const submitBankTransferProofSchema = z.object({
   paymentId: z.string().min(1),
   proofUrl: z.string().url(),
+  proofPublicId: z.string().min(1),
 });
 
 export const reviewPaymentSchema = z.discriminatedUnion("action", [

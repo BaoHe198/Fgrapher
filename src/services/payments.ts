@@ -10,6 +10,10 @@ import {
   subscriptionEndedEmailHtml,
 } from "@/lib/email";
 import { revalidatePublicProfile } from "@/lib/cache";
+import {
+  UploadVerificationError,
+  verifyPurposeImageUpload,
+} from "@/lib/cloudinary";
 import { db } from "@/lib/db";
 import {
   buildAppTransId,
@@ -513,6 +517,7 @@ export async function submitBankTransferProof(
   userId: string,
   paymentId: string,
   proofUrl: string,
+  proofPublicId: string,
 ) {
   const payment = await db.payment.findUnique({ where: { id: paymentId } });
   if (
@@ -524,6 +529,20 @@ export async function submitBankTransferProof(
   }
   if (payment.status !== "PENDING") {
     throw new PaymentError("already_submitted");
+  }
+
+  try {
+    await verifyPurposeImageUpload({
+      publicId: proofPublicId,
+      url: proofUrl,
+      userId,
+      purpose: "payment",
+    });
+  } catch (error) {
+    if (error instanceof UploadVerificationError) {
+      throw new PaymentError("invalid_proof");
+    }
+    throw error;
   }
 
   return db.payment.update({

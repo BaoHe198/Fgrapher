@@ -100,7 +100,9 @@ function dateSeparatorLabel(
   return formatDayMonthLong(date);
 }
 
-async function uploadImage(file: File): Promise<string | null> {
+async function uploadImage(
+  file: File,
+): Promise<{ url: string; publicId: string } | null> {
   const sigRes = await fetch("/api/upload/signature", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -140,7 +142,9 @@ async function uploadImage(file: File): Promise<string | null> {
     },
   );
   const uploadBody = await uploadRes.json();
-  return uploadRes.ok ? uploadBody.secure_url : null;
+  return uploadRes.ok
+    ? { url: uploadBody.secure_url, publicId: uploadBody.public_id }
+    : null;
 }
 
 export function ChatPanel({
@@ -232,7 +236,12 @@ export function ChatPanel({
   usePolling(load, { intervalMs: 2000, resetKey: conversationId });
 
   const onSend = async (
-    overrides?: Partial<{ content: string; type: string; mediaUrl: string }>,
+    overrides?: Partial<{
+      content: string;
+      type: string;
+      mediaUrl: string;
+      mediaPublicId: string;
+    }>,
   ) => {
     const content = overrides?.content ?? draft.trim();
     if (!content && !overrides?.mediaUrl) return;
@@ -249,6 +258,7 @@ export function ChatPanel({
           content: overrides?.content ?? draft.trim() ?? t("sentPhoto"),
           type: overrides?.type ?? "text",
           mediaUrl: overrides?.mediaUrl,
+          mediaPublicId: overrides?.mediaPublicId,
         }),
       });
 
@@ -279,10 +289,15 @@ export function ChatPanel({
     if (!file) return;
 
     setUploading(true);
-    const url = await uploadImage(file);
+    const media = await uploadImage(file);
     setUploading(false);
-    if (url) {
-      await onSend({ content: t("photo"), type: "image", mediaUrl: url });
+    if (media) {
+      await onSend({
+        content: t("photo"),
+        type: "image",
+        mediaUrl: media.url,
+        mediaPublicId: media.publicId,
+      });
     }
   };
 
