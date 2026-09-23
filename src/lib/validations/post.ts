@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { referenceMediaUrlSchema } from "@/lib/validations/reference-media";
+
 export const MAX_POST_MEDIA = 6;
 
 export const createPostSchema = z.object({
@@ -7,8 +9,8 @@ export const createPostSchema = z.object({
   media: z
     .array(
       z.object({
-        url: z.string().min(1),
-        publicId: z.string().nullish(),
+        url: referenceMediaUrlSchema,
+        publicId: z.string().min(1),
         type: z.enum(["IMAGE", "VIDEO"]).default("IMAGE"),
       }),
     )
