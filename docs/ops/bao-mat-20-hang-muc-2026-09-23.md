@@ -59,6 +59,33 @@ dụng hoặc thay đổi.
   trang chủ và dữ liệu provider, không có error log runtime. Lỗi build enum
   `COSTUME_SHOP` đã hết sau khi sửa cấu hình database Preview.
 
+## Kiểm thử Preview có đăng nhập
+
+- Đăng nhập thành công bằng tài khoản seed trên database development.
+- Tài khoản thường truy cập trực tiếp `/admin` nhận trang 404, không thấy dữ
+  liệu hay công cụ quản trị.
+- Danh sách yêu cầu hiển thị đúng hai yêu cầu đang mở, đúng tên hiển thị `Gia
+Bảo`, giá và phường/xã; yêu cầu của chính tài khoản có nhãn “Yêu cầu của bạn”
+  và dẫn về màn quản lý của chủ yêu cầu.
+- Hai yêu cầu tự đăng không xuất hiện trong “Yêu cầu phù hợp” và không có form
+  gửi đề nghị, nên không thể tự nhận yêu cầu qua giao diện.
+- Form tạo yêu cầu thông báo rõ nội dung chỉ được công khai sau khi admin duyệt.
+- Danh sách hội thoại và các thẻ booking tải được; ba thẻ có cùng nội dung trong
+  dữ liệu test là ba booking khác nhau, không phải một booking bị nhân bản.
+- Hồ sơ Costume Shop chỉ cho nhắn tin thuê và không có booking/lịch bận, đúng
+  phạm vi sản phẩm hiện tại. Hồ sơ Camera Shop cũng không hiện booking.
+- `/shop` đang trả 404 trên Preview vì `MARKETPLACE_ENABLED=false`; cần bật cờ
+  Preview trước khi kiểm thử end-to-end đăng sản phẩm, giỏ hàng và đơn hàng.
+- Dữ liệu seed `customer@test.com` đã bị lệch so với `prisma/seed.ts`: database
+  hiện có thêm role `PHOTOGRAPHER` nhưng chưa có profile/subscription. Vì vậy
+  sidebar hiển thị các mục provider và nhãn “Pro — Photographer”. Đây là dữ
+  liệu development đã bị thay đổi, không phải bằng chứng khách hàng thuần được
+  cấp role provider; vẫn nên làm sạch hoặc seed lại tài khoản test trước vòng QA
+  đa vai trò tiếp theo.
+- Đã sửa cách hiển thị yêu cầu linh hoạt cũ không có khoảng ngày: dùng câu
+  “Linh hoạt — chưa chọn khoảng ngày cụ thể” thay cho `? — ?` ở cả màn chủ yêu
+  cầu và màn provider.
+
 ## Việc còn lại theo thứ tự ưu tiên
 
 1. Dùng tài khoản thử trên Preview để đi hết các luồng upload, chat, yêu cầu,

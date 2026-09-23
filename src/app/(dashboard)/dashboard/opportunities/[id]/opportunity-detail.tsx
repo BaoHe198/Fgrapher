@@ -164,14 +164,16 @@ export function OpportunityDetail({
               <span className="text-text-tertiary">{t("whenLabel")}</span>
               <p className="font-semibold text-text-primary">
                 {request.isDateFlexible
-                  ? t("flexibleRange", {
-                      start: request.dateRangeStart
-                        ? formatDate(request.dateRangeStart)
-                        : "?",
-                      end: request.dateRangeEnd
-                        ? formatDate(request.dateRangeEnd)
-                        : "?",
-                    })
+                  ? request.dateRangeStart || request.dateRangeEnd
+                    ? t("flexibleRange", {
+                        start: request.dateRangeStart
+                          ? formatDate(request.dateRangeStart)
+                          : "—",
+                        end: request.dateRangeEnd
+                          ? formatDate(request.dateRangeEnd)
+                          : "—",
+                      })
+                    : t("flexibleNoRange")
                   : request.shootDate
                     ? formatDate(request.shootDate)
                     : "—"}
