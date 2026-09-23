@@ -329,7 +329,14 @@ export async function createMomoPaymentIntent(
       where: { id: payment.id },
       data: { status: "FAILED" },
     });
-    throw new PaymentError(result.message || "momo_create_failed");
+    // Provider text is useful for operations but is not a stable public API
+    // code and may contain implementation details. Keep it server-side.
+    console.error("[Payment] MoMo create failed", {
+      paymentId: payment.id,
+      resultCode: result.resultCode,
+      providerMessage: result.message,
+    });
+    throw new PaymentError("momo_create_failed");
   }
 
   return { payUrl: result.payUrl };
@@ -433,7 +440,12 @@ export async function createZalopayPaymentIntent(
       where: { id: payment.id },
       data: { status: "FAILED" },
     });
-    throw new PaymentError(result.return_message || "zalopay_create_failed");
+    console.error("[Payment] ZaloPay create failed", {
+      paymentId: payment.id,
+      returnCode: result.return_code,
+      providerMessage: result.return_message,
+    });
+    throw new PaymentError("zalopay_create_failed");
   }
 
   return { payUrl: result.order_url };
