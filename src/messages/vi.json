@@ -3640,6 +3640,7 @@
       "whereLabel": "Khu vực",
       "budgetLabel": "Ngân sách",
       "flexibleDate": "{start} – {end}",
+      "flexibleNoRange": "Linh hoạt — chưa chọn khoảng ngày cụ thể",
       "notSet": "Chưa xác định",
       "offer": {
         "count": "{count} đề nghị",

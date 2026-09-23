@@ -3640,6 +3640,7 @@
       "whereLabel": "Area",
       "budgetLabel": "Budget",
       "flexibleDate": "{start} – {end}",
+      "flexibleNoRange": "Flexible — no specific window chosen",
       "notSet": "Not specified",
       "offer": {
         "count": "{count} offers",
