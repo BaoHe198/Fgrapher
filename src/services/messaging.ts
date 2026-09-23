@@ -194,7 +194,13 @@ export async function listMessages({
     .filter((id): id is string => Boolean(id));
   const bookings = bookingIds.length
     ? await db.booking.findMany({
-        where: { id: { in: bookingIds } },
+        where: {
+          id: { in: bookingIds },
+          // A legacy or malformed message must not turn chat into an IDOR
+          // oracle. Only hydrate summaries for bookings the current viewer
+          // participates in, even though the conversation itself is valid.
+          OR: [{ customerId: userId }, { providerId: userId }],
+        },
         select: {
           id: true,
           date: true,
@@ -245,6 +251,23 @@ export async function sendMessage({
 
   if (await isBlocked(senderId, receiverId)) {
     throw new MessagingError("You can't message this user", 403);
+  }
+
+  if (type === "booking_link") {
+    if (!bookingId) {
+      throw new MessagingError("Booking link is missing a booking", 400);
+    }
+
+    const booking = await db.booking.findUnique({
+      where: { id: bookingId },
+      select: { customerId: true, providerId: true },
+    });
+    const bookingParties = booking
+      ? new Set([booking.customerId, booking.providerId])
+      : null;
+    if (!bookingParties?.has(senderId) || !bookingParties.has(receiverId)) {
+      throw new MessagingError("Booking is not part of this conversation", 403);
+    }
   }
 
   if (type === "image") {

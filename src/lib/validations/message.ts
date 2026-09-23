@@ -8,7 +8,10 @@ export const sendMessageSchema = z
   .object({
     conversationId: z.string().min(1),
     content: z.string().min(1).max(2000),
-    type: z.enum(["text", "image", "booking_link"]).default("text"),
+    // booking_link is reserved for the trusted booking service. Accepting it
+    // from the public messages API would let a participant attach an
+    // arbitrary booking ID and probe that booking through the chat response.
+    type: z.enum(["text", "image"]).default("text"),
     mediaUrl: z.string().url().optional(),
     mediaPublicId: z.string().min(1).optional(),
     bookingId: z.string().optional(),
