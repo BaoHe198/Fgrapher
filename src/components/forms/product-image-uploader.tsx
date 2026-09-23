@@ -32,7 +32,7 @@ const UPLOAD_MAX_DIMENSION = 1920;
 
 export interface ProductImage {
   url: string;
-  publicId?: string;
+  publicId: string;
 }
 
 interface ProductImageUploaderProps {

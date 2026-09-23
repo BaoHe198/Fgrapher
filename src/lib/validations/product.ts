@@ -103,7 +103,7 @@ export const productSchema = z
     stock: z.number().int().min(0),
     isActive: z.boolean(),
     images: z.array(
-      z.object({ url: z.string().url(), publicId: z.string().optional() }),
+      z.object({ url: z.string().url(), publicId: z.string().min(1) }),
     ),
   })
   .refine((data) => data.type !== "SALE" || data.price !== undefined, {
@@ -141,7 +141,7 @@ export function getProductSchema(t: (key: string) => string) {
       stock: z.number().int().min(0),
       isActive: z.boolean(),
       images: z.array(
-        z.object({ url: z.string().url(), publicId: z.string().optional() }),
+        z.object({ url: z.string().url(), publicId: z.string().min(1) }),
       ),
     })
     .refine((data) => data.type !== "SALE" || data.price !== undefined, {
