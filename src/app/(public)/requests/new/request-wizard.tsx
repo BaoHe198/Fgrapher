@@ -57,7 +57,7 @@ interface DraftShape {
   detailedAddress: string | null;
   budgetMin: number | null;
   budgetMax: number | null;
-  references: { mediaUrl: string; publicId?: string }[];
+  references: { mediaUrl: string; publicId: string }[];
 }
 
 interface RequestWizardProps {
@@ -87,7 +87,7 @@ interface FormState {
   detailedAddress: string;
   budgetMin: string;
   budgetMax: string;
-  references: { mediaUrl: string; publicId?: string }[];
+  references: { mediaUrl: string; publicId: string }[];
 }
 
 function draftToForm(draft: DraftShape | null): FormState {
@@ -482,10 +482,11 @@ export function RequestWizard({
               onChange={(next) =>
                 setForm((prev) => ({
                   ...prev,
-                  references: next.map((item) => ({
-                    mediaUrl: item.url,
-                    publicId: item.publicId,
-                  })),
+                  references: next.flatMap((item) =>
+                    item.publicId
+                      ? [{ mediaUrl: item.url, publicId: item.publicId }]
+                      : [],
+                  ),
                 }))
               }
             />

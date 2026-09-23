@@ -38,7 +38,7 @@ export function isCloudinaryConfigured() {
 const ALLOWED_UPLOAD_FORMATS = "jpg,jpeg,png,webp,gif,mp4,mov,webm";
 
 type PublicMediaType = "IMAGE" | "VIDEO";
-type PublicUploadPurpose = "portfolio" | "account";
+type PublicUploadPurpose = "portfolio" | "account" | "request" | "booking";
 type CloudinaryResource = {
   public_id?: unknown;
   secure_url?: unknown;
@@ -73,6 +73,27 @@ const ACCOUNT_IMAGE_UPLOAD_POLICY = {
   resourceType: "image",
 } as const;
 
+const REFERENCE_MEDIA_UPLOAD_POLICY = {
+  IMAGE: {
+    maxBytes: 2 * 1024 * 1024,
+    formats: new Set(["jpg", "jpeg", "png", "webp", "gif"]),
+    resourceType: "image",
+  },
+  VIDEO: {
+    maxBytes: 50 * 1024 * 1024,
+    formats: new Set(["mp4", "mov", "webm"]),
+    resourceType: "video",
+  },
+} as const;
+
+function uploadPolicyFor(purpose: PublicUploadPurpose, type: PublicMediaType) {
+  if (purpose === "account") return ACCOUNT_IMAGE_UPLOAD_POLICY;
+  if (purpose === "request" || purpose === "booking") {
+    return REFERENCE_MEDIA_UPLOAD_POLICY[type];
+  }
+  return PORTFOLIO_UPLOAD_POLICY[type];
+}
+
 function isValidPublicAsset(
   asset: CloudinaryResource,
   input: {
@@ -83,10 +104,7 @@ function isValidPublicAsset(
     purpose: PublicUploadPurpose;
   },
 ) {
-  const policy =
-    input.purpose === "account"
-      ? ACCOUNT_IMAGE_UPLOAD_POLICY
-      : PORTFOLIO_UPLOAD_POLICY[input.type];
+  const policy = uploadPolicyFor(input.purpose, input.type);
   const expectedPrefix = `fgrapher/${input.purpose}/${input.userId}/`;
 
   return (
@@ -138,10 +156,7 @@ async function verifyPublicUpload(input: {
   type: PublicMediaType;
   purpose: PublicUploadPurpose;
 }) {
-  const policy =
-    input.purpose === "account"
-      ? ACCOUNT_IMAGE_UPLOAD_POLICY
-      : PORTFOLIO_UPLOAD_POLICY[input.type];
+  const policy = uploadPolicyFor(input.purpose, input.type);
   let asset: CloudinaryResource;
 
   try {
@@ -194,6 +209,16 @@ export async function verifyAccountImageUpload(input: {
   userId: string;
 }) {
   return verifyPublicUpload({ ...input, type: "IMAGE", purpose: "account" });
+}
+
+export async function verifyReferenceMediaUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+  type: PublicMediaType;
+  purpose: "request" | "booking";
+}) {
+  return verifyPublicUpload(input);
 }
 
 // Portfolio/product/chat images — public delivery type (the default).

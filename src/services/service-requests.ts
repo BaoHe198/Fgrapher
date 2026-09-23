@@ -7,7 +7,9 @@ import type {
 import { getTranslations } from "next-intl/server";
 
 import { appUrl } from "@/lib/app-url";
+import { verifyReferenceMediaUpload } from "@/lib/cloudinary";
 import { features } from "@/lib/features";
+import { mediaKindFromUrl } from "@/lib/media-kind";
 import { db } from "@/lib/db";
 import { requestNoOffersEmailHtml } from "@/lib/email";
 import { resolvePartyName } from "@/lib/party-name";
@@ -91,7 +93,7 @@ export interface CreateServiceRequestInput {
   detailedAddress?: string;
   budgetMin?: number;
   budgetMax?: number;
-  references?: { mediaUrl: string; publicId?: string }[];
+  references?: { mediaUrl: string; publicId: string }[];
   isDraft: boolean;
 }
 
@@ -129,6 +131,16 @@ export async function createServiceRequest(
         400,
       );
     }
+  }
+
+  for (const reference of input.references ?? []) {
+    await verifyReferenceMediaUpload({
+      publicId: reference.publicId,
+      url: reference.mediaUrl,
+      userId: customerId,
+      type: mediaKindFromUrl(reference.mediaUrl),
+      purpose: "request",
+    });
   }
 
   const code = await generateRequestCode();
