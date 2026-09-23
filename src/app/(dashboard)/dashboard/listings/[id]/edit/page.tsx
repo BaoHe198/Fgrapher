@@ -59,7 +59,11 @@ export default async function EditProductPage({
           isActive: product.isActive,
           images: product.images.map((img) => ({
             url: img.url,
-            publicId: img.publicId ?? undefined,
+            // Existing rows from before server-side upload verification may
+            // lack a public ID. Keeping an empty value makes the form show
+            // its existing image, while validation prevents that unverified
+            // asset from being resubmitted; the seller can replace it.
+            publicId: img.publicId ?? "",
           })),
         }}
       />

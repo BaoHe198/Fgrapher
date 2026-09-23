@@ -39,7 +39,12 @@ export const createBookingSchema = z.object({
   // Photos or videos (see lib/media-kind.ts). Limit shared with
   // service requests — see validations/reference-media.ts.
   referenceImages: z
-    .array(referenceMediaUrlSchema)
+    .array(
+      z.object({
+        url: referenceMediaUrlSchema,
+        publicId: z.string().min(1),
+      }),
+    )
     .max(MAX_REFERENCE_MEDIA)
     .optional(),
   // Crew-hire (Prompt B7, VIỆC 1) — "Gắn vào đơn khách hàng".
@@ -86,7 +91,12 @@ export function getCreateBookingSchema(t: (key: string) => string) {
     // Photos or videos (see lib/media-kind.ts). Limit shared with
     // service requests — see validations/reference-media.ts.
     referenceImages: z
-      .array(referenceMediaUrlSchema)
+      .array(
+        z.object({
+          url: referenceMediaUrlSchema,
+          publicId: z.string().min(1),
+        }),
+      )
       .max(MAX_REFERENCE_MEDIA)
       .optional(),
     parentBookingId: z.string().min(1).optional(),

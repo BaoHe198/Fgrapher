@@ -50,6 +50,7 @@ export async function GET(
             select: {
               id: true,
               url: true,
+              type: true,
               title: true,
               moderationStatus: true,
             },

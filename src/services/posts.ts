@@ -1,6 +1,7 @@
 import type { PostKind, Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { verifyPortfolioUpload } from "@/lib/cloudinary";
 import { runPostMediaModeration } from "@/services/moderation";
 import { notify } from "@/services/notification";
 
@@ -61,10 +62,19 @@ export async function createPost({
 }: {
   userId: string;
   caption?: string;
-  media: { url: string; publicId?: string | null; type: "IMAGE" | "VIDEO" }[];
+  media: { url: string; publicId: string; type: "IMAGE" | "VIDEO" }[];
 }) {
   if (!caption?.trim() && media.length === 0) {
     throw new PostError("A post needs a caption or a photo", 400);
+  }
+
+  for (const item of media) {
+    await verifyPortfolioUpload({
+      publicId: item.publicId,
+      url: item.url,
+      userId,
+      type: item.type,
+    });
   }
   await assertUnderLimit(userId, "post");
 
@@ -76,7 +86,7 @@ export async function createPost({
       media: {
         create: media.map((item, index) => ({
           url: item.url,
-          publicId: item.publicId ?? null,
+          publicId: item.publicId,
           type: item.type,
           order: index,
         })),

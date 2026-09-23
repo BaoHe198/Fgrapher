@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, it } from "node:test";
 
 import {
@@ -14,6 +16,10 @@ import {
 } from "@/lib/validations/product";
 import { createServiceRequestSchema } from "@/lib/validations/service-request";
 import { submitVerificationSchema } from "@/lib/validations/verification";
+
+const repoRoot = path.resolve(__dirname, "../../..");
+const read = (relativePath: string) =>
+  readFileSync(path.join(repoRoot, relativePath), "utf8");
 
 describe("role capability boundaries", () => {
   // The two shop roles are NOT interchangeable, and the difference is the
@@ -50,6 +56,38 @@ describe("role capability boundaries", () => {
     // shows no portfolio tab — only the catalogue.
     assert.ok(PORTFOLIO_ROLES.includes("COSTUME_SHOP"));
     assert.equal(PORTFOLIO_ROLES.includes("CAMERA_SHOP"), false);
+  });
+
+  it("keeps shop roles out of the creative Portfolio UI", () => {
+    const hook = read("src/hooks/use-user-roles.ts");
+    const portfolioPage = read(
+      "src/app/(dashboard)/dashboard/portfolio/page.tsx",
+    );
+    assert.match(hook, /canUpload:[^\n]+PROVIDER_ROLES/);
+    assert.match(portfolioPage, /role:\s*{\s*in:\s*PROVIDER_ROLES\s*}/);
+  });
+
+  it("lets Costume Shop upload moderated outfit images without an album", () => {
+    const manager = read(
+      "src/app/(dashboard)/dashboard/settings/profile/costumes-manager.tsx",
+    );
+    const uploader = read("src/components/modals/upload-media-modal.tsx");
+    assert.match(manager, /allowStandalone/);
+    assert.match(manager, /imageOnly/);
+    assert.match(uploader, /albumId:\s*resolvedAlbumId\s*\?\?\s*undefined/);
+  });
+
+  it("never lists private albums for another user's profile", () => {
+    const route = read("src/app/api/albums/route.ts");
+    const ownerGuard = route.indexOf("profile.userId !== session.user.id");
+    const listCall = route.indexOf(
+      "const albums = await listAlbums(profileId)",
+    );
+    assert.ok(ownerGuard >= 0, "album GET must compare the profile owner");
+    assert.ok(
+      ownerGuard < listCall,
+      "ownership must be checked before listing",
+    );
   });
 
   it("still calls both of them shops, for naming and shop-name purposes", () => {

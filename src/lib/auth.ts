@@ -13,6 +13,13 @@ import { cache } from "react";
  */
 const SESSION_SYNC_MS = 60_000;
 
+/**
+ * Keep authentication lifetime explicit instead of relying on Auth.js's
+ * library default. This value governs both the encrypted JWT and its session
+ * cookie, so a session cannot remain valid indefinitely after its issue time.
+ */
+const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+
 import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth-errors";
 import { db } from "@/lib/db";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -65,7 +72,10 @@ const {
   signOut,
 } = NextAuth({
   adapter: PrismaAdapter(db),
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  },
   pages: {
     signIn: "/login",
   },

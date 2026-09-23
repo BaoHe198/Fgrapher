@@ -15,7 +15,10 @@ import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { ModelSafetyNotice } from "@/components/booking/model-safety-notice";
 import { termsChunk } from "@/components/legal/terms-link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ReferenceMediaField } from "@/components/forms/reference-media-field";
+import {
+  ReferenceMediaField,
+  type ReferenceMedia,
+} from "@/components/forms/reference-media-field";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -84,7 +87,7 @@ interface Draft {
   numberOfPeople: string;
   notes: string;
   // Uploaded reference photo/video URLs — sent as Booking.referenceImages.
-  referenceMedia: string[];
+  referenceMedia: ReferenceMedia[];
   contactPhone: string;
   agreed: boolean;
   // Model-booking-specific — see docs/guides/fgrapher-prompts-batch-2.md
@@ -243,7 +246,23 @@ export function BookingWizard({
         // back without it, and the details step would crash reading
         // `undefined.map` for anyone who had a booking half-filled at the
         // moment this shipped.
-        setDraft({ ...emptyDraft(contactPhoneDefault), ...JSON.parse(saved) });
+        const restored = JSON.parse(saved) as Partial<Draft>;
+        setDraft({
+          ...emptyDraft(contactPhoneDefault),
+          ...restored,
+          // Drafts saved before references carried Cloudinary public IDs
+          // cannot pass the server's ownership verification. Omit only those
+          // old attachments; the rest of the booking draft stays intact.
+          referenceMedia: Array.isArray(restored.referenceMedia)
+            ? restored.referenceMedia.filter(
+                (item): item is ReferenceMedia =>
+                  typeof item === "object" &&
+                  item !== null &&
+                  typeof item.url === "string" &&
+                  typeof item.publicId === "string",
+              )
+            : [],
+        });
       }
       setHydrated(true);
     });
@@ -930,7 +949,7 @@ function StepDetails({
   locationAddress: string;
   numberOfPeople: string;
   notes: string;
-  referenceMedia: string[];
+  referenceMedia: ReferenceMedia[];
   contactPhone: string;
   isModel?: boolean;
   shootType: string;
@@ -1079,13 +1098,8 @@ function StepDetails({
       <ReferenceMediaField
         purpose="booking"
         max={MAX_REFERENCE_MEDIA}
-        value={referenceMedia.map((url) => ({ url }))}
-        onChange={(next) =>
-          onChange(
-            "referenceMedia",
-            next.map((item) => item.url),
-          )
-        }
+        value={referenceMedia}
+        onChange={(next) => onChange("referenceMedia", next)}
       />
 
       <Input

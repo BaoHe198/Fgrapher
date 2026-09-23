@@ -39,7 +39,9 @@ interface BankTransferPayment {
 const UPLOAD_MAX_BYTES = 3 * 1024 * 1024;
 const UPLOAD_MAX_DIMENSION = 1920;
 
-async function uploadProofFile(file: File): Promise<string> {
+async function uploadProofFile(
+  file: File,
+): Promise<{ url: string; publicId: string }> {
   const compressed = await compressImageFile(file, {
     maxBytes: UPLOAD_MAX_BYTES,
     maxDimension: UPLOAD_MAX_DIMENSION,
@@ -68,7 +70,10 @@ async function uploadProofFile(file: File): Promise<string> {
   );
   const uploadBody = await uploadRes.json();
   if (!uploadRes.ok) throw new Error("upload_failed");
-  return uploadBody.secure_url as string;
+  return {
+    url: uploadBody.secure_url as string,
+    publicId: uploadBody.public_id as string,
+  };
 }
 
 export function LocalPaymentsContent({
@@ -181,11 +186,15 @@ export function LocalPaymentsContent({
     setError(null);
     setBankBusy(true);
     try {
-      const proofUrl = await uploadProofFile(file);
+      const proof = await uploadProofFile(file);
       const res = await fetch("/api/payments/bank-transfer", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId: activeBankPayment.id, proofUrl }),
+        body: JSON.stringify({
+          paymentId: activeBankPayment.id,
+          proofUrl: proof.url,
+          proofPublicId: proof.publicId,
+        }),
       });
       const body = await res.json();
       if (!res.ok) {

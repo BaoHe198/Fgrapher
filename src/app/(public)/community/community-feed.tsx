@@ -51,6 +51,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useUserRoles } from "@/hooks/use-user-roles";
 import { formatDate } from "@/lib/format";
 import {
   cn,
@@ -157,6 +158,7 @@ async function fetchFeed(
 
 export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
   const t = useTranslations("publicPages.community");
+  const { canReceiveBookings } = useUserRoles();
   const [tab, setTab] = useState<"discover" | "following">("discover");
   const [filter, setFilter] = useState<FeedFilter>("all");
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -379,15 +381,17 @@ export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
             <CalendarDays className="size-4" />
             {t("createBooking")}
           </Button>
-          <Button
-            variant="secondary"
-            className="w-full justify-start"
-            nativeButton={false}
-            render={<Link href="/dashboard/portfolio" />}
-          >
-            <Camera className="size-4" />
-            {t("uploadPortfolio")}
-          </Button>
+          {canReceiveBookings ? (
+            <Button
+              variant="secondary"
+              className="w-full justify-start"
+              nativeButton={false}
+              render={<Link href="/dashboard/portfolio" />}
+            >
+              <Camera className="size-4" />
+              {t("uploadPortfolio")}
+            </Button>
+          ) : null}
         </Card>
         <Card className="flex flex-col gap-2">
           <span className="text-heading-sm text-text-primary">
@@ -865,14 +869,12 @@ function RequestPostPanel({
       <div className="grid gap-2 sm:grid-cols-3">
         <InfoTile icon={CalendarDays} label={t("whenLabel")}>
           {request.isDateFlexible
-            ? t("flexibleDate", {
-                start: request.dateRangeStart
-                  ? formatDate(request.dateRangeStart)
-                  : "?",
-                end: request.dateRangeEnd
-                  ? formatDate(request.dateRangeEnd)
-                  : "?",
-              })
+            ? request.dateRangeStart && request.dateRangeEnd
+              ? t("flexibleDate", {
+                  start: formatDate(request.dateRangeStart),
+                  end: formatDate(request.dateRangeEnd),
+                })
+              : t("flexibleNoRange")
             : request.shootDate
               ? formatDate(request.shootDate)
               : t("notSet")}

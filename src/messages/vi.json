@@ -211,7 +211,7 @@
     "studios": "Studio cho thuê",
     "browseStudios": "Xem studio",
     "f1t": "Khám phá",
-    "f1b": "Lọc theo vai trò, thành phố, giá và lịch trống — mỗi hồ sơ trước hết là một portfolio.",
+    "f1b": "Lọc theo vai trò, thành phố, giá và lịch trống — so sánh portfolio sáng tạo và danh mục cửa hàng tại một nơi.",
     "f2t": "Đặt lịch",
     "f2b": "Chọn ngày và khung giờ trên lịch thật. Nghệ sĩ phản hồi nhanh chóng qua tin nhắn.",
     "f3t": "Thuê hoặc mua",
@@ -1348,6 +1348,7 @@
         "budgetLabel": "Ngân sách",
         "budgetNotSet": "Chưa đặt",
         "flexibleRange": "Linh hoạt: {start} — {end}",
+        "flexibleNoRange": "Linh hoạt — chưa chọn khoảng ngày cụ thể",
         "pendingReviewTitle": "Yêu cầu đang chờ kiểm duyệt",
         "pendingReviewBody": "Yêu cầu chưa hiển thị cho provider. Quản trị viên sẽ kiểm tra nội dung và ảnh tham khảo trước khi đăng.",
         "rejectedTitle": "Yêu cầu không được duyệt",
@@ -1409,6 +1410,7 @@
         "budgetLabel": "Ngân sách",
         "budgetNotSet": "Chưa đặt",
         "flexibleRange": "Linh hoạt: {start} — {end}",
+        "flexibleNoRange": "Linh hoạt — chưa chọn khoảng ngày cụ thể",
         "addressHiddenNote": "Địa chỉ chi tiết chỉ hiển thị sau khi khách chấp nhận đề nghị của bạn.",
         "yourOfferTitle": "Đề nghị của bạn",
         "sendOfferTitle": "Gửi đề nghị",
@@ -1550,7 +1552,7 @@
     "portfolio": {
       "proOnly": {
         "title": "Portfolio dành cho người làm nghề sáng tạo",
-        "body": "Thêm một vai trò trả phí — Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm, Studio hoặc Cửa hàng máy ảnh — để giới thiệu tác phẩm của bạn.",
+        "body": "Thêm một vai trò sáng tạo — Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm, Studio hoặc Người mẫu — để giới thiệu tác phẩm của bạn.",
         "cta": "Thêm vai trò"
       },
       "noProfile": {
@@ -2330,6 +2332,7 @@
         "title": "Trang phục cho thuê",
         "helper": "Mỗi bộ đồ hiển thị trên hồ sơ công khai của bạn kèm ảnh, giá thuê theo ngày và tiền cọc. Khách xem rồi nhắn tin để thuê — không đặt lịch, không bán qua Chợ F.",
         "add": "Thêm bộ đồ",
+        "uploadPhoto": "Tải ảnh trang phục",
         "addTitle": "Thêm bộ trang phục",
         "editTitle": "Sửa bộ trang phục",
         "empty": "Chưa có bộ trang phục nào",
@@ -2347,7 +2350,7 @@
         "photoLabel": "Ảnh",
         "photoNone": "Chưa gắn ảnh",
         "photoNumbered": "Ảnh số {index}",
-        "photoHelper": "Chọn từ ảnh portfolio đã tải lên. Ảnh mới phải qua kiểm duyệt trước khi hiện công khai.",
+        "photoHelper": "Chọn ảnh trang phục đã tải lên. Ảnh mới phải qua kiểm duyệt trước khi hiện công khai.",
         "descriptionLabel": "Mô tả",
         "activeLabel": "Đang cho thuê",
         "cancel": "Huỷ",
@@ -3638,6 +3641,7 @@
       "whereLabel": "Khu vực",
       "budgetLabel": "Ngân sách",
       "flexibleDate": "{start} – {end}",
+      "flexibleNoRange": "Linh hoạt — chưa chọn khoảng ngày cụ thể",
       "notSet": "Chưa xác định",
       "offer": {
         "count": "{count} đề nghị",
@@ -3767,6 +3771,8 @@
       "title": "Tải ảnh/video lên",
       "dropzone": "Kéo thả file vào đây, hoặc bấm để chọn",
       "sizeLimits": "Ảnh tối đa 10MB, video tối đa 100MB",
+      "sizeLimitsImageOnly": "Ảnh tối đa 10MB",
+      "imageOnly": "Hãy chọn một tệp ảnh",
       "removeFile": "Xóa file",
       "titlePlaceholder": "Tiêu đề (không bắt buộc)",
       "uploaded": "Đã tải lên",
@@ -3918,7 +3924,7 @@
       "calendar": "Lịch làm việc",
       "reviews": "Đánh giá",
       "portfolio": "Portfolio",
-      "myRequests": "Booking của tôi",
+      "myRequests": "Yêu cầu của tôi",
       "opportunities": "Booking phù hợp",
       "myOffers": "Đề nghị đã gửi",
       "costumes": "Trang phục của tôi",
@@ -3936,7 +3942,7 @@
       "openMenu": "Mở menu bảng điều khiển",
       "menuTitle": "Menu bảng điều khiển",
       "menuDescription": "Điều hướng bảng điều khiển",
-      "createBooking": "Tạo Booking"
+      "createBooking": "Đăng yêu cầu"
     },
     "suspendedAccountNotice": {
       "title": "Tài khoản của bạn đã bị tạm khóa",

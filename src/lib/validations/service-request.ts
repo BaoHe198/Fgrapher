@@ -51,7 +51,7 @@ const serviceRequestFields = z.object({
     .array(
       z.object({
         mediaUrl: referenceMediaUrlSchema,
-        publicId: z.string().optional(),
+        publicId: z.string().min(1),
       }),
     )
     // Shared with the booking schema — a request's references become the

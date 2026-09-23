@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { UploadVerificationError } from "@/lib/cloudinary";
 import { createServiceRequestSchema } from "@/lib/validations/service-request";
 import {
   ServiceRequestError,
@@ -19,6 +20,12 @@ export async function GET() {
       { status: 200 },
     );
   } catch (err) {
+    if (err instanceof UploadVerificationError) {
+      return NextResponse.json(
+        { data: null, error: "invalid_upload", message: t("invalidInput") },
+        { status: 400 },
+      );
+    }
     if (err instanceof AuthError) {
       return NextResponse.json(
         { data: null, error: "unauthorized", message: err.message },

@@ -17,7 +17,7 @@ import {
 } from "@/lib/email";
 import type { BatchRecipient } from "@/lib/notifications";
 import type { NotificationPreferences } from "@/lib/validations/user";
-import { referenceUrlsForBooking } from "@/lib/validations/reference-media";
+import { referenceMediaForBooking } from "@/lib/validations/reference-media";
 import { logAudit } from "@/services/compliance";
 import {
   SERVICE_AREA_SELECT,
@@ -84,6 +84,36 @@ type OfferableRequest = Pick<
   ServiceRequest,
   "customerId" | "isDraft" | "role" | "status"
 >;
+
+type ViewableOpportunity = OfferableRequest & {
+  offers: readonly { id: string }[];
+};
+
+/**
+ * The detail endpoint carries more information than the public request cards,
+ * including reference media. Moderation states must stay private. A provider
+ * may still revisit a closed request from their offer history, but only when
+ * the provider-filtered query proves they actually submitted an offer.
+ */
+export function assertProviderMayViewOpportunity(
+  request: ViewableOpportunity | null,
+  providerId: string,
+  role: Role,
+): asserts request is ViewableOpportunity {
+  if (
+    !request ||
+    request.isDraft ||
+    request.role !== role ||
+    request.customerId === providerId
+  ) {
+    throw new OfferNotFoundError();
+  }
+
+  const isOpen = request.status === "OPEN" || request.status === "HAS_OFFERS";
+  if (!isOpen && request.offers.length === 0) {
+    throw new OfferNotFoundError();
+  }
+}
 
 export function assertProviderMayOffer(
   request: OfferableRequest | null,
@@ -402,11 +432,10 @@ export async function getOpportunityDetail(
       },
     },
   });
-  if (!request || request.isDraft) throw new OfferNotFoundError();
-  if (request.role !== role) throw new OfferNotFoundError();
-  // A customer may also have a verified provider role. Their own request
-  // must never become an opportunity, even through a copied detail URL.
-  if (request.customerId === providerId) throw new OfferNotFoundError();
+  // A customer may also have a provider role. Their own request must never
+  // become an opportunity, and unmoderated/closed requests stay private
+  // unless this provider has an existing offer to revisit from My Offers.
+  assertProviderMayViewOpportunity(request, providerId, role);
 
   // Ràng buộc #1 — "Ghi AuditLog mỗi lần một provider xem chi tiết yêu
   // cầu." detailedAddress is never selected above, so there's nothing to
@@ -617,7 +646,8 @@ export async function acceptOffer(
       // them. Every reference fits: request and booking share one limit
       // (MAX_REFERENCE_MEDIA), so nothing is dropped and the result is always
       // valid booking input. Pinned by reference-media-policy.test.ts.
-      referenceImages: referenceUrlsForBooking(offer.request.references),
+      referenceImages: referenceMediaForBooking(offer.request.references),
+      trustedReferenceMedia: true,
       // Server-trusted role from the moderated request. Public booking input
       // never accepts this field; it selects the role through its service.
       trustedRecipientRole: offer.request.role,

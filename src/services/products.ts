@@ -1,5 +1,6 @@
 import type { ProductType } from "@prisma/client";
 
+import { verifyPortfolioUpload } from "@/lib/cloudinary";
 import { db } from "@/lib/db";
 import type { ProductInput } from "@/lib/validations/product";
 import { runProductImageModeration } from "@/services/moderation";
@@ -38,6 +39,15 @@ export async function listProducts({
 }
 
 export async function createProduct(userId: string, input: ProductInput) {
+  for (const image of input.images) {
+    await verifyPortfolioUpload({
+      publicId: image.publicId,
+      url: image.url,
+      userId,
+      type: "IMAGE",
+    });
+  }
+
   const product = await db.product.create({
     data: {
       userId,
@@ -73,9 +83,32 @@ export async function updateProduct(
   userId: string,
   input: ProductInput,
 ) {
-  const existing = await db.product.findUnique({ where: { id } });
+  const existing = await db.product.findUnique({
+    where: { id },
+    include: { images: true },
+  });
   if (!existing || existing.userId !== userId) {
     return null;
+  }
+
+  const existingImages = new Set(
+    existing.images
+      .filter((image): image is typeof image & { publicId: string } =>
+        Boolean(image.publicId),
+      )
+      .map((image) => `${image.publicId}\u0000${image.url}`),
+  );
+
+  // The edit form submits retained images too. Verify only newly introduced
+  // assets, and do it before deleting old image rows inside the transaction.
+  for (const image of input.images) {
+    if (existingImages.has(`${image.publicId}\u0000${image.url}`)) continue;
+    await verifyPortfolioUpload({
+      publicId: image.publicId,
+      url: image.url,
+      userId,
+      type: "IMAGE",
+    });
   }
 
   return db.$transaction(async (tx) => {

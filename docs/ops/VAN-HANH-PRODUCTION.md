@@ -42,9 +42,10 @@ Hai điều rút ra:
 
 ### Hiện trạng thật (tính đến 12/09/2026)
 
-**Chưa có gì tự động báo cho anh khi web lỗi.** Thư viện Sentry đã cài sẵn trong
-code nhưng chưa có tài khoản Sentry để nhận. Chưa có giám sát uptime. Nghĩa là
-hôm nay anh chỉ biết web hỏng khi **có người phản ánh**, hoặc khi tự vào xem.
+Sentry đã được nối bằng DSN trên Vercel Production, nhưng chưa xác nhận người
+nhận cảnh báo và quy tắc cảnh báo. Chưa có giám sát uptime độc lập. Vì vậy hôm
+nay vẫn phải xem Vercel Logs và tự kiểm tra website; không được giả định rằng
+mọi lỗi sẽ tự gửi thông báo đúng người.
 
 Đây là hai việc đầu bảng trong file checklist Excel. Làm xong hai việc đó thì
 mục này cần viết lại.
@@ -280,9 +281,9 @@ consent phải tách riêng từng mục đích).
 
 Viết ra để sau này bổ sung, không phải để lờ đi:
 
-- **Cảnh báo tự động:** chưa có Sentry và chưa có giám sát uptime, nên mục 2 hiện
-  chỉ mô tả cách xem thủ công. Khi cài xong, mục đó cần viết lại: mỗi cảnh báo là
-  gì, khi nào nó kêu, và ba việc đầu tiên cần kiểm tra khi nó kêu.
+- **Cảnh báo tự động:** DSN Sentry production đã có nhưng chưa xác nhận người
+  nhận và quy tắc cảnh báo; cũng chưa có giám sát uptime. Khi hoàn tất, mục 2 cần
+  ghi rõ mỗi cảnh báo là gì, khi nào nó kêu và ba việc đầu tiên cần kiểm tra.
 - **Ai trực:** hiện là "ai rảnh thì làm". Cần chốt người chịu trách nhiệm trước
   khi có người dùng thật phụ thuộc vào hệ thống.
 - **Chế độ bảo trì:** chưa có nút bật trang "đang bảo trì". Cách nhanh nhất hiện

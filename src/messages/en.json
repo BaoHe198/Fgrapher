@@ -211,7 +211,7 @@
     "studios": "Studios for rent",
     "browseStudios": "Browse studios",
     "f1t": "Discover",
-    "f1b": "Filter by role, city, price and availability — every profile is a portfolio first.",
+    "f1b": "Filter by role, city, price and availability — compare creative portfolios and shop catalogues in one place.",
     "f2t": "Book",
     "f2b": "Pick a date and slot from a real calendar. Artists respond quickly by message.",
     "f3t": "Rent or buy",
@@ -1348,6 +1348,7 @@
         "budgetLabel": "Budget",
         "budgetNotSet": "Not set",
         "flexibleRange": "Flexible: {start} — {end}",
+        "flexibleNoRange": "Flexible — no specific window chosen",
         "pendingReviewTitle": "Request awaiting moderation",
         "pendingReviewBody": "Providers cannot see it yet. An admin will review the content and reference media before publishing it.",
         "rejectedTitle": "Request rejected",
@@ -1409,6 +1410,7 @@
         "budgetLabel": "Budget",
         "budgetNotSet": "Not set",
         "flexibleRange": "Flexible: {start} — {end}",
+        "flexibleNoRange": "Flexible — no specific window chosen",
         "addressHiddenNote": "The detailed address only shows once the customer accepts your offer.",
         "yourOfferTitle": "Your offer",
         "sendOfferTitle": "Send an offer",
@@ -1550,7 +1552,7 @@
     "portfolio": {
       "proOnly": {
         "title": "Portfolio is for creative pros",
-        "body": "Add a paid role — Photographer, Videographer, Make-up Artist, Studio, or Camera Shop — to showcase your work.",
+        "body": "Add a creative role — Photographer, Videographer, Make-up Artist, Studio, or Model — to showcase your work.",
         "cta": "Add a role"
       },
       "noProfile": {
@@ -2330,6 +2332,7 @@
         "title": "Costume rentals",
         "helper": "Each outfit appears on your public profile with its photo, daily price and deposit. Customers message you to rent it — there is no booking, and outfits are not sold through Chợ F.",
         "add": "Add outfit",
+        "uploadPhoto": "Upload outfit photo",
         "addTitle": "Add an outfit",
         "editTitle": "Edit outfit",
         "empty": "No outfits yet",
@@ -2347,7 +2350,7 @@
         "photoLabel": "Photo",
         "photoNone": "No photo yet",
         "photoNumbered": "Photo {index}",
-        "photoHelper": "Pick one of your uploaded portfolio photos. A new photo must clear moderation before it appears publicly.",
+        "photoHelper": "Pick an uploaded outfit photo. A new photo must clear moderation before it appears publicly.",
         "descriptionLabel": "Description",
         "activeLabel": "Available to rent",
         "cancel": "Cancel",
@@ -3638,6 +3641,7 @@
       "whereLabel": "Area",
       "budgetLabel": "Budget",
       "flexibleDate": "{start} – {end}",
+      "flexibleNoRange": "Flexible — no specific window chosen",
       "notSet": "Not specified",
       "offer": {
         "count": "{count} offers",
@@ -3767,6 +3771,8 @@
       "title": "Upload media",
       "dropzone": "Drag files here, or click to browse",
       "sizeLimits": "Images up to 10MB, videos up to 100MB",
+      "sizeLimitsImageOnly": "Images up to 10MB",
+      "imageOnly": "Choose an image file",
       "removeFile": "Remove file",
       "titlePlaceholder": "Title (optional)",
       "uploaded": "Uploaded",
@@ -3918,7 +3924,7 @@
       "calendar": "Calendar",
       "reviews": "Reviews",
       "portfolio": "Portfolio",
-      "myRequests": "My bookings",
+      "myRequests": "My requests",
       "opportunities": "Matching bookings",
       "myOffers": "Offers sent",
       "costumes": "My outfits",
@@ -3936,7 +3942,7 @@
       "openMenu": "Open dashboard menu",
       "menuTitle": "Dashboard menu",
       "menuDescription": "Dashboard navigation",
-      "createBooking": "Create booking"
+      "createBooking": "Post a request"
     },
     "suspendedAccountNotice": {
       "title": "Your account has been suspended",

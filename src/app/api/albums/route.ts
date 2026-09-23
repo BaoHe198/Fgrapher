@@ -7,20 +7,35 @@ import {
   requireAuth,
 } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { PORTFOLIO_ROLES } from "@/lib/constants";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { createAlbumSchema } from "@/lib/validations/album";
 import { createAlbum, listAlbums } from "@/services/albums";
 
 export async function GET(request: Request) {
   const t = await getTranslations("apiMessages.albums");
   try {
-    await requireAuth();
+    const session = await requireAuth();
     const { searchParams } = new URL(request.url);
     const profileId = searchParams.get("profileId");
     if (!profileId) {
       return NextResponse.json(
         { data: null, error: "validation_error", message: t("invalidInput") },
         { status: 400 },
+      );
+    }
+
+    const profile = await db.profile.findUnique({
+      where: { id: profileId },
+      select: { userId: true, role: true },
+    });
+    if (
+      !profile ||
+      profile.userId !== session.user.id ||
+      !PROVIDER_ROLES.includes(profile.role)
+    ) {
+      return NextResponse.json(
+        { data: null, error: "forbidden", message: t("profileNotOwned") },
+        { status: 403 },
       );
     }
 
@@ -70,7 +85,7 @@ export async function POST(request: Request) {
         { status: 403 },
       );
     }
-    if (!PORTFOLIO_ROLES.includes(profile.role)) {
+    if (!PROVIDER_ROLES.includes(profile.role)) {
       return NextResponse.json(
         { data: null, error: "forbidden", message: t("profileNotOwned") },
         { status: 403 },

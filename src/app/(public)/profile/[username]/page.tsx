@@ -15,11 +15,7 @@ import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/age-gate";
 import { formatAdministrativeLocation } from "@/lib/location";
-import {
-  PORTFOLIO_ROLES,
-  PROVIDER_ROLES,
-  type ROLE_LABELS,
-} from "@/lib/constants";
+import { PROVIDER_ROLES, type ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
 import { listAlbums } from "@/services/albums";
@@ -164,7 +160,7 @@ export default async function PublicProfilePage({
     // everything they have, including drafts and albums still pending
     // moderation. Same call dashboard/portfolio/page.tsx makes for its
     // own owner-only view.
-    isOwnProfile && PORTFOLIO_ROLES.includes(activeProfile.role)
+    isOwnProfile && PROVIDER_ROLES.includes(activeProfile.role)
       ? listAlbums(activeProfile.id)
       : Promise.resolve(null),
     features.socialFeedEnabled
@@ -198,7 +194,7 @@ export default async function PublicProfilePage({
   // only matters for the narrow window between actual expiry and the
   // next daily cron run.
   const canEditPortfolio =
-    isOwnProfile && PORTFOLIO_ROLES.includes(activeProfile.role)
+    isOwnProfile && PROVIDER_ROLES.includes(activeProfile.role)
       ? await requireActiveSubscription(user.id, activeProfile.role)
           .then(() => true)
           .catch(() => false)

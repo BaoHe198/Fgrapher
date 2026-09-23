@@ -78,7 +78,7 @@ export default async function NewServiceRequestPage({
               budgetMax: draft.budgetMax,
               references: draft.references.map((r) => ({
                 mediaUrl: r.mediaUrl,
-                publicId: r.publicId ?? undefined,
+                publicId: r.publicId ?? "",
               })),
             }
           : null

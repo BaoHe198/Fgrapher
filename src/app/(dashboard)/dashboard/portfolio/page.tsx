@@ -11,7 +11,7 @@ import { SectionHead } from "@/components/ui/section-head";
 import { Tag } from "@/components/ui/tag";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { PORTFOLIO_ROLES } from "@/lib/constants";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { listAlbums } from "@/services/albums";
 
 import { AlbumGrid } from "./album-grid";
@@ -35,7 +35,7 @@ export default async function PortfolioPage({
   }
 
   const canUpload = session.user.roles.some((role) =>
-    PORTFOLIO_ROLES.includes(role),
+    PROVIDER_ROLES.includes(role),
   );
   if (!canUpload) {
     return (
@@ -60,7 +60,7 @@ export default async function PortfolioPage({
   }
 
   const profiles = await db.profile.findMany({
-    where: { userId: session.user.id, role: { in: PORTFOLIO_ROLES } },
+    where: { userId: session.user.id, role: { in: PROVIDER_ROLES } },
     orderBy: { createdAt: "asc" },
   });
 

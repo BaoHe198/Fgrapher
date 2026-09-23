@@ -10,6 +10,7 @@ import {
   OfferNotFoundError,
   OwnRequestOfferError,
   assertProviderMayOffer,
+  assertProviderMayViewOpportunity,
 } from "@/services/request-offers";
 
 const openRequest = {
@@ -77,6 +78,56 @@ describe("quyền gửi đề nghị cho yêu cầu dịch vụ", () => {
   });
 });
 
+describe("quyền xem chi tiết cơ hội", () => {
+  const openDetail = { ...openRequest, offers: [] };
+
+  it("cho phép xem yêu cầu công khai đúng vai trò", () => {
+    assert.doesNotThrow(() =>
+      assertProviderMayViewOpportunity(
+        openDetail,
+        "provider_2",
+        "PHOTOGRAPHER",
+      ),
+    );
+  });
+
+  it("ẩn yêu cầu chưa duyệt hoặc bị từ chối khỏi URL trực tiếp", () => {
+    for (const status of ["PENDING_REVIEW", "REJECTED"] as const) {
+      assert.throws(
+        () =>
+          assertProviderMayViewOpportunity(
+            { ...openDetail, status },
+            "provider_2",
+            "PHOTOGRAPHER",
+          ),
+        OfferNotFoundError,
+      );
+    }
+  });
+
+  it("cho provider xem lại yêu cầu đã đóng nếu chính họ từng gửi offer", () => {
+    assert.doesNotThrow(() =>
+      assertProviderMayViewOpportunity(
+        { ...openDetail, status: "FULFILLED", offers: [{ id: "offer_1" }] },
+        "provider_2",
+        "PHOTOGRAPHER",
+      ),
+    );
+  });
+
+  it("ẩn yêu cầu đã đóng với provider không có offer", () => {
+    assert.throws(
+      () =>
+        assertProviderMayViewOpportunity(
+          { ...openDetail, status: "FULFILLED" },
+          "provider_2",
+          "PHOTOGRAPHER",
+        ),
+      OfferNotFoundError,
+    );
+  });
+});
+
 // These checks pin the read paths too. The owner must not receive or act on
 // their request as a provider, while the system-wide browse remains complete
 // and sends the owner to customer management instead.
@@ -97,12 +148,12 @@ describe("phân biệt yêu cầu của chính mình trong các luồng provider
   });
 
   it("chặn URL chi tiết trực tiếp trước khi ghi audit", () => {
-    const ownerGuard = offerService.indexOf(
-      "if (request.customerId === providerId) throw new OfferNotFoundError()",
+    const detailGuard = offerService.indexOf(
+      "assertProviderMayViewOpportunity(request, providerId, role)",
     );
-    const auditWrite = offerService.indexOf("await logAudit", ownerGuard);
-    assert.ok(ownerGuard >= 0, "missing detail ownership guard");
-    assert.ok(auditWrite > ownerGuard, "ownership guard must run before audit");
+    const auditWrite = offerService.indexOf("await logAudit", detailGuard);
+    assert.ok(detailGuard >= 0, "missing detail access guard");
+    assert.ok(auditWrite > detailGuard, "access guard must run before audit");
   });
 
   it("vẫn hiện yêu cầu của chủ trong danh sách chung và đánh dấu quyền sở hữu", () => {

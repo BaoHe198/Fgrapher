@@ -33,11 +33,13 @@ model User {
   lastName                String?
   username                String?   @unique
   avatar                  String?
+  avatarPublicId          String?
   // Mirrors of firstName+lastName / avatar, required by @auth/prisma-adapter's
   // default field names for OAuth account creation
   name                    String?
   image                   String?
   coverImage              String?
+  coverImagePublicId      String?
   bio                     String?
   phone                   String?
   // Free-text display location kept for backward compatibility. Prefer

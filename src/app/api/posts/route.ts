@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { UploadVerificationError } from "@/lib/cloudinary";
 import { features } from "@/lib/features";
 import { createPostSchema } from "@/lib/validations/post";
 import {
@@ -86,6 +87,17 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (err) {
+    if (err instanceof UploadVerificationError) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "invalid_upload",
+          message: "Uploaded media could not be verified",
+        },
+        { status: 400 },
+      );
+    }
+
     if (err instanceof AuthError) {
       return NextResponse.json(
         { data: null, error: "unauthorized", message: err.message },

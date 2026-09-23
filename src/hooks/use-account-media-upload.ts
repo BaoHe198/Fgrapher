@@ -60,7 +60,10 @@ async function uploadFile(
   );
   const result = await res.json();
   if (!res.ok) throw new Error(messages.failed);
-  return result.secure_url as string;
+  return {
+    url: result.secure_url as string,
+    publicId: result.public_id as string,
+  };
 }
 
 export function useAccountMediaUpload({
@@ -113,7 +116,7 @@ export function useAccountMediaUpload({
         maxBytes: UPLOAD_MAX_BYTES,
         maxDimension: UPLOAD_MAX_DIMENSION,
       });
-      const url = await uploadFile(compressed, {
+      const media = await uploadFile(compressed, {
         unavailable: t("uploadUnavailable"),
         failed: t("uploadFailed"),
       });
@@ -122,7 +125,9 @@ export function useAccountMediaUpload({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
-          target === "avatar" ? { avatar: url } : { coverImage: url },
+          target === "avatar"
+            ? { avatar: media.url, avatarPublicId: media.publicId }
+            : { coverImage: media.url, coverImagePublicId: media.publicId },
         ),
       });
       const body = await res.json();
@@ -131,8 +136,8 @@ export function useAccountMediaUpload({
         return;
       }
 
-      if (target === "avatar") setAvatar(url);
-      else setCoverImage(url);
+      if (target === "avatar") setAvatar(media.url);
+      else setCoverImage(media.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("uploadFailed"));
     } finally {

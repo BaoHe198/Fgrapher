@@ -1,11 +1,12 @@
 "use client";
 
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { ImagePlus, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { UploadMediaModal } from "@/components/modals/upload-media-modal";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import {
   Dialog,
@@ -24,6 +25,7 @@ import { formatCurrency } from "@/lib/utils";
 export interface CostumeMedia {
   id: string;
   url: string;
+  type?: "IMAGE" | "VIDEO";
   title?: string | null;
   moderationStatus: string;
 }
@@ -77,6 +79,10 @@ export function CostumesManager({
   const t = useTranslations("dashboardSettings.profile.costumes");
   const categoryT = useTranslations("profileCategory");
   const [items, setItems] = useState<CostumeItem[]>(initialCostumes);
+  const [media, setMedia] = useState<CostumeMedia[]>(
+    availableMedia.filter((item) => item.type !== "VIDEO"),
+  );
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<CostumeDraft>(EMPTY_DRAFT);
@@ -143,14 +149,14 @@ export function CostumesManager({
       return;
     }
 
-    const media = availableMedia.find((m) => m.id === draft.mediaId) ?? null;
+    const selectedMedia = media.find((m) => m.id === draft.mediaId) ?? null;
     const saved: CostumeItem = {
       ...body.data,
-      media: media
+      media: selectedMedia
         ? {
-            id: media.id,
-            url: media.url,
-            moderationStatus: media.moderationStatus,
+            id: selectedMedia.id,
+            url: selectedMedia.url,
+            moderationStatus: selectedMedia.moderationStatus,
           }
         : null,
     };
@@ -174,14 +180,24 @@ export function CostumesManager({
     // section buried in the profile form — QA-06 read that as the role
     // having no way to post anything at all.
     <div id="costumes" className="flex scroll-mt-24 flex-col gap-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
           {t("title")}
         </span>
-        <Button size="sm" variant="secondary" onClick={openCreate}>
-          <Plus className="size-4" />
-          {t("add")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setUploadOpen(true)}
+          >
+            <ImagePlus className="size-4" />
+            {t("uploadPhoto")}
+          </Button>
+          <Button size="sm" variant="secondary" onClick={openCreate}>
+            <Plus className="size-4" />
+            {t("add")}
+          </Button>
+        </div>
       </div>
       <p className="text-body-sm text-text-tertiary">{t("helper")}</p>
 
@@ -303,7 +319,7 @@ export function CostumesManager({
               label={t("photoLabel")}
               options={[
                 { value: "", label: t("photoNone") },
-                ...availableMedia.map((m, index) => ({
+                ...media.map((m, index) => ({
                   value: m.id,
                   label: m.title ?? t("photoNumbered", { index: index + 1 }),
                 })),
@@ -350,6 +366,27 @@ export function CostumesManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <UploadMediaModal
+        open={uploadOpen}
+        onOpenChange={setUploadOpen}
+        profileId={profileId}
+        role="COSTUME_SHOP"
+        allowStandalone
+        imageOnly
+        onUploaded={(uploaded) =>
+          setMedia((current) => [
+            ...current,
+            ...uploaded.map((item) => ({
+              id: item.id,
+              url: item.url,
+              type: item.type,
+              title: item.title,
+              moderationStatus: item.moderationStatus,
+            })),
+          ])
+        }
+      />
     </div>
   );
 }

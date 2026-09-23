@@ -7,6 +7,7 @@ import {
 } from "@/lib/auth-helpers";
 import { SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
+import { UploadVerificationError } from "@/lib/cloudinary";
 import {
   productCategoryAllowedForRole,
   productSchema,
@@ -43,6 +44,17 @@ export async function GET(request: Request) {
       { status: 200 },
     );
   } catch (err) {
+    if (err instanceof UploadVerificationError) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "invalid_upload",
+          message: "Uploaded product images could not be verified",
+        },
+        { status: 400 },
+      );
+    }
+
     if (err instanceof AuthError) {
       return NextResponse.json(
         { data: null, error: "unauthorized", message: err.message },

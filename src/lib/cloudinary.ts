@@ -32,11 +32,213 @@ export function isCloudinaryConfigured() {
 // have failed with "Invalid Signature". File size is enforced by the
 // Cloudinary account's own plan-level cap plus the client-side checks
 // already in place (e.g. account-media.tsx's MAX_BYTES) — bypassable by
-// a determined attacker calling Cloudinary directly, same residual gap
-// as before this pass. A real server-side cap would need a post-upload
-// check via Cloudinary's Admin API (`cloudinary.api.resource`, reading
-// `bytes`) and deleting anything over the limit — not implemented here.
+// a determined attacker calling Cloudinary directly. Portfolio persistence
+// adds a post-upload Admin API check below; the other upload purposes still
+// need purpose-specific verification before they are protected equally.
 const ALLOWED_UPLOAD_FORMATS = "jpg,jpeg,png,webp,gif,mp4,mov,webm";
+
+type PublicMediaType = "IMAGE" | "VIDEO";
+type PublicUploadPurpose =
+  "portfolio" | "account" | "request" | "booking" | "chat" | "payment";
+type CloudinaryResource = {
+  public_id?: unknown;
+  secure_url?: unknown;
+  bytes?: unknown;
+  format?: unknown;
+  resource_type?: unknown;
+};
+
+export class UploadVerificationError extends Error {
+  constructor() {
+    super("Uploaded media could not be verified");
+    this.name = "UploadVerificationError";
+  }
+}
+
+const PORTFOLIO_UPLOAD_POLICY = {
+  IMAGE: {
+    maxBytes: 10 * 1024 * 1024,
+    formats: new Set(["jpg", "jpeg", "png", "webp", "gif"]),
+    resourceType: "image",
+  },
+  VIDEO: {
+    maxBytes: 100 * 1024 * 1024,
+    formats: new Set(["mp4", "mov", "webm"]),
+    resourceType: "video",
+  },
+} as const;
+
+const ACCOUNT_IMAGE_UPLOAD_POLICY = {
+  maxBytes: 3 * 1024 * 1024,
+  formats: new Set(["jpg", "jpeg", "png", "webp"]),
+  resourceType: "image",
+} as const;
+
+const CHAT_IMAGE_UPLOAD_POLICY = {
+  maxBytes: 2 * 1024 * 1024,
+  formats: new Set(["jpg", "jpeg", "png", "webp"]),
+  resourceType: "image",
+} as const;
+
+const REFERENCE_MEDIA_UPLOAD_POLICY = {
+  IMAGE: {
+    maxBytes: 2 * 1024 * 1024,
+    formats: new Set(["jpg", "jpeg", "png", "webp", "gif"]),
+    resourceType: "image",
+  },
+  VIDEO: {
+    maxBytes: 50 * 1024 * 1024,
+    formats: new Set(["mp4", "mov", "webm"]),
+    resourceType: "video",
+  },
+} as const;
+
+function uploadPolicyFor(purpose: PublicUploadPurpose, type: PublicMediaType) {
+  if (purpose === "account" || purpose === "payment") {
+    return ACCOUNT_IMAGE_UPLOAD_POLICY;
+  }
+  if (purpose === "chat") return CHAT_IMAGE_UPLOAD_POLICY;
+  if (purpose === "request" || purpose === "booking") {
+    return REFERENCE_MEDIA_UPLOAD_POLICY[type];
+  }
+  return PORTFOLIO_UPLOAD_POLICY[type];
+}
+
+function isValidPublicAsset(
+  asset: CloudinaryResource,
+  input: {
+    publicId: string;
+    url: string;
+    userId: string;
+    type: PublicMediaType;
+    purpose: PublicUploadPurpose;
+  },
+) {
+  const policy = uploadPolicyFor(input.purpose, input.type);
+  const expectedPrefix = `fgrapher/${input.purpose}/${input.userId}/`;
+
+  return (
+    asset.public_id === input.publicId &&
+    asset.public_id.startsWith(expectedPrefix) &&
+    asset.secure_url === input.url &&
+    asset.resource_type === policy.resourceType &&
+    typeof asset.bytes === "number" &&
+    asset.bytes > 0 &&
+    asset.bytes <= policy.maxBytes &&
+    typeof asset.format === "string" &&
+    policy.formats.has(asset.format.toLowerCase())
+  );
+}
+
+export function isValidPortfolioAsset(
+  asset: CloudinaryResource,
+  input: {
+    publicId: string;
+    url: string;
+    userId: string;
+    type: PublicMediaType;
+  },
+) {
+  return isValidPublicAsset(asset, { ...input, purpose: "portfolio" });
+}
+
+export function isValidAccountImageAsset(
+  asset: CloudinaryResource,
+  input: { publicId: string; url: string; userId: string },
+) {
+  return isValidPublicAsset(asset, {
+    ...input,
+    type: "IMAGE",
+    purpose: "account",
+  });
+}
+
+/**
+ * Confirms that direct browser uploads satisfy their server policy before
+ * their URL is persisted. Cloudinary signatures constrain the upload request,
+ * but this Admin API read is the authoritative size and metadata check after
+ * the upload completes.
+ */
+async function verifyPublicUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+  type: PublicMediaType;
+  purpose: PublicUploadPurpose;
+}) {
+  const policy = uploadPolicyFor(input.purpose, input.type);
+  let asset: CloudinaryResource;
+
+  try {
+    asset = await cloudinary.api.resource(input.publicId, {
+      resource_type: policy.resourceType,
+      type: "upload",
+    });
+  } catch {
+    throw new UploadVerificationError();
+  }
+
+  if (isValidPublicAsset(asset, input)) return;
+
+  // An asset that is actually in this user's expected folder but violates the
+  // server policy is an orphaned, disallowed upload. Remove it. Do not
+  // delete an asset outside that folder: a forged public ID must never let a
+  // user delete another user's content.
+  if (
+    typeof asset.public_id === "string" &&
+    asset.public_id.startsWith(`fgrapher/${input.purpose}/${input.userId}/`) &&
+    (typeof asset.bytes !== "number" ||
+      asset.bytes > policy.maxBytes ||
+      typeof asset.format !== "string" ||
+      !policy.formats.has(asset.format.toLowerCase()) ||
+      asset.resource_type !== policy.resourceType)
+  ) {
+    try {
+      await deleteCloudinaryAsset(asset.public_id, policy.resourceType);
+    } catch {
+      // The validation failure still blocks persistence. A scheduled cleanup
+      // can remove the rare orphan if Cloudinary deletion is temporarily down.
+    }
+  }
+
+  throw new UploadVerificationError();
+}
+
+export async function verifyPortfolioUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+  type: PublicMediaType;
+}) {
+  return verifyPublicUpload({ ...input, purpose: "portfolio" });
+}
+
+export async function verifyAccountImageUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+}) {
+  return verifyPublicUpload({ ...input, type: "IMAGE", purpose: "account" });
+}
+
+export async function verifyReferenceMediaUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+  type: PublicMediaType;
+  purpose: "request" | "booking";
+}) {
+  return verifyPublicUpload(input);
+}
+
+export async function verifyPurposeImageUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+  purpose: "chat" | "payment";
+}) {
+  return verifyPublicUpload({ ...input, type: "IMAGE" });
+}
 
 // Portfolio/product/chat images — public delivery type (the default).
 // Never use this for KYC documents; see generateKycUploadSignature below,

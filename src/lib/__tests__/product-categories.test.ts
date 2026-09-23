@@ -10,6 +10,7 @@ import {
   normalizeProductCategory,
   productCategoriesForRole,
   productCategoryQueryValues,
+  productSchema,
 } from "@/lib/validations/product";
 
 // QA-04 (22/09/2026): Văn Long Camera had five products visible on /shop and
@@ -121,6 +122,43 @@ describe("truy vấn hồ sơ công khai chịu được dữ liệu cũ", () =>
     assert.doesNotMatch(
       source,
       /in:\s*\[\.\.\.productCategoriesForRole\(role\)\]/,
+    );
+  });
+});
+
+describe("ảnh sản phẩm được xác minh", () => {
+  const product = {
+    name: "Máy ảnh thử nghiệm",
+    category: "Camera body",
+    type: "SALE" as const,
+    price: 1,
+    condition: "NEW" as const,
+    stock: 1,
+    isActive: true,
+  };
+
+  it("không nhận URL ảnh thiếu public ID từ Cloudinary", () => {
+    assert.equal(
+      productSchema.safeParse({
+        ...product,
+        images: [{ url: "https://res.cloudinary.com/demo/image/upload/a.jpg" }],
+      }).success,
+      false,
+    );
+  });
+
+  it("nhận ảnh có public ID để server xác minh", () => {
+    assert.equal(
+      productSchema.safeParse({
+        ...product,
+        images: [
+          {
+            url: "https://res.cloudinary.com/demo/image/upload/a.jpg",
+            publicId: "fgrapher/portfolio/user-1/a",
+          },
+        ],
+      }).success,
+      true,
     );
   });
 });

@@ -32,10 +32,13 @@ const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 // only knows how to decode images via createImageBitmap.
 const UPLOAD_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 const UPLOAD_IMAGE_MAX_DIMENSION = 2400;
-const ACCEPT = {
+const IMAGE_ACCEPT = {
   "image/jpeg": [".jpg", ".jpeg"],
   "image/png": [".png"],
   "image/webp": [".webp"],
+};
+const MEDIA_ACCEPT = {
+  ...IMAGE_ACCEPT,
   "video/mp4": [".mp4"],
   "video/quicktime": [".mov"],
 };
@@ -68,6 +71,8 @@ interface UploadMediaModalProps {
   // renders first, matching the prompt's Bước 1.
   albumId?: string;
   role?: Role;
+  allowStandalone?: boolean;
+  imageOnly?: boolean;
   onUploaded: (items: UploadedMedia[]) => void;
 }
 
@@ -133,6 +138,8 @@ export function UploadMediaModal({
   profileId,
   albumId,
   role,
+  allowStandalone = false,
+  imageOnly = false,
   onUploaded,
 }: UploadMediaModalProps) {
   const t = useTranslations("sharedComponents.uploadMediaModal");
@@ -141,7 +148,7 @@ export function UploadMediaModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
 
-  const needsAlbumPicker = !albumId;
+  const needsAlbumPicker = !albumId && !allowStandalone;
   const [albums, setAlbums] = useState<AlbumOption[]>([]);
   const [selectedAlbumId, setSelectedAlbumId] = useState("");
   const [newAlbumTitle, setNewAlbumTitle] = useState("");
@@ -217,10 +224,13 @@ export function UploadMediaModal({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: ACCEPT,
+    accept: imageOnly ? IMAGE_ACCEPT : MEDIA_ACCEPT,
     multiple: true,
     validator: (file) => {
       const isVideo = file.type.startsWith("video/");
+      if (imageOnly && isVideo) {
+        return { code: "video-not-allowed", message: t("imageOnly") };
+      }
       const max = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
       if (file.size > max) {
         return {
@@ -241,7 +251,7 @@ export function UploadMediaModal({
   };
 
   const uploadAll = async () => {
-    if (!rightsConfirmed || !resolvedAlbumId) return;
+    if (!rightsConfirmed || (!resolvedAlbumId && !allowStandalone)) return;
     setIsSubmitting(true);
 
     const sigRes = await fetch("/api/upload/signature", { method: "POST" });
@@ -296,7 +306,7 @@ export function UploadMediaModal({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               profileId,
-              albumId: resolvedAlbumId,
+              albumId: resolvedAlbumId ?? undefined,
               url: result.secure_url,
               publicId: result.public_id,
               type,
@@ -308,13 +318,16 @@ export function UploadMediaModal({
           });
           const saveBody = await saveRes.json();
 
+          if (!saveRes.ok) {
+            throw new Error(saveBody.message ?? t("uploadFailed"));
+          }
+
           setFiles((prev) =>
             prev.map((cur, idx) =>
               idx === i ? { ...cur, status: "done" } : cur,
             ),
           );
 
-          if (!saveRes.ok) return null;
           return {
             id: saveBody.data.id,
             url: result.secure_url,
@@ -339,6 +352,8 @@ export function UploadMediaModal({
     const uploaded = results.filter((r): r is UploadedMedia => r !== null);
 
     setIsSubmitting(false);
+    if (uploaded.length === 0) return;
+
     onUploaded(uploaded);
     setFiles([]);
     onOpenChange(false);
@@ -421,7 +436,7 @@ export function UploadMediaModal({
           </div>
         ) : null}
 
-        {resolvedAlbumId ? (
+        {resolvedAlbumId || allowStandalone ? (
           <>
             <div
               {...getRootProps()}
@@ -435,7 +450,7 @@ export function UploadMediaModal({
               <UploadCloud className="size-6" />
               <p className="text-body-sm">{t("dropzone")}</p>
               <p className="text-body-sm text-text-tertiary">
-                {t("sizeLimits")}
+                {t(imageOnly ? "sizeLimitsImageOnly" : "sizeLimits")}
               </p>
             </div>
 
