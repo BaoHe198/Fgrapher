@@ -9,6 +9,10 @@ import {
 import { db } from "@/lib/db";
 import { PORTFOLIO_ROLES } from "@/lib/constants";
 import { ROLE_PLANS } from "@/lib/constants/plans";
+import {
+  UploadVerificationError,
+  verifyPortfolioUpload,
+} from "@/lib/cloudinary";
 import { getCreatePortfolioMediaSchema } from "@/lib/validations/portfolio";
 import { runModeration } from "@/services/moderation";
 
@@ -99,6 +103,13 @@ export async function POST(request: Request) {
       }
     }
 
+    await verifyPortfolioUpload({
+      publicId: parsed.data.publicId,
+      url: parsed.data.url,
+      userId: session.user.id,
+      type: parsed.data.type,
+    });
+
     const media = await db.profileMedia.create({
       data: {
         profileId: profile.id,
@@ -128,6 +139,13 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (err) {
+    if (err instanceof UploadVerificationError) {
+      return NextResponse.json(
+        { data: null, error: "invalid_upload", message: t("invalidInput") },
+        { status: 400 },
+      );
+    }
+
     if (err instanceof AuthError) {
       return NextResponse.json(
         { data: null, error: "unauthorized", message: err.message },

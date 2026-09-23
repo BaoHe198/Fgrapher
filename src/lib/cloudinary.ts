@@ -32,11 +32,114 @@ export function isCloudinaryConfigured() {
 // have failed with "Invalid Signature". File size is enforced by the
 // Cloudinary account's own plan-level cap plus the client-side checks
 // already in place (e.g. account-media.tsx's MAX_BYTES) — bypassable by
-// a determined attacker calling Cloudinary directly, same residual gap
-// as before this pass. A real server-side cap would need a post-upload
-// check via Cloudinary's Admin API (`cloudinary.api.resource`, reading
-// `bytes`) and deleting anything over the limit — not implemented here.
+// a determined attacker calling Cloudinary directly. Portfolio persistence
+// adds a post-upload Admin API check below; the other upload purposes still
+// need purpose-specific verification before they are protected equally.
 const ALLOWED_UPLOAD_FORMATS = "jpg,jpeg,png,webp,gif,mp4,mov,webm";
+
+type PublicMediaType = "IMAGE" | "VIDEO";
+type CloudinaryResource = {
+  public_id?: unknown;
+  secure_url?: unknown;
+  bytes?: unknown;
+  format?: unknown;
+  resource_type?: unknown;
+};
+
+export class UploadVerificationError extends Error {
+  constructor() {
+    super("Uploaded media could not be verified");
+    this.name = "UploadVerificationError";
+  }
+}
+
+const PORTFOLIO_UPLOAD_POLICY = {
+  IMAGE: {
+    maxBytes: 10 * 1024 * 1024,
+    formats: new Set(["jpg", "jpeg", "png", "webp", "gif"]),
+    resourceType: "image",
+  },
+  VIDEO: {
+    maxBytes: 100 * 1024 * 1024,
+    formats: new Set(["mp4", "mov", "webm"]),
+    resourceType: "video",
+  },
+} as const;
+
+export function isValidPortfolioAsset(
+  asset: CloudinaryResource,
+  input: {
+    publicId: string;
+    url: string;
+    userId: string;
+    type: PublicMediaType;
+  },
+) {
+  const policy = PORTFOLIO_UPLOAD_POLICY[input.type];
+  const expectedPrefix = `fgrapher/portfolio/${input.userId}/`;
+
+  return (
+    asset.public_id === input.publicId &&
+    asset.public_id.startsWith(expectedPrefix) &&
+    asset.secure_url === input.url &&
+    asset.resource_type === policy.resourceType &&
+    typeof asset.bytes === "number" &&
+    asset.bytes > 0 &&
+    asset.bytes <= policy.maxBytes &&
+    typeof asset.format === "string" &&
+    policy.formats.has(asset.format.toLowerCase())
+  );
+}
+
+/**
+ * Confirms that direct browser uploads satisfy the server's portfolio
+ * policy before their URL is persisted. Cloudinary signatures constrain the
+ * upload request, but this Admin API read is the authoritative size and
+ * metadata check after the upload completes.
+ */
+export async function verifyPortfolioUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+  type: PublicMediaType;
+}) {
+  const policy = PORTFOLIO_UPLOAD_POLICY[input.type];
+  let asset: CloudinaryResource;
+
+  try {
+    asset = await cloudinary.api.resource(input.publicId, {
+      resource_type: policy.resourceType,
+      type: "upload",
+    });
+  } catch {
+    throw new UploadVerificationError();
+  }
+
+  if (isValidPortfolioAsset(asset, input)) return;
+
+  // An asset that is actually in this user's portfolio folder but violates
+  // the server policy is an orphaned, disallowed upload. Remove it. Do not
+  // delete an asset outside that folder: a forged public ID must never let a
+  // user delete another user's content.
+  if (
+    typeof asset.public_id === "string" &&
+    asset.public_id.startsWith(`fgrapher/portfolio/${input.userId}/`) &&
+    (typeof asset.bytes !== "number" ||
+      asset.bytes > policy.maxBytes ||
+      typeof asset.format !== "string" ||
+      !policy.formats.has(asset.format.toLowerCase()) ||
+      asset.resource_type !== policy.resourceType)
+  ) {
+    try {
+      await deleteCloudinaryAsset(asset.public_id, policy.resourceType);
+    } catch {
+      // The validation failure still blocks persistence. A scheduled cleanup
+      // can remove the rare orphan if Cloudinary deletion is temporarily down.
+    }
+  }
+
+  throw new UploadVerificationError();
+}
 
 // Portfolio/product/chat images — public delivery type (the default).
 // Never use this for KYC documents; see generateKycUploadSignature below,
