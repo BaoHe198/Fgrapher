@@ -7,6 +7,10 @@ import {
   revalidateProfileUsername,
 } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import {
+  UploadVerificationError,
+  verifyAccountImageUpload,
+} from "@/lib/cloudinary";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { updateMeSchema } from "@/lib/validations/user";
@@ -100,15 +104,54 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const currentMedia = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        avatar: true,
+        avatarPublicId: true,
+        coverImage: true,
+        coverImagePublicId: true,
+      },
+    });
+
+    const accountMedia = [
+      {
+        url: parsed.data.avatar,
+        publicId: parsed.data.avatarPublicId,
+        currentUrl: currentMedia?.avatar,
+        currentPublicId: currentMedia?.avatarPublicId,
+      },
+      {
+        url: parsed.data.coverImage,
+        publicId: parsed.data.coverImagePublicId,
+        currentUrl: currentMedia?.coverImage,
+        currentPublicId: currentMedia?.coverImagePublicId,
+      },
+    ];
+
+    for (const media of accountMedia) {
+      if (media.url === undefined || media.url === null) continue;
+      if (media.url === media.currentUrl && !media.publicId) continue;
+      if (!media.publicId) throw new UploadVerificationError();
+      await verifyAccountImageUpload({
+        url: media.url,
+        publicId: media.publicId,
+        userId: session.user.id,
+      });
+    }
+
     // Prompt G2, VIỆC 2 — avatar/cover skip the human moderation queue
     // portfolio photos go through, but still get scanned for auto-block
     // (never auto-approved into a queue — just outright rejected here if
     // flagged). MockScanner never flags anything today (see
     // services/moderation.ts's comment); this wiring is what a real
     // scanner implementation plugs into later.
-    for (const url of [parsed.data.avatar, parsed.data.coverImage]) {
-      if (!url) continue;
-      const result = await contentScanner.scan({ url, publicId: null });
+    for (const media of accountMedia) {
+      if (!media.url) continue;
+      const result = await contentScanner.scan({
+        url: media.url,
+        publicId: media.publicId ?? media.currentPublicId ?? null,
+      });
       if (result.verdict === "flagged") {
         const t = await getTranslations("apiMessages.users");
         return NextResponse.json(
@@ -122,7 +165,14 @@ export async function PATCH(request: Request) {
       }
     }
 
-    const { wardId, phone, currentPassword, ...rest } = parsed.data;
+    const {
+      wardId,
+      phone,
+      currentPassword,
+      avatarPublicId,
+      coverImagePublicId,
+      ...rest
+    } = parsed.data;
 
     // Changing the account's email requires proving the current password
     // first — without this, a session alone (a stolen cookie, an XSS
@@ -218,6 +268,14 @@ export async function PATCH(request: Request) {
       where: { id: session.user.id },
       data: {
         ...rest,
+        ...(parsed.data.avatar !== undefined && {
+          avatarPublicId: parsed.data.avatar ? avatarPublicId : null,
+        }),
+        ...(parsed.data.coverImage !== undefined && {
+          coverImagePublicId: parsed.data.coverImage
+            ? coverImagePublicId
+            : null,
+        }),
         phone,
         wardId,
         ...locationUpdate,
@@ -241,6 +299,17 @@ export async function PATCH(request: Request) {
       { status: 200 },
     );
   } catch (err) {
+    if (err instanceof UploadVerificationError) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "invalid_upload",
+          message: "Uploaded account media could not be verified",
+        },
+        { status: 400 },
+      );
+    }
+
     if (err instanceof AuthError) {
       return NextResponse.json(
         { data: null, error: "unauthorized", message: err.message },

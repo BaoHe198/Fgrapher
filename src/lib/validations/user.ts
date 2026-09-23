@@ -73,7 +73,9 @@ export const updateMeSchema = z.object({
   acceptingBookings: z.boolean().optional(),
   notificationPreferences: notificationPreferencesSchema.optional(),
   avatar: z.string().url().nullable().optional(),
+  avatarPublicId: z.string().min(1).optional(),
   coverImage: z.string().url().nullable().optional(),
+  coverImagePublicId: z.string().min(1).optional(),
   bio: z.string().max(500, "Bio must be 500 characters or fewer").optional(),
   username: z
     .string()
@@ -133,7 +135,9 @@ export function getUpdateMeSchema(t: (key: string) => string) {
     acceptingBookings: z.boolean().optional(),
     notificationPreferences: notificationPreferencesSchema.optional(),
     avatar: z.string().url().nullable().optional(),
+    avatarPublicId: z.string().min(1).optional(),
     coverImage: z.string().url().nullable().optional(),
+    coverImagePublicId: z.string().min(1).optional(),
     bio: z.string().max(500, t("bioTooLong")).optional(),
     username: z
       .string()

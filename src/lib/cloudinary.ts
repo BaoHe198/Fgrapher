@@ -38,6 +38,7 @@ export function isCloudinaryConfigured() {
 const ALLOWED_UPLOAD_FORMATS = "jpg,jpeg,png,webp,gif,mp4,mov,webm";
 
 type PublicMediaType = "IMAGE" | "VIDEO";
+type PublicUploadPurpose = "portfolio" | "account";
 type CloudinaryResource = {
   public_id?: unknown;
   secure_url?: unknown;
@@ -66,17 +67,27 @@ const PORTFOLIO_UPLOAD_POLICY = {
   },
 } as const;
 
-export function isValidPortfolioAsset(
+const ACCOUNT_IMAGE_UPLOAD_POLICY = {
+  maxBytes: 3 * 1024 * 1024,
+  formats: new Set(["jpg", "jpeg", "png", "webp"]),
+  resourceType: "image",
+} as const;
+
+function isValidPublicAsset(
   asset: CloudinaryResource,
   input: {
     publicId: string;
     url: string;
     userId: string;
     type: PublicMediaType;
+    purpose: PublicUploadPurpose;
   },
 ) {
-  const policy = PORTFOLIO_UPLOAD_POLICY[input.type];
-  const expectedPrefix = `fgrapher/portfolio/${input.userId}/`;
+  const policy =
+    input.purpose === "account"
+      ? ACCOUNT_IMAGE_UPLOAD_POLICY
+      : PORTFOLIO_UPLOAD_POLICY[input.type];
+  const expectedPrefix = `fgrapher/${input.purpose}/${input.userId}/`;
 
   return (
     asset.public_id === input.publicId &&
@@ -91,19 +102,46 @@ export function isValidPortfolioAsset(
   );
 }
 
+export function isValidPortfolioAsset(
+  asset: CloudinaryResource,
+  input: {
+    publicId: string;
+    url: string;
+    userId: string;
+    type: PublicMediaType;
+  },
+) {
+  return isValidPublicAsset(asset, { ...input, purpose: "portfolio" });
+}
+
+export function isValidAccountImageAsset(
+  asset: CloudinaryResource,
+  input: { publicId: string; url: string; userId: string },
+) {
+  return isValidPublicAsset(asset, {
+    ...input,
+    type: "IMAGE",
+    purpose: "account",
+  });
+}
+
 /**
- * Confirms that direct browser uploads satisfy the server's portfolio
- * policy before their URL is persisted. Cloudinary signatures constrain the
- * upload request, but this Admin API read is the authoritative size and
- * metadata check after the upload completes.
+ * Confirms that direct browser uploads satisfy their server policy before
+ * their URL is persisted. Cloudinary signatures constrain the upload request,
+ * but this Admin API read is the authoritative size and metadata check after
+ * the upload completes.
  */
-export async function verifyPortfolioUpload(input: {
+async function verifyPublicUpload(input: {
   publicId: string;
   url: string;
   userId: string;
   type: PublicMediaType;
+  purpose: PublicUploadPurpose;
 }) {
-  const policy = PORTFOLIO_UPLOAD_POLICY[input.type];
+  const policy =
+    input.purpose === "account"
+      ? ACCOUNT_IMAGE_UPLOAD_POLICY
+      : PORTFOLIO_UPLOAD_POLICY[input.type];
   let asset: CloudinaryResource;
 
   try {
@@ -115,15 +153,15 @@ export async function verifyPortfolioUpload(input: {
     throw new UploadVerificationError();
   }
 
-  if (isValidPortfolioAsset(asset, input)) return;
+  if (isValidPublicAsset(asset, input)) return;
 
-  // An asset that is actually in this user's portfolio folder but violates
-  // the server policy is an orphaned, disallowed upload. Remove it. Do not
+  // An asset that is actually in this user's expected folder but violates the
+  // server policy is an orphaned, disallowed upload. Remove it. Do not
   // delete an asset outside that folder: a forged public ID must never let a
   // user delete another user's content.
   if (
     typeof asset.public_id === "string" &&
-    asset.public_id.startsWith(`fgrapher/portfolio/${input.userId}/`) &&
+    asset.public_id.startsWith(`fgrapher/${input.purpose}/${input.userId}/`) &&
     (typeof asset.bytes !== "number" ||
       asset.bytes > policy.maxBytes ||
       typeof asset.format !== "string" ||
@@ -139,6 +177,23 @@ export async function verifyPortfolioUpload(input: {
   }
 
   throw new UploadVerificationError();
+}
+
+export async function verifyPortfolioUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+  type: PublicMediaType;
+}) {
+  return verifyPublicUpload({ ...input, purpose: "portfolio" });
+}
+
+export async function verifyAccountImageUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+}) {
+  return verifyPublicUpload({ ...input, type: "IMAGE", purpose: "account" });
 }
 
 // Portfolio/product/chat images — public delivery type (the default).

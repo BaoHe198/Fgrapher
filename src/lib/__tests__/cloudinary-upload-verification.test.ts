@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isValidPortfolioAsset } from "@/lib/cloudinary";
+import {
+  isValidAccountImageAsset,
+  isValidPortfolioAsset,
+} from "@/lib/cloudinary";
 
 const input = {
   publicId: "fgrapher/portfolio/user-1/photo",
@@ -41,5 +44,40 @@ describe("isValidPortfolioAsset", () => {
       ),
       false,
     );
+  });
+});
+
+describe("isValidAccountImageAsset", () => {
+  const accountInput = {
+    publicId: "fgrapher/account/user-1/avatar",
+    url: "https://res.cloudinary.com/demo/image/upload/v1/fgrapher/account/user-1/avatar.jpg",
+    userId: "user-1",
+  };
+
+  it("accepts an account image within its 3 MiB limit", () => {
+    assert.equal(
+      isValidAccountImageAsset(
+        {
+          public_id: accountInput.publicId,
+          secure_url: accountInput.url,
+          bytes: 3 * 1024 * 1024,
+          format: "webp",
+          resource_type: "image",
+        },
+        accountInput,
+      ),
+      true,
+    );
+  });
+
+  it("rejects an image outside the account folder or above the limit", () => {
+    const asset = {
+      public_id: "fgrapher/portfolio/user-1/avatar",
+      secure_url: accountInput.url,
+      bytes: 3 * 1024 * 1024 + 1,
+      format: "jpg",
+      resource_type: "image",
+    };
+    assert.equal(isValidAccountImageAsset(asset, accountInput), false);
   });
 });
