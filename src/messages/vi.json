@@ -211,7 +211,7 @@
     "studios": "Studio cho thuê",
     "browseStudios": "Xem studio",
     "f1t": "Khám phá",
-    "f1b": "Lọc theo vai trò, thành phố, giá và lịch trống — mỗi hồ sơ trước hết là một portfolio.",
+    "f1b": "Lọc theo vai trò, thành phố, giá và lịch trống — so sánh portfolio sáng tạo và danh mục cửa hàng tại một nơi.",
     "f2t": "Đặt lịch",
     "f2b": "Chọn ngày và khung giờ trên lịch thật. Nghệ sĩ phản hồi nhanh chóng qua tin nhắn.",
     "f3t": "Thuê hoặc mua",
@@ -3924,7 +3924,7 @@
       "calendar": "Lịch làm việc",
       "reviews": "Đánh giá",
       "portfolio": "Portfolio",
-      "myRequests": "Booking của tôi",
+      "myRequests": "Yêu cầu của tôi",
       "opportunities": "Booking phù hợp",
       "myOffers": "Đề nghị đã gửi",
       "costumes": "Trang phục của tôi",
@@ -3942,7 +3942,7 @@
       "openMenu": "Mở menu bảng điều khiển",
       "menuTitle": "Menu bảng điều khiển",
       "menuDescription": "Điều hướng bảng điều khiển",
-      "createBooking": "Tạo Booking"
+      "createBooking": "Đăng yêu cầu"
     },
     "suspendedAccountNotice": {
       "title": "Tài khoản của bạn đã bị tạm khóa",
