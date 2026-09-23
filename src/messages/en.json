@@ -1552,7 +1552,7 @@
     "portfolio": {
       "proOnly": {
         "title": "Portfolio is for creative pros",
-        "body": "Add a paid role — Photographer, Videographer, Make-up Artist, Studio, or Camera Shop — to showcase your work.",
+        "body": "Add a creative role — Photographer, Videographer, Make-up Artist, Studio, or Model — to showcase your work.",
         "cta": "Add a role"
       },
       "noProfile": {
@@ -2332,6 +2332,7 @@
         "title": "Costume rentals",
         "helper": "Each outfit appears on your public profile with its photo, daily price and deposit. Customers message you to rent it — there is no booking, and outfits are not sold through Chợ F.",
         "add": "Add outfit",
+        "uploadPhoto": "Upload outfit photo",
         "addTitle": "Add an outfit",
         "editTitle": "Edit outfit",
         "empty": "No outfits yet",
@@ -2349,7 +2350,7 @@
         "photoLabel": "Photo",
         "photoNone": "No photo yet",
         "photoNumbered": "Photo {index}",
-        "photoHelper": "Pick one of your uploaded portfolio photos. A new photo must clear moderation before it appears publicly.",
+        "photoHelper": "Pick an uploaded outfit photo. A new photo must clear moderation before it appears publicly.",
         "descriptionLabel": "Description",
         "activeLabel": "Available to rent",
         "cancel": "Cancel",
@@ -3770,6 +3771,8 @@
       "title": "Upload media",
       "dropzone": "Drag files here, or click to browse",
       "sizeLimits": "Images up to 10MB, videos up to 100MB",
+      "sizeLimitsImageOnly": "Images up to 10MB",
+      "imageOnly": "Choose an image file",
       "removeFile": "Remove file",
       "titlePlaceholder": "Title (optional)",
       "uploaded": "Uploaded",

@@ -1552,7 +1552,7 @@
     "portfolio": {
       "proOnly": {
         "title": "Portfolio dành cho người làm nghề sáng tạo",
-        "body": "Thêm một vai trò trả phí — Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm, Studio hoặc Cửa hàng máy ảnh — để giới thiệu tác phẩm của bạn.",
+        "body": "Thêm một vai trò sáng tạo — Nhiếp ảnh gia, Quay phim, Chuyên viên trang điểm, Studio hoặc Người mẫu — để giới thiệu tác phẩm của bạn.",
         "cta": "Thêm vai trò"
       },
       "noProfile": {
@@ -2332,6 +2332,7 @@
         "title": "Trang phục cho thuê",
         "helper": "Mỗi bộ đồ hiển thị trên hồ sơ công khai của bạn kèm ảnh, giá thuê theo ngày và tiền cọc. Khách xem rồi nhắn tin để thuê — không đặt lịch, không bán qua Chợ F.",
         "add": "Thêm bộ đồ",
+        "uploadPhoto": "Tải ảnh trang phục",
         "addTitle": "Thêm bộ trang phục",
         "editTitle": "Sửa bộ trang phục",
         "empty": "Chưa có bộ trang phục nào",
@@ -2349,7 +2350,7 @@
         "photoLabel": "Ảnh",
         "photoNone": "Chưa gắn ảnh",
         "photoNumbered": "Ảnh số {index}",
-        "photoHelper": "Chọn từ ảnh portfolio đã tải lên. Ảnh mới phải qua kiểm duyệt trước khi hiện công khai.",
+        "photoHelper": "Chọn ảnh trang phục đã tải lên. Ảnh mới phải qua kiểm duyệt trước khi hiện công khai.",
         "descriptionLabel": "Mô tả",
         "activeLabel": "Đang cho thuê",
         "cancel": "Huỷ",
@@ -3770,6 +3771,8 @@
       "title": "Tải ảnh/video lên",
       "dropzone": "Kéo thả file vào đây, hoặc bấm để chọn",
       "sizeLimits": "Ảnh tối đa 10MB, video tối đa 100MB",
+      "sizeLimitsImageOnly": "Ảnh tối đa 10MB",
+      "imageOnly": "Hãy chọn một tệp ảnh",
       "removeFile": "Xóa file",
       "titlePlaceholder": "Tiêu đề (không bắt buộc)",
       "uploaded": "Đã tải lên",
