@@ -43,7 +43,9 @@ trên dashboard tương ứng.
 - Che nội dung lỗi trực tiếp từ cổng thanh toán.
 
 Migration `20260923093000_add_account_media_public_ids` đã áp dụng thành công
-trên database development. Production chưa được áp dụng.
+trên database development. Hai biến `DATABASE_URL` và `DIRECT_URL` của Vercel
+Preview đã được đồng bộ lại với database development; Production chưa được áp
+dụng hoặc thay đổi.
 
 ## Kết quả kiểm tra
 
@@ -53,11 +55,15 @@ trên database development. Production chưa được áp dụng.
 - `pnpm build`: đạt, tạo thành công 166 route/page.
 - Smoke test production build: `/` và `/api/health` trả HTTP 200; các security
   header xuất hiện trong response.
+- Vercel Preview của commit `1a6b72d`: trạng thái `Ready`; alias nhánh tải được
+  trang chủ và dữ liệu provider, không có error log runtime. Lỗi build enum
+  `COSTUME_SHOP` đã hết sau khi sửa cấu hình database Preview.
 
 ## Việc còn lại theo thứ tự ưu tiên
 
-1. Tạo Preview từ nhánh, chạy migration trên môi trường Preview/dev và thử các
-   luồng upload, chat, yêu cầu, booking, thanh toán giả lập.
+1. Dùng tài khoản thử trên Preview để đi hết các luồng upload, chat, yêu cầu,
+   booking và thanh toán giả lập. Preview đang bật Vercel Deployment Protection
+   nên các smoke test ẩn danh từ CI chưa truy cập trực tiếp được.
 2. Sau khi duyệt Preview, merge và chạy migration production qua workflow có
    approval. Không deploy code dùng cột mới rồi để migration chờ lâu.
 3. Chọn shared rate-limit store (Vercel KV/Upstash Redis hoặc giải pháp tương
