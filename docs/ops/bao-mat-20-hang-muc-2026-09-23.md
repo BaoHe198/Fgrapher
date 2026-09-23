@@ -31,7 +31,7 @@ trên dashboard tương ứng.
 |  17 | Database không mở public            | Cần xác nhận dashboard   | Tài liệu dự án ghi Supabase Data API đã tắt. Phải kiểm tra lại trên project production; code không thể chứng minh cấu hình dashboard.                                                                                                           |
 |  18 | DB user chỉ có đúng quyền cần dùng  | Cần cấu hình hạ tầng     | Cần tách/quản lý role kết nối production và kiểm tra quyền trong Supabase/Postgres. Không giải quyết bằng frontend/API code.                                                                                                                    |
 |  19 | Đưa web qua Cloudflare              | Chưa làm                 | Hiện dùng Vercel. Chỉ cấu hình Cloudflare khi đã có domain và quyết định DNS/WAF; tránh thêm proxy khi chưa có kế hoạch cache, webhook và rollback.                                                                                             |
-|  20 | Backup + theo dõi lỗi               | Một phần                 | Code Sentry và health endpoint đã có; chưa có tài khoản Sentry/uptime alert. Cần xác nhận backup/PITR production và diễn tập khôi phục thay vì chỉ thấy trạng thái “backup enabled”.                                                            |
+|  20 | Backup + theo dõi lỗi               | Một phần                 | Code Sentry, health endpoint và DSN production đã có; chưa xác nhận người nhận cảnh báo và chưa có uptime monitor. Cần xác nhận backup/PITR production và diễn tập khôi phục thay vì chỉ thấy trạng thái “backup enabled”.                      |
 
 ## Thay đổi đã hoàn thành trên nhánh
 
@@ -63,6 +63,10 @@ dụng hoặc thay đổi.
   trang chủ, dữ liệu provider, Chợ F và Cộng đồng F, không có lỗi runtime trong
   các luồng đã kiểm tra. Preview hiện ở
   `https://fgrapher-git-fix-security-foundation-bao-he.vercel.app`.
+- Deployment Preview mới nhất của commit `44e5efc` cũng ở trạng thái `Ready`
+  (`dpl_66s1FwLmbLyEJH5atkLs76FEZAEH`). Production `/api/health` trả HTTP 200;
+  Vercel Production có biến database và Sentry DSN. File `.env.production` cục
+  bộ đã hết hiệu lực nên không được dùng để chạy migration.
 
 ## Kiểm thử Preview có đăng nhập
 
@@ -106,6 +110,8 @@ Bảo`, giá và phường/xã; yêu cầu của chính tài khoản có nhãn �
    bước submit để không tạo bài đăng, tin nhắn hoặc giao dịch thử ngoài ý muốn.
 2. Sau khi duyệt Preview, merge và chạy migration production qua workflow có
    approval. Không deploy code dùng cột mới rồi để migration chờ lâu.
+   Đợt này có 17 migration và xoá hai bảng lịch cũ; bắt buộc làm theo
+   `docs/ops/KE-HOACH-PHAT-HANH-2026-09-24.md`.
 3. Chọn shared rate-limit store (Vercel KV/Upstash Redis hoặc giải pháp tương
    đương), sau đó thay bộ đếm trong RAM.
 4. Cấu hình Sentry và uptime monitor, đặt người nhận cảnh báo.
