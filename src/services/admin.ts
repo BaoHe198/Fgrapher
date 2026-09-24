@@ -9,6 +9,8 @@ import { revalidatePublicProfile } from "@/lib/cache";
 import { generateKycSignedUrl } from "@/lib/cloudinary";
 import { mediaApprovedEmailHtml, mediaRejectedEmailHtml } from "@/lib/email";
 import { db } from "@/lib/db";
+import { features } from "@/lib/features";
+import { FREE_PLAN } from "@/lib/free-plan";
 import {
   KYC_PURGE_AFTER_DAYS,
   PAID_ROLES,
@@ -102,6 +104,9 @@ export async function getAdminStats() {
       where: {
         status: { in: ["ACTIVE", "TRIALING"] },
         currentPeriodEnd: { lte: new Date(Date.now() + 7 * 86_400_000) },
+        // A free plan renews itself while billing is off — nothing for an
+        // admin to do about it, so it doesn't belong in an alert count.
+        ...(features.billingEnabled ? {} : { NOT: { plan: FREE_PLAN } }),
       },
     }),
   ]);

@@ -9,6 +9,7 @@ import {
   subscriptionEndedEmailHtml,
   welcomeSubscriptionEmailHtml,
 } from "@/lib/email";
+import { FREE_PLAN, freePlanTermEnd } from "@/lib/free-plan";
 import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { intervalForPriceId, ROLE_PLANS } from "@/lib/constants/plans";
@@ -405,17 +406,15 @@ export async function assignManualPlan({
   });
 }
 
-const FREE_PLAN_DEFAULT_MONTHS = 12;
-
 // Called from /api/auth/register when BILLING_ENABLED=false — every new
 // paid-role signup gets a free plan immediately instead of being routed
-// through Stripe Checkout.
+// through Stripe Checkout. It renews itself for as long as billing stays
+// off — see lib/free-plan.ts.
 export async function assignFreePlan(userId: string, roles: Role[]) {
-  const expiresAt = new Date();
-  expiresAt.setMonth(expiresAt.getMonth() + FREE_PLAN_DEFAULT_MONTHS);
+  const expiresAt = freePlanTermEnd(new Date());
   return Promise.all(
     roles.map((role) =>
-      assignManualPlan({ userId, role, plan: "FREE", expiresAt }),
+      assignManualPlan({ userId, role, plan: FREE_PLAN, expiresAt }),
     ),
   );
 }

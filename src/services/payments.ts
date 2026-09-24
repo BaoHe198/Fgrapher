@@ -31,6 +31,7 @@ import { formatCurrency } from "@/lib/utils";
 import { type BillingInterval, ROLE_PLANS } from "@/lib/constants/plans";
 import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
+import { FREE_PLAN, freePlanTermEnd } from "@/lib/free-plan";
 import { notifyCritical } from "@/services/notification";
 
 export class PaymentError extends Error {}
@@ -680,6 +681,28 @@ export async function sendSubscriptionRenewalReminders() {
 // for a cancelled Stripe subscription.
 export async function expireLocalSubscriptions() {
   const now = new Date();
+
+  // While billing is off, a free plan that has reached its end starts a
+  // new term instead of expiring (lib/free-plan.ts). Done first, so these
+  // rows have a future end date by the time the expiry query below runs
+  // and it never touches them. The where clause is renewsAutomatically()
+  // expressed as a query.
+  if (!features.billingEnabled) {
+    await db.subscription.updateMany({
+      where: {
+        status: "ACTIVE",
+        plan: FREE_PLAN,
+        stripeSubscriptionId: null,
+        currentPeriodEnd: { lt: now },
+      },
+      data: {
+        currentPeriodStart: now,
+        currentPeriodEnd: freePlanTermEnd(now),
+        cancelAtPeriodEnd: false,
+      },
+    });
+  }
+
   const candidates = await db.subscription.findMany({
     where: {
       status: "ACTIVE",

@@ -5,6 +5,8 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PAID_ROLES } from "@/lib/constants";
+import { features } from "@/lib/features";
+import { renewsAutomatically } from "@/lib/free-plan";
 
 export class AuthError extends Error {
   constructor(
@@ -102,13 +104,22 @@ export async function requireRole(userId: string, role: Role) {
 // treated as still-usable — defensive only, a real Subscription row
 // always has one; this predicate shouldn't be the thing that breaks if
 // that assumption is ever wrong.
+//
+// A free plan that renews itself (lib/free-plan.ts) is usable past its
+// period end too: the daily cron is what moves the date forward, and
+// without this every paid-role check refused the provider for the hours in
+// between — the studio seen on 24/09 couldn't create an album for exactly
+// that reason.
 function isSubscriptionUsable(subscription: {
   status: string;
+  plan: string | null;
+  stripeSubscriptionId: string | null;
   currentPeriodEnd: Date | null;
   graceEndsAt: Date | null;
 }) {
   if (subscription.status === "ACTIVE" || subscription.status === "TRIALING") {
     return (
+      renewsAutomatically(subscription, features.billingEnabled) ||
       !subscription.currentPeriodEnd ||
       subscription.currentPeriodEnd > new Date()
     );
