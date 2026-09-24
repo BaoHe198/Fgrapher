@@ -503,7 +503,7 @@
         },
         "costumeShop": {
           "label": "Costume Shop",
-          "description": "List costumes for sale or rent on Chợ F"
+          "description": "Show the outfits you rent and agree terms with customers in chat"
         },
         "model": {
           "label": "Model",
@@ -2023,7 +2023,8 @@
       "requestRoleChangeSubmit": "Submit request",
       "pendingRequestBadge": "Pending review — switching to {role}",
       "changeRequestSubmitted": "Role change request submitted",
-      "changeRequestFailed": "Couldn't submit the request, please try again"
+      "changeRequestFailed": "Couldn't submit the request, please try again",
+      "oneProviderRoleNote": "An account holds one provider role at a time. You can change it later."
     },
     "nav": {
       "profile": "Profile",
@@ -2056,7 +2057,7 @@
       "themeDark": "Dark",
       "themeSystem": "System",
       "dangerZoneTitle": "Danger zone",
-      "dangerZoneDesc": "Deactivating disables access to your account immediately. To permanently delete your personal data, use the Data & Privacy section below instead.",
+      "dangerZoneDesc": "Deactivating disables access to your account immediately. To permanently delete your personal data, use the <data>Data & Privacy</data> tab instead.",
       "deleteAccount": "Deactivate account",
       "deleteDialogTitle": "Deactivate your account?",
       "deleteDialogBody": "This immediately disables your Fgrapher account and signs you out — the account and your data stay in our system, this is not the same as data deletion. This action cannot be undone from here. To request permanent deletion of your personal data, use Data & Privacy instead.",

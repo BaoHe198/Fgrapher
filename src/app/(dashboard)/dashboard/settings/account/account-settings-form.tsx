@@ -4,6 +4,7 @@ import { BadgeCheck, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -28,6 +29,11 @@ interface AccountSettingsFormProps {
   initialPhone: string | null;
   initialPhoneVerified: boolean;
 }
+
+const LANGUAGE_NAMES: Record<(typeof routing.locales)[number], string> = {
+  en: "English",
+  vi: "Tiếng Việt",
+};
 
 export function AccountSettingsForm({
   initialEmail,
@@ -258,7 +264,8 @@ export function AccountSettingsForm({
           value={locale}
           options={routing.locales.map((code) => ({
             value: code,
-            label: code.toUpperCase(),
+            // A language's own name, not its code: the select read "VI".
+            label: LANGUAGE_NAMES[code],
           }))}
           onChange={(value) =>
             startTransition(async () => {
@@ -286,7 +293,17 @@ export function AccountSettingsForm({
           {t("dangerZoneTitle")}
         </span>
         <p className="text-body-sm text-text-secondary">
-          {t("dangerZoneDesc")}
+          {t.rich("dangerZoneDesc", {
+            // It said "below"; it is a tab at the top of the page.
+            data: (chunks) => (
+              <Link
+                href="/dashboard/settings/data"
+                className="font-semibold underline underline-offset-2"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
         <Button
           variant="destructive"

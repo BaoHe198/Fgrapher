@@ -55,6 +55,19 @@ const VERIFICATION_VARIANT: Record<
   REJECTED: "destructive",
 };
 
+// Keys of the role descriptions already written for the role picker.
+const ROLE_DESCRIPTION_KEY: Record<Role, string> = {
+  PHOTOGRAPHER: "photographer",
+  VIDEOGRAPHER: "videographer",
+  MAKEUP_ARTIST: "makeupArtist",
+  STUDIO: "studio",
+  CAMERA_SHOP: "cameraShop",
+  COSTUME_SHOP: "costumeShop",
+  MODEL: "model",
+  CUSTOMER: "customer",
+  ADMIN: "customer",
+};
+
 const ROLE_ICONS: Record<Role, LucideIcon> = {
   PHOTOGRAPHER: Camera,
   VIDEOGRAPHER: Video,
@@ -80,6 +93,7 @@ export function RolesSettings({
 }) {
   const roleT = useTranslations("role");
   const t = useTranslations("dashboardSettings.roles");
+  const roleSelectionT = useTranslations("uiKit.roleSelectionForm.roles");
   const router = useRouter();
   const [activatingRole, setActivatingRole] = useState<Role | null>(null);
   const [removingRole, setRemovingRole] = useState<Role | null>(null);
@@ -328,20 +342,41 @@ export function RolesSettings({
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
             {t("addRole")}
           </span>
+          {/* The one-provider-role rule was enforced (the list vanishes
+              once a role is active) but never stated, so it only surfaced
+              as a surprise. */}
+          <p className="-mt-1 text-body-sm text-text-secondary">
+            {t("oneProviderRoleNote")}
+          </p>
+          {/* flex-row: Card is flex-col by default, so these meant-to-be rows
+              rendered as seven tall centred stacks, each with the same gold
+              button — ~950px of competing calls to action and not a word on
+              what any role does. One line each now, with its description, and
+              a quieter button. */}
           {availableRoles.map((role) => {
             const Icon = ROLE_ICONS[role];
             const isActivating = activatingRole === role;
             return (
-              <Card key={role} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Icon className="size-5 text-text-tertiary" />
-                  <p className="text-body-md font-semibold! text-text-primary">
-                    {roleT(role)}
-                  </p>
+              <Card
+                key={role}
+                className="flex-row items-center justify-between gap-4"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <Icon className="size-5 shrink-0 text-text-tertiary" />
+                  <div className="flex min-w-0 flex-col">
+                    <p className="text-body-md font-semibold! text-text-primary">
+                      {roleT(role)}
+                    </p>
+                    <p className="text-body-sm text-text-secondary">
+                      {roleSelectionT(
+                        `${ROLE_DESCRIPTION_KEY[role]}.description`,
+                      )}
+                    </p>
+                  </div>
                 </div>
                 <Button
                   size="sm"
-                  variant="accent"
+                  variant="secondary"
                   disabled={activatingRole !== null}
                   onClick={() => activateRole(role)}
                 >
