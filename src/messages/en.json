@@ -449,7 +449,8 @@
       "forSaleBadge": "For sale",
       "outOfStock": "Out of stock",
       "perDay": "/day",
-      "shopFallback": "Shop"
+      "shopFallback": "Shop",
+      "orRent": "or rent for {price}/day"
     },
     "productForm": {
       "nameLabel": "Name",
@@ -3598,7 +3599,11 @@
       "viewShopProducts": "View shop products",
       "newShopBadge": "New",
       "messageShop": "Message shop",
-      "inStock": "{count} in stock"
+      "inStock": "{count} in stock",
+      "outOfStockHelp": "This item is out of stock. Message the shop to ask when it's back.",
+      "askShop": "Ask the shop",
+      "decreaseQuantity": "Decrease quantity",
+      "increaseQuantity": "Increase quantity"
     },
     "community": {
       "heading": "Community",

@@ -449,7 +449,8 @@
       "forSaleBadge": "Bán",
       "outOfStock": "Hết hàng",
       "perDay": "/ngày",
-      "shopFallback": "Cửa hàng"
+      "shopFallback": "Cửa hàng",
+      "orRent": "hoặc thuê {price}/ngày"
     },
     "productForm": {
       "nameLabel": "Tên sản phẩm",
@@ -3548,8 +3549,8 @@
         "conditionGood": "Tốt",
         "conditionFair": "Khá",
         "price": "Giá",
-        "min": "Thấp nhất",
-        "max": "Cao nhất",
+        "min": "Từ",
+        "max": "Đến",
         "inStockOnly": "Chỉ hàng còn sẵn",
         "province": "Khu vực người bán",
         "provinceAll": "Mọi tỉnh/thành",
@@ -3598,7 +3599,11 @@
       "viewShopProducts": "Xem sản phẩm của shop",
       "newShopBadge": "Mới",
       "messageShop": "Nhắn tin cho shop",
-      "inStock": "Còn {count} sản phẩm"
+      "inStock": "Còn {count} sản phẩm",
+      "outOfStockHelp": "Sản phẩm này tạm hết hàng. Nhắn tin để hỏi shop khi nào có lại.",
+      "askShop": "Nhắn tin hỏi shop",
+      "decreaseQuantity": "Giảm số lượng",
+      "increaseQuantity": "Tăng số lượng"
     },
     "community": {
       "heading": "Cộng đồng F",

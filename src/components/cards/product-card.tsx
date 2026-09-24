@@ -88,6 +88,23 @@ export async function ProductCard({ product }: ProductCardProps) {
                   ? `${formatCurrency(product.rentalPrice, product.currency)}${t("perDay")}`
                   : "—"}
           </span>
+          {/* "Sale & rental" showed only the sale price, so someone who
+              only wanted to rent had to open the listing to learn whether
+              it was affordable. */}
+          {/* Always rendered, blank when there's nothing to say, so the
+              extra line on one card doesn't lift its price out of line
+              with the rest of the row. */}
+          {product.type === "BOTH" && product.price && product.rentalPrice ? (
+            <span className="text-body-sm text-text-secondary">
+              {t("orRent", {
+                price: formatCurrency(product.rentalPrice, product.currency),
+              })}
+            </span>
+          ) : (
+            <span aria-hidden className="text-body-sm">
+              {"\u00a0"}
+            </span>
+          )}
           <span className="text-body-sm text-text-secondary">{shopName}</span>
         </div>
       </Card>

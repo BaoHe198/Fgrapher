@@ -131,53 +131,86 @@ export function ProductPurchasePanel({
             </Badge>
           )}
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              className="flex size-9 items-center justify-center rounded-full border border-border-default"
-            >
-              −
-            </button>
-            <span className="w-6 text-center text-body-md font-semibold!">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-              className="flex size-9 items-center justify-center rounded-full border border-border-default"
-            >
-              +
-            </button>
-          </div>
+          {/* Out of stock, this used to keep the whole purchase UI — a
+              quantity stepper, a running total, then two disabled buttons
+              with nothing saying why. Someone could set a quantity, read a
+              total and then find nothing would press. What they can
+              actually do is ask the shop, so that is what's offered. */}
+          {product.stock === 0 ? (
+            <>
+              <p className="text-body-sm text-text-secondary">
+                {t("outOfStockHelp")}
+              </p>
+              <Button
+                variant="secondary"
+                size="lg"
+                className="w-full"
+                nativeButton={false}
+                render={<Link href={`/dashboard/messages?to=${shopId}`} />}
+              >
+                <MessageCircle className="size-4" />
+                {t("askShop")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  aria-label={t("decreaseQuantity")}
+                  className="flex size-9 items-center justify-center rounded-full border border-border-default"
+                >
+                  −
+                </button>
+                <span className="w-6 text-center text-body-md font-semibold!">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuantity((q) => Math.min(product.stock, q + 1))
+                  }
+                  aria-label={t("increaseQuantity")}
+                  className="flex size-9 items-center justify-center rounded-full border border-border-default"
+                >
+                  +
+                </button>
+              </div>
 
-          <div className="flex justify-between text-body-md">
-            <span className="text-text-secondary">{t("total")}</span>
-            <span className="font-semibold text-text-primary">
-              {formatCurrency(saleTotal, product.currency)}
-            </span>
-          </div>
+              <div className="flex justify-between text-body-md">
+                <span className="text-text-secondary">{t("total")}</span>
+                <span className="font-semibold text-text-primary">
+                  {formatCurrency(saleTotal, product.currency)}
+                </span>
+              </div>
 
-          {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+              {error ? (
+                <p className="text-body-sm text-danger">{error}</p>
+              ) : null}
 
-          <Button
-            variant="accent"
-            size="lg"
-            className="w-full"
-            disabled={product.stock === 0 || isSubmitting}
-            onClick={() => addToCart(false)}
-          >
-            {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            {t("addToCart")}
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full"
-            disabled={product.stock === 0 || isSubmitting}
-            onClick={() => addToCart(true)}
-          >
-            {t("buyNow")}
-          </Button>
+              <Button
+                variant="accent"
+                size="lg"
+                className="w-full"
+                disabled={product.stock === 0 || isSubmitting}
+                onClick={() => addToCart(false)}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : null}
+                {t("addToCart")}
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full"
+                disabled={product.stock === 0 || isSubmitting}
+                onClick={() => addToCart(true)}
+              >
+                {t("buyNow")}
+              </Button>
+            </>
+          )}
         </>
       ) : (
         <>

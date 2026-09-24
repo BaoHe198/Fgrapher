@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
+import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
@@ -165,12 +166,20 @@ export default async function ProductDetailPage({
                 <span className="text-body-md font-semibold! text-text-primary">
                   {shopName}
                 </span>
-                <StarRating
-                  rating={
-                    shopRating > 0 ? shopRating.toFixed(1) : t("newShopBadge")
-                  }
-                  reviews={shopReviewCount}
-                />
+                {/* A shop with no reviews rendered "★ Mới (0)": a star, a
+                    word where the score goes and a zero count — three
+                    signals disagreeing. Same rule as the profile header:
+                    stars once there is something to average. */}
+                {shopReviewCount > 0 ? (
+                  <StarRating
+                    rating={shopRating.toFixed(1)}
+                    reviews={shopReviewCount}
+                  />
+                ) : (
+                  <Badge variant="neutral" className="w-fit">
+                    {t("newShopBadge")}
+                  </Badge>
+                )}
               </div>
             </div>
             <div className="flex gap-2">
