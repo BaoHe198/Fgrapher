@@ -4,7 +4,11 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
 import { returnRentalSchema } from "@/lib/validations/marketplace";
-import { markRentalReturned, OrderError } from "@/services/orders";
+import {
+  markRentalReturned,
+  OrderError,
+  orderErrorMessage,
+} from "@/services/orders";
 
 // Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function POST(
@@ -55,7 +59,11 @@ export async function POST(
     }
     if (err instanceof OrderError) {
       return NextResponse.json(
-        { data: null, error: "order_error", message: err.message },
+        {
+          data: null,
+          error: "order_error",
+          message: await orderErrorMessage(err),
+        },
         { status: err.status },
       );
     }

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { formatAdministrativeLocation } from "@/lib/location";
+import {
+  formatAdministrativeLocation,
+  formatFullAddress,
+} from "@/lib/location";
 
 describe("formatAdministrativeLocation", () => {
   it("shows only ward and province", () => {
@@ -37,5 +40,35 @@ describe("formatAdministrativeLocation", () => {
     } as Parameters<typeof formatAdministrativeLocation>[0]);
     assert.equal(location, "Phường Sài Gòn, Thành phố Hồ Chí Minh");
     assert.doesNotMatch(location, /Nguyễn Huệ/);
+  });
+});
+
+describe("formatFullAddress", () => {
+  const ward = { name: "Phường Tân Bình" };
+  const province = { name: "Thành phố Hồ Chí Minh" };
+
+  it("appends ward and province to a street address", () => {
+    assert.equal(
+      formatFullAddress("12 Cộng Hòa", ward, province),
+      "12 Cộng Hòa, Phường Tân Bình, Thành phố Hồ Chí Minh",
+    );
+  });
+
+  it("does not repeat what the address already says", () => {
+    assert.equal(
+      formatFullAddress(
+        "Phường Tân Bình, Thành phố Hồ Chí Minh",
+        ward,
+        province,
+      ),
+      "Phường Tân Bình, Thành phố Hồ Chí Minh",
+    );
+  });
+
+  it("works without a street address", () => {
+    assert.equal(
+      formatFullAddress(null, ward, province),
+      "Phường Tân Bình, Thành phố Hồ Chí Minh",
+    );
   });
 });

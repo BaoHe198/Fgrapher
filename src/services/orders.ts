@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 
 import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { formatFullAddress } from "@/lib/location";
 import {
   ACTIVE_RENTAL_STATUSES,
   checkOrderTransition,
@@ -29,14 +30,38 @@ function partyName(party: { firstName: string | null; name: string | null }) {
   return party.firstName ?? party.name ?? "there";
 }
 
+export type OrderErrorCode =
+  | "cartEmpty"
+  | "rentalByMessage"
+  | "noDelivery"
+  | "addressRequired"
+  | "outOfStock"
+  | "alreadyRented"
+  | "notFound"
+  | "notParticipant"
+  | "shopOnly"
+  | "invalidTransition";
+
+// `message` stays English for logs; what the buyer or shop reads is the
+// translated `code` (see orderErrorMessage). These messages used to reach
+// the checkout page verbatim — "… is out of stock" in a Vietnamese UI.
 export class OrderError extends Error {
   constructor(
     message: string,
     public status: 400 | 403 | 404 | 409,
+    public code?: OrderErrorCode,
+    public params: Record<string, string> = {},
   ) {
     super(message);
     this.name = "OrderError";
   }
+}
+
+/** The user-facing, translated text for an OrderError. */
+export async function orderErrorMessage(err: OrderError) {
+  if (!err.code) return err.message;
+  const t = await getTranslations("apiMessages.orderErrors");
+  return t(err.code, err.params);
 }
 
 export async function createCheckoutSessionForCart(
@@ -47,11 +72,13 @@ export async function createCheckoutSessionForCart(
     where: { userId },
     include: { product: true },
   });
-  if (cart.length === 0) throw new OrderError("Your cart is empty", 400);
+  if (cart.length === 0)
+    throw new OrderError("Your cart is empty", 400, "cartEmpty");
   if (cart.some((item) => item.type === "RENT")) {
     throw new OrderError(
       "Rental items must be arranged directly with the shop by message",
       400,
+      "rentalByMessage",
     );
   }
 
@@ -185,6 +212,7 @@ async function createOrdersForCart(
       throw new OrderError(
         "This shop does not deliver — choose collection at the shop instead",
         409,
+        "noDelivery",
       );
     }
     totalPrice += delivery.fee;
@@ -376,23 +404,34 @@ export async function placeOrdersFromCart(
     where: { userId },
     include: { product: { select: { name: true, stock: true } } },
   });
-  if (cart.length === 0) throw new OrderError("Your cart is empty", 400);
+  if (cart.length === 0)
+    throw new OrderError("Your cart is empty", 400, "cartEmpty");
   if (cart.some((item) => item.type === "RENT")) {
     throw new OrderError(
       "Rental items must be arranged directly with the shop by message",
       400,
+      "rentalByMessage",
     );
   }
 
   if (options.deliveryMethod === "SHIP" && !options.shippingAddress?.trim()) {
-    throw new OrderError("A delivery address is required", 400);
+    throw new OrderError(
+      "A delivery address is required",
+      400,
+      "addressRequired",
+    );
   }
 
   const outOfStock = cart.find(
     (item) => item.type === "SALE" && item.product.stock < item.quantity,
   );
   if (outOfStock) {
-    throw new OrderError(`${outOfStock.product.name} is out of stock`, 409);
+    throw new OrderError(
+      `${outOfStock.product.name} is out of stock`,
+      409,
+      "outOfStock",
+      { name: outOfStock.product.name },
+    );
   }
 
   const conflicts = await findRentalConflicts(cart);
@@ -400,6 +439,8 @@ export async function placeOrdersFromCart(
     throw new OrderError(
       `${conflicts[0].productName} is already rented for those dates`,
       409,
+      "alreadyRented",
+      { name: conflicts[0].productName },
     );
   }
 
@@ -526,9 +567,7 @@ async function shopPickupAddress(shopId: string) {
   });
   if (!profile) return null;
   return (
-    [profile.address, profile.ward?.name, profile.province?.name]
-      .filter(Boolean)
-      .join(", ") || null
+    formatFullAddress(profile.address, profile.ward, profile.province) || null
   );
 }
 
@@ -563,14 +602,22 @@ export async function updateOrderStatus({
     where: { id: orderId },
     include: ORDER_INCLUDE,
   });
-  if (!order) throw new OrderError("Order not found", 404);
+  if (!order) throw new OrderError("Order not found", 404, "notFound");
 
   const isShop = order.shopId === userId;
   const isCustomer = order.customerId === userId;
   if (!isShop && !isCustomer)
-    throw new OrderError("You are not part of this order", 403);
+    throw new OrderError(
+      "You are not part of this order",
+      403,
+      "notParticipant",
+    );
   if (status !== "CANCELLED" && !isShop) {
-    throw new OrderError("Only the shop can update this order's status", 403);
+    throw new OrderError(
+      "Only the shop can update this order's status",
+      403,
+      "shopOnly",
+    );
   }
 
   const transition = checkOrderTransition(
@@ -578,7 +625,8 @@ export async function updateOrderStatus({
     status,
     order.items.some((item) => item.type === "RENT"),
   );
-  if (!transition.ok) throw new OrderError(transition.reason, 409);
+  if (!transition.ok)
+    throw new OrderError(transition.reason, 409, "invalidTransition");
 
   const updated = await db.order.update({
     where: { id: orderId },
@@ -647,14 +695,15 @@ export async function markRentalReturned(
     include: ORDER_INCLUDE,
   });
   if (!order || order.shopId !== userId)
-    throw new OrderError("Order not found", 404);
+    throw new OrderError("Order not found", 404, "notFound");
 
   const transition = checkOrderTransition(
     order.status,
     "RETURNED",
     order.items.some((item) => item.type === "RENT"),
   );
-  if (!transition.ok) throw new OrderError(transition.reason, 409);
+  if (!transition.ok)
+    throw new OrderError(transition.reason, 409, "invalidTransition");
 
   const returnedAt = new Date();
 

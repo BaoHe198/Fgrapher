@@ -6,6 +6,7 @@ import { features } from "@/lib/features";
 import { updateCartItemSchema } from "@/lib/validations/marketplace";
 import {
   CartError,
+  cartErrorMessage,
   removeCartItem,
   updateCartItemQuantity,
 } from "@/services/marketplace";
@@ -58,7 +59,11 @@ export async function PATCH(
     }
     if (err instanceof CartError) {
       return NextResponse.json(
-        { data: null, error: "cart_error", message: err.message },
+        {
+          data: null,
+          error: "cart_error",
+          message: await cartErrorMessage(err),
+        },
         { status: err.status },
       );
     }

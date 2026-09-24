@@ -4,7 +4,12 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
 import { addToCartSchema } from "@/lib/validations/marketplace";
-import { addToCart, CartError, getCart } from "@/services/marketplace";
+import {
+  addToCart,
+  CartError,
+  cartErrorMessage,
+  getCart,
+} from "@/services/marketplace";
 
 // Dormant while MARKETPLACE_ENABLED=false — see CLAUDE.md.
 export async function GET() {
@@ -89,7 +94,11 @@ export async function POST(request: Request) {
     }
     if (err instanceof CartError) {
       return NextResponse.json(
-        { data: null, error: "cart_error", message: err.message },
+        {
+          data: null,
+          error: "cart_error",
+          message: await cartErrorMessage(err),
+        },
         { status: err.status },
       );
     }

@@ -1288,6 +1288,25 @@
       "checkoutFailed": "Could not place the order",
       "rentalReturned": "Return recorded",
       "rentalReturnFailed": "Could not record the return"
+    },
+    "orderErrors": {
+      "cartEmpty": "Your cart is empty.",
+      "rentalByMessage": "Rental items are arranged directly with the shop by message.",
+      "noDelivery": "This shop does not deliver — choose collection at the shop instead.",
+      "addressRequired": "A delivery address is required.",
+      "outOfStock": "{name} doesn't have enough stock. Lower the quantity or remove it from your cart.",
+      "alreadyRented": "{name} is already rented for those dates.",
+      "notFound": "Order not found.",
+      "notParticipant": "You are not part of this order.",
+      "shopOnly": "Only the shop can update this order's status.",
+      "invalidTransition": "The order can't move to that status from where it is."
+    },
+    "cartErrors": {
+      "productNotFound": "Product not found.",
+      "rentalByMessage": "Rentals are arranged directly with the shop by message.",
+      "notEnoughStock": "The shop only has {stock} of this item.",
+      "alreadyAtStock": "Your cart already holds {inCart} of this item — the shop only has {stock}.",
+      "itemNotFound": "This item is no longer in your cart."
     }
   },
   "dashboardCore": {
@@ -2027,7 +2046,18 @@
       "commentLabel": "Comment (optional)",
       "reviewSubmit": "Post review",
       "reviewSubmitted": "Thanks for your review",
-      "reviewFailed": "Could not post the review"
+      "reviewFailed": "Could not post the review",
+      "deliveryMethodLabel": "Delivery",
+      "deliveryMethod": {
+        "SHIP": "Delivered to the buyer",
+        "PICKUP": "Collected at the shop"
+      },
+      "pickupStatus": {
+        "SHIPPED": "Ready for collection",
+        "DELIVERED": "Collected"
+      },
+      "markReadyForPickup": "Ready for collection",
+      "markPickedUpByBuyer": "Buyer has collected"
     }
   },
   "dashboardSettings": {
@@ -3150,7 +3180,7 @@
       "deposits": "Deposits",
       "shippingNote": "The shop collects payment on delivery or when you collect.",
       "total": "Total",
-      "continueToPayment": "Continue to payment",
+      "continueToPayment": "Place order",
       "deliveryFee": "Delivery fee"
     },
     "checkoutSuccess": {

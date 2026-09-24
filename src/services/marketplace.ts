@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Prisma, ProductCondition, ProductType } from "@prisma/client";
 
 import { SELLER_ROLES } from "@/lib/constants";
@@ -247,14 +248,32 @@ export async function getCart(userId: string) {
   return items;
 }
 
+export type CartErrorCode =
+  | "productNotFound"
+  | "rentalByMessage"
+  | "notEnoughStock"
+  | "alreadyAtStock"
+  | "itemNotFound";
+
+// English `message` for logs; users read the translated `code` (see
+// cartErrorMessage), as with OrderError.
 export class CartError extends Error {
   constructor(
     message: string,
     public status: 400 | 404,
+    public code?: CartErrorCode,
+    public params: Record<string, string | number> = {},
   ) {
     super(message);
     this.name = "CartError";
   }
+}
+
+/** The user-facing, translated text for a CartError. */
+export async function cartErrorMessage(err: CartError) {
+  if (!err.code) return err.message;
+  const t = await getTranslations("apiMessages.cartErrors");
+  return t(err.code, err.params);
 }
 
 export async function addToCart({
@@ -275,17 +294,21 @@ export async function addToCart({
   const product = await db.product.findUnique({
     where: { id: productId, isActive: true, deletedAt: null },
   });
-  if (!product) throw new CartError("Product not found", 404);
+  if (!product)
+    throw new CartError("Product not found", 404, "productNotFound");
 
   if (type === "RENT") {
     throw new CartError(
       "Rentals are arranged directly with the shop by message",
       400,
+      "rentalByMessage",
     );
   }
 
   if (type === "SALE" && product.stock < quantity) {
-    throw new CartError("Not enough stock available", 400);
+    throw new CartError("Not enough stock available", 400, "notEnoughStock", {
+      stock: product.stock,
+    });
   }
   const existing = await db.cartItem.findFirst({
     where: {
@@ -298,6 +321,15 @@ export async function addToCart({
   });
 
   if (existing) {
+    // Adding again merged into the existing line with no stock check, so a
+    // second tap put 2 of a last-one item in the cart and checkout failed
+    // later (24/09 audit).
+    if (type === "SALE" && existing.quantity + quantity > product.stock) {
+      throw new CartError("Not enough stock available", 400, "alreadyAtStock", {
+        inCart: existing.quantity,
+        stock: product.stock,
+      });
+    }
     return db.cartItem.update({
       where: { id: existing.id },
       data: { quantity: existing.quantity + quantity },
@@ -319,10 +351,12 @@ export async function updateCartItemQuantity(
     include: { product: true },
   });
   if (!item || item.userId !== userId)
-    throw new CartError("Cart item not found", 404);
+    throw new CartError("Cart item not found", 404, "itemNotFound");
 
   if (item.type === "SALE" && item.product.stock < quantity) {
-    throw new CartError("Not enough stock available", 400);
+    throw new CartError("Not enough stock available", 400, "notEnoughStock", {
+      stock: item.product.stock,
+    });
   }
 
   return db.cartItem.update({ where: { id }, data: { quantity } });

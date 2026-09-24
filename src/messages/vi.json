@@ -1288,6 +1288,25 @@
       "checkoutFailed": "Không đặt được đơn hàng",
       "rentalReturned": "Đã ghi nhận trả đồ",
       "rentalReturnFailed": "Không ghi nhận được việc trả đồ"
+    },
+    "orderErrors": {
+      "cartEmpty": "Giỏ hàng đang trống.",
+      "rentalByMessage": "Đồ cho thuê được thỏa thuận trực tiếp với shop qua tin nhắn.",
+      "noDelivery": "Shop này không giao hàng — hãy chọn nhận tại cửa hàng.",
+      "addressRequired": "Vui lòng nhập địa chỉ giao hàng.",
+      "outOfStock": "{name} không còn đủ hàng. Hãy giảm số lượng hoặc bỏ sản phẩm khỏi giỏ.",
+      "alreadyRented": "{name} đã có người thuê trong những ngày này.",
+      "notFound": "Không tìm thấy đơn hàng.",
+      "notParticipant": "Bạn không thuộc đơn hàng này.",
+      "shopOnly": "Chỉ shop mới cập nhật được trạng thái đơn này.",
+      "invalidTransition": "Đơn hàng không thể chuyển sang trạng thái này từ trạng thái hiện tại."
+    },
+    "cartErrors": {
+      "productNotFound": "Không tìm thấy sản phẩm.",
+      "rentalByMessage": "Đồ cho thuê được thỏa thuận trực tiếp với shop qua tin nhắn.",
+      "notEnoughStock": "Shop chỉ còn {stock} sản phẩm này.",
+      "alreadyAtStock": "Giỏ hàng của bạn đã có {inCart} sản phẩm này — shop chỉ còn {stock}.",
+      "itemNotFound": "Sản phẩm này không còn trong giỏ hàng."
     }
   },
   "dashboardCore": {
@@ -2027,7 +2046,18 @@
       "commentLabel": "Nhận xét (không bắt buộc)",
       "reviewSubmit": "Gửi đánh giá",
       "reviewSubmitted": "Cảm ơn bạn đã đánh giá",
-      "reviewFailed": "Không gửi được đánh giá"
+      "reviewFailed": "Không gửi được đánh giá",
+      "deliveryMethodLabel": "Hình thức nhận hàng",
+      "deliveryMethod": {
+        "SHIP": "Giao hàng tận nơi",
+        "PICKUP": "Nhận tại cửa hàng"
+      },
+      "pickupStatus": {
+        "SHIPPED": "Chờ khách nhận",
+        "DELIVERED": "Khách đã nhận"
+      },
+      "markReadyForPickup": "Báo khách đến nhận",
+      "markPickedUpByBuyer": "Khách đã nhận hàng"
     }
   },
   "dashboardSettings": {
@@ -3150,7 +3180,7 @@
       "deposits": "Tiền đặt cọc",
       "shippingNote": "Cửa hàng thu tiền trực tiếp khi giao hoặc khi bạn đến nhận.",
       "total": "Tổng cộng",
-      "continueToPayment": "Tiếp tục thanh toán",
+      "continueToPayment": "Đặt hàng",
       "deliveryFee": "Phí giao hàng"
     },
     "checkoutSuccess": {

@@ -133,6 +133,13 @@ export function OrderDetailContent() {
   const isShop = session?.user?.id === order.shopId;
   const variant = STATUS_VARIANT[order.status];
   const stepIndex = STEPS.indexOf(order.status);
+  // A collection order is never "shipped": the same two statuses read as
+  // ready-for-pickup / collected, and there is no carrier to enter.
+  const isPickup = order.deliveryMethod === "PICKUP";
+  const statusLabel = (status: OrderStatus) =>
+    isPickup && (status === "SHIPPED" || status === "DELIVERED")
+      ? t(`pickupStatus.${status}`)
+      : t(`status.${status}`);
   const hasRental = order.items.some((i) => i.type === "RENT");
 
   return (
@@ -149,30 +156,47 @@ export function OrderDetailContent() {
         <h1 className="text-display-md text-text-primary">
           {t("orderNumber", { id: order.id.slice(-8) })}
         </h1>
-        <Badge variant={variant}>{t(`status.${order.status}`)}</Badge>
+        <Badge variant={variant}>{statusLabel(order.status)}</Badge>
       </div>
 
       {order.status !== "CANCELLED" && order.status !== "RETURNED" ? (
-        <div className="flex items-center gap-2">
+        // Each step is named: bare "1 — 2 — 3 — 4" told neither side what
+        // the order was waiting for (24/09 audit).
+        <ol className="flex items-start gap-2">
           {STEPS.map((step, index) => (
-            <div key={step} className="flex flex-1 items-center last:flex-none">
-              <div
-                className={`flex size-7 items-center justify-center rounded-full text-body-sm font-bold ${
-                  index <= stepIndex
-                    ? "bg-brand-primary text-text-on-brand"
-                    : "bg-bg-sunken text-text-tertiary"
-                }`}
-              >
-                {index + 1}
+            <li
+              key={step}
+              className="flex flex-1 items-start last:flex-none"
+              aria-current={index === stepIndex ? "step" : undefined}
+            >
+              <div className="flex flex-col items-center gap-1.5">
+                <div
+                  className={`flex size-7 items-center justify-center rounded-full text-body-sm font-bold ${
+                    index <= stepIndex
+                      ? "bg-brand-primary text-text-on-brand"
+                      : "bg-bg-sunken text-text-tertiary"
+                  }`}
+                >
+                  {index + 1}
+                </div>
+                <span
+                  className={`text-center text-caption whitespace-nowrap ${
+                    index <= stepIndex
+                      ? "text-text-primary"
+                      : "text-text-tertiary"
+                  }`}
+                >
+                  {statusLabel(step)}
+                </span>
               </div>
               {index < STEPS.length - 1 ? (
                 <div
-                  className={`mx-1.5 h-px flex-1 ${index < stepIndex ? "bg-brand-primary" : "bg-bg-sunken"}`}
+                  className={`mx-1.5 mt-3.5 h-px flex-1 ${index < stepIndex ? "bg-brand-primary" : "bg-bg-sunken"}`}
                 />
               ) : null}
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
       ) : null}
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_320px]">
@@ -225,6 +249,20 @@ export function OrderDetailContent() {
                   onDone={load}
                 />
               ))}
+            </Card>
+          ) : null}
+
+          {/* Neither side could see whether the buyer chose delivery or
+              collection until an address appeared (24/09 audit). */}
+          {order.deliveryMethod === "SHIP" ||
+          order.deliveryMethod === "PICKUP" ? (
+            <Card className="flex flex-col gap-1.5">
+              <span className="text-body-sm text-text-tertiary">
+                {t("deliveryMethodLabel")}
+              </span>
+              <p className="text-body-md text-text-primary">
+                {t(`deliveryMethod.${order.deliveryMethod}`)}
+              </p>
             </Card>
           ) : null}
 
@@ -308,9 +346,11 @@ export function OrderDetailContent() {
               <Button
                 variant="accent"
                 disabled={busy}
-                onClick={() => setTrackingOpen(true)}
+                onClick={() =>
+                  isPickup ? updateStatus("SHIPPED") : setTrackingOpen(true)
+                }
               >
-                {t("markAsShipped")}
+                {isPickup ? t("markReadyForPickup") : t("markAsShipped")}
               </Button>
             ) : null}
             {isShop && order.status === "SHIPPED" ? (
@@ -319,7 +359,7 @@ export function OrderDetailContent() {
                 disabled={busy}
                 onClick={() => updateStatus("DELIVERED")}
               >
-                {t("markAsDelivered")}
+                {isPickup ? t("markPickedUpByBuyer") : t("markAsDelivered")}
               </Button>
             ) : null}
             {isShop && hasRental && order.status === "DELIVERED" ? (
