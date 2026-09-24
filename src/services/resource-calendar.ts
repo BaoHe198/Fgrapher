@@ -123,6 +123,22 @@ function isWholeDay(startTime: string, endTime: string) {
   return startTime === "00:00" && (endTime === "23:59" || endTime === "00:00");
 }
 
+/**
+ * Callers pass days as date keys at UTC midnight ("2026-10-13T00:00Z"), but
+ * a block is stored as a real instant starting at Vietnamese midnight —
+ * 17:00 UTC the day before. Filtering blocks by the date keys themselves
+ * dropped every block on the first day of the range: a one-day lookup (the
+ * booking API's isSlotBookable) never saw a whole-day block, so a blocked
+ * day could still be booked, and today's block was missing from the
+ * provider's own editor (24/09 e2e run).
+ */
+export function localDayRange(from: Date, to: Date) {
+  return {
+    start: localDayAndTimeToInstant(from, "00:00"),
+    end: localDayAndTimeToInstant(to, "00:00"),
+  };
+}
+
 export async function listBlocks(
   userId: string,
   from: Date,
@@ -131,8 +147,9 @@ export async function listBlocks(
   const resourceId = await resourceIdForProvider(userId);
   if (!resourceId) return [];
 
+  const range = localDayRange(from, to);
   const blocks = await db.availabilityBlock.findMany({
-    where: { resourceId, startAt: { gte: from, lt: to } },
+    where: { resourceId, startAt: { gte: range.start, lt: range.end } },
     orderBy: { startAt: "asc" },
   });
 
