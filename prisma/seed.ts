@@ -608,13 +608,18 @@ async function main() {
     // this, every access-control check added in Phase 7
     // (requireActiveSubscription/requirePaidRole) would reject every seeded
     // account, since a bare UserRole row alone no longer grants access.
+    //
+    // Paid plans, not FREE — the seed exercises the paid path — but with a
+    // long term: at 30 days the expiry cron started unpublishing the seed
+    // studios and make-up artists a month after every reseed (project
+    // owner, 24/09/2026).
     await Promise.all(
       createdRoles
         .filter((ur) => ur.role !== "CUSTOMER" && ur.role !== "ADMIN")
         .map((ur) => {
           const now = new Date();
           const periodEnd = new Date(now);
-          periodEnd.setDate(periodEnd.getDate() + 30);
+          periodEnd.setFullYear(periodEnd.getFullYear() + 5);
           return db.subscription.create({
             data: {
               userRoleId: ur.id,
