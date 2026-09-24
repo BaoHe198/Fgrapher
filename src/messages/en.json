@@ -539,7 +539,7 @@
         "veryGood": "Very good",
         "excellent": "Excellent"
       },
-      "starAriaLabel": "{count} star"
+      "starAriaLabel": "{count, plural, one {# star} other {# stars}}"
     },
     "dateField": {
       "openPicker": "Pick a date from the calendar",

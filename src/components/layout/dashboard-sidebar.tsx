@@ -202,7 +202,12 @@ export function DashboardSidebar({
     : t("planFree");
 
   return (
-    <div className={cn("flex flex-col gap-1", className)}>
+    // A nav landmark, so screen readers (and the route-crawl spec) find the
+    // dashboard menu the way they find the site header's.
+    <nav
+      aria-label={t("menuTitle")}
+      className={cn("flex flex-col gap-1", className)}
+    >
       {sections.map((section, index) => (
         <div
           key={section.heading ?? `section-${index}`}
@@ -265,7 +270,7 @@ export function DashboardSidebar({
           </Button>
         </div>
       )}
-    </div>
+    </nav>
   );
 }
 

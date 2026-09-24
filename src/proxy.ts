@@ -58,8 +58,22 @@ const MARKETPLACE_DASHBOARD_PREFIXES = [
 // Authenticated requests are keyed by user id (fairer than IP — several
 // people can legitimately share one IP behind NAT/office wifi); anonymous
 // requests fall back to IP, matching every other limiter in this codebase.
-const API_DEFAULT_RATE_LIMIT = { max: 300, windowMs: 60 * 1000 };
-const API_ANONYMOUS_RATE_LIMIT = { max: 100, windowMs: 60 * 1000 };
+// Raised only by e2e/.env.test (like lib/auth.ts's login limits): the whole
+// suite runs anonymously from 127.0.0.1, and after ~28 specs the anonymous
+// ceiling started answering the sign-in flow with 429 — the failures looked
+// like broken logins at the end of the run. Unset everywhere else.
+const limitFromEnv = (name: string, fallback: number) => {
+  const parsed = Number(process.env[name]);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
+const API_DEFAULT_RATE_LIMIT = {
+  max: limitFromEnv("API_RATE_LIMIT_MAX", 300),
+  windowMs: 60 * 1000,
+};
+const API_ANONYMOUS_RATE_LIMIT = {
+  max: limitFromEnv("API_ANONYMOUS_RATE_LIMIT_MAX", 100),
+  windowMs: 60 * 1000,
+};
 
 // Cron calls (Vercel's own scheduler, already gated by requireCronSecret)
 // and payment webhooks (MoMo/ZaloPay/Stripe's own servers, already gated

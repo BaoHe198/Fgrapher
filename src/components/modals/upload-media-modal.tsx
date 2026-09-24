@@ -160,7 +160,15 @@ export function UploadMediaModal({
     if (!open || !needsAlbumPicker) return;
     fetch(`/api/albums?profileId=${profileId}`)
       .then((res) => res.json())
-      .then((body) => setAlbums(body.data ?? []));
+      .then((body) => {
+        const list: AlbumOption[] = body.data ?? [];
+        setAlbums(list);
+        // A brand-new provider has no album yet: the picker showed an empty
+        // "Choose an album" with "create new" buried inside it, which read
+        // as a dead end on their very first upload (24/09 e2e run). Open the
+        // create form straight away instead.
+        if (list.length === 0) setSelectedAlbumId(NEW_ALBUM_VALUE);
+      });
   }, [open, needsAlbumPicker, profileId]);
 
   const categoryOptions = role ? (CATEGORIES_BY_ROLE[role] ?? []) : [];
