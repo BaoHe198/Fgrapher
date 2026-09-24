@@ -98,41 +98,43 @@ function SortableAlbumCard({
             </div>
           )}
         </Link>
-        <div className="flex items-start justify-between gap-2 p-3">
-          <div className="min-w-0">
-            <Link
-              href={`/dashboard/portfolio/${album.id}`}
-              // block: truncate does nothing on an inline <a>, so a long
-              // title ran straight under the reorder and delete buttons.
-              className="block truncate text-body-md font-semibold! text-text-primary hover:underline"
-              title={album.title}
-            >
-              {album.title}
-            </Link>
-            <p className="text-body-sm text-text-tertiary">
+        {/* Title on its own full-width row (two lines allowed); the reorder
+            and delete buttons sit beside the meta line instead. Sharing a
+            row with them left a phone's half-width card room for about
+            eight characters ("Ảnh thời …"). */}
+        <div className="flex flex-col gap-1 p-3">
+          <Link
+            href={`/dashboard/portfolio/${album.id}`}
+            className="line-clamp-2 text-body-md font-semibold! break-words text-text-primary hover:underline"
+            title={album.title}
+          >
+            {album.title}
+          </Link>
+          <div className="flex items-center justify-between gap-2">
+            <p className="min-w-0 text-body-sm text-text-tertiary">
               {album.category ? categoryT(album.category) : t("uncategorized")}
               {" · "}
               {t("photoCount", { count: album.mediaCount })}
             </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-1">
-            <button
-              type="button"
-              {...attributes}
-              {...listeners}
-              className="flex size-7 cursor-grab items-center justify-center rounded-full text-text-tertiary hover:bg-bg-sunken"
-              aria-label={t("reorder")}
-            >
-              <GripVertical className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(album.id)}
-              className="flex size-7 items-center justify-center rounded-full text-text-tertiary hover:bg-danger-bg hover:text-danger"
-              aria-label={t("deleteAlbum")}
-            >
-              <Trash2 className="size-4" />
-            </button>
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                {...attributes}
+                {...listeners}
+                className="flex size-7 cursor-grab items-center justify-center rounded-full text-text-tertiary hover:bg-bg-sunken"
+                aria-label={t("reorder")}
+              >
+                <GripVertical className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(album.id)}
+                className="flex size-7 items-center justify-center rounded-full text-text-tertiary hover:bg-danger-bg hover:text-danger"
+                aria-label={t("deleteAlbum")}
+              >
+                <Trash2 className="size-4" />
+              </button>
+            </div>
           </div>
         </div>
       </Card>

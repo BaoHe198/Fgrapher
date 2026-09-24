@@ -269,6 +269,13 @@ export function CalendarClient({
           {t("legend.noWorkingHours")}
         </span>
       </div>
+      {/* The only way to block a day is to tap it, and nothing said so — the
+          legend named "Đã chặn" without saying how to get there. */}
+      {view === "AGENDA" ? null : (
+        <p className="-mt-2 text-body-sm text-text-tertiary">
+          {t("blockHint")}
+        </p>
+      )}
       {workingWeekdays.size === 0 ? (
         <p className="text-body-sm text-warning">{t("noScheduleWarning")}</p>
       ) : null}

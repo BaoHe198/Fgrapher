@@ -42,7 +42,8 @@
     "billing": "Billing",
     "signout": "Sign out",
     "messages": "Messages",
-    "messagesAria": "Open messages"
+    "messagesAria": "Open messages",
+    "viewPublicProfile": "View public profile"
   },
   "fmap": {
     "title": "Fmap — find providers by area and availability",
@@ -1751,7 +1752,8 @@
         "blockedToast": "Blocked",
         "unblockedToast": "Unblocked",
         "genericError": "Something went wrong, please try again"
-      }
+      },
+      "blockHint": "Tap a day to block it (whole day, a time window or several days) or to unblock it."
     },
     "bookingDetail": {
       "notFound": "Booking not found",

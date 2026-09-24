@@ -42,7 +42,8 @@
     "billing": "Thanh toán",
     "signout": "Đăng xuất",
     "messages": "Tin nhắn",
-    "messagesAria": "Mở tin nhắn"
+    "messagesAria": "Mở tin nhắn",
+    "viewPublicProfile": "Xem hồ sơ công khai"
   },
   "fmap": {
     "title": "Bản đồ F — tìm nhà cung cấp theo khu vực và lịch trống",
@@ -1751,7 +1752,8 @@
         "blockedToast": "Đã chặn lịch",
         "unblockedToast": "Đã bỏ chặn",
         "genericError": "Không thể thực hiện, vui lòng thử lại"
-      }
+      },
+      "blockHint": "Bấm vào một ngày để chặn nghỉ (cả ngày, khung giờ hoặc nhiều ngày) hoặc bỏ chặn."
     },
     "bookingDetail": {
       "notFound": "Không tìm thấy lịch đặt",

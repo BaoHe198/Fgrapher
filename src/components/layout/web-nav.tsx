@@ -223,6 +223,7 @@ function UserMenu({
   session: ReturnType<typeof useSession>["data"];
 }) {
   const t = useTranslations("nav");
+  const { isPaid } = useUserRoles();
 
   return (
     <DropdownMenu>
@@ -240,6 +241,12 @@ function UserMenu({
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        {/* Providers had no way to see the page customers see. */}
+        {isPaid ? (
+          <DropdownMenuItem render={<Link href="/profile/me" />}>
+            {t("viewPublicProfile")}
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
           {t("settings")}
         </DropdownMenuItem>
@@ -274,6 +281,7 @@ function MobileNavSheet({
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const messaging = useMessaging();
+  const { isPaid } = useUserRoles();
   const navLinks = NAV_LINKS.filter(
     (link) =>
       (marketplaceEnabled || link.href !== "/shop") &&
@@ -376,6 +384,15 @@ function MobileNavSheet({
                 </span>
               ) : null}
             </button>
+            {isPaid ? (
+              <Link
+                href="/profile/me"
+                onClick={() => setOpen(false)}
+                className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
+              >
+                {t("viewPublicProfile")}
+              </Link>
+            ) : null}
             <Link
               href="/dashboard/notifications"
               onClick={() => setOpen(false)}

@@ -315,7 +315,10 @@ export function ProfileInteractive({
         ) : (
           <BookingSidebar
             providerId={providerId}
-            firstName={firstName}
+            // A studio is booked as a business, so the card says "Đặt lịch
+            // với Đức Thịnh Creative Studio", matching its profile and the
+            // booking wizard, not the owner's first name.
+            firstName={role === "STUDIO" ? displayName : firstName}
             services={services}
             selectedServiceId={selectedServiceId}
             onServiceChange={setSelectedServiceId}
