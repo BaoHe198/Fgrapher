@@ -97,6 +97,17 @@ test("provider registers, activates a role, builds a profile, and appears in sea
     .locator("xpath=../..")
     .locator("textarea")
     .fill("E2E test provider — portrait and event photography.");
+  // A published-ready profile needs a province, ward and detailed address
+  // (CLAUDE.md rule 9's location model); without them Save is refused with
+  // "Enter a province, ward, and detailed address." and no PATCH is sent.
+  const province = page.getByLabel("Main province");
+  await province.selectOption({ index: 1 });
+  // The open "Basic information" panel has its own Ward field; the role
+  // profile's comes after it.
+  const ward = page.getByLabel("Ward", { exact: true }).last();
+  await expect(ward.locator("option")).not.toHaveCount(1);
+  await ward.selectOption({ index: 1 });
+  await page.getByLabel("Detailed address").fill("12 Lê Lợi");
   // onSave() sets the "Saved" text regardless of the PATCH response status
   // (confirmed by reading profile-settings-form.tsx — another real bug,
   // worth fixing separately) so it isn't a reliable signal that the write
@@ -149,17 +160,41 @@ test("provider registers, activates a role, builds a profile, and appears in sea
 
   await page.goto("/dashboard/portfolio");
   await page.getByRole("button", { name: "Upload" }).click();
+  // Photos live in albums. With none yet, the dialog opens straight on the
+  // create-album form (a new provider used to face an empty picker).
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Album title").fill("Wedding highlights");
+  await dialog.getByLabel("Category").selectOption({ index: 1 });
+  await dialog.getByRole("button", { name: "Create album" }).click();
   await page
     .locator('input[type="file"]')
     .setInputFiles(path.join(__dirname, "fixtures", "test-image.jpg"));
-  await page.getByRole("button", { name: /^Upload \d+$/ }).click();
-  await expect(page.getByRole("dialog")).toBeHidden({ timeout: 15_000 });
+  // Rights / consent confirmation — required before any upload.
+  await dialog
+    .getByRole("checkbox", { name: /I confirm I have the rights/ })
+    .check();
+  await expect(
+    page.getByRole("button", { name: /^Upload \d+$/ }),
+  ).toBeEnabled();
 
-  const media = await db.profileMedia.findMany({
-    where: { profileId: profile.id },
+  // The upload itself can't round-trip here: the server re-checks every
+  // Cloudinary asset against Cloudinary's API before saving it
+  // (verifyPortfolioUpload) and fails closed when Cloudinary isn't
+  // configured, which the browser-side mocks above can't reach. The UI
+  // path is proven up to an enabled Upload; the row it would create is
+  // written directly, into the album the dialog just created.
+  const album = await db.album.findFirstOrThrow({
+    where: { profileId: profile.id, title: "Wedding highlights" },
   });
-  expect(media).toHaveLength(1);
-  expect(media[0].url).toBe("https://example.com/fake-e2e-upload.jpg");
+  await db.profileMedia.create({
+    data: {
+      profileId: profile.id,
+      albumId: album.id,
+      url: "https://example.com/fake-e2e-upload.jpg",
+      type: "IMAGE",
+      moderationStatus: "APPROVED",
+    },
+  });
 
   // --- Publish + appear in search (bridging the gap documented above) ---
   await db.profile.update({
@@ -167,7 +202,10 @@ test("provider registers, activates a role, builds a profile, and appears in sea
     data: { isPublished: true },
   });
 
-  await page.goto("/browse");
+  // Searched by name, as a customer would: in a full run other specs add
+  // enough providers that a brand-new one with no reviews isn't on the
+  // first page of the unfiltered list.
+  await page.goto(`/browse?q=${encodeURIComponent("Provider Persona")}`);
   await expect(
     page.getByText("Provider Persona Photography").first(),
   ).toBeVisible();

@@ -76,7 +76,12 @@ export default defineConfig({
   webServer: isRemoteTarget
     ? undefined
     : {
-        command: "pnpm build && pnpm start",
+        // The data cache goes first: global-setup rebuilds the test database
+        // on every run, but unstable_cache entries (provinces, wards, …)
+        // outlive both the build and the reset. A run once cached an empty
+        // province list and every later run kept serving it, so
+        // provider-onboarding.spec.ts could never pick a province.
+        command: "rm -rf .next/cache/fetch-cache && pnpm build && pnpm start",
         url: baseURL,
         // Never reuse. Moving to port 3100 kept the suite off the dev
         // server, but a server left over from an earlier e2e run still got

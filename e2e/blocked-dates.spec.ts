@@ -39,12 +39,12 @@ test("a whole-day blocked date can't be booked via direct API call", async ({
     lastName: "Provider",
     roles: ["PHOTOGRAPHER"],
   });
-  await seedWeekdayAvailability(provider.id);
   const profile = await createPublishedProfile({
     userId: provider.id,
     role: "PHOTOGRAPHER",
     displayName: "Blocked Date Fixture",
   });
+  await seedWeekdayAvailability(provider.id);
   const service = await db.service.create({
     data: {
       profileId: profile.id,

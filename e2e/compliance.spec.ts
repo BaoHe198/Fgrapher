@@ -84,10 +84,12 @@ test("data & privacy settings: toggle consent, export data, request deletion", a
     })
     .toBe(true);
 
-  // "Tải về dữ liệu của tôi" downloads a complete JSON export.
+  // "Download my data" downloads a complete JSON export. The suite runs in
+  // English (the browser's Accept-Language), like every other spec here —
+  // these steps used Vietnamese labels and could never find their buttons.
   const [download] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("button", { name: "Tải về dữ liệu của tôi" }).click(),
+    page.getByRole("button", { name: "Download my data" }).click(),
   ]);
   const downloadPath = await download.path();
   expect(downloadPath).toBeTruthy();
@@ -100,10 +102,10 @@ test("data & privacy settings: toggle consent, export data, request deletion", a
 
   // Deletion only ever queues a DataRequest — it must not touch the User
   // row itself (that only happens once staff runs processDeletion).
-  await page.getByRole("button", { name: "Yêu cầu xóa tài khoản" }).click();
-  await page.getByRole("button", { name: "Tiếp tục" }).click();
-  await page.getByRole("button", { name: "Xác nhận gửi yêu cầu" }).click();
-  await expect(page.getByText("đang chờ xử lý")).toBeVisible({
+  await page.getByRole("button", { name: "Request account deletion" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Confirm submission" }).click();
+  await expect(page.getByText("pending account deletion request")).toBeVisible({
     timeout: 10_000,
   });
 

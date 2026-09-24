@@ -55,6 +55,12 @@ export default async function globalSetup() {
     env: process.env,
   });
 
+  // Provinces and wards, as production has them (migrate-production runs
+  // the same script). Every provider profile needs a province, ward and
+  // address before it saves, so without these provider-onboarding.spec.ts
+  // faced an empty province list and could never save a profile.
+  execSync("pnpm db:seed:geography", { stdio: "inherit", env: process.env });
+
   // One published, bookable provider fixture reused across booking/
   // messaging/marketplace-style tests as "the counterparty" — individual
   // test files create whichever customer/provider they're specifically
@@ -68,7 +74,6 @@ export default async function globalSetup() {
     location: "Đà Nẵng",
   });
   await activatePaidRole(provider.id, "PHOTOGRAPHER");
-  await seedWeekdayAvailability(provider.id);
   await createPublishedProfile({
     userId: provider.id,
     role: "PHOTOGRAPHER",
@@ -85,6 +90,11 @@ export default async function globalSetup() {
       },
     ],
   });
+  // After the profile: availability hangs off the profile's bookable
+  // resource, and with no profile yet replaceWeeklyRules found nothing to
+  // attach to and silently wrote no rules — every day showed as booked and
+  // booking-review.spec.ts could never pick a date.
+  await seedWeekdayAvailability(provider.id);
 
   // Fixture shop + product for marketplace tests, same "shared
   // counterparty" reasoning as the provider fixture above.

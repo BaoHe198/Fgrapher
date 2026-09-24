@@ -5,15 +5,12 @@ import { login } from "./helpers/auth";
 
 // Customer buys a product -> shop fulfills -> order completes.
 //
-// Order rows are created only by the Stripe checkout.session.completed
-// webhook (src/services/orders.ts createOrdersFromCheckout) — there is no
-// direct-create path anywhere in the app, and STRIPE_SECRET_KEY is
-// unconfigured in this environment. So this is two tests: the real UI path
-// up to the Checkout handoff (asserting the app's graceful degraded-mode
-// message, same as the subscribe flow), and the fulfillment lifecycle on a
-// directly-seeded PENDING order standing in for what a completed payment
-// would have produced.
-test("customer reaches the Stripe checkout handoff for a product", async ({
+// Online payment is off (CLAUDE.md: no Stripe, and the local rails are
+// flag-gated). Checkout therefore places the order directly and the shop
+// collects payment on delivery or at collection — so the first test drives
+// the real UI all the way to an order row, and the second walks a seeded
+// order through fulfilment.
+test("customer places an order for a product through checkout", async ({
   page,
 }) => {
   test.skip(
@@ -39,16 +36,20 @@ test("customer reaches the Stripe checkout handoff for a product", async ({
   await page.getByRole("button", { name: "Checkout" }).click();
 
   await expect(page).toHaveURL(/\/checkout/, { timeout: 10_000 });
-  await page.getByRole("radio", { name: "Ship to me" }).check();
+  await page.getByRole("radio", { name: "Pick up at shop" }).check();
   await page
     .getByRole("checkbox", { name: "I agree to the terms of sale/rental" })
     .check();
-  await page.getByRole("button", { name: "Continue to payment" }).click();
-  await expect(
-    page.getByText("Payments aren't set up in this environment yet."),
-  ).toBeVisible({
-    timeout: 10_000,
+  await page.getByRole("button", { name: "Place order" }).click();
+
+  await expect(page).toHaveURL(/\/dashboard\/orders/, { timeout: 15_000 });
+  const order = await db.order.findFirstOrThrow({
+    where: { customerId: customer.id },
+    include: { items: true },
   });
+  expect(order.status).toBe("PENDING");
+  expect(order.deliveryMethod).toBe("PICKUP");
+  expect(order.items.map((item) => item.productId)).toContain(product.id);
 });
 
 test("shop fulfills a seeded order through to delivered", async ({

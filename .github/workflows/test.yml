@@ -65,6 +65,8 @@ jobs:
       # allows, all from 127.0.0.1 — see src/lib/auth.ts.
       LOGIN_IP_RATE_LIMIT_MAX: "100000"
       LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
+      API_ANONYMOUS_RATE_LIMIT_MAX: "100000"
+      API_RATE_LIMIT_MAX: "100000"
       # requireCronSecret() fails closed outside development.
       CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
       # Flagged-off-by-default features whose specs exercise the real
@@ -144,6 +146,8 @@ jobs:
       # allows, all from 127.0.0.1 — see src/lib/auth.ts.
       LOGIN_IP_RATE_LIMIT_MAX: "100000"
       LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
+      API_ANONYMOUS_RATE_LIMIT_MAX: "100000"
+      API_RATE_LIMIT_MAX: "100000"
       # requireCronSecret() fails closed outside development.
       CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
       # Flagged-off-by-default features whose specs exercise the real
@@ -267,6 +271,8 @@ jobs:
       # allows, all from 127.0.0.1 — see src/lib/auth.ts.
       LOGIN_IP_RATE_LIMIT_MAX: "100000"
       LOGIN_EMAIL_RATE_LIMIT_MAX: "1000"
+      API_ANONYMOUS_RATE_LIMIT_MAX: "100000"
+      API_RATE_LIMIT_MAX: "100000"
       # requireCronSecret() fails closed outside development.
       CRON_SECRET: e2e-cron-secret-not-used-anywhere-real
       # Flagged-off-by-default features whose specs exercise the real

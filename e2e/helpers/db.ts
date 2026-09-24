@@ -80,7 +80,7 @@ export async function activatePaidRole(userId: string, role: Role) {
 // BookableResource.
 export async function seedWeekdayAvailability(userId: string) {
   const WEEKDAYS = [1, 2, 3, 4, 5];
-  await replaceWeeklyRules(
+  const written = await replaceWeeklyRules(
     userId,
     WEEKDAYS.map((dayOfWeek) => ({
       dayOfWeek,
@@ -88,6 +88,14 @@ export async function seedWeekdayAvailability(userId: string) {
       endTime: "17:00",
     })),
   );
+  // replaceWeeklyRules returns 0 when the user has no provider profile to
+  // hang a calendar on. Called too early it used to write nothing, and the
+  // specs that book this provider failed far away with every day "busy".
+  if (written === 0) {
+    throw new Error(
+      `seedWeekdayAvailability(${userId}): no provider profile yet — create the profile first`,
+    );
+  }
 }
 
 export async function createPublishedProfile(opts: {

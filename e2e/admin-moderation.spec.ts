@@ -93,7 +93,12 @@ test("admin approves a pending photo: status flips, AuditLog is written, photo g
   // whole point of the moderation gate (Profile.isPublished requires at
   // least one APPROVED ProfileMedia row, per services/public-profile.ts).
   await page.goto(`/profile/${provider.username}`);
-  await expect(page.locator(`img[src="${media.url}"]`)).toBeVisible();
+  // Matched by file name: the page serves the photo through next/image and
+  // Cloudinary size variants, so the src is never the stored URL verbatim.
+  const fileName = media.url.split("/").pop()!;
+  await expect(
+    page.locator(`main img[src*="${fileName.split(".")[0]}"]`).first(),
+  ).toBeVisible();
 });
 
 test("admin rejects a pending photo with a reason: status flips and AuditLog records it", async ({
