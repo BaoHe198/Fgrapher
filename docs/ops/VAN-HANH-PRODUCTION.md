@@ -187,6 +187,12 @@ Bước 3 lỗi thì code **không** được deploy — web vẫn chạy bản 
 | `VERCEL_TOKEN`                        | Tạo ở vercel.com/account/tokens                                                                          |
 | `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` | Trong `.vercel/project.json`                                                                             |
 
+Tất cả đặt ở mục **Repository secrets**. **Đừng** tạo secret trùng tên trong
+Settings → Environments → `production`: secret của environment được ưu tiên hơn
+và che mất bản ở repository. Ngày 24/09/2026 một `PRODUCTION_DATABASE_URL` cũ
+nằm ở đó đã làm hỏng ba lần deploy liên tiếp dù bản ở repository đã đúng.
+Kiểm tra: `gh secret list --env production` phải trống.
+
 Đổi mật khẩu database thì phải cập nhật **cùng lúc** hai secret database ở trên
 và `DATABASE_URL`/`DIRECT_URL` môi trường Production trên Vercel.
 
