@@ -738,7 +738,7 @@
         "gmvThisMonthSub": "{bookingGmv} đặt lịch · {orderGmv} cửa hàng",
         "failedPayments": "Thanh toán thất bại",
         "pendingReports": "Báo cáo chờ xử lý",
-        "expiringSoon": "Gói sắp hết hạn trong 7 ngày",
+        "expiringSoon": "Gói đã hoặc sắp hết hạn (7 ngày)",
         "recentActivity": "Hoạt động gần đây",
         "noActivity": "Chưa có hoạt động nào",
         "activity": {

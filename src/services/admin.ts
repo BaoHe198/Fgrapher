@@ -93,13 +93,15 @@ export async function getAdminStats() {
     }),
     db.subscription.count({ where: { status: "PAST_DUE" } }),
     db.report.count({ where: { status: "PENDING" } }),
+    // No lower bound. "Expiring in the next 7 days" skipped plans whose
+    // period had already ended but that the daily expiry cron hadn't
+    // reached yet — exactly the ones needing an admin now. With billing off,
+    // a lapsed provider is told to contact Fgrapher, and this card is how
+    // Fgrapher finds out.
     db.subscription.count({
       where: {
         status: { in: ["ACTIVE", "TRIALING"] },
-        currentPeriodEnd: {
-          gte: new Date(),
-          lte: new Date(Date.now() + 7 * 86_400_000),
-        },
+        currentPeriodEnd: { lte: new Date(Date.now() + 7 * 86_400_000) },
       },
     }),
   ]);

@@ -738,7 +738,7 @@
         "gmvThisMonthSub": "{bookingGmv} bookings · {orderGmv} marketplace",
         "failedPayments": "Failed payments",
         "pendingReports": "Pending reports",
-        "expiringSoon": "Subscriptions expiring in 7 days",
+        "expiringSoon": "Plans expired or expiring within 7 days",
         "recentActivity": "Recent activity",
         "noActivity": "No activity yet",
         "activity": {
