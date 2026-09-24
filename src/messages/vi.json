@@ -3702,7 +3702,8 @@
         "confirmAccept": "Chấp nhận và tạo lịch"
       },
       "loadFailed": "Không tải được bảng tin. Vui lòng thử lại.",
-      "retry": "Thử lại"
+      "retry": "Thử lại",
+      "openPhoto": "Xem ảnh {index}/{total}"
     }
   },
   "sharedComponents": {

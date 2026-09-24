@@ -3702,7 +3702,8 @@
         "confirmAccept": "Accept and create booking"
       },
       "loadFailed": "Could not load the feed. Please try again.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "openPhoto": "View photo {index} of {total}"
     }
   },
   "sharedComponents": {

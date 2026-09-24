@@ -32,6 +32,7 @@ import {
   ProductImageUploader,
   type ProductImage,
 } from "@/components/forms/product-image-uploader";
+import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ReportModal } from "@/components/modals/report-modal";
 import { PostEngagement } from "@/components/social/post-engagement";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -648,37 +649,57 @@ function PostCard({
 }
 
 function PostMedia({ media }: { media: FeedPost["media"] }) {
+  const t = useTranslations("publicPages.community");
+  // Every photo opens the full set; the "+N" tile opens at that photo, so
+  // the hidden rest is one swipe away instead of unreachable.
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
   const visible = media.slice(0, 4);
   return (
-    <div
-      className={cn(
-        "grid gap-1.5 overflow-hidden rounded-xl",
-        visible.length === 1 ? "grid-cols-1" : "grid-cols-2",
-      )}
-    >
-      {visible.map((item, index) => (
-        <div
-          key={item.id}
-          className={cn(
-            "relative overflow-hidden bg-bg-sunken",
-            visible.length === 1 ? "aspect-[4/3]" : "aspect-square",
-          )}
-        >
-          <Image
-            src={item.url}
-            alt=""
-            fill
-            sizes="(min-width: 768px) 620px, 95vw"
-            className="object-cover transition-transform duration-300 hover:scale-[1.02]"
-          />
-          {index === 3 && media.length > 4 ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-heading-lg text-white">
-              +{media.length - 4}
-            </div>
-          ) : null}
-        </div>
-      ))}
-    </div>
+    <>
+      <div
+        className={cn(
+          "grid gap-1.5 overflow-hidden rounded-xl",
+          visible.length === 1 ? "grid-cols-1" : "grid-cols-2",
+        )}
+      >
+        {visible.map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => setOpenIndex(index)}
+            aria-label={t("openPhoto", {
+              index: index + 1,
+              total: media.length,
+            })}
+            className={cn(
+              "relative cursor-zoom-in overflow-hidden bg-bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary",
+              visible.length === 1 ? "aspect-[4/3]" : "aspect-square",
+            )}
+          >
+            <Image
+              src={item.url}
+              alt=""
+              fill
+              sizes="(min-width: 768px) 620px, 95vw"
+              className="object-cover transition-transform duration-300 hover:scale-[1.02]"
+            />
+            {index === 3 && media.length > 4 ? (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-heading-lg text-white">
+                +{media.length - 4}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+      {openIndex !== null ? (
+        <MediaLightbox
+          items={media.map((item) => ({ url: item.url }))}
+          index={openIndex}
+          onClose={() => setOpenIndex(null)}
+          onIndexChange={setOpenIndex}
+        />
+      ) : null}
+    </>
   );
 }
 
