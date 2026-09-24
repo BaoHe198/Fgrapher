@@ -20,7 +20,8 @@ import { cn, formatCurrency } from "@/lib/utils";
 import type { ServiceKind } from "@prisma/client";
 
 import { serviceKindsForRole } from "@/lib/constants/service-matrix";
-import { searchProfiles, type SortOption } from "@/services/search";
+import { normalizeSort } from "@/lib/search-params";
+import { searchProfiles } from "@/services/search";
 import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
 
 interface BrowsePageProps {
@@ -100,7 +101,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   if (categories?.length === 1) fmapParams.set("category", categories[0]);
   const fmapHref = fmapParams.size > 0 ? `/fmap?${fmapParams}` : "/fmap";
 
-  const sort = (params.sort as SortOption) ?? "rating";
+  const sort = normalizeSort(params.sort);
   const page = params.page ? Number(params.page) : 1;
 
   const experienceLevel = params.experienceLevel?.split(",").filter(Boolean) as

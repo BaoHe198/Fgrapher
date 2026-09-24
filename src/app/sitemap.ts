@@ -4,6 +4,11 @@ import { db } from "@/lib/db";
 import { DISCOVERABLE_ROLES, PAID_ROLES, ROLE_SLUGS } from "@/lib/constants";
 import { features } from "@/lib/features";
 
+// Rebuilt hourly. Without this the sitemap was generated once at build time
+// and then frozen: a provider who published after a deploy never reached it,
+// and a product deleted since still sat in it as a link to a 404.
+export const revalidate = 3600;
+
 const STATIC_ROUTES = [
   "",
   "/browse",

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 import { ArtistCard } from "@/components/cards/artist-card";
 import { db } from "@/lib/db";
-import { PROVIDER_ROLES, SLUG_TO_ROLE } from "@/lib/constants";
+import { DISCOVERABLE_ROLES, SLUG_TO_ROLE } from "@/lib/constants";
 import { formatCurrency, jsonLdScriptProps } from "@/lib/utils";
 import { searchProfiles } from "@/services/search";
 
@@ -29,7 +29,9 @@ interface PageProps {
 // is lost.
 async function resolveParams(roleSlug: string, provinceSlug: string) {
   const role = SLUG_TO_ROLE[roleSlug];
-  if (!role || !PROVIDER_ROLES.includes(role)) return null;
+  // Every role /browse can find, the costume shop included: the sitemap
+  // lists /costume-rental/<province> for each province, and all 34 were 404.
+  if (!role || !DISCOVERABLE_ROLES.includes(role)) return null;
 
   const province = await db.province.findUnique({
     where: { code: provinceSlug },
@@ -56,7 +58,12 @@ export async function generateMetadata({
     province: resolved.province.name,
   };
   const title = t("metaTitle", values);
-  const description = t("metaDescription", values);
+  // A costume shop takes no bookings and shows no portfolio: it is found,
+  // then rented through a chat — its copy says so.
+  const description =
+    resolved.role === "COSTUME_SHOP"
+      ? t("costumeMetaDescription", values)
+      : t("metaDescription", values);
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
   const url = `${baseUrl}/${roleSlug}/${provinceSlug}`;
 
@@ -97,7 +104,10 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: t("heading", values),
-    description: t("metaDescription", values),
+    description:
+      resolved.role === "COSTUME_SHOP"
+        ? t("costumeMetaDescription", values)
+        : t("metaDescription", values),
     mainEntity: {
       "@type": "ItemList",
       itemListElement: result.data.map((profile, index) => ({
@@ -117,7 +127,9 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
         {t("heading", values)}
       </h1>
       <p className="mt-2 max-w-2xl text-body-md text-text-secondary">
-        {t("intro", values)}
+        {resolved.role === "COSTUME_SHOP"
+          ? t("costumeIntro", values)
+          : t("intro", values)}
       </p>
 
       {result.data.length === 0 ? (

@@ -5,15 +5,8 @@ import { PUBLIC_SEARCH_CACHE_CONTROL } from "@/lib/cache";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { ServiceKind } from "@prisma/client";
 
-import { searchProfiles, type SortOption } from "@/services/search";
-
-const VALID_SORTS: SortOption[] = [
-  "rating",
-  "price_asc",
-  "price_desc",
-  "newest",
-  "reviews",
-];
+import { normalizeSort } from "@/lib/search-params";
+import { searchProfiles } from "@/services/search";
 
 // Fully public, no auth gate (by design — search has to work for
 // anonymous visitors), and every call runs several DB queries
@@ -59,9 +52,7 @@ export async function GET(request: Request) {
     ? Number(searchParams.get("minRating"))
     : undefined;
   const sortParam = searchParams.get("sort");
-  const sort = VALID_SORTS.includes(sortParam as SortOption)
-    ? (sortParam as SortOption)
-    : "rating";
+  const sort = normalizeSort(sortParam);
   const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
 
   const result = await searchProfiles({

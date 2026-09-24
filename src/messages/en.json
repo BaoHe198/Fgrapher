@@ -3155,6 +3155,8 @@
       "metaDescription": "Find and book trusted {role}s in {province}. Browse portfolios, prices, and reviews on Fgrapher.",
       "heading": "{role}s in {province}",
       "intro": "Browse {role}s based in {province}, compare portfolios and prices, and book directly on Fgrapher.",
+      "costumeMetaDescription": "Find costume rental shops in {province}. See their outfits and rental prices, and message the shop directly on Fgrapher.",
+      "costumeIntro": "Browse costume rental shops in {province}, compare outfits and rental prices, then message a shop directly on Fgrapher to rent.",
       "empty": {
         "heading": "No {role}s in {province} yet",
         "body": "Be the first to know when one joins, or browse all providers nationwide.",

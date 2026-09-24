@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { DISCOVERABLE_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { formatAdministrativeLocation } from "@/lib/location";
+import { sanitizeSearchParams } from "@/lib/search-params";
 import {
   CACHE_KEY_VERSION,
   CACHE_TAGS,
@@ -563,7 +564,11 @@ const searchProfilesCached = unstable_cache(
  * revalidateSearch). Fully public — never fed a session or per-user value.
  */
 export async function searchProfiles(params: SearchParams) {
-  return reviveDates(await searchProfilesCached(canonicalParamsKey(params)));
+  return reviveDates(
+    await searchProfilesCached(
+      canonicalParamsKey(sanitizeSearchParams(params)),
+    ),
+  );
 }
 
 /**

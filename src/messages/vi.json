@@ -3155,6 +3155,8 @@
       "metaDescription": "Tìm và đặt lịch {role} uy tín tại {province}. Xem portfolio, bảng giá, và đánh giá trên Fgrapher.",
       "heading": "{role} tại {province}",
       "intro": "Khám phá các {role} đang hoạt động tại {province}, so sánh portfolio và bảng giá, đặt lịch trực tiếp trên Fgrapher.",
+      "costumeMetaDescription": "Tìm shop cho thuê trang phục tại {province}. Xem mẫu trang phục, giá thuê và nhắn tin trực tiếp cho shop trên Fgrapher.",
+      "costumeIntro": "Khám phá các shop cho thuê trang phục tại {province}, xem mẫu và giá thuê, rồi nhắn tin trực tiếp cho shop để thuê trên Fgrapher.",
       "empty": {
         "heading": "Chưa có {role} nào tại {province}",
         "body": "Đăng ký để được báo ngay khi có nhà cung cấp mới, hoặc khám phá toàn bộ nhà cung cấp trên toàn quốc.",
