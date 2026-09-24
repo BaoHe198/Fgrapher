@@ -112,7 +112,8 @@
     "cluster": {
       "title": "{count} providers at this spot",
       "close": "Close list"
-    }
+    },
+    "resultCount": "{count, plural, one {# provider} other {# providers}}"
   },
   "role": {
     "PHOTOGRAPHER": "Photographer",

@@ -199,7 +199,9 @@ export function FmapMap({
   markers: FmapMarker[];
   selectedProfileId: string | null;
   centreRequest: { latitude: number; longitude: number; nonce: number } | null;
-  fitRequest: { bounds: FmapBounds; nonce: number } | null;
+  /** keepZoom: centre the bounds without zooming in past the current
+   * level — used to pull results off the edge, not to re-frame the map. */
+  fitRequest: { bounds: FmapBounds; nonce: number; keepZoom?: boolean } | null;
   onBoundsChange: (bounds: FmapBounds) => void;
   onSelectProvider: (profileId: string) => void;
   /** Providers that share one spot and can't be split by zooming. */
@@ -441,7 +443,13 @@ export function FmapMap({
         [west, south],
         [east, north],
       ],
-      { padding: 48, maxZoom: 13, duration: 900 },
+      {
+        padding: 64,
+        maxZoom: fitRequest.keepZoom
+          ? Math.min(13, mapRef.current.getZoom())
+          : 13,
+        duration: 900,
+      },
     );
   }, [fitRequest]);
 

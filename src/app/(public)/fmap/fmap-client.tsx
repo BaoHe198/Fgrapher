@@ -78,8 +78,36 @@ interface FmapClientProps {
   initialCategory: FmapFilterValue["category"];
 }
 
+/** Share of the searched area treated as "the edge" on each side. */
+const EDGE_MARGIN = 0.12;
+
+function resultsNearEdge(markers: FmapMarker[], area: FmapBounds) {
+  if (markers.length === 0) return false;
+  const latMargin = (area.north - area.south) * EDGE_MARGIN;
+  const lngMargin = (area.east - area.west) * EDGE_MARGIN;
+  return markers.some(
+    (m) =>
+      m.latitude > area.north - latMargin ||
+      m.latitude < area.south + latMargin ||
+      m.longitude > area.east - lngMargin ||
+      m.longitude < area.west + lngMargin,
+  );
+}
+
+function boundsOf(markers: FmapMarker[]): FmapBounds {
+  return {
+    north: Math.max(...markers.map((m) => m.latitude)),
+    south: Math.min(...markers.map((m) => m.latitude)),
+    east: Math.max(...markers.map((m) => m.longitude)),
+    west: Math.min(...markers.map((m) => m.longitude)),
+  };
+}
+
 export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   const t = useTranslations("fmap");
+  // The page heading is the same name the site nav uses — "Bản đồ F" in
+  // Vietnamese — rather than a hardcoded "Fmap" the nav never called it.
+  const navT = useTranslations("nav");
   const [filters, setFilters] = useState<FmapFilterValue>({
     provinceId: "",
     wardId: "",
@@ -106,6 +134,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   const [fitRequest, setFitRequest] = useState<{
     bounds: FmapBounds;
     nonce: number;
+    keepZoom?: boolean;
   } | null>(null);
   const [notice, setNotice] = useState<{
     tone: "info" | "error";
@@ -183,6 +212,19 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
           return;
         }
         setMarkers(body.data);
+        // A result near the edge of the area searched sat half off the map
+        // — the one hit for "photographer, HCMC, 09:00–11:00" was a price
+        // tag clipped at the top border, easy to take for "nothing found".
+        // Bring results into view, at the same zoom, without that counting
+        // as the user moving the map.
+        if (resultsNearEdge(body.data, area)) {
+          ignoreNextMoveRef.current = true;
+          setFitRequest({
+            bounds: boundsOf(body.data),
+            nonce: Date.now(),
+            keepZoom: true,
+          });
+        }
         setTruncated(Boolean(body.truncated));
         setHasSearched(true);
         setSearchedFor(current);
@@ -379,7 +421,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   return (
     <div className="mx-auto max-w-[1600px] px-3 pt-4 pb-8 sm:px-6 sm:pt-6">
       <div className="mb-3">
-        <h1 className="text-display-md text-text-primary">Fmap</h1>
+        <h1 className="text-display-md text-text-primary">{navT("fmap")}</h1>
         <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
       </div>
       <FmapFilterBar
@@ -412,6 +454,11 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
               start: searchedFor.start,
               end: searchedFor.end,
             })}
+            {/* How many were found — otherwise the only feedback was
+                whatever markers happened to be in view. */}
+            {!loading && markers.length > 0
+              ? ` · ${t("resultCount", { count: markers.length })}${truncated ? "+" : ""}`
+              : null}
           </p>
         ) : null}
         <FmapMap
