@@ -116,10 +116,14 @@ export function AlbumEditDialog({
               onChange={(e) => setTitle(e.target.value)}
             />
             <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-semibold! text-text-primary">
+              <label
+                htmlFor="album-edit-dialog-field-1"
+                className="text-body-sm font-semibold! text-text-primary"
+              >
                 {t("descriptionLabel")}
               </label>
               <Textarea
+                id="album-edit-dialog-field-1"
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}

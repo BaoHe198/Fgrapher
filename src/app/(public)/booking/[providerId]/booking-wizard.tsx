@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   formatDate,
   formatDateLong,
+  formatDurationHours,
   formatDayMonth,
   formatMonthYear,
 } from "@/lib/format";
@@ -198,6 +199,11 @@ export function BookingWizard({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  // The success screen replaces a long form; without this the phone stayed
+  // scrolled to the footer and never showed the "sent" confirmation.
+  useEffect(() => {
+    if (bookingId) window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [bookingId]);
   const [providerZaloUrl, setProviderZaloUrl] = useState<string | null>(null);
   // Crew-hire (Prompt B7, VIỆC 1) — "Gắn vào đơn khách hàng".
   const [parentBookingOptions, setParentBookingOptions] = useState<
@@ -308,6 +314,29 @@ export function BookingWizard({
         return false;
     }
   }, [step, draft, services.length]);
+
+  // What the disabled Continue button is waiting for. A greyed-out button
+  // alone left people guessing — the phone number in particular carried no
+  // mark that it was required (24/09 audit).
+  const missingHint = useMemo(() => {
+    if (canContinue) return null;
+    switch (step) {
+      case 0:
+        return t("missingHint.service");
+      case 1:
+        return t("missingHint.dateTime");
+      case 2:
+        return draft.locationType !== null &&
+          draft.locationType !== "PROVIDER" &&
+          draft.contactPhone.trim().length > 0
+          ? t("missingHint.address")
+          : t("missingHint.details");
+      case 3:
+        return t("missingHint.agree");
+      default:
+        return null;
+    }
+  }, [canContinue, step, draft.locationType, draft.contactPhone, t]);
 
   const onSubmit = async () => {
     setSubmitting(true);
@@ -590,6 +619,11 @@ export function BookingWizard({
           </Button>
         )}
       </div>
+      {missingHint ? (
+        <p className="mt-2 text-right text-body-sm text-text-tertiary">
+          {missingHint}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -665,10 +699,14 @@ function StepService({
 
       {services.length === 0 ? (
         <div className="flex flex-col gap-2">
-          <label className="text-body-sm font-semibold! text-text-primary">
+          <label
+            htmlFor="booking-wizard-field-1"
+            className="text-body-sm font-semibold! text-text-primary"
+          >
             {t("stepService.describeLabel")}
           </label>
           <Textarea
+            id="booking-wizard-field-1"
             rows={4}
             value={customRequest}
             onChange={(e) => onCustomRequest(e.target.value)}
@@ -1039,10 +1077,14 @@ function StepDetails({
             onChange={(e) => onChange("usageRights", e.target.value)}
           />
           <div className="flex flex-col gap-1.5">
-            <label className="text-body-sm font-semibold! text-text-primary">
+            <label
+              htmlFor="booking-wizard-field-2"
+              className="text-body-sm font-semibold! text-text-primary"
+            >
               {t("stepDetails.wardrobeLabel")}
             </label>
             <Textarea
+              id="booking-wizard-field-2"
               rows={2}
               value={wardrobeNotes}
               onChange={(e) => onChange("wardrobeNotes", e.target.value)}
@@ -1105,10 +1147,14 @@ function StepDetails({
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold! text-text-primary">
+        <label
+          htmlFor="booking-wizard-field-3"
+          className="text-body-sm font-semibold! text-text-primary"
+        >
           {t("stepDetails.notesLabel")}
         </label>
         <Textarea
+          id="booking-wizard-field-3"
           rows={4}
           maxLength={1000}
           value={notes}
@@ -1130,6 +1176,8 @@ function StepDetails({
       <Input
         label={t("stepDetails.contactPhoneLabel")}
         type="tel"
+        autoComplete="tel"
+        required
         value={contactPhone}
         onChange={(e) => onChange("contactPhone", e.target.value)}
       />
@@ -1228,7 +1276,17 @@ function StepReview({
     ],
     [t("stepReview.rowDate"), date ? formatDateLong(date) : "—"],
     [t("stepReview.rowTime"), time ?? "—"],
-    [t("stepReview.rowDuration"), "—"],
+    // Was a hard-coded "—" on every booking, which read as missing data.
+    ...(service?.duration
+      ? ([
+          [
+            t("stepReview.rowDuration"),
+            t("stepReview.durationValue", {
+              hours: formatDurationHours(service.duration),
+            }),
+          ],
+        ] as [string, string][])
+      : []),
     [
       t("stepReview.rowLocation"),
       locationType === "PROVIDER"

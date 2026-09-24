@@ -242,10 +242,14 @@ export function OpportunityDetail({
           />
         ) : null}
         <div className="flex flex-col gap-1.5">
-          <label className="text-body-sm font-semibold! text-text-primary">
+          <label
+            htmlFor="opportunity-detail-field-1"
+            className="text-body-sm font-semibold! text-text-primary"
+          >
             {t("messageLabel")}
           </label>
           <Textarea
+            id="opportunity-detail-field-1"
             rows={3}
             value={message}
             disabled={!isEditable}

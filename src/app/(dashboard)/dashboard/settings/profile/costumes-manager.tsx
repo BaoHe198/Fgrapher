@@ -331,10 +331,14 @@ export function CostumesManager({
               {t("photoHelper")}
             </p>
             <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-semibold! text-text-primary">
+              <label
+                htmlFor="costumes-manager-field-1"
+                className="text-body-sm font-semibold! text-text-primary"
+              >
                 {t("descriptionLabel")}
               </label>
               <Textarea
+                id="costumes-manager-field-1"
                 aria-label={t("descriptionLabel")}
                 rows={5}
                 className="min-h-28 text-body-md"

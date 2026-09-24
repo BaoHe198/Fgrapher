@@ -34,12 +34,19 @@ export function PhoneVerifyDialog({
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [devHint, setDevHint] = useState<string | null>(null);
+  // Editable: with no phone on the account the dialog used to read "Gửi mã
+  // … tới" with nothing after it and no field to type one into, so a
+  // customer without a saved number could never post a request.
+  const [phoneInput, setPhoneInput] = useState(phone);
+  const phoneValue = phoneInput.trim();
+  const phoneLooksValid = phoneValue.replace(/\D/g, "").length >= 9;
 
   const reset = () => {
     setStep("send");
     setCode("");
     setError(null);
     setDevHint(null);
+    setPhoneInput(phone);
   };
 
   const sendCode = async () => {
@@ -48,7 +55,7 @@ export function PhoneVerifyDialog({
     const res = await fetch("/api/phone/send-code", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify({ phone: phoneValue }),
     });
     const body = await res.json();
     setIsSending(false);
@@ -68,7 +75,7 @@ export function PhoneVerifyDialog({
     const res = await fetch("/api/phone/verify-code", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, code }),
+      body: JSON.stringify({ phone: phoneValue, code }),
     });
     const body = await res.json();
     setIsVerifying(false);
@@ -99,14 +106,23 @@ export function PhoneVerifyDialog({
         {step === "send" ? (
           <div className="flex flex-col gap-3">
             <p className="text-body-sm text-text-secondary">
-              {t("sendDescription", { phone })}
+              {t("sendDescriptionEnter")}
             </p>
+            <Input
+              label={t("phoneLabel")}
+              type="tel"
+              autoComplete="tel"
+              inputMode="tel"
+              value={phoneInput}
+              onChange={(e) => setPhoneInput(e.target.value)}
+              placeholder="0901 234 567"
+            />
             {error ? <p className="text-body-sm text-danger">{error}</p> : null}
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             <p className="text-body-sm text-text-secondary">
-              {t("codeDescription", { phone })}
+              {t("codeDescription", { phone: phoneValue })}
             </p>
             {devHint ? (
               <p className="text-body-sm font-semibold! text-warning">
@@ -137,7 +153,11 @@ export function PhoneVerifyDialog({
             {t("cancel")}
           </Button>
           {step === "send" ? (
-            <Button variant="accent" disabled={isSending} onClick={sendCode}>
+            <Button
+              variant="accent"
+              disabled={isSending || !phoneLooksValid}
+              onClick={sendCode}
+            >
               {isSending ? <Loader2 className="size-4 animate-spin" /> : null}
               {t("sendCode")}
             </Button>

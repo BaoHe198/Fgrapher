@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/ui/star-rating";
+import { auth } from "@/lib/auth";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
 import { getProductDetail } from "@/services/marketplace";
@@ -67,6 +68,8 @@ export default async function ProductDetailPage({
   if (!result) notFound();
 
   const { product, related, shopRating, shopReviewCount } = result;
+  const session = await auth();
+  const isOwner = session?.user?.id === product.user.id;
   const shopName =
     product.user.profiles[0]?.shopName ??
     product.user.firstName ??
@@ -191,16 +194,18 @@ export default async function ProductDetailPage({
               >
                 {t("viewShopProducts")}
               </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                nativeButton={false}
-                render={
-                  <Link href={`/dashboard/messages?to=${product.user.id}`} />
-                }
-              >
-                {t("messageShop")}
-              </Button>
+              {isOwner ? null : (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  nativeButton={false}
+                  render={
+                    <Link href={`/dashboard/messages?to=${product.user.id}`} />
+                  }
+                >
+                  {t("messageShop")}
+                </Button>
+              )}
             </div>
           </Card>
         </div>
@@ -220,6 +225,7 @@ export default async function ProductDetailPage({
             }}
             shopId={product.user.id}
             shopLocation={product.user.location}
+            isOwner={isOwner}
           />
         </div>
       </div>

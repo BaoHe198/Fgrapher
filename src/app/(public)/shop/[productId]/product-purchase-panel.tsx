@@ -1,7 +1,14 @@
 "use client";
 
 import type { ProductCondition, ProductType } from "@prisma/client";
-import { Loader2, MessageCircle, RotateCcw, Shield, Truck } from "lucide-react";
+import {
+  Loader2,
+  MessageCircle,
+  Pencil,
+  RotateCcw,
+  Shield,
+  Truck,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -37,10 +44,12 @@ export function ProductPurchasePanel({
   product,
   shopId,
   shopLocation,
+  isOwner,
 }: {
   product: Product;
   shopId: string;
   shopLocation: string | null;
+  isOwner: boolean;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"SALE" | "RENT">(
@@ -52,6 +61,25 @@ export function ProductPurchasePanel({
   const [error, setError] = useState<string | null>(null);
 
   const saleTotal = (product.price ?? 0) * quantity;
+
+  // The shop looking at its own listing: buying, renting or messaging would
+  // only fail ("You can't message yourself" / own-cart), so offer the one
+  // thing it can do here.
+  const ownerActions = (
+    <>
+      <p className="text-body-sm text-text-secondary">{t("ownProductNote")}</p>
+      <Button
+        variant="secondary"
+        size="lg"
+        className="w-full"
+        nativeButton={false}
+        render={<Link href={`/dashboard/listings/${product.id}/edit`} />}
+      >
+        <Pencil className="size-4" />
+        {t("editOwnProduct")}
+      </Button>
+    </>
+  );
 
   const addToCart = async (redirectToCheckout: boolean) => {
     setError(null);
@@ -136,7 +164,9 @@ export function ProductPurchasePanel({
               with nothing saying why. Someone could set a quantity, read a
               total and then find nothing would press. What they can
               actually do is ask the shop, so that is what's offered. */}
-          {product.stock === 0 ? (
+          {isOwner ? (
+            ownerActions
+          ) : product.stock === 0 ? (
             <>
               <p className="text-body-sm text-text-secondary">
                 {t("outOfStockHelp")}
@@ -232,24 +262,30 @@ export function ProductPurchasePanel({
             </div>
           ) : null}
 
-          <p className="text-body-sm text-text-secondary">
-            {t("rentalMessageHelp")}
-          </p>
+          {isOwner ? (
+            ownerActions
+          ) : (
+            <>
+              <p className="text-body-sm text-text-secondary">
+                {t("rentalMessageHelp")}
+              </p>
 
-          <Button
-            variant="accent"
-            size="lg"
-            className="w-full"
-            nativeButton={false}
-            render={
-              <Link
-                href={`/dashboard/messages?to=${shopId}&product=${product.id}&productName=${encodeURIComponent(product.name)}`}
-              />
-            }
-          >
-            <MessageCircle className="size-4" />
-            {t("messageToRent")}
-          </Button>
+              <Button
+                variant="accent"
+                size="lg"
+                className="w-full"
+                nativeButton={false}
+                render={
+                  <Link
+                    href={`/dashboard/messages?to=${shopId}&product=${product.id}&productName=${encodeURIComponent(product.name)}`}
+                  />
+                }
+              >
+                <MessageCircle className="size-4" />
+                {t("messageToRent")}
+              </Button>
+            </>
+          )}
         </>
       )}
 

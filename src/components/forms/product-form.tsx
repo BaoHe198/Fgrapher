@@ -110,10 +110,14 @@ export function ProductForm({
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold! text-text-primary">
+        <label
+          htmlFor="product-form-field-1"
+          className="text-body-sm font-semibold! text-text-primary"
+        >
           {t("descriptionLabel")}
         </label>
         <textarea
+          id="product-form-field-1"
           className="min-h-24 w-full rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none focus:border-border-focus focus:ring-2 focus:ring-gold-500/20"
           {...register("description")}
         />

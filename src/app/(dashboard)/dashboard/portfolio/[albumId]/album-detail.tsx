@@ -257,10 +257,14 @@ export function AlbumDetail({
           onChange={(e) => setMeta((p) => ({ ...p, title: e.target.value }))}
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-body-sm font-semibold! text-text-primary">
+          <label
+            htmlFor="album-detail-field-1"
+            className="text-body-sm font-semibold! text-text-primary"
+          >
             {t("descriptionLabel")}
           </label>
           <Textarea
+            id="album-detail-field-1"
             rows={2}
             value={meta.description ?? ""}
             onChange={(e) =>

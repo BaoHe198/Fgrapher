@@ -1,10 +1,17 @@
 import type { Role } from "@prisma/client";
 import type { Metadata } from "next";
-import { CalendarDays, Handshake, MapPin, WalletCards } from "lucide-react";
+import {
+  CalendarDays,
+  Handshake,
+  MapPin,
+  ShieldCheck,
+  WalletCards,
+} from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { Tag } from "@/components/ui/tag";
@@ -40,7 +47,7 @@ export default async function OpportunitiesPage({
       active: true,
       role: { in: PROVIDER_ROLES },
     },
-    select: { role: true },
+    select: { role: true, verificationStatus: true },
   });
 
   if (providerRoles.length === 0) {
@@ -61,6 +68,14 @@ export default async function OpportunitiesPage({
   const activeRole =
     providerRoles.find((r) => r.role === roleParam)?.role ??
     providerRoles[0].role;
+
+  const activeStatus = providerRoles.find(
+    (r) => r.role === activeRole,
+  )?.verificationStatus;
+  // listOpportunitiesForProvider returns nothing for an unverified role; the
+  // generic "nothing matches yet, we'll let you know" then told providers to
+  // wait for something that could never arrive (24/09 audit).
+  const isVerified = activeStatus === "VERIFIED";
 
   const opportunities = await listOpportunitiesForProvider(
     session.user.id,
@@ -85,7 +100,30 @@ export default async function OpportunitiesPage({
         </div>
       ) : null}
 
-      {opportunities.length === 0 ? (
+      {!isVerified ? (
+        <Card className="flex flex-col items-center gap-3 py-16 text-center">
+          <ShieldCheck className="size-10 text-text-tertiary" />
+          <p className="text-body-md font-semibold! text-text-primary">
+            {t("unverified.title")}
+          </p>
+          <p className="max-w-md text-body-sm text-text-secondary">
+            {activeStatus === "PENDING"
+              ? t("unverified.pendingBody")
+              : t("unverified.body")}
+          </p>
+          {activeStatus === "PENDING" ? null : (
+            <Button
+              variant="accent"
+              nativeButton={false}
+              render={
+                <Link href={`/onboarding/verification?role=${activeRole}`} />
+              }
+            >
+              {t("unverified.cta")}
+            </Button>
+          )}
+        </Card>
+      ) : opportunities.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 py-16 text-center">
           <Handshake className="size-10 text-text-tertiary" />
           <p className="text-body-md font-semibold! text-text-primary">

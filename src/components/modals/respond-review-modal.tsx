@@ -97,10 +97,14 @@ export function RespondReviewModal({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-body-sm font-semibold! text-text-primary">
+            <label
+              htmlFor="respond-review-modal-field-1"
+              className="text-body-sm font-semibold! text-text-primary"
+            >
               {t("yourResponse")}
             </label>
             <Textarea
+              id="respond-review-modal-field-1"
               rows={4}
               maxLength={MAX_LENGTH}
               value={response}

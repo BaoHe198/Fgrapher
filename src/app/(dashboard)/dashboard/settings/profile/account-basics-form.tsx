@@ -129,10 +129,14 @@ export function AccountBasicsForm({
     <div className="flex flex-col gap-4">
       {showDisplayName ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-body-sm font-semibold! text-text-primary">
+          <label
+            htmlFor="account-basics-form-field-1"
+            className="text-body-sm font-semibold! text-text-primary"
+          >
             {t("displayNameLabel")}
           </label>
           <Input
+            id="account-basics-form-field-1"
             aria-label={t("displayNameLabel")}
             value={name}
             onChange={(e) => setName(e.target.value)}

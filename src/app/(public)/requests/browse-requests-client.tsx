@@ -13,6 +13,7 @@ import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
 import { PROVIDER_ROLES } from "@/lib/constants";
@@ -52,6 +53,9 @@ export function BrowseRequestsClient({
   provinces: { id: string; code: string; name: string }[];
 }) {
   const t = useTranslations("dashboardCore.browseRequests");
+  // Filters start folded on phones: open, they filled the whole first
+  // screen above the page's own heading (24/09 audit).
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const roleT = useTranslations("role");
 
   const [role, setRole] = useState("");
@@ -140,8 +144,42 @@ export function BrowseRequestsClient({
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 pt-8 pb-[72px] sm:px-8">
+      {/* Heading and the "post" action first: this page had no way to post
+          a request at all, and on a phone the filter card sat above the
+          heading. */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-display-md text-text-primary">{heading}</h1>
+          <p className="max-w-2xl text-body-md text-text-secondary">
+            {subheading}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="accent"
+            nativeButton={false}
+            render={<Link href="/requests/new" />}
+          >
+            {t("postRequest")}
+          </Button>
+          <Button
+            variant="secondary"
+            className="lg:hidden"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            {filtersOpen ? t("hideFilters") : t("showFilters")}
+          </Button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[268px_1fr]">
-        <div className="lg:sticky lg:top-[104px]">
+        <div
+          className={cn(
+            "lg:sticky lg:top-[104px] lg:block",
+            filtersOpen ? "block" : "hidden",
+          )}
+        >
           <Card className="flex flex-col gap-1">
             <p className="mb-1 text-body-sm font-semibold! text-text-tertiary">
               {t("filtersHeading")}
@@ -151,11 +189,6 @@ export function BrowseRequestsClient({
         </div>
 
         <div className="min-w-0">
-          <div className="mb-5 flex flex-col gap-1">
-            <h1 className="text-display-md text-text-primary">{heading}</h1>
-            <p className="text-body-md text-text-secondary">{subheading}</p>
-          </div>
-
           {isLoading ? (
             <div className="flex justify-center py-16">
               <Loader2 className="size-6 animate-spin text-text-tertiary" />
@@ -169,6 +202,13 @@ export function BrowseRequestsClient({
               <p className="text-body-sm text-text-secondary">
                 {t("empty.body")}
               </p>
+              <Button
+                variant="secondary"
+                nativeButton={false}
+                render={<Link href="/requests/new" />}
+              >
+                {t("emptyCta")}
+              </Button>
             </Card>
           ) : (
             <div className="flex flex-col gap-3">

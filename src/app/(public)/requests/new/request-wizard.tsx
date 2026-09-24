@@ -21,6 +21,7 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
+import { formatDate } from "@/lib/format";
 import { Tag } from "@/components/ui/tag";
 import { Textarea } from "@/components/ui/textarea";
 import { ReferenceMediaField } from "@/components/forms/reference-media-field";
@@ -291,10 +292,39 @@ export function RequestWizard({
     }
   })();
 
+  // Why Continue is greyed out — "đã chọn 0/5" read as a limit, not as
+  // "pick at least one" (24/09 audit).
+  const missingHint = (() => {
+    if (canContinue) return null;
+    switch (step) {
+      case 0:
+        return form.role ? t("missingHint.categories") : t("missingHint.role");
+      case 1:
+        return dateRangeInvalid
+          ? t("missingHint.dateRange")
+          : t("missingHint.date");
+      case 2:
+        return t("missingHint.province");
+      case 3:
+        return t("missingHint.budget");
+      case 4:
+        return t("missingHint.title");
+      default:
+        return null;
+    }
+  })();
+
   return (
     <div className="mx-auto max-w-[760px] px-4 py-8 sm:px-0">
       <h1 className="mb-1 text-display-md text-text-primary">{t("heading")}</h1>
       <p className="mb-6 text-body-md text-text-secondary">{t("subheading")}</p>
+      {/* Said up front, not only on the last step after five screens of
+          typing (24/09 audit). */}
+      {!isVerifiedNow && step === 0 ? (
+        <p className="-mt-3 mb-6 rounded-[var(--fg-radius-md)] bg-info-bg p-3 text-body-sm text-info">
+          {t("phoneVerifyHeadsUp")}
+        </p>
+      ) : null}
 
       <div className="mb-6 flex items-center gap-1.5">
         {STEP_KEYS.map((key, index) => (
@@ -420,10 +450,14 @@ export function RequestWizard({
               ]}
             />
             <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-semibold! text-text-primary">
+              <label
+                htmlFor="request-wizard-field-1"
+                className="text-body-sm font-semibold! text-text-primary"
+              >
                 {t("detailedAddressLabel")}
               </label>
               <Textarea
+                id="request-wizard-field-1"
                 rows={2}
                 value={form.detailedAddress}
                 onChange={(e) => update("detailedAddress", e.target.value)}
@@ -463,10 +497,14 @@ export function RequestWizard({
               onChange={(e) => update("title", e.target.value)}
             />
             <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-semibold! text-text-primary">
+              <label
+                htmlFor="request-wizard-field-2"
+                className="text-body-sm font-semibold! text-text-primary"
+              >
                 {t("descriptionLabel")}
               </label>
               <Textarea
+                id="request-wizard-field-2"
                 rows={4}
                 value={form.description}
                 onChange={(e) => update("description", e.target.value)}
@@ -526,11 +564,13 @@ export function RequestWizard({
                 {form.isDateFlexible
                   ? form.dateRangeStart && form.dateRangeEnd
                     ? t("reviewDateFlexible", {
-                        start: form.dateRangeStart,
-                        end: form.dateRangeEnd,
+                        start: formatDate(form.dateRangeStart),
+                        end: formatDate(form.dateRangeEnd),
                       })
                     : t("reviewDateFlexibleNoRange")
-                  : form.shootDate || "—"}
+                  : form.shootDate
+                    ? formatDate(form.shootDate)
+                    : "—"}
               </span>
             </div>
             <div className="flex gap-2.5 rounded-[var(--fg-radius-md)] bg-info-bg p-3.5">
@@ -614,6 +654,11 @@ export function RequestWizard({
           )}
         </div>
       </div>
+      {missingHint ? (
+        <p className="mt-2 text-right text-body-sm text-text-tertiary">
+          {missingHint}
+        </p>
+      ) : null}
 
       <PhoneVerifyDialog
         open={verifyDialogOpen}

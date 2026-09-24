@@ -186,6 +186,14 @@ export function ProfileInteractive({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: providerId }),
       });
+      // Signed out, this used to do nothing at all — the most common
+      // first tap on a profile was a dead button (24/09 audit).
+      if (res.status === 401) {
+        router.push(
+          `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
+        );
+        return;
+      }
       const body = await res.json();
       if (res.ok && body.data?.id) {
         messaging.open(body.data.id);
