@@ -71,6 +71,12 @@ after `globalSetup` had reset the (separate) local test database. The suite
 would then read and write real dev data while looking like it passed. The
 local server therefore runs on **3100**; CI, which has no dev server, stays on 3000. `E2E_PORT` overrides it.
 
+A dedicated port was not enough on its own: a server left behind by an
+earlier run was adopted just the same, built from whatever code existed
+then. Reuse is now off entirely — every run builds fresh, and a taken port
+stops the run with an error instead of testing stale code. If that happens,
+find the leftover with `lsof -ti tcp:3100` and stop it.
+
 **A `DATABASE_URL` exported in your shell.** `pnpm test:e2e` loads
 `e2e/.env.test` through `dotenv-cli`, and dotenv never overwrites a variable
 that is already set. If you ran `source .env.local` earlier in that terminal,

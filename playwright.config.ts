@@ -78,7 +78,15 @@ export default defineConfig({
     : {
         command: "pnpm build && pnpm start",
         url: baseURL,
-        reuseExistingServer: !process.env.CI,
+        // Never reuse. Moving to port 3100 kept the suite off the dev
+        // server, but a server left over from an earlier e2e run still got
+        // adopted: on 24/09 a run silently reused one built an hour and a
+        // half earlier, from code that predated a merge and a migration,
+        // against a database global-setup had just rebuilt on the new
+        // schema — 31 of 34 specs failed on ERR_ABORTED, none for a reason
+        // in the code under test. A fresh build per run costs about a
+        // minute; if the port is taken, Playwright now stops and says so.
+        reuseExistingServer: false,
         timeout: 180_000,
         env: { NODE_ENV: "production", PORT: localPort },
       },
