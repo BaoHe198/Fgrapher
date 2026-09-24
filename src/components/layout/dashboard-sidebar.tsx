@@ -44,6 +44,12 @@ interface NavItem {
   badge?: number;
 }
 
+interface NavSection {
+  /** Shown for provider roles only — see isProviderNav. */
+  heading?: string;
+  items: NavItem[];
+}
+
 export function DashboardSidebar({
   className,
   marketplaceEnabled,
@@ -59,89 +65,130 @@ export function DashboardSidebar({
   const isAdmin = hasRole("ADMIN");
   const unreadMessages = useMessaging().unreadCount;
 
-  const items: NavItem[] = [
-    { href: "/dashboard", label: t("overview"), icon: LayoutDashboard },
+  // Grouped by what the person is doing, for provider roles. As one flat
+  // list a photographer got fifteen entries — their own work, their public
+  // profile, their Chợ F shop and the things they hire other people for,
+  // interleaved — and had to read every line to find one. A customer has
+  // about eight and no second hat to separate, so theirs stays one list
+  // without headings.
+  const isProviderNav =
+    canReceiveBookings || canUpload || canSell || hasRole("COSTUME_SHOP");
+
+  const bookingsItem: NavItem = {
+    href: "/dashboard/bookings",
+    label: canReceiveBookings ? t("bookings") : t("myBookings"),
+    icon: Calendar,
+  };
+  const myOrdersItem: NavItem[] = marketplaceEnabled
+    ? [{ href: "/dashboard/orders", label: t("myOrders"), icon: Package }]
+    : [];
+
+  const sections: NavSection[] = [
     {
-      href: "/dashboard/bookings",
-      label: canReceiveBookings ? t("bookings") : t("myBookings"),
-      icon: Calendar,
+      items: [
+        { href: "/dashboard", label: t("overview"), icon: LayoutDashboard },
+        {
+          href: "/dashboard/messages",
+          label: t("messages"),
+          icon: MessageCircle,
+          badge: unreadMessages,
+        },
+      ],
     },
-    ...(canReceiveBookings
-      ? [
-          {
-            href: "/dashboard/calendar",
-            label: t("calendar"),
-            icon: CalendarDays,
-          },
-          { href: "/dashboard/reviews", label: t("reviews"), icon: Star },
-        ]
-      : []),
-    ...(canUpload
-      ? [
-          {
-            href: "/dashboard/portfolio",
-            label: t("portfolio"),
-            icon: ImageIcon,
-          },
-        ]
-      : []),
-    { href: "/requests/new", label: t("createBooking"), icon: Plus },
-    { href: "/dashboard/requests", label: t("myRequests"), icon: Send },
-    ...(canReceiveBookings
-      ? [
-          {
-            href: "/dashboard/opportunities",
-            label: t("opportunities"),
-            icon: Handshake,
-          },
-          {
-            href: "/dashboard/my-offers",
-            label: t("myOffers"),
-            icon: Handshake,
-          },
-        ]
-      : []),
-    // A costume shop rents out outfits through chat, so it has no Chợ F
-    // listings page — its catalogue lives in Settings → Profile. That is
-    // the right architecture (CLAUDE.md, 22/09/2026) but it had no visible
-    // way in, and /dashboard/listings told the role it could not sell, so
-    // it read as "this role cannot post anything" (QA-06).
-    ...(hasRole("COSTUME_SHOP")
-      ? [
-          {
-            href: "/dashboard/settings/profile?section=roleProfile#costumes",
-            label: t("costumes"),
-            icon: Shirt,
-          },
-        ]
-      : []),
-    ...(marketplaceEnabled && canSell
-      ? [
-          {
-            href: "/dashboard/listings",
-            label: t("listings"),
-            icon: ShoppingBag,
-          },
-          {
-            href: "/dashboard/shop-orders",
-            label: t("shopOrders"),
-            icon: Package,
-          },
-        ]
-      : []),
-    ...(marketplaceEnabled
-      ? [{ href: "/dashboard/orders", label: t("myOrders"), icon: Package }]
-      : []),
-    { href: "/saved", label: t("saved"), icon: Bookmark },
     {
-      href: "/dashboard/messages",
-      label: t("messages"),
-      icon: MessageCircle,
-      badge: unreadMessages,
+      heading: t("sectionWork"),
+      items: canReceiveBookings
+        ? [
+            bookingsItem,
+            {
+              href: "/dashboard/calendar",
+              label: t("calendar"),
+              icon: CalendarDays,
+            },
+            {
+              href: "/dashboard/opportunities",
+              label: t("opportunities"),
+              icon: Handshake,
+            },
+            {
+              href: "/dashboard/my-offers",
+              label: t("myOffers"),
+              icon: Handshake,
+            },
+          ]
+        : [],
     },
-    { href: "/dashboard/settings", label: t("settings"), icon: Settings },
-    ...(isAdmin ? [{ href: "/admin", label: t("admin"), icon: Shield }] : []),
-  ];
+    {
+      heading: t("sectionProfile"),
+      items: [
+        ...(canUpload
+          ? [
+              {
+                href: "/dashboard/portfolio",
+                label: t("portfolio"),
+                icon: ImageIcon,
+              },
+            ]
+          : []),
+        ...(canReceiveBookings
+          ? [{ href: "/dashboard/reviews", label: t("reviews"), icon: Star }]
+          : []),
+        // A costume shop rents out outfits through chat, so it has no Chợ F
+        // listings page — its catalogue lives in Settings → Profile. That is
+        // the right architecture (CLAUDE.md, 22/09/2026) but it had no
+        // visible way in, and /dashboard/listings told the role it could not
+        // sell, so it read as "this role cannot post anything" (QA-06).
+        ...(hasRole("COSTUME_SHOP")
+          ? [
+              {
+                href: "/dashboard/settings/profile?section=roleProfile#costumes",
+                label: t("costumes"),
+                icon: Shirt,
+              },
+            ]
+          : []),
+      ],
+    },
+    {
+      heading: t("sectionMarket"),
+      items:
+        marketplaceEnabled && canSell
+          ? [
+              {
+                href: "/dashboard/listings",
+                label: t("listings"),
+                icon: ShoppingBag,
+              },
+              {
+                href: "/dashboard/shop-orders",
+                label: t("shopOrders"),
+                icon: Package,
+              },
+              ...myOrdersItem,
+            ]
+          : [],
+    },
+    {
+      heading: t("sectionHiring"),
+      items: [
+        // Someone who only books others: their bookings list is the heart
+        // of this section rather than of "Work".
+        ...(canReceiveBookings ? [] : [bookingsItem]),
+        { href: "/requests/new", label: t("createBooking"), icon: Plus },
+        { href: "/dashboard/requests", label: t("myRequests"), icon: Send },
+        ...(marketplaceEnabled && canSell ? [] : myOrdersItem),
+        { href: "/saved", label: t("saved"), icon: Bookmark },
+      ],
+    },
+    {
+      items: [
+        { href: "/dashboard/settings", label: t("settings"), icon: Settings },
+        ...(isAdmin
+          ? [{ href: "/admin", label: t("admin"), icon: Shield }]
+          : []),
+      ],
+    },
+  ].filter((section) => section.items.length > 0);
 
   // ADMIN is never "the plan" — admins have no Subscription (see the
   // schema comment on Role.ADMIN) and this card has nothing useful to
@@ -156,30 +203,46 @@ export function DashboardSidebar({
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      {items.map(({ href, label, icon: Icon, badge }) => {
-        const isActive =
-          href === "/dashboard" ? pathname === href : pathname.startsWith(href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] px-3 py-2.5 text-body-md font-semibold! transition-colors duration-150",
-              isActive
-                ? "bg-success-bg text-brand-primary"
-                : "text-text-secondary hover:bg-bg-sunken",
-            )}
-          >
-            <Icon className="size-[18px]" />
-            {label}
-            {badge ? (
-              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-sm font-bold text-text-on-brand">
-                {badge}
-              </span>
-            ) : null}
-          </Link>
-        );
-      })}
+      {sections.map((section, index) => (
+        <div
+          key={section.heading ?? `section-${index}`}
+          role={section.heading ? "group" : undefined}
+          aria-label={section.heading}
+          className={cn("flex flex-col gap-1", index > 0 && "mt-3")}
+        >
+          {isProviderNav && section.heading ? (
+            <span className="px-3 pb-1 text-caption-upper tracking-[0.08em] text-text-tertiary">
+              {section.heading}
+            </span>
+          ) : null}
+          {section.items.map(({ href, label, icon: Icon, badge }) => {
+            const isActive =
+              href === "/dashboard"
+                ? pathname === href
+                : pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] px-3 py-2.5 text-body-md font-semibold! transition-colors duration-150",
+                  isActive
+                    ? "bg-success-bg text-brand-primary"
+                    : "text-text-secondary hover:bg-bg-sunken",
+                )}
+              >
+                <Icon className="size-[18px]" />
+                {label}
+                {badge ? (
+                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-sm font-bold text-text-on-brand">
+                    {badge}
+                  </span>
+                ) : null}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
 
       {/* Only for someone with a provider role. A customer has no plan —
           CUSTOMER is free and stays free — so the card used to spend the

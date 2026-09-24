@@ -98,11 +98,14 @@ function providerStatCards(stats: ProviderStats, t: Translator): StatCard[] {
       href: "/dashboard/bookings",
     },
     {
-      label: t("stats.confirmed"),
-      value: String(stats.confirmed),
+      label: t("stats.upcomingBookings"),
+      value: String(stats.upcoming),
       href: "/dashboard/bookings",
     },
-    { label: t("stats.earnings"), value: formatCurrency(stats.earnings) },
+    {
+      label: t("stats.earningsThisMonth"),
+      value: formatCurrency(stats.earnings),
+    },
     { label: t("stats.profileViews"), value: String(stats.views) },
   ];
 }

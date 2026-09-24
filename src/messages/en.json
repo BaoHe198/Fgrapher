@@ -1837,6 +1837,7 @@
         "pendingRequests": "Pending requests",
         "confirmed": "Confirmed",
         "earnings": "Earnings",
+        "earningsThisMonth": "Earnings this month",
         "profileViews": "Profile views",
         "upcomingBookings": "Upcoming bookings",
         "savedArtists": "Saved artists",
@@ -3947,7 +3948,11 @@
       "openMenu": "Open dashboard menu",
       "menuTitle": "Dashboard menu",
       "menuDescription": "Dashboard navigation",
-      "createBooking": "Post a request"
+      "createBooking": "Post a request",
+      "sectionWork": "Work",
+      "sectionProfile": "Profile",
+      "sectionMarket": "Chợ F",
+      "sectionHiring": "Hiring others"
     },
     "suspendedAccountNotice": {
       "title": "Your account has been suspended",

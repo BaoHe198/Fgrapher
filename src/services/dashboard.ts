@@ -4,9 +4,46 @@ import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 
+/** Vietnam is UTC+7 all year — no daylight saving to account for. */
+const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+/**
+ * Bookings that have not started yet.
+ *
+ * startAt, not date: `date` is the calendar day at 00:00, so `date >= now`
+ * dropped a booking for later today out of "upcoming" from midnight onwards
+ * — on exactly the day it matters most. startAt is nullable on rows that
+ * predate it, so those fall back to the calendar day in Vietnam time (a
+ * @db.Date compares as UTC midnight).
+ */
+function notStartedYet(now: Date) {
+  const todayInVietnam = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+  }).format(now);
+  return [
+    { startAt: { gte: now } },
+    { startAt: null, date: { gte: new Date(todayInVietnam) } },
+  ];
+}
+
+/**
+ * Midnight on the 1st of the current month in Vietnam, as an instant.
+ * setDate(1)/setHours(0) used the server's clock — UTC on Vercel — so the
+ * month started seven hours late and a job finished at 06:00 on the 1st
+ * Vietnam time was counted in the previous month.
+ */
+function startOfMonthInVietnam(now: Date) {
+  const vn = new Date(now.getTime() + VN_OFFSET_MS);
+  return new Date(
+    Date.UTC(vn.getUTCFullYear(), vn.getUTCMonth(), 1) - VN_OFFSET_MS,
+  );
+}
+
 export interface ProviderStats {
   pending: number;
-  confirmed: number;
+  /** Confirmed and not yet started — the shoots a provider has coming up. */
+  upcoming: number;
+  /** Completed this month (Vietnam time). */
   earnings: number;
   views: number;
 }
@@ -23,17 +60,19 @@ export function isProviderRoleSet(roles: Role[]) {
 }
 
 export async function getProviderStats(userId: string): Promise<ProviderStats> {
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
+  const now = new Date();
+  const startOfMonth = startOfMonthInVietnam(now);
 
-  const [pending, confirmed, completedThisMonth, profiles] = await Promise.all([
+  const [pending, upcoming, completedThisMonth, profiles] = await Promise.all([
     db.booking.count({ where: { providerId: userId, status: "PENDING" } }),
+    // Was "confirmed with a date this month", which counted shoots already
+    // done earlier in the month and none from next month — a number that
+    // answered no question a provider asks. "What have I got coming up?"
     db.booking.count({
       where: {
         providerId: userId,
         status: "CONFIRMED",
-        date: { gte: startOfMonth },
+        OR: notStartedYet(now),
       },
     }),
     db.booking.findMany({
@@ -49,7 +88,7 @@ export async function getProviderStats(userId: string): Promise<ProviderStats> {
 
   return {
     pending,
-    confirmed,
+    upcoming,
     earnings: completedThisMonth.reduce(
       (sum, b) => sum + (b.totalPrice ?? 0),
       0,
@@ -64,25 +103,7 @@ export async function getCustomerStats(userId: string): Promise<CustomerStats> {
       where: {
         customerId: userId,
         status: { in: ["PENDING", "CONFIRMED"] },
-        // startAt, not date: `date` is the calendar day at 00:00, so
-        // `date >= now` dropped a booking for later today out of "upcoming"
-        // from midnight onwards — on exactly the day the customer most
-        // needs it on their dashboard. startAt is nullable on rows that
-        // predate it, so those fall back to the calendar day, taken in
-        // Vietnam time — a @db.Date compares as UTC midnight.
-        OR: [
-          { startAt: { gte: new Date() } },
-          {
-            startAt: null,
-            date: {
-              gte: new Date(
-                new Intl.DateTimeFormat("en-CA", {
-                  timeZone: "Asia/Ho_Chi_Minh",
-                }).format(new Date()),
-              ),
-            },
-          },
-        ],
+        OR: notStartedYet(new Date()),
       },
     }),
     db.savedProfile.count({ where: { userId } }),
