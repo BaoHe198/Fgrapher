@@ -809,6 +809,13 @@
           "reasonPlaceholder": "Reason (required to record a violation — kept in the audit log)",
           "add": "Record a violation",
           "clear": "Clear all points"
+        },
+        "subscriptionStatus": {
+          "ACTIVE": "Active",
+          "PAST_DUE": "Past due",
+          "CANCELLED": "Cancelled",
+          "EXPIRED": "Expired",
+          "TRIALING": "Trialing"
         }
       },
       "reports": {
@@ -916,7 +923,17 @@
           "rejectBtn": "Reject",
           "noteRequiredToast": "A note is required to reject a request",
           "updateFailedToast": "Failed to update request",
-          "updatedToast": "Request updated"
+          "updatedToast": "Request updated",
+          "typeLabel": {
+            "EXPORT": "Data export",
+            "DELETION": "Account deletion"
+          },
+          "statusLabel": {
+            "PENDING": "Pending",
+            "PROCESSING": "Processing",
+            "COMPLETED": "Completed",
+            "REJECTED": "Rejected"
+          }
         },
         "auditLog": {
           "actorIdPlaceholder": "Actor user ID",
@@ -1322,7 +1339,17 @@
       "genericError": "Something went wrong, please try again",
       "dateRangeOrderError": "Start date can't be after the end date",
       "budgetOrderError": "Minimum budget can't be greater than the maximum",
-      "reviewDateFlexibleNoRange": "Flexible — no specific window chosen"
+      "reviewDateFlexibleNoRange": "Flexible — no specific window chosen",
+      "missingHint": {
+        "role": "Pick the role you need to continue.",
+        "categories": "Pick at least one category to continue.",
+        "date": "Pick a shoot date, or mark the date as flexible, to continue.",
+        "dateRange": "The end date must be after the start date.",
+        "province": "Pick a province to continue.",
+        "budget": "The minimum budget must be below the maximum.",
+        "title": "Enter a title (at least 3 characters) to continue."
+      },
+      "phoneVerifyHeadsUp": "Before posting you'll verify your phone with an SMS code — it tells providers the request is genuine."
     },
     "serviceRequests": {
       "title": "My requests",
@@ -1432,6 +1459,12 @@
         "offerSentToast": "Offer sent",
         "withdrawnToast": "Offer withdrawn",
         "genericError": "Something went wrong, please try again"
+      },
+      "unverified": {
+        "title": "Verify your identity to receive requests",
+        "body": "Customers' requests only reach verified providers. Complete identity verification — once approved, matching requests appear here.",
+        "pendingBody": "Your verification is being reviewed. Once approved, matching requests appear here.",
+        "cta": "Verify now"
       }
     },
     "browseRequests": {
@@ -1453,7 +1486,11 @@
       "yourRequest": "Your request",
       "postedBy": "Posted by {name}",
       "unknownRequester": "User",
-      "offerCount": "{count, plural, =0 {No offers yet} other {# offers}}"
+      "offerCount": "{count, plural, =0 {No offers yet} other {# offers}}",
+      "postRequest": "Post a request",
+      "showFilters": "Filters",
+      "hideFilters": "Hide filters",
+      "emptyCta": "Post the first request"
     },
     "myOffers": {
       "title": "Offers sent",
@@ -2844,17 +2881,17 @@
         "wardrobeLabel": "Wardrobe / styling notes",
         "wardrobePlaceholder": "Outfits, styling direction, anything the model should bring or expect",
         "muaProvidedLabel": "A make-up artist will be provided",
-        "locationLabel": "Location",
+        "locationLabel": "Location (required)",
         "locationProvider": "At provider's studio",
         "locationCustomer": "At my location",
         "locationOutdoor": "Outdoor / other",
-        "addressLabel": "Address",
+        "addressLabel": "Address (required)",
         "addressPlaceholder": "Street, ward, city",
         "numberOfPeopleLabel": "Number of people",
         "numberOfPeoplePlaceholder": "e.g. 2",
         "notesLabel": "Notes",
         "notesPlaceholder": "Describe your vision, style references, special requirements...",
-        "contactPhoneLabel": "Contact phone"
+        "contactPhoneLabel": "Contact phone (required)"
       },
       "stepReview": {
         "heading": "Review your booking",
@@ -2868,7 +2905,15 @@
         "total": "Total",
         "notesLabel": "Notes",
         "cancellationNotice": "Free cancellation up to 48 hours before your session. Cancelling within 24 hours may be subject to a fee once payments are enabled.",
-        "agreeTerms": "I agree to the <terms>booking terms</terms>"
+        "agreeTerms": "I agree to the <terms>booking terms</terms>",
+        "durationValue": "{hours} h"
+      },
+      "missingHint": {
+        "service": "Pick a service, or describe what you need, to continue.",
+        "dateTime": "Pick a date and time to continue.",
+        "details": "Choose a location and enter a contact phone to continue.",
+        "address": "Enter the shoot address to continue.",
+        "agree": "Tick the agreement above to send the request."
       }
     },
     "browse": {
@@ -3607,7 +3652,9 @@
       "outOfStockHelp": "This item is out of stock. Message the shop to ask when it's back.",
       "askShop": "Ask the shop",
       "decreaseQuantity": "Decrease quantity",
-      "increaseQuantity": "Increase quantity"
+      "increaseQuantity": "Increase quantity",
+      "ownProductNote": "This is your listing. Customers see the buy or message buttons here.",
+      "editOwnProduct": "Edit listing"
     },
     "community": {
       "heading": "Community",
@@ -3722,7 +3769,9 @@
       "sendCode": "Send code",
       "verify": "Verify",
       "cancel": "Cancel",
-      "genericError": "Something went wrong, please try again"
+      "genericError": "Something went wrong, please try again",
+      "phoneLabel": "Phone number",
+      "sendDescriptionEnter": "Enter your phone number to get a 6-digit code by SMS."
     },
     "artistCard": {
       "noPhotoLabel": "No portfolio photos yet",

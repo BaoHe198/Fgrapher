@@ -363,7 +363,7 @@ export default function AdminUserDetailPage() {
                   </div>
                   {ur.subscription ? (
                     <Badge variant={SUB_STATUS_VARIANT[ur.subscription.status]}>
-                      {ur.subscription.status}
+                      {t(`subscriptionStatus.${ur.subscription.status}`)}
                     </Badge>
                   ) : (
                     <Badge variant="neutral">{t("noSubscription")}</Badge>

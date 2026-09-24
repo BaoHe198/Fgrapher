@@ -172,7 +172,7 @@ function DataRequestsPanel() {
                         r.type === "DELETION" ? "destructive" : "neutral"
                       }
                     >
-                      {r.type}
+                      {t(`typeLabel.${r.type}`)}
                     </Badge>
                     <span className="text-body-md font-semibold! text-text-primary">
                       {r.user?.firstName ??
@@ -193,7 +193,7 @@ function DataRequestsPanel() {
                           : "warning"
                     }
                   >
-                    {r.status}
+                    {t(`statusLabel.${r.status}`)}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-body-sm text-text-secondary">

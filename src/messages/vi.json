@@ -809,6 +809,13 @@
           "reasonPlaceholder": "Lý do (bắt buộc khi ghi nhận vi phạm — lưu vào nhật ký)",
           "add": "Ghi nhận vi phạm",
           "clear": "Xoá hết điểm"
+        },
+        "subscriptionStatus": {
+          "ACTIVE": "Đang hoạt động",
+          "PAST_DUE": "Quá hạn thanh toán",
+          "CANCELLED": "Đã hủy",
+          "EXPIRED": "Đã hết hạn",
+          "TRIALING": "Dùng thử"
         }
       },
       "reports": {
@@ -916,7 +923,17 @@
           "rejectBtn": "Từ chối",
           "noteRequiredToast": "Cần nhập ghi chú để từ chối yêu cầu",
           "updateFailedToast": "Cập nhật yêu cầu thất bại",
-          "updatedToast": "Đã cập nhật yêu cầu"
+          "updatedToast": "Đã cập nhật yêu cầu",
+          "typeLabel": {
+            "EXPORT": "Xuất dữ liệu",
+            "DELETION": "Xóa tài khoản"
+          },
+          "statusLabel": {
+            "PENDING": "Chờ xử lý",
+            "PROCESSING": "Đang xử lý",
+            "COMPLETED": "Đã xong",
+            "REJECTED": "Đã từ chối"
+          }
         },
         "auditLog": {
           "actorIdPlaceholder": "Mã người thực hiện",
@@ -940,7 +957,7 @@
       },
       "serviceRequests": {
         "title": "Kiểm duyệt yêu cầu",
-        "description": "Kiểm tra nội dung, thể loại và ảnh tham khảo trước khi yêu cầu được hiển thị cho provider.",
+        "description": "Kiểm tra nội dung, thể loại và ảnh tham khảo trước khi yêu cầu được hiển thị cho nhà cung cấp.",
         "pendingHeading": "Chờ duyệt ({count})",
         "pendingEmpty": "Không có yêu cầu nào đang chờ duyệt.",
         "unclaimedHeading": "Đã duyệt nhưng chưa có đề nghị ({count})",
@@ -1015,7 +1032,7 @@
       "cannotRemoveVerified": "Không thể xoá vai trò đã được xác minh",
       "removed": "Đã xoá vai trò",
       "removeFailed": "Không thể xoá vai trò, vui lòng thử lại",
-      "changeRequestSubmitted": "Đã gửi yêu cầu đổi vai trò, chờ admin duyệt",
+      "changeRequestSubmitted": "Đã gửi yêu cầu đổi vai trò, chờ quản trị viên duyệt",
       "changeRequestFailed": "Không thể gửi yêu cầu, vui lòng thử lại",
       "changeRequestNoActiveRole": "Bạn chưa có vai trò nhà cung cấp nào đang hoạt động",
       "changeRequestNotVerified": "Vai trò này chưa được xác minh — bạn có thể tự xoá và thêm vai trò khác trực tiếp",
@@ -1257,7 +1274,7 @@
       "invalidInput": "Dữ liệu không hợp lệ.",
       "createFailed": "Không thể khởi tạo thanh toán. Vui lòng thử lại.",
       "loadFailed": "Không thể tải thông tin thanh toán.",
-      "bankTransferSubmitted": "Đã gửi minh chứng chuyển khoản, đang chờ admin xác nhận."
+      "bankTransferSubmitted": "Đã gửi minh chứng chuyển khoản, đang chờ quản trị viên xác nhận."
     },
     "orders": {
       "notFound": "Không tìm thấy",
@@ -1276,7 +1293,7 @@
   "dashboardCore": {
     "requestWizard": {
       "heading": "Đăng yêu cầu",
-      "subheading": "Mô tả nhu cầu của bạn. Sau khi quản trị viên duyệt, các provider phù hợp sẽ có thể gửi đề nghị.",
+      "subheading": "Mô tả nhu cầu của bạn. Sau khi quản trị viên duyệt, các nhà cung cấp phù hợp sẽ có thể gửi đề nghị.",
       "stepLabel": "Bước {current}/{total}",
       "steps": {
         "who": "Cần những ai?",
@@ -1301,10 +1318,10 @@
       "areaNoteLabel": "Khu vực chung",
       "areaNotePlaceholder": "Ví dụ: Quận 1, gần trung tâm",
       "detailedAddressLabel": "Địa chỉ chi tiết",
-      "detailedAddressHint": "Chỉ hiển thị với provider sau khi bạn chấp nhận đề nghị của họ.",
+      "detailedAddressHint": "Chỉ hiển thị với nhà cung cấp sau khi bạn chấp nhận đề nghị của họ.",
       "budgetMinLabel": "Ngân sách tối thiểu",
       "budgetMaxLabel": "Ngân sách tối đa",
-      "budgetHint": "Không bắt buộc, nhưng giúp provider chào giá phù hợp hơn.",
+      "budgetHint": "Không bắt buộc, nhưng giúp nhà cung cấp chào giá phù hợp hơn.",
       "titleLabel": "Tiêu đề yêu cầu",
       "descriptionLabel": "Mô tả concept",
       "uploadUnavailable": "Tính năng tải ảnh chưa khả dụng",
@@ -1322,14 +1339,24 @@
       "genericError": "Có lỗi xảy ra, vui lòng thử lại",
       "dateRangeOrderError": "Ngày bắt đầu không được sau ngày kết thúc",
       "budgetOrderError": "Ngân sách tối thiểu không được lớn hơn ngân sách tối đa",
-      "reviewDateFlexibleNoRange": "Linh hoạt — chưa chọn khoảng ngày cụ thể"
+      "reviewDateFlexibleNoRange": "Linh hoạt — chưa chọn khoảng ngày cụ thể",
+      "missingHint": {
+        "role": "Chọn vai trò bạn cần tìm để tiếp tục.",
+        "categories": "Chọn ít nhất một thể loại để tiếp tục.",
+        "date": "Chọn ngày chụp, hoặc đánh dấu ngày linh hoạt, để tiếp tục.",
+        "dateRange": "Ngày kết thúc phải sau ngày bắt đầu.",
+        "province": "Chọn tỉnh/thành để tiếp tục.",
+        "budget": "Ngân sách tối thiểu phải nhỏ hơn tối đa.",
+        "title": "Nhập tiêu đề (ít nhất 3 ký tự) để tiếp tục."
+      },
+      "phoneVerifyHeadsUp": "Trước khi đăng, bạn sẽ cần xác minh số điện thoại bằng mã SMS. Việc này giúp nhà cung cấp tin rằng yêu cầu là thật."
     },
     "serviceRequests": {
       "title": "Yêu cầu của tôi",
       "newRequest": "Đăng yêu cầu",
       "empty": {
         "title": "Chưa có yêu cầu nào",
-        "body": "Đăng yêu cầu để các provider phù hợp chủ động gửi đề nghị cho bạn."
+        "body": "Đăng yêu cầu để các nhà cung cấp phù hợp chủ động gửi đề nghị cho bạn."
       },
       "draftPrefix": "[Nháp]",
       "draftBadge": "Nháp",
@@ -1353,7 +1380,7 @@
         "flexibleRange": "Linh hoạt: {start} — {end}",
         "flexibleNoRange": "Linh hoạt — chưa chọn khoảng ngày cụ thể",
         "pendingReviewTitle": "Yêu cầu đang chờ kiểm duyệt",
-        "pendingReviewBody": "Yêu cầu chưa hiển thị cho provider. Quản trị viên sẽ kiểm tra nội dung và ảnh tham khảo trước khi đăng.",
+        "pendingReviewBody": "Yêu cầu chưa hiển thị cho nhà cung cấp. Quản trị viên sẽ kiểm tra nội dung và ảnh tham khảo trước khi đăng.",
         "rejectedTitle": "Yêu cầu không được duyệt",
         "rejectedBody": "Nội dung này không được hiển thị trong danh sách yêu cầu.",
         "rejectionReason": "Lý do: {reason}",
@@ -1361,7 +1388,7 @@
         "cancelConfirm": "Hủy yêu cầu này? Mọi đề nghị đang chờ sẽ tự động bị từ chối.",
         "cancelledToast": "Đã hủy yêu cầu",
         "offersCount": "{count, plural, =0 {Chưa có đề nghị} other {# đề nghị}}",
-        "noOffers": "Chưa có provider nào gửi đề nghị. Chúng tôi sẽ thông báo khi có đề nghị mới.",
+        "noOffers": "Chưa có nhà cung cấp nào gửi đề nghị. Chúng tôi sẽ thông báo khi có đề nghị mới.",
         "offerStatus": {
           "PENDING": "Đang chờ",
           "ACCEPTED": "Đã chấp nhận",
@@ -1378,7 +1405,7 @@
         "acceptTimeLabel": "Giờ bắt đầu",
         "acceptLocationLabel": "Địa điểm",
         "locationOutdoor": "Ngoại cảnh",
-        "locationProvider": "Tại chỗ của provider",
+        "locationProvider": "Tại chỗ của nhà cung cấp",
         "locationCustomer": "Tại chỗ của tôi",
         "cancel": "Hủy",
         "confirmAccept": "Xác nhận",
@@ -1432,6 +1459,12 @@
         "offerSentToast": "Đã gửi đề nghị",
         "withdrawnToast": "Đã rút đề nghị",
         "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+      },
+      "unverified": {
+        "title": "Xác minh danh tính để nhận yêu cầu",
+        "body": "Khách hàng chỉ gửi yêu cầu tới nhà cung cấp đã xác minh. Hoàn tất xác minh danh tính, sau khi được duyệt các yêu cầu phù hợp sẽ hiện ở đây.",
+        "pendingBody": "Hồ sơ xác minh của bạn đang được duyệt. Khi được duyệt, các yêu cầu phù hợp sẽ hiện ở đây.",
+        "cta": "Xác minh ngay"
       }
     },
     "browseRequests": {
@@ -1453,7 +1486,11 @@
       "yourRequest": "Yêu cầu của bạn",
       "postedBy": "Đăng bởi {name}",
       "unknownRequester": "Người dùng",
-      "offerCount": "{count, plural, =0 {Chưa có ai chào} other {# đề nghị}}"
+      "offerCount": "{count, plural, =0 {Chưa có ai chào} other {# đề nghị}}",
+      "postRequest": "Đăng yêu cầu",
+      "showFilters": "Bộ lọc",
+      "hideFilters": "Ẩn bộ lọc",
+      "emptyCta": "Đăng yêu cầu đầu tiên"
     },
     "myOffers": {
       "title": "Đề nghị đã gửi",
@@ -2113,7 +2150,7 @@
       "transferReferenceLabel": "Mã tham chiếu",
       "transferReferenceHint": "Ghi đúng mã này vào nội dung chuyển khoản để được xác nhận nhanh hơn.",
       "uploadProof": "Tải lên minh chứng chuyển khoản",
-      "awaitingReview": "Đã gửi minh chứng, đang chờ admin xác nhận.",
+      "awaitingReview": "Đã gửi minh chứng, đang chờ quản trị viên xác nhận.",
       "startBankTransfer": "Bắt đầu chuyển khoản"
     },
     "data": {
@@ -2210,7 +2247,7 @@
         "nationwideHelper": "Hồ sơ sẽ xuất hiện trong kết quả tìm kiếm ở mọi tỉnh/thành, kèm nhãn \"Nhận job toàn quốc\"",
         "extraAreasLabel": "Tỉnh/thành phục vụ thêm (tùy chọn)",
         "extraAreasHelper": "Ngoài tỉnh/thành chính ở trên, chọn thêm các tỉnh/thành khác bạn cũng nhận job",
-        "requiredNote": "Mọi provider cần cung cấp đủ tỉnh/thành, phường/xã và địa chỉ chi tiết trước khi hồ sơ được công khai.",
+        "requiredNote": "Mọi nhà cung cấp phải điền đủ tỉnh/thành, phường/xã và địa chỉ chi tiết trước khi hồ sơ được công khai.",
         "addressPlaceholder": "Số nhà, tên đường hoặc thôn/ấp",
         "addressPrivacy": "Địa chỉ chi tiết được lưu riêng tư. Trên hồ sơ và kết quả tìm kiếm chỉ hiển thị tỉnh/thành và phường/xã.",
         "requiredError": "Vui lòng nhập đủ tỉnh/thành, phường/xã và địa chỉ chi tiết.",
@@ -2844,17 +2881,17 @@
         "wardrobeLabel": "Ghi chú trang phục / tạo hình",
         "wardrobePlaceholder": "Trang phục, định hướng tạo hình, những gì người mẫu nên mang theo hoặc chuẩn bị",
         "muaProvidedLabel": "Sẽ có chuyên viên trang điểm đi cùng",
-        "locationLabel": "Địa điểm",
+        "locationLabel": "Địa điểm (bắt buộc)",
         "locationProvider": "Tại studio của nhà cung cấp",
         "locationCustomer": "Tại địa điểm của tôi",
         "locationOutdoor": "Ngoài trời / khác",
-        "addressLabel": "Địa chỉ",
+        "addressLabel": "Địa chỉ (bắt buộc)",
         "addressPlaceholder": "Số nhà, phường/xã, thành phố",
         "numberOfPeopleLabel": "Số người",
         "numberOfPeoplePlaceholder": "VD: 2",
         "notesLabel": "Ghi chú",
         "notesPlaceholder": "Mô tả concept, phong cách tham khảo, yêu cầu đặc biệt...",
-        "contactPhoneLabel": "Số điện thoại liên hệ"
+        "contactPhoneLabel": "Số điện thoại liên hệ (bắt buộc)"
       },
       "stepReview": {
         "heading": "Xem lại yêu cầu đặt lịch",
@@ -2868,7 +2905,15 @@
         "total": "Tổng cộng",
         "notesLabel": "Ghi chú",
         "cancellationNotice": "Miễn phí hủy trước 48 giờ so với buổi hẹn. Hủy trong vòng 24 giờ có thể bị tính phí khi tính năng thanh toán được bật.",
-        "agreeTerms": "Tôi đồng ý với <terms>điều khoản đặt lịch</terms>"
+        "agreeTerms": "Tôi đồng ý với <terms>điều khoản đặt lịch</terms>",
+        "durationValue": "{hours} giờ"
+      },
+      "missingHint": {
+        "service": "Chọn một dịch vụ, hoặc mô tả nhu cầu, để tiếp tục.",
+        "dateTime": "Chọn ngày và giờ để tiếp tục.",
+        "details": "Chọn địa điểm và nhập số điện thoại liên hệ để tiếp tục.",
+        "address": "Nhập địa chỉ buổi chụp để tiếp tục.",
+        "agree": "Đánh dấu đồng ý bên trên để gửi yêu cầu."
       }
     },
     "browse": {
@@ -3607,7 +3652,9 @@
       "outOfStockHelp": "Sản phẩm này tạm hết hàng. Nhắn tin để hỏi shop khi nào có lại.",
       "askShop": "Nhắn tin hỏi shop",
       "decreaseQuantity": "Giảm số lượng",
-      "increaseQuantity": "Tăng số lượng"
+      "increaseQuantity": "Tăng số lượng",
+      "ownProductNote": "Đây là sản phẩm của bạn. Khách sẽ thấy nút mua hoặc nhắn tin ở đây.",
+      "editOwnProduct": "Sửa sản phẩm"
     },
     "community": {
       "heading": "Cộng đồng F",
@@ -3660,7 +3707,7 @@
         "PENDING_REVIEW": "Chờ duyệt",
         "OPEN": "Đang nhận đề nghị",
         "HAS_OFFERS": "Đã có đề nghị",
-        "FULFILLED": "Đã chọn provider",
+        "FULFILLED": "Đã chọn nhà cung cấp",
         "EXPIRED": "Đã hết hạn",
         "CANCELLED": "Đã hủy",
         "REJECTED": "Không được duyệt"
@@ -3689,13 +3736,13 @@
         "received": "Đề nghị đã nhận",
         "accept": "Chấp nhận",
         "decline": "Từ chối",
-        "acceptTitle": "Xác nhận lịch với provider",
+        "acceptTitle": "Xác nhận lịch với nhà cung cấp",
         "bookingDate": "Ngày thực hiện",
         "bookingTime": "Giờ bắt đầu",
         "location": "Địa điểm",
         "locationType": {
           "OUTDOOR": "Địa điểm bên ngoài",
-          "PROVIDER": "Tại địa điểm của provider",
+          "PROVIDER": "Tại địa điểm của nhà cung cấp",
           "CUSTOMER": "Tại địa điểm của khách hàng"
         },
         "cancel": "Hủy",
@@ -3722,7 +3769,9 @@
       "sendCode": "Gửi mã",
       "verify": "Xác nhận",
       "cancel": "Hủy",
-      "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+      "genericError": "Có lỗi xảy ra, vui lòng thử lại",
+      "phoneLabel": "Số điện thoại",
+      "sendDescriptionEnter": "Nhập số điện thoại để nhận mã xác minh 6 số qua SMS."
     },
     "artistCard": {
       "noPhotoLabel": "Chưa có ảnh portfolio",
@@ -3956,7 +4005,7 @@
       "reviews": "Đánh giá",
       "portfolio": "Portfolio",
       "myRequests": "Yêu cầu của tôi",
-      "opportunities": "Booking phù hợp",
+      "opportunities": "Yêu cầu phù hợp",
       "myOffers": "Đề nghị đã gửi",
       "costumes": "Trang phục của tôi",
       "listings": "Tin đăng",

@@ -168,6 +168,7 @@ export function ChatPanel({
   alwaysShowBack?: boolean;
 }) {
   const t = useTranslations("sharedComponents.chatPanel");
+  const statusT = useTranslations("dashboardCore.bookings.status");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [draft, setDraft] = useState(initialDraft ?? "");
@@ -440,7 +441,7 @@ export function ChatPanel({
                         variant={BOOKING_STATUS_VARIANT[message.booking.status]}
                         className="w-fit"
                       >
-                        {message.booking.status}
+                        {statusT(message.booking.status)}
                       </Badge>
                       <span className="text-body-sm font-semibold! text-brand-primary">
                         {t("viewBooking")}
