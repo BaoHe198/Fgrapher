@@ -82,7 +82,11 @@ interface Draft {
   customRequest: string;
   date: string | null;
   time: string | null;
-  locationType: LocationType;
+  // null until the customer picks one. It used to start on PROVIDER ("at
+  // the provider's studio"), which a customer describing an outdoor shoot
+  // with a freelancer who has no studio could — and did — sail past,
+  // sending a booking with the wrong place on it. Nothing is chosen for them.
+  locationType: LocationType | null;
   locationAddress: string;
   numberOfPeople: string;
   notes: string;
@@ -113,7 +117,7 @@ function emptyDraft(contactPhoneDefault: string): Draft {
     customRequest: "",
     date: null,
     time: null,
-    locationType: "PROVIDER",
+    locationType: null,
     locationAddress: "",
     numberOfPeople: "",
     notes: "",
@@ -294,6 +298,7 @@ export function BookingWizard({
       case 2:
         return (
           draft.contactPhone.trim().length > 0 &&
+          draft.locationType !== null &&
           (draft.locationType === "PROVIDER" ||
             draft.locationAddress.trim().length > 0)
         );
@@ -462,6 +467,33 @@ export function BookingWizard({
         </div>
       ) : null}
 
+      {/* Who and when, on every step before the review. The customer picks
+          a provider, a day and a time on the profile page and lands here on
+          "What do you need?" with none of that in sight — the only mention
+          of the provider was a grey line at the foot of step two. The review
+          step has its own full summary, so this stops there. */}
+      {step < 3 ? (
+        <div className="mb-4 flex items-center gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-surface px-4 py-3">
+          <Avatar className="size-9">
+            {providerAvatar ? (
+              <AvatarImage src={providerAvatar} alt="" />
+            ) : null}
+            <AvatarFallback>{providerName[0]?.toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-body-md font-semibold! text-text-primary">
+              {t("stepDateTime.bookingWith", { providerName })}
+            </span>
+            {draft.date ? (
+              <span className="text-body-sm text-text-secondary">
+                {formatDateLong(`${draft.date}T00:00:00.000Z`)}
+                {draft.time ? ` · ${draft.time}` : null}
+              </span>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
       <Card className="p-8">
         {step === 0 ? (
           <StepService
@@ -476,7 +508,6 @@ export function BookingWizard({
         {step === 1 ? (
           <StepDateTime
             providerId={providerId}
-            providerName={providerName}
             selectedServiceId={draft.serviceId}
             date={draft.date}
             time={draft.time}
@@ -692,7 +723,6 @@ function StepService({
 
 function StepDateTime({
   providerId,
-  providerName,
   selectedServiceId,
   date,
   time,
@@ -700,7 +730,6 @@ function StepDateTime({
   onSelectTime,
 }: {
   providerId: string;
-  providerName: string;
   selectedServiceId: string | null;
   date: string | null;
   time: string | null;
@@ -916,12 +945,6 @@ function StepDateTime({
           )}
         </div>
       </div>
-
-      <p className="text-body-sm text-text-tertiary">
-        {providerName
-          ? t("stepDateTime.bookingWith", { providerName })
-          : t("stepDateTime.booking")}
-      </p>
     </div>
   );
 }
@@ -945,7 +968,7 @@ function StepDetails({
   onParentBookingChange,
 }: {
   providerName: string;
-  locationType: LocationType;
+  locationType: LocationType | null;
   locationAddress: string;
   numberOfPeople: string;
   notes: string;
@@ -1062,7 +1085,7 @@ function StepDetails({
         </div>
       </div>
 
-      {locationType !== "PROVIDER" ? (
+      {locationType === "CUSTOMER" || locationType === "OUTDOOR" ? (
         <Input
           label={t("stepDetails.addressLabel")}
           value={locationAddress}
@@ -1074,7 +1097,9 @@ function StepDetails({
       <Input
         label={t("stepDetails.numberOfPeopleLabel")}
         type="number"
+        inputMode="numeric"
         min={1}
+        placeholder={t("stepDetails.numberOfPeoplePlaceholder")}
         value={numberOfPeople}
         onChange={(e) => onChange("numberOfPeople", e.target.value)}
       />
@@ -1186,7 +1211,7 @@ function StepReview({
   customRequest: string;
   date: string | null;
   time: string | null;
-  locationType: LocationType;
+  locationType: LocationType | null;
   locationAddress: string;
   numberOfPeople: string;
   notes: string;
@@ -1208,7 +1233,7 @@ function StepReview({
       t("stepReview.rowLocation"),
       locationType === "PROVIDER"
         ? locationLabel.PROVIDER
-        : locationAddress || locationLabel[locationType],
+        : locationAddress || (locationType ? locationLabel[locationType] : "—"),
     ],
     [t("stepReview.rowPeople"), numberOfPeople || "1"],
   ];

@@ -2811,7 +2811,7 @@
         "heading": "Khi nào phù hợp với bạn?",
         "previous": "Trước",
         "next": "Sau",
-        "localTimeNote": "Giờ hiển thị theo múi giờ của bạn · cần đặt trước ít nhất 24 giờ",
+        "localTimeNote": "Giờ Việt Nam (GMT+7) · cần đặt trước ít nhất 24 giờ",
         "selectDatePrompt": "Chọn một ngày để xem khung giờ trống.",
         "noAvailability": "Không có lịch trống vào ngày này — hãy thử ngày khác.",
         "bookingWith": "Đặt lịch với {providerName}",
@@ -2836,6 +2836,7 @@
         "addressLabel": "Địa chỉ",
         "addressPlaceholder": "Số nhà, phường/xã, thành phố",
         "numberOfPeopleLabel": "Số người",
+        "numberOfPeoplePlaceholder": "VD: 2",
         "notesLabel": "Ghi chú",
         "notesPlaceholder": "Mô tả concept, phong cách tham khảo, yêu cầu đặc biệt...",
         "contactPhoneLabel": "Số điện thoại liên hệ"

@@ -371,14 +371,19 @@ paid-role seed account, plus one seeded `admin@test.com` (password `Test1234!`,
 same as every other seed account) for exercising `/admin` locally — keep both
 in mind when adding new seed users with paid or admin roles.
 
-Known bug, NOT resolved (see the Phase 4 commit message for the full
-investigation): the Follow/Save/Share buttons on `/profile/[username]` don't
-respond to clicks in this dev environment specifically when logged in, despite
-rendering correctly. Extensively isolated to "authenticated session + any
-async delay before a Client Component renders" — reproduces with plain Prisma
-queries or even a bare `setTimeout`, unrelated to this feature's own code.
-Every other auth-gated interactive feature in the app works fine. Needs a
-fresh look with real browser devtools, not headless/CDP testing.
+**Not a bug — do not chase it again (re-verified 24/09/2026).** An earlier
+note here said the Follow/Save/Share buttons on `/profile/[username]` don't
+respond to clicks when logged in (Phase 4 commit). All three work: Follow
+flips to "Đang theo dõi" and bumps the count, Save flips to "Bỏ lưu", Share
+opens its copy-link / Facebook / QR menu. What had been observed is an
+automation artifact: a CDP-driven tab can get into a state where _trusted_
+mouse input stops reaching the page entirely — not one `pointerdown` arrives
+even on a capture listener on `window`, on any element, anywhere — while
+`element.click()` from script still works and the DOM shows nothing covering
+the target. Opening a fresh tab in the same context clears it at once. If
+clicks "do nothing" during browser testing, check for that first: add a
+capture `pointerdown` listener on `window`, click, and if nothing is logged,
+the input is being lost before the page — switch tabs, don't debug the app.
 
 ## Rules
 

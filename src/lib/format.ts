@@ -86,13 +86,19 @@ export function formatTime(value: Date | string | number) {
   }).format(toDate(value));
 }
 
-// "tháng 9 năm 2026" — calendar-header granularity, not a full date.
+// "Tháng 9 năm 2026" — calendar-header granularity, not a full date.
+//
+// Capitalised by hand: Intl gives "tháng 9 năm 2026", correct mid-sentence
+// but this is only ever used as a standalone label — a calendar header or
+// the date line under a review — where a lowercase first word reads as a
+// typo.
 export function formatMonthYear(value: Date | string | number) {
-  return new Intl.DateTimeFormat("vi-VN", {
+  const label = new Intl.DateTimeFormat("vi-VN", {
     timeZone: HCM_TIME_ZONE,
     month: "long",
     year: "numeric",
   }).format(toDate(value));
+  return label.charAt(0).toLocaleUpperCase("vi-VN") + label.slice(1);
 }
 
 // "CN" / "T2" / "T3"... — day-of-week abbreviation for a calendar grid.

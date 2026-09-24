@@ -2811,7 +2811,7 @@
         "heading": "When works for you?",
         "previous": "Previous",
         "next": "Next",
-        "localTimeNote": "Times shown in your local time · needs at least 24 hours notice",
+        "localTimeNote": "Vietnam time (GMT+7) · needs at least 24 hours notice",
         "selectDatePrompt": "Select a date to see open times.",
         "noAvailability": "No availability on this date — try another.",
         "bookingWith": "Booking with {providerName}",
@@ -2836,6 +2836,7 @@
         "addressLabel": "Address",
         "addressPlaceholder": "Street, ward, city",
         "numberOfPeopleLabel": "Number of people",
+        "numberOfPeoplePlaceholder": "e.g. 2",
         "notesLabel": "Notes",
         "notesPlaceholder": "Describe your vision, style references, special requirements...",
         "contactPhoneLabel": "Contact phone"
