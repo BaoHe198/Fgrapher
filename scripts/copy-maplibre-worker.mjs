@@ -9,7 +9,10 @@
 // ./maplibre-gl-shared.mjs, so both files are copied side by side.
 //
 // Runs from `postinstall`, so the copy always matches the installed
-// maplibre-gl version. The output directory is gitignored.
+// maplibre-gl version, AND from `build`: Vercel restores node_modules from
+// its build cache ("Already up to date") and skips postinstall entirely,
+// so on 24/09/2026 production shipped without the worker and Fmap stayed
+// blank. The output directory is gitignored.
 import { copyFileSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
