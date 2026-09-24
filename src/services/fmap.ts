@@ -9,6 +9,7 @@ import {
   weeklyWindowsForProviders,
 } from "@/services/resource-calendar";
 import type { FmapSearchInput } from "@/lib/validations/fmap";
+import { joinVietnameseName } from "@/lib/vietnamese-name";
 import { timeToMinutes } from "@/services/availability";
 
 export const MAX_FMAP_MARKERS = 250;
@@ -360,9 +361,10 @@ export async function findAvailableProvidersOnMap(
     );
 
   const markers = available.slice(0, MAX_FMAP_MARKERS).map((profile) => {
-    const fullName = [profile.user.firstName, profile.user.lastName]
-      .filter(Boolean)
-      .join(" ");
+    const fullName = joinVietnameseName(
+      profile.user.firstName,
+      profile.user.lastName,
+    );
 
     return {
       profileId: profile.id,
@@ -458,9 +460,10 @@ export async function getFmapProviderPreview(
     _avg: { rating: true },
     _count: { _all: true },
   });
-  const fullName = [profile.user.firstName, profile.user.lastName]
-    .filter(Boolean)
-    .join(" ");
+  const fullName = joinVietnameseName(
+    profile.user.firstName,
+    profile.user.lastName,
+  );
   const location = [profile.ward?.name, profile.province?.name]
     .filter(Boolean)
     .join(", ");

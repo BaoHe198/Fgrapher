@@ -703,7 +703,14 @@
           "legalEntityHousehold": "Household business",
           "legalEntityCompany": "Company",
           "businessDocLabel": "Business registration certificate",
-          "businessDocHelp": "A household business or company must upload its registration certificate. A freelance individual does not."
+          "businessDocHelp": "A household business or company must upload its registration certificate. A freelance individual does not.",
+          "missingHint": {
+            "name": "Enter your full name as on the ID.",
+            "idNumber": "Enter your ID number.",
+            "photos": "Add the front and back of the ID and a selfie holding it.",
+            "businessDoc": "Add the business registration document.",
+            "consent": "Tick the agreement above to submit."
+          }
         }
       }
     },
@@ -1917,7 +1924,9 @@
           "coverImage": "Add a cover photo",
           "phone": "Add a phone number",
           "roleProfile": "Finish your {role} profile",
-          "categories": "Choose specialty categories for your {role} profile"
+          "categories": "Choose specialty categories for your {role} profile",
+          "verifyIdentity": "Verify your identity for {role} — required before your profile goes public and receives requests",
+          "verifyPending": "Your {role} verification is being reviewed"
         }
       },
       "recentActivity": "Recent activity",

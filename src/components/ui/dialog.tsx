@@ -126,7 +126,10 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        "font-heading text-base leading-none font-medium",
+        // pr-8 clears the absolutely-positioned close button, and
+        // leading-snug keeps a title that wraps on a phone from stacking
+        // its lines on top of each other ("…thế nào?×", 24/09 audit).
+        "font-heading pr-8 text-base leading-snug font-medium",
         className,
       )}
       {...props}

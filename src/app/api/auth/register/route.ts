@@ -7,6 +7,7 @@ import { CURRENT_POLICY_VERSION, SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRegisterSchema } from "@/lib/validations/auth";
+import { splitVietnameseName } from "@/lib/vietnamese-name";
 import { recordConsent } from "@/services/compliance";
 import { sendVerificationEmail } from "@/services/email-verification";
 import { assignFreePlan } from "@/services/subscription";
@@ -80,8 +81,7 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const [firstName, ...rest] = name.trim().split(/\s+/);
-  const lastName = rest.join(" ") || null;
+  const { firstName, lastName } = splitVietnameseName(name);
 
   // Best-effort — used only to timestamp the consent record, never to
   // gate registration itself. x-forwarded-for is a comma-separated list

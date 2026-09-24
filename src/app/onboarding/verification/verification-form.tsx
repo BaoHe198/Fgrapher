@@ -219,6 +219,19 @@ export function VerificationForm({
     selfie &&
     (!needsBusinessDoc || businessDoc) &&
     consent;
+  // First missing piece, said out loud — a greyed-out submit alone left
+  // people hunting for what was left (24/09 audit).
+  const missingHint = canSubmit
+    ? null
+    : fullName.trim().length < 2
+      ? t("missingHint.name")
+      : !idNumber.trim()
+        ? t("missingHint.idNumber")
+        : !idFront || !idBack || !selfie
+          ? t("missingHint.photos")
+          : needsBusinessDoc && !businessDoc
+            ? t("missingHint.businessDoc")
+            : t("missingHint.consent");
 
   const onSubmit = async () => {
     if (!canSubmit || !idFront || !idBack || !selfie) return;
@@ -299,11 +312,6 @@ export function VerificationForm({
           <AlertDescription>
             {t("rejectedNotice", { reason: rejectedReason })}
           </AlertDescription>
-        </Alert>
-      ) : null}
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
 
@@ -389,6 +397,13 @@ export function VerificationForm({
         />
       </div>
 
+      {/* Next to the button that failed: at the top of this long form the
+          error was off-screen and submit looked like it did nothing. */}
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
       <Button
         variant="accent"
         size="lg"
@@ -398,6 +413,11 @@ export function VerificationForm({
         {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
         {t("submit")}
       </Button>
+      {missingHint ? (
+        <p className="-mt-2 text-center text-body-sm text-text-tertiary">
+          {missingHint}
+        </p>
+      ) : null}
       <Button
         variant="ghost"
         nativeButton={false}

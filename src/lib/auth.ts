@@ -26,6 +26,7 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations/auth";
 import { PAID_ROLES } from "@/lib/constants";
 import { resolvePartyName } from "@/lib/party-name";
+import { joinVietnameseName } from "@/lib/vietnamese-name";
 
 // Two layers: per-IP catches a scripted credential-stuffing loop trying
 // many different accounts from one source; per-email catches someone
@@ -136,8 +137,7 @@ const {
           email: user.email,
           name:
             user.name ??
-            ([user.firstName, user.lastName].filter(Boolean).join(" ") ||
-              user.email),
+            (joinVietnameseName(user.firstName, user.lastName) || user.email),
           avatar: user.avatar,
         };
       },

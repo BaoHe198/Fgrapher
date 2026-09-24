@@ -703,7 +703,14 @@
           "legalEntityHousehold": "Hộ kinh doanh",
           "legalEntityCompany": "Doanh nghiệp",
           "businessDocLabel": "Giấy đăng ký kinh doanh",
-          "businessDocHelp": "Hộ kinh doanh và doanh nghiệp cần tải giấy đăng ký. Cá nhân tự do không cần."
+          "businessDocHelp": "Hộ kinh doanh và doanh nghiệp cần tải giấy đăng ký. Cá nhân tự do không cần.",
+          "missingHint": {
+            "name": "Nhập họ và tên đầy đủ theo giấy tờ.",
+            "idNumber": "Nhập số CCCD/CMND.",
+            "photos": "Tải đủ ảnh mặt trước, mặt sau giấy tờ và ảnh chân dung cầm giấy tờ.",
+            "businessDoc": "Tải giấy đăng ký kinh doanh.",
+            "consent": "Đánh dấu đồng ý bên trên để gửi."
+          }
         }
       }
     },
@@ -1917,7 +1924,9 @@
           "coverImage": "Thêm ảnh bìa",
           "phone": "Thêm số điện thoại",
           "roleProfile": "Hoàn thiện hồ sơ {role}",
-          "categories": "Chọn thể loại sở trường cho hồ sơ {role}"
+          "categories": "Chọn thể loại sở trường cho hồ sơ {role}",
+          "verifyIdentity": "Xác minh danh tính cho vai trò {role} — bắt buộc để hồ sơ hiện công khai và nhận yêu cầu",
+          "verifyPending": "Hồ sơ xác minh {role} đang chờ duyệt"
         }
       },
       "recentActivity": "Hoạt động gần đây",

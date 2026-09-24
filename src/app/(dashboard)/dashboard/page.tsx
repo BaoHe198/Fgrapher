@@ -217,7 +217,10 @@ export default async function DashboardPage() {
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    include: { profiles: true },
+    include: {
+      profiles: true,
+      roles: { select: { role: true, verificationStatus: true } },
+    },
   });
   if (!user) {
     redirect("/login");
@@ -262,15 +265,32 @@ export default async function DashboardPage() {
   // role's whole profile; a role WITH a Profile but no categories still
   // gets its own "chọn thể loại sở trường" line (previously invisible —
   // completion% never looked at Profile.categories at all).
-  const missingItems: string[] = [];
-  if (!user.avatar) missingItems.push(t("completeProfile.missing.avatar"));
-  if (!user.coverImage)
-    missingItems.push(t("completeProfile.missing.coverImage"));
-  if (!user.phone) missingItems.push(t("completeProfile.missing.phone"));
+  const missingItems: { label: string; href?: string }[] = [];
+  const pushMissing = (label: string, href?: string) =>
+    missingItems.push({ label, href });
+  if (!user.avatar) pushMissing(t("completeProfile.missing.avatar"));
+  if (!user.coverImage) pushMissing(t("completeProfile.missing.coverImage"));
+  if (!user.phone) pushMissing(t("completeProfile.missing.phone"));
+  // Identity verification gates the public profile and every request
+  // (CLAUDE.md rule 5), yet a new provider's checklist never mentioned it —
+  // they only met it as an unexplained empty "Yêu cầu phù hợp" (24/09 audit).
+  for (const role of nonCustomerRoles) {
+    const status = user.roles.find((r) => r.role === role)?.verificationStatus;
+    if (status === "UNVERIFIED" || status === "REJECTED") {
+      pushMissing(
+        t("completeProfile.missing.verifyIdentity", { role: roleT(role) }),
+        `/onboarding/verification?role=${role}`,
+      );
+    } else if (status === "PENDING") {
+      pushMissing(
+        t("completeProfile.missing.verifyPending", { role: roleT(role) }),
+      );
+    }
+  }
   for (const role of nonCustomerRoles) {
     const profile = user.profiles.find((p) => p.role === role);
     if (!profile) {
-      missingItems.push(
+      pushMissing(
         t("completeProfile.missing.roleProfile", { role: roleT(role) }),
       );
     } else if (
@@ -279,7 +299,7 @@ export default async function DashboardPage() {
       // so the nudge used to sit on its dashboard permanently.
       (CATEGORIES_BY_ROLE[role]?.length ?? 0) > 0
     ) {
-      missingItems.push(
+      pushMissing(
         t("completeProfile.missing.categories", { role: roleT(role) }),
       );
     }
@@ -346,11 +366,20 @@ export default async function DashboardPage() {
           <ul className="flex flex-col gap-1.5">
             {missingItems.map((item) => (
               <li
-                key={item}
+                key={item.label}
                 className="flex items-center gap-2 text-body-sm text-text-secondary"
               >
                 <span className="size-1.5 shrink-0 rounded-full bg-warning" />
-                {item}
+                {item.href ? (
+                  <Link
+                    href={item.href}
+                    className="font-semibold! text-text-link underline-offset-4 hover:underline"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  item.label
+                )}
               </li>
             ))}
           </ul>
