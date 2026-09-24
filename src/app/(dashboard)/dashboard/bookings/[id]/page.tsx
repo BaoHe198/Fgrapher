@@ -343,8 +343,10 @@ export default function BookingDetailPage() {
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-4">
-          <Card className="flex flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+          {/* Phones: the buttons go on their own row under the name. Side
+              by side, "Nhắn tin" ran off the screen and the name wrapped. */}
+          <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
               <Avatar className="size-11">
                 {otherParty.avatar ? (
                   <AvatarImage src={otherParty.avatar} alt="" />
@@ -353,8 +355,8 @@ export default function BookingDetailPage() {
                   {partyName(otherParty)[0]?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
-                <span className="flex items-center gap-1.5 text-body-md font-semibold! text-text-primary">
+              <div className="flex min-w-0 flex-col">
+                <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-body-md font-semibold! text-text-primary">
                   {partyName(otherParty)}
                   {(otherParty.roles?.length ?? 0) > 0 ? (
                     <Badge variant="accent">{t("otherParty.verified")}</Badge>
@@ -367,7 +369,7 @@ export default function BookingDetailPage() {
                 </span>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 max-sm:[&>*]:flex-1">
               {otherParty.username ? (
                 <Button
                   size="sm"

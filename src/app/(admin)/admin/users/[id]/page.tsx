@@ -221,12 +221,12 @@ export default function AdminUserDetailPage() {
               ].map(([label, value]) => (
                 <div
                   key={label}
-                  className="flex items-center justify-between px-5 py-3"
+                  className="flex items-baseline justify-between gap-4 px-4 py-3 sm:px-5"
                 >
-                  <span className="text-body-sm text-text-tertiary">
+                  <span className="shrink-0 text-body-sm whitespace-nowrap text-text-tertiary">
                     {label}
                   </span>
-                  <span className="text-body-md text-text-primary">
+                  <span className="min-w-0 text-right text-body-md break-words text-text-primary">
                     {value}
                   </span>
                 </div>
