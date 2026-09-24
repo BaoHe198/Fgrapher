@@ -40,8 +40,14 @@ type BookingRow = Booking & {
 // with none produced different widths for every other column, and nothing
 // lined up with the header. Wide enough for the widest set: accept, decline,
 // details.
+//
+// md and up only. On a phone six columns in ~340px crushed the headers into
+// "KháchDịchThờiTổngTrạng", wrapped the date over five lines and pushed the
+// action column out of the card entirely — a provider could not accept,
+// decline or complete a booking from their phone. Below md each booking is
+// a stacked card and the header row is hidden.
 const ROW_GRID =
-  "grid grid-cols-[1.2fr_1.2fr_1.4fr_0.8fr_0.9fr_16rem] items-center";
+  "md:grid md:grid-cols-[1.2fr_1.2fr_1.4fr_0.8fr_0.9fr_16rem] md:items-center md:gap-0";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -190,7 +196,7 @@ export function BookingsClient({
           <div
             className={cn(
               ROW_GRID,
-              "border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.06em] text-text-tertiary",
+              "hidden border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.06em] text-text-tertiary",
             )}
           >
             <span>
@@ -221,7 +227,7 @@ export function BookingsClient({
                 key={booking.id}
                 className={cn(
                   ROW_GRID,
-                  "border-b border-border-subtle px-5 py-4 text-body-md last:border-b-0",
+                  "flex flex-col gap-2 border-b border-border-subtle px-5 py-4 text-body-md last:border-b-0",
                 )}
               >
                 <div className="flex items-center gap-2">
@@ -237,7 +243,14 @@ export function BookingsClient({
                     {partyName(party)}
                   </span>
                 </div>
-                <span className="text-text-secondary">
+                <span
+                  className={cn(
+                    "text-text-secondary",
+                    // In the stacked phone card an empty service is a lone
+                    // "—" on its own line; the table still needs the cell.
+                    !booking.service && "hidden md:inline",
+                  )}
+                >
                   {booking.service?.name ?? "—"}
                 </span>
                 <span className="text-text-secondary">
@@ -259,7 +272,7 @@ export function BookingsClient({
                   ) : null}
                 </div>
 
-                <div className="flex justify-end gap-2">
+                <div className="mt-1 flex flex-wrap gap-2 md:mt-0 md:justify-end">
                   {/* Details on every row. Only pending and confirmed
                       bookings used to have a way in, so a provider could
                       not open a completed, cancelled or expired booking
