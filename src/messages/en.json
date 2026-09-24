@@ -2976,7 +2976,9 @@
         "draftBadge": "Not public yet",
         "upgradeHint": "Renew your subscription to create new albums.",
         "allAlbums": "All",
-        "photoAria": "View larger"
+        "photoAria": "View larger",
+        "upgradeHintBilling": "Your plan has expired, so you can't create new albums yet. <link>Renew your plan</link>",
+        "upgradeHintSupport": "Your plan has expired, so you can't create new albums yet. <link>Contact Fgrapher</link> to have it renewed."
       },
       "servicesTab": {
         "empty": "No service packages listed",

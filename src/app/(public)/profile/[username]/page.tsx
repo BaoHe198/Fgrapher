@@ -466,6 +466,7 @@ export default async function PublicProfilePage({
             offersTfp={offersTfp}
             isOwnProfile={isOwnProfile}
             canEditPortfolio={canEditPortfolio}
+            billingEnabled={features.billingEnabled}
           />
         </div>
       </div>

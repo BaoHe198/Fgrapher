@@ -2976,7 +2976,9 @@
         "draftBadge": "Chưa công khai",
         "upgradeHint": "Gia hạn gói để tạo album mới.",
         "allAlbums": "Tất cả",
-        "photoAria": "Xem ảnh lớn"
+        "photoAria": "Xem ảnh lớn",
+        "upgradeHintBilling": "Gói của bạn đã hết hạn nên chưa tạo được album mới. <link>Gia hạn gói</link>",
+        "upgradeHintSupport": "Gói của bạn đã hết hạn nên chưa tạo được album mới. <link>Liên hệ Fgrapher</link> để được gia hạn."
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",

@@ -65,6 +65,7 @@ interface ProfileInteractiveProps {
   // page.tsx's comment on why this is a second, separate fetch.
   ownerAlbums: OwnerAlbum[] | null;
   canEditPortfolio: boolean;
+  billingEnabled: boolean;
   services: {
     id: string;
     name: string;
@@ -115,6 +116,7 @@ export function ProfileInteractive({
   albums,
   ownerAlbums,
   canEditPortfolio,
+  billingEnabled,
   services,
   reviews,
   reviewStats,
@@ -234,6 +236,7 @@ export function ProfileInteractive({
                   viewerId={viewerId}
                   isOwnProfile={isOwnProfile}
                   canEdit={canEditPortfolio}
+                  billingEnabled={billingEnabled}
                 />
               </TabsPanel>
               <TabsPanel value="services" className="mt-6">

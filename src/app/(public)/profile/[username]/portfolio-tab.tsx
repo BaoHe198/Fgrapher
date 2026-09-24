@@ -18,6 +18,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -210,6 +211,8 @@ interface PortfolioTabProps {
   // reordering/editing existing albums doesn't, so those stay available
   // to the owner regardless (see page.tsx's comment on canEditPortfolio).
   canEdit: boolean;
+  /** Decides where "renew" leads — see the hint at the bottom. */
+  billingEnabled: boolean;
 }
 
 export function PortfolioTab({
@@ -220,6 +223,7 @@ export function PortfolioTab({
   viewerId,
   isOwnProfile,
   canEdit,
+  billingEnabled,
 }: PortfolioTabProps) {
   const t = useTranslations("publicPages.profile.portfolioTab");
   const categoryT = useTranslations("profileCategory");
@@ -434,8 +438,29 @@ export function PortfolioTab({
         </>
       )}
 
+      {/* "Renew your plan to create new albums" gave no way to renew —
+          and with billing off (the MVP state) the billing page says
+          Fgrapher is free, which contradicts it outright. It now says what
+          happened and links to the one place that can act: the billing
+          page when billing is on, support when it isn't. */}
       {isOwnProfile && !canEdit ? (
-        <p className="text-body-sm text-text-tertiary">{t("upgradeHint")}</p>
+        <p className="text-body-sm text-text-tertiary">
+          {t.rich(
+            billingEnabled ? "upgradeHintBilling" : "upgradeHintSupport",
+            {
+              link: (chunks) => (
+                <Link
+                  href={
+                    billingEnabled ? "/dashboard/settings/billing" : "/contact"
+                  }
+                  className="font-semibold text-brand-primary underline underline-offset-2"
+                >
+                  {chunks}
+                </Link>
+              ),
+            },
+          )}
+        </p>
       ) : null}
 
       {openPhoto ? (
