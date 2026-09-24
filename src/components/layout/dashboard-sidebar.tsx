@@ -287,9 +287,11 @@ export function MobileDashboardSidebar({
           side panel", matching what this one specifically does. */}
       <SheetTrigger
         render={
-          <Button variant="secondary" size="icon">
-            <PanelLeft className="size-5" />
-            <span className="sr-only">{t("openMenu")}</span>
+          // Labelled, not icon-only: a bare panel icon under the site
+          // nav's ☰ read as a second, unexplained menu (24/09 audit).
+          <Button variant="secondary" size="sm" aria-label={t("openMenu")}>
+            <PanelLeft className="size-4" />
+            {t("menuTitle")}
           </Button>
         }
       />

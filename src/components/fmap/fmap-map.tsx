@@ -173,7 +173,7 @@ function markerElement(
 
   const roleBadge = document.createElement("span");
   roleBadge.className =
-    "relative z-10 -mb-2 flex size-7 items-center justify-center rounded-full border-2 border-white bg-gold-400 text-neutral-900 shadow-sm";
+    "relative z-10 -mb-2 flex size-7 items-center justify-center rounded-full border-2 border-white bg-gold-400 text-gold-900 shadow-sm";
   roleBadge.appendChild(roleIcon(marker.role));
 
   const price = document.createElement("span");

@@ -321,7 +321,9 @@ export default async function DashboardPage() {
               <span className="text-body-sm text-text-secondary">
                 {stat.label}
               </span>
-              <span className="text-heading-lg break-words text-text-primary sm:text-display-md">
+              {/* nowrap + a step smaller on phones: break-words split
+                  "2.500.000₫" before the ₫ in a half-width card. */}
+              <span className="text-heading-md whitespace-nowrap text-text-primary tabular-nums sm:text-display-md">
                 {stat.value}
               </span>
             </Card>

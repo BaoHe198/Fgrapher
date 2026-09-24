@@ -221,11 +221,13 @@
   --border-focus: hsl(38 44% 52%);
   --success: hsl(168 50% 26%);
   --success-bg: hsl(168 40% 96%);
-  --warning: hsl(35 90% 48%);
+  /* 34%/38% lightness, not 48%/45%: as badge text on their -bg tints the
+     old values measured 2.4:1 and 3.9:1, under the 4.5:1 body-text floor. */
+  --warning: hsl(32 88% 34%);
   --warning-bg: hsl(35 90% 96%);
   --danger: hsl(6 70% 46%);
   --danger-bg: hsl(6 70% 96%);
-  --info: hsl(205 65% 45%);
+  --info: hsl(205 65% 38%);
   --info-bg: hsl(205 65% 96%);
 
   /* Fgrapher brand — typography (theme-invariant) */

@@ -14,8 +14,11 @@ const buttonVariants = cva(
       variant: {
         primary:
           "bg-brand-primary text-text-on-brand hover:-translate-y-px hover:opacity-90 hover:shadow-[var(--shadow-md)]",
+        // text-gold-900, not text-neutral-900: the neutral scale flips in
+        // dark mode while gold does not, so neutral-900 turned near-white
+        // on the unchanged gold fill (contrast ~2:1).
         accent:
-          "bg-gold-400 text-neutral-900 hover:-translate-y-px hover:bg-gold-500 hover:shadow-[var(--shadow-md)]",
+          "bg-gold-400 text-gold-900 hover:-translate-y-px hover:bg-gold-500 hover:shadow-[var(--shadow-md)]",
         secondary:
           "bg-bg-surface border-border-default text-text-primary hover:-translate-y-px hover:border-border-focus hover:bg-bg-sunken hover:shadow-[var(--shadow-sm)]",
         ghost: "text-text-secondary hover:bg-bg-sunken hover:text-text-primary",

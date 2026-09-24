@@ -131,7 +131,11 @@ export function MessagesClient({
           panel) genuinely doesn't need a big visible page title the way
           other dashboard pages do, but a screen reader still needs one. */}
       <h1 className="sr-only">{t("pageTitle")}</h1>
-      <div className="grid h-[calc(100dvh-140px)] min-h-[480px] grid-cols-1 overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card lg:h-[calc(100dvh-180px)] lg:grid-cols-[340px_1fr]">
+      {/* 176px below lg: the 72px nav, main's 24px top padding and the 56px
+          mobile sidebar toggle sit above this panel, plus a 24px gap. At
+          140px the composer ended ~12px under the fold on every phone and
+          the whole page had to scroll to type. */}
+      <div className="grid h-[calc(100dvh-176px)] min-h-[420px] grid-cols-1 overflow-hidden rounded-[var(--fg-radius-lg)] border border-border-subtle bg-surface-card lg:h-[calc(100dvh-180px)] lg:grid-cols-[340px_1fr]">
         <div
           className={cn(
             "h-full min-h-0",

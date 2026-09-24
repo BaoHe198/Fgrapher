@@ -1100,18 +1100,20 @@ function InfoTile({
     <div
       className={cn(
         "flex gap-2 rounded-[var(--fg-radius-md)] p-3",
-        accent ? "bg-gold-100 text-gold-800" : "bg-bg-surface",
+        accent
+          ? "bg-gold-100 text-gold-800 dark:bg-gold-900/30 dark:text-gold-100"
+          : "bg-bg-surface",
       )}
     >
       <Icon className="mt-0.5 size-4 shrink-0" />
-      {/* The gold scale does not flip in dark mode, so the accent tile keeps
-          its light fill there — its text must stay dark gold too, not the
-          theme's text colours, which turn light and vanish on it. */}
+      {/* The gold scale does not flip in dark mode, so the accent tile sets
+          its own dark pair (the Fmap price chip's) — the theme's text
+          colours turn light and vanished on the light gold fill. */}
       <div className="min-w-0">
         <span
           className={cn(
             "text-caption",
-            accent ? "text-gold-700" : "text-text-tertiary",
+            accent ? "text-gold-700 dark:text-gold-200" : "text-text-tertiary",
           )}
         >
           {label}
@@ -1119,7 +1121,7 @@ function InfoTile({
         <p
           className={cn(
             "text-body-sm font-semibold!",
-            accent ? "text-gold-900" : "text-text-primary",
+            accent ? "text-gold-900 dark:text-gold-100" : "text-text-primary",
           )}
         >
           {children}

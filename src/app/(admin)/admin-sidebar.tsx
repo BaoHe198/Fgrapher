@@ -74,7 +74,7 @@ export function AdminSidebar({ counts }: { counts: AdminQueueCounts }) {
             <Icon className="size-[18px]" />
             {t(key)}
             {key in counts && counts[key as QueueKey] > 0 ? (
-              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-sm font-bold text-white">
+              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-sm font-bold text-text-on-brand">
                 {counts[key as QueueKey]}
               </span>
             ) : null}
