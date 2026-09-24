@@ -1845,7 +1845,8 @@
         "upcomingBookings": "Upcoming bookings",
         "savedArtists": "Saved artists",
         "messages": "Messages",
-        "orders": "Orders"
+        "orders": "Orders",
+        "activeCostumes": "Outfits listed"
       },
       "completeProfile": {
         "title": "Complete your profile",
@@ -1869,7 +1870,8 @@
         "album": "New album added — \"{title}\"",
         "fallbackPerson": "a user",
         "fallbackSender": "Someone"
-      }
+      },
+      "manageCostumes": "Manage outfits"
     },
     "messages": {
       "selectConversation": "Select a conversation",

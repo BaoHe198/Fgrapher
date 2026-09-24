@@ -1845,7 +1845,8 @@
         "upcomingBookings": "Lịch sắp tới",
         "savedArtists": "Nghệ sĩ đã lưu",
         "messages": "Tin nhắn",
-        "orders": "Đơn hàng"
+        "orders": "Đơn hàng",
+        "activeCostumes": "Trang phục đang cho thuê"
       },
       "completeProfile": {
         "title": "Hoàn thiện hồ sơ của bạn",
@@ -1869,7 +1870,8 @@
         "album": "Đã thêm album mới — \"{title}\"",
         "fallbackPerson": "một người dùng",
         "fallbackSender": "Ai đó"
-      }
+      },
+      "manageCostumes": "Quản lý trang phục"
     },
     "messages": {
       "selectConversation": "Chọn một cuộc trò chuyện",

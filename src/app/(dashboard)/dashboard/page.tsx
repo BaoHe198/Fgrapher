@@ -19,10 +19,12 @@ import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
 import {
+  getCostumeShopStats,
   getCustomerStats,
   getProviderStats,
   getRecentActivity,
   isProviderRoleSet,
+  type CostumeShopStats,
   type CustomerStats,
   type ProviderStats,
   type RecentActivityItem,
@@ -110,6 +112,29 @@ function providerStatCards(stats: ProviderStats, t: Translator): StatCard[] {
   ];
 }
 
+// Where a costume shop's catalogue lives — see the sidebar entry.
+const COSTUMES_HREF =
+  "/dashboard/settings/profile?section=roleProfile#costumes";
+
+function costumeShopStatCards(
+  stats: CostumeShopStats,
+  t: Translator,
+): StatCard[] {
+  return [
+    {
+      label: t("stats.messages"),
+      value: String(stats.unreadMessages),
+      href: "/dashboard/messages",
+    },
+    {
+      label: t("stats.activeCostumes"),
+      value: String(stats.activeCostumes),
+      href: COSTUMES_HREF,
+    },
+    { label: t("stats.profileViews"), value: String(stats.views) },
+  ];
+}
+
 function customerStatCards(stats: CustomerStats, t: Translator): StatCard[] {
   return [
     {
@@ -169,11 +194,20 @@ export default async function DashboardPage() {
     getTranslations("dashboardCore.bookings"),
   ]);
 
+  // Not a provider (it takes no bookings), not a customer either.
+  const isCostumeShop = !isProvider && roles.includes("COSTUME_SHOP");
+
   const [activity, statCards] = await Promise.all([
     getRecentActivity(user.id, isProvider),
     isProvider
       ? getProviderStats(user.id).then((stats) => providerStatCards(stats, t))
-      : getCustomerStats(user.id).then((stats) => customerStatCards(stats, t)),
+      : isCostumeShop
+        ? getCostumeShopStats(user.id).then((stats) =>
+            costumeShopStatCards(stats, t),
+          )
+        : getCustomerStats(user.id).then((stats) =>
+            customerStatCards(stats, t),
+          ),
   ]);
 
   // Prompt G2, VIỆC 6 — "Nêu rõ còn thiếu gì thay vì chỉ hiện phần trăm":
@@ -294,10 +328,22 @@ export default async function DashboardPage() {
               size="sm"
               nativeButton={false}
               render={
-                <Link href={isProvider ? "/dashboard/portfolio" : "/browse"} />
+                <Link
+                  href={
+                    isProvider
+                      ? "/dashboard/portfolio"
+                      : isCostumeShop
+                        ? COSTUMES_HREF
+                        : "/browse"
+                  }
+                />
               }
             >
-              {isProvider ? t("buildPortfolio") : t("browseArtists")}
+              {isProvider
+                ? t("buildPortfolio")
+                : isCostumeShop
+                  ? t("manageCostumes")
+                  : t("browseArtists")}
             </Button>
           </Card>
         ) : (

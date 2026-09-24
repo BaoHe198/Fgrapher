@@ -55,6 +55,44 @@ export interface CustomerStats {
   orders: number;
 }
 
+export interface CostumeShopStats {
+  /** Unread messages — for a shop that rents through chat, these are the
+   * enquiries. */
+  unreadMessages: number;
+  activeCostumes: number;
+  views: number;
+}
+
+/**
+ * A costume shop is not in PROVIDER_ROLES — it takes no bookings — so it
+ * used to fall through to the customer's numbers: upcoming bookings, saved
+ * artists, orders. None of those says anything to someone running a rental
+ * shop. These are the three that do.
+ */
+export async function getCostumeShopStats(
+  userId: string,
+): Promise<CostumeShopStats> {
+  const [unreadMessages, activeCostumes, profile] = await Promise.all([
+    db.message.count({ where: { receiverId: userId, readAt: null } }),
+    db.costumeItem.count({
+      where: {
+        profile: { userId, role: "COSTUME_SHOP" },
+        isActive: true,
+        deletedAt: null,
+      },
+    }),
+    db.profile.findUnique({
+      where: { userId_role: { userId, role: "COSTUME_SHOP" } },
+      select: { viewCount: true },
+    }),
+  ]);
+  return {
+    unreadMessages,
+    activeCostumes,
+    views: profile?.viewCount ?? 0,
+  };
+}
+
 export function isProviderRoleSet(roles: Role[]) {
   return roles.some((role) => PROVIDER_ROLES.includes(role));
 }
