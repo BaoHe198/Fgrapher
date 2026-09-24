@@ -23,12 +23,10 @@ export interface PublicCostume {
 export function CostumesTab({
   costumes,
   shopUserId,
-  shopUsername,
   isOwnProfile,
 }: {
   costumes: PublicCostume[];
   shopUserId: string;
-  shopUsername: string | null;
   isOwnProfile: boolean;
 }) {
   const t = useTranslations("publicPages.profile.costumesTab");
@@ -47,7 +45,10 @@ export function CostumesTab({
       <p className="text-body-sm text-text-tertiary">{t("note")}</p>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {costumes.map((costume) => (
-          <div key={costume.id} className="flex flex-col gap-2">
+          // h-full + flex-1 + mt-auto: outfits list different amounts of
+          // detail (a deposit, a size, a description — or none), which left
+          // each card's "message to rent" button at a different height.
+          <div key={costume.id} className="flex h-full flex-col gap-2">
             <div className="relative aspect-[3/4] overflow-hidden rounded-[var(--fg-radius-md)]">
               {costume.media ? (
                 <Image
@@ -58,7 +59,13 @@ export function CostumesTab({
                   className="object-cover"
                 />
               ) : (
-                <MediaPlaceholder tint="green-300" height="100%" />
+                // Neutral, labelled — the brand green block read as a
+                // broken image rather than as "no photo yet".
+                <MediaPlaceholder
+                  tint="neutral-200"
+                  height="100%"
+                  label={t("noPhoto")}
+                />
               )}
               {costume.category ? (
                 <div className="absolute left-2 top-2">
@@ -66,7 +73,7 @@ export function CostumesTab({
                 </div>
               ) : null}
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-1 flex-col gap-0.5">
               <p className="text-body-md font-semibold! text-text-primary">
                 {costume.name}
               </p>
@@ -97,19 +104,22 @@ export function CostumesTab({
                   (project owner, 22/09/2026). The message is prefilled with
                   the outfit, but the customer still presses send. */}
               {isOwnProfile ? null : (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  nativeButton={false}
-                  render={
-                    <Link
-                      href={`/dashboard/messages?to=${shopUserId}&costume=${costume.id}&costumeName=${encodeURIComponent(costume.name)}${shopUsername ? `&shop=${shopUsername}` : ""}`}
-                    />
-                  }
-                >
-                  <MessageCircle className="size-4" />
-                  {t("messageToRent")}
-                </Button>
+                <div className="mt-auto pt-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="w-full"
+                    nativeButton={false}
+                    render={
+                      <Link
+                        href={`/dashboard/messages?to=${shopUserId}&costume=${costume.id}&costumeName=${encodeURIComponent(costume.name)}`}
+                      />
+                    }
+                  >
+                    <MessageCircle className="size-4" />
+                    {t("messageToRent")}
+                  </Button>
+                </div>
               )}
             </div>
           </div>

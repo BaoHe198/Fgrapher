@@ -1876,7 +1876,7 @@
       "selectConversationHint": "Choose from the list to start chatting",
       "rentalDraft": "Hi, I'd like to rent {product}. Product: {url}",
       "pageTitle": "Messages",
-      "costumeDraft": "Hi, I would like to rent {costume}. See it at: {url}"
+      "costumeDraft": "Hi, I'd like to rent “{costume}”. I need it on … — is it available?"
     },
     "shopOrders": {
       "title": "Shop orders",
@@ -2925,7 +2925,8 @@
       "status": {
         "available": "Available",
         "bookedOut": "Booked out",
-        "verified": "Verified"
+        "verified": "Verified",
+        "new": "New"
       },
       "age": "· Age {age}",
       "modelDetails": {
@@ -3035,7 +3036,8 @@
         "note": "Prices are per day. Pick an outfit and message the shop to agree the dates and the deposit.",
         "perDay": "{price}/day",
         "deposit": "Deposit {amount}",
-        "messageToRent": "Message to rent"
+        "messageToRent": "Message to rent",
+        "noPhoto": "No photo yet"
       },
       "postsTab": {
         "empty": "No posts yet",

@@ -32,7 +32,6 @@ interface OwnerAlbum {
 
 interface ProfileInteractiveProps {
   providerId: string;
-  username: string | null;
   profileId: string;
   role: Role;
   firstName: string;
@@ -106,7 +105,6 @@ interface ProfileInteractiveProps {
 
 export function ProfileInteractive({
   providerId,
-  username,
   profileId,
   role,
   firstName,
@@ -265,7 +263,6 @@ export function ProfileInteractive({
               <CostumesTab
                 costumes={costumes}
                 shopUserId={providerId}
-                shopUsername={username}
                 isOwnProfile={isOwnProfile}
               />
             </TabsPanel>

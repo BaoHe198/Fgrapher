@@ -31,21 +31,20 @@ export function MessagesClient({
   const startedRef = useRef(false);
   const productId = searchParams.get("product");
   const productName = searchParams.get("productName");
-  // An outfit has no product page of its own — the catalogue lives on the
-  // shop's profile, so the draft links there instead.
+  // An outfit has no page of its own. The draft used to link to the shop's
+  // profile instead — sent to that same shop, a link to its own page, and a
+  // relative one the chat doesn't make clickable. What the shop actually
+  // needs first is the date, since dates, price and deposit are agreed here
+  // (project owner, 22/09/2026), so the draft asks for it.
   const costumeId = searchParams.get("costume");
   const costumeName = searchParams.get("costumeName");
-  const shopUsername = searchParams.get("shop");
   const rentalDraft = productId
     ? t("rentalDraft", {
         product: productName || productId,
         url: `/shop/${productId}`,
       })
     : costumeId
-      ? t("costumeDraft", {
-          costume: costumeName || costumeId,
-          url: shopUsername ? `/profile/${shopUsername}` : "",
-        })
+      ? t("costumeDraft", { costume: costumeName || costumeId })
       : undefined;
 
   const loadConversations = () => {
@@ -84,7 +83,6 @@ export function MessagesClient({
             if (productName) nextParams.set("productName", productName);
             if (costumeId) nextParams.set("costume", costumeId);
             if (costumeName) nextParams.set("costumeName", costumeName);
-            if (shopUsername) nextParams.set("shop", shopUsername);
             router.replace(`/dashboard/messages?${nextParams.toString()}`);
             loadConversations();
           }

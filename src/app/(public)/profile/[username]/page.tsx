@@ -349,10 +349,18 @@ export default async function PublicProfilePage({
                   {isVerified ? (
                     <Badge variant="accent">{t("status.verified")}</Badge>
                   ) : null}
-                  <StarRating
-                    rating={averageRating}
-                    reviews={reviewStats.count}
-                  />
+                  {/* "★ 0.0 (0)" reads as a zero-star rating, not as "no
+                      reviews yet" — and the same provider's card on /browse
+                      already said "Mới". Stars once there is something to
+                      average. */}
+                  {reviewStats.count > 0 ? (
+                    <StarRating
+                      rating={averageRating}
+                      reviews={reviewStats.count}
+                    />
+                  ) : (
+                    <Badge variant="neutral">{t("status.new")}</Badge>
+                  )}
                 </div>
                 {profileLocation || ageRangeLabel ? (
                   <div className="flex items-center gap-1.5 text-body-sm text-text-secondary">
@@ -419,7 +427,6 @@ export default async function PublicProfilePage({
 
           <ProfileInteractive
             providerId={user.id}
-            username={username}
             profileId={activeProfile.id}
             role={activeProfile.role}
             firstName={firstName}
