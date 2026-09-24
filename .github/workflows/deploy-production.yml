@@ -1,0 +1,137 @@
+name: Deploy production
+
+# The one path to production: migrate the database, THEN deploy the code.
+#
+# It used to be two independent systems racing each other: Vercel built and
+# served every push to master immediately, while "Migrate production" sat
+# waiting for approval. New code ran against the old schema until someone
+# clicked approve (24/09/2026: the build even failed outright, because the
+# sitemap prerender queried a Role value the old database did not have).
+# Vercel's own git deploys for master are now switched off in vercel.json
+# (`git.deploymentEnabled.master: false`); this workflow deploys instead,
+# and only after the migration has succeeded.
+#
+# Flow: push to master → pauses for approval (the `production` GitHub
+# Environment) → check the database secrets → migrate → geography seed →
+# deploy to Vercel → health check. One approval, always in that order.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   PRODUCTION_DATABASE_URL, PRODUCTION_DIRECT_URL — fgrapher-prod, copied
+#     from Supabase → Connect. DIRECT_URL must be the session pooler (5432).
+#   VERCEL_TOKEN — https://vercel.com/account/tokens
+#   VERCEL_ORG_ID, VERCEL_PROJECT_ID — from .vercel/project.json
+# Full setup walkthrough: docs/ops/VAN-HANH-PRODUCTION.md §7.
+on:
+  push:
+    branches: [master]
+  # Redeploy without a new commit — e.g. after fixing a secret.
+  workflow_dispatch:
+
+# Never two production deploys at once; a newer push waits for the older
+# one instead of cancelling it half-way through a migration.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production # <-- pauses here for manual approval
+    env:
+      DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fail in seconds with a message that says which secret is wrong,
+      # instead of Prisma's P1013/P1001 half-way through the job. Never
+      # prints the values.
+      - name: Check database secrets
+        run: |
+          fail() { echo "::error title=Database secret::$1"; exit 1; }
+          for name in DATABASE_URL DIRECT_URL; do
+            value="${!name}"
+            [ -n "$value" ] || fail "PRODUCTION_$name is empty or missing."
+            case "$value" in
+              postgresql://*|postgres://*) ;;
+              *) fail "PRODUCTION_$name must start with postgresql:// (no quotes, no <>, no spaces)." ;;
+            esac
+            # Same ref scripts/check-db-safety.mjs names as production.
+            case "$value" in
+              *"postgres.mplyshxbtzovpexjhkoh:"*) ;;
+              *) fail "PRODUCTION_$name does not point at fgrapher-prod (mplyshxbtzovpexjhkoh)." ;;
+            esac
+          done
+          case "$DIRECT_URL" in
+            *":6543/"*) fail "PRODUCTION_DIRECT_URL uses port 6543; migrations need the session pooler on 5432." ;;
+          esac
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check the database answers
+        run: |
+          echo "SELECT 1;" | npx prisma db execute --stdin --url "$DIRECT_URL" \
+            || { echo "::error title=Database unreachable::Could not connect with PRODUCTION_DIRECT_URL. Usual causes: the password changed (copy the string again from Supabase → Connect), or Supabase Network Restrictions/Bans block GitHub."; exit 1; }
+
+      - name: Log current migration status before applying
+        # Exits 1 whenever migrations are pending — the expected state here.
+        run: npx prisma migrate status || true
+
+      # Always run: `migrate deploy` is a no-op when nothing is pending, so
+      # there is no diff-based "did migrations change?" check left to miss
+      # a batch.
+      - name: Apply migrations to production
+        run: pnpm db:migrate:deploy
+
+      - name: Seed reference geography data (provinces/wards)
+        # Idempotent upsert, not the full prisma/seed.ts (which also
+        # creates fake *@test.com users/bookings — never run that against
+        # production).
+        run: pnpm db:seed:geography
+
+      - name: On failure, stop and alert clearly
+        if: failure()
+        run: |
+          echo "## :rotating_light: Production migration FAILED — code was NOT deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "The live site is still on the previous version. See docs/MIGRATIONS.md \"Rollback\" before retrying — check _prisma_migrations and use \`prisma migrate resolve\` if a migration stopped half-way." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+  deploy:
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      # Built on Vercel, not here: the production env vars are marked
+      # sensitive, so `vercel pull` would hand a local build empty values.
+      - name: Deploy to Vercel production
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ] \
+            || { echo "::error title=Vercel secrets::VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID must all be set."; exit 1; }
+          url=$(npx vercel@latest deploy --prod --yes --token="$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "## Deployed to production" >> "$GITHUB_STEP_SUMMARY"
+          echo "$url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Health check
+        run: |
+          for i in 1 2 3 4 5 6; do
+            curl -fsS https://fgrapher.vercel.app/api/health && exit 0
+            sleep 10
+          done
+          echo "::error title=Health check::https://fgrapher.vercel.app/api/health did not return 200. Roll back: Vercel → Deployments → previous → Promote to Production."
+          exit 1

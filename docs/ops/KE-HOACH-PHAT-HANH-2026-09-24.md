@@ -49,15 +49,15 @@ này để migration. Việc production vẫn trả health 200 cho thấy creden
 3. Bắt đầu cửa sổ bảo trì; tránh để người dùng cập nhật lịch trong lúc chuyển dữ
    liệu.
 4. Merge nhánh vào `master` trong thời gian có người trực.
-5. Vào GitHub Actions, mở job **Migrate production** và duyệt ngay. Không để job
-   chờ lâu trong khi Vercel đang triển khai code mới.
+5. Vào GitHub Actions, mở workflow **Deploy production** và duyệt lần 1
+   (cập nhật database).
 6. Chờ migration và bước seed địa giới đều thành công. Nếu migration lỗi, dừng
    release; không bấm chạy lại theo phỏng đoán.
-7. Chờ Vercel Production chuyển sang `Ready`.
+7. Duyệt lần 2 (deploy code), chờ Vercel Production chuyển sang `Ready`.
 8. Smoke test theo danh sách bên dưới rồi kết thúc cửa sổ bảo trì.
 
-Hai hệ thống có thể chạy song song sau khi merge. Người vận hành phải theo dõi
-cả GitHub Actions và Vercel, đồng thời duyệt migration ngay khi job xuất hiện.
+Code chỉ được deploy sau khi migration thành công (xem `VAN-HANH-PRODUCTION.md`
+§7), nên không còn khoảng code mới chạy trên database cũ.
 
 ## Smoke test production sau phát hành
 
@@ -88,3 +88,11 @@ cả GitHub Actions và Vercel, đồng thời duyệt migration ngay khi job xu
 Các việc sau vẫn cần hoàn thành nhưng không nên trộn vào cửa sổ migration lớn:
 shared rate-limit store, uptime monitor, kiểm tra người nhận cảnh báo Sentry,
 quyền tối thiểu của DB user, Cloudflare/WAF và CSP nonce.
+
+**Bắt buộc trước khi có người dùng thật:** đổi mật khẩu database production
+(Supabase → Project Settings → Database → Reset database password). Ngày
+24/09/2026 mật khẩu hiện tại đã xuất hiện trong phiên chat với AI và lịch sử
+Terminal khi chạy migration bằng tay. Chủ dự án chấp nhận tạm hoãn vì
+production lúc đó chỉ có dữ liệu thử. Đổi xong phải cập nhật cùng lúc: Vercel
+(`DATABASE_URL`, `DIRECT_URL` môi trường Production) và GitHub Secrets
+(`PRODUCTION_DATABASE_URL`, `PRODUCTION_DIRECT_URL`).

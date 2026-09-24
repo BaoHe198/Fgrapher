@@ -160,21 +160,35 @@ deploy có thay đổi giao diện, tự đi một vòng trên link Preview:
 
 ### Chuyện gì tự xảy ra khi gộp code vào nhánh `master`
 
-1. **Vercel tự deploy** lên `fgrapher.vercel.app`. Vài phút.
-2. **Nếu đợt này có thay đổi cấu trúc database**, GitHub sẽ chạy workflow
-   _"Migrate production"_ và **dừng lại chờ anh bấm duyệt**. Nó không tự chạy
-   vào database production.
+Chỉ có **một đường** lên production: workflow _"Deploy production"_ trên GitHub
+(`.github/workflows/deploy-production.yml`). Vercel **không** tự deploy nhánh
+`master` nữa (`vercel.json` → `git.deploymentEnabled.master: false`), nên code
+mới không bao giờ chạy trước database.
 
-> **Anh duyệt ở đâu:** GitHub → tab **Actions** → job **Migrate production** →
-> bấm nút duyệt.
+1. GitHub dừng lại **chờ anh duyệt lần 1** (job `migrate`).
+2. Kiểm tra chuỗi kết nối database. Sai định dạng, sai cổng hay trỏ nhầm
+   database thì dừng ngay và ghi rõ secret nào sai.
+3. Cập nhật database (migration) và dữ liệu tỉnh/phường.
+4. **Chờ anh duyệt lần 2** (job `deploy`), rồi deploy code lên Vercel.
+5. Tự kiểm tra `https://fgrapher.vercel.app/api/health`.
 
-### Điểm cần cẩn thận: code lên trước, database lên sau
+Bước 3 lỗi thì code **không** được deploy — web vẫn chạy bản cũ.
 
-Code mới deploy gần như tức thì, còn migration chờ anh duyệt. Trong khoảng giữa
-đó, code mới đang chạy trên **database cũ** — những trang dùng tới cột mới sẽ báo
-lỗi cho tới khi anh duyệt xong.
+> **Anh duyệt ở đâu:** GitHub → tab **Actions** → **Deploy production** →
+> **Review deployments** → tick `production` → **Approve and deploy**.
+> Deploy lại mà không cần commit mới: cùng trang đó → **Run workflow**.
 
-Nên: **có migration thì duyệt ngay sau khi đẩy code**, đừng để qua đêm.
+### Secret cần có (GitHub → Settings → Secrets and variables → Actions)
+
+| Secret                                | Giá trị                                                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `PRODUCTION_DIRECT_URL`               | Chuỗi Supabase **Session pooler**, cổng **5432**, bắt đầu bằng `postgresql://` — không nháy, không `< >` |
+| `PRODUCTION_DATABASE_URL`             | Cùng chuỗi trên                                                                                          |
+| `VERCEL_TOKEN`                        | Tạo ở vercel.com/account/tokens                                                                          |
+| `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` | Trong `.vercel/project.json`                                                                             |
+
+Đổi mật khẩu database thì phải cập nhật **cùng lúc** hai secret database ở trên
+và `DATABASE_URL`/`DIRECT_URL` môi trường Production trên Vercel.
 
 ### Nguyên tắc về thời điểm
 
