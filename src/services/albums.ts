@@ -33,15 +33,31 @@ export async function listAlbums(profileId: string) {
     where: { profileId, deletedAt: null },
     orderBy: { sortOrder: "asc" },
     include: {
-      coverMedia: { select: { id: true, url: true, type: true } },
+      coverMedia: {
+        select: { id: true, url: true, type: true, deletedAt: true },
+      },
       _count: { select: { media: { where: { deletedAt: null } } } },
     },
   });
 
+  // A chosen cover that has since been moved to the trash is no cover at
+  // all. Prisma can't filter a to-one include, so this has to be checked
+  // by hand — public-profile.ts already did; this list didn't, and the
+  // owner saw a solid black tile (a deleted video's frame) over an album
+  // that said "no photos yet".
+  const liveCover = (album: (typeof albums)[number]) =>
+    album.coverMedia && !album.coverMedia.deletedAt
+      ? {
+          id: album.coverMedia.id,
+          url: album.coverMedia.url,
+          type: album.coverMedia.type,
+        }
+      : null;
+
   // Fall back to the first (lowest `order`) photo as the cover when none
   // was explicitly chosen — matches how a flat portfolio grid used to
   // just show every photo, so a fresh album still looks populated.
-  const albumsNeedingFallbackCover = albums.filter((a) => !a.coverMedia);
+  const albumsNeedingFallbackCover = albums.filter((a) => !liveCover(a));
   const fallbackCovers = albumsNeedingFallbackCover.length
     ? await db.profileMedia.findMany({
         where: {
@@ -57,7 +73,7 @@ export async function listAlbums(profileId: string) {
 
   return albums.map((album) => ({
     ...album,
-    coverMedia: album.coverMedia ?? fallbackByAlbum.get(album.id) ?? null,
+    coverMedia: liveCover(album) ?? fallbackByAlbum.get(album.id) ?? null,
   }));
 }
 

@@ -43,11 +43,14 @@ export interface AlbumCard {
 
 function SortableAlbumCard({
   album,
+  aboveTheFold,
   onDelete,
   t,
   categoryT,
 }: {
   album: AlbumCard;
+  /** First row — one of these covers is the page's LCP image. */
+  aboveTheFold: boolean;
   onDelete: (id: string) => void;
   t: ReturnType<typeof useTranslations>;
   categoryT: ReturnType<typeof useTranslations>;
@@ -86,6 +89,7 @@ function SortableAlbumCard({
                 fill
                 className="object-cover"
                 unoptimized
+                loading={aboveTheFold ? "eager" : undefined}
               />
             )
           ) : (
@@ -98,7 +102,10 @@ function SortableAlbumCard({
           <div className="min-w-0">
             <Link
               href={`/dashboard/portfolio/${album.id}`}
-              className="truncate text-body-md font-semibold! text-text-primary hover:underline"
+              // block: truncate does nothing on an inline <a>, so a long
+              // title ran straight under the reorder and delete buttons.
+              className="block truncate text-body-md font-semibold! text-text-primary hover:underline"
+              title={album.title}
             >
               {album.title}
             </Link>
@@ -229,10 +236,11 @@ export function AlbumGrid({
             strategy={rectSortingStrategy}
           >
             <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4">
-              {albums.map((album) => (
+              {albums.map((album, index) => (
                 <SortableAlbumCard
                   key={album.id}
                   album={album}
+                  aboveTheFold={index < 4}
                   onDelete={onDelete}
                   t={t}
                   categoryT={categoryT}
