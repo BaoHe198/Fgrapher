@@ -157,16 +157,18 @@ export default async function ProductDetailPage({
             )}
           </div>
 
-          <Card className="flex flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+          {/* Stacks on phones: side by side, the two buttons squeezed the
+              shop name to one word per line and ran off the screen. */}
+          <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
               <Avatar className="size-11">
                 {product.user.avatar ? (
                   <AvatarImage src={product.user.avatar} alt="" />
                 ) : null}
                 <AvatarFallback>{shopName[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
-                <span className="text-body-md font-semibold! text-text-primary">
+              <div className="flex min-w-0 flex-col">
+                <span className="text-body-md font-semibold! break-words text-text-primary">
                   {shopName}
                 </span>
                 {/* A shop with no reviews rendered "★ Mới (0)": a star, a
@@ -185,10 +187,11 @@ export default async function ProductDetailPage({
                 )}
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 sm:shrink-0">
               <Button
                 size="sm"
                 variant="secondary"
+                className="flex-1 sm:flex-none"
                 nativeButton={false}
                 render={<Link href={`/shop?sellerId=${product.user.id}`} />}
               >
@@ -198,6 +201,7 @@ export default async function ProductDetailPage({
                 <Button
                   size="sm"
                   variant="secondary"
+                  className="flex-1 sm:flex-none"
                   nativeButton={false}
                   render={
                     <Link href={`/dashboard/messages?to=${product.user.id}`} />

@@ -26,6 +26,16 @@ export interface CartItemWithProduct {
   };
 }
 
+// Every useCart() instance (the header's cart icon, /cart, /checkout) loads
+// on its own, so adding a product left the header's count stale until the
+// icon was clicked (25/09 report). Anything that changes the cart announces
+// it, and every instance reloads.
+const CART_CHANGED = "fgrapher:cart-changed";
+
+export function notifyCartChanged() {
+  window.dispatchEvent(new Event(CART_CHANGED));
+}
+
 export function useCart() {
   const [items, setItems] = useState<CartItemWithProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,6 +51,9 @@ export function useCart() {
 
   useEffect(() => {
     load();
+    const onChanged = () => load();
+    window.addEventListener(CART_CHANGED, onChanged);
+    return () => window.removeEventListener(CART_CHANGED, onChanged);
   }, [load]);
 
   const updateQuantity = async (id: string, quantity: number) => {
@@ -52,12 +65,13 @@ export function useCart() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ quantity }),
     });
-    load();
+    notifyCartChanged();
   };
 
   const removeItem = async (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
     await fetch(`/api/cart/${id}`, { method: "DELETE" });
+    notifyCartChanged();
   };
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);

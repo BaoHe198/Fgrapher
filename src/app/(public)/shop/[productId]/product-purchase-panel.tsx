@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { useTranslations } from "next-intl";
 
+import { notifyCartChanged } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
 
 const CONDITION_KEY: Record<ProductCondition, string> = {
@@ -100,6 +101,7 @@ export function ProductPurchasePanel({
       setError(body.message ?? t("addFailed"));
       return;
     }
+    notifyCartChanged();
 
     if (redirectToCheckout) {
       router.push("/cart");

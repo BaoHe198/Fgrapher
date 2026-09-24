@@ -26,7 +26,9 @@ export function SettingsNav() {
   const tabs = TABS.filter((tab) => tab.key !== "billing" || hasPlan);
 
   return (
-    <div className="flex gap-1 overflow-x-auto border-b border-border-subtle">
+    // Scrollbar hidden like TabsList: on a phone these five tabs scroll by
+    // swipe, and always-on scrollbars drew a bar under the row.
+    <div className="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-border-subtle [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)] [&::-webkit-scrollbar]:hidden">
       {tabs.map((tab) => {
         const isActive = pathname.startsWith(tab.href);
         return (

@@ -41,7 +41,7 @@ export function ProductGallery({
       </button>
 
       {images.length > 1 ? (
-        <div className="flex gap-2.5 overflow-x-auto">
+        <div className="flex gap-2.5 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {images.map((img, index) => (
             <button
               key={img.url}

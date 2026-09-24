@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Radio } from "@/components/ui/radio";
-import { useCart } from "@/hooks/use-cart";
+import { notifyCartChanged, useCart } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
 
 export function CheckoutContent() {
@@ -64,7 +64,9 @@ export function CheckoutContent() {
     }
 
     // No payment provider in the loop — the shop settles with the customer
-    // directly — so the order exists the moment this returns.
+    // directly — so the order exists the moment this returns. The cart is
+    // now empty; tell the header's cart icon.
+    notifyCartChanged();
     router.push("/dashboard/orders");
   };
 

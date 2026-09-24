@@ -355,7 +355,7 @@ export function PortfolioTab({
           {/* Album chips only earn their space once there is more than one
               body of work to switch between. */}
           {albums.length > 1 ? (
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            <div className="-mx-1 flex gap-2 overflow-x-auto overflow-y-hidden px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <AlbumChip
                 label={t("allAlbums")}
                 active={activeAlbumId === null}
