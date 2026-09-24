@@ -2172,6 +2172,7 @@
       },
       "labels": {
         "bookingRequest": "New booking request",
+        "bookingRescheduleCustomer": "Reschedule proposals",
         "bookingConfirmed": "Booking confirmed",
         "bookingCancelled": "Booking cancelled",
         "bookingReminder": "Upcoming booking reminder",

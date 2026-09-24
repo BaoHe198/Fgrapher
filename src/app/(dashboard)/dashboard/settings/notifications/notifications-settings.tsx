@@ -42,9 +42,11 @@ const BASE_GROUPS: {
 export function NotificationsSettings({
   initialPreferences,
   socialFeedEnabled,
+  receivesBookings,
 }: {
   initialPreferences: NotificationPreferences | null;
   socialFeedEnabled: boolean;
+  receivesBookings: boolean;
 }) {
   const t = useTranslations("dashboardSettings.notifications");
   // Merge over defaults, don't replace: a preferences object stored before
@@ -58,10 +60,20 @@ export function NotificationsSettings({
     }),
   );
 
+  // A customer is never sent an availability reminder, so that row is
+  // noise for them. `bookingRequest` stays: it also carries reschedule
+  // proposals, which reach the customer — it is only relabelled.
   const GROUPS = useMemo(
     () =>
-      BASE_GROUPS.filter((g) => g.titleKey !== "social" || socialFeedEnabled),
-    [socialFeedEnabled],
+      BASE_GROUPS.filter(
+        (g) => g.titleKey !== "social" || socialFeedEnabled,
+      ).map((g) => ({
+        ...g,
+        keys: g.keys.filter(
+          (key) => receivesBookings || key !== "availabilityReminder",
+        ),
+      })),
+    [socialFeedEnabled, receivesBookings],
   );
 
   const toggle = async (
@@ -108,7 +120,10 @@ export function NotificationsSettings({
             // to a screen reader. aria-label combines both per switch
             // without adding a second visible label next to the
             // existing grid text.
-            const rowLabel = t(`labels.${key}`);
+            const rowLabel =
+              key === "bookingRequest" && !receivesBookings
+                ? t("labels.bookingRescheduleCustomer")
+                : t(`labels.${key}`);
             return (
               <Fragment key={key}>
                 <span className="text-body-md text-text-primary">

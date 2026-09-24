@@ -2172,6 +2172,7 @@
       },
       "labels": {
         "bookingRequest": "Yêu cầu đặt lịch mới",
+        "bookingRescheduleCustomer": "Đề xuất đổi lịch hẹn",
         "bookingConfirmed": "Đã xác nhận đặt lịch",
         "bookingCancelled": "Đã hủy đặt lịch",
         "bookingReminder": "Nhắc lịch sắp tới",
