@@ -303,9 +303,9 @@ export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
                 <TabsTab value="following">{t("tabFollowing")}</TabsTab>
               </TabsList>
             </Tabs>
-            <span className="hidden text-body-sm text-text-tertiary sm:block">
-              {t(`filter.${filter}`)}
-            </span>
+            {/* A grey "Tất cả" used to sit here, repeating whichever filter
+                was picked in the left column. It read as a third control
+                for the same feed and did nothing when pressed. */}
           </div>
 
           {loadError && posts.length === 0 ? (
@@ -368,20 +368,16 @@ export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
       </section>
 
       <aside className="sticky top-[96px] hidden flex-col gap-4 xl:flex">
-        <Card className="flex flex-col gap-3">
-          <span className="text-heading-sm text-text-primary">
-            {t("quickActions")}
-          </span>
-          <Button
-            variant="accent"
-            className="w-full justify-start"
-            nativeButton={false}
-            render={<Link href="/requests/new" />}
-          >
-            <CalendarDays className="size-4" />
-            {t("createBooking")}
-          </Button>
-          {canReceiveBookings ? (
+        {/* "Create F Booking" was offered twice on one screen — a gold
+            button alone in a "quick actions" card, and again in the
+            composer — while the card explaining what an F Booking is had
+            only a list link. The action now lives with its explanation;
+            quick actions keep what is unique to providers. */}
+        {canReceiveBookings ? (
+          <Card className="flex flex-col gap-3">
+            <span className="text-heading-sm text-text-primary">
+              {t("quickActions")}
+            </span>
             <Button
               variant="secondary"
               className="w-full justify-start"
@@ -391,8 +387,8 @@ export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
               <Camera className="size-4" />
               {t("uploadPortfolio")}
             </Button>
-          ) : null}
-        </Card>
+          </Card>
+        ) : null}
         <Card className="flex flex-col gap-2">
           <span className="text-heading-sm text-text-primary">
             {t("bookingHelpTitle")}
@@ -400,6 +396,15 @@ export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
           <p className="text-body-sm text-text-secondary">
             {t("bookingHelpBody")}
           </p>
+          <Button
+            variant="accent"
+            className="mt-1 w-full justify-start"
+            nativeButton={false}
+            render={<Link href="/requests/new" />}
+          >
+            <CalendarDays className="size-4" />
+            {t("createBooking")}
+          </Button>
           <Link href="/requests" className="text-body-sm text-brand-primary">
             {t("viewBookings")}
           </Link>
