@@ -2901,6 +2901,10 @@
         "emailPlaceholder": "Your email",
         "submit": "Notify me",
         "roleRequired": "Select a role above first to sign up for this province"
+      },
+      "noPortfolioGroup": {
+        "heading": "No portfolio photos yet",
+        "body": "These profiles haven't posted any work yet, so they're listed after the ones you can see photos from."
       }
     },
     "profile": {

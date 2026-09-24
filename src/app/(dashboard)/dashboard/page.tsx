@@ -1,6 +1,7 @@
 import {
   Bookmark,
   Calendar,
+  ChevronRight,
   Images,
   MessageCircle,
   ShoppingBag,
@@ -36,7 +37,16 @@ type Translator = (
 ) => string;
 
 function greeting(firstName: string, t: Translator) {
-  const hour = new Date().getHours();
+  // The server's clock, not the visitor's: getHours() on Vercel is UTC, so
+  // six in the evening in Vietnam greeted people with "good morning".
+  // CLAUDE.md rule 10 — the product runs on Asia/Ho_Chi_Minh.
+  const hour = Number(
+    new Intl.DateTimeFormat("en-GB", {
+      hour: "numeric",
+      hourCycle: "h23",
+      timeZone: "Asia/Ho_Chi_Minh",
+    }).format(new Date()),
+  );
   const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
   return t(`greeting.${timeOfDay}`, { name: firstName });
 }
@@ -73,26 +83,56 @@ function activityText(
   }
 }
 
-function providerStatCards(stats: ProviderStats, t: Translator) {
+interface StatCard {
+  label: string;
+  value: string;
+  /** Where the number comes from. A count you can't open is a dead end. */
+  href?: string;
+}
+
+function providerStatCards(stats: ProviderStats, t: Translator): StatCard[] {
   return [
-    { label: t("stats.pendingRequests"), value: String(stats.pending) },
-    { label: t("stats.confirmed"), value: String(stats.confirmed) },
+    {
+      label: t("stats.pendingRequests"),
+      value: String(stats.pending),
+      href: "/dashboard/bookings",
+    },
+    {
+      label: t("stats.confirmed"),
+      value: String(stats.confirmed),
+      href: "/dashboard/bookings",
+    },
     { label: t("stats.earnings"), value: formatCurrency(stats.earnings) },
     { label: t("stats.profileViews"), value: String(stats.views) },
   ];
 }
 
-function customerStatCards(stats: CustomerStats, t: Translator) {
+function customerStatCards(stats: CustomerStats, t: Translator): StatCard[] {
   return [
     {
       label: t("stats.upcomingBookings"),
       value: String(stats.upcomingBookings),
+      href: "/dashboard/bookings",
     },
-    { label: t("stats.savedArtists"), value: String(stats.savedArtists) },
-    { label: t("stats.messages"), value: String(stats.messages) },
+    {
+      label: t("stats.savedArtists"),
+      value: String(stats.savedArtists),
+      href: "/saved",
+    },
+    {
+      label: t("stats.messages"),
+      value: String(stats.messages),
+      href: "/dashboard/messages",
+    },
     // Hidden while MARKETPLACE_ENABLED=false.
     ...(features.marketplaceEnabled
-      ? [{ label: t("stats.orders"), value: String(stats.orders) }]
+      ? [
+          {
+            label: t("stats.orders"),
+            value: String(stats.orders),
+            href: "/dashboard/orders",
+          },
+        ]
       : []),
   ];
 }
@@ -182,16 +222,28 @@ export default async function DashboardPage() {
           statCards.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
         }`}
       >
-        {statCards.map((stat) => (
-          <Card key={stat.label} className="flex flex-col gap-1.5">
-            <span className="text-body-sm text-text-secondary">
-              {stat.label}
-            </span>
-            <span className="text-display-md text-text-primary">
-              {stat.value}
-            </span>
-          </Card>
-        ))}
+        {statCards.map((stat) => {
+          const card = (
+            <Card
+              interactive={Boolean(stat.href)}
+              className="flex h-full flex-col gap-1.5"
+            >
+              <span className="text-body-sm text-text-secondary">
+                {stat.label}
+              </span>
+              <span className="text-display-md text-text-primary">
+                {stat.value}
+              </span>
+            </Card>
+          );
+          return stat.href ? (
+            <Link key={stat.label} href={stat.href}>
+              {card}
+            </Link>
+          ) : (
+            <div key={stat.label}>{card}</div>
+          );
+        })}
       </div>
 
       {hasIncompleteProfile ? (
@@ -253,9 +305,10 @@ export default async function DashboardPage() {
             {activity.map((item) => {
               const Icon = ACTIVITY_ICONS[item.type];
               return (
-                <div
+                <Link
                   key={item.id}
-                  className="flex items-center gap-3 px-5 py-3.5"
+                  href={item.href}
+                  className="flex items-center gap-3 px-5 py-3.5 transition-colors duration-150 hover:bg-bg-sunken focus-visible:bg-bg-sunken focus-visible:outline-none"
                 >
                   <Icon className="size-4 shrink-0 text-text-tertiary" />
                   <span className="flex-1 text-body-md text-text-primary">
@@ -264,7 +317,8 @@ export default async function DashboardPage() {
                   <span className="text-body-sm text-text-tertiary">
                     {formatRelativeTime(item.timestamp)}
                   </span>
-                </div>
+                  <ChevronRight className="size-4 shrink-0 text-text-tertiary" />
+                </Link>
               );
             })}
           </Card>

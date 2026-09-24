@@ -64,7 +64,25 @@ export async function getCustomerStats(userId: string): Promise<CustomerStats> {
       where: {
         customerId: userId,
         status: { in: ["PENDING", "CONFIRMED"] },
-        date: { gte: new Date() },
+        // startAt, not date: `date` is the calendar day at 00:00, so
+        // `date >= now` dropped a booking for later today out of "upcoming"
+        // from midnight onwards — on exactly the day the customer most
+        // needs it on their dashboard. startAt is nullable on rows that
+        // predate it, so those fall back to the calendar day, taken in
+        // Vietnam time — a @db.Date compares as UTC midnight.
+        OR: [
+          { startAt: { gte: new Date() } },
+          {
+            startAt: null,
+            date: {
+              gte: new Date(
+                new Intl.DateTimeFormat("en-CA", {
+                  timeZone: "Asia/Ho_Chi_Minh",
+                }).format(new Date()),
+              ),
+            },
+          },
+        ],
       },
     }),
     db.savedProfile.count({ where: { userId } }),
@@ -87,10 +105,16 @@ export async function getCustomerStats(userId: string): Promise<CustomerStats> {
 // Text is built by the caller via next-intl (a page component, not this
 // data-layer service) — each variant carries the raw params a template
 // needs to interpolate, not pre-rendered English strings.
+//
+// `href` is resolved here rather than in the page because this is the only
+// place that still has the underlying row id: the activity list used to be
+// plain text, so "Booking pending — Mai Hương" was something a customer
+// could read but not open.
 export type RecentActivityItem =
   | {
       id: string;
       type: "booking";
+      href: string;
       timestamp: Date;
       status: string;
       personName: string | null;
@@ -98,12 +122,14 @@ export type RecentActivityItem =
   | {
       id: string;
       type: "message";
+      href: string;
       timestamp: Date;
       personName: string | null;
     }
   | {
       id: string;
       type: "review";
+      href: string;
       timestamp: Date;
       personName: string | null;
       rating: number;
@@ -111,6 +137,7 @@ export type RecentActivityItem =
   | {
       id: string;
       type: "album";
+      href: string;
       timestamp: Date;
       albumTitle: string;
     };
@@ -162,6 +189,7 @@ export async function getRecentActivity(
     ...bookings.map((b) => ({
       id: `booking-${b.id}`,
       type: "booking" as const,
+      href: `/dashboard/bookings/${b.id}`,
       status: b.status,
       personName: isProvider
         ? (b.customer.firstName ?? b.customer.name)
@@ -171,12 +199,14 @@ export async function getRecentActivity(
     ...messages.map((m) => ({
       id: `message-${m.id}`,
       type: "message" as const,
+      href: "/dashboard/messages",
       personName: m.sender.firstName ?? m.sender.name,
       timestamp: m.createdAt,
     })),
     ...reviews.map((r) => ({
       id: `review-${r.id}`,
       type: "review" as const,
+      href: "/dashboard/reviews",
       personName: r.reviewer.firstName ?? r.reviewer.name,
       rating: r.rating,
       timestamp: r.createdAt,
@@ -184,6 +214,7 @@ export async function getRecentActivity(
     ...albums.map((a) => ({
       id: `album-${a.id}`,
       type: "album" as const,
+      href: "/dashboard/portfolio",
       albumTitle: a.title,
       timestamp: a.createdAt,
     })),

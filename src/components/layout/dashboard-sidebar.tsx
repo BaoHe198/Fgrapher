@@ -181,7 +181,12 @@ export function DashboardSidebar({
         );
       })}
 
-      {isAdmin ? null : (
+      {/* Only for someone with a provider role. A customer has no plan —
+          CUSTOMER is free and stays free — so the card used to spend the
+          sidebar's most prominent slot on "Free — Customer" and a "Manage
+          plan" button leading to a billing page with nothing on it for
+          them. Admins are excluded for the reason given above. */}
+      {isAdmin || !nonCustomerRole ? null : (
         <div className="mt-3.5 flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-green-900 p-3.5">
           <span className="text-body-sm text-green-200">
             {t("currentPlan")}

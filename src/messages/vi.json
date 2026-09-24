@@ -2901,6 +2901,10 @@
         "emailPlaceholder": "Email của bạn",
         "submit": "Đăng ký",
         "roleRequired": "Chọn một vai trò ở trên trước để đăng ký cho tỉnh/thành này"
+      },
+      "noPortfolioGroup": {
+        "heading": "Chưa có ảnh portfolio",
+        "body": "Những hồ sơ này chưa đăng ảnh nào nên được xếp sau, để bạn xem trước những người đã có tác phẩm."
       }
     },
     "profile": {

@@ -1,5 +1,6 @@
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 import { MapIcon, SearchX } from "lucide-react";
+import { Fragment } from "react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -122,6 +123,11 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     sort,
     page,
   });
+  // Where the no-portfolio group begins on this page (see the divider in
+  // the grid below). -1 when every card has photos, or none do.
+  const firstNoPortfolioIndex = result.data.findIndex(
+    (profile) => profile.media.length === 0,
+  );
 
   const roleCounts = Object.fromEntries(
     result.facets.roles.map((r) => [r.role, r.count]),
@@ -243,7 +249,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   <span className="sr-only sm:hidden">{t("viewOnMap")}</span>
                 </Link>
                 <SearchInput
-                  className="w-full sm:w-64"
+                  // Wide enough for the whole Vietnamese placeholder ("Tìm nghệ
+                  // sĩ, studio hoặc thiết bị"); at w-64 it was cut off after
+                  // "hoặc", hiding what the box can actually search for.
+                  className="w-full sm:w-80 lg:w-96"
                   marketplaceEnabled={features.marketplaceEnabled}
                 />
                 <div className="lg:hidden">
@@ -257,13 +266,22 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               </div>
             </div>
 
+            {/* Quick sort. This row used to hold a single tag — the default
+                sort, permanently selected — so it could never do anything
+                when clicked. Three real choices make it the fastest way to
+                re-order results, and on a phone the only one that doesn't
+                sit behind the filter sheet. The full list stays in the
+                sidebar. */}
             <div className="mb-5 flex flex-wrap gap-2">
-              <Tag
-                selected={sort === "rating"}
-                render={<Link href={queryWith(params, { sort: "rating" })} />}
-              >
-                {t("filterTopRated")}
-              </Tag>
+              {(["rating", "price_asc", "newest"] as const).map((option) => (
+                <Tag
+                  key={option}
+                  selected={sort === option}
+                  render={<Link href={queryWith(params, { sort: option })} />}
+                >
+                  {SORT_LABELS[option]}
+                </Tag>
+              ))}
             </div>
 
             <FilterResultsPane label={t("updatingResults")}>
@@ -320,49 +338,66 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 <>
                   <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
                     {result.data.map((profile, index) => (
-                      <ArtistCard
-                        key={profile.userId}
-                        // The first row is above the fold on every viewport
-                        // width this grid supports, and one of those images
-                        // is the page's LCP.
-                        priority={index < 4}
-                        artist={{
-                          id: profile.userId,
-                          name:
-                            profile.displayName ??
-                            profile.user.name ??
-                            t("unnamed"),
-                          username: profile.user.username ?? "",
-                          // Role first, then anything extra they can be
-                          // hired for — a studio that also shoots reads
-                          // "Studio · Chụp ảnh" rather than just "Studio".
-                          roles: [
-                            ...profile.roles.map((role) => roleT(role)),
-                            ...profile.serviceKinds
-                              .filter(
-                                (kind) =>
-                                  !profile.roles.some(
-                                    (role) =>
-                                      serviceKindsForRole(role)[0] === kind,
-                                  ),
-                              )
-                              .map((kind) => serviceKindT(kind)),
-                          ],
-                          city: profile.location,
-                          rating:
-                            profile.avgRating > 0
-                              ? profile.avgRating.toFixed(1)
-                              : t("newBadge"),
-                          reviews: profile.reviewCount,
-                          price: profile.priceMin
-                            ? t("priceFrom", {
-                                price: formatCurrency(profile.priceMin),
-                              })
-                            : t("contactForPricing"),
-                          avatar: profile.user.avatar ?? undefined,
-                          media: profile.media,
-                        }}
-                      />
+                      <Fragment key={profile.userId}>
+                        {/* services/search.ts always ranks profiles with no
+                            portfolio after those with one, whatever the sort.
+                            That is deliberate, but invisible: sorted by price,
+                            a 1.500.000₫ card landing after a 5.000.000₫ one
+                            just looked like a broken sort. Naming the group
+                            where it starts makes the order explain itself. */}
+                        {index > 0 && index === firstNoPortfolioIndex ? (
+                          <div className="col-span-full mt-3 flex flex-col gap-1 border-t border-border-subtle pt-5">
+                            <p className="text-body-md font-semibold! text-text-primary">
+                              {t("noPortfolioGroup.heading")}
+                            </p>
+                            <p className="text-body-sm text-text-secondary">
+                              {t("noPortfolioGroup.body")}
+                            </p>
+                          </div>
+                        ) : null}
+                        <ArtistCard
+                          // The first row is above the fold on every viewport
+                          // width this grid supports, and one of those images
+                          // is the page's LCP.
+                          priority={index < 4}
+                          artist={{
+                            id: profile.userId,
+                            name:
+                              profile.displayName ??
+                              profile.user.name ??
+                              t("unnamed"),
+                            username: profile.user.username ?? "",
+                            // Role first, then anything extra they can be
+                            // hired for — a studio that also shoots reads
+                            // "Studio · Chụp ảnh" rather than just "Studio".
+                            roles: [
+                              ...profile.roles.map((role) => roleT(role)),
+                              ...profile.serviceKinds
+                                .filter(
+                                  (kind) =>
+                                    !profile.roles.some(
+                                      (role) =>
+                                        serviceKindsForRole(role)[0] === kind,
+                                    ),
+                                )
+                                .map((kind) => serviceKindT(kind)),
+                            ],
+                            city: profile.location,
+                            rating:
+                              profile.avgRating > 0
+                                ? profile.avgRating.toFixed(1)
+                                : t("newBadge"),
+                            reviews: profile.reviewCount,
+                            price: profile.priceMin
+                              ? t("priceFrom", {
+                                  price: formatCurrency(profile.priceMin),
+                                })
+                              : t("contactForPricing"),
+                            avatar: profile.user.avatar ?? undefined,
+                            media: profile.media,
+                          }}
+                        />
+                      </Fragment>
                     ))}
                   </div>
 
