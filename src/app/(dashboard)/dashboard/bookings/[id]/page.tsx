@@ -4,6 +4,8 @@ import type { Booking, BookingStatus, Service, User } from "@prisma/client";
 import {
   AlertTriangle,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   Loader2,
   MapPin,
   MessageCircle,
@@ -31,7 +33,12 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { StarInput } from "@/components/ui/star-input";
 import { Textarea } from "@/components/ui/textarea";
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
-import { formatDate, formatDateTime, formatWeekdayShort } from "@/lib/format";
+import {
+  formatDate,
+  formatDateTime,
+  formatWeekdayShort,
+  vietnamDateKey,
+} from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 import { resolvePartyName } from "@/lib/party-name";
 import type { DayAvailability } from "@/services/availability";
@@ -830,6 +837,10 @@ function RescheduleDialog({
   const [date, setDate] = useState<string | null>(null);
   const [time, setTime] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Weeks ahead of this one. The dialog used to show only the next seven
+  // days, so a shoot could never be moved further than a week out.
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -838,16 +849,18 @@ function RescheduleDialog({
       setDate(null);
       setTime(null);
     });
-    const today = new Date().toISOString().slice(0, 10);
-    fetch(`/api/availability/${providerId}?from=${today}`)
+    // Vietnamese "today" — toISOString() is UTC, a day behind after 17:00.
+    const from = vietnamDateKey(weekOffset * 7);
+    fetch(`/api/availability/${providerId}?from=${from}`)
       .then((res) => res.json())
       .then((body) => {
         startTransition(() => {
           setDays(body.data?.dates ?? []);
           setIsLoading(false);
         });
-      });
-  }, [open, providerId]);
+      })
+      .catch(() => startTransition(() => setIsLoading(false)));
+  }, [open, providerId, weekOffset]);
 
   const activeDay = days.find((d) => d.date === date);
 
@@ -859,12 +872,18 @@ function RescheduleDialog({
       Number(time.slice(3)) +
       (serviceDuration ?? 60);
     const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
-    await fetch(`/api/bookings/${params.id}/reschedule`, {
+    const res = await fetch(`/api/bookings/${params.id}/reschedule`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ date, startTime: time, endTime }),
     });
     setBusy(false);
+    // A failed proposal used to close the dialog exactly like a sent one.
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      setError(body?.message ?? t("dialogs.reschedule.failed"));
+      return;
+    }
     onProposed();
   };
 
@@ -880,6 +899,33 @@ function RescheduleDialog({
           </div>
         ) : (
           <div className="flex flex-col gap-3">
+            <p className="text-body-sm text-text-secondary">
+              {t("dialogs.reschedule.hint")}
+            </p>
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                disabled={weekOffset === 0}
+                onClick={() => setWeekOffset((w) => Math.max(0, w - 1))}
+                aria-label={t("dialogs.reschedule.prevWeek")}
+                className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken disabled:opacity-30"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="text-body-sm font-semibold! text-text-primary">
+                {days.length
+                  ? `${formatDate(days[0].date)} – ${formatDate(days[days.length - 1].date)}`
+                  : null}
+              </span>
+              <button
+                type="button"
+                onClick={() => setWeekOffset((w) => w + 1)}
+                aria-label={t("dialogs.reschedule.nextWeek")}
+                className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
             <div className="grid grid-cols-7 gap-1.5">
               {days.map((day) => {
                 const d = new Date(day.date);
@@ -909,6 +955,13 @@ function RescheduleDialog({
               })}
             </div>
 
+            {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+            {activeDay &&
+            activeDay.slots.filter((s) => s.available).length === 0 ? (
+              <p className="text-body-sm text-text-tertiary">
+                {t("dialogs.reschedule.noSlots")}
+              </p>
+            ) : null}
             {activeDay ? (
               <div className="grid grid-cols-3 gap-2">
                 {activeDay.slots

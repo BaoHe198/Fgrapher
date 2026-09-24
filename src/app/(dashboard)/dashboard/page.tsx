@@ -445,7 +445,7 @@ export default async function DashboardPage() {
                 <Link
                   key={item.id}
                   href={item.href}
-                  className="flex items-center gap-3 px-5 py-3.5 transition-colors duration-150 hover:bg-bg-sunken focus-visible:bg-bg-sunken focus-visible:outline-none"
+                  className="flex items-center gap-3 px-5 py-3.5 transition-colors duration-150 hover:bg-bg-sunken focus-visible:bg-bg-sunken focus-visible:ring-2 focus-visible:ring-gold-500/40 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   <Icon className="size-4 shrink-0 text-text-tertiary" />
                   <span className="flex-1 text-body-md text-text-primary">

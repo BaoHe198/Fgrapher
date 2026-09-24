@@ -1853,7 +1853,12 @@
         "reschedule": {
           "title": "Propose a new time",
           "cancel": "Cancel",
-          "sendProposal": "Send proposal"
+          "sendProposal": "Send proposal",
+          "hint": "Pick a day, then a start time.",
+          "noSlots": "No free time left on this day — pick another.",
+          "prevWeek": "Previous week",
+          "nextWeek": "Next week",
+          "failed": "Couldn't send the proposal. Please try again."
         }
       }
     },

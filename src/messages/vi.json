@@ -1853,7 +1853,12 @@
         "reschedule": {
           "title": "Đề xuất thời gian mới",
           "cancel": "Hủy",
-          "sendProposal": "Gửi đề xuất"
+          "sendProposal": "Gửi đề xuất",
+          "hint": "Chọn ngày, rồi chọn giờ bắt đầu.",
+          "noSlots": "Ngày này không còn giờ trống — chọn ngày khác.",
+          "prevWeek": "Tuần trước",
+          "nextWeek": "Tuần sau",
+          "failed": "Không gửi được đề xuất. Vui lòng thử lại."
         }
       }
     },

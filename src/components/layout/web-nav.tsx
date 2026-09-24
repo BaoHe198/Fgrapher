@@ -59,7 +59,9 @@ const NAV_LINKS = [
     labelKey: "community" as const,
     alwaysVisible: false,
   },
-  { href: "/about", labelKey: "introduce" as const, alwaysVisible: true },
+  // Not always visible: on a 768px tablet, signed in, it pushed the header
+  // 6px past the screen edge (25/09 audit). The footer links it anyway.
+  { href: "/about", labelKey: "introduce" as const, alwaysVisible: false },
 ];
 
 function subscribeResize(callback: () => void) {

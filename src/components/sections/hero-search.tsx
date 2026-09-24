@@ -63,7 +63,7 @@ const BUDGET_LABEL_KEYS: Record<(typeof BUDGET_VALUES)[number], string> = {
 // left responsive rather than hardcoded to desktop-only values in case
 // that changes.
 const segmentClass =
-  "flex w-full min-w-0 items-center justify-between gap-2 rounded-[var(--fg-radius-sm)] px-3.5 py-3 text-body-md text-text-primary outline-none hover:bg-bg-sunken focus-visible:bg-bg-sunken lg:w-auto lg:flex-1 lg:justify-center lg:gap-1 lg:rounded-full lg:px-3.5 lg:py-2.5 lg:text-body-sm";
+  "flex w-full min-w-0 items-center justify-between gap-2 rounded-[var(--fg-radius-sm)] px-3.5 py-3 text-body-md text-text-primary outline-none hover:bg-bg-sunken focus-visible:bg-bg-sunken focus-visible:ring-2 focus-visible:ring-gold-500/40 focus-visible:ring-inset lg:w-auto lg:flex-1 lg:justify-center lg:gap-1 lg:rounded-full lg:px-3.5 lg:py-2.5 lg:text-body-sm";
 
 // A single divider whose orientation flips with the layout: a full-width
 // horizontal rule between stacked rows on mobile, a thin vertical rule
