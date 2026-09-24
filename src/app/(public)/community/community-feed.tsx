@@ -1083,9 +1083,24 @@ function InfoTile({
       )}
     >
       <Icon className="mt-0.5 size-4 shrink-0" />
+      {/* The gold scale does not flip in dark mode, so the accent tile keeps
+          its light fill there — its text must stay dark gold too, not the
+          theme's text colours, which turn light and vanish on it. */}
       <div className="min-w-0">
-        <span className="text-caption text-text-tertiary">{label}</span>
-        <p className="text-body-sm font-semibold! text-text-primary">
+        <span
+          className={cn(
+            "text-caption",
+            accent ? "text-gold-700" : "text-text-tertiary",
+          )}
+        >
+          {label}
+        </span>
+        <p
+          className={cn(
+            "text-body-sm font-semibold!",
+            accent ? "text-gold-900" : "text-text-primary",
+          )}
+        >
           {children}
         </p>
       </div>

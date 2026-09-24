@@ -182,7 +182,10 @@ const PUBLIC_POST_WHERE: Prisma.PostWhereInput = {
       serviceRequest: {
         is: {
           isDraft: false,
-          status: { notIn: ["PENDING_REVIEW", "REJECTED"] },
+          // Same rule as the public F Booking list: only a request still
+          // looking for someone. A cancelled, expired or fulfilled one is
+          // noise in the feed and invites offers that can no longer land.
+          status: { in: ["OPEN", "HAS_OFFERS"] },
         },
       },
     },

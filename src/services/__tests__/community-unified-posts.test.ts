@@ -51,10 +51,7 @@ describe("Community F dùng chung bài viết nguồn", () => {
       checks.length >= 3,
       "like, add comment và list comment đều phải kiểm tra",
     );
-    assert.match(
-      posts,
-      /status:\s*{\s*notIn:\s*\["PENDING_REVIEW",\s*"REJECTED"\]/,
-    );
+    assert.match(posts, /status:\s*{\s*in:\s*\["OPEN",\s*"HAS_OFFERS"\]/);
     assert.match(posts, /moderationStatus:\s*"APPROVED"/);
   });
 
