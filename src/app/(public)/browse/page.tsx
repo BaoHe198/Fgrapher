@@ -236,7 +236,12 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   })}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              {/* On a phone the search box gets a row of its own. Squeezed
+                  between the map and filter buttons it was ~150px wide and
+                  showed "Tìm nghệ sĩ, stu…" — the page's main control, too
+                  narrow to say what it does. The map button then has room
+                  for its label on the row below. */}
+              <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
                 <Link
                   href={fmapHref}
                   className={cn(
@@ -245,14 +250,13 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                   )}
                 >
                   <MapIcon className="size-4" />
-                  <span className="hidden sm:inline">{t("viewOnMap")}</span>
-                  <span className="sr-only sm:hidden">{t("viewOnMap")}</span>
+                  {t("viewOnMap")}
                 </Link>
                 <SearchInput
                   // Wide enough for the whole Vietnamese placeholder ("Tìm nghệ
                   // sĩ, studio hoặc thiết bị"); at w-64 it was cut off after
                   // "hoặc", hiding what the box can actually search for.
-                  className="w-full sm:w-80 lg:w-96"
+                  className="order-first w-full sm:order-none sm:w-80 lg:w-96"
                   marketplaceEnabled={features.marketplaceEnabled}
                 />
                 <div className="lg:hidden">

@@ -34,7 +34,7 @@ export function MobileFilterSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button variant="secondary" size="sm">
+          <Button variant="secondary" size="md">
             <SlidersHorizontal className="size-4" />
             {t("filtersButton")}
             {activeCount > 0 ? ` (${activeCount})` : ""}
