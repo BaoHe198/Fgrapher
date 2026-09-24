@@ -30,14 +30,6 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function AppleIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M16.365 1.43c0 1.14-.462 2.03-1.386 2.85-.924.82-1.897 1.32-2.937 1.24-.13-1.05.32-2.09 1.28-2.95.98-.9 2.05-1.32 3.043-1.14v.01Zm3.933 17.02c-.61 1.42-1.34 2.83-2.44 4.14-1.1 1.29-1.98 1.98-3.28 2-1.24.02-1.65-.79-3.06-.79-1.42 0-1.87.77-3.04.81-1.25.05-2.2-1.35-3.31-2.63C3.02 19.6 1.5 15.85 3 12.99c1.02-2.02 2.86-3.29 4.86-3.32 1.19-.02 2.32.81 3.06.81.74 0 2.1-1 3.55-.85.6.02 2.31.24 3.4 1.83-.09.06-2.03 1.19-2.01 3.55.02 2.83 2.48 3.77 2.51 3.79-.02.06-.4 1.36-1.33 2.66h-.05Z" />
-    </svg>
-  );
-}
-
 interface SocialRowProps {
   callbackUrl?: string;
 }
@@ -61,6 +53,9 @@ function SocialRow({ callbackUrl = "/dashboard" }: SocialRowProps) {
         <div className="h-px flex-1 bg-border-subtle" />
       </div>
 
+      {/* Apple sign-in used to sit here, permanently disabled with a
+          "coming soon" tooltip that phones never show — a button that
+          does nothing reads as broken. It comes back when it works. */}
       <div className="flex gap-2.5">
         <Button
           type="button"
@@ -75,16 +70,6 @@ function SocialRow({ callbackUrl = "/dashboard" }: SocialRowProps) {
             <GoogleIcon className="size-4" />
           )}
           Google
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="flex-1"
-          disabled
-          title={t("appleComingSoon")}
-        >
-          <AppleIcon className="size-4" />
-          Apple
         </Button>
       </div>
     </>

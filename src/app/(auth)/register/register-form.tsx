@@ -455,7 +455,28 @@ export function RegisterForm({
 
       <SocialRow />
 
-      <p className="text-body-sm text-text-tertiary">{t("terms")}</p>
+      {/* The documents being agreed to were named but not linked, so the
+          sentence asked for agreement to something nobody could open. */}
+      <p className="text-body-sm text-text-tertiary">
+        {t.rich("terms", {
+          terms: (chunks) => (
+            <Link
+              href="/terms"
+              className="font-semibold text-text-secondary underline underline-offset-2 hover:text-text-primary"
+            >
+              {chunks}
+            </Link>
+          ),
+          privacy: (chunks) => (
+            <Link
+              href="/privacy"
+              className="font-semibold text-text-secondary underline underline-offset-2 hover:text-text-primary"
+            >
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
 
       <p className="text-body-md text-text-secondary">
         {t("alreadyHaveAccount")}{" "}
