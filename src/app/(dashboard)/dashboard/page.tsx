@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Images,
   MessageCircle,
+  Package,
   ShoppingBag,
   Star,
 } from "lucide-react";
@@ -16,14 +17,17 @@ import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
 import {
+  getCameraShopStats,
   getCostumeShopStats,
   getCustomerStats,
   getProviderStats,
   getRecentActivity,
   isProviderRoleSet,
+  type CameraShopStats,
   type CostumeShopStats,
   type CustomerStats,
   type ProviderStats,
@@ -58,12 +62,14 @@ const ACTIVITY_ICONS = {
   message: MessageCircle,
   review: Star,
   album: Images,
+  order: Package,
 } as const;
 
 function activityText(
   item: RecentActivityItem,
   t: Translator,
   bookingStatusT: Translator,
+  orderStatusT: Translator,
 ) {
   switch (item.type) {
     case "booking":
@@ -82,6 +88,11 @@ function activityText(
       });
     case "album":
       return t("activityItems.album", { title: item.albumTitle });
+    case "order":
+      return t("activityItems.order", {
+        status: orderStatusT(`status.${item.status}`),
+        name: item.personName ?? t("activityItems.fallbackPerson"),
+      });
   }
 }
 
@@ -130,6 +141,30 @@ function costumeShopStatCards(
       label: t("stats.activeCostumes"),
       value: String(stats.activeCostumes),
       href: COSTUMES_HREF,
+    },
+    { label: t("stats.profileViews"), value: String(stats.views) },
+  ];
+}
+
+function cameraShopStatCards(
+  stats: CameraShopStats,
+  t: Translator,
+): StatCard[] {
+  return [
+    {
+      label: t("stats.ordersToHandle"),
+      value: String(stats.ordersToHandle),
+      href: "/dashboard/shop-orders",
+    },
+    {
+      label: t("stats.activeListings"),
+      value: String(stats.activeListings),
+      href: "/dashboard/listings",
+    },
+    {
+      label: t("stats.messages"),
+      value: String(stats.unreadMessages),
+      href: "/dashboard/messages",
     },
     { label: t("stats.profileViews"), value: String(stats.views) },
   ];
@@ -188,14 +223,21 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [t, roleT, bookingStatusT] = await Promise.all([
+  const [t, roleT, bookingStatusT, orderStatusT] = await Promise.all([
     getTranslations("dashboardCore.home"),
     getTranslations("role"),
     getTranslations("dashboardCore.bookings"),
+    getTranslations("dashboardCore.shopOrders"),
   ]);
 
-  // Not a provider (it takes no bookings), not a customer either.
+  // Not providers (neither takes bookings), not customers either. A camera
+  // shop only has a shop to run while Chợ F is switched on.
   const isCostumeShop = !isProvider && roles.includes("COSTUME_SHOP");
+  const isCameraShop =
+    !isProvider &&
+    !isCostumeShop &&
+    features.marketplaceEnabled &&
+    roles.includes("CAMERA_SHOP");
 
   const [activity, statCards] = await Promise.all([
     getRecentActivity(user.id, isProvider),
@@ -205,9 +247,13 @@ export default async function DashboardPage() {
         ? getCostumeShopStats(user.id).then((stats) =>
             costumeShopStatCards(stats, t),
           )
-        : getCustomerStats(user.id).then((stats) =>
-            customerStatCards(stats, t),
-          ),
+        : isCameraShop
+          ? getCameraShopStats(user.id).then((stats) =>
+              cameraShopStatCards(stats, t),
+            )
+          : getCustomerStats(user.id).then((stats) =>
+              customerStatCards(stats, t),
+            ),
   ]);
 
   // Prompt G2, VIỆC 6 — "Nêu rõ còn thiếu gì thay vì chỉ hiện phần trăm":
@@ -227,7 +273,12 @@ export default async function DashboardPage() {
       missingItems.push(
         t("completeProfile.missing.roleProfile", { role: roleT(role) }),
       );
-    } else if (profile.categories.length === 0) {
+    } else if (
+      profile.categories.length === 0 &&
+      // A role with no category list (CAMERA_SHOP) can never satisfy this,
+      // so the nudge used to sit on its dashboard permanently.
+      (CATEGORIES_BY_ROLE[role]?.length ?? 0) > 0
+    ) {
       missingItems.push(
         t("completeProfile.missing.categories", { role: roleT(role) }),
       );
@@ -334,7 +385,9 @@ export default async function DashboardPage() {
                       ? "/dashboard/portfolio"
                       : isCostumeShop
                         ? COSTUMES_HREF
-                        : "/browse"
+                        : isCameraShop
+                          ? "/dashboard/listings"
+                          : "/browse"
                   }
                 />
               }
@@ -343,7 +396,9 @@ export default async function DashboardPage() {
                 ? t("buildPortfolio")
                 : isCostumeShop
                   ? t("manageCostumes")
-                  : t("browseArtists")}
+                  : isCameraShop
+                    ? t("manageListings")
+                    : t("browseArtists")}
             </Button>
           </Card>
         ) : (
@@ -361,7 +416,7 @@ export default async function DashboardPage() {
                 >
                   <Icon className="size-4 shrink-0 text-text-tertiary" />
                   <span className="flex-1 text-body-md text-text-primary">
-                    {activityText(item, t, bookingStatusT)}
+                    {activityText(item, t, bookingStatusT, orderStatusT)}
                   </span>
                   <span className="text-body-sm text-text-tertiary">
                     {formatRelativeTime(item.timestamp)}

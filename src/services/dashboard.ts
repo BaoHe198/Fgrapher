@@ -93,6 +93,44 @@ export async function getCostumeShopStats(
   };
 }
 
+export interface CameraShopStats {
+  /** Pending or confirmed — orders still waiting on the shop to act. */
+  ordersToHandle: number;
+  activeListings: number;
+  unreadMessages: number;
+  views: number;
+}
+
+/**
+ * Same story as the costume shop: CAMERA_SHOP sells on Chợ F rather than
+ * taking bookings, and without its own numbers it saw a customer's —
+ * including "orders", meaning orders it had *placed*, not received.
+ */
+export async function getCameraShopStats(
+  userId: string,
+): Promise<CameraShopStats> {
+  const [ordersToHandle, activeListings, unreadMessages, profile] =
+    await Promise.all([
+      db.order.count({
+        where: { shopId: userId, status: { in: ["PENDING", "CONFIRMED"] } },
+      }),
+      db.product.count({
+        where: { userId, isActive: true, deletedAt: null },
+      }),
+      db.message.count({ where: { receiverId: userId, readAt: null } }),
+      db.profile.findUnique({
+        where: { userId_role: { userId, role: "CAMERA_SHOP" } },
+        select: { viewCount: true },
+      }),
+    ]);
+  return {
+    ordersToHandle,
+    activeListings,
+    unreadMessages,
+    views: profile?.viewCount ?? 0,
+  };
+}
+
 export function isProviderRoleSet(roles: Role[]) {
   return roles.some((role) => PROVIDER_ROLES.includes(role));
 }
@@ -195,6 +233,14 @@ export type RecentActivityItem =
     }
   | {
       id: string;
+      type: "order";
+      href: string;
+      timestamp: Date;
+      status: string;
+      personName: string | null;
+    }
+  | {
+      id: string;
       type: "album";
       href: string;
       timestamp: Date;
@@ -209,7 +255,7 @@ export async function getRecentActivity(
     ? { providerId: userId }
     : { customerId: userId };
 
-  const [bookings, messages, reviews, albums] = await Promise.all([
+  const [bookings, messages, reviews, albums, orders] = await Promise.all([
     db.booking.findMany({
       where: bookingWhere,
       orderBy: { updatedAt: "desc" },
@@ -242,6 +288,17 @@ export async function getRecentActivity(
           select: { id: true, title: true, createdAt: true },
         })
       : Promise.resolve([]),
+    // Orders this user has *received* as a seller. Without these a shop
+    // with an order waiting on it read "no activity yet" directly under a
+    // card saying "orders to handle: 1".
+    features.marketplaceEnabled
+      ? db.order.findMany({
+          where: { shopId: userId },
+          orderBy: { updatedAt: "desc" },
+          take: 5,
+          include: { customer: { select: { name: true, firstName: true } } },
+        })
+      : Promise.resolve([]),
   ]);
 
   const items: RecentActivityItem[] = [
@@ -269,6 +326,14 @@ export async function getRecentActivity(
       personName: r.reviewer.firstName ?? r.reviewer.name,
       rating: r.rating,
       timestamp: r.createdAt,
+    })),
+    ...orders.map((o) => ({
+      id: `order-${o.id}`,
+      type: "order" as const,
+      href: "/dashboard/shop-orders",
+      status: o.status,
+      personName: o.customer.firstName ?? o.customer.name,
+      timestamp: o.updatedAt,
     })),
     ...albums.map((a) => ({
       id: `album-${a.id}`,

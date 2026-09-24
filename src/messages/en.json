@@ -1846,7 +1846,9 @@
         "savedArtists": "Saved artists",
         "messages": "Messages",
         "orders": "Orders",
-        "activeCostumes": "Outfits listed"
+        "activeCostumes": "Outfits listed",
+        "ordersToHandle": "Orders to handle",
+        "activeListings": "Active listings"
       },
       "completeProfile": {
         "title": "Complete your profile",
@@ -1868,10 +1870,12 @@
         "message": "New message from {name}",
         "review": "New {rating}★ review from {name}",
         "album": "New album added — \"{title}\"",
+        "order": "Order {status} — {name}",
         "fallbackPerson": "a user",
         "fallbackSender": "Someone"
       },
-      "manageCostumes": "Manage outfits"
+      "manageCostumes": "Manage outfits",
+      "manageListings": "Manage listings"
     },
     "messages": {
       "selectConversation": "Select a conversation",

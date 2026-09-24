@@ -1846,7 +1846,9 @@
         "savedArtists": "Nghệ sĩ đã lưu",
         "messages": "Tin nhắn",
         "orders": "Đơn hàng",
-        "activeCostumes": "Trang phục đang cho thuê"
+        "activeCostumes": "Trang phục đang cho thuê",
+        "ordersToHandle": "Đơn cần xử lý",
+        "activeListings": "Tin đăng đang bán"
       },
       "completeProfile": {
         "title": "Hoàn thiện hồ sơ của bạn",
@@ -1868,10 +1870,12 @@
         "message": "Tin nhắn mới từ {name}",
         "review": "Đánh giá {rating}★ mới từ {name}",
         "album": "Đã thêm album mới — \"{title}\"",
+        "order": "Đơn hàng {status} — {name}",
         "fallbackPerson": "một người dùng",
         "fallbackSender": "Ai đó"
       },
-      "manageCostumes": "Quản lý trang phục"
+      "manageCostumes": "Quản lý trang phục",
+      "manageListings": "Quản lý tin đăng"
     },
     "messages": {
       "selectConversation": "Chọn một cuộc trò chuyện",
