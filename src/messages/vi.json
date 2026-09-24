@@ -3789,7 +3789,9 @@
     "cartItemRow": {
       "rentalBadge": "Thuê — {days} ngày",
       "purchaseBadge": "Mua",
-      "removeLabel": "Xóa sản phẩm"
+      "removeLabel": "Xóa sản phẩm",
+      "decreaseLabel": "Giảm số lượng",
+      "increaseLabel": "Tăng số lượng"
     },
     "uploadMediaModal": {
       "title": "Tải ảnh/video lên",

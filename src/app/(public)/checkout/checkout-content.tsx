@@ -26,9 +26,17 @@ export function CheckoutContent() {
   const groups = groupByShop(items);
   const totals = cartTotals(items);
 
-  const [deliveryMethod, setDeliveryMethod] = useState<"SHIP" | "PICKUP">(
-    "SHIP",
+  // Ship-to-me used to be pre-selected for every cart, so a cart holding
+  // anything from a shop that doesn't deliver opened on a red error about
+  // a choice the customer never made. Until they pick, the default follows
+  // the cart: pickup if any shop in it can't ship. Derived rather than set
+  // in an effect, because the cart arrives after the first render.
+  const [chosenMethod, setDeliveryMethod] = useState<"SHIP" | "PICKUP" | null>(
+    null,
   );
+  const shipImpossible =
+    deliveryTotals(groups, "SHIP").undeliverable.length > 0;
+  const deliveryMethod = chosenMethod ?? (shipImpossible ? "PICKUP" : "SHIP");
   const router = useRouter();
   const [shippingAddress, setShippingAddress] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -160,12 +168,6 @@ export function CheckoutContent() {
               </Card>
             ))}
           </div>
-
-          <Checkbox
-            checked={agreed}
-            onCheckedChange={(checked) => setAgreed(checked === true)}
-            label={t.rich("agreeTerms", { terms: termsChunk })}
-          />
         </div>
 
         <Card className="sticky top-[104px] flex flex-col gap-3">
@@ -201,6 +203,15 @@ export function CheckoutContent() {
           </div>
 
           {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+
+          {/* Right above the button it unlocks. It used to sit at the foot
+              of the left column, under the order review, while the disabled
+              button sat top right with nothing saying why it wouldn't press. */}
+          <Checkbox
+            checked={agreed}
+            onCheckedChange={(checked) => setAgreed(checked === true)}
+            label={t.rich("agreeTerms", { terms: termsChunk })}
+          />
 
           <Button
             variant="accent"

@@ -3789,7 +3789,9 @@
     "cartItemRow": {
       "rentalBadge": "Rental — {days}d",
       "purchaseBadge": "Purchase",
-      "removeLabel": "Remove item"
+      "removeLabel": "Remove item",
+      "decreaseLabel": "Decrease quantity",
+      "increaseLabel": "Increase quantity"
     },
     "uploadMediaModal": {
       "title": "Upload media",

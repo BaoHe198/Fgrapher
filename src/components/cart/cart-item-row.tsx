@@ -74,6 +74,7 @@ export function CartItemRow({
               onClick={() =>
                 onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
               }
+              aria-label={t("decreaseLabel")}
               className="flex size-6 items-center justify-center rounded-full border border-border-default text-body-sm"
             >
               −
@@ -84,6 +85,7 @@ export function CartItemRow({
             <button
               type="button"
               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+              aria-label={t("increaseLabel")}
               className="flex size-6 items-center justify-center rounded-full border border-border-default text-body-sm"
             >
               +
