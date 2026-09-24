@@ -264,6 +264,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                     roleCounts={roleCounts}
                     categoryCounts={categoryCounts}
                     activeCount={activeFilterCount}
+                    resultCount={result.total}
                     marketplaceEnabled={features.marketplaceEnabled}
                   />
                 </div>

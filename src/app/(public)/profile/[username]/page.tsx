@@ -430,6 +430,7 @@ export default async function PublicProfilePage({
             profileId={activeProfile.id}
             role={activeProfile.role}
             firstName={firstName}
+            displayName={displayName}
             // Chợ F carries equipment from every gear owner, not only
             // camera shops, so the tab follows the listings themselves. A
             // camera shop keeps the tab even with nothing listed, because

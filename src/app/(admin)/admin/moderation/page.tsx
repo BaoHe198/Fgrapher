@@ -319,8 +319,8 @@ export default function AdminModerationPage() {
                     </div>
                     <div className="flex flex-col gap-0.5 p-2">
                       <span className="truncate text-body-sm font-semibold! text-text-primary">
-                        {item.profile.user.firstName ??
-                          item.profile.user.name ??
+                        {item.profile.user.name ??
+                          item.profile.user.firstName ??
                           item.profile.user.email}
                       </span>
                       <span className="text-body-sm text-text-tertiary">

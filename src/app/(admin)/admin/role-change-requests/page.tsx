@@ -101,7 +101,7 @@ export default function AdminRoleChangeRequestsPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="text-body-md font-semibold! text-text-primary">
-                    {row.user.firstName ?? row.user.name ?? row.user.email}
+                    {row.user.name ?? row.user.firstName ?? row.user.email}
                   </span>
                   <Badge variant="neutral">{roleT(row.fromRole)}</Badge>
                   <ArrowLeftRight className="size-3.5 text-text-tertiary" />

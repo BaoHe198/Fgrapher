@@ -146,7 +146,7 @@ export default function AdminUserDetailPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-display-md text-text-primary">
-          {user.firstName ?? user.name ?? user.email}
+          {user.name ?? user.firstName ?? user.email}
         </h1>
         {user.isSuspended ? (
           <Badge variant="destructive">{t("suspendedBadge")}</Badge>

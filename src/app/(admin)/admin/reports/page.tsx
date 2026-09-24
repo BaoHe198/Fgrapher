@@ -127,8 +127,8 @@ export default function AdminReportsPage() {
               <p className="text-body-sm text-text-secondary">
                 {t("reportedBy", {
                   name:
-                    report.reporter?.firstName ??
                     report.reporter?.name ??
+                    report.reporter?.firstName ??
                     report.reporter?.email ??
                     t("unknownReporter"),
                 })}{" "}

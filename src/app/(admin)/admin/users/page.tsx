@@ -114,7 +114,7 @@ export default function AdminUsersPage() {
                         href={`/admin/users/${user.id}`}
                         className="font-semibold text-text-primary underline-offset-2 hover:underline"
                       >
-                        {user.firstName ?? user.name ?? "—"}
+                        {user.name ?? user.firstName ?? "—"}
                       </Link>
                     </td>
                     <td className="px-3 py-3 text-text-secondary">

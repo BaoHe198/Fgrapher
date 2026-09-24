@@ -2448,7 +2448,8 @@
         "save": "Lưu",
         "saveFailed": "Không lưu được, vui lòng thử lại",
         "editAria": "Sửa {name}",
-        "deleteAria": "Xoá {name}"
+        "deleteAria": "Xoá {name}",
+        "missingHint": "Nhập tên bộ đồ và giá thuê mỗi ngày để lưu."
       }
     }
   },
@@ -3813,7 +3814,7 @@
       "sendDescriptionEnter": "Nhập số điện thoại để nhận mã xác minh 6 số qua SMS."
     },
     "artistCard": {
-      "noPhotoLabel": "Chưa có ảnh portfolio",
+      "noPhotoLabel": "Chưa có ảnh",
       "previousPhoto": "Ảnh trước",
       "nextPhoto": "Ảnh sau",
       "viewPhoto": "Xem ảnh {index}"
@@ -3860,7 +3861,8 @@
     "mobileFilterSheet": {
       "filtersButton": "Bộ lọc",
       "title": "Bộ lọc",
-      "description": "Bộ lọc tìm kiếm"
+      "description": "Bộ lọc tìm kiếm",
+      "showResults": "{count, plural, =0 {Không có kết quả — đóng bộ lọc} other {Xem # kết quả}}"
     },
     "searchInput": {
       "placeholder": "Tìm nghệ sĩ, studio hoặc thiết bị",

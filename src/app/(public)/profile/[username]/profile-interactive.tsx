@@ -35,6 +35,8 @@ interface ProfileInteractiveProps {
   profileId: string;
   role: Role;
   firstName: string;
+  /** The name the profile trades under — a shop's name, not its owner's. */
+  displayName: string;
   hasGear: boolean;
   viewerId: string | null;
   posts: ProfilePost[];
@@ -109,6 +111,7 @@ export function ProfileInteractive({
   profileId,
   role,
   firstName,
+  displayName,
   hasGear,
   viewerId,
   posts,
@@ -289,7 +292,7 @@ export function ProfileInteractive({
       <div id="booking-sidebar" ref={sidebarRef}>
         {isProductShop ? (
           <Card className="sticky top-[104px] flex flex-col gap-3">
-            <h3 className="text-heading-lg text-text-primary">{firstName}</h3>
+            <h3 className="text-heading-lg text-text-primary">{displayName}</h3>
             <p className="text-body-sm text-text-secondary">
               {stickyT("shopMessageHelp")}
             </p>

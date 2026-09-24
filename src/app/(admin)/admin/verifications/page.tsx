@@ -151,7 +151,7 @@ export default function AdminVerificationsPage() {
                 <div className="flex items-center gap-2">
                   <Badge variant="neutral">{row.role}</Badge>
                   <span className="text-body-md font-semibold! text-text-primary">
-                    {row.user.firstName ?? row.user.name ?? row.user.email}
+                    {row.user.name ?? row.user.firstName ?? row.user.email}
                   </span>
                 </div>
                 <span className="text-body-sm text-text-tertiary">

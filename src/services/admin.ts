@@ -180,14 +180,14 @@ export async function getRecentActivity(t: ActivityT, limit = 15) {
     ...signups.map((u) => ({
       type: "signup" as const,
       id: u.id,
-      label: t("signedUp", { name: u.firstName ?? u.name ?? u.email }),
+      label: t("signedUp", { name: u.name ?? u.firstName ?? u.email }),
       timestamp: u.createdAt,
     })),
     ...bookings.map((b) => ({
       type: "booking" as const,
       id: b.id,
       label: t("madeBooking", {
-        name: b.customer.firstName ?? b.customer.name ?? t("someone"),
+        name: b.customer.name ?? b.customer.firstName ?? t("someone"),
       }),
       timestamp: b.createdAt,
     })),

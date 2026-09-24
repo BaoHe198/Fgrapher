@@ -20,11 +20,13 @@ export function MobileFilterSheet({
   roleCounts,
   categoryCounts,
   activeCount,
+  resultCount,
   marketplaceEnabled,
 }: {
   roleCounts: Record<string, number>;
   categoryCounts: Partial<Record<string, number>>;
   activeCount: number;
+  resultCount: number;
   marketplaceEnabled: boolean;
 }) {
   const t = useTranslations("sharedComponents.mobileFilterSheet");
@@ -41,17 +43,31 @@ export function MobileFilterSheet({
           </Button>
         }
       />
-      <SheetContent side="left" className="w-3/4 overflow-y-auto sm:max-w-xs">
+      <SheetContent
+        side="left"
+        className="flex w-3/4 flex-col overflow-hidden sm:max-w-xs"
+      >
         <SheetHeader className="sr-only">
           <SheetTitle>{t("title")}</SheetTitle>
           <SheetDescription>{t("description")}</SheetDescription>
         </SheetHeader>
-        <div className="p-4">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <FilterSidebar
             roleCounts={roleCounts}
             categoryCounts={categoryCounts}
             marketplaceEnabled={marketplaceEnabled}
           />
+        </div>
+        {/* Filters apply as they are ticked, but nothing said so and the
+            only way back to the results was a small × at the top. */}
+        <div className="border-t border-border-subtle p-4">
+          <Button
+            variant="accent"
+            className="w-full"
+            onClick={() => setOpen(false)}
+          >
+            {t("showResults", { count: resultCount })}
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

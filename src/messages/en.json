@@ -2448,7 +2448,8 @@
         "save": "Save",
         "saveFailed": "Could not save, please try again",
         "editAria": "Edit {name}",
-        "deleteAria": "Delete {name}"
+        "deleteAria": "Delete {name}",
+        "missingHint": "Enter the outfit name and daily price to save."
       }
     }
   },
@@ -3813,7 +3814,7 @@
       "sendDescriptionEnter": "Enter your phone number to get a 6-digit code by SMS."
     },
     "artistCard": {
-      "noPhotoLabel": "No portfolio photos yet",
+      "noPhotoLabel": "No photos yet",
       "previousPhoto": "Previous photo",
       "nextPhoto": "Next photo",
       "viewPhoto": "View photo {index}"
@@ -3860,7 +3861,8 @@
     "mobileFilterSheet": {
       "filtersButton": "Filters",
       "title": "Filters",
-      "description": "Browse filters"
+      "description": "Browse filters",
+      "showResults": "{count, plural, =0 {No results — close filters} one {Show # result} other {Show # results}}"
     },
     "searchInput": {
       "placeholder": "Search artists, studios or gear",

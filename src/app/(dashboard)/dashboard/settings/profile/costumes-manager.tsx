@@ -354,6 +354,11 @@ export function CostumesManager({
               onChange={(value) => setDraft({ ...draft, isActive: value })}
             />
             {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+            {!draft.name || !draft.rentalPricePerDay ? (
+              <p className="text-body-sm text-text-tertiary">
+                {t("missingHint")}
+              </p>
+            ) : null}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setModalOpen(false)}>

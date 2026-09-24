@@ -175,8 +175,8 @@ function DataRequestsPanel() {
                       {t(`typeLabel.${r.type}`)}
                     </Badge>
                     <span className="text-body-md font-semibold! text-text-primary">
-                      {r.user?.firstName ??
-                        r.user?.name ??
+                      {r.user?.name ??
+                        r.user?.firstName ??
                         r.user?.email ??
                         t("unknownUser")}
                     </span>
@@ -347,8 +347,8 @@ function AuditLogPanel() {
                     {formatDateTime(log.createdAt)}
                   </td>
                   <td className="px-3 py-3 text-text-secondary">
-                    {log.actor?.firstName ??
-                      log.actor?.name ??
+                    {log.actor?.name ??
+                      log.actor?.firstName ??
                       log.actor?.email ??
                       log.actorId ??
                       t("systemActor")}
