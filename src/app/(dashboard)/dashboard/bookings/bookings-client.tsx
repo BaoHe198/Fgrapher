@@ -25,7 +25,7 @@ import {
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { useUserRoles } from "@/hooks/use-user-roles";
 import { formatWeekdayDayMonth } from "@/lib/format";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import type { BookingTab } from "@/services/bookings";
 
 type BookingParty = Pick<User, "id" | "name" | "firstName" | "avatar">;
@@ -34,6 +34,16 @@ type BookingRow = Booking & {
   provider: BookingParty;
   service: { name: string } | null;
 };
+
+// Header and every row share one template. The last column was `auto`, so
+// each row sized it to its own buttons — a row with three actions and a row
+// with none produced different widths for every other column, and nothing
+// lined up with the header. Wide enough for the widest set: accept, decline,
+// details.
+const ROW_GRID =
+  "grid grid-cols-[1.2fr_1.2fr_1.4fr_0.8fr_0.9fr_16rem] items-center";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const TAB_VALUES: BookingTab[] = [
   "ALL",
@@ -68,6 +78,10 @@ export function BookingsClient({
   initialTotalPages: number;
 }) {
   const t = useTranslations("dashboardCore.bookings");
+  // Read once per mount: calling Date.now() during render is impure (the
+  // React Compiler refuses it), and a list that is minutes stale about
+  // whether yesterday is over is fine.
+  const [now] = useState(() => Date.now());
   const { isCustomerOnly } = useUserRoles();
 
   function partyName(party: BookingParty) {
@@ -173,7 +187,12 @@ export function BookingsClient({
         </Card>
       ) : (
         <Card padding={false}>
-          <div className="grid grid-cols-[1.2fr_1.2fr_1.4fr_0.8fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.06em] text-text-tertiary">
+          <div
+            className={cn(
+              ROW_GRID,
+              "border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.06em] text-text-tertiary",
+            )}
+          >
             <span>
               {isCustomerOnly ? t("table.provider") : t("table.client")}
             </span>
@@ -188,11 +207,22 @@ export function BookingsClient({
             const party = isCustomerOnly ? booking.provider : booking.customer;
             const statusVariant = STATUS_VARIANT[booking.status];
             const isBusy = actionId === booking.id;
+            // A confirmed shoot whose day is over stays "Confirmed" until the
+            // provider says otherwise — and the only way to say so was a "…"
+            // menu. Seen in seed data: one sat confirmed for nearly a month.
+            // Completing it is what lets the customer leave a review.
+            const isOverdue =
+              !isCustomerOnly &&
+              booking.status === "CONFIRMED" &&
+              new Date(booking.date).getTime() + DAY_MS < now;
 
             return (
               <div
                 key={booking.id}
-                className="grid grid-cols-[1.2fr_1.2fr_1.4fr_0.8fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-4 text-body-md last:border-b-0"
+                className={cn(
+                  ROW_GRID,
+                  "border-b border-border-subtle px-5 py-4 text-body-md last:border-b-0",
+                )}
               >
                 <div className="flex items-center gap-2">
                   <Avatar className="size-7">
@@ -218,29 +248,57 @@ export function BookingsClient({
                     ? formatCurrency(booking.totalPrice, booking.currency)
                     : "—"}
                 </span>
-                <Badge variant={statusVariant}>
-                  {t(`status.${booking.status}`)}
-                </Badge>
+                <div className="flex flex-col items-start gap-1">
+                  <Badge variant={statusVariant}>
+                    {t(`status.${booking.status}`)}
+                  </Badge>
+                  {isOverdue ? (
+                    <span className="text-body-sm text-warning">
+                      {t("needsCompletion")}
+                    </span>
+                  ) : null}
+                </div>
 
                 <div className="flex justify-end gap-2">
-                  {booking.status === "PENDING" && !isCustomerOnly ? (
+                  {/* Details on every row. Only pending and confirmed
+                      bookings used to have a way in, so a provider could
+                      not open a completed, cancelled or expired booking
+                      from their own list — and the row, missing its
+                      buttons, also knocked every column out of line. */}
+                  {!isCustomerOnly ? (
                     <>
-                      <Button
-                        size="sm"
-                        variant="accent"
-                        disabled={isBusy}
-                        onClick={() => updateStatus(booking.id, "CONFIRMED")}
-                      >
-                        {t("accept")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={isBusy}
-                        onClick={() => updateStatus(booking.id, "DECLINED")}
-                      >
-                        {t("decline")}
-                      </Button>
+                      {booking.status === "PENDING" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="accent"
+                            disabled={isBusy}
+                            onClick={() =>
+                              updateStatus(booking.id, "CONFIRMED")
+                            }
+                          >
+                            {t("accept")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={isBusy}
+                            onClick={() => updateStatus(booking.id, "DECLINED")}
+                          >
+                            {t("decline")}
+                          </Button>
+                        </>
+                      ) : null}
+                      {isOverdue ? (
+                        <Button
+                          size="sm"
+                          variant="accent"
+                          disabled={isBusy}
+                          onClick={() => updateStatus(booking.id, "COMPLETED")}
+                        >
+                          {t("completeShort")}
+                        </Button>
+                      ) : null}
                       <Button
                         size="sm"
                         variant="secondary"
@@ -251,47 +309,38 @@ export function BookingsClient({
                       >
                         {t("details")}
                       </Button>
-                    </>
-                  ) : null}
-
-                  {booking.status === "CONFIRMED" && !isCustomerOnly ? (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        nativeButton={false}
-                        render={
-                          <Link href={`/dashboard/bookings/${booking.id}`} />
-                        }
-                      >
-                        {t("details")}
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={
-                            <Button size="icon-sm" variant="ghost">
-                              <MoreHorizontal className="size-4" />
-                            </Button>
-                          }
-                        />
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() =>
-                              updateStatus(booking.id, "COMPLETED")
+                      {booking.status === "CONFIRMED" ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            render={
+                              <Button
+                                size="icon-sm"
+                                variant="ghost"
+                                aria-label={t("moreActions")}
+                              >
+                                <MoreHorizontal className="size-4" />
+                              </Button>
                             }
-                          >
-                            {t("markComplete")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() =>
-                              updateStatus(booking.id, "CANCELLED")
-                            }
-                          >
-                            {t("cancel")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          />
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                updateStatus(booking.id, "COMPLETED")
+                              }
+                            >
+                              {t("markComplete")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() =>
+                                updateStatus(booking.id, "CANCELLED")
+                              }
+                            >
+                              {t("cancel")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : null}
                     </>
                   ) : null}
 

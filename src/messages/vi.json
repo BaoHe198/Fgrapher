@@ -1547,7 +1547,10 @@
       "unknownParty": "Không xác định",
       "previous": "Trước",
       "next": "Sau",
-      "pageOf": "Trang {page} / {total}"
+      "pageOf": "Trang {page} / {total}",
+      "needsCompletion": "Đã qua ngày chụp",
+      "moreActions": "Thao tác khác",
+      "completeShort": "Hoàn tất"
     },
     "portfolio": {
       "proOnly": {

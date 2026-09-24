@@ -1547,7 +1547,10 @@
       "unknownParty": "Unknown",
       "previous": "Previous",
       "next": "Next",
-      "pageOf": "Page {page} of {total}"
+      "pageOf": "Page {page} of {total}",
+      "needsCompletion": "Shoot date has passed",
+      "moreActions": "More actions",
+      "completeShort": "Complete"
     },
     "portfolio": {
       "proOnly": {
