@@ -1248,3 +1248,49 @@ export async function moderateMedia({
 
   return mediaIds.length;
 }
+
+/**
+ * Items waiting on an admin, per sidebar section.
+ *
+ * The admin sidebar used to be a plain list of links: four portfolio photos
+ * could sit past their 24-hour moderation target with nothing outside the
+ * moderation page saying so. Each count mirrors the filter of the list its
+ * page shows, restricted to what an admin can act on — MoMo/ZaloPay
+ * payments still pending are shown on the payments page for monitoring
+ * only, so they are not counted.
+ */
+export async function getAdminQueueCounts() {
+  const [
+    reports,
+    verifications,
+    roleChangeRequests,
+    payments,
+    portfolioMedia,
+    postMedia,
+    productImages,
+    serviceRequests,
+  ] = await Promise.all([
+    db.report.count({ where: { status: "PENDING" } }),
+    db.userRole.count({ where: { verificationStatus: "PENDING" } }),
+    db.roleChangeRequest.count({ where: { status: "PENDING" } }),
+    db.payment.count({ where: { status: "AWAITING_REVIEW" } }),
+    db.profileMedia.count({ where: { moderationStatus: "PENDING" } }),
+    db.postMedia.count({
+      where: { moderationStatus: "PENDING", post: { deletedAt: null } },
+    }),
+    db.productImage.count({ where: { moderationStatus: "PENDING" } }),
+    db.serviceRequest.count({
+      where: { isDraft: false, status: "PENDING_REVIEW" },
+    }),
+  ]);
+  return {
+    reports,
+    verifications,
+    roleChangeRequests,
+    payments,
+    moderation: portfolioMedia + postMedia + productImages,
+    serviceRequests,
+  };
+}
+
+export type AdminQueueCounts = Awaited<ReturnType<typeof getAdminQueueCounts>>;

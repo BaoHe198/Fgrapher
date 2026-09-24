@@ -27,6 +27,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import type { AdminQueueCounts } from "@/services/admin";
 
 const ITEMS = [
   { href: "/admin", key: "overview", icon: LayoutDashboard },
@@ -48,7 +49,9 @@ const ITEMS = [
   },
 ] as const;
 
-export function AdminSidebar() {
+type QueueKey = keyof AdminQueueCounts;
+
+export function AdminSidebar({ counts }: { counts: AdminQueueCounts }) {
   const t = useTranslations("accountFlows.admin.sidebar");
   const pathname = usePathname();
 
@@ -70,6 +73,11 @@ export function AdminSidebar() {
           >
             <Icon className="size-[18px]" />
             {t(key)}
+            {key in counts && counts[key as QueueKey] > 0 ? (
+              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-sm font-bold text-white">
+                {counts[key as QueueKey]}
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -82,7 +90,7 @@ export function AdminSidebar() {
 // no mobile navigation at all below lg (aside is hidden, no trigger of
 // any kind), leaving every /admin/* page below 1024px with no way to
 // move between sections.
-export function MobileAdminSidebar() {
+export function MobileAdminSidebar({ counts }: { counts: AdminQueueCounts }) {
   const t = useTranslations("accountFlows.admin.sidebar");
   const [open, setOpen] = useState(false);
 
@@ -102,7 +110,7 @@ export function MobileAdminSidebar() {
           <SheetDescription>{t("menuDescription")}</SheetDescription>
         </SheetHeader>
         <div className="p-4" onClick={() => setOpen(false)}>
-          <AdminSidebar />
+          <AdminSidebar counts={counts} />
         </div>
       </SheetContent>
     </Sheet>

@@ -954,6 +954,7 @@
         "rejectedToast": "Request rejected",
         "reviewFailed": "Couldn't review the request",
         "hoursOpen": "{hours}h with no offers",
+        "daysOpen": "{days, plural, one {# day} other {# days}} without an offer",
         "budgetNotSet": "No budget set"
       },
       "payments": {

@@ -112,7 +112,7 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-3">
                       <Link
                         href={`/admin/users/${user.id}`}
-                        className="font-semibold text-text-primary"
+                        className="font-semibold text-text-primary underline-offset-2 hover:underline"
                       >
                         {user.firstName ?? user.name ?? "—"}
                       </Link>
@@ -121,7 +121,19 @@ export default function AdminUsersPage() {
                       {user.email}
                     </td>
                     <td className="px-3 py-3 text-text-secondary">
-                      {user.roles.map((r) => roleT(r.role)).join(", ") || "—"}
+                      {/* The role that says what someone does first,
+                          CUSTOMER — which every account has — last. The
+                          database order put it first on some rows and last
+                          on others, so the column had to be read, not
+                          scanned. */}
+                      {[...user.roles]
+                        .sort(
+                          (a, b) =>
+                            Number(a.role === "CUSTOMER") -
+                            Number(b.role === "CUSTOMER"),
+                        )
+                        .map((r) => roleT(r.role))
+                        .join(", ") || "—"}
                     </td>
                     <td className="px-3 py-3 text-text-secondary">
                       {formatDate(user.createdAt)}

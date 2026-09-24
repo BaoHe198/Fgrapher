@@ -719,9 +719,9 @@
         "reports": "Báo cáo",
         "verifications": "Xác minh",
         "roleChangeRequests": "Đổi vai trò",
-        "moderation": "Kiểm duyệt",
+        "moderation": "Duyệt ảnh",
         "compliance": "Tuân thủ dữ liệu",
-        "serviceRequests": "Kiểm duyệt yêu cầu",
+        "serviceRequests": "Duyệt yêu cầu",
         "payments": "Thanh toán",
         "openMenu": "Mở menu quản trị",
         "menuTitle": "Menu quản trị",
@@ -954,6 +954,7 @@
         "rejectedToast": "Đã từ chối yêu cầu",
         "reviewFailed": "Không thể xử lý yêu cầu",
         "hoursOpen": "{hours} giờ chưa ai nhận",
+        "daysOpen": "{days} ngày chưa ai nhận",
         "budgetNotSet": "Chưa đặt ngân sách"
       },
       "payments": {

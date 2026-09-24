@@ -142,7 +142,13 @@ export default async function AdminServiceRequestsPage() {
                         hoursSincePosted >= 48 ? "destructive" : "warning"
                       }
                     >
-                      {t("hoursOpen", { hours: hoursSincePosted })}
+                      {/* "164 giờ" has to be worked out; "6 ngày" doesn't.
+                          Hours still read better inside the first two days. */}
+                      {hoursSincePosted >= 48
+                        ? t("daysOpen", {
+                            days: Math.floor(hoursSincePosted / 24),
+                          })
+                        : t("hoursOpen", { hours: hoursSincePosted })}
                     </Badge>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-body-sm text-text-secondary">

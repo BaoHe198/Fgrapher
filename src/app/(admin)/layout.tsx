@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/admin";
 import { auth } from "@/lib/auth";
 import { AuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { getAdminQueueCounts } from "@/services/admin";
 
 import { AdminSidebar, MobileAdminSidebar } from "./admin-sidebar";
 
@@ -49,7 +50,10 @@ export default async function AdminLayout({
     notFound();
   }
 
-  const t = await getTranslations("accountFlows.admin.layout");
+  const [t, queueCounts] = await Promise.all([
+    getTranslations("accountFlows.admin.layout"),
+    getAdminQueueCounts(),
+  ]);
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg-sunken">
@@ -68,12 +72,12 @@ export default async function AdminLayout({
 
       <div className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-8">
         <div className="mb-4 lg:hidden">
-          <MobileAdminSidebar />
+          <MobileAdminSidebar counts={queueCounts} />
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_1fr]">
           <aside className="hidden lg:block">
-            <AdminSidebar />
+            <AdminSidebar counts={queueCounts} />
           </aside>
           <div className="min-w-0">{children}</div>
         </div>
