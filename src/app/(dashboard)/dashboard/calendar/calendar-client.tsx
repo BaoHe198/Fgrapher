@@ -243,7 +243,15 @@ export function CalendarClient({
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-4 text-body-sm text-text-secondary">
+      {/* The legend explains the month grid's markers; the agenda list
+          (the default below lg) draws none of them, so there it only
+          described things that weren't on screen. */}
+      <div
+        className={cn(
+          "flex flex-wrap items-center gap-4 text-body-sm text-text-secondary",
+          view === "AGENDA" && "hidden",
+        )}
+      >
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-success" />
           {t("legend.booked")}

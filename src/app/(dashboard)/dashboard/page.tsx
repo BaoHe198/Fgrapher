@@ -306,7 +306,9 @@ export default async function DashboardPage() {
       </div>
 
       <div
-        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${
+        // Two up from the smallest screen: one card per row put four
+        // numbers in ~500px on a phone, above anything to act on.
+        className={`grid grid-cols-2 gap-3 sm:gap-4 ${
           statCards.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
         }`}
       >
@@ -319,7 +321,7 @@ export default async function DashboardPage() {
               <span className="text-body-sm text-text-secondary">
                 {stat.label}
               </span>
-              <span className="text-display-md text-text-primary">
+              <span className="text-heading-lg break-words text-text-primary sm:text-display-md">
                 {stat.value}
               </span>
             </Card>
