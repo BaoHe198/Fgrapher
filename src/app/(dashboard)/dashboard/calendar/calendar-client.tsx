@@ -183,7 +183,11 @@ export function CalendarClient({
     ),
   ];
 
-  const todayKey = dateKey(new Date());
+  // Vietnam's today, not UTC's. dateKey() is toISOString-based, so from
+  // midnight to 07:00 in Vietnam the highlighted "today" was yesterday.
+  const todayKey = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+  }).format(new Date());
 
   const changeMonth = (delta: number) => {
     setMonthCursor(
@@ -249,7 +253,7 @@ export function CalendarClient({
           {t("legend.blocked")}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full border border-border-default" />
+          <span className="size-2 rounded-full border border-success" />
           {t("legend.open")}
         </span>
         <span className="flex items-center gap-1.5">
@@ -287,6 +291,16 @@ export function CalendarClient({
               const dayBookings = byDate.get(key) ?? [];
               const blocked = blockedByDate.get(key);
               const noWorkingHours = !workingWeekdays.has(date.getUTCDay());
+              const isPast = key < todayKey;
+              // The legend has always promised an "open" marker, but no cell
+              // ever drew one: a working day with nothing booked rendered as
+              // a blank square, so a quiet month looked like a calendar that
+              // had failed to load.
+              const isOpen =
+                !isPast &&
+                !blocked &&
+                !noWorkingHours &&
+                dayBookings.length === 0;
               return (
                 <div
                   key={key}
@@ -307,9 +321,22 @@ export function CalendarClient({
                   )}
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span className="text-body-sm font-semibold! text-text-primary">
+                    <span
+                      className={cn(
+                        "text-body-sm font-semibold!",
+                        // Past days recede so the eye lands on what is
+                        // still to come; they stay clickable for history.
+                        isPast ? "text-text-tertiary" : "text-text-primary",
+                      )}
+                    >
                       {date.getUTCDate()}
                     </span>
+                    {isOpen ? (
+                      <span
+                        aria-hidden
+                        className="size-2 shrink-0 rounded-full border border-success"
+                      />
+                    ) : null}
                     {/* Text pills hidden below sm — a 7-col grid cell on a
                         real phone has no room for a date number plus a
                         multi-word pill (QA: "rất chật"). The cell's own
