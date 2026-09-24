@@ -357,34 +357,35 @@ export function RolesSettings({
             const Icon = ROLE_ICONS[role];
             const isActivating = activatingRole === role;
             return (
-              <Card
-                key={role}
-                className="flex-row items-center justify-between gap-4"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <Icon className="size-5 shrink-0 text-text-tertiary" />
-                  <div className="flex min-w-0 flex-col">
-                    <p className="text-body-md font-semibold! text-text-primary">
+              // The button sits beside the name, not beside the whole
+              // block, so the description gets the full width on phones
+              // instead of wrapping into a narrow column next to it.
+              <Card key={role} className="flex-row items-start gap-3">
+                <Icon className="mt-1.5 size-5 shrink-0 text-text-tertiary" />
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="min-w-0 text-body-md font-semibold! text-text-primary">
                       {roleT(role)}
                     </p>
-                    <p className="text-body-sm text-text-secondary">
-                      {roleSelectionT(
-                        `${ROLE_DESCRIPTION_KEY[role]}.description`,
-                      )}
-                    </p>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="shrink-0"
+                      disabled={activatingRole !== null}
+                      onClick={() => activateRole(role)}
+                    >
+                      {isActivating ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : null}
+                      {t("activate")}
+                    </Button>
                   </div>
+                  <p className="text-body-sm text-text-secondary">
+                    {roleSelectionT(
+                      `${ROLE_DESCRIPTION_KEY[role]}.description`,
+                    )}
+                  </p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={activatingRole !== null}
-                  onClick={() => activateRole(role)}
-                >
-                  {isActivating ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : null}
-                  {t("activate")}
-                </Button>
               </Card>
             );
           })}

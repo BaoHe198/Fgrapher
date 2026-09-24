@@ -61,10 +61,12 @@ export default async function AdminLayout({
         <span className="rounded bg-danger px-1.5 py-0.5 text-sm font-bold tracking-wide text-text-on-brand uppercase">
           {t("badge")}
         </span>
-        <span className="text-neutral-300">{t("subtitle")}</span>
+        <span className="hidden truncate text-neutral-300 sm:inline">
+          {t("subtitle")}
+        </span>
         <Link
           href="/dashboard"
-          className="ml-auto text-neutral-300 hover:text-white"
+          className="ml-auto whitespace-nowrap text-neutral-300 hover:text-white"
         >
           {t("exitAdmin")}
         </Link>

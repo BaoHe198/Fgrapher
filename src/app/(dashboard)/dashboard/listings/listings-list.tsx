@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, MoreHorizontal, ShoppingBag } from "lucide-react";
+import { Loader2, MoreHorizontal, Pencil, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -60,6 +60,24 @@ function priceLabel(
   return formatCurrency(product.price ?? 0, product.currency);
 }
 
+// The same prices as separate unbreakable pieces, for the narrow phone row:
+// "12.000.000₫ · 500.000₫/ngày" as one string broke wherever it hit the
+// edge, splitting an amount from its "/ngày".
+function priceParts(
+  product: ProductRow,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (product.type === "BOTH") {
+    return [
+      formatCurrency(product.price ?? 0, product.currency),
+      t("priceRental", {
+        price: formatCurrency(product.rentalPrice ?? 0, product.currency),
+      }),
+    ];
+  }
+  return [priceLabel(product, t)];
+}
+
 export function ListingsList() {
   const t = useTranslations("dashboardCore.listings");
   const FILTERS: { value: ListingFilter; label: string }[] = FILTER_VALUES.map(
@@ -100,7 +118,9 @@ export function ListingsList() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap gap-2">
+      {/* One row that scrolls sideways on phones, like the other chip
+          rows, instead of dropping "Hết hàng" onto a line of its own. */}
+      <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0">
         {FILTERS.map((f) => (
           <Tag
             key={f.value}
@@ -139,7 +159,10 @@ export function ListingsList() {
             return (
               <div
                 key={product.id}
-                className="flex items-center gap-4 border-b border-border-subtle px-5 py-4 last:border-b-0"
+                // Phones: badge and price move under the name, which gets the
+                // row's width; as five columns a product name was squeezed
+                // to ~60px (five lines) and the price ran off the screen.
+                className="flex items-center gap-3 border-b border-border-subtle px-4 py-4 last:border-b-0 sm:gap-4 sm:px-5"
               >
                 <div className="relative size-16 shrink-0 overflow-hidden rounded-lg">
                   {product.images[0] ? (
@@ -155,8 +178,8 @@ export function ListingsList() {
                   )}
                 </div>
 
-                <div className="flex-1">
-                  <p className="text-heading-sm text-text-primary">
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-heading-sm text-text-primary">
                     {product.name}
                   </p>
                   {product.images[0] &&
@@ -170,10 +193,26 @@ export function ListingsList() {
                       ? t("inStock", { count: product.stock })
                       : t("outOfStock")}
                   </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 sm:hidden">
+                    <Badge variant={badge.variant}>{badge.label}</Badge>
+                    {priceParts(product, t).map((part) => (
+                      <span
+                        key={part}
+                        className="text-body-sm font-semibold! whitespace-nowrap text-text-primary"
+                      >
+                        {part}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                <Badge variant={badge.variant}>{badge.label}</Badge>
-                <span className="text-body-md font-semibold! text-text-primary">
+                <Badge
+                  variant={badge.variant}
+                  className="hidden sm:inline-flex"
+                >
+                  {badge.label}
+                </Badge>
+                <span className="hidden text-body-md font-semibold! whitespace-nowrap text-text-primary sm:block">
                   {priceLabel(product, t)}
                 </span>
 
@@ -185,13 +224,19 @@ export function ListingsList() {
                     <Link href={`/dashboard/listings/${product.id}/edit`} />
                   }
                 >
-                  {t("edit")}
+                  {/* Phones: a pencil, so the name gets the room. */}
+                  <Pencil className="size-4 sm:hidden" aria-hidden />
+                  <span className="sr-only sm:not-sr-only">{t("edit")}</span>
                 </Button>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
-                      <Button size="icon-sm" variant="ghost">
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        aria-label={t("moreActions")}
+                      >
                         <MoreHorizontal className="size-4" />
                       </Button>
                     }

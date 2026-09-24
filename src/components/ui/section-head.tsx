@@ -23,12 +23,14 @@ function SectionHead({
   as: Heading = "h2",
 }: SectionHeadProps) {
   return (
-    <div className={cn("mb-5 flex items-center justify-between", className)}>
+    <div
+      className={cn("mb-5 flex items-center justify-between gap-4", className)}
+    >
       <Heading className="text-display-md text-text-primary">{title}</Heading>
       {actionLabel && actionHref ? (
         <Link
           href={actionHref}
-          className="text-body-md font-semibold! text-text-link"
+          className="shrink-0 text-body-md font-semibold! whitespace-nowrap text-text-link"
         >
           {actionLabel}
         </Link>

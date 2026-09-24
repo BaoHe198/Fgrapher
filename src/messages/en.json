@@ -1900,7 +1900,8 @@
         "costumeShopCta": "Manage outfits"
       },
       "pageTitle": "Listings",
-      "photoPending": "Photo awaiting moderation"
+      "photoPending": "Photo awaiting moderation",
+      "moreActions": "More actions"
     },
     "home": {
       "greeting": {

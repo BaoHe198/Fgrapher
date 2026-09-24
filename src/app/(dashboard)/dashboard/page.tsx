@@ -317,7 +317,7 @@ export default async function DashboardPage() {
           BILLING_ENABLED=false since that Checkout route itself 404s. */}
       {features.billingEnabled ? <CheckoutSuccessToast /> : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-display-md text-text-primary">
+        <h1 className="text-heading-lg text-text-primary sm:text-display-md">
           {greeting(firstName, t)}
         </h1>
         {isProvider ? (
@@ -336,7 +336,7 @@ export default async function DashboardPage() {
           const card = (
             <Card
               interactive={Boolean(stat.href)}
-              className="flex h-full flex-col gap-1.5"
+              className="flex h-full flex-col gap-1.5 [--card-spacing:--spacing(4)] sm:[--card-spacing:--spacing(5)]"
             >
               <span className="text-body-sm text-text-secondary">
                 {stat.label}
@@ -448,11 +448,15 @@ export default async function DashboardPage() {
                   className="flex items-center gap-3 px-5 py-3.5 transition-colors duration-150 hover:bg-bg-sunken focus-visible:bg-bg-sunken focus-visible:ring-2 focus-visible:ring-gold-500/40 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   <Icon className="size-4 shrink-0 text-text-tertiary" />
-                  <span className="flex-1 text-body-md text-text-primary">
-                    {activityText(item, t, bookingStatusT, orderStatusT)}
-                  </span>
-                  <span className="text-body-sm text-text-tertiary">
-                    {formatRelativeTime(item.timestamp)}
+                  {/* Phones: the time goes under the text, so the text gets
+                      the full width instead of wrapping beside it. */}
+                  <span className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-center sm:gap-3">
+                    <span className="min-w-0 flex-1 text-body-md text-text-primary">
+                      {activityText(item, t, bookingStatusT, orderStatusT)}
+                    </span>
+                    <span className="text-body-sm whitespace-nowrap text-text-tertiary">
+                      {formatRelativeTime(item.timestamp)}
+                    </span>
                   </span>
                   <ChevronRight className="size-4 shrink-0 text-text-tertiary" />
                 </Link>

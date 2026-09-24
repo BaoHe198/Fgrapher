@@ -192,12 +192,30 @@ export function AlbumGrid({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Phones: the count and the trash link share the first line, the two
+          main actions split the second evenly. Wrapping freely, "Tải ảnh
+          lên" used to drop onto a line of its own. */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-body-sm text-text-secondary">
-          {t("albumCount", { count: albums.length })}
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setTrashOpen(true)}>
+        <div className="flex items-center justify-between gap-2 sm:justify-start">
+          <p className="text-body-sm text-text-secondary">
+            {t("albumCount", { count: albums.length })}
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="sm:hidden"
+            onClick={() => setTrashOpen(true)}
+          >
+            {t("trashButton")}
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex"
+            onClick={() => setTrashOpen(true)}
+          >
             {t("trashButton")}
           </Button>
           <Button variant="accent" size="sm" onClick={() => setFormOpen(true)}>

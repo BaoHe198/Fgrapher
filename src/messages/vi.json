@@ -585,7 +585,7 @@
       "iAmA": "Tôi là",
       "customerLabel": "Khách hàng",
       "customerDesc": "Đặt lịch nghệ sĩ và mua thiết bị",
-      "providerLabel": "Nhà sáng tạo chuyên nghiệp",
+      "providerLabel": "Nhà sáng tạo",
       "providerDesc": "Nhận đặt lịch và bán hàng",
       "whatDoYouOffer": "Bạn cung cấp dịch vụ gì?",
       "changeLaterNote": "Bạn có thể thay đổi sau. Quyền truy cập của khách hàng luôn miễn phí.",
@@ -1900,7 +1900,8 @@
         "costumeShopCta": "Quản lý trang phục"
       },
       "pageTitle": "Sản phẩm",
-      "photoPending": "Ảnh đang chờ kiểm duyệt"
+      "photoPending": "Ảnh đang chờ kiểm duyệt",
+      "moreActions": "Thêm thao tác"
     },
     "home": {
       "greeting": {
@@ -1919,7 +1920,7 @@
         "savedArtists": "Nghệ sĩ đã lưu",
         "messages": "Tin nhắn",
         "orders": "Đơn hàng",
-        "activeCostumes": "Trang phục đang cho thuê",
+        "activeCostumes": "Trang phục cho thuê",
         "ordersToHandle": "Đơn cần xử lý",
         "activeListings": "Tin đăng đang bán"
       },

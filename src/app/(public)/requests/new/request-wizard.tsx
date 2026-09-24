@@ -628,7 +628,6 @@ export function RequestWizard({
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
-            size="sm"
             disabled={isSavingDraft}
             onClick={saveDraft}
           >

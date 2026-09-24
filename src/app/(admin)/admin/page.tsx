@@ -77,13 +77,21 @@ export default async function AdminOverviewPage() {
     <div className="flex flex-col gap-6">
       <h1 className="text-display-md text-text-primary">{t("title")}</h1>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Two columns even on phones: one card per row made the overview
+          four screens long. The value steps down a size there so an
+          amount like "50.000.000₫" still fits half the width. */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {metrics.map((m) => (
-          <Card key={m.label} className="flex flex-col gap-1">
+          <Card
+            key={m.label}
+            className="flex flex-col gap-1 [--card-spacing:--spacing(4)] sm:[--card-spacing:--spacing(5)]"
+          >
             <span className="text-body-sm text-text-tertiary">{m.label}</span>
-            <span className="text-heading-lg text-text-primary">{m.value}</span>
-            <span className="flex items-center gap-1 text-body-sm text-text-secondary">
-              <TrendingUp className="size-3.5" />
+            <span className="text-heading-md whitespace-nowrap text-text-primary tabular-nums sm:text-heading-lg">
+              {m.value}
+            </span>
+            <span className="flex items-start gap-1 text-body-sm text-text-secondary">
+              <TrendingUp className="mt-1 size-3.5 shrink-0" />
               {m.sub}
             </span>
           </Card>
@@ -121,12 +129,12 @@ export default async function AdminOverviewPage() {
             activity.map((event) => (
               <div
                 key={`${event.type}-${event.id}`}
-                className="flex items-center justify-between border-b border-border-subtle px-5 py-3 last:border-b-0"
+                className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-3 last:border-b-0 sm:px-5"
               >
-                <span className="text-body-sm text-text-primary">
+                <span className="min-w-0 text-body-sm text-text-primary">
                   {event.label}
                 </span>
-                <span className="text-body-sm text-text-tertiary">
+                <span className="shrink-0 text-body-sm whitespace-nowrap text-text-tertiary">
                   {formatDateTime(event.timestamp)}
                 </span>
               </div>
