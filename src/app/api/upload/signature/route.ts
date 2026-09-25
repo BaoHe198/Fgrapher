@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth, requirePaidRole } from "@/lib/auth-helpers";
 import {
@@ -46,7 +47,9 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "cloudinary_not_configured",
-          message: "Media uploads are not configured for this environment yet",
+          message: (await getTranslations("apiMessages.uploads"))(
+            "mediaNotConfigured",
+          ),
         },
         { status: 503 },
       );
@@ -72,7 +75,9 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "server_error",
-        message: "Failed to generate upload signature",
+        message: (await getTranslations("apiMessages.uploads"))(
+          "signatureFailed",
+        ),
       },
       { status: 500 },
     );

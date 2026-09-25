@@ -8,13 +8,6 @@ import { db } from "@/lib/db";
 
 import { VerificationForm } from "./verification-form";
 
-const STATUS_LABELS: Record<string, string> = {
-  UNVERIFIED: "Not started",
-  PENDING: "Under review",
-  VERIFIED: "Verified",
-  REJECTED: "Needs resubmission",
-};
-
 export default async function OnboardingVerificationPage({
   searchParams,
 }: {
@@ -26,6 +19,10 @@ export default async function OnboardingVerificationPage({
   }
 
   const roleT = await getTranslations("role");
+  // These two screens were hardcoded English inside the Vietnamese app.
+  const t = await getTranslations(
+    "accountFlows.onboarding.verification.picker",
+  );
   const { role: roleParam } = await searchParams;
 
   const roles = await db.userRole.findMany({
@@ -42,17 +39,14 @@ export default async function OnboardingVerificationPage({
     return (
       <div className="mx-auto flex min-h-full max-w-lg flex-col items-center justify-center gap-3 px-6 py-16 text-center">
         <h1 className="text-display-md text-text-primary">
-          No provider role yet
+          {t("noRoleTitle")}
         </h1>
-        <p className="text-body-md text-text-secondary">
-          Add a provider role first, then come back here to verify your
-          identity.
-        </p>
+        <p className="text-body-md text-text-secondary">{t("noRoleBody")}</p>
         <Link
           href="/dashboard/settings/roles"
           className="text-text-link hover:underline"
         >
-          Manage roles
+          {t("manageRoles")}
         </Link>
       </div>
     );
@@ -64,12 +58,8 @@ export default async function OnboardingVerificationPage({
     return (
       <div className="mx-auto flex min-h-full max-w-lg flex-col justify-center gap-5 px-6 py-16">
         <div className="flex flex-col gap-2 text-center">
-          <h1 className="text-display-md text-text-primary">
-            Verify your identity
-          </h1>
-          <p className="text-body-md text-text-secondary">
-            Choose which role to verify.
-          </p>
+          <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+          <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
         </div>
         <div className="flex flex-col gap-2.5">
           {roles.map((r) => (
@@ -82,7 +72,7 @@ export default async function OnboardingVerificationPage({
                 {roleT(r.role)}
               </span>
               <span className="text-body-sm text-text-secondary">
-                {STATUS_LABELS[r.verificationStatus]}
+                {t(`status.${r.verificationStatus}`)}
               </span>
             </Link>
           ))}

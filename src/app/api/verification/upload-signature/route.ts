@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import {
@@ -15,8 +16,9 @@ export async function POST() {
         {
           data: null,
           error: "cloudinary_not_configured",
-          message:
-            "Document uploads are not configured for this environment yet",
+          message: (await getTranslations("apiMessages.uploads"))(
+            "documentsNotConfigured",
+          ),
         },
         { status: 503 },
       );
@@ -40,7 +42,9 @@ export async function POST() {
       {
         data: null,
         error: "server_error",
-        message: "Failed to generate upload signature",
+        message: (await getTranslations("apiMessages.uploads"))(
+          "signatureFailed",
+        ),
       },
       { status: 500 },
     );

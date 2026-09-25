@@ -661,6 +661,19 @@
         "subtitle": "Pick every role that fits — you can always add more later. Customer is included by default so you can always book and browse."
       },
       "verification": {
+        "picker": {
+          "noRoleTitle": "No provider role yet",
+          "noRoleBody": "Add a provider role first, then come back here to verify your identity.",
+          "manageRoles": "Manage roles",
+          "title": "Verify your identity",
+          "subtitle": "Choose which role to verify.",
+          "status": {
+            "UNVERIFIED": "Not started",
+            "PENDING": "Under review",
+            "VERIFIED": "Verified",
+            "REJECTED": "Needs resubmission"
+          }
+        },
         "statusNotStarted": "Not started",
         "statusPending": "Under review",
         "statusVerified": "Verified",
@@ -777,6 +790,17 @@
         "scrollHint": "Swipe to see more columns"
       },
       "userDetail": {
+        "manualPlan": {
+          "title": "Assign a plan manually",
+          "hint": "Grants or extends a plan while online payment is off. Every assignment is recorded in the admin log.",
+          "role": "Role",
+          "name": "Plan name",
+          "expiresAt": "Expires",
+          "notePlaceholder": "Reason (saved to the admin log)",
+          "save": "Save plan",
+          "until": "{plan} plan · until {date}"
+        },
+        "actionFailed": "Couldn't complete that, please try again",
         "backToUsers": "Back to users",
         "suspendedBadge": "Suspended",
         "verifiedBadge": "Verified",
@@ -1025,6 +1049,11 @@
     }
   },
   "apiMessages": {
+    "uploads": {
+      "documentsNotConfigured": "Document uploads aren't available right now. Please try again later or contact support.",
+      "mediaNotConfigured": "Photo uploads aren't available right now. Please try again later or contact support.",
+      "signatureFailed": "Couldn't prepare the upload, please try again."
+    },
     "comments": {
       "deleted": "Comment deleted",
       "notYours": "You can only delete your own comments, or comments on your own post",

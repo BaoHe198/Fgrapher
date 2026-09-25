@@ -166,7 +166,10 @@ function DataRequestsPanel() {
             return (
               <Card key={r.id} className="flex flex-col gap-2.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                  {/* Wraps: on a phone the badge, name and a long
+                      (anonymised) email squeezed the name into a 47px
+                      column, four lines tall. */}
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                     <Badge
                       variant={
                         r.type === "DELETION" ? "destructive" : "neutral"
@@ -180,7 +183,7 @@ function DataRequestsPanel() {
                         r.user?.email ??
                         t("unknownUser")}
                     </span>
-                    <span className="text-body-sm text-text-tertiary">
+                    <span className="min-w-0 text-body-sm break-all text-text-tertiary">
                       {r.user?.email}
                     </span>
                   </div>

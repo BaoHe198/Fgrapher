@@ -289,6 +289,9 @@ export function RegisterForm({
             "grid transition-[grid-template-rows] duration-300 ease-out",
             accountType === "provider" ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
           )}
+          // Collapsed by height only, these fields were still reachable with
+          // Tab and read out by screen readers while invisible.
+          inert={accountType !== "provider"}
         >
           <div className="flex flex-col gap-2 overflow-hidden">
             <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
@@ -322,6 +325,7 @@ export function RegisterForm({
             "grid transition-[grid-template-rows] duration-300 ease-out",
             isModelSelected ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
           )}
+          inert={!isModelSelected}
         >
           <div className="flex flex-col gap-3 overflow-hidden">
             <Checkbox

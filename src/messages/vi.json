@@ -661,6 +661,19 @@
         "subtitle": "Chọn mọi vai trò phù hợp với bạn — bạn luôn có thể thêm sau. Vai trò khách hàng luôn được bao gồm mặc định để bạn có thể đặt lịch và duyệt xem."
       },
       "verification": {
+        "picker": {
+          "noRoleTitle": "Bạn chưa có vai trò nhà cung cấp",
+          "noRoleBody": "Hãy thêm một vai trò nhà cung cấp trước, rồi quay lại đây để xác minh danh tính.",
+          "manageRoles": "Quản lý vai trò",
+          "title": "Xác minh danh tính",
+          "subtitle": "Chọn vai trò bạn muốn xác minh.",
+          "status": {
+            "UNVERIFIED": "Chưa bắt đầu",
+            "PENDING": "Đang xét duyệt",
+            "VERIFIED": "Đã xác minh",
+            "REJECTED": "Cần gửi lại"
+          }
+        },
         "statusNotStarted": "Chưa bắt đầu",
         "statusPending": "Đang xem xét",
         "statusVerified": "Đã xác minh",
@@ -777,6 +790,17 @@
         "scrollHint": "Vuốt ngang để xem thêm cột"
       },
       "userDetail": {
+        "manualPlan": {
+          "title": "Gán gói thủ công",
+          "hint": "Dùng để cấp hoặc gia hạn gói cho một tài khoản khi chưa thu phí trực tuyến. Mọi lần gán đều được ghi vào nhật ký quản trị.",
+          "role": "Vai trò",
+          "name": "Tên gói",
+          "expiresAt": "Hết hạn",
+          "notePlaceholder": "Lý do (được lưu vào nhật ký quản trị)",
+          "save": "Lưu gói",
+          "until": "Gói {plan} · đến {date}"
+        },
+        "actionFailed": "Không thực hiện được, vui lòng thử lại",
         "backToUsers": "Quay lại danh sách người dùng",
         "suspendedBadge": "Đã tạm khóa",
         "verifiedBadge": "Đã xác minh",
@@ -1025,6 +1049,11 @@
     }
   },
   "apiMessages": {
+    "uploads": {
+      "documentsNotConfigured": "Hiện chưa thể tải ảnh giấy tờ lên. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
+      "mediaNotConfigured": "Hiện chưa thể tải ảnh lên. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
+      "signatureFailed": "Không thể chuẩn bị tải ảnh lên, vui lòng thử lại."
+    },
     "comments": {
       "deleted": "Đã xóa bình luận",
       "notYours": "Bạn chỉ xóa được bình luận của mình hoặc bình luận trên bài của mình",

@@ -17,11 +17,15 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
       </header>
 
       <div className="grid min-h-[calc(100vh-72px)] lg:grid-cols-2">
-        <div className="flex items-center justify-center px-5 py-10 sm:px-8 sm:py-14">
+        {/* The page's main landmark — the skip link had no target here. */}
+        <main
+          id="main-content"
+          className="flex items-center justify-center px-5 py-10 sm:px-8 sm:py-14"
+        >
           <div className="flex w-full max-w-[400px] flex-col gap-[22px]">
             {children}
           </div>
-        </div>
+        </main>
 
         <div className="relative hidden items-end bg-green-900 p-10 lg:flex">
           <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 opacity-50">

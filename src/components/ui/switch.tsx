@@ -40,7 +40,7 @@ function Switch({
       <span
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute inset-0 rounded-full bg-neutral-300 transition-[background-color,box-shadow] duration-150 peer-hover:bg-neutral-400 peer-hover:shadow-[0_0_0_3px_var(--color-success-bg)] peer-checked:bg-brand-primary peer-checked:peer-hover:bg-green-400 peer-focus-visible:ring-2 peer-focus-visible:ring-gold-500/20 peer-disabled:opacity-50",
+          "pointer-events-none absolute inset-0 rounded-full bg-neutral-300 transition-[background-color,box-shadow] duration-150 peer-hover:bg-neutral-400 peer-hover:shadow-[0_0_0_3px_var(--color-success-bg)] peer-checked:bg-brand-primary peer-checked:peer-hover:bg-green-400 peer-focus-visible:ring-2 peer-focus-visible:ring-gold-500 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-bg-surface peer-disabled:opacity-50",
           className,
         )}
       />

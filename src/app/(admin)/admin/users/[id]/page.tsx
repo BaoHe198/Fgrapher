@@ -80,6 +80,12 @@ export default function AdminUserDetailPage() {
           if (body.data) {
             setUser(body.data);
             setNotes(body.data.adminNotes ?? "");
+            // Preselect the role the account actually holds, so a plan for
+            // a studio isn't saved against "Nhiếp ảnh gia" by default.
+            const paidRole = (body.data.roles as UserDetail["roles"]).find(
+              (r) => r.active && PAID_ROLES.includes(r.role),
+            );
+            if (paidRole) setPlanRole(paidRole.role);
           }
           setIsLoading(false);
         });
@@ -95,13 +101,19 @@ export default function AdminUserDetailPage() {
 
   const runAction = async (action: string, extra?: Record<string, unknown>) => {
     setBusy(true);
-    await fetch(`/api/admin/users/${params.id}`, {
+    const res = await fetch(`/api/admin/users/${params.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action, ...extra }),
-    });
+    }).catch(() => null);
     setBusy(false);
     setSuspendOpen(false);
+    // It used to report success whatever happened.
+    if (!res?.ok) {
+      const body = await res?.json().catch(() => null);
+      toast.add({ title: body?.message ?? t("actionFailed"), type: "error" });
+      return;
+    }
     toast.add({ title: t("updatedToast"), type: "success" });
     setIsLoading(true);
     load();
@@ -307,11 +319,14 @@ export default function AdminUserDetailPage() {
         <TabsPanel value="billing" className="mt-4">
           <Card className="mb-4 flex flex-col gap-3">
             <span className="text-body-sm font-semibold! text-text-primary">
-              Gán gói thủ công (billing đang tắt — xem CLAUDE.md)
+              {t("manualPlan.title")}
             </span>
+            <p className="text-body-sm text-text-secondary">
+              {t("manualPlan.hint")}
+            </p>
             <div className="grid grid-cols-2 gap-3">
               <NativeSelect
-                label="Vai trò"
+                label={t("manualPlan.role")}
                 value={planRole}
                 onChange={(v) => setPlanRole(v as Role)}
                 options={PAID_ROLES.map((role) => ({
@@ -320,18 +335,18 @@ export default function AdminUserDetailPage() {
                 }))}
               />
               <Input
-                label="Tên gói"
+                label={t("manualPlan.name")}
                 value={planName}
                 onChange={(e) => setPlanName(e.target.value)}
               />
               <DateField
-                label="Hết hạn"
+                label={t("manualPlan.expiresAt")}
                 value={planExpiresAt}
                 onChange={setPlanExpiresAt}
               />
             </div>
             <Textarea
-              placeholder="Ghi chú lý do (lưu vào nhật ký AdminAction)"
+              placeholder={t("manualPlan.notePlaceholder")}
               rows={2}
               value={planNote}
               onChange={(e) => setPlanNote(e.target.value)}
@@ -343,7 +358,7 @@ export default function AdminUserDetailPage() {
               disabled={busy || !planName.trim() || !planExpiresAt}
               onClick={assignPlan}
             >
-              Lưu gói
+              {t("manualPlan.save")}
             </Button>
           </Card>
 
@@ -360,6 +375,14 @@ export default function AdminUserDetailPage() {
                     <span className="text-body-sm text-text-secondary">
                       {ur.active ? t("activeRole") : t("inactiveRole")}
                     </span>
+                    {ur.subscription?.currentPeriodEnd ? (
+                      <span className="text-body-sm text-text-tertiary">
+                        {t("manualPlan.until", {
+                          plan: ur.subscription.plan ?? "",
+                          date: formatDate(ur.subscription.currentPeriodEnd),
+                        })}
+                      </span>
+                    ) : null}
                   </div>
                   {ur.subscription ? (
                     <Badge variant={SUB_STATUS_VARIANT[ur.subscription.status]}>
