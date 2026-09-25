@@ -15,7 +15,14 @@ const forgotPasswordSchema = z.object({
 // enumerate registered emails; it's purely a cap on how many reset emails
 // one source can trigger (email-bombing) and how many token rows it can
 // insert per hour, unrelated to which specific address is targeted.
-const FORGOT_PASSWORD_RATE_LIMIT = { max: 5, windowMs: 60 * 60 * 1000 };
+// Per IP, and Vietnamese mobile carriers put many subscribers behind one
+// shared address (CGNAT), as do venue and office wifi: this is a ceiling
+// against scripted abuse, set high enough not to lock out real people who
+// happen to share an IP. Tight per-person limits live on the email/account.
+const FORGOT_PASSWORD_RATE_LIMIT = { max: 30, windowMs: 60 * 60 * 1000 };
+// Per address: stops anyone flooding one inbox with reset emails, now that
+// the IP ceiling above is loose.
+const FORGOT_PASSWORD_EMAIL_RATE_LIMIT = { max: 3, windowMs: 60 * 60 * 1000 };
 
 export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.auth");
@@ -56,7 +63,13 @@ export async function POST(request: Request) {
   // can't be used to enumerate registered emails. sendPasswordResetEmail
   // never throws, so a failure issuing or sending the link can't turn into
   // a 500 that only registered addresses would ever produce.
-  if (user) {
+  // Over the per-address limit, answer exactly as usual and send nothing,
+  // so the response still reveals nothing about which emails exist.
+  const emailLimit = checkRateLimit(
+    `forgot-password:email:${email.toLowerCase()}`,
+    FORGOT_PASSWORD_EMAIL_RATE_LIMIT,
+  );
+  if (user && emailLimit.allowed) {
     await sendPasswordResetEmail({ userId: user.id, email: user.email });
   }
 

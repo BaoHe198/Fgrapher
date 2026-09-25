@@ -13,7 +13,11 @@ import { searchProfiles } from "@/services/search";
 // (services/search.ts's searchProfiles). Generous enough for real
 // browsing (rapid filter changes can fire a handful of calls in a burst)
 // but caps a scripted scraping/DoS loop, which had no resistance before.
-const SEARCH_RATE_LIMIT = { max: 60, windowMs: 60 * 1000 };
+// Per IP, and Vietnamese mobile carriers put many subscribers behind one
+// shared address (CGNAT), as do venue and office wifi: this is a ceiling
+// against scripted abuse, set high enough not to lock out real people who
+// happen to share an IP. Tight per-person limits live on the email/account.
+const SEARCH_RATE_LIMIT = { max: 200, windowMs: 60 * 1000 };
 
 export async function GET(request: Request) {
   const ip = getClientIp(request);

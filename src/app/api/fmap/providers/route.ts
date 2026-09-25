@@ -9,7 +9,11 @@ import {
 } from "@/lib/validations/fmap";
 import { findAvailableProvidersOnMap } from "@/services/fmap";
 
-const FMAP_RATE_LIMIT = { max: 60, windowMs: 60 * 1000 };
+// Per IP, and Vietnamese mobile carriers put many subscribers behind one
+// shared address (CGNAT), as do venue and office wifi: this is a ceiling
+// against scripted abuse, set high enough not to lock out real people who
+// happen to share an IP. Tight per-person limits live on the email/account.
+const FMAP_RATE_LIMIT = { max: 200, windowMs: 60 * 1000 };
 
 export async function GET(request: Request) {
   const ip = getClientIp(request);

@@ -8,7 +8,11 @@ import {
 } from "@/lib/validations/fmap";
 import { getWardProviderCounts } from "@/services/fmap";
 
-const WARD_COUNTS_RATE_LIMIT = { max: 120, windowMs: 60 * 1000 };
+// Per IP, and Vietnamese mobile carriers put many subscribers behind one
+// shared address (CGNAT), as do venue and office wifi: this is a ceiling
+// against scripted abuse, set high enough not to lock out real people who
+// happen to share an IP. Tight per-person limits live on the email/account.
+const WARD_COUNTS_RATE_LIMIT = { max: 300, windowMs: 60 * 1000 };
 
 // Per-ward provider counts for the Fmap ward picker, so it only lists wards
 // that can actually return someone. Counts ignore availability (that

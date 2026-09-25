@@ -131,6 +131,31 @@ trước khi gửi ảnh sang dịch vụ AI ngoài. Không gửi KYC.
 Twilio có chi phí; endpoint phải chống spam/SMS toll fraud. Dev bypass không hoạt
 động ở production.
 
+**Trạng thái production (25/09/2026):** `PHONE_VERIFICATION_REQUIRED=false` đã được
+đặt tường minh trên Vercel Production vì Twilio chưa được cấu hình. Lưu ý: nếu biến
+này **không được đặt**, code mặc định là `true` (`src/lib/env.ts`) — khách sẽ không
+đăng được yêu cầu F Booking. Chỉ đổi sang `true` sau khi Twilio đã chạy thật.
+
+## 10b. Giới hạn tần suất theo IP
+
+Nhà mạng di động Việt Nam dùng CGNAT (rất nhiều thuê bao chung một IP), wifi sự kiện
+và văn phòng cũng vậy. Vì thế giới hạn **theo IP** chỉ là trần chống tấn công hàng
+loạt, đặt rộng; giới hạn **chặt** nằm theo tài khoản/email:
+
+| Chức năng                | Theo IP        | Theo tài khoản/email                  |
+| ------------------------ | -------------- | ------------------------------------- |
+| Đăng nhập                | 100 / 10 phút  | 8 / 10 phút mỗi email                 |
+| Đăng ký                  | 30 / 15 phút   | — (email phải duy nhất)               |
+| Quên mật khẩu            | 30 / giờ       | 3 email / giờ mỗi địa chỉ             |
+| Gửi lại email xác minh   | 30 / giờ       | 3 / giờ mỗi email                     |
+| Bấm link xác minh        | 60 / 15 phút   | —                                     |
+| Liên hệ                  | 20 / giờ       | —                                     |
+| API khách chưa đăng nhập | 300 / phút     | 300 / phút mỗi tài khoản đã đăng nhập |
+| Tìm kiếm, Bản đồ F       | 200–300 / phút | —                                     |
+
+Bộ đếm hiện nằm trong bộ nhớ từng máy chủ (không dùng Redis), nên thực tế còn
+lỏng hơn bảng trên khi Vercel chạy nhiều máy.
+
 ## 11. Phần chưa xây hoặc chưa hoàn thiện vận hành
 
 - giao file ảnh/video cuối cùng cho khách qua nền tảng;

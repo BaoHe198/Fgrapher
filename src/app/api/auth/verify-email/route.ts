@@ -55,7 +55,11 @@ const verifyEmailSchema = z.object({
 // Tokens are 256 bits of randomness, so this isn't holding back a
 // realistic brute force — it caps how fast one source can probe the token
 // space at all, in line with every other unauthenticated auth route here.
-const VERIFY_RATE_LIMIT = { max: 20, windowMs: 15 * 60 * 1000 };
+// Per IP, and Vietnamese mobile carriers put many subscribers behind one
+// shared address (CGNAT), as do venue and office wifi: this is a ceiling
+// against scripted abuse, set high enough not to lock out real people who
+// happen to share an IP. Tight per-person limits live on the email/account.
+const VERIFY_RATE_LIMIT = { max: 60, windowMs: 15 * 60 * 1000 };
 
 export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.auth");

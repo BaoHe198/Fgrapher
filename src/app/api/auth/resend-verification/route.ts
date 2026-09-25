@@ -24,7 +24,11 @@ const resendSchema = z.object({
 // rotating IPs. The email bucket is not an enumeration oracle — the
 // response is identical whether or not the address is registered, and the
 // limit applies to unknown addresses too.
-const RESEND_IP_RATE_LIMIT = { max: 5, windowMs: 60 * 60 * 1000 };
+// Per IP, and Vietnamese mobile carriers put many subscribers behind one
+// shared address (CGNAT), as do venue and office wifi: this is a ceiling
+// against scripted abuse, set high enough not to lock out real people who
+// happen to share an IP. Tight per-person limits live on the email/account.
+const RESEND_IP_RATE_LIMIT = { max: 30, windowMs: 60 * 60 * 1000 };
 const RESEND_EMAIL_RATE_LIMIT = { max: 3, windowMs: 60 * 60 * 1000 };
 
 export async function POST(request: Request) {

@@ -71,7 +71,8 @@ const API_DEFAULT_RATE_LIMIT = {
   windowMs: 60 * 1000,
 };
 const API_ANONYMOUS_RATE_LIMIT = {
-  max: limitFromEnv("API_ANONYMOUS_RATE_LIMIT_MAX", 100),
+  // Per IP (anonymous visitors only) — see the CGNAT note in auth.ts.
+  max: limitFromEnv("API_ANONYMOUS_RATE_LIMIT_MAX", 300),
   windowMs: 60 * 1000,
 };
 

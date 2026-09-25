@@ -15,9 +15,12 @@ import { Prisma } from "@prisma/client";
 
 // Registration hits the DB unconditionally (email-uniqueness check, user
 // insert) with no auth gate at all — a scripted loop had zero resistance
-// before this. 5 per 15 minutes per IP is generous for a real person
-// signing up, tight for an automated loop.
-const REGISTER_RATE_LIMIT = { max: 5, windowMs: 15 * 60 * 1000 };
+// before this.
+// Per IP, and Vietnamese mobile carriers put many subscribers behind one
+// shared address (CGNAT), as do venue and office wifi: this is a ceiling
+// against scripted abuse, set high enough not to lock out real people who
+// happen to share an IP. Tight per-person limits live on the email/account.
+const REGISTER_RATE_LIMIT = { max: 30, windowMs: 15 * 60 * 1000 };
 
 export async function POST(request: Request) {
   const [t, tValidation] = await Promise.all([

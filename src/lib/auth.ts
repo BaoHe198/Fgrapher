@@ -50,8 +50,13 @@ const limitFromEnv = (name: string, fallback: number) => {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+// Per IP, and Vietnamese mobile carriers put many subscribers behind one
+// shared address (CGNAT), as do venue and office wifi: the IP limit is a ceiling
+// against scripted abuse, set high enough not to lock out real people who
+// happen to share an IP. Tight per-person limits live on the email/account.
+// Password guessing on one account is held by LOGIN_EMAIL_RATE_LIMIT.
 const LOGIN_IP_RATE_LIMIT = {
-  max: limitFromEnv("LOGIN_IP_RATE_LIMIT_MAX", 20),
+  max: limitFromEnv("LOGIN_IP_RATE_LIMIT_MAX", 100),
   windowMs: 10 * 60 * 1000,
 };
 const LOGIN_EMAIL_RATE_LIMIT = {
