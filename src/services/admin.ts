@@ -9,6 +9,12 @@ import { revalidatePublicProfile } from "@/lib/cache";
 import { generateKycSignedUrl } from "@/lib/cloudinary";
 import { mediaApprovedEmailHtml, mediaRejectedEmailHtml } from "@/lib/email";
 import { db } from "@/lib/db";
+import {
+  escapeLike,
+  foldVietnamese,
+  SQL_FOLD_FROM,
+  SQL_FOLD_TO,
+} from "@/lib/vietnamese-fold";
 import { features } from "@/lib/features";
 import { FREE_PLAN } from "@/lib/free-plan";
 import {
@@ -213,17 +219,21 @@ export async function listAdminUsers({
   role?: string;
   page?: number;
 }) {
+  // Names are searched without accents ("nguyen van" finds "Nguyễn Văn");
+  // email and username are plain ASCII already.
+  const searchIds = search
+    ? (
+        await db.$queryRaw<{ id: string }[]>`
+          SELECT id FROM users
+          WHERE lower(translate(
+            concat_ws(' ', name, email, username), ${SQL_FOLD_FROM}, ${SQL_FOLD_TO}
+          )) LIKE ${`%${escapeLike(foldVietnamese(search))}%`}
+        `
+      ).map((row) => row.id)
+    : null;
   const where = {
     deletedAt: null,
-    ...(search
-      ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" as const } },
-            { email: { contains: search, mode: "insensitive" as const } },
-            { username: { contains: search, mode: "insensitive" as const } },
-          ],
-        }
-      : {}),
+    ...(searchIds ? { id: { in: searchIds } } : {}),
     ...(role ? { roles: { some: { role: role as never, active: true } } } : {}),
   };
 

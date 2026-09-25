@@ -12,6 +12,12 @@ import { features } from "@/lib/features";
 import { formatAdministrativeLocation } from "@/lib/location";
 import { sanitizeSearchParams } from "@/lib/search-params";
 import {
+  escapeLike,
+  foldVietnamese,
+  SQL_FOLD_FROM,
+  SQL_FOLD_TO,
+} from "@/lib/vietnamese-fold";
+import {
   CACHE_KEY_VERSION,
   CACHE_TAGS,
   CACHE_TTL,
@@ -203,7 +209,31 @@ const NATIONWIDE_SECTION_SIZE = 6;
 // VIỆC 4's "kết quả chính < 5").
 const NATIONWIDE_SECTION_THRESHOLD = 5;
 
-function buildBaseWhere(params: SearchParams): Prisma.ProfileWhereInput {
+/**
+ * Profiles whose name, shop name, description or owner's name contain the
+ * search text, ignoring Vietnamese accents on both sides — "nhiep" finds
+ * "Nhiếp ảnh". Prisma's `contains` compares accents exactly, so this one
+ * match runs in SQL (see lib/vietnamese-fold.ts); every other filter stays
+ * in the Prisma `where`.
+ */
+async function profileIdsMatchingText(q: string): Promise<string[]> {
+  const pattern = `%${escapeLike(foldVietnamese(q))}%`;
+  const rows = await db.$queryRaw<{ id: string }[]>`
+    SELECT p.id
+    FROM profiles p
+    JOIN users u ON u.id = p."userId"
+    WHERE lower(translate(
+      concat_ws(' ', p."displayName", p."shopName", p.description, u.name),
+      ${SQL_FOLD_FROM}, ${SQL_FOLD_TO}
+    )) LIKE ${pattern}
+  `;
+  return rows.map((row) => row.id);
+}
+
+function buildBaseWhere(
+  params: SearchParams,
+  textMatchIds?: string[],
+): Prisma.ProfileWhereInput {
   // Also clamps an explicit ?roles=CAMERA_SHOP (a direct URL edit, not
   // just the UI's own role picker, which already omits that option) down
   // while the marketplace is off, rather than trusting it — but only
@@ -251,24 +281,7 @@ function buildBaseWhere(params: SearchParams): Prisma.ProfileWhereInput {
       ? { experienceLevel: { in: params.experienceLevel } }
       : {}),
     ...(params.travelWilling ? { travelWilling: true } : {}),
-    ...(params.q
-      ? {
-          OR: [
-            {
-              displayName: { contains: params.q, mode: "insensitive" as const },
-            },
-            {
-              description: { contains: params.q, mode: "insensitive" as const },
-            },
-            { shopName: { contains: params.q, mode: "insensitive" as const } },
-            {
-              user: {
-                name: { contains: params.q, mode: "insensitive" as const },
-              },
-            },
-          ],
-        }
-      : {}),
+    ...(params.q && textMatchIds ? { id: { in: textMatchIds } } : {}),
   };
 }
 
@@ -455,7 +468,10 @@ async function searchProfilesUncached(params: SearchParams) {
     ? await db.province.findUnique({ where: { code: params.city } })
     : null;
 
-  const baseWhere = buildBaseWhere(params);
+  const textMatchIds = params.q
+    ? await profileIdsMatchingText(params.q)
+    : undefined;
+  const baseWhere = buildBaseWhere(params, textMatchIds);
   const withProvince: Prisma.ProfileWhereInput = province
     ? { AND: [baseWhere, provinceMatch(province.id)] }
     : baseWhere;

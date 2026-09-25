@@ -4,6 +4,12 @@ import type { Prisma, ProductCondition, ProductType } from "@prisma/client";
 import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
+  escapeLike,
+  foldVietnamese,
+  SQL_FOLD_FROM,
+  SQL_FOLD_TO,
+} from "@/lib/vietnamese-fold";
+import {
   normalizeProductCategory,
   productCategoryQueryValues,
 } from "@/lib/validations/product";
@@ -44,10 +50,16 @@ export async function searchProducts(params: ShopSearchParams) {
 
   const q = params.q?.trim();
   if (q) {
-    where.OR = [
-      { name: { contains: q, mode: "insensitive" } },
-      { description: { contains: q, mode: "insensitive" } },
-    ];
+    // Accent-insensitive, like profile search: "den flash" finds "Đèn
+    // flash" (see lib/vietnamese-fold.ts).
+    const pattern = `%${escapeLike(foldVietnamese(q))}%`;
+    const rows = await db.$queryRaw<{ id: string }[]>`
+      SELECT id FROM products
+      WHERE lower(translate(
+        concat_ws(' ', name, description), ${SQL_FOLD_FROM}, ${SQL_FOLD_TO}
+      )) LIKE ${pattern}
+    `;
+    where.id = { in: rows.map((row) => row.id) };
   }
   if (params.type) {
     where.type = { in: [params.type, "BOTH"] };
