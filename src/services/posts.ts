@@ -588,6 +588,40 @@ export async function listComments(postId: string) {
   });
 }
 
+/**
+ * The comment's author can remove it, and so can the owner of the post it
+ * sits under (to clear spam off their own post). Soft delete, like posts:
+ * the row stays for moderation history, and the post's count drops by one.
+ */
+export async function deleteComment({
+  postId,
+  commentId,
+  userId,
+}: {
+  postId: string;
+  commentId: string;
+  userId: string;
+}) {
+  const comment = await db.comment.findFirst({
+    where: { id: commentId, postId, deletedAt: null },
+    select: { userId: true, post: { select: { userId: true } } },
+  });
+  if (!comment) throw new PostError("Comment not found", 404);
+  if (comment.userId !== userId && comment.post.userId !== userId) {
+    throw new PostError("Not your comment", 403);
+  }
+  await db.$transaction([
+    db.comment.update({
+      where: { id: commentId },
+      data: { deletedAt: new Date() },
+    }),
+    db.post.update({
+      where: { id: postId },
+      data: { commentCount: { decrement: 1 } },
+    }),
+  ]);
+}
+
 export async function deletePost(postId: string, userId: string) {
   const post = await db.post.findUnique({
     where: { id: postId },

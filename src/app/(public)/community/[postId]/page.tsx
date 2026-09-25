@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PostEngagement } from "@/components/social/post-engagement";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { auth } from "@/lib/auth";
 import { features } from "@/lib/features";
@@ -114,25 +115,23 @@ export default async function PostPage({ params }: PostPageProps) {
           </div>
         ) : null}
 
-        <div className="flex gap-4 border-t border-border-subtle pt-3 text-body-sm text-text-secondary">
-          <span>{t("likes", { count: post.likeCount })}</span>
-          <span>{t("comments", { count: post.commentCount })}</span>
-        </div>
-
-        {comments.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            {comments.map((comment) => (
-              <div key={comment.id} className="flex flex-col">
-                <span className="text-body-sm font-semibold! text-text-primary">
-                  {comment.user.firstName ?? comment.user.name ?? ""}
-                </span>
-                <span className="text-body-sm text-text-secondary">
-                  {comment.content}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : null}
+        {/* The same like/comment controls as the feed — this page used to
+            be read-only, so a shared link led to a post nobody could
+            answer. Comments start open: they are why people open it. */}
+        <PostEngagement
+          postId={post.id}
+          viewerId={session?.user?.id ?? null}
+          initialLiked={post.likedByViewer}
+          initialLikeCount={post.likeCount}
+          initialCommentCount={post.commentCount}
+          postOwnerId={post.user.id}
+          initialComments={comments.map((comment) => ({
+            id: comment.id,
+            content: comment.content,
+            createdAt: comment.createdAt.toISOString(),
+            user: comment.user,
+          }))}
+        />
       </article>
     </div>
   );

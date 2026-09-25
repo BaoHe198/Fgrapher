@@ -1016,6 +1016,12 @@
     }
   },
   "apiMessages": {
+    "comments": {
+      "deleted": "Comment deleted",
+      "notYours": "You can only delete your own comments, or comments on your own post",
+      "notFound": "This comment no longer exists",
+      "deleteFailed": "Couldn't delete the comment, please try again"
+    },
     "users": {
       "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo",
       "emailChangeNoPassword": "This account signs in with a social provider and has no password to confirm with — email can't be changed this way.",
@@ -3735,6 +3741,10 @@
       "loadMore": "Load more",
       "comments": "{count} comments",
       "likes": "{count} likes",
+      "deleteComment": "Delete comment",
+      "deleteCommentConfirm": "Delete this comment?",
+      "deleteCommentFailed": "Couldn't delete the comment, please try again",
+      "commentFailed": "Couldn't post your comment, please try again",
       "commentPlaceholder": "Write a comment...",
       "send": "Send",
       "delete": "Delete post",

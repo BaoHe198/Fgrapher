@@ -1016,6 +1016,12 @@
     }
   },
   "apiMessages": {
+    "comments": {
+      "deleted": "Đã xóa bình luận",
+      "notYours": "Bạn chỉ xóa được bình luận của mình hoặc bình luận trên bài của mình",
+      "notFound": "Bình luận không còn tồn tại",
+      "deleteFailed": "Không xóa được bình luận, vui lòng thử lại"
+    },
     "users": {
       "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa",
       "emailChangeNoPassword": "Tài khoản này đăng nhập qua mạng xã hội, không có mật khẩu để xác nhận — không thể đổi email theo cách này.",
@@ -3735,6 +3741,10 @@
       "loadMore": "Xem thêm",
       "comments": "{count} bình luận",
       "likes": "{count} lượt thích",
+      "deleteComment": "Xóa bình luận",
+      "deleteCommentConfirm": "Xóa bình luận này?",
+      "deleteCommentFailed": "Không xóa được bình luận, vui lòng thử lại",
+      "commentFailed": "Không gửi được bình luận, vui lòng thử lại",
       "commentPlaceholder": "Viết bình luận...",
       "send": "Gửi",
       "delete": "Xoá bài",

@@ -576,7 +576,14 @@ function PostCard({
             </span>
           )}
           <span className="flex items-center gap-2 text-body-sm text-text-tertiary">
-            {formatRelativeTime(new Date(post.createdAt))}
+            {/* The time links to the post's own page — the one address a
+                post has for sharing; the feed card had no way to reach it. */}
+            <Link
+              href={`/community/${post.id}`}
+              className="hover:text-text-secondary hover:underline"
+            >
+              {formatRelativeTime(new Date(post.createdAt))}
+            </Link>
             <span>·</span>
             {t(`postKind.${post.kind}`)}
           </span>
@@ -636,6 +643,7 @@ function PostCard({
         initialLiked={post.likedByViewer}
         initialLikeCount={post.likeCount}
         initialCommentCount={post.commentCount}
+        postOwnerId={post.user.id}
       />
 
       <ReportModal

@@ -430,6 +430,9 @@ export function PortfolioTab({
                     initialLiked={album.socialPost.likedByViewer}
                     initialLikeCount={album.socialPost.likeCount}
                     initialCommentCount={album.socialPost.commentCount}
+                    postOwnerId={
+                      isOwnProfile ? (viewerId ?? undefined) : undefined
+                    }
                   />
                 ) : null}
               </section>

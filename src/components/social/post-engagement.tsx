@@ -1,15 +1,16 @@
 "use client";
 
-import { Heart, Loader2, MessageCircle, Send } from "lucide-react";
+import { Heart, Loader2, MessageCircle, Send, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-interface FeedComment {
+export interface FeedComment {
   id: string;
   content: string;
   createdAt: string;
@@ -22,10 +23,16 @@ export function PostEngagement({
   initialLiked,
   initialLikeCount,
   initialCommentCount,
+  postOwnerId,
+  initialComments,
   className,
 }: {
   postId: string;
   viewerId: string | null;
+  /** The post's author may remove any comment under it (spam clean-up). */
+  postOwnerId?: string;
+  /** Comments already loaded on the server — the post's own page shows them open. */
+  initialComments?: FeedComment[];
   initialLiked: boolean;
   initialLikeCount: number;
   initialCommentCount: number;
@@ -35,10 +42,16 @@ export function PostEngagement({
   const [liked, setLiked] = useState(initialLiked);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
-  const [comments, setComments] = useState<FeedComment[] | null>(null);
+  const [comments, setComments] = useState<FeedComment[] | null>(
+    initialComments ?? null,
+  );
   const [draft, setDraft] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [commentError, setCommentError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const pathname = usePathname();
+  const loginHref = `/login?callbackUrl=${encodeURIComponent(pathname)}`;
 
   const toggleLike = async () => {
     if (!viewerId) return;
@@ -70,12 +83,40 @@ export function PostEngagement({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: draft }),
     });
-    const body = await res.json();
+    const body = await res.json().catch(() => null);
     setBusy(false);
     if (res.ok) {
       setComments((current) => [...(current ?? []), body.data]);
       setCommentCount((count) => count + 1);
       setDraft("");
+      setCommentError(null);
+    } else {
+      // Keep the draft so nothing typed is lost, and say what happened —
+      // a failed send used to look exactly like nothing happening.
+      setCommentError(body?.message ?? t("commentFailed"));
+    }
+  };
+
+  const canDelete = (comment: FeedComment) =>
+    Boolean(viewerId) &&
+    (comment.user.id === viewerId || postOwnerId === viewerId);
+
+  const deleteComment = async (commentId: string) => {
+    if (!window.confirm(t("deleteCommentConfirm"))) return;
+    setDeletingId(commentId);
+    const res = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+      method: "DELETE",
+    }).catch(() => null);
+    setDeletingId(null);
+    if (res?.ok) {
+      setComments((current) =>
+        (current ?? []).filter((comment) => comment.id !== commentId),
+      );
+      setCommentCount((count) => Math.max(0, count - 1));
+      setCommentError(null);
+    } else {
+      const body = await res?.json().catch(() => null);
+      setCommentError(body?.message ?? t("deleteCommentFailed"));
     }
   };
 
@@ -97,7 +138,7 @@ export function PostEngagement({
           </button>
         ) : (
           <Link
-            href="/login"
+            href={loginHref}
             className="flex items-center gap-1.5 text-body-sm text-text-secondary hover:text-brand-primary"
           >
             <Heart className="size-4" />
@@ -124,16 +165,38 @@ export function PostEngagement({
             <p className="text-body-sm text-text-tertiary">{t("noComments")}</p>
           ) : (
             comments.map((comment) => (
-              <div key={comment.id} className="flex flex-col">
-                <span className="text-body-sm font-semibold! text-text-primary">
-                  {comment.user.firstName ?? comment.user.name ?? ""}
-                </span>
-                <span className="whitespace-pre-wrap text-body-sm text-text-secondary">
-                  {comment.content}
-                </span>
+              <div key={comment.id} className="flex items-start gap-2">
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="text-body-sm font-semibold! text-text-primary">
+                    {comment.user.firstName ?? comment.user.name ?? ""}
+                  </span>
+                  <span className="text-body-sm break-words whitespace-pre-wrap text-text-secondary">
+                    {comment.content}
+                  </span>
+                </div>
+                {canDelete(comment) ? (
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    aria-label={t("deleteComment")}
+                    disabled={deletingId === comment.id}
+                    onClick={() => void deleteComment(comment.id)}
+                  >
+                    {deletingId === comment.id ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="size-4" />
+                    )}
+                  </Button>
+                ) : null}
               </div>
             ))
           )}
+          {commentError ? (
+            <p className="text-body-sm text-danger" role="alert">
+              {commentError}
+            </p>
+          ) : null}
           {viewerId ? (
             <div className="flex items-end gap-2">
               <Textarea
@@ -164,7 +227,7 @@ export function PostEngagement({
               </Button>
             </div>
           ) : (
-            <Link href="/login" className="text-body-sm text-brand-primary">
+            <Link href={loginHref} className="text-body-sm text-brand-primary">
               {t("loginToInteract")}
             </Link>
           )}
