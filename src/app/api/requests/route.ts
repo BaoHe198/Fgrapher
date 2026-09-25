@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { UploadVerificationError } from "@/lib/cloudinary";
 import { createServiceRequestSchema } from "@/lib/validations/service-request";
+import { requestErrorMessage } from "@/services/request-error-message";
 import {
   ServiceRequestError,
   createServiceRequest,
@@ -72,7 +73,11 @@ export async function POST(request: Request) {
     }
     if (err instanceof ServiceRequestError) {
       return NextResponse.json(
-        { data: null, error: "request_error", message: err.message },
+        {
+          data: null,
+          error: "request_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }

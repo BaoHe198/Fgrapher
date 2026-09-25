@@ -6,6 +6,7 @@ import { createBookingSchema } from "@/lib/validations/booking";
 import { isProviderRoleSet } from "@/services/dashboard";
 import {
   BookingActionError,
+  bookingErrorMessage,
   createBooking,
   listBookings,
   type BookingTab,
@@ -103,7 +104,11 @@ export async function POST(request: Request) {
     }
     if (err instanceof BookingActionError) {
       return NextResponse.json(
-        { data: null, error: "booking_error", message: err.message },
+        {
+          data: null,
+          error: "booking_error",
+          message: await bookingErrorMessage(err),
+        },
         { status: err.status },
       );
     }

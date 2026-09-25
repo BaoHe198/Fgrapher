@@ -8,6 +8,7 @@ import {
 } from "@/lib/validations/booking";
 import {
   BookingActionError,
+  bookingErrorMessage,
   proposeReschedule,
   respondToReschedule,
 } from "@/services/bookings";
@@ -53,7 +54,11 @@ export async function POST(
     }
     if (err instanceof BookingActionError) {
       return NextResponse.json(
-        { data: null, error: "booking_error", message: err.message },
+        {
+          data: null,
+          error: "booking_error",
+          message: await bookingErrorMessage(err),
+        },
         { status: err.status },
       );
     }
@@ -116,7 +121,11 @@ export async function PATCH(
     }
     if (err instanceof BookingActionError) {
       return NextResponse.json(
-        { data: null, error: "booking_error", message: err.message },
+        {
+          data: null,
+          error: "booking_error",
+          message: await bookingErrorMessage(err),
+        },
         { status: err.status },
       );
     }

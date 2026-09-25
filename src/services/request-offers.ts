@@ -24,7 +24,11 @@ import {
   profileProvinceIds,
   providerCoversProvince,
 } from "@/services/service-areas";
-import { BookingActionError, createBooking } from "@/services/bookings";
+import {
+  BookingActionError,
+  bookingErrorMessage,
+  createBooking,
+} from "@/services/bookings";
 import {
   NotificationBatchError,
   notify,
@@ -679,7 +683,12 @@ export async function acceptOffer(
     });
   } catch (err) {
     if (err instanceof BookingActionError) {
-      throw new OfferError(err.message, err.status as 400 | 403);
+      // Already translated: the booking's own reason (e.g. the slot was just
+      // taken) is what the customer needs to read.
+      throw new OfferError(
+        await bookingErrorMessage(err),
+        err.status as 400 | 403,
+      );
     }
     throw err;
   }

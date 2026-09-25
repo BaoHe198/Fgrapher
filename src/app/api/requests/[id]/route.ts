@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { updateDraftServiceRequestSchema } from "@/lib/validations/service-request";
+import { requestErrorMessage } from "@/services/request-error-message";
 import {
   ServiceRequestError,
   cancelServiceRequest,
@@ -32,7 +33,11 @@ export async function GET(
     }
     if (err instanceof ServiceRequestError) {
       return NextResponse.json(
-        { data: null, error: "request_error", message: err.message },
+        {
+          data: null,
+          error: "request_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }
@@ -84,7 +89,11 @@ export async function PATCH(
     }
     if (err instanceof ServiceRequestError) {
       return NextResponse.json(
-        { data: null, error: "request_error", message: err.message },
+        {
+          data: null,
+          error: "request_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }
@@ -117,7 +126,11 @@ export async function DELETE(
     }
     if (err instanceof ServiceRequestError) {
       return NextResponse.json(
-        { data: null, error: "request_error", message: err.message },
+        {
+          data: null,
+          error: "request_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }

@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import {
   BookingActionError,
+  bookingErrorMessage,
   getBookingDetail,
   transitionBooking,
 } from "@/services/bookings";
@@ -87,7 +88,11 @@ export async function PATCH(
     }
     if (err instanceof BookingActionError) {
       return NextResponse.json(
-        { data: null, error: "booking_error", message: err.message },
+        {
+          data: null,
+          error: "booking_error",
+          message: await bookingErrorMessage(err),
+        },
         { status: err.status },
       );
     }

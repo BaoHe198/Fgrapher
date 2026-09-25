@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { createOfferSchema } from "@/lib/validations/service-request";
+import { requestErrorMessage } from "@/services/request-error-message";
 import {
   OfferError,
   editOffer,
@@ -46,7 +47,11 @@ export async function PATCH(
     }
     if (err instanceof OfferError) {
       return NextResponse.json(
-        { data: null, error: "offer_error", message: err.message },
+        {
+          data: null,
+          error: "offer_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }
@@ -79,7 +84,11 @@ export async function DELETE(
     }
     if (err instanceof OfferError) {
       return NextResponse.json(
-        { data: null, error: "offer_error", message: err.message },
+        {
+          data: null,
+          error: "offer_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }

@@ -37,6 +37,7 @@ import { isSlotBookable } from "@/services/availability";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
+import { BOOKING_ERROR_KEYS } from "@/lib/booking-error-messages";
 
 // Translation helper for the shared email templates in @/lib/email —
 // namespace "libServices.email". Request-triggered functions (called from a
@@ -336,6 +337,13 @@ export class BookingActionError extends Error {
     super(message);
     this.name = "BookingActionError";
   }
+}
+
+/** The user-facing, translated text for a BookingActionError. */
+export async function bookingErrorMessage(err: BookingActionError) {
+  const t = await getTranslations("apiMessages.bookingErrors");
+  const key = BOOKING_ERROR_KEYS[err.message];
+  return key ? t(key) : t("unknown");
 }
 
 export async function createBooking(

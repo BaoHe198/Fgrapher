@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { requestErrorMessage } from "@/services/request-error-message";
 import {
   ServiceRequestError,
   publishDraftServiceRequest,
@@ -29,7 +30,11 @@ export async function POST(
     }
     if (err instanceof ServiceRequestError) {
       return NextResponse.json(
-        { data: null, error: "request_error", message: err.message },
+        {
+          data: null,
+          error: "request_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }

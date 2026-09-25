@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { acceptOfferSchema } from "@/lib/validations/service-request";
 import { OfferError, acceptOffer } from "@/services/request-offers";
+import { requestErrorMessage } from "@/services/request-error-message";
 
 export async function POST(
   request: Request,
@@ -42,7 +43,11 @@ export async function POST(
     }
     if (err instanceof OfferError) {
       return NextResponse.json(
-        { data: null, error: "offer_error", message: err.message },
+        {
+          data: null,
+          error: "offer_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }

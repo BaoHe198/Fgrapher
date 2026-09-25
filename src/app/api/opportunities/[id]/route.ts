@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { OfferError, getOpportunityDetail } from "@/services/request-offers";
+import { requestErrorMessage } from "@/services/request-error-message";
 
 export async function GET(
   request: Request,
@@ -35,7 +36,11 @@ export async function GET(
     }
     if (err instanceof OfferError) {
       return NextResponse.json(
-        { data: null, error: "offer_error", message: err.message },
+        {
+          data: null,
+          error: "offer_error",
+          message: await requestErrorMessage(err),
+        },
         { status: err.status },
       );
     }

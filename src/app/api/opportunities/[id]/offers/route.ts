@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { createOfferSchema } from "@/lib/validations/service-request";
+import { requestErrorMessage } from "@/services/request-error-message";
 import {
   OfferError,
   OwnRequestOfferError,
@@ -61,7 +62,7 @@ export async function POST(
           message:
             err instanceof OwnRequestOfferError
               ? t("ownRequestForbidden")
-              : err.message,
+              : await requestErrorMessage(err),
         },
         { status: err.status },
       );
