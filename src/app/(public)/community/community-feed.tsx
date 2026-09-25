@@ -615,13 +615,13 @@ function PostCard({
             {post.album.title}
           </p>
           {post.album.description ? (
-            <p className="mt-1 whitespace-pre-wrap text-body-md text-text-secondary">
+            <p className="mt-1 whitespace-pre-wrap [overflow-wrap:anywhere] text-body-md text-text-secondary">
               {post.album.description}
             </p>
           ) : null}
         </div>
       ) : post.caption ? (
-        <p className="whitespace-pre-wrap text-body-md text-text-primary">
+        <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-md text-text-primary">
           {post.caption}
         </p>
       ) : null}
@@ -887,7 +887,7 @@ function RequestPostPanel({
       </div>
 
       {request.description ? (
-        <p className="whitespace-pre-wrap text-body-sm text-text-secondary">
+        <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-sm text-text-secondary">
           {request.description}
         </p>
       ) : null}

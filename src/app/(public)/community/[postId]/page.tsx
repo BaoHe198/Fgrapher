@@ -76,7 +76,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
 
         {post.caption ? (
-          <p className="whitespace-pre-wrap text-body-lg text-text-primary">
+          <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-lg text-text-primary">
             {post.caption}
           </p>
         ) : null}

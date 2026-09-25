@@ -331,7 +331,7 @@ export function ChatPanel({
             {resolvePartyName(otherUser, t("unknown"))[0]?.toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span className="flex-1 text-heading-sm text-text-primary">
+        <span className="line-clamp-2 min-w-0 flex-1 text-heading-sm text-text-primary">
           {resolvePartyName(otherUser, t("unknown"))}
         </span>
 
@@ -463,7 +463,9 @@ export function ChatPanel({
                   ) : (
                     <div
                       className={cn(
-                        "max-w-[70%] px-4 py-2.5 text-body-md",
+                        // A pasted link has no spaces to wrap at; without
+                        // anywhere-wrapping it was cut off at the bubble's edge.
+                        "max-w-[70%] px-4 py-2.5 text-body-md whitespace-pre-wrap [overflow-wrap:anywhere]",
                         isOwn
                           ? "rounded-[16px_16px_4px_16px] bg-brand-primary text-text-on-brand"
                           : "rounded-[16px_16px_16px_4px] border border-border-subtle bg-surface-card text-text-primary",

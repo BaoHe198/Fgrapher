@@ -453,6 +453,21 @@
   html {
     @apply font-sans;
   }
+  /* A word or link longer than its line (a pasted URL, text typed without
+     spaces) breaks instead of pushing the page wider than the phone — the
+     browser then zoomed the whole page out to fit (1041px on a 390px
+     screen). break-word only acts on text that would overflow, so normal
+     wrapping is unchanged. */
+  p,
+  li,
+  dd,
+  blockquote,
+  h1,
+  h2,
+  h3,
+  h4 {
+    overflow-wrap: break-word;
+  }
   button:not(:disabled),
   summary,
   [role="button"]:not([aria-disabled="true"]) {

@@ -469,7 +469,7 @@ export default function BookingDetailPage() {
               <span className="text-body-sm text-text-tertiary">
                 {t("notes")}
               </span>
-              <p className="whitespace-pre-line text-body-md text-text-primary">
+              <p className="whitespace-pre-line [overflow-wrap:anywhere] text-body-md text-text-primary">
                 {booking.notes}
               </p>
             </Card>

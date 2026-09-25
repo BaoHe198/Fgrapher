@@ -170,7 +170,7 @@ export function PostEngagement({
                   <span className="text-body-sm font-semibold! text-text-primary">
                     {comment.user.firstName ?? comment.user.name ?? ""}
                   </span>
-                  <span className="text-body-sm break-words whitespace-pre-wrap text-text-secondary">
+                  <span className="text-body-sm break-words whitespace-pre-wrap [overflow-wrap:anywhere] text-text-secondary">
                     {comment.content}
                   </span>
                 </div>

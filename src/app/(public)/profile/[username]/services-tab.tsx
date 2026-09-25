@@ -57,7 +57,7 @@ export function ServicesTab({
               {service.name}
             </span>
             {service.description ? (
-              <p className="whitespace-pre-line text-body-sm leading-relaxed text-text-secondary">
+              <p className="whitespace-pre-line [overflow-wrap:anywhere] text-body-sm leading-relaxed text-text-secondary">
                 {service.description}
               </p>
             ) : null}

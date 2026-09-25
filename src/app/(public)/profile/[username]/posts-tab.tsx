@@ -31,7 +31,7 @@ export function PostsTab({ posts }: { posts: ProfilePost[] }) {
             {formatRelativeTime(post.createdAt)}
           </span>
           {post.caption ? (
-            <p className="whitespace-pre-wrap text-body-md text-text-primary">
+            <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-md text-text-primary">
               {post.caption}
             </p>
           ) : null}

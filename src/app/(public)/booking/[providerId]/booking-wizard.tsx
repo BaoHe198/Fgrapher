@@ -740,7 +740,7 @@ function StepService({
                   {service.name}
                 </span>
                 {service.description ? (
-                  <span className="whitespace-pre-line text-body-sm leading-relaxed text-text-secondary">
+                  <span className="whitespace-pre-line [overflow-wrap:anywhere] text-body-sm leading-relaxed text-text-secondary">
                     {service.description}
                   </span>
                 ) : null}

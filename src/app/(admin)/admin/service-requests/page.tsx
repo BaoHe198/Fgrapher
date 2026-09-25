@@ -80,7 +80,7 @@ export default async function AdminServiceRequestsPage() {
                 </div>
 
                 {request.description ? (
-                  <p className="whitespace-pre-wrap text-body-sm text-text-secondary">
+                  <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-sm text-text-secondary">
                     {request.description}
                   </p>
                 ) : null}

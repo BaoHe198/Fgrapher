@@ -106,7 +106,7 @@ export default async function ProductDetailPage({
               <h2 className="text-heading-lg text-text-primary">
                 {t("description")}
               </h2>
-              <p className="whitespace-pre-wrap text-body-md text-text-secondary">
+              <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-md text-text-secondary">
                 {product.description}
               </p>
             </div>
@@ -138,7 +138,7 @@ export default async function ProductDetailPage({
                         <StarRating rating={String(review.rating)} />
                       </div>
                       {review.content ? (
-                        <p className="whitespace-pre-wrap text-body-md text-text-secondary">
+                        <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-md text-text-secondary">
                           {review.content}
                         </p>
                       ) : null}
