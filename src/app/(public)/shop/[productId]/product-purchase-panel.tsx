@@ -98,6 +98,12 @@ export function ProductPurchasePanel({
     setIsSubmitting(false);
 
     if (!res.ok) {
+      // "Mua ngay" on something already in the cart up to the shop's stock:
+      // the buyer wants to pay for it, not to read that it's already there.
+      if (redirectToCheckout && body.code === "alreadyAtStock") {
+        router.push("/cart");
+        return;
+      }
       setError(body.message ?? t("addFailed"));
       return;
     }

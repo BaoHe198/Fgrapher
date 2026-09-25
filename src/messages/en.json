@@ -1323,7 +1323,7 @@
     "cartErrors": {
       "productNotFound": "Product not found.",
       "rentalByMessage": "Rentals are arranged directly with the shop by message.",
-      "notEnoughStock": "The shop only has {stock} of this item.",
+      "notEnoughStock": "{stock, plural, =0 {This item is sold out.} other {The shop only has # of this item.}}",
       "alreadyAtStock": "Your cart already holds {inCart} of this item — the shop only has {stock}.",
       "itemNotFound": "This item is no longer in your cart."
     }
@@ -2511,9 +2511,11 @@
         "nameRequired": "Enter a product name",
         "salePriceRequired": "Enter a sale price",
         "rentalPriceRequired": "Enter a rental price per day",
-        "bothPricesRequired": "Enter both a sale price and a rental price"
+        "bothPricesRequired": "Enter both a sale price and a rental price",
+        "amountTooHigh": "That amount is too large — at most 10,000,000,000₫"
       },
       "profile": {
+        "amountTooHigh": "That amount is too large — at most 10,000,000,000₫",
         "displayNameRequired": "Enter a display name",
         "addressRequired": "Enter a detailed address",
         "provinceRequired": "Select a province",
@@ -2524,6 +2526,7 @@
         "contentTooShort": "Share a bit more detail (at least 20 characters)"
       },
       "service": {
+        "amountTooHigh": "That amount is too large — at most 10,000,000,000₫",
         "nameRequired": "Enter a service name",
         "durationRequired": "Enter a duration in minutes",
         "priceRequired": "Enter a price"

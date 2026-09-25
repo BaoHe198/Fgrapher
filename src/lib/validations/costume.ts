@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_VND_AMOUNT } from "@/lib/validations/money";
 
 // The eight costume categories a costume shop can tag an outfit with. Same
 // values as the COSTUME_SHOP entry of CATEGORIES_BY_ROLE — they are
@@ -21,7 +22,10 @@ export const createCostumeSchema = z.object({
   name: z.string().min(2, "Enter an outfit name"),
   description: z.string().max(1000).optional(),
   category: z.enum(COSTUME_CATEGORIES).nullish(),
-  rentalPricePerDay: z.number().positive("Enter a daily rental price"),
+  rentalPricePerDay: z
+    .number()
+    .positive("Enter a daily rental price")
+    .max(MAX_VND_AMOUNT, "That amount is too large"),
   // Optional: a shop may take no deposit at all. 0 and null both mean "no
   // deposit"; the shop collects whatever it sets directly.
   depositAmount: z.number().nonnegative().max(1_000_000_000).nullish(),

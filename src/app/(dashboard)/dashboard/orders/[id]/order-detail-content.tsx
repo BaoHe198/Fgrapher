@@ -29,7 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/format";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 type Party = Pick<User, "id" | "name" | "firstName" | "avatar" | "email">;
 type OrderDetail = Order & {
@@ -162,38 +162,40 @@ export function OrderDetailContent() {
       {order.status !== "CANCELLED" && order.status !== "RETURNED" ? (
         // Each step is named: bare "1 — 2 — 3 — 4" told neither side what
         // the order was waiting for (24/09 audit).
-        <ol className="flex items-start gap-2">
+        // Four equal columns, so the last step can't run off a phone
+        // screen (it was cut to "Khách đã…" at 390px); the connector sits
+        // behind the circles from each column's centre to the next.
+        <ol className="grid grid-cols-4">
           {STEPS.map((step, index) => (
             <li
               key={step}
-              className="flex flex-1 items-start last:flex-none"
+              className="relative flex flex-col items-center gap-1.5 px-1 text-center"
               aria-current={index === stepIndex ? "step" : undefined}
             >
-              <div className="flex flex-col items-center gap-1.5">
-                <div
-                  className={`flex size-7 items-center justify-center rounded-full text-body-sm font-bold ${
-                    index <= stepIndex
-                      ? "bg-brand-primary text-text-on-brand"
-                      : "bg-bg-sunken text-text-tertiary"
-                  }`}
-                >
-                  {index + 1}
-                </div>
-                <span
-                  className={`text-center text-caption whitespace-nowrap ${
-                    index <= stepIndex
-                      ? "text-text-primary"
-                      : "text-text-tertiary"
-                  }`}
-                >
-                  {statusLabel(step)}
-                </span>
-              </div>
               {index < STEPS.length - 1 ? (
                 <div
-                  className={`mx-1.5 mt-3.5 h-px flex-1 ${index < stepIndex ? "bg-brand-primary" : "bg-bg-sunken"}`}
+                  aria-hidden
+                  className={`absolute top-3.5 left-1/2 h-px w-full ${index < stepIndex ? "bg-brand-primary" : "bg-bg-sunken"}`}
                 />
               ) : null}
+              <div
+                className={`relative flex size-7 items-center justify-center rounded-full text-body-sm font-bold ${
+                  index <= stepIndex
+                    ? "bg-brand-primary text-text-on-brand"
+                    : "bg-bg-sunken text-text-tertiary"
+                }`}
+              >
+                {index + 1}
+              </div>
+              <span
+                className={`text-caption leading-tight ${
+                  index <= stepIndex
+                    ? "text-text-primary"
+                    : "text-text-tertiary"
+                }`}
+              >
+                {statusLabel(step)}
+              </span>
             </li>
           ))}
         </ol>
@@ -489,12 +491,16 @@ function ProductReviewForm({
   onDone: () => void;
 }) {
   const t = useTranslations("dashboardCore.orderDetail");
-  const [rating, setRating] = useState(5);
+  // No stars until the buyer picks some. It used to start at 5 while the
+  // stars looked empty, so an immediate "send" filed a 5-star review
+  // nobody chose.
+  const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const submit = async () => {
+    if (rating === 0) return;
     setBusy(true);
     setError(null);
     const res = await fetch("/api/product-reviews", {
@@ -528,12 +534,14 @@ function ProductReviewForm({
             key={value}
             type="button"
             aria-label={`${t("ratingLabel")} ${value}`}
+            aria-pressed={value <= rating}
             onClick={() => setRating(value)}
-            className={
-              value <= rating ? "text-brand-primary" : "text-text-tertiary"
-            }
+            className={cn(
+              "-m-1 cursor-pointer rounded-full p-1.5",
+              value <= rating ? "text-gold-500" : "text-text-tertiary",
+            )}
           >
-            <Star className="size-5" />
+            <Star className={cn("size-6", value <= rating && "fill-current")} />
           </button>
         ))}
       </div>
@@ -545,7 +553,12 @@ function ProductReviewForm({
         onChange={(event) => setContent(event.target.value)}
       />
       {error ? <p className="text-body-sm text-danger">{error}</p> : null}
-      <Button variant="accent" size="sm" disabled={busy} onClick={submit}>
+      <Button
+        variant="accent"
+        size="sm"
+        disabled={busy || rating === 0}
+        onClick={submit}
+      >
         {busy ? <Loader2 className="size-4 animate-spin" /> : null}
         {t("reviewSubmit")}
       </Button>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { SELLER_ROLES } from "@/lib/constants";
@@ -7,7 +8,7 @@ import { features } from "@/lib/features";
 import { UploadVerificationError } from "@/lib/cloudinary";
 import {
   productCategoryAllowedForRole,
-  productSchema,
+  getProductSchema,
 } from "@/lib/validations/product";
 import { deleteProduct, updateProduct } from "@/services/products";
 
@@ -67,7 +68,9 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const parsed = productSchema.safeParse(body);
+    const parsed = getProductSchema(
+      await getTranslations("libServices.validation.product"),
+    ).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {

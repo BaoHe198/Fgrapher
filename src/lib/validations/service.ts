@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_VND_AMOUNT } from "@/lib/validations/money";
 
 import { SERVICE_KINDS } from "@/lib/constants/service-matrix";
 
@@ -13,7 +14,10 @@ export const createServiceSchema = z.object({
   // provider's calendar. Providers no longer set it (project owner,
   // 21/09/2026) — they state the timing in the description instead.
   duration: z.number().int().positive().default(60),
-  price: z.number().positive("Enter a price"),
+  price: z
+    .number()
+    .positive("Enter a price")
+    .max(MAX_VND_AMOUNT, "That amount is too large"),
   isActive: z.boolean().default(true),
 });
 
@@ -37,7 +41,10 @@ export function getCreateServiceSchema(t: (key: string) => string) {
     // provider's calendar. Providers no longer set it (project owner,
     // 21/09/2026) — they state the timing in the description instead.
     duration: z.number().int().positive().default(60),
-    price: z.number().positive(t("priceRequired")),
+    price: z
+      .number()
+      .positive(t("priceRequired"))
+      .max(MAX_VND_AMOUNT, t("amountTooHigh")),
     isActive: z.boolean().default(true),
   });
 }

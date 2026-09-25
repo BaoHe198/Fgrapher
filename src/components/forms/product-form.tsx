@@ -19,8 +19,8 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { Switch } from "@/components/ui/switch";
 import {
+  getProductSchema,
   productCategoriesForRole,
-  productSchema,
   type ProductInput,
 } from "@/lib/validations/product";
 
@@ -36,6 +36,7 @@ export function ProductForm({
   defaultValues,
 }: ProductFormProps) {
   const t = useTranslations("uiKit.productForm");
+  const tValidation = useTranslations("libServices.validation.product");
   const productCategories = productCategoriesForRole(sellerRole);
   const tCondition = useTranslations("uiKit.condition");
   const tCategory = useTranslations("productCategory");
@@ -56,7 +57,9 @@ export function ProductForm({
     control,
     formState: { errors, isSubmitting },
   } = useForm<ProductInput>({
-    resolver: zodResolver(productSchema),
+    // The translated schema: this one used to show English messages
+    // ("Enter a sale price") in the Vietnamese form.
+    resolver: zodResolver(getProductSchema(tValidation)),
     defaultValues: {
       name: "",
       description: "",

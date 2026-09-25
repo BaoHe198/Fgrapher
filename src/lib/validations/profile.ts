@@ -1,5 +1,6 @@
 import { ExperienceLevel, ProfileCategory } from "@prisma/client";
 import { z } from "zod";
+import { MAX_VND_AMOUNT } from "@/lib/validations/money";
 
 import { isValidZaloUrl, normalizeZaloUrl } from "@/lib/zalo";
 
@@ -40,8 +41,8 @@ export const updateProfileSchema = z.object({
   facebook: z.string().max(60).optional(),
   tiktok: z.string().max(60).optional(),
   zaloUrl: zaloUrlSchema("Enter an official https://zalo.me link"),
-  priceMin: z.number().nonnegative().optional(),
-  priceMax: z.number().nonnegative().optional(),
+  priceMin: z.number().nonnegative().max(MAX_VND_AMOUNT).optional(),
+  priceMax: z.number().nonnegative().max(MAX_VND_AMOUNT).optional(),
   categories: z.array(z.enum(ProfileCategory)).optional(),
   address: z.string().trim().min(5).max(200),
   addressPoint: addressPointSchema,
@@ -87,8 +88,16 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     facebook: z.string().max(60).optional(),
     tiktok: z.string().max(60).optional(),
     zaloUrl: zaloUrlSchema(t("zaloUrlInvalid")),
-    priceMin: z.number().nonnegative().optional(),
-    priceMax: z.number().nonnegative().optional(),
+    priceMin: z
+      .number()
+      .nonnegative()
+      .max(MAX_VND_AMOUNT, t("amountTooHigh"))
+      .optional(),
+    priceMax: z
+      .number()
+      .nonnegative()
+      .max(MAX_VND_AMOUNT, t("amountTooHigh"))
+      .optional(),
     categories: z.array(z.enum(ProfileCategory)).optional(),
     address: z.string().trim().min(5, t("addressRequired")).max(200),
     addressPoint: addressPointSchema,

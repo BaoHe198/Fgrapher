@@ -85,11 +85,7 @@ export function RespondReviewModal({
               <span className="text-body-sm font-semibold! text-text-primary">
                 {reviewerName}
               </span>
-              <StarRating
-                rating={rating}
-                reviews={0}
-                className="[&>span:last-child]:hidden"
-              />
+              <StarRating rating={rating} />
             </div>
             {content ? (
               <p className="text-body-sm text-text-secondary">{content}</p>

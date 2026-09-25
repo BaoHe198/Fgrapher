@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 
 interface StarRatingProps {
   rating: string | number;
-  reviews: number;
+  /** How many reviews the rating averages. Leave out for one review's own stars. */
+  reviews?: number;
   size?: number;
   className?: string;
   // Prompt G5, VIỆC 5 — "Mới (0)" reads as a mistake, not a status. Opt-in
@@ -35,7 +36,9 @@ function StarRating({
     >
       <Star size={size} className="fill-gold-500 text-gold-500" />
       <span className="font-semibold text-text-primary">{rating}</span>
-      <span className="text-text-secondary">({reviews})</span>
+      {reviews !== undefined ? (
+        <span className="text-text-secondary">({reviews})</span>
+      ) : null}
     </div>
   );
 }

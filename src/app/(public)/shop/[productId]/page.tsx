@@ -135,10 +135,7 @@ export default async function ProductDetailPage({
                             review.reviewer.name ??
                             ""}
                         </span>
-                        <StarRating
-                          rating={String(review.rating)}
-                          reviews={0}
-                        />
+                        <StarRating rating={String(review.rating)} />
                       </div>
                       {review.content ? (
                         <p className="whitespace-pre-wrap text-body-md text-text-secondary">

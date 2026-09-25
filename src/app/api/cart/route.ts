@@ -97,6 +97,8 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "cart_error",
+          // Lets "Mua ngay" tell "already in your cart" from a real failure.
+          code: err.code ?? null,
           message: await cartErrorMessage(err),
         },
         { status: err.status },

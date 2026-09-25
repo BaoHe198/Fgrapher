@@ -143,11 +143,7 @@ export function ReviewsDashboardContent({
                     {partyName(review.reviewer, t)}
                   </span>
                   <div className="flex items-center gap-2">
-                    <StarRating
-                      rating={review.rating}
-                      reviews={0}
-                      className="[&>span:last-child]:hidden"
-                    />
+                    <StarRating rating={review.rating} />
                     <span className="text-body-sm text-text-tertiary">
                       {formatDate(review.createdAt)}
                     </span>

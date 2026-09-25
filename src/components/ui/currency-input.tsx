@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { MAX_VND_DIGITS } from "@/lib/validations/money";
 
 // Value/onChange carry the raw digit string (e.g. "1000000"), matching what
 // callers store and eventually send to the API — this component only owns
@@ -42,7 +43,11 @@ function CurrencyInput({
         inputMode="numeric"
         data-slot="input"
         value={formatted}
-        onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
+        // Capped at MAX_VND_DIGITS: a caret left mid-number used to let a
+        // retyped price append to the old one (45.000.000 + 44000000).
+        onChange={(e) =>
+          onChange(e.target.value.replace(/\D/g, "").slice(0, MAX_VND_DIGITS))
+        }
         aria-invalid={ariaInvalid ?? Boolean(error)}
         className={cn(
           "h-auto w-full min-w-0 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 pr-9 text-body-md text-text-primary outline-none transition-[border-color,box-shadow,background-color] placeholder:text-text-tertiary hover:border-border-strong focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger",

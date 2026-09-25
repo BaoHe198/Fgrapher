@@ -2,6 +2,7 @@ import { ProfileCategory } from "@prisma/client";
 import { z } from "zod";
 
 import { locationTypeSchema } from "@/lib/validations/booking";
+import { MAX_VND_AMOUNT } from "@/lib/validations/money";
 import {
   MAX_REFERENCE_MEDIA,
   referenceMediaUrlSchema,
@@ -41,8 +42,8 @@ const serviceRequestFields = z.object({
   wardId: z.string().nullable().optional(),
   areaNote: z.string().max(120).optional(),
   detailedAddress: z.string().max(300).optional(),
-  budgetMin: z.coerce.number().positive().optional(),
-  budgetMax: z.coerce.number().positive().optional(),
+  budgetMin: z.coerce.number().positive().max(MAX_VND_AMOUNT).optional(),
+  budgetMax: z.coerce.number().positive().max(MAX_VND_AMOUNT).optional(),
   // Photos or videos (mediaUrl holds either — see lib/media-kind.ts). Only
   // Cloudinary delivery URLs: these are rendered for every provider who
   // opens the request, so an arbitrary URL here would be loaded into all of
@@ -122,7 +123,7 @@ export const updateDraftServiceRequestSchema = serviceRequestFields
 
 export const createOfferSchema = z.object({
   message: z.string().max(1000).optional(),
-  proposedPrice: z.coerce.number().positive(),
+  proposedPrice: z.coerce.number().positive().max(MAX_VND_AMOUNT),
   proposedDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)

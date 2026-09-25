@@ -1323,7 +1323,7 @@
     "cartErrors": {
       "productNotFound": "Không tìm thấy sản phẩm.",
       "rentalByMessage": "Đồ cho thuê được thỏa thuận trực tiếp với shop qua tin nhắn.",
-      "notEnoughStock": "Shop chỉ còn {stock} sản phẩm này.",
+      "notEnoughStock": "{stock, plural, =0 {Sản phẩm này đã hết hàng.} other {Shop chỉ còn # sản phẩm này.}}",
       "alreadyAtStock": "Giỏ hàng của bạn đã có {inCart} sản phẩm này — shop chỉ còn {stock}.",
       "itemNotFound": "Sản phẩm này không còn trong giỏ hàng."
     }
@@ -2511,9 +2511,11 @@
         "nameRequired": "Vui lòng nhập tên sản phẩm",
         "salePriceRequired": "Vui lòng nhập giá bán",
         "rentalPriceRequired": "Vui lòng nhập giá thuê mỗi ngày",
-        "bothPricesRequired": "Vui lòng nhập cả giá bán và giá thuê"
+        "bothPricesRequired": "Vui lòng nhập cả giá bán và giá thuê",
+        "amountTooHigh": "Số tiền quá lớn — tối đa 10.000.000.000₫"
       },
       "profile": {
+        "amountTooHigh": "Số tiền quá lớn — tối đa 10.000.000.000₫",
         "displayNameRequired": "Vui lòng nhập tên hiển thị",
         "addressRequired": "Vui lòng nhập địa chỉ chi tiết",
         "provinceRequired": "Vui lòng chọn tỉnh/thành",
@@ -2524,6 +2526,7 @@
         "contentTooShort": "Vui lòng chia sẻ chi tiết hơn (tối thiểu 20 ký tự)"
       },
       "service": {
+        "amountTooHigh": "Số tiền quá lớn — tối đa 10.000.000.000₫",
         "nameRequired": "Vui lòng nhập tên dịch vụ",
         "durationRequired": "Vui lòng nhập thời lượng (phút)",
         "priceRequired": "Vui lòng nhập giá"

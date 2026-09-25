@@ -1,5 +1,6 @@
 import type { Role } from "@prisma/client";
 import { z } from "zod";
+import { MAX_VND_AMOUNT } from "@/lib/validations/money";
 
 export const CAMERA_PRODUCT_CATEGORIES = [
   "Camera body",
@@ -90,36 +91,18 @@ export function productCategoryAllowedForRole(role: Role, category: string) {
   );
 }
 
-export const productSchema = z
-  .object({
-    name: z.string().min(2, "Enter a product name"),
-    description: z.string().optional(),
-    category: z.enum(PRODUCT_CATEGORIES),
-    type: z.enum(["SALE", "RENT", "BOTH"]),
-    price: z.number().positive().optional(),
-    rentalPrice: z.number().positive().optional(),
-    depositAmount: z.number().min(0).optional(),
-    condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR"]),
-    stock: z.number().int().min(0),
-    isActive: z.boolean(),
-    images: z.array(
-      z.object({ url: z.string().url(), publicId: z.string().min(1) }),
-    ),
-  })
-  .refine((data) => data.type !== "SALE" || data.price !== undefined, {
-    message: "Enter a sale price",
-    path: ["price"],
-  })
-  .refine((data) => data.type !== "RENT" || data.rentalPrice !== undefined, {
-    message: "Enter a rental price per day",
-    path: ["rentalPrice"],
-  })
-  .refine(
-    (data) =>
-      data.type !== "BOTH" ||
-      (data.price !== undefined && data.rentalPrice !== undefined),
-    { message: "Enter both a sale price and a rental price", path: ["price"] },
-  );
+// English messages for server logs and any caller without a translator.
+const PRODUCT_MESSAGES_EN: Record<string, string> = {
+  nameRequired: "Enter a product name",
+  salePriceRequired: "Enter a sale price",
+  rentalPriceRequired: "Enter a rental price per day",
+  bothPricesRequired: "Enter both a sale price and a rental price",
+  amountTooHigh: "That amount is too large",
+};
+
+export const productSchema = getProductSchema(
+  (key) => PRODUCT_MESSAGES_EN[key] ?? key,
+);
 
 export type ProductInput = z.infer<typeof productSchema>;
 
@@ -134,9 +117,21 @@ export function getProductSchema(t: (key: string) => string) {
       description: z.string().optional(),
       category: z.enum(PRODUCT_CATEGORIES),
       type: z.enum(["SALE", "RENT", "BOTH"]),
-      price: z.number().positive().optional(),
-      rentalPrice: z.number().positive().optional(),
-      depositAmount: z.number().min(0).optional(),
+      price: z
+        .number()
+        .positive()
+        .max(MAX_VND_AMOUNT, t("amountTooHigh"))
+        .optional(),
+      rentalPrice: z
+        .number()
+        .positive()
+        .max(MAX_VND_AMOUNT, t("amountTooHigh"))
+        .optional(),
+      depositAmount: z
+        .number()
+        .min(0)
+        .max(MAX_VND_AMOUNT, t("amountTooHigh"))
+        .optional(),
       condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR"]),
       stock: z.number().int().min(0),
       isActive: z.boolean(),
