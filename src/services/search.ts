@@ -76,6 +76,9 @@ const PAGE_SIZE_DEFAULT = 24;
 export const PUBLIC_USER_FILTER = {
   deletedAt: null,
   isSuspended: false,
+  // No username means no public page (/profile/<username>); a card for such
+  // an account linked to /profile/ and a 404.
+  username: { not: null },
 } as const;
 
 const PROVIDER_INCLUDE = {

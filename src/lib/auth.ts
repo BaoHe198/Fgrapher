@@ -30,6 +30,7 @@ import { loginSchema } from "@/lib/validations/auth";
 import { PAID_ROLES } from "@/lib/constants";
 import { resolvePartyName } from "@/lib/party-name";
 import { joinVietnameseName } from "@/lib/vietnamese-name";
+import { assignUsernameIfMissing } from "@/services/username";
 
 // Two layers: per-IP catches a scripted credential-stuffing loop trying
 // many different accounts from one source; per-email catches someone
@@ -197,6 +198,12 @@ const {
       // server-side store to revoke from — see docs/DEVELOPMENT.md's
       // technical debt register), only blocks new sign-ins from here on.
       if (dbUser?.isSuspended) return false;
+
+      // Accounts made before sign-up assigned usernames, and OAuth accounts
+      // (created by the adapter), get one here; a no-op when it is set.
+      if (dbUser && !dbUser.username) {
+        await assignUsernameIfMissing(dbUser.id);
+      }
 
       // OAuth providers already verify email ownership; only gate credentials login.
       if (account?.provider !== "credentials") return true;

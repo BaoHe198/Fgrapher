@@ -11,6 +11,7 @@ import { splitVietnameseName } from "@/lib/vietnamese-name";
 import { recordConsent } from "@/services/compliance";
 import { sendVerificationEmail } from "@/services/email-verification";
 import { assignFreePlan } from "@/services/subscription";
+import { assignUsernameIfMissing } from "@/services/username";
 import { Prisma } from "@prisma/client";
 
 // Registration hits the DB unconditionally (email-uniqueness check, user
@@ -147,6 +148,10 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    // The public profile lives at /profile/<username>; give every new
+    // account one now rather than leaving it to settings.
+    await assignUsernameIfMissing(user.id);
 
     // Three separate ConsentRecord rows, always — including for the two
     // optional purposes even when declined, so there's a complete record

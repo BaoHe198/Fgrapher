@@ -11,6 +11,12 @@ import "./src/lib/env";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const isDev = process.env.NODE_ENV === "development";
+// A local build served over plain http (next start for e2e/manual testing).
+// There, upgrade-insecure-requests makes Safari/WebKit fetch every CSS, JS
+// and font file over https://localhost and fail — the page renders
+// unstyled. Chrome exempts localhost, which is why this went unnoticed.
+// Anything else, including an unset NEXTAUTH_URL, keeps the directive.
+const isLocalHttp = process.env.NEXTAUTH_URL?.startsWith("http://localhost");
 
 // No nonce-based CSP (Next.js's own recommended stricter approach) — that
 // requires forcing every page into dynamic rendering, which conflicts with
@@ -60,7 +66,7 @@ const cspHeader = `
   base-uri 'self';
   form-action 'self';
   frame-ancestors 'none';
-  upgrade-insecure-requests;
+  ${isLocalHttp ? "" : "upgrade-insecure-requests;"}
 `
   .replace(/\s{2,}/g, " ")
   .trim();

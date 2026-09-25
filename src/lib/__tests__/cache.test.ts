@@ -218,10 +218,12 @@ describe("cached reads stay cached", () => {
 });
 
 describe("public reads exclude suspended / soft-deleted accounts", () => {
-  it("PUBLIC_USER_FILTER requires a live, unsuspended owner", () => {
+  it("PUBLIC_USER_FILTER requires a live, unsuspended owner with a public address", () => {
     assert.deepEqual(PUBLIC_USER_FILTER, {
       deletedAt: null,
       isSuspended: false,
+      // no username → no /profile/<username> page to link to
+      username: { not: null },
     });
   });
 
