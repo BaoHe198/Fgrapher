@@ -1553,8 +1553,11 @@
       "title": "Saved artists",
       "empty": {
         "title": "No saved artists yet",
-        "body": "Tap the bookmark icon on a profile to save it here."
+        "body": "Tap the bookmark icon on a profile to save it here.",
+        "cta": "Browse artists"
       },
+      "remove": "Remove",
+      "removeFailed": "Couldn't remove it, please try again",
       "unnamed": "Unnamed",
       "priceFrom": "From {amount}",
       "newBadge": "New"
@@ -3975,6 +3978,8 @@
       "targetMessage": "this message",
       "targetProduct": "this product",
       "reasonLabel": "Reason",
+      "reasonPlaceholder": "Choose a reason",
+      "submitFailed": "Couldn't send the report, please try again",
       "detailsPlaceholder": "Additional details (optional)",
       "cancel": "Cancel",
       "submit": "Submit report",

@@ -41,12 +41,17 @@ export function ReportModal({
   targetId,
 }: ReportModalProps) {
   const t = useTranslations("sharedComponents.reportModal");
-  const [reason, setReason] = useState(REASONS[0]);
+  // No reason picked in advance: with "Spam" preselected, one careless tap
+  // filed a spam report the visitor never chose.
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async () => {
+    if (!reason) return;
     setIsSubmitting(true);
+    setError(null);
     const res = await fetch("/api/reports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -56,13 +61,17 @@ export function ReportModal({
         reason,
         description: description || undefined,
       }),
-    });
+    }).catch(() => null);
     setIsSubmitting(false);
 
-    if (res.ok) {
+    if (res?.ok) {
       toast.add({ title: t("submitted"), type: "success" });
       onOpenChange(false);
       setDescription("");
+      setReason("");
+    } else {
+      const body = await res?.json().catch(() => null);
+      setError(body?.message ?? t("submitFailed"));
     }
   };
 
@@ -79,10 +88,13 @@ export function ReportModal({
             label={t("reasonLabel")}
             value={reason}
             onChange={setReason}
-            options={REASONS.map((r) => ({
-              value: r,
-              label: t(`reasons.${r}`),
-            }))}
+            options={[
+              { value: "", label: t("reasonPlaceholder") },
+              ...REASONS.map((r) => ({
+                value: r,
+                label: t(`reasons.${r}`),
+              })),
+            ]}
           />
           <Textarea
             placeholder={t("detailsPlaceholder")}
@@ -90,6 +102,11 @@ export function ReportModal({
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
           />
+          {error ? (
+            <p className="text-body-sm text-danger" role="alert">
+              {error}
+            </p>
+          ) : null}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
@@ -97,7 +114,7 @@ export function ReportModal({
           </Button>
           <Button
             variant="destructive"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !reason}
             onClick={onSubmit}
           >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}

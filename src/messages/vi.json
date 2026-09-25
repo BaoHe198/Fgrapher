@@ -1553,8 +1553,11 @@
       "title": "Nghệ sĩ đã lưu",
       "empty": {
         "title": "Chưa lưu nghệ sĩ nào",
-        "body": "Nhấn biểu tượng bookmark trên một hồ sơ để lưu vào đây."
+        "body": "Nhấn biểu tượng dấu trang trên một hồ sơ để lưu vào đây.",
+        "cta": "Khám phá nghệ sĩ"
       },
+      "remove": "Bỏ lưu",
+      "removeFailed": "Không bỏ lưu được, vui lòng thử lại",
       "unnamed": "Chưa đặt tên",
       "priceFrom": "Từ {amount}",
       "newBadge": "Mới"
@@ -3975,6 +3978,8 @@
       "targetMessage": "tin nhắn này",
       "targetProduct": "sản phẩm này",
       "reasonLabel": "Lý do",
+      "reasonPlaceholder": "Chọn lý do",
+      "submitFailed": "Không gửi được báo cáo, vui lòng thử lại",
       "detailsPlaceholder": "Thông tin bổ sung (không bắt buộc)",
       "cancel": "Hủy",
       "submit": "Gửi báo cáo",

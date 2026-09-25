@@ -3,6 +3,7 @@
 import { Bookmark, Check, Flag, Link2, QrCode, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
 import Script from "next/script";
 import { startTransition, useEffect, useState } from "react";
 
@@ -43,6 +44,17 @@ export function ProfileActions({
   const t = useTranslations("publicPages.profile.shareMenu");
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && Boolean(session?.user);
+  const router = useRouter();
+  const pathname = usePathname();
+  // A visitor who isn't signed in is sent to sign in and brought back here.
+  // These buttons used to be greyed out for them with no hint why, while
+  // "Nhắn tin" beside them did exactly this.
+  const requireSignIn = () => {
+    if (isAuthenticated) return false;
+    if (status === "loading") return true;
+    router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
+    return true;
+  };
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(initialFollowerCount);
@@ -78,7 +90,7 @@ export function ProfileActions({
   }, [isAuthenticated, isOwnProfile, targetUserId, profileId]);
 
   const toggleFollow = async () => {
-    if (!isAuthenticated) return;
+    if (requireSignIn()) return;
     const next = !isFollowing;
     setIsFollowing(next);
     setFollowerCount((c) => c + (next ? 1 : -1));
@@ -97,7 +109,7 @@ export function ProfileActions({
   };
 
   const toggleSave = async () => {
-    if (!isAuthenticated) return;
+    if (requireSignIn()) return;
     const next = !isSaved;
     setIsSaved(next);
 
@@ -126,7 +138,6 @@ export function ProfileActions({
           <Button
             variant={isFollowing ? "ghost" : "secondary"}
             size="sm"
-            disabled={!isAuthenticated}
             onClick={toggleFollow}
           >
             {isFollowing ? <Check className="size-4" /> : null}
@@ -142,7 +153,6 @@ export function ProfileActions({
         <Button
           variant="ghost"
           size="icon-sm"
-          disabled={!isAuthenticated}
           onClick={toggleSave}
           aria-label={isSaved ? t("removeFromSaved") : t("saveProfile")}
         >
@@ -200,8 +210,9 @@ export function ProfileActions({
         <Button
           variant="ghost"
           size="icon-sm"
-          disabled={!isAuthenticated}
-          onClick={() => setReportOpen(true)}
+          onClick={() => {
+            if (!requireSignIn()) setReportOpen(true);
+          }}
           aria-label={t("report")}
         >
           <Flag className="size-4" />
