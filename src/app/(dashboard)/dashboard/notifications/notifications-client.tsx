@@ -15,6 +15,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { notificationHref } from "@/lib/notification-href";
 
 type FilterTab =
   "ALL" | "UNREAD" | "BOOKINGS" | "ORDERS" | "MESSAGES" | "SOCIAL";
@@ -87,18 +88,6 @@ function relativeTime(
   if (hours < 24) return t("hoursAgo", { hours });
   const days = Math.floor(hours / 24);
   return t("daysAgo", { days });
-}
-
-function notificationHref(notification: Notification) {
-  const data = notification.data as {
-    bookingId?: string;
-    orderId?: string;
-    href?: string;
-  } | null;
-  if (data?.href?.startsWith("/dashboard/")) return data.href;
-  if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
-  if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
-  return "/dashboard/notifications";
 }
 
 export function NotificationsClient({

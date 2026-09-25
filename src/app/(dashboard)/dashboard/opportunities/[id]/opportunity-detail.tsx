@@ -77,7 +77,10 @@ export function OpportunityDetail({
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isEditable = !offer || offer.status === "PENDING";
+  // A withdrawn offer can be sent again (the server reopens the same row);
+  // only an accepted or declined one is final.
+  const isPending = offer?.status === "PENDING";
+  const isEditable = !offer || isPending || offer.status === "WITHDRAWN";
 
   const submitOffer = async () => {
     setError(null);
@@ -90,7 +93,7 @@ export function OpportunityDetail({
         ? proposedDate || undefined
         : undefined,
     };
-    const res = offer
+    const res = isPending
       ? await fetch(`/api/offers/${offer.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -269,9 +272,9 @@ export function OpportunityDetail({
               {isSubmitting ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : null}
-              {offer ? t("updateOffer") : t("sendOffer")}
+              {isPending ? t("updateOffer") : t("sendOffer")}
             </Button>
-            {offer ? (
+            {isPending ? (
               <Button
                 variant="ghost"
                 className="text-danger"

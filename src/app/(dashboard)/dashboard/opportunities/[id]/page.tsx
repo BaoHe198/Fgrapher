@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { resolvePartyName } from "@/lib/party-name";
 import { OfferError, getOpportunityDetail } from "@/services/request-offers";
 
@@ -23,7 +24,19 @@ export default async function OpportunityDetailPage({
 
   const { id } = await params;
   const { role } = await searchParams;
-  if (!role) notFound();
+  // Links from notifications and emails carry only the request id. The
+  // request itself says which role it wants; use that when this provider
+  // holds it, instead of a "page not found".
+  if (!role) {
+    const request = await db.serviceRequest.findUnique({
+      where: { id },
+      select: { role: true },
+    });
+    if (request && session.user.roles.includes(request.role)) {
+      redirect(`/dashboard/opportunities/${id}?role=${request.role}`);
+    }
+    notFound();
+  }
 
   let request;
   try {

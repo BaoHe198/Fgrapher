@@ -35,6 +35,12 @@ function requestUrlFor(requestId: string) {
   return appUrl(`/dashboard/requests/${requestId}`);
 }
 
+// The same request seen from the provider's side. /dashboard/requests/<id>
+// is the customer's page, and a provider following it got "not found".
+function opportunityUrlFor(requestId: string) {
+  return appUrl(`/dashboard/opportunities/${requestId}`);
+}
+
 // namespace "libServices.email" — every caller below runs in a request
 // context (route handlers), so the request locale is used.
 function getRequestEmailT() {
@@ -559,6 +565,23 @@ export async function editOffer(
   });
 }
 
+/**
+ * A request shows "has offers" only while one is actually waiting. Once the
+ * last pending offer is withdrawn or declined it goes back to OPEN, so it is
+ * listed and nudged like any request still looking for someone — it used to
+ * stay HAS_OFFERS with nothing left to choose from.
+ */
+async function reopenIfNoPendingOffers(requestId: string) {
+  const pending = await db.requestOffer.count({
+    where: { requestId, status: "PENDING" },
+  });
+  if (pending > 0) return;
+  await db.serviceRequest.updateMany({
+    where: { id: requestId, status: "HAS_OFFERS" },
+    data: { status: "OPEN" },
+  });
+}
+
 export async function withdrawOffer(offerId: string, providerId: string) {
   const offer = await db.requestOffer.findUnique({ where: { id: offerId } });
   if (!offer || offer.providerId !== providerId) throw new OfferNotFoundError();
@@ -566,10 +589,12 @@ export async function withdrawOffer(offerId: string, providerId: string) {
     throw new OfferError("Only a pending offer can be withdrawn", 400);
   }
 
-  return db.requestOffer.update({
+  const withdrawn = await db.requestOffer.update({
     where: { id: offerId },
     data: { status: "WITHDRAWN" },
   });
+  await reopenIfNoPendingOffers(offer.requestId);
+  return withdrawn;
 }
 
 export async function listProviderOffers(providerId: string) {
@@ -761,6 +786,7 @@ export async function declineOffer(offerId: string, customerId: string) {
     where: { id: offerId },
     data: { status: "DECLINED" as RequestOfferStatus },
   });
+  await reopenIfNoPendingOffers(offer.requestId);
 
   const declineEmailT = await getRequestEmailT();
   const declineNt = await getRequestNotifyT();
@@ -779,7 +805,7 @@ export async function declineOffer(offerId: string, customerId: string) {
         t: declineEmailT,
         requestTitle: offer.request.title,
         requestCode: offer.request.code,
-        requestUrl: requestUrlFor(offer.requestId),
+        requestUrl: opportunityUrlFor(offer.requestId),
       }),
       dedupe: [offer.requestId, "DECLINED", offer.id],
     },

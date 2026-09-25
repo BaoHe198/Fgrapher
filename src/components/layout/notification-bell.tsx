@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { notificationHref } from "@/lib/notification-href";
 
 const ICONS: Record<NotificationType, typeof Bell> = {
   BOOKING_REQUEST: Calendar,
@@ -83,22 +84,6 @@ function relativeTime(
   if (hours < 24) return labels.hoursAgo(hours);
   const days = Math.floor(hours / 24);
   return labels.daysAgo(days);
-}
-
-function notificationHref(notification: Notification) {
-  const data = notification.data as {
-    bookingId?: string;
-    orderId?: string;
-    postId?: string;
-    href?: string;
-  } | null;
-  if (data?.href?.startsWith("/dashboard/")) return data.href;
-  if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
-  if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
-  // A like or a comment is only useful if it takes you to the post it is
-  // about; before this it landed on the notifications list.
-  if (data?.postId) return `/community/${data.postId}`;
-  return "/dashboard/notifications";
 }
 
 export function NotificationBell() {
