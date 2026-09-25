@@ -16,6 +16,7 @@ interface AuthTabsProps {
   callbackUrl?: string;
   hasError: boolean;
   errorCode?: string;
+  errorKind?: string;
   marketplaceEnabled: boolean;
 }
 
@@ -25,6 +26,7 @@ export function AuthTabs({
   callbackUrl,
   hasError,
   errorCode,
+  errorKind,
   marketplaceEnabled,
 }: AuthTabsProps) {
   const t = useTranslations("auth");
@@ -65,6 +67,7 @@ export function AuthTabs({
           callbackUrl={callbackUrl}
           hasError={hasError}
           errorCode={errorCode}
+          errorKind={errorKind}
           interval={interval}
           onSwitchToRegister={() => setMode("register")}
         />

@@ -20,7 +20,10 @@ const SESSION_SYNC_MS = 60_000;
  */
 const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 
-import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth-errors";
+import {
+  ACCOUNT_SUSPENDED_CODE,
+  EMAIL_NOT_VERIFIED_CODE,
+} from "@/lib/auth-errors";
 import { db } from "@/lib/db";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations/auth";
@@ -66,6 +69,10 @@ class EmailNotVerifiedError extends CredentialsSignin {
   code = EMAIL_NOT_VERIFIED_CODE;
 }
 
+class AccountSuspendedError extends CredentialsSignin {
+  code = ACCOUNT_SUSPENDED_CODE;
+}
+
 const {
   handlers,
   auth: uncachedAuth,
@@ -79,6 +86,10 @@ const {
   },
   pages: {
     signIn: "/login",
+    // Any other sign-in failure (e.g. a suspended account via Google, which
+    // the signIn callback refuses) comes back to our own login page with
+    // ?error=…, instead of Auth.js's untranslated default error page.
+    error: "/login",
   },
   providers: [
     Google({
@@ -128,6 +139,13 @@ const {
         // (?error=CredentialsSignin&code=email_not_verified); it's a
         // deliberate, non-sensitive disclosure to someone holding valid
         // credentials for the account.
+        // Checked here, after the password, rather than only in the signIn
+        // callback: a callback refusal becomes AccessDenied on Auth.js's own
+        // English error page, which said nothing about why.
+        if (user.isSuspended) {
+          throw new AccountSuspendedError();
+        }
+
         if (!user.emailVerified) {
           throw new EmailNotVerifiedError();
         }

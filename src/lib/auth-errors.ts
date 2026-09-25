@@ -15,3 +15,10 @@
  * showing "wrong email or password".
  */
 export const EMAIL_NOT_VERIFIED_CODE = "email_not_verified";
+
+/**
+ * The password was correct but an admin has suspended the account. Same
+ * reasoning as above: only someone holding the password learns this, and
+ * "wrong email or password" would send them to reset a password that works.
+ */
+export const ACCOUNT_SUSPENDED_CODE = "account_suspended";

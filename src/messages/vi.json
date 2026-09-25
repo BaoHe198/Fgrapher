@@ -561,6 +561,7 @@
     "login": {
       "metaTitle": "Đăng nhập hoặc tạo tài khoản — Fgrapher",
       "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "accountSuspended": "Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ bộ phận hỗ trợ của Fgrapher nếu bạn cho rằng đây là nhầm lẫn.",
       "title": "Chào mừng trở lại",
       "subtitle": "Đăng nhập để quản lý lịch đặt và portfolio của bạn.",
       "emailLabel": "Email",
@@ -839,6 +840,14 @@
         "highPriority": "Ưu tiên cao",
         "reportedBy": "Báo cáo bởi {name}",
         "targetIdLabel": "· mã đối tượng",
+        "viewTarget": "Xem nội dung bị báo cáo",
+        "targetTypes": {
+          "user": "Hồ sơ",
+          "post": "Bài đăng",
+          "product": "Sản phẩm",
+          "review": "Đánh giá",
+          "message": "Tin nhắn"
+        },
         "resolutionNotePlaceholder": "Ghi chú xử lý (không bắt buộc)",
         "resolve": "Xử lý",
         "dismiss": "Bỏ qua",

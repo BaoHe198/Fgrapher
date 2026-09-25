@@ -3,6 +3,7 @@
 import type { Report, ReportStatus } from "@prisma/client";
 import { Flag, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,17 @@ type ReportRow = Report & {
   } | null;
 };
 
+const TARGET_TYPES = ["user", "post", "product", "review", "message"];
+
+// Where the reported thing can be looked at. Reviews and messages have no
+// page of their own; the queue used to show only a raw id for everything.
+function targetHref(targetType: string, targetId: string): string | null {
+  if (targetType === "user") return `/admin/users/${targetId}`;
+  if (targetType === "post") return `/community/${targetId}`;
+  if (targetType === "product") return `/shop/${targetId}`;
+  return null;
+}
+
 const TAB_VALUES: (ReportStatus | "ALL")[] = [
   "PENDING",
   "REVIEWING",
@@ -31,6 +43,7 @@ const TAB_VALUES: (ReportStatus | "ALL")[] = [
 
 export default function AdminReportsPage() {
   const t = useTranslations("accountFlows.admin.reports");
+  const reasonT = useTranslations("sharedComponents.reportModal.reasons");
   const TAB_LABELS: Record<ReportStatus | "ALL", string> = {
     PENDING: t("tabs.pending"),
     REVIEWING: t("tabs.reviewing"),
@@ -115,9 +128,15 @@ export default function AdminReportsPage() {
                   {report.priority === "HIGH" ? (
                     <Badge variant="destructive">{t("highPriority")}</Badge>
                   ) : null}
-                  <Badge variant="neutral">{report.targetType}</Badge>
+                  <Badge variant="neutral">
+                    {TARGET_TYPES.includes(report.targetType)
+                      ? t(`targetTypes.${report.targetType}`)
+                      : report.targetType}
+                  </Badge>
                   <span className="text-body-md font-semibold! text-text-primary">
-                    {report.reason}
+                    {reasonT.has(report.reason)
+                      ? reasonT(report.reason)
+                      : report.reason}
                   </span>
                 </div>
                 <span className="text-body-sm text-text-tertiary">
@@ -135,6 +154,15 @@ export default function AdminReportsPage() {
                 {t("targetIdLabel")}{" "}
                 <code className="text-body-sm">{report.targetId}</code>
               </p>
+              {targetHref(report.targetType, report.targetId) ? (
+                <Link
+                  href={targetHref(report.targetType, report.targetId)!}
+                  target="_blank"
+                  className="w-fit text-body-sm font-semibold! text-text-link hover:underline"
+                >
+                  {t("viewTarget")} ↗
+                </Link>
+              ) : null}
               {report.description ? (
                 <p className="text-body-md text-text-primary">
                   {report.description}
@@ -174,11 +202,20 @@ export default function AdminReportsPage() {
                   </div>
                 </>
               ) : (
-                <Badge
-                  variant={report.status === "RESOLVED" ? "success" : "neutral"}
-                >
-                  {report.status}
-                </Badge>
+                <div className="flex flex-col items-start gap-1.5">
+                  <Badge
+                    variant={
+                      report.status === "RESOLVED" ? "success" : "neutral"
+                    }
+                  >
+                    {TAB_LABELS[report.status]}
+                  </Badge>
+                  {report.reviewNote ? (
+                    <p className="text-body-sm text-text-secondary">
+                      {report.reviewNote}
+                    </p>
+                  ) : null}
+                </div>
               )}
             </Card>
           ))}

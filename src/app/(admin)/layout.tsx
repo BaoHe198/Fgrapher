@@ -81,7 +81,11 @@ export default async function AdminLayout({
           <aside className="hidden lg:block">
             <AdminSidebar counts={queueCounts} />
           </aside>
-          <div className="min-w-0">{children}</div>
+          {/* The one main landmark of the admin pages — there was none, so
+              screen readers had no "skip to content" target here. */}
+          <main id="main-content" className="min-w-0">
+            {children}
+          </main>
         </div>
       </div>
     </div>

@@ -35,6 +35,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       // EMAIL_NOT_VERIFIED_CODE in lib/auth.ts. Everything else stays the
       // generic "wrong email or password".
       errorCode={params.code}
+      errorKind={params.error}
       marketplaceEnabled={features.marketplaceEnabled}
     />
   );

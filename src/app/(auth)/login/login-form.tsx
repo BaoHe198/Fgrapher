@@ -13,7 +13,10 @@ import { SocialRow } from "@/components/auth/social-row";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth-errors";
+import {
+  ACCOUNT_SUSPENDED_CODE,
+  EMAIL_NOT_VERIFIED_CODE,
+} from "@/lib/auth-errors";
 import type { BillingInterval } from "@/lib/onboarding-destination";
 import {
   rememberAttemptedEmail,
@@ -25,6 +28,8 @@ interface LoginFormProps {
   callbackUrl?: string;
   hasError: boolean;
   errorCode?: string;
+  /** Auth.js's `error` query value, e.g. "CredentialsSignin", "AccessDenied". */
+  errorKind?: string;
   /** From /login?interval=…; survives into a resend via sessionStorage. */
   interval: BillingInterval;
   onSwitchToRegister: () => void;
@@ -34,6 +39,7 @@ export function LoginForm({
   callbackUrl,
   hasError,
   errorCode,
+  errorKind,
   interval,
   onSwitchToRegister,
 }: LoginFormProps) {
@@ -45,8 +51,17 @@ export function LoginForm({
   // discloses nothing an attacker didn't have — and telling everyone else
   // "wrong email or password" would send them to reset a working password.
   const isUnverified = hasError && errorCode === EMAIL_NOT_VERIFIED_CODE;
+  // A suspended account: from the password check (code) or from Google,
+  // where the signIn callback's refusal arrives as error=AccessDenied.
+  const isSuspended =
+    hasError &&
+    (errorCode === ACCOUNT_SUSPENDED_CODE || errorKind === "AccessDenied");
   const [serverError, setServerError] = useState<string | null>(
-    hasError && !isUnverified ? t("invalidCredentials") : null,
+    isSuspended
+      ? t("accountSuspended")
+      : hasError && !isUnverified
+        ? t("invalidCredentials")
+        : null,
   );
   const [attemptedEmail, setAttemptedEmail] = useState("");
   const [attemptedInterval, setAttemptedInterval] =

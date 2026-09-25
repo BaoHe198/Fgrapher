@@ -561,6 +561,7 @@
     "login": {
       "metaTitle": "Sign in or create an account — Fgrapher",
       "invalidCredentials": "Invalid email or password",
+      "accountSuspended": "Your account is suspended. Please contact Fgrapher support if you think this is a mistake.",
       "title": "Welcome back",
       "subtitle": "Sign in to manage your bookings and portfolio.",
       "emailLabel": "Email",
@@ -839,6 +840,14 @@
         "highPriority": "High priority",
         "reportedBy": "Reported by {name}",
         "targetIdLabel": "· target ID",
+        "viewTarget": "View the reported item",
+        "targetTypes": {
+          "user": "Profile",
+          "post": "Post",
+          "product": "Product",
+          "review": "Review",
+          "message": "Message"
+        },
         "resolutionNotePlaceholder": "Resolution note (optional)",
         "resolve": "Resolve",
         "dismiss": "Dismiss",
