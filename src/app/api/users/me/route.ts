@@ -13,7 +13,8 @@ import {
 } from "@/lib/cloudinary";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
-import { updateMeSchema } from "@/lib/validations/user";
+import { toE164VN } from "@/lib/phone";
+import { getUpdateMeSchema } from "@/lib/validations/user";
 import { contentScanner } from "@/services/moderation";
 
 // Shared allowlist for GET and PATCH — both used to return whatever
@@ -92,7 +93,9 @@ export async function PATCH(request: Request) {
     const session = await requireAuth();
 
     const body = await request.json();
-    const parsed = updateMeSchema.safeParse(body);
+    const parsed = getUpdateMeSchema(
+      await getTranslations("libServices.validation.user"),
+    ).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -167,7 +170,7 @@ export async function PATCH(request: Request) {
 
     const {
       wardId,
-      phone,
+      phone: rawPhone,
       currentPassword,
       avatarPublicId,
       coverImagePublicId,
@@ -218,6 +221,22 @@ export async function PATCH(request: Request) {
           );
         }
       }
+    }
+
+    // A phone is optional, but one that is given must be a real Vietnamese
+    // number: "123" used to be saved as-is. Stored without the spaces and
+    // dots people type ("0912 345 678" → "0912345678") so the same number
+    // always compares equal, and verification sees what the user sees.
+    let phone = rawPhone;
+    if (phone !== undefined && phone.trim() !== "") {
+      if (!toE164VN(phone)) {
+        const t = await getTranslations("apiMessages.users");
+        return NextResponse.json(
+          { data: null, error: "invalid_phone", message: t("invalidPhone") },
+          { status: 400 },
+        );
+      }
+      phone = phone.replace(/[\s.\-()]/g, "");
     }
 
     // Prompt G7 — a verified phone number is proof of THAT number, not of

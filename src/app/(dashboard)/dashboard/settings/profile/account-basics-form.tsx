@@ -75,22 +75,48 @@ export function AccountBasicsForm({
       body: JSON.stringify({ wardId: value || null }),
     });
   };
+  // What is saved right now — the "unchanged" baseline moves with each save.
+  const [savedUsername, setSavedUsername] = useState(initialUsername ?? "");
   const [usernameStatus, setUsernameStatus] = useState<
-    "idle" | "checking" | "available" | "taken"
+    | "idle"
+    | "checking"
+    | "available"
+    | "taken"
+    | "tooShort"
+    | "tooLong"
+    | "invalid"
+    | "saved"
+    | "saveFailed"
   >("idle");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const isUnchangedOrTooShort =
-      username === (initialUsername ?? "") || username.length < 3;
+    // Same rules as the server (validations/user.ts). Checked here so a
+    // name that can never be saved says why at once — it used to be sent on
+    // blur, refused by the server, and the field gave no sign of it.
+    const localProblem =
+      username === savedUsername
+        ? null
+        : username.length < 3
+          ? "tooShort"
+          : username.length > 30
+            ? "tooLong"
+            : !/^[a-z0-9_]+$/.test(username)
+              ? "invalid"
+              : null;
 
-    startTransition(() => {
-      setUsernameStatus(isUnchangedOrTooShort ? "idle" : "checking");
-    });
-    if (isUnchangedOrTooShort) {
+    if (username === savedUsername || localProblem) {
+      startTransition(() => {
+        setUsernameStatus((current) =>
+          username === savedUsername && current === "saved"
+            ? "saved"
+            : (localProblem ?? "idle"),
+        );
+      });
       return;
     }
 
+    startTransition(() => setUsernameStatus("checking"));
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       const res = await fetch(
@@ -105,14 +131,22 @@ export function AccountBasicsForm({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [username, initialUsername]);
+  }, [username, savedUsername]);
 
   const saveUsername = async () => {
     if (usernameStatus !== "available") return;
-    await fetch("/api/users/me", {
+    const res = await fetch("/api/users/me", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username }),
+    }).catch(() => null);
+    startTransition(() => {
+      if (res?.ok) {
+        setSavedUsername(username);
+        setUsernameStatus("saved");
+      } else {
+        setUsernameStatus("saveFailed");
+      }
     });
   };
 
@@ -159,15 +193,31 @@ export function AccountBasicsForm({
           />
           {usernameStatus === "checking" ? (
             <Loader2 className="size-4 animate-spin text-text-tertiary" />
-          ) : usernameStatus === "available" ? (
+          ) : usernameStatus === "available" || usernameStatus === "saved" ? (
             <CheckCircle className="size-4 text-success" />
-          ) : usernameStatus === "taken" ? (
+          ) : usernameStatus !== "idle" ? (
             <XCircle className="size-4 text-danger" />
           ) : null}
         </div>
         <p className="text-body-sm text-text-tertiary">{t("usernameHint")}</p>
-        {usernameStatus === "taken" ? (
-          <p className="text-body-sm text-danger">{t("usernameTaken")}</p>
+        {usernameStatus === "saved" ? (
+          <p className="text-body-sm text-success" role="status">
+            {t("usernameSaved")}
+          </p>
+        ) : usernameStatus !== "idle" &&
+          usernameStatus !== "checking" &&
+          usernameStatus !== "available" ? (
+          <p className="text-body-sm text-danger" role="alert">
+            {t(
+              {
+                taken: "usernameTaken",
+                tooShort: "usernameTooShort",
+                tooLong: "usernameTooLong",
+                invalid: "usernameInvalid",
+                saveFailed: "usernameSaveFailed",
+              }[usernameStatus],
+            )}
+          </p>
         ) : null}
       </div>
 

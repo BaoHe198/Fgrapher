@@ -1019,7 +1019,11 @@
     "users": {
       "imageFlagged": "This image was flagged for sensitive content and can't be used as your avatar or cover photo",
       "emailChangeNoPassword": "This account signs in with a social provider and has no password to confirm with — email can't be changed this way.",
-      "emailChangeWrongPassword": "Current password is incorrect."
+      "emailChangeWrongPassword": "Current password is incorrect.",
+      "invalidPhone": "That phone number isn't valid. Enter a 10-digit Vietnamese mobile number, e.g. 0901 234 567.",
+      "noPasswordToChange": "This account signs in with a social provider and has no password to change.",
+      "passwordUpdated": "Password updated",
+      "passwordUpdateFailed": "Couldn't update your password, please try again"
     },
     "profiles": {
       "unknownRole": "Unknown role",
@@ -1183,7 +1187,8 @@
       "loadFailed": "Failed to load availability",
       "invalidInput": "Invalid input",
       "updated": "Availability updated",
-      "updateFailed": "Failed to update availability"
+      "updateFailed": "Failed to update availability",
+      "endBeforeStart": "The end time has to be after the start time"
     },
     "blockedDates": {
       "notFound": "Blocked date not found",
@@ -2277,6 +2282,11 @@
         "usernameLabel": "Username",
         "usernameHint": "Used for your profile URL (e.g. fgrapher.vn/profile/yourname) — unaccented letters, numbers, and underscores only. For a name with diacritics, use \"Display name\".",
         "usernameTaken": "That username is taken",
+        "usernameTooShort": "Usernames need at least 3 characters",
+        "usernameTooLong": "Usernames can be at most 30 characters",
+        "usernameInvalid": "Use lowercase letters, numbers and underscores (_) only — no spaces",
+        "usernameSaved": "Username saved",
+        "usernameSaveFailed": "Couldn't save your username, please try again",
         "provinceLabel": "Province/city",
         "provinceNotSelected": "Not selected",
         "wardLabel": "Ward",
@@ -2418,6 +2428,8 @@
         "blockedDateLabel": "Block date",
         "saveSchedule": "Save schedule",
         "saved": "Saved",
+        "endBeforeStart": "The end time has to be after the start time",
+        "saveFailed": "Couldn't save your schedule, please try again",
         "blockedDates": "Blocked dates",
         "removeAria": "Remove",
         "blockDateButton": "Block date"

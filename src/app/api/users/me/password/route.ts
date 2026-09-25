@@ -1,16 +1,20 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { changePasswordSchema } from "@/lib/validations/user";
+import { getChangePasswordSchema } from "@/lib/validations/user";
 
 export async function POST(request: Request) {
   try {
     const session = await requireAuth();
 
+    const t = await getTranslations("apiMessages.users");
     const body = await request.json();
-    const parsed = changePasswordSchema.safeParse(body);
+    const parsed = getChangePasswordSchema(
+      await getTranslations("libServices.validation.user"),
+    ).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -28,8 +32,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "no_password",
-          message:
-            "This account signs in with a social provider and has no password to change",
+          message: t("noPasswordToChange"),
         },
         { status: 400 },
       );
@@ -44,7 +47,7 @@ export async function POST(request: Request) {
         {
           data: null,
           error: "invalid_password",
-          message: "Current password is incorrect",
+          message: t("emailChangeWrongPassword"),
         },
         { status: 400 },
       );
@@ -54,7 +57,7 @@ export async function POST(request: Request) {
     await db.user.update({ where: { id: user.id }, data: { passwordHash } });
 
     return NextResponse.json(
-      { data: null, error: null, message: "Password updated" },
+      { data: null, error: null, message: t("passwordUpdated") },
       { status: 200 },
     );
   } catch (err) {
@@ -69,7 +72,9 @@ export async function POST(request: Request) {
       {
         data: null,
         error: "server_error",
-        message: "Failed to update password",
+        message: (await getTranslations("apiMessages.users"))(
+          "passwordUpdateFailed",
+        ),
       },
       { status: 500 },
     );

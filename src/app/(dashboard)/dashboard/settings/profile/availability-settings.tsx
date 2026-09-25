@@ -46,6 +46,7 @@ export function AvailabilitySettings() {
   const [newBlockedDate, setNewBlockedDate] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,16 +91,32 @@ export function AvailabilitySettings() {
     );
   };
 
+  // A working day has to end after it starts. "18:00 – 09:00" used to be
+  // saved as-is and quietly left that day with no bookable time at all.
+  const backwardsDays = schedule.filter(
+    (day) => day.isActive && day.startTime >= day.endTime,
+  );
+
   const save = async () => {
-    setIsSaving(true);
     setSaved(false);
-    await fetch("/api/availability", {
+    setSaveError(null);
+    if (backwardsDays.length > 0) {
+      setSaveError(t("endBeforeStart"));
+      return;
+    }
+    setIsSaving(true);
+    const res = await fetch("/api/availability", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ schedule }),
-    });
+    }).catch(() => null);
     setIsSaving(false);
-    setSaved(true);
+    if (res?.ok) {
+      setSaved(true);
+    } else {
+      const body = await res?.json().catch(() => null);
+      setSaveError(body?.message ?? t("saveFailed"));
+    }
   };
 
   const addBlockedDate = async () => {
@@ -175,7 +192,7 @@ export function AvailabilitySettings() {
                   onChange={(e) =>
                     updateDay(day.dayOfWeek, { startTime: e.target.value })
                   }
-                  className="w-32"
+                  className="w-36"
                 />
                 <span className="text-text-tertiary">–</span>
                 <Input
@@ -185,9 +202,15 @@ export function AvailabilitySettings() {
                   onChange={(e) =>
                     updateDay(day.dayOfWeek, { endTime: e.target.value })
                   }
-                  className="w-32"
+                  className="w-36"
+                  aria-invalid={day.startTime >= day.endTime ? true : undefined}
                 />
               </div>
+            ) : null}
+            {day.isActive && day.startTime >= day.endTime ? (
+              <span className="w-full text-body-sm text-danger sm:w-auto">
+                {t("endBeforeStart")}
+              </span>
             ) : null}
           </div>
         ))}
@@ -202,7 +225,13 @@ export function AvailabilitySettings() {
           {t("saveSchedule")}
         </Button>
         {saved ? (
-          <span className="text-body-sm text-success">{t("saved")}</span>
+          <span className="text-body-sm text-success" role="status">
+            {t("saved")}
+          </span>
+        ) : saveError ? (
+          <span className="text-body-sm text-danger" role="alert">
+            {saveError}
+          </span>
         ) : null}
       </div>
 

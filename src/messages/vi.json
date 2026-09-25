@@ -1019,7 +1019,11 @@
     "users": {
       "imageFlagged": "Ảnh này bị đánh dấu chứa nội dung nhạy cảm và không thể sử dụng làm ảnh đại diện hoặc ảnh bìa",
       "emailChangeNoPassword": "Tài khoản này đăng nhập qua mạng xã hội, không có mật khẩu để xác nhận — không thể đổi email theo cách này.",
-      "emailChangeWrongPassword": "Mật khẩu hiện tại không đúng."
+      "emailChangeWrongPassword": "Mật khẩu hiện tại không đúng.",
+      "invalidPhone": "Số điện thoại không hợp lệ. Nhập số di động Việt Nam 10 chữ số, ví dụ 0901 234 567.",
+      "noPasswordToChange": "Tài khoản này đăng nhập qua mạng xã hội nên không có mật khẩu để đổi.",
+      "passwordUpdated": "Đã cập nhật mật khẩu",
+      "passwordUpdateFailed": "Không thể cập nhật mật khẩu, vui lòng thử lại"
     },
     "profiles": {
       "unknownRole": "Vai trò không xác định",
@@ -1183,7 +1187,8 @@
       "loadFailed": "Không thể tải lịch làm việc",
       "invalidInput": "Dữ liệu không hợp lệ",
       "updated": "Đã cập nhật lịch làm việc",
-      "updateFailed": "Không thể cập nhật lịch làm việc"
+      "updateFailed": "Không thể cập nhật lịch làm việc",
+      "endBeforeStart": "Giờ kết thúc phải sau giờ bắt đầu"
     },
     "blockedDates": {
       "notFound": "Không tìm thấy ngày đã chặn",
@@ -2277,6 +2282,11 @@
         "usernameLabel": "Tên người dùng",
         "usernameHint": "Dùng cho đường dẫn hồ sơ của bạn (vd: fgrapher.vn/profile/tenban) — chỉ chữ không dấu, số và dấu gạch dưới. Muốn hiển thị tên có dấu, hãy dùng mục \"Tên hiển thị\".",
         "usernameTaken": "Tên người dùng này đã được sử dụng",
+        "usernameTooShort": "Tên người dùng cần ít nhất 3 ký tự",
+        "usernameTooLong": "Tên người dùng tối đa 30 ký tự",
+        "usernameInvalid": "Chỉ dùng chữ thường không dấu, số và dấu gạch dưới (_) — không dấu cách",
+        "usernameSaved": "Đã lưu tên người dùng",
+        "usernameSaveFailed": "Không lưu được tên người dùng, vui lòng thử lại",
         "provinceLabel": "Tỉnh/thành",
         "provinceNotSelected": "Chưa chọn",
         "wardLabel": "Phường/xã",
@@ -2418,6 +2428,8 @@
         "blockedDateLabel": "Chặn ngày",
         "saveSchedule": "Lưu lịch làm việc",
         "saved": "Đã lưu",
+        "endBeforeStart": "Giờ kết thúc phải sau giờ bắt đầu",
+        "saveFailed": "Không lưu được lịch làm việc, vui lòng thử lại",
         "blockedDates": "Ngày không nhận lịch",
         "removeAria": "Xóa",
         "blockDateButton": "Chặn ngày"

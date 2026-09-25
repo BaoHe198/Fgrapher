@@ -148,6 +148,8 @@ export function getUpdateMeSchema(t: (key: string) => string) {
     name: z.string().min(2).optional(),
     phone: z.string().max(30).optional(),
     location: z.string().max(120).optional(),
+    // See updateMeSchema: existence is checked in the route.
+    wardId: z.string().min(1).nullable().optional(),
     email: z.string().email().optional(),
     currentPassword: z.string().min(1, t("currentPasswordRequired")).optional(),
   });

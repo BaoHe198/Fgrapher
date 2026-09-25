@@ -74,6 +74,18 @@ export async function PUT(request: Request) {
       );
     }
 
+    // The editor stops this too; the check here is what makes it a rule.
+    if (
+      parsed.data.schedule.some(
+        (day) => day.isActive && day.startTime >= day.endTime,
+      )
+    ) {
+      return NextResponse.json(
+        { data: null, error: "validation_error", message: t("endBeforeStart") },
+        { status: 400 },
+      );
+    }
+
     await replaceWeeklyRules(
       session.user.id,
       parsed.data.schedule
