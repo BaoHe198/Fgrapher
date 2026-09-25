@@ -255,6 +255,7 @@ export function OpportunityDetail({
             id="opportunity-detail-field-1"
             rows={3}
             value={message}
+            maxLength={1000}
             disabled={!isEditable}
             onChange={(e) => setMessage(e.target.value)}
           />

@@ -83,7 +83,8 @@ export const updateMeSchema = z.object({
     .max(30)
     .regex(/^[a-z0-9_]+$/, "Lowercase letters, numbers, and underscores only")
     .optional(),
-  name: z.string().min(2).optional(),
+  // A display name, not a paragraph: 5,000 characters used to be accepted.
+  name: z.string().trim().min(2).max(100).optional(),
   phone: z.string().max(30).optional(),
   location: z.string().max(120).optional(),
   // Prompt B4/B8 — real Ward row id (see services/geography.ts). Nullable
@@ -145,7 +146,8 @@ export function getUpdateMeSchema(t: (key: string) => string) {
       .max(30)
       .regex(/^[a-z0-9_]+$/, t("usernameInvalidChars"))
       .optional(),
-    name: z.string().min(2).optional(),
+    // A display name, not a paragraph: 5,000 characters used to be accepted.
+    name: z.string().trim().min(2).max(100).optional(),
     phone: z.string().max(30).optional(),
     location: z.string().max(120).optional(),
     // See updateMeSchema: existence is checked in the route.

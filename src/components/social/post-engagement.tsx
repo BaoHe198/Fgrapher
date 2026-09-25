@@ -204,6 +204,7 @@ export function PostEngagement({
                 placeholder={t("commentPlaceholder")}
                 rows={1}
                 value={draft}
+                maxLength={1000}
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {

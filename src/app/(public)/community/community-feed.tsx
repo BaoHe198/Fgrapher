@@ -484,6 +484,7 @@ function PostComposer({
         placeholder={t("composerPlaceholder")}
         rows={3}
         value={caption}
+        maxLength={2000}
         onChange={(event) => setCaption(event.target.value)}
         className="border-0 bg-bg-sunken"
       />
@@ -956,6 +957,7 @@ function RequestPostPanel({
           <Textarea
             rows={2}
             value={message}
+            maxLength={1000}
             placeholder={t("offer.message")}
             onChange={(event) => setMessage(event.target.value)}
           />

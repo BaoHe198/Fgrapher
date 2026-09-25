@@ -99,6 +99,7 @@ export function ReportModal({
           <Textarea
             placeholder={t("detailsPlaceholder")}
             value={description}
+            maxLength={1000}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
           />

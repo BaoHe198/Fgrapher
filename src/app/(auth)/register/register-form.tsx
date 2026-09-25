@@ -356,6 +356,7 @@ export function RegisterForm({
           autoComplete="name"
           error={errors.name?.message}
           {...register("name")}
+          maxLength={100}
         />
         <Input
           label={t("emailLabel")}

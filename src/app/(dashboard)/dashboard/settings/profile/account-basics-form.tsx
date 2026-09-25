@@ -173,6 +173,7 @@ export function AccountBasicsForm({
             id="account-basics-form-field-1"
             aria-label={t("displayNameLabel")}
             value={name}
+            maxLength={100}
             onChange={(e) => setName(e.target.value)}
             onBlur={(e) => saveName(e.target.value)}
           />

@@ -44,7 +44,7 @@ export type ProviderRole = (typeof PAID_ROLE_VALUES)[number];
 
 export const registerSchema = z
   .object({
-    name: z.string().min(2, "Enter your full name"),
+    name: z.string().trim().min(2, "Enter your full name").max(100),
     email: z.string().email("Enter a valid email address"),
     password: z
       .string()
@@ -159,7 +159,7 @@ export function getCompleteProfileSchema(t: (key: string) => string) {
 export function getRegisterSchema(t: (key: string) => string) {
   return z
     .object({
-      name: z.string().min(2, t("nameRequired")),
+      name: z.string().trim().min(2, t("nameRequired")).max(100),
       email: z.string().email(t("emailInvalid")),
       password: z
         .string()

@@ -460,6 +460,7 @@ export function RequestWizard({
                 id="request-wizard-field-1"
                 rows={2}
                 value={form.detailedAddress}
+                maxLength={300}
                 onChange={(e) => update("detailedAddress", e.target.value)}
               />
               <p className="text-body-sm text-text-tertiary">
@@ -507,6 +508,7 @@ export function RequestWizard({
                 id="request-wizard-field-2"
                 rows={4}
                 value={form.description}
+                maxLength={2000}
                 onChange={(e) => update("description", e.target.value)}
               />
             </div>

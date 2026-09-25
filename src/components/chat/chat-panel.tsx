@@ -518,6 +518,7 @@ export function ChatPanel({
           ref={textareaRef}
           rows={1}
           value={draft}
+          maxLength={2000}
           onChange={(e) => {
             setDraft(e.target.value);
             e.target.style.height = "auto";
