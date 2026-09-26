@@ -1,4 +1,5 @@
 import type { PostKind, Prisma } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
 import { verifyPortfolioUpload } from "@/lib/cloudinary";
@@ -517,11 +518,12 @@ export async function toggleLike(postId: string, userId: string) {
   ]);
 
   if (post.userId !== userId) {
+    const nt = await getTranslations("libServices.notifications");
     await notify({
       userId: post.userId,
       type: "NEW_LIKE",
-      title: "Someone liked your post",
-      message: "Your post got a new like.",
+      title: nt("post.like.title"),
+      message: nt("post.like.message"),
       data: { postId },
     });
   }
@@ -560,10 +562,11 @@ export async function addComment({
   ]);
 
   if (post.userId !== userId) {
+    const nt = await getTranslations("libServices.notifications");
     await notify({
       userId: post.userId,
       type: "NEW_COMMENT",
-      title: "New comment on your post",
+      title: nt("post.comment.title"),
       message: content.trim().slice(0, 120),
       data: { postId },
     });

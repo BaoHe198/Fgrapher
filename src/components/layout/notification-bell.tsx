@@ -193,7 +193,7 @@ export function NotificationBell() {
           ) : null}
         </div>
 
-        <div className="max-h-[360px] overflow-y-auto">
+        <div className="max-h-[360px] overflow-x-hidden overflow-y-auto">
           {notifications.length === 0 ? (
             <p className="px-4 py-5 text-center text-body-sm text-text-secondary">
               {t("emptyState")}
@@ -214,7 +214,9 @@ export function NotificationBell() {
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-bg-sunken">
                     <Icon className="size-4 text-text-secondary" />
                   </div>
-                  <div className="flex min-w-0 flex-col gap-0.5">
+                  {/* Titles carry user text (request and product names), so an
+                      unbroken word must wrap here, not widen the list. */}
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5 [overflow-wrap:anywhere]">
                     <span className="text-body-sm font-semibold! text-text-primary">
                       {notification.title}
                     </span>

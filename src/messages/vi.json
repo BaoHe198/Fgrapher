@@ -2728,18 +2728,22 @@
       "orderConfirmation": {
         "heading": "Đơn hàng đã được xác nhận!",
         "body": "Đơn hàng {orderNumber} — {itemsSummary}. Tổng cộng: {totalLabel}",
-        "cta": "Xem đơn hàng"
+        "cta": "Xem đơn hàng",
+        "subject": "Xác nhận đơn hàng #{orderNumber} — Fgrapher"
       },
       "newOrder": {
         "heading": "Có đơn hàng mới",
         "body": "{customerName} đã đặt đơn hàng {orderNumber} — {itemsSummary}",
-        "cta": "Xem đơn hàng"
+        "cta": "Xem đơn hàng",
+        "subject": "Đơn hàng mới #{orderNumber} — Fgrapher"
       },
       "orderStatus": {
-        "heading": "Đơn hàng {statusLabel}",
-        "body": "Đơn hàng {orderNumber} của bạn hiện đang {statusLabel}.",
-        "bodyWithDetail": "Đơn hàng {orderNumber} của bạn hiện đang {statusLabel}. {detail}",
-        "cta": "Xem đơn hàng"
+        "heading": "Đơn hàng: {statusLabel}",
+        "body": "Đơn hàng {orderNumber} của bạn đã chuyển sang trạng thái: {statusLabel}.",
+        "bodyWithDetail": "Đơn hàng {orderNumber} của bạn đã chuyển sang trạng thái: {statusLabel}. {detail}",
+        "cta": "Xem đơn hàng",
+        "subject": "Đơn hàng: {statusLabel} — Fgrapher",
+        "trackingDetail": "Mã vận đơn: {carrier} {trackingNumber}"
       },
       "newReview": {
         "heading": "Đánh giá mới",
@@ -2950,6 +2954,55 @@
         "noOffers": {
           "title": "Chưa có nhà cung cấp nào chào giá",
           "message": "Yêu cầu “{title}” ({code}) chưa nhận được đề nghị nào sau 48 giờ. Cân nhắc nới ngân sách hoặc đặt lịch trực tiếp."
+        }
+      },
+      "post": {
+        "like": {
+          "title": "Có người thích bài viết của bạn",
+          "message": "Bài viết của bạn vừa có thêm một lượt thích."
+        },
+        "comment": {
+          "title": "Có bình luận mới trên bài viết của bạn"
+        }
+      },
+      "order": {
+        "statusLabel": {
+          "PENDING": "Đang xử lý",
+          "CONFIRMED": "Đã xác nhận",
+          "SHIPPED": "Đang giao",
+          "DELIVERED": "Đã giao",
+          "PICKED_UP": "Đã lấy hàng",
+          "OVERDUE": "Quá hạn trả",
+          "CANCELLED": "Đã hủy",
+          "RETURNED": "Đã hoàn trả"
+        },
+        "someCustomer": "Một khách hàng",
+        "newForShop": {
+          "title": "Có đơn hàng mới",
+          "message": "{customerName} đã đặt hàng — {itemsSummary}"
+        },
+        "confirmedForCustomer": {
+          "title": "Đặt hàng thành công",
+          "message": "Đơn #{orderNumber} — {itemsSummary}"
+        },
+        "status": {
+          "title": "Đơn hàng: {statusLabel}",
+          "message": "Đơn #{orderNumber} đã chuyển sang: {statusLabel}",
+          "messageWithTracking": "Đơn #{orderNumber} đã chuyển sang: {statusLabel} — mã vận đơn: {trackingNumber}"
+        },
+        "rentalReturned": {
+          "title": "Cửa hàng đã nhận lại đồ thuê",
+          "depositRefunded": "Tiền cọc thuê đồ của bạn đã được hoàn lại.",
+          "depositWithheld": "Cửa hàng đã giữ lại một phần tiền cọc.",
+          "depositWithheldWithNote": "Cửa hàng đã giữ lại một phần tiền cọc. Ghi chú: {note}"
+        },
+        "rentalOverdue": {
+          "title": "Đồ thuê đã quá hạn trả",
+          "message": "Đơn #{orderNumber} đã quá ngày trả. Vui lòng liên hệ cửa hàng để trả đồ."
+        },
+        "rentalDueTomorrow": {
+          "title": "Ngày mai đến hạn trả đồ thuê",
+          "message": "Đơn #{orderNumber} đến hạn trả vào ngày mai. Hãy liên hệ cửa hàng để hẹn lịch trả."
         }
       }
     }

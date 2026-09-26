@@ -4,11 +4,11 @@ import type Stripe from "stripe";
 
 import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { formatVND } from "@/lib/format";
 import { formatFullAddress } from "@/lib/location";
 import {
   ACTIVE_RENTAL_STATUSES,
   checkOrderTransition,
-  ORDER_STATUS_LABEL as STATUS_LABEL,
 } from "@/lib/order-status";
 import { calculateRentalDays, resolveDeliveryFee } from "@/lib/pricing";
 import {
@@ -289,19 +289,26 @@ async function createOrdersForCart(
       locale: "vi",
       namespace: "libServices.email",
     });
+    const nt = await getTranslations({
+      locale: "vi",
+      namespace: "libServices.notifications",
+    });
+    const customerName = customer
+      ? partyName(customer)
+      : nt("order.someCustomer");
 
     await notify({
       userId: shopId,
       type: "NEW_ORDER",
-      title: "New order received",
-      message: `${customer ? partyName(customer) : "A customer"} placed an order — ${itemsSummary}`,
+      title: nt("order.newForShop.title"),
+      message: nt("order.newForShop.message", { customerName, itemsSummary }),
       data: { orderId: order.id },
       email: {
-        subject: `New order #${orderNumber} — Fgrapher`,
+        subject: emailT("newOrder.subject", { orderNumber }),
         html: newOrderEmailHtml({
           t: emailT,
           orderNumber,
-          customerName: customer ? partyName(customer) : "A customer",
+          customerName,
           itemsSummary,
           orderUrl: orderUrlFor(order.id),
         }),
@@ -312,16 +319,19 @@ async function createOrdersForCart(
       await notify({
         userId: customer.id,
         type: "NEW_ORDER",
-        title: "Order confirmed!",
-        message: `Order #${orderNumber} — ${itemsSummary}`,
+        title: nt("order.confirmedForCustomer.title"),
+        message: nt("order.confirmedForCustomer.message", {
+          orderNumber,
+          itemsSummary,
+        }),
         data: { orderId: order.id },
         email: {
-          subject: `Order confirmed #${orderNumber} — Fgrapher`,
+          subject: emailT("orderConfirmation.subject", { orderNumber }),
           html: orderConfirmationEmailHtml({
             t: emailT,
             orderNumber,
             itemsSummary,
-            totalLabel: `${totalPrice} ${currency}`,
+            totalLabel: formatVND(totalPrice),
             orderUrl: orderUrlFor(order.id),
           }),
         },
@@ -658,21 +668,34 @@ export async function updateOrderStatus({
   const notificationType = NOTIFICATION_TYPE_FOR_STATUS[status];
   if (notificationType) {
     const orderNumber = order.id.slice(-8);
-    const emailT = await getTranslations("libServices.email");
+    const [emailT, nt] = await Promise.all([
+      getTranslations("libServices.email"),
+      getTranslations("libServices.notifications"),
+    ]);
+    const statusLabel = nt(`order.statusLabel.${status}`);
     await notify({
       userId: recipient.id,
       type: notificationType,
-      title: `Order ${STATUS_LABEL[status]}`,
-      message: `Order #${orderNumber} is now ${STATUS_LABEL[status]}${trackingNumber ? ` — tracking: ${trackingNumber}` : ""}`,
+      title: nt("order.status.title", { statusLabel }),
+      message: trackingNumber
+        ? nt("order.status.messageWithTracking", {
+            orderNumber,
+            statusLabel,
+            trackingNumber,
+          })
+        : nt("order.status.message", { orderNumber, statusLabel }),
       data: { orderId: order.id },
       email: {
-        subject: `Order ${STATUS_LABEL[status]} — Fgrapher`,
+        subject: emailT("orderStatus.subject", { statusLabel }),
         html: orderStatusEmailHtml({
           t: emailT,
           orderNumber,
-          statusLabel: STATUS_LABEL[status],
+          statusLabel,
           detail: trackingNumber
-            ? `Tracking: ${trackingCarrier ?? ""} ${trackingNumber}`
+            ? emailT("orderStatus.trackingDetail", {
+                carrier: trackingCarrier ?? "",
+                trackingNumber,
+              })
             : undefined,
           orderUrl: orderUrlFor(order.id),
         }),
@@ -727,13 +750,18 @@ export async function markRentalReturned(
     },
   });
 
+  const nt = await getTranslations("libServices.notifications");
   await notify({
     userId: order.customerId,
     type: "ORDER_DELIVERED",
-    title: "Rental returned",
-    message: deductDeposit
-      ? `Your deposit was partially withheld. ${note ?? ""}`.trim()
-      : "Your rental deposit has been refunded.",
+    title: nt("order.rentalReturned.title"),
+    message: !deductDeposit
+      ? nt("order.rentalReturned.depositRefunded")
+      : note?.trim()
+        ? nt("order.rentalReturned.depositWithheldWithNote", {
+            note: note.trim(),
+          })
+        : nt("order.rentalReturned.depositWithheld"),
     data: { orderId: order.id },
   });
 
@@ -763,6 +791,11 @@ export async function flagOverdueRentals(now = new Date()) {
     data: { status: "OVERDUE" },
   });
 
+  // Cron — no request to take a locale from, so Vietnamese (CLAUDE.md rule 10).
+  const nt = await getTranslations({
+    locale: "vi",
+    namespace: "libServices.notifications",
+  });
   for (const order of candidates) {
     const detail = await db.order.findUnique({
       where: { id: order.id },
@@ -772,8 +805,10 @@ export async function flagOverdueRentals(now = new Date()) {
     await notify({
       userId: detail.customerId,
       type: "ORDER_DELIVERED",
-      title: "Rental overdue",
-      message: `Order #${order.id.slice(-8)} is past its return date. Please contact the shop to return it.`,
+      title: nt("order.rentalOverdue.title"),
+      message: nt("order.rentalOverdue.message", {
+        orderNumber: order.id.slice(-8),
+      }),
       data: { orderId: order.id },
     });
   }
@@ -813,12 +848,19 @@ export async function sendRentalReturnReminders(now = new Date()) {
     select: { id: true, customerId: true },
   });
 
+  // Cron — no request to take a locale from, so Vietnamese (CLAUDE.md rule 10).
+  const nt = await getTranslations({
+    locale: "vi",
+    namespace: "libServices.notifications",
+  });
   for (const order of orders) {
     await notify({
       userId: order.customerId,
       type: "ORDER_DELIVERED",
-      title: "Rental due back tomorrow",
-      message: `Order #${order.id.slice(-8)} is due back tomorrow. Contact the shop to arrange the return.`,
+      title: nt("order.rentalDueTomorrow.title"),
+      message: nt("order.rentalDueTomorrow.message", {
+        orderNumber: order.id.slice(-8),
+      }),
       data: { orderId: order.id },
     });
   }

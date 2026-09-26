@@ -2728,18 +2728,22 @@
       "orderConfirmation": {
         "heading": "Order confirmed!",
         "body": "Order {orderNumber} — {itemsSummary}. Total: {totalLabel}",
-        "cta": "View order"
+        "cta": "View order",
+        "subject": "Order confirmed #{orderNumber} — Fgrapher"
       },
       "newOrder": {
         "heading": "New order received",
         "body": "{customerName} placed order {orderNumber} — {itemsSummary}",
-        "cta": "View order"
+        "cta": "View order",
+        "subject": "New order #{orderNumber} — Fgrapher"
       },
       "orderStatus": {
         "heading": "Order {statusLabel}",
         "body": "Your order {orderNumber} is now {statusLabel}.",
         "bodyWithDetail": "Your order {orderNumber} is now {statusLabel}. {detail}",
-        "cta": "View order"
+        "cta": "View order",
+        "subject": "Order {statusLabel} — Fgrapher",
+        "trackingDetail": "Tracking: {carrier} {trackingNumber}"
       },
       "newReview": {
         "heading": "New review",
@@ -2950,6 +2954,55 @@
         "noOffers": {
           "title": "No offers yet",
           "message": "Request “{title}” ({code}) has had no offers after 48 hours. Consider widening the budget or booking directly."
+        }
+      },
+      "post": {
+        "like": {
+          "title": "Someone liked your post",
+          "message": "Your post got a new like."
+        },
+        "comment": {
+          "title": "New comment on your post"
+        }
+      },
+      "order": {
+        "statusLabel": {
+          "PENDING": "pending",
+          "CONFIRMED": "confirmed",
+          "SHIPPED": "shipped",
+          "DELIVERED": "delivered",
+          "PICKED_UP": "picked up",
+          "OVERDUE": "overdue",
+          "CANCELLED": "cancelled",
+          "RETURNED": "returned"
+        },
+        "someCustomer": "A customer",
+        "newForShop": {
+          "title": "New order received",
+          "message": "{customerName} placed an order — {itemsSummary}"
+        },
+        "confirmedForCustomer": {
+          "title": "Order confirmed!",
+          "message": "Order #{orderNumber} — {itemsSummary}"
+        },
+        "status": {
+          "title": "Order {statusLabel}",
+          "message": "Order #{orderNumber} is now {statusLabel}",
+          "messageWithTracking": "Order #{orderNumber} is now {statusLabel} — tracking: {trackingNumber}"
+        },
+        "rentalReturned": {
+          "title": "Rental returned",
+          "depositRefunded": "Your rental deposit has been refunded.",
+          "depositWithheld": "Your deposit was partially withheld.",
+          "depositWithheldWithNote": "Your deposit was partially withheld. {note}"
+        },
+        "rentalOverdue": {
+          "title": "Rental overdue",
+          "message": "Order #{orderNumber} is past its return date. Please contact the shop to return it."
+        },
+        "rentalDueTomorrow": {
+          "title": "Rental due back tomorrow",
+          "message": "Order #{orderNumber} is due back tomorrow. Contact the shop to arrange the return."
         }
       }
     }

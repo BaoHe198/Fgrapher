@@ -186,7 +186,7 @@ export function NotificationsClient({
               type="button"
               onClick={() => onClick(notification)}
               className={cn(
-                "flex w-full flex-col gap-0.5 border-b border-border-subtle px-5 py-4 text-left last:border-b-0 hover:bg-bg-sunken",
+                "flex w-full flex-col gap-0.5 border-b border-border-subtle px-5 py-4 text-left [overflow-wrap:anywhere] last:border-b-0 hover:bg-bg-sunken",
                 !notification.readAt && "bg-success-bg/40",
               )}
             >
