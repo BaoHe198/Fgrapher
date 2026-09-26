@@ -223,7 +223,7 @@ export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
   };
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[220px_minmax(0,680px)] xl:grid-cols-[220px_minmax(0,680px)_280px]">
+    <div className="grid items-start gap-6 lg:grid-cols-[220px_minmax(0,680px)] xl:grid-cols-[220px_minmax(0,680px)_280px] xl:justify-between">
       <aside className="sticky top-[96px] hidden flex-col gap-3 lg:flex">
         <Card className="flex flex-col gap-1 p-2">
           {FILTERS.map(({ value, icon: Icon }) => (

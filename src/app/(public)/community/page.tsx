@@ -19,7 +19,7 @@ export default async function CommunityPage() {
   const session = await auth();
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-8 sm:py-8">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-8 sm:py-8">
       <div className="relative mb-6 overflow-hidden rounded-[var(--fg-radius-xl)] border border-border-subtle bg-brand-primary px-5 py-6 text-text-on-brand sm:px-8 sm:py-8">
         <div className="pointer-events-none absolute -top-20 -right-16 size-56 rounded-full bg-gold-400/20 blur-3xl" />
         <div className="relative max-w-2xl">
