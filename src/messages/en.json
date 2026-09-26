@@ -212,12 +212,6 @@
     "seeAll": "See all",
     "studios": "Studios for rent",
     "browseStudios": "Browse studios",
-    "f1t": "Discover",
-    "f1b": "Filter by role, city, price and availability — compare creative portfolios and shop catalogues in one place.",
-    "f2t": "Book",
-    "f2b": "Pick a date and slot from a real calendar. Artists respond quickly by message.",
-    "f3t": "Rent or buy",
-    "f3b": "Camera shops and studios list gear and space alongside their services.",
     "ctaTitle": "Bring your services to clients already searching",
     "ctaSub": "Free to join during our early access period — clients search for and book with you at no cost.",
     "ctaBtn": "Become a provider"
@@ -3378,15 +3372,6 @@
       "newBadge": "New",
       "priceFrom": "From {price}",
       "contactForPricing": "Contact for pricing",
-      "howItWorks": {
-        "heading": "How it works",
-        "step1Title": "Search & compare",
-        "step1Desc": "Browse verified profiles, compare pricing, and read real reviews.",
-        "step2Title": "Book your date",
-        "step2Desc": "Message the artist, pick a slot, and confirm your booking online.",
-        "step3Title": "Get your shoot",
-        "step3Desc": "Meet up and get creative with the artist you booked."
-      },
       "heroPhotoAlt": "Work by {name}"
     },
     "pricing": {

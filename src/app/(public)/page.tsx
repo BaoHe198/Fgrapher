@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { CalendarCheck, Search, ShoppingBag } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -8,6 +7,9 @@ import { HeroContactSheet } from "@/components/sections/hero-contact-sheet";
 import { HeroSearch } from "@/components/sections/hero-search";
 import { Button } from "@/components/ui/button";
 import { SectionHead } from "@/components/ui/section-head";
+// The "features" and "how it works" sections that sat between the featured
+// artists and the CTA were removed (project owner, 26/09/2026): their copy
+// was too thin to describe the product. Do not bring them back as-is.
 import { features } from "@/lib/features";
 import { formatCurrency } from "@/lib/utils";
 import { getFeaturedProfiles } from "@/services/search";
@@ -49,31 +51,9 @@ const HERO_PHOTOS = [
   },
 ] as const;
 
-const HOW_IT_WORKS_KEYS = [
-  { titleKey: "howItWorks.step1Title", descKey: "howItWorks.step1Desc" },
-  { titleKey: "howItWorks.step2Title", descKey: "howItWorks.step2Desc" },
-  { titleKey: "howItWorks.step3Title", descKey: "howItWorks.step3Desc" },
-] as const;
-
 export default async function LandingPage() {
   const t = await getTranslations();
   const tLanding = await getTranslations("publicPages.landing");
-
-  const homeFeatures = [
-    { icon: Search, title: t("home.f1t"), description: t("home.f1b") },
-    { icon: CalendarCheck, title: t("home.f2t"), description: t("home.f2b") },
-    // Marketplace-specific ("Rent or buy — camera shops and studios list
-    // gear...") — hidden while MARKETPLACE_ENABLED=false.
-    ...(features.marketplaceEnabled
-      ? [
-          {
-            icon: ShoppingBag,
-            title: t("home.f3t"),
-            description: t("home.f3b"),
-          },
-        ]
-      : []),
-  ];
 
   const featuredProfiles = await getFeaturedProfiles(4);
   const heroPhotos = HERO_PHOTOS.map((photo) => ({
@@ -152,49 +132,7 @@ export default async function LandingPage() {
         </section>
       ) : null}
 
-      {/* SECTION 3 — FEATURES */}
-      <section className="border-y border-border-subtle bg-bg-surface">
-        <div
-          className={`mx-auto grid max-w-[1440px] gap-8 px-8 py-16 max-md:grid-cols-1 max-md:px-5 ${
-            features.marketplaceEnabled ? "grid-cols-3" : "grid-cols-2"
-          }`}
-        >
-          {homeFeatures.map(({ icon: Icon, title, description }) => (
-            <div key={title} className="flex flex-col gap-2.5">
-              <div className="flex size-11 items-center justify-center rounded-[var(--fg-radius-md)] bg-success-bg">
-                <Icon className="size-[22px] text-brand-primary" />
-              </div>
-              <h3 className="text-heading-md text-text-primary">{title}</h3>
-              <p className="text-body-md text-text-secondary">{description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SECTION 4 — HOW IT WORKS (not part of the real design strings — see comment above) */}
-      <section
-        id="how-it-works"
-        className="mx-auto max-w-[1440px] px-8 py-[72px] max-md:px-5"
-      >
-        <SectionHead title={tLanding("howItWorks.heading")} />
-        <div className="grid grid-cols-3 gap-8 max-md:grid-cols-1">
-          {HOW_IT_WORKS_KEYS.map((step, index) => (
-            <div key={step.titleKey} className="flex flex-col gap-2.5">
-              <div className="flex size-8 items-center justify-center rounded-full bg-brand-primary font-bold text-text-on-brand">
-                {index + 1}
-              </div>
-              <h3 className="text-heading-md text-text-primary">
-                {tLanding(step.titleKey)}
-              </h3>
-              <p className="text-body-md text-text-secondary">
-                {tLanding(step.descKey)}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SECTION 5 — CTA */}
+      {/* SECTION 3 — CTA */}
       <section className="bg-green-900 text-gold-50">
         <div className="mx-auto max-w-[1440px] px-8 py-20 text-center max-md:px-5">
           <h2 className="text-display-lg">{t("home.ctaTitle")}</h2>

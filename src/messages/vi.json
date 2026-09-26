@@ -212,12 +212,6 @@
     "seeAll": "Xem tất cả",
     "studios": "Studio cho thuê",
     "browseStudios": "Xem studio",
-    "f1t": "Khám phá",
-    "f1b": "Lọc theo vai trò, thành phố, giá và lịch trống — so sánh portfolio sáng tạo và danh mục cửa hàng tại một nơi.",
-    "f2t": "Đặt lịch",
-    "f2b": "Chọn ngày và khung giờ trên lịch thật. Nghệ sĩ phản hồi nhanh chóng qua tin nhắn.",
-    "f3t": "Thuê hoặc mua",
-    "f3b": "Cửa hàng máy ảnh và studio đăng thiết bị, mặt bằng cùng với dịch vụ của họ.",
     "ctaTitle": "Đưa dịch vụ của bạn đến khách hàng đang tìm kiếm",
     "ctaSub": "Miễn phí tham gia trong giai đoạn đầu — khách hàng tìm kiếm và đặt lịch với bạn hoàn toàn miễn phí.",
     "ctaBtn": "Trở thành nhà cung cấp"
@@ -3378,15 +3372,6 @@
       "newBadge": "Mới",
       "priceFrom": "Từ {price}",
       "contactForPricing": "Liên hệ để biết giá",
-      "howItWorks": {
-        "heading": "Cách thức hoạt động",
-        "step1Title": "Tìm kiếm & so sánh",
-        "step1Desc": "Duyệt qua các hồ sơ đã xác minh, so sánh giá và đọc đánh giá thật.",
-        "step2Title": "Đặt lịch của bạn",
-        "step2Desc": "Nhắn tin cho nghệ sĩ, chọn khung giờ và xác nhận đặt lịch trực tuyến.",
-        "step3Title": "Tận hưởng buổi chụp",
-        "step3Desc": "Gặp gỡ và sáng tạo cùng nghệ sĩ bạn đã chọn."
-      },
       "heroPhotoAlt": "Tác phẩm của {name}"
     },
     "pricing": {
