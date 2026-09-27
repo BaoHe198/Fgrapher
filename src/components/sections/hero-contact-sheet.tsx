@@ -12,11 +12,13 @@ export interface HeroPhoto {
 
 // The four frames keep the original mosaic's staggered heights — the
 // offset column is what stops it reading as a plain grid.
+// Scaled down ~30% (project owner, 27/09/2026) so the hero takes less of
+// the first screen; the proportions between frames are unchanged.
 const FRAMES = [
-  { height: 200, column: 0 },
   { height: 140, column: 0 },
-  { height: 150, column: 1 },
-  { height: 190, column: 1 },
+  { height: 100, column: 0 },
+  { height: 105, column: 1 },
+  { height: 135, column: 1 },
 ] as const;
 
 const REVEAL_STAGGER_MS = 120;
@@ -94,12 +96,12 @@ export function HeroContactSheet({ photos }: { photos: HeroPhoto[] }) {
   );
 
   return (
-    <div className="grid grid-cols-2 gap-3 max-lg:hidden">
+    <div className="grid w-full max-w-[400px] grid-cols-2 gap-2.5 justify-self-end max-lg:hidden">
       {columns.map((frames, col) => (
         <div
           key={col}
           className={
-            col === 1 ? "flex flex-col gap-3 pt-[34px]" : "flex flex-col gap-3"
+            col === 1 ? "flex flex-col gap-2.5 pt-6" : "flex flex-col gap-2.5"
           }
         >
           {frames.map((frame) => {
@@ -123,7 +125,7 @@ export function HeroContactSheet({ photos }: { photos: HeroPhoto[] }) {
                       src={buildMediaVariants(photo.url).medium}
                       alt={layer === 0 ? photo.alt : ""}
                       fill
-                      sizes="(min-width: 1024px) 300px, 0px"
+                      sizes="(min-width: 1024px) 200px, 0px"
                       // A photograph appearing rather than sliding in:
                       // it arrives slightly desaturated and lifts to full
                       // contrast, the way a print comes up in a tray.
