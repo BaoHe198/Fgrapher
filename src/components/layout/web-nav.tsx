@@ -195,7 +195,12 @@ export function WebNav({
           visible next step anywhere above the page footer. Signed-in users
           keep the plain hamburger — their entry points are already in it. */}
       <div className="flex h-[72px] items-center justify-between gap-2 px-4 sm:hidden">
-        <LogoFull />
+        {/* A step smaller on narrow phones (360px Androids): at full size the
+            wordmark pushed the sign-up button and hamburger past the edge. */}
+        <LogoFull
+          size={24}
+          className="min-w-0 max-[389px]:gap-2 max-[389px]:[&_span]:text-heading-md"
+        />
         <div className="flex items-center gap-1">
           {isAuthenticated ? null : (
             <Button

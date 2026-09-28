@@ -32,44 +32,48 @@ export function Footer() {
         {/* The "Khám phá" column of role links was removed (project owner,
             28/09/2026): it repeated the search filters and made the footer
             long on phones. Role pages reach search engines via the sitemap.
-            2fr keeps the two link columns where they sat before. */}
-        <div className="grid grid-cols-[2fr_1fr_1fr] gap-8 max-md:grid-cols-1">
-          <div className="flex flex-col gap-3">
+            With two link columns left, a grid spread them unevenly and left
+            a gap on the right; the brand now anchors the left edge and the
+            links sit together against the right one. */}
+        <div className="flex justify-between gap-12 max-md:flex-col max-md:gap-8">
+          <div className="flex max-w-[360px] flex-col gap-3">
             <LogoFull />
             <p className="text-body-sm text-text-secondary">
               {t("hero.title")}
             </p>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <span className="text-body-sm font-semibold! text-text-primary">
-              {t("foot.providers")}
-            </span>
-            {providerLinks.map((link) => (
-              <Link
-                key={link.labelKey}
-                href={link.href}
-                className="text-body-sm text-text-secondary hover:text-text-primary"
-              >
-                {t(`foot.${link.labelKey}`)}
-              </Link>
-            ))}
-          </div>
+          <div className="flex gap-24 max-lg:gap-16 max-md:grid max-md:grid-cols-2 max-md:gap-6">
+            <div className="flex flex-col gap-3">
+              <span className="text-body-sm font-semibold! text-text-primary">
+                {t("foot.providers")}
+              </span>
+              {providerLinks.map((link) => (
+                <Link
+                  key={link.labelKey}
+                  href={link.href}
+                  className="text-body-sm text-text-secondary hover:text-text-primary"
+                >
+                  {t(`foot.${link.labelKey}`)}
+                </Link>
+              ))}
+            </div>
 
-          <div className="flex flex-col gap-3">
-            <span className="text-body-sm font-semibold! text-text-primary">
-              {t("foot.company")}
-            </span>
-            {COMPANY_LINKS.map((link) => (
-              <Link
-                key={link.labelKey}
-                href={link.href}
-                className="text-body-sm text-text-secondary hover:text-text-primary"
-              >
-                {t(`foot.${link.labelKey}`)}
-              </Link>
-            ))}
-            <CookieSettingsLink label={t("foot.cookieSettings")} />
+            <div className="flex flex-col gap-3">
+              <span className="text-body-sm font-semibold! text-text-primary">
+                {t("foot.company")}
+              </span>
+              {COMPANY_LINKS.map((link) => (
+                <Link
+                  key={link.labelKey}
+                  href={link.href}
+                  className="text-body-sm text-text-secondary hover:text-text-primary"
+                >
+                  {t(`foot.${link.labelKey}`)}
+                </Link>
+              ))}
+              <CookieSettingsLink label={t("foot.cookieSettings")} />
+            </div>
           </div>
         </div>
 
