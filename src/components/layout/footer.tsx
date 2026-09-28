@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { LogoFull } from "@/components/brand/logo-full";
 import { CookieSettingsLink } from "@/components/layout/cookie-settings-link";
-import { DISCOVERABLE_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 
 const PROVIDER_LINKS = [
@@ -23,9 +22,6 @@ const COMPANY_LINKS = [
 
 export function Footer() {
   const t = useTranslations();
-  const discoverRoles = features.marketplaceEnabled
-    ? [...DISCOVERABLE_ROLES, "CAMERA_SHOP" as const]
-    : DISCOVERABLE_ROLES;
   const providerLinks = features.marketplaceEnabled
     ? PROVIDER_LINKS
     : PROVIDER_LINKS.filter((link) => link.labelKey !== "sell");
@@ -33,27 +29,16 @@ export function Footer() {
   return (
     <footer className="border-t border-border-subtle bg-bg-surface">
       <div className="mx-auto max-w-[1440px] px-8 py-14 max-md:px-5">
-        <div className="grid grid-cols-4 gap-8 max-md:grid-cols-1">
+        {/* The "Khám phá" column of role links was removed (project owner,
+            28/09/2026): it repeated the search filters and made the footer
+            long on phones. Role pages reach search engines via the sitemap.
+            2fr keeps the two link columns where they sat before. */}
+        <div className="grid grid-cols-[2fr_1fr_1fr] gap-8 max-md:grid-cols-1">
           <div className="flex flex-col gap-3">
             <LogoFull />
             <p className="text-body-sm text-text-secondary">
               {t("hero.title")}
             </p>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <span className="text-body-sm font-semibold! text-text-primary">
-              {t("foot.discover")}
-            </span>
-            {discoverRoles.map((role) => (
-              <Link
-                key={role}
-                href={`/browse?roles=${role}`}
-                className="text-body-sm text-text-secondary hover:text-text-primary"
-              >
-                {t(`role.${role}`)}
-              </Link>
-            ))}
           </div>
 
           <div className="flex flex-col gap-3">
