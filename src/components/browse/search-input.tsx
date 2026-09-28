@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useRef, useState } from "react";
 
 import { useSharedFilterParams } from "@/components/filters/filter-params-provider";
-import { setOrDelete } from "@/lib/filter-params";
+import { setOrDelete } from "@/lib/search/filter-params";
 
 // Long enough that typing a word is one navigation, short enough that the
 // results follow the keystrokes rather than a submit.

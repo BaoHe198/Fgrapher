@@ -13,7 +13,7 @@ import { ProfileViewBeacon } from "@/components/profile/profile-view-beacon";
 import { auth } from "@/lib/auth";
 import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { getAgeRangeLabel } from "@/lib/age-gate";
+import { getAgeRangeLabel } from "@/lib/account/age-gate";
 import { formatAdministrativeLocation } from "@/lib/location";
 import { PROVIDER_ROLES, type ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
@@ -212,7 +212,7 @@ export default async function PublicProfilePage({
     user.roles.find((r) => r.role === activeProfile.role)
       ?.verificationStatus === "VERIFIED";
   // Never expose the exact date of birth beyond this computed range — see
-  // lib/age-gate.ts's comment on why a range, not an age, is public.
+  // lib/account/age-gate.ts's comment on why a range, not an age, is public.
   const ageRangeLabel =
     activeProfile.role === "MODEL" && user.dateOfBirth
       ? getAgeRangeLabel(user.dateOfBirth)

@@ -13,7 +13,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { toast } from "@/components/ui/toast";
-import { buildMediaVariants } from "@/lib/media-variants";
+import { buildMediaVariants } from "@/lib/media/variants";
 
 interface TrashedAlbum {
   id: string;

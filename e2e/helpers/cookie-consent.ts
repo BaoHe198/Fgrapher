@@ -2,7 +2,7 @@ import { CURRENT_POLICY_VERSION } from "../../src/lib/constants";
 import {
   COOKIE_CONSENT_COOKIE,
   serializeCookieConsent,
-} from "../../src/lib/cookie-consent";
+} from "../../src/lib/privacy/cookie-consent";
 
 /**
  * A browser that already answered the cookie banner ("necessary only").

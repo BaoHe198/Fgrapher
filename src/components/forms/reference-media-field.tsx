@@ -4,8 +4,8 @@ import { Loader2, Play, Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { compressImageFile } from "@/lib/image-compression";
-import { type MediaKind, mediaKindFromUrl } from "@/lib/media-kind";
+import { compressImageFile } from "@/lib/media/image-compression";
+import { type MediaKind, mediaKindFromUrl } from "@/lib/media/kind";
 import { cn } from "@/lib/utils";
 
 export interface ReferenceMedia {
@@ -22,7 +22,7 @@ const IMAGE_MAX_DIMENSION = 1600;
 // Half the portfolio's 100MB video cap, on purpose. Portfolio uploads are
 // limited to paid provider accounts; reference uploads are open to every
 // signed-in account, including free CUSTOMER-only ones. And the size check
-// is client-side only — lib/cloudinary.ts documents that there is no
+// is client-side only — lib/media/cloudinary.ts documents that there is no
 // server-side cap — so this number is effectively the storage bill a single
 // free account can run up per file. 50MB still fits a minute or so of phone
 // video, which is what a reference clip actually is.

@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { requestErrorKey } from "@/lib/request-error-messages";
+import { requestErrorKey } from "@/lib/errors/request-messages";
 
 /**
  * The user-facing, translated text for an OfferError / ServiceRequestError.

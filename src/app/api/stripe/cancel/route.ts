@@ -4,7 +4,10 @@ import { z } from "zod";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
-import { cancelSubscription, StripeNotConfiguredError } from "@/lib/stripe";
+import {
+  cancelSubscription,
+  StripeNotConfiguredError,
+} from "@/lib/payments/stripe";
 
 const bodySchema = z.object({ role: z.string() });
 

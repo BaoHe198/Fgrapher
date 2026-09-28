@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import {
   isValidAccountImageAsset,
   isValidPortfolioAsset,
-} from "@/lib/cloudinary";
+} from "@/lib/media/cloudinary";
 
 const input = {
   publicId: "fgrapher/portfolio/user-1/photo",

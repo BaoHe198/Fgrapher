@@ -7,7 +7,7 @@ import { features } from "@/lib/features";
 import {
   getBankTransferInfo,
   isBankTransferConfigured,
-} from "@/lib/bank-transfer";
+} from "@/lib/payments/bank-transfer";
 import {
   createPaymentIntentSchema,
   submitBankTransferProofSchema,

@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { features } from "@/lib/features";
-import { isMomoConfigured, type MomoIpnPayload } from "@/lib/momo";
+import { isMomoConfigured, type MomoIpnPayload } from "@/lib/payments/momo";
 import { confirmMomoPayment, PaymentError } from "@/services/payments";
 
 // Server-to-server from MoMo — no requireAuth, the signature check

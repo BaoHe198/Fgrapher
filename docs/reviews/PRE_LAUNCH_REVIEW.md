@@ -78,7 +78,7 @@ secret ở staging/production giờ bị coi là lỗi cấu hình, không phả
 ### 4. [ĐÃ VÁ] Tài khoản đăng ký qua Google OAuth bỏ qua hoàn toàn ràng buộc 18+ và ghi nhận đồng ý
 
 Đăng ký bằng email/mật khẩu thực thi đúng ở server (`registerSchema` +
-`isAtLeast18`, `src/lib/validations/auth.ts`, `src/lib/age-gate.ts`) — không
+`isAtLeast18`, `src/lib/validations/auth.ts`, `src/lib/account/age-gate.ts`) — không
 chỉ chặn ở UI. Nhưng đăng ký qua Google OAuth (`src/lib/auth.ts`, qua
 `PrismaAdapter`) tạo `User` với `dateOfBirth = null` — Google chỉ cung cấp
 tên/email/ảnh. Đã rà soát mọi nơi ghi `dateOfBirth` trong toàn bộ codebase:
@@ -339,7 +339,7 @@ _Nguồn: `docs/reviews/prelaunch-audit-perf-debt.md` mục 1.3._
 
 - **Stripe/thanh toán trực tuyến**: cả 6 route liên quan Stripe và webhook
   đều chặn đúng bằng `features.billingEnabled` trước khi chạm vào
-  `lib/stripe.ts`; không tìm thấy tích hợp cổng thanh toán nào khác
+  `lib/payments/stripe.ts`; không tìm thấy tích hợp cổng thanh toán nào khác
   (đã tìm momo/vnpay/zalopay/payos/onepay/napas — không có).
 - **Gán gói thủ công qua admin**: `assignManualPlan` chỉ gọi được qua
   `requireAdmin()`, xác nhận không có đường thanh toán nào khác.

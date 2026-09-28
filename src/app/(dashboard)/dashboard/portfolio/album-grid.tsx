@@ -28,7 +28,7 @@ import { UploadMediaModal } from "@/components/modals/upload-media-modal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
-import { buildMediaVariants } from "@/lib/media-variants";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { FrameMark } from "@/components/brand/frame-mark";
 import { cn } from "@/lib/utils";
 

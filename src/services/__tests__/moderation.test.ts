@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildMediaVariants } from "@/lib/media-variants";
+import { buildMediaVariants } from "@/lib/media/variants";
 import type { ModerationScores } from "@/lib/openai-moderation";
 import {
   type ContentScanner,

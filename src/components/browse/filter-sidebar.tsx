@@ -22,7 +22,7 @@ import {
   readBrowseFilters,
   writeBrowseFilters,
   type BrowseFilterState,
-} from "@/lib/browse-filters";
+} from "@/lib/search/browse-filters";
 
 import { useSharedFilterParams } from "@/components/filters/filter-params-provider";
 

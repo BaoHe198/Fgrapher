@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
-import { deliverEmail, logEmailFailure } from "@/lib/email-transport";
+import { deliverEmail, logEmailFailure } from "@/lib/email/transport";
 import {
   type CredentialStore,
   type OutboxRowWrite,

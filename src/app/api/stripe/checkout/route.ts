@@ -8,7 +8,7 @@ import {
   createCheckoutSession,
   getOrCreateCustomer,
   StripeNotConfiguredError,
-} from "@/lib/stripe";
+} from "@/lib/payments/stripe";
 import { checkoutSchema } from "@/lib/validations/subscription";
 
 // Dormant while BILLING_ENABLED=false — see CLAUDE.md. Registration

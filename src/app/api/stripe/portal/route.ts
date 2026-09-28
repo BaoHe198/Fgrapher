@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
-import { createPortalSession, StripeNotConfiguredError } from "@/lib/stripe";
+import {
+  createPortalSession,
+  StripeNotConfiguredError,
+} from "@/lib/payments/stripe";
 
 // Dormant while BILLING_ENABLED=false (Stripe can't take a Vietnam-
 // registered merchant account — see CLAUDE.md). 404, not 500: a

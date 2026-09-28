@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { usernameBase } from "@/lib/username";
+import { usernameBase } from "@/lib/account/username";
 
 describe("usernameBase", () => {
   it("uses the name without accents or spaces", () => {

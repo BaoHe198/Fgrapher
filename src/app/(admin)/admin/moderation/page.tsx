@@ -23,7 +23,7 @@ import {
   MEDIA_MODERATION_SLA_HOURS,
   MEDIA_REJECTION_REASONS,
 } from "@/lib/constants";
-import { buildMediaVariants } from "@/lib/media-variants";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
 interface MediaRow {

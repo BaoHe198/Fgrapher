@@ -1,4 +1,4 @@
-import { foldVietnamese } from "@/lib/vietnamese-fold";
+import { foldVietnamese } from "@/lib/vietnam/fold";
 
 const MAX_BASE_LENGTH = 20;
 

@@ -33,7 +33,7 @@ import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ReportModal } from "@/components/modals/report-modal";
 import { formatDate, formatDayMonthLong, formatTime } from "@/lib/format";
 import { resolvePartyName } from "@/lib/party-name";
-import { compressImageFile } from "@/lib/image-compression";
+import { compressImageFile } from "@/lib/media/image-compression";
 import { cn } from "@/lib/utils";
 
 // Chat attachments are viewed inline in a narrow message bubble (and full-

@@ -5,7 +5,7 @@ import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import {
   generateKycUploadSignature,
   isCloudinaryConfigured,
-} from "@/lib/cloudinary";
+} from "@/lib/media/cloudinary";
 
 export async function POST() {
   try {

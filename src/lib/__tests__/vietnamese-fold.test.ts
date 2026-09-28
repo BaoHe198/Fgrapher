@@ -6,7 +6,7 @@ import {
   foldVietnamese,
   SQL_FOLD_FROM,
   SQL_FOLD_TO,
-} from "@/lib/vietnamese-fold";
+} from "@/lib/vietnam/fold";
 
 // What Postgres does: translate() then lower().
 function sqlFold(text: string) {

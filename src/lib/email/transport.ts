@@ -2,11 +2,11 @@ import { createHash } from "crypto";
 
 import { Resend } from "resend";
 
-import { emailHtmlToText } from "@/lib/email-templates";
+import { emailHtmlToText } from "@/lib/email/templates";
 import { env } from "@/lib/env";
 
 // The single place that talks to Resend. Both the immediate send path
-// (lib/email.ts's sendEmail) and the retry path (services/email-outbox.ts's
+// (lib/email/index.ts's sendEmail) and the retry path (services/email-outbox.ts's
 // processEmailOutbox) go through this — they previously each constructed
 // their own Resend client with their own copy of the FROM address and the
 // staging-redirect rule, which is exactly the kind of duplication that

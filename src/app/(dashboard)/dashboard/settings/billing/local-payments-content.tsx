@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
-import { compressImageFile } from "@/lib/image-compression";
+import { compressImageFile } from "@/lib/media/image-compression";
 import { formatCurrency } from "@/lib/utils";
 
 interface RoleBilling {

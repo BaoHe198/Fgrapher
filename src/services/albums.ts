@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import {
   deleteCloudinaryAsset,
   isCloudinaryConfigured,
-} from "@/lib/cloudinary";
+} from "@/lib/media/cloudinary";
 
 // Prompt G3 (docs/guides/fgrapher-prompt-dot-2.md) — the album layer on
 // top of the previously-flat ProfileMedia list. Trash/restore behavior

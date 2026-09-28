@@ -16,12 +16,12 @@ import { Input } from "@/components/ui/input";
 import {
   ACCOUNT_SUSPENDED_CODE,
   EMAIL_NOT_VERIFIED_CODE,
-} from "@/lib/auth-errors";
-import type { BillingInterval } from "@/lib/onboarding-destination";
+} from "@/lib/account/auth-errors";
+import type { BillingInterval } from "@/lib/account/onboarding-destination";
 import {
   rememberAttemptedEmail,
   takeAttemptedSignIn,
-} from "@/lib/resend-verification";
+} from "@/lib/account/resend-verification";
 import { getLoginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useMounted } from "@/hooks/use-mounted";
 

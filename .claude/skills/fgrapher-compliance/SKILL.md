@@ -96,7 +96,7 @@ Quy tắc (khớp với `services/compliance.ts`):
 ### 3. Tuổi tối thiểu 18 — áp dụng cho mọi vai trò
 
 `dateOfBirth` là bắt buộc khi đăng ký, kiểm tra bằng `isAtLeast18()`
-(`src/lib/age-gate.ts`), gắn vào cả `registerSchema` (đăng ký bằng mật khẩu) lẫn
+(`src/lib/account/age-gate.ts`), gắn vào cả `registerSchema` (đăng ký bằng mật khẩu) lẫn
 `completeProfileSchema` (bước tương đương mà tài khoản Google phải làm ở lần vào
 dashboard đầu tiên) — cả hai trong `src/lib/validations/auth.ts`. Không phải chỉ
 role `MODEL`.
@@ -140,7 +140,7 @@ Hiện trạng thật (xem comment dài trong `model UserRole` của `schema.pri
 
 - 3 ảnh (CMND/CCCD mặt trước, mặt sau, selfie) lưu trên **Cloudinary**, thư mục
   tách hẳn khỏi portfolio, delivery type `authenticated` —
-  `lib/cloudinary.ts` → `generateKycUploadSignature()`
+  `lib/media/cloudinary.ts` → `generateKycUploadSignature()`
 - Cột `*Url`/`*PublicId` **không phải URL công khai**; admin xem qua URL ký
   ngắn hạn sinh bằng `generateKycSignedUrl()`
 - **Số giấy tờ không bao giờ lưu dạng plaintext** — chỉ `idNumberHash` (SHA-256),
@@ -183,7 +183,7 @@ Thấy code liên quan thì cảnh báo người dùng thay vì tự sửa hay x
   mở tài khoản cho doanh nghiệp đăng ký tại VN). Đừng viết thêm code Stripe.
 - **MoMo / ZaloPay / chuyển khoản ngân hàng** — `MOMO_ENABLED`, `ZALOPAY_ENABLED`,
   `BANK_TRANSFER_ENABLED`, mỗi cổng một flag riêng, mặc định `false`. Code đã có
-  (`services/payments.ts`, `lib/momo.ts`, `lib/zalopay.ts`, `lib/bank-transfer.ts`).
+  (`services/payments.ts`, `lib/payments/momo.ts`, `lib/payments/zalopay.ts`, `lib/payments/bank-transfer.ts`).
   Nghĩa là: **nói "Fgrapher không có thanh toán" là sai** — có, nhưng đang tắt.
 - **Gear marketplace** — `MARKETPLACE_ENABLED` (Product/Order/Cart/checkout, role `CAMERA_SHOP`)
 - **Social feed** — `SOCIAL_FEED_ENABLED` (Post/Like/Comment/Follow)

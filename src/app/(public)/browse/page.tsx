@@ -20,7 +20,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import type { ServiceKind } from "@prisma/client";
 
 import { serviceKindsForRole } from "@/lib/constants/service-matrix";
-import { normalizeSort } from "@/lib/search-params";
+import { normalizeSort } from "@/lib/search/params";
 import { searchProfiles } from "@/services/search";
 import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
 

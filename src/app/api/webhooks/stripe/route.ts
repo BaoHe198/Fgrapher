@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 
 import { features } from "@/lib/features";
 import { db } from "@/lib/db";
-import { constructWebhookEvent, isStripeConfigured } from "@/lib/stripe";
+import {
+  constructWebhookEvent,
+  isStripeConfigured,
+} from "@/lib/payments/stripe";
 import { createOrdersFromCheckout } from "@/services/orders";
 import {
   handleCheckoutCompleted,

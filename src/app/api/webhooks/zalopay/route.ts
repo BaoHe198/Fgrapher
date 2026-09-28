@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { features } from "@/lib/features";
-import { isZalopayConfigured } from "@/lib/zalopay";
+import { isZalopayConfigured } from "@/lib/payments/zalopay";
 import { confirmZalopayPayment, PaymentError } from "@/services/payments";
 
 // Server-to-server from ZaloPay — no requireAuth, the mac check inside

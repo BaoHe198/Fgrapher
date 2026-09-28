@@ -10,7 +10,7 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { useSharedFilterParams } from "@/components/filters/filter-params-provider";
-import { setOrDelete } from "@/lib/filter-params";
+import { setOrDelete } from "@/lib/search/filter-params";
 import { PRODUCT_CATEGORIES } from "@/lib/validations/product";
 
 const CONDITIONS = ["NEW", "LIKE_NEW", "GOOD", "FAIR"] as const;

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { parseBillingInterval } from "@/lib/onboarding-destination";
+import { parseBillingInterval } from "@/lib/account/onboarding-destination";
 
 import { VerifyEmailPanel } from "./verify-email-panel";
 

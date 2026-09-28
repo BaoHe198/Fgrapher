@@ -8,7 +8,7 @@ import {
   FREE_PLAN_TERM_MONTHS,
   freePlanTermEnd,
   renewsAutomatically,
-} from "@/lib/free-plan";
+} from "@/lib/payments/free-plan";
 
 const repoRoot = path.resolve(__dirname, "../../..");
 const read = (relativePath: string) =>

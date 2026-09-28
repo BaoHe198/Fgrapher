@@ -34,7 +34,7 @@ Stripe không mở tài khoản merchant cho doanh nghiệp đăng ký tại Vi�
 
 > Hãy tự kiểm tra lại tại stripe.com/global trước khi quyết định — chính sách có thể đã đổi.
 
-Hệ quả với codebase hiện tại: **toàn bộ nhánh Stripe là code chết** — 12 biến `STRIPE_PRICE_*`, 6 API route `/api/stripe/*`, webhook handler, `src/lib/stripe.ts`, `src/services/subscription.ts`, model `Payment` + `WebhookEvent`, trang `/onboarding/billing` và `/dashboard/settings/billing`, cùng luồng `/checkout` của marketplace.
+Hệ quả với codebase hiện tại: **toàn bộ nhánh Stripe là code chết** — 12 biến `STRIPE_PRICE_*`, 6 API route `/api/stripe/*`, webhook handler, `src/lib/payments/stripe.ts`, `src/services/subscription.ts`, model `Payment` + `WebhookEvent`, trang `/onboarding/billing` và `/dashboard/settings/billing`, cùng luồng `/checkout` của marketplace.
 
 Ba hướng xử lý:
 
@@ -285,7 +285,7 @@ VIỆC 4 — Trang "Dữ liệu của tôi" tại /dashboard/settings/data:
 - Link tới Chính sách bảo vệ dữ liệu cá nhân
 
 VIỆC 5 — Áp dụng ConsentPurpose.MARKETING:
-Trong src/lib/email.ts và src/services/notification.ts: trước khi gửi bất kỳ email marketing nào, kiểm tra hasConsent(userId, MARKETING). Email giao dịch (xác nhận đơn, nhắc lịch, đặt lại mật khẩu) KHÔNG cần đồng ý marketing — phân loại rõ hai nhóm này trong code.
+Trong src/lib/email/index.ts và src/services/notification.ts: trước khi gửi bất kỳ email marketing nào, kiểm tra hasConsent(userId, MARKETING). Email giao dịch (xác nhận đơn, nhắc lịch, đặt lại mật khẩu) KHÔNG cần đồng ý marketing — phân loại rõ hai nhóm này trong code.
 
 VIỆC 6 — Trang admin /admin/compliance:
 - Danh sách DataRequest kèm hạn xử lý
@@ -323,7 +323,7 @@ VIỆC 3 — Bảo mật ảnh giấy tờ (bắt buộc, không được đơn 
 - Upload vào folder Cloudinary RIÊNG, type "private" hoặc "authenticated", TÁCH HOÀN TOÀN khỏi folder ảnh portfolio
 - Không bao giờ trả URL công khai. Chỉ sinh signed URL hạn 5 phút, chỉ cấp cho ADMIN
 - MỌI lượt sinh signed URL ghi AuditLog: action "VIEW_KYC_DOCUMENT", targetId là userId của người bị xem, kèm IP
-- Sửa src/lib/cloudinary.ts để tách hai luồng upload này rõ ràng, đặt tên hàm khác nhau để không gọi nhầm
+- Sửa src/lib/media/cloudinary.ts để tách hai luồng upload này rõ ràng, đặt tên hàm khác nhau để không gọi nhầm
 
 VIỆC 4 — Ràng buộc nghiệp vụ:
 - Profile.isPublished chỉ được đặt true khi UserRole.verificationStatus === VERIFIED
@@ -333,7 +333,7 @@ VIỆC 4 — Ràng buộc nghiệp vụ:
 - Hiển thị huy hiệu "Đã xác minh" trên hồ sơ công khai và trong trang chi tiết đơn
 
 VIỆC 5 — Mở rộng age gate:
-src/lib/age-gate.ts hiện chỉ áp cho MODEL. Đổi thành áp cho MỌI vai trò, kiểm tra ở /api/auth/register. dateOfBirth chuyển thành bắt buộc khi đăng ký. Dưới 18 tuổi: từ chối kèm thông báo lịch sự, rõ ràng.
+src/lib/account/age-gate.ts hiện chỉ áp cho MODEL. Đổi thành áp cho MỌI vai trò, kiểm tra ở /api/auth/register. dateOfBirth chuyển thành bắt buộc khi đăng ký. Dưới 18 tuổi: từ chối kèm thông báo lịch sự, rõ ràng.
 
 VIỆC 6 — Hoàn thiện trang admin /admin/verifications:
 - Hàng đợi sắp theo thời gian nộp, hiện thời gian chờ
@@ -438,7 +438,7 @@ Trước khi upload, hiện checkbox KHÔNG tick sẵn:
 Không tick thì không cho upload. Lưu thời điểm vào rightsConfirmedAt.
 Lý do (ghi vào comment code): theo Điều 32 Bộ luật Dân sự 2015, việc sử dụng hình ảnh cá nhân phải được người đó đồng ý.
 
-VIỆC 3 — Xử lý ảnh khi upload (sửa src/lib/cloudinary.ts):
+VIỆC 3 — Xử lý ảnh khi upload (sửa src/lib/media/cloudinary.ts):
 - XÓA EXIF, đặc biệt là toạ độ GPS. Đây là dữ liệu cá nhân, giữ lại vừa vi phạm vừa nguy hiểm cho an toàn của Model.
 - Tạo các biến thể: thumbnail 400px, medium 1200px, large 2000px
 - Chuyển WebP

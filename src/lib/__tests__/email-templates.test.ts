@@ -14,10 +14,10 @@ import {
   requestNewOfferEmailHtml,
   resetPasswordEmailHtml,
   verifyEmailHtml,
-} from "@/lib/email-templates";
+} from "@/lib/email/templates";
 import { escapeHtml } from "@/lib/utils";
 
-// Imports the real templates. lib/email-templates.ts is deliberately free
+// Imports the real templates. lib/email/templates.ts is deliberately free
 // of `env`/`db`/Resend imports so this can exercise production markup
 // directly rather than re-implementing it.
 

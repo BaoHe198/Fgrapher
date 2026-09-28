@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { auth } from "@/lib/auth";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
-import { writeCookieConsent } from "@/lib/cookie-consent-server";
+import { writeCookieConsent } from "@/lib/privacy/cookie-consent-server";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRequestMeta } from "@/lib/request-meta";
 import { cookieConsentSchema } from "@/lib/validations/compliance";

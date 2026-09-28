@@ -9,7 +9,7 @@ import {
   replaceWeeklyRules,
 } from "@/services/resource-calendar";
 import { weeklyAvailabilitySchema } from "@/lib/validations/availability";
-import { vietnamDateStart } from "@/lib/vietnam-date";
+import { vietnamDateStart } from "@/lib/vietnam/date";
 
 export async function GET() {
   const t = await getTranslations("apiMessages.availability");

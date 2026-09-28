@@ -5,7 +5,7 @@ import {
   canSubmitResend,
   rememberAttemptedEmail,
   takeAttemptedSignIn,
-} from "@/lib/resend-verification";
+} from "@/lib/account/resend-verification";
 
 // Guards the resend prompt against being rendered in a state where it can
 // never be submitted. A draft of the login page's compact prompt hid the

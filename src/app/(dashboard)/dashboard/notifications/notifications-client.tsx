@@ -15,7 +15,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { notificationHref } from "@/lib/notification-href";
+import { notificationHref } from "@/lib/notifications/href";
 
 type FilterTab =
   "ALL" | "UNREAD" | "BOOKINGS" | "ORDERS" | "MESSAGES" | "SOCIAL";

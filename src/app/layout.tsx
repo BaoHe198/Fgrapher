@@ -13,7 +13,7 @@ import { CookieConsentBanner } from "@/components/layout/cookie-consent-banner";
 import { EnvironmentBanner } from "@/components/layout/environment-banner";
 import { Toaster } from "@/components/ui/toast";
 import { auth } from "@/lib/auth";
-import { readCookieConsent } from "@/lib/cookie-consent-server";
+import { readCookieConsent } from "@/lib/privacy/cookie-consent-server";
 import "./globals.css";
 
 const fontBody = Plus_Jakarta_Sans({

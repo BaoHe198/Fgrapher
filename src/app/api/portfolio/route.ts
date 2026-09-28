@@ -12,7 +12,7 @@ import { ROLE_PLANS } from "@/lib/constants/plans";
 import {
   UploadVerificationError,
   verifyPortfolioUpload,
-} from "@/lib/cloudinary";
+} from "@/lib/media/cloudinary";
 import { getCreatePortfolioMediaSchema } from "@/lib/validations/portfolio";
 import { runModeration } from "@/services/moderation";
 

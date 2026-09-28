@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
 import { PAID_ROLES, PROVIDER_ROLES, SHOP_ROLES } from "@/lib/constants";
-import { omitPrivateProfileFields } from "@/lib/profile-privacy";
+import { omitPrivateProfileFields } from "@/lib/privacy/profile-privacy";
 import {
   productCategoriesForRole,
   productCategoryQueryValues,

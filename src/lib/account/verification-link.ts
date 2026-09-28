@@ -1,4 +1,4 @@
-import type { BillingInterval } from "@/lib/onboarding-destination";
+import type { BillingInterval } from "@/lib/account/onboarding-destination";
 
 // The two URLs the email-verification flow builds, as pure functions so the
 // chain from signup through the emailed link to the post-login destination

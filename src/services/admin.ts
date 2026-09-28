@@ -6,7 +6,7 @@ import type {
 import { getTranslations } from "next-intl/server";
 
 import { revalidatePublicProfile } from "@/lib/cache";
-import { generateKycSignedUrl } from "@/lib/cloudinary";
+import { generateKycSignedUrl } from "@/lib/media/cloudinary";
 import { mediaApprovedEmailHtml, mediaRejectedEmailHtml } from "@/lib/email";
 import { db } from "@/lib/db";
 import {
@@ -14,9 +14,9 @@ import {
   foldVietnamese,
   SQL_FOLD_FROM,
   SQL_FOLD_TO,
-} from "@/lib/vietnamese-fold";
+} from "@/lib/vietnam/fold";
 import { features } from "@/lib/features";
-import { FREE_PLAN } from "@/lib/free-plan";
+import { FREE_PLAN } from "@/lib/payments/free-plan";
 import {
   KYC_PURGE_AFTER_DAYS,
   PAID_ROLES,
@@ -143,7 +143,7 @@ export async function getAdminStats() {
   };
 }
 
-// Matches lib/email.ts's EmailT shape — the caller passes a translator
+// Matches lib/email/index.ts's EmailT shape — the caller passes a translator
 // scoped to accountFlows.admin.overview.activity (see admin/page.tsx).
 type ActivityT = (
   key: string,

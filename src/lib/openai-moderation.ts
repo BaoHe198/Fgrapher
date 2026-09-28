@@ -2,8 +2,8 @@
 // (omni-moderation-latest). Deliberately a hand-rolled fetch call rather
 // than the `openai` SDK: this is one POST to one endpoint with a small,
 // stable payload, and the SDK would be a new production dependency
-// carrying far more surface than that — same reasoning as lib/momo.ts and
-// lib/zalopay.ts, which also speak their providers' HTTP APIs directly.
+// carrying far more surface than that — same reasoning as lib/payments/momo.ts and
+// lib/payments/zalopay.ts, which also speak their providers' HTTP APIs directly.
 //
 // No-ops gracefully when OPENAI_API_KEY isn't set, matching the pattern
 // used for Stripe/Cloudinary/Resend/Twilio (docs/ARCHITECTURE.md §7) —

@@ -2,7 +2,7 @@ import type { PostKind, Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
-import { verifyPortfolioUpload } from "@/lib/cloudinary";
+import { verifyPortfolioUpload } from "@/lib/media/cloudinary";
 import { runPostMediaModeration } from "@/services/moderation";
 import { notify } from "@/services/notification";
 

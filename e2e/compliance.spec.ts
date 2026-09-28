@@ -123,6 +123,6 @@ test("data & privacy settings: toggle consent, export data, request deletion", a
 // prisma/schema.prisma is classified as marketing, so no code path in the
 // app actually sends a marketing email today — see the
 // MARKETING_PREFERENCE_KEYS comment in src/services/notification.ts. The
-// gate itself (sendMarketingEmail in src/lib/email.ts, wired through
+// gate itself (sendMarketingEmail in src/lib/email/index.ts, wired through
 // notify()) is in place for whenever a promotional NotificationType is
 // added; there's just no send call site yet to drive through the UI.

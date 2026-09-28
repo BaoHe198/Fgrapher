@@ -4,15 +4,15 @@ import { describe, it } from "node:test";
 import {
   parseBillingInterval,
   resolveOnboardingNext,
-} from "@/lib/onboarding-destination";
+} from "@/lib/account/onboarding-destination";
 import {
   rememberAttemptedEmail,
   takeAttemptedSignIn,
-} from "@/lib/resend-verification";
+} from "@/lib/account/resend-verification";
 import {
   buildLoginCallbackPath,
   buildVerificationPath,
-} from "@/lib/verification-link";
+} from "@/lib/account/verification-link";
 import type { Role } from "@prisma/client";
 
 // Follows the billing period along the whole route it actually travels:

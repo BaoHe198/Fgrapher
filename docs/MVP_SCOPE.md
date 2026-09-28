@@ -167,7 +167,7 @@ Banner hỏi khách lần đầu vào trang (và hỏi lại khi `CURRENT_POLICY
 | Thống kê  | `fg_pv` (chống đếm trùng lượt xem hồ sơ, 24 giờ)        | Chỉ khi khách đồng ý |
 
 - Lựa chọn lưu trong cookie `fg_cookie_consent` 180 ngày
-  (`src/lib/cookie-consent.ts`). Khách đã đăng nhập thì lựa chọn đó cũng là
+  (`src/lib/privacy/cookie-consent.ts`). Khách đã đăng nhập thì lựa chọn đó cũng là
   đồng ý mục đích `ANALYTICS`, ghi `ConsentRecord` (thời điểm, phiên bản chính
   sách, IP) — cùng một công tắc với "Phân tích hành vi sử dụng" ở
   `/dashboard/settings/data`, hai nơi luôn khớp nhau.

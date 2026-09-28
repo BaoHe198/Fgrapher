@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
-import { buildMediaVariants } from "@/lib/media-variants";
+import { buildMediaVariants } from "@/lib/media/variants";
 import {
   type ImageCategory,
   type ModerationScores,

@@ -7,7 +7,7 @@ import {
   type BillingInterval,
   parseBillingInterval,
   resolveOnboardingNext,
-} from "@/lib/onboarding-destination";
+} from "@/lib/account/onboarding-destination";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   getPendingPaidRoles,

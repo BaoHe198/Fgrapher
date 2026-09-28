@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
-import { writeCookieConsent } from "@/lib/cookie-consent-server";
+import { writeCookieConsent } from "@/lib/privacy/cookie-consent-server";
 import { getRequestMeta } from "@/lib/request-meta";
 import { updateConsentSchema } from "@/lib/validations/compliance";
 import { recordConsent } from "@/services/compliance";

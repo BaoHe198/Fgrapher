@@ -830,7 +830,7 @@ describe("credential guards are wired into the real paths", () => {
   });
 
   it("the immediate path passes the key so finalize can guard it", () => {
-    const src = codeOnly("src/lib/email.ts");
+    const src = codeOnly("src/lib/email/index.ts");
     assert.match(
       src,
       /finalizeReservedEmail\(\{[^}]*idempotencyKey: reservation\.idempotencyKey/,

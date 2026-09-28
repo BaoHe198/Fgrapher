@@ -4,7 +4,7 @@ import { escapeHtml } from "@/lib/utils";
 // Pure template layer: builds HTML strings and nothing else. No `env`, no
 // `db`, no Resend — which is what makes it directly unit-testable (see
 // lib/__tests__/email-templates.test.ts) without booting a validated env
-// or a Prisma client. lib/email.ts re-exports everything here, so existing
+// or a Prisma client. lib/email/index.ts re-exports everything here, so existing
 // `import { bookingRequestEmailHtml } from "@/lib/email"` call sites are
 // unaffected.
 

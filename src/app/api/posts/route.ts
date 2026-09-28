@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { UploadVerificationError } from "@/lib/cloudinary";
+import { UploadVerificationError } from "@/lib/media/cloudinary";
 import { features } from "@/lib/features";
 import { createPostSchema } from "@/lib/validations/post";
 import {

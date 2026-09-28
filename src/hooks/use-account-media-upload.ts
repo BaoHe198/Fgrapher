@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { compressImageFile } from "@/lib/image-compression";
+import { compressImageFile } from "@/lib/media/image-compression";
 
 // Shared by dashboard/settings/profile/account-media.tsx and the public
 // profile page's inline hero editor (profile-hero.tsx) — both need the

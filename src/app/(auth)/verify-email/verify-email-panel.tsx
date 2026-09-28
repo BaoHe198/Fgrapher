@@ -10,9 +10,12 @@ import { Input } from "@/components/ui/input";
 import {
   type BillingInterval,
   isSafeInternalPath,
-} from "@/lib/onboarding-destination";
-import { canSubmitResend, type ResendStatus } from "@/lib/resend-verification";
-import { buildLoginCallbackPath } from "@/lib/verification-link";
+} from "@/lib/account/onboarding-destination";
+import {
+  canSubmitResend,
+  type ResendStatus,
+} from "@/lib/account/resend-verification";
+import { buildLoginCallbackPath } from "@/lib/account/verification-link";
 import { cn } from "@/lib/utils";
 
 type PanelState =

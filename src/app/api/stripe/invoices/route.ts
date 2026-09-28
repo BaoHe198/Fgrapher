@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
-import { isStripeConfigured, stripe } from "@/lib/stripe";
+import { isStripeConfigured, stripe } from "@/lib/payments/stripe";
 
 // Dormant while BILLING_ENABLED=false — see CLAUDE.md.
 export async function GET() {

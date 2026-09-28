@@ -9,13 +9,13 @@ import {
   subscriptionEndedEmailHtml,
   welcomeSubscriptionEmailHtml,
 } from "@/lib/email";
-import { FREE_PLAN, freePlanTermEnd } from "@/lib/free-plan";
+import { FREE_PLAN, freePlanTermEnd } from "@/lib/payments/free-plan";
 import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { intervalForPriceId, ROLE_PLANS } from "@/lib/constants/plans";
 import { PAID_ROLES } from "@/lib/constants";
 import { notifyCritical } from "@/services/notification";
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@/lib/payments/stripe";
 
 const GRACE_PERIOD_DAYS = 7;
 
@@ -409,7 +409,7 @@ export async function assignManualPlan({
 // Called from /api/auth/register when BILLING_ENABLED=false — every new
 // paid-role signup gets a free plan immediately instead of being routed
 // through Stripe Checkout. It renews itself for as long as billing stays
-// off — see lib/free-plan.ts.
+// off — see lib/payments/free-plan.ts.
 export async function assignFreePlan(userId: string, roles: Role[]) {
   const expiresAt = freePlanTermEnd(new Date());
   return Promise.all(

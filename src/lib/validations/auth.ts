@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { isAtLeast18 } from "@/lib/age-gate";
+import { isAtLeast18 } from "@/lib/account/age-gate";
 
 export const loginSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -61,7 +61,7 @@ export const registerSchema = z
     // — required for EVERY account as of B3, not just MODEL (was optional
     // before). Stored privately on User; never returned to the client or
     // displayed, only used to compute a public age range (see
-    // lib/age-gate.ts's getAgeRangeLabel).
+    // lib/account/age-gate.ts's getAgeRangeLabel).
     dateOfBirth: z.string().min(1, "Date of birth is required"),
     // Content guidelines acceptance (§3b item 3) — required only when
     // MODEL is selected.

@@ -8,7 +8,7 @@
 import {
   type BillingInterval,
   parseBillingInterval,
-} from "@/lib/onboarding-destination";
+} from "@/lib/account/onboarding-destination";
 
 export type ResendStatus = "idle" | "sending" | "sent" | "error";
 

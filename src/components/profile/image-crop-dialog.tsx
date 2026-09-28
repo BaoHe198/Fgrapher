@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getCroppedImageFile } from "@/lib/image-crop";
+import { getCroppedImageFile } from "@/lib/media/image-crop";
 
 interface ImageCropDialogProps {
   open: boolean;

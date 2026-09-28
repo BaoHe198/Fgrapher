@@ -8,7 +8,7 @@ import {
   foldVietnamese,
   SQL_FOLD_FROM,
   SQL_FOLD_TO,
-} from "@/lib/vietnamese-fold";
+} from "@/lib/vietnam/fold";
 import {
   normalizeProductCategory,
   productCategoryQueryValues,
@@ -51,7 +51,7 @@ export async function searchProducts(params: ShopSearchParams) {
   const q = params.q?.trim();
   if (q) {
     // Accent-insensitive, like profile search: "den flash" finds "Đèn
-    // flash" (see lib/vietnamese-fold.ts).
+    // flash" (see lib/vietnam/fold.ts).
     const pattern = `%${escapeLike(foldVietnamese(q))}%`;
     const rows = await db.$queryRaw<{ id: string }[]>`
       SELECT id FROM products

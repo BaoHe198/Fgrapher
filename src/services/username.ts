@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
-import { usernameBase } from "@/lib/username";
+import { usernameBase } from "@/lib/account/username";
 
 /**
  * Gives an account a username if it has none. The username is the address of

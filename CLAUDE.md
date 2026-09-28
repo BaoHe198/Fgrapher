@@ -50,7 +50,7 @@ lịch, nhắn tin, đánh giá, thông báo, quản trị, tuân thủ dữ li�
    **[Cập nhật 07/09/2026, quyết định của chủ dự án, ghi đè câu gốc ở
    trên]** MoMo, ZaloPay, và chuyển khoản ngân hàng (xác nhận thủ công
    qua `/admin/payments`) đã được xây dựng — xem `src/services/
-payments.ts`, `src/lib/momo.ts`, `src/lib/zalopay.ts`, `src/lib/
+payments.ts`, `src/lib/payments/momo.ts`, `src/lib/payments/zalopay.ts`, `src/lib/
 bank-transfer.ts`. Mỗi cổng nằm sau feature flag riêng
    (`MOMO_ENABLED`/`ZALOPAY_ENABLED`/`BANK_TRANSFER_ENABLED`, mặc định
    `false`) — chỉ bật khi thật sự sẵn sàng thu phí, không cần deploy lại
@@ -131,11 +131,20 @@ src/
   lib/
     db.ts             # Prisma client singleton
     auth.ts           # NextAuth config
-    stripe.ts         # Stripe client + helpers
-    cloudinary.ts     # upload helpers
+    auth-helpers.ts   # requireAuth / requireRole / subscription guards
     utils.ts          # general utilities
-    constants.ts      # app-wide constants, enums
+    features.ts       # feature flags
+    constants/        # app-wide constants, enums, plans
     validations/      # Zod schemas per domain
+    account/          # sign-up/verification helpers, auth error codes, usernames
+    email/            # sending (index.ts), transport, templates
+    errors/           # English error → translation-key maps
+    media/            # Cloudinary, media kinds/variants, image compression/crop
+    notifications/    # notification policy and deep links
+    payments/         # MoMo, ZaloPay, bank transfer, Stripe (flag-gated), free plan
+    privacy/          # cookie consent, profile privacy
+    search/           # search/filter URL params, browse filters
+    vietnam/          # Vietnam time zone dates, accent folding, names, phone
   i18n/               # next-intl routing/request config + locale server action
   messages/           # en.json / vi.json translation catalogs
   hooks/              # custom React hooks

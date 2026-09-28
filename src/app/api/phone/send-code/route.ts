@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { toE164VN } from "@/lib/phone";
+import { toE164VN } from "@/lib/vietnam/phone";
 import { checkRateLimit } from "@/lib/rate-limit";
 import {
   DEV_BYPASS_CODE,

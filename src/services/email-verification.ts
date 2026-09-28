@@ -6,8 +6,8 @@ import { sendEmail, verifyEmailHtml } from "@/lib/email";
 import {
   type BillingInterval,
   pendingPaidRoles,
-} from "@/lib/onboarding-destination";
-import { buildVerificationPath } from "@/lib/verification-link";
+} from "@/lib/account/onboarding-destination";
+import { buildVerificationPath } from "@/lib/account/verification-link";
 import {
   issueCredential,
   prismaCredentialStore,

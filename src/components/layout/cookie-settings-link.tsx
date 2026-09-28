@@ -1,6 +1,6 @@
 "use client";
 
-import { OPEN_COOKIE_SETTINGS_EVENT } from "@/lib/cookie-consent";
+import { OPEN_COOKIE_SETTINGS_EVENT } from "@/lib/privacy/cookie-consent";
 
 interface CookieSettingsLinkProps {
   label: string;

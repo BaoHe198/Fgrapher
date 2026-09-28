@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { omitPrivateProfileFields } from "@/lib/profile-privacy";
+import { omitPrivateProfileFields } from "@/lib/privacy/profile-privacy";
 
 describe("public profile privacy boundary", () => {
   it("removes the detailed address and post-booking Zalo contact", () => {

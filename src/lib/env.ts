@@ -92,19 +92,19 @@ const serverSchema = z.object({
   SUPPORT_EMAIL: z.string().email().optional(),
   CRON_SECRET: z.string().optional(),
 
-  // MoMo Payment Gateway — src/lib/momo.ts no-ops without these, same
+  // MoMo Payment Gateway — src/lib/payments/momo.ts no-ops without these, same
   // pattern as every other integration above.
   MOMO_PARTNER_CODE: z.string().optional(),
   MOMO_ACCESS_KEY: z.string().optional(),
   MOMO_SECRET_KEY: z.string().optional(),
 
-  // ZaloPay — src/lib/zalopay.ts. key1 signs outgoing requests, key2
+  // ZaloPay — src/lib/payments/zalopay.ts. key1 signs outgoing requests, key2
   // verifies incoming callbacks — see that file's comment for why mixing
   // them up is a real, easy-to-make security bug.
   ZALOPAY_APP_ID: z.string().optional(),
   ZALOPAY_KEY1: z.string().optional(),
   ZALOPAY_KEY2: z.string().optional(),
-  // Staging-only — see lib/email.ts's sendEmail(). Every outbound email
+  // Staging-only — see lib/email/index.ts's sendEmail(). Every outbound email
   // is redirected here instead of the real recipient when APP_ENV is
   // "staging" and this is set.
   STAGING_TEST_INBOX: z.string().email().optional(),
@@ -165,7 +165,7 @@ const publicSchema = z.object({
   // Zalo Official Account ID for the profile share menu's Zalo widget
   // (Prompt F7, VIỆC 4) — read directly via process.env in
   // profile-actions.tsx (same reason NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is,
-  // per lib/cloudinary.ts's comment: needs to work from a Client
+  // per lib/media/cloudinary.ts's comment: needs to work from a Client
   // Component). Unset in this environment; see that file's comment.
   NEXT_PUBLIC_ZALO_OA_ID: z.string().optional(),
   // Read directly via process.env in sentry.server.config.ts/sentry.edge.
@@ -180,7 +180,7 @@ const publicSchema = z.object({
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   // Not secrets — shown directly to any customer paying by bank
   // transfer, same reasoning as NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME. Read
-  // via src/lib/bank-transfer.ts.
+  // via src/lib/payments/bank-transfer.ts.
   NEXT_PUBLIC_BANK_TRANSFER_ACCOUNT_NUMBER: z.string().optional(),
   NEXT_PUBLIC_BANK_TRANSFER_ACCOUNT_NAME: z.string().optional(),
   NEXT_PUBLIC_BANK_TRANSFER_BANK_NAME: z.string().optional(),

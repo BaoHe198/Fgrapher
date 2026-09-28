@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { SearchParams } from "@/services/search";
-import { normalizeSort, sanitizeSearchParams } from "@/lib/search-params";
+import { normalizeSort, sanitizeSearchParams } from "@/lib/search/params";
 
 // The shapes /browse builds from a URL, where anything can appear.
 const fromUrl = (p: Record<string, unknown>) => p as unknown as SearchParams;

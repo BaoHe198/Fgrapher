@@ -13,25 +13,25 @@ import { revalidatePublicProfile } from "@/lib/cache";
 import {
   UploadVerificationError,
   verifyPurposeImageUpload,
-} from "@/lib/cloudinary";
+} from "@/lib/media/cloudinary";
 import { db } from "@/lib/db";
 import {
   buildAppTransId,
   createZalopayOrder,
   verifyZalopayCallback,
-} from "@/lib/zalopay";
+} from "@/lib/payments/zalopay";
 import {
   createMomoPayment,
   verifyMomoIpnSignature,
   type MomoIpnPayload,
-} from "@/lib/momo";
-import type { ZalopayCallbackData } from "@/lib/zalopay";
-import { generateTransferReference } from "@/lib/bank-transfer";
+} from "@/lib/payments/momo";
+import type { ZalopayCallbackData } from "@/lib/payments/zalopay";
+import { generateTransferReference } from "@/lib/payments/bank-transfer";
 import { formatCurrency } from "@/lib/utils";
 import { type BillingInterval, ROLE_PLANS } from "@/lib/constants/plans";
 import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
-import { FREE_PLAN, freePlanTermEnd } from "@/lib/free-plan";
+import { FREE_PLAN, freePlanTermEnd } from "@/lib/payments/free-plan";
 import { notifyCritical } from "@/services/notification";
 
 export class PaymentError extends Error {}
@@ -683,7 +683,7 @@ export async function expireLocalSubscriptions() {
   const now = new Date();
 
   // While billing is off, a free plan that has reached its end starts a
-  // new term instead of expiring (lib/free-plan.ts). Done first, so these
+  // new term instead of expiring (lib/payments/free-plan.ts). Done first, so these
   // rows have a future end date by the time the expiry query below runs
   // and it never touches them. The where clause is renewsAutomatically()
   // expressed as a query.

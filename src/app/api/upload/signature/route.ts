@@ -5,7 +5,7 @@ import { AuthError, requireAuth, requirePaidRole } from "@/lib/auth-helpers";
 import {
   generateUploadSignature,
   isCloudinaryConfigured,
-} from "@/lib/cloudinary";
+} from "@/lib/media/cloudinary";
 
 export async function POST(request: Request) {
   try {

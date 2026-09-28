@@ -10,13 +10,13 @@ import { db } from "@/lib/db";
 import { DISCOVERABLE_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { formatAdministrativeLocation } from "@/lib/location";
-import { sanitizeSearchParams } from "@/lib/search-params";
+import { sanitizeSearchParams } from "@/lib/search/params";
 import {
   escapeLike,
   foldVietnamese,
   SQL_FOLD_FROM,
   SQL_FOLD_TO,
-} from "@/lib/vietnamese-fold";
+} from "@/lib/vietnam/fold";
 import {
   CACHE_KEY_VERSION,
   CACHE_TAGS,
@@ -216,7 +216,7 @@ const NATIONWIDE_SECTION_THRESHOLD = 5;
  * Profiles whose name, shop name, description or owner's name contain the
  * search text, ignoring Vietnamese accents on both sides — "nhiep" finds
  * "Nhiếp ảnh". Prisma's `contains` compares accents exactly, so this one
- * match runs in SQL (see lib/vietnamese-fold.ts); every other filter stays
+ * match runs in SQL (see lib/vietnam/fold.ts); every other filter stays
  * in the Prisma `where`.
  */
 async function profileIdsMatchingText(q: string): Promise<string[]> {

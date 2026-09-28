@@ -6,7 +6,7 @@ import Stripe from "stripe";
 
 import { ROLE_LABELS } from "../src/lib/constants";
 import { ROLE_PLANS } from "../src/lib/constants/plans";
-import { toStripeAmount } from "../src/lib/stripe";
+import { toStripeAmount } from "../src/lib/payments/stripe";
 
 const ROLES = [
   "PHOTOGRAPHER",

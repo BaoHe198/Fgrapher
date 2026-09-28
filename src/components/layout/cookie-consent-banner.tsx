@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { OPEN_COOKIE_SETTINGS_EVENT } from "@/lib/cookie-consent";
+import { OPEN_COOKIE_SETTINGS_EVENT } from "@/lib/privacy/cookie-consent";
 
 interface CookieConsentBannerProps {
   /** The choice already stored in this browser, or null to ask. */

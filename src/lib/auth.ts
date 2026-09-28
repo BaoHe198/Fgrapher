@@ -23,13 +23,13 @@ const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 import {
   ACCOUNT_SUSPENDED_CODE,
   EMAIL_NOT_VERIFIED_CODE,
-} from "@/lib/auth-errors";
+} from "@/lib/account/auth-errors";
 import { db } from "@/lib/db";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations/auth";
 import { PAID_ROLES } from "@/lib/constants";
 import { resolvePartyName } from "@/lib/party-name";
-import { joinVietnameseName } from "@/lib/vietnamese-name";
+import { joinVietnameseName } from "@/lib/vietnam/name";
 import { assignUsernameIfMissing } from "@/services/username";
 
 // Two layers: per-IP catches a scripted credential-stuffing loop trying
@@ -68,7 +68,7 @@ const LOGIN_EMAIL_RATE_LIMIT = {
 /**
  * Signals a correct password on an account whose email is still
  * unverified, so the login page can show the resend prompt rather than
- * "wrong email or password". The code itself lives in lib/auth-errors.ts
+ * "wrong email or password". The code itself lives in lib/account/auth-errors.ts
  * so the login page can read it without importing this server module.
  */
 class EmailNotVerifiedError extends CredentialsSignin {

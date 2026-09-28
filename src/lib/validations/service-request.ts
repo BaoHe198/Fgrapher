@@ -44,7 +44,7 @@ const serviceRequestFields = z.object({
   detailedAddress: z.string().max(300).optional(),
   budgetMin: z.coerce.number().positive().max(MAX_VND_AMOUNT).optional(),
   budgetMax: z.coerce.number().positive().max(MAX_VND_AMOUNT).optional(),
-  // Photos or videos (mediaUrl holds either — see lib/media-kind.ts). Only
+  // Photos or videos (mediaUrl holds either — see lib/media/kind.ts). Only
   // Cloudinary delivery URLs: these are rendered for every provider who
   // opens the request, so an arbitrary URL here would be loaded into all of
   // their browsers. The upload field only ever produces Cloudinary URLs.

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { isCloudinaryDeliveryUrl } from "@/lib/media-kind";
+import { isCloudinaryDeliveryUrl } from "@/lib/media/kind";
 
 /**
  * The single limit on reference photos/videos attached to a job.

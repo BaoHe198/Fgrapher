@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
-import { isMomoConfigured } from "@/lib/momo";
+import { isMomoConfigured } from "@/lib/payments/momo";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createPaymentIntentSchema } from "@/lib/validations/payments";
 import { createMomoPaymentIntent, PaymentError } from "@/services/payments";

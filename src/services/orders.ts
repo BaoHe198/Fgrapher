@@ -16,7 +16,10 @@ import {
   orderConfirmationEmailHtml,
   orderStatusEmailHtml,
 } from "@/lib/email";
-import { createOrderCheckoutSession, refundPayment } from "@/lib/stripe";
+import {
+  createOrderCheckoutSession,
+  refundPayment,
+} from "@/lib/payments/stripe";
 import { notify } from "@/services/notification";
 import { pendingReviewsForOrder } from "@/services/product-reviews";
 

@@ -298,7 +298,7 @@ Grep toàn bộ src/ tìm chuỗi tiếng Anh hardcode chưa qua next-intl. Chú
 - Thông báo lỗi từ Zod trong src/lib/validations/*
 - Thông báo lỗi trả về từ API route
 - Nhãn của enum: BookingStatus, Role, ProfileCategory, NotificationType, ExperienceLevel, MediaType
-- Mẫu email trong src/lib/email.ts
+- Mẫu email trong src/lib/email/index.ts
 - Trạng thái rỗng và trạng thái loading
 - Thuộc tính aria-label và alt của ảnh
 - Placeholder của input

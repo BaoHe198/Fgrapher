@@ -89,7 +89,7 @@ export default function PrivacyPage() {
       {/* Unlike the sections above, this one describes what the code sets
           today, in words a visitor understands — no cookie names here. The
           names behind each item, for whoever keeps this in step
-          (src/lib/cookie-consent.ts):
+          (src/lib/privacy/cookie-consent.ts):
             necessary — authjs.session-token, authjs.csrf-token,
                         authjs.callback-url, locale (1 year),
                         fg_cookie_consent (180 days)

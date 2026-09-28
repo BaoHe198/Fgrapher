@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 import {
   REQUEST_ERROR_KEYS,
   requestErrorKey,
-} from "@/lib/request-error-messages";
+} from "@/lib/errors/request-messages";
 import en from "@/messages/en.json";
 import vi from "@/messages/vi.json";
 

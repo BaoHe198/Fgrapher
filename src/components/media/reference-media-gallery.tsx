@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { MediaLightbox } from "@/components/modals/media-lightbox";
-import { mediaKindFromUrl } from "@/lib/media-kind";
+import { mediaKindFromUrl } from "@/lib/media/kind";
 
 /**
  * Read-only view of a customer's reference photos/videos, for whoever is on

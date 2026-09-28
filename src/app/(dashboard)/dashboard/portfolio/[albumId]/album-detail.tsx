@@ -38,7 +38,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
-import { buildMediaVariants } from "@/lib/media-variants";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 interface MediaItem {

@@ -5,7 +5,7 @@ import { PUBLIC_SEARCH_CACHE_CONTROL } from "@/lib/cache";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { ServiceKind } from "@prisma/client";
 
-import { normalizeSort } from "@/lib/search-params";
+import { normalizeSort } from "@/lib/search/params";
 import { searchProfiles } from "@/services/search";
 
 // Fully public, no auth gate (by design — search has to work for

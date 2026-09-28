@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { notificationHref } from "@/lib/notification-href";
+import { notificationHref } from "@/lib/notifications/href";
 
 describe("notificationHref", () => {
   it("opens the request for the customer who posted it", () => {

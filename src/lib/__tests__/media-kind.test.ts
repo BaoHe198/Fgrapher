@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isCloudinaryDeliveryUrl, mediaKindFromUrl } from "@/lib/media-kind";
+import { isCloudinaryDeliveryUrl, mediaKindFromUrl } from "@/lib/media/kind";
 
 describe("mediaKindFromUrl", () => {
   it("trusts Cloudinary's resource type in the path over the extension", () => {

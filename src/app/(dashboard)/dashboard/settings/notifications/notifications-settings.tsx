@@ -14,7 +14,7 @@ const DEFAULT_PREFERENCES: NotificationPreferences = Object.fromEntries(
   NOTIFICATION_KEYS.map((key) => [key, { email: true, inApp: true }]),
 ) as NotificationPreferences;
 
-// Groups follow lib/notifications.ts's feature model: `newReview` is a
+// Groups follow lib/notifications/index.ts's feature model: `newReview` is a
 // core MVP type (CLAUDE.md "đánh giá") so it gets its own always-visible
 // group rather than sitting under "social", which is hidden while the
 // social feed is disabled. The "marketing" group is omitted entirely —

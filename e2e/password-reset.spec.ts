@@ -8,7 +8,7 @@ import {
 } from "./helpers/db";
 
 // Full password-reset cycle. Resend isn't configured in this environment
-// (sendEmail no-ops silently — see src/lib/email.ts). The reset token is
+// (sendEmail no-ops silently — see src/lib/email/index.ts). The reset token is
 // written to the database regardless, but only as a hash, so it can't be
 // read back out — see e2e/README.md.
 test("user resets their password end to end", async ({ page }) => {

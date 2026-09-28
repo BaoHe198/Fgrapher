@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import {
   UploadVerificationError,
   verifyPurposeImageUpload,
-} from "@/lib/cloudinary";
+} from "@/lib/media/cloudinary";
 import { newMessageEmailHtml } from "@/lib/email";
 import { messagePreview } from "@/lib/notifications";
 import { notify } from "@/services/notification";

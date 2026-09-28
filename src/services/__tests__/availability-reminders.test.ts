@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { vietnamDateKey, vietnamDateStart } from "@/lib/vietnam-date";
+import { vietnamDateKey, vietnamDateStart } from "@/lib/vietnam/date";
 
 describe("availability reminder date key", () => {
   it("uses the Vietnam calendar day across the UTC boundary", () => {

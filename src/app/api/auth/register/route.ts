@@ -8,7 +8,7 @@ import { features } from "@/lib/features";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRequestMeta } from "@/lib/request-meta";
 import { getRegisterSchema } from "@/lib/validations/auth";
-import { splitVietnameseName } from "@/lib/vietnamese-name";
+import { splitVietnameseName } from "@/lib/vietnam/name";
 import { recordConsent } from "@/services/compliance";
 import { sendVerificationEmail } from "@/services/email-verification";
 import { assignFreePlan } from "@/services/subscription";

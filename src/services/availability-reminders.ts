@@ -4,7 +4,7 @@ import { appUrl } from "@/lib/app-url";
 import { PROVIDER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { availabilityReminderEmailHtml } from "@/lib/email";
-import { vietnamDateKey } from "@/lib/vietnam-date";
+import { vietnamDateKey } from "@/lib/vietnam/date";
 import { notify } from "@/services/notification";
 
 const DELIVERY_CONCURRENCY = 10;

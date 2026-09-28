@@ -7,7 +7,7 @@ import {
   type CookieConsent,
   parseCookieConsent,
   serializeCookieConsent,
-} from "@/lib/cookie-consent";
+} from "@/lib/privacy/cookie-consent";
 import {
   PROFILE_VIEW_COOKIE,
   PROFILE_VIEW_COOKIE_PATH,

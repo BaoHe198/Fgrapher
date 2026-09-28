@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { omitPrivateProfileFields } from "@/lib/profile-privacy";
+import { omitPrivateProfileFields } from "@/lib/privacy/profile-privacy";
 
 const saveSchema = z.object({ profileId: z.string().min(1) });
 

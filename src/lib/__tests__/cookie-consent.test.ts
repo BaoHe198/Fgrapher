@@ -7,7 +7,7 @@ import {
   hasAnalyticsCookieConsent,
   parseCookieConsent,
   serializeCookieConsent,
-} from "@/lib/cookie-consent";
+} from "@/lib/privacy/cookie-consent";
 import vi from "@/messages/vi.json";
 import en from "@/messages/en.json";
 

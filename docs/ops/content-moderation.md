@@ -55,7 +55,7 @@ tạo điểm thứ ba; admin cũng có thể xoá điểm hoặc bỏ đình ch
 
 OpenAI chỉ nhận **bản thu nhỏ 512px do Cloudinary tạo lại**, không nhận file gốc.
 URL được tạo bởi `buildMediaVariants(url).moderation` trong
-`lib/media-variants.ts`.
+`lib/media/variants.ts`.
 
 Điều này giảm dữ liệu gửi đi:
 
@@ -170,7 +170,7 @@ không tạo điểm phạt, người dùng chỉ cần chọn ảnh khác.
 | Thành phần         | Vị trí                                      |
 | ------------------ | ------------------------------------------- |
 | Client gọi OpenAI  | `src/lib/openai-moderation.ts`              |
-| Tạo bản ảnh nhỏ    | `src/lib/media-variants.ts`                 |
+| Tạo bản ảnh nhỏ    | `src/lib/media/variants.ts`                 |
 | Policy và scanner  | `src/services/moderation.ts`                |
 | Điểm vi phạm       | `src/services/admin.ts`                     |
 | Test               | `src/services/__tests__/moderation.test.ts` |

@@ -1,7 +1,7 @@
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
-import { setOrDelete } from "@/lib/filter-params";
+import { setOrDelete } from "@/lib/search/filter-params";
 
 export interface BrowseFilterState {
   roles: Role[];

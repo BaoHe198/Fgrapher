@@ -8,7 +8,7 @@ import {
 } from "@/lib/auth-helpers";
 import { SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
-import { UploadVerificationError } from "@/lib/cloudinary";
+import { UploadVerificationError } from "@/lib/media/cloudinary";
 import {
   productCategoryAllowedForRole,
   getProductSchema,

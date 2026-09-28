@@ -7,7 +7,7 @@ sự kiện có quy tắc riêng: có gửi email hay không, người dùng có
 và tính năng nào phải đang bật.
 
 Nguồn chính xác để máy chạy là `NOTIFICATION_POLICY` trong
-`src/lib/notifications.ts`. File này là bản giải thích cho con người. Test
+`src/lib/notifications/index.ts`. File này là bản giải thích cho con người. Test
 `src/lib/__tests__/notifications.test.ts` bảo đảm mọi `NotificationType` đều có
 quy tắc. Khi sửa, phải cập nhật code và tài liệu cùng lúc.
 

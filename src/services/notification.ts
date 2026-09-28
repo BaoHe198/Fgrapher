@@ -15,7 +15,7 @@ import { emailIdempotencyKey } from "@/services/email-outbox-policy";
 import type { NotificationPreferences } from "@/lib/validations/user";
 
 // Feature-flag state is resolved here (server side) and passed into the
-// pure policy in lib/notifications.ts — that module must not import
+// pure policy in lib/notifications/index.ts — that module must not import
 // lib/features.ts / lib/env.ts.
 const featureGate = makeFeatureGate({
   marketplaceEnabled: features.marketplaceEnabled,
@@ -24,7 +24,7 @@ const featureGate = makeFeatureGate({
 
 // The channel matrix — which NotificationType writes an in-app row, which
 // may email, under which preference toggle, and which MVP feature it
-// belongs to — lives in lib/notifications.ts (pure, unit-tested,
+// belongs to — lives in lib/notifications/index.ts (pure, unit-tested,
 // documented in docs/ops/notification-matrix.md). This module is the thin
 // side-effecting layer: it reads the recipient, asks the policy what to
 // do, and performs the writes.

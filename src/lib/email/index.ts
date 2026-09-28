@@ -2,7 +2,7 @@ import {
   deliverEmail,
   getSupportEmail,
   logEmailFailure,
-} from "@/lib/email-transport";
+} from "@/lib/email/transport";
 import {
   enqueueEmail,
   finalizeReservedEmail,
@@ -13,10 +13,10 @@ import {
   reserveThrottledEmail,
 } from "@/services/email-outbox";
 
-// The templates themselves live in lib/email-templates.ts (pure, no env/db,
+// The templates themselves live in lib/email/templates.ts (pure, no env/db,
 // unit-testable). Re-exported here so every existing
 // `import { bookingRequestEmailHtml } from "@/lib/email"` keeps working.
-export * from "@/lib/email-templates";
+export * from "@/lib/email/templates";
 export { getSupportEmail };
 
 export interface SendEmailResult {

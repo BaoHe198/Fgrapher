@@ -6,12 +6,12 @@ import {
   clearBrowseFilters,
   readBrowseFilters,
   writeBrowseFilters,
-} from "@/lib/browse-filters";
+} from "@/lib/search/browse-filters";
 import {
   isSameFilterQuery,
   nextFilterQuery,
   setOrDelete,
-} from "@/lib/filter-params";
+} from "@/lib/search/filter-params";
 
 // QA-01 (22/09/2026): on /browse, searching "Thanh Tâm" narrowed the grid to
 // one card — and then ticking a role checkbox put all eight back with the

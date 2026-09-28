@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import type { LegalEntityType, Role } from "@prisma/client";
 
-import { deleteKycAsset, isCloudinaryConfigured } from "@/lib/cloudinary";
+import { deleteKycAsset, isCloudinaryConfigured } from "@/lib/media/cloudinary";
 import { CURRENT_POLICY_VERSION, KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { logAudit, recordConsent } from "@/services/compliance";

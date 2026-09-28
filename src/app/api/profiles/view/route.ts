@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import {
   COOKIE_CONSENT_COOKIE,
   hasAnalyticsCookieConsent,
-} from "@/lib/cookie-consent";
+} from "@/lib/privacy/cookie-consent";
 import { db } from "@/lib/db";
 import {
   PROFILE_VIEW_COOKIE,

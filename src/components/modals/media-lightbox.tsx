@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
-import { type MediaKind, mediaKindFromUrl } from "@/lib/media-kind";
-import { buildMediaVariants } from "@/lib/media-variants";
+import { type MediaKind, mediaKindFromUrl } from "@/lib/media/kind";
+import { buildMediaVariants } from "@/lib/media/variants";
 
 interface MediaLightboxProps {
   // `type` is optional: portfolio media carries its own, while reference

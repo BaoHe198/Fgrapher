@@ -25,7 +25,7 @@ import { useState } from "react";
 import { FrameMark } from "@/components/brand/frame-mark";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { PostEngagement } from "@/components/social/post-engagement";
-import { buildMediaVariants } from "@/lib/media-variants";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 import { AlbumEditDialog } from "./album-edit-dialog";

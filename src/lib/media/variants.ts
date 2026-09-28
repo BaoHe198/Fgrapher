@@ -1,4 +1,4 @@
-// Deliberately zero imports (not even from lib/cloudinary.ts, which
+// Deliberately zero imports (not even from lib/media/cloudinary.ts, which
 // imports the Node-only `cloudinary` SDK and would break if bundled into
 // a Client Component). Pure string manipulation, safe from either side.
 

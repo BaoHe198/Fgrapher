@@ -286,7 +286,7 @@ export async function deleteCloudinaryAsset(
 }
 
 // Portfolio image size variants (thumbnail/medium/large) moved to
-// src/lib/media-variants.ts — that file has zero imports so it's safe to
+// src/lib/media/variants.ts — that file has zero imports so it's safe to
 // use from Client Components, unlike this one (imports the Node-only
 // `cloudinary` SDK at module scope).
 

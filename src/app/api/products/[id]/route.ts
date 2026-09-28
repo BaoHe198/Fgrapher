@@ -5,7 +5,7 @@ import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { SELLER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
-import { UploadVerificationError } from "@/lib/cloudinary";
+import { UploadVerificationError } from "@/lib/media/cloudinary";
 import {
   productCategoryAllowedForRole,
   getProductSchema,

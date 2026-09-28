@@ -10,7 +10,7 @@ import {
   useTransition,
 } from "react";
 
-import { isSameFilterQuery, nextFilterQuery } from "@/lib/filter-params";
+import { isSameFilterQuery, nextFilterQuery } from "@/lib/search/filter-params";
 
 export interface NavigateOptions {
   /**
@@ -46,7 +46,7 @@ export interface FilterParamsController {
  * Every control on a page shares ONE of these (via context on /browse, or
  * directly in the one component that owns them on /shop) so that no two
  * controls can build competing query strings from a stale URL — see
- * lib/filter-params.ts for the failures that came from letting them.
+ * lib/search/filter-params.ts for the failures that came from letting them.
  */
 export function useFilterParams(): FilterParamsController {
   const router = useRouter();

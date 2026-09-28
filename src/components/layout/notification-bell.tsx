@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { notificationHref } from "@/lib/notification-href";
+import { notificationHref } from "@/lib/notifications/href";
 
 const ICONS: Record<NotificationType, typeof Bell> = {
   BOOKING_REQUEST: Calendar,

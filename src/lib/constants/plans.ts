@@ -8,7 +8,7 @@ export interface RolePlan {
   role: Role;
   currency: "VND";
   // VND, whole currency units — VND is a zero-decimal currency (see
-  // toStripeAmount in lib/stripe.ts), so these are the exact amounts
+  // toStripeAmount in lib/payments/stripe.ts), so these are the exact amounts
   // charged, not cents. `yearly` already has the 20% discount applied
   // (monthly * 12 * 0.8) — it's the total charged once a year, not a
   // monthly-equivalent figure.

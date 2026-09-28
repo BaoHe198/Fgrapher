@@ -11,8 +11,8 @@ import { db } from "@/lib/db";
 import {
   UploadVerificationError,
   verifyReferenceMediaUpload,
-} from "@/lib/cloudinary";
-import { mediaKindFromUrl } from "@/lib/media-kind";
+} from "@/lib/media/cloudinary";
+import { mediaKindFromUrl } from "@/lib/media/kind";
 import {
   holdSlot,
   isOverlapViolation,
@@ -37,7 +37,7 @@ import { isSlotBookable } from "@/services/availability";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
-import { BOOKING_ERROR_KEYS } from "@/lib/booking-error-messages";
+import { BOOKING_ERROR_KEYS } from "@/lib/errors/booking-messages";
 
 // Translation helper for the shared email templates in @/lib/email —
 // namespace "libServices.email". Request-triggered functions (called from a

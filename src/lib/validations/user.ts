@@ -48,7 +48,7 @@ export const NOTIFICATION_KEYS = [
   "newMessage",
   // Reverse-marketplace: new matching request, a new offer on your
   // request, an offer accepted/declined, the 48h no-offers nudge. See
-  // lib/notifications.ts's NOTIFICATION_POLICY.
+  // lib/notifications/index.ts's NOTIFICATION_POLICY.
   "serviceRequests",
   "newFollower",
   "newReview",

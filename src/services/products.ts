@@ -1,6 +1,6 @@
 import type { ProductType } from "@prisma/client";
 
-import { verifyPortfolioUpload } from "@/lib/cloudinary";
+import { verifyPortfolioUpload } from "@/lib/media/cloudinary";
 import { db } from "@/lib/db";
 import type { ProductInput } from "@/lib/validations/product";
 import { runProductImageModeration } from "@/services/moderation";

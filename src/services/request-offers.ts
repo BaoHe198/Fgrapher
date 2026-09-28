@@ -274,7 +274,7 @@ const defaultRequestMatchDeps: RequestMatchDeps = {
   },
   writeInApp: (input) => notifyInAppBatch(input),
   // A handled failure still has to be seen. console.error is how the rest
-  // of the service layer surfaces a handled failure (lib/email-transport.ts,
+  // of the service layer surfaces a handled failure (lib/email/transport.ts,
   // lib/cache.ts, services/email-verification.ts): it lands in the Vercel
   // runtime logs, which docs/ops/VAN-HANH-PRODUCTION.md §2 names as the
   // place to look for errors until an alerting service is set up. The tag

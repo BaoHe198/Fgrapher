@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { toE164VN } from "@/lib/phone";
+import { toE164VN } from "@/lib/vietnam/phone";
 import { canVerifyPhone, checkPhoneVerification } from "@/lib/sms";
 import { verifyPhoneCodeSchema } from "@/lib/validations/phone";
 

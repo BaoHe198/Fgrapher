@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Progress } from "@/components/ui/progress";
-import { compressImageFile } from "@/lib/image-compression";
+import { compressImageFile } from "@/lib/media/image-compression";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 
 const NEW_ALBUM_VALUE = "__new__";

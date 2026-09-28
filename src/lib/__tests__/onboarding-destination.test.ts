@@ -6,7 +6,7 @@ import {
   isSafeInternalPath,
   parseBillingInterval,
   pendingPaidRoles,
-} from "@/lib/onboarding-destination";
+} from "@/lib/account/onboarding-destination";
 import type { Role } from "@prisma/client";
 
 // The regression these guard: registration used to build

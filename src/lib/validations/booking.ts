@@ -36,7 +36,7 @@ export const createBookingSchema = z.object({
   numberOfPeople: z.coerce.number().int().min(1).max(999).optional(),
   notes: z.string().max(1000).optional(),
   contactPhone: z.string().max(30).optional(),
-  // Photos or videos (see lib/media-kind.ts). Limit shared with
+  // Photos or videos (see lib/media/kind.ts). Limit shared with
   // service requests — see validations/reference-media.ts.
   referenceImages: z
     .array(
@@ -88,7 +88,7 @@ export function getCreateBookingSchema(t: (key: string) => string) {
     numberOfPeople: z.coerce.number().int().min(1).max(999).optional(),
     notes: z.string().max(1000).optional(),
     contactPhone: z.string().max(30).optional(),
-    // Photos or videos (see lib/media-kind.ts). Limit shared with
+    // Photos or videos (see lib/media/kind.ts). Limit shared with
     // service requests — see validations/reference-media.ts.
     referenceImages: z
       .array(

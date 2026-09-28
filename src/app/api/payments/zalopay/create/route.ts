@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
-import { isZalopayConfigured } from "@/lib/zalopay";
+import { isZalopayConfigured } from "@/lib/payments/zalopay";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createPaymentIntentSchema } from "@/lib/validations/payments";
 import { createZalopayPaymentIntent, PaymentError } from "@/services/payments";

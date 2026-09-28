@@ -9,7 +9,7 @@ import {
   weeklyWindowsForProviders,
 } from "@/services/resource-calendar";
 import type { FmapSearchInput } from "@/lib/validations/fmap";
-import { joinVietnameseName } from "@/lib/vietnamese-name";
+import { joinVietnameseName } from "@/lib/vietnam/name";
 import { timeToMinutes } from "@/services/availability";
 
 const MAX_FMAP_MARKERS = 250;

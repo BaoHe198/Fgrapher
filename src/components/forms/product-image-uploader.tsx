@@ -21,8 +21,8 @@ import Image from "next/image";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
-import { compressImageFile } from "@/lib/image-compression";
-import { buildMediaVariants } from "@/lib/media-variants";
+import { compressImageFile } from "@/lib/media/image-compression";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 // Product photos are shown in shop listing grids and a product detail

@@ -10,10 +10,10 @@ import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import {
   UploadVerificationError,
   verifyAccountImageUpload,
-} from "@/lib/cloudinary";
+} from "@/lib/media/cloudinary";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
-import { toE164VN } from "@/lib/phone";
+import { toE164VN } from "@/lib/vietnam/phone";
 import { getUpdateMeSchema } from "@/lib/validations/user";
 import { contentScanner } from "@/services/moderation";
 

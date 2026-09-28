@@ -126,7 +126,7 @@ role ở giao diện.
 
 ### Email mới
 
-1. Tạo template theo pattern hiện có trong `src/lib/email.ts`.
+1. Tạo template theo pattern hiện có trong `src/lib/email/index.ts`.
 2. Gọi qua lớp outbox, không gửi trực tiếp rải rác trong route.
 3. Tạo idempotency key để tránh email trùng.
 4. Không ghi token nguyên văn vào payload/log.

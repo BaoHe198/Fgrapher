@@ -7,9 +7,9 @@ import type {
 import { getTranslations } from "next-intl/server";
 
 import { appUrl } from "@/lib/app-url";
-import { verifyReferenceMediaUpload } from "@/lib/cloudinary";
+import { verifyReferenceMediaUpload } from "@/lib/media/cloudinary";
 import { features } from "@/lib/features";
-import { mediaKindFromUrl } from "@/lib/media-kind";
+import { mediaKindFromUrl } from "@/lib/media/kind";
 import { db } from "@/lib/db";
 import { requestNoOffersEmailHtml } from "@/lib/email";
 import { resolvePartyName } from "@/lib/party-name";
