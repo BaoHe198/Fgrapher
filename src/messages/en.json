@@ -228,7 +228,9 @@
     "about": "About",
     "careers": "Careers",
     "support": "Support",
-    "terms": "Terms"
+    "terms": "Terms",
+    "privacy": "Privacy policy",
+    "cookieSettings": "Cookie settings"
   },
   "browse": {
     "role": "ROLE",
@@ -4263,5 +4265,18 @@
     "VENUE_RENTAL": "Venue rental",
     "MAKEUP": "Make-up",
     "MODELING": "Modelling"
+  },
+  "cookieConsent": {
+    "title": "Fgrapher uses cookies",
+    "body": "Necessary cookies keep you signed in and remember your language. They are always on because the site does not work without them. Analytics cookies make profile view counts more accurate and are only set if you agree. We do not use advertising cookies.",
+    "details": "Details",
+    "necessaryOnly": "Necessary cookies only",
+    "allowAnalytics": "Allow analytics cookies",
+    "currentChoice": "Current choice: {choice}",
+    "choiceAnalytics": "analytics cookies allowed",
+    "choiceNecessary": "necessary cookies only",
+    "close": "Close",
+    "saveFailed": "Your cookie choice was not saved. Please try again.",
+    "regionLabel": "Cookie notice"
   }
 }

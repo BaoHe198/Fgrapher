@@ -86,6 +86,43 @@ export default function PrivacyPage() {
           <p className="italic">Nội dung chờ luật sư soạn.</p>
         </div>
       ))}
+      {/* Unlike the sections above, this one is a factual inventory of what
+          the code sets today (src/lib/cookie-consent.ts). Keep it in step
+          whenever a cookie is added or removed. */}
+      <div id="cookie" className="flex scroll-mt-20 flex-col gap-2">
+        <h2>11. Cookie</h2>
+        <p>
+          Cookie là tệp nhỏ trình duyệt lưu lại khi bạn dùng Fgrapher. Chúng tôi
+          chia cookie làm hai nhóm:
+        </p>
+        <ul>
+          <li>
+            <strong>Cookie cần thiết (luôn bật):</strong> giữ phiên đăng nhập và
+            chống giả mạo yêu cầu (authjs.session-token, authjs.csrf-token,
+            authjs.callback-url), ghi nhớ ngôn ngữ bạn chọn (locale), và ghi nhớ
+            lựa chọn cookie của bạn (fg_cookie_consent, 180 ngày). Thiếu các
+            cookie này trang web không hoạt động được.
+          </li>
+          <li>
+            <strong>Cookie thống kê (chỉ khi bạn đồng ý):</strong> fg_pv ghi nhớ
+            những hồ sơ bạn đã xem trong 24 giờ để một lượt xem không bị đếm
+            nhiều lần. Cookie này chỉ nằm trên trình duyệt của bạn và chỉ được
+            gửi tới đúng địa chỉ đếm lượt xem.
+          </li>
+        </ul>
+        <p>
+          Fgrapher không dùng cookie quảng cáo hay cookie theo dõi của bên thứ
+          ba. Bạn đổi lựa chọn bất cứ lúc nào bằng liên kết “Cài đặt cookie” ở
+          chân trang; nếu đã đăng nhập, bạn cũng có thể đổi tại{" "}
+          <Link
+            href="/dashboard/settings/data"
+            className="text-text-link hover:underline"
+          >
+            Cài đặt → Dữ liệu &amp; quyền riêng tư
+          </Link>{" "}
+          (mục Phân tích hành vi sử dụng).
+        </p>
+      </div>
     </SimplePage>
   );
 }

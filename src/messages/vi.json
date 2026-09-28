@@ -228,7 +228,9 @@
     "about": "Giới thiệu",
     "careers": "Tuyển dụng",
     "support": "Hỗ trợ",
-    "terms": "Điều khoản"
+    "terms": "Điều khoản",
+    "privacy": "Chính sách bảo mật",
+    "cookieSettings": "Cài đặt cookie"
   },
   "browse": {
     "role": "VAI TRÒ",
@@ -4263,5 +4265,18 @@
     "VENUE_RENTAL": "Cho thuê không gian",
     "MAKEUP": "Trang điểm",
     "MODELING": "Làm mẫu"
+  },
+  "cookieConsent": {
+    "title": "Fgrapher sử dụng cookie",
+    "body": "Cookie cần thiết giúp bạn đăng nhập và ghi nhớ ngôn ngữ, luôn được bật vì trang web không hoạt động nếu thiếu chúng. Cookie thống kê giúp đếm lượt xem hồ sơ chính xác hơn và chỉ được bật khi bạn đồng ý. Chúng tôi không dùng cookie quảng cáo.",
+    "details": "Xem chi tiết",
+    "necessaryOnly": "Chỉ dùng cookie cần thiết",
+    "allowAnalytics": "Cho phép cookie thống kê",
+    "currentChoice": "Lựa chọn hiện tại: {choice}",
+    "choiceAnalytics": "đã cho phép cookie thống kê",
+    "choiceNecessary": "chỉ cookie cần thiết",
+    "close": "Đóng",
+    "saveFailed": "Chưa lưu được lựa chọn cookie. Vui lòng thử lại.",
+    "regionLabel": "Thông báo cookie"
   }
 }

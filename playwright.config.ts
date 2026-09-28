@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+import { cookieConsentState } from "./e2e/helpers/cookie-consent";
+
 // When BASE_URL is set (CI running against a Vercel preview deployment),
 // Playwright drives that remote URL directly and never starts a local
 // server. Locally, BASE_URL is unset — Playwright starts `next start`
@@ -38,6 +40,9 @@ export default defineConfig({
   },
   use: {
     baseURL,
+    // Every browser starts with the cookie banner already answered; see
+    // e2e/helpers/cookie-consent.ts. cookie-consent.spec.ts opts back out.
+    storageState: cookieConsentState(baseURL),
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",

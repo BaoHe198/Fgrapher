@@ -27,6 +27,17 @@ export function ProfileViewBeacon({ profileId }: ProfileViewBeaconProps) {
     if (reportedRef.current === profileId) return;
     reportedRef.current = profileId;
 
+    // Once per tab session per profile. This is the only dedupe for a
+    // visitor who declined analytics cookies (the server then keeps no
+    // cookie), and it stays on this device — nothing about it is sent.
+    const seenKey = `fg_pv_seen:${profileId}`;
+    try {
+      if (sessionStorage.getItem(seenKey)) return;
+      sessionStorage.setItem(seenKey, "1");
+    } catch {
+      // Storage blocked (private mode, embedded view): count anyway.
+    }
+
     void fetch("/api/profiles/view", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

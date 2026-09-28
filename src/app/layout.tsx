@@ -9,9 +9,11 @@ import {
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { MessagingProvider } from "@/components/providers/messaging-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { CookieConsentBanner } from "@/components/layout/cookie-consent-banner";
 import { EnvironmentBanner } from "@/components/layout/environment-banner";
 import { Toaster } from "@/components/ui/toast";
 import { auth } from "@/lib/auth";
+import { readCookieConsent } from "@/lib/cookie-consent-server";
 import "./globals.css";
 
 const fontBody = Plus_Jakarta_Sans({
@@ -59,6 +61,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   const messages = await getMessages();
   const session = await auth();
+  // auth() already reads the request's cookies, so reading one more keeps
+  // no page static that was static before — and deciding here means the
+  // banner is in the first HTML instead of popping in after hydration.
+  const cookieConsent = await readCookieConsent();
 
   return (
     <html
@@ -80,6 +86,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <MessagingProvider>
                 <Toaster>{children}</Toaster>
               </MessagingProvider>
+              <CookieConsentBanner
+                initialAnalytics={cookieConsent?.analytics ?? null}
+              />
             </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

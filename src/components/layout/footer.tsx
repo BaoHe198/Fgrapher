@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { LogoFull } from "@/components/brand/logo-full";
+import { CookieSettingsLink } from "@/components/layout/cookie-settings-link";
 import { DISCOVERABLE_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 
@@ -17,6 +18,7 @@ const COMPANY_LINKS = [
   { labelKey: "guide", href: "/guide" },
   { labelKey: "support", href: "/help" },
   { labelKey: "terms", href: "/terms" },
+  { labelKey: "privacy", href: "/privacy" },
 ] as const;
 
 export function Footer() {
@@ -82,6 +84,7 @@ export function Footer() {
                 {t(`foot.${link.labelKey}`)}
               </Link>
             ))}
+            <CookieSettingsLink label={t("foot.cookieSettings")} />
           </div>
         </div>
 

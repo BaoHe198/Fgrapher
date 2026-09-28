@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/lib/auth";
+import {
+  COOKIE_CONSENT_COOKIE,
+  hasAnalyticsCookieConsent,
+} from "@/lib/cookie-consent";
 import { db } from "@/lib/db";
 import {
   PROFILE_VIEW_COOKIE,
@@ -15,7 +19,8 @@ import {
 } from "@/lib/profile-views";
 import { incrementProfileView } from "@/services/public-profile";
 
-// Counts one profile view, at most once per browser per profile per day.
+// Counts one profile view, at most once per browser per profile per day
+// when the visitor allowed analytics cookies, otherwise once per tab session.
 //
 // This lives in a route handler rather than in the profile page itself for a
 // single hard reason: a Server Component cannot set cookies, and without a
@@ -54,7 +59,15 @@ export async function POST(request: Request) {
 
     const cookieStore = await cookies();
     const nowSeconds = Math.floor(Date.now() / 1000);
-    const state = parseViewState(cookieStore.get(PROFILE_VIEW_COOKIE)?.value);
+    // The dedupe cookie is an analytics cookie: without the visitor's yes
+    // from the cookie banner it is neither read nor set, and the only
+    // dedupe left is ProfileViewBeacon's once-per-tab-session guard.
+    const cookieAllowed = hasAnalyticsCookieConsent(
+      cookieStore.get(COOKIE_CONSENT_COOKIE)?.value,
+    );
+    const state = parseViewState(
+      cookieAllowed ? cookieStore.get(PROFILE_VIEW_COOKIE)?.value : undefined,
+    );
 
     // Check the cookie before touching the database — the repeat-view case is
     // the common one, and it should cost nothing.
@@ -78,6 +91,8 @@ export async function POST(request: Request) {
     }
 
     incrementProfileView(profileId);
+
+    if (!cookieAllowed) return result(true);
 
     cookieStore.set(
       PROFILE_VIEW_COOKIE,

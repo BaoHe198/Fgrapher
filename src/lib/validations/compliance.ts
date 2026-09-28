@@ -9,3 +9,8 @@ export const updateConsentSchema = z.object({
 });
 
 export type UpdateConsentInput = z.infer<typeof updateConsentSchema>;
+
+/** The cookie banner's choice. Only the optional category is sent. */
+export const cookieConsentSchema = z.object({
+  analytics: z.boolean(),
+});

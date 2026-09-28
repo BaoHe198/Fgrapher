@@ -156,6 +156,32 @@ loạt, đặt rộng; giới hạn **chặt** nằm theo tài khoản/email:
 Bộ đếm hiện nằm trong bộ nhớ từng máy chủ (không dùng Redis), nên thực tế còn
 lỏng hơn bảng trên khi Vercel chạy nhiều máy.
 
+## 10c. Thông báo cookie
+
+Banner hỏi khách lần đầu vào trang (và hỏi lại khi `CURRENT_POLICY_VERSION`
+đổi). Hai nhóm cookie, không tick sẵn, hai nút ngang hàng nhau:
+
+| Nhóm      | Cookie                                                  | Khi nào có           |
+| --------- | ------------------------------------------------------- | -------------------- |
+| Cần thiết | phiên đăng nhập NextAuth, `locale`, `fg_cookie_consent` | Luôn (chỉ thông báo) |
+| Thống kê  | `fg_pv` (chống đếm trùng lượt xem hồ sơ, 24 giờ)        | Chỉ khi khách đồng ý |
+
+- Lựa chọn lưu trong cookie `fg_cookie_consent` 180 ngày
+  (`src/lib/cookie-consent.ts`). Khách đã đăng nhập thì lựa chọn đó cũng là
+  đồng ý mục đích `ANALYTICS`, ghi `ConsentRecord` (thời điểm, phiên bản chính
+  sách, IP) — cùng một công tắc với "Phân tích hành vi sử dụng" ở
+  `/dashboard/settings/data`, hai nơi luôn khớp nhau.
+- Khách chưa đăng nhập: chỉ lưu trong trình duyệt, chưa có bằng chứng phía
+  máy chủ (không có tài khoản để gắn). Nếu luật sư yêu cầu bằng chứng cho cả
+  khách vãng lai thì cần một bảng mới.
+- Từ chối thống kê: không đọc/ghi `fg_pv`, lượt xem chỉ chống trùng trong một
+  phiên tab (sessionStorage, không gửi đi đâu).
+- Thêm bất kỳ công cụ theo dõi nào (Google Analytics, pixel quảng cáo, Vercel
+  Analytics dùng cookie) phải đặt sau nhóm Thống kê hoặc một nhóm mới có công
+  tắc riêng, và cập nhật mục 11 "Cookie" ở `/privacy`.
+- e2e: mọi trình duyệt test bắt đầu với banner đã trả lời
+  (`e2e/helpers/cookie-consent.ts`), trừ `e2e/cookie-consent.spec.ts`.
+
 ## 11. Phần chưa xây hoặc chưa hoàn thiện vận hành
 
 - giao file ảnh/video cuối cùng cho khách qua nền tảng;

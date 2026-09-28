@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
+import { writeCookieConsent } from "@/lib/cookie-consent-server";
 import { updateConsentSchema } from "@/lib/validations/compliance";
 import { recordConsent } from "@/services/compliance";
 
@@ -36,6 +37,12 @@ export async function POST(request: Request) {
       ipAddress,
       userAgent,
     });
+
+    // The ANALYTICS switch here and the cookie banner are the same choice;
+    // keep this browser's cookie in step so the two never disagree.
+    if (parsed.data.purpose === "ANALYTICS") {
+      await writeCookieConsent(parsed.data.granted);
+    }
 
     return NextResponse.json(
       { data: record, error: null, message: "Preference updated" },
