@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import { createUser, db, TEST_PASSWORD } from "./helpers/db";
 import { login } from "./helpers/auth";
@@ -25,6 +25,16 @@ test("customer messages the fixture provider and gets a reply", async ({
     where: { username: "fixtureprovider" },
   });
 
+  // A message's text shows twice once its conversation is open: as the
+  // bubble in the chat panel and as the preview line in the conversation
+  // list. An unscoped getByText() passed only while the list had not caught
+  // up yet, so it failed whenever a slow run let both render. Exact text and
+  // the last match target the bubble, which is what delivery means here —
+  // the list comes first in the DOM, and the sender's own preview carries a
+  // "You:" prefix so it never matches exactly.
+  const bubble = (p: Page, text: string) =>
+    p.getByText(text, { exact: true }).last();
+
   await login(page, customer.email, TEST_PASSWORD);
   await page.goto(`/dashboard/messages?to=${provider.id}`);
 
@@ -33,7 +43,7 @@ test("customer messages the fixture provider and gets a reply", async ({
   await page.getByRole("button", { name: "Send message" }).click();
   // Sender sees their own message immediately (chat-panel.tsx reloads on
   // send) — no polling wait needed on this side.
-  await expect(page.getByText(customerMessage)).toBeVisible({
+  await expect(bubble(page, customerMessage)).toBeVisible({
     timeout: 10_000,
   });
 
@@ -47,14 +57,14 @@ test("customer messages the fixture provider and gets a reply", async ({
     .click();
   // Cross-tab delivery is polling-based (4s interval, no live transport —
   // see e2e/README.md), so this genuinely needs to wait, not just assert.
-  await expect(providerPage.getByText(customerMessage)).toBeVisible({
+  await expect(bubble(providerPage, customerMessage)).toBeVisible({
     timeout: 45_000,
   });
 
   const providerReply = `Yes! Let's confirm a time. — ${Date.now()}`;
   await providerPage.getByPlaceholder("Write a message...").fill(providerReply);
   await providerPage.getByRole("button", { name: "Send message" }).click();
-  await expect(providerPage.getByText(providerReply)).toBeVisible({
+  await expect(bubble(providerPage, providerReply)).toBeVisible({
     timeout: 10_000,
   });
 
@@ -64,7 +74,7 @@ test("customer messages the fixture provider and gets a reply", async ({
   // poll interval well past it. Foreground it so the poll actually runs at
   // its intended cadence instead of intermittently timing out here.
   await page.bringToFront();
-  await expect(page.getByText(providerReply)).toBeVisible({ timeout: 45_000 });
+  await expect(bubble(page, providerReply)).toBeVisible({ timeout: 45_000 });
   await providerContext.close();
 
   // Scoped to this test's customer, not the shared fixture provider (who
