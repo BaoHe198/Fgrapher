@@ -1,0 +1,16 @@
+{
+  // The repo root has to hold each tool's config (Next.js, pnpm, TypeScript,
+  // ESLint, Vercel, shadcn, Playwright look for them there). Nesting only
+  // changes how the Explorer shows them: related files fold under one
+  // parent. Nothing moves on disk.
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "pnpm-lock.yaml, pnpm-workspace.yaml, .npmrc, commitlint.config.cjs, eslint.config.mjs, postcss.config.mjs, components.json",
+    "next.config.ts": "next-env.d.ts, vercel.json",
+    "tsconfig.json": "tsconfig.*.json, tsconfig.tsbuildinfo",
+    ".env.example": ".env, .env.*",
+    ".gitignore": ".prettierignore, .vercelignore",
+    "README.md": "AGENTS.md, CLAUDE.md"
+  }
+}
