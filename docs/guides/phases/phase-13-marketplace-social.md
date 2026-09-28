@@ -35,13 +35,13 @@ khi phần tương ứng chạy được.
 
 Toàn bộ nằm sau cờ `MARKETPLACE_ENABLED=false`:
 
-| Đã có                            | Ghi chú                                    |
-| -------------------------------- | ------------------------------------------ |
-| Bảng `Product`, `ProductImage`   | Có sẵn `rentalPrice` (giá/ngày) và `depositAmount` |
-| Bảng `Order`, `OrderItem`, `CartItem` | `OrderStatus`: PENDING → CONFIRMED → SHIPPED → DELIVERED → CANCELLED/RETURNED |
-| Trang `/shop`, `/shop/[id]`, `/cart`, `/checkout` | Giao diện đã dựng |
-| API sản phẩm, giỏ hàng, đơn hàng | `src/app/api/products`, `/cart`, `/orders` |
-| Bảng điều khiển: Tin đăng, Đơn hàng cửa hàng | `/dashboard/listings`, `/dashboard/shop-orders` |
+| Đã có                                             | Ghi chú                                                                       |
+| ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Bảng `Product`, `ProductImage`                    | Có sẵn `rentalPrice` (giá/ngày) và `depositAmount`                            |
+| Bảng `Order`, `OrderItem`, `CartItem`             | `OrderStatus`: PENDING → CONFIRMED → SHIPPED → DELIVERED → CANCELLED/RETURNED |
+| Trang `/shop`, `/shop/[id]`, `/cart`, `/checkout` | Giao diện đã dựng                                                             |
+| API sản phẩm, giỏ hàng, đơn hàng                  | `src/app/api/products`, `/cart`, `/orders`                                    |
+| Bảng điều khiển: Tin đăng, Đơn hàng cửa hàng      | `/dashboard/listings`, `/dashboard/shop-orders`                               |
 
 ### Chợ — chưa có, hoặc không dùng được
 
@@ -88,10 +88,10 @@ thông báo đơn hàng, đăng ký Bộ Công Thương, bật cờ trên Vercel
 
 ### Cộng đồng — gần như chưa có
 
-| Đã có                                    | Chưa có                                              |
-| ---------------------------------------- | ---------------------------------------------------- |
+| Đã có                                                 | Chưa có                                                             |
+| ----------------------------------------------------- | ------------------------------------------------------------------- |
 | Bảng `Post`, `PostMedia`, `Like`, `Comment`, `Follow` | API bài đăng, trang bảng tin, màn soạn bài, hiển thị bài trên hồ sơ |
-| API theo dõi (`/api/follows`)            | Thích, bình luận, thông báo, kiểm duyệt, chống spam   |
+| API theo dõi (`/api/follows`)                         | Thích, bình luận, thông báo, kiểm duyệt, chống spam                 |
 
 ## 3. Giai đoạn 13A — Chợ F
 
@@ -144,8 +144,8 @@ duyệt thì chủ shop vẫn thấy (kèm ghi chú) nhưng khách không thấy
 
 **Ảnh sản phẩm: xong 21/09/2026.** `ProductImage` có bộ cột kiểm duyệt riêng
 (không trộn vào `ProfileMedia`, vì ảnh bán hàng không phải ảnh portfolio và
-không được hiện trong tab portfolio của chủ shop). Ảnh mới mặc định *chờ
-duyệt* và không hiện trên Chợ, trang sản phẩm hay tab Thiết bị cho tới khi
+không được hiện trong tab portfolio của chủ shop). Ảnh mới mặc định _chờ
+duyệt_ và không hiện trên Chợ, trang sản phẩm hay tab Thiết bị cho tới khi
 admin duyệt. Admin chỉ nhìn **một hàng chờ**: API tự nhận biết ảnh thuộc bảng
 nào, nên chọn gộp cả hai loại rồi duyệt một lần vẫn đúng. Ảnh cũ đã được
 migration đánh dấu là đã duyệt để không làm trắng các shop đang có.
@@ -159,7 +159,7 @@ migration đánh dấu là đã duyệt để không làm trắng các shop đan
 **Đã xong 21/09/2026**: lọc theo tỉnh/thành của người bán; toàn bộ trang Chợ,
 trang sản phẩm và panel mua hàng đã chuyển sang tiếng Việt (trước đó hardcode
 tiếng Anh); **đánh giá sản phẩm** (bảng `ProductReview` riêng, đánh giá được
-sau khi *giao xong* với đơn mua và sau khi *trả đồ* với đơn thuê, mỗi sản phẩm
+sau khi _giao xong_ với đơn mua và sau khi _trả đồ_ với đơn thuê, mỗi sản phẩm
 một lần trên mỗi đơn); **nhắc trả đồ** trước hạn một ngày bằng cron. Trang
 riêng của shop dùng luôn hồ sơ provider sẵn có (tab Thiết bị).
 
@@ -215,17 +215,17 @@ Ràng buộc giữ nguyên: **không có danh mục hay nội dung nude/sexy/bou
 Tính theo phiên làm việc thực tế (mỗi phiên vài giờ, có AI local hỗ trợ các phần
 nhỏ):
 
-| Phần                          | Ước lượng    |
-| ----------------------------- | ------------ |
-| 13A.1 Thanh toán              | 3–4 phiên    |
-| 13A.2 Thuê theo ngày          | 2–3 phiên    |
-| 13A.3 Sản phẩm trang phục     | 1–2 phiên    |
-| 13A.4 Giao nhận               | 1 phiên      |
-| 13A.5 Kiểm duyệt              | 1 phiên      |
-| 13A.6 Trải nghiệm             | 2–3 phiên    |
-| 13A.8 Kiểm thử & bật          | 1–2 phiên    |
-| **Chợ — tổng**                | **11–16 phiên** |
-| 13B Cộng đồng                 | 6–9 phiên    |
+| Phần                      | Ước lượng       |
+| ------------------------- | --------------- |
+| 13A.1 Thanh toán          | 3–4 phiên       |
+| 13A.2 Thuê theo ngày      | 2–3 phiên       |
+| 13A.3 Sản phẩm trang phục | 1–2 phiên       |
+| 13A.4 Giao nhận           | 1 phiên         |
+| 13A.5 Kiểm duyệt          | 1 phiên         |
+| 13A.6 Trải nghiệm         | 2–3 phiên       |
+| 13A.8 Kiểm thử & bật      | 1–2 phiên       |
+| **Chợ — tổng**            | **11–16 phiên** |
+| 13B Cộng đồng             | 6–9 phiên       |
 
 Chưa tính phần pháp lý và thời gian chờ đăng ký với Bộ Công Thương.
 

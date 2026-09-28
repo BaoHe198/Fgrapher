@@ -24,18 +24,20 @@ Nguồn hiện hành:
 
 | Giai đoạn | Mục tiêu lịch sử                         | File                       |
 | --------- | ---------------------------------------- | -------------------------- |
-| 1         | Landing page, navigation và design token | `phase-1-landing-nav.md`   |
-| 2         | Đăng nhập, đăng ký và quên mật khẩu      | `phase-2-auth.md`          |
-| 3         | Khung dashboard và các khu quản lý       | `phase-3-dashboard.md`     |
-| 4         | Hồ sơ công khai và portfolio             | `phase-4-profiles.md`      |
-| 5         | Tìm kiếm và khám phá nhà cung cấp        | `phase-5-browse-search.md` |
-| 6         | Đặt lịch và lịch rảnh                    | `phase-6-booking.md`       |
-| 7         | Gói và thanh toán                        | `phase-7-payments.md`      |
-| 8         | Tin nhắn                                 | `phase-8-messaging.md`     |
-| 9         | Marketplace thiết bị                     | `phase-9-marketplace.md`   |
-| 10        | Đánh giá                                 | `phase-10-reviews.md`      |
-| 11        | i18n, hiệu năng, SEO và accessibility    | `phase-11-polish.md`       |
-| 12        | Admin và chuẩn bị ra mắt                 | `phase-12-admin-launch.md` |
+| 0         | Cài đặt dự án ban đầu                    | `phases/phase-0-guide.md` |
+| 1         | Landing page, navigation và design token | `phases/phase-1-landing-nav.md`   |
+| 2         | Đăng nhập, đăng ký và quên mật khẩu      | `phases/phase-2-auth.md`          |
+| 3         | Khung dashboard và các khu quản lý       | `phases/phase-3-dashboard.md`     |
+| 4         | Hồ sơ công khai và portfolio             | `phases/phase-4-profiles.md`      |
+| 5         | Tìm kiếm và khám phá nhà cung cấp        | `phases/phase-5-browse-search.md` |
+| 6         | Đặt lịch và lịch rảnh                    | `phases/phase-6-booking.md`       |
+| 7         | Gói và thanh toán                        | `phases/phase-7-payments.md`      |
+| 8         | Tin nhắn                                 | `phases/phase-8-messaging.md`     |
+| 9         | Marketplace thiết bị                     | `phases/phase-9-marketplace.md`   |
+| 10        | Đánh giá                                 | `phases/phase-10-reviews.md`      |
+| 11        | i18n, hiệu năng, SEO và accessibility    | `phases/phase-11-polish.md`       |
+| 12        | Admin và chuẩn bị ra mắt                 | `phases/phase-12-admin-launch.md` |
+| 13        | Marketplace và mạng xã hội               | `phases/phase-13-marketplace-social.md` |
 
 ## Cách đọc một guide cũ
 

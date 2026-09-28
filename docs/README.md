@@ -11,17 +11,17 @@ Nếu mới làm quen dự án, hãy đọc theo thứ tự này:
 
 ## Tài liệu hiện hành
 
-| File                   | Dùng khi nào?                                       |
-| ---------------------- | --------------------------------------------------- |
-| `ARCHITECTURE.md`      | Cần hiểu cấu trúc hệ thống                          |
-| `FEATURES.md`          | Cần biết sản phẩm đang làm gì                       |
-| `MVP_SCOPE.md`         | Cần quyết định tính năng đang bật hay ngoài phạm vi |
-| `DEVELOPMENT.md`       | Cài local, sửa code, test                           |
-| `ENVIRONMENTS.md`      | Phân biệt local, Preview và production              |
-| `MIGRATIONS.md`        | Thay đổi database                                   |
-| `OPERATIONS.md`        | Vận hành hằng ngày và sự cố                         |
-| `PRE_LAUNCH_REVIEW.md` | Xem lần rà soát trước launch                        |
-| `REVIEW-2026-09-08.md` | Xem audit có mốc ngày cụ thể                        |
+| File                           | Dùng khi nào?                                       |
+| ------------------------------ | --------------------------------------------------- |
+| `ARCHITECTURE.md`              | Cần hiểu cấu trúc hệ thống                          |
+| `FEATURES.md`                  | Cần biết sản phẩm đang làm gì                       |
+| `MVP_SCOPE.md`                 | Cần quyết định tính năng đang bật hay ngoài phạm vi |
+| `DEVELOPMENT.md`               | Cài local, sửa code, test                           |
+| `ENVIRONMENTS.md`              | Phân biệt local, Preview và production              |
+| `MIGRATIONS.md`                | Thay đổi database                                   |
+| `OPERATIONS.md`                | Vận hành hằng ngày và sự cố                         |
+| `reviews/PRE_LAUNCH_REVIEW.md` | Xem lần rà soát trước launch                        |
+| `reviews/REVIEW-2026-09-08.md` | Xem audit có mốc ngày cụ thể                        |
 
 Hướng dẫn giao task cho AI chạy trên máy nằm tại
 `ops/local-ai-worker.md`. Coding agent bắt đầu từ `../AGENTS.md` để biết thứ tự
@@ -36,8 +36,9 @@ checklist thủ công và cẩm nang IT.
 
 ### `guides/`
 
-Kế hoạch/prompt lịch sử từng dùng để xây dự án. Dùng để hiểu ý định, không dùng làm
-nguồn hiện trạng nếu mâu thuẫn với code hoặc tài liệu hiện hành.
+Kế hoạch/prompt lịch sử từng dùng để xây dự án; hướng dẫn từng giai đoạn (Phase
+0–13) nằm trong `guides/phases/`. Dùng để hiểu ý định, không dùng làm nguồn hiện
+trạng nếu mâu thuẫn với code hoặc tài liệu hiện hành.
 
 ### `design-reference/`
 
@@ -49,10 +50,12 @@ cách token được dùng.
 Các JSON trung gian cho bản dịch ứng dụng. Đây là dữ liệu i18n, không phải tài liệu
 đọc. File `.en.json` cần giữ tiếng Anh; file `.vi.json` giữ tiếng Việt.
 
-### `_prelaunch-audit-*.md`
+### `reviews/`
 
-Báo cáo lịch sử tại thời điểm audit. Chúng lưu phát hiện và phương pháp, không khẳng
-định lỗi hiện vẫn tồn tại.
+Báo cáo rà soát và audit có mốc thời gian: `PRE_LAUNCH_REVIEW.md`, các
+`prelaunch-audit-*.md`, `REVIEW-2026-09-08.md` và biên bản
+`QA-USER-ACCEPTANCE-2026-09-22.md`. Đây là báo cáo lịch sử: chúng lưu phát hiện và
+phương pháp, không khẳng định lỗi hiện vẫn tồn tại.
 
 ## Quy tắc duy trì tài liệu
 

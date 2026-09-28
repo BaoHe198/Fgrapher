@@ -401,7 +401,7 @@ async function findRentalConflicts(
  * The live "place order" path: no payment provider involved. The customer
  * confirms what they want, each shop gets an order to accept, and payment
  * (including any rental deposit) happens between them — on delivery, on
- * pickup, or by transfer. See docs/guides/phase-13-marketplace-social.md.
+ * pickup, or by transfer. See docs/guides/phases/phase-13-marketplace-social.md.
  */
 export async function placeOrdersFromCart(
   userId: string,

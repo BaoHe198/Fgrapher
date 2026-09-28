@@ -96,7 +96,7 @@ rental packages. Every provider role can book one, because a costume rental
 is the one thing a studio or a model books for a shoot.
 
 Listing individual outfits as rental products is phase 13A — see
-`docs/guides/phase-13-marketplace-social.md`. Until then the role works
+`docs/guides/phases/phase-13-marketplace-social.md`. Until then the role works
 entirely through bookings.
 
 Categories: AO_DAI, WEDDING_DRESS, MENSWEAR, EVENING_GOWN, HISTORICAL,

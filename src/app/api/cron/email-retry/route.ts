@@ -13,7 +13,7 @@ import {
 // answered every scheduled invocation with 405 and the outbox would never
 // have drained. requireCronSecret() is the same helper the nine sibling
 // crons already use (and the one hardened against failing open when
-// CRON_SECRET is unset — see docs/PRE_LAUNCH_REVIEW.md item 3).
+// CRON_SECRET is unset — see docs/reviews/PRE_LAUNCH_REVIEW.md item 3).
 export const runtime = "nodejs";
 export const maxDuration = 60;
 

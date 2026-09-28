@@ -109,8 +109,8 @@ describe("resolvePartyName", () => {
 
 describe("the chat UI has no private copy of the naming rule", () => {
   const consumers = [
-    "src/components/chat/chat-panel.tsx",
-    "src/components/chat/conversation-list.tsx",
+    "src/components/messaging/chat-panel.tsx",
+    "src/components/messaging/conversation-list.tsx",
   ];
 
   for (const file of consumers) {

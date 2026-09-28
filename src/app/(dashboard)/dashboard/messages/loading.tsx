@@ -1,4 +1,4 @@
-import { MessagesSkeleton } from "@/components/chat/messages-skeleton";
+import { MessagesSkeleton } from "@/components/messaging/messages-skeleton";
 
 // QA: messages showed a blank white screen + spinner for ~2s while
 // page.tsx's listConversations() query resolves server-side — the

@@ -9,7 +9,7 @@ import { getRequestMeta } from "@/lib/request-meta";
 import { getCompleteProfileSchema } from "@/lib/validations/auth";
 import { recordConsent } from "@/services/compliance";
 
-// Closes the gap documented in PRE_LAUNCH_REVIEW.md — Google OAuth signups
+// Closes the gap documented in docs/reviews/PRE_LAUNCH_REVIEW.md — Google OAuth signups
 // never go through /api/auth/register, so they had no age-gate enforcement
 // (CLAUDE.md rule 4) and no ConsentRecord rows at all (rule 6). This is the
 // equivalent step, gated onto first dashboard visit by

@@ -151,7 +151,7 @@ describe("shouldMarkRead — the two-row write only when it does something", () 
 
 describe("no component keeps its own polling loop", () => {
   const polled = [
-    "src/components/chat/chat-panel.tsx",
+    "src/components/messaging/chat-panel.tsx",
     "src/components/messaging/messaging-popup.tsx",
     "src/components/providers/messaging-provider.tsx",
     "src/components/layout/notification-bell.tsx",
@@ -196,7 +196,7 @@ describe("the messaging popup mounts exactly one body", () => {
 });
 
 describe("chat panel read-marking and freshness", () => {
-  const src = codeOnly(read("src/components/chat/chat-panel.tsx"));
+  const src = codeOnly(read("src/components/messaging/chat-panel.tsx"));
 
   it("guards the read PATCH behind shouldMarkRead", () => {
     assert.match(src, /if \(shouldMarkRead\([\s\S]{0,60}\)\) \{/);

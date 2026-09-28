@@ -15,7 +15,7 @@ Repo này **không có thư mục `docs/legal/`**. Nguồn để đối chiếu,
 1. `CLAUDE.md` — mục "Phạm vi MVP & Ràng buộc bắt buộc" (10 ràng buộc, đã được chủ dự án xác nhận)
 2. `docs/MVP_SCOPE.md` — phạm vi đã chốt
 3. `docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md` — tài liệu gốc, các "Prompt B2/B3/B5" được trích dẫn trong comment của `schema.prisma`
-4. `docs/_prelaunch-audit-compliance.md` — audit gần nhất về mảng này
+4. `docs/reviews/prelaunch-audit-compliance.md` — audit gần nhất về mảng này
 
 **Không bịa số hiệu điều luật.** Các con số dưới đây trích từ tài liệu gốc và
 **chưa được luật sư xác nhận** (CLAUDE.md nói rõ điều này). Code trong repo là

@@ -109,7 +109,7 @@ dòng `ConsentRecord` (kể cả 2 mục tùy chọn bị từ chối) và `date
 ghi đúng, chuyển vào dashboard thật; tài khoản seed bình thường vào thẳng
 dashboard không qua bước này. Commit `1dd0041`.
 
-_Nguồn: `docs/_prelaunch-audit-compliance.md` mục 4 và 6._
+_Nguồn: `docs/reviews/prelaunch-audit-compliance.md` mục 4 và 6._
 
 ---
 
@@ -124,7 +124,7 @@ thay vì dùng `src/lib/format.ts` (nguồn sự thật duy nhất, đã ghi rõ
 comment đầu file). Hầu hết hardcode `"en-US"`, nhiều chỗ không set
 `Asia/Ho_Chi_Minh` nên phụ thuộc múi giờ server/trình duyệt. Danh sách đầy
 đủ (21 file, một số có nhiều điểm gọi) nằm trong
-`docs/_prelaunch-audit-compliance.md` mục 10 — bao gồm cả
+`docs/reviews/prelaunch-audit-compliance.md` mục 10 — bao gồm cả
 `services/bookings.ts:76` (`dateLabel`), nghĩa là rò rỉ cả vào nội dung email
 xác nhận đặt lịch, không chỉ UI.
 
@@ -164,7 +164,7 @@ nhập qua session thật) xác nhận nhãn tiếng Việt hiển thị đúng 
 khóa dịch thô (`role.`/`profileCategory.`/`experienceLevel.`) rò rỉ ra HTML.
 Commit `733761f`.
 
-_Nguồn: `docs/_prelaunch-audit-compliance.md` mục 10._
+_Nguồn: `docs/reviews/prelaunch-audit-compliance.md` mục 10._
 
 ### 6. [ĐÃ VÁ] Booking `contactPhone`/`locationAddress` bị lộ không nhất quán giữa các route anh em
 
@@ -185,7 +185,7 @@ về `contactPhone`/`locationAddress` là `null` qua cả 2 endpoint (list và
 calendar), hiển thị đúng sau khi `CONFIRMED`, khách hàng luôn thấy thông tin
 của chính mình. Commit `987d97d`.
 
-_Nguồn: `docs/_prelaunch-audit-compliance.md` mục "Sensitive Data Leaks" (phone, locationAddress)._
+_Nguồn: `docs/reviews/prelaunch-audit-compliance.md` mục "Sensitive Data Leaks" (phone, locationAddress)._
 
 ### 7. [ĐÃ VÁ] N+1 query ở danh sách hội thoại
 
@@ -199,7 +199,7 @@ gộp thành một `db.message.groupBy({ by: ["conversationId"], ... })` sau khi
 `count()`. Đã kiểm thử qua curl (gửi tin nhắn, tải danh sách hội thoại,
 `unreadCount` đúng). Commit `987d97d`.
 
-_Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 1.1 Finding A._
+_Nguồn: `docs/reviews/prelaunch-audit-perf-debt.md` mục 1.1 Finding A._
 
 ---
 
@@ -220,7 +220,7 @@ Component sẽ rò rỉ cả 4 trường nhạy cảm trên ra payload trang, k�
 khai thực sự dùng — `tsc` xác nhận không thiếu field nào (nếu thiếu sẽ báo
 lỗi biên dịch ngay tại chỗ dùng). Commit `987d97d`.
 
-_Nguồn: `docs/_prelaunch-audit-compliance.md` mục "Sensitive Data Leaks" (dateOfBirth)._
+_Nguồn: `docs/reviews/prelaunch-audit-compliance.md` mục "Sensitive Data Leaks" (dateOfBirth)._
 
 ### 9. [ĐÃ VÁ] Ảnh giấy tờ tùy thân của hồ sơ bị từ chối không bao giờ tự xóa
 
@@ -238,7 +238,7 @@ không bao giờ được admin xem xét (kẹt `PENDING`) — `reviewVerificati
 đó ghi đè bằng mốc mới khi admin thực sự duyệt/từ chối. Gộp hằng số
 `KYC_PURGE_AFTER_DAYS` về `lib/constants`. Commit `987d97d`.
 
-_Nguồn: `docs/_prelaunch-audit-compliance.md` mục 7._
+_Nguồn: `docs/reviews/prelaunch-audit-compliance.md` mục 7._
 
 ### 10. [ĐÃ VÁ] Danh sách thành phố hardcode ở bộ lọc browse
 
@@ -256,7 +256,7 @@ quán với `account-basics-form.tsx` (form chỉnh hồ sơ) vốn đã dùng �
 trần trụi — khớp chính xác sẽ không bao giờ trúng. Đã kiểm thử qua curl.
 Commit `987d97d`.
 
-_Nguồn: `docs/_prelaunch-audit-compliance.md` mục 9._
+_Nguồn: `docs/reviews/prelaunch-audit-compliance.md` mục 9._
 
 ### 11. [ĐÃ VÁ] Thiếu index cho các cột lọc thường dùng ở trang quản trị
 
@@ -268,7 +268,7 @@ thật lớn lên.
 **Đã sửa**: thêm cả `@@index([deletedAt])` và `@@index([isSuspended])`,
 migration thuần cộng thêm (additive), đã apply vào DB dev. Commit `987d97d`.
 
-_Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 1.2._
+_Nguồn: `docs/reviews/prelaunch-audit-perf-debt.md` mục 1.2._
 
 ### 12. [ĐÃ VÁ] Logic tính giá thuê lặp lại độc lập ở 4 nơi, không có nguồn chung
 
@@ -290,7 +290,7 @@ kết quả đúng với vài khoảng ngày đã biết; curl xác nhận đặ
 vẫn bị từ chối với cùng thông báo "cần trước ít nhất 24 giờ" như trước khi
 gộp. Commit `ee518a0`.
 
-_Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 2.4._
+_Nguồn: `docs/reviews/prelaunch-audit-perf-debt.md` mục 2.4._
 
 ### 13. [ĐÃ VÁ] Ảnh bìa hồ sơ công khai dùng `<img>` thô, không qua `next/image`
 
@@ -306,20 +306,20 @@ container kích thước cố định nên đây là chuyển đổi an toàn, g
 nhận việc render ảnh thật vì Cloudinary chưa có credential thật trong môi
 trường này (như mọi phần liên quan ảnh khác trong dự án). Commit `4919e4c`.
 
-_Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 1.3._
+_Nguồn: `docs/reviews/prelaunch-audit-perf-debt.md` mục 1.3._
 
 ---
 
 ## THẤP
 
 - **[ĐÃ VÁ] `/admin` không có trong `robots.ts` disallow list** — thêm vào
-  danh sách disallow. Commit `987d97d`. (`docs/_prelaunch-audit-compliance.md` mục email/sitemap)
+  danh sách disallow. Commit `987d97d`. (`docs/reviews/prelaunch-audit-compliance.md` mục email/sitemap)
 - **Email khách hàng hiển thị cho provider ngay từ khi booking còn PENDING**
   (khác với phone/address, không bị che) — CHƯA sửa, cần quyết định sản
   phẩm trước (đây có phải chủ đích hay không), không phải lỗi code đơn
-  thuần. (`docs/_prelaunch-audit-compliance.md` mục email)
+  thuần. (`docs/reviews/prelaunch-audit-compliance.md` mục email)
 - **Nhãn `ALTERNATIVE` trong `ProfileCategory`** — CHƯA sửa, cần luật sư xác
-  nhận, không phải việc code có thể tự quyết định. (`docs/_prelaunch-audit-compliance.md` mục 3)
+  nhận, không phải việc code có thể tự quyết định. (`docs/reviews/prelaunch-audit-compliance.md` mục 3)
 - **[ĐÃ VÁ/ĐÃ XÁC MINH] 8 chỗ tắt `react-hooks/exhaustive-deps`** — đã đọc
   đầy đủ từng effect body của cả 8: 7 chỗ là pattern "fetch khi một param/
   filter cụ thể đổi" hợp lệ, 1 chỗ (booking-wizard.tsx) là hydrate-một-lần-
@@ -328,10 +328,10 @@ _Nguồn: `docs/_prelaunch-audit-perf-debt.md` mục 1.3._
 - **`past-due-banner.tsx` truy vấn DB trực tiếp từ Server Component** thay
   vì gọi qua `services/subscription.ts` — CHƯA sửa, vi phạm nhẹ quy ước
   kiến trúc, quy mô nhỏ, không phải bug, để lại cho một đợt dọn dẹp sau.
-  (`docs/_prelaunch-audit-perf-debt.md` mục 2.4 #5)
+  (`docs/reviews/prelaunch-audit-perf-debt.md` mục 2.4 #5)
 - Vài index thứ yếu đáng cân nhắc nhưng không cấp bách — CHƯA sửa, không
   cấp bách: `Message.senderId`, `Subscription.stripeCustomerId` (đang ngủ
-  đông vì `BILLING_ENABLED=false`). (`docs/_prelaunch-audit-perf-debt.md` mục 1.2)
+  đông vì `BILLING_ENABLED=false`). (`docs/reviews/prelaunch-audit-perf-debt.md` mục 1.2)
 
 ---
 
@@ -428,8 +428,8 @@ cùng phiên:
 
 ## Báo cáo gốc (chi tiết đầy đủ, theo file:line)
 
-- `docs/_prelaunch-audit-compliance.md` — thực thi ràng buộc CLAUDE.md + rò
+- `docs/reviews/prelaunch-audit-compliance.md` — thực thi ràng buộc CLAUDE.md + rò
   rỉ dữ liệu nhạy cảm
-- `docs/_prelaunch-audit-permissions.md` — phân quyền toàn bộ 83 route API
-- `docs/_prelaunch-audit-flags-cron.md` — feature flag + cron job
-- `docs/_prelaunch-audit-perf-debt.md` — hiệu năng + nợ kỹ thuật
+- `docs/reviews/prelaunch-audit-permissions.md` — phân quyền toàn bộ 83 route API
+- `docs/reviews/prelaunch-audit-flags-cron.md` — feature flag + cron job
+- `docs/reviews/prelaunch-audit-perf-debt.md` — hiệu năng + nợ kỹ thuật

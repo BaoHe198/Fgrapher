@@ -9,11 +9,11 @@ import { startTransition, useEffect, useRef, useState } from "react";
 import { usePolling } from "@/hooks/use-polling";
 
 import { Button } from "@/components/ui/button";
-import { ChatPanel } from "@/components/chat/chat-panel";
+import { ChatPanel } from "@/components/messaging/chat-panel";
 import {
   ConversationList,
   type ConversationSummary,
-} from "@/components/chat/conversation-list";
+} from "@/components/messaging/conversation-list";
 import { Z_INDEX } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 

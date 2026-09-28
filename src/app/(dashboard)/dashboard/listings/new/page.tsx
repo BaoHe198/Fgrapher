@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
 import { ProductForm } from "@/components/forms/product-form";
-import { SubscriptionGate } from "@/components/subscription-gate";
+import { SubscriptionGate } from "@/components/subscription/subscription-gate";
 import { auth } from "@/lib/auth";
 import { SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";

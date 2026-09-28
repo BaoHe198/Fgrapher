@@ -7,12 +7,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 
 import { usePolling } from "@/hooks/use-polling";
-import { ChatPanel } from "@/components/chat/chat-panel";
+import { ChatPanel } from "@/components/messaging/chat-panel";
 import {
   ConversationList,
   type ConversationSummary,
-} from "@/components/chat/conversation-list";
-import { MessagesSkeleton } from "@/components/chat/messages-skeleton";
+} from "@/components/messaging/conversation-list";
+import { MessagesSkeleton } from "@/components/messaging/messages-skeleton";
 import { cn } from "@/lib/utils";
 
 export function MessagesClient({

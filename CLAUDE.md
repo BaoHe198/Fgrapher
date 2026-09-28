@@ -148,7 +148,9 @@ prisma/
   seed.ts
 docs/
   design-reference/   # Claude Design export + extracted design-tokens.md
-  guides/             # phase-by-phase build guides (source of the current plan)
+  guides/             # historical plans/prompts; phases/ holds the Phase 0-13 guides
+  ops/                # production runbooks (email, moderation, checklists)
+  reviews/            # dated audits and QA reports (history, not current state)
 ```
 
 ### User roles (critical domain concept)
@@ -306,7 +308,7 @@ Supabase's pooled-connection hostname (`aws-0-<region>.pooler.supabase.com`) is 
 
 ## Current phase
 
-Phase 12, part 1 of 2 — Admin panel (see `docs/guides/phase-12-admin-launch.md`).
+Phase 12, part 1 of 2 — Admin panel (see `docs/guides/phases/phase-12-admin-launch.md`).
 ADMIN role (`requireAdmin()` + `scripts/make-admin.ts`), a distinct `(admin)`
 route group (dark top bar, its own sidebar), an overview dashboard (user/
 subscription/booking/GMV metrics, health indicators, recent activity — no
@@ -324,7 +326,7 @@ access to — a production Supabase project, a Vercel account/domain, Stripe's
 business verification for live mode, a verified Resend sending domain, a
 Sentry project, uptime monitoring. No amount of further autonomous coding
 closes this gap; it needs a human with those accounts. See
-`docs/guides/phase-12-admin-launch.md` Steps 6-8 for the literal checklist
+`docs/guides/phases/phase-12-admin-launch.md` Steps 6-8 for the literal checklist
 (env vars to set, DNS records, Stripe live-mode setup, cron config, monitoring)
 when that time comes — nothing here has abbreviated it.
 

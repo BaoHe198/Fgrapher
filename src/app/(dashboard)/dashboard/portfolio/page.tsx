@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { SubscriptionGate } from "@/components/subscription-gate";
+import { SubscriptionGate } from "@/components/subscription/subscription-gate";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
