@@ -207,7 +207,11 @@ export function ResendVerificationForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+    // POST, not the default GET: a click before hydration submits natively,
+    // and GET would put the address in the URL. Unlike the password forms,
+    // Submit is not held back until hydration — a prefilled resend must be
+    // usable on first paint (see __tests__/resend-form.render.test.tsx).
+    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-3">
       {/* Rendered in BOTH layouts, never hidden in the compact one: the
           submit button is gated on a non-empty address, so a layout with
           no field would be permanently unsubmittable. The compact variant

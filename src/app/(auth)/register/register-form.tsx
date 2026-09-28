@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Radio } from "@/components/ui/radio";
 import { PAID_ROLES, SELLER_ROLES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useMounted } from "@/hooks/use-mounted";
 import {
   getRegisterSchema,
   type ProviderRole,
@@ -54,6 +55,11 @@ export function RegisterForm({
   onSwitchToLogin,
   marketplaceEnabled,
 }: RegisterFormProps) {
+  // Until hydration the form is plain HTML: a click then would submit it
+  // natively, and the default GET put every field — the password included —
+  // into the URL, browser history and server logs. POST keeps them out of
+  // the URL, and Submit stays disabled until React owns the form.
+  const mounted = useMounted();
   const t = useTranslations("accountFlows.register");
   const roleT = useTranslations("role");
   const tValidation = useTranslations("libServices.validation.auth");
@@ -224,7 +230,11 @@ export function RegisterForm({
         </div>
       ) : null}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
+      <form
+        method="post"
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-3.5"
+      >
         <div className="flex flex-col gap-2">
           <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
             {t("iAmA")}
@@ -445,7 +455,7 @@ export function RegisterForm({
           variant="accent"
           size="lg"
           className="w-full"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !mounted}
         >
           {isSubmitting ? (
             <>
