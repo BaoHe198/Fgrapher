@@ -1,11 +1,15 @@
 import { execSync } from "node:child_process";
+import { rm } from "node:fs/promises";
 import path from "node:path";
+
+import { seedGeography } from "../prisma/seed-geography";
 
 import {
   activatePaidRole,
   createProduct,
   createPublishedProfile,
   createUser,
+  db,
   disconnect,
   seedWeekdayAvailability,
 } from "./helpers/db";
@@ -55,6 +59,11 @@ export default async function globalSetup() {
     env: process.env,
   });
 
+  // The profile editor requires the real province/ward reference data.
+  // Migrations create only the tables; production and dev normally load
+  // these rows through prisma/seed.ts, so E2E must do the same explicitly.
+  await seedGeography(db);
+
   // One published, bookable provider fixture reused across booking/
   // messaging/marketplace-style tests as "the counterparty" — individual
   // test files create whichever customer/provider they're specifically
@@ -68,7 +77,6 @@ export default async function globalSetup() {
     location: "Đà Nẵng",
   });
   await activatePaidRole(provider.id, "PHOTOGRAPHER");
-  await seedWeekdayAvailability(provider.id);
   await createPublishedProfile({
     userId: provider.id,
     role: "PHOTOGRAPHER",
@@ -85,6 +93,9 @@ export default async function globalSetup() {
       },
     ],
   });
+  // The calendar belongs to the profile's BookableResource, so the profile
+  // must exist before replaceWeeklyRules can create and populate it.
+  await seedWeekdayAvailability(provider.id);
 
   // Fixture shop + product for marketplace tests, same "shared
   // counterparty" reasoning as the provider fixture above.
@@ -112,6 +123,14 @@ export default async function globalSetup() {
     userId: shop.id,
     name: "Fixture Mirrorless Camera",
     price: 25_000_000,
+  });
+
+  // `unstable_cache` persists under .next/cache between local runs. Keeping
+  // it would let the newly-reset database inherit empty geography or stale
+  // profile results from a previous run, making E2E depend on run order.
+  await rm(path.join(projectRoot, ".next", "cache", "fetch-cache"), {
+    recursive: true,
+    force: true,
   });
 
   await disconnect();

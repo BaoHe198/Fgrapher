@@ -112,8 +112,8 @@ export async function createPublishedProfile(opts: {
   provinceId?: string;
   wardId?: string;
 }) {
-  // There's no UI path that sets Profile.isPublished (see e2e/README.md) —
-  // this fixture stands in for what a real admin/ops process would do.
+  // Most specs need a provider that is already discoverable; the separate
+  // onboarding/moderation specs cover the gates that tryAutoPublish checks.
   const profile = await db.profile.create({
     data: {
       userId: opts.userId,

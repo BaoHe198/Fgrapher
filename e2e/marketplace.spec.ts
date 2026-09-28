@@ -5,15 +5,10 @@ import { login } from "./helpers/auth";
 
 // Customer buys a product -> shop fulfills -> order completes.
 //
-// Order rows are created only by the Stripe checkout.session.completed
-// webhook (src/services/orders.ts createOrdersFromCheckout) — there is no
-// direct-create path anywhere in the app, and STRIPE_SECRET_KEY is
-// unconfigured in this environment. So this is two tests: the real UI path
-// up to the Checkout handoff (asserting the app's graceful degraded-mode
-// message, same as the subscribe flow), and the fulfillment lifecycle on a
-// directly-seeded PENDING order standing in for what a completed payment
-// would have produced.
-test("customer reaches the Stripe checkout handoff for a product", async ({
+// Marketplace payments are settled directly between the customer and shop
+// in the MVP. Checkout therefore creates the order immediately, then the
+// shop fulfills it through the normal order lifecycle.
+test("customer checks out a product and the order is created", async ({
   page,
 }) => {
   test.skip(
@@ -41,14 +36,29 @@ test("customer reaches the Stripe checkout handoff for a product", async ({
   await expect(page).toHaveURL(/\/checkout/, { timeout: 10_000 });
   await page.getByRole("radio", { name: "Ship to me" }).check();
   await page
+    .getByLabel("Delivery address")
+    .fill("12 Nguyen Hue, Ho Chi Minh City");
+  await page
     .getByRole("checkbox", { name: "I agree to the terms of sale/rental" })
     .check();
-  await page.getByRole("button", { name: "Continue to payment" }).click();
-  await expect(
-    page.getByText("Payments aren't set up in this environment yet."),
-  ).toBeVisible({
-    timeout: 10_000,
+  const [checkoutResponse] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.url().includes("/api/orders/checkout") &&
+        res.request().method() === "POST",
+    ),
+    page.getByRole("button", { name: "Continue to payment" }).click(),
+  ]);
+  expect(checkoutResponse.status()).toBe(201);
+  await expect(page).toHaveURL(/\/dashboard\/orders/, { timeout: 10_000 });
+
+  const order = await db.order.findFirst({
+    where: {
+      customerId: customer.id,
+      items: { some: { productId: product.id } },
+    },
   });
+  expect(order).not.toBeNull();
 });
 
 test("shop fulfills a seeded order through to delivered", async ({

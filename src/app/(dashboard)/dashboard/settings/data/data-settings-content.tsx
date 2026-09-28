@@ -98,8 +98,14 @@ export function DataSettingsContent({
       const link = document.createElement("a");
       link.href = url;
       link.download = "fgrapher-du-lieu-cua-toi.json";
+      // Firefox/WebKit and automation clients only reliably emit a download
+      // for an attached anchor. Revoke on the next task so the browser has
+      // time to consume the object URL before it is released.
+      link.hidden = true;
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(url);
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
       toast.add({ title: t("toastExportSuccess"), type: "success" });
     } finally {
       setIsExporting(false);

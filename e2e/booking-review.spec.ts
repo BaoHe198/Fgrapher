@@ -129,7 +129,9 @@ test("provider marks a past booking complete, customer reviews it", async ({
   const customerPage = await customerContext.newPage();
   await login(customerPage, customer.email, TEST_PASSWORD);
   await customerPage.goto(`/review/${booking.id}`);
-  await customerPage.getByRole("button", { name: "5 stars" }).click();
+  await customerPage
+    .getByRole("button", { name: "5 star", exact: true })
+    .click();
   await customerPage
     .getByPlaceholder("What did you like? What could be better?")
     .fill(

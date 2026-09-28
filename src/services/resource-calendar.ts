@@ -131,8 +131,17 @@ export async function listBlocks(
   const resourceId = await resourceIdForProvider(userId);
   if (!resourceId) return [];
 
+  // Callers pass UTC-midnight Date objects as calendar-day keys (the same
+  // representation used by Booking.date), while availability blocks are
+  // stored as real UTC instants converted from Vietnam local time. Convert
+  // both range boundaries before querying; otherwise a block beginning at
+  // 00:00 in Vietnam (17:00Z on the previous day) falls outside a query that
+  // starts at 00:00Z and a direct booking can bypass the block.
+  const rangeStart = localDayAndTimeToInstant(from, "00:00");
+  const rangeEnd = localDayAndTimeToInstant(to, "00:00");
+
   const blocks = await db.availabilityBlock.findMany({
-    where: { resourceId, startAt: { gte: from, lt: to } },
+    where: { resourceId, startAt: { gte: rangeStart, lt: rangeEnd } },
     orderBy: { startAt: "asc" },
   });
 

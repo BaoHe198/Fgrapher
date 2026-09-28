@@ -3,6 +3,7 @@ import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 import { createEmailVerificationToken } from "../src/services/email-verification";
+import { login } from "./helpers/auth";
 import { db, TEST_PASSWORD } from "./helpers/db";
 
 // Register as provider -> role activates automatically -> create profile ->
@@ -15,20 +16,16 @@ import { db, TEST_PASSWORD } from "./helpers/db";
 // there's no Checkout handoff to drive or degraded-mode message to assert
 // here anymore.
 //
-// One step still can't be driven for real without live credentials this
-// environment doesn't have (Cloudinary is unconfigured — confirmed empty,
-// see e2e/README.md): "Upload portfolio" mocks the two network calls that
-// leave this app's code (the Cloudinary upload itself, and Cloudinary's
-// response shape) while exercising every line of first-party code around
-// it for real: the signature request, the XHR upload call, and the
-// POST /api/portfolio that persists the result.
+// One step still can't be completed without live credentials: after the
+// browser uploads to Cloudinary, POST /api/portfolio verifies the asset with
+// Cloudinary's Admin API before persisting it. Playwright can mock the browser
+// upload, but not that server-to-server verification. The spec therefore
+// proves the UI fails safely, then seeds one approved asset to continue the
+// profile-discovery half of this end-to-end journey.
 //
-// A second gap, unrelated to third-party services: there is no UI path
-// anywhere in the app that sets Profile.isPublished (grepped every read/
-// write site — see e2e/README.md) — search silently excludes every
-// profile a real user creates, forever, with no error or affordance to
-// fix it. This test documents that by flipping it directly via Prisma
-// rather than pretending a "publish" button exists.
+// Publishing is automatic once identity verification, approved media,
+// category and location gates all pass. Those gates have focused specs; this
+// journey seeds the external/admin outcomes after exercising the provider UI.
 test("provider registers, activates a role, builds a profile, and appears in search", async ({
   page,
 }) => {
@@ -71,11 +68,7 @@ test("provider registers, activates a role, builds a profile, and appears in sea
     page.getByRole("heading", { name: "Email verified" }),
   ).toBeVisible({ timeout: 15_000 });
 
-  await page.goto("/login");
-  await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
-  await page.getByLabel("Password").fill(TEST_PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+  await login(page, email, TEST_PASSWORD);
 
   const userRole = await db.userRole.findUniqueOrThrow({
     where: { userId_role: { userId: user.id, role: "PHOTOGRAPHER" } },
@@ -97,11 +90,25 @@ test("provider registers, activates a role, builds a profile, and appears in sea
     .locator("xpath=../..")
     .locator("textarea")
     .fill("E2E test provider — portrait and event photography.");
+  await page.getByRole("button", { name: "Portrait", exact: true }).click();
+
+  const province = await db.province.findFirstOrThrow({
+    include: { wards: { take: 1, orderBy: { code: "asc" } } },
+    orderBy: { code: "asc" },
+  });
+  const ward = province.wards[0];
+  expect(ward).toBeTruthy();
+  // Select by stable visible names rather than generated CUIDs. A database
+  // reset regenerates IDs, while the nationwide reference names stay fixed.
+  await page.getByLabel("Main province").selectOption({ label: province.name });
+  await expect(page.getByLabel("Ward")).toBeEnabled();
+  await page.getByLabel("Ward").selectOption({ label: ward.name });
+  await page.getByLabel("Detailed address").fill("12 Nguyen Hue");
   // onSave() sets the "Saved" text regardless of the PATCH response status
   // (confirmed by reading profile-settings-form.tsx — another real bug,
   // worth fixing separately) so it isn't a reliable signal that the write
   // actually landed; wait on the response itself instead.
-  await Promise.all([
+  const [profileResponse] = await Promise.all([
     page.waitForResponse(
       (res) =>
         res.url().includes("/api/profiles/PHOTOGRAPHER") &&
@@ -109,11 +116,12 @@ test("provider registers, activates a role, builds a profile, and appears in sea
     ),
     page.getByRole("button", { name: "Save changes" }).click(),
   ]);
+  expect(profileResponse.ok(), await profileResponse.text()).toBe(true);
 
   const profile = await db.profile.findUniqueOrThrow({
     where: { userId_role: { userId: user.id, role: "PHOTOGRAPHER" } },
   });
-  expect(profile.isPublished).toBe(false); // no UI sets this true — see comment above
+  expect(profile.isPublished).toBe(false); // KYC and approved media are still missing.
 
   // --- Portfolio upload (Cloudinary mocked, everything else real) ---
   await page.route("**/api/upload/signature", async (route) => {
@@ -126,7 +134,9 @@ test("provider registers, activates a role, builds a profile, and appears in sea
           signature: "fake",
           apiKey: "fake",
           cloudName: "fake",
-          folder: "fake",
+          folder: `fgrapher/portfolio/${user.id}`,
+          transformation: "fl_strip_profile",
+          allowedFormats: "jpg,jpeg,png,webp,gif,mp4,mov,webm",
         },
         error: null,
         message: null,
@@ -139,7 +149,7 @@ test("provider registers, activates a role, builds a profile, and appears in sea
       contentType: "application/json",
       body: JSON.stringify({
         secure_url: "https://example.com/fake-e2e-upload.jpg",
-        public_id: "fake-e2e-upload",
+        public_id: `fgrapher/portfolio/${user.id}/fake-e2e-upload`,
         resource_type: "image",
         width: 800,
         height: 600,
@@ -148,26 +158,55 @@ test("provider registers, activates a role, builds a profile, and appears in sea
   });
 
   await page.goto("/dashboard/portfolio");
-  await page.getByRole("button", { name: "Upload" }).click();
-  await page
+  await page.getByRole("button", { name: "Upload photos" }).first().click();
+  const uploadDialog = page.getByRole("dialog", { name: "Upload media" });
+  await uploadDialog.getByLabel("Album").selectOption({
+    label: "+ Create new album",
+  });
+  await uploadDialog.getByLabel("Album title").fill("Portrait work");
+  await uploadDialog.getByLabel("Category").selectOption({
+    label: "Portrait",
+  });
+  await uploadDialog.getByRole("button", { name: "Create album" }).click();
+  await uploadDialog
     .locator('input[type="file"]')
     .setInputFiles(path.join(__dirname, "fixtures", "test-image.jpg"));
-  await page.getByRole("button", { name: /^Upload \d+$/ }).click();
-  await expect(page.getByRole("dialog")).toBeHidden({ timeout: 15_000 });
-
-  const media = await db.profileMedia.findMany({
-    where: { profileId: profile.id },
+  await uploadDialog
+    .getByRole("checkbox", { name: /I confirm I have the rights/ })
+    .check();
+  await uploadDialog.getByRole("button", { name: /^Upload \d+$/ }).click();
+  await expect(uploadDialog.getByText("Upload failed")).toBeVisible({
+    timeout: 15_000,
   });
-  expect(media).toHaveLength(1);
-  expect(media[0].url).toBe("https://example.com/fake-e2e-upload.jpg");
+  await uploadDialog.getByRole("button", { name: "Close" }).click();
 
-  // --- Publish + appear in search (bridging the gap documented above) ---
+  const album = await db.album.findFirstOrThrow({
+    where: { profileId: profile.id, title: "Portrait work" },
+  });
+  const media = await db.profileMedia.create({
+    data: {
+      profileId: profile.id,
+      albumId: album.id,
+      url: "https://example.com/fake-e2e-upload.jpg",
+      publicId: `fgrapher/portfolio/${user.id}/fake-e2e-upload`,
+      type: "IMAGE",
+      moderationStatus: "APPROVED",
+      rightsConfirmedAt: new Date(),
+    },
+  });
+  expect(media.url).toBe("https://example.com/fake-e2e-upload.jpg");
+
+  // --- Apply the verified/approved outcomes, then appear in search ---
   await db.profile.update({
     where: { id: profile.id },
     data: { isPublished: true },
   });
 
-  await page.goto("/browse");
+  // The final publish above is an intentional test-only DB shortcut, so it
+  // cannot call Next's request-scoped revalidateTag hook. Search by the new
+  // profile's unique name to use a fresh cache key while still exercising
+  // the real public search path.
+  await page.goto("/browse?q=Provider%20Persona%20Photography");
   await expect(
     page.getByText("Provider Persona Photography").first(),
   ).toBeVisible();

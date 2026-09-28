@@ -22,7 +22,7 @@ const EXCLUDED_PREFIXES = ["/api/", "mailto:", "http://", "https://", "#"];
 // cross-test coupling without weakening what the test actually guards.
 async function collectInternalLinks(page: import("@playwright/test").Page) {
   const hrefs = await page
-    .locator("header a[href], nav a[href], footer a[href]")
+    .locator("header a[href], nav a[href], aside a[href], footer a[href]")
     .evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""));
   const unique = new Set(
     hrefs.filter(

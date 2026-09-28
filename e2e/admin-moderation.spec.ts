@@ -16,11 +16,21 @@ import {
 // moderationStatus: "APPROVED" media).
 
 async function seedPendingMedia(profileId: string) {
+  const album = await db.album.create({
+    data: {
+      profileId,
+      title: "Moderation test album",
+      category: "PORTRAIT",
+      isPublished: true,
+    },
+  });
   return db.profileMedia.create({
     data: {
       profileId,
+      albumId: album.id,
       url: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
       type: "IMAGE",
+      title: "Moderation test photo",
       moderationStatus: "PENDING",
     },
   });
@@ -93,7 +103,9 @@ test("admin approves a pending photo: status flips, AuditLog is written, photo g
   // whole point of the moderation gate (Profile.isPublished requires at
   // least one APPROVED ProfileMedia row, per services/public-profile.ts).
   await page.goto(`/profile/${provider.username}`);
-  await expect(page.locator(`img[src="${media.url}"]`)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Moderation test photo" }),
+  ).toBeVisible();
 });
 
 test("admin rejects a pending photo with a reason: status flips and AuditLog records it", async ({
