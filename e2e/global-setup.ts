@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { rm } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -122,6 +123,14 @@ export default async function globalSetup() {
     userId: shop.id,
     name: "Fixture Mirrorless Camera",
     price: 25_000_000,
+  });
+
+  // `unstable_cache` persists under .next/cache between local runs. Keeping
+  // it would let the newly-reset database inherit empty geography or stale
+  // profile results from a previous run, making E2E depend on run order.
+  await rm(path.join(projectRoot, ".next", "cache", "fetch-cache"), {
+    recursive: true,
+    force: true,
   });
 
   await disconnect();
