@@ -71,3 +71,12 @@ e2e/visual/**/*-snapshots/*-diff.png
 # Screenshots, snapshots and console logs written by the Playwright MCP server
 # during interactive UI review. Scratch output, never project files.
 .playwright-mcp/
+
+# Claude Design sync - staged converter, build output and machine state.
+# The durable set (.design-sync/config.json, NOTES.md, conventions.md,
+# previews/, runtime/, entry.ts) is committed.
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

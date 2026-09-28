@@ -19,6 +19,11 @@ const eslintConfig = defineConfig([
     // worktree turned `pnpm lint` into ~1,300 files of noise and buried the
     // handful of findings that are actually about this checkout.
     ".worktrees/**",
+    // Claude Design sync (.design-sync/NOTES.md): its previews import the
+    // bundle by package name and its staged converter is third-party code.
+    ".design-sync/**",
+    ".ds-sync/**",
+    "ds-bundle/**",
   ]),
 ]);
 

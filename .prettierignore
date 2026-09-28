@@ -9,3 +9,9 @@ docs/design-reference/*.html
 # user-authored planning docs — not ours to reformat as a side effect of
 # formatting our own code changes
 docs/guides/*.md
+
+# Claude Design sync: build output, staged converter, and the sync inputs
+# (reformatting a preview changes its hash and forces a re-verify)
+.ds-sync
+ds-bundle
+.design-sync

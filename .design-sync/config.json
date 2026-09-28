@@ -1,0 +1,246 @@
+{
+  "projectId": "f198f9b9-9990-46a8-a6c1-be976a006baa",
+  "pkg": "fgrapher",
+  "globalName": "Fgrapher",
+  "shape": "package",
+  "buildCmd": "node .design-sync/build-css.mjs",
+  "tsconfig": ".design-sync/tsconfig.ds.json",
+  "cssEntry": ".design-sync/.cache/fgrapher.css",
+  "provider": {
+    "component": "FgrapherProvider"
+  },
+  "componentSrcMap": {
+    "Accordion": "src/components/ui/accordion.tsx",
+    "Alert": "src/components/ui/alert.tsx",
+    "Avatar": "src/components/ui/avatar.tsx",
+    "Badge": "src/components/ui/badge.tsx",
+    "Button": "src/components/ui/button.tsx",
+    "Card": "src/components/ui/card.tsx",
+    "Checkbox": "src/components/ui/checkbox.tsx",
+    "CurrencyInput": "src/components/ui/currency-input.tsx",
+    "DateField": "src/components/ui/date-field.tsx",
+    "Dialog": "src/components/ui/dialog.tsx",
+    "DropdownMenu": "src/components/ui/dropdown-menu.tsx",
+    "Input": "src/components/ui/input.tsx",
+    "MediaPlaceholder": "src/components/ui/media-placeholder.tsx",
+    "NativeSelect": "src/components/ui/native-select.tsx",
+    "Progress": "src/components/ui/progress.tsx",
+    "Radio": "src/components/ui/radio.tsx",
+    "SectionHead": "src/components/ui/section-head.tsx",
+    "Sheet": "src/components/ui/sheet.tsx",
+    "Skeleton": "src/components/ui/skeleton.tsx",
+    "StarInput": "src/components/ui/star-input.tsx",
+    "StarRating": "src/components/ui/star-rating.tsx",
+    "Switch": "src/components/ui/switch.tsx",
+    "Tabs": "src/components/ui/tabs.tsx",
+    "Tag": "src/components/ui/tag.tsx",
+    "Textarea": "src/components/ui/textarea.tsx",
+    "Toaster": "src/components/ui/toast.tsx",
+    "FrameMark": "src/components/brand/frame-mark.tsx",
+    "LogoFull": "src/components/brand/logo-full.tsx",
+    "LogoMark": "src/components/brand/logo-mark.tsx",
+    "HeroContactSheet": "src/components/sections/hero-contact-sheet.tsx",
+    "HeroSearch": "src/components/sections/hero-search.tsx",
+    "SimplePage": "src/components/sections/simple-page.tsx",
+    "Footer": "src/components/layout/footer.tsx",
+    "CookieConsentBanner": "src/components/layout/cookie-consent-banner.tsx",
+    "ReviewReminderBannerClient": "src/components/layout/review-reminder-banner-client.tsx",
+    "ArtistCard": "src/components/cards/artist-card.tsx",
+    "CartItemRow": "src/components/cart/cart-item-row.tsx",
+    "PostEngagement": "src/components/social/post-engagement.tsx",
+    "ConversationList": "src/components/messaging/conversation-list.tsx",
+    "MessagesSkeleton": "src/components/messaging/messages-skeleton.tsx",
+    "ReferenceMediaGallery": "src/components/media/reference-media-gallery.tsx",
+    "SearchInput": "src/components/browse/search-input.tsx",
+    "FilterSidebar": "src/components/browse/filter-sidebar.tsx",
+    "MobileFilterSheet": "src/components/browse/mobile-filter-sheet.tsx",
+    "ShopFilters": "src/components/shop/shop-filters.tsx",
+    "FmapFilterBar": "src/components/fmap/fmap-filter-bar.tsx",
+    "WaitlistForm": "src/components/browse/waitlist-form.tsx",
+    "RoleSelectionForm": "src/components/forms/role-selection-form.tsx",
+    "ProductForm": "src/components/forms/product-form.tsx",
+    "AddressAutocomplete": "src/components/forms/address-autocomplete.tsx",
+    "ReferenceMediaField": "src/components/forms/reference-media-field.tsx",
+    "ProductImageUploader": "src/components/forms/product-image-uploader.tsx",
+    "ReviewModal": "src/components/modals/review-modal.tsx",
+    "ReportModal": "src/components/modals/report-modal.tsx",
+    "RespondReviewModal": "src/components/modals/respond-review-modal.tsx",
+    "UploadMediaModal": "src/components/modals/upload-media-modal.tsx",
+    "PhoneVerifyDialog": "src/components/modals/phone-verify-dialog.tsx",
+    "MediaLightbox": "src/components/modals/media-lightbox.tsx",
+    "AvailabilityDialog": "src/components/profile/availability-dialog.tsx",
+    "ImageCropDialog": "src/components/profile/image-crop-dialog.tsx",
+    "QrCodeDialog": "src/components/profile/qr-code-dialog.tsx",
+    "ProfileActions": "src/components/profile/profile-actions.tsx",
+    "SocialRow": "src/components/auth/social-row.tsx",
+    "SuspendedAccountNotice": "src/components/auth/suspended-account-notice.tsx"
+  },
+  "guidelinesGlob": [
+    "docs/design-reference/*.md"
+  ],
+  "overrides": {
+    "Dialog": {
+      "cardMode": "single",
+      "viewport": "720x480"
+    },
+    "Sheet": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "MobileFilterSheet": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "ReviewModal": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "ReportModal": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "RespondReviewModal": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "UploadMediaModal": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "PhoneVerifyDialog": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "AvailabilityDialog": {
+      "cardMode": "single",
+      "viewport": "720x900"
+    },
+    "ImageCropDialog": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "QrCodeDialog": {
+      "cardMode": "single",
+      "viewport": "720x640"
+    },
+    "MediaLightbox": {
+      "cardMode": "single",
+      "viewport": "900x640"
+    },
+    "DropdownMenu": {
+      "cardMode": "single",
+      "viewport": "520x420"
+    },
+    "CookieConsentBanner": {
+      "cardMode": "single",
+      "viewport": "720x480"
+    },
+    "Toaster": {
+      "cardMode": "single",
+      "viewport": "720x360"
+    },
+    "Footer": {
+      "cardMode": "column"
+    },
+    "HeroSearch": {
+      "cardMode": "column",
+      "viewport": "1280x520"
+    },
+    "HeroContactSheet": {
+      "cardMode": "column",
+      "viewport": "1280x520"
+    },
+    "SimplePage": {
+      "cardMode": "column"
+    },
+    "ConversationList": {
+      "cardMode": "column"
+    },
+    "ProductForm": {
+      "cardMode": "column",
+      "viewport": "900x1300"
+    },
+    "FilterSidebar": {
+      "cardMode": "column",
+      "viewport": "900x1500"
+    },
+    "ShopFilters": {
+      "cardMode": "column"
+    },
+    "FmapFilterBar": {
+      "cardMode": "column"
+    },
+    "RoleSelectionForm": {
+      "cardMode": "column",
+      "viewport": "1100x950"
+    },
+    "ReferenceMediaGallery": {
+      "cardMode": "column"
+    },
+    "PostEngagement": {
+      "cardMode": "column"
+    },
+    "CartItemRow": {
+      "cardMode": "column"
+    },
+    "Tabs": {
+      "cardMode": "column"
+    },
+    "Accordion": {
+      "cardMode": "column"
+    },
+    "Alert": {
+      "cardMode": "column"
+    },
+    "MessagesSkeleton": {
+      "cardMode": "column",
+      "viewport": "1280x720"
+    },
+    "FrameMark": {
+      "cardMode": "column"
+    },
+    "LogoFull": {
+      "cardMode": "column"
+    },
+    "SearchInput": {
+      "cardMode": "column"
+    },
+    "AddressAutocomplete": {
+      "cardMode": "column"
+    },
+    "ProductImageUploader": {
+      "cardMode": "column"
+    },
+    "ReferenceMediaField": {
+      "cardMode": "column"
+    },
+    "CurrencyInput": {
+      "cardMode": "column"
+    },
+    "DateField": {
+      "cardMode": "column"
+    },
+    "Input": {
+      "cardMode": "column"
+    },
+    "NativeSelect": {
+      "cardMode": "column"
+    },
+    "Progress": {
+      "cardMode": "single"
+    },
+    "SectionHead": {
+      "cardMode": "column"
+    },
+    "StarRating": {
+      "cardMode": "column"
+    },
+    "Switch": {
+      "cardMode": "column"
+    },
+    "Textarea": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}

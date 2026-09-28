@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "paths": {
+      "@/lib/features": [
+        "runtime/features.ts"
+      ],
+      "next/link": [
+        "runtime/next-link.tsx"
+      ],
+      "next/image": [
+        "runtime/next-image.tsx"
+      ],
+      "next/navigation": [
+        "runtime/next-navigation.ts"
+      ],
+      "next/script": [
+        "runtime/next-script.tsx"
+      ],
+      "next-auth/react": [
+        "runtime/next-auth-react.tsx"
+      ],
+      "@/lib/constants": [
+        "../src/lib/constants/index.ts"
+      ],
+      "@/lib/email": [
+        "../src/lib/email/index.ts"
+      ],
+      "@/lib/notifications": [
+        "../src/lib/notifications/index.ts"
+      ],
+      "@/*": [
+        "../src/*"
+      ]
+    }
+  }
+}
