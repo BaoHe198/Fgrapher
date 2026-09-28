@@ -86,41 +86,47 @@ export default function PrivacyPage() {
           <p className="italic">Nội dung chờ luật sư soạn.</p>
         </div>
       ))}
-      {/* Unlike the sections above, this one is a factual inventory of what
-          the code sets today (src/lib/cookie-consent.ts). Keep it in step
-          whenever a cookie is added or removed. */}
+      {/* Unlike the sections above, this one describes what the code sets
+          today, in words a visitor understands — no cookie names here. The
+          names behind each item, for whoever keeps this in step
+          (src/lib/cookie-consent.ts):
+            necessary — authjs.session-token, authjs.csrf-token,
+                        authjs.callback-url, locale (1 year),
+                        fg_cookie_consent (180 days)
+            analytics — fg_pv (24 hours, only after consent)
+          Update the copy below whenever a cookie is added or removed. */}
       <div id="cookie" className="flex scroll-mt-20 flex-col gap-2">
         <h2>11. Cookie</h2>
         <p>
-          Cookie là tệp nhỏ trình duyệt lưu lại khi bạn dùng Fgrapher. Chúng tôi
-          chia cookie làm hai nhóm:
+          Cookie là những tệp dữ liệu nhỏ mà trình duyệt lưu lại khi bạn truy
+          cập Fgrapher. Chúng tôi chỉ dùng hai loại:
         </p>
         <ul>
           <li>
-            <strong>Cookie cần thiết (luôn bật):</strong> giữ phiên đăng nhập và
-            chống giả mạo yêu cầu (authjs.session-token, authjs.csrf-token,
-            authjs.callback-url), ghi nhớ ngôn ngữ bạn chọn (locale), và ghi nhớ
-            lựa chọn cookie của bạn (fg_cookie_consent, 180 ngày). Thiếu các
-            cookie này trang web không hoạt động được.
+            <strong>Cookie cần thiết (luôn bật):</strong> giúp bạn giữ trạng
+            thái đăng nhập, bảo vệ tài khoản khỏi các yêu cầu giả mạo, ghi nhớ
+            ngôn ngữ bạn chọn và ghi nhớ lựa chọn về cookie của bạn trong 180
+            ngày. Nếu thiếu những cookie này, trang web sẽ không hoạt động đúng.
           </li>
           <li>
-            <strong>Cookie thống kê (chỉ khi bạn đồng ý):</strong> fg_pv ghi nhớ
-            những hồ sơ bạn đã xem trong 24 giờ để một lượt xem không bị đếm
-            nhiều lần. Cookie này chỉ nằm trên trình duyệt của bạn và chỉ được
-            gửi tới đúng địa chỉ đếm lượt xem.
+            <strong>Cookie thống kê (chỉ bật khi bạn đồng ý):</strong> ghi nhớ
+            những hồ sơ bạn đã xem trong vòng 24 giờ, để mỗi lượt xem chỉ được
+            đếm một lần. Thông tin này chỉ dùng để đếm lượt xem hồ sơ, không
+            dùng cho mục đích nào khác.
           </li>
         </ul>
         <p>
-          Fgrapher không dùng cookie quảng cáo hay cookie theo dõi của bên thứ
-          ba. Bạn đổi lựa chọn bất cứ lúc nào bằng liên kết “Cài đặt cookie” ở
-          chân trang; nếu đã đăng nhập, bạn cũng có thể đổi tại{" "}
+          Fgrapher không dùng cookie quảng cáo và không dùng cookie theo dõi của
+          bên thứ ba. Bạn có thể thay đổi lựa chọn bất cứ lúc nào qua liên kết
+          “Cài đặt cookie” ở cuối trang. Nếu đã đăng nhập, bạn cũng có thể thay
+          đổi tại{" "}
           <Link
             href="/dashboard/settings/data"
             className="text-text-link hover:underline"
           >
             Cài đặt → Dữ liệu &amp; quyền riêng tư
           </Link>{" "}
-          (mục Phân tích hành vi sử dụng).
+          (mục “Phân tích hành vi sử dụng”).
         </p>
       </div>
     </SimplePage>
