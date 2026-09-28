@@ -377,7 +377,3 @@ export async function updateCartItemQuantity(
 export async function removeCartItem(id: string, userId: string) {
   await db.cartItem.deleteMany({ where: { id, userId } });
 }
-
-export async function clearCart(userId: string) {
-  await db.cartItem.deleteMany({ where: { userId } });
-}

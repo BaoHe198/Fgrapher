@@ -27,7 +27,7 @@ export const VALID_ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 };
 
 /** Statuses that only mean anything once the order contains a rental item. */
-export const RENTAL_ONLY_STATUSES: OrderStatus[] = [
+const RENTAL_ONLY_STATUSES: OrderStatus[] = [
   "PICKED_UP",
   "OVERDUE",
   "RETURNED",
@@ -43,7 +43,7 @@ export const ACTIVE_RENTAL_STATUSES: OrderStatus[] = [
   "OVERDUE",
 ];
 
-export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING: "pending",
   CONFIRMED: "confirmed",
   SHIPPED: "shipped",

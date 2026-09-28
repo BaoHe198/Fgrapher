@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { referenceMediaUrlSchema } from "@/lib/validations/reference-media";
 
-export const MAX_POST_MEDIA = 6;
+const MAX_POST_MEDIA = 6;
 
 export const createPostSchema = z.object({
   caption: z.string().max(2000).optional(),

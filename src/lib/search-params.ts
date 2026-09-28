@@ -2,7 +2,7 @@ import { ExperienceLevel, ProfileCategory, ServiceKind } from "@prisma/client";
 
 import type { SearchParams, SortOption } from "@/services/search";
 
-export const VALID_SORTS: readonly SortOption[] = [
+const VALID_SORTS: readonly SortOption[] = [
   "rating",
   "price_asc",
   "price_desc",

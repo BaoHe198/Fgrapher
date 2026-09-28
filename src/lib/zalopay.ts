@@ -18,7 +18,7 @@ export function isZalopayConfigured() {
   return Boolean(appId && key1 && key2);
 }
 
-export class ZalopayNotConfiguredError extends Error {
+class ZalopayNotConfiguredError extends Error {
   constructor() {
     super("ZaloPay isn't configured in this environment");
     this.name = "ZalopayNotConfiguredError";

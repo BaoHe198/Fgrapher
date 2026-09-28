@@ -349,7 +349,7 @@ async function createOrdersForCart(
  * customers renting the same dress on the same weekend is the failure this
  * marketplace cannot ship without.
  */
-export async function findRentalConflicts(
+async function findRentalConflicts(
   items: {
     productId: string;
     rentalStart: Date | null;

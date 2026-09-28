@@ -26,7 +26,7 @@ const IMAGE_MAX_DIMENSION = 1600;
 // server-side cap — so this number is effectively the storage bill a single
 // free account can run up per file. 50MB still fits a minute or so of phone
 // video, which is what a reference clip actually is.
-export const REFERENCE_VIDEO_MAX_BYTES = 50 * 1024 * 1024;
+const REFERENCE_VIDEO_MAX_BYTES = 50 * 1024 * 1024;
 
 const ACCEPT =
   "image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm";

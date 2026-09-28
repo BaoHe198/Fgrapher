@@ -130,32 +130,6 @@ export async function ensureAlbumSocialPost(albumId: string) {
   });
 }
 
-/** Approved requests enter Community F once, then keep that post as status changes. */
-export async function ensureServiceRequestSocialPost(serviceRequestId: string) {
-  const request = await db.serviceRequest.findUnique({
-    where: { id: serviceRequestId },
-    select: { id: true, customerId: true, isDraft: true, status: true },
-  });
-  if (
-    !request ||
-    request.isDraft ||
-    request.status === "PENDING_REVIEW" ||
-    request.status === "REJECTED"
-  ) {
-    return null;
-  }
-
-  return db.post.upsert({
-    where: { serviceRequestId },
-    create: {
-      userId: request.customerId,
-      kind: "SERVICE_REQUEST",
-      serviceRequestId,
-    },
-    update: { deletedAt: null },
-  });
-}
-
 const PUBLIC_POST_WHERE: Prisma.PostWhereInput = {
   deletedAt: null,
   OR: [

@@ -12,8 +12,8 @@ import type { FmapSearchInput } from "@/lib/validations/fmap";
 import { joinVietnameseName } from "@/lib/vietnamese-name";
 import { timeToMinutes } from "@/services/availability";
 
-export const MAX_FMAP_MARKERS = 250;
-export const PROVINCE_BOUNDS_PADDING_DEG = 0.05; // ~5 km
+const MAX_FMAP_MARKERS = 250;
+const PROVINCE_BOUNDS_PADDING_DEG = 0.05; // ~5 km
 // Largest blur offset (650 m) plus headroom, in degrees of latitude. The DB
 // query is widened by this much so that blurred markers whose private point
 // sits just outside the viewport are still considered.

@@ -18,7 +18,7 @@ const client =
 
 const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
-export function isSmsConfigured() {
+function isSmsConfigured() {
   return Boolean(client && verifyServiceSid);
 }
 
@@ -37,7 +37,7 @@ export function canVerifyPhone() {
   return isSmsConfigured() || isDevBypassActive();
 }
 
-export class SmsNotConfiguredError extends Error {
+class SmsNotConfiguredError extends Error {
   constructor() {
     super("SMS verification isn't configured in this environment");
     this.name = "SmsNotConfiguredError";

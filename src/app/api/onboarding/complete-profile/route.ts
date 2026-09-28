@@ -5,6 +5,7 @@ import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { getRequestMeta } from "@/lib/request-meta";
 import { getCompleteProfileSchema } from "@/lib/validations/auth";
 import { recordConsent } from "@/services/compliance";
 
@@ -37,11 +38,7 @@ export async function POST(request: Request) {
     const { dateOfBirth, consentService, consentMarketing, consentAnalytics } =
       parsed.data;
 
-    const ipAddress = request.headers
-      .get("x-forwarded-for")
-      ?.split(",")[0]
-      ?.trim();
-    const userAgent = request.headers.get("user-agent") ?? undefined;
+    const { ipAddress, userAgent } = getRequestMeta(request);
 
     await db.user.update({
       where: { id: session.user.id },

@@ -261,59 +261,8 @@ export const CATEGORIES_BY_ROLE: Partial<Record<Role, ProfileCategory[]>> = {
   ],
 };
 
-export const CATEGORY_LABELS: Record<ProfileCategory, string> = {
-  WEDDING: "Wedding",
-  PORTRAIT: "Portrait",
-  FASHION: "Fashion",
-  COMMERCIAL: "Commercial",
-  EVENT: "Event",
-  PRODUCT: "Product",
-  FOOD: "Food",
-  LANDSCAPE: "Landscape",
-  STREET: "Street",
-  DOCUMENTARY: "Documentary",
-  MUSIC_VIDEO: "Music video",
-  CORPORATE: "Corporate",
-  REAL_ESTATE: "Real estate",
-  BRIDAL: "Bridal",
-  EDITORIAL: "Editorial",
-  SFX: "SFX",
-  NATURAL: "Natural",
-  GLAM: "Glam",
-  INDOOR: "Indoor",
-  OUTDOOR: "Outdoor",
-  ROOFTOP: "Rooftop",
-  CYCLORAMA: "Cyclorama",
-  GREEN_SCREEN: "Green screen",
-  FASHION_MODEL: "Fashion",
-  COMMERCIAL_MODEL: "Commercial",
-  FITNESS_MODEL: "Fitness",
-  PORTRAIT_MODEL: "Portrait",
-  HAND_FOOT_MODEL: "Hand & foot",
-  PLUS_SIZE: "Plus size",
-  PETITE: "Petite",
-  MATURE: "Mature",
-  ALTERNATIVE: "Alternative",
-  AO_DAI: "Áo dài",
-  WEDDING_DRESS: "Wedding dress",
-  MENSWEAR: "Menswear",
-  EVENING_GOWN: "Evening gown",
-  HISTORICAL: "Historical costume",
-  COSPLAY: "Cosplay",
-  KIDSWEAR: "Kidswear",
-  ACCESSORIES: "Accessories",
-};
-
-export const EXPERIENCE_LEVEL_LABELS: Record<ExperienceLevel, string> = {
-  NEW: "New",
-  INTERMEDIATE: "Intermediate",
-  EXPERIENCED: "Experienced",
-  PROFESSIONAL: "Professional",
-};
-
 // Canonical ExperienceLevel enum order for building select options — pairs
-// with the "experienceLevel" next-intl namespace (t(level)) rather than
-// EXPERIENCE_LEVEL_LABELS, which stays English-only and unused in UI now.
+// with the "experienceLevel" next-intl namespace (t(level)) for the labels.
 export const EXPERIENCE_LEVELS: ExperienceLevel[] = [
   "NEW",
   "INTERMEDIATE",

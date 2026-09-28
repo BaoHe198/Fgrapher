@@ -25,10 +25,6 @@ export function getSupportEmail(): string {
   return SUPPORT_EMAIL;
 }
 
-export function isEmailConfigured(): boolean {
-  return resend !== null;
-}
-
 export interface DeliverInput {
   to: string;
   subject: string;

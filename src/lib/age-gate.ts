@@ -2,7 +2,7 @@
 // fgrapher-danh-gia-va-prompt-sua-doi.md) — was MODEL-only before.
 const MIN_REGISTRATION_AGE = 18;
 
-export function calculateAge(dateOfBirth: Date, at: Date = new Date()): number {
+function calculateAge(dateOfBirth: Date, at: Date = new Date()): number {
   let age = at.getFullYear() - dateOfBirth.getFullYear();
   const monthDiff = at.getMonth() - dateOfBirth.getMonth();
   if (

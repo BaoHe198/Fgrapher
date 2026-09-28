@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { writeCookieConsent } from "@/lib/cookie-consent-server";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getRequestMeta } from "@/lib/request-meta";
 import { cookieConsentSchema } from "@/lib/validations/compliance";
 import { recordConsent } from "@/services/compliance";
 
@@ -56,8 +57,7 @@ export async function POST(request: Request) {
         purpose: "ANALYTICS",
         granted: parsed.data.analytics,
         policyVersion: CURRENT_POLICY_VERSION,
-        ipAddress: ip === "unknown" ? undefined : ip,
-        userAgent: request.headers.get("user-agent") ?? undefined,
+        ...getRequestMeta(request),
       });
     }
 

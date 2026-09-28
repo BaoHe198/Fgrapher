@@ -13,7 +13,7 @@ export function isMomoConfigured() {
   return Boolean(partnerCode && accessKey && secretKey);
 }
 
-export class MomoNotConfiguredError extends Error {
+class MomoNotConfiguredError extends Error {
   constructor() {
     super("MoMo isn't configured in this environment");
     this.name = "MomoNotConfiguredError";

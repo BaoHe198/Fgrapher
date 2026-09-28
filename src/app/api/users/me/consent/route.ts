@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { writeCookieConsent } from "@/lib/cookie-consent-server";
+import { getRequestMeta } from "@/lib/request-meta";
 import { updateConsentSchema } from "@/lib/validations/compliance";
 import { recordConsent } from "@/services/compliance";
 
@@ -23,11 +24,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const ipAddress = request.headers
-      .get("x-forwarded-for")
-      ?.split(",")[0]
-      ?.trim();
-    const userAgent = request.headers.get("user-agent") ?? undefined;
+    const { ipAddress, userAgent } = getRequestMeta(request);
 
     const record = await recordConsent({
       userId: session.user.id,

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
+import { getRequestIp } from "@/lib/request-meta";
 import { getKycImageUrl, type KycImageKind } from "@/services/admin";
 
 const VALID_KINDS: KycImageKind[] = ["front", "back", "selfie"];
@@ -29,10 +30,7 @@ export async function GET(
       );
     }
 
-    const ipAddress = request.headers
-      .get("x-forwarded-for")
-      ?.split(",")[0]
-      ?.trim();
+    const ipAddress = getRequestIp(request);
     const url = await getKycImageUrl({
       userRoleId: id,
       kind: kind as KycImageKind,

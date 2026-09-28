@@ -41,7 +41,7 @@ export class MessagingError extends Error {
   }
 }
 
-export async function isBlocked(userId: string, otherUserId: string) {
+async function isBlocked(userId: string, otherUserId: string) {
   const block = await db.blockedUser.findFirst({
     where: {
       OR: [

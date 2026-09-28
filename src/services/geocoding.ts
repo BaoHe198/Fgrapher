@@ -65,7 +65,7 @@ function isCoordinatePair(value: unknown): value is [number, number] {
   );
 }
 
-export async function maptilerForwardGeocode(
+async function maptilerForwardGeocode(
   input: GeocodeAddress,
   options: ForwardGeocodeOptions = {},
 ): Promise<GeocodeResult> {

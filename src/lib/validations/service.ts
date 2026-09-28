@@ -31,7 +31,7 @@ export type UpdateServiceInput = z.infer<typeof updateServiceSchema>;
 
 // Translated variants — see validations/auth.ts's getLoginSchema comment.
 // Namespace "libServices.validation.service".
-export function getCreateServiceSchema(t: (key: string) => string) {
+function getCreateServiceSchema(t: (key: string) => string) {
   return z.object({
     profileId: z.string().min(1),
     kind: z.enum(SERVICE_KINDS),

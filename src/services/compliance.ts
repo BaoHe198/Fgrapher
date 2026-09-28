@@ -44,21 +44,6 @@ export async function recordConsent({
   });
 }
 
-export async function revokeConsent(
-  userId: string,
-  purpose: ConsentPurpose,
-  policyVersion: string,
-  meta?: RequestMeta,
-) {
-  return recordConsent({
-    userId,
-    purpose,
-    granted: false,
-    policyVersion,
-    ...meta,
-  });
-}
-
 // The most recent ConsentRecord row for this (userId, purpose) decides
 // current status — false if none exists yet (never granted).
 export async function hasConsent(

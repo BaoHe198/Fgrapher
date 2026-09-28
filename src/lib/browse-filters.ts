@@ -27,7 +27,7 @@ export interface BrowseFilterState {
  * `q` field, so every filter click silently threw the search keyword away
  * (QA-01, 22/09/2026).
  */
-export const BROWSE_FILTER_KEYS = [
+const BROWSE_FILTER_KEYS = [
   "roles",
   "services",
   "sort",

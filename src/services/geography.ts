@@ -71,18 +71,3 @@ export const listWards = unstable_cache(
   [CACHE_KEY_VERSION, "geography", "wards"],
   { tags: [CACHE_TAGS.geography], revalidate: CACHE_TTL.geography },
 );
-
-export const getWardById = unstable_cache(
-  async (wardId: string) =>
-    db.ward.findUnique({
-      where: { id: wardId },
-      select: {
-        id: true,
-        code: true,
-        name: true,
-        province: { select: { code: true, name: true } },
-      },
-    }),
-  [CACHE_KEY_VERSION, "geography", "ward-by-id"],
-  { tags: [CACHE_TAGS.geography], revalidate: CACHE_TTL.geography },
-);

@@ -1,4 +1,4 @@
-export const VIETNAM_TIME_ZONE = "Asia/Ho_Chi_Minh";
+const VIETNAM_TIME_ZONE = "Asia/Ho_Chi_Minh";
 
 /** Returns the current Vietnam calendar date as YYYY-MM-DD. */
 export function vietnamDateKey(now = new Date()) {

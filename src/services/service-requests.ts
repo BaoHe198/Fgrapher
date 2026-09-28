@@ -39,13 +39,13 @@ export class ServiceRequestError extends Error {
   }
 }
 
-export class ServiceRequestNotFoundError extends ServiceRequestError {
+class ServiceRequestNotFoundError extends ServiceRequestError {
   constructor() {
     super("Service request not found", 404);
   }
 }
 
-export class ServiceRequestNotOwnedError extends ServiceRequestError {
+class ServiceRequestNotOwnedError extends ServiceRequestError {
   constructor() {
     super("You don't own this request", 403);
   }

@@ -8,6 +8,9 @@
 // at all. Revisit with a shared store (Upstash Redis, or a DB-backed
 // counter table) if real abuse is observed or scale grows past one
 // instance actually mattering.
+
+import { getRequestIp } from "@/lib/request-meta";
+
 const buckets = new Map<string, { count: number; resetAt: number }>();
 
 // Buckets are never actively evicted otherwise, so a long-running instance
@@ -56,12 +59,8 @@ export function checkRateLimit(
   return { allowed: true, retryAfterSeconds: 0 };
 }
 
-// x-forwarded-for is a comma-separated list when the request passed
-// through multiple proxies — the first entry is the original client.
 // Falls back to a constant so a request with no header at all still gets
 // bucketed together (better than throwing/skipping the check entirely).
 export function getClientIp(request: Request): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-  );
+  return getRequestIp(request) ?? "unknown";
 }

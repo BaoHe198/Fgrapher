@@ -21,7 +21,7 @@ import { credentialEmailKey } from "@/services/email-outbox-policy";
 //
 // The gate itself lives in lib/auth.ts's credentials authorize().
 
-export const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 
 export function hashVerificationToken(rawToken: string): string {
   return crypto.createHash("sha256").update(rawToken).digest("hex");

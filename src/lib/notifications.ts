@@ -59,7 +59,7 @@ export interface NotificationPolicyEntry {
   throttleMs?: number;
 }
 
-export const MESSAGE_EMAIL_THROTTLE_MS = 15 * 60 * 1000;
+const MESSAGE_EMAIL_THROTTLE_MS = 15 * 60 * 1000;
 
 export const NOTIFICATION_POLICY: Record<
   NotificationType,
@@ -272,7 +272,7 @@ export function makeFeatureGate(flags: {
   };
 }
 
-export function isNotificationTypeActive(
+function isNotificationTypeActive(
   type: NotificationType,
   isFeatureEnabled: FeatureGate,
 ): boolean {

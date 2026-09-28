@@ -14,7 +14,7 @@ import { db } from "@/lib/db";
 export const HOLDING_STATUSES: BookingStatus[] = ["PENDING", "CONFIRMED"];
 
 /** Postgres raises this when the overlap constraint refuses a write. */
-export const OVERLAP_CONSTRAINT = "booking_allocations_no_overlap";
+const OVERLAP_CONSTRAINT = "booking_allocations_no_overlap";
 
 export function isOverlapViolation(error: unknown) {
   return error instanceof Error && error.message.includes(OVERLAP_CONSTRAINT);
@@ -26,7 +26,7 @@ export function isOverlapViolation(error: unknown) {
  * null for an account that has none — a customer, an admin, or a shop, none
  * of which take bookings.
  */
-export async function providerResourceId(
+async function providerResourceId(
   providerId: string,
   tx: Prisma.TransactionClient = db,
 ) {

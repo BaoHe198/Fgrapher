@@ -18,7 +18,7 @@ import { CURRENT_POLICY_VERSION } from "@/lib/constants";
  */
 
 export const COOKIE_CONSENT_COOKIE = "fg_cookie_consent";
-export const COOKIE_CONSENT_MAX_AGE_SECONDS = 180 * 24 * 60 * 60;
+const COOKIE_CONSENT_MAX_AGE_SECONDS = 180 * 24 * 60 * 60;
 
 /** Fired on window to reopen the banner from the footer's "Cài đặt cookie". */
 export const OPEN_COOKIE_SETTINGS_EVENT = "fg:open-cookie-settings";

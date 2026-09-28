@@ -12,7 +12,7 @@
 //
 // This resolves the same way NextAuth itself does, so email links work
 // on Preview without hardcoding a hostname anywhere.
-export function getAppUrl(): string {
+function getAppUrl(): string {
   const candidate =
     process.env.NEXTAUTH_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||

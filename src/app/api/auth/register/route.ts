@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { CURRENT_POLICY_VERSION, SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getRequestMeta } from "@/lib/request-meta";
 import { getRegisterSchema } from "@/lib/validations/auth";
 import { splitVietnameseName } from "@/lib/vietnamese-name";
 import { recordConsent } from "@/services/compliance";
@@ -88,14 +89,8 @@ export async function POST(request: Request) {
   const { firstName, lastName } = splitVietnameseName(name);
 
   // Best-effort — used only to timestamp the consent record, never to
-  // gate registration itself. x-forwarded-for is a comma-separated list
-  // when the request passed through multiple proxies; the first entry is
-  // the original client.
-  const ipAddress = request.headers
-    .get("x-forwarded-for")
-    ?.split(",")[0]
-    ?.trim();
-  const userAgent = request.headers.get("user-agent") ?? undefined;
+  // gate registration itself.
+  const { ipAddress, userAgent } = getRequestMeta(request);
 
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {

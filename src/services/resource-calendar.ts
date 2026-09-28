@@ -48,7 +48,7 @@ function instantToLocalParts(instant: Date) {
  * customer, an admin, or a shop — which is the caller's cue that there is no
  * calendar to read or write.
  */
-export async function resourceIdForProvider(
+async function resourceIdForProvider(
   userId: string,
   tx: Prisma.TransactionClient = db,
 ) {

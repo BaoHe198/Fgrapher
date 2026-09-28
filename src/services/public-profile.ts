@@ -18,11 +18,11 @@ import {
   unstable_cache,
 } from "@/lib/cache";
 
-export class ProfileNotVerifiedError extends Error {}
-export class ProfileNotFoundError extends Error {}
-export class ProfileHasNoApprovedMediaError extends Error {}
-export class ProfileMissingLocationError extends Error {}
-export class ProfileMissingCategoryError extends Error {}
+class ProfileNotVerifiedError extends Error {}
+class ProfileNotFoundError extends Error {}
+class ProfileHasNoApprovedMediaError extends Error {}
+class ProfileMissingLocationError extends Error {}
+class ProfileMissingCategoryError extends Error {}
 
 // The single write path for Profile.isPublished (Prompt B3, VIỆC 4) —
 // every other read site (search.ts, sitemap.ts, this file's own queries

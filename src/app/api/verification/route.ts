@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { getRequestMeta } from "@/lib/request-meta";
 import { submitVerificationSchema } from "@/lib/validations/verification";
 import { submitVerification, VerificationError } from "@/services/verification";
 
@@ -21,11 +22,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const ipAddress = request.headers
-      .get("x-forwarded-for")
-      ?.split(",")[0]
-      ?.trim();
-    const userAgent = request.headers.get("user-agent") ?? undefined;
+    const { ipAddress, userAgent } = getRequestMeta(request);
 
     const {
       role,
