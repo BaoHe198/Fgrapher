@@ -73,7 +73,20 @@
     "QrCodeDialog": "src/components/profile/qr-code-dialog.tsx",
     "ProfileActions": "src/components/profile/profile-actions.tsx",
     "SocialRow": "src/components/auth/social-row.tsx",
-    "SuspendedAccountNotice": "src/components/auth/suspended-account-notice.tsx"
+    "SuspendedAccountNotice": "src/components/auth/suspended-account-notice.tsx",
+    "ChoiceCard": "src/components/ui/choice-card.tsx",
+    "EmptyState": "src/components/ui/empty-state.tsx",
+    "FgImage": "src/components/ui/fg-image.tsx",
+    "SectionNav": "src/components/ui/section-nav.tsx",
+    "StickyActionBar": "src/components/ui/sticky-action-bar.tsx",
+    "StepProgress": "src/components/ui/progress.tsx",
+    "AlbumCard": "src/components/cards/album-card.tsx",
+    "AvailabilityCalendar": "src/components/booking/availability-calendar.tsx",
+    "TimeSlotGrid": "src/components/booking/time-slot-grid.tsx",
+    "BookingSummary": "src/components/booking/booking-summary.tsx",
+    "BookingStatusBadge": "src/components/booking/booking-status-badge.tsx",
+    "BookingListItem": "src/components/booking/booking-list-item.tsx",
+    "MapMarker": "src/components/fmap/map-marker.tsx"
   },
   "guidelinesGlob": [
     "docs/design-reference/*.md"
@@ -239,6 +252,32 @@
       "cardMode": "column"
     },
     "Textarea": {
+      "cardMode": "column"
+    },
+    "SectionNav": {
+      "cardMode": "column"
+    },
+    "StepProgress": {
+      "cardMode": "column"
+    },
+    "BookingListItem": {
+      "cardMode": "column"
+    },
+    "AlbumCard": {
+      "cardMode": "column"
+    },
+    "StickyActionBar": {
+      "cardMode": "single",
+      "viewport": "480x200"
+    },
+    "BookingSummary": {
+      "cardMode": "column",
+      "viewport": "900x900"
+    },
+    "AvailabilityCalendar": {
+      "viewport": "900x800"
+    },
+    "MapMarker": {
       "cardMode": "column"
     }
   },

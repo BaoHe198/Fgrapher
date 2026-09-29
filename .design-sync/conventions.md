@@ -32,6 +32,7 @@ hex colours, not inline font stacks.
 | Borders | `border-border-subtle`, `border-border-default` |
 | Status | `text-success` / `bg-success-bg`, `text-warning` / `bg-warning-bg`, `bg-info-bg`, `text-danger` / `bg-danger-bg` |
 | Type scale | `text-display-2xl`, `text-display-xl`, `text-display-lg` (Bricolage Grotesque headlines); `text-heading-lg`, `text-heading-md`; `text-body-lg`, `text-body-md`, `text-body-sm`; `text-caption`, `text-caption-upper` |
+| Motion | `duration-[var(--fg-dur-260)]` (also 150, 200, 320, 400), `ease-fg-out` / `ease-fg-in` / `ease-fg-in-out`; photos `animate-develop`, section headings `animate-rise` |
 | Radius / shadow | `rounded-[var(--fg-radius-md)]` (also `-sm`, `-lg`, `-xl`); `shadow-[var(--shadow-sm)]`, `shadow-[var(--shadow-md)]` |
 | Page frame | `mx-auto max-w-[1440px] px-8 max-md:px-5` |
 
@@ -46,7 +47,11 @@ secondary, outline, ghost, destructive, link; sizes sm/md/lg), `Badge`, `Tag`,
 `Card`, `Input`, `Textarea`, `NativeSelect`, `CurrencyInput`, `DateField`,
 `Checkbox`, `Radio`, `Switch`, `Dialog`, `Sheet`, `DropdownMenu`, `Tabs`,
 `Accordion`, `Toaster`, `StarRating`, `SectionHead`, `ArtistCard`, `LogoFull`,
-`Footer`, `HeroSearch`, `HeroContactSheet`. Each component's `.prompt.md` shows
+`Footer`, `HeroSearch`, `HeroContactSheet`. Redesign 09/2026 pieces: `FgImage`
+(every photo), `ChoiceCard` (pick one/several), `EmptyState`/`ErrorState`,
+`SectionNav`, `StickyActionBar`, `StepProgress` (film-frame counter),
+`AvailabilityCalendar`, `TimeSlotGrid` (golden hour), `BookingSummary`,
+`BookingStatusBadge`, `BookingListItem`, `AlbumCard`, `MapMarker`. Each component's `.prompt.md` shows
 its props and examples.
 
 `Card` pads itself: put content directly inside

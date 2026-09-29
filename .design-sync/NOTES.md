@@ -130,18 +130,15 @@ changes its source hash and forces a re-verify.
 
 ## Component quirks found while authoring
 
-- `Textarea` is still shadcn-default styled (`border-input`, `ring-ring`) and
-  has no `label`/`error` props, unlike Input/NativeSelect/CurrencyInput; its
-  preview composes label + helper around it. `field-sizing-content` ignores
-  `rows` (renders ~2 lines). Candidate for the brand-token pass.
+- `Textarea` now shares Input's control style (field-control.ts) and takes
+  `label`/`error`/`hint`/`showCount`. `field-sizing-content` still ignores
+  `rows` (renders ~2 lines).
 - `Card` pads itself and CardHeader/CardContent/CardFooter add the same
   horizontal padding again (double indent; CardFooter's band sits inset). The
   app never uses those sub-parts: it uses `<Card className="flex flex-col
   gap-N">` with direct children, or `padding={false}` for flush media.
 - `MobileFilterSheet` has no `open` prop, so only its trigger renders in a
   preview. `ImageCropDialog`'s zoom slider is an unstyled native range input.
-  `Skeleton` (`bg-muted`) is very pale on white; `Progress` fills with
-  `bg-primary` (near-black), not brand green - both as in the app.
 - Review sheets render at ~1.75x pixel ratio: a `w-[360px]` cell measures
   ~630px on the sheet. Not missing CSS.
 
@@ -168,3 +165,19 @@ changes its source hash and forces a re-verify.
 - Fonts load from Google Fonts at render time (network-dependent).
 - `src/messages/vi.json` is bundled whole into `_ds_bundle.js`; it grows the
   bundle as the catalog grows.
+
+## Redesign 09/2026 additions (synced 29/09/2026)
+
+- New: ChoiceCard, EmptyState/ErrorState, FgImage, SectionNav,
+  StickyActionBar, StepProgress (in progress.tsx), AlbumCard,
+  AvailabilityCalendar, TimeSlotGrid, BookingSummary, BookingStatusBadge,
+  BookingListItem, MapMarker. Home sections (RoleTiles, StyleGrid, MapTeaser,
+  TrustSection, ClosingCta) are async server components and stay out.
+- FgImage/AlbumCard previews add a scoped style that stops the 400ms develop
+  animation, or captures land mid-fade.
+- StickyActionBar is `fixed` and `lg:hidden` in the app; its preview passes
+  `className="absolute lg:block"` inside a sized wrapper.
+- Capture viewports are wider than a phone, so phone-only layouts (StepProgress
+  hides frame labels below md) never show in a card.
+- The capture clock is pinned (2024), so BookingListItem's reply deadline
+  reads as a 2024 date - expected.
