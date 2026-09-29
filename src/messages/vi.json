@@ -3237,6 +3237,73 @@
         "details": "Chọn địa điểm và nhập số điện thoại liên hệ để tiếp tục.",
         "address": "Nhập địa chỉ buổi chụp để tiếp tục.",
         "agree": "Đánh dấu đồng ý bên trên để gửi yêu cầu."
+      },
+      "flow": {
+        "title": "Yêu cầu đặt lịch",
+        "backToProfile": "Hồ sơ",
+        "backToProfileShort": "Về hồ sơ",
+        "saveAndExit": "Lưu nháp & thoát",
+        "progressLabel": "Tiến trình đặt lịch",
+        "stepOf": "Bước {n}/{total}",
+        "steps": {
+          "package": "Gói",
+          "date": "Ngày",
+          "time": "Giờ",
+          "location": "Địa điểm",
+          "notes": "Ghi chú",
+          "review": "Xem lại"
+        },
+        "headings": {
+          "package": "Chọn gói dịch vụ",
+          "date": "Chọn ngày chụp",
+          "time": "Chọn khung giờ",
+          "location": "Chụp ở đâu?",
+          "notes": "Ghi chú cho nghệ sĩ",
+          "review": "Xem lại yêu cầu"
+        },
+        "subs": {
+          "package": "Chọn gói có sẵn hoặc mô tả nhu cầu riêng để nghệ sĩ báo giá.",
+          "date": "Ngày có chấm xanh là ngày {providerName} còn lịch trống.",
+          "time": "Khung có nhãn giờ vàng là lúc ánh sáng đẹp nhất trong ngày.",
+          "location": "Chọn nơi chụp để nghệ sĩ chuẩn bị đúng.",
+          "notes": "Phong cách mong muốn, ảnh tham khảo và số điện thoại để nghệ sĩ liên hệ.",
+          "review": "Kiểm tra lại trước khi gửi. Chưa mất phí ở bước này."
+        },
+        "custom": {
+          "title": "Tùy chỉnh",
+          "description": "Mô tả nhu cầu, nghệ sĩ báo giá riêng",
+          "price": "Báo giá sau"
+        },
+        "editedPhotos": "{count} ảnh chỉnh sửa",
+        "deliveryDays": "giao sau {count} ngày",
+        "missing": {
+          "date": "Chọn một ngày còn trống để tiếp tục.",
+          "time": "Chọn một khung giờ để tiếp tục.",
+          "location": "Chọn nơi chụp để tiếp tục.",
+          "phone": "Nhập số điện thoại liên hệ để tiếp tục."
+        },
+        "keptNote": "Thông tin đã nhập được giữ khi quay lại",
+        "rows": {
+          "package": "Gói",
+          "date": "Ngày",
+          "time": "Giờ",
+          "location": "Địa điểm",
+          "references": "Tham khảo"
+        },
+        "goldenHour": "Giờ vàng",
+        "referenceCount": "{count} ảnh tham khảo",
+        "hasNotes": "Có ghi chú",
+        "totalNote": "Giá cuối cùng chốt khi nghệ sĩ xác nhận",
+        "confirmWithin48h": "Nghệ sĩ phản hồi trong 48 giờ",
+        "noDaysThisMonth": "Tháng này không còn ngày trống. Xem tháng sau hoặc nhắn tin hỏi nghệ sĩ.",
+        "availabilityError": "Không tải được lịch trống. Lựa chọn của bạn vẫn được giữ — hãy thử lại.",
+        "changeDate": "Đổi ngày",
+        "timezone": "Giờ Việt Nam (GMT+7)",
+        "locationHints": {
+          "PROVIDER": "Studio hoặc địa điểm quen của nghệ sĩ",
+          "CUSTOMER": "Nhà riêng, văn phòng, nhà hàng… bạn chọn",
+          "OUTDOOR": "Công viên, phố, bãi biển… ghi địa chỉ hoặc tên nơi chụp"
+        }
       }
     },
     "browse": {

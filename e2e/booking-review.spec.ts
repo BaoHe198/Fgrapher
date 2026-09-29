@@ -25,21 +25,33 @@ test("customer books the fixture provider, who accepts it", async ({
   await login(page, customer.email, TEST_PASSWORD);
   await page.goto(`/booking/${provider.id}`);
 
-  await page.getByRole("button", { name: "Portrait Session" }).click();
+  // Six steps since the 09/2026 redesign: package, date, time, place,
+  // notes, review. Packages and places are choice cards (a real radio
+  // inside a label), so the card's text is what gets clicked.
+  await page.getByText("Portrait Session").click();
   await page.getByRole("button", { name: "Continue" }).click();
 
-  // Jump the calendar a full cycle forward (28 days) to stay comfortably
-  // clear of the 24h minimum-notice window without hardcoding a date.
-  await page.getByRole("button", { name: "Next" }).click();
+  // Next month stays comfortably clear of the 24h minimum-notice window
+  // without hardcoding a date.
+  await page.getByRole("button", { name: "Next month" }).click();
   await page
-    .locator(".grid.grid-cols-7 button:not([disabled])")
+    .locator(
+      '[data-slot="availability-calendar"] button[aria-pressed]:not([aria-disabled])',
+    )
     .first()
     .click();
-  await page.locator("text=/^\\d{2}:\\d{2}$/").first().click();
   await page.getByRole("button", { name: "Continue" }).click();
 
-  await page.getByRole("radio", { name: "At provider's studio" }).check();
+  await page
+    .locator('[data-slot="time-slot-grid"] button:not([aria-disabled])')
+    .first()
+    .click();
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  await page.getByText("At provider's studio").click();
   await page.getByLabel("Number of people").fill("2");
+  await page.getByRole("button", { name: "Continue" }).click();
+
   await page.getByLabel("Contact phone").fill("0900000000");
   await page.getByRole("button", { name: "Continue" }).click();
 

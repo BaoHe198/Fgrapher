@@ -312,9 +312,14 @@ export async function getProviderForBooking(providerId: string) {
         select: {
           displayName: true,
           role: true,
+          // Server-side only: the booking page rounds these to ~10 km for
+          // golden-hour hints before anything reaches the browser.
+          latitude: true,
+          longitude: true,
           services: { where: { isActive: true }, orderBy: { price: "asc" } },
         },
       },
+      roles: { select: { role: true, verificationStatus: true } },
     },
   });
 }

@@ -3237,6 +3237,73 @@
         "details": "Choose a location and enter a contact phone to continue.",
         "address": "Enter the shoot address to continue.",
         "agree": "Tick the agreement above to send the request."
+      },
+      "flow": {
+        "title": "Booking request",
+        "backToProfile": "Profile",
+        "backToProfileShort": "Back to profile",
+        "saveAndExit": "Save draft & exit",
+        "progressLabel": "Booking progress",
+        "stepOf": "Step {n}/{total}",
+        "steps": {
+          "package": "Package",
+          "date": "Date",
+          "time": "Time",
+          "location": "Place",
+          "notes": "Notes",
+          "review": "Review"
+        },
+        "headings": {
+          "package": "Choose a package",
+          "date": "Pick a shoot date",
+          "time": "Pick a time",
+          "location": "Where is the shoot?",
+          "notes": "Notes for the artist",
+          "review": "Review your request"
+        },
+        "subs": {
+          "package": "Pick a ready package or describe what you need for a quote.",
+          "date": "Days with a green dot are when {providerName} is free.",
+          "time": "Slots marked golden hour have the day's best light.",
+          "location": "Choose the place so the artist can prepare.",
+          "notes": "Style, reference photos and a phone number the artist can reach.",
+          "review": "Check everything before sending. Nothing is charged here."
+        },
+        "custom": {
+          "title": "Custom",
+          "description": "Describe what you need; the artist sends a quote",
+          "price": "Quote later"
+        },
+        "editedPhotos": "{count} edited photos",
+        "deliveryDays": "delivered in {count} days",
+        "missing": {
+          "date": "Pick a free day to continue.",
+          "time": "Pick a time to continue.",
+          "location": "Choose a place to continue.",
+          "phone": "Enter a contact phone to continue."
+        },
+        "keptNote": "What you entered is kept if you go back",
+        "rows": {
+          "package": "Package",
+          "date": "Date",
+          "time": "Time",
+          "location": "Place",
+          "references": "References"
+        },
+        "goldenHour": "Golden hour",
+        "referenceCount": "{count} reference photos",
+        "hasNotes": "Notes added",
+        "totalNote": "The final price is set when the artist confirms",
+        "confirmWithin48h": "The artist replies within 48 hours",
+        "noDaysThisMonth": "No free days left this month. Try next month or message the artist.",
+        "availabilityError": "Couldn't load availability. Your choices are kept — try again.",
+        "changeDate": "Change date",
+        "timezone": "Vietnam time (GMT+7)",
+        "locationHints": {
+          "PROVIDER": "The artist's studio or usual place",
+          "CUSTOMER": "A home, office, restaurant… of your choice",
+          "OUTDOOR": "A park, street, beach… give the address or name"
+        }
       }
     },
     "browse": {

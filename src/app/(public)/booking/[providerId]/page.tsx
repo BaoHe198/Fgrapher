@@ -4,7 +4,12 @@ import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getProviderForBooking } from "@/services/public-profile";
+import { responseBucket } from "@/lib/response-time";
+import { getProfileStats } from "@/services/profile-stats";
+import {
+  getProfileReviewStats,
+  getProviderForBooking,
+} from "@/services/public-profile";
 import { resolvePartyName } from "@/lib/party-name";
 
 import { BookingWizard } from "./booking-wizard";
@@ -78,8 +83,33 @@ export default async function BookingFlowPage({
       price: service.price,
       currency: service.currency,
       duration: service.duration,
+      editedPhotoCount: service.editedPhotoCount,
+      deliveryDays: service.deliveryDays,
     })),
   );
+
+  // The booking summary's provider line and the golden-hour hints
+  // (redesign 09/2026). Coordinates are rounded to one decimal (~10 km)
+  // here, on the server: enough for sunrise maths, too coarse to locate
+  // anyone, and the exact point never reaches the browser.
+  const [reviewStats, stats] = await Promise.all([
+    getProfileReviewStats(provider.id),
+    getProfileStats(provider.id),
+  ]);
+  const located = provider.profiles.find(
+    (profile) => profile.latitude != null && profile.longitude != null,
+  );
+  const sunPoint = located
+    ? {
+        latitude: Math.round(located.latitude! * 10) / 10,
+        longitude: Math.round(located.longitude! * 10) / 10,
+      }
+    : null;
+  const response =
+    stats.responseMinutes !== null
+      ? responseBucket(stats.responseMinutes)
+      : null;
+  const tProfile = await getTranslations("publicPages.profile");
 
   const isModel = provider.profiles.some((profile) => profile.role === "MODEL");
 
@@ -107,6 +137,20 @@ export default async function BookingFlowPage({
       providerId={provider.id}
       providerName={resolvePartyName(provider, t("fallbackProviderName"))}
       providerAvatar={provider.avatar}
+      providerUsername={provider.username}
+      providerRating={reviewStats.count > 0 ? reviewStats.avgRating : null}
+      providerReviewCount={reviewStats.count}
+      providerVerified={provider.roles.some(
+        (role) => role.verificationStatus === "VERIFIED",
+      )}
+      responseNote={
+        response
+          ? tProfile(`responseShort.${response.unit}`, {
+              count: response.value,
+            })
+          : t("flow.confirmWithin48h")
+      }
+      sunPoint={sunPoint}
       services={services}
       contactPhoneDefault={customer?.phone ?? ""}
       isModel={isModel}

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Check,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -9,34 +8,44 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  AvailabilityCalendar,
+  toCalendarDays,
+} from "@/components/booking/availability-calendar";
+import {
+  BookingSummary,
+  type BookingSummaryRow,
+} from "@/components/booking/booking-summary";
 import { ModelSafetyNotice } from "@/components/booking/model-safety-notice";
-import { termsChunk } from "@/components/legal/terms-link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TimeSlotGrid } from "@/components/booking/time-slot-grid";
 import {
   ReferenceMediaField,
   type ReferenceMedia,
 } from "@/components/forms/reference-media-field";
+import { termsChunk } from "@/components/legal/terms-link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ChoiceCard, ChoiceCardGroup } from "@/components/ui/choice-card";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { Radio } from "@/components/ui/radio";
+import { StepProgress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  formatDate,
-  formatDateLong,
-  formatDurationHours,
-  formatDayMonth,
-  formatMonthYear,
-} from "@/lib/format";
-import { WEEKDAY_SHORT_LABELS_VI } from "@/lib/constants";
+import { formatDate, formatDateLong, formatDayMonth } from "@/lib/format";
+import { isGoldenHourSlot, sunTimes } from "@/lib/sun";
+import { cn, formatCurrency } from "@/lib/utils";
 import { MAX_REFERENCE_MEDIA } from "@/lib/validations/reference-media";
-import { formatCurrency, cn, mondayFirstColumn } from "@/lib/utils";
+import { vietnamDateKey } from "@/lib/vietnam/date";
 import type { DayAvailability } from "@/services/availability";
+
+// The booking request flow, redesign 09/2026: six short steps - package,
+// day, time, place, notes, review - each one screen, with the request
+// summary beside them (every row has its own "Sửa" back to its step) and a
+// film-frame counter ("03/06") instead of numbered circles. Nothing about
+// what is sent changed: the same fields reach POST /api/bookings.
 
 const SHOOT_TYPE_OPTION_KEYS = [
   { value: "", key: "shootTypeOptions.notSpecified" },
@@ -55,12 +64,22 @@ interface ServiceOption {
   price: number;
   currency: string;
   duration: number;
+  editedPhotoCount?: number | null;
+  deliveryDays?: number | null;
 }
 
 interface BookingWizardProps {
   providerId: string;
   providerName: string;
   providerAvatar: string | null;
+  providerUsername: string | null;
+  providerRating: number | null;
+  providerReviewCount: number;
+  providerVerified: boolean;
+  /** "Phản hồi trong 2 giờ", or the 48-hour confirmation promise. */
+  responseNote: string;
+  /** ~10 km-rounded coordinates for golden-hour hints, or null. */
+  sunPoint: { latitude: number; longitude: number } | null;
   services: ServiceOption[];
   contactPhoneDefault: string;
   isModel?: boolean;
@@ -80,6 +99,8 @@ type LocationType = "PROVIDER" | "CUSTOMER" | "OUTDOOR";
 
 interface Draft {
   serviceId: string | null;
+  /** "Tùy chỉnh": no package, the customer describes what they need. */
+  custom: boolean;
   customRequest: string;
   date: string | null;
   time: string | null;
@@ -105,16 +126,25 @@ interface Draft {
   muaProvided: boolean;
 }
 
-const STEP_KEYS = [
-  "steps.service",
-  "steps.dateTime",
-  "steps.details",
-  "steps.confirm",
+const STEPS = [
+  "package",
+  "date",
+  "time",
+  "location",
+  "notes",
+  "review",
 ] as const;
+type Step = (typeof STEPS)[number];
+const REVIEW = STEPS.length - 1;
+
+// "Lưu nháp & thoát" keeps a draft on this device for a week. The contact
+// phone is left out of what is stored: it is refilled from the account.
+const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function emptyDraft(contactPhoneDefault: string): Draft {
   return {
     serviceId: null,
+    custom: false,
     customRequest: "",
     date: null,
     time: null,
@@ -132,23 +162,68 @@ function emptyDraft(contactPhoneDefault: string): Draft {
   };
 }
 
-function toLocalDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+function readStoredDraft(key: string): Partial<Draft> | null {
+  try {
+    const raw = localStorage.getItem(key) ?? sessionStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as {
+      savedAt?: number;
+      draft?: Partial<Draft>;
+    } & Partial<Draft>;
+    // Older drafts were stored bare in sessionStorage; newer ones carry
+    // savedAt so a week-old half-booking doesn't reappear forever.
+    if (parsed.draft) {
+      if (!parsed.savedAt || Date.now() - parsed.savedAt > DRAFT_TTL_MS)
+        return null;
+      return parsed.draft;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredDraft(key: string, draft: Draft) {
+  try {
+    const { contactPhone: _phone, agreed: _agreed, ...rest } = draft;
+    void _phone;
+    void _agreed;
+    localStorage.setItem(
+      key,
+      JSON.stringify({ savedAt: Date.now(), draft: rest }),
+    );
+    sessionStorage.removeItem(key);
+  } catch {
+    // Private mode or storage full: the draft simply isn't kept.
+  }
+}
+
+function clearStoredDraft(key: string) {
+  try {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  } catch {
+    // Nothing to clear.
+  }
 }
 
 export function BookingWizard({
   providerId,
   providerName,
   providerAvatar,
+  providerUsername,
+  providerRating,
+  providerReviewCount,
+  providerVerified,
+  responseNote,
+  sunPoint,
   services,
   contactPhoneDefault,
   isModel,
   requesterCrewRole,
 }: BookingWizardProps) {
   const t = useTranslations("publicPages.booking");
+  const router = useRouter();
   const searchParams = useSearchParams();
   const categoryT = useTranslations("profileCategory");
   // Search context carried over from /fmap. Bookings only store a start
@@ -172,19 +247,24 @@ export function BookingWizard({
       ? categoryT(fmapContext.category)
       : null;
   const storageKey = `booking-draft-${providerId}`;
+  const profileHref = providerUsername
+    ? `/profile/${providerUsername}`
+    : "/browse";
 
   const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<"next" | "back">("next");
   const stepSettledRef = useRef(false);
+  const goTo = (next: number) => {
+    setDirection(next > step ? "next" : "back");
+    setStep(next);
+  };
 
   // Every step is taller than the viewport on a phone, and the Back/Continue
   // buttons sit at the bottom — so changing step left the scroll position down
-  // there and the new step opened already scrolled past its own heading,
-  // looking as though the page had skipped content.
-  //
+  // there and the new step opened already scrolled past its own heading.
   // In an effect keyed on `step`, not in the click handler: the handler runs
-  // before React commits the new step, so scrolling there measures the
-  // outgoing layout. Skipping the first run keeps a fresh (or deep-linked)
-  // page where it loaded instead of yanking it.
+  // before React commits the new step. Skipping the first run keeps a fresh
+  // (or deep-linked) page where it loaded instead of yanking it.
   useEffect(() => {
     if (!stepSettledRef.current) {
       stepSettledRef.current = true;
@@ -219,7 +299,7 @@ export function BookingWizard({
   }, [requesterCrewRole]);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem(storageKey);
+    const saved = readStoredDraft(storageKey);
     const fromUrl: Partial<Draft> = {
       serviceId: searchParams.get("service"),
       date: searchParams.get("date"),
@@ -250,21 +330,22 @@ export function BookingWizard({
           ...fromUrl,
           notes: prev.notes || fmapNotes,
         }));
+        // Arriving with a package, day and time already picked on the
+        // profile: open at the first thing still missing.
+        if (fromUrl.serviceId && fromUrl.date && fromUrl.time) setStep(3);
+        else if (fromUrl.serviceId && fromUrl.date) setStep(2);
+        else if (fromUrl.serviceId) setStep(1);
       } else if (saved) {
         // Merged over a fresh draft, not used as-is: a draft saved before a
-        // field existed (referenceMedia, added later) would otherwise come
-        // back without it, and the details step would crash reading
-        // `undefined.map` for anyone who had a booking half-filled at the
-        // moment this shipped.
-        const restored = JSON.parse(saved) as Partial<Draft>;
+        // field existed would otherwise come back without it.
         setDraft({
           ...emptyDraft(contactPhoneDefault),
-          ...restored,
+          ...saved,
           // Drafts saved before references carried Cloudinary public IDs
           // cannot pass the server's ownership verification. Omit only those
           // old attachments; the rest of the booking draft stays intact.
-          referenceMedia: Array.isArray(restored.referenceMedia)
-            ? restored.referenceMedia.filter(
+          referenceMedia: Array.isArray(saved.referenceMedia)
+            ? saved.referenceMedia.filter(
                 (item): item is ReferenceMedia =>
                   typeof item === "object" &&
                   item !== null &&
@@ -272,6 +353,8 @@ export function BookingWizard({
                   typeof item.publicId === "string",
               )
             : [],
+          contactPhone: contactPhoneDefault,
+          agreed: false,
         });
       }
       setHydrated(true);
@@ -283,8 +366,8 @@ export function BookingWizard({
   }, []);
 
   useEffect(() => {
-    if (hydrated) sessionStorage.setItem(storageKey, JSON.stringify(draft));
-  }, [draft, hydrated, storageKey]);
+    if (hydrated && !bookingId) writeStoredDraft(storageKey, draft);
+  }, [draft, hydrated, storageKey, bookingId]);
 
   const update = <K extends keyof Draft>(key: K, value: Draft[K]) => {
     setDraft((prev) => ({ ...prev, [key]: value }));
@@ -292,51 +375,122 @@ export function BookingWizard({
 
   const selectedService =
     services.find((s) => s.id === draft.serviceId) ?? null;
+  const isCustom = draft.custom || services.length === 0;
 
-  const canContinue = useMemo(() => {
-    switch (step) {
-      case 0:
-        return services.length === 0
+  // One month of availability, shared by the day and time steps.
+  const [monthCursor, setMonthCursor] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const [days, setDays] = useState<DayAvailability[]>([]);
+  const [daysLoading, setDaysLoading] = useState(true);
+  const [daysError, setDaysError] = useState(false);
+  // A day picked on the profile (or restored) can sit in a later month.
+  useEffect(() => {
+    if (!draft.date) return;
+    const [y, m] = draft.date.split("-").map(Number);
+    startTransition(() =>
+      setMonthCursor((prev) =>
+        prev.getFullYear() === y && prev.getMonth() === m - 1
+          ? prev
+          : new Date(y, m - 1, 1),
+      ),
+    );
+    // Only on arrival/restore; later month paging is the customer's.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+  useEffect(() => {
+    let cancelled = false;
+    startTransition(() => {
+      setDaysLoading(true);
+      setDaysError(false);
+    });
+    const first = monthCursor;
+    const last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+    const key = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const serviceParam = draft.serviceId ? `&serviceId=${draft.serviceId}` : "";
+    fetch(
+      `/api/availability/${providerId}?from=${key(first)}&to=${key(last)}${serviceParam}`,
+    )
+      .then((res) => res.json())
+      .then((body) => {
+        if (!cancelled)
+          startTransition(() => {
+            setDays(body.data?.dates ?? []);
+            setDaysLoading(false);
+          });
+      })
+      .catch(() => {
+        if (!cancelled)
+          startTransition(() => {
+            setDaysError(true);
+            setDaysLoading(false);
+          });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [providerId, monthCursor, draft.serviceId]);
+
+  const today = vietnamDateKey();
+  const atCurrentMonth =
+    monthCursor.getFullYear() === new Date().getFullYear() &&
+    monthCursor.getMonth() === new Date().getMonth();
+  const activeDay = days.find((d) => d.date === draft.date);
+  const slots = useMemo(() => {
+    if (!activeDay || !draft.date) return [];
+    const sun = sunPoint
+      ? sunTimes(draft.date, sunPoint.latitude, sunPoint.longitude)
+      : null;
+    return activeDay.slots.map((slot) => ({
+      start: slot.time,
+      status: slot.available ? ("available" as const) : ("booked" as const),
+      golden: sun ? isGoldenHourSlot(slot.time, sun) : false,
+    }));
+  }, [activeDay, draft.date, sunPoint]);
+
+  const stepValid = (index: number): boolean => {
+    switch (STEPS[index]) {
+      case "package":
+        return isCustom
           ? draft.customRequest.trim().length > 0
           : !!draft.serviceId;
-      case 1:
-        return !!draft.date && !!draft.time;
-      case 2:
+      case "date":
+        return !!draft.date;
+      case "time":
+        return !!draft.time;
+      case "location":
         return (
-          draft.contactPhone.trim().length > 0 &&
           draft.locationType !== null &&
           (draft.locationType === "PROVIDER" ||
             draft.locationAddress.trim().length > 0)
         );
-      case 3:
+      case "notes":
+        return draft.contactPhone.trim().length > 0;
+      case "review":
         return draft.agreed;
-      default:
-        return false;
     }
-  }, [step, draft, services.length]);
+  };
+  const canContinue = stepValid(step);
 
   // What the disabled Continue button is waiting for. A greyed-out button
-  // alone left people guessing — the phone number in particular carried no
-  // mark that it was required (24/09 audit).
-  const missingHint = useMemo(() => {
-    if (canContinue) return null;
-    switch (step) {
-      case 0:
-        return t("missingHint.service");
-      case 1:
-        return t("missingHint.dateTime");
-      case 2:
-        return draft.locationType !== null &&
-          draft.locationType !== "PROVIDER" &&
-          draft.contactPhone.trim().length > 0
-          ? t("missingHint.address")
-          : t("missingHint.details");
-      case 3:
-        return t("missingHint.agree");
-      default:
-        return null;
-    }
-  }, [canContinue, step, draft.locationType, draft.contactPhone, t]);
+  // alone left people guessing (24/09 audit).
+  const missingHint = canContinue
+    ? null
+    : (
+        {
+          package: t("missingHint.service"),
+          date: t("flow.missing.date"),
+          time: t("flow.missing.time"),
+          location:
+            draft.locationType !== null && draft.locationType !== "PROVIDER"
+              ? t("missingHint.address")
+              : t("flow.missing.location"),
+          notes: t("flow.missing.phone"),
+          review: t("missingHint.agree"),
+        } satisfies Record<Step, string>
+      )[STEPS[step]];
 
   const onSubmit = async () => {
     setSubmitting(true);
@@ -360,56 +514,57 @@ export function BookingWizard({
       : "";
 
     const notesParts = [
-      draft.customRequest
+      isCustom && draft.customRequest
         ? t("notes.customRequest", { value: draft.customRequest })
         : null,
       modelDetailsBlock || null,
       draft.notes || null,
     ].filter(Boolean);
 
-    const res = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        providerId,
-        serviceId: draft.serviceId ?? undefined,
-        date: draft.date,
-        startTime: draft.time,
-        locationType: draft.locationType,
-        locationAddress: draft.locationAddress || undefined,
-        numberOfPeople: draft.numberOfPeople
-          ? Number(draft.numberOfPeople)
-          : undefined,
-        notes: notesParts.length > 0 ? notesParts.join("\n\n") : undefined,
-        contactPhone: draft.contactPhone,
-        referenceImages:
-          draft.referenceMedia.length > 0 ? draft.referenceMedia : undefined,
-        parentBookingId: parentBookingId ?? undefined,
-        requesterRole: parentBookingId ? requesterCrewRole : undefined,
-      }),
-    });
-
-    const body = await res.json();
-    setSubmitting(false);
-
-    if (!res.ok) {
-      setSubmitError(body.message ?? t("genericError"));
-      return;
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          providerId,
+          serviceId: isCustom ? undefined : (draft.serviceId ?? undefined),
+          date: draft.date,
+          startTime: draft.time,
+          locationType: draft.locationType,
+          locationAddress: draft.locationAddress || undefined,
+          numberOfPeople: draft.numberOfPeople
+            ? Number(draft.numberOfPeople)
+            : undefined,
+          notes: notesParts.length > 0 ? notesParts.join("\n\n") : undefined,
+          contactPhone: draft.contactPhone,
+          referenceImages:
+            draft.referenceMedia.length > 0 ? draft.referenceMedia : undefined,
+          parentBookingId: parentBookingId ?? undefined,
+          requesterRole: parentBookingId ? requesterCrewRole : undefined,
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setSubmitError(body.message ?? t("genericError"));
+        return;
+      }
+      clearStoredDraft(storageKey);
+      setBookingId(body.data.id);
+      setProviderZaloUrl(body.data.providerZaloUrl ?? null);
+    } catch {
+      setSubmitError(t("genericError"));
+    } finally {
+      setSubmitting(false);
     }
-
-    sessionStorage.removeItem(storageKey);
-    setBookingId(body.data.id);
-    setProviderZaloUrl(body.data.providerZaloUrl ?? null);
   };
 
   if (bookingId) {
     return (
-      <div className="mx-auto max-w-[900px] px-8 py-10">
+      <div className="mx-auto max-w-[900px] px-5 py-10 sm:px-8">
         <Card className="flex flex-col items-center gap-4 py-16 text-center">
-          {/* Hand-drawn tick rather than the static <Check/> icon: this is
-              the moment the request actually leaves, and it is the one
-              point in the customer flow worth marking. The ring settles,
-              then the stroke draws. */}
+          {/* Hand-drawn tick rather than a static icon: this is the moment
+              the request actually leaves, the one point in the customer
+              flow worth marking. The ring settles, then the stroke draws. */}
           <div className="animate-settle-in flex size-16 items-center justify-center rounded-full bg-success-bg">
             <svg
               viewBox="0 0 24 24"
@@ -456,7 +611,7 @@ export function BookingWizard({
           ) : null}
           <div className="flex flex-wrap justify-center gap-3">
             <Button
-              variant={providerZaloUrl ? "secondary" : "accent"}
+              variant={providerZaloUrl ? "outline" : "accent"}
               nativeButton={false}
               render={<Link href="/dashboard/bookings" />}
             >
@@ -475,16 +630,101 @@ export function BookingWizard({
     );
   }
 
+  const locationLabel: Record<LocationType, string> = {
+    PROVIDER: t("stepDetails.locationProvider"),
+    CUSTOMER: t("stepDetails.locationCustomer"),
+    OUTDOOR: t("stepDetails.locationOutdoor"),
+  };
+  const dateLabel = draft.date
+    ? formatDate(`${draft.date}T00:00:00+07:00`)
+    : null;
+  const summaryRows: BookingSummaryRow[] = [
+    {
+      label: t("flow.rows.package"),
+      value: isCustom
+        ? draft.customRequest
+          ? t("flow.custom.title")
+          : null
+        : (selectedService?.name ?? null),
+      onEdit: () => goTo(0),
+    },
+    { label: t("flow.rows.date"), value: dateLabel, onEdit: () => goTo(1) },
+    {
+      label: t("flow.rows.time"),
+      value: draft.time,
+      sub:
+        draft.time && slots.find((s) => s.start === draft.time)?.golden
+          ? t("flow.goldenHour")
+          : undefined,
+      onEdit: () => goTo(2),
+    },
+    {
+      label: t("flow.rows.location"),
+      value: draft.locationType
+        ? draft.locationType !== "PROVIDER" && draft.locationAddress
+          ? draft.locationAddress
+          : locationLabel[draft.locationType]
+        : null,
+      onEdit: () => goTo(3),
+    },
+    {
+      label: t("flow.rows.references"),
+      value:
+        draft.referenceMedia.length > 0
+          ? t("flow.referenceCount", { count: draft.referenceMedia.length })
+          : draft.notes
+            ? t("flow.hasNotes")
+            : null,
+      onEdit: () => goTo(4),
+    },
+  ];
+  const total =
+    !isCustom && selectedService
+      ? formatCurrency(selectedService.price, selectedService.currency)
+      : null;
+
+  const stepNames = STEPS.map((key) => t(`flow.steps.${key}`));
+  const current = STEPS[step];
+
   return (
-    <div className="mx-auto max-w-[900px] px-8 py-10">
-      {/* QA: no <h1> anywhere in the wizard — each step already has its
-          own <h2> ("Bạn cần gì?", "Chọn ngày & giờ", ...), so a second
-          large visible title here would be redundant; a screen-reader
-          -only one still gives the page an actual name. */}
-      <h1 className="sr-only">{t("pageTitle")}</h1>
-      <ProgressIndicator step={step} />
+    <div className="mx-auto max-w-[1280px] px-5 pt-8 pb-16 sm:px-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href={profileHref}
+          className="focus-ring inline-flex items-center gap-1.5 rounded-[4px] text-body-sm text-text-secondary hover:text-text-primary"
+        >
+          <ChevronLeft className="size-4" />
+          {t("flow.backToProfile")}
+          <span className="font-semibold! text-text-primary">
+            {providerName}
+          </span>
+        </Link>
+        <button
+          type="button"
+          onClick={() => {
+            writeStoredDraft(storageKey, draft);
+            router.push(profileHref);
+          }}
+          className="focus-ring rounded-[4px] text-body-sm font-semibold! text-text-link underline underline-offset-4 hover:text-text-primary"
+        >
+          {t("flow.saveAndExit")}
+        </button>
+      </div>
+
+      <h1 className="mt-4 text-display-md text-text-primary sm:text-display-lg">
+        {t("flow.title")}
+      </h1>
+
+      <StepProgress
+        className="mt-6"
+        label={t("flow.progressLabel")}
+        steps={stepNames}
+        current={step}
+        onStepClick={goTo}
+      />
+
       {fmapContext ? (
-        <div className="mb-4 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-sunken px-4 py-3 text-body-sm text-text-secondary">
+        <div className="mt-6 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-sunken px-4 py-3 text-body-sm text-text-secondary">
           {fmapContext.date && fmapContext.start && fmapContext.end
             ? t("fmapContext.banner", {
                 date: formatDate(`${fmapContext.date}T00:00:00.000Z`),
@@ -496,860 +736,412 @@ export function BookingWizard({
         </div>
       ) : null}
 
-      {/* Who and when, on every step before the review. The customer picks
-          a provider, a day and a time on the profile page and lands here on
-          "What do you need?" with none of that in sight — the only mention
-          of the provider was a grey line at the foot of step two. The review
-          step has its own full summary, so this stops there. */}
-      {step < 3 ? (
-        <div className="mb-4 flex items-center gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-surface px-4 py-3">
-          <Avatar className="size-9">
-            {providerAvatar ? (
-              <AvatarImage src={providerAvatar} alt="" />
-            ) : null}
-            <AvatarFallback>{providerName[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate text-body-md font-semibold! text-text-primary">
-              {t("stepDateTime.bookingWith", { providerName })}
-            </span>
-            {draft.date ? (
-              <span className="text-body-sm text-text-secondary">
-                {formatDateLong(`${draft.date}T00:00:00.000Z`)}
-                {draft.time ? ` · ${draft.time}` : null}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      <Card className="p-8">
-        {step === 0 ? (
-          <StepService
-            services={services}
-            selectedServiceId={draft.serviceId}
-            customRequest={draft.customRequest}
-            onSelect={(id) => update("serviceId", id)}
-            onCustomRequest={(v) => update("customRequest", v)}
-          />
-        ) : null}
-
-        {step === 1 ? (
-          <StepDateTime
-            providerId={providerId}
-            selectedServiceId={draft.serviceId}
-            date={draft.date}
-            time={draft.time}
-            onSelectDate={(d) => update("date", d)}
-            onSelectTime={(t) => update("time", t)}
-          />
-        ) : null}
-
-        {step === 2 ? (
-          <StepDetails
-            providerName={providerName}
-            locationType={draft.locationType}
-            locationAddress={draft.locationAddress}
-            numberOfPeople={draft.numberOfPeople}
-            notes={draft.notes}
-            referenceMedia={draft.referenceMedia}
-            contactPhone={draft.contactPhone}
-            isModel={isModel}
-            shootType={draft.shootType}
-            usageRights={draft.usageRights}
-            wardrobeNotes={draft.wardrobeNotes}
-            muaProvided={draft.muaProvided}
-            onChange={update}
-            parentBookingOptions={requesterCrewRole ? parentBookingOptions : []}
-            parentBookingId={parentBookingId}
-            onParentBookingChange={setParentBookingId}
-          />
-        ) : null}
-
-        {step === 3 ? (
-          <StepReview
-            providerName={providerName}
-            providerAvatar={providerAvatar}
-            service={selectedService}
-            customRequest={draft.customRequest}
-            date={draft.date}
-            time={draft.time}
-            locationType={draft.locationType}
-            locationAddress={draft.locationAddress}
-            numberOfPeople={draft.numberOfPeople}
-            notes={draft.notes}
-            agreed={draft.agreed}
-            onAgree={(v) => update("agreed", v)}
-          />
-        ) : null}
-
-        {submitError ? (
-          <div className="mt-4 rounded-[var(--fg-radius-md)] bg-danger-bg p-3 text-body-sm text-danger">
-            {submitError}
-          </div>
-        ) : null}
-      </Card>
-
-      <div className="mt-5 flex items-center justify-between">
-        <Button
-          variant="ghost"
-          disabled={step === 0}
-          onClick={() => setStep((s) => s - 1)}
-        >
-          <ChevronLeft className="size-4" />
-          {t("back")}
-        </Button>
-        {step < STEP_KEYS.length - 1 ? (
-          <Button
-            variant="accent"
-            disabled={!canContinue}
-            onClick={() => setStep((s) => s + 1)}
+      <div className="mt-8 grid grid-cols-1 items-start gap-10 border-t border-border-subtle pt-8 lg:grid-cols-[1fr_380px]">
+        <div className="min-w-0">
+          <div
+            key={step}
+            className={cn(
+              "flex flex-col gap-5",
+              direction === "next" ? "animate-step-next" : "animate-step-back",
+            )}
           >
-            {t("continueBtn")}
-            <ChevronRight className="size-4" />
-          </Button>
-        ) : (
-          <Button
-            variant="accent"
-            disabled={!canContinue || submitting}
-            onClick={onSubmit}
-          >
-            {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            {t("submitBtn")}
-          </Button>
-        )}
-      </div>
-      {missingHint ? (
-        <p className="mt-2 text-right text-body-sm text-text-tertiary">
-          {missingHint}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function ProgressIndicator({ step }: { step: number }) {
-  const t = useTranslations("publicPages.booking");
-  return (
-    <div className="mb-8 flex items-center">
-      {STEP_KEYS.map((key, index) => {
-        const label = t(key);
-        const isDone = index < step;
-        const isActive = index === step;
-        return (
-          <div key={key} className="flex flex-1 items-center last:flex-none">
-            <div className="flex flex-col items-center gap-1.5">
-              <div
-                className={cn(
-                  "flex size-8 items-center justify-center rounded-full text-body-sm font-bold!",
-                  isDone
-                    ? "bg-success text-white"
-                    : isActive
-                      ? "bg-brand-primary text-text-on-brand"
-                      : "bg-bg-sunken text-text-tertiary",
-                )}
-              >
-                {isDone ? <Check className="size-4" /> : index + 1}
-              </div>
-              <span
-                className={cn(
-                  "text-body-sm font-semibold! whitespace-nowrap",
-                  isActive || isDone
-                    ? "text-text-primary"
-                    : "text-text-tertiary",
-                )}
-              >
-                {label}
+            <div className="flex flex-col gap-1.5">
+              <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+                {t("flow.stepOf", { n: step + 1, total: STEPS.length })}
               </span>
+              <h2 className="text-heading-xl text-text-primary">
+                {t(`flow.headings.${current}`)}
+              </h2>
+              <p className="text-body-md text-text-secondary">
+                {t(`flow.subs.${current}`, { providerName })}
+              </p>
             </div>
-            {index < STEP_KEYS.length - 1 ? (
-              <div
-                className={cn(
-                  "mx-2 h-px flex-1",
-                  isDone ? "bg-brand-primary" : "bg-bg-sunken",
-                )}
-              />
-            ) : null}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
-function StepService({
-  services,
-  selectedServiceId,
-  customRequest,
-  onSelect,
-  onCustomRequest,
-}: {
-  services: ServiceOption[];
-  selectedServiceId: string | null;
-  customRequest: string;
-  onSelect: (id: string) => void;
-  onCustomRequest: (value: string) => void;
-}) {
-  const t = useTranslations("publicPages.booking");
-  return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-heading-lg text-text-primary">
-        {t("stepService.heading")}
-      </h2>
-
-      {services.length === 0 ? (
-        <div className="flex flex-col gap-2">
-          <label
-            htmlFor="booking-wizard-field-1"
-            className="text-body-sm font-semibold! text-text-primary"
-          >
-            {t("stepService.describeLabel")}
-          </label>
-          <Textarea
-            id="booking-wizard-field-1"
-            rows={4}
-            value={customRequest}
-            onChange={(e) => onCustomRequest(e.target.value)}
-            placeholder={t("stepService.describePlaceholder")}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {services.map((service) => {
-            const isSelected = service.id === selectedServiceId;
-            return (
-              // Fully stacked: the name and the description each get the
-              // card's whole width, and duration/price share the last row.
-              // This used to be a single flex row with the price in its own
-              // column, which on a phone left the description ~43% of a card
-              // that is itself only ~260px wide inside the step's Card — so a
-              // package description wrapped every two or three words, and a
-              // longer name broke across three lines.
-              <button
-                key={service.id}
-                type="button"
-                onClick={() => onSelect(service.id)}
-                className={cn(
-                  "flex flex-col gap-1.5 rounded-[var(--fg-radius-md)] border p-5 text-left transition-colors",
-                  isSelected
-                    ? "border-brand-primary bg-success-bg ring-1 ring-brand-primary"
-                    : "border-border-default bg-bg-surface",
-                )}
-              >
-                <span className="text-heading-sm text-text-primary">
-                  {service.name}
-                </span>
-                {service.description ? (
-                  <span className="whitespace-pre-line [overflow-wrap:anywhere] text-body-sm leading-relaxed text-text-secondary">
-                    {service.description}
-                  </span>
+            {current === "package" ? (
+              <ChoiceCardGroup legend={t("flow.headings.package")} hideLegend>
+                {services.map((service) => (
+                  <ChoiceCard
+                    key={service.id}
+                    name="package"
+                    value={service.id}
+                    selected={!isCustom && draft.serviceId === service.id}
+                    onSelect={(id) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        serviceId: id,
+                        custom: false,
+                      }))
+                    }
+                    title={service.name}
+                    description={
+                      [
+                        service.editedPhotoCount != null
+                          ? t("flow.editedPhotos", {
+                              count: service.editedPhotoCount,
+                            })
+                          : null,
+                        service.deliveryDays != null
+                          ? t("flow.deliveryDays", {
+                              count: service.deliveryDays,
+                            })
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || undefined
+                    }
+                    meta={
+                      service.description
+                        ? service.description.split("\n")[0]
+                        : undefined
+                    }
+                    price={formatCurrency(service.price, service.currency)}
+                  />
+                ))}
+                <ChoiceCard
+                  name="package"
+                  value="__custom__"
+                  selected={isCustom}
+                  onSelect={() =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      custom: true,
+                      serviceId: null,
+                    }))
+                  }
+                  title={t("flow.custom.title")}
+                  description={t("flow.custom.description")}
+                  price={t("flow.custom.price")}
+                />
+                {isCustom ? (
+                  <Textarea
+                    label={t("stepService.describeLabel")}
+                    rows={4}
+                    maxLength={1000}
+                    showCount
+                    value={draft.customRequest}
+                    onChange={(e) => update("customRequest", e.target.value)}
+                    placeholder={t("stepService.describePlaceholder")}
+                  />
                 ) : null}
-                {/* Duration and price each get their own line. Sharing one
-                    row put a ~26-character label next to the price inside a
-                    ~220px card, which broke the label across three lines. */}
-                <span className="text-heading-sm font-bold! text-text-primary">
-                  {formatCurrency(service.price, service.currency)}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
+              </ChoiceCardGroup>
+            ) : null}
 
-function StepDateTime({
-  providerId,
-  selectedServiceId,
-  date,
-  time,
-  onSelectDate,
-  onSelectTime,
-}: {
-  providerId: string;
-  selectedServiceId: string | null;
-  date: string | null;
-  time: string | null;
-  onSelectDate: (date: string) => void;
-  onSelectTime: (time: string) => void;
-}) {
-  const t = useTranslations("publicPages.booking");
-  // A real calendar month, not a rolling 28-day window. The window version
-  // paged by ±28 days under a "tháng 9 năm 2026" heading, so its columns were
-  // whatever weekdays the window happened to start on — Sunday landed in a
-  // different column on every page — and a page could run past the month it
-  // was labelled with (… 29, 30, 1 …).
-  const [monthCursor, setMonthCursor] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
-  const [days, setDays] = useState<DayAvailability[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const monthEnd = useMemo(
-    () => new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 0),
-    [monthCursor],
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    startTransition(() => setIsLoading(true));
-    const serviceParam = selectedServiceId
-      ? `&serviceId=${selectedServiceId}`
-      : "";
-    fetch(
-      `/api/availability/${providerId}?from=${toLocalDateKey(
-        monthCursor,
-      )}&to=${toLocalDateKey(monthEnd)}${serviceParam}`,
-    )
-      .then((res) => res.json())
-      .then((body) => {
-        if (!cancelled) {
-          startTransition(() => {
-            setDays(body.data?.dates ?? []);
-            setIsLoading(false);
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [providerId, monthCursor, monthEnd, selectedServiceId]);
-
-  const activeDay = days.find((d) => d.date === date);
-  const today = toLocalDateKey(new Date());
-
-  const dayByDate = useMemo(
-    () => new Map(days.map((d) => [d.date, d])),
-    [days],
-  );
-
-  // Leading blanks so the 1st lands under its real weekday column, then one
-  // cell per day of the month. Monday-first, matching every other fixed grid
-  // in the app (see WEEK_STARTS_ON).
-  const cells = useMemo<(string | null)[]>(
-    () => [
-      ...Array.from(
-        { length: mondayFirstColumn(monthCursor.getDay()) },
-        () => null,
-      ),
-      ...Array.from({ length: monthEnd.getDate() }, (_, i) =>
-        toLocalDateKey(
-          new Date(monthCursor.getFullYear(), monthCursor.getMonth(), i + 1),
-        ),
-      ),
-    ],
-    [monthCursor, monthEnd],
-  );
-
-  // Nothing bookable is ever in a past month, so don't let the visitor page
-  // back into empty grids.
-  const atCurrentMonth =
-    monthCursor.getFullYear() === new Date().getFullYear() &&
-    monthCursor.getMonth() === new Date().getMonth();
-
-  const changeMonth = (delta: number) =>
-    setMonthCursor(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1),
-    );
-
-  return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-heading-lg text-text-primary">
-        {t("stepDateTime.heading")}
-      </h2>
-
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_280px]">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              aria-label={t("stepDateTime.previous")}
-              disabled={atCurrentMonth}
-              onClick={() => changeMonth(-1)}
-              className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken disabled:pointer-events-none disabled:opacity-30"
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <span className="text-body-md font-semibold! text-text-primary">
-              {formatMonthYear(monthCursor)}
-            </span>
-            <button
-              type="button"
-              aria-label={t("stepDateTime.next")}
-              onClick={() => changeMonth(1)}
-              className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
-            >
-              <ChevronRight className="size-4" />
-            </button>
-          </div>
-
-          {/* Fixed weekday header — the per-cell labels the rolling window
-              needed are redundant once the columns mean something. */}
-          <div className="grid grid-cols-7 gap-2 text-center text-caption-upper tracking-[0.06em] text-text-tertiary">
-            {WEEKDAY_SHORT_LABELS_VI.map((label) => (
-              <span key={label}>{label}</span>
-            ))}
-          </div>
-
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="size-5 animate-spin text-text-tertiary" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-7 gap-2">
-              {cells.map((dateKey, i) => {
-                if (!dateKey) return <span key={`empty-${i}`} aria-hidden />;
-                const day = dayByDate.get(dateKey);
-                // A day the availability window didn't cover (or one already
-                // past) is shown, but not selectable — leaving a hole in the
-                // month would break the columns this grid exists to fix.
-                const unavailable = !day || day.busy || dateKey < today;
-                const isSelected = dateKey === date;
-                const isToday = dateKey === today;
-                return (
-                  <button
-                    key={dateKey}
-                    type="button"
-                    disabled={unavailable}
-                    onClick={() => onSelectDate(dateKey)}
-                    className={cn(
-                      "flex flex-col items-center gap-0.5 rounded-[var(--fg-radius-sm)] py-2.5 text-body-sm",
-                      isSelected
-                        ? "bg-brand-primary text-text-on-brand"
-                        : unavailable
-                          ? "cursor-not-allowed text-text-tertiary opacity-40"
-                          : `cursor-pointer hover:bg-bg-sunken ${isToday ? "border border-brand-primary" : ""}`,
-                    )}
-                  >
-                    <span className="font-semibold">
-                      {Number(dateKey.slice(8, 10))}
-                    </span>
-                    {!unavailable && day.slots.some((s) => s.available) ? (
-                      <span className="size-1 rounded-full bg-brand-primary" />
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          <p className="text-body-sm text-text-tertiary">
-            {t("stepDateTime.localTimeNote")}
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          {!date ? (
-            <p className="text-body-sm text-text-secondary">
-              {t("stepDateTime.selectDatePrompt")}
-            </p>
-          ) : (
-            <>
-              <span className="text-body-sm font-semibold! text-text-primary">
-                {formatDateLong(date)}
-              </span>
-              {isLoading ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="size-4 animate-spin text-text-tertiary" />
-                </div>
-              ) : activeDay &&
-                activeDay.slots.filter((s) => s.available).length > 0 ? (
-                <div className="flex flex-col gap-2">
-                  {activeDay.slots
-                    .filter((s) => s.available)
-                    .map((slot) => (
-                      <button
-                        key={slot.time}
-                        type="button"
-                        onClick={() => onSelectTime(slot.time)}
-                        className={cn(
-                          "rounded-[var(--fg-radius-sm)] border py-2.5 text-body-md font-semibold!",
-                          time === slot.time
-                            ? "border-transparent bg-brand-primary text-text-on-brand"
-                            : "border-border-default bg-bg-surface text-text-primary",
-                        )}
-                      >
-                        {slot.time}
-                      </button>
-                    ))}
-                </div>
-              ) : (
-                <p className="text-body-sm text-text-secondary">
-                  {t("stepDateTime.noAvailability")}
+            {current === "date" ? (
+              <div className="flex flex-col gap-3">
+                <AvailabilityCalendar
+                  month={monthCursor}
+                  days={toCalendarDays(days, today)}
+                  selected={draft.date}
+                  loading={daysLoading}
+                  canGoBack={!atCurrentMonth}
+                  onMonthChange={(delta) =>
+                    setMonthCursor(
+                      (prev) =>
+                        new Date(
+                          prev.getFullYear(),
+                          prev.getMonth() + delta,
+                          1,
+                        ),
+                    )
+                  }
+                  onSelect={(date) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      date,
+                      time: prev.date === date ? prev.time : null,
+                    }))
+                  }
+                  emptyMessage={t("flow.noDaysThisMonth")}
+                />
+                {daysError ? (
+                  <p role="alert" className="text-body-sm text-danger">
+                    {t("flow.availabilityError")}
+                  </p>
+                ) : null}
+                <p className="text-meta text-text-tertiary">
+                  {t("stepDateTime.localTimeNote")}
                 </p>
+              </div>
+            ) : null}
+
+            {current === "time" ? (
+              <div className="flex flex-col gap-4">
+                {draft.date ? (
+                  <div className="flex items-center justify-between gap-3 rounded-[var(--fg-radius-md)] bg-bg-sunken px-4 py-3">
+                    <span className="text-body-sm font-semibold! text-text-primary">
+                      {formatDateLong(`${draft.date}T00:00:00.000Z`)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => goTo(1)}
+                      className="focus-ring rounded-[4px] text-body-sm font-semibold! text-text-link underline underline-offset-4"
+                    >
+                      {t("flow.changeDate")}
+                    </button>
+                  </div>
+                ) : null}
+                <TimeSlotGrid
+                  slots={slots}
+                  selected={draft.time}
+                  onSelect={(time) => update("time", time)}
+                  timezoneLabel={t("flow.timezone")}
+                  loading={daysLoading}
+                  emptyMessage={t("stepDateTime.noAvailability")}
+                />
+              </div>
+            ) : null}
+
+            {current === "location" ? (
+              <div className="flex flex-col gap-5">
+                {isModel ? <ModelSafetyNotice /> : null}
+                <ChoiceCardGroup
+                  legend={t("stepDetails.locationLabel")}
+                  hideLegend
+                >
+                  {(["PROVIDER", "CUSTOMER", "OUTDOOR"] as const).map(
+                    (type) => (
+                      <ChoiceCard
+                        key={type}
+                        name="locationType"
+                        value={type}
+                        selected={draft.locationType === type}
+                        onSelect={() => update("locationType", type)}
+                        title={locationLabel[type]}
+                        description={t(`flow.locationHints.${type}`)}
+                      />
+                    ),
+                  )}
+                </ChoiceCardGroup>
+                {draft.locationType === "CUSTOMER" ||
+                draft.locationType === "OUTDOOR" ? (
+                  <Input
+                    label={t("stepDetails.addressLabel")}
+                    value={draft.locationAddress}
+                    onChange={(e) => update("locationAddress", e.target.value)}
+                    placeholder={t("stepDetails.addressPlaceholder")}
+                  />
+                ) : null}
+                <Input
+                  label={t("stepDetails.numberOfPeopleLabel")}
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  placeholder={t("stepDetails.numberOfPeoplePlaceholder")}
+                  value={draft.numberOfPeople}
+                  onChange={(e) => update("numberOfPeople", e.target.value)}
+                />
+                {requesterCrewRole && parentBookingOptions.length > 0 ? (
+                  <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-4">
+                    <Checkbox
+                      checked={parentBookingId !== null}
+                      onCheckedChange={(checked) =>
+                        setParentBookingId(
+                          checked === true ? parentBookingOptions[0].id : null,
+                        )
+                      }
+                      label={t("stepDetails.attachToJob")}
+                    />
+                    {parentBookingId !== null ? (
+                      <NativeSelect
+                        label={t("stepDetails.clientJobLabel")}
+                        value={parentBookingId}
+                        onChange={(v) => setParentBookingId(v)}
+                        options={parentBookingOptions.map((option) => ({
+                          value: option.id,
+                          label: `${formatDayMonth(option.date)} ${option.startTime} — ${option.service?.name ?? t("stepDetails.customRequestOption")}`,
+                        }))}
+                      />
+                    ) : null}
+                  </div>
+                ) : null}
+                {isModel ? (
+                  <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-4">
+                    <span className="text-meta tracking-[0.12em] text-text-tertiary uppercase">
+                      {t("stepDetails.shootDetails")}
+                    </span>
+                    <NativeSelect
+                      label={t("stepDetails.shootTypeLabel")}
+                      value={draft.shootType}
+                      onChange={(v) => update("shootType", v)}
+                      options={SHOOT_TYPE_OPTION_KEYS.map((option) => ({
+                        value: option.value,
+                        label: t(option.key),
+                      }))}
+                    />
+                    <Input
+                      label={t("stepDetails.usageRightsLabel")}
+                      placeholder={t("stepDetails.usageRightsPlaceholder")}
+                      value={draft.usageRights}
+                      onChange={(e) => update("usageRights", e.target.value)}
+                    />
+                    <Textarea
+                      label={t("stepDetails.wardrobeLabel")}
+                      rows={2}
+                      value={draft.wardrobeNotes}
+                      onChange={(e) => update("wardrobeNotes", e.target.value)}
+                      placeholder={t("stepDetails.wardrobePlaceholder")}
+                    />
+                    <Checkbox
+                      checked={draft.muaProvided}
+                      onCheckedChange={(checked) =>
+                        update("muaProvided", checked === true)
+                      }
+                      label={t("stepDetails.muaProvidedLabel")}
+                    />
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {current === "notes" ? (
+              <div className="flex flex-col gap-5">
+                <Textarea
+                  label={t("stepDetails.notesLabel")}
+                  rows={4}
+                  maxLength={1000}
+                  showCount
+                  value={draft.notes}
+                  onChange={(e) => update("notes", e.target.value)}
+                  placeholder={t("stepDetails.notesPlaceholder")}
+                />
+                {/* Showing the look is faster and far less ambiguous than
+                    describing it. */}
+                <ReferenceMediaField
+                  purpose="booking"
+                  max={MAX_REFERENCE_MEDIA}
+                  value={draft.referenceMedia}
+                  onChange={(next) => update("referenceMedia", next)}
+                />
+                <Input
+                  label={t("stepDetails.contactPhoneLabel")}
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  value={draft.contactPhone}
+                  onChange={(e) => update("contactPhone", e.target.value)}
+                />
+              </div>
+            ) : null}
+
+            {current === "review" ? (
+              <div className="flex flex-col gap-5">
+                {/* The summary column is the review on a desktop; phones
+                    get it here, since the column sits below the fold. */}
+                <div className="lg:hidden">
+                  <BookingSummary
+                    provider={{
+                      name: providerName,
+                      avatarUrl: providerAvatar,
+                      rating: providerRating,
+                      reviewCount: providerReviewCount,
+                      verified: providerVerified,
+                    }}
+                    rows={summaryRows}
+                    total={total}
+                    totalNote={t("flow.totalNote")}
+                    responseNote={responseNote}
+                  />
+                </div>
+                {draft.notes ? (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-body-sm text-text-tertiary">
+                      {t("stepReview.notesLabel")}
+                    </span>
+                    <p className="text-body-md whitespace-pre-line text-text-primary">
+                      {draft.notes}
+                    </p>
+                  </div>
+                ) : null}
+                <div className="rounded-[var(--fg-radius-md)] bg-bg-sunken p-4 text-body-sm text-text-secondary">
+                  {t("stepReview.cancellationNotice")}
+                </div>
+                <Checkbox
+                  checked={draft.agreed}
+                  onCheckedChange={(checked) =>
+                    update("agreed", checked === true)
+                  }
+                  label={t.rich("stepReview.agreeTerms", { terms: termsChunk })}
+                />
+              </div>
+            ) : null}
+
+            {submitError ? (
+              <div
+                role="alert"
+                className="rounded-[var(--fg-radius-md)] bg-danger-bg p-3 text-body-sm text-danger"
+              >
+                {submitError}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-6">
+            {step === 0 ? (
+              <Button
+                variant="outline"
+                nativeButton={false}
+                render={<Link href={profileHref} />}
+              >
+                {t("flow.backToProfileShort")}
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => goTo(step - 1)}>
+                <ChevronLeft className="size-4" />
+                {t("back")}
+              </Button>
+            )}
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <span className="hidden text-meta text-text-tertiary sm:inline">
+                {missingHint ?? t("flow.keptNote")}
+              </span>
+              {step < REVIEW ? (
+                <Button
+                  variant="accent"
+                  size="lg"
+                  disabled={!canContinue}
+                  onClick={() => goTo(step + 1)}
+                >
+                  {t("continueBtn")}
+                  <ChevronRight className="size-4" />
+                </Button>
+              ) : (
+                <Button
+                  variant="accent"
+                  size="lg"
+                  disabled={!canContinue || submitting}
+                  onClick={onSubmit}
+                >
+                  {submitting ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : null}
+                  {t("submitBtn")}
+                </Button>
               )}
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StepDetails({
-  providerName,
-  locationType,
-  locationAddress,
-  numberOfPeople,
-  notes,
-  referenceMedia,
-  contactPhone,
-  isModel,
-  shootType,
-  usageRights,
-  wardrobeNotes,
-  muaProvided,
-  onChange,
-  parentBookingOptions,
-  parentBookingId,
-  onParentBookingChange,
-}: {
-  providerName: string;
-  locationType: LocationType | null;
-  locationAddress: string;
-  numberOfPeople: string;
-  notes: string;
-  referenceMedia: ReferenceMedia[];
-  contactPhone: string;
-  isModel?: boolean;
-  shootType: string;
-  usageRights: string;
-  wardrobeNotes: string;
-  muaProvided: boolean;
-  onChange: <K extends keyof Draft>(key: K, value: Draft[K]) => void;
-  parentBookingOptions: ParentBookingOption[];
-  parentBookingId: string | null;
-  onParentBookingChange: (id: string | null) => void;
-}) {
-  const t = useTranslations("publicPages.booking");
-  return (
-    <div className="flex flex-col gap-5">
-      <h2 className="text-heading-lg text-text-primary">
-        {t("stepDetails.heading", { providerName })}
-      </h2>
-
-      {isModel ? <ModelSafetyNotice /> : null}
-
-      {parentBookingOptions.length > 0 ? (
-        <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
-          <Checkbox
-            checked={parentBookingId !== null}
-            onCheckedChange={(checked) =>
-              onParentBookingChange(
-                checked === true ? parentBookingOptions[0].id : null,
-              )
-            }
-            label={t("stepDetails.attachToJob")}
-          />
-          {parentBookingId !== null ? (
-            <NativeSelect
-              label={t("stepDetails.clientJobLabel")}
-              value={parentBookingId}
-              onChange={(v) => onParentBookingChange(v)}
-              options={parentBookingOptions.map((option) => ({
-                value: option.id,
-                label: `${formatDayMonth(option.date)} ${option.startTime} — ${option.service?.name ?? t("stepDetails.customRequestOption")}`,
-              }))}
-            />
+            </div>
+          </div>
+          {missingHint ? (
+            <p className="mt-2 text-right text-meta text-text-tertiary sm:hidden">
+              {missingHint}
+            </p>
           ) : null}
         </div>
-      ) : null}
 
-      {isModel ? (
-        <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            {t("stepDetails.shootDetails")}
-          </span>
-          <NativeSelect
-            label={t("stepDetails.shootTypeLabel")}
-            value={shootType}
-            onChange={(v) => onChange("shootType", v)}
-            options={SHOOT_TYPE_OPTION_KEYS.map((option) => ({
-              value: option.value,
-              label: t(option.key),
-            }))}
+        <aside className="hidden lg:sticky lg:top-[96px] lg:block">
+          <BookingSummary
+            provider={{
+              name: providerName,
+              avatarUrl: providerAvatar,
+              rating: providerRating,
+              reviewCount: providerReviewCount,
+              verified: providerVerified,
+            }}
+            rows={summaryRows}
+            total={total}
+            totalNote={t("flow.totalNote")}
+            responseNote={responseNote}
           />
-          <Input
-            label={t("stepDetails.usageRightsLabel")}
-            placeholder={t("stepDetails.usageRightsPlaceholder")}
-            value={usageRights}
-            onChange={(e) => onChange("usageRights", e.target.value)}
-          />
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="booking-wizard-field-2"
-              className="text-body-sm font-semibold! text-text-primary"
-            >
-              {t("stepDetails.wardrobeLabel")}
-            </label>
-            <Textarea
-              id="booking-wizard-field-2"
-              rows={2}
-              value={wardrobeNotes}
-              onChange={(e) => onChange("wardrobeNotes", e.target.value)}
-              placeholder={t("stepDetails.wardrobePlaceholder")}
-            />
-          </div>
-          <Checkbox
-            checked={muaProvided}
-            onCheckedChange={(checked) =>
-              onChange("muaProvided", checked === true)
-            }
-            label={t("stepDetails.muaProvidedLabel")}
-          />
-        </div>
-      ) : null}
-
-      <div className="flex flex-col gap-2">
-        <span className="text-body-sm font-semibold! text-text-primary">
-          {t("stepDetails.locationLabel")}
-        </span>
-        <div className="flex flex-col gap-2">
-          <Radio
-            name="locationType"
-            checked={locationType === "PROVIDER"}
-            onChange={() => onChange("locationType", "PROVIDER")}
-            label={t("stepDetails.locationProvider")}
-          />
-          <Radio
-            name="locationType"
-            checked={locationType === "CUSTOMER"}
-            onChange={() => onChange("locationType", "CUSTOMER")}
-            label={t("stepDetails.locationCustomer")}
-          />
-          <Radio
-            name="locationType"
-            checked={locationType === "OUTDOOR"}
-            onChange={() => onChange("locationType", "OUTDOOR")}
-            label={t("stepDetails.locationOutdoor")}
-          />
-        </div>
+        </aside>
       </div>
-
-      {locationType === "CUSTOMER" || locationType === "OUTDOOR" ? (
-        <Input
-          label={t("stepDetails.addressLabel")}
-          value={locationAddress}
-          onChange={(e) => onChange("locationAddress", e.target.value)}
-          placeholder={t("stepDetails.addressPlaceholder")}
-        />
-      ) : null}
-
-      <Input
-        label={t("stepDetails.numberOfPeopleLabel")}
-        type="number"
-        inputMode="numeric"
-        min={1}
-        placeholder={t("stepDetails.numberOfPeoplePlaceholder")}
-        value={numberOfPeople}
-        onChange={(e) => onChange("numberOfPeople", e.target.value)}
-      />
-
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="booking-wizard-field-3"
-          className="text-body-sm font-semibold! text-text-primary"
-        >
-          {t("stepDetails.notesLabel")}
-        </label>
-        <Textarea
-          id="booking-wizard-field-3"
-          rows={4}
-          maxLength={1000}
-          value={notes}
-          onChange={(e) => onChange("notes", e.target.value)}
-          placeholder={t("stepDetails.notesPlaceholder")}
-        />
-      </div>
-
-      {/* Directly under the notes, whose placeholder already asks for
-          "phong cách tham khảo" — showing the look is faster and far less
-          ambiguous than describing it. */}
-      <ReferenceMediaField
-        purpose="booking"
-        max={MAX_REFERENCE_MEDIA}
-        value={referenceMedia}
-        onChange={(next) => onChange("referenceMedia", next)}
-      />
-
-      <Input
-        label={t("stepDetails.contactPhoneLabel")}
-        type="tel"
-        autoComplete="tel"
-        required
-        value={contactPhone}
-        onChange={(e) => onChange("contactPhone", e.target.value)}
-      />
-    </div>
-  );
-}
-
-function getLocationLabel(
-  t: ReturnType<typeof useTranslations>,
-): Record<LocationType, string> {
-  return {
-    PROVIDER: t("stepDetails.locationProvider"),
-    CUSTOMER: t("stepDetails.locationCustomer"),
-    OUTDOOR: t("stepDetails.locationOutdoor"),
-  };
-}
-
-// Every label/value line in the review card goes through this, so they can't
-// drift apart again. The rows used to be written inline twice with different
-// type: the detail rows as small-grey label + medium-semibold value, the
-// price rows as medium-secondary label + medium-regular value.
-//
-// Two flex bugs went with that. The label had no `shrink-0`, so a long value
-// squeezed it until it broke across lines — "Địa điểm" rendered as "Địa" /
-// "điểm". And the value had no `text-right`, so the moment it wrapped its
-// lines aligned left while every single-line value above stayed right,
-// breaking the column. `items-baseline` sits the two different type sizes on
-// the same line rather than on their box tops.
-function ReviewRow({
-  label,
-  value,
-  total = false,
-}: {
-  label: string;
-  value: string;
-  total?: boolean;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 py-2.5">
-      <span
-        className={cn(
-          "shrink-0",
-          total
-            ? "text-heading-md font-bold! text-text-primary"
-            : "text-body-sm text-text-tertiary",
-        )}
-      >
-        {label}
-      </span>
-      <span
-        className={cn(
-          "min-w-0 text-right break-words text-text-primary",
-          total ? "text-heading-md font-bold!" : "text-body-md font-semibold!",
-        )}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function StepReview({
-  providerName,
-  providerAvatar,
-  service,
-  customRequest,
-  date,
-  time,
-  locationType,
-  locationAddress,
-  numberOfPeople,
-  notes,
-  agreed,
-  onAgree,
-}: {
-  providerName: string;
-  providerAvatar: string | null;
-  service: ServiceOption | null;
-  customRequest: string;
-  date: string | null;
-  time: string | null;
-  locationType: LocationType | null;
-  locationAddress: string;
-  numberOfPeople: string;
-  notes: string;
-  agreed: boolean;
-  onAgree: (v: boolean) => void;
-}) {
-  const t = useTranslations("publicPages.booking");
-  const locationLabel = getLocationLabel(t);
-  const rows: [string, string][] = [
-    [
-      t("stepReview.rowService"),
-      service?.name ??
-        (customRequest ? t("stepDetails.customRequestOption") : "—"),
-    ],
-    [t("stepReview.rowDate"), date ? formatDateLong(date) : "—"],
-    [t("stepReview.rowTime"), time ?? "—"],
-    // Was a hard-coded "—" on every booking, which read as missing data.
-    ...(service?.duration
-      ? ([
-          [
-            t("stepReview.rowDuration"),
-            t("stepReview.durationValue", {
-              hours: formatDurationHours(service.duration),
-            }),
-          ],
-        ] as [string, string][])
-      : []),
-    [
-      t("stepReview.rowLocation"),
-      locationType === "PROVIDER"
-        ? locationLabel.PROVIDER
-        : locationAddress || (locationType ? locationLabel[locationType] : "—"),
-    ],
-    [t("stepReview.rowPeople"), numberOfPeople || "1"],
-  ];
-
-  return (
-    <div className="flex flex-col gap-5">
-      <h2 className="text-heading-lg text-text-primary">
-        {t("stepReview.heading")}
-      </h2>
-
-      <div className="flex items-center gap-3">
-        <Avatar className="size-10">
-          {providerAvatar ? <AvatarImage src={providerAvatar} alt="" /> : null}
-          <AvatarFallback>{providerName[0]?.toUpperCase()}</AvatarFallback>
-        </Avatar>
-        <span className="text-body-md font-semibold! text-text-primary">
-          {providerName}
-        </span>
-      </div>
-
-      <div className="flex flex-col divide-y divide-border-subtle border-y border-border-subtle">
-        {rows.map(([label, value]) => (
-          <ReviewRow key={label} label={label} value={value} />
-        ))}
-      </div>
-
-      {service ? (
-        <div className="flex flex-col divide-y divide-border-subtle border-b border-border-subtle">
-          <ReviewRow
-            label={t("stepReview.servicePrice")}
-            value={formatCurrency(service.price, service.currency)}
-          />
-          <ReviewRow
-            label={t("stepReview.total")}
-            value={formatCurrency(service.price, service.currency)}
-            total
-          />
-        </div>
-      ) : null}
-
-      {notes ? (
-        <div className="flex flex-col gap-1">
-          <span className="text-body-sm text-text-tertiary">
-            {t("stepReview.notesLabel")}
-          </span>
-          <p className="text-body-md text-text-primary">{notes}</p>
-        </div>
-      ) : null}
-
-      <div className="rounded-[var(--fg-radius-md)] bg-bg-sunken p-4 text-body-sm text-text-secondary">
-        {t("stepReview.cancellationNotice")}
-      </div>
-
-      <Checkbox
-        checked={agreed}
-        onCheckedChange={(checked) => onAgree(checked === true)}
-        label={t.rich("stepReview.agreeTerms", { terms: termsChunk })}
-      />
     </div>
   );
 }
