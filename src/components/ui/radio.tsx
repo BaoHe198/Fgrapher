@@ -29,7 +29,7 @@ function Radio({
         type="radio"
         checked={checked}
         disabled={disabled}
-        className="peer absolute inset-0 m-0 size-full cursor-pointer appearance-none rounded-full border border-border-default bg-bg-surface outline-none transition-[border-color,box-shadow] hover:border-brand-primary hover:shadow-[0_0_0_3px_var(--color-success-bg)] checked:border-brand-primary focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="peer absolute inset-0 m-0 size-full cursor-pointer appearance-none rounded-full border border-border-strong bg-bg-surface outline-none transition-[border-color,box-shadow] hover:border-brand-primary hover:shadow-[0_0_0_3px_var(--color-success-bg)] checked:border-brand-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:opacity-50"
         {...props}
       />
       <span

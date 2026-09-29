@@ -18,7 +18,7 @@ export default async function OnboardingRolesPage() {
           <h1 className="text-display-md text-balance text-text-primary">
             How will you use Fgrapher?
           </h1>
-          <p className="mx-auto max-w-lg text-muted-foreground">
+          <p className="mx-auto max-w-lg text-text-secondary">
             Pick every role that fits — you can always add more later. Customer
             is included by default so you can always book and browse.
           </p>

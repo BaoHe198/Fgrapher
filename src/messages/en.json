@@ -515,7 +515,8 @@
       "perMonth": "/mo",
       "selectRole": "Select {role}",
       "genericError": "Something went wrong. Please try again.",
-      "continueButton": "Continue"
+      "continueButton": "Continue",
+      "groupLegend": "Your roles"
     },
     "dialog": {
       "closeSr": "Close",
@@ -540,6 +541,51 @@
     "dateField": {
       "openPicker": "Pick a date from the calendar",
       "placeholder": "dd/mm/yyyy"
+    },
+    "availabilityCalendar": {
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "offShort": "Off",
+      "status": {
+        "available": "available",
+        "full": "fully booked",
+        "off": "day off",
+        "past": "past"
+      },
+      "legend": {
+        "available": "Available",
+        "full": "Fully booked",
+        "off": "Artist's day off"
+      }
+    },
+    "timeSlotGrid": {
+      "goldenLegend": "Golden hour: soft light near sunrise and sunset",
+      "golden": "Golden hour",
+      "booked": "Booked",
+      "taken": "Just booked",
+      "empty": "No free slots left on this day. Please pick another day.",
+      "period": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening"
+      }
+    },
+    "bookingSummary": {
+      "label": "Booking request summary",
+      "verified": "Verified",
+      "notChosen": "Not chosen",
+      "edit": "Edit",
+      "editRow": "Edit {row}",
+      "total": "Estimated total",
+      "quoteLater": "Quote later",
+      "noOnlinePayment": "No online payment",
+      "noOnlinePaymentDetail": "— agree the deposit directly with the artist."
+    },
+    "stepProgress": {
+      "label": "Booking progress"
+    },
+    "sectionNav": {
+      "label": "Sections on this page"
     }
   },
   "accountFlows": {

@@ -20,6 +20,7 @@ import { ReferenceMediaGallery } from "@/components/media/reference-media-galler
 import { ReviewModal } from "@/components/modals/review-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { BookingStatusBadge } from "@/components/booking/booking-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -74,19 +75,6 @@ type BookingDetail = Booking & {
   // Anti-spam/safety (Prompt B7, VIỆC 4).
   isFirstBookingBetweenParties: boolean;
   providerZaloUrl: string | null;
-};
-
-const STATUS_VARIANT: Record<
-  BookingStatus,
-  "warning" | "success" | "neutral" | "destructive"
-> = {
-  PENDING: "warning",
-  CONFIRMED: "success",
-  COMPLETED: "neutral",
-  CANCELLED: "destructive",
-  DECLINED: "destructive",
-  NO_SHOW: "destructive",
-  EXPIRED: "neutral",
 };
 
 const DECLINE_REASON_VALUES = [
@@ -219,7 +207,6 @@ export default function BookingDetailPage() {
 
   const viewerIsProvider = session?.user?.id === booking.provider.id;
   const otherParty = viewerIsProvider ? booking.customer : booking.provider;
-  const statusVariant = STATUS_VARIANT[booking.status];
   const isPast = new Date(booking.date).getTime() < now;
   const withinCancellationWindow =
     new Date(booking.date).getTime() - now < MIN_NOTICE_HOURS * 60 * 60 * 1000;
@@ -238,9 +225,7 @@ export default function BookingDetailPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-display-md text-text-primary">{t("title")}</h1>
-        <Badge variant={statusVariant}>
-          {tBookings(`status.${booking.status}`)}
-        </Badge>
+        <BookingStatusBadge status={booking.status} />
         <span className="text-body-sm text-text-tertiary">
           {t("idRequested", {
             id: booking.id.slice(-8),

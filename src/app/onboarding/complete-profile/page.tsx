@@ -36,7 +36,7 @@ export default async function CompleteProfilePage() {
           <h1 className="text-display-md text-balance text-text-primary">
             Hoàn tất hồ sơ
           </h1>
-          <p className="mx-auto max-w-sm text-muted-foreground">
+          <p className="mx-auto max-w-sm text-text-secondary">
             Chỉ còn một bước nữa trước khi bạn có thể dùng Fgrapher — chúng tôi
             cần xác nhận ngày sinh và sự đồng ý xử lý dữ liệu cá nhân của bạn.
           </p>

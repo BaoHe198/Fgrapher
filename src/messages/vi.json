@@ -515,7 +515,8 @@
       "perMonth": "/tháng",
       "selectRole": "Chọn {role}",
       "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
-      "continueButton": "Tiếp tục"
+      "continueButton": "Tiếp tục",
+      "groupLegend": "Vai trò của bạn"
     },
     "dialog": {
       "closeSr": "Đóng",
@@ -540,6 +541,51 @@
     "dateField": {
       "openPicker": "Chọn ngày từ lịch",
       "placeholder": "dd/mm/yyyy"
+    },
+    "availabilityCalendar": {
+      "previousMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "offShort": "Nghỉ",
+      "status": {
+        "available": "còn trống",
+        "full": "đã kín",
+        "off": "nghỉ",
+        "past": "đã qua"
+      },
+      "legend": {
+        "available": "Còn trống",
+        "full": "Đã kín",
+        "off": "Nghệ sĩ nghỉ"
+      }
+    },
+    "timeSlotGrid": {
+      "goldenLegend": "Giờ vàng: ánh sáng đẹp gần lúc mặt trời mọc và lặn",
+      "golden": "Giờ vàng",
+      "booked": "Đã đặt",
+      "taken": "Vừa có người đặt",
+      "empty": "Ngày này không còn khung giờ trống. Hãy chọn ngày khác.",
+      "period": {
+        "morning": "Sáng",
+        "afternoon": "Chiều",
+        "evening": "Tối"
+      }
+    },
+    "bookingSummary": {
+      "label": "Tóm tắt yêu cầu đặt lịch",
+      "verified": "Đã xác minh",
+      "notChosen": "Chưa chọn",
+      "edit": "Sửa",
+      "editRow": "Sửa {row}",
+      "total": "Tổng dự kiến",
+      "quoteLater": "Báo giá sau",
+      "noOnlinePayment": "Chưa thanh toán trực tuyến",
+      "noOnlinePaymentDetail": "— đặt cọc thỏa thuận trực tiếp với nghệ sĩ."
+    },
+    "stepProgress": {
+      "label": "Tiến trình đặt lịch"
+    },
+    "sectionNav": {
+      "label": "Các mục trong trang"
     }
   },
   "accountFlows": {

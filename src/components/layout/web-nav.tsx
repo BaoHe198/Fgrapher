@@ -234,7 +234,7 @@ function UserMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-gold-500/20">
+      <DropdownMenuTrigger className="rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus">
         <Avatar className="size-[34px]">
           {session?.user?.avatar ? (
             <AvatarImage

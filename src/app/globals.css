@@ -98,6 +98,7 @@
   --color-neutral-900: var(--neutral-900);
   --color-neutral-950: var(--neutral-950);
   --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
   --color-brand-accent: var(--brand-accent);
   --color-bg-page: var(--bg-page);
   --color-bg-surface: var(--bg-surface);
@@ -121,6 +122,11 @@
   --color-danger-bg: var(--danger-bg);
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
+  --color-scrim: var(--fg-scrim);
+  --color-surface-raised: var(--surface-raised);
+  --ease-fg-out: var(--fg-ease-out);
+  --ease-fg-in: var(--fg-ease-in);
+  --ease-fg-in-out: var(--fg-ease-in-out);
 }
 
 :root {
@@ -200,6 +206,9 @@
   --neutral-900: hsl(30 15% 11%);
   --neutral-950: hsl(30 18% 7%);
   --brand-primary: hsl(168 58% 15%);
+  /* Primary hover shifts the fill, not its opacity: opacity muddied the
+     colour in dark mode (audit §05). */
+  --brand-primary-hover: hsl(168 55% 20%);
   --brand-accent: hsl(38 46% 60%);
   --bg-page: hsl(30 20% 98%);
   --bg-surface: #ffffff;
@@ -273,6 +282,9 @@
      compressed step in the scale (weight 600), so it stays visually
      distinct from --text-caption above at the same size. */
   --text-caption-upper: 600 0.875rem/1.4 var(--font-body);
+  /* Redesign 09/2026: the one step under 14px - counts, ratings, frame
+     numbers beside a card title ("48 ảnh · 4,9★"). Nothing goes below it. */
+  --text-meta: 500 0.75rem/1.45 var(--font-body);
 
   /* Fgrapher brand — radius (theme-invariant). --radius-sm/md/lg/xl are
      shadcn EXISTING radius scale (used by every current component) —
@@ -290,6 +302,31 @@
   --shadow-md: 0 4px 14px rgba(18, 16, 10, 0.08);
   --shadow-lg: 0 14px 36px rgba(18, 16, 10, 0.14);
   --shadow-focus: 0 0 0 3px hsl(38 44% 52% / 0.35);
+
+  /* Redesign 09/2026 (docs/design-reference/redesign-2026-09, system audit
+     §03). Five durations and three curves replace the 22 durations and 5
+     curves the screens had grown. 400 is the ceiling; the skeleton pulse is
+     the only thing allowed to run longer, because it signals loading. */
+  --fg-dur-150: 150ms; /* colour, border */
+  --fg-dur-200: 200ms; /* press, map marker */
+  --fg-dur-260: 260ms; /* card, step, tab */
+  --fg-dur-320: 320ms; /* sheet, page */
+  --fg-dur-400: 400ms; /* photo develop */
+  --fg-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1); /* entering, lifting */
+  --fg-ease-in: cubic-bezier(0.4, 0, 1, 1); /* closing, leaving */
+  --fg-ease-in-out: cubic-bezier(0.45, 0, 0.25, 1); /* dragging, sliding */
+
+  /* The one overlay under text laid on a photo (audit §04). */
+  --fg-scrim: hsl(168 62% 7% / 0.64);
+  /* Behind a dialog or sheet: the scrim's hue, lighter, so the page stays
+     readable as context. */
+  --fg-backdrop: hsl(168 62% 7% / 0.32);
+  /* A menu opened on top of a sheet or dialog. Same as surface-card in
+     light mode (the shadow separates them); one step lighter in dark,
+     where shadows barely show. */
+  --surface-raised: #ffffff;
+  /* Hairline inside a photo so it does not glow on a dark page. */
+  --fg-image-ring: hsl(0 0% 0% / 0.06);
 }
 
 .dark {
@@ -349,6 +386,7 @@
   --neutral-900: hsl(30 15% 95%);
   --neutral-950: hsl(30 18% 98%);
   --brand-primary: hsl(168 38% 50%);
+  --brand-primary-hover: hsl(168 38% 58%);
   --brand-accent: hsl(38 46% 60%);
   --bg-page: hsl(30 10% 7%);
   --bg-surface: hsl(30 9% 11%);
@@ -375,6 +413,8 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.55);
+  --fg-image-ring: hsl(0 0% 100% / 0.06);
+  --surface-raised: hsl(30 9% 16%);
 }
 
 /*
@@ -441,6 +481,9 @@
 }
 @utility text-caption-upper {
   font: var(--text-caption-upper);
+}
+@utility text-meta {
+  font: var(--text-meta);
 }
 
 @layer base {
@@ -525,25 +568,117 @@
   }
 }
 
-/* The landing hero's contact sheet (components/sections/hero-contact-sheet.tsx).
-   A photograph coming up in a developing tray: it arrives flat and
-   desaturated and lifts to full contrast, rather than sliding in from an
-   edge. Frames stagger via an inline animation-delay so the sheet
-   develops one frame at a time. Neutralised by the
-   prefers-reduced-motion rule at the bottom of this file. */
+/* Photo develop (audit §03): the one entrance a photograph makes anywhere
+   in the app - hero contact sheet, FgImage, portfolio grids. It arrives
+   soft and desaturated and comes up to full colour, like a print in a
+   developing tray. Only photos develop; text and buttons appear at once, so
+   the effect stays a signature rather than decoration. Stagger with an
+   inline animation-delay (60ms steps, at most six photos). Neutralised by
+   the prefers-reduced-motion rule at the bottom of this file. */
 @keyframes fg-develop {
   from {
     opacity: 0;
-    filter: saturate(0.35) contrast(0.85);
+    filter: blur(6px) saturate(0.3);
   }
   to {
     opacity: 1;
-    filter: saturate(1) contrast(1);
+    filter: blur(0) saturate(1);
   }
 }
 
 @utility animate-develop {
-  animation: fg-develop 900ms ease-out both;
+  animation: fg-develop var(--fg-dur-400) var(--fg-ease-out) both;
+}
+
+/* Section headings only, once, as they scroll in: fade + rise 12px. */
+@keyframes fg-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise {
+  animation: fg-rise var(--fg-dur-320) var(--fg-ease-out) both;
+}
+
+/* Page entrance: fade + up 8px. */
+@keyframes fg-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-page-in {
+  animation: fg-page-in var(--fg-dur-260) var(--fg-ease-out) both;
+}
+
+/* Step / tab change: slide 12px in the direction of travel + fade. */
+@keyframes fg-step-next {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fg-step-back {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@utility animate-step-next {
+  animation: fg-step-next var(--fg-dur-260) var(--fg-ease-out) both;
+}
+
+@utility animate-step-back {
+  animation: fg-step-back var(--fg-dur-260) var(--fg-ease-out) both;
+}
+
+/* Skeleton: an opacity pulse on a 1.2s loop - the one animation allowed
+   past 400ms, because it is a loading indicator. Static under reduced
+   motion. */
+@keyframes fg-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@utility animate-fg-pulse {
+  animation: fg-pulse 1.2s ease-in-out infinite;
+}
+
+/* Focus rule (audit §02): always a 2px gold ring, 2px out, on
+   --border-focus. Hand-built controls (calendar days, time slots, choice
+   cards) use this so none of them drops the outline without a
+   replacement. */
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
 }
 
 /* Provider-card carousel. Incoming and outgoing media overlap during the

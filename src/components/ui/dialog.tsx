@@ -32,7 +32,7 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 bg-[var(--fg-backdrop)] duration-[var(--fg-dur-260)] supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className,
       )}
       {...props}
@@ -56,7 +56,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card p-5 text-body-sm text-text-primary shadow-[var(--shadow-lg)] duration-[var(--fg-dur-260)] ease-fg-out outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-[0.98] data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-[0.98] data-closed:duration-[var(--fg-dur-200)] data-closed:ease-fg-in",
           className,
         )}
         {...props}
@@ -106,7 +106,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 sm:flex-row sm:justify-end",
+        "-mx-5 -mb-5 flex flex-col-reverse gap-2 rounded-b-[var(--fg-radius-xl)] border-t border-border-subtle bg-bg-sunken p-4 sm:flex-row sm:justify-end",
         className,
       )}
       {...props}
@@ -129,7 +129,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
         // pr-8 clears the absolutely-positioned close button, and
         // leading-snug keeps a title that wraps on a phone from stacking
         // its lines on top of each other ("…thế nào?×", 24/09 audit).
-        "font-heading pr-8 text-base leading-snug font-medium",
+        "pr-8 text-heading-md text-text-primary",
         className,
       )}
       {...props}
@@ -145,7 +145,7 @@ function DialogDescription({
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn(
-        "text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+        "text-body-sm text-text-secondary *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-text-primary",
         className,
       )}
       {...props}

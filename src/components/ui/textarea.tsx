@@ -1,17 +1,114 @@
+"use client";
+
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
-  return (
+import { fieldControlClass } from "./field-control";
+
+// Same control styling as Input (field-control.ts) and the same optional
+// label/error wrapper, plus a hint line and an opt-in character counter
+// (`showCount` with `maxLength`). Without label/error/hint/showCount it
+// renders the bare <textarea>, so existing call sites that compose their own
+// label keep their layout.
+interface TextareaProps extends React.ComponentProps<"textarea"> {
+  label?: string;
+  error?: string;
+  hint?: string;
+  showCount?: boolean;
+}
+
+function Textarea({
+  className,
+  label,
+  error,
+  hint,
+  showCount = false,
+  id,
+  maxLength,
+  onChange,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
+  ...props
+}: TextareaProps) {
+  const generatedId = React.useId();
+  const textareaId = id ?? generatedId;
+  const hintId = `${textareaId}-hint`;
+  const errorId = `${textareaId}-error`;
+
+  const initialLength = String(props.value ?? props.defaultValue ?? "").length;
+  const [uncontrolledLength, setUncontrolledLength] =
+    React.useState(initialLength);
+  const length =
+    props.value !== undefined ? String(props.value).length : uncontrolledLength;
+  const counting = showCount && maxLength !== undefined;
+
+  const describedBy =
+    [ariaDescribedBy, hint ? hintId : null, error ? errorId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+
+  const textarea = (
     <textarea
+      id={textareaId}
       data-slot="textarea"
+      maxLength={maxLength}
+      aria-invalid={ariaInvalid ?? Boolean(error)}
+      aria-describedby={describedBy}
+      onChange={(event) => {
+        if (counting) setUncontrolledLength(event.target.value.length);
+        onChange?.(event);
+      }}
       className={cn(
-        "flex field-sizing-content min-h-16 w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-base transition-[border-color,box-shadow,background-color] outline-none placeholder:text-muted-foreground hover:border-border-strong focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        fieldControlClass,
+        "flex field-sizing-content min-h-20",
         className,
       )}
       {...props}
     />
+  );
+
+  if (!label && !error && !hint && !counting) return textarea;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {label ? (
+        <label
+          htmlFor={textareaId}
+          className="text-body-sm font-semibold! text-text-primary"
+        >
+          {label}
+        </label>
+      ) : null}
+      {textarea}
+      {hint || error || counting ? (
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            {error ? (
+              <p id={errorId} className="text-body-sm text-danger">
+                {error}
+              </p>
+            ) : null}
+            {hint ? (
+              <p id={hintId} className="text-body-sm text-text-tertiary">
+                {hint}
+              </p>
+            ) : null}
+          </div>
+          {counting ? (
+            <span
+              aria-live="polite"
+              className={cn(
+                "shrink-0 text-meta tabular-nums text-text-tertiary",
+                length >= maxLength && "text-danger",
+              )}
+            >
+              {length}/{maxLength}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
   );
 }
 

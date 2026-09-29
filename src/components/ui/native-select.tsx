@@ -5,6 +5,8 @@ import { ChevronDownIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+import { fieldControlClass } from "./field-control";
+
 type NativeSelectOption = string | { value: string; label: string };
 
 interface NativeSelectProps extends Omit<
@@ -40,7 +42,8 @@ function NativeSelect({
         onChange={(event) => onChange?.(event.target.value)}
         aria-invalid={ariaInvalid ?? Boolean(error)}
         className={cn(
-          "h-auto w-full min-w-0 cursor-pointer appearance-none rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 pr-10 text-body-md text-text-primary outline-none transition-[border-color,box-shadow,background-color] hover:border-border-strong hover:bg-bg-sunken focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger",
+          fieldControlClass,
+          "cursor-pointer appearance-none pr-10 hover:bg-bg-sunken",
           className,
         )}
         {...props}

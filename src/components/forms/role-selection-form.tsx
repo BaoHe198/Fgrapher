@@ -19,10 +19,9 @@ import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { ChoiceCard, ChoiceCardGroup } from "@/components/ui/choice-card";
 import { PAID_ROLES, SHOP_ROLES } from "@/lib/constants";
-import { cn, formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 interface RoleOption {
   role: Role;
@@ -107,77 +106,47 @@ export function RoleSelectionForm({
         </Alert>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ChoiceCardGroup
+        legend={t("groupLegend")}
+        hideLegend
+        className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      >
         {roleOptions.map(({ role, key, icon: Icon }) => {
           const isSelected = selected.has(role);
           const isCustomer = role === "CUSTOMER";
           const paid = isPaidRole(role);
           const price = rolePrices[role];
-          const label = t(`roles.${key}.label`);
-          const description = t(`roles.${key}.description`);
 
           return (
-            <Card
+            <ChoiceCard
               key={role}
-              role="button"
-              tabIndex={isCustomer ? -1 : 0}
-              aria-pressed={isSelected}
-              onClick={() => toggleRole(role)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  toggleRole(role);
-                }
-              }}
-              className={cn(
-                "cursor-pointer p-5 transition-all hover:shadow-md hover:ring-primary/40",
-                isSelected && "ring-2 ring-primary",
-                isCustomer &&
-                  "cursor-default opacity-90 hover:shadow-none hover:ring-foreground/10",
-              )}
+              name="roles"
+              value={role}
+              mode="multiple"
+              selected={isSelected}
+              disabled={isCustomer}
+              onSelect={() => toggleRole(role)}
+              icon={<Icon />}
+              title={t(`roles.${key}.label`)}
+              description={t(`roles.${key}.description`)}
             >
-              <div className="flex items-start justify-between">
-                <div
-                  className={cn(
-                    "flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary",
-                    isSelected && "bg-primary text-primary-foreground",
-                  )}
-                >
-                  <Icon className="size-5" />
-                </div>
-                <Checkbox
-                  checked={isSelected}
-                  disabled={isCustomer}
-                  aria-label={t("selectRole", { role: label })}
-                  onCheckedChange={() => toggleRole(role)}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-
-              <div className="mt-4 space-y-1">
-                <h3 className="font-medium">{label}</h3>
-                <p className="text-sm text-muted-foreground">{description}</p>
-              </div>
-
-              <div className="mt-4 flex items-center gap-2">
-                {isCustomer ? (
-                  <Badge variant="secondary">{t("defaultBadge")}</Badge>
-                ) : (
-                  <Badge variant="outline">
-                    {t("subscriptionRequiredBadge")}
-                  </Badge>
-                )}
-                {paid && isSelected && price ? (
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {formatCurrency(price, "VND")}
-                    {t("perMonth")}
-                  </span>
-                ) : null}
-              </div>
-            </Card>
+              {isCustomer ? (
+                <Badge variant="secondary">{t("defaultBadge")}</Badge>
+              ) : (
+                <Badge variant="outline">
+                  {t("subscriptionRequiredBadge")}
+                </Badge>
+              )}
+              {paid && isSelected && price ? (
+                <span className="font-mono text-body-sm text-text-secondary tabular-nums">
+                  {formatCurrency(price, "VND")}
+                  {t("perMonth")}
+                </span>
+              ) : null}
+            </ChoiceCard>
           );
         })}
-      </div>
+      </ChoiceCardGroup>
 
       <div className="flex justify-end">
         <Button size="lg" onClick={onContinue} disabled={isSubmitting}>

@@ -5,6 +5,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { MAX_VND_DIGITS } from "@/lib/validations/money";
 
+import { fieldControlClass } from "./field-control";
+
 // Value/onChange carry the raw digit string (e.g. "1000000"), matching what
 // callers store and eventually send to the API — this component only owns
 // the display formatting (thousands separators + "₫" suffix), never the
@@ -49,10 +51,7 @@ function CurrencyInput({
           onChange(e.target.value.replace(/\D/g, "").slice(0, MAX_VND_DIGITS))
         }
         aria-invalid={ariaInvalid ?? Boolean(error)}
-        className={cn(
-          "h-auto w-full min-w-0 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 pr-9 text-body-md text-text-primary outline-none transition-[border-color,box-shadow,background-color] placeholder:text-text-tertiary hover:border-border-strong focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger",
-          className,
-        )}
+        className={cn(fieldControlClass, "pr-9", className)}
         {...props}
       />
       <span className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-body-md text-text-tertiary">

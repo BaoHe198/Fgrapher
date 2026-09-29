@@ -1,6 +1,6 @@
 "use client";
 
-import type { Booking, BookingStatus, User } from "@prisma/client";
+import type { Booking, User } from "@prisma/client";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -14,6 +14,10 @@ import {
   useState,
 } from "react";
 
+import {
+  BOOKING_STATUS_TONE,
+  BookingStatusBadge,
+} from "@/components/booking/booking-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { WEEKDAY_SHORT_LABELS_VI } from "@/lib/constants";
@@ -27,29 +31,6 @@ type BookingRow = Booking & {
   customer: BookingParty;
   provider: BookingParty;
   service: { name: string } | null;
-};
-
-const STATUS_DOT: Record<BookingStatus, string> = {
-  PENDING: "bg-warning",
-  CONFIRMED: "bg-success",
-  COMPLETED: "bg-text-tertiary",
-  CANCELLED: "bg-danger",
-  DECLINED: "bg-danger",
-  NO_SHOW: "bg-danger",
-  EXPIRED: "bg-text-tertiary",
-};
-
-const STATUS_BADGE_VARIANT: Record<
-  BookingStatus,
-  "warning" | "success" | "neutral" | "destructive"
-> = {
-  PENDING: "warning",
-  CONFIRMED: "success",
-  COMPLETED: "neutral",
-  CANCELLED: "destructive",
-  DECLINED: "destructive",
-  NO_SHOW: "destructive",
-  EXPIRED: "neutral",
 };
 
 function monthKey(date: Date) {
@@ -380,7 +361,7 @@ export function CalendarClient({
                         <span
                           className={cn(
                             "size-1.5 shrink-0 rounded-full",
-                            STATUS_DOT[b.status],
+                            BOOKING_STATUS_TONE[b.status].dot,
                           )}
                         />
                         <span className="truncate">
@@ -446,9 +427,7 @@ export function CalendarClient({
                       {formatWeekdayDayMonth(b.date)} · {b.startTime}
                     </span>
                   </div>
-                  <Badge variant={STATUS_BADGE_VARIANT[b.status]}>
-                    {tBookings(`status.${b.status}`)}
-                  </Badge>
+                  <BookingStatusBadge status={b.status} />
                 </Link>
               ))}
             </>

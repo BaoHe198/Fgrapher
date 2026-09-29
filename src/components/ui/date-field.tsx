@@ -154,7 +154,7 @@ export function DateField({
           // The visible field is the one that carries the label, so this
           // button needs its own name for screen readers.
           aria-label={t("openPicker")}
-          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-[var(--fg-radius-md)] text-text-tertiary transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-gold-500/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-[var(--fg-radius-md)] text-text-tertiary transition-colors hover:text-text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:opacity-50"
         >
           <CalendarDays className="size-4" />
         </button>

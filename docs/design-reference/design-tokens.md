@@ -184,3 +184,45 @@ shadcn và token thương hiệu có một số tên dễ va nhau.
 - Không dùng chữ tertiary cho nội dung quan trọng nếu tương phản không đủ.
 - Không dùng shadow/radius tuỳ ý khiến các màn hình mất nhất quán.
 - So với UI Kit nhưng ưu tiên accessibility và trạng thái thật của component.
+
+## 9. Bộ quy tắc rà soát 09/2026
+
+Nguồn: `docs/design-reference/redesign-2026-09/templates/system-audit/`.
+
+**Chuyển động** — chỉ 5 thời lượng, 3 đường cong:
+
+| Token                                 | Dùng cho                                |
+| ------------------------------------- | --------------------------------------- |
+| `--fg-dur-150`                        | đổi màu, viền, nút                      |
+| `--fg-dur-200`                        | nhấn, marker bản đồ, đóng sheet         |
+| `--fg-dur-260`                        | thẻ, bước, tab, toast                   |
+| `--fg-dur-320`                        | mở sheet, chuyển trang, tiêu đề section |
+| `--fg-dur-400`                        | tráng ảnh (`animate-develop`)           |
+| `--fg-ease-out` / `ease-fg-out`       | mọi thứ đi vào, nhấc lên                |
+| `--fg-ease-in` / `ease-fg-in`         | đóng, rời trang                         |
+| `--fg-ease-in-out` / `ease-fg-in-out` | kéo thả, trượt vị trí, gạch chân tab    |
+
+Keyframe: `animate-develop` (chỉ ảnh), `animate-rise` (chỉ tiêu đề section),
+`animate-page-in`, `animate-step-next` / `animate-step-back`,
+`animate-fg-pulse` (skeleton, ngoại lệ duy nhất vượt 400ms).
+
+**Trạng thái**
+
+- Focus: vòng vàng 2px cách 2px (`focus-ring`, hoặc
+  `focus-visible:outline-2 outline-offset-2 outline-border-focus`).
+- Đang chọn: luôn `bg-brand-primary` + `text-text-on-brand`.
+- Hết chỗ là thông tin: gạch ngang hoặc viền đứt, giữ `text-text-tertiary`;
+  chỉ thứ thật sự bị khoá mới giảm opacity .5.
+- Hover: nút nhấc 1px, thẻ bấm được nhấc 2px; nhấn thu 0,98.
+
+**Token mới**: `--fg-scrim` (lớp phủ dưới chữ trên ảnh, `bg-scrim`),
+`--fg-backdrop` (nền sau dialog/sheet), `--fg-image-ring` (viền trong của
+ảnh), `--surface-raised` (menu mở trên sheet/dialog), `--brand-primary-hover`,
+`text-meta` (12px — cỡ nhỏ nhất được dùng). Ô nhập dùng `border-strong`
+(`src/components/ui/field-control.ts`) để viền đạt 3:1.
+
+**Component dùng chung mới**: `FgImage`, `ChoiceCard`/`ChoiceCardGroup`,
+`EmptyState`/`ErrorState`, `StickyActionBar`, `SectionNav`, `StepProgress`
+(trong `progress.tsx`) ở `src/components/ui/`; `AvailabilityCalendar`,
+`TimeSlotGrid`, `BookingSummary`, `BookingStatusBadge` ở
+`src/components/booking/`. Giờ vàng tính từ tọa độ trong `src/lib/sun.ts`.

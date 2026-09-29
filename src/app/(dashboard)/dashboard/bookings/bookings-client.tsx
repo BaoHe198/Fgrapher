@@ -1,6 +1,6 @@
 "use client";
 
-import type { Booking, BookingStatus, User } from "@prisma/client";
+import type { Booking, User } from "@prisma/client";
 import { Calendar, Loader2, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -13,7 +13,7 @@ import {
 } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { BookingStatusBadge } from "@/components/booking/booking-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -58,19 +58,6 @@ const TAB_VALUES: BookingTab[] = [
   "COMPLETED",
   "CANCELLED",
 ];
-
-const STATUS_VARIANT: Record<
-  BookingStatus,
-  "warning" | "success" | "neutral" | "destructive"
-> = {
-  PENDING: "warning",
-  CONFIRMED: "success",
-  COMPLETED: "neutral",
-  CANCELLED: "destructive",
-  DECLINED: "destructive",
-  NO_SHOW: "destructive",
-  EXPIRED: "neutral",
-};
 
 function formatWhen(date: string | Date, startTime: string) {
   return `${formatWeekdayDayMonth(date)} · ${startTime}`;
@@ -211,7 +198,6 @@ export function BookingsClient({
 
           {bookings.map((booking) => {
             const party = isCustomerOnly ? booking.provider : booking.customer;
-            const statusVariant = STATUS_VARIANT[booking.status];
             const isBusy = actionId === booking.id;
             // A confirmed shoot whose day is over stays "Confirmed" until the
             // provider says otherwise — and the only way to say so was a "…"
@@ -262,9 +248,7 @@ export function BookingsClient({
                     : "—"}
                 </span>
                 <div className="flex flex-col items-start gap-1">
-                  <Badge variant={statusVariant}>
-                    {t(`status.${booking.status}`)}
-                  </Badge>
+                  <BookingStatusBadge status={booking.status} />
                   {isOverdue ? (
                     <span className="text-body-sm text-warning">
                       {t("needsCompletion")}

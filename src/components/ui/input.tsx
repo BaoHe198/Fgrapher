@@ -3,6 +3,8 @@ import { Input as InputPrimitive } from "@base-ui/react/input";
 
 import { cn } from "@/lib/utils";
 
+import { fieldControlClass } from "./field-control";
+
 // React 19 forwards `ref` as a normal prop on function components — no
 // React.forwardRef wrapper needed for react-hook-form's register() to reach
 // the underlying <input>; already confirmed working end-to-end (phase-0
@@ -30,10 +32,7 @@ function Input({
       type={type}
       data-slot="input"
       aria-invalid={ariaInvalid ?? Boolean(error)}
-      className={cn(
-        "h-auto w-full min-w-0 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none transition-[border-color,box-shadow,background-color] placeholder:text-text-tertiary hover:border-border-strong focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger",
-        className,
-      )}
+      className={cn(fieldControlClass, className)}
       {...props}
     />
   );
