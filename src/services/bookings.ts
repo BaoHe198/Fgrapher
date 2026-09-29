@@ -8,6 +8,7 @@ import {
   PROVIDER_ROLES,
 } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { vietnamDateKey } from "@/lib/vietnam/date";
 import {
   UploadVerificationError,
   verifyReferenceMediaUpload,
@@ -157,24 +158,78 @@ export async function listBookings({
         ? { status: tab }
         : {};
 
-  const [bookings, total] = await Promise.all([
+  const [bookings, total, counts] = await Promise.all([
     db.booking.findMany({
       where: { ...where, ...statusFilter },
       orderBy: { date: "desc" },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
-      include: BOOKING_INCLUDE,
+      include: {
+        ...BOOKING_INCLUDE,
+        // "Viết đánh giá" on a completed shoot not yet reviewed.
+        review: { select: { id: true } },
+      },
     }),
     db.booking.count({ where: { ...where, ...statusFilter } }),
+    countBookingTabs(where),
   ]);
 
   return {
-    bookings: bookings.map((b) => redactContactInfo(b, userId)),
+    // The other party's email is in BOOKING_INCLUDE for notification
+    // mail, never for this list: strip it before it reaches the browser.
+    bookings: bookings.map((b) =>
+      redactContactInfo(
+        {
+          ...b,
+          customer: withoutEmail(b.customer),
+          provider: withoutEmail(b.provider),
+        },
+        userId,
+      ),
+    ),
     total,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+    counts,
   };
 }
+
+function withoutEmail<T extends { email?: unknown }>(
+  party: T,
+): Omit<T, "email"> {
+  const { email, ...rest } = party;
+  void email;
+  return rest;
+}
+
+/**
+ * Per-tab counts for "Lịch đặt của tôi" (redesign 09/2026), plus how many
+ * confirmed shoots are still ahead. CANCELLED groups declined and expired
+ * requests, the same way the tab itself does.
+ */
+async function countBookingTabs(
+  where: { providerId: string } | { customerId: string },
+) {
+  const today = new Date(`${vietnamDateKey()}T00:00:00.000Z`);
+  const [byStatus, upcoming] = await Promise.all([
+    db.booking.groupBy({ by: ["status"], where, _count: true }),
+    db.booking.count({
+      where: { ...where, status: "CONFIRMED", date: { gte: today } },
+    }),
+  ]);
+  const of = (status: BookingStatus) =>
+    byStatus.find((row) => row.status === status)?._count ?? 0;
+  return {
+    ALL: byStatus.reduce((sum, row) => sum + row._count, 0),
+    PENDING: of("PENDING"),
+    CONFIRMED: of("CONFIRMED"),
+    COMPLETED: of("COMPLETED"),
+    CANCELLED: of("CANCELLED") + of("DECLINED") + of("EXPIRED"),
+    upcoming,
+  };
+}
+
+export type BookingTabCounts = Awaited<ReturnType<typeof countBookingTabs>>;
 
 export async function listBookingsForRange({
   providerId,
@@ -195,8 +250,18 @@ export async function listBookingsForRange({
     include: BOOKING_INCLUDE,
   });
   // Only ever called with the viewing provider's own id (see the calendar
-  // route), so that's the viewer for redaction purposes too.
-  return bookings.map((b) => redactContactInfo(b, providerId));
+  // route), so that's the viewer for redaction purposes too. Emails are
+  // for notification mail only and are stripped, as in listBookings.
+  return bookings.map((b) =>
+    redactContactInfo(
+      {
+        ...b,
+        customer: withoutEmail(b.customer),
+        provider: withoutEmail(b.provider),
+      },
+      providerId,
+    ),
+  );
 }
 
 const VERIFIED_ROLE_SELECT = {

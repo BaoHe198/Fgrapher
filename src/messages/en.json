@@ -1798,7 +1798,9 @@
       },
       "empty": {
         "heading": "No bookings yet",
-        "body": "When clients book you, they'll appear here."
+        "body": "When clients book you, they'll appear here.",
+        "headingTab": "Nothing in this tab",
+        "bodyCustomer": "Find an artist and send a booking request — it will show up here."
       },
       "shareProfile": "Share your profile",
       "accept": "Accept",
@@ -1813,7 +1815,29 @@
       "pageOf": "Page {page} of {total}",
       "needsCompletion": "Shoot date has passed",
       "moreActions": "More actions",
-      "completeShort": "Complete"
+      "completeShort": "Complete",
+      "findArtists": "Find artists",
+      "summary": {
+        "pending": "{count} awaiting confirmation",
+        "upcoming": "{count} upcoming"
+      },
+      "card": {
+        "when": "When",
+        "where": "Where",
+        "respondByCustomer": "The artist replies by {time}, {date} · {hours} h left",
+        "respondByProvider": "Reply by {time}, {date} · {hours} h left",
+        "reviewPrompt": "How was the shoot? A review helps other customers choose.",
+        "writeReview": "Write a review",
+        "message": "Message",
+        "cancelRequest": "Cancel request",
+        "respondOverdue": "The reply deadline has passed — the request will expire."
+      },
+      "error": {
+        "title": "Couldn't load your bookings",
+        "body": "The connection dropped.",
+        "kept": "Requests you sent are safe; they just can't be shown right now.",
+        "retry": "Try again"
+      }
     },
     "portfolio": {
       "proOnly": {

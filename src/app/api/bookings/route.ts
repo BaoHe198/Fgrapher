@@ -47,6 +47,7 @@ export async function GET(request: Request) {
         total: result.total,
         page: result.page,
         totalPages: result.totalPages,
+        counts: result.counts,
       },
       { status: 200 },
     );

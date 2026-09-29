@@ -1798,7 +1798,9 @@
       },
       "empty": {
         "heading": "Chưa có lịch đặt nào",
-        "body": "Khi khách đặt lịch với bạn, lịch đặt sẽ hiện ở đây."
+        "body": "Khi khách đặt lịch với bạn, lịch đặt sẽ hiện ở đây.",
+        "headingTab": "Không có lịch đặt nào ở mục này",
+        "bodyCustomer": "Tìm nghệ sĩ và gửi yêu cầu đặt lịch — lịch đặt sẽ hiện ở đây."
       },
       "shareProfile": "Chia sẻ hồ sơ",
       "accept": "Chấp nhận",
@@ -1813,7 +1815,29 @@
       "pageOf": "Trang {page} / {total}",
       "needsCompletion": "Đã qua ngày chụp",
       "moreActions": "Thao tác khác",
-      "completeShort": "Hoàn tất"
+      "completeShort": "Hoàn tất",
+      "findArtists": "Tìm nghệ sĩ",
+      "summary": {
+        "pending": "{count} chờ xác nhận",
+        "upcoming": "{count} buổi sắp tới"
+      },
+      "card": {
+        "when": "Thời gian",
+        "where": "Địa điểm",
+        "respondByCustomer": "Nghệ sĩ phản hồi trước {time}, {date} · còn {hours} giờ",
+        "respondByProvider": "Hãy phản hồi trước {time}, {date} · còn {hours} giờ",
+        "reviewPrompt": "Buổi chụp thế nào? Đánh giá giúp khách khác chọn nghệ sĩ.",
+        "writeReview": "Viết đánh giá",
+        "message": "Nhắn tin",
+        "cancelRequest": "Hủy yêu cầu",
+        "respondOverdue": "Đã quá hạn phản hồi — yêu cầu sẽ tự hết hạn."
+      },
+      "error": {
+        "title": "Không tải được lịch đặt",
+        "body": "Kết nối bị gián đoạn.",
+        "kept": "Yêu cầu bạn đã gửi vẫn an toàn, chỉ là chưa hiển thị được.",
+        "retry": "Thử lại"
+      }
     },
     "portfolio": {
       "proOnly": {

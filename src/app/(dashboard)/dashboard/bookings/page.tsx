@@ -14,7 +14,7 @@ export default async function BookingsPage() {
 
   // Only the default "ALL" tab's first page is worth fetching server-side
   // — tab switches and pagination stay client-side fetches from here.
-  const { bookings, totalPages } = await listBookings({
+  const { bookings, totalPages, counts } = await listBookings({
     userId: session.user.id,
     isProvider: isProviderRoleSet(session.user.roles),
     tab: "ALL",
@@ -22,6 +22,10 @@ export default async function BookingsPage() {
   });
 
   return (
-    <BookingsClient initialBookings={bookings} initialTotalPages={totalPages} />
+    <BookingsClient
+      initialBookings={bookings}
+      initialTotalPages={totalPages}
+      initialCounts={counts}
+    />
   );
 }
