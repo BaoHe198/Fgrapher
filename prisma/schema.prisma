@@ -2,7 +2,7 @@
 // Fgrapher — Social media booking & marketplace for photography/videography
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   /// Lets a query with nested `include`s be fetched with LATERAL joins in ONE
   /// statement instead of one statement per relation level.
   ///
@@ -407,17 +407,17 @@ enum VerificationStatus {
 }
 
 model UserRole {
-  id        String   @id @default(cuid())
-  userId    String
-  role      Role
-  active    Boolean  @default(true)
+  id                     String           @id @default(cuid())
+  userId                 String
+  role                   Role
+  active                 Boolean          @default(true)
   /// Sits here rather than on Profile because KYC state
   /// (verificationStatus, below) is what depends on it. null = not declared;
   /// treated as INDIVIDUAL, which needs no paperwork beyond the ID card.
   legalEntityType        LegalEntityType?
   legalEntityConfirmedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
 
   // Identity verification — required for every provider role as of
   // Prompt B3 (docs/guides/fgrapher-danh-gia-va-prompt-sua-doi.md), not
@@ -434,29 +434,29 @@ model UserRole {
   // verifiedAt; verificationStatus/verifiedAt/verifiedBy/idNumberHash are
   // kept forever as the audit trail even after the images themselves are
   // purged.
-  verificationStatus          VerificationStatus @default(UNVERIFIED)
-  verificationIdUrl           String?
-  verificationIdPublicId      String?
-  verificationIdBackUrl       String?
-  verificationIdBackPublicId  String?
-  verificationSelfieUrl       String?
-  verificationSelfiePublicId  String?
+  verificationStatus              VerificationStatus @default(UNVERIFIED)
+  verificationIdUrl               String?
+  verificationIdPublicId          String?
+  verificationIdBackUrl           String?
+  verificationIdBackPublicId      String?
+  verificationSelfieUrl           String?
+  verificationSelfiePublicId      String?
   /// Business registration certificate, required only for a household
   /// business or a company (Luật TMĐT 122/2025). A freelance individual
   /// uploads nothing extra — see LegalEntityType. Purged on the same 90-day
   /// clock as the ID documents.
   verificationBusinessDocUrl      String?
   verificationBusinessDocPublicId String?
-  idNumberHash                String?
-  purgeAfter                  DateTime?
-  verifiedAt                  DateTime?
-  verifiedBy                  String? // admin userId
-  verificationRejectedReason  String?
+  idNumberHash                    String?
+  purgeAfter                      DateTime?
+  verifiedAt                      DateTime?
+  verifiedBy                      String? // admin userId
+  verificationRejectedReason      String?
   // Content policy acceptance (currently only collected at registration
   // for the MODEL role) — lives here rather than on Profile because
   // UserRole exists from the moment of registration; Profile rows are
   // only created later, lazily, when the user first edits their profile.
-  contentGuidelinesAcceptedAt DateTime?
+  contentGuidelinesAcceptedAt     DateTime?
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscription Subscription?
@@ -655,6 +655,9 @@ enum ProfileCategory {
   MUSIC_VIDEO
   CORPORATE
   REAL_ESTATE
+  // Kỷ yếu - school and class photos, a staple Vietnamese shoot type
+  // (redesign 09/2026 style browsing).
+  YEARBOOK
   // Makeup styles
   BRIDAL
   EDITORIAL
@@ -745,6 +748,21 @@ model Profile {
   // this flag instead controls whether the profile appears in every
   // province's search results (services/search.ts), not just its own.
   servesNationwide            Boolean          @default(false)
+  // Redesign 09/2026 (docs/design-reference/redesign-2026-09, profile).
+  // Self-reported by the provider in profile settings, shown on the public
+  // profile's stats row and "Đặt cọc / Hủy lịch / Đổi lịch" panel. All
+  // optional; a blank field is simply not shown. Deposits are agreed and
+  // paid directly with the provider - depositPercent is information for the
+  // customer, never charged through the platform (no online payment, see
+  // CLAUDE.md). Completed-shoot count and response time are computed from
+  // bookings and messages instead of stored (services/profile-stats.ts).
+  yearsExperience             Int?
+  depositPercent              Int?
+  depositPolicy               String?          @db.Text
+  cancellationPolicy          String?          @db.Text
+  reschedulePolicy            String?          @db.Text
+  // How far from its base the provider travels without extra charge (km).
+  serviceRadiusKm             Int?
   // Model-specific — all optional, self-reported, only used when role is
   // MODEL. Never displayed on the profile when unset (no placeholder
   // dashes — see docs/guides/fgrapher-prompts-batch-2.md §3a).
@@ -783,10 +801,10 @@ model Profile {
   createdAt                   DateTime         @default(now())
   updatedAt                   DateTime         @updatedAt
 
-  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  province     Province?            @relation(fields: [provinceId], references: [id])
-  ward         Ward?                @relation(fields: [wardId], references: [id])
-  categories   ProfileCategory[]
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  province      Province?         @relation(fields: [provinceId], references: [id])
+  ward          Ward?             @relation(fields: [wardId], references: [id])
+  categories    ProfileCategory[]
   /// Denormalised from Service.kind so search can filter on it without a
   /// join. Rewritten in the same transaction that writes a Service.
   serviceKinds  ServiceKind[]
@@ -1123,20 +1141,24 @@ enum ModerationStatus {
 // ============================================================================
 
 model Service {
-  id          String   @id @default(cuid())
-  profileId   String
+  id               String      @id @default(cuid())
+  profileId        String
   /// What this package is: a shoot, a film, venue hire, make-up. Required —
   /// validated against src/lib/constants/service-matrix.ts, which decides
   /// which kinds a given role may offer.
-  kind        ServiceKind
-  name        String
-  description String?  @db.Text
-  duration    Int // minutes
-  price       Float
-  currency    String   @default("VND")
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  kind             ServiceKind
+  name             String
+  description      String?     @db.Text
+  duration         Int // minutes
+  price            Float
+  // Redesign 09/2026: what the package delivers, for the package cards
+  // ("30 ảnh chỉnh sửa · giao sau 5 ngày"). Optional; blank hides the row.
+  editedPhotoCount Int?
+  deliveryDays     Int?
+  currency         String      @default("VND")
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   profile  Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
   bookings Booking[]
@@ -1144,8 +1166,6 @@ model Service {
   @@index([profileId])
   @@map("services")
 }
-
-
 
 enum BookingStatus {
   PENDING

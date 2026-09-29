@@ -20,9 +20,12 @@ as part of the incident procedure in `docs/MIGRATIONS.md` §4.
    columns the deployed code expects.
 3. Run the script against the target database.
 4. Tell Prisma the migration is no longer applied so a later
-   `migrate deploy` re-runs it:
-   `npx prisma migrate resolve --rolled-back <migration_name>`.
-   Never hand-edit `_prisma_migrations`.
+   `migrate deploy` re-runs it. `npx prisma migrate resolve --rolled-back
+<migration_name>` only accepts a migration that _failed_ (a successful
+   one is refused with P3012, verified 29/09/2026), so for a migration that
+   completed, delete its one row instead:
+   `DELETE FROM "_prisma_migrations" WHERE migration_name = '<migration_name>';`
+   That row is the only hand edit `_prisma_migrations` should ever get.
 
 ## Data loss
 

@@ -217,6 +217,7 @@ export const CATEGORIES_BY_ROLE: Partial<Record<Role, ProfileCategory[]>> = {
   PHOTOGRAPHER: [
     "WEDDING",
     "PORTRAIT",
+    "YEARBOOK",
     "FASHION",
     "COMMERCIAL",
     "EVENT",
@@ -230,6 +231,7 @@ export const CATEGORIES_BY_ROLE: Partial<Record<Role, ProfileCategory[]>> = {
   ],
   VIDEOGRAPHER: [
     "WEDDING",
+    "YEARBOOK",
     "EVENT",
     "MUSIC_VIDEO",
     "CORPORATE",

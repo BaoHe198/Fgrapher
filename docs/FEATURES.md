@@ -74,7 +74,14 @@ Mỗi hồ sơ thuộc một vai trò và có thể chứa:
 - portfolio theo album;
 - dịch vụ có thể đặt;
 - rating và đánh giá;
-- trường riêng của từng vai trò.
+- trường riêng của từng vai trò;
+- thông tin tự khai (từ 09/2026): số năm kinh nghiệm, % đặt cọc và chính sách
+  đặt cọc, chính sách hủy lịch, chính sách đổi lịch, bán kính phục vụ (km).
+  Tất cả không bắt buộc; bỏ trống thì hồ sơ không hiện dòng đó. Đặt cọc chỉ là
+  thông tin cho khách — tiền trao trực tiếp với nghệ sĩ, nền tảng không thu.
+
+Số buổi đã chụp và thời gian phản hồi **không** lưu mà tính từ booking và tin
+nhắn khi hiển thị.
 
 Hồ sơ chỉ xuất hiện công khai khi đáp ứng quy tắc publish hiện hành, gồm trạng thái
 vai trò/gói, xác minh cần thiết và media đã được duyệt. Service ở server phải lọc
@@ -125,7 +132,8 @@ provider mặc định được làm mờ. Chi tiết: `docs/ops/fmap.md`.
 
 ## 7. Dịch vụ và lịch rảnh
 
-Nhà cung cấp có thể tạo dịch vụ với tên, mô tả, thời lượng và giá. Availability kết
+Nhà cung cấp có thể tạo dịch vụ với tên, mô tả, thời lượng và giá, và (từ 09/2026)
+số ảnh chỉnh sửa giao kèm và số ngày giao ảnh. Availability kết
 hợp:
 
 - lịch làm việc thường lệ;
