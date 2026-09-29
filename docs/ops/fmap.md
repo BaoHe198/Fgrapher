@@ -9,8 +9,8 @@ Fmap trả lời câu hỏi: ai cung cấp dịch vụ tôi cần, gần khu v�
 1. Khách chọn khu vực: nút "Vị trí của tôi" (dùng GPS, không bắt buộc), chọn tỉnh/thành và (tuỳ chọn) phường/xã, hoặc kéo bản đồ rồi bấm "Tìm trong khu vực này". Chọn tỉnh/phường thì bản đồ tự thu phóng tới nơi có provider và tìm luôn; chọn phường thì kết quả chỉ gồm provider ở phường đó. Danh sách phường/xã chỉ hiện những phường đang có provider của vai trò đã chọn, kèm số lượng (`GET /api/fmap/ward-counts`); đổi vai trò mà phường đang chọn không còn ai thì bộ lọc phường tự bỏ.
 2. Chọn ngày, giờ bắt đầu/kết thúc (danh sách 24 giờ, bước 30 phút), vai trò, thể loại. Đổi bất kỳ mục nào thì bản đồ tự tìm lại sau 0,4 giây. Khung giờ phải dài 30 phút – 12 tiếng; sai thì báo ngay dưới bộ lọc thay vì gửi yêu cầu. Trên điện thoại, bộ lọc thu gọn thành một dòng tóm tắt.
 3. API `GET /api/fmap/providers` lọc theo khung bản đồ, vai trò, thể loại, rồi loại provider không rảnh: lịch tuần, ngày bận, booking PENDING/CONFIRMED, và quy định đặt trước tối thiểu 24 giờ.
-4. Marker hiện avatar, icon vai trò, giá khởi điểm; nhiều provider gần nhau gom thành cụm có số. Bấm cụm để phóng to; nếu các provider ở gần như cùng một chỗ (không tách được dù phóng tối đa) thì hiện danh sách để chọn.
-5. Bấm marker mở thẻ xem nhanh (`GET /api/fmap/providers/[profileId]`), bản đồ vẫn nhìn thấy phía sau.
+4. Marker là khung ảnh (ảnh portfolio mới nhất đã duyệt, không có thì avatar/chữ cái đầu) kèm giá khởi điểm viết gọn chữ mono ("2,0tr"), chung thiết kế với `components/fmap/map-marker.tsx`; nhiều provider gần nhau gom thành cụm có số. Bấm cụm để phóng to; nếu các provider ở gần như cùng một chỗ (không tách được dù phóng tối đa) thì hiện danh sách để chọn.
+5. Bấm marker mở thẻ xem nhanh (`GET /api/fmap/providers/[profileId]`) có dải 3 ảnh mới nhất; trên điện thoại thẻ trượt lên từ đáy. Bản đồ vẫn nhìn thấy phía sau.
 6. "Xem hồ sơ" hoặc "Đặt lịch". Trang đặt lịch nhận sẵn ngày, giờ, khung giờ mong muốn và thể loại; khách chưa đăng nhập vẫn giữ các thông tin này sau khi đăng nhập.
 7. Không có kết quả: hiện gợi ý "Đổi thời gian", "Mở rộng khu vực", "Đổi dịch vụ".
 
@@ -37,7 +37,7 @@ MapLibre GL (thư viện bản đồ mã nguồn mở). `NEXT_PUBLIC_MAP_STYLE_U
 
 ## Hiệu năng
 
-- Chỉ truy vấn trong khung bản đồ (tối đa 6° mỗi chiều); tối đa 600 ứng viên và 250 marker mỗi lần; kiểm tra lịch rảnh theo lô, chỉ 3 truy vấn cho tất cả ứng viên; không tự tìm lại khi kéo bản đồ (khách bấm "Tìm trong khu vực này"); thẻ xem nhanh chỉ tải khi bấm marker; giới hạn 60 lượt tìm/phút mỗi IP.
+- Chỉ truy vấn trong khung bản đồ (tối đa 6° mỗi chiều); tối đa 600 ứng viên và 250 marker mỗi lần; kiểm tra lịch rảnh theo lô, chỉ 3 truy vấn cho tất cả ứng viên; khi bật "Tìm khi di chuyển bản đồ" (mặc định) chỉ tìm lại 400 ms sau khi thôi kéo, không tìm trong lúc kéo; tắt đi thì khách bấm "Tìm trong khu vực này"; thẻ xem nhanh chỉ tải khi bấm marker; giới hạn 60 lượt tìm/phút mỗi IP.
 - Chưa dùng PostGIS; khi dữ liệu lớn có thể chuyển sang `geography(Point)` kèm chỉ mục GiST.
 
 ## Thay đổi database

@@ -124,10 +124,23 @@ Giao diện tìm kiếm:
 Dữ liệu địa lý lấy từ bảng Province/Ward, không hardcode danh sách tỉnh thành trong
 component.
 
+Từ 09/2026:
+
+- **Ngày & giờ cần chụp** (`date`, `from`, `to` trên URL): chỉ hiện nghệ sĩ còn
+  trống vào ngày/khung giờ đó, cùng một quy tắc với Bản đồ F
+  (`providersAvailableForInterval` trong `services/fmap.ts`). Không chọn giờ thì
+  chỉ cần còn ít nhất một giờ trống trong ngày. Mỗi thẻ ghi "Còn lịch dd/MM/yyyy".
+- **Tab Album dự án** (`tab=albums`): album đã xuất bản có ít nhất một ảnh được
+  duyệt, lọc theo cùng bộ lọc của tab Nghệ sĩ (`searchAlbums`). Bấm album mở thẳng
+  album đó trên hồ sơ (`?album=<id>`).
+- Chip cho từng bộ lọc đang bật (bỏ riêng từng cái) và "Xóa tất cả" (giữ từ khoá).
+
 **Fmap** (`/fmap`) là cách tìm thứ hai, trên bản đồ: khách chọn khu vực (GPS, tỉnh/thành
 hoặc kéo bản đồ), ngày giờ, vai trò và thể loại, và chỉ thấy provider **đang rảnh** vào
-khung giờ đó. Marker hiện avatar, icon vai trò và giá khởi điểm; bấm vào mở thẻ xem nhanh
-với nút "Xem hồ sơ" và "Đặt lịch" (trang đặt lịch nhận sẵn ngày giờ đã chọn). Vị trí
+khung giờ đó. Marker là một khung ảnh — ảnh portfolio mới nhất đã duyệt — kèm giá
+khởi điểm viết gọn ("2,0tr"); bấm vào mở thẻ xem nhanh có dải 3 ảnh gần nhất, nút "Xem
+hồ sơ" và "Đặt lịch" (trang đặt lịch nhận sẵn ngày giờ đã chọn). "Tìm khi di chuyển bản
+đồ" (bật mặc định) tự tìm lại khi thôi kéo bản đồ. Vị trí
 provider mặc định được làm mờ. Chi tiết: `docs/ops/fmap.md`.
 
 ## 7. Dịch vụ và lịch rảnh
@@ -166,6 +179,13 @@ trạng thái cuối quay lại trạng thái đang hoạt động.
 
 Booking tạo hội thoại/liên kết để hai bên trao đổi. Cron gửi nhắc lịch và có cờ
 chống gửi lặp.
+
+Giao diện gửi yêu cầu (từ 09/2026) có 6 bước: Gói (hoặc "Tùy chỉnh" để nghệ sĩ báo
+giá), Ngày, Giờ (có gợi ý **giờ vàng** gần lúc mặt trời mọc/lặn, tính trên trình
+duyệt từ toạ độ đã làm tròn ~10 km của nghệ sĩ — `lib/sun.ts`), Địa điểm, Ghi chú,
+Xem lại. Cột tóm tắt bên cạnh có nút "Sửa" cho từng dòng. "Lưu nháp & thoát" giữ
+bản nháp trên thiết bị 7 ngày, không lưu số điện thoại. Dữ liệu gửi lên
+`POST /api/bookings` không đổi.
 
 ## 9. Yêu cầu dịch vụ và đề nghị
 

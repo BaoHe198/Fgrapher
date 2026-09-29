@@ -78,7 +78,9 @@ test("customer registers, verifies their email, signs in, and views a profile", 
   await expect(
     page.getByRole("heading", { name: "Fixture Provider Photography" }),
   ).toBeVisible();
+  // Since the 09/2026 redesign a single role reads as plain text under
+  // the name ("Photographer"), not a badge.
   await expect(
-    page.locator('[data-slot="badge"]', { hasText: "Photographer" }),
+    page.getByRole("main").getByText("Photographer", { exact: true }).first(),
   ).toBeVisible();
 });

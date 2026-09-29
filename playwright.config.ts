@@ -87,7 +87,14 @@ export default defineConfig({
         // province list and every later run kept serving it, so
         // provider-onboarding.spec.ts could never pick a province.
         command: "rm -rf .next/cache/fetch-cache && pnpm build && pnpm start",
-        url: baseURL,
+        // Probe a route that never touches the database. Playwright starts
+        // this server before global-setup rebuilds the test database, and
+        // probing "/" made the home page open pooled connections (and fill
+        // the data cache) against the old database: after the rebuild,
+        // queries with enum parameters on those connections failed with
+        // Postgres "cache lookup failed for type" (29/09/2026, once the
+        // home page began filtering by ProfileCategory).
+        url: `${baseURL}/robots.txt`,
         // Never reuse. Moving to port 3100 kept the suite off the dev
         // server, but a server left over from an earlier e2e run still got
         // adopted: on 24/09 a run silently reused one built an hour and a
