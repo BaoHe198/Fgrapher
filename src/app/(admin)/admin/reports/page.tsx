@@ -1,12 +1,14 @@
 "use client";
 
 import type { Report, ReportStatus } from "@prisma/client";
-import { Flag, Loader2 } from "lucide-react";
+import { Flag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { ListSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
@@ -109,16 +111,9 @@ export default function AdminReportsPage() {
       </Tabs>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : reports.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <Flag className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty")}
-          </p>
-        </Card>
+        <EmptyState icon={<Flag />} title={t("empty")} />
       ) : (
         <div className="flex flex-col gap-4">
           {reports.map((report) => (

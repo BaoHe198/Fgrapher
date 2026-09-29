@@ -1,7 +1,8 @@
 "use client";
 
+import { ListSkeleton } from "@/components/ui/skeleton";
 import type { Notification, NotificationType } from "@prisma/client";
-import { Bell, Loader2 } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
@@ -12,6 +13,7 @@ import {
   useState,
 } from "react";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -167,17 +169,13 @@ export function NotificationsClient({
       </Tabs>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : visible.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <Bell className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty.title")}
-          </p>
-          <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
-        </Card>
+        <EmptyState
+          icon={<Bell />}
+          title={t("empty.title")}
+          description={t("empty.body")}
+        />
       ) : (
         <Card padding={false}>
           {visible.map((notification) => (

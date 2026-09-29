@@ -147,7 +147,7 @@ export function ServicesManager({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("title")}
         </span>
         <Button size="sm" variant="secondary" onClick={openCreate}>

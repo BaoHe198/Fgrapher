@@ -5,6 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
@@ -42,13 +43,11 @@ export default async function MyOffersPage() {
       <SectionHead title={t("title")} as="h1" />
 
       {offers.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <Send className="size-10 text-text-tertiary" />
-          <p className="text-body-md font-semibold! text-text-primary">
-            {t("empty.title")}
-          </p>
-          <p className="text-body-sm text-text-secondary">{t("empty.body")}</p>
-        </Card>
+        <EmptyState
+          icon={<Send />}
+          title={t("empty.title")}
+          description={t("empty.body")}
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {offers.map((offer) => (

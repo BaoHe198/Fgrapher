@@ -18,6 +18,7 @@ import { useState } from "react";
 import { ReferenceMediaGallery } from "@/components/media/reference-media-gallery";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -319,9 +320,7 @@ export function RequestDetail({
           </p>
 
           {offers.length === 0 ? (
-            <Card className="py-10 text-center text-body-sm text-text-secondary">
-              {t("noOffers")}
-            </Card>
+            <EmptyState title={t("noOffers")} />
           ) : (
             offers.map((offer) => (
               <Card key={offer.id} className="flex flex-col gap-3">

@@ -13,6 +13,7 @@ import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
@@ -89,20 +90,22 @@ export function CustomerOrdersContent() {
       </Tabs>
 
       {isLoading ? null : orders.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <Package className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty")}
-          </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/shop" />}
-          >
-            {t("browseGear")}
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<Package />}
+          title={t("empty")}
+          primaryAction={
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/shop" />}
+              >
+                {t("browseGear")}
+              </Button>
+            </>
+          }
+        />
       ) : (
         <div className="flex flex-col gap-4">
           {orders.map((order) => {

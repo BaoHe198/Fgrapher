@@ -139,7 +139,7 @@ export function PricingContent({
         </div>
       ) : null}
       <section className="bg-green-900 px-6 py-20 text-center">
-        <span className="text-caption-upper tracking-[0.14em] text-gold-300">
+        <span className="text-caption-upper tracking-[0.12em] text-gold-300">
           {t("eyebrow")}
         </span>
         <h1 className="mt-3 text-display-xl text-gold-50">{t("heroTitle")}</h1>

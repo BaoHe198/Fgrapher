@@ -143,7 +143,7 @@ export function AvailabilitySettings() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start gap-3 rounded-xl border border-info/25 bg-info-bg p-4">
+      <div className="flex items-start gap-3 rounded-[var(--fg-radius-lg)] border border-info/25 bg-info-bg p-4">
         <CalendarClock className="mt-0.5 size-5 shrink-0 text-info" />
         <div className="flex flex-col gap-1">
           <p className="text-body-sm font-medium text-text-primary">
@@ -162,7 +162,7 @@ export function AvailabilitySettings() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("weeklySchedule")}
         </span>
         {schedule.map((day) => (
@@ -236,7 +236,7 @@ export function AvailabilitySettings() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("blockedDates")}
         </span>
         <div className="flex flex-wrap gap-2">

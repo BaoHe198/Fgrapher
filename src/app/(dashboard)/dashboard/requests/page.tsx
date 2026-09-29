@@ -5,6 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
@@ -59,21 +60,23 @@ export default async function ServiceRequestsPage() {
       </div>
 
       {requests.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <Send className="size-10 text-text-tertiary" />
-          <p className="text-body-md font-semibold! text-text-primary">
-            {t("empty.title")}
-          </p>
-          <p className="text-body-sm text-text-secondary">{t("empty.body")}</p>
-          <Button
-            variant="accent"
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/requests/new" />}
-          >
-            {t("newRequest")}
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<Send />}
+          title={t("empty.title")}
+          description={t("empty.body")}
+          primaryAction={
+            <>
+              <Button
+                variant="accent"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/requests/new" />}
+              >
+                {t("newRequest")}
+              </Button>
+            </>
+          }
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {requests.map((request) => (

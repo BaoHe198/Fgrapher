@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { Loader2, RotateCcw, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -110,10 +111,7 @@ export function TrashSheet({
               <Loader2 className="size-5 animate-spin text-text-tertiary" />
             </div>
           ) : albums.length === 0 && media.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-10 text-center">
-              <Trash2 className="size-8 text-text-tertiary" />
-              <p className="text-body-sm text-text-secondary">{t("empty")}</p>
-            </div>
+            <EmptyState icon={<Trash2 />} title={t("empty")} />
           ) : (
             <>
               {albums.map((album) => (

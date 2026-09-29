@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Bookmark } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -103,19 +104,21 @@ export default async function SavedProfilesPage() {
       <SectionHead title={t("title")} as="h1" />
 
       {profiles.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <Bookmark className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty.title")}
-          </p>
-          <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
-          <Link
-            href="/browse"
-            className={buttonVariants({ variant: "accent" })}
-          >
-            {t("empty.cta")}
-          </Link>
-        </div>
+        <EmptyState
+          icon={<Bookmark />}
+          title={t("empty.title")}
+          description={t("empty.body")}
+          primaryAction={
+            <>
+              <Link
+                href="/browse"
+                className={buttonVariants({ variant: "accent" })}
+              >
+                {t("empty.cta")}
+              </Link>
+            </>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {profiles.map((profile) => {

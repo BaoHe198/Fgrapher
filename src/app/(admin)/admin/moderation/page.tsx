@@ -13,6 +13,8 @@ import {
 } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { ListSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -187,16 +189,9 @@ export default function AdminModerationPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : media.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <ImageOff className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty")}
-          </p>
-        </Card>
+        <EmptyState icon={<ImageOff />} title={t("empty")} />
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2">
@@ -241,12 +236,7 @@ export default function AdminModerationPage() {
           </div>
 
           {filteredMedia.length === 0 ? (
-            <Card className="flex flex-col items-center gap-3 py-16 text-center">
-              <ImageOff className="size-12 text-text-tertiary" />
-              <p className="text-body-lg font-semibold! text-text-primary">
-                {t("emptyFiltered")}
-              </p>
-            </Card>
+            <EmptyState icon={<ImageOff />} title={t("emptyFiltered")} />
           ) : (
             <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
               {filteredMedia.map((item, index) => {
@@ -352,7 +342,7 @@ export default function AdminModerationPage() {
             </div>
           )}
 
-          <div className="sticky bottom-4 flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface p-3.5 shadow-lg">
+          <div className="sticky bottom-4 flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface p-3.5 shadow-[var(--shadow-lg)]">
             {showRejectPanel ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
                 <NativeSelect
@@ -429,7 +419,7 @@ export default function AdminModerationPage() {
                 src={lightboxItem.url}
                 controls
                 autoPlay
-                className="max-h-[80vh] w-full rounded-xl"
+                className="max-h-[80vh] w-full rounded-[var(--fg-radius-lg)]"
               />
             ) : (
               <Image
@@ -437,7 +427,7 @@ export default function AdminModerationPage() {
                 alt=""
                 width={1200}
                 height={1200}
-                className="max-h-[80vh] w-full rounded-xl object-contain"
+                className="max-h-[80vh] w-full rounded-[var(--fg-radius-lg)] object-contain"
               />
             )
           ) : null}

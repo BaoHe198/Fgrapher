@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 
 import { RespondReviewModal } from "@/components/modals/respond-review-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -119,12 +120,7 @@ export function ReviewsDashboardContent({
       </Tabs>
 
       {filtered.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <Star className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty")}
-          </p>
-        </Card>
+        <EmptyState icon={<Star />} title={t("empty")} />
       ) : (
         <div className="flex flex-col gap-4">
           {filtered.map((review) => (

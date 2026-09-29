@@ -1,12 +1,14 @@
 "use client";
 
-import { Loader2, MoreHorizontal, Pencil, ShoppingBag } from "lucide-react";
+import { MoreHorizontal, Pencil, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useCallback, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { ListSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -133,25 +135,25 @@ export function ListingsList() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : products.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <ShoppingBag className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty.title")}
-          </p>
-          <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
-          <Button
-            variant="secondary"
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/dashboard/listings/new" />}
-          >
-            {t("addProduct")}
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<ShoppingBag />}
+          title={t("empty.title")}
+          description={t("empty.body")}
+          primaryAction={
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/dashboard/listings/new" />}
+              >
+                {t("addProduct")}
+              </Button>
+            </>
+          }
+        />
       ) : (
         <Card padding={false}>
           {products.map((product) => {
@@ -164,7 +166,7 @@ export function ListingsList() {
                 // to ~60px (five lines) and the price ran off the screen.
                 className="flex items-center gap-3 border-b border-border-subtle px-4 py-4 last:border-b-0 sm:gap-4 sm:px-5"
               >
-                <div className="relative size-16 shrink-0 overflow-hidden rounded-lg">
+                <div className="relative size-16 shrink-0 overflow-hidden rounded-[var(--fg-radius-md)]">
                   {product.images[0] ? (
                     <Image
                       src={product.images[0].url}

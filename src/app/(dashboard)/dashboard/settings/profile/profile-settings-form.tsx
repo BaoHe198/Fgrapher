@@ -431,7 +431,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
             {tEditor("categoriesLabel")}
           </span>
           <span className="text-body-sm text-text-tertiary">
@@ -473,7 +473,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       </div>
 
       <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("title")}
         </span>
         <p className="text-body-sm text-text-tertiary">{t("requiredNote")}</p>
@@ -649,7 +649,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             onChange={(e) => set("area", e.target.value)}
           />
           <div className="flex flex-col gap-2">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
               {tEditor("amenitiesLabel")}
             </span>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -668,7 +668,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
 
       {role === "MODEL" ? (
         <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
             {tEditor("modelDetails.title")}
           </span>
           <p className="text-body-sm text-text-tertiary">
@@ -738,7 +738,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           ) : null}
 
           <div className="h-px bg-border-subtle" />
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
             {tEditor("modelDetails.privacyTitle")}
           </span>
           <Checkbox
@@ -755,7 +755,7 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           MODEL, since every published provider can appear on the map. */}
       {PROVIDER_ROLES.includes(role) ? (
         <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
             {tEditor("privacySettings.title")}
           </span>
           <Checkbox

@@ -25,6 +25,7 @@ import { useState } from "react";
 import { AlbumFormDialog } from "./album-form-dialog";
 import { TrashSheet } from "./trash-sheet";
 import { UploadMediaModal } from "@/components/modals/upload-media-modal";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
@@ -234,16 +235,22 @@ export function AlbumGrid({
       </div>
 
       {albums.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <FrameMark size={48} className="text-text-tertiary" />
-          <p className="text-body-md font-semibold! text-text-primary">
-            {t("empty.title")}
-          </p>
-          <p className="text-body-sm text-text-secondary">{t("empty.body")}</p>
-          <Button variant="accent" size="sm" onClick={() => setFormOpen(true)}>
-            {t("newAlbum")}
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<FrameMark size={48} />}
+          title={t("empty.title")}
+          description={t("empty.body")}
+          primaryAction={
+            <>
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={() => setFormOpen(true)}
+              >
+                {t("newAlbum")}
+              </Button>
+            </>
+          }
+        />
       ) : (
         <DndContext
           id="albums"

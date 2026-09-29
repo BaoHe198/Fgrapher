@@ -95,7 +95,7 @@ function SortableMediaTile({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "group relative aspect-4/3 overflow-hidden rounded-xl bg-bg-sunken",
+        "group relative aspect-4/3 overflow-hidden rounded-[var(--fg-radius-lg)] bg-bg-sunken",
         isDragging && "opacity-50",
         isCover && "ring-2 ring-brand-primary",
       )}
@@ -128,7 +128,7 @@ function SortableMediaTile({
         </Badge>
       ) : null}
 
-      <div className="absolute inset-0 flex flex-col justify-between bg-black/50 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+      <div className="absolute inset-0 flex flex-col justify-between bg-scrim opacity-0 transition-opacity duration-150 group-hover:opacity-100">
         <div className="flex justify-between p-2">
           <button
             type="button"
@@ -342,7 +342,7 @@ export function AlbumDetail({
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="flex aspect-4/3 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-default text-text-tertiary transition-colors duration-150 hover:border-brand-primary hover:text-brand-primary"
+              className="flex aspect-4/3 cursor-pointer flex-col items-center justify-center gap-2 rounded-[var(--fg-radius-lg)] border-2 border-dashed border-border-default text-text-tertiary transition-colors duration-150 hover:border-brand-primary hover:text-brand-primary"
             >
               <Upload className="size-[22px]" />
               <span className="text-body-sm">{t("upload")}</span>

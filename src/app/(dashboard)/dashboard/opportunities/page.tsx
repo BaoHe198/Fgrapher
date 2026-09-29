@@ -11,6 +11,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
@@ -52,15 +53,11 @@ export default async function OpportunitiesPage({
 
   if (providerRoles.length === 0) {
     return (
-      <Card className="flex flex-col items-center gap-3 py-16 text-center">
-        <Handshake className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold! text-text-primary">
-          {t("proOnly.title")}
-        </p>
-        <p className="max-w-sm text-body-md text-text-secondary">
-          {t("proOnly.body")}
-        </p>
-      </Card>
+      <EmptyState
+        icon={<Handshake />}
+        title={t("proOnly.title")}
+        description={t("proOnly.body")}
+      />
     );
   }
 
@@ -101,36 +98,38 @@ export default async function OpportunitiesPage({
       ) : null}
 
       {!isVerified ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <ShieldCheck className="size-10 text-text-tertiary" />
-          <p className="text-body-md font-semibold! text-text-primary">
-            {t("unverified.title")}
-          </p>
-          <p className="max-w-md text-body-sm text-text-secondary">
-            {activeStatus === "PENDING"
+        <EmptyState
+          icon={<ShieldCheck />}
+          title={t("unverified.title")}
+          description={
+            activeStatus === "PENDING"
               ? t("unverified.pendingBody")
-              : t("unverified.body")}
-          </p>
-          {activeStatus === "PENDING" ? null : (
-            <Button
-              variant="accent"
-              nativeButton={false}
-              render={
-                <Link href={`/onboarding/verification?role=${activeRole}`} />
-              }
-            >
-              {t("unverified.cta")}
-            </Button>
-          )}
-        </Card>
+              : t("unverified.body")
+          }
+          primaryAction={
+            <>
+              {activeStatus === "PENDING" ? null : (
+                <Button
+                  variant="accent"
+                  nativeButton={false}
+                  render={
+                    <Link
+                      href={`/onboarding/verification?role=${activeRole}`}
+                    />
+                  }
+                >
+                  {t("unverified.cta")}
+                </Button>
+              )}
+            </>
+          }
+        />
       ) : opportunities.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <Handshake className="size-10 text-text-tertiary" />
-          <p className="text-body-md font-semibold! text-text-primary">
-            {t("empty.title")}
-          </p>
-          <p className="text-body-sm text-text-secondary">{t("empty.body")}</p>
-        </Card>
+        <EmptyState
+          icon={<Handshake />}
+          title={t("empty.title")}
+          description={t("empty.body")}
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {opportunities.map((request) => {

@@ -1,9 +1,5 @@
-import { Loader2 } from "lucide-react";
+import { DetailSkeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLoading() {
-  return (
-    <div className="flex justify-center py-24">
-      <Loader2 className="size-6 animate-spin text-text-tertiary" />
-    </div>
-  );
+  return <DetailSkeleton />;
 }

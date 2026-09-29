@@ -12,6 +12,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
@@ -398,42 +399,40 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-3">
         <SectionHead title={t("recentActivity")} />
         {activity.length === 0 ? (
-          <Card className="flex flex-col items-center gap-3 py-12 text-center">
-            {isProvider ? (
-              <ShoppingBag className="size-10 text-text-tertiary" />
-            ) : (
-              <Bookmark className="size-10 text-text-tertiary" />
-            )}
-            <p className="text-body-md font-semibold! text-text-primary">
-              {t("noActivity")}
-            </p>
-            <Button
-              variant="secondary"
-              size="sm"
-              nativeButton={false}
-              render={
-                <Link
-                  href={
-                    isProvider
-                      ? "/dashboard/portfolio"
-                      : isCostumeShop
-                        ? COSTUMES_HREF
-                        : isCameraShop
-                          ? "/dashboard/listings"
-                          : "/browse"
+          <EmptyState
+            icon={isProvider ? <ShoppingBag /> : <Bookmark />}
+            title={t("noActivity")}
+            primaryAction={
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  nativeButton={false}
+                  render={
+                    <Link
+                      href={
+                        isProvider
+                          ? "/dashboard/portfolio"
+                          : isCostumeShop
+                            ? COSTUMES_HREF
+                            : isCameraShop
+                              ? "/dashboard/listings"
+                              : "/browse"
+                      }
+                    />
                   }
-                />
-              }
-            >
-              {isProvider
-                ? t("buildPortfolio")
-                : isCostumeShop
-                  ? t("manageCostumes")
-                  : isCameraShop
-                    ? t("manageListings")
-                    : t("browseArtists")}
-            </Button>
-          </Card>
+                >
+                  {isProvider
+                    ? t("buildPortfolio")
+                    : isCostumeShop
+                      ? t("manageCostumes")
+                      : isCameraShop
+                        ? t("manageListings")
+                        : t("browseArtists")}
+                </Button>
+              </>
+            }
+          />
         ) : (
           <Card
             padding={false}

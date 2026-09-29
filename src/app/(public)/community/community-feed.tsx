@@ -37,6 +37,7 @@ import { ReportModal } from "@/components/modals/report-modal";
 import { PostEngagement } from "@/components/social/post-engagement";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { ListSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CurrencyInput } from "@/components/ui/currency-input";
@@ -319,9 +320,7 @@ export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
               </Button>
             </Card>
           ) : isLoading && posts.length === 0 ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="size-6 animate-spin text-text-tertiary" />
-            </div>
+            <ListSkeleton />
           ) : posts.length === 0 ? (
             <Card className="flex flex-col items-center gap-2 py-14 text-center">
               <Users className="size-10 text-text-tertiary" />

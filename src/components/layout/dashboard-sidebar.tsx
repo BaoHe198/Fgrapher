@@ -216,7 +216,7 @@ export function DashboardSidebar({
           className={cn("flex flex-col gap-1", index > 0 && "mt-3")}
         >
           {isProviderNav && section.heading ? (
-            <span className="px-3 pb-1 text-caption-upper tracking-[0.08em] text-text-tertiary">
+            <span className="px-3 pb-1 text-caption-upper tracking-[0.12em] text-text-tertiary">
               {section.heading}
             </span>
           ) : null}

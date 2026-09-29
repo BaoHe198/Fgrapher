@@ -150,7 +150,7 @@ export function ShopFilters({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("province")}
         </span>
         <NativeSelect
@@ -166,7 +166,7 @@ export function ShopFilters({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("type")}
         </span>
         <Radio
@@ -187,7 +187,7 @@ export function ShopFilters({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("category")}
         </span>
         {PRODUCT_CATEGORIES.map((category) => (
@@ -201,7 +201,7 @@ export function ShopFilters({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("condition")}
         </span>
         {CONDITIONS.map((value) => (
@@ -215,7 +215,7 @@ export function ShopFilters({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("price")}
         </span>
         <div className="flex items-center gap-2">

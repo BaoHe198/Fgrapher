@@ -1,7 +1,8 @@
 "use client";
 
+import { ListSkeleton } from "@/components/ui/skeleton";
 import type { Booking, User } from "@prisma/client";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { WeeklyRule } from "@/services/resource-calendar";
@@ -262,12 +263,10 @@ export function CalendarClient({
       ) : null}
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : view === "MONTH" ? (
         <Card padding={false} className="overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-border-subtle text-caption-upper tracking-[0.06em] text-text-tertiary">
+          <div className="grid grid-cols-7 border-b border-border-subtle text-caption-upper tracking-[0.12em] text-text-tertiary">
             {WEEKDAY_SHORT_LABELS_VI.map((d) => (
               <div key={d} className="px-2 py-2.5 text-center">
                 {d}

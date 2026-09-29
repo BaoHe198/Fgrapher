@@ -13,6 +13,7 @@ import {
 } from "@/components/cart/cart-utils";
 import { termsChunk } from "@/components/legal/terms-link";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DetailSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -71,11 +72,7 @@ export function CheckoutContent() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24">
-        <Loader2 className="size-6 animate-spin text-text-tertiary" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (items.length === 0) {

@@ -1,10 +1,12 @@
 "use client";
 
-import { ArrowLeftRight, Loader2 } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { ListSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -84,16 +86,9 @@ export default function AdminRoleChangeRequestsPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : rows.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <ArrowLeftRight className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty")}
-          </p>
-        </Card>
+        <EmptyState icon={<ArrowLeftRight />} title={t("empty")} />
       ) : (
         <div className="flex flex-col gap-4">
           {rows.map((row) => (

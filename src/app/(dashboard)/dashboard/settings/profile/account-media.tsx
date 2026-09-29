@@ -49,7 +49,7 @@ export function AccountMedia({
           type="button"
           onClick={() => coverInput.current?.click()}
           aria-label={t("coverButton")}
-          className="absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-body-sm text-white"
+          className="absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-scrim px-3 py-1.5 text-body-sm text-white"
         >
           {uploading === "cover" ? (
             <Loader2 className="size-3.5 animate-spin" />
@@ -96,7 +96,7 @@ export function AccountMedia({
             className={cn(
               "absolute inset-0 flex flex-col items-center justify-center gap-1 transition-opacity",
               avatar
-                ? "bg-black/40 text-white opacity-0 hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+                ? "bg-scrim text-white opacity-0 hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
                 : "text-text-tertiary hover:text-text-secondary",
             )}
           >

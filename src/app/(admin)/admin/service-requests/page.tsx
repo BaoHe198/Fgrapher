@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { ReferenceMediaGallery } from "@/components/media/reference-media-gallery";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/format";
 import { resolvePartyName } from "@/lib/party-name";
@@ -113,12 +114,7 @@ export default async function AdminServiceRequestsPage() {
         </div>
 
         {unclaimed.length === 0 ? (
-          <Card className="flex flex-col items-center gap-3 py-10 text-center">
-            <Handshake className="size-9 text-text-tertiary" />
-            <p className="text-body-sm text-text-secondary">
-              {t("unclaimedEmpty")}
-            </p>
-          </Card>
+          <EmptyState icon={<Handshake />} title={t("unclaimedEmpty")} />
         ) : (
           <div className="flex flex-col gap-3">
             {unclaimed.map((request) => {

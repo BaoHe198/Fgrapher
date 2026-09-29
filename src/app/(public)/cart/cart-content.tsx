@@ -1,12 +1,13 @@
 "use client";
 
-import { Loader2, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { CartItemRow } from "@/components/cart/cart-item-row";
 import { cartTotals, groupByShop } from "@/components/cart/cart-utils";
+import { DetailSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCart } from "@/hooks/use-cart";
@@ -20,11 +21,7 @@ export function CartContent() {
   const totals = cartTotals(items);
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24">
-        <Loader2 className="size-6 animate-spin text-text-tertiary" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (items.length === 0) {

@@ -181,7 +181,7 @@ export function CostumesManager({
     // having no way to post anything at all.
     <div id="costumes" className="flex scroll-mt-24 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("title")}
         </span>
         <div className="flex flex-wrap gap-2">

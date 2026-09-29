@@ -106,7 +106,7 @@ export function NotificationsSettings({
         <Fragment key={group.titleKey}>
           <span
             className={cn(
-              "col-span-3 text-caption-upper tracking-[0.08em] text-text-tertiary",
+              "col-span-3 text-caption-upper tracking-[0.12em] text-text-tertiary",
               index > 0 && "mt-4",
             )}
           >

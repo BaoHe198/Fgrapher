@@ -1,18 +1,13 @@
 "use client";
 
 import type { Role } from "@prisma/client";
-import {
-  CalendarDays,
-  Handshake,
-  Loader2,
-  MapPin,
-  WalletCards,
-} from "lucide-react";
+import { CalendarDays, Handshake, MapPin, WalletCards } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { ListSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -190,9 +185,7 @@ export function BrowseRequestsClient({
 
         <div className="min-w-0">
           {isLoading ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="size-6 animate-spin text-text-tertiary" />
-            </div>
+            <ListSkeleton />
           ) : requests.length === 0 ? (
             <Card className="flex flex-col items-center gap-3 py-16 text-center">
               <Handshake className="size-10 text-text-tertiary" />

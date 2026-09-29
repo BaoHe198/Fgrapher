@@ -5,8 +5,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { SubscriptionGate } from "@/components/subscription/subscription-gate";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { Tag } from "@/components/ui/tag";
 import { auth } from "@/lib/auth";
@@ -39,23 +39,23 @@ export default async function PortfolioPage({
   );
   if (!canUpload) {
     return (
-      <Card className="flex flex-col items-center gap-3 py-16 text-center">
-        <Camera className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold! text-text-primary">
-          {t("proOnly.title")}
-        </p>
-        <p className="max-w-sm text-body-md text-text-secondary">
-          {t("proOnly.body")}
-        </p>
-        <Button
-          variant="secondary"
-          size="sm"
-          nativeButton={false}
-          render={<Link href="/dashboard/settings/roles" />}
-        >
-          {t("proOnly.cta")}
-        </Button>
-      </Card>
+      <EmptyState
+        icon={<Camera />}
+        title={t("proOnly.title")}
+        description={t("proOnly.body")}
+        primaryAction={
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/dashboard/settings/roles" />}
+            >
+              {t("proOnly.cta")}
+            </Button>
+          </>
+        }
+      />
     );
   }
 
@@ -66,23 +66,23 @@ export default async function PortfolioPage({
 
   if (profiles.length === 0) {
     return (
-      <Card className="flex flex-col items-center gap-3 py-16 text-center">
-        <Camera className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold! text-text-primary">
-          {t("noProfile.title")}
-        </p>
-        <p className="max-w-sm text-body-md text-text-secondary">
-          {t("noProfile.body")}
-        </p>
-        <Button
-          variant="secondary"
-          size="sm"
-          nativeButton={false}
-          render={<Link href="/dashboard/settings/profile" />}
-        >
-          {t("noProfile.cta")}
-        </Button>
-      </Card>
+      <EmptyState
+        icon={<Camera />}
+        title={t("noProfile.title")}
+        description={t("noProfile.body")}
+        primaryAction={
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/dashboard/settings/profile" />}
+            >
+              {t("noProfile.cta")}
+            </Button>
+          </>
+        }
+      />
     );
   }
 

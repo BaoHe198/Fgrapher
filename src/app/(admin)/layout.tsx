@@ -57,16 +57,18 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg-sunken">
-      <div className="flex h-11 items-center gap-2 bg-neutral-900 px-4 text-body-sm font-semibold! text-white">
-        <span className="rounded bg-danger px-1.5 py-0.5 text-sm font-bold tracking-wide text-text-on-brand uppercase">
+      {/* bg-inverse, not neutral-900: the neutral scale flips in dark mode,
+          which turned this bar light grey under white text. */}
+      <div className="flex h-11 items-center gap-2 border-b border-white/5 bg-bg-inverse px-4 text-body-sm font-semibold! text-gold-50">
+        <span className="rounded-[4px] bg-danger px-1.5 py-0.5 text-meta font-bold! tracking-[0.12em] text-white uppercase">
           {t("badge")}
         </span>
-        <span className="hidden truncate text-neutral-300 sm:inline">
+        <span className="hidden truncate text-green-200 sm:inline">
           {t("subtitle")}
         </span>
         <Link
           href="/dashboard"
-          className="ml-auto whitespace-nowrap text-neutral-300 hover:text-white"
+          className="ml-auto whitespace-nowrap text-green-200 hover:text-gold-50"
         >
           {t("exitAdmin")}
         </Link>

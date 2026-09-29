@@ -14,6 +14,7 @@ import { startTransition, useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
@@ -99,15 +100,10 @@ export function ShopOrdersContent() {
       </Tabs>
 
       {isLoading ? null : orders.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <Package className="size-12 text-text-tertiary" />
-          <p className="text-body-lg font-semibold! text-text-primary">
-            {t("empty")}
-          </p>
-        </Card>
+        <EmptyState icon={<Package />} title={t("empty")} />
       ) : (
         <Card padding={false}>
-          <div className="grid grid-cols-[1.2fr_1.6fr_0.9fr_0.9fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.06em] text-text-tertiary">
+          <div className="grid grid-cols-[1.2fr_1.6fr_0.9fr_0.9fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.12em] text-text-tertiary">
             <span>{t("columns.customer")}</span>
             <span>{t("columns.items")}</span>
             <span>{t("columns.total")}</span>

@@ -219,7 +219,7 @@ export function RolesSettings({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("yourRoles")}
         </span>
 
@@ -339,7 +339,7 @@ export function RolesSettings({
 
       {availableRoles.length > 0 ? (
         <div className="flex flex-col gap-3">
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
             {t("addRole")}
           </span>
           {/* The one-provider-role rule was enforced (the list vanishes

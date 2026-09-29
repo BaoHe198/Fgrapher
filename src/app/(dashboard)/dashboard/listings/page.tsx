@@ -5,8 +5,8 @@ import { SELLER_ROLES } from "@/lib/constants";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { features } from "@/lib/features";
@@ -33,45 +33,41 @@ export default async function ListingsPage() {
     // catalogue instead.
     const isCostumeShop = session.user.roles.includes("COSTUME_SHOP");
     return (
-      <Card className="flex flex-col items-center gap-3 py-16 text-center">
-        {isCostumeShop ? (
-          <Shirt className="size-12 text-text-tertiary" />
-        ) : (
-          <ShoppingBag className="size-12 text-text-tertiary" />
+      <EmptyState
+        icon={isCostumeShop ? <Shirt /> : <ShoppingBag />}
+        title={t(
+          isCostumeShop
+            ? "roleRequired.costumeShopTitle"
+            : "roleRequired.title",
         )}
-        <p className="text-body-lg font-semibold! text-text-primary">
-          {t(
-            isCostumeShop
-              ? "roleRequired.costumeShopTitle"
-              : "roleRequired.title",
-          )}
-        </p>
-        <p className="max-w-sm text-body-md text-text-secondary">
-          {t(
-            isCostumeShop
-              ? "roleRequired.costumeShopBody"
-              : "roleRequired.body",
-          )}
-        </p>
-        <Button
-          variant="secondary"
-          size="sm"
-          nativeButton={false}
-          render={
-            <Link
-              href={
-                isCostumeShop
-                  ? "/dashboard/settings/profile?section=roleProfile#costumes"
-                  : "/dashboard/settings/roles"
+        description={t(
+          isCostumeShop ? "roleRequired.costumeShopBody" : "roleRequired.body",
+        )}
+        primaryAction={
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              nativeButton={false}
+              render={
+                <Link
+                  href={
+                    isCostumeShop
+                      ? "/dashboard/settings/profile?section=roleProfile#costumes"
+                      : "/dashboard/settings/roles"
+                  }
+                />
               }
-            />
-          }
-        >
-          {t(
-            isCostumeShop ? "roleRequired.costumeShopCta" : "roleRequired.cta",
-          )}
-        </Button>
-      </Card>
+            >
+              {t(
+                isCostumeShop
+                  ? "roleRequired.costumeShopCta"
+                  : "roleRequired.cta",
+              )}
+            </Button>
+          </>
+        }
+      />
     );
   }
 

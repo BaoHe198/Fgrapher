@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { ListSkeleton, DetailSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DateField } from "@/components/ui/date-field";
@@ -145,13 +147,9 @@ function DataRequestsPanel() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : requests.length === 0 ? (
-        <Card className="py-16 text-center text-body-sm text-text-secondary">
-          {t("empty")}
-        </Card>
+        <EmptyState title={t("empty")} />
       ) : (
         <div className="flex flex-col gap-3">
           {requests.map((r) => {
@@ -326,9 +324,7 @@ function AuditLogPanel() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : (
         <Card padding={false} className="overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-body-sm">
@@ -400,11 +396,7 @@ function ConsentStatsPanel() {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="size-6 animate-spin text-text-tertiary" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   return (

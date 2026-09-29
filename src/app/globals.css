@@ -479,8 +479,12 @@
 @utility text-caption {
   font: var(--text-caption);
 }
+/* Caps labels (section labels, table headers): one tracking and always
+   upper case (audit 09/2026 §01). Some call sites used the name without
+   uppercase and read as widely spaced sentence case. */
 @utility text-caption-upper {
   font: var(--text-caption-upper);
+  text-transform: uppercase;
 }
 @utility text-meta {
   font: var(--text-meta);

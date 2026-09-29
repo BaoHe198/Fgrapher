@@ -16,6 +16,7 @@ import { useParams } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { DetailSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -123,11 +124,7 @@ export function OrderDetailContent() {
   };
 
   if (isLoading || !order) {
-    return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="size-6 animate-spin text-text-tertiary" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   const isShop = session?.user?.id === order.shopId;

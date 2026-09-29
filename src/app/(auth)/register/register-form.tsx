@@ -236,7 +236,7 @@ export function RegisterForm({
         className="flex flex-col gap-3.5"
       >
         <div className="flex flex-col gap-2">
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+          <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
             {t("iAmA")}
           </span>
           <div className="grid grid-cols-2 gap-2.5">
@@ -304,7 +304,7 @@ export function RegisterForm({
           inert={accountType !== "provider"}
         >
           <div className="flex flex-col gap-2 overflow-hidden">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+            <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
               {t("whatDoYouOffer")}
             </span>
             <div className="flex flex-col gap-2.5">

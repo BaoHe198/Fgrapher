@@ -471,7 +471,7 @@ export default async function PublicProfilePage({
             <div className="mb-5 grid grid-cols-2 gap-x-8 gap-y-3 rounded-[var(--fg-radius-lg)] bg-surface-card p-5 sm:grid-cols-4">
               {modelDetails.map((detail) => (
                 <div key={detail.label} className="flex flex-col gap-0.5">
-                  <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+                  <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
                     {detail.label}
                   </span>
                   <span className="text-body-md font-semibold! text-text-primary">

@@ -1,7 +1,8 @@
 "use client";
 
+import { ListSkeleton } from "@/components/ui/skeleton";
 import type { Role, User, UserRole } from "@prisma/client";
-import { Loader2, MoveHorizontal, Search } from "lucide-react";
+import { MoveHorizontal, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
@@ -79,9 +80,7 @@ export default function AdminUsersPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-6 animate-spin text-text-tertiary" />
-        </div>
+        <ListSkeleton />
       ) : (
         <>
           {/* Card below already scrolls its own overflow (no document-

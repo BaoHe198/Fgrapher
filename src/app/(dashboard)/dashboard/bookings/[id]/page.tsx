@@ -21,6 +21,8 @@ import { ReviewModal } from "@/components/modals/review-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BookingStatusBadge } from "@/components/booking/booking-status-badge";
+import { DetailSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -182,27 +184,25 @@ export default function BookingDetailPage() {
 
   if (notFoundError) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <p className="text-body-lg font-semibold! text-text-primary">
-          {t("notFound")}
-        </p>
-        <Button
-          variant="secondary"
-          nativeButton={false}
-          render={<Link href="/dashboard/bookings" />}
-        >
-          {t("backToBookings")}
-        </Button>
-      </div>
+      <EmptyState
+        title={t("notFound")}
+        primaryAction={
+          <>
+            <Button
+              variant="secondary"
+              nativeButton={false}
+              render={<Link href="/dashboard/bookings" />}
+            >
+              {t("backToBookings")}
+            </Button>
+          </>
+        }
+      />
     );
   }
 
   if (isLoading || !booking) {
-    return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="size-6 animate-spin text-text-tertiary" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   const viewerIsProvider = session?.user?.id === booking.provider.id;

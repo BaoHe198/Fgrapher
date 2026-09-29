@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -121,22 +122,22 @@ export function LocalPaymentsContent({
 
   if (roles.length === 0) {
     return (
-      <Card className="flex flex-col items-center gap-3 py-16 text-center">
-        <Wallet className="size-12 text-text-tertiary" />
-        <p className="text-body-lg font-semibold! text-text-primary">
-          {t("emptyTitle")}
-        </p>
-        <p className="max-w-sm text-body-md text-text-secondary">
-          {t("emptyDesc")}
-        </p>
-        <Button
-          variant="accent"
-          nativeButton={false}
-          render={<Link href="/dashboard/settings/roles" />}
-        >
-          {t("browseRoles")}
-        </Button>
-      </Card>
+      <EmptyState
+        icon={<Wallet />}
+        title={t("emptyTitle")}
+        description={t("emptyDesc")}
+        primaryAction={
+          <>
+            <Button
+              variant="accent"
+              nativeButton={false}
+              render={<Link href="/dashboard/settings/roles" />}
+            >
+              {t("browseRoles")}
+            </Button>
+          </>
+        }
+      />
     );
   }
 
@@ -258,7 +259,7 @@ export function LocalPaymentsContent({
       {error ? <p className="text-body-sm text-danger">{error}</p> : null}
 
       <div className="flex flex-col gap-3">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
+        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("paymentMethodLabel")}
         </span>
 
