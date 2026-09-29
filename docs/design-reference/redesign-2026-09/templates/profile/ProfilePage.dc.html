@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--bg-page)}a{color:inherit}.fg-x::-webkit-scrollbar{display:none}@keyframes pf-dev{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:none}}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<sc-if value="{{ showAlbum }}" hint-placeholder-val="{{ false }}"><dc-import name="PfAlbum" album="{{ album }}" on-back="{{ closeAlbum }}" on-open="{{ openAlbumPhoto }}" hint-size="100%,1600px"></dc-import></sc-if>
+<sc-if value="{{ showBooking }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Chọn ngày và gói" style="min-height:100vh;display:flex;flex-direction:column">
+<div style="position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;height:60px;padding:0 8px 0 4px;background:var(--bg-page);border-bottom:1px solid var(--border-subtle)"><button type="button" onClick="{{ closeBooking }}" aria-label="Đóng" style="width:44px;height:44px;border:0;background:none;color:var(--text-primary);font-size:24px;cursor:pointer">×</button><strong style="font-family:var(--font-display);font-size:18px">Đặt lịch với {{ shortName }}</strong><span style="width:44px"></span></div>
+<div style="padding:20px"><dc-import name="PfBooking" pkgs="{{ bookPkgs }}" selected-pkg="{{ pkg }}" price-label="{{ fromPrice }}" rating-label="{{ ratingLabel }}" hint-size="100%,760px"></dc-import></div>
+</div>
+</sc-if>
+<sc-if value="{{ showProfile }}" hint-placeholder-val="{{ true }}">
+<header style="position:sticky;top:0;z-index:20;background:var(--green-900)">
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,2.4vw,32px);height:60px;display:flex;align-items:center;gap:24px">
+<a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a>
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><nav aria-label="Điều hướng chính" style="display:flex;align-items:center;gap:4px;flex:1;justify-content:center">
+<a href="../search/SearchPage.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Tìm kiếm F</a>
+<a href="../search-map/SearchMapPage.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Bản đồ F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Đặt lịch F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Chợ F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Cộng đồng F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Giới thiệu F</a>
+</nav></sc-if>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><div style="flex:1"></div></sc-if>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md">Đăng nhập / Đăng ký</x-import>
+</div>
+</header>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Đang tải hồ sơ">
+<div style="height:clamp(160px,22vw,320px)"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full rounded-none" hint-size="100%,100%"></x-import></div>
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,2.4vw,32px);display:flex;flex-direction:column;gap:16px">
+<div style="width:112px;height:112px;margin-top:-56px;border-radius:50%;border:4px solid var(--bg-page);overflow:hidden"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full rounded-none" hint-size="100%,100%"></x-import></div>
+<div style="height:28px;width:min(360px,70%)"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,28px"></x-import></div>
+<div style="height:16px;width:min(480px,90%)"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,16px"></x-import></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:12px;padding:24px 0 48px">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6"><div style="aspect-ratio:4/5"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,100%"></x-import></div></sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div style="height:clamp(160px,22vw,340px);background:var(--bg-sunken);overflow:hidden"><img src="{{ p.cover }}" alt="Ảnh bìa của {{ p.name }}" style="width:100%;height:100%;object-fit:cover;display:block;animation:pf-dev 600ms ease-out both"></div>
+<section style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,2.4vw,32px) 20px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px 32px">
+<div style="display:flex;flex-direction:column;gap:12px;min-width:0;flex:1 1 520px">
+<img src="{{ p.avatar }}" alt="Ảnh đại diện của {{ p.name }}" style="width:clamp(96px,9vw,132px);height:clamp(96px,9vw,132px);margin-top:calc(clamp(96px,9vw,132px) / -2);border-radius:50%;object-fit:cover;border:4px solid var(--bg-page);background:var(--bg-sunken)">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px"><h1 style="margin:0;font-family:var(--font-display);font-size:clamp(26px,2.8vw,40px);line-height:1.1;letter-spacing:-.02em;font-weight:700;text-wrap:balance;min-width:0">{{ p.name }}</h1><x-import component-from-global-scope="Fgrapher.Badge" variant="success">Đã xác minh</x-import></div>
+<span style="font-size:15px;font-weight:600;color:var(--text-secondary)">{{ p.roles }}</span>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:14px;color:var(--text-secondary)"><span>{{ p.place }}</span><sc-if value="{{ p.nationwide }}" hint-placeholder-val="{{ true }}"><span style="padding:3px 10px;border-radius:999px;border:1px solid var(--border-default);font-size:12px;font-weight:700;color:var(--text-primary)">Nhận việc toàn quốc</span></sc-if></div>
+<div style="display:flex;gap:clamp(20px,3vw,40px);padding-top:4px">
+<sc-for list="{{ p.stats }}" as="s" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:2px"><strong style="font-family:var(--font-display);font-size:clamp(20px,1.8vw,26px);line-height:1">{{ s.v }}</strong><span style="font-size:12px;color:var(--text-secondary)">{{ s.l }}</span></div></sc-for>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+<x-import component-from-global-scope="Fgrapher.ProfileActions" target-user-id="usr_minhanh" profile-id="pf_minhanh" initial-follower-count="{{ p.followers }}" share-url="{{ p.shareUrl }}" social-feed-enabled="{{ true }}" is-own-profile="{{ false }}" hint-size="260px,44px"></x-import>
+<x-import component-from-global-scope="Fgrapher.Button" variant="secondary" size="md">{{ msgLabel }}</x-import>
+</div>
+<sc-if value="{{ p.bio }}" hint-placeholder-val="{{ true }}"><p style="margin:0;flex:1 1 100%;max-width:760px;font-size:15px;line-height:1.65;color:var(--text-secondary);text-wrap:pretty">{{ p.bio }}</p></sc-if>
+</section>
+<nav aria-label="Mục trong hồ sơ" style="position:sticky;top:60px;z-index:15;background:var(--bg-page);border-bottom:1px solid var(--border-subtle)">
+<div class="fg-x" style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,2.4vw,32px);display:flex;gap:4px;overflow-x:auto;scrollbar-width:none">
+<sc-for list="{{ sections }}" as="s" hint-placeholder-count="4"><button type="button" data-jump="{{ s.id }}" style="flex:none;min-height:48px;padding:0 14px;border:0;background:none;color:var(--text-secondary);font:700 14px/1 var(--font-body);cursor:pointer;border-bottom:2px solid transparent;transition:color 150ms,border-color 200ms" style-hover="color:var(--text-primary)">{{ s.label }}</button></sc-for>
+</div>
+</nav>
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,2.4vw,32px);display:flex;gap:48px;align-items:flex-start">
+<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:clamp(40px,4vw,64px);padding:clamp(24px,3vw,40px) 0 clamp(48px,5vw,80px)">
+<sc-if value="{{ isStudio }}" hint-placeholder-val="{{ false }}">
+<section id="pf-space" data-sec="space" style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="Fgrapher.SectionHead" title="Không gian &amp; tiện nghi" hint-size="100%,32px"></x-import>
+<div style="display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:6px;height:clamp(240px,28vw,420px);border-radius:var(--fg-radius-sm);overflow:hidden">
+<img src="https://picsum.photos/seed/fg-sp1/900/700" alt="Phòng chụp chính" style="grid-row:1 / 3;width:100%;height:100%;object-fit:cover;animation:pf-dev 500ms ease-out both">
+<img src="https://picsum.photos/seed/fg-sp2/500/400" alt="Phông nền màu" style="width:100%;height:100%;object-fit:cover;animation:pf-dev 500ms 80ms ease-out both">
+<img src="https://picsum.photos/seed/fg-sp3/500/400" alt="Phòng thay đồ" style="width:100%;height:100%;object-fit:cover;animation:pf-dev 500ms 160ms ease-out both">
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<div style="padding:14px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><strong style="display:block;font-family:var(--font-display);font-size:22px">120 m²</strong><span style="font-size:13px;color:var(--text-secondary)">Diện tích phòng chụp</span></div>
+<div style="padding:14px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><strong style="display:block;font-family:var(--font-display);font-size:22px">12 người</strong><span style="font-size:13px;color:var(--text-secondary)">Sức chứa tối đa</span></div>
+<div style="padding:14px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><strong style="display:block;font-family:var(--font-display);font-size:22px">4,5 m</strong><span style="font-size:13px;color:var(--text-secondary)">Trần cao</span></div>
+</div>
+<ul style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:10px 20px;font-size:15px">
+<li style="display:flex;gap:10px;align-items:center"><span style="width:6px;height:6px;background:var(--gold-500)"></span>Phòng thay đồ riêng, gương lớn</li>
+<li style="display:flex;gap:10px;align-items:center"><span style="width:6px;height:6px;background:var(--gold-500)"></span>4 bộ đèn flash Godox, softbox</li>
+<li style="display:flex;gap:10px;align-items:center"><span style="width:6px;height:6px;background:var(--gold-500)"></span>6 phông nền giấy nhiều màu</li>
+<li style="display:flex;gap:10px;align-items:center"><span style="width:6px;height:6px;background:var(--gold-500)"></span>Cửa sổ lấy sáng tự nhiên hướng Đông</li>
+<li style="display:flex;gap:10px;align-items:center"><span style="width:6px;height:6px;background:var(--gold-500)"></span>Máy lạnh, Wi-Fi, nước uống</li>
+<li style="display:flex;gap:10px;align-items:center"><span style="width:6px;height:6px;background:var(--gold-500)"></span>Chỗ đậu 2 ô tô, thang máy</li>
+</ul>
+</section>
+</sc-if>
+<sc-if value="{{ hasPortfolio }}" hint-placeholder-val="{{ true }}">
+<section id="pf-portfolio" data-sec="portfolio" style="display:flex;flex-direction:column;gap:20px">
+<x-import component-from-global-scope="Fgrapher.SectionHead" title="Album dự án" hint-size="100%,32px"></x-import>
+<sc-if value="{{ pfOk }}" hint-placeholder-val="{{ true }}">
+<div class="fg-x" style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:16px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x mandatory;margin:0 calc(-1 * clamp(20px,2.4vw,32px));padding:0 clamp(20px,2.4vw,32px) 4px">
+<sc-for list="{{ albums }}" as="a" hint-placeholder-count="3">
+<button type="button" data-album-id="{{ a.id }}" data-tile="" style="scroll-snap-align:start;display:flex;flex-direction:column;gap:10px;padding:0;border:0;background:none;color:var(--text-primary);text-align:left;font-family:inherit;cursor:pointer">
+<div style="position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--fg-radius-sm);overflow:hidden;background:var(--bg-sunken)"><img src="{{ a.cover }}" alt="{{ a.title }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;animation:pf-dev 500ms ease-out both"><span style="position:absolute;left:8px;bottom:8px;padding:3px 8px;border-radius:4px;background:rgba(10,20,14,.66);color:var(--gold-50);font-size:11px;font-weight:700;letter-spacing:.06em">{{ a.count }}</span></div>
+<strong style="font-family:var(--font-display);font-size:17px;line-height:1.25;text-wrap:pretty">{{ a.title }}</strong>
+<span style="font-size:13px;line-height:1.5;color:var(--text-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ a.desc }}</span>
+</button>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px"><h3 style="margin:0;font-size:17px;font-weight:700">Tất cả ảnh <span style="font-weight:500;color:var(--text-tertiary)">{{ photoCount }}</span></h3>
+<div role="group" aria-label="Lọc theo phong cách" style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ styleTags }}" as="t" hint-placeholder-count="5"><span data-style="{{ t.label }}" style="display:flex"><x-import component-from-global-scope="Fgrapher.Tag" selected="{{ t.on }}">{{ t.label }}</x-import></span></sc-for></div></div>
+<div style="columns:clamp(150px,20vw,260px);column-gap:12px">
+<sc-for list="{{ photos }}" as="g" hint-placeholder-count="9"><button type="button" data-photo="{{ g.i }}" aria-label="Xem ảnh toàn màn hình" style="display:block;width:100%;margin:0 0 12px;padding:0;border:0;background:var(--bg-sunken);border-radius:var(--fg-radius-sm);overflow:hidden;break-inside:avoid;cursor:zoom-in"><img src="{{ g.url }}" alt="{{ g.alt }}" loading="lazy" style="width:100%;height:auto;display:block;animation:pf-dev 500ms ease-out both;transition:transform 500ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.03)"></button></sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ pfEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:8px;padding:28px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg)"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Khung trống</span><strong style="font-size:17px">Nghệ sĩ chưa đăng album nào</strong><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Bạn vẫn có thể xem gói dịch vụ và nhắn tin để xin thêm ảnh mẫu.</span><div><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Nhắn tin xin ảnh mẫu</x-import></div></div></sc-if>
+<sc-if value="{{ pfError }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px"><x-import component-from-global-scope="Fgrapher.Alert" variant="destructive" hint-size="100%,88px"><x-import component-from-global-scope="Fgrapher.AlertTitle">Không tải được portfolio</x-import><x-import component-from-global-scope="Fgrapher.AlertDescription">Kết nối mạng bị gián đoạn. Thông tin gói và đánh giá bên dưới vẫn xem được.</x-import></x-import><div><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Thử lại</x-import></div></div></sc-if>
+</section>
+</sc-if>
+<sc-if value="{{ isShop }}" hint-placeholder-val="{{ false }}">
+<section id="pf-outfits" data-sec="outfits" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px"><x-import component-from-global-scope="Fgrapher.SectionHead" title="Trang phục" hint-size="200px,32px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><x-import component-from-global-scope="Fgrapher.Tag" selected="{{ true }}">Tất cả</x-import><x-import component-from-global-scope="Fgrapher.Tag">Áo dài</x-import><x-import component-from-global-scope="Fgrapher.Tag">Váy cưới</x-import><x-import component-from-global-scope="Fgrapher.Tag">Vest</x-import><x-import component-from-global-scope="Fgrapher.Tag">Cổ phục</x-import></div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:24px 16px">
+<sc-for list="{{ outfits }}" as="o" hint-placeholder-count="6">
+<article data-tile="" style="display:flex;flex-direction:column;gap:10px">
+<button type="button" data-photo="{{ o.i }}" aria-label="Xem ảnh {{ o.name }}" style="padding:0;border:0;background:var(--bg-sunken);border-radius:var(--fg-radius-sm);overflow:hidden;aspect-ratio:3/4;cursor:zoom-in"><img src="{{ o.img }}" alt="{{ o.name }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;animation:pf-dev 500ms ease-out both"></button>
+<div style="display:flex;flex-direction:column;gap:3px"><strong style="font-size:15px;line-height:1.3">{{ o.name }}</strong><span style="font-size:13px;color:var(--text-secondary)">Size {{ o.size }}</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;font-size:14px"><span><strong>{{ o.price }}</strong>/ngày</span><span style="font-size:13px;color:var(--text-secondary)">Tiền cọc {{ o.deposit }}</span></div>
+<x-import component-from-global-scope="Fgrapher.Button" variant="secondary" size="md" style="width:100%">Nhắn tin để thuê</x-import>
+</article>
+</sc-for>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{ hasPackages }}" hint-placeholder-val="{{ true }}">
+<section id="pf-packages" data-sec="packages" style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="Fgrapher.SectionHead" title="{{ pkgTitle }}" hint-size="100%,32px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:16px">
+<sc-for list="{{ pkgs }}" as="k" hint-placeholder-count="3">
+<article data-tile="" style="display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<strong style="font-family:var(--font-display);font-size:18px;line-height:1.25;text-wrap:pretty">{{ k.name }}</strong>
+<dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px"><dt style="color:var(--text-secondary)">Thời lượng</dt><dd style="margin:0;font-weight:600">{{ k.duration }}</dd><dt style="color:var(--text-secondary)">{{ k.photosLabel }}</dt><dd style="margin:0;font-weight:600">{{ k.photos }}</dd><dt style="color:var(--text-secondary)">Giao ảnh</dt><dd style="margin:0;font-weight:600">{{ k.delivery }}</dd></dl>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid var(--border-subtle)"><span style="font-size:17px;font-weight:700">{{ k.price }}</span><span data-pick="{{ k.id }}" style="display:flex"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Chọn gói</x-import></span></div>
+</article>
+</sc-for>
+</div>
+</section>
+</sc-if>
+<section id="pf-reviews" data-sec="reviews" style="display:flex;flex-direction:column;gap:20px">
+<x-import component-from-global-scope="Fgrapher.SectionHead" title="Đánh giá &amp; xác minh" hint-size="100%,32px"></x-import>
+<dc-import name="PfReviews" mode="{{ reviewMode }}" reviews="{{ reviews }}" artist="{{ shortName }}" hint-size="100%,720px"></dc-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px">
+<div style="display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg)">
+<strong style="font-size:16px">Thông tin xác minh</strong>
+<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:14px">
+<li style="display:flex;justify-content:space-between;gap:12px"><span>Danh tính (CCCD)</span><span style="font-weight:700;color:var(--success)">Đã xác minh 03/2025</span></li>
+<li style="display:flex;justify-content:space-between;gap:12px"><span>Số điện thoại</span><span style="font-weight:700;color:var(--success)">Đã xác minh</span></li>
+<li style="display:flex;justify-content:space-between;gap:12px"><span>Tham gia Fgrapher</span><span style="font-weight:600">01/2024</span></li>
+<li style="display:flex;justify-content:space-between;gap:12px"><span>Thời gian phản hồi</span><span style="font-weight:600">Thường trong 2 giờ</span></li>
+</ul>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:8px 20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg)">
+<x-import component-from-global-scope="Fgrapher.Accordion" default-value="{{ accOpen }}" hint-size="100%,200px">
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="deposit"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Đặt cọc</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:var(--text-secondary)">Cọc 30% sau khi nghệ sĩ xác nhận lịch, trao đổi và thanh toán trực tiếp với nghệ sĩ. Fgrapher không thu tiền trực tuyến.</p></x-import></x-import>
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="cancel"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Hủy lịch</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:var(--text-secondary)">Hủy trước 7 ngày: hoàn toàn bộ cọc. Hủy trong vòng 7 ngày: không hoàn cọc, trừ trường hợp thời tiết xấu.</p></x-import></x-import>
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="resched"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Đổi lịch</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:var(--text-secondary)">Được đổi 1 lần miễn phí nếu báo trước ít nhất 48 giờ.</p></x-import></x-import>
+</x-import>
+</div>
+</div>
+</section>
+<section id="pf-area" data-sec="area" style="display:flex;flex-direction:column;gap:14px">
+<x-import component-from-global-scope="Fgrapher.SectionHead" title="Khu vực phục vụ" hint-size="100%,32px"></x-import>
+<div style="position:relative;height:clamp(220px,22vw,300px);border-radius:var(--fg-radius-lg);overflow:hidden;border:1px solid var(--border-subtle);background-color:var(--bg-sunken);background-image:linear-gradient(90deg,var(--border-subtle) 1px,transparent 1px),linear-gradient(var(--border-subtle) 1px,transparent 1px);background-size:44px 44px">
+<div aria-hidden="true" style="position:absolute;left:-10%;right:-10%;top:62%;height:26px;transform:rotate(-8deg);background:color-mix(in srgb,var(--green-500) 22%,var(--bg-sunken))"></div>
+<div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:220px;height:220px;margin:-110px 0 0 -110px;border-radius:50%;background:color-mix(in srgb,var(--gold-400) 18%,transparent);border:2px dashed var(--gold-500)"></div>
+<span aria-hidden="true" style="position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:4px;background:var(--green-900);border:3px solid var(--bg-surface)"></span>
+<span style="position:absolute;left:14px;bottom:14px;padding:8px 12px;border-radius:var(--fg-radius-md);background:var(--bg-surface);border:1px solid var(--border-subtle);font-size:13px;font-weight:600;box-shadow:var(--shadow-sm)">{{ p.place }} · bán kính 20 km</span>
+</div>
+<p style="margin:0;font-size:14px;line-height:1.6;color:var(--text-secondary)">{{ areaNote }}</p>
+</section>
+</main>
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<aside style="flex:0 0 380px;position:sticky;top:124px;padding:clamp(24px,3vw,40px) 0 40px">
+<div style="padding:22px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-xl);background:var(--bg-surface);box-shadow:var(--shadow-md)">
+<sc-if value="{{ canBook }}" hint-placeholder-val="{{ true }}"><dc-import name="PfBooking" pkgs="{{ bookPkgs }}" selected-pkg="{{ pkg }}" price-label="{{ fromPrice }}" rating-label="{{ ratingLabel }}" hint-size="100%,760px"></dc-import></sc-if>
+<sc-if value="{{ isShop }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:14px">
+<strong style="font-family:var(--font-display);font-size:22px">Thuê trang phục</strong>
+<p style="margin:0;font-size:14px;line-height:1.6;color:var(--text-secondary)">Xem catalogue và nhắn tin cho shop để hỏi size, lịch trống và thử đồ. Shop không nhận đặt lịch trên Fgrapher.</p>
+<dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 12px;font-size:14px"><dt style="color:var(--text-secondary)">Địa chỉ</dt><dd style="margin:0;font-weight:600">24 Trần Phú, Phường Hội An, Thành phố Đà Nẵng</dd><dt style="color:var(--text-secondary)">Mở cửa</dt><dd style="margin:0;font-weight:600">08:00–21:00, thứ Hai đến Chủ nhật</dd><dt style="color:var(--text-secondary)">Giao đồ</dt><dd style="margin:0;font-weight:600">Toàn quốc, phí ship thỏa thuận</dd></dl>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" style="width:100%">Nhắn tin để thuê</x-import>
+</div></sc-if>
+</div>
+</aside>
+</sc-if>
+</div>
+</sc-if>
+<x-import component-from-global-scope="Fgrapher.Footer" hint-size="100%,320px"></x-import>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+<div style="height:84px"></div>
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;gap:12px;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:var(--bg-surface);border-top:1px solid var(--border-subtle);box-shadow:0 -6px 20px rgba(18,16,10,.08)">
+<sc-if value="{{ canBook }}" hint-placeholder-val="{{ true }}"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><strong style="font-size:16px">{{ fromPrice }}</strong><span style="font-size:12px;color:var(--text-secondary)"><span style="color:var(--gold-700)">★</span> {{ ratingLabel }}</span></div><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ openBooking }}">Chọn ngày</x-import></sc-if>
+<sc-if value="{{ isShop }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" style="width:100%">Nhắn tin để thuê</x-import></sc-if>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ lbOpen }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Fgrapher.MediaLightbox" items="{{ lbItems }}" index="{{ lbIndex }}" on-close="{{ closeLb }}" on-index-change="{{ setLb }}" title="{{ lbTitle }}" description="{{ lbDesc }}" category-label="{{ lbCat }}" hint-size="0,0"></x-import></sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const q = new URLSearchParams(window.location.search); this.q = q;
+    this.state = { w: window.innerWidth, kind: q.get('kind') || 'artist', st: q.get('state') || 'default', view: q.get('view') || 'profile', album: q.get('album'), lb: q.get('lb') != null ? +q.get('lb') : null, lbSrc: q.get('album') ? 'album' : 'gallery', style: 'Tất cả', pkg: null };
+  }
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR);
+    this.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.onClick = e => {
+      const t = e.target; if (!t.closest) return;
+      const al = t.closest('[data-album-id]'); if (al) { this.go({ album: al.dataset.albumId, view: 'album' }); return; }
+      const ph = t.closest('[data-photo]'); if (ph) { this.setState({ lb: +ph.dataset.photo, lbSrc: this.state.kind === 'shop' ? 'outfits' : 'gallery' }); return; }
+      const sty = t.closest('[data-style]'); if (sty) { this.setState({ style: sty.dataset.style }); return; }
+      const pk = t.closest('[data-pick]'); if (pk) { this.setState({ pkg: pk.dataset.pick }); if (this.state.w < 1024) this.go({ view: 'booking' }); return; }
+      const j = t.closest('[data-jump]'); if (j) { const el = document.querySelector(`[data-sec="${j.dataset.jump}"]`); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 120, behavior: this.reduce ? 'auto' : 'smooth' }); }
+    };
+    document.addEventListener('click', this.onClick);
+    this.onOver = e => { const tl = e.target.closest && e.target.closest('[data-tile]'); if (tl === this.hov) return; if (this.hov) this.lift(this.hov, false); this.hov = tl; if (tl) this.lift(tl, true); };
+    document.addEventListener('pointerover', this.onOver);
+    this.onScroll = () => this.paintNav(); window.addEventListener('scroll', this.onScroll, { passive: true });
+    setTimeout(() => this.paintNav(), 100);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); window.removeEventListener('scroll', this.onScroll); document.removeEventListener('click', this.onClick); document.removeEventListener('pointerover', this.onOver); }
+  componentDidUpdate() { this.paintNav(); }
+  go(patch) {
+    const root = document.body;
+    if (this.reduce || !root.animate) { this.setState(patch); window.scrollTo(0, 0); return; }
+    root.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: 'ease-in' }).onfinish = () => { this.setState(patch); window.scrollTo(0, 0); root.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)' }); };
+  }
+  lift(el, on) { if (this.reduce) return; el.style.transition = 'transform 220ms cubic-bezier(.2,.7,.2,1)'; el.style.transform = on ? 'translateY(-3px)' : ''; }
+  paintNav() {
+    const secs = [...document.querySelectorAll('[data-sec]')]; if (!secs.length) return;
+    let cur = secs[0].dataset.sec; secs.forEach(s => { if (s.getBoundingClientRect().top < 160) cur = s.dataset.sec; });
+    document.querySelectorAll('[data-jump]').forEach(b => { const on = b.dataset.jump === cur; b.style.color = on ? 'var(--text-primary)' : ''; b.style.borderBottomColor = on ? 'var(--gold-500)' : 'transparent'; });
+  }
+  renderVals() {
+    const S = this.state, isDesktop = S.w >= 1024, kind = S.kind, st = S.st;
+    const pic = (s, w, h) => `https://picsum.photos/seed/fg-${s}/${w}/${h}`;
+    const dims = [[600, 800], [800, 560], [600, 900], [700, 700], [900, 600], [600, 760], [800, 1000], [900, 640], [640, 800], [800, 600], [600, 840], [760, 760]];
+    const styles = ['Cưới', 'Chân dung', 'Kỷ yếu', 'Áo dài'];
+    const allPhotos = dims.map(([w, h], i) => ({ i, url: pic('pg' + kind + i, w, h), alt: `Ảnh ${styles[i % 4].toLowerCase()} trong portfolio`, style: styles[i % 4] }));
+    const photos = (S.style === 'Tất cả' ? allPhotos : allPhotos.filter(p => p.style === S.style));
+    const mkAlbum = (id, title, desc, count, category, meta, k) => ({ id, title, desc, count, category, meta, cover: pic(k + '0', 800, 600), photos: [[1400, 900], [1400, 900], [700, 900], [700, 900], [1400, 800], [700, 900], [700, 900]].map(([w, h], i) => ({ url: pic(k + i, w, h), alt: title })), pkgLine: 'Gói Ảnh cưới ngoại cảnh · Từ 5.500.000₫' });
+    const albums = [
+      mkAlbum('al1', 'Cưới Đà Lạt – Thảo Vy & Quốc Anh', 'Hai ngày ngoại cảnh ở đồi thông Đa Phú và hồ Tuyền Lâm, chụp theo phong cách tự nhiên, ít tạo dáng.', '48 ảnh', 'Ảnh cưới', '14–15/09/2026 · Phường Xuân Hương, Tỉnh Lâm Đồng', 'pa1'),
+      mkAlbum('al2', 'Kỷ yếu 12A1 – THPT Nguyễn Du', 'Một buổi sáng ở sân trường và công viên Gia Định với 42 bạn và cô chủ nhiệm.', '120 ảnh', 'Kỷ yếu', '28/05/2026 · Phường Thủ Đức, Thành phố Hồ Chí Minh', 'pa2'),
+      mkAlbum('al3', 'Áo dài Tết – Phố cổ Hội An', 'Chân dung áo dài lụa trong ánh đèn lồng buổi tối, mùng 3 Tết.', '36 ảnh', 'Chân dung', '19/02/2026 · Phường Hội An, Thành phố Đà Nẵng', 'pa3'),
+      mkAlbum('al4', 'Chân dung doanh nhân – Chị Lan Anh', 'Bộ ảnh hồ sơ cá nhân chụp tại văn phòng và studio.', '18 ảnh', 'Chân dung', '02/08/2026 · Phường Bến Thành, Thành phố Hồ Chí Minh', 'pa4')
+    ];
+    if (st === 'long') albums[0] = { ...albums[0], title: 'Hành trình 3 ngày chụp ảnh cưới xuyên Tây Bắc: Mộc Châu, Tà Xùa và Mù Cang Chải mùa lúa chín – Thảo Vy & Quốc Anh', desc: 'Chuyến đi dài nhất năm của chúng tôi: 3 ngày, 2 váy cưới, 1 bộ áo dài và rất nhiều sương. Chúng tôi đi theo lịch lúa chín ở Mù Cang Chải, chờ mây ở Tà Xùa từ 04:30 và kết thúc bằng buổi chiều trên đồi chè Mộc Châu.', count: '1.024 ảnh' };
+    const P = {
+      artist: { name: 'Minh Anh Nhiếp Ảnh', short: 'Minh Anh', roles: 'Nhiếp ảnh gia · Quay phim', place: 'Phường Thủ Đức, Thành phố Hồ Chí Minh', nationwide: true, followers: 1284, stats: [['312', 'buổi đã chụp'], ['4,9', 'điểm · 128 đánh giá'], ['8', 'năm kinh nghiệm']], bio: 'Chụp ảnh cưới và chân dung theo lối tự nhiên, ưu tiên ánh sáng thật. Nhận chụp ngoại cảnh toàn quốc, thường xuyên ở Đà Lạt và Hội An.', k: 'pfa' },
+      studio: { name: 'Studio Rừng Thông', short: 'Studio Rừng Thông', roles: 'Studio chụp ảnh · Cho thuê không gian', place: 'Phường Hoàn Kiếm, Thành phố Hà Nội', nationwide: false, followers: 3120, stats: [['1.240', 'buổi đã tổ chức'], ['4,8', 'điểm · 96 đánh giá'], ['6', 'năm hoạt động']], bio: 'Studio 120 m² với cửa sổ lấy sáng tự nhiên, 6 phông nền và phòng thay đồ riêng. Có nhiếp ảnh gia nội bộ hoặc cho thuê không gian theo giờ.', k: 'pfs' },
+      shop: { name: 'Áo Dài Mây', short: 'Áo Dài Mây', roles: 'Cho thuê trang phục', place: 'Phường Hội An, Thành phố Đà Nẵng', nationwide: true, followers: 862, stats: [['186', 'mẫu trang phục'], ['4,9', 'điểm · 64 đánh giá'], ['5', 'năm hoạt động']], bio: 'Áo dài lụa, cổ phục Việt và váy cưới cho thuê theo ngày. Nhận may đo và gửi đồ đi toàn quốc.', k: 'pfh' }
+    }[kind];
+    let p = { ...P, cover: pic(P.k + 'c', 1600, 600), avatar: pic(P.k + 'v', 300, 300), shareUrl: 'https://fgrapher.vn/profile/minhanh', stats: P.stats.map(([v, l]) => ({ v, l })) };
+    if (st === 'long') p = { ...p, name: 'Nguyễn Trần Phương Uyên Photography & Wedding Film Studio', short: 'Phương Uyên', roles: 'Nhiếp ảnh gia · Quay phim · Chuyên viên trang điểm · Người mẫu', place: 'Phường Long Trường, Thành phố Hồ Chí Minh', bio: 'Mình bắt đầu chụp ảnh từ năm 2016, chuyên ảnh cưới phóng sự và phim cưới ngắn. Ekip gồm 2 nhiếp ảnh gia, 1 quay phim và 1 chuyên viên trang điểm, nhận việc toàn quốc và đã đi hơn 40 tỉnh, thành. Mình ưu tiên ánh sáng tự nhiên, hạn chế photoshop da, và luôn gửi ảnh xem trước trong 72 giờ sau buổi chụp để hai bạn chọn ảnh chỉnh sửa.', stats: [['1.284', 'buổi đã chụp'], ['4,7', 'điểm · 1.284 đánh giá'], ['10', 'năm kinh nghiệm']].map(([v, l]) => ({ v, l })) };
+    if (st === 'empty') p = { ...p, stats: [['0', 'buổi đã chụp'], ['Mới', 'chưa có đánh giá'], ['2', 'năm kinh nghiệm']].map(([v, l]) => ({ v, l })) };
+    const pkgsBy = {
+      artist: [['p1', 'Chân dung áo dài', '2 giờ', '30 ảnh', 'Sau 5 ngày', 'Từ 2.000.000₫'], ['p2', 'Ảnh cưới ngoại cảnh', '1 ngày', '120 ảnh', 'Sau 14 ngày', 'Từ 5.500.000₫'], ['p3', 'Kỷ yếu cả lớp', '4 giờ', '200 ảnh', 'Sau 10 ngày', 'Từ 3.500.000₫']],
+      studio: [['s1', 'Thuê studio theo giờ', 'Tối thiểu 2 giờ', 'Không kèm', 'Tự chụp', '450.000₫/giờ'], ['s2', 'Gói nửa ngày kèm trợ lý ánh sáng', '4 giờ', 'Không kèm', 'Tự chụp', 'Từ 1.600.000₫'], ['s3', 'Kỷ yếu tại studio', '3 giờ', '150 ảnh', 'Sau 7 ngày', 'Từ 4.200.000₫']]
+    }[kind] || [];
+    let pkgs = pkgsBy.map(([id, name, duration, photos, delivery, price]) => ({ id, name, duration, photos, delivery, price, photosLabel: 'Ảnh chỉnh sửa', short: `${duration} · ${photos === 'Không kèm' ? 'tự chụp' : photos + ' chỉnh sửa'}` }));
+    if (st === 'long' && pkgs[1]) pkgs[1] = { ...pkgs[1], name: 'Trọn gói ảnh cưới ngoại cảnh 2 ngày kèm phim cưới ngắn 3 phút và album in 30×30 cm', duration: '2 ngày', photos: '250 ảnh', delivery: 'Sau 21 ngày', price: 'Từ 18.500.000₫', short: '2 ngày · 250 ảnh chỉnh sửa' };
+    const rv = (name, date, service, stars, text, reply, k) => ({ name, date, service, stars, text, reply, avatar: pic(k, 80, 80) });
+    let reviews = [
+      rv('Trần Thảo Vy', '20/09/2026', 'Ảnh cưới ngoại cảnh', 5, 'Anh Minh Anh rất kiên nhẫn, hai ngày ở Đà Lạt trời mưa liên tục mà vẫn canh được lúc tạnh để chụp. Ảnh giao đúng 14 ngày, màu đẹp hơn mong đợi.', 'Cảm ơn Vy và Quốc Anh! Hai bạn chịu dậy lúc 04:30 nên mới có những tấm sương đẹp như vậy.', 'rv1'),
+      rv('Lê Hoàng Nam', '02/09/2026', 'Kỷ yếu cả lớp', 5, 'Lớp 42 người mà ai cũng có ảnh riêng đẹp. Anh hướng dẫn tạo dáng vui, không bị gượng.', '', 'rv2'),
+      rv('Phạm Ngọc Hân', '18/08/2026', 'Chân dung áo dài', 4, 'Ảnh đẹp, đúng hẹn. Chỉ tiếc là buổi chụp bắt đầu trễ 15 phút do kẹt xe.', 'Xin lỗi Hân về việc đến trễ, lần sau mình sẽ xuất phát sớm hơn.', 'rv3')
+    ];
+    if (st === 'long') reviews[0] = { ...reviews[0], text: 'Mình đã xem rất nhiều hồ sơ trước khi chọn anh. Từ lúc nhắn tin anh đã gửi gợi ý địa điểm theo giờ mặt trời mọc, lịch trình từng ngày và danh sách đồ cần chuẩn bị. Hai ngày ở Đà Lạt trời mưa liên tục, anh vẫn canh được lúc tạnh, còn mượn thêm ô trong suốt để chụp dưới mưa. Ảnh xem trước gửi sau 3 ngày, ảnh chỉnh sửa giao đúng 14 ngày, màu đẹp hơn mong đợi. Gia đình hai bên đều rất thích album. Cảm ơn anh và ekip rất nhiều!' };
+    const outfits = [['Áo dài lụa trơn màu kem', 'S–L', '250.000₫', '1.000.000₫'], ['Áo dài gấm đỏ ngày Tết', 'M–XL', '300.000₫', '1.500.000₫'], ['Váy cưới đuôi cá ren Pháp', 'S–M', '1.800.000₫', '5.000.000₫'], ['Nhật bình cổ phục triều Nguyễn', 'Freesize', '450.000₫', '2.000.000₫'], ['Vest nam xanh rêu', '48–54', '350.000₫', '1.500.000₫'], ['Áo dài cách tân họa tiết sen', 'S–L', '200.000₫', '800.000₫']].map(([name, size, price, deposit], i) => ({ i, name, size, price, deposit, img: pic('of' + i, 600, 800) }));
+    const mode = st === 'loading' ? 'loading' : 'ready';
+    const cur = albums.find(a => a.id === S.album) || albums[0];
+    const lbItems = S.lbSrc === 'album' ? cur.photos : S.lbSrc === 'outfits' ? outfits.map(o => ({ url: o.img, alt: o.name })) : allPhotos.map(g => ({ url: g.url, alt: g.alt }));
+    const isShop = kind === 'shop', canBook = !isShop;
+    const sections = isShop ? [['outfits', 'Trang phục']] : kind === 'studio' ? [['space', 'Không gian'], ['portfolio', 'Portfolio'], ['packages', 'Gói thuê'], ['reviews', 'Đánh giá'], ['area', 'Khu vực']] : [['portfolio', 'Portfolio'], ['packages', 'Gói dịch vụ'], ['reviews', 'Đánh giá'], ['area', 'Khu vực phục vụ']];
+    return {
+      theme: this.q.get('theme') || 'light', isDesktop, isMobile: !isDesktop,
+      showAlbum: S.view === 'album', showBooking: !isDesktop && S.view === 'booking', showProfile: S.view === 'profile' || (isDesktop && S.view === 'booking'),
+      isLoading: mode === 'loading', isReady: mode === 'ready', skel: isDesktop ? [1, 2, 3, 4, 5, 6] : [1, 2],
+      p, shortName: p.short, msgLabel: isShop ? 'Nhắn tin để thuê' : 'Nhắn tin',
+      sections: sections.map(([id, label]) => ({ id, label })),
+      isStudio: kind === 'studio', isShop, canBook,
+      hasPortfolio: !isShop, pfOk: st !== 'empty' && st !== 'error', pfEmpty: st === 'empty', pfError: st === 'error',
+      albums, photos, photoCount: String(photos.length),
+      styleTags: ['Tất cả', ...styles].map(label => ({ label, on: S.style === label })),
+      outfits, hasPackages: !isShop, pkgTitle: kind === 'studio' ? 'Gói thuê' : 'Gói dịch vụ', pkgs,
+      bookPkgs: pkgs, pkg: S.pkg, fromPrice: kind === 'studio' ? 'Từ 450.000₫/giờ' : 'Từ 2.000.000₫', ratingLabel: st === 'empty' ? 'Mới' : kind === 'studio' ? '4,8 · 96 đánh giá' : '4,9 · 128 đánh giá',
+      reviewMode: st === 'empty' ? 'empty' : 'ok', reviews: st === 'empty' ? [] : reviews, accOpen: ['deposit'],
+      areaNote: p.nationwide ? 'Nhận việc toàn quốc. Ngoài bán kính 20 km, phí di chuyển và lưu trú thỏa thuận trực tiếp.' : 'Chụp tại studio. Nhận chụp ngoại cảnh trong nội thành Hà Nội.',
+      album: cur, closeAlbum: () => this.go({ view: 'profile' }), openAlbumPhoto: i => this.setState({ lb: i, lbSrc: 'album' }),
+      openBooking: () => this.go({ view: 'booking' }), closeBooking: () => this.go({ view: 'profile' }),
+      lbOpen: S.lb !== null, lbItems, lbIndex: S.lb || 0, closeLb: () => this.setState({ lb: null }), setLb: i => this.setState({ lb: i }),
+      lbTitle: S.lbSrc === 'album' ? cur.title : isShop ? 'Trang phục' : `Portfolio của ${p.short}`, lbDesc: S.lbSrc === 'album' ? cur.meta : '', lbCat: S.lbSrc === 'album' ? cur.category : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

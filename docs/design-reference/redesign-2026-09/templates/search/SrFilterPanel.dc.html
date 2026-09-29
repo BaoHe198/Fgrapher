@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Khu vực</span>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Tỉnh/thành phố" options="{{ provinces }}" value="{{ province }}" on-change="{{ setProvince }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Phường/xã" options="{{ wards }}" value="{{ ward }}" on-change="{{ setWard }}" hint-size="100%,64px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Ngày &amp; giờ cần chụp</span>
+<x-import component-from-global-scope="Fgrapher.DateField" label="Ngày chụp" value="{{ date }}" on-change="{{ setDate }}" hint-size="100%,64px"></x-import>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px">
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Từ" options="{{ hours }}" value="{{ start }}" on-change="{{ setStart }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Đến" options="{{ hours }}" value="{{ end }}" on-change="{{ setEnd }}" hint-size="100%,64px"></x-import>
+</div>
+<span style="font-size:13px;line-height:1.5;color:var(--text-secondary)">Chỉ hiện nghệ sĩ còn lịch trống trong khung giờ này.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Đánh giá</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="Fgrapher.Tag">Tất cả</x-import>
+<x-import component-from-global-scope="Fgrapher.Tag">Từ 4,0★</x-import>
+<x-import component-from-global-scope="Fgrapher.Tag" selected="{{ true }}">Từ 4,5★</x-import>
+<x-import component-from-global-scope="Fgrapher.Tag">5,0★</x-import>
+</div>
+</div>
+<div style="padding-top:20px;border-top:1px solid var(--border-subtle)">
+<x-import component-from-global-scope="Fgrapher.FilterSidebar" role-counts="{{ roleCounts }}" category-counts="{{ categoryCounts }}" marketplace-enabled="{{ false }}" hint-size="100%,640px"></x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { province: 'Thành phố Hồ Chí Minh', ward: 'Phường Thủ Đức', date: '2026-10-12', start: '08:00', end: '11:00' };
+  renderVals() {
+    const set = k => v => this.setState({ [k]: v && v.target ? v.target.value : v });
+    return {
+      ...this.state,
+      provinces: ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội', 'Thành phố Đà Nẵng', 'Thành phố Cần Thơ', 'Thành phố Huế', 'Tỉnh Lâm Đồng', 'Tỉnh Khánh Hòa'],
+      wards: ['Tất cả phường/xã', 'Phường Thủ Đức', 'Phường Linh Xuân', 'Phường Tăng Nhơn Phú', 'Phường Long Trường', 'Phường Bến Thành'],
+      hours: Array.from({ length: 16 }, (_, i) => String(i + 5).padStart(2, '0') + ':00'),
+      setProvince: set('province'), setWard: set('ward'), setDate: set('date'), setStart: set('start'), setEnd: set('end'),
+      roleCounts: { PHOTOGRAPHER: 128, VIDEOGRAPHER: 46, MAKEUP_ARTIST: 71, MODEL: 39, STUDIO: 22 },
+      categoryCounts: { WEDDING: 64, PORTRAIT: 52, YEARBOOK: 18, EVENT: 30, FASHION: 21, PRODUCT: 12, BRIDAL: 9 }
+    };
+  }
+}
+</script>
+</body>
+</html>

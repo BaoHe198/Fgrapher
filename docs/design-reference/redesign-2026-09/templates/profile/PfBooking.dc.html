@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+<span style="font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:-.01em">{{ priceLabel }}</span>
+<span style="font-size:13px;font-weight:600;color:var(--text-secondary)"><span style="color:var(--gold-700)">★</span> {{ ratingLabel }}</span>
+</div>
+<div role="radiogroup" aria-label="Chọn gói" style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Gói dịch vụ</span>
+<sc-for list="{{ pkgs }}" as="p" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{ p.on }}" data-pk="{{ p.id }}" style="display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 14px;border-radius:var(--fg-radius-md);border:1px solid var(--border-default);background:var(--bg-surface);color:var(--text-primary);text-align:left;font-family:inherit;cursor:pointer;transition:border-color 150ms,background 150ms" style-hover="border-color:var(--text-tertiary)">
+<sc-if value="{{ p.on }}" hint-placeholder-val="{{ false }}"><span style="flex:none;width:20px;height:20px;border-radius:50%;border:6px solid var(--brand-primary);background:var(--bg-surface)"></span></sc-if>
+<sc-if value="{{ p.off }}" hint-placeholder-val="{{ true }}"><span style="flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--border-default)"></span></sc-if>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:700;line-height:1.3">{{ p.name }}</span><span style="font-size:12px;color:var(--text-secondary)">{{ p.short }}</span></span>
+<span style="flex:none;font-size:14px;font-weight:700">{{ p.price }}</span>
+</button>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Lịch trống tuần này</span>
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+<sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+<sc-if value="{{ d.busy }}" hint-placeholder-val="{{ false }}"><span aria-label="{{ d.aria }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;border-radius:var(--fg-radius-sm);color:var(--text-tertiary);text-decoration:line-through;font-size:12px"><span style="font-size:10px">{{ d.dow }}</span><strong style="font-size:14px">{{ d.day }}</strong></span></sc-if>
+<sc-if value="{{ d.free }}" hint-placeholder-val="{{ true }}"><button type="button" data-day="{{ d.iso }}" aria-label="{{ d.aria }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;border-radius:var(--fg-radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);font-family:inherit;font-size:12px;cursor:pointer" style-hover="border-color:var(--text-tertiary)"><span style="font-size:10px;color:var(--text-secondary)">{{ d.dow }}</span><strong style="font-size:14px">{{ d.day }}</strong></button></sc-if>
+<sc-if value="{{ d.sel }}" hint-placeholder-val="{{ false }}"><button type="button" data-day="{{ d.iso }}" aria-label="{{ d.aria }}" aria-pressed="true" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;border-radius:var(--fg-radius-sm);border:1px solid var(--green-900);background:var(--green-900);color:var(--gold-50);font-family:inherit;font-size:12px;cursor:pointer"><span style="font-size:10px;color:var(--green-200)">{{ d.dow }}</span><strong style="font-size:14px">{{ d.day }}</strong></button></sc-if>
+</sc-for>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px">
+<x-import component-from-global-scope="Fgrapher.DateField" label="Ngày chụp" value="{{ date }}" on-change="{{ setDate }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Giờ bắt đầu" options="{{ hours }}" value="{{ start }}" on-change="{{ setStart }}" hint-size="100%,64px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:var(--fg-radius-md);background:var(--bg-sunken);font-size:13px;line-height:1.5">
+<span style="font-weight:700">{{ summary }}</span>
+<span style="color:var(--text-secondary)">Giá cuối cùng chốt khi nghệ sĩ xác nhận.</span>
+</div>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" style="width:100%">Gửi yêu cầu đặt lịch</x-import>
+<x-import component-from-global-scope="Fgrapher.Button" variant="secondary" size="lg" style="width:100%">Nhắn tin trước</x-import>
+<p style="margin:0;font-size:13px;line-height:1.5;color:var(--text-secondary);text-align:center;text-wrap:pretty">Chưa mất phí. Nghệ sĩ xác nhận trong 48 giờ, đặt cọc thỏa thuận trực tiếp.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pkgs&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object[]&quot;},&quot;selectedPkg&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;onPick&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id)=&gt;void&quot;},&quot;priceLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Từ 2.000.000₫&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;ratingLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;4,9 · 128 đánh giá&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { pk: null, date: '2026-10-12', start: '08:00' };
+  componentDidMount() {
+    this.h = e => { const t = e.target; if (!t.closest) return; const p = t.closest('[data-pk]'); if (p && this.root(p)) { this.setState({ pk: p.dataset.pk }); this.props.onPick && this.props.onPick(p.dataset.pk); } const d = t.closest('[data-day]'); if (d && this.root(d)) this.setState({ date: d.dataset.day }); };
+    document.addEventListener('click', this.h);
+  }
+  root() { return true; }
+  componentWillUnmount() { document.removeEventListener('click', this.h); }
+  renderVals() {
+    const pkgs = this.props.pkgs || [];
+    const pk = this.state.pk || this.props.selectedPkg || (pkgs[0] && pkgs[0].id);
+    const cur = pkgs.find(p => p.id === pk) || pkgs[0] || {};
+    const dows = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    const busy = ['2026-10-10', '2026-10-11', '2026-10-15'];
+    const days = Array.from({ length: 7 }, (_, i) => { const dt = new Date(Date.UTC(2026, 9, 10 + i)); const iso = dt.toISOString().slice(0, 10); const b = busy.includes(iso); const s = !b && iso === this.state.date; const dd = String(dt.getUTCDate()).padStart(2, '0'); return { iso, day: dd, dow: dows[dt.getUTCDay()], busy: b, sel: s, free: !b && !s, aria: `${dd}/10/2026, ${b ? 'kín lịch' : 'còn lịch'}` }; });
+    const [y, m, d] = this.state.date.split('-');
+    const set = k => v => this.setState({ [k]: v && v.target ? v.target.value : v });
+    return {
+      priceLabel: this.props.priceLabel || 'Từ 2.000.000₫', ratingLabel: this.props.ratingLabel || '4,9 · 128 đánh giá',
+      pkgs: pkgs.map(p => ({ ...p, on: p.id === cur.id, off: p.id !== cur.id })),
+      days, date: this.state.date, setDate: set('date'), start: this.state.start, setStart: set('start'),
+      hours: Array.from({ length: 15 }, (_, i) => String(i + 5).padStart(2, '0') + ':00'),
+      summary: `${cur.name || ''} · ${d}/${m}/${y} · ${this.state.start} · ${cur.price || ''}`
+    };
+  }
+}
+</script>
+</body>
+</html>

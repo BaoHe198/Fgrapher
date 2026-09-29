@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--bg-page)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}html{scroll-behavior:smooth}.au-x::-webkit-scrollbar{display:none}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<header style="position:sticky;top:0;z-index:20;background:var(--green-900);box-shadow:0 1px 0 hsl(0 0% 100% / .06)">
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,2.4vw,32px);height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+<a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a>
+<span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--green-200)">HỆ THỐNG · RÀ SOÁT 09/2026</span>
+</div>
+</header>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Mục rà soát" class="au-x" style="position:sticky;top:60px;z-index:15;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 20px;background:var(--bg-page);border-bottom:1px solid var(--border-subtle)">
+<a href="#au-foundations" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Nền tảng</a>
+<a href="#au-states" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Trạng thái</a>
+<a href="#au-motion" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Chuyển động</a>
+<a href="#au-dark" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Chế độ tối</a>
+<a href="#au-components" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Component</a>
+<a href="#au-identity" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Bản sắc</a>
+</nav>
+</sc-if>
+<div style="max-width:1320px;margin:0 auto;padding:clamp(32px,5vw,72px) clamp(20px,2.4vw,32px) clamp(64px,8vw,120px);display:flex;gap:64px;align-items:flex-start">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Mục rà soát" style="flex:0 0 200px;position:sticky;top:100px;display:flex;flex-direction:column;gap:2px">
+<span style="padding:0 12px 10px;font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">MỤC LỤC</span>
+<a href="#au-foundations" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">01</span>Nền tảng</a>
+<a href="#au-states" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">02</span>Trạng thái</a>
+<a href="#au-motion" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">03</span>Chuyển động</a>
+<a href="#au-dark" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">04</span>Chế độ tối</a>
+<a href="#au-components" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">05</span>Component</a>
+<a href="#au-identity" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">06</span>Bản sắc</a>
+</nav>
+</sc-if>
+<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:clamp(64px,7vw,96px)">
+<div style="display:flex;flex-direction:column;gap:20px">
+<h1 style="margin:0;font:var(--text-display-lg);letter-spacing:-.02em;text-wrap:balance">Rà soát toàn hệ thống</h1>
+<p style="margin:0;max-width:680px;font:var(--text-body-lg);color:var(--text-secondary);text-wrap:pretty">6 màn đều đã có bản sáng và tối. Nhưng mỗi màn lại tự đặt thời lượng chuyển động, bo góc, cỡ chữ nhỏ và màu trạng thái riêng. Một số component của design system vẫn dùng token trung tính mặc định của shadcn. Trang này gom tất cả về một bộ quy tắc.</p>
+<dl style="margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:1px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);overflow:hidden;background:var(--border-subtle)">
+<div style="display:flex;flex-direction:column;gap:6px;padding:18px 20px;background:var(--bg-surface)"><dt style="font-size:14px;color:var(--text-secondary)">Thời lượng chuyển động</dt><dd style="margin:0;font:700 26px/1 var(--font-display)">22 → 5</dd></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:18px 20px;background:var(--bg-surface)"><dt style="font-size:14px;color:var(--text-secondary)">Kiểu ảnh hiện dần</dt><dd style="margin:0;font:700 26px/1 var(--font-display)">5 → 1</dd></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:18px 20px;background:var(--bg-surface)"><dt style="font-size:14px;color:var(--text-secondary)">Component cần chỉnh</dt><dd style="margin:0;font:700 26px/1 var(--font-display)">9</dd></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:18px 20px;background:var(--bg-surface)"><dt style="font-size:14px;color:var(--text-secondary)">Component cần thêm</dt><dd style="margin:0;font:700 26px/1 var(--font-display)">10</dd></div>
+</dl>
+</div>
+<dc-import name="AuFoundations" hint-size="100%,1100px"></dc-import>
+<dc-import name="AuStates" hint-size="100%,1300px"></dc-import>
+<dc-import name="AuMotion" hint-size="100%,1400px"></dc-import>
+<dc-import name="AuDark" theme="{{ theme }}" hint-size="100%,1300px"></dc-import>
+<dc-import name="AuComponents" hint-size="100%,1300px"></dc-import>
+<dc-import name="AuIdentity" hint-size="100%,1000px"></dc-import>
+</main>
+</div>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.q = new URLSearchParams(window.location.search); this.state = { w: window.innerWidth }; }
+  componentDidMount() { this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  renderVals() { const d = this.state.w >= 1024; return { theme: this.q.get('theme') || 'light', isDesktop: d, isMobile: !d }; }
+}
+</script>
+</body>
+</html>

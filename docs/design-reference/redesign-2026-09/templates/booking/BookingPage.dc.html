@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--bg-page)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}@keyframes bk-in{from{opacity:0}to{opacity:1}}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<header style="position:sticky;top:0;z-index:20;background:var(--green-900)">
+<div style="max-width:1440px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+<a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a>
+<a href="../profile/ProfilePage.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 4px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Lưu nháp &amp; thoát</a>
+</div>
+</header>
+</sc-if>
+<sc-if value="{{ mobileBar }}" hint-placeholder-val="{{ false }}">
+<div style="position:sticky;top:0;z-index:20;background:var(--bg-page)">
+<div style="display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 4px;border-bottom:1px solid var(--border-subtle)">
+<button type="button" onClick="{{ back }}" aria-label="{{ backAria }}" style="width:48px;height:48px;border:0;background:none;color:var(--text-primary);font-size:22px;cursor:pointer">←</button>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0"><span style="font-size:12px;font-weight:600;color:var(--text-secondary)">{{ stepCount }}</span><strong style="font-size:15px">{{ stepTitle }}</strong></div>
+<a href="../profile/ProfilePage.dc.html" aria-label="Lưu nháp và thoát" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:var(--text-primary);font-size:24px;text-decoration:none">×</a>
+</div>
+<div role="progressbar" aria-label="Tiến trình đặt lịch" aria-valuemin="1" aria-valuemax="6" aria-valuenow="{{ step }}" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:0 0 0 0">
+<sc-for list="{{ steps }}" as="s" hint-placeholder-count="6"><sc-if value="{{ s.lit }}" hint-placeholder-val="{{ false }}"><span style="height:3px;background:var(--brand-primary)"></span></sc-if><sc-if value="{{ s.dim }}" hint-placeholder-val="{{ true }}"><span style="height:3px;background:var(--border-subtle)"></span></sc-if></sc-for>
+</div>
+</div>
+</sc-if>
+<div style="max-width:1200px;margin:0 auto;padding:clamp(20px,3vw,40px) clamp(20px,2.4vw,32px) clamp(32px,6vw,96px)">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:20px;padding-bottom:36px;margin-bottom:40px;border-bottom:1px solid var(--border-subtle)">
+<a href="../profile/ProfilePage.dc.html" style="align-self:flex-start;display:flex;align-items:center;gap:8px;min-height:32px;font-size:14px;font-weight:600;text-decoration:none;color:var(--text-secondary)" style-hover="color:var(--text-primary)">← Hồ sơ {{ artist }}</a>
+<h1 style="margin:0;font-family:var(--font-display);font-size:36px;line-height:1.1;letter-spacing:-.02em;font-weight:700">{{ pageTitle }}</h1>
+<sc-if value="{{ inFlow }}" hint-placeholder-val="{{ true }}">
+<ol aria-label="Các bước đặt lịch" style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px">
+<sc-for list="{{ steps }}" as="s" hint-placeholder-count="6">
+<li style="display:flex;flex-direction:column;gap:10px">
+<sc-if value="{{ s.lit }}" hint-placeholder-val="{{ false }}"><span style="height:2px;border-radius:2px;background:var(--brand-primary)"></span></sc-if><sc-if value="{{ s.dim }}" hint-placeholder-val="{{ true }}"><span style="height:2px;border-radius:2px;background:var(--border-subtle)"></span></sc-if>
+<sc-if value="{{ s.done }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ s.go }}" style="display:flex;align-items:center;gap:8px;min-height:32px;padding:0;border:0;background:none;color:var(--text-secondary);font:600 14px/1.2 var(--font-body);text-align:left;cursor:pointer" style-hover="color:var(--text-primary)"><span aria-hidden="true" style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--brand-primary);color:var(--text-on-brand);display:flex;align-items:center;justify-content:center;font-size:12px">✓</span>{{ s.label }}</button></sc-if>
+<sc-if value="{{ s.cur }}" hint-placeholder-val="{{ false }}"><span aria-current="step" style="display:flex;align-items:center;gap:8px;min-height:32px;color:var(--text-primary);font:700 14px/1.2 var(--font-body)"><span aria-hidden="true" style="flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--brand-primary);color:var(--text-primary);display:flex;align-items:center;justify-content:center;font-size:12px">{{ s.n }}</span>{{ s.label }}</span></sc-if>
+<sc-if value="{{ s.todo }}" hint-placeholder-val="{{ true }}"><span style="display:flex;align-items:center;gap:8px;min-height:32px;color:var(--text-tertiary);font:600 14px/1.2 var(--font-body)"><span aria-hidden="true" style="flex:none;width:22px;height:22px;border-radius:50%;border:1px solid var(--border-default);display:flex;align-items:center;justify-content:center;font-size:12px">{{ s.n }}</span>{{ s.label }}</span></sc-if>
+</li>
+</sc-for>
+</ol>
+</sc-if>
+</div>
+</sc-if>
+<div style="display:flex;gap:72px;align-items:flex-start">
+<main data-stepbox="" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:28px">
+<sc-if value="{{ inFlow }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">{{ stepCount }}</span></sc-if>
+<h2 style="margin:0;font-family:var(--font-display);font-size:clamp(22px,1.9vw,26px);line-height:1.2;letter-spacing:-.01em;font-weight:700">{{ stepTitle }}</h2>
+<p style="margin:0;font-size:15px;line-height:1.6;color:var(--text-secondary);max-width:560px;text-wrap:pretty">{{ stepDesc }}</p>
+</div>
+</sc-if>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><div role="alert"><x-import component-from-global-scope="Fgrapher.Alert" variant="destructive" hint-size="100%,80px"><x-import component-from-global-scope="Fgrapher.AlertTitle">{{ errTitle }}</x-import><x-import component-from-global-scope="Fgrapher.AlertDescription">{{ errDesc }}</x-import></x-import></div></sc-if>
+<sc-if value="{{ s1 }}" hint-placeholder-val="{{ true }}">
+<div role="radiogroup" aria-label="Gói dịch vụ" style="display:flex;flex-direction:column;gap:10px">
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3"><div style="height:92px"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,92px"></x-import></div></sc-for></sc-if>
+<sc-if value="{{ noPkgs }}" hint-placeholder-val="{{ false }}"><p style="margin:0;padding:14px 16px;border-radius:var(--fg-radius-md);background:var(--bg-sunken);font-size:14px;line-height:1.55;color:var(--text-secondary)">{{ artist }} chưa đăng gói dịch vụ. Mô tả nhu cầu của bạn, nghệ sĩ sẽ báo giá khi phản hồi.</p></sc-if>
+<sc-for list="{{ pkgs }}" as="k" hint-placeholder-count="3">
+<sc-if value="{{ k.on }}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" onClick="{{ k.pick }}" data-tile="" style="display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:var(--fg-radius-lg);border:1px solid var(--brand-primary);box-shadow:inset 0 0 0 1px var(--brand-primary);background:var(--bg-surface);color:var(--text-primary);text-align:left;font-family:inherit;cursor:pointer;transition:border-color 150ms,box-shadow 150ms">
+<span aria-hidden="true" style="flex:none;width:20px;height:20px;border-radius:50%;border:6px solid var(--brand-primary);background:var(--bg-surface)"></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><strong style="font-size:16px;line-height:1.35;text-wrap:pretty">{{ k.name }}</strong><span style="font-size:13px;color:var(--text-secondary)">{{ k.meta }}</span></span>
+<strong style="flex:none;font-size:16px;white-space:nowrap">{{ k.price }}</strong>
+</button></sc-if>
+<sc-if value="{{ k.off }}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{ k.pick }}" data-tile="" style="display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:var(--fg-radius-lg);border:1px solid var(--border-subtle);box-shadow:none;background:var(--bg-surface);color:var(--text-primary);text-align:left;font-family:inherit;cursor:pointer;transition:border-color 150ms,box-shadow 150ms" style-hover="border-color:var(--border-strong)">
+<span aria-hidden="true" style="flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--border-default);background:var(--bg-surface)"></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><strong style="font-size:16px;line-height:1.35;text-wrap:pretty">{{ k.name }}</strong><span style="font-size:13px;color:var(--text-secondary)">{{ k.meta }}</span></span>
+<strong style="flex:none;font-size:16px;white-space:nowrap">{{ k.price }}</strong>
+</button></sc-if>
+</sc-for>
+<sc-if value="{{ customOn }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px;padding:18px 20px;border-radius:var(--fg-radius-lg);background:var(--bg-sunken)">
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Thời lượng dự kiến" options="{{ durOpts }}" value="{{ customDur }}" on-change="{{ setCustomDur }}" hint-size="100%,64px"></x-import>
+<div style="display:flex;flex-direction:column;gap:6px"><label for="bk-custom" style="font-size:14px;font-weight:600">Bạn muốn chụp gì?</label><x-import component-from-global-scope="Fgrapher.Textarea" id="bk-custom" rows="{{ 3 }}" value="{{ customDesc }}" on-change="{{ setCustomDesc }}" placeholder="VD: ảnh gia đình 5 người, có 1 bé 2 tuổi, muốn chụp ở công viên" hint-size="100%,96px"></x-import></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">
+<dc-import name="BkCalendar" title="{{ monthTitle }}" cells="{{ cells }}" loading="{{ loading }}" empty="{{ monthEmpty }}" empty-title="{{ emptyTitle }}" compact="{{ isMobile }}" on-prev="{{ prevMonth }}" on-next="{{ nextMonth }}" prev-disabled="{{ atFirstMonth }}" next-disabled="{{ atLastMonth }}" hint-size="100%,460px"></dc-import>
+</sc-if>
+<sc-if value="{{ s3 }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:14px 16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)">
+<span style="display:flex;flex-direction:column;gap:2px"><strong style="font-size:15px">{{ dateLong }}</strong><span style="font-size:13px;color:var(--text-secondary)">{{ durLabel }}</span></span>
+<span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text-secondary)"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;border:2px solid var(--text-tertiary)"></span>Giờ Việt Nam (GMT+7)</span>
+</div>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px"><sc-for list="{{ skel9 }}" as="k" hint-placeholder-count="9"><div style="height:52px"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,52px"></x-import></div></sc-for></div></sc-if>
+<sc-if value="{{ noSlots }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;padding:18px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg)"><strong style="font-size:15px">Ngày này không còn khung đủ {{ durShort }}</strong><span style="font-size:14px;line-height:1.55;color:var(--text-secondary)">Chọn ngày khác hoặc đổi sang gói ngắn hơn. Địa điểm và ghi chú bạn nhập sau vẫn được giữ.</span><div style="display:flex;flex-wrap:wrap;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md" on-click="{{ goStep2 }}">Chọn ngày khác</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md" on-click="{{ goStep1 }}">Đổi gói</x-import></div></div></sc-if>
+<sc-for list="{{ slotGroups }}" as="g" hint-placeholder-count="2">
+<div role="radiogroup" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">{{ g.label }}</span>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">
+<sc-for list="{{ g.slots }}" as="t" hint-placeholder-count="4">
+<sc-if value="{{ t.free }}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{ t.pick }}" style="min-height:52px;padding:0 10px;border-radius:var(--fg-radius-md);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);font:700 15px/1 var(--font-body);font-variant-numeric:tabular-nums;cursor:pointer;transition:border-color 150ms" style-hover="border-color:var(--border-strong)">{{ t.label }}</button></sc-if>
+<sc-if value="{{ t.sel }}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" onClick="{{ t.pick }}" style="min-height:52px;padding:0 10px;border-radius:var(--fg-radius-md);border:1px solid var(--brand-primary);background:var(--brand-primary);color:var(--text-on-brand);font:700 15px/1 var(--font-body);font-variant-numeric:tabular-nums;cursor:pointer;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand-primary) 22%,transparent)">{{ t.label }}</button></sc-if>
+<sc-if value="{{ t.taken }}" hint-placeholder-val="{{ false }}"><span role="radio" aria-checked="false" aria-disabled="true" aria-label="{{ t.label }}, đã có người đặt" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;border-radius:var(--fg-radius-md);border:1px dashed var(--border-subtle);color:var(--text-tertiary);opacity:.6;font:600 15px/1 var(--font-body);font-variant-numeric:tabular-nums"><span style="text-decoration:line-through">{{ t.label }}</span><span style="font-size:11px">Đã có người đặt</span></span></sc-if>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ s4 }}" hint-placeholder-val="{{ false }}">
+<div role="radiogroup" aria-label="Loại địa điểm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px">
+<sc-for list="{{ locs }}" as="l" hint-placeholder-count="3">
+<sc-if value="{{ l.on }}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" onClick="{{ l.pick }}" data-tile="" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:18px;border-radius:var(--fg-radius-lg);border:1px solid var(--brand-primary);box-shadow:inset 0 0 0 1px var(--brand-primary);background:var(--bg-surface);color:var(--text-primary);text-align:left;font-family:inherit;cursor:pointer;transition:border-color 150ms,box-shadow 150ms">
+<span style="display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:none;width:18px;height:18px;border-radius:50%;border:5px solid var(--brand-primary)"></span><strong style="font-size:15px">{{ l.name }}</strong></span>
+<span style="font-size:13px;line-height:1.5;color:var(--text-secondary)">{{ l.sub }}</span>
+</button></sc-if>
+<sc-if value="{{ l.off }}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{ l.pick }}" data-tile="" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:18px;border-radius:var(--fg-radius-lg);border:1px solid var(--border-subtle);box-shadow:none;background:var(--bg-surface);color:var(--text-primary);text-align:left;font-family:inherit;cursor:pointer;transition:border-color 150ms,box-shadow 150ms" style-hover="border-color:var(--border-strong)">
+<span style="display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--border-default)"></span><strong style="font-size:15px">{{ l.name }}</strong></span>
+<span style="font-size:13px;line-height:1.5;color:var(--text-secondary)">{{ l.sub }}</span>
+</button></sc-if>
+</sc-for>
+</div>
+<sc-if value="{{ locStudio }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:4px;padding:16px;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"><strong style="font-size:15px">Studio Minh Anh</strong><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">18 Đường số 9, Phường Thủ Đức, Thành phố Hồ Chí Minh</span><span style="font-size:13px;color:var(--text-secondary)">Đã gồm phí studio trong gói. Có chỗ đậu xe máy.</span></div></sc-if>
+<sc-if value="{{ locAddr }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Tỉnh/thành" options="{{ provinces }}" value="{{ province }}" on-change="{{ setProvince }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Phường/xã" options="{{ wards }}" value="{{ ward }}" on-change="{{ setWard }}" hint-size="100%,64px"></x-import>
+</div>
+<x-import component-from-global-scope="Fgrapher.AddressAutocomplete" label="{{ addrLabel }}" placeholder="{{ addrPh }}" value="{{ addr }}" point="{{ point }}" province-id="{{ provinceId }}" ward-id="{{ wardId }}" area-names="{{ areaNames }}" on-change="{{ setAddr }}" hint-size="100%,72px"></x-import>
+<sc-if value="{{ addrErr }}" hint-placeholder-val="{{ false }}"><span style="margin-top:-6px;font-size:14px;color:var(--danger)">Nhập địa chỉ chụp hoặc chọn một gợi ý.</span></sc-if>
+<sc-if value="{{ farNote }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;line-height:1.55;color:var(--text-secondary)">Địa điểm cách khu vực của nghệ sĩ hơn 20 km. Phí di chuyển và lưu trú (nếu có) sẽ được thỏa thuận khi nghệ sĩ phản hồi.</p></sc-if>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ s5 }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;gap:12px"><label for="bk-note" style="font-size:14px;font-weight:600">Lời nhắn cho nghệ sĩ</label><span style="font-size:13px;color:var(--text-tertiary);font-variant-numeric:tabular-nums">{{ noteCount }}</span></div>
+<x-import component-from-global-scope="Fgrapher.Textarea" id="bk-note" rows="{{ 5 }}" value="{{ note }}" on-change="{{ setNote }}" placeholder="Số người, phong cách mong muốn, trang phục, điều cần tránh…" hint-size="100%,140px"></x-import>
+</div>
+<x-import component-from-global-scope="Fgrapher.ReferenceMediaField" value="{{ refs }}" on-change="{{ setRefs }}" max="{{ 5 }}" purpose="booking" hint-size="100%,160px"></x-import>
+<p style="margin:0;font-size:13px;line-height:1.55;color:var(--text-secondary)">Tối đa 5 ảnh hoặc video. Chỉ nghệ sĩ nhận yêu cầu này xem được, không hiển thị công khai.</p>
+</sc-if>
+<sc-if value="{{ s6 }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><dc-import name="BkSummary" artist="{{ artist }}" avatar="{{ avatar }}" rating="{{ rating }}" rows="{{ sumRows }}" total="{{ total }}" total-note="{{ totalNote }}" editable="{{ true }}" hint-size="100%,520px"></dc-import></sc-if>
+<div style="display:flex;flex-direction:column;gap:12px;padding:18px 20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg)">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><strong style="font-size:15px">Lời nhắn &amp; tham khảo</strong><button type="button" onClick="{{ goStep5 }}" style="min-height:32px;padding:0 4px;border:0;background:none;color:var(--text-link);font:700 13px/1 var(--font-body);cursor:pointer;text-decoration:underline;text-underline-offset:3px">Sửa</button></div>
+<p style="margin:0;font-size:14px;line-height:1.6;color:var(--text-secondary);white-space:pre-line;overflow-wrap:anywhere">{{ notePreview }}</p>
+<sc-if value="{{ hasRefs }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ refs }}" as="r" hint-placeholder-count="3"><img src="{{ r.url }}" alt="Ảnh tham khảo" style="width:64px;height:64px;border-radius:var(--fg-radius-sm);object-fit:cover;background:var(--bg-sunken);animation:bk-in 400ms ease-out both"></sc-for></div></sc-if>
+</div>
+<fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:12px">
+<legend style="padding:0 0 12px;font-size:15px;font-weight:700">Đồng ý trước khi gửi</legend>
+<x-import component-from-global-scope="Fgrapher.Checkbox" label="Tôi đồng ý với Điều khoản đặt lịch và chính sách hủy của nghệ sĩ" checked="{{ agreeTerms }}" on-checked-change="{{ toggleTerms }}" aria-invalid="{{ termsInvalid }}" hint-size="100%,28px"></x-import>
+<x-import component-from-global-scope="Fgrapher.Checkbox" label="Tôi đồng ý cho Fgrapher chia sẻ tên, số điện thoại và thông tin buổi chụp với nghệ sĩ để xử lý yêu cầu này" checked="{{ agreeData }}" on-checked-change="{{ toggleData }}" aria-invalid="{{ dataInvalid }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ consentErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--danger)">Cần đồng ý cả hai mục để gửi yêu cầu.</span></sc-if>
+</fieldset>
+</sc-if>
+<sc-if value="{{ s7 }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+<x-import component-from-global-scope="Fgrapher.Badge" variant="warning">Chờ xác nhận</x-import>
+<h2 style="margin:0;font-family:var(--font-display);font-size:clamp(22px,1.9vw,26px);line-height:1.2;letter-spacing:-.01em;font-weight:700;text-wrap:balance">Đã gửi yêu cầu tới {{ artistShort }}</h2>
+<p style="margin:0;font-size:14px;color:var(--text-secondary)">Mã yêu cầu <strong style="color:var(--text-primary);font-family:var(--font-mono)">FG-7K2Q9</strong> · gửi lúc 14:32, 29/09/2026</p>
+</div>
+<ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg)">
+<li style="display:flex;gap:14px;padding:18px 20px;border-bottom:1px solid var(--border-subtle)"><span style="flex:none;width:26px;height:26px;border-radius:50%;background:var(--brand-primary);color:var(--text-on-brand);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">1</span><span style="display:flex;flex-direction:column;gap:3px"><strong style="font-size:15px">{{ artistShort }} xem và phản hồi</strong><span style="font-size:14px;line-height:1.55;color:var(--text-secondary)">Trước 14:32, 01/10/2026. Bạn nhận thông báo qua ứng dụng và SMS.</span></span></li>
+<li style="display:flex;gap:14px;padding:18px 20px;border-bottom:1px solid var(--border-subtle)"><span style="flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--border-default);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">2</span><span style="display:flex;flex-direction:column;gap:3px"><strong style="font-size:15px">Nhắn tin chốt chi tiết và đặt cọc</strong><span style="font-size:14px;line-height:1.55;color:var(--text-secondary)">Đặt cọc thỏa thuận trực tiếp với nghệ sĩ. Fgrapher không thu tiền trực tuyến.</span></span></li>
+<li style="display:flex;gap:14px;padding:18px 20px"><span style="flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--border-default);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">3</span><span style="display:flex;flex-direction:column;gap:3px"><strong style="font-size:15px">Lịch chuyển sang “Đã xác nhận”</strong><span style="font-size:14px;line-height:1.55;color:var(--text-secondary)">Bạn được nhắc lịch trước buổi chụp 1 ngày.</span></span></li>
+</ol>
+<p style="margin:0;font-size:14px;line-height:1.6;color:var(--text-secondary);text-wrap:pretty">Nếu sau 48 giờ nghệ sĩ chưa phản hồi, yêu cầu tự hết hạn và bạn có thể gửi lại hoặc đặt với nghệ sĩ khác.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg">Nhắn tin với nghệ sĩ</x-import>
+<x-import component-from-global-scope="Fgrapher.Button" variant="secondary" size="lg" on-click="{{ goMy }}">Xem lịch đặt của tôi</x-import>
+</div>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><div style="padding-top:8px;border-top:1px solid var(--border-subtle)"><dc-import name="BkSummary" artist="{{ artist }}" avatar="{{ avatar }}" rating="{{ rating }}" rows="{{ sumRows }}" total="{{ total }}" total-note="{{ totalNote }}" editable="{{ false }}" hint-size="100%,520px"></dc-import></div></sc-if>
+</sc-if>
+<sc-if value="{{ deskNav }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:24px;border-top:1px solid var(--border-subtle)">
+<x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="lg" on-click="{{ back }}">{{ backLabel }}</x-import>
+<span style="flex:1;font-size:13px;color:var(--text-tertiary);text-align:right">Thông tin đã nhập được giữ khi quay lại</span>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ next }}">{{ nextLabel }}</x-import>
+</div>
+</sc-if>
+</main>
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<aside aria-label="Tóm tắt yêu cầu" style="flex:0 0 400px;position:sticky;top:84px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-xl);background:var(--bg-surface);box-shadow:var(--shadow-sm)">
+<dc-import name="BkSummary" artist="{{ artist }}" avatar="{{ avatar }}" rating="{{ rating }}" rows="{{ sumRows }}" total="{{ total }}" total-note="{{ totalNote }}" editable="{{ inFlow }}" loading="{{ loading }}" hint-size="100%,520px"></dc-import>
+</aside>
+</sc-if>
+</div>
+</div>
+<sc-if value="{{ mobileCta }}" hint-placeholder-val="{{ false }}">
+<div style="height:96px"></div>
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;gap:12px;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:var(--bg-surface);border-top:1px solid var(--border-subtle)">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><strong style="font-size:16px">{{ total }}</strong><span style="font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ barSub }}</span></div>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ next }}">{{ nextLabelShort }}</x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const q = new URLSearchParams(window.location.search); this.q = q;
+    const step = Math.min(7, Math.max(1, +(q.get('step') || 1)));
+    const st = q.get('state') || 'default', err = q.get('err') === '1', long = st === 'long';
+    this.state = {
+      w: window.innerWidth, step, st, err, month: 9,
+      pkg: st === 'empty' && step === 1 ? 'custom' : err && step === 1 ? null : (long ? 'p4' : 'p2'),
+      customDur: '4 giờ', customDesc: '',
+      date: err && step === 2 ? null : '2026-10-12', slot: err && step === 3 ? null : 6,
+      loc: 'outdoor', province: 'Tỉnh Lâm Đồng', ward: 'Phường Xuân Hương',
+      addr: err && step === 4 ? '' : long ? 'Khu du lịch Đồi thông Đa Phú, cuối đường Đa Phú, gần hồ Tuyền Lâm (đi vào cổng phụ phía sau khu cắm trại)' : 'Đồi thông Đa Phú, Đường Đa Phú',
+      point: err && step === 4 ? null : { latitude: 11.905, longitude: 108.43 },
+      note: long ? 'Tụi em chụp ảnh cưới ngoại cảnh, gồm cô dâu, chú rể và 2 phù dâu. Muốn phong cách tự nhiên, ít tạo dáng, có vài tấm dưới sương sớm nên em muốn bắt đầu từ 06:00.\nTrang phục: 1 váy cưới trắng, 1 áo dài đỏ, 1 bộ đồ thường ngày.\nEm có xem album Cưới Đà Lạt của anh và rất thích tông màu ấm. Nhờ anh tư vấn thêm điểm chụp dự phòng nếu trời mưa. Ekip trang điểm em tự thuê, sẽ có mặt lúc 04:30.' : 'Chụp cô dâu, chú rể và 2 phù dâu. Muốn phong cách tự nhiên, có vài tấm dưới sương sớm.',
+      refs: (long ? [1, 2, 3, 4, 5] : [1, 2, 3]).map(i => ({ url: `https://picsum.photos/seed/fg-ref${i}/300/300` })),
+      agreeTerms: step >= 7 || (err && step === 6), agreeData: step >= 7 || (err && step === 6), errs: {}
+    };
+    if (err) this.state.errs = { [step]: true };
+  }
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR);
+    this.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.onOver = e => { const tl = e.target.closest && e.target.closest('[data-tile]'); if (tl === this.hov) return; if (this.hov) this.lift(this.hov, false); this.hov = tl; if (tl) this.lift(tl, true); };
+    document.addEventListener('pointerover', this.onOver);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); document.removeEventListener('pointerover', this.onOver); }
+  componentDidUpdate(_, prev) {
+    if (prev.step !== this.state.step) {
+      window.scrollTo({ top: 0 });
+      const box = document.querySelector('[data-stepbox]');
+      if (box && !this.reduce && box.animate) box.animate([{ opacity: 0, transform: `translateX(${this.state.step > prev.step ? 12 : -12}px)` }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    }
+  }
+  lift(el, on) { if (this.reduce) return; el.style.transition = 'transform 200ms cubic-bezier(.2,.7,.2,1), border-color 150ms, box-shadow 150ms'; el.style.transform = on ? 'translateY(-2px)' : ''; }
+  upd(patch) { this.setState(s => ({ ...patch, errs: { ...s.errs, [s.step]: false } })); }
+  go(n) { this.setState({ step: n }); }
+  pkgList() {
+    const L = this.state.st === 'long';
+    const base = [['p1', 'Chân dung áo dài', 2, '2 giờ · 30 ảnh chỉnh sửa · giao sau 5 ngày', '2.000.000₫'], ['p2', 'Ảnh cưới ngoại cảnh', 8, '1 ngày (8 giờ) · 120 ảnh chỉnh sửa · giao sau 14 ngày', '5.500.000₫'], ['p3', 'Kỷ yếu cả lớp', 4, '4 giờ · 200 ảnh chỉnh sửa · giao sau 10 ngày', '3.500.000₫']];
+    if (L) base.push(['p4', 'Trọn gói ảnh cưới ngoại cảnh kèm phim cưới ngắn 3 phút, album in 30×30 cm và trang điểm cô dâu', 8, '1 ngày (8 giờ) · 250 ảnh chỉnh sửa · phim 3 phút · giao sau 21 ngày', '18.500.000₫']);
+    if (this.state.st === 'empty') return [];
+    return base.map(([id, name, dur, meta, price]) => ({ id, name, dur, meta, price }));
+  }
+  validate() {
+    const S = this.state;
+    if (S.step === 1) return !!S.pkg; if (S.step === 2) return !!S.date; if (S.step === 3) return S.slot != null;
+    if (S.step === 4) return S.loc === 'studio' || !!S.addr.trim(); if (S.step === 6) return S.agreeTerms && S.agreeData; return true;
+  }
+  renderVals() {
+    const S = this.state, isDesktop = S.w >= 1024, step = S.step, st = S.st, loading = st === 'loading', errNow = !!S.errs[step];
+    const titles = ['Chọn gói dịch vụ', 'Chọn ngày', 'Chọn khung giờ', 'Địa điểm chụp', 'Ghi chú & ảnh tham khảo', 'Xem lại & gửi'];
+    const labels = ['Gói', 'Ngày', 'Giờ', 'Địa điểm', 'Ghi chú', 'Xem lại'];
+    const descs = ['Chọn gói có sẵn hoặc mô tả nhu cầu riêng để nghệ sĩ báo giá.', 'Ngày có chấm xanh là ngày nghệ sĩ còn nhận lịch.', 'Mỗi khung dài đúng thời lượng gói. Khung mờ là khung đã có người đặt.', 'Chọn nơi chụp. Địa chỉ chính xác giúp nghệ sĩ tính thời gian di chuyển.', 'Không bắt buộc, nhưng giúp nghệ sĩ hiểu ý bạn và báo giá sát hơn.', 'Kiểm tra lại thông tin. Bạn có thể sửa từng mục trước khi gửi.'];
+    const L = st === 'long';
+    const artist = L ? 'Nguyễn Trần Phương Uyên Photography & Wedding Film Studio' : 'Minh Anh Nhiếp Ảnh', artistShort = L ? 'Phương Uyên' : 'Minh Anh';
+    const pk = this.pkgList(), cur = pk.find(p => p.id === S.pkg);
+    const dur = S.pkg === 'custom' ? parseInt(S.customDur) : cur ? cur.dur : 2;
+    const on = x => ({ border: x ? 'var(--brand-primary)' : 'var(--border-subtle)', ring: x ? 'inset 0 0 0 1px var(--brand-primary)' : 'none', dot: x ? '6px solid var(--brand-primary)' : '2px solid var(--border-default)' });
+    const pkgs = loading ? [] : [...pk, { id: 'custom', name: 'Tùy chỉnh', meta: 'Mô tả nhu cầu, nghệ sĩ báo giá riêng', price: 'Báo giá sau' }].map(p => ({ ...p, on: S.pkg === p.id, off: S.pkg !== p.id, pick: () => this.upd({ pkg: p.id }) }));
+    // calendar
+    const avail = { 9: { full: [3, 4, 10, 11, 17, 18, 24, 31], off: [19, 20, 21] }, 10: { full: [1, 7, 8, 14, 15, 21, 22, 28, 29], off: [2, 3] } };
+    const A = avail[S.month]; const dim = new Date(Date.UTC(2026, S.month + 1, 0)).getUTCDate();
+    const lead = (new Date(Date.UTC(2026, S.month, 1)).getUTCDay() + 6) % 7;
+    const dnames = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const monthEmpty = st === 'empty' && S.month === 9;
+    const cells = [...Array(lead).fill({ blank: true }), ...Array.from({ length: dim }, (_, i) => {
+      const d = i + 1, iso = `2026-${String(S.month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      let full = A.full.includes(d) || (S.errs[2] && iso === '2026-10-12') || (monthEmpty && !A.off.includes(d)); const off = A.off.includes(d); const sel = !full && !off && S.date === iso;
+      const dn = dnames[new Date(Date.UTC(2026, S.month, d)).getUTCDay()];
+      return { day: String(d), full, off, sel, free: !full && !off && !sel, blank: false, past: false, aria: `${dn}, ${d} tháng ${S.month + 1} năm 2026, ${full ? 'đã kín' : off ? 'nghệ sĩ nghỉ' : 'còn trống'}`, pick: () => this.upd({ date: iso, slot: null }) };
+    })];
+    const [yy, mm, dd] = (S.date || '2026-10-12').split('-');
+    const dObj = new Date(Date.UTC(+yy, +mm - 1, +dd));
+    const dateShort = S.date ? `${dd}/${mm}/${yy}` : '';
+    const dateLong = S.date ? `${dnames[dObj.getUTCDay()]}, ${dd}/${mm}/${yy}` : 'Chưa chọn ngày';
+    // slots
+    const hh = h => String(h).padStart(2, '0') + ':00';
+    const booked = +dd % 3 === 0 ? [[5, 9]] : [[15, 18]];
+    const slotsAll = []; for (let s = 5; s + dur <= 21; s++) { const taken = booked.some(([a, b]) => s < b && s + dur > a) || (S.errs[3] && s === 6); slotsAll.push({ s, taken }); }
+    const noSlots = !loading && (st === 'empty' || slotsAll.every(x => x.taken));
+    const mkSlot = x => ({ label: `${hh(x.s)} – ${hh(x.s + dur)}`, taken: x.taken, sel: !x.taken && S.slot === x.s, free: !x.taken && S.slot !== x.s, pick: () => this.upd({ slot: x.s }) });
+    const slotGroups = loading || noSlots ? [] : [['Sáng', x => x.s < 12], ['Chiều', x => x.s >= 12 && x.s < 17], ['Tối', x => x.s >= 17]].map(([label, f]) => ({ label, slots: slotsAll.filter(f).map(mkSlot) })).filter(g => g.slots.length);
+    const slotLabel = S.slot != null ? `${hh(S.slot)} – ${hh(S.slot + dur)}` : '';
+    // location
+    const provinces = ['Thành phố Hồ Chí Minh', 'Tỉnh Lâm Đồng', 'Thành phố Đà Nẵng', 'Thành phố Hà Nội'];
+    const wardsBy = { 'Thành phố Hồ Chí Minh': ['Phường Thủ Đức', 'Phường Bến Thành', 'Phường Long Trường'], 'Tỉnh Lâm Đồng': ['Phường Xuân Hương', 'Phường Lâm Viên', 'Phường Cam Ly'], 'Thành phố Đà Nẵng': ['Phường Hội An', 'Phường Hải Châu'], 'Thành phố Hà Nội': ['Phường Hoàn Kiếm', 'Phường Ba Đình'] };
+    const locDefs = [['studio', 'Studio của nghệ sĩ', 'Phường Thủ Đức, TP. Hồ Chí Minh'], ['outdoor', 'Ngoài trời', 'Công viên, phố cổ, đồi thông… do bạn chọn'], ['home', 'Tại nhà bạn', 'Nghệ sĩ đến địa chỉ của bạn']];
+    const locs = locDefs.map(([id, name, sub]) => ({ id, name, sub, on: S.loc === id, off: S.loc !== id, pick: () => this.upd({ loc: id }) }));
+    const far = S.loc !== 'studio' && S.province !== 'Thành phố Hồ Chí Minh';
+    const locVal = S.loc === 'studio' ? 'Studio của nghệ sĩ' : S.addr ? `${S.loc === 'home' ? 'Tại nhà' : 'Ngoài trời'} · ${S.addr}` : '';
+    const locSub = S.loc === 'studio' ? '18 Đường số 9, Phường Thủ Đức' : S.addr ? `${S.ward}, ${S.province}` : '';
+    const setV = k => v => this.upd({ [k]: v && v.target ? v.target.value : v });
+    // summary
+    const pkName = S.pkg === 'custom' ? `Tùy chỉnh · ${S.customDur}` : cur ? cur.name : '';
+    const total = S.pkg === 'custom' ? 'Báo giá sau' : cur ? cur.price : '—';
+    const upTo = step >= 7 ? 0 : 7;
+    const sumRows = [
+      { label: 'Gói', value: pkName, edit: upTo && (() => this.go(1)) },
+      { label: 'Ngày', value: step >= 2 && S.date ? dateLong : '', edit: upTo && (() => this.go(2)) },
+      { label: 'Giờ', value: step > 3 || (step === 3 && S.slot != null) ? slotLabel : '', sub: slotLabel ? 'Giờ Việt Nam (GMT+7)' : '', edit: upTo && (() => this.go(3)) },
+      { label: 'Địa điểm', value: step >= 4 ? locVal : '', sub: step >= 4 ? locSub : '', edit: upTo && (() => this.go(4)) },
+      { label: 'Tham khảo', value: step >= 5 ? `${S.note ? 'Có lời nhắn' : 'Không lời nhắn'} · ${S.refs.length} tệp` : '', edit: upTo && (() => this.go(5)) }
+    ].map(r => ({ ...r, edit: r.edit || null }));
+    // errors
+    const E = {
+      1: ['Chưa chọn gói', 'Chọn một gói hoặc “Tùy chỉnh” để tiếp tục.'],
+      2: S.err ? ['Ngày 12/10 vừa kín lịch', 'Một khách khác vừa đặt trước bạn. Chọn ngày khác, gói và các thông tin khác vẫn được giữ.'] : ['Chưa chọn ngày', 'Chọn một ngày còn trống trên lịch.'],
+      3: S.err ? ['Khung 06:00 – 14:00 vừa có người đặt', 'Chọn khung khác bên dưới. Gói, ngày và địa điểm của bạn vẫn giữ nguyên.'] : ['Chưa chọn khung giờ', 'Chọn một khung giờ còn trống.'],
+      4: ['Thiếu địa chỉ chụp', 'Nhập địa chỉ hoặc chọn “Studio của nghệ sĩ”.'],
+      5: ['Không tải lên được 1 tệp', 'video-da-lat.mov vượt dung lượng cho phép. Lời nhắn và 3 tệp đã thêm vẫn được giữ.'],
+      6: S.err ? ['Chưa gửi được yêu cầu', 'Mất kết nối khi gửi. Mọi thông tin vẫn được giữ, bạn chỉ cần bấm gửi lại.'] : ['Cần đồng ý để gửi', 'Đánh dấu cả hai mục đồng ý bên dưới.']
+    }[step] || ['', ''];
+    const consentErr = step === 6 && errNow && !(S.agreeTerms && S.agreeData);
+    const next = () => { if (step >= 7) return; if (!this.validate()) { this.setState(s => ({ errs: { ...s.errs, [step]: true }, err: false })); return; } if (step === 6 && S.err && errNow) { this.setState({ err: false, errs: {} }); } this.setState(s => ({ step: s.step + 1, err: false, errs: {} })); };
+    const back = () => { if (step > 1 && step < 7) this.go(step - 1); else window.location.href = '../profile/ProfilePage.dc.html'; };
+    const inFlow = step <= 6;
+    const theme = this.q.get('theme') || 'light';
+    return {
+      theme, isDesktop, isMobile: !isDesktop, loading, step: String(step),
+      mobileBar: !isDesktop && inFlow, mobileCta: !isDesktop && inFlow, deskNav: isDesktop && inFlow, inFlow,
+      pagePad: isDesktop ? '40px 32px 96px' : '20px 20px 32px', cols: isDesktop ? (step === 7 ? 'minmax(0,640px) 400px' : 'minmax(0,1fr) 400px') : 'minmax(0,1fr)',
+      h2Size: isDesktop ? '26px' : '22px', pageTitle: step === 7 ? 'Yêu cầu đã được gửi' : 'Yêu cầu đặt lịch',
+      artist, artistShort, avatar: 'https://picsum.photos/seed/fg-pfav/300/300', rating: st === 'empty' ? 'Mới' : L ? '4,7 (1.284)' : '4,9 (128)',
+      stepCount: inFlow ? `Bước ${step}/6` : 'Đã gửi', stepTitle: inFlow ? titles[step - 1] : 'Đã gửi', stepDesc: descs[step - 1] || '',
+      steps: labels.map((label, i) => ({ n: String(i + 1), label, done: i + 1 < step, cur: i + 1 === step, todo: i + 1 > step, lit: i + 1 <= step, dim: i + 1 > step, go: () => this.go(i + 1) })),
+      backAria: step === 1 ? 'Về hồ sơ nghệ sĩ' : 'Quay lại bước trước', backLabel: step === 1 ? 'Về hồ sơ' : 'Quay lại',
+      nextLabel: step === 6 ? 'Gửi yêu cầu đặt lịch' : 'Tiếp tục', nextLabelShort: step === 6 ? 'Gửi yêu cầu' : 'Tiếp tục', next, back,
+      barSub: [pkName, step >= 2 ? dateShort : '', step >= 3 ? slotLabel.split(' – ')[0] : ''].filter(Boolean).join(' · ') || 'Chưa chọn gói',
+      hasErr: errNow, errTitle: E[0], errDesc: E[1],
+      s1: step === 1, s2: step === 2, s3: step === 3, s4: step === 4, s5: step === 5, s6: step === 6, s7: step === 7,
+      skel3: [1, 2, 3], skel9: [1, 2, 3, 4, 5, 6, 7, 8, 9], pkgs, noPkgs: st === 'empty' && !loading,
+      customOn: S.pkg === 'custom' && !loading, customCols: isDesktop ? '200px minmax(0,1fr)' : 'minmax(0,1fr)', durOpts: Array.from({ length: 10 }, (_, i) => `${i + 1} giờ`), customDur: S.customDur, setCustomDur: setV('customDur'), customDesc: S.customDesc, setCustomDesc: setV('customDesc'),
+      monthTitle: `Tháng ${S.month + 1}, 2026`, cells, monthEmpty, emptyTitle: 'Tháng 10 không còn ngày trống', atFirstMonth: S.month === 9, atLastMonth: S.month === 10,
+      prevMonth: () => this.setState({ month: 9 }), nextMonth: () => this.setState({ month: 10 }),
+      dateLong, durLabel: S.pkg === 'custom' ? `Tùy chỉnh · ${dur} giờ` : cur ? `${cur.name} · ${dur} giờ` : '', durShort: `${dur} giờ`, slotGroups, noSlots, slotCols: isDesktop ? 'repeat(auto-fill,minmax(150px,1fr))' : 'repeat(2,minmax(0,1fr))',
+      goStep1: () => this.go(1), goStep2: () => this.go(2), goStep5: () => this.go(5),
+      locs, locCols: isDesktop ? 'repeat(3,minmax(0,1fr))' : 'minmax(0,1fr)', locStudio: S.loc === 'studio', locAddr: S.loc !== 'studio', addrCols: isDesktop ? 'repeat(2,minmax(0,1fr))' : 'minmax(0,1fr)',
+      provinces, province: S.province, setProvince: v => { const p = v && v.target ? v.target.value : v; this.upd({ province: p, ward: wardsBy[p][0] }); },
+      wards: wardsBy[S.province], ward: S.ward, setWard: setV('ward'),
+      addrLabel: S.loc === 'home' ? 'Địa chỉ nhà' : 'Địa điểm chụp', addrPh: S.loc === 'home' ? 'Số nhà, tên đường (VD: 12 Võ Văn Ngân)' : 'Tên địa điểm hoặc số nhà, tên đường', addr: S.addr, point: S.point,
+      provinceId: 'p-' + provinces.indexOf(S.province), wardId: 'w-' + S.ward, areaNames: [S.province, S.ward], setAddr: (a, pt) => this.upd({ addr: a || '', point: pt || null }),
+      addrErr: step === 4 && errNow && !S.addr.trim(), farNote: far,
+      note: S.note, setNote: setV('note'), noteCount: `${S.note.length.toLocaleString('vi-VN')}/1.000`, refs: S.refs, setRefs: v => this.upd({ refs: v }), hasRefs: S.refs.length > 0,
+      notePreview: S.note || 'Không có lời nhắn.',
+      agreeTerms: S.agreeTerms, agreeData: S.agreeData, toggleTerms: v => this.upd({ agreeTerms: !!v }), toggleData: v => this.upd({ agreeData: !!v }),
+      termsInvalid: consentErr && !S.agreeTerms, dataInvalid: consentErr && !S.agreeData, consentErr,
+      sumRows, total, totalNote: S.pkg === 'custom' ? 'Nghệ sĩ báo giá khi phản hồi' : far && step >= 4 ? 'Chưa gồm phí di chuyển, thỏa thuận sau' : 'Giá cuối cùng chốt khi nghệ sĩ xác nhận',
+      ctaDir: isDesktop ? 'row' : 'column',
+      goMy: () => { window.location.href = `MyBookings.dc.html?theme=${theme}&tab=pending`; }
+    };
+  }
+}
+</script>
+</body>
+</html>

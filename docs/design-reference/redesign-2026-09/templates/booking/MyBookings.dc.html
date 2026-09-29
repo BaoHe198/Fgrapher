@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--bg-page)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}.bk-x::-webkit-scrollbar{display:none}@keyframes bk-in{from{opacity:0}to{opacity:1}}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<header style="position:sticky;top:0;z-index:20;background:var(--green-900)">
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,2.4vw,32px);height:60px;display:flex;align-items:center;gap:24px">
+<a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a>
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><nav aria-label="Điều hướng chính" style="display:flex;align-items:center;gap:4px;flex:1;justify-content:center">
+<a href="../search/SearchPage.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Tìm kiếm F</a>
+<a href="../search-map/SearchMapPage.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Bản đồ F</a>
+<a href="#" aria-current="page" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:700;color:var(--gold-50);text-decoration:none;box-shadow:inset 0 -2px 0 var(--gold-500)">Đặt lịch F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Chợ F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Cộng đồng F</a>
+</nav></sc-if>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><div style="flex:1"></div></sc-if>
+<img src="https://picsum.photos/seed/fg-me/80/80" alt="Tài khoản của bạn" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--green-200)">
+</div>
+</header>
+<sc-if value="{{ showBanner }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Fgrapher.ReviewReminderBannerClient" message="{{ bannerMsg }}" cta-label="Đánh giá ngay" dismiss-label="Để sau" cta-href="?tab=completed" hint-size="100%,56px"></x-import></sc-if>
+<main style="max-width:1040px;margin:0 auto;padding:clamp(24px,3vw,48px) clamp(20px,2.4vw,32px) 80px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px">
+<div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-family:var(--font-display);font-size:clamp(26px,2.6vw,36px);line-height:1.1;letter-spacing:-.02em;font-weight:700">Lịch đặt của tôi</h1><span style="font-size:15px;color:var(--text-secondary)">{{ subline }}</span></div>
+<x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Tìm nghệ sĩ</x-import>
+</div>
+<div class="bk-x" style="overflow-x:auto;scrollbar-width:none;margin:0 calc(-1 * clamp(20px,2.4vw,32px));padding:0 clamp(20px,2.4vw,32px)">
+<x-import component-from-global-scope="Fgrapher.Tabs" value="{{ tab }}" on-value-change="{{ setTab }}" hint-size="100%,44px">
+<x-import component-from-global-scope="Fgrapher.TabsList">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><x-import component-from-global-scope="Fgrapher.TabsTab" value="{{ t.id }}">{{ t.label }}</x-import></sc-for>
+</x-import>
+</x-import>
+</div>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}"><div aria-busy="true" aria-label="Đang tải lịch đặt" style="display:flex;flex-direction:column;gap:12px"><sc-for list="{{ skel }}" as="s" hint-placeholder-count="3"><div style="height:148px"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,148px"></x-import></div></sc-for></div></sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px"><x-import component-from-global-scope="Fgrapher.Alert" variant="destructive" hint-size="100%,80px"><x-import component-from-global-scope="Fgrapher.AlertTitle">Không tải được lịch đặt</x-import><x-import component-from-global-scope="Fgrapher.AlertDescription">Kết nối bị gián đoạn. Yêu cầu bạn đã gửi vẫn an toàn, chỉ là chưa hiển thị được.</x-import></x-import><div><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Thử lại</x-import></div></div></sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:32px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg)"><strong style="font-size:18px">{{ emptyTitle }}</strong><span style="font-size:14px;line-height:1.55;color:var(--text-secondary);max-width:520px">{{ emptyDesc }}</span><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md">Tìm nghệ sĩ</x-import></div></sc-if>
+<sc-if value="{{ hasList }}" hint-placeholder-val="{{ true }}">
+<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ items }}" as="b" hint-placeholder-count="2">
+<li data-tile="" style="display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:16px 20px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface);transition:border-color 150ms" style-hover="border-color:var(--border-default)">
+<img src="{{ b.avatar }}" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:var(--bg-sunken);animation:bk-in 400ms ease-out both">
+<div style="min-width:0;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px"><strong style="font-size:16px;line-height:1.3;overflow-wrap:anywhere">{{ b.artist }}</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="{{ b.variant }}">{{ b.status }}</x-import></div>
+<span style="font-size:14px;font-weight:600;line-height:1.4;overflow-wrap:anywhere">{{ b.pkg }}</span>
+<dl style="margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:14px;color:var(--text-secondary)"><dt>Thời gian</dt><dd style="margin:0;color:var(--text-primary);font-variant-numeric:tabular-nums">{{ b.when }}</dd><dt>Địa điểm</dt><dd style="margin:0;color:var(--text-primary);overflow-wrap:anywhere">{{ b.where }}</dd></dl>
+<sc-if value="{{ b.warn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:8px;font-size:13px;line-height:1.5;color:var(--warning)"><span aria-hidden="true" style="flex:none;margin-top:6px;width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ b.note }}</span></sc-if><sc-if value="{{ b.ok }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:8px;font-size:13px;line-height:1.5;color:var(--success)"><span aria-hidden="true" style="flex:none;margin-top:6px;width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ b.note }}</span></sc-if><sc-if value="{{ b.mute }}" hint-placeholder-val="{{ true }}"><span style="display:flex;gap:8px;font-size:13px;line-height:1.5;color:var(--text-secondary)"><span aria-hidden="true" style="flex:none;margin-top:6px;width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ b.note }}</span></sc-if><sc-if value="{{ b.bad }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:8px;font-size:13px;line-height:1.5;color:var(--danger)"><span aria-hidden="true" style="flex:none;margin-top:6px;width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ b.note }}</span></sc-if>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px"><sc-for list="{{ b.actions }}" as="a" hint-placeholder-count="2"><x-import component-from-global-scope="Fgrapher.Button" variant="{{ a.v }}" size="md">{{ a.label }}</x-import></sc-for></div></sc-if>
+<sc-if value="{{ b.review }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;padding:12px 14px;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"><span style="font-size:14px;line-height:1.5">Buổi chụp thế nào? Đánh giá giúp khách khác chọn nghệ sĩ.</span><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md">Viết đánh giá</x-import></div></sc-if>
+</div>
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><div style="width:160px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ b.actions }}" as="a" hint-placeholder-count="2"><x-import component-from-global-scope="Fgrapher.Button" variant="{{ a.v }}" size="md">{{ a.label }}</x-import></sc-for></div></sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+</main>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const q = new URLSearchParams(window.location.search); this.q = q;
+    this.state = { w: window.innerWidth, tab: q.get('tab') || 'pending', st: q.get('state') || 'default' };
+  }
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR);
+    this.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.onOver = e => { const tl = e.target.closest && e.target.closest('[data-tile]'); if (tl === this.hov) return; if (this.hov) this.lift(this.hov, false); this.hov = tl; if (tl) this.lift(tl, true); };
+    document.addEventListener('pointerover', this.onOver);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); document.removeEventListener('pointerover', this.onOver); }
+  lift(el, on) { if (this.reduce) return; el.style.transition = 'transform 200ms cubic-bezier(.2,.7,.2,1), border-color 150ms'; el.style.transform = on ? 'translateY(-2px)' : ''; }
+  componentDidUpdate(_, prev) {
+    if (prev.tab !== this.state.tab && !this.reduce) { const ul = document.querySelector('main ul'); if (ul && ul.animate) ul.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2,.7,.2,1)' }); }
+  }
+  renderVals() {
+    const S = this.state, isDesktop = S.w >= 768, st = S.st, L = st === 'long';
+    const av = k => `https://picsum.photos/seed/fg-${k}/120/120`;
+    const warn = 'var(--warning)', ok = 'var(--success)', mute = 'var(--text-secondary)', bad = 'var(--danger)';
+    const msg = { label: 'Nhắn tin', v: 'secondary' }, det = { label: 'Xem chi tiết', v: 'ghost' };
+    const data = {
+      pending: [{ artist: L ? 'Nguyễn Trần Phương Uyên Photography & Wedding Film Studio' : 'Minh Anh Nhiếp Ảnh', avatar: av('pfav'), pkg: L ? 'Trọn gói ảnh cưới ngoại cảnh kèm phim cưới ngắn 3 phút, album in 30×30 cm và trang điểm cô dâu' : 'Ảnh cưới ngoại cảnh · 5.500.000₫', when: 'Thứ Hai, 12/10/2026 · 06:00 – 14:00', where: L ? 'Khu du lịch Đồi thông Đa Phú, cuối đường Đa Phú, gần hồ Tuyền Lâm, Phường Xuân Hương, Tỉnh Lâm Đồng' : 'Đồi thông Đa Phú, Phường Xuân Hương, Tỉnh Lâm Đồng', note: 'Nghệ sĩ phản hồi trước 14:32, 01/10/2026 · còn 47 giờ', noteColor: warn, actions: [msg, { label: 'Hủy yêu cầu', v: 'ghost' }] }],
+      confirmed: [
+        { artist: 'Studio Rừng Thông', avatar: av('pfsv'), pkg: 'Thuê studio theo giờ · 900.000₫', when: 'Chủ nhật, 04/10/2026 · 09:00 – 11:00', where: '45 Hàng Bạc, Phường Hoàn Kiếm, Thành phố Hà Nội', note: 'Còn 5 ngày · Nhắc lịch trước 1 ngày', noteColor: ok, actions: [msg, det] },
+        { artist: 'Ngọc Linh Makeup', avatar: av('mua1'), pkg: 'Trang điểm cô dâu · 1.800.000₫', when: 'Thứ Hai, 12/10/2026 · 04:30 – 06:00', where: 'Đồi thông Đa Phú, Phường Xuân Hương, Tỉnh Lâm Đồng', note: 'Còn 13 ngày · Cọc đã thỏa thuận trực tiếp', noteColor: ok, actions: [msg, det] }
+      ],
+      completed: [
+        { artist: 'Minh Anh Nhiếp Ảnh', avatar: av('pfav'), pkg: 'Chân dung áo dài · 2.000.000₫', when: 'Thứ Ba, 18/08/2026 · 16:00 – 18:00', where: 'Phố cổ Hội An, Phường Hội An, Thành phố Đà Nẵng', note: 'Hoàn thành 18/08/2026 · Chưa đánh giá', noteColor: warn, review: true, actions: [{ label: 'Đặt lại', v: 'secondary' }, det] },
+        { artist: 'Studio Nắng Sài Gòn', avatar: av('st2'), pkg: 'Kỷ yếu tại studio · 4.200.000₫', when: 'Thứ Năm, 28/05/2026 · 08:00 – 11:00', where: 'Phường Bến Thành, Thành phố Hồ Chí Minh', note: 'Bạn đã đánh giá 5★ ngày 02/06/2026', noteColor: mute, actions: [{ label: 'Đặt lại', v: 'secondary' }, det] }
+      ],
+      cancelled: [{ artist: 'Lê Hoàng Photo', avatar: av('lh1'), pkg: 'Chụp sự kiện · 3.000.000₫', when: 'Chủ nhật, 20/09/2026 · 18:00 – 22:00', where: 'Phường Thủ Đức, Thành phố Hồ Chí Minh', note: 'Bạn đã hủy ngày 12/09/2026 · Lý do: đổi ngày tổ chức', noteColor: mute, actions: [{ label: 'Đặt lại', v: 'secondary' }, det] }],
+      expired: [{ artist: 'Hà Film', avatar: av('hf1'), pkg: 'Quay phim phóng sự cưới · 7.000.000₫', when: 'Thứ Bảy, 15/09/2026 · 07:00 – 15:00', where: 'Phường Hải Châu, Thành phố Đà Nẵng', note: 'Nghệ sĩ không phản hồi trong 48 giờ nên yêu cầu đã hết hạn', noteColor: bad, actions: [{ label: 'Gửi lại yêu cầu', v: 'secondary' }, { label: 'Tìm nghệ sĩ khác', v: 'ghost' }] }]
+    };
+    const meta = { pending: ['Chờ xác nhận', 'warning'], confirmed: ['Đã xác nhận', 'success'], completed: ['Đã hoàn thành', 'neutral'], cancelled: ['Đã hủy', 'destructive'], expired: ['Hết hạn', 'outline'] };
+    const empties = { pending: 'Không có yêu cầu nào đang chờ', confirmed: 'Chưa có buổi chụp sắp tới', completed: 'Chưa có buổi chụp nào hoàn thành', cancelled: 'Không có lịch đã hủy', expired: 'Không có yêu cầu hết hạn' };
+    const isEmptyAll = st === 'empty', loading = st === 'loading', error = st === 'error';
+    const list = isEmptyAll ? [] : (data[S.tab] || []);
+    const tone = { [warn]: 'warn', [ok]: 'ok', [mute]: 'mute', [bad]: 'bad' };
+    const items = list.map(b => ({ ...b, warn: tone[b.noteColor] === 'warn', ok: tone[b.noteColor] === 'ok', mute: tone[b.noteColor] === 'mute', bad: tone[b.noteColor] === 'bad', review: !!b.review, status: meta[S.tab][0], variant: meta[S.tab][1] }));
+    const count = k => isEmptyAll ? 0 : data[k].length;
+    return {
+      theme: this.q.get('theme') || 'light', isDesktop, isMobile: !isDesktop,
+      showBanner: !isEmptyAll && !loading && !error, bannerMsg: 'Bạn có 1 buổi chụp đã hoàn thành chưa đánh giá, gần đây nhất với Minh Anh Nhiếp Ảnh.',
+      subline: isEmptyAll ? 'Các yêu cầu bạn gửi sẽ hiện ở đây' : '1 chờ xác nhận · 2 buổi sắp tới',
+      tab: S.tab, setTab: v => this.setState({ tab: v }),
+      tabs: Object.keys(meta).map(id => ({ id, label: `${meta[id][0]} (${count(id)})` })),
+      isLoading: loading, isError: error, skel: [1, 2, 3],
+      isEmpty: !loading && !error && !items.length, emptyTitle: isEmptyAll ? 'Bạn chưa có lịch đặt nào' : empties[S.tab],
+      emptyDesc: isEmptyAll ? 'Tìm nhiếp ảnh gia, studio hoặc chuyên viên trang điểm gần bạn, chọn ngày trống và gửi yêu cầu. Chưa mất phí khi gửi.' : 'Các lịch ở trạng thái này sẽ hiện ở đây.',
+      hasList: !loading && !error && items.length > 0, items,
+      rowCols: isDesktop ? '56px minmax(0,1fr) 160px' : '56px minmax(0,1fr)', actDir: isDesktop ? 'column' : 'row', actCol: isDesktop ? 'auto' : '1 / -1'
+    };
+  }
+}
+</script>
+</body>
+</html>

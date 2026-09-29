@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Hồ sơ nghệ sĩ &amp; portfolio" description="Hồ sơ nghệ sĩ/studio/shop trang phục: bản sắc, album kể chuyện, gallery tỷ lệ thật + lightbox, gói dịch vụ, đánh giá, khu vực, đặt lịch dính; sáng/tối, đủ trạng thái." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1d1b16">
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="width:760px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Quyết định UX</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Trang cuộn một mạch, sắp theo thứ tự khách ra quyết định: xem ảnh, xem gói, đọc đánh giá, xem khu vực phục vụ. Thanh mục dính ở trên để nhảy nhanh giữa các phần, không giấu nội dung sau tab.</li>
+<li>Portfolio có hai lớp:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Album dự án ở trên: bấm vào mở thành trang kể chuyện có ảnh lớn, đoạn dẫn theo từng ngày, và nút "Chọn gói này" ở cuối.</li><li>"Tất cả ảnh" ở dưới: lưới giữ tỷ lệ ảnh thật, lọc theo phong cách, bấm ảnh mở MediaLightbox.</li></ul></li>
+<li>Huy hiệu "Đã xác minh" nằm ngay cạnh tên. Phần niềm tin gom điểm tổng, phân bổ sao, đánh giá có phản hồi của nghệ sĩ, bảng xác minh và chính sách cọc/hủy vào một chỗ.</li>
+<li>Đặt lịch trên máy tính là cột dính bên phải: chọn gói, lịch trống 7 ngày, ngày giờ, rồi "Gửi yêu cầu đặt lịch". Ngay dưới nút ghi rõ "Chưa mất phí, xác nhận trong 48 giờ".</li>
+<li>Trên điện thoại, thanh dính đáy hiện "Từ 2.000.000₫ · Chọn ngày" và mở màn đặt lịch toàn màn hình. Bấm "Chọn gói" ở một gói cũng đi thẳng tới màn đó.</li>
+<li>Biến thể:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Studio thêm mục "Không gian &amp; tiện nghi" và gói thuê theo giờ.</li><li>Shop trang phục chỉ có mục "Trang phục": giá thuê/ngày, tiền cọc, nút "Nhắn tin để thuê", không có lịch.</li></ul></li>
+<li>Chuyển động:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Thẻ nhấc 3px, ảnh phóng nhẹ khi rê chuột.</li><li>Ảnh "tráng" dần khi hiện.</li><li>Chuyển sang album hoặc màn đặt lịch có hiệu ứng mờ và trượt trong 400ms.</li><li>Tất cả tắt khi bật prefers-reduced-motion.</li></ul></li>
+</ol>
+</div>
+<div style="width:620px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Component</div>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Dùng lại:</strong> FgrapherProvider, LogoFull, Badge, ProfileActions (Theo dõi, Lưu, Chia sẻ kèm mã QR), Button, SectionHead, Tag, MediaLightbox, StarRating, Accordion, DateField, NativeSelect, Skeleton, Alert, Footer.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Tạo mới</strong> (chỉ dùng token của design system):</p>
+<ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.5">
+<li><strong>PfBooking:</strong> khối đặt lịch gồm chọn gói, dải lịch trống 7 ngày và tóm tắt. AvailabilityDialog có sẵn là công cụ nghệ sĩ dùng để sửa lịch tuần, không dành cho khách.</li>
+<li><strong>PfReviews:</strong> điểm tổng, phân bổ sao, phản hồi của nghệ sĩ. Design system mới có StarRating đơn lẻ.</li>
+<li><strong>PfAlbum:</strong> trang album kể chuyện.</li>
+<li>Thẻ album, thẻ gói, thẻ trang phục, bảng xác minh, bản đồ khu vực phục vụ.</li>
+</ul>
+<p style="margin:0;font-size:14px;line-height:1.5;color:#6b665c">Ảnh đại diện dùng ảnh tròn tự dựng vì Avatar có sẵn tối đa cỡ lg, quá nhỏ cho ảnh hồ sơ. Ảnh là ảnh giữ chỗ, bản đồ là hình minh họa.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Máy tính · 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:80px 64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiếp ảnh gia · sáng</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=light" style="width:1440px;height:3200px;border:1px solid #d9d4ca;border-radius:12px" title="Hồ sơ sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiếp ảnh gia · tối</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=dark" style="width:1440px;height:3200px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Hồ sơ tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Album kể chuyện</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=light&amp;view=album&amp;album=al1" style="width:1440px;height:2600px;border:1px solid #d9d4ca;border-radius:12px" title="Album"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Xem ảnh toàn màn hình (MediaLightbox)</span><iframe src="ProfilePage.dc.html?theme=dark&amp;lb=2" style="width:1440px;height:900px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Lightbox"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Biến thể studio</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=light&amp;kind=studio" style="width:1440px;height:3400px;border:1px solid #d9d4ca;border-radius:12px" title="Studio"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Biến thể shop trang phục · tối</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=dark&amp;kind=shop" style="width:1440px;height:2000px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Shop"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại · 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:2900px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiếp ảnh gia · sáng</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=light" style="width:390px;height:5000px;border:1px solid #d9d4ca;border-radius:28px" title="Điện thoại sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiếp ảnh gia · tối</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=dark" style="width:390px;height:5000px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Điện thoại tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Chọn ngày &amp; gói</span><iframe src="ProfilePage.dc.html?theme=light&amp;view=booking" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Đặt lịch"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Chọn ngày · tối</span><iframe src="ProfilePage.dc.html?theme=dark&amp;view=booking" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Đặt lịch tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Album kể chuyện</span><iframe src="ProfilePage.dc.html?theme=light&amp;view=album&amp;album=al1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Album điện thoại"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lightbox</span><iframe src="ProfilePage.dc.html?theme=dark&amp;lb=0" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Lightbox điện thoại"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Studio</span><iframe src="ProfilePage.dc.html?theme=light&amp;kind=studio" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Studio điện thoại"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Shop trang phục</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=light&amp;kind=shop" style="width:390px;height:3000px;border:1px solid #d9d4ca;border-radius:28px" title="Shop điện thoại"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Trạng thái</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:2900px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải</span><iframe src="ProfilePage.dc.html?theme=light&amp;state=loading" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Đang tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trống · nghệ sĩ mới</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=light&amp;state=empty" style="width:390px;height:3000px;border:1px solid #d9d4ca;border-radius:28px" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi tải portfolio · tối</span><iframe src="ProfilePage.dc.html?theme=dark&amp;state=error" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài</span><iframe data-fit="1" src="ProfilePage.dc.html?theme=light&amp;state=long" style="width:390px;height:5000px;border:1px solid #d9d4ca;border-radius:28px" title="Nội dung dài"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · máy tính</span><iframe src="ProfilePage.dc.html?theme=light&amp;state=loading" style="width:1440px;height:900px;border:1px solid #d9d4ca;border-radius:12px" title="Đang tải máy tính"></iframe></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

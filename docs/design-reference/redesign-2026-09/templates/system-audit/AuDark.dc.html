@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section id="au-dark" style="scroll-margin-top:120px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">04 · CHẾ ĐỘ TỐI &amp; TƯƠNG PHẢN</span><h2 style="margin:0;font:var(--text-heading-xl);letter-spacing:-.01em">Đo trực tiếp trên token đang chạy</h2><p style="margin:0;max-width:640px;font:var(--text-body-md);color:var(--text-secondary);text-wrap:pretty">Bảng dưới đọc màu thật từ trình duyệt ở chế độ <strong style="color:var(--text-primary)">{{ modeLabel }}</strong>. Chữ thường cần 4,5:1, chữ lớn cần 3:1. Viền ô nhập là thành phần giao diện nên cũng cần 3:1.</p></div>
+<span data-probe="" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></span>
+<div style="display:flex;flex-direction:column;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface);overflow:hidden">
+
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+<div style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border-subtle)">
+<span style="flex:1 1 220px;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:600">{{ r.label }}</span><span style="font:500 12px/1.3 var(--font-mono);color:var(--text-tertiary);overflow-wrap:anywhere">{{ r.pair }}</span></span>
+<span style="display:flex;align-items:center;gap:12px"><span aria-hidden="true" data-swatch="{{ r.i }}" style="width:56px;display:flex;align-items:center;justify-content:center;height:32px;border-radius:var(--fg-radius-sm);border:1px solid var(--border-subtle);font:700 15px/1 var(--font-body)">Aa</span>
+<strong style="width:56px;font-size:14px;font-variant-numeric:tabular-nums">{{ r.ratio }}</strong>
+<x-import component-from-global-scope="Fgrapher.Badge" variant="{{ r.variant }}">{{ r.verdict }}</x-import></span>
+</div>
+</sc-for>
+</div>
+<p style="margin:0;max-width:720px;font:var(--text-body-sm);color:var(--text-secondary)">Nếu "Viền ô nhập" chưa đạt 3:1 thì ô nhập, Textarea và NativeSelect đang dựa vào viền quá nhạt để người dùng nhận ra. Đề xuất đổi viền ô nhập sang border-strong, còn viền thẻ và đường kẻ trang trí vẫn giữ border-subtle.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px">
+<div style="display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<strong style="font:var(--text-heading-sm)">Ảnh không bị viền chói</strong>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="aspect-ratio:1;padding:4px;border-radius:var(--fg-radius-sm);background:hsl(30 20% 98%)"><img src="https://picsum.photos/seed/fg-dk1/400/400" alt="" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:4px"></div><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Trước: khung sáng quanh ảnh, rất chói trên nền tối</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="position:relative;aspect-ratio:1;border-radius:var(--fg-radius-sm);overflow:hidden;background:var(--bg-sunken)"><img src="https://picsum.photos/seed/fg-dk1/400/400" alt="" style="width:100%;height:100%;object-fit:cover;display:block"><span style="position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px hsl(0 0% 100% / .06);pointer-events:none"></span></div><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Sau: không khung, viền trong 6% trắng, nền chờ bg-sunken</span></div>
+</div>
+<ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font:var(--text-body-sm);color:var(--text-secondary)"><li>Không làm tối hay lọc màu ảnh portfolio, vì nhiếp ảnh gia cần khách thấy đúng màu.</li><li>Viền quanh ảnh đại diện dùng màu bg-page để hòa vào nền theo từng chế độ.</li><li>Lớp phủ dưới chữ trên ảnh dùng một token chung --fg-scrim: hsl(168 62% 7% / .64). Hiện đang có 4 giá trị rgba khác nhau.</li></ul>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<strong style="font:var(--text-heading-sm)">Bậc nền thay cho bóng</strong>
+<div style="display:flex;flex-direction:column;gap:0;border-radius:var(--fg-radius-md);overflow:hidden;border:1px solid var(--border-subtle)">
+<span style="display:flex;justify-content:space-between;padding:14px;background:var(--bg-sunken);font:500 12px/1 var(--font-mono)"><span>bg-sunken</span><span style="color:var(--text-tertiary)">ô chờ ảnh, khối phụ</span></span>
+<span style="display:flex;justify-content:space-between;padding:14px;background:var(--bg-page);font:500 12px/1 var(--font-mono)"><span>bg-page</span><span style="color:var(--text-tertiary)">nền trang</span></span>
+<span style="display:flex;justify-content:space-between;padding:14px;background:var(--bg-surface);font:500 12px/1 var(--font-mono)"><span>bg-surface</span><span style="color:var(--text-tertiary)">thẻ, thanh dính</span></span>
+<span style="display:flex;justify-content:space-between;padding:14px;background:var(--surface-card);font:500 12px/1 var(--font-mono)"><span>surface-card</span><span style="color:var(--text-tertiary)">sheet, dialog, menu</span></span>
+</div>
+<ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font:var(--text-body-sm);color:var(--text-secondary)"><li>Header green-900 cố định ở cả hai chế độ. Ở chế độ tối nó gần sát nền trang nên cần thêm viền dưới 6% trắng.</li><li>Dialog, Sheet, Dropdown, Toast và Skeleton đang dùng bg-popover/bg-muted trung tính (xám lạnh). Cần đổi sang các bậc nền ấm ở trên.</li></ul>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<strong style="font:var(--text-heading-md)">Độ phủ chế độ tối theo màn</strong>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><div style="display:flex;justify-content:space-between;gap:8px"><strong style="font-size:15px">Trang chủ</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="success">Đủ bản tối</x-import></div><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Còn 3 lớp phủ rgba riêng trên ảnh hero, cần gom về --fg-scrim.</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><div style="display:flex;justify-content:space-between;gap:8px"><strong style="font-size:15px">Tìm kiếm F</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="warning">Cần chỉnh DS</x-import></div><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">MobileFilterSheet dùng Sheet (bg-popover) và Skeleton (bg-muted).</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><div style="display:flex;justify-content:space-between;gap:8px"><strong style="font-size:15px">Bản đồ F</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="warning">Cần chỉnh</x-import></div><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Bóng của marker gần như vô hình trên nền tối, cần thay bằng vòng 4px. Lớp phủ rgba(0,0,0,.5) cũng cần gom về token chung.</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><div style="display:flex;justify-content:space-between;gap:8px"><strong style="font-size:15px">Hồ sơ</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="warning">Cần chỉnh</x-import></div><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Ngày đang chọn tô green-900 cố định nên chìm vào nền tối. QrCodeDialog dùng Dialog có nền trung tính.</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><div style="display:flex;justify-content:space-between;gap:8px"><strong style="font-size:15px">Đặt lịch</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="warning">Cần chỉnh DS</x-import></div><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Textarea dùng nền dark:bg-input/30 và viền focus xám, lệch với Input.</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md)"><div style="display:flex;justify-content:space-between;gap:8px"><strong style="font-size:15px">Lịch đặt của tôi</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="success">Đủ bản tối</x-import></div><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Badge "Hết hạn" dùng outline, cần kiểm tra lại độ tương phản trên thẻ.</span></div>
+</div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;}}">
+class Component extends DCLogic {
+  state = { vals: null };
+  componentDidMount() { this.t1 = setTimeout(() => this.measure(), 400); this.t2 = setTimeout(() => this.measure(), 1500); }
+  componentWillUnmount() { clearTimeout(this.t1); clearTimeout(this.t2); }
+  pairs() {
+    return [['Chữ chính / nền trang', '--text-primary', '--bg-page', 4.5], ['Chữ phụ / nền trang', '--text-secondary', '--bg-page', 4.5], ['Chữ mờ / thẻ', '--text-tertiary', '--bg-surface', 4.5], ['Chữ mờ / nền chìm', '--text-tertiary', '--bg-sunken', 4.5], ['Chữ trên nền thương hiệu', '--text-on-brand', '--brand-primary', 4.5], ['Nút accent', '--gold-900', '--gold-400', 4.5], ['Liên kết / thẻ', '--text-link', '--bg-surface', 4.5], ['Cảnh báo', '--warning', '--warning-bg', 4.5], ['Lỗi', '--danger', '--danger-bg', 4.5], ['Thành công', '--success', '--success-bg', 4.5], ['Menu header', '--green-200', '--green-900', 4.5], ['Viền ô nhập / thẻ', '--border-default', '--bg-surface', 3]];
+  }
+  measure() {
+    const p = document.querySelector('[data-probe]'); if (!p) return;
+    const rgb = v => { p.style.color = `var(${v})`; const c = getComputedStyle(p).color; const m = c.match(/[\d.]+/g); if (!m) return null; let n = m.slice(c.startsWith('color(') ? 0 : 0, 3).map(Number); if (c.startsWith('color(')) n = m.slice(0, 3).map(x => Number(x) * 255); return n; };
+    const L = ([r, g, b]) => { const f = x => { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+    const vals = this.pairs().map(([, fg, bg]) => { const a = rgb(fg), b = rgb(bg); if (!a || !b) return null; const l1 = L(a), l2 = L(b); return { r: (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05), fg: `rgb(${a.join(',')})`, bg: `rgb(${b.join(',')})` }; });
+    this.setState({ vals }, () => document.querySelectorAll('[data-swatch]').forEach(el => { const v = vals[+el.dataset.swatch]; if (v) { el.style.color = v.fg; el.style.background = v.bg; } }));
+  }
+  renderVals() {
+    const V = this.state.vals;
+    const rows = this.pairs().map(([label, fg, bg, need], i) => {
+      const v = V && V[i]; const r = v ? v.r : null;
+      const ok = r != null && r >= need, big = r != null && need === 4.5 && r >= 3 && r < 4.5;
+      return { i: String(i), label, pair: `${fg} / ${bg}`, ratio: r == null ? '…' : r.toFixed(1).replace('.', ',') + ':1', verdict: r == null ? 'Đang đo' : ok ? (need === 3 ? 'Đạt 3:1' : 'Đạt AA') : big ? 'Chỉ chữ lớn' : 'Chưa đạt', variant: r == null ? 'outline' : ok ? 'success' : big ? 'warning' : 'destructive' };
+    });
+    return { rows, modeLabel: (this.props.theme || 'light') === 'dark' ? 'tối' : 'sáng' };
+  }
+}
+</script>
+</body>
+</html>
