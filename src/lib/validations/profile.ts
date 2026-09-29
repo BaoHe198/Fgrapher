@@ -65,6 +65,14 @@ export const updateProfileSchema = z.object({
   provinceId: z.string().min(1),
   wardId: z.string().min(1),
   servesNationwide: z.boolean().optional(),
+  // Redesign 09/2026 - self-reported, shown on the public profile. null
+  // clears a value the provider no longer wants shown.
+  yearsExperience: z.number().int().min(0).max(70).nullable().optional(),
+  depositPercent: z.number().int().min(0).max(100).nullable().optional(),
+  depositPolicy: z.string().trim().max(600).nullable().optional(),
+  cancellationPolicy: z.string().trim().max(800).nullable().optional(),
+  reschedulePolicy: z.string().trim().max(800).nullable().optional(),
+  serviceRadiusKm: z.number().int().min(0).max(2000).nullable().optional(),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
@@ -119,5 +127,13 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     provinceId: z.string().min(1, t("provinceRequired")),
     wardId: z.string().min(1, t("wardRequired")),
     servesNationwide: z.boolean().optional(),
+    // Redesign 09/2026 - self-reported, shown on the public profile. null
+    // clears a value the provider no longer wants shown.
+    yearsExperience: z.number().int().min(0).max(70).nullable().optional(),
+    depositPercent: z.number().int().min(0).max(100).nullable().optional(),
+    depositPolicy: z.string().trim().max(600).nullable().optional(),
+    cancellationPolicy: z.string().trim().max(800).nullable().optional(),
+    reschedulePolicy: z.string().trim().max(800).nullable().optional(),
+    serviceRadiusKm: z.number().int().min(0).max(2000).nullable().optional(),
   });
 }

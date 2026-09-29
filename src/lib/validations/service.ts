@@ -19,6 +19,10 @@ export const createServiceSchema = z.object({
     .positive("Enter a price")
     .max(MAX_VND_AMOUNT, "That amount is too large"),
   isActive: z.boolean().default(true),
+  // Redesign 09/2026: what the package delivers, shown on the package
+  // card ("30 ảnh chỉnh sửa · giao sau 5 ngày"). null clears it.
+  editedPhotoCount: z.number().int().min(0).max(5000).nullable().optional(),
+  deliveryDays: z.number().int().min(0).max(365).nullable().optional(),
 });
 
 export type CreateServiceInput = z.infer<typeof createServiceSchema>;
@@ -46,6 +50,10 @@ function getCreateServiceSchema(t: (key: string) => string) {
       .positive(t("priceRequired"))
       .max(MAX_VND_AMOUNT, t("amountTooHigh")),
     isActive: z.boolean().default(true),
+    // Redesign 09/2026: what the package delivers, shown on the package
+    // card ("30 ảnh chỉnh sửa · giao sau 5 ngày"). null clears it.
+    editedPhotoCount: z.number().int().min(0).max(5000).nullable().optional(),
+    deliveryDays: z.number().int().min(0).max(365).nullable().optional(),
   });
 }
 

@@ -2585,7 +2585,9 @@
         "activeLabel": "Active",
         "cancel": "Cancel",
         "save": "Save",
-        "kindLabel": "Service type"
+        "kindLabel": "Service type",
+        "editedPhotosLabel": "Edited photos",
+        "deliveryDaysLabel": "Delivery (days)"
       },
       "media": {
         "coverButton": "Cover",
@@ -2661,6 +2663,20 @@
         "editAria": "Edit {name}",
         "deleteAria": "Delete {name}",
         "missingHint": "Enter the outfit name and daily price to save."
+      },
+      "policy": {
+        "title": "Experience & policies",
+        "intro": "Shown on your public profile so customers know before they book. Leave a field blank to hide it.",
+        "yearsLabel": "Years of experience",
+        "depositPercentLabel": "Deposit (%)",
+        "depositPolicyLabel": "Deposit policy",
+        "depositPolicyHint": "E.g. deposit after the booking is confirmed, paid directly to you. Fgrapher takes no online payment.",
+        "cancellationLabel": "Cancellation policy",
+        "cancellationHint": "E.g. cancel 7+ days before for a full refund, 3+ days for half.",
+        "rescheduleLabel": "Reschedule policy",
+        "rescheduleHint": "E.g. one free reschedule with 48 hours' notice.",
+        "radiusLabel": "Travel radius with no travel fee (km)",
+        "radiusHelper": "Beyond this, travel and lodging are agreed directly with the customer."
       }
     }
   },
@@ -3352,13 +3368,24 @@
         "allAlbums": "All",
         "photoAria": "View larger",
         "upgradeHintBilling": "Your plan has expired, so you can't create new albums yet. <link>Renew your plan</link>",
-        "upgradeHintSupport": "Your plan has expired, so you can't create new albums yet. <link>Contact Fgrapher</link> to have it renewed."
+        "upgradeHintSupport": "Your plan has expired, so you can't create new albums yet. <link>Contact Fgrapher</link> to have it renewed.",
+        "albumsHeading": "Project albums",
+        "allPhotos": "All photos",
+        "filterByStyle": "Filter by style"
       },
       "servicesTab": {
         "empty": "No service packages listed",
         "tfpAvailable": "TFP available",
         "tfpCollab": "TFP / Collaboration",
-        "book": "Book"
+        "book": "Book",
+        "editedPhotos": "Edited photos",
+        "delivery": "Delivery",
+        "photoCount": "{count} photos",
+        "afterDays": "After {count} days",
+        "from": "From {price}",
+        "choose": "Choose",
+        "emptyHint": "Message the artist for a quote for what you need.",
+        "askForQuote": "Ask for a quote"
       },
       "reviewsTab": {
         "sortNewest": "Newest",
@@ -3368,7 +3395,10 @@
         "all": "All",
         "anonymous": "Anonymous",
         "respond": "Respond",
-        "report": "Report"
+        "report": "Report",
+        "onlyCompleted": "Only customers who completed a shoot can review.",
+        "responseFrom": "Response from {name}",
+        "seeAll": "See all {count} reviews"
       },
       "bookingSidebar": {
         "book": "Book {name}",
@@ -3395,7 +3425,19 @@
         "stickyMessage": "Message",
         "shopMessageHelp": "Contact the shop directly about availability, rental dates and the deposit.",
         "stickyBook": "Book now",
-        "pickDateHint": "Pick a date and time to continue."
+        "pickDateHint": "Pick a date and time to continue.",
+        "chooseDate": "Pick a date",
+        "reviewCount": "{count} reviews",
+        "packagesLabel": "Packages",
+        "editedPhotos": "{count} edited photos",
+        "thisWeek": "Free this week",
+        "weekOf": "Week of {date}",
+        "noDaysThisWeek": "Fully booked this week. Try next week or message the artist.",
+        "timezone": "Vietnam time (GMT+7)",
+        "finalPriceNote": "The final price is set when the artist confirms.",
+        "sendRequest": "Send booking request",
+        "messageFirst": "Message first",
+        "noChargeNote": "Nothing charged yet. The artist confirms within 48 hours; the deposit is agreed directly."
       },
       "productTab": {
         "empty": "This shop has not listed any products yet",
@@ -3424,6 +3466,61 @@
       "postsTab": {
         "empty": "No posts yet",
         "stats": "{likes} likes · {comments} comments"
+      },
+      "facts": {
+        "title": "Verification",
+        "identity": "Identity (ID card)",
+        "phone": "Phone number",
+        "joined": "Joined Fgrapher",
+        "responseTime": "Response time",
+        "verified": "Verified",
+        "verifiedOn": "Verified {date}",
+        "notVerified": "Not verified",
+        "response": {
+          "hour": "Usually within an hour",
+          "hours": "Usually within {count} hours",
+          "day": "Usually within a day",
+          "days": "Usually within {count} days"
+        },
+        "deposit": "Deposit",
+        "cancellation": "Cancellation",
+        "reschedule": "Rescheduling",
+        "depositPercent": "{percent}% deposit once the artist confirms.",
+        "depositDirect": "Agreed and paid directly with the artist. Fgrapher takes no online payment.",
+        "depositDefault": "Deposit agreed directly with the artist once the booking is confirmed. Fgrapher takes no online payment.",
+        "policyAskInChat": "The artist hasn't written this policy yet. Ask in a message before booking."
+      },
+      "area": {
+        "radius": "{km} km radius",
+        "nationwide": "Takes work nationwide. Travel and lodging agreed directly.",
+        "nationwideWithRadius": "Takes work nationwide. Beyond {km} km, travel and lodging are agreed directly.",
+        "local": "Works in this area. Message to ask about other locations.",
+        "localWithRadius": "Works within {km} km. Further away, message to agree a travel fee."
+      },
+      "sections": {
+        "navLabel": "Profile sections",
+        "reviews": "Reviews & verification",
+        "area": "Service area",
+        "space": "The space"
+      },
+      "stats": {
+        "shoots": "shoots completed",
+        "rating": "rating · {count} reviews",
+        "years": "years of experience"
+      },
+      "nationwide": "Works nationwide",
+      "priceFrom": "From {price}",
+      "responseShort": {
+        "hour": "Replies within an hour",
+        "hours": "Replies within {count} hours",
+        "day": "Replies within a day",
+        "days": "Replies within {count} days"
+      },
+      "shootsShort": "{count} shoots completed",
+      "studio": {
+        "area": "Floor area",
+        "squareMeters": "{area} m²",
+        "amenities": "Amenities"
       }
     },
     "roleProvinceLanding": {

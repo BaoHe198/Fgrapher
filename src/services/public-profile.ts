@@ -158,6 +158,10 @@ async function getPublicProfileUserUncached(username: string) {
         },
       },
       acceptingBookings: true,
+      // Public "Thông tin xác minh" facts (redesign 09/2026): whether the
+      // phone was verified - never the number - and the month they joined.
+      phoneVerified: true,
+      createdAt: true,
       // Never rendered directly — only ever passed through
       // getAgeRangeLabel() to compute a bucketed range, MODEL role only.
       dateOfBirth: true,
@@ -235,7 +239,10 @@ async function getPublicProfileUserUncached(username: string) {
       // Only verificationStatus is actually used publicly (the Verified
       // badge) — the rest of UserRole (subscription, verification ID
       // fields) is never read from this query's result on the client side.
-      roles: { select: { role: true, verificationStatus: true } },
+      // verifiedAt is shown as month/year only ("Đã xác minh 03/2025").
+      roles: {
+        select: { role: true, verificationStatus: true, verifiedAt: true },
+      },
     },
   });
 
@@ -348,6 +355,8 @@ async function getProfileReviewsUncached(userId: string) {
     where: { reviewedId: userId },
     include: {
       reviewer: { select: { name: true, firstName: true, avatar: true } },
+      // Which package the review is about ("Ảnh cưới ngoại cảnh · 20/09").
+      booking: { select: { service: { select: { name: true } } } },
     },
     orderBy: { createdAt: "desc" },
     // No "load more" on the public reviews tab yet — was fetching every

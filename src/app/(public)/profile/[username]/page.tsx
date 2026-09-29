@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { MapPin } from "lucide-react";
+import { BadgeCheck, MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { StarRating } from "@/components/ui/star-rating";
 import { Tag } from "@/components/ui/tag";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { ProfileViewBeacon } from "@/components/profile/profile-view-beacon";
@@ -17,7 +16,8 @@ import { getAgeRangeLabel } from "@/lib/account/age-gate";
 import { formatAdministrativeLocation } from "@/lib/location";
 import { PROVIDER_ROLES, type ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
-import { jsonLdScriptProps } from "@/lib/utils";
+import { responseBucket } from "@/lib/response-time";
+import { formatCurrency, jsonLdScriptProps } from "@/lib/utils";
 import { listAlbums } from "@/services/albums";
 import {
   getProfileReviews,
@@ -26,6 +26,7 @@ import {
   getShopProducts,
 } from "@/services/public-profile";
 import { listPublicCostumes } from "@/services/costumes";
+import { getProfileStats } from "@/services/profile-stats";
 import { listAlbumSocialState, listUserPosts } from "@/services/posts";
 
 import { ProfileAvatar, ProfileCover } from "./profile-hero";
@@ -123,10 +124,9 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  const [roleT, experienceLevelT, categoryT, t] = await Promise.all([
+  const [roleT, experienceLevelT, t] = await Promise.all([
     getTranslations("role"),
     getTranslations("experienceLevel"),
-    getTranslations("profileCategory"),
     getTranslations("publicPages.profile"),
   ]);
 
@@ -145,6 +145,7 @@ export default async function PublicProfilePage({
     posts,
     costumes,
     albumSocialState,
+    stats,
   ] = await Promise.all([
     getProfileReviews(user.id),
     getProfileReviewStats(user.id),
@@ -178,6 +179,7 @@ export default async function PublicProfilePage({
           session?.user?.id ?? null,
         )
       : Promise.resolve([]),
+    getProfileStats(user.id),
   ]);
   const albumSocialById = new Map(
     albumSocialState.map((state) => [state.albumId, state]),
@@ -272,6 +274,66 @@ export default async function PublicProfilePage({
   // provider.
   const averageRating = reviewStats.avgRating.toFixed(1);
 
+  // Redesign 09/2026 header stats and trust facts. Each appears only when
+  // there is something true to say: no "0 buổi đã chụp", no guessed
+  // response time.
+  const isProviderRole = PROVIDER_ROLES.includes(activeProfile.role);
+  const roleRecord = user.roles.find((r) => r.role === activeProfile.role);
+  const response =
+    stats.responseMinutes !== null
+      ? responseBucket(stats.responseMinutes)
+      : null;
+  const headerStats = [
+    stats.completedShoots > 0
+      ? { value: String(stats.completedShoots), label: t("stats.shoots") }
+      : null,
+    reviewStats.count > 0
+      ? {
+          value: averageRating.replace(".", ","),
+          label: t("stats.rating", { count: reviewStats.count }),
+        }
+      : null,
+    activeProfile.yearsExperience
+      ? {
+          value: String(activeProfile.yearsExperience),
+          label: t("stats.years"),
+        }
+      : null,
+  ].filter(Boolean) as { value: string; label: string }[];
+  const minServicePrice = activeProfile.services.length
+    ? Math.min(
+        ...activeProfile.services.map((s) => s.price).filter((p) => p > 0),
+      )
+    : null;
+  const startingPrice =
+    minServicePrice !== null && Number.isFinite(minServicePrice)
+      ? minServicePrice
+      : (activeProfile.priceMin ?? null);
+  const priceLabel = startingPrice
+    ? t("priceFrom", { price: formatCurrency(startingPrice) })
+    : null;
+  const trustLine =
+    [
+      response
+        ? t(`responseShort.${response.unit}`, { count: response.value })
+        : null,
+      stats.completedShoots > 0
+        ? t("shootsShort", { count: stats.completedShoots })
+        : null,
+    ]
+      .filter(Boolean)
+      .join(" · ") || null;
+  // Golden-hour hints need where the shoot roughly is, not the address:
+  // one decimal place is about 10 km, plenty for sunrise maths and too
+  // coarse to locate anyone.
+  const sunPoint =
+    activeProfile.latitude != null && activeProfile.longitude != null
+      ? {
+          latitude: Math.round(activeProfile.latitude * 10) / 10,
+          longitude: Math.round(activeProfile.longitude * 10) / 10,
+        }
+      : null;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": activeProfile.role === "STUDIO" ? "LocalBusiness" : "Person",
@@ -305,7 +367,7 @@ export default async function PublicProfilePage({
         isOwnProfile={isOwnProfile}
       />
 
-      <div className="mx-auto w-full max-w-[1440px] px-4 pb-[72px] sm:px-8">
+      <div className="mx-auto w-full max-w-[1440px] px-5 pb-[72px] sm:px-8">
         <div className="flex flex-col gap-[18px] pt-4">
           <div className="flex flex-wrap items-start justify-between gap-[18px]">
             <div className="flex flex-wrap items-start gap-[18px]">
@@ -315,9 +377,15 @@ export default async function PublicProfilePage({
                 isOwnProfile={isOwnProfile}
               />
 
-              <div className="flex flex-col gap-1.5 pt-2">
-                <h1 className="text-display-md text-text-primary">
+              <div className="flex min-w-0 flex-col gap-2 pt-2">
+                <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-display-md text-text-primary sm:text-display-lg">
                   {displayName}
+                  {isVerified ? (
+                    <Badge variant="success" className="gap-1 align-middle">
+                      <BadgeCheck className="size-3.5" />
+                      {t("status.verified")}
+                    </Badge>
+                  ) : null}
                 </h1>
                 <div className="flex flex-wrap items-center gap-2">
                   {user.profiles.length > 1 ? (
@@ -335,61 +403,50 @@ export default async function PublicProfilePage({
                       </Tag>
                     ))
                   ) : (
-                    <Badge variant="accent">{roleT(activeProfile.role)}</Badge>
+                    <span className="text-body-md text-text-secondary">
+                      {roleT(activeProfile.role)}
+                    </span>
                   )}
-                  {PROVIDER_ROLES.includes(activeProfile.role) ? (
-                    <Badge
-                      variant={user.acceptingBookings ? "success" : "warning"}
-                    >
-                      {user.acceptingBookings
-                        ? t("status.available")
-                        : t("status.bookedOut")}
-                    </Badge>
+                  {isProviderRole && !user.acceptingBookings ? (
+                    <Badge variant="warning">{t("status.bookedOut")}</Badge>
                   ) : null}
-                  {isVerified ? (
-                    <Badge variant="accent">{t("status.verified")}</Badge>
-                  ) : null}
-                  {/* "★ 0.0 (0)" reads as a zero-star rating, not as "no
-                      reviews yet" — and the same provider's card on /browse
-                      already said "Mới". Stars once there is something to
-                      average. */}
-                  {reviewStats.count > 0 ? (
-                    <StarRating
-                      rating={averageRating}
-                      reviews={reviewStats.count}
-                    />
-                  ) : (
+                  {reviewStats.count === 0 ? (
                     <Badge variant="neutral">{t("status.new")}</Badge>
-                  )}
+                  ) : null}
                 </div>
-                {profileLocation || ageRangeLabel ? (
-                  <div className="flex items-center gap-1.5 text-body-sm text-text-secondary">
+                {profileLocation ||
+                ageRangeLabel ||
+                activeProfile.servesNationwide ? (
+                  <div className="flex flex-wrap items-center gap-2 text-body-sm text-text-secondary">
                     {profileLocation ? (
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="size-3.5" />
                         {profileLocation}
                       </span>
                     ) : null}
+                    {activeProfile.servesNationwide ? (
+                      <Badge variant="outline" className="text-meta">
+                        {t("nationwide")}
+                      </Badge>
+                    ) : null}
                     {ageRangeLabel ? (
                       <span>{t("age", { age: ageRangeLabel })}</span>
                     ) : null}
                   </div>
                 ) : null}
-                {activeProfile.categories.length > 0 ? (
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {activeProfile.categories.map((category) => (
-                      <Tag
-                        key={category}
-                        render={
-                          <Link
-                            href={`/browse?roles=${activeProfile.role}&categories=${category}`}
-                          />
-                        }
-                      >
-                        {categoryT(category)}
-                      </Tag>
+                {headerStats.length > 0 ? (
+                  <dl className="mt-1 flex flex-wrap gap-x-8 gap-y-2">
+                    {headerStats.map((stat) => (
+                      <div key={stat.label} className="flex flex-col">
+                        <dt className="order-last text-meta text-text-tertiary">
+                          {stat.label}
+                        </dt>
+                        <dd className="font-mono text-heading-lg font-semibold! tabular-nums text-text-primary">
+                          {stat.value}
+                        </dd>
+                      </div>
                     ))}
-                  </div>
+                  </dl>
                 ) : null}
               </div>
             </div>
@@ -468,6 +525,39 @@ export default async function PublicProfilePage({
             isOwnProfile={isOwnProfile}
             canEditPortfolio={canEditPortfolio}
             billingEnabled={features.billingEnabled}
+            facts={
+              isProviderRole
+                ? {
+                    identityVerifiedAt:
+                      isVerified && roleRecord?.verifiedAt
+                        ? roleRecord.verifiedAt.toISOString()
+                        : null,
+                    phoneVerified: user.phoneVerified,
+                    joinedAt: user.createdAt.toISOString(),
+                    response,
+                    depositPercent: activeProfile.depositPercent,
+                    depositPolicy: activeProfile.depositPolicy,
+                    cancellationPolicy: activeProfile.cancellationPolicy,
+                    reschedulePolicy: activeProfile.reschedulePolicy,
+                  }
+                : null
+            }
+            area={{
+              location: profileLocation || null,
+              radiusKm: activeProfile.serviceRadiusKm,
+              nationwide: activeProfile.servesNationwide,
+            }}
+            priceLabel={priceLabel}
+            trustLine={trustLine}
+            sunPoint={sunPoint}
+            studio={
+              activeProfile.role === "STUDIO"
+                ? {
+                    area: activeProfile.area,
+                    amenities: activeProfile.amenities,
+                  }
+                : null
+            }
           />
         </div>
       </div>

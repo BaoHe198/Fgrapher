@@ -60,7 +60,7 @@ export function ProfileCover({
   const needsScrim = !chosenCover && Boolean(fallbackImage);
 
   return (
-    <div className="relative h-[200px] w-full sm:h-[240px]">
+    <div className="relative h-[180px] w-full bg-bg-sunken sm:h-[260px]">
       {displayCover ? (
         <>
           <Image
@@ -73,7 +73,7 @@ export function ProfileCover({
             unoptimized={isOwnProfile}
           />
           {needsScrim ? (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-scrim via-transparent to-transparent opacity-70" />
           ) : null}
         </>
       ) : (
@@ -164,11 +164,11 @@ export function ProfileAvatar({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Avatar className="-mt-16 size-[104px] shrink-0 border-4 border-bg-surface bg-bg-surface">
+      <Avatar className="-mt-14 size-24 shrink-0 border-4 border-bg-page bg-bg-page sm:-mt-20 sm:size-[132px]">
         {displayAvatar ? (
           <AvatarImage src={displayAvatar} alt={displayName} />
         ) : null}
-        <AvatarFallback className="text-heading-lg">
+        <AvatarFallback className="text-heading-lg sm:text-display-md">
           {displayName[0]?.toUpperCase()}
         </AvatarFallback>
 
@@ -201,7 +201,7 @@ export function ProfileAvatar({
         />
       ) : null}
       {isOwnProfile && error ? (
-        <p className="max-w-[104px] text-body-sm text-danger">{error}</p>
+        <p className="max-w-[132px] text-body-sm text-danger">{error}</p>
       ) : null}
       {isOwnProfile ? (
         <ImageCropDialog

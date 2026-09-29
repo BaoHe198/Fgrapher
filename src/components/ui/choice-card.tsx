@@ -31,6 +31,8 @@ interface ChoiceCardProps {
   invalid?: boolean;
   /** "single" renders a radio, "multiple" a checkbox. */
   mode?: "single" | "multiple";
+  /** "sm" for narrow columns such as the profile's booking sidebar. */
+  size?: "md" | "sm";
   onSelect: (value: string) => void;
   className?: string;
 }
@@ -48,6 +50,7 @@ function ChoiceCard({
   disabled = false,
   invalid = false,
   mode = "single",
+  size = "md",
   onSelect,
   className,
 }: ChoiceCardProps) {
@@ -61,7 +64,10 @@ function ChoiceCard({
       data-selected={selected || undefined}
       data-interactive="true"
       className={cn(
-        "group/choice relative flex items-start gap-3.5 rounded-[var(--fg-radius-lg)] border bg-bg-surface p-4 text-left transition-[border-color,box-shadow,transform,background-color] duration-[var(--fg-dur-260)] ease-fg-out sm:p-5",
+        "group/choice relative flex items-start rounded-[var(--fg-radius-lg)] border bg-bg-surface text-left transition-[border-color,box-shadow,transform,background-color] duration-[var(--fg-dur-260)] ease-fg-out",
+        size === "sm"
+          ? "gap-3 rounded-[var(--fg-radius-md)] p-3"
+          : "gap-3.5 p-4 sm:p-5",
         "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-border-focus",
         selected
           ? "border-brand-primary shadow-[inset_0_0_0_1px_var(--brand-primary)]"
@@ -118,11 +124,21 @@ function ChoiceCard({
       ) : null}
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="flex items-start justify-between gap-3">
-          <span className="line-clamp-2 text-heading-sm text-text-primary">
+          <span
+            className={cn(
+              "line-clamp-2 text-text-primary",
+              size === "sm" ? "text-body-sm font-semibold!" : "text-heading-sm",
+            )}
+          >
             {title}
           </span>
           {price ? (
-            <span className="shrink-0 font-mono text-body-md font-semibold! tabular-nums text-text-primary">
+            <span
+              className={cn(
+                "shrink-0 font-mono font-semibold! tabular-nums text-text-primary",
+                size === "sm" ? "text-body-sm" : "text-body-md",
+              )}
+            >
               {price}
             </span>
           ) : null}

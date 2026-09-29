@@ -11,7 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NativeSelect } from "@/components/ui/native-select";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tag } from "@/components/ui/tag";
-import { formatMonthYear } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/format";
 
 interface ReviewItem {
   id: string;
@@ -24,14 +25,19 @@ interface ReviewItem {
     firstName: string | null;
     avatar: string | null;
   };
+  booking?: { service: { name: string } | null } | null;
 }
+
+const INITIAL_REVIEWS = 3;
 
 export function ReviewsTab({
   providerId,
+  providerName,
   reviews,
   stats,
 }: {
   providerId: string;
+  providerName: string;
   reviews: ReviewItem[];
   stats: {
     avgRating: number;
@@ -52,12 +58,14 @@ export function ReviewsTab({
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [respondTarget, setRespondTarget] = useState<ReviewItem | null>(null);
   const [reportTarget, setReportTarget] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   // From the true DB-side aggregate (stats), not derived from `reviews` —
   // that list is capped (see getProfileReviews), so computing these here
   // would silently go wrong for a provider with more reviews than the
   // display cap fetches.
   const average = stats.avgRating.toFixed(1);
+  const averageVi = average.replace(".", ",");
   const breakdown = stats.breakdown;
 
   const filtered = useMemo(() => {
@@ -82,25 +90,30 @@ export function ReviewsTab({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 rounded-[var(--fg-radius-md)] bg-surface-card p-5 shadow-[var(--shadow-sm)] sm:flex-row sm:items-center sm:gap-8">
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-display-lg text-text-primary">{average}</span>
+      <div className="flex flex-col gap-5 rounded-[var(--fg-radius-lg)] border border-border-subtle bg-bg-surface p-5 sm:flex-row sm:items-center sm:gap-10">
+        <div className="flex flex-col gap-1">
+          <span className="text-display-lg text-text-primary tabular-nums">
+            {averageVi}
+          </span>
           <StarRating rating={average} reviews={stats.count} />
+          <span className="max-w-[220px] text-meta text-text-tertiary">
+            {t("onlyCompleted")}
+          </span>
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
           {breakdown.map((b) => (
-            <div key={b.stars} className="flex items-center gap-2">
-              <span className="w-8 text-body-sm text-text-tertiary">
+            <div key={b.stars} className="flex items-center gap-3">
+              <span className="w-7 font-mono text-meta text-text-tertiary">
                 {b.stars}★
               </span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-200">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-bg-sunken">
                 <div
                   className="h-full rounded-full bg-gold-400"
                   style={{ width: `${b.percent}%` }}
                 />
               </div>
-              <span className="w-8 text-right text-body-sm text-text-tertiary">
-                {b.percent}%
+              <span className="w-8 text-right font-mono text-meta text-text-tertiary tabular-nums">
+                {b.count}
               </span>
             </div>
           ))}
@@ -136,65 +149,87 @@ export function ReviewsTab({
       </div>
 
       <div className="flex flex-col gap-[18px]">
-        {filtered.map((review) => {
-          const name =
-            review.reviewer.firstName ?? review.reviewer.name ?? t("anonymous");
-          return (
-            <div key={review.id} className="flex gap-3">
-              <Avatar size="lg" className="shrink-0">
-                {review.reviewer.avatar ? (
-                  <AvatarImage src={review.reviewer.avatar} alt="" />
-                ) : null}
-                <AvatarFallback>{name[0]?.toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-1 flex-col gap-1">
-                <span className="text-heading-sm text-text-primary">
-                  {name}
-                </span>
-                <div className="flex items-center gap-2">
-                  <StarRating rating={review.rating} />
-                  <span className="text-body-sm text-text-tertiary">
-                    {formatMonthYear(review.createdAt)}
+        {(showAll ? filtered : filtered.slice(0, INITIAL_REVIEWS)).map(
+          (review) => {
+            const name =
+              review.reviewer.firstName ??
+              review.reviewer.name ??
+              t("anonymous");
+            return (
+              <div key={review.id} className="flex gap-3">
+                <Avatar size="lg" className="shrink-0">
+                  {review.reviewer.avatar ? (
+                    <AvatarImage src={review.reviewer.avatar} alt="" />
+                  ) : null}
+                  <AvatarFallback>{name[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-1 flex-col gap-1">
+                  <span className="text-heading-sm text-text-primary">
+                    {name}
                   </span>
-                </div>
-                {review.content ? (
-                  <p className="text-body-md text-text-secondary">
-                    {review.content}
-                  </p>
-                ) : null}
-                {review.response ? (
-                  <div className="mt-2 border-l-2 border-brand-primary pl-3">
-                    <p className="text-body-sm text-text-secondary">
-                      {review.response}
-                    </p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <StarRating rating={review.rating} />
+                    <span className="text-meta text-text-tertiary">
+                      {[
+                        review.booking?.service?.name,
+                        formatDate(review.createdAt),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
                   </div>
-                ) : null}
+                  {review.content ? (
+                    <p className="text-body-md text-text-secondary">
+                      {review.content}
+                    </p>
+                  ) : null}
+                  {review.response ? (
+                    <div className="mt-2 rounded-[var(--fg-radius-md)] border-l-2 border-brand-primary bg-bg-sunken px-3.5 py-2.5">
+                      <p className="text-meta text-text-tertiary">
+                        {t("responseFrom", { name: providerName })}
+                      </p>
+                      <p className="text-body-sm text-text-secondary">
+                        {review.response}
+                      </p>
+                    </div>
+                  ) : null}
 
-                <div className="mt-1.5 flex gap-3">
-                  {isOwner && !review.response ? (
-                    <button
-                      type="button"
-                      onClick={() => setRespondTarget(review)}
-                      className="text-body-sm font-semibold! text-brand-primary"
-                    >
-                      {t("respond")}
-                    </button>
-                  ) : null}
-                  {!isOwner ? (
-                    <button
-                      type="button"
-                      onClick={() => setReportTarget(review.id)}
-                      className="text-body-sm text-text-tertiary"
-                    >
-                      {t("report")}
-                    </button>
-                  ) : null}
+                  <div className="mt-1.5 flex gap-3">
+                    {isOwner && !review.response ? (
+                      <button
+                        type="button"
+                        onClick={() => setRespondTarget(review)}
+                        className="text-body-sm font-semibold! text-brand-primary"
+                      >
+                        {t("respond")}
+                      </button>
+                    ) : null}
+                    {!isOwner ? (
+                      <button
+                        type="button"
+                        onClick={() => setReportTarget(review.id)}
+                        className="text-body-sm text-text-tertiary"
+                      >
+                        {t("report")}
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          },
+        )}
       </div>
+
+      {!showAll && filtered.length > INITIAL_REVIEWS ? (
+        <Button
+          variant="outline"
+          className="self-start"
+          onClick={() => setShowAll(true)}
+        >
+          {t("seeAll", { count: stats.count })}
+        </Button>
+      ) : null}
 
       {respondTarget ? (
         <RespondReviewModal

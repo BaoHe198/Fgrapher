@@ -31,6 +31,8 @@ interface ServiceItem {
   price: number;
   currency: string;
   isActive: boolean;
+  editedPhotoCount?: number | null;
+  deliveryDays?: number | null;
 }
 
 interface ServiceDraft {
@@ -39,6 +41,8 @@ interface ServiceDraft {
   description: string;
   price: string;
   isActive: boolean;
+  editedPhotoCount: string;
+  deliveryDays: string;
 }
 
 const EMPTY_DRAFT: ServiceDraft = {
@@ -47,6 +51,8 @@ const EMPTY_DRAFT: ServiceDraft = {
   description: "",
   price: "",
   isActive: true,
+  editedPhotoCount: "",
+  deliveryDays: "",
 };
 
 export function ServicesManager({
@@ -83,6 +89,12 @@ export function ServicesManager({
       description: service.description ?? "",
       price: String(service.price),
       isActive: service.isActive,
+      editedPhotoCount:
+        service.editedPhotoCount != null
+          ? String(service.editedPhotoCount)
+          : "",
+      deliveryDays:
+        service.deliveryDays != null ? String(service.deliveryDays) : "",
     });
     setModalOpen(true);
   };
@@ -95,6 +107,11 @@ export function ServicesManager({
       description: draft.description || undefined,
       price: Number(draft.price),
       isActive: draft.isActive,
+      // Blank clears: the package card then simply leaves that line out.
+      editedPhotoCount: draft.editedPhotoCount
+        ? Number(draft.editedPhotoCount)
+        : null,
+      deliveryDays: draft.deliveryDays ? Number(draft.deliveryDays) : null,
     };
 
     const res = editingId
@@ -217,6 +234,28 @@ export function ServicesManager({
                 value={draft.description}
                 onChange={(e) =>
                   setDraft({ ...draft, description: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label={t("editedPhotosLabel")}
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={draft.editedPhotoCount}
+                onChange={(e) =>
+                  setDraft({ ...draft, editedPhotoCount: e.target.value })
+                }
+              />
+              <Input
+                label={t("deliveryDaysLabel")}
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={draft.deliveryDays}
+                onChange={(e) =>
+                  setDraft({ ...draft, deliveryDays: e.target.value })
                 }
               />
             </div>

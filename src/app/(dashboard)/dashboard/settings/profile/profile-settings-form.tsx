@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { NativeSelect } from "@/components/ui/native-select";
 import {
   AddressAutocomplete,
@@ -93,6 +94,12 @@ interface ProfileFormValues {
   provinceId: string;
   wardId: string;
   servesNationwide: boolean;
+  yearsExperience: string;
+  depositPercent: string;
+  depositPolicy: string;
+  cancellationPolicy: string;
+  reschedulePolicy: string;
+  serviceRadiusKm: string;
 }
 
 function toFormValues(
@@ -130,12 +137,22 @@ function toFormValues(
     provinceId: (profile?.provinceId as string) ?? "",
     wardId: (profile?.wardId as string) ?? "",
     servesNationwide: (profile?.servesNationwide as boolean) ?? false,
+    yearsExperience:
+      profile?.yearsExperience != null ? String(profile.yearsExperience) : "",
+    depositPercent:
+      profile?.depositPercent != null ? String(profile.depositPercent) : "",
+    depositPolicy: (profile?.depositPolicy as string) ?? "",
+    cancellationPolicy: (profile?.cancellationPolicy as string) ?? "",
+    reschedulePolicy: (profile?.reschedulePolicy as string) ?? "",
+    serviceRadiusKm:
+      profile?.serviceRadiusKm != null ? String(profile.serviceRadiusKm) : "",
   };
 }
 
 export function ProfileSettingsForm({ role }: { role: Role }) {
   const t = useTranslations("dashboardSettings.profile.location");
   const tEditor = useTranslations("dashboardSettings.profile.editor");
+  const tPolicy = useTranslations("dashboardSettings.profile.policy");
   const categoryT = useTranslations("profileCategory");
   const experienceLevelT = useTranslations("experienceLevel");
   const [values, setValues] = useState<ProfileFormValues>(toFormValues(null));
@@ -291,6 +308,23 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           provinceId: values.provinceId,
           wardId: values.wardId,
           servesNationwide: values.servesNationwide,
+          // Blank sends null, which clears the value on the public profile.
+          ...(PROVIDER_ROLES.includes(role)
+            ? {
+                yearsExperience: values.yearsExperience
+                  ? Number(values.yearsExperience)
+                  : null,
+                depositPercent: values.depositPercent
+                  ? Number(values.depositPercent)
+                  : null,
+                depositPolicy: values.depositPolicy.trim() || null,
+                cancellationPolicy: values.cancellationPolicy.trim() || null,
+                reschedulePolicy: values.reschedulePolicy.trim() || null,
+                serviceRadiusKm: values.serviceRadiusKm
+                  ? Number(values.serviceRadiusKm)
+                  : null,
+              }
+            : {}),
         }),
       });
 
@@ -506,6 +540,18 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
             <p className="text-body-sm text-text-tertiary">
               {t("nationwideHelper")}
             </p>
+            <Input
+              label={tPolicy("radiusLabel")}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={2000}
+              value={values.serviceRadiusKm}
+              onChange={(e) => set("serviceRadiusKm", e.target.value)}
+            />
+            <p className="-mt-2 text-body-sm text-text-tertiary">
+              {tPolicy("radiusHelper")}
+            </p>
 
             {provinces.length > 1 ? (
               <div className="flex flex-col gap-2">
@@ -533,6 +579,66 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           </>
         ) : null}
       </div>
+
+      {PROVIDER_ROLES.includes(role) ? (
+        <section className="flex flex-col gap-4 rounded-[var(--fg-radius-lg)] border border-border-subtle p-5">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-heading-sm text-text-primary">
+              {tPolicy("title")}
+            </h3>
+            <p className="text-body-sm text-text-tertiary">
+              {tPolicy("intro")}
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label={tPolicy("yearsLabel")}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={70}
+              value={values.yearsExperience}
+              onChange={(e) => set("yearsExperience", e.target.value)}
+            />
+            <Input
+              label={tPolicy("depositPercentLabel")}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={100}
+              value={values.depositPercent}
+              onChange={(e) => set("depositPercent", e.target.value)}
+            />
+          </div>
+          <Textarea
+            label={tPolicy("depositPolicyLabel")}
+            hint={tPolicy("depositPolicyHint")}
+            rows={2}
+            maxLength={600}
+            showCount
+            value={values.depositPolicy}
+            onChange={(e) => set("depositPolicy", e.target.value)}
+          />
+          <Textarea
+            label={tPolicy("cancellationLabel")}
+            hint={tPolicy("cancellationHint")}
+            rows={2}
+            maxLength={800}
+            showCount
+            value={values.cancellationPolicy}
+            onChange={(e) => set("cancellationPolicy", e.target.value)}
+          />
+          <Textarea
+            label={tPolicy("rescheduleLabel")}
+            hint={tPolicy("rescheduleHint")}
+            rows={2}
+            maxLength={800}
+            showCount
+            value={values.reschedulePolicy}
+            onChange={(e) => set("reschedulePolicy", e.target.value)}
+          />
+        </section>
+      ) : null}
 
       {role === "STUDIO" ? (
         <>

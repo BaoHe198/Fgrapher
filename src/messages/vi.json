@@ -2585,7 +2585,9 @@
         "activeLabel": "Đang hoạt động",
         "cancel": "Hủy",
         "save": "Lưu",
-        "kindLabel": "Loại dịch vụ"
+        "kindLabel": "Loại dịch vụ",
+        "editedPhotosLabel": "Số ảnh chỉnh sửa",
+        "deliveryDaysLabel": "Giao ảnh sau (ngày)"
       },
       "media": {
         "coverButton": "Ảnh bìa",
@@ -2661,6 +2663,20 @@
         "editAria": "Sửa {name}",
         "deleteAria": "Xoá {name}",
         "missingHint": "Nhập tên bộ đồ và giá thuê mỗi ngày để lưu."
+      },
+      "policy": {
+        "title": "Kinh nghiệm & chính sách",
+        "intro": "Hiện trên hồ sơ công khai để khách biết trước khi đặt. Bỏ trống ô nào thì hồ sơ không hiện ô đó.",
+        "yearsLabel": "Số năm kinh nghiệm",
+        "depositPercentLabel": "Tỷ lệ đặt cọc (%)",
+        "depositPolicyLabel": "Chính sách đặt cọc",
+        "depositPolicyHint": "Ví dụ: cọc sau khi xác nhận lịch, chuyển khoản trực tiếp cho bạn. Fgrapher không thu tiền trực tuyến.",
+        "cancellationLabel": "Chính sách hủy lịch",
+        "cancellationHint": "Ví dụ: hủy trước 7 ngày hoàn cọc 100%, trước 3 ngày hoàn 50%.",
+        "rescheduleLabel": "Chính sách đổi lịch",
+        "rescheduleHint": "Ví dụ: đổi lịch miễn phí một lần nếu báo trước 48 giờ.",
+        "radiusLabel": "Bán kính phục vụ không tính phí di chuyển (km)",
+        "radiusHelper": "Ngoài bán kính này, phí di chuyển và lưu trú thỏa thuận trực tiếp với khách."
       }
     }
   },
@@ -3352,13 +3368,24 @@
         "allAlbums": "Tất cả",
         "photoAria": "Xem ảnh lớn",
         "upgradeHintBilling": "Gói của bạn đã hết hạn nên chưa tạo được album mới. <link>Gia hạn gói</link>",
-        "upgradeHintSupport": "Gói của bạn đã hết hạn nên chưa tạo được album mới. <link>Liên hệ Fgrapher</link> để được gia hạn."
+        "upgradeHintSupport": "Gói của bạn đã hết hạn nên chưa tạo được album mới. <link>Liên hệ Fgrapher</link> để được gia hạn.",
+        "albumsHeading": "Album dự án",
+        "allPhotos": "Tất cả ảnh",
+        "filterByStyle": "Lọc theo phong cách"
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
         "tfpAvailable": "Nhận hợp tác TFP",
         "tfpCollab": "TFP / Hợp tác",
-        "book": "Đặt lịch"
+        "book": "Đặt lịch",
+        "editedPhotos": "Ảnh chỉnh sửa",
+        "delivery": "Giao ảnh",
+        "photoCount": "{count} ảnh",
+        "afterDays": "Sau {count} ngày",
+        "from": "Từ {price}",
+        "choose": "Chọn gói",
+        "emptyHint": "Nhắn tin để nghệ sĩ báo giá theo nhu cầu của bạn.",
+        "askForQuote": "Nhắn tin hỏi giá"
       },
       "reviewsTab": {
         "sortNewest": "Mới nhất",
@@ -3368,7 +3395,10 @@
         "all": "Tất cả",
         "anonymous": "Ẩn danh",
         "respond": "Phản hồi",
-        "report": "Báo cáo"
+        "report": "Báo cáo",
+        "onlyCompleted": "Chỉ khách đã hoàn thành buổi chụp mới được đánh giá.",
+        "responseFrom": "Phản hồi của {name}",
+        "seeAll": "Xem tất cả {count} đánh giá"
       },
       "bookingSidebar": {
         "book": "Đặt lịch với {name}",
@@ -3395,7 +3425,19 @@
         "stickyMessage": "Nhắn tin",
         "shopMessageHelp": "Trao đổi trực tiếp với shop về tình trạng sản phẩm, ngày thuê và tiền cọc.",
         "stickyBook": "Đặt lịch",
-        "pickDateHint": "Chọn ngày và giờ để tiếp tục."
+        "pickDateHint": "Chọn ngày và giờ để tiếp tục.",
+        "chooseDate": "Chọn ngày",
+        "reviewCount": "{count} đánh giá",
+        "packagesLabel": "Gói dịch vụ",
+        "editedPhotos": "{count} ảnh chỉnh sửa",
+        "thisWeek": "Lịch trống tuần này",
+        "weekOf": "Tuần từ {date}",
+        "noDaysThisWeek": "Tuần này đã kín lịch. Xem tuần sau hoặc nhắn tin hỏi nghệ sĩ.",
+        "timezone": "Giờ Việt Nam (GMT+7)",
+        "finalPriceNote": "Giá cuối cùng chốt khi nghệ sĩ xác nhận.",
+        "sendRequest": "Gửi yêu cầu đặt lịch",
+        "messageFirst": "Nhắn tin trước",
+        "noChargeNote": "Chưa mất phí. Nghệ sĩ xác nhận trong 48 giờ, đặt cọc thỏa thuận trực tiếp."
       },
       "productTab": {
         "empty": "Shop chưa đăng sản phẩm nào",
@@ -3424,6 +3466,61 @@
       "postsTab": {
         "empty": "Chưa có bài đăng nào",
         "stats": "{likes} lượt thích · {comments} bình luận"
+      },
+      "facts": {
+        "title": "Thông tin xác minh",
+        "identity": "Danh tính (CCCD)",
+        "phone": "Số điện thoại",
+        "joined": "Tham gia Fgrapher",
+        "responseTime": "Thời gian phản hồi",
+        "verified": "Đã xác minh",
+        "verifiedOn": "Đã xác minh {date}",
+        "notVerified": "Chưa xác minh",
+        "response": {
+          "hour": "Thường trong 1 giờ",
+          "hours": "Thường trong {count} giờ",
+          "day": "Thường trong 1 ngày",
+          "days": "Thường trong {count} ngày"
+        },
+        "deposit": "Đặt cọc",
+        "cancellation": "Hủy lịch",
+        "reschedule": "Đổi lịch",
+        "depositPercent": "Cọc {percent}% sau khi nghệ sĩ xác nhận lịch.",
+        "depositDirect": "Trao đổi và thanh toán trực tiếp với nghệ sĩ. Fgrapher không thu tiền trực tuyến.",
+        "depositDefault": "Đặt cọc thỏa thuận trực tiếp với nghệ sĩ sau khi lịch được xác nhận. Fgrapher không thu tiền trực tuyến.",
+        "policyAskInChat": "Nghệ sĩ chưa ghi chính sách này. Hãy hỏi trong tin nhắn trước khi đặt."
+      },
+      "area": {
+        "radius": "bán kính {km} km",
+        "nationwide": "Nhận việc toàn quốc. Phí di chuyển và lưu trú thỏa thuận trực tiếp.",
+        "nationwideWithRadius": "Nhận việc toàn quốc. Ngoài bán kính {km} km, phí di chuyển và lưu trú thỏa thuận trực tiếp.",
+        "local": "Nhận việc trong khu vực này. Nơi chụp khác hãy nhắn tin để hỏi.",
+        "localWithRadius": "Nhận việc trong bán kính {km} km. Xa hơn, hãy nhắn tin để thỏa thuận phí di chuyển."
+      },
+      "sections": {
+        "navLabel": "Các mục trong hồ sơ",
+        "reviews": "Đánh giá & xác minh",
+        "area": "Khu vực phục vụ",
+        "space": "Không gian"
+      },
+      "stats": {
+        "shoots": "buổi đã chụp",
+        "rating": "điểm · {count} đánh giá",
+        "years": "năm kinh nghiệm"
+      },
+      "nationwide": "Nhận việc toàn quốc",
+      "priceFrom": "Từ {price}",
+      "responseShort": {
+        "hour": "Phản hồi trong 1 giờ",
+        "hours": "Phản hồi trong {count} giờ",
+        "day": "Phản hồi trong 1 ngày",
+        "days": "Phản hồi trong {count} ngày"
+      },
+      "shootsShort": "{count} buổi đã chụp",
+      "studio": {
+        "area": "Diện tích",
+        "squareMeters": "{area} m²",
+        "amenities": "Tiện nghi"
       }
     },
     "roleProvinceLanding": {

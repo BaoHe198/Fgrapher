@@ -527,7 +527,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                       {albumResult.data.map((album, index) => (
                         <AlbumCard
                           key={album.id}
-                          href={`/profile/${album.providerUsername}?album=${album.id}#albums`}
+                          href={`/profile/${album.providerUsername}?album=${album.id}#portfolio`}
                           title={album.title}
                           description={album.description}
                           coverUrl={album.coverUrl}

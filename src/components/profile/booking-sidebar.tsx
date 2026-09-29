@@ -6,17 +6,24 @@ import {
   ChevronRight,
   Loader2,
   MessageCircle,
+  Star,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 
+import {
+  AvailabilityCalendar,
+  toCalendarDays,
+} from "@/components/booking/availability-calendar";
+import { TimeSlotGrid } from "@/components/booking/time-slot-grid";
 import { AvailabilityDialog } from "@/components/profile/availability-dialog";
-import { useMessaging } from "@/components/providers/messaging-provider";
 import { Button } from "@/components/ui/button";
-import { NativeSelect } from "@/components/ui/native-select";
-import { formatMonthYear, formatWeekdayShort } from "@/lib/format";
+import { ChoiceCard, ChoiceCardGroup } from "@/components/ui/choice-card";
+import { formatDate } from "@/lib/format";
+import { isGoldenHourSlot, sunTimes } from "@/lib/sun";
 import { formatCurrency } from "@/lib/utils";
+import { vietnamDateKey } from "@/lib/vietnam/date";
 import type { DayAvailability } from "@/services/availability";
 
 interface ServiceOption {
@@ -25,6 +32,8 @@ interface ServiceOption {
   price: number;
   currency: string;
   duration: number;
+  editedPhotoCount?: number | null;
+  deliveryDays?: number | null;
 }
 
 interface BookingSidebarProps {
@@ -38,25 +47,25 @@ interface BookingSidebarProps {
   // it server-side), so this renders a pointer to the dashboard instead
   // of a booking form that can only ever end in an error.
   isOwnProfile: boolean;
+  priceLabel: string | null;
+  rating: number | null;
+  reviewCount: number;
+  onMessage: () => void;
+  isOpeningChat: boolean;
+  /** Rough (~10 km) coordinates for golden-hour hints; never the address. */
+  sunPoint?: { latitude: number; longitude: number } | null;
 }
 
-function startOfDay(date: Date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
+const addDays = (dateKey: string, days: number) => {
+  const d = new Date(`${dateKey}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+};
 
-// A "YYYY-MM-DD" calendar-date key built from LOCAL date parts — never
-// toISOString() here, which reports the UTC calendar date and silently
-// shifts by a day for anyone west-of-UTC-midnight in their local time
-// (this app's Vietnamese audience is UTC+7).
-function toLocalDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
+// The profile's booking column (redesign 09/2026): price and rating, the
+// packages as choice cards, this week's free days, start times with
+// golden-hour hints, a one-line summary, then "Gửi yêu cầu đặt lịch" -
+// which opens the booking flow with everything picked here carried over.
 export function BookingSidebar({
   providerId,
   firstName,
@@ -64,16 +73,21 @@ export function BookingSidebar({
   selectedServiceId,
   onServiceChange,
   isOwnProfile,
+  priceLabel,
+  rating,
+  reviewCount,
+  onMessage,
+  isOpeningChat,
+  sunPoint,
 }: BookingSidebarProps) {
   const t = useTranslations("publicPages.profile.bookingSidebar");
   const router = useRouter();
-  const messaging = useMessaging();
-  const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
+  const today = vietnamDateKey();
+  const [weekStart, setWeekStart] = useState(today);
   const [days, setDays] = useState<DayAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [isOpeningChat, setIsOpeningChat] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
 
   useEffect(() => {
@@ -82,39 +96,45 @@ export function BookingSidebar({
     const serviceParam = selectedServiceId
       ? `&serviceId=${selectedServiceId}`
       : "";
-    fetch(
-      `/api/availability/${providerId}?from=${toLocalDateKey(weekStart)}${serviceParam}`,
-    )
+    fetch(`/api/availability/${providerId}?from=${weekStart}${serviceParam}`)
       .then((res) => res.json())
       .then((body) => {
         if (!cancelled) {
           startTransition(() => {
-            setDays(body.data?.dates ?? []);
+            setDays((body.data?.dates ?? []).slice(0, 7));
             setIsLoading(false);
           });
         }
+      })
+      .catch(() => {
+        if (!cancelled) startTransition(() => setIsLoading(false));
       });
     return () => {
       cancelled = true;
     };
   }, [providerId, weekStart, selectedServiceId, isOwnProfile]);
 
-  const changeWeek = (deltaDays: number) => {
+  const changeWeek = (delta: -7 | 7) => {
     setIsLoading(true);
     setSelectedDate(null);
     setSelectedTime(null);
-    setWeekStart((prev) => {
-      const next = new Date(prev);
-      next.setDate(next.getDate() + deltaDays);
-      return next;
-    });
+    setWeekStart((prev) => addDays(prev, delta));
   };
 
   const selectedService = services.find((s) => s.id === selectedServiceId);
   const activeDay = days.find((d) => d.date === selectedDate);
-  const today = toLocalDateKey(new Date());
-  const minPrice =
-    services.length > 0 ? Math.min(...services.map((s) => s.price)) : null;
+
+  const slots = useMemo(() => {
+    if (!activeDay || !selectedDate) return [];
+    const sun = sunPoint
+      ? sunTimes(selectedDate, sunPoint.latitude, sunPoint.longitude)
+      : null;
+    return activeDay.slots.map((slot) => ({
+      start: slot.time,
+      status: slot.available ? ("available" as const) : ("booked" as const),
+      golden: sun ? isGoldenHourSlot(slot.time, sun) : false,
+    }));
+  }, [activeDay, selectedDate, sunPoint]);
 
   const onBookNow = () => {
     const params = new URLSearchParams();
@@ -124,38 +144,9 @@ export function BookingSidebar({
     router.push(`/booking/${providerId}?${params.toString()}`);
   };
 
-  // Opens the floating chat popup with this provider in-place, instead of
-  // navigating to /dashboard/messages — a full navigation would lose
-  // whatever service/date/time the customer already picked above, which
-  // defeats the point of messaging to sort out details *before* booking.
-  const onMessage = async () => {
-    setIsOpeningChat(true);
-    try {
-      const res = await fetch("/api/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: providerId }),
-      });
-      // Signed out, this used to do nothing at all — the most common
-      // first tap on a profile was a dead button (24/09 audit).
-      if (res.status === 401) {
-        router.push(
-          `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
-        );
-        return;
-      }
-      const body = await res.json();
-      if (res.ok && body.data?.id) {
-        messaging.open(body.data.id);
-      }
-    } finally {
-      setIsOpeningChat(false);
-    }
-  };
-
   if (isOwnProfile) {
     return (
-      <div className="sticky top-[104px] flex flex-col items-start gap-3 rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-md)]">
+      <div className="flex flex-col items-start gap-3 rounded-[var(--fg-radius-xl)] border border-border-subtle bg-bg-surface p-6 shadow-[var(--shadow-sm)]">
         <CalendarCog className="size-6 text-text-tertiary" />
         <h3 className="text-heading-lg text-text-primary">
           {t("ownProfileTitle")}
@@ -164,7 +155,7 @@ export function BookingSidebar({
           {t("ownProfileBody")}
         </p>
         <Button
-          variant="secondary"
+          variant="outline"
           className="w-full"
           onClick={() => setAvailabilityOpen(true)}
         >
@@ -178,198 +169,166 @@ export function BookingSidebar({
     );
   }
 
+  const sectionLabel =
+    "text-meta tracking-[0.12em] text-text-tertiary uppercase";
+  const summary = [
+    selectedService?.name,
+    selectedDate ? formatDate(`${selectedDate}T00:00:00+07:00`) : null,
+    selectedTime,
+    selectedService
+      ? t("from", {
+          price: formatCurrency(
+            selectedService.price,
+            selectedService.currency,
+          ),
+        })
+      : null,
+  ].filter(Boolean);
+
   return (
-    <div className="sticky top-[104px] flex flex-col gap-4 rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-md)]">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-heading-lg text-text-primary">
-          {t("book", { name: firstName })}
-        </h3>
-        {minPrice !== null ? (
-          <p className="text-body-md text-text-secondary">
-            {t("from", {
-              price: formatCurrency(minPrice, services[0]?.currency),
-            })}
-          </p>
+    <div className="flex flex-col gap-5 rounded-[var(--fg-radius-xl)] border border-border-subtle bg-bg-surface p-6 shadow-[var(--shadow-sm)]">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="font-mono text-heading-md font-semibold! tabular-nums text-text-primary">
+          {priceLabel ?? t("book", { name: firstName })}
+        </span>
+        {rating !== null ? (
+          <span className="flex shrink-0 items-center gap-1 text-meta text-text-secondary">
+            <Star
+              aria-hidden
+              className="size-3.5 fill-gold-400 text-gold-400"
+            />
+            {rating.toFixed(1).replace(".", ",")}
+            {" · "}
+            {t("reviewCount", { count: reviewCount })}
+          </span>
         ) : null}
       </div>
 
       {services.length > 0 ? (
-        <NativeSelect
-          value={selectedServiceId ?? ""}
-          onChange={onServiceChange}
-          options={[
-            { value: "", label: t("selectService") },
-            ...services.map((s) => ({
-              value: s.id,
-              label: `${s.name} — ${formatCurrency(s.price, s.currency)}`,
-            })),
-          ]}
-        />
+        <ChoiceCardGroup legend={t("packagesLabel")} className="gap-2">
+          {services.map((service) => (
+            <ChoiceCard
+              key={service.id}
+              name="sidebar-service"
+              value={service.id}
+              selected={service.id === selectedServiceId}
+              onSelect={onServiceChange}
+              title={service.name}
+              meta={
+                service.editedPhotoCount != null
+                  ? t("editedPhotos", { count: service.editedPhotoCount })
+                  : undefined
+              }
+              price={formatCurrency(service.price, service.currency)}
+              size="sm"
+            />
+          ))}
+        </ChoiceCardGroup>
       ) : null}
 
       <div className="flex flex-col gap-2">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          {t("selectDate")}
-        </span>
         <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => changeWeek(-7)}
-            aria-label={t("prevWeek")}
-            className="flex size-7 items-center justify-center rounded-full hover:bg-bg-sunken"
-          >
-            <ChevronLeft className="size-4" />
-          </button>
-          <span className="text-body-sm font-semibold! text-text-primary">
-            {formatMonthYear(weekStart)}
+          <span className={sectionLabel}>
+            {weekStart === today
+              ? t("thisWeek")
+              : t("weekOf", {
+                  date: formatDate(`${weekStart}T00:00:00+07:00`),
+                })}
           </span>
-          <button
-            type="button"
-            onClick={() => changeWeek(7)}
-            aria-label={t("nextWeek")}
-            className="flex size-7 items-center justify-center rounded-full hover:bg-bg-sunken"
-          >
-            <ChevronRight className="size-4" />
-          </button>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => changeWeek(-7)}
+              disabled={weekStart <= today}
+              aria-label={t("prevWeek")}
+              className="focus-ring flex size-7 items-center justify-center rounded-full text-text-secondary hover:bg-bg-sunken disabled:pointer-events-none disabled:opacity-40"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => changeWeek(7)}
+              aria-label={t("nextWeek")}
+              className="focus-ring flex size-7 items-center justify-center rounded-full text-text-secondary hover:bg-bg-sunken"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
         </div>
-
-        {isLoading ? (
-          <div className="flex justify-center py-4">
-            <Loader2 className="size-4 animate-spin text-text-tertiary" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-7 gap-1.5">
-            {days.map((day) => {
-              const date = new Date(day.date);
-              const isSelected = day.date === selectedDate;
-              const isToday = day.date === today;
-              return (
-                <button
-                  key={day.date}
-                  type="button"
-                  disabled={day.busy}
-                  onClick={() => {
-                    setSelectedDate(day.date);
-                    setSelectedTime(null);
-                  }}
-                  className={`flex flex-col items-center gap-1 rounded-[var(--fg-radius-sm)] py-2 ${
-                    isSelected
-                      ? "bg-brand-primary text-text-on-brand"
-                      : day.busy
-                        ? "cursor-not-allowed text-text-tertiary opacity-40"
-                        : `cursor-pointer hover:bg-bg-sunken ${isToday ? "border border-brand-primary" : ""}`
-                  }`}
-                >
-                  <span className="text-body-sm text-text-tertiary">
-                    {formatWeekdayShort(date)}
-                  </span>
-                  <span className="text-body-md font-semibold!">
-                    {date.getUTCDate()}
-                  </span>
-                  {day.busy ? (
-                    <span className="size-1 rounded-full bg-text-tertiary" />
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <AvailabilityCalendar
+          compact="week"
+          month={new Date(`${weekStart}T00:00:00`)}
+          days={toCalendarDays(days, today)}
+          selected={selectedDate}
+          loading={isLoading}
+          onSelect={(date) => {
+            setSelectedDate(date);
+            setSelectedTime(null);
+          }}
+          emptyMessage={t("noDaysThisWeek")}
+        />
       </div>
 
-      {activeDay && !activeDay.busy ? (
+      {selectedDate ? (
         <div className="flex flex-col gap-2">
-          <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-            {t("availableTimes")}
+          <span className={sectionLabel}>{t("availableTimes")}</span>
+          <TimeSlotGrid
+            slots={slots}
+            selected={selectedTime}
+            onSelect={setSelectedTime}
+            timezoneLabel={t("timezone")}
+            loading={isLoading}
+            emptyMessage={t("noTimes")}
+          />
+        </div>
+      ) : null}
+
+      {summary.length > 0 ? (
+        <div className="flex flex-col gap-1 rounded-[var(--fg-radius-md)] bg-bg-sunken px-3.5 py-3">
+          <span className="text-body-sm font-semibold! text-text-primary">
+            {summary.join(" · ")}
           </span>
-          {activeDay.slots.filter((s) => s.available).length === 0 ? (
-            <p className="text-body-sm text-text-secondary">{t("noTimes")}</p>
+          <span className="text-meta text-text-tertiary">
+            {t("finalPriceNote")}
+          </span>
+        </div>
+      ) : null}
+
+      <div className="flex flex-col gap-2">
+        <Button
+          variant="accent"
+          size="lg"
+          className="w-full"
+          disabled={!selectedDate || !selectedTime}
+          onClick={onBookNow}
+        >
+          {t("sendRequest")}
+        </Button>
+        {/* The main action starts disabled, which on its own reads as
+            "broken" rather than "not yet". Say what is missing. */}
+        {!selectedDate || !selectedTime ? (
+          <p className="text-center text-meta text-text-tertiary">
+            {t("pickDateHint")}
+          </p>
+        ) : null}
+        <Button
+          variant="outline"
+          className="w-full"
+          disabled={isOpeningChat}
+          onClick={onMessage}
+        >
+          {isOpeningChat ? (
+            <Loader2 className="size-4 animate-spin" />
           ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {activeDay.slots
-                .filter((s) => s.available)
-                .map((slot) => (
-                  <button
-                    key={slot.time}
-                    type="button"
-                    onClick={() => setSelectedTime(slot.time)}
-                    className={`rounded-[var(--fg-radius-sm)] border py-2.5 text-body-md font-semibold ${
-                      selectedTime === slot.time
-                        ? "border-transparent bg-brand-primary text-text-on-brand"
-                        : "border-border-default bg-bg-surface text-text-primary"
-                    }`}
-                  >
-                    {slot.time}
-                  </button>
-                ))}
-            </div>
+            <MessageCircle className="size-4" />
           )}
-        </div>
-      ) : null}
-
-      {selectedDate && selectedTime ? (
-        <div className="flex flex-col gap-2 border-t border-border-subtle pt-3">
-          {selectedService ? (
-            <div className="flex justify-between text-body-sm">
-              <span className="text-text-tertiary">{t("service")}</span>
-              <span className="text-text-primary">{selectedService.name}</span>
-            </div>
-          ) : null}
-          <div className="flex justify-between text-body-sm">
-            <span className="text-text-tertiary">{t("date")}</span>
-            <span className="text-text-primary">{selectedDate}</span>
-          </div>
-          <div className="flex justify-between text-body-sm">
-            <span className="text-text-tertiary">{t("time")}</span>
-            <span className="text-text-primary">{selectedTime}</span>
-          </div>
-          {selectedService ? (
-            <div className="flex justify-between text-heading-sm font-bold!">
-              <span>{t("total")}</span>
-              <span>
-                {formatCurrency(
-                  selectedService.price,
-                  selectedService.currency,
-                )}
-              </span>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      <Button
-        variant="accent"
-        size="lg"
-        className="w-full"
-        disabled={!selectedDate || !selectedTime}
-        onClick={onBookNow}
-      >
-        {t("bookNow")}
-      </Button>
-      {/* The page's main action starts disabled, which on its own reads as
-          "broken" rather than "not yet". Say what is missing. */}
-      {!selectedDate || !selectedTime ? (
-        <p className="text-center text-body-sm text-text-tertiary">
-          {t("pickDateHint")}
-        </p>
-      ) : null}
-      <Button
-        variant="ghost"
-        className="w-full"
-        disabled={isOpeningChat}
-        onClick={onMessage}
-      >
-        {isOpeningChat ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <MessageCircle className="size-4" />
-        )}
-        {t("message", { name: firstName })}
-      </Button>
-
-      <div className="flex flex-col gap-2 text-body-sm text-text-secondary">
-        <span>{t("cancellationNote")}</span>
-        <span>{t("responseNote")}</span>
+          {t("messageFirst")}
+        </Button>
       </div>
+
+      <p className="text-center text-meta text-text-tertiary">
+        {t("noChargeNote")}
+      </p>
     </div>
   );
 }

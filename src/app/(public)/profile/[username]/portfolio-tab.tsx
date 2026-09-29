@@ -20,9 +20,10 @@ import { GripVertical, Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 import { FrameMark } from "@/components/brand/frame-mark";
+import { FgImage } from "@/components/ui/fg-image";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { PostEngagement } from "@/components/social/post-engagement";
 import { buildMediaVariants } from "@/lib/media/variants";
@@ -229,9 +230,11 @@ export function PortfolioTab({
   const categoryT = useTranslations("profileCategory");
   const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  // Visitor-side album filter. null = every photo, which is the default:
+  // Visitor-side style filter. null = every photo, which is the default:
   // most visitors want to see the work, not pick a folder first.
-  const [activeAlbumId, setActiveAlbumId] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<ProfileCategory | null>(
+    null,
+  );
   // Index into visiblePhotos; null = closed. Separate from openAlbumId,
   // which drives the owner grid's per-album preview.
   const [photoIndex, setPhotoIndex] = useState<number | null>(null);
@@ -243,6 +246,19 @@ export function PortfolioTab({
   );
 
   const showOwnerGrid = isOwnProfile && ownerAlbums !== null;
+
+  // /browse's "Album dự án" tab links to /profile/<name>?album=<id>#albums.
+  // Read once on mount (a Client Component can't take searchParams here
+  // without making the whole page dynamic on it).
+  useEffect(() => {
+    const albumId = new URLSearchParams(window.location.search).get("album");
+    if (albumId && albums.some((album) => album.id === albumId)) {
+      startTransition(() => {
+        setOpenAlbumId(albumId);
+        setLightboxIndex(0);
+      });
+    }
+  }, [albums]);
 
   if (!showOwnerGrid && albums.length === 0) {
     return (
@@ -260,14 +276,17 @@ export function PortfolioTab({
   const allPhotos = albums.flatMap((album) =>
     album.media.map((media) => ({ ...media, album })),
   );
+  const photoCategories = [
+    ...new Set(
+      albums
+        .map((album) => album.category)
+        .filter((category): category is ProfileCategory => category !== null),
+    ),
+  ];
   const visiblePhotos =
-    activeAlbumId === null
+    activeCategory === null
       ? allPhotos
-      : allPhotos.filter((photo) => photo.album.id === activeAlbumId);
-  const visibleAlbums =
-    activeAlbumId === null
-      ? albums
-      : albums.filter((album) => album.id === activeAlbumId);
+      : allPhotos.filter((photo) => photo.album.category === activeCategory);
   const openPhoto =
     photoIndex === null ? null : (visiblePhotos[photoIndex] ?? null);
 
@@ -352,92 +371,143 @@ export function PortfolioTab({
         </DndContext>
       ) : (
         <>
-          {/* Album chips only earn their space once there is more than one
-              body of work to switch between. */}
-          {albums.length > 1 ? (
-            <div className="-mx-1 flex gap-2 overflow-x-auto overflow-y-hidden px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <AlbumChip
-                label={t("allAlbums")}
-                active={activeAlbumId === null}
-                onClick={() => setActiveAlbumId(null)}
-              />
-              {albums.map((album) => (
-                <AlbumChip
-                  key={album.id}
-                  label={album.title}
-                  active={activeAlbumId === album.id}
-                  onClick={() => setActiveAlbumId(album.id)}
-                />
-              ))}
-            </div>
-          ) : null}
-
-          <div className="flex flex-col gap-8">
-            {visibleAlbums.map((album) => (
-              <section key={album.id} className="flex flex-col gap-3">
-                <div>
-                  <h3 className="text-heading-md text-text-primary">
-                    {album.title}
-                  </h3>
-                  {album.description ? (
-                    <p className="mt-1 text-body-sm text-text-secondary">
-                      {album.description}
-                    </p>
-                  ) : null}
-                </div>
-                {/* Each album is also one Community post. Keeping the
-                    album together here makes its engagement unambiguous. */}
-                <div className="columns-2 gap-3 sm:columns-3 [&>*]:mb-3">
-                  {album.media.map((photo) => (
+          {/* "Album dự án" (redesign 09/2026): each album as a project -
+              cover, photo count, title and what the shoot was - opening
+              in the lightbox. /browse's album tab links here with
+              ?album=<id>, which opens it straight away. */}
+          <section className="flex flex-col gap-3">
+            <h3 className="text-heading-md text-text-primary">
+              {t("albumsHeading")}
+            </h3>
+            <ul className="-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
+              {albums.map((album, index) => {
+                const cover = album.coverMedia ?? album.media[0] ?? null;
+                return (
+                  <li
+                    key={album.id}
+                    id={`album-${album.id}`}
+                    className="flex w-[220px] shrink-0 snap-start flex-col gap-2 sm:w-auto"
+                  >
                     <button
-                      key={photo.id}
                       type="button"
-                      onClick={() =>
-                        setPhotoIndex(
-                          visiblePhotos.findIndex(
-                            (item) => item.id === photo.id,
-                          ),
-                        )
-                      }
-                      aria-label={photo.title ?? t("photoAria")}
-                      className="block w-full cursor-pointer overflow-hidden rounded-xl bg-bg-sunken break-inside-avoid focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:outline-none"
+                      onClick={() => {
+                        setOpenAlbumId(album.id);
+                        setLightboxIndex(0);
+                      }}
+                      className="group/album focus-ring flex flex-col gap-2 rounded-[var(--fg-radius-sm)] text-left"
                     >
-                      {photo.type === "VIDEO" ? (
-                        <video
-                          src={photo.url}
-                          className="w-full"
-                          muted
-                          playsInline
-                        />
-                      ) : (
-                        <Image
-                          src={buildMediaVariants(photo.url).medium}
-                          alt={photo.title ?? ""}
-                          width={photo.width ?? 800}
-                          height={photo.height ?? 1000}
-                          className="h-auto w-full"
-                          sizes="(min-width: 640px) 30vw, 45vw"
-                          unoptimized
-                        />
-                      )}
+                      <FgImage
+                        src={
+                          cover && cover.type === "IMAGE"
+                            ? buildMediaVariants(cover.url).medium
+                            : null
+                        }
+                        alt=""
+                        ratio="4/3"
+                        revealIndex={index}
+                        sizes="(min-width: 1024px) 18vw, 220px"
+                        className="transition-[transform,box-shadow] duration-[var(--fg-dur-260)] ease-fg-out group-hover/album:-translate-y-0.5 group-hover/album:shadow-[var(--shadow-md)] motion-reduce:group-hover/album:translate-y-0"
+                        imageClassName="transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/album:scale-[1.03]"
+                      >
+                        <span className="absolute bottom-2 left-2 rounded-[4px] bg-scrim px-1.5 py-0.5 font-mono text-meta text-gold-50">
+                          {t("photoCount", { count: album.media.length })}
+                        </span>
+                      </FgImage>
+                      <span className="line-clamp-2 text-heading-sm text-text-primary">
+                        {album.title}
+                      </span>
+                      {album.description ? (
+                        <span className="line-clamp-2 text-body-sm text-text-secondary">
+                          {album.description}
+                        </span>
+                      ) : null}
                     </button>
+                    {album.socialPost ? (
+                      <PostEngagement
+                        postId={album.socialPost.id}
+                        viewerId={viewerId}
+                        initialLiked={album.socialPost.likedByViewer}
+                        initialLikeCount={album.socialPost.likeCount}
+                        initialCommentCount={album.socialPost.commentCount}
+                        postOwnerId={
+                          isOwnProfile ? (viewerId ?? undefined) : undefined
+                        }
+                      />
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          <section className="mt-6 flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="flex items-baseline gap-2 text-heading-md text-text-primary">
+                {t("allPhotos")}
+                <span className="font-mono text-meta tabular-nums text-text-tertiary">
+                  {allPhotos.length}
+                </span>
+              </h3>
+              {/* Styles, not folder names: "Cưới / Kỷ yếu" is how a
+                  customer thinks; the album titles are the strip above. */}
+              {photoCategories.length > 1 ? (
+                <div
+                  role="group"
+                  aria-label={t("filterByStyle")}
+                  className="flex flex-wrap gap-2"
+                >
+                  <AlbumChip
+                    label={t("allAlbums")}
+                    active={activeCategory === null}
+                    onClick={() => setActiveCategory(null)}
+                  />
+                  {photoCategories.map((category) => (
+                    <AlbumChip
+                      key={category}
+                      label={categoryT(category)}
+                      active={activeCategory === category}
+                      onClick={() => setActiveCategory(category)}
+                    />
                   ))}
                 </div>
-                {album.socialPost ? (
-                  <PostEngagement
-                    postId={album.socialPost.id}
-                    viewerId={viewerId}
-                    initialLiked={album.socialPost.likedByViewer}
-                    initialLikeCount={album.socialPost.likeCount}
-                    initialCommentCount={album.socialPost.commentCount}
-                    postOwnerId={
-                      isOwnProfile ? (viewerId ?? undefined) : undefined
-                    }
-                  />
-                ) : null}
-              </section>
-            ))}
-          </div>
+              ) : null}
+            </div>
+            {/* Every photo at its own aspect ratio: a photographer framed
+                the shot, so the mosaic never crops it to a uniform tile. */}
+            <div className="columns-2 gap-3 sm:columns-3 [&>*]:mb-3">
+              {visiblePhotos.map((photo, index) => (
+                <button
+                  key={photo.id}
+                  type="button"
+                  onClick={() => setPhotoIndex(index)}
+                  aria-label={photo.title ?? t("photoAria")}
+                  className="focus-ring block w-full cursor-pointer overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken break-inside-avoid"
+                >
+                  {photo.type === "VIDEO" ? (
+                    <video
+                      src={photo.url}
+                      className="w-full"
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <Image
+                      src={buildMediaVariants(photo.url).medium}
+                      alt={photo.title ?? ""}
+                      width={photo.width ?? 800}
+                      height={photo.height ?? 1000}
+                      className={cn(
+                        "h-auto w-full",
+                        index < 6 && "animate-develop",
+                      )}
+                      sizes="(min-width: 640px) 30vw, 45vw"
+                      unoptimized
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
         </>
       )}
 

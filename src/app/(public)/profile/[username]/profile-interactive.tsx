@@ -10,15 +10,19 @@ import { BookingSidebar } from "@/components/profile/booking-sidebar";
 import { useMessaging } from "@/components/providers/messaging-provider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+import { SectionNav } from "@/components/ui/section-nav";
+import { StickyActionBar } from "@/components/ui/sticky-action-bar";
 import { PROVIDER_ROLES } from "@/lib/constants";
 
 import { CostumesTab, type PublicCostume } from "./costumes-tab";
 import { PostsTab, type ProfilePost } from "./posts-tab";
 import { GearTab } from "./gear-tab";
 import { PortfolioTab } from "./portfolio-tab";
+import { ProfileFacts, type ProfileFactsProps } from "./profile-facts";
 import { ReviewsTab } from "./reviews-tab";
+import { ServiceArea } from "./service-area";
 import { ServicesTab } from "./services-tab";
+import { StudioSpace } from "./studio-space";
 
 interface OwnerAlbum {
   id: string;
@@ -104,6 +108,19 @@ interface ProfileInteractiveProps {
   }[];
   offersTfp?: boolean;
   isOwnProfile: boolean;
+  facts: ProfileFactsProps | null;
+  area: {
+    location: string | null;
+    radiusKm: number | null;
+    nationwide: boolean;
+  };
+  /** "Từ 2.000.000₫" for the phone action bar. */
+  priceLabel: string | null;
+  /** "Phản hồi trong 2 giờ · 312 buổi đã chụp". */
+  trustLine: string | null;
+  sunPoint: { latitude: number; longitude: number } | null;
+  /** STUDIO only: the room's size and amenities. */
+  studio: { area: number | null; amenities: string[] } | null;
 }
 
 export function ProfileInteractive({
@@ -126,8 +143,15 @@ export function ProfileInteractive({
   products,
   offersTfp,
   isOwnProfile,
+  facts,
+  area,
+  priceLabel,
+  trustLine,
+  sunPoint,
+  studio,
 }: ProfileInteractiveProps) {
   const t = useTranslations("publicPages.profile.tabs");
+  const sectionT = useTranslations("publicPages.profile.sections");
   const stickyT = useTranslations("publicPages.profile.bookingSidebar");
   const router = useRouter();
   const messaging = useMessaging();
@@ -139,9 +163,6 @@ export function ProfileInteractive({
   // A costume shop's profile IS its catalogue: no portfolio, no services, no
   // calendar — the visitor picks an outfit and messages the shop (project
   // owner, 22/09/2026).
-  const [tab, setTab] = useState(
-    costumes.length > 0 ? "costumes" : isProductShop ? "gear" : "portfolio",
-  );
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
@@ -206,92 +227,145 @@ export function ProfileInteractive({
     }
   };
 
+  // One scrolling page with a sticky section bar (redesign 09/2026) rather
+  // than tabs: a customer reads a profile top to bottom - work, packages,
+  // reviews, where they work - and tabs hid three of those four.
+  const isProvider = !isProductShop && costumes.length === 0;
+  const sections = [
+    ...(isProvider && studio
+      ? [{ id: "space", label: sectionT("space") }]
+      : []),
+    ...(isProvider
+      ? [
+          { id: "portfolio", label: t("portfolio") },
+          { id: "services", label: t("services") },
+          { id: "reviews", label: t("reviews") },
+          { id: "area", label: sectionT("area") },
+        ]
+      : []),
+    ...(costumes.length > 0 ? [{ id: "costumes", label: t("costumes") }] : []),
+    ...(hasGear
+      ? [{ id: "gear", label: t(isProductShop ? "products" : "gear") }]
+      : []),
+    ...(posts.length > 0 ? [{ id: "posts", label: t("posts") }] : []),
+  ];
+  const sectionClass = "scroll-mt-36 pt-10 first:pt-6";
+
   return (
     <div
       className={
         isOwnProfile
-          ? "grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_360px]"
-          : "grid grid-cols-1 items-start gap-10 pb-20 lg:pb-0 lg:grid-cols-[1fr_360px]"
+          ? "grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_380px]"
+          : "grid grid-cols-1 items-start gap-10 pb-24 lg:grid-cols-[1fr_380px] lg:pb-0"
       }
     >
       <div className="min-w-0">
-        <Tabs value={tab} onValueChange={(v) => setTab(v as string)}>
-          <TabsList>
-            {isProductShop ? null : (
-              <>
-                <TabsTab value="portfolio">{t("portfolio")}</TabsTab>
-                <TabsTab value="services">{t("services")}</TabsTab>
-                <TabsTab value="reviews">{t("reviews")}</TabsTab>
-              </>
-            )}
-            {hasGear ? (
-              <TabsTab value="gear">
-                {t(isProductShop ? "products" : "gear")}
-              </TabsTab>
-            ) : null}
-            {costumes.length > 0 ? (
-              <TabsTab value="costumes">{t("costumes")}</TabsTab>
-            ) : null}
-            {posts.length > 0 ? (
-              <TabsTab value="posts">{t("posts")}</TabsTab>
-            ) : null}
-          </TabsList>
-          {isProductShop ? null : (
-            <>
-              <TabsPanel value="portfolio" className="mt-6">
-                <PortfolioTab
-                  albums={albums}
-                  ownerAlbums={ownerAlbums}
-                  profileId={profileId}
-                  role={role}
-                  viewerId={viewerId}
-                  isOwnProfile={isOwnProfile}
-                  canEdit={canEditPortfolio}
-                  billingEnabled={billingEnabled}
-                />
-              </TabsPanel>
-              <TabsPanel value="services" className="mt-6">
-                <ServicesTab
-                  services={services}
-                  onBook={onBook}
-                  offersTfp={offersTfp}
-                  isOwnProfile={isOwnProfile}
-                />
-              </TabsPanel>
-              <TabsPanel value="reviews" className="mt-6">
+        {sections.length > 1 ? (
+          <SectionNav
+            items={sections}
+            offset={72}
+            topClassName="top-[72px]"
+            label={sectionT("navLabel")}
+            className="-mx-5 md:mx-0"
+          />
+        ) : null}
+
+        {isProvider && studio ? (
+          <section id="space" className={sectionClass}>
+            <h2 className="mb-5 text-display-md text-text-primary">
+              {sectionT("space")}
+            </h2>
+            <StudioSpace
+              photos={albums.flatMap((album) =>
+                album.media
+                  .filter((media) => media.type === "IMAGE")
+                  .map((media) => media.url),
+              )}
+              area={studio.area}
+              amenities={studio.amenities}
+            />
+          </section>
+        ) : null}
+        {isProvider ? (
+          <>
+            <section id="portfolio" className={sectionClass}>
+              <PortfolioTab
+                albums={albums}
+                ownerAlbums={ownerAlbums}
+                profileId={profileId}
+                role={role}
+                viewerId={viewerId}
+                isOwnProfile={isOwnProfile}
+                canEdit={canEditPortfolio}
+                billingEnabled={billingEnabled}
+              />
+            </section>
+            <section id="services" className={sectionClass}>
+              <h2 className="mb-5 text-display-md text-text-primary">
+                {t("services")}
+              </h2>
+              <ServicesTab
+                services={services}
+                onBook={onBook}
+                onMessage={onStickyMessage}
+                offersTfp={offersTfp}
+                isOwnProfile={isOwnProfile}
+              />
+            </section>
+            <section id="reviews" className={sectionClass}>
+              <h2 className="mb-5 text-display-md text-text-primary">
+                {sectionT("reviews")}
+              </h2>
+              <div className="flex flex-col gap-8">
                 <ReviewsTab
                   providerId={providerId}
+                  providerName={displayName}
                   reviews={reviews}
                   stats={reviewStats}
                 />
-              </TabsPanel>
-            </>
-          )}
-          {hasGear ? (
-            <TabsPanel value="gear" className="mt-6">
-              <GearTab products={products} />
-            </TabsPanel>
-          ) : null}
-          {costumes.length > 0 ? (
-            <TabsPanel value="costumes" className="mt-6">
-              <CostumesTab
-                costumes={costumes}
-                shopUserId={providerId}
-                isOwnProfile={isOwnProfile}
+                {facts ? <ProfileFacts {...facts} /> : null}
+              </div>
+            </section>
+            <section id="area" className={sectionClass}>
+              <h2 className="mb-5 text-display-md text-text-primary">
+                {sectionT("area")}
+              </h2>
+              <ServiceArea
+                location={area.location}
+                radiusKm={area.radiusKm}
+                nationwide={area.nationwide}
               />
-            </TabsPanel>
-          ) : null}
-          {posts.length > 0 ? (
-            <TabsPanel value="posts" className="mt-6">
-              <PostsTab posts={posts} />
-            </TabsPanel>
-          ) : null}
-        </Tabs>
+            </section>
+          </>
+        ) : null}
+        {costumes.length > 0 ? (
+          <section id="costumes" className={sectionClass}>
+            <CostumesTab
+              costumes={costumes}
+              shopUserId={providerId}
+              isOwnProfile={isOwnProfile}
+            />
+          </section>
+        ) : null}
+        {hasGear ? (
+          <section id="gear" className={sectionClass}>
+            <GearTab products={products} />
+          </section>
+        ) : null}
+        {posts.length > 0 ? (
+          <section id="posts" className={sectionClass}>
+            <PostsTab posts={posts} />
+          </section>
+        ) : null}
       </div>
 
-      <div id="booking-sidebar" ref={sidebarRef}>
-        {isProductShop ? (
-          <Card className="sticky top-[104px] flex flex-col gap-3">
+      <div
+        id="booking-sidebar"
+        ref={sidebarRef}
+        className="scroll-mt-24 lg:sticky lg:top-[96px]"
+      >
+        {isProductShop || costumes.length > 0 ? (
+          <Card className="flex flex-col gap-3">
             <h3 className="text-heading-lg text-text-primary">{displayName}</h3>
             <p className="text-body-sm text-text-secondary">
               {stickyT("shopMessageHelp")}
@@ -323,40 +397,61 @@ export function ProfileInteractive({
             selectedServiceId={selectedServiceId}
             onServiceChange={setSelectedServiceId}
             isOwnProfile={isOwnProfile}
+            priceLabel={priceLabel}
+            rating={reviewStats.count > 0 ? reviewStats.avgRating : null}
+            reviewCount={reviewStats.count}
+            onMessage={onStickyMessage}
+            isOpeningChat={isOpeningChat}
+            sunPoint={sunPoint}
           />
         )}
       </div>
 
       {isOwnProfile || sidebarInView ? null : (
-        <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-border-subtle bg-bg-surface p-3 shadow-[var(--shadow-lg)] lg:hidden">
-          <Button
-            variant="secondary"
-            className="flex-1"
-            disabled={isOpeningChat}
-            onClick={onStickyMessage}
-          >
-            {isOpeningChat ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <MessageCircle className="size-4" />
-            )}
-            {stickyT("stickyMessage")}
-          </Button>
-          {isProductShop ? null : (
+        <StickyActionBar
+          title={
+            isProductShop || costumes.length > 0 ? displayName : priceLabel
+          }
+          subtitle={trustLine}
+          secondary={
             <Button
-              variant="accent"
-              className="flex-1"
-              onClick={() =>
-                document
-                  .getElementById("booking-sidebar")
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
-              }
+              variant="outline"
+              size="icon"
+              aria-label={stickyT("stickyMessage")}
+              disabled={isOpeningChat}
+              onClick={onStickyMessage}
             >
-              <CalendarDays className="size-4" />
-              {stickyT("stickyBook")}
+              {isOpeningChat ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <MessageCircle className="size-4" />
+              )}
             </Button>
-          )}
-        </div>
+          }
+          primary={
+            isProductShop || costumes.length > 0 ? (
+              <Button
+                variant="accent"
+                disabled={isOpeningChat}
+                onClick={onStickyMessage}
+              >
+                {stickyT("stickyMessage")}
+              </Button>
+            ) : (
+              <Button
+                variant="accent"
+                onClick={() =>
+                  document
+                    .getElementById("booking-sidebar")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+              >
+                <CalendarDays className="size-4" />
+                {stickyT("chooseDate")}
+              </Button>
+            )
+          }
+        />
       )}
     </div>
   );
