@@ -131,8 +131,8 @@ export function HeroContactSheet({ photos }: { photos: HeroPhoto[] }) {
                       // contrast, the way a print comes up in a tray.
                       className={
                         layer === 0
-                          ? "animate-develop object-cover transition-opacity duration-[900ms] ease-out"
-                          : "object-cover transition-opacity duration-[900ms] ease-out"
+                          ? "animate-develop object-cover transition-opacity duration-[var(--fg-dur-400)] ease-fg-out"
+                          : "object-cover transition-opacity duration-[var(--fg-dur-400)] ease-fg-out"
                       }
                       style={{
                         // Bias the crop toward the upper third so portrait

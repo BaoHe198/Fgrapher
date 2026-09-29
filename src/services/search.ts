@@ -199,6 +199,9 @@ function groupProfilesByUser(
       // takes bookings nationwide, so the browse card can show the badge
       // regardless of which specific role/profile matched the search.
       servesNationwide: userProfiles.some((p) => p.servesNationwide),
+      // Styles across every matching profile - the landing page's featured
+      // strip filters by them on phones (redesign 09/2026).
+      categories: [...new Set(userProfiles.flatMap((p) => p.categories))],
     };
   });
 }

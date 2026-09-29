@@ -81,7 +81,9 @@ function FgImage({
   const [loaded, setLoaded] = React.useState(false);
   const [failedSrc, setFailedSrc] = React.useState<string | null>(null);
   const [inView, setInView] = React.useState(!reveal || priority);
-  const failed = !src || failedSrc === src;
+  // No src at all is an empty slot (nothing to show yet); a src that fails
+  // to load is an error and says so with an icon.
+  const failed = Boolean(src) && failedSrc === src;
 
   React.useEffect(() => {
     if (inView) return;
@@ -110,7 +112,9 @@ function FgImage({
     <div
       ref={frameRef}
       data-slot="fg-image"
-      data-state={failed ? "error" : loaded ? "loaded" : "loading"}
+      data-state={
+        !src ? "empty" : failed ? "error" : loaded ? "loaded" : "loading"
+      }
       className={cn(
         "relative isolate overflow-hidden bg-bg-sunken",
         ratio ? RATIO_CLASS[ratio] : "size-full",
@@ -119,7 +123,7 @@ function FgImage({
         className,
       )}
     >
-      {failed ? (
+      {!src ? null : failed ? (
         <span className="absolute inset-0 flex items-center justify-center text-text-tertiary">
           <ImageOffIcon aria-hidden className="size-6" />
           <span className="sr-only">{alt}</span>

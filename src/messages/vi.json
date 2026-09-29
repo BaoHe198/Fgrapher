@@ -141,6 +141,7 @@
     "MUSIC_VIDEO": "MV ca nhạc",
     "CORPORATE": "Doanh nghiệp",
     "REAL_ESTATE": "Bất động sản",
+    "YEARBOOK": "Kỷ yếu",
     "BRIDAL": "Cô dâu",
     "EDITORIAL": "Ảnh biên tập",
     "SFX": "Hiệu ứng đặc biệt",
@@ -214,7 +215,57 @@
     "browseStudios": "Xem studio",
     "ctaTitle": "Đưa dịch vụ của bạn đến khách hàng đang tìm kiếm",
     "ctaSub": "Miễn phí tham gia trong giai đoạn đầu — khách hàng tìm kiếm và đặt lịch với bạn hoàn toàn miễn phí.",
-    "ctaBtn": "Trở thành nhà cung cấp"
+    "ctaBtn": "Trở thành nhà cung cấp",
+    "frameLabel": "Khung {n}",
+    "scope": "Toàn quốc",
+    "heroSub": "Nhiếp ảnh gia, quay phim, trang điểm, người mẫu và studio trên khắp {count} tỉnh, thành. Mọi nhà cung cấp đều đã xác minh danh tính.",
+    "heroSubShort": "Nhiếp ảnh gia, quay phim, trang điểm, người mẫu và studio. Tất cả đã xác minh danh tính.",
+    "whoTitle": "Bạn cần ai?",
+    "roleTiles": {
+      "PHOTOGRAPHER": "Nhiếp ảnh gia",
+      "VIDEOGRAPHER": "Quay phim",
+      "MAKEUP_ARTIST": "Trang điểm",
+      "MODEL": "Người mẫu",
+      "STUDIO": "Studio",
+      "COSTUME_SHOP": "Thuê trang phục",
+      "CAMERA_SHOP": "Chợ F"
+    },
+    "stylesTitle": "Duyệt theo phong cách",
+    "allStyles": "Tất cả",
+    "map": {
+      "eyebrow": "Bản đồ F",
+      "title": "Xem nghệ sĩ gần nơi bạn chụp",
+      "sub": "Lọc theo vai trò, phong cách và ngân sách ngay trên bản đồ. Chạm vào một khung để xem nhanh hồ sơ.",
+      "cta": "Mở Bản đồ F",
+      "chipStyle": "Ảnh cưới",
+      "chipBudget": "Dưới 3.000.000₫",
+      "verified": "Đã xác minh",
+      "previewLabel": "Xem trước Bản đồ F"
+    },
+    "trust": {
+      "title": "Đặt lịch yên tâm",
+      "verifiedBadge": "Đã xác minh",
+      "verifiedTitle": "Xác minh danh tính",
+      "verifiedDesc": "Mọi nghệ sĩ, studio và shop đều xác minh giấy tờ trước khi hồ sơ được hiển thị.",
+      "reviewMeta": "{name} · sau buổi chụp {date}",
+      "reviewFallback": "Từ khách đã hoàn thành buổi chụp",
+      "reviewTitle": "Đánh giá thật sau buổi chụp",
+      "reviewDesc": "Chỉ khách đã hoàn thành buổi chụp mới được viết đánh giá.",
+      "chatSample": "Thứ Bảy này mình còn lịch từ 08:00 bạn nhé.",
+      "chatTitle": "Nhắn tin trực tiếp",
+      "chatDesc": "Trao đổi ý tưởng, địa điểm và đặt cọc thẳng với nghệ sĩ.",
+      "footnote": "Đặt lịch là gửi yêu cầu. Nghệ sĩ xác nhận trong 48 giờ, đặt cọc thỏa thuận trực tiếp. Không thanh toán trực tuyến."
+    },
+    "provider": {
+      "eyebrow": "Dành cho nhà cung cấp",
+      "sub": "Xác minh danh tính, đăng portfolio và nhận yêu cầu đặt lịch từ khách trên toàn quốc. Miễn phí tham gia trong giai đoạn đầu."
+    },
+    "request": {
+      "eyebrow": "Đặt lịch F",
+      "title": "Đăng yêu cầu, nhận đề xuất từ nghệ sĩ",
+      "sub": "Mô tả buổi chụp, ngày và ngân sách. Nghệ sĩ phù hợp gửi đề xuất cho bạn chọn. Đặt cọc thỏa thuận trực tiếp.",
+      "cta": "Đăng yêu cầu"
+    }
   },
   "foot": {
     "providers": "Nhà cung cấp",

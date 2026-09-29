@@ -141,6 +141,7 @@
     "MUSIC_VIDEO": "Music video",
     "CORPORATE": "Corporate",
     "REAL_ESTATE": "Real estate",
+    "YEARBOOK": "Yearbook",
     "BRIDAL": "Bridal",
     "EDITORIAL": "Editorial",
     "SFX": "SFX",
@@ -214,7 +215,57 @@
     "browseStudios": "Browse studios",
     "ctaTitle": "Bring your services to clients already searching",
     "ctaSub": "Free to join during our early access period — clients search for and book with you at no cost.",
-    "ctaBtn": "Become a provider"
+    "ctaBtn": "Become a provider",
+    "frameLabel": "Frame {n}",
+    "scope": "Nationwide",
+    "heroSub": "Photographers, videographers, make-up artists, models and studios across {count} provinces and cities. Every provider is identity-verified.",
+    "heroSubShort": "Photographers, videographers, make-up artists, models and studios. All identity-verified.",
+    "whoTitle": "Who do you need?",
+    "roleTiles": {
+      "PHOTOGRAPHER": "Photographer",
+      "VIDEOGRAPHER": "Videographer",
+      "MAKEUP_ARTIST": "Make-up",
+      "MODEL": "Model",
+      "STUDIO": "Studio",
+      "COSTUME_SHOP": "Costume rental",
+      "CAMERA_SHOP": "Chợ F"
+    },
+    "stylesTitle": "Browse by style",
+    "allStyles": "All",
+    "map": {
+      "eyebrow": "Bản đồ F",
+      "title": "Find artists near where you shoot",
+      "sub": "Filter by role, style and budget right on the map. Tap a frame for a quick look at the profile.",
+      "cta": "Open Bản đồ F",
+      "chipStyle": "Wedding",
+      "chipBudget": "Under 3,000,000₫",
+      "verified": "Verified",
+      "previewLabel": "Bản đồ F preview"
+    },
+    "trust": {
+      "title": "Book with confidence",
+      "verifiedBadge": "Verified",
+      "verifiedTitle": "Identity verified",
+      "verifiedDesc": "Every artist, studio and shop verifies their ID before their profile is shown.",
+      "reviewMeta": "{name} · after the shoot {date}",
+      "reviewFallback": "From customers who completed a shoot",
+      "reviewTitle": "Real reviews after the shoot",
+      "reviewDesc": "Only customers who completed a shoot can write a review.",
+      "chatSample": "I'm free from 08:00 this Saturday.",
+      "chatTitle": "Message directly",
+      "chatDesc": "Talk through ideas, location and deposit straight with the artist.",
+      "footnote": "Booking sends a request. The artist confirms within 48 hours and the deposit is agreed directly. No online payment."
+    },
+    "provider": {
+      "eyebrow": "For providers",
+      "sub": "Verify your identity, post your portfolio and get booking requests from customers nationwide. Free to join during launch."
+    },
+    "request": {
+      "eyebrow": "Đặt lịch F",
+      "title": "Post a request, get offers from artists",
+      "sub": "Describe the shoot, date and budget. Matching artists send offers for you to choose from. Deposit agreed directly.",
+      "cta": "Post a request"
+    }
   },
   "foot": {
     "providers": "For providers",

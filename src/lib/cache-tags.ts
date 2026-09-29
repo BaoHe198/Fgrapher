@@ -43,7 +43,9 @@ export const profileUserTag = (userId: string) => `profile:user:${userId}`;
 // v3 (22/09/2026): searchProfiles began returning `serviceKinds`, and every
 // entry written before that kept being served without it — which crashed
 // /browse on a cache hit. Exactly the return-shape case described above.
-export const CACHE_KEY_VERSION = "v3";
+// v4 (29/09/2026): provider cards gained `categories` (landing page style
+// chips), and the landing page's showcase cache was added.
+export const CACHE_KEY_VERSION = "v4";
 
 /** Revalidate seconds per cached read. Kept together so the policy is legible. */
 export const CACHE_TTL = {
