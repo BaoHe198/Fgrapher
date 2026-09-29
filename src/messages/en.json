@@ -78,7 +78,11 @@
       "whenTitle": "Time & service",
       "wardEmpty": "No providers on Fmap in this ward yet.",
       "wardOption": "{name} ({count})",
-      "noWardsWithProviders": "No wards with providers yet"
+      "noWardsWithProviders": "No wards with providers yet",
+      "wholeMap": "Whole map view",
+      "more": "Filters",
+      "close": "Close",
+      "whenPill": "Shoot date & time"
     },
     "empty": {
       "title": "No matching providers yet",
@@ -114,7 +118,9 @@
       "title": "{count} providers at this spot",
       "close": "Close list"
     },
-    "resultCount": "{count, plural, one {# provider} other {# providers}}"
+    "resultCount": "{count, plural, one {# provider} other {# providers}}",
+    "searchOnMove": "Search as I move the map",
+    "inView": "{count} artists in view"
   },
   "role": {
     "PHOTOGRAPHER": "Photographer",
@@ -3244,7 +3250,8 @@
         "removeRating": "Remove rating filter",
         "removeCity": "Remove province filter",
         "removeWard": "Remove ward filter",
-        "removeRoles": "Remove role filter"
+        "removeRoles": "Remove role filter",
+        "headingOnDate": "Nobody is free on {date}"
       },
       "clearFilters": "Clear all filters",
       "unnamed": "Unnamed",
@@ -3267,6 +3274,22 @@
       "noPortfolioGroup": {
         "heading": "No portfolio photos yet",
         "body": "These profiles haven't posted any work yet, so they're listed after the ones you can see photos from."
+      },
+      "eyebrow": "Tìm kiếm F",
+      "headingPlace": "Artists in {place}",
+      "availableOn": "Free {date}",
+      "ratingChip": "{rating}★ and up",
+      "removeFilter": "Remove filter {filter}",
+      "clearAll": "Clear all",
+      "tabsLabel": "Result type",
+      "tabArtists": "Artists",
+      "tabAlbums": "Project albums",
+      "photoCount": "{count} photos",
+      "pageOf": "Page {page} of {total}",
+      "noAlbums": {
+        "heading": "No matching project albums yet",
+        "body": "Try removing a filter, or look at the artists instead.",
+        "seeArtists": "See artists"
       }
     },
     "profile": {
@@ -4111,10 +4134,18 @@
       "budgetOver15m": "Over ₫15M",
       "ratingLabel": "Rating",
       "ratingAny": "Any",
-      "rating4Plus": "4+ stars",
-      "rating45Plus": "4.5+ stars",
+      "rating4Plus": "4.0★+",
+      "rating45Plus": "4.5★+",
       "resetFilters": "Reset filters",
-      "serviceLabel": "Service"
+      "serviceLabel": "Service",
+      "areaLabel": "Area",
+      "shootWhenLabel": "Shoot date & time",
+      "shootDateLabel": "Shoot date",
+      "fromLabel": "From",
+      "toLabel": "To",
+      "anyTime": "Any",
+      "shootWhenHint": "Only shows artists who are free in this window.",
+      "rating5": "5.0★"
     },
     "mobileFilterSheet": {
       "filtersButton": "Filters",

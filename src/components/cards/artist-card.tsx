@@ -34,6 +34,9 @@ interface ArtistCardProps {
     // section, so those cards carry a visible "accepts nationwide
     // bookings" label distinguishing them from a province-matched result.
     nationwideLabel?: string;
+    // Redesign 09/2026: "Còn lịch 12/10/2026" when /browse is filtered by
+    // a shoot date - every card shown is free then, and says so.
+    availabilityLabel?: string;
   };
   onClick?: () => void;
 }
@@ -265,6 +268,15 @@ export function ArtistCard({ artist, onClick, priority }: ArtistCardProps) {
           {artist.nationwideLabel ? (
             <Badge variant="neutral" className="absolute top-2 left-2 z-20">
               {artist.nationwideLabel}
+            </Badge>
+          ) : null}
+          {artist.availabilityLabel ? (
+            <Badge
+              variant="neutral"
+              className="absolute top-2 right-2 z-20 gap-1.5 bg-bg-surface text-meta text-text-primary shadow-[var(--shadow-sm)]"
+            >
+              <span aria-hidden className="size-1.5 rounded-full bg-success" />
+              {artist.availabilityLabel}
             </Badge>
           ) : null}
         </div>

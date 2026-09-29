@@ -17,6 +17,10 @@ export interface BrowseFilterState {
   heightMax: string;
   experienceLevel: ExperienceLevel[];
   travelWilling: boolean;
+  /** Shoot date "yyyy-MM-dd" and optional "HH:mm" window (redesign 09/2026). */
+  date: string;
+  from: string;
+  to: string;
 }
 
 /**
@@ -41,6 +45,9 @@ const BROWSE_FILTER_KEYS = [
   "heightMax",
   "experienceLevel",
   "travelWilling",
+  "date",
+  "from",
+  "to",
 ] as const;
 
 export const EMPTY_BROWSE_FILTERS: BrowseFilterState = {
@@ -57,6 +64,9 @@ export const EMPTY_BROWSE_FILTERS: BrowseFilterState = {
   heightMax: "",
   experienceLevel: [],
   travelWilling: false,
+  date: "",
+  from: "",
+  to: "",
 };
 
 function list(params: URLSearchParams, key: string): string[] {
@@ -78,6 +88,9 @@ export function readBrowseFilters(params: URLSearchParams): BrowseFilterState {
     heightMax: params.get("heightMax") ?? "",
     experienceLevel: list(params, "experienceLevel") as ExperienceLevel[],
     travelWilling: params.get("travelWilling") === "1",
+    date: params.get("date") ?? "",
+    from: params.get("from") ?? "",
+    to: params.get("to") ?? "",
   };
 }
 
@@ -116,6 +129,10 @@ export function writeBrowseFilters(
     "travelWilling",
     modelOnly && filters.travelWilling ? "1" : "",
   );
+  // A time window means nothing without a day - it goes with the date.
+  setOrDelete(params, "date", filters.date);
+  setOrDelete(params, "from", filters.date ? filters.from : "");
+  setOrDelete(params, "to", filters.date ? filters.to : "");
 }
 
 /** Removes every sidebar key, leaving `q` (and anything else) in place. */

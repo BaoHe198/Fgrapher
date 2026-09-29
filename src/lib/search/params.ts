@@ -49,6 +49,31 @@ function onlyKnown<T extends string>(
  * Roles are left alone: searchProfiles already narrows them to the
  * searchable set, and an unknown one correctly matches nobody.
  */
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * The shoot-date filter: a real calendar date, and a from-to pair only when
+ * both are valid times with `from` before `to`. A half or reversed range is
+ * dropped rather than guessed at; the date alone still filters.
+ */
+export function sanitizeShootWindow(
+  date: string | undefined,
+  from: string | undefined,
+  to: string | undefined,
+): { date?: string; from?: string; to?: string } {
+  if (!date || !DATE_RE.test(date)) return {};
+  const parsed = new Date(`${date}T00:00:00.000Z`);
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.toISOString().slice(0, 10) !== date
+  )
+    return {};
+  if (from && to && TIME_RE.test(from) && TIME_RE.test(to) && from < to)
+    return { date, from, to };
+  return { date };
+}
+
 export function sanitizeSearchParams(params: SearchParams): SearchParams {
   const page = finiteOrUndefined(params.page, 1);
   const limit = finiteOrUndefined(params.limit, 1, MAX_LIMIT);
@@ -56,6 +81,8 @@ export function sanitizeSearchParams(params: SearchParams): SearchParams {
 
   return {
     ...params,
+    ...{ date: undefined, from: undefined, to: undefined },
+    ...sanitizeShootWindow(params.date, params.from, params.to),
     q: q ? q : undefined,
     serviceKinds: onlyKnown(params.serviceKinds, ServiceKind),
     categories: onlyKnown(params.categories, ProfileCategory),

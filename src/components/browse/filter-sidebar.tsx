@@ -7,6 +7,8 @@ import { startTransition, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SERVICE_KINDS } from "@/lib/constants/service-matrix";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DateField } from "@/components/ui/date-field";
+import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
 import { toast } from "@/components/ui/toast";
@@ -16,6 +18,8 @@ import {
   DISCOVERABLE_ROLES,
 } from "@/lib/constants";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
+import { cn } from "@/lib/utils";
+import { vietnamDateKey } from "@/lib/vietnam/date";
 import {
   categoriesStillValid,
   clearBrowseFilters,
@@ -60,12 +64,22 @@ interface FilterSidebarProps {
   roleCounts: Record<string, number>;
   categoryCounts: Partial<Record<string, number>>;
   marketplaceEnabled: boolean;
+  /** Rendered inside the phone filter sheet: not sticky, and carries sort. */
+  inSheet?: boolean;
 }
+
+// Whole hours for the shoot window, 05:00-21:00 - the span Bản đồ F and the
+// booking calendar work in.
+const HOUR_OPTIONS = Array.from({ length: 17 }, (_, i) => {
+  const value = `${String(5 + i).padStart(2, "0")}:00`;
+  return { value, label: value };
+});
 
 export function FilterSidebar({
   roleCounts,
   categoryCounts,
   marketplaceEnabled,
+  inSheet = false,
 }: FilterSidebarProps) {
   const t = useTranslations("sharedComponents.filterSidebar");
   const roleT = useTranslations("role");
@@ -92,7 +106,9 @@ export function FilterSidebar({
     { value: "", label: t("ratingAny") },
     { value: "4", label: t("rating4Plus") },
     { value: "4.5", label: t("rating45Plus") },
+    { value: "5", label: t("rating5") },
   ];
+  const todayKey = vietnamDateKey();
   const roleFilterOptions = marketplaceEnabled
     ? [...DISCOVERABLE_ROLES, "CAMERA_SHOP" as const]
     : DISCOVERABLE_ROLES;
@@ -281,164 +297,244 @@ export function FilterSidebar({
   }
   const hasAnyCategory = categoryGroups.some((g) => g.categories.length > 0);
 
-  return (
-    <div className="sticky top-[104px] flex flex-col gap-[22px] rounded-[var(--fg-radius-lg)] bg-surface-card p-5 shadow-[var(--shadow-sm)]">
-      <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          {t("serviceLabel")}
-        </span>
-        <div className="flex flex-col gap-2.5">
-          {SERVICE_KINDS.map((kind) => (
-            <Checkbox
-              key={kind}
-              checked={filters.serviceKinds.includes(kind)}
-              onCheckedChange={() => toggleServiceKind(kind)}
-              label={serviceKindT(kind)}
-            />
-          ))}
-        </div>
-      </div>
+  // Section label: small caps with the audit's one tracking value (.12em).
+  const sectionLabel =
+    "text-meta tracking-[0.12em] text-text-tertiary uppercase";
 
-      <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          {t("roleLabel")}
-        </span>
-        <div className="flex flex-col gap-2.5">
-          {roleFilterOptions.map((role) => {
-            const count = roleCounts[role] ?? 0;
+  return (
+    // Not sticky: with the date, rating and style groups it is taller than
+    // a laptop screen, and a sticky column that tall either hides its own
+    // bottom or clips inside a scroll box.
+    <div className="flex flex-col gap-6">
+      <section className="flex flex-col gap-3">
+        <span className={sectionLabel}>{t("areaLabel")}</span>
+        <NativeSelect
+          label={t("cityLabel")}
+          value={filters.city}
+          onChange={(value) => applyFilters({ city: value, ward: "" })}
+          options={[
+            { value: "", label: t("allCities") },
+            ...provinces.map((p) => ({ value: p.code, label: p.name })),
+          ]}
+        />
+        <NativeSelect
+          label={t("wardLabel")}
+          value={filters.ward}
+          onChange={(value) => applyFilters({ ward: value })}
+          disabled={!filters.city || wards.length === 0}
+          options={[
+            { value: "", label: t("allWards") },
+            ...wards.map((w) => ({ value: w.id, label: w.name })),
+          ]}
+        />
+      </section>
+
+      {/* "Ngày & giờ cần chụp": the same availability rule as Bản đồ F.
+          The window only applies once a day is picked. */}
+      <section className="flex flex-col gap-3">
+        <span className={sectionLabel}>{t("shootWhenLabel")}</span>
+        <DateField
+          label={t("shootDateLabel")}
+          value={filters.date}
+          min={todayKey}
+          onChange={(value) =>
+            applyFilters(
+              { date: value, ...(value ? {} : { from: "", to: "" }) },
+              true,
+            )
+          }
+        />
+        <div className="grid grid-cols-2 gap-2">
+          <NativeSelect
+            label={t("fromLabel")}
+            value={filters.from}
+            disabled={!filters.date}
+            onChange={(value) =>
+              applyFilters(
+                {
+                  from: value,
+                  // Keep the window the right way round.
+                  to:
+                    filters.to && value && filters.to <= value
+                      ? ""
+                      : filters.to,
+                },
+                true,
+              )
+            }
+            options={[{ value: "", label: t("anyTime") }, ...HOUR_OPTIONS]}
+          />
+          <NativeSelect
+            label={t("toLabel")}
+            value={filters.to}
+            disabled={!filters.date}
+            onChange={(value) => applyFilters({ to: value }, true)}
+            options={[
+              { value: "", label: t("anyTime") },
+              ...HOUR_OPTIONS.filter(
+                (option) => !filters.from || option.value > filters.from,
+              ),
+            ]}
+          />
+        </div>
+        <p className="text-meta text-text-tertiary">{t("shootWhenHint")}</p>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <span className={sectionLabel}>{t("ratingLabel")}</span>
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label={t("ratingLabel")}
+        >
+          {RATING_OPTIONS.map((option) => {
+            const active = filters.minRating === option.value;
             return (
-              <Checkbox
-                key={role}
-                checked={filters.roles.includes(role)}
-                onCheckedChange={() => toggleRole(role)}
-                // Matching the category checkboxes below (already
-                // disabled at 0) — QA flagged the filter sheet as long
-                // and still showing plenty of options that can only ever
-                // return nothing; a checked-but-disabled role isn't
-                // reachable, so this only applies while unchecked.
-                disabled={count === 0 && !filters.roles.includes(role)}
-                label={`${roleT(role)} (${count})`}
-              />
+              <button
+                key={option.value}
+                type="button"
+                data-interactive="true"
+                aria-pressed={active}
+                onClick={() => applyFilters({ minRating: option.value }, true)}
+                className={cn(
+                  "focus-ring rounded-full border px-3 py-1.5 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
+                  active
+                    ? "border-brand-primary bg-brand-primary text-text-on-brand"
+                    : "border-border-default bg-bg-surface text-text-primary hover:border-border-strong",
+                )}
+              >
+                {option.label}
+              </button>
             );
           })}
         </div>
-      </div>
+      </section>
+
+      <div className="h-px bg-border-subtle" />
+
+      <section className="flex flex-col gap-2.5">
+        <span className={sectionLabel}>{t("serviceLabel")}</span>
+        {SERVICE_KINDS.map((kind) => (
+          <Checkbox
+            key={kind}
+            checked={filters.serviceKinds.includes(kind)}
+            onCheckedChange={() => toggleServiceKind(kind)}
+            label={serviceKindT(kind)}
+          />
+        ))}
+      </section>
+
+      <section className="flex flex-col gap-2.5">
+        <span className={sectionLabel}>{t("roleLabel")}</span>
+        {roleFilterOptions.map((role) => {
+          const count = roleCounts[role] ?? 0;
+          return (
+            <Checkbox
+              key={role}
+              checked={filters.roles.includes(role)}
+              onCheckedChange={() => toggleRole(role)}
+              // A role with nobody in it can only return nothing; a
+              // checked one stays reachable so it can be unchecked.
+              disabled={count === 0 && !filters.roles.includes(role)}
+              label={`${roleT(role)} (${count})`}
+            />
+          );
+        })}
+      </section>
 
       {hasAnyCategory ? (
-        <>
-          <div className="h-px bg-border-subtle" />
-          <div className="flex flex-col gap-3.5">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-                {t("styleLabel")}
-              </span>
-              {filters.roles.length === 0 && !showAllCategories ? (
-                <button
-                  type="button"
-                  onClick={() => setShowAllCategories(true)}
-                  className="text-body-sm font-semibold! text-text-link"
-                >
-                  {t("seeAllCategories")}
-                </button>
-              ) : null}
-            </div>
-            {categoryGroups.map((group) => {
-              const isExpanded = group.role
-                ? expandedGroups.has(group.role)
-                : true;
-              const visible = isExpanded
-                ? group.categories
-                : group.categories.slice(0, COLLAPSE_THRESHOLD);
-              const hasMore =
-                group.role != null &&
-                group.categories.length > COLLAPSE_THRESHOLD;
-              return (
-                <div
-                  key={group.role ?? "popular"}
-                  className="flex flex-col gap-2.5"
-                >
-                  {group.role ? (
-                    <span className="text-body-sm font-semibold! text-text-secondary">
-                      {roleT(group.role)}
-                    </span>
-                  ) : null}
-                  <div className="flex flex-col gap-2.5">
-                    {visible.map((category) => {
-                      const count = categoryCounts[category] ?? 0;
-                      return (
-                        <Checkbox
-                          key={category}
-                          checked={filters.categories.includes(category)}
-                          onCheckedChange={() => toggleCategory(category)}
-                          disabled={count === 0}
-                          label={`${categoryT(category)} (${count})`}
-                        />
-                      );
-                    })}
-                  </div>
-                  {hasMore ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        group.role && toggleGroupExpand(group.role)
-                      }
-                      className="self-start text-body-sm font-semibold! text-text-link"
-                    >
-                      {isExpanded
-                        ? t("showLess")
-                        : t("showMore", {
-                            count: group.categories.length - COLLAPSE_THRESHOLD,
-                          })}
-                    </button>
-                  ) : null}
-                </div>
-              );
-            })}
+        <section className="flex flex-col gap-3.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className={sectionLabel}>{t("styleLabel")}</span>
+            {filters.roles.length === 0 && !showAllCategories ? (
+              <button
+                type="button"
+                onClick={() => setShowAllCategories(true)}
+                className="focus-ring rounded-[4px] text-body-sm font-semibold! text-text-link"
+              >
+                {t("seeAllCategories")}
+              </button>
+            ) : null}
           </div>
-        </>
+          {categoryGroups.map((group) => {
+            const isExpanded = group.role
+              ? expandedGroups.has(group.role)
+              : true;
+            const visible = isExpanded
+              ? group.categories
+              : group.categories.slice(0, COLLAPSE_THRESHOLD);
+            const hasMore =
+              group.role != null &&
+              group.categories.length > COLLAPSE_THRESHOLD;
+            return (
+              <div
+                key={group.role ?? "popular"}
+                className="flex flex-col gap-2.5"
+              >
+                {group.role ? (
+                  <span className="text-body-sm font-semibold! text-text-secondary">
+                    {roleT(group.role)}
+                  </span>
+                ) : null}
+                {visible.map((category) => {
+                  const count = categoryCounts[category] ?? 0;
+                  return (
+                    <Checkbox
+                      key={category}
+                      checked={filters.categories.includes(category)}
+                      onCheckedChange={() => toggleCategory(category)}
+                      disabled={count === 0}
+                      label={`${categoryT(category)} (${count})`}
+                    />
+                  );
+                })}
+                {hasMore ? (
+                  <button
+                    type="button"
+                    onClick={() => group.role && toggleGroupExpand(group.role)}
+                    className="focus-ring self-start rounded-[4px] text-body-sm font-semibold! text-text-link"
+                  >
+                    {isExpanded
+                      ? t("showLess")
+                      : t("showMore", {
+                          count: group.categories.length - COLLAPSE_THRESHOLD,
+                        })}
+                  </button>
+                ) : null}
+              </div>
+            );
+          })}
+        </section>
       ) : null}
 
       {singleRole === "MODEL" ? (
-        <>
-          <div className="h-px bg-border-subtle" />
-          <div className="flex flex-col gap-2.5">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-              {t("heightLabel")}
-            </span>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder={t("heightMinPh")}
-                value={filters.heightMin}
-                onChange={(e) => applyFilters({ heightMin: e.target.value })}
-                className="w-full rounded-[var(--fg-radius-sm)] border border-border-default bg-bg-surface px-3 py-2 text-body-sm text-text-primary outline-none focus:border-border-focus"
-              />
-              <input
-                type="number"
-                placeholder={t("heightMaxPh")}
-                value={filters.heightMax}
-                onChange={(e) => applyFilters({ heightMax: e.target.value })}
-                className="w-full rounded-[var(--fg-radius-sm)] border border-border-default bg-bg-surface px-3 py-2 text-body-sm text-text-primary outline-none focus:border-border-focus"
-              />
-            </div>
+        <section className="flex flex-col gap-3">
+          <span className={sectionLabel}>{t("heightLabel")}</span>
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              aria-label={t("heightMinPh")}
+              placeholder={t("heightMinPh")}
+              value={filters.heightMin}
+              onChange={(e) => applyFilters({ heightMin: e.target.value })}
+            />
+            <Input
+              type="number"
+              aria-label={t("heightMaxPh")}
+              placeholder={t("heightMaxPh")}
+              value={filters.heightMax}
+              onChange={(e) => applyFilters({ heightMax: e.target.value })}
+            />
           </div>
-
-          <div className="flex flex-col gap-2.5">
-            <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-              {t("experienceLabel")}
-            </span>
-            <div className="flex flex-col gap-2.5">
-              {EXPERIENCE_LEVELS.map((level) => (
-                <Checkbox
-                  key={level}
-                  checked={filters.experienceLevel.includes(level)}
-                  onCheckedChange={() => toggleExperienceLevel(level)}
-                  label={experienceLevelT(level)}
-                />
-              ))}
-            </div>
-          </div>
-
+          <span className={sectionLabel}>{t("experienceLabel")}</span>
+          {EXPERIENCE_LEVELS.map((level) => (
+            <Checkbox
+              key={level}
+              checked={filters.experienceLevel.includes(level)}
+              onCheckedChange={() => toggleExperienceLevel(level)}
+              label={experienceLevelT(level)}
+            />
+          ))}
           <Checkbox
             checked={filters.travelWilling}
             onCheckedChange={(checked) =>
@@ -446,16 +542,23 @@ export function FilterSidebar({
             }
             label={t("travelWillingLabel")}
           />
-        </>
+        </section>
       ) : null}
 
       <div className="h-px bg-border-subtle" />
 
-      <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          {t("sortByLabel")}
-        </span>
-        <div className="flex flex-col gap-2.5">
+      <NativeSelect
+        label={t("budgetLabel")}
+        value={budget}
+        onChange={onBudgetChange}
+        options={BUDGET_OPTIONS}
+      />
+
+      {/* Sort lives above the results on a desktop; the phone sheet has no
+          such header, so it keeps a copy here. */}
+      {inSheet ? (
+        <section className="flex flex-col gap-2.5">
+          <span className={sectionLabel}>{t("sortByLabel")}</span>
           {SORT_OPTIONS.map((option) => (
             <Radio
               key={option.value}
@@ -465,59 +568,10 @@ export function FilterSidebar({
               label={option.label}
             />
           ))}
-        </div>
-      </div>
+        </section>
+      ) : null}
 
-      <div className="h-px bg-border-subtle" />
-
-      <NativeSelect
-        label={t("cityLabel")}
-        value={filters.city}
-        onChange={(value) => applyFilters({ city: value, ward: "" })}
-        options={[
-          { value: "", label: t("allCities") },
-          ...provinces.map((p) => ({ value: p.code, label: p.name })),
-        ]}
-      />
-
-      <NativeSelect
-        label={t("wardLabel")}
-        value={filters.ward}
-        onChange={(value) => applyFilters({ ward: value })}
-        disabled={!filters.city || wards.length === 0}
-        options={[
-          { value: "", label: t("allWards") },
-          ...wards.map((w) => ({ value: w.id, label: w.name })),
-        ]}
-      />
-
-      <NativeSelect
-        label={t("budgetLabel")}
-        value={budget}
-        onChange={onBudgetChange}
-        options={BUDGET_OPTIONS}
-      />
-
-      <div className="h-px bg-border-subtle" />
-
-      <div className="flex flex-col gap-2.5">
-        <span className="text-caption-upper tracking-[0.08em] text-text-tertiary">
-          {t("ratingLabel")}
-        </span>
-        <div className="flex flex-col gap-2.5">
-          {RATING_OPTIONS.map((option) => (
-            <Radio
-              key={option.value}
-              name="rating"
-              checked={filters.minRating === option.value}
-              onChange={() => applyFilters({ minRating: option.value })}
-              label={option.label}
-            />
-          ))}
-        </div>
-      </div>
-
-      <Button variant="secondary" className="w-full" onClick={resetFilters}>
+      <Button variant="outline" className="w-full" onClick={resetFilters}>
         {t("resetFilters")}
       </Button>
     </div>

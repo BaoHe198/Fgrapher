@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { SearchParams } from "@/services/search";
-import { normalizeSort, sanitizeSearchParams } from "@/lib/search/params";
+import {
+  normalizeSort,
+  sanitizeSearchParams,
+  sanitizeShootWindow,
+} from "@/lib/search/params";
 
 // The shapes /browse builds from a URL, where anything can appear.
 const fromUrl = (p: Record<string, unknown>) => p as unknown as SearchParams;
@@ -60,5 +64,36 @@ describe("normalizeSort", () => {
     assert.equal(normalizeSort("bogus"), "rating");
     assert.equal(normalizeSort(undefined), "rating");
     assert.equal(normalizeSort("price_asc"), "price_asc");
+  });
+});
+
+describe("sanitizeShootWindow", () => {
+  it("keeps a valid date and ordered time range", () => {
+    assert.deepEqual(sanitizeShootWindow("2026-10-12", "08:00", "11:00"), {
+      date: "2026-10-12",
+      from: "08:00",
+      to: "11:00",
+    });
+  });
+
+  it("keeps the date but drops a reversed, half or malformed range", () => {
+    assert.deepEqual(sanitizeShootWindow("2026-10-12", "11:00", "08:00"), {
+      date: "2026-10-12",
+    });
+    assert.deepEqual(sanitizeShootWindow("2026-10-12", "08:00", undefined), {
+      date: "2026-10-12",
+    });
+    assert.deepEqual(sanitizeShootWindow("2026-10-12", "8h", "11:00"), {
+      date: "2026-10-12",
+    });
+  });
+
+  it("drops an impossible or malformed date entirely", () => {
+    assert.deepEqual(sanitizeShootWindow("2026-02-30", "08:00", "11:00"), {});
+    assert.deepEqual(
+      sanitizeShootWindow("12/10/2026", undefined, undefined),
+      {},
+    );
+    assert.deepEqual(sanitizeShootWindow(undefined, "08:00", "11:00"), {});
   });
 });

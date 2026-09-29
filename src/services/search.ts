@@ -11,6 +11,7 @@ import { DISCOVERABLE_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { formatAdministrativeLocation } from "@/lib/location";
 import { sanitizeSearchParams } from "@/lib/search/params";
+import { providersAvailableForInterval } from "@/services/fmap";
 import {
   escapeLike,
   foldVietnamese,
@@ -65,6 +66,13 @@ export interface SearchParams {
   heightMax?: number;
   experienceLevel?: ExperienceLevel[];
   travelWilling?: boolean;
+  // Redesign 09/2026 - "Ngày & giờ cần chụp": only providers free on this
+  // day ("yyyy-MM-dd", Vietnam time), within from-to ("HH:mm") when given,
+  // otherwise for at least one hour of it. Same rule as Bản đồ F
+  // (services/fmap.ts providersAvailableForInterval).
+  date?: string;
+  from?: string;
+  to?: string;
 }
 
 const PAGE_SIZE_DEFAULT = 24;
@@ -302,6 +310,7 @@ async function resolveProviderCards(
   sort: SortOption | undefined,
   minRating: number | undefined,
   excludeUserIds?: string[],
+  availability?: { date: string; from?: string; to?: string },
 ) {
   // A user matches if ANY of their profiles satisfies the filters above
   // (role included) — find those first, then pull in the rest of that
@@ -312,9 +321,18 @@ async function resolveProviderCards(
     select: { userId: true },
   });
   const excludeSet = new Set(excludeUserIds ?? []);
-  const matchedUserIds = Array.from(
+  let matchedUserIds = Array.from(
     new Set(matches.map((m) => m.userId).filter((id) => !excludeSet.has(id))),
   );
+  if (availability) {
+    const free = await providersAvailableForInterval(
+      matchedUserIds,
+      availability.date,
+      availability.from,
+      availability.to,
+    );
+    matchedUserIds = matchedUserIds.filter((id) => free.has(id));
+  }
 
   // Independent once matchedUserIds is known — run together rather than
   // waiting on `profiles` before starting the review-stats query.
@@ -486,10 +504,15 @@ async function searchProfilesUncached(params: SearchParams) {
     ? { AND: [withProvince, wardMatch(params.wardId)] }
     : withProvince;
 
+  const availability = params.date
+    ? { date: params.date, from: params.from, to: params.to }
+    : undefined;
   const results = await resolveProviderCards(
     primaryWhere,
     params.sort,
     params.minRating,
+    undefined,
+    availability,
   );
 
   const effectiveTotal = results.length;
@@ -508,6 +531,7 @@ async function searchProfilesUncached(params: SearchParams) {
       params.sort,
       params.minRating,
       results.map((r) => r.userId),
+      availability,
     );
     nationwide = nationwideResults.slice(0, NATIONWIDE_SECTION_SIZE);
   }
@@ -560,6 +584,144 @@ async function searchProfilesUncached(params: SearchParams) {
       ) as Partial<Record<ProfileCategory, number>>,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// "Album dự án" tab (redesign 09/2026): published albums from providers who
+// match the same filters as the artist tab, so switching tabs never widens
+// or narrows the search. An album needs at least one approved photo to be
+// shown, and only approved photos count or become its cover - the same bar
+// the public profile applies.
+// ---------------------------------------------------------------------------
+
+const APPROVED_ALBUM_IMAGE = {
+  type: "IMAGE",
+  moderationStatus: "APPROVED",
+  deletedAt: null,
+} as const;
+
+const ALBUM_PAGE_SIZE = 12;
+
+async function searchAlbumsUncached(params: SearchParams) {
+  const page = Math.max(1, params.page ?? 1);
+  const limit = params.limit ?? ALBUM_PAGE_SIZE;
+  const province = params.city
+    ? await db.province.findUnique({ where: { code: params.city } })
+    : null;
+  // Text search looks at the album's own title as well as the provider.
+  const textMatchIds = params.q
+    ? await profileIdsMatchingText(params.q)
+    : undefined;
+  const profileWhere = buildBaseWhere({ ...params, q: undefined });
+  const scoped: Prisma.ProfileWhereInput[] = [profileWhere];
+  if (province) scoped.push(provinceMatch(province.id));
+  if (params.wardId) scoped.push(wardMatch(params.wardId));
+
+  const where: Prisma.AlbumWhereInput = {
+    isPublished: true,
+    deletedAt: null,
+    media: { some: APPROVED_ALBUM_IMAGE },
+    profile: { AND: scoped },
+    ...(params.categories && params.categories.length > 0
+      ? { category: { in: params.categories } }
+      : {}),
+    ...(params.q
+      ? {
+          OR: [
+            { title: { contains: params.q, mode: "insensitive" } },
+            { profileId: { in: textMatchIds ?? [] } },
+          ],
+        }
+      : {}),
+  };
+
+  const [total, albums] = await Promise.all([
+    db.album.count({ where }),
+    db.album.findMany({
+      where,
+      orderBy: [
+        { shootDate: { sort: "desc", nulls: "last" } },
+        { createdAt: "desc" },
+      ],
+      skip: (page - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        coverMedia: {
+          select: { url: true, moderationStatus: true, deletedAt: true },
+        },
+        media: {
+          where: APPROVED_ALBUM_IMAGE,
+          orderBy: { order: "asc" },
+          take: 3,
+          select: { url: true },
+        },
+        _count: { select: { media: { where: APPROVED_ALBUM_IMAGE } } },
+        profile: {
+          select: {
+            role: true,
+            displayName: true,
+            user: { select: { name: true, username: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  return {
+    data: albums.map((album) => {
+      const cover =
+        album.coverMedia &&
+        album.coverMedia.moderationStatus === "APPROVED" &&
+        !album.coverMedia.deletedAt
+          ? album.coverMedia.url
+          : (album.media[0]?.url ?? null);
+      return {
+        id: album.id,
+        title: album.title,
+        description: album.description,
+        category: album.category,
+        coverUrl: cover,
+        previewUrls: album.media.map((m) => m.url),
+        photoCount: album._count.media,
+        providerName:
+          album.profile.displayName ?? album.profile.user.name ?? null,
+        providerUsername: album.profile.user.username,
+        providerRole: album.profile.role,
+      };
+    }),
+    total,
+    page,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+  };
+}
+
+export type AlbumSearchResult = Awaited<
+  ReturnType<typeof searchAlbumsUncached>
+>;
+
+const searchAlbumsCached = unstable_cache(
+  (key: string) => searchAlbumsUncached(JSON.parse(key) as SearchParams),
+  [CACHE_KEY_VERSION, "search", "albums"],
+  { tags: [CACHE_TAGS.search], revalidate: CACHE_TTL.search },
+);
+
+/** Public album search for /browse's second tab. Cached like searchProfiles. */
+export async function searchAlbums(params: SearchParams) {
+  return reviveDates(
+    await searchAlbumsCached(
+      // The shoot-date filter is about people's calendars, not albums.
+      canonicalParamsKey({
+        ...sanitizeSearchParams(params),
+        date: undefined,
+        from: undefined,
+        to: undefined,
+      }),
+    ),
+  );
 }
 
 // A canonical string for the params object so `unstable_cache`'s key is

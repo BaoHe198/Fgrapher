@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { LocateFixed, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
@@ -19,6 +19,7 @@ import {
 import type { FmapBounds, MarkerLabels } from "@/components/fmap/fmap-map";
 import { FmapProviderPreviewCard } from "@/components/fmap/fmap-provider-preview";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { formatDate, formatVND, vietnamDateKey } from "@/lib/format";
 import type { FmapMarker, FmapProviderPreview } from "@/services/fmap";
 
@@ -153,6 +154,11 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   // claim into the booking flow.
   const [searchedFor, setSearchedFor] = useState<FmapFilterValue | null>(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  // "Tìm khi di chuyển bản đồ" (redesign 09/2026): on by default, the map
+  // re-searches a moment after the customer stops panning. Off, it falls
+  // back to the "search this area" button.
+  const [searchOnMove, setSearchOnMove] = useState(true);
+  const moveSearchTimerRef = useRef<number | null>(null);
 
   const filtersRef = useRef(filters);
   const boundsRef = useRef(bounds);
@@ -307,6 +313,8 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
     () => () => {
       requestRef.current?.abort();
       if (moveFallbackRef.current) window.clearTimeout(moveFallbackRef.current);
+      if (moveSearchTimerRef.current)
+        window.clearTimeout(moveSearchTimerRef.current);
     },
     [],
   );
@@ -419,11 +427,10 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   }, [bounds, searchAfterMove]);
 
   return (
-    <div className="mx-auto max-w-[1600px] px-3 pt-4 pb-8 sm:px-6 sm:pt-6">
-      <div className="mb-3">
-        <h1 className="text-display-md text-text-primary">{navT("fmap")}</h1>
-        <p className="text-body-md text-text-secondary">{t("subtitle")}</p>
-      </div>
+    // Full-bleed under the site header (redesign 09/2026): the compact
+    // filter bar on top, the map filling the rest of the screen.
+    <div className="flex h-[calc(100dvh-73px)] min-h-[560px] flex-col">
+      <h1 className="sr-only">{navT("fmap")}</h1>
       <FmapFilterBar
         value={filters}
         onChange={setFilters}
@@ -436,29 +443,64 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
       />
       {notice ? (
         <p
+          role={notice.tone === "error" ? "alert" : "status"}
           className={
             notice.tone === "error"
-              ? "mt-2 text-body-sm text-danger"
-              : "mt-2 text-body-sm text-text-secondary"
+              ? "border-b border-border-subtle bg-danger-bg px-4 py-2 text-body-sm text-danger md:px-6"
+              : "border-b border-border-subtle bg-bg-sunken px-4 py-2 text-body-sm text-text-secondary md:px-6"
           }
         >
           {notice.text}
         </p>
       ) : null}
 
-      <div className="relative mt-3 h-[62vh] min-h-[480px] overflow-hidden rounded-[var(--fg-radius-xl)] border border-border-default bg-bg-sunken shadow-[var(--shadow-sm)]">
-        {searchedFor ? (
-          <p className="absolute top-3 left-3 z-10 max-w-[calc(100%-1.5rem)] truncate rounded-full bg-bg-surface/95 px-3 py-1 text-body-sm font-semibold text-text-primary shadow-md">
-            {t("context", {
-              date: formatDate(`${searchedFor.date}T00:00:00.000Z`),
-              start: searchedFor.start,
-              end: searchedFor.end,
-            })}
-            {/* How many were found — otherwise the only feedback was
-                whatever markers happened to be in view. */}
-            {!loading && markers.length > 0
-              ? ` · ${t("resultCount", { count: markers.length })}${truncated ? "+" : ""}`
-              : null}
+      <div className="relative flex-1 overflow-hidden bg-bg-sunken">
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-2 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-surface py-1.5 pr-2 pl-3 shadow-[var(--shadow-md)]">
+          <Switch
+            label={<span className="text-body-sm">{t("searchOnMove")}</span>}
+            checked={searchOnMove}
+            onChange={(checked) => {
+              setSearchOnMove(checked);
+              if (checked && mapMoved) void search();
+            }}
+          />
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={useMyLocation}
+          className="absolute right-3 bottom-28 z-10 bg-bg-surface shadow-[var(--shadow-md)]"
+        >
+          <LocateFixed />
+          {t("filters.myLocation")}
+        </Button>
+
+        {/* How many are in view, and for when: the one line that tells the
+            customer the map has answered. */}
+        {searchedFor && !loading && !searchError ? (
+          <p
+            role="status"
+            className="absolute bottom-6 left-1/2 z-10 max-w-[calc(100%-2rem)] -translate-x-1/2 truncate rounded-full bg-green-900 px-4 py-2 text-body-sm font-semibold! text-gold-50 shadow-[var(--shadow-lg)]"
+          >
+            {t("inView", { count: markers.length })}
+            {truncated ? "+" : ""}
+            <span className="font-normal text-green-200">
+              {" · "}
+              {t("context", {
+                date: formatDate(`${searchedFor.date}T00:00:00.000Z`),
+                start: searchedFor.start,
+                end: searchedFor.end,
+              })}
+            </span>
+          </p>
+        ) : loading ? (
+          <p
+            role="status"
+            className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-bg-surface px-4 py-2 text-body-sm text-text-secondary shadow-[var(--shadow-lg)]"
+          >
+            {t("filters.searching")}
           </p>
         ) : null}
         <FmapMap
@@ -477,7 +519,17 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
               void search(nextBounds);
               return;
             }
-            if (hasSearched) setMapMoved(true);
+            if (!hasSearched) return;
+            if (searchOnMove) {
+              if (moveSearchTimerRef.current)
+                window.clearTimeout(moveSearchTimerRef.current);
+              moveSearchTimerRef.current = window.setTimeout(
+                () => void search(nextBounds),
+                AUTO_SEARCH_DELAY_MS,
+              );
+              return;
+            }
+            setMapMoved(true);
           }}
           onSelectProvider={(profileId) => void selectProvider(profileId)}
           onSelectCluster={(profileIds) => {
@@ -492,7 +544,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
           <Button
             type="button"
             variant="secondary"
-            className="absolute top-14 left-1/2 z-10 -translate-x-1/2 shadow-[var(--shadow-md)]"
+            className="absolute top-3 left-1/2 z-10 -translate-x-1/2 shadow-[var(--shadow-md)] max-sm:top-16"
             disabled={loading || invalidReason != null}
             onClick={() => void search()}
           >
@@ -558,14 +610,8 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
           </div>
         ) : null}
 
-        {truncated ? (
-          <p className="absolute right-3 bottom-3 z-10 rounded-full bg-bg-surface px-3 py-1 text-body-sm text-text-secondary shadow-md">
-            {t("truncated")}
-          </p>
-        ) : null}
-
         {clusterMarkers.length > 0 ? (
-          <aside className="absolute right-3 bottom-3 left-3 z-10 max-h-[60%] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-default bg-bg-surface p-3 shadow-[var(--shadow-xl)] sm:top-3 sm:bottom-auto sm:left-auto sm:w-[340px]">
+          <aside className="absolute right-3 bottom-3 left-3 z-10 max-h-[60%] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card p-3 shadow-[var(--shadow-lg)] sm:top-3 sm:bottom-auto sm:left-auto sm:w-[340px]">
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className="font-semibold text-text-primary">
                 {t("cluster.title", { count: clusterMarkers.length })}

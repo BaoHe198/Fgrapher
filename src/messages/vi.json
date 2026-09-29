@@ -78,7 +78,11 @@
       "whenTitle": "Thời gian & dịch vụ",
       "wardEmpty": "Phường/xã này chưa có nhà cung cấp nào trên Bản đồ F.",
       "wardOption": "{name} ({count})",
-      "noWardsWithProviders": "Chưa có phường/xã nào có nhà cung cấp"
+      "noWardsWithProviders": "Chưa có phường/xã nào có nhà cung cấp",
+      "wholeMap": "Toàn khung bản đồ",
+      "more": "Bộ lọc",
+      "close": "Đóng",
+      "whenPill": "Ngày & giờ cần chụp"
     },
     "empty": {
       "title": "Chưa có nhà cung cấp phù hợp",
@@ -114,7 +118,9 @@
       "title": "{count} nhà cung cấp ở cùng vị trí",
       "close": "Đóng danh sách"
     },
-    "resultCount": "{count, plural, other {# nhà cung cấp}}"
+    "resultCount": "{count, plural, other {# nhà cung cấp}}",
+    "searchOnMove": "Tìm khi di chuyển bản đồ",
+    "inView": "{count} nghệ sĩ trong khung bản đồ"
   },
   "role": {
     "PHOTOGRAPHER": "Nhiếp ảnh gia",
@@ -3244,7 +3250,8 @@
         "removeRating": "Bỏ lọc theo đánh giá",
         "removeCity": "Bỏ lọc theo tỉnh/thành",
         "removeWard": "Bỏ lọc theo phường/xã",
-        "removeRoles": "Bỏ lọc theo vai trò"
+        "removeRoles": "Bỏ lọc theo vai trò",
+        "headingOnDate": "Không có nghệ sĩ nào còn lịch ngày {date}"
       },
       "clearFilters": "Xóa tất cả bộ lọc",
       "unnamed": "Chưa đặt tên",
@@ -3267,6 +3274,22 @@
       "noPortfolioGroup": {
         "heading": "Chưa có ảnh portfolio",
         "body": "Những hồ sơ này chưa đăng ảnh nào nên được xếp sau, để bạn xem trước những người đã có tác phẩm."
+      },
+      "eyebrow": "Tìm kiếm F",
+      "headingPlace": "Nghệ sĩ tại {place}",
+      "availableOn": "Còn lịch {date}",
+      "ratingChip": "Từ {rating}★",
+      "removeFilter": "Bỏ lọc {filter}",
+      "clearAll": "Xóa tất cả",
+      "tabsLabel": "Loại kết quả",
+      "tabArtists": "Nghệ sĩ",
+      "tabAlbums": "Album dự án",
+      "photoCount": "{count} ảnh",
+      "pageOf": "Trang {page}/{total}",
+      "noAlbums": {
+        "heading": "Chưa có album dự án phù hợp",
+        "body": "Thử bỏ bớt bộ lọc, hoặc xem danh sách nghệ sĩ.",
+        "seeArtists": "Xem nghệ sĩ"
       }
     },
     "profile": {
@@ -4111,10 +4134,18 @@
       "budgetOver15m": "Trên 15 triệu",
       "ratingLabel": "Đánh giá",
       "ratingAny": "Tất cả",
-      "rating4Plus": "Từ 4 sao",
-      "rating45Plus": "Từ 4.5 sao",
+      "rating4Plus": "Từ 4,0★",
+      "rating45Plus": "Từ 4,5★",
       "resetFilters": "Đặt lại bộ lọc",
-      "serviceLabel": "Dịch vụ"
+      "serviceLabel": "Dịch vụ",
+      "areaLabel": "Khu vực",
+      "shootWhenLabel": "Ngày & giờ cần chụp",
+      "shootDateLabel": "Ngày chụp",
+      "fromLabel": "Từ",
+      "toLabel": "Đến",
+      "anyTime": "Bất kỳ",
+      "shootWhenHint": "Chỉ hiện nghệ sĩ còn lịch trống trong khung giờ này.",
+      "rating5": "5,0★"
     },
     "mobileFilterSheet": {
       "filtersButton": "Bộ lọc",

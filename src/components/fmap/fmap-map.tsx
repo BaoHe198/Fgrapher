@@ -10,6 +10,7 @@ import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
 
+import { compactVnd, MAP_MARKER_CLASSES } from "@/components/fmap/map-marker";
 import type { FmapMarker } from "@/services/fmap";
 
 export type FmapBounds = {
@@ -25,58 +26,6 @@ const CLUSTER_COUNT_LAYER = "fmap-cluster-count";
 const UNCLUSTERED_LAYER = "fmap-unclustered";
 const MAX_ZOOM = 18;
 const CLUSTER_LIST_LIMIT = 50;
-
-const roleIconPaths: Record<FmapMarker["role"], string[]> = {
-  PHOTOGRAPHER: [
-    "M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z",
-    "M15 13a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
-  ],
-  VIDEOGRAPHER: [
-    "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5",
-    "M4 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z",
-  ],
-  MAKEUP_ARTIST: [
-    "m11 10 3 3",
-    "M6.5 21A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z",
-    "M9.969 17.031 21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031",
-  ],
-  STUDIO: [
-    "M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z",
-    "M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2",
-    "M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2",
-    "M10 6h4",
-    "M10 10h4",
-    "M10 14h4",
-    "M10 18h4",
-  ],
-  MODEL: [
-    "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2",
-    "M12 7a4 4 0 1 1 0 8 4 4 0 0 1 0-8z",
-  ],
-};
-
-function roleIcon(role: FmapMarker["role"]) {
-  const svgNs = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(svgNs, "svg");
-  for (const [name, value] of Object.entries({
-    width: "15",
-    height: "15",
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    "stroke-width": "2",
-    "stroke-linecap": "round",
-    "stroke-linejoin": "round",
-    "aria-hidden": "true",
-  }))
-    svg.setAttribute(name, value);
-  for (const d of roleIconPaths[role]) {
-    const path = document.createElementNS(svgNs, "path");
-    path.setAttribute("d", d);
-    svg.appendChild(path);
-  }
-  return svg;
-}
 
 // Keyless fallback when NEXT_PUBLIC_MAP_STYLE_URL is unset. OpenFreeMap
 // serves vector tiles with no API key or request quota, unlike the public
@@ -136,17 +85,24 @@ function markerElement(
 ) {
   // MapLibre positions the element it is given with an inline transform, so
   // that element must never move itself: a hover lift on it pushed the box
-  // out from under the pointer, un-hovered, dropped back, and looped —
-  // visible as jitter. The wrapper keeps a fixed hit area and owns :hover;
-  // only the inner button lifts.
+  // out from under the pointer, un-hovered, dropped back, and looped -
+  // visible as jitter. The wrapper keeps a fixed hit area and owns :hover
+  // and the selected state; only the inner button moves.
+  //
+  // The marker itself is the photo-frame design shared with the React
+  // MapMarker (map-marker.tsx, MAP_MARKER_CLASSES): a portfolio thumbnail
+  // with the starting price in mono under it. Selected scales 1.12 with a
+  // gold ring in 200ms, no bounce.
   const wrapper = document.createElement("div");
   wrapper.className = "group";
   if (selected) wrapper.dataset.selected = "true";
 
   const button = document.createElement("button");
   button.type = "button";
-  button.className =
-    "relative flex cursor-pointer flex-col items-center rounded-full outline-none transition-transform duration-200 group-hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-gold-400";
+  button.className = [
+    MAP_MARKER_CLASSES.root,
+    "cursor-pointer rounded-[var(--fg-radius-sm)] outline-none group-hover:-translate-y-0.5 group-data-[selected=true]:scale-[1.12] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-border-focus motion-reduce:group-hover:translate-y-0",
+  ].join(" ");
   button.setAttribute(
     "aria-label",
     `${marker.displayName}, ${priceLabel(marker.startingPrice, marker.currency, labels)}`,
@@ -154,34 +110,35 @@ function markerElement(
   button.addEventListener("click", () => onSelect(marker.profileId));
 
   const frame = document.createElement("span");
-  frame.className =
-    "relative block size-14 overflow-hidden rounded-full border-3 border-white bg-green-800 shadow-[var(--shadow-lg)] group-hover:shadow-[0_8px_24px_rgba(0,0,0,.28)] transition-transform group-data-[selected=true]:scale-110 group-data-[selected=true]:border-gold-400";
-  if (marker.avatar) {
+  frame.className = [
+    MAP_MARKER_CLASSES.frame,
+    "block transition-shadow duration-[var(--fg-dur-200)] group-data-[selected=true]:shadow-[0_0_0_2px_var(--bg-surface),0_0_0_4px_var(--gold-400)]",
+  ].join(" ");
+  const photo = marker.thumbnailUrl ?? marker.avatar;
+  if (photo) {
     const image = document.createElement("img");
-    image.src = marker.avatar;
+    image.src = photo;
     image.alt = "";
     image.loading = "lazy";
-    image.className = "size-full object-cover";
+    image.className = MAP_MARKER_CLASSES.image;
     frame.appendChild(image);
   } else {
     const fallback = document.createElement("span");
-    fallback.className =
-      "flex size-full items-center justify-center text-xl text-white";
+    fallback.className = MAP_MARKER_CLASSES.initial;
     fallback.textContent = marker.displayName.slice(0, 1).toUpperCase();
     frame.appendChild(fallback);
   }
 
-  const roleBadge = document.createElement("span");
-  roleBadge.className =
-    "relative z-10 -mb-2 flex size-7 items-center justify-center rounded-full border-2 border-white bg-gold-400 text-gold-900 shadow-sm";
-  roleBadge.appendChild(roleIcon(marker.role));
-
   const price = document.createElement("span");
-  price.className =
-    "mt-1 rounded-full border border-border-default bg-bg-surface px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-text-primary shadow-md";
-  price.textContent = priceLabel(marker.startingPrice, marker.currency, labels);
+  price.className = [
+    MAP_MARKER_CLASSES.price,
+    "transition-colors duration-[var(--fg-dur-200)] group-data-[selected=true]:bg-gold-400 group-data-[selected=true]:text-gold-900",
+  ].join(" ");
+  price.textContent =
+    compactVnd(marker.currency === "VND" ? marker.startingPrice : null) ??
+    labels.contact;
 
-  button.append(roleBadge, frame, price);
+  button.append(frame, price);
   wrapper.appendChild(button);
   return wrapper;
 }
@@ -318,10 +275,13 @@ export function FmapMap({
         source: SOURCE_ID,
         filter: ["has", "point_count"],
         paint: {
-          "circle-color": "#0f4c3a",
+          // green-900 / gold-400 from globals.css (GL layers can't read CSS
+          // variables). The ring doubles as the dark-map outline a drop
+          // shadow can't give (audit §04).
+          "circle-color": "#0b2d27",
           "circle-radius": ["step", ["get", "point_count"], 20, 20, 25, 60, 32],
-          "circle-stroke-width": 3,
-          "circle-stroke-color": "#f5c76b",
+          "circle-stroke-width": 4,
+          "circle-stroke-color": "#c8a36a",
         },
       });
       map.addLayer({

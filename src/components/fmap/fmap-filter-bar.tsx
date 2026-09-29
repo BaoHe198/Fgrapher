@@ -1,12 +1,7 @@
 "use client";
 
 import type { ProfileCategory } from "@prisma/client";
-import {
-  ChevronDown,
-  LocateFixed,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
+import { LocateFixed, Search, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
@@ -142,190 +137,244 @@ export function FmapFilterBar({
   const categoryOptions = CATEGORIES_BY_ROLE[value.role] ?? [];
   const searchDisabled = isLoading || invalidReason != null;
   const sectionTitle =
-    "text-caption-upper tracking-[0.08em] text-text-tertiary sm:col-span-2 lg:col-span-12";
+    "text-meta tracking-[0.12em] text-text-tertiary uppercase sm:col-span-2 lg:col-span-12";
+
+  const provinceName = provinces.find((p) => p.id === value.provinceId)?.name;
+  const wardName = wards.find((w) => w.id === value.wardId)?.name;
+  const placeLabel = wardName
+    ? `${wardName}, ${provinceName ?? ""}`
+    : (provinceName ?? t("filters.wholeMap"));
+  const whenLabel = value.date
+    ? `${formatDate(`${value.date}T00:00:00.000Z`)} · ${value.start}–${value.end}`
+    : "—";
 
   return (
-    <div
-      id="fmap-filters"
-      className="rounded-[var(--fg-radius-xl)] border border-border-default bg-bg-surface p-3 shadow-[var(--shadow-lg)] sm:p-4"
-    >
-      {/* Phones: one summary line; the full form opens on demand so the map
-          stays above the fold. */}
-      <div className="flex items-center gap-2 sm:hidden">
-        <button
+    <div id="fmap-filters" className="relative z-30">
+      {/* The compact bar (redesign 09/2026): where and when in one pill
+          with the search button, the role as chips, and "Bộ lọc" for the
+          full form. Both halves of the pill open that form too. */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-border-subtle bg-bg-surface px-4 py-3 md:flex-nowrap md:gap-3 md:px-6">
+        <div className="flex min-w-0 flex-1 items-center rounded-full border border-border-strong bg-bg-surface py-1 pr-1 pl-4 shadow-[var(--shadow-sm)] md:w-[500px] md:flex-none">
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-controls="fmap-filter-panel"
+            onClick={() => onExpandedChange(!expanded)}
+            className="focus-ring flex min-w-0 flex-1 flex-col items-start rounded-[var(--fg-radius-sm)] py-1 text-left"
+          >
+            <span className="text-meta text-text-tertiary">
+              {t("filters.areaTitle")}
+            </span>
+            <span className="w-full truncate text-body-sm font-semibold! text-text-primary">
+              {placeLabel}
+            </span>
+          </button>
+          <span
+            aria-hidden
+            className="mx-3 h-8 w-px shrink-0 bg-border-subtle"
+          />
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-controls="fmap-filter-panel"
+            onClick={() => onExpandedChange(!expanded)}
+            className="focus-ring flex min-w-0 flex-1 flex-col items-start rounded-[var(--fg-radius-sm)] py-1 text-left"
+          >
+            <span className="text-meta text-text-tertiary">
+              {t("filters.whenPill")}
+            </span>
+            <span className="w-full truncate font-mono text-body-sm font-semibold! text-text-primary tabular-nums">
+              {whenLabel}
+            </span>
+          </button>
+          <Button
+            type="button"
+            size="icon"
+            aria-label={t("filters.search")}
+            disabled={searchDisabled}
+            onClick={onSearch}
+            className="ml-2 shrink-0 rounded-full"
+          >
+            <Search />
+          </Button>
+        </div>
+
+        <div
+          role="group"
+          aria-label={t("filters.role")}
+          className="-mx-4 flex w-[calc(100%+2rem)] gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:w-auto md:px-0 [&::-webkit-scrollbar]:hidden"
+        >
+          {FMAP_PROVIDER_ROLES.map((role) => {
+            const active = value.role === role;
+            return (
+              <button
+                key={role}
+                type="button"
+                data-interactive="true"
+                aria-pressed={active}
+                onClick={() => onChange({ ...value, role, category: "" })}
+                className={cn(
+                  "focus-ring shrink-0 rounded-full border px-3.5 py-2 text-body-sm whitespace-nowrap transition-colors duration-[var(--fg-dur-150)]",
+                  active
+                    ? "border-brand-primary bg-brand-primary font-semibold! text-text-on-brand"
+                    : "border-border-default bg-bg-surface text-text-primary hover:border-border-strong",
+                )}
+              >
+                {roleT(role)}
+              </button>
+            );
+          })}
+        </div>
+
+        <Button
           type="button"
+          variant="outline"
           aria-expanded={expanded}
+          aria-controls="fmap-filter-panel"
           onClick={() => onExpandedChange(!expanded)}
-          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[var(--fg-radius-md)] border border-border-default px-3 py-2.5 text-left text-body-sm text-text-primary"
+          className="ml-auto shrink-0 max-md:hidden"
         >
-          <SlidersHorizontal className="size-4 shrink-0" />
-          <span className="truncate">
-            {t("filters.summary", {
-              date: value.date
-                ? formatDate(`${value.date}T00:00:00.000Z`)
-                : "—",
-              start: value.start,
-              end: value.end,
-              role: roleT(value.role),
-            })}
-          </span>
-          <ChevronDown
-            className={cn(
-              "ml-auto size-4 shrink-0 transition-transform",
-              expanded && "rotate-180",
-            )}
-          />
-        </button>
-        <Button
-          type="button"
-          size="icon-sm"
-          aria-label={t("filters.search")}
-          disabled={searchDisabled}
-          onClick={onSearch}
-        >
-          <Search />
-        </Button>
-      </div>
-
-      <div
-        className={cn(
-          expanded ? "mt-3 grid" : "hidden",
-          "grid-cols-1 gap-3 sm:mt-0 sm:grid sm:grid-cols-2 lg:grid-cols-12 lg:items-end",
-        )}
-      >
-        <p className={sectionTitle}>{t("filters.areaTitle")}</p>
-        <div className="lg:col-span-4">
-          <NativeSelect
-            label={t("filters.province")}
-            value={value.provinceId}
-            options={[
-              { value: "", label: t("filters.chooseProvince") },
-              ...provinces.map((province) => ({
-                value: province.id,
-                label: province.name,
-              })),
-            ]}
-            onChange={(provinceId) =>
-              onChange({ ...value, provinceId, wardId: "" })
-            }
-          />
-        </div>
-        <div className="lg:col-span-4">
-          <NativeSelect
-            label={t("filters.ward")}
-            value={value.wardId}
-            disabled={!value.provinceId || wardOptions.length === 0}
-            options={[
-              {
-                value: "",
-                label: !value.provinceId
-                  ? t("filters.wardNeedsProvince")
-                  : wardCounts && wardOptions.length === 0
-                    ? t("filters.noWardsWithProviders")
-                    : t("filters.allWards"),
-              },
-              ...wardOptions.map((ward) => ({
-                value: ward.id,
-                label: t("filters.wardOption", {
-                  name: ward.name,
-                  count: wardCounts?.get(ward.id) ?? 0,
-                }),
-              })),
-            ]}
-            onChange={(wardId) => onChange({ ...value, wardId })}
-          />
-        </div>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onUseLocation}
-          className="h-[46px] sm:col-span-2 lg:col-span-4"
-        >
-          <LocateFixed />
-          {t("filters.myLocation")}
-        </Button>
-
-        <div className="my-1 h-px bg-border-subtle sm:col-span-2 lg:col-span-12" />
-
-        <p className={sectionTitle}>{t("filters.whenTitle")}</p>
-        <div className="sm:col-span-2 lg:col-span-3">
-          <DateField
-            label={t("filters.date")}
-            min={today}
-            value={value.date}
-            onChange={(date) => onChange({ ...value, date })}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:col-span-2 lg:col-span-3">
-          <NativeSelect
-            label={t("filters.start")}
-            value={value.start}
-            options={TIME_OPTIONS}
-            onChange={(start) => onChange({ ...value, start })}
-          />
-          <NativeSelect
-            label={t("filters.end")}
-            value={value.end}
-            options={TIME_OPTIONS}
-            onChange={(end) => onChange({ ...value, end })}
-          />
-        </div>
-        <div className="lg:col-span-2">
-          <NativeSelect
-            label={t("filters.role")}
-            value={value.role}
-            options={FMAP_PROVIDER_ROLES.map((role) => ({
-              value: role,
-              label: roleT(role),
-            }))}
-            onChange={(role) =>
-              onChange({
-                ...value,
-                role: role as FmapFilterValue["role"],
-                category: "",
-              })
-            }
-          />
-        </div>
-        <div className="lg:col-span-2">
-          <NativeSelect
-            label={t("filters.category")}
-            value={value.category}
-            options={[
-              { value: "", label: t("filters.allCategories") },
-              ...categoryOptions.map((category) => ({
-                value: category,
-                label: categoryT(category),
-              })),
-            ]}
-            onChange={(category) =>
-              onChange({
-                ...value,
-                category: category as FmapFilterValue["category"],
-              })
-            }
-          />
-        </div>
-        <Button
-          type="button"
-          className="h-[46px] sm:col-span-2 lg:col-span-2"
-          disabled={searchDisabled}
-          onClick={onSearch}
-        >
-          <Search />
-          {isLoading ? t("filters.searching") : t("filters.search")}
+          <SlidersHorizontal />
+          {t("filters.more")}
         </Button>
       </div>
 
       {invalidReason ? (
-        <p role="alert" className="mt-2 text-body-sm text-danger">
+        <p
+          role="alert"
+          className="border-b border-border-subtle bg-danger-bg px-4 py-2 text-body-sm text-danger md:px-6"
+        >
           {invalidReason}
         </p>
-      ) : (
-        <p className="mt-2 hidden text-body-sm text-text-tertiary sm:block">
-          {t("filters.mapHint")}
-        </p>
-      )}
+      ) : null}
+
+      {expanded ? (
+        <div
+          id="fmap-filter-panel"
+          className="absolute inset-x-3 top-full mt-2 max-h-[calc(100dvh-180px)] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card p-4 shadow-[var(--shadow-lg)] animate-page-in md:left-6 md:right-auto md:w-[min(960px,calc(100%-3rem))] md:p-5"
+        >
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+            <p className={sectionTitle}>{t("filters.areaTitle")}</p>
+            <div className="lg:col-span-4">
+              <NativeSelect
+                label={t("filters.province")}
+                value={value.provinceId}
+                options={[
+                  { value: "", label: t("filters.chooseProvince") },
+                  ...provinces.map((province) => ({
+                    value: province.id,
+                    label: province.name,
+                  })),
+                ]}
+                onChange={(provinceId) =>
+                  onChange({ ...value, provinceId, wardId: "" })
+                }
+              />
+            </div>
+            <div className="lg:col-span-4">
+              <NativeSelect
+                label={t("filters.ward")}
+                value={value.wardId}
+                disabled={!value.provinceId || wardOptions.length === 0}
+                options={[
+                  {
+                    value: "",
+                    label: !value.provinceId
+                      ? t("filters.wardNeedsProvince")
+                      : wardCounts && wardOptions.length === 0
+                        ? t("filters.noWardsWithProviders")
+                        : t("filters.allWards"),
+                  },
+                  ...wardOptions.map((ward) => ({
+                    value: ward.id,
+                    label: t("filters.wardOption", {
+                      name: ward.name,
+                      count: wardCounts?.get(ward.id) ?? 0,
+                    }),
+                  })),
+                ]}
+                onChange={(wardId) => onChange({ ...value, wardId })}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onUseLocation}
+              className="h-[46px] sm:col-span-2 lg:col-span-4"
+            >
+              <LocateFixed />
+              {t("filters.myLocation")}
+            </Button>
+
+            <div className="my-1 h-px bg-border-subtle sm:col-span-2 lg:col-span-12" />
+
+            <p className={sectionTitle}>{t("filters.whenTitle")}</p>
+            <div className="sm:col-span-2 lg:col-span-4">
+              <DateField
+                label={t("filters.date")}
+                min={today}
+                value={value.date}
+                onChange={(date) => onChange({ ...value, date })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:col-span-2 lg:col-span-4">
+              <NativeSelect
+                label={t("filters.start")}
+                value={value.start}
+                options={TIME_OPTIONS}
+                onChange={(start) => onChange({ ...value, start })}
+              />
+              <NativeSelect
+                label={t("filters.end")}
+                value={value.end}
+                options={TIME_OPTIONS}
+                onChange={(end) => onChange({ ...value, end })}
+              />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-4">
+              <NativeSelect
+                label={t("filters.category")}
+                value={value.category}
+                options={[
+                  { value: "", label: t("filters.allCategories") },
+                  ...categoryOptions.map((category) => ({
+                    value: category,
+                    label: categoryT(category),
+                  })),
+                ]}
+                onChange={(category) =>
+                  onChange({
+                    ...value,
+                    category: category as FmapFilterValue["category"],
+                  })
+                }
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-4">
+            <p className="text-meta text-text-tertiary">
+              {t("filters.mapHint")}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => onExpandedChange(false)}
+              >
+                {t("filters.close")}
+              </Button>
+              <Button
+                type="button"
+                disabled={searchDisabled}
+                onClick={onSearch}
+              >
+                <Search />
+                {isLoading ? t("filters.searching") : t("filters.search")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

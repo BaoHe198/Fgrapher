@@ -45,6 +45,8 @@ export interface FmapMarker {
   username: string | null;
   displayName: string;
   avatar: string | null;
+  /** Newest approved portfolio photo - the marker is a photo frame. */
+  thumbnailUrl: string | null;
   role: FmapSearchInput["roles"][number];
   categories: string[];
   startingPrice: number | null;
@@ -60,6 +62,7 @@ export interface FmapProviderPreview {
   displayName: string;
   avatar: string | null;
   coverUrl: string | null;
+  photoUrls: string[];
   role: FmapMarker["role"];
   /** What they can be hired for, beyond what the role is called. */
   serviceKinds: ServiceKind[];
@@ -215,12 +218,87 @@ function fmapEligibleWhere(
   };
 }
 
+/**
+ * Which of `providerIds` can take a shoot on `dateKey` ("yyyy-MM-dd")
+ * between `start` and `end` ("HH:mm"): inside their weekly hours, not in a
+ * blocked range, clear of PENDING/CONFIRMED bookings, and past the minimum
+ * notice. Without a time range, a provider counts as available if any
+ * one-hour slot between 05:00 and 21:00 passes those checks. Shared by
+ * Bản đồ F and the /browse date filter so the two can never disagree.
+ */
+export async function providersAvailableForInterval(
+  providerIds: string[],
+  dateKey: string,
+  start?: string,
+  end?: string,
+): Promise<Set<string>> {
+  const ids = [...new Set(providerIds)];
+  if (ids.length === 0) return new Set();
+  const date = new Date(`${dateKey}T00:00:00.000Z`);
+  const [weeklyWindows, blockedDates, bookings] = await Promise.all([
+    weeklyWindowsForProviders(ids, date.getUTCDay()),
+    blocksForProviders(ids, date),
+    db.booking.findMany({
+      where: {
+        providerId: { in: ids },
+        date,
+        status: { in: BLOCKING_BOOKING_STATUSES },
+      },
+      select: {
+        providerId: true,
+        startTime: true,
+        endTime: true,
+        service: { select: { duration: true } },
+      },
+    }),
+  ]);
+
+  const weeklyByProvider = new Map<string, TimeRange[]>();
+  for (const window of weeklyWindows) {
+    const values = weeklyByProvider.get(window.userId) ?? [];
+    values.push(window);
+    weeklyByProvider.set(window.userId, values);
+  }
+  const blockByProvider = new Map(
+    blockedDates.map((block) => [block.userId, block]),
+  );
+  const bookingsByProvider = new Map<string, BlockingBooking[]>();
+  for (const booking of bookings) {
+    const values = bookingsByProvider.get(booking.providerId) ?? [];
+    values.push(booking);
+    bookingsByProvider.set(booking.providerId, values);
+  }
+
+  const intervals: [string, string][] =
+    start && end
+      ? [[start, end]]
+      : Array.from({ length: 16 }, (_, i) => [
+          `${String(5 + i).padStart(2, "0")}:00`,
+          `${String(6 + i).padStart(2, "0")}:00`,
+        ]);
+
+  const now = new Date();
+  return new Set(
+    ids.filter((id) =>
+      intervals.some(([from, to]) =>
+        isProviderAvailableForInterval({
+          date: dateKey,
+          start: from,
+          end: to,
+          weeklyWindows: weeklyByProvider.get(id) ?? [],
+          blockedDate: blockByProvider.get(id),
+          bookings: bookingsByProvider.get(id) ?? [],
+          now,
+        }),
+      ),
+    ),
+  );
+}
+
 export async function findAvailableProvidersOnMap(
   input: FmapSearchInput,
   viewerUserId?: string,
 ): Promise<{ markers: FmapMarker[]; truncated: boolean }> {
-  const date = new Date(`${input.date}T00:00:00.000Z`);
-  const dayOfWeek = date.getUTCDay();
   const lngMargin =
     BLUR_MARGIN_DEG /
     Math.max(
@@ -267,6 +345,12 @@ export async function findAvailableProvidersOnMap(
           avatar: true,
         },
       },
+      media: {
+        where: { moderationStatus: "APPROVED", deletedAt: null, type: "IMAGE" },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { url: true },
+      },
     },
     orderBy: { id: "asc" },
     take: MAX_SPATIAL_CANDIDATES + 1,
@@ -298,54 +382,15 @@ export async function findAvailableProvidersOnMap(
   const boundedCandidates = candidates.slice(0, MAX_SPATIAL_CANDIDATES);
   if (boundedCandidates.length === 0) return { markers: [], truncated: false };
 
-  const providerIds = [
-    ...new Set(boundedCandidates.map((profile) => profile.userId)),
-  ];
-  const [weeklyWindows, blockedDates, bookings] = await Promise.all([
-    weeklyWindowsForProviders(providerIds, dayOfWeek),
-    blocksForProviders(providerIds, date),
-    db.booking.findMany({
-      where: {
-        providerId: { in: providerIds },
-        date,
-        status: { in: BLOCKING_BOOKING_STATUSES },
-      },
-      select: {
-        providerId: true,
-        startTime: true,
-        endTime: true,
-        service: { select: { duration: true } },
-      },
-    }),
-  ]);
-
-  const weeklyByProvider = new Map<string, TimeRange[]>();
-  for (const window of weeklyWindows) {
-    const values = weeklyByProvider.get(window.userId) ?? [];
-    values.push(window);
-    weeklyByProvider.set(window.userId, values);
-  }
-  const blockByProvider = new Map(
-    blockedDates.map((block) => [block.userId, block]),
+  const availableIds = await providersAvailableForInterval(
+    boundedCandidates.map((profile) => profile.userId),
+    input.date,
+    input.start,
+    input.end,
   );
-  const bookingsByProvider = new Map<string, BlockingBooking[]>();
-  for (const booking of bookings) {
-    const values = bookingsByProvider.get(booking.providerId) ?? [];
-    values.push(booking);
-    bookingsByProvider.set(booking.providerId, values);
-  }
 
   const available = boundedCandidates
-    .filter((profile) =>
-      isProviderAvailableForInterval({
-        date: input.date,
-        start: input.start,
-        end: input.end,
-        weeklyWindows: weeklyByProvider.get(profile.userId) ?? [],
-        blockedDate: blockByProvider.get(profile.userId),
-        bookings: bookingsByProvider.get(profile.userId) ?? [],
-      }),
-    )
+    .filter((profile) => availableIds.has(profile.userId))
     .sort(
       (a, b) =>
         distanceSquaredFromCentre(
@@ -374,6 +419,7 @@ export async function findAvailableProvidersOnMap(
         (profile.displayName ?? profile.user.name ?? fullName) ||
         "Fgrapher provider",
       avatar: profile.user.avatar,
+      thumbnailUrl: profile.media[0]?.url ?? null,
       role: profile.role as FmapMarker["role"],
       categories: profile.categories,
       startingPrice: profile.priceMin,
@@ -414,10 +460,13 @@ export async function getFmapProviderPreview(
       currency: true,
       province: { select: { name: true } },
       ward: { select: { name: true } },
+      // The three newest approved photos: the preview shows a strip of
+      // frames, because customers judge an artist by several photos, not
+      // one cover (redesign 09/2026, audit §06).
       media: {
-        where: { moderationStatus: "APPROVED", deletedAt: null },
-        orderBy: { order: "asc" },
-        take: 1,
+        where: { moderationStatus: "APPROVED", deletedAt: null, type: "IMAGE" },
+        orderBy: { createdAt: "desc" },
+        take: 3,
         select: { url: true },
       },
       services: {
@@ -479,6 +528,7 @@ export async function getFmapProviderPreview(
       (fullName || "Fgrapher provider"),
     avatar: profile.user.avatar,
     coverUrl: profile.media[0]?.url ?? null,
+    photoUrls: profile.media.map((media) => media.url),
     role: profile.role as FmapMarker["role"],
     categories: profile.categories,
     startingPrice: profile.priceMin,

@@ -56,6 +56,7 @@ export function MobileFilterSheet({
             roleCounts={roleCounts}
             categoryCounts={categoryCounts}
             marketplaceEnabled={marketplaceEnabled}
+            inSheet
           />
         </div>
         {/* Filters apply as they are ticked, but nothing said so and the

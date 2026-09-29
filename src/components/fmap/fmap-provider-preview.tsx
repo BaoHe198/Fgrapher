@@ -4,12 +4,12 @@ import { BadgeCheck, CalendarCheck, MapPin, Star, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { serviceKindsForRole } from "@/lib/constants/service-matrix";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { FgImage } from "@/components/ui/fg-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatVND } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -45,7 +45,13 @@ export function FmapProviderPreviewCard({
   }, [onClose]);
 
   return (
-    <aside className="absolute right-3 bottom-3 left-3 z-10 max-h-[70%] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-default bg-bg-surface shadow-[var(--shadow-xl)] sm:top-3 sm:right-3 sm:bottom-auto sm:left-auto sm:max-h-[calc(100%-1.5rem)] sm:w-[370px]">
+    // Phones: a bottom sheet over the map (rounded top, handle). Larger
+    // screens: a floating card on the right. Enters with fade + rise 6px.
+    <aside className="absolute inset-x-0 bottom-0 z-20 max-h-[75%] animate-page-in overflow-y-auto rounded-t-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card pt-2 shadow-[var(--shadow-lg)] sm:top-3 sm:right-3 sm:bottom-auto sm:left-auto sm:max-h-[calc(100%-1.5rem)] sm:w-[370px] sm:rounded-[var(--fg-radius-xl)] sm:pt-0">
+      <span
+        aria-hidden
+        className="mx-auto mb-1 block h-1 w-10 rounded-full bg-border-strong sm:hidden"
+      />
       <Button
         type="button"
         variant="secondary"
@@ -81,15 +87,23 @@ export function FmapProviderPreviewCard({
         </div>
       ) : (
         <>
-          {preview.coverUrl ? (
-            <div className="relative hidden h-36 w-full bg-bg-sunken sm:block">
-              <Image
-                src={preview.coverUrl}
-                alt=""
-                fill
-                sizes="370px"
-                className="object-cover"
-              />
+          {/* Three frames from their newest work, not one cover: a
+              customer judges an artist across several photos (audit §06).
+              Shown on phones too, as a short strip. */}
+          {preview.photoUrls.length > 0 ? (
+            <div className="grid grid-cols-3 gap-1 p-1 pb-0">
+              {preview.photoUrls.slice(0, 3).map((url, index) => (
+                <FgImage
+                  key={url}
+                  src={url}
+                  alt=""
+                  ratio="1/1"
+                  rounded="sm"
+                  revealIndex={index}
+                  sizes="124px"
+                  className="max-sm:aspect-[4/3]"
+                />
+              ))}
             </div>
           ) : null}
           <div className="p-4">
@@ -101,7 +115,7 @@ export function FmapProviderPreviewCard({
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <h2 className="flex min-w-0 items-center gap-1.5 text-title-md text-text-primary">
+                <h2 className="flex min-w-0 items-center gap-1.5 text-heading-sm text-text-primary">
                   <span className="truncate">{preview.displayName}</span>
                   <BadgeCheck
                     className="size-4 shrink-0 text-success"
