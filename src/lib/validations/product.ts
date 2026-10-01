@@ -132,7 +132,7 @@ export function getProductSchema(t: (key: string) => string) {
         .min(0)
         .max(MAX_VND_AMOUNT, t("amountTooHigh"))
         .optional(),
-      condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR"]),
+      condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR", "AVERAGE"]),
       stock: z.number().int().min(0),
       isActive: z.boolean(),
       images: z.array(

@@ -111,6 +111,7 @@ model User {
   orders                   Order[]
   shopOrders               Order[]                   @relation("shopOrders")
   cartItems                CartItem[]
+  stockAlerts              StockAlert[]
   following                Follow[]                  @relation("follower")
   followers                Follow[]                  @relation("following")
   notifications            Notification[]
@@ -1424,6 +1425,9 @@ enum ProductCondition {
   LIKE_NEW
   GOOD
   FAIR
+  // "Trung bình" (wave 2 Chợ F): visible wear, works as described. Always
+  // shown as the seller's own statement - Fgrapher inspects nothing.
+  AVERAGE
 }
 
 model Product {
@@ -1444,11 +1448,12 @@ model Product {
   updatedAt     DateTime         @updatedAt
   deletedAt     DateTime?
 
-  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images     ProductImage[]
-  orderItems OrderItem[]
-  cartItems  CartItem[]
-  reviews    ProductReview[]
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images      ProductImage[]
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+  reviews     ProductReview[]
+  stockAlerts StockAlert[]
 
   @@index([userId, isActive])
   @@index([category])
@@ -1583,6 +1588,27 @@ model CartItem {
   @@unique([userId, productId, type, rentalStart, rentalEnd])
   @@index([productId])
   @@map("cart_items")
+}
+
+/// "Báo cho tôi khi có hàng" (wave 2 Chợ F): a customer asks to be told
+/// when an out-of-stock listing has stock again. One row per (user,
+/// product); notifiedAt is set once the notice goes out, and asking again
+/// later resets it. Personal data (what someone wants to buy): included in
+/// exportUserData() and removed by processDeletion().
+model StockAlert {
+  id         String    @id @default(cuid())
+  userId     String
+  productId  String
+  notifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId, notifiedAt])
+  @@map("stock_alerts")
 }
 
 // ============================================================================
@@ -1948,6 +1974,8 @@ enum NotificationType {
   REQUEST_NO_OFFERS_48H
   ROLE_CHANGE_APPROVED
   ROLE_CHANGE_REJECTED
+  // Wave 2 Chợ F — a product someone asked about is in stock again.
+  PRODUCT_BACK_IN_STOCK
 }
 
 model Notification {

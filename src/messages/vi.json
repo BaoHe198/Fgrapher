@@ -491,7 +491,8 @@
       "new": "Mới",
       "likeNew": "Như mới",
       "good": "Tốt",
-      "fair": "Khá"
+      "fair": "Khá",
+      "average": "Trung bình"
     },
     "socialRow": {
       "orDivider": "hoặc",
@@ -3327,6 +3328,10 @@
           "title": "Ngày mai đến hạn trả đồ thuê",
           "message": "Đơn #{orderNumber} đến hạn trả vào ngày mai. Hãy liên hệ cửa hàng để hẹn lịch trả."
         }
+      },
+      "stock": {
+        "title": "Có hàng trở lại",
+        "message": "{product} đã có hàng trở lại trên Chợ F."
       }
     }
   },
@@ -4417,7 +4422,8 @@
         "provinceAll": "Mọi tỉnh/thành",
         "reset": "Đặt lại bộ lọc",
         "searchLabel": "Tìm thiết bị",
-        "searchPlaceholder": "Tên thiết bị, hãng..."
+        "searchPlaceholder": "Tên thiết bị, hãng...",
+        "conditionAverage": "Trung bình"
       },
       "v2": {
         "eyebrow": "Chợ F · thiết bị",
@@ -4494,8 +4500,13 @@
         "noPhoto": "Chưa có ảnh",
         "askForPhotos": "Xin ảnh thật",
         "openPhoto": "Xem lớn góc {frame}",
-        "angle": "Góc {frame}"
-      }
+        "angle": "Góc {frame}",
+        "alertAsk": "Báo cho tôi khi có hàng",
+        "alertOn": "Sẽ báo khi có hàng · Bỏ theo dõi",
+        "alertOnToast": "Bạn sẽ nhận thông báo khi có hàng trở lại",
+        "alertOffToast": "Đã bỏ theo dõi sản phẩm này"
+      },
+      "conditionAverage": "Trung bình"
     },
     "community": {
       "heading": "Cộng đồng F",

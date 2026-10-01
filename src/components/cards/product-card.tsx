@@ -35,6 +35,7 @@ export async function ProductCard({ product }: ProductCardProps) {
     LIKE_NEW: tCondition("likeNew"),
     GOOD: tCondition("good"),
     FAIR: tCondition("fair"),
+    AVERAGE: tCondition("average"),
   };
   const shopName =
     product.user.firstName ?? product.user.name ?? t("shopFallback");

@@ -251,6 +251,13 @@ export const NOTIFICATION_POLICY: Record<
   ORDER_SHIPPED: { feature: "marketplace", inApp: true, email: "none" },
   ORDER_DELIVERED: { feature: "marketplace", inApp: true, email: "none" },
   ORDER_CANCELLED: { feature: "marketplace", inApp: true, email: "none" },
+  // In-app only: the customer asked for it on the listing, and the bell is
+  // where they will look. No email preference to manage for a one-off.
+  PRODUCT_BACK_IN_STOCK: {
+    feature: "marketplace",
+    inApp: true,
+    email: "none",
+  },
 };
 
 export type FeatureGate = (feature: NotificationFeature) => boolean;

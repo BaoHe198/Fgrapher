@@ -102,6 +102,7 @@ export async function exportUserData(userId: string) {
     reviewsReceived,
     consentRecords,
     orders,
+    stockAlerts,
   ] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
@@ -133,6 +134,16 @@ export async function exportUserData(userId: string) {
       orderBy: { createdAt: "asc" },
     }),
     db.order.findMany({ where: { customerId: userId } }),
+    // "Báo cho tôi khi có hàng" requests: what this person wanted to buy.
+    db.stockAlert.findMany({
+      where: { userId },
+      select: {
+        productId: true,
+        notifiedAt: true,
+        createdAt: true,
+        product: { select: { name: true } },
+      },
+    }),
   ]);
 
   return {
@@ -146,6 +157,7 @@ export async function exportUserData(userId: string) {
     reviewsReceived,
     consentHistory: consentRecords,
     orders,
+    stockAlerts,
   };
 }
 
@@ -182,6 +194,8 @@ export async function processDeletion(userId: string, requestId?: string) {
       where: { OR: [{ senderId: userId }, { receiverId: userId }] },
     }),
     db.conversationParticipant.deleteMany({ where: { userId } }),
+    // Back-in-stock requests say what this person wanted to buy.
+    db.stockAlert.deleteMany({ where: { userId } }),
     // ProfileMedia + Service cascade-delete from their parent Profile —
     // see those models' onDelete: Cascade in the schema.
     db.profile.deleteMany({ where: { userId } }),

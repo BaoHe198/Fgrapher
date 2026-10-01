@@ -28,6 +28,7 @@ export function notificationHref(notification: NotificationLike): string {
     orderId?: string;
     postId?: string;
     requestId?: string;
+    productId?: string;
     href?: string;
   } | null;
   if (data?.href?.startsWith("/dashboard/")) return data.href;
@@ -36,6 +37,8 @@ export function notificationHref(notification: NotificationLike): string {
   // A like or a comment is only useful if it takes you to the post it is
   // about.
   if (data?.postId) return `/community/${data.postId}`;
+  // "Có hàng trở lại" opens the listing itself.
+  if (data?.productId) return `/shop/${data.productId}`;
   if (data?.requestId) {
     if (CUSTOMER_REQUEST_TYPES.has(notification.type)) {
       return `/dashboard/requests/${data.requestId}`;

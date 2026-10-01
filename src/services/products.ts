@@ -2,6 +2,7 @@ import type { ProductType } from "@prisma/client";
 
 import { verifyPortfolioUpload } from "@/lib/media/cloudinary";
 import { db } from "@/lib/db";
+import { notifyBackInStock } from "@/services/stock-alerts";
 import type { ProductInput } from "@/lib/validations/product";
 import { runProductImageModeration } from "@/services/moderation";
 
@@ -111,7 +112,7 @@ export async function updateProduct(
     });
   }
 
-  return db.$transaction(async (tx) => {
+  const updated = await db.$transaction(async (tx) => {
     await tx.productImage.deleteMany({ where: { productId: id } });
     return tx.product.update({
       where: { id },
@@ -133,6 +134,17 @@ export async function updateProduct(
       include: { images: true },
     });
   });
+
+  // Restocked from zero (or switched back on with stock): answer the
+  // "Báo cho tôi khi có hàng" requests on this listing.
+  if (
+    updated.stock > 0 &&
+    updated.isActive &&
+    (existing.stock === 0 || !existing.isActive)
+  ) {
+    await notifyBackInStock(id).catch(() => {});
+  }
+  return updated;
 }
 
 export async function deleteProduct(id: string, userId: string) {

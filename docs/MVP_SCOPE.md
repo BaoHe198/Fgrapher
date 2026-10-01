@@ -61,7 +61,10 @@ migration phá huỷ. Server phải chặn tạo mới và bề mặt công khai
 
 Phần giữ lại trong code/schema:
 
-- `Product`, `ProductImage`, `CartItem`, `Order`, `OrderItem`;
+- `Product`, `ProductImage`, `CartItem`, `Order`, `OrderItem`, `StockAlert`
+  ("Báo cho tôi khi có hàng", thêm 01/10/2026 — có trong xuất dữ liệu và bị
+  xoá khi xoá tài khoản); tình trạng sản phẩm có 5 mức, mức thứ năm là
+  `AVERAGE` ("Trung bình"), luôn hiển thị là do người bán tự khai;
 - service/API sản phẩm, cart, order;
 - trang `/shop`, `/cart`, `/checkout`;
 - dashboard listings/orders;

@@ -22,6 +22,7 @@ const CONDITIONS = [
   ["LIKE_NEW", "conditionLikeNew"],
   ["GOOD", "conditionGood"],
   ["FAIR", "conditionFair"],
+  ["AVERAGE", "conditionAverage"],
 ] as const;
 
 // Chợ F's sticky bar (wave 2): Tất cả | Mua | Thuê, quick chips for

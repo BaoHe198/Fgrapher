@@ -491,7 +491,8 @@
       "new": "New",
       "likeNew": "Like new",
       "good": "Good",
-      "fair": "Fair"
+      "fair": "Fair",
+      "average": "Average"
     },
     "socialRow": {
       "orDivider": "or",
@@ -3327,6 +3328,10 @@
           "title": "Rental due back tomorrow",
           "message": "Order #{orderNumber} is due back tomorrow. Contact the shop to arrange the return."
         }
+      },
+      "stock": {
+        "title": "Back in stock",
+        "message": "{product} is back in stock on Fmarket."
       }
     }
   },
@@ -4417,7 +4422,8 @@
         "provinceAll": "All provinces",
         "reset": "Reset filters",
         "searchLabel": "Search gear",
-        "searchPlaceholder": "Name, brand..."
+        "searchPlaceholder": "Name, brand...",
+        "conditionAverage": "Average"
       },
       "v2": {
         "eyebrow": "Fmarket · equipment",
@@ -4494,8 +4500,13 @@
         "noPhoto": "No photo yet",
         "askForPhotos": "Ask for real photos",
         "openPhoto": "Enlarge angle {frame}",
-        "angle": "Angle {frame}"
-      }
+        "angle": "Angle {frame}",
+        "alertAsk": "Tell me when it's back",
+        "alertOn": "We'll tell you · Stop following",
+        "alertOnToast": "You'll be notified when it's back in stock",
+        "alertOffToast": "You've stopped following this product"
+      },
+      "conditionAverage": "Average"
     },
     "community": {
       "heading": "Community",

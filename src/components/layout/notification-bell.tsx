@@ -55,6 +55,7 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   ORDER_SHIPPED: Package,
   ORDER_DELIVERED: Package,
   ORDER_CANCELLED: Package,
+  PRODUCT_BACK_IN_STOCK: Package,
   REVIEW_RESPONSE: Star,
   MEDIA_APPROVED: ImageIcon,
   MEDIA_REJECTED: ImageIcon,

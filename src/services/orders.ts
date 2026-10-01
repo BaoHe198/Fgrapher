@@ -20,6 +20,7 @@ import {
   createOrderCheckoutSession,
   refundPayment,
 } from "@/lib/payments/stripe";
+import { notifyBackInStock } from "@/services/stock-alerts";
 import { notify } from "@/services/notification";
 import { pendingReviewsForOrder } from "@/services/product-reviews";
 
@@ -660,6 +661,8 @@ export async function updateOrderStatus({
           where: { id: item.productId },
           data: { stock: { increment: item.quantity } },
         });
+        // Back from zero: tell whoever asked on the listing.
+        await notifyBackInStock(item.productId).catch(() => {});
       }
     }
     if (order.stripePaymentId) {

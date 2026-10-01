@@ -15,6 +15,7 @@ import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
 import { normalizeProductCategory } from "@/lib/validations/product";
 import { getProductDetail } from "@/services/marketplace";
+import { hasStockAlert } from "@/services/stock-alerts";
 import {
   getProductRating,
   listProductReviews,
@@ -245,6 +246,12 @@ export default async function ProductDetailPage({
             shopId={product.user.id}
             shopLocation={product.user.location}
             isOwner={isOwner}
+            viewerId={session?.user?.id ?? null}
+            initialAlert={
+              session?.user && product.stock === 0
+                ? await hasStockAlert(session.user.id, product.id)
+                : false
+            }
           />
         </div>
       </div>

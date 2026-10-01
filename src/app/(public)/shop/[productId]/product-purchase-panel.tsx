@@ -29,10 +29,17 @@ const CONDITION_KEY: Record<ProductCondition, string> = {
   LIKE_NEW: "conditionLikeNew",
   GOOD: "conditionGood",
   FAIR: "conditionFair",
+  AVERAGE: "conditionAverage",
 };
 
-// The four levels a seller can state, worst last.
-const CONDITION_SCALE: ProductCondition[] = ["FAIR", "GOOD", "LIKE_NEW", "NEW"];
+// The five levels a seller can state, from worst to best.
+const CONDITION_SCALE: ProductCondition[] = [
+  "AVERAGE",
+  "FAIR",
+  "GOOD",
+  "LIKE_NEW",
+  "NEW",
+];
 
 function addDays(key: string, days: number) {
   const date = new Date(`${key}T00:00:00.000Z`);
@@ -58,11 +65,17 @@ export function ProductPurchasePanel({
   shopId,
   shopLocation,
   isOwner,
+  viewerId,
+  initialAlert,
 }: {
   product: Product;
   shopId: string;
   shopLocation: string | null;
   isOwner: boolean;
+  /** null for a signed-out visitor. */
+  viewerId: string | null;
+  /** Whether this viewer already asked to hear when it is back. */
+  initialAlert: boolean;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"SALE" | "RENT">(
@@ -71,6 +84,25 @@ export function ProductPurchasePanel({
   const t = useTranslations("publicPages.productDetail");
   const categoryLabel = product.categoryLabel;
   const [quantity, setQuantity] = useState(1);
+  const [alertOn, setAlertOn] = useState(initialAlert);
+  const [alertBusy, setAlertBusy] = useState(false);
+
+  const toggleAlert = async () => {
+    setAlertBusy(true);
+    const res = await fetch(`/api/products/${product.id}/stock-alert`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ on: !alertOn }),
+    });
+    setAlertBusy(false);
+    if (res.ok) {
+      setAlertOn(!alertOn);
+      toast.add({
+        title: alertOn ? t("v2.alertOffToast") : t("v2.alertOnToast"),
+        type: "success",
+      });
+    }
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -169,7 +201,7 @@ export function ProductPurchasePanel({
             {t("v2.sellerStated")}
           </span>
         </span>
-        <span aria-hidden className="grid grid-cols-4 gap-1">
+        <span aria-hidden className="grid grid-cols-5 gap-1">
           {CONDITION_SCALE.map((level, index) => (
             <span
               key={level}
@@ -238,6 +270,37 @@ export function ProductPurchasePanel({
               <p className="text-body-sm text-text-secondary">
                 {t("outOfStockHelp")}
               </p>
+              {/* "Báo cho tôi khi có hàng" (wave 2): one in-app notice when
+                  the listing has stock again. */}
+              {viewerId ? (
+                <Button
+                  variant={alertOn ? "outline" : "accent"}
+                  size="lg"
+                  className="w-full"
+                  disabled={alertBusy}
+                  aria-pressed={alertOn}
+                  onClick={toggleAlert}
+                >
+                  {alertBusy ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : null}
+                  {alertOn ? t("v2.alertOn") : t("v2.alertAsk")}
+                </Button>
+              ) : (
+                <Button
+                  variant="accent"
+                  size="lg"
+                  className="w-full"
+                  nativeButton={false}
+                  render={
+                    <Link
+                      href={`/login?callbackUrl=${encodeURIComponent(`/shop/${product.id}`)}`}
+                    />
+                  }
+                >
+                  {t("v2.alertAsk")}
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 size="lg"

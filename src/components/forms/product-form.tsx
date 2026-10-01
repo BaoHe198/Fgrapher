@@ -48,6 +48,7 @@ export function ProductForm({
     { value: "LIKE_NEW", label: tCondition("likeNew") },
     { value: "GOOD", label: tCondition("good") },
     { value: "FAIR", label: tCondition("fair") },
+    { value: "AVERAGE", label: tCondition("average") },
   ];
 
   const {

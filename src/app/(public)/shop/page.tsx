@@ -38,7 +38,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     params.type === "SALE" || params.type === "RENT" ? params.type : undefined;
   const category = params.category?.split(",").filter(Boolean);
   const condition = params.condition?.split(",").filter(Boolean) as
-    ("NEW" | "LIKE_NEW" | "GOOD" | "FAIR")[] | undefined;
+    ("NEW" | "LIKE_NEW" | "GOOD" | "FAIR" | "AVERAGE")[] | undefined;
   const sort =
     params.sort === "price_asc" || params.sort === "price_desc"
       ? params.sort

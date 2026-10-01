@@ -13,7 +13,7 @@ import { useSharedFilterParams } from "@/components/filters/filter-params-provid
 import { setOrDelete } from "@/lib/search/filter-params";
 import { PRODUCT_CATEGORIES } from "@/lib/validations/product";
 
-const CONDITIONS = ["NEW", "LIKE_NEW", "GOOD", "FAIR"] as const;
+const CONDITIONS = ["NEW", "LIKE_NEW", "GOOD", "FAIR", "AVERAGE"] as const;
 const SORT_VALUES = ["newest", "price_asc", "price_desc"] as const;
 
 const CONDITION_KEY: Record<(typeof CONDITIONS)[number], string> = {
@@ -21,6 +21,7 @@ const CONDITION_KEY: Record<(typeof CONDITIONS)[number], string> = {
   LIKE_NEW: "conditionLikeNew",
   GOOD: "conditionGood",
   FAIR: "conditionFair",
+  AVERAGE: "conditionAverage",
 };
 
 const SORT_KEY: Record<(typeof SORT_VALUES)[number], string> = {
