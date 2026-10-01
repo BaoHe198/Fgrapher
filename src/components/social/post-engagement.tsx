@@ -120,6 +120,17 @@ export function PostEngagement({
     }
   };
 
+  // Likes are counted for the author only (wave 2, option B): the feed is
+  // read for the photos, not ranked by a number anyone can see - and a
+  // public count invites fake accounts. Comments stay visible: they are an
+  // invitation to join in, not a score.
+  const isAuthor = Boolean(viewerId) && viewerId === postOwnerId;
+  const likeLabel = isAuthor
+    ? t("likesOwner", { count: likeCount })
+    : liked
+      ? t("liked")
+      : t("like");
+
   return (
     <div className={cn("flex flex-col gap-3", className)}>
       <div className="flex items-center gap-5 border-t border-border-subtle pt-3">
@@ -134,7 +145,7 @@ export function PostEngagement({
             )}
           >
             <Heart className={cn("size-4", liked && "fill-current")} />
-            {t("likes", { count: likeCount })}
+            {likeLabel}
           </button>
         ) : (
           <Link
@@ -142,7 +153,7 @@ export function PostEngagement({
             className="flex items-center gap-1.5 text-body-sm text-text-secondary hover:text-brand-primary"
           >
             <Heart className="size-4" />
-            {t("likes", { count: likeCount })}
+            {likeLabel}
           </Link>
         )}
         <button

@@ -357,7 +357,7 @@ export function ProfileInteractive({
         ) : null}
         {posts.length > 0 ? (
           <section id="posts" className={sectionClass}>
-            <PostsTab posts={posts} />
+            <PostsTab posts={posts} isOwnProfile={isOwnProfile} />
           </section>
         ) : null}
       </div>

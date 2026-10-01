@@ -3767,7 +3767,8 @@
       },
       "postsTab": {
         "empty": "Chưa có bài đăng nào",
-        "stats": "{likes} lượt thích · {comments} bình luận"
+        "stats": "{likes} lượt thích · {comments} bình luận",
+        "commentsOnly": "{comments} bình luận"
       },
       "facts": {
         "title": "Thông tin xác minh",
@@ -4609,7 +4610,10 @@
         "requests": "Yêu cầu mới",
         "askPrice": "Để nghệ sĩ báo giá",
         "allRequests": "Xem Đặt lịch F"
-      }
+      },
+      "like": "Thích",
+      "liked": "Đã thích",
+      "likesOwner": "{count} lượt thích · chỉ bạn thấy"
     },
     "requestsF": {
       "metaTitle": "Đặt lịch F — Đăng yêu cầu chụp, nhận đề xuất",

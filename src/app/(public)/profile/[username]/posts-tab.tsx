@@ -12,7 +12,14 @@ export interface ProfilePost {
   media: { id: string; url: string }[];
 }
 
-export function PostsTab({ posts }: { posts: ProfilePost[] }) {
+export function PostsTab({
+  posts,
+  isOwnProfile,
+}: {
+  posts: ProfilePost[];
+  /** Like counts are shown to the author only (wave 2, option B). */
+  isOwnProfile: boolean;
+}) {
   const t = useTranslations("publicPages.profile.postsTab");
 
   if (posts.length === 0) {
@@ -54,10 +61,12 @@ export function PostsTab({ posts }: { posts: ProfilePost[] }) {
             </div>
           ) : null}
           <span className="text-body-sm text-text-tertiary">
-            {t("stats", {
-              likes: post.likeCount,
-              comments: post.commentCount,
-            })}
+            {isOwnProfile
+              ? t("stats", {
+                  likes: post.likeCount,
+                  comments: post.commentCount,
+                })
+              : t("commentsOnly", { comments: post.commentCount })}
           </span>
         </div>
       ))}

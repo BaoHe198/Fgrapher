@@ -3767,7 +3767,8 @@
       },
       "postsTab": {
         "empty": "No posts yet",
-        "stats": "{likes} likes · {comments} comments"
+        "stats": "{likes} likes · {comments} comments",
+        "commentsOnly": "{comments, plural, one {# comment} other {# comments}}"
       },
       "facts": {
         "title": "Verification",
@@ -4609,7 +4610,10 @@
         "requests": "New requests",
         "askPrice": "Artist quotes",
         "allRequests": "Open FBooking"
-      }
+      },
+      "like": "Like",
+      "liked": "Liked",
+      "likesOwner": "{count, plural, one {# like} other {# likes}} · only you see this"
     },
     "requestsF": {
       "metaTitle": "FBooking — Post a shoot request, get proposals",
