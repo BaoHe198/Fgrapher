@@ -127,6 +127,8 @@ export function MasonryGrid({
       key={item.id}
       type="button"
       data-interactive="true"
+      // Lets a lightbox find the tile it should fly back to.
+      data-frame-index={index}
       onClick={() => onOpen?.(index)}
       aria-label={t("open", { frame: frameLabel(index) })}
       className={cn(

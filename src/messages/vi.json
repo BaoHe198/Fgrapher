@@ -3530,6 +3530,26 @@
         "heading": "Chưa có album dự án phù hợp",
         "body": "Thử bỏ bớt bộ lọc, hoặc xem danh sách nghệ sĩ.",
         "seeArtists": "Xem nghệ sĩ"
+      },
+      "v2": {
+        "subjectDefault": "Nghệ sĩ",
+        "subjectWithStyle": "{role} {style}",
+        "titleAt": "{subject} tại {place}",
+        "priceFrom": "Từ <strong>{price}</strong>",
+        "availableOn": "Còn lịch {date}",
+        "railAll": "Tất cả",
+        "railLabel": "Vai trò và phong cách",
+        "eyebrow": "Tìm kiếm F · {tab}",
+        "tabs": {
+          "artists": "Nghệ sĩ",
+          "photos": "Theo ảnh",
+          "albums": "Album dự án"
+        },
+        "countArtists": "{count, plural, =0 {Chưa có nghệ sĩ phù hợp} other {# nghệ sĩ · tất cả đã xác minh danh tính}}",
+        "countPhotos": "{count} ảnh từ {artists} nghệ sĩ",
+        "countAlbums": "{count} album",
+        "showMap": "Hiện bản đồ",
+        "noPhotos": "Các nghệ sĩ phù hợp chưa có ảnh công khai"
       }
     },
     "profile": {
@@ -4540,6 +4560,23 @@
         "body": "Nghệ sĩ cần biết yêu cầu đến từ một người thật. Đăng nhập xong, bạn vào thẳng câu hỏi đầu tiên.",
         "signIn": "Đăng nhập",
         "register": "Tạo tài khoản"
+      }
+    },
+    "browseV2": {
+      "pill": {
+        "label": "Tìm theo khu vực và ngày",
+        "where": "Khu vực",
+        "anywhere": "Mọi tỉnh/thành",
+        "when": "Ngày & giờ",
+        "date": "Ngày chụp",
+        "time": "Giờ bắt đầu",
+        "anyTime": "Giờ bất kỳ",
+        "submit": "Tìm"
+      },
+      "photos": {
+        "alt": "Ảnh của {name}",
+        "viewProfile": "Xem hồ sơ",
+        "book": "Đặt lịch"
       }
     }
   },

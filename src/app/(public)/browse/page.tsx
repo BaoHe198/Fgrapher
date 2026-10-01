@@ -1,12 +1,20 @@
 import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 import { MapIcon, SearchX, XIcon } from "lucide-react";
 import { Fragment } from "react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import Image from "next/image";
 import Link from "next/link";
 
 import { AlbumCard } from "@/components/cards/album-card";
-import { ArtistCard } from "@/components/cards/artist-card";
-import { FilterSidebar } from "@/components/browse/filter-sidebar";
+import {
+  BrowseArtistCard,
+  type BrowseArtist,
+} from "@/components/browse/browse-artist-card";
+import {
+  BrowsePhotoGrid,
+  type BrowsePhoto,
+} from "@/components/browse/browse-photo-grid";
+import { BrowseSearchPill } from "@/components/browse/browse-search-pill";
 import {
   FilterParamsProvider,
   FilterResultsPane,
@@ -20,12 +28,15 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Tag } from "@/components/ui/tag";
 import { features } from "@/lib/features";
 import { formatDate } from "@/lib/format";
+import { PROVIDER_ROLES } from "@/lib/constants";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { cn, formatBudgetRange, formatCurrency } from "@/lib/utils";
 import type { ServiceKind } from "@prisma/client";
 
 import { serviceKindsForRole } from "@/lib/constants/service-matrix";
 import { normalizeSort, sanitizeShootWindow } from "@/lib/search/params";
-import { listWards } from "@/services/geography";
+import { listProvinces, listWards } from "@/services/geography";
+import { getHomeShowcase } from "@/services/home";
 import { searchAlbums, searchProfiles } from "@/services/search";
 import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
 
@@ -89,6 +100,9 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const categoryT = await getTranslations("profileCategory");
 
   const params = await searchParams;
+  const locale = await getLocale();
+  const tShort = await getTranslations("publicPages.about.roleShort");
+  const provinceOptions = await listProvinces();
 
   const roles = params.roles?.split(",").filter(Boolean) as Role[] | undefined;
   const serviceKinds = params.services?.split(",").filter(Boolean) as
@@ -217,7 +231,6 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     params.travelWilling,
   ].filter(Boolean).length;
 
-  const tab = params.tab === "albums" ? "albums" : "artists";
   const albumResult = await searchAlbums({
     q: params.q,
     roles,
@@ -228,7 +241,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
     categories,
     minRating: params.minRating ? Number(params.minRating) : undefined,
-    page: tab === "albums" ? page : 1,
+    page: params.tab === "albums" ? page : 1,
   });
 
   const wardName =
@@ -240,21 +253,9 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       ? `${wardName}, ${result.province.name}`
       : result.province.name
     : undefined;
-  const heading =
-    roles && roles.length === 1
-      ? place
-        ? t("headingWithRoleCity", { role: roleT(roles[0]), city: place })
-        : roleT(roles[0])
-      : place
-        ? t("headingPlace", { place })
-        : t("headingDefault");
-
   const shootWindow = sanitizeShootWindow(params.date, params.from, params.to);
   const shootDateLabel = shootWindow.date
     ? formatDate(`${shootWindow.date}T00:00:00+07:00`)
-    : undefined;
-  const availabilityLabel = shootDateLabel
-    ? t("availableOn", { date: shootDateLabel })
     : undefined;
 
   // The chips above the results: one per active filter, each removable on
@@ -345,10 +346,17 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     return queryWithout(params, [...chip.drop, "page"]);
   };
 
+  const tab =
+    params.tab === "albums"
+      ? "albums"
+      : params.tab === "photos"
+        ? "photos"
+        : "artists";
+
   const toArtist = (
     profile: (typeof result.data)[number],
-    extra: object = {},
-  ) => ({
+    extra: Partial<BrowseArtist> = {},
+  ): BrowseArtist => ({
     id: profile.userId,
     name: profile.displayName ?? profile.user.name ?? t("unnamed"),
     username: profile.user.username ?? "",
@@ -364,47 +372,257 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
             ),
         )
         .map((kind) => serviceKindT(kind)),
-    ],
-    city: profile.location,
+    ].join(", "),
+    place: profile.location,
     rating:
-      profile.avgRating > 0 ? profile.avgRating.toFixed(1) : t("newBadge"),
+      profile.reviewCount > 0
+        ? profile.avgRating.toFixed(1).replace(".", ",")
+        : null,
     reviews: profile.reviewCount,
     price: profile.priceMin
-      ? t("priceFrom", { price: formatCurrency(profile.priceMin) })
+      ? t.rich("v2.priceFrom", {
+          price: formatCurrency(profile.priceMin),
+          strong: (chunks) => (
+            <strong className="font-semibold tabular-nums">{chunks}</strong>
+          ),
+        })
       : t("contactForPricing"),
-    avatar: profile.user.avatar ?? undefined,
-    media: profile.media,
-    availabilityLabel,
+    photos: profile.media
+      .filter((media) => media.type === "IMAGE")
+      .map((media) => media.url),
+    availability: shootDateLabel
+      ? t("v2.availableOn", { date: shootDateLabel })
+      : undefined,
     ...extra,
   });
 
-  const tabHref = (next: "artists" | "albums") =>
-    next === "albums"
-      ? queryWith(queryWithoutParams(params, ["page"]), { tab: "albums" })
-      : queryWithout(params, ["tab", "page"]);
+  const photos: BrowsePhoto[] = result.data.flatMap((profile) =>
+    profile.media
+      .filter((media) => media.type === "IMAGE")
+      .map((media) => ({
+        id: media.id,
+        url: media.url,
+        width: media.width,
+        height: media.height,
+        artistName: profile.displayName ?? profile.user.name ?? t("unnamed"),
+        username: profile.user.username ?? "",
+        bookingHref: profile.roles.some((role) => PROVIDER_ROLES.includes(role))
+          ? `/booking/${profile.userId}`
+          : null,
+      })),
+  );
+
+  const tabHref = (next: "artists" | "photos" | "albums") =>
+    next === "artists"
+      ? queryWithout(params, ["tab", "page"])
+      : queryWith(queryWithoutParams(params, ["page"]), { tab: next });
   const pageHref = (n: number) => queryWith(params, { page: String(n) });
 
   const totalPages =
-    tab === "albums" ? albumResult.totalPages : result.totalPages;
+    tab === "albums"
+      ? albumResult.totalPages
+      : tab === "photos"
+        ? 1
+        : result.totalPages;
+
+  // The contextual title: "Nhiếp ảnh gia cưới tại Thành phố Hồ Chí Minh".
+  const subjectRole =
+    roles && roles.length === 1 ? roleT(roles[0]) : t("v2.subjectDefault");
+  const subjectStyle =
+    categories && categories.length === 1
+      ? categoryT(categories[0]).toLocaleLowerCase(locale)
+      : null;
+  const subject = subjectStyle
+    ? t("v2.subjectWithStyle", { role: subjectRole, style: subjectStyle })
+    : subjectRole;
+  const title = place ? t("v2.titleAt", { subject, place }) : subject;
+
+  // The rail: everyone, the six roles, then six styles - each with a real
+  // approved photo when there is one, and its frame number.
+  const showcase = await getHomeShowcase();
+  const singleRole = roles?.length === 1 ? roles[0] : null;
+  const singleCategory = categories?.length === 1 ? categories[0] : null;
+  const rail = [
+    {
+      key: "all",
+      label: t("v2.railAll"),
+      photo: showcase.roles.find((r) => r.photoUrl)?.photoUrl ?? null,
+      active: !singleRole && !singleCategory,
+      href: queryWithout(params, ["roles", "categories", "page"]),
+    },
+    ...showcase.roles.map((tile) => ({
+      key: tile.role,
+      // Short labels ("Trang điểm", not "Chuyên viên trang điểm") keep
+      // the rail to one line per tile.
+      label: tShort(tile.role as "STUDIO"),
+      photo: tile.photoUrl,
+      active: singleRole === tile.role,
+      href:
+        singleRole === tile.role
+          ? queryWithout(params, ["roles", "page"])
+          : queryWith(queryWithoutParams(params, ["page", "categories"]), {
+              roles: tile.role,
+            }),
+    })),
+    ...showcase.styles.map((tile) => ({
+      key: tile.category,
+      label: categoryT(tile.category),
+      photo: tile.photoUrls[0] ?? null,
+      active: singleCategory === tile.category,
+      href:
+        singleCategory === tile.category
+          ? queryWithout(params, ["categories", "page"])
+          : queryWith(queryWithoutParams(params, ["page"]), {
+              categories: tile.category,
+            }),
+    })),
+  ];
+
+  const countLine =
+    tab === "albums"
+      ? t("v2.countAlbums", { count: albumResult.total })
+      : tab === "photos"
+        ? t("v2.countPhotos", {
+            count: photos.length,
+            artists: result.data.length,
+          })
+        : t("v2.countArtists", { count: result.total });
 
   return (
     <FilterParamsProvider>
-      {/* Header band: what is being searched, and the keyword box. */}
-      <div className="border-b border-border-subtle bg-bg-surface">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-8 py-8 max-md:px-5 max-md:py-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="flex flex-col gap-2">
-            <span className="font-mono text-meta tracking-[0.12em] text-gold-700 uppercase dark:text-gold-400">
-              {t("eyebrow")}
-            </span>
-            <h1 className="max-w-3xl text-display-md text-text-primary lg:text-display-lg">
-              {heading}
-            </h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap">
-            <SearchInput
-              className="order-first w-full lg:order-none lg:w-[420px]"
+      <div className="border-b border-border-subtle bg-bg-page">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-8 pt-4 pb-3 max-md:px-4">
+          <BrowseSearchPill
+            provinces={provinceOptions.map((p) => ({
+              code: p.code,
+              name: p.name,
+            }))}
+          />
+          <div className="flex items-center gap-3">
+            <nav
+              aria-label={t("v2.railLabel")}
+              className="-mb-3 flex min-w-0 flex-1 snap-x gap-1 overflow-x-auto pb-3 [scrollbar-width:thin]"
+            >
+              {rail.map((item, index) => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  aria-current={item.active ? "true" : undefined}
+                  className={cn(
+                    "focus-ring group flex shrink-0 snap-start flex-col items-center gap-1.5 rounded-[var(--fg-radius-sm)] px-2 pt-1 pb-1.5",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "relative block size-12 overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken",
+                      item.active
+                        ? "ring-2 ring-gold-400 ring-offset-2 ring-offset-bg-page"
+                        : "opacity-85 group-hover:opacity-100",
+                    )}
+                  >
+                    {item.photo ? (
+                      <Image
+                        src={buildMediaVariants(item.photo).thumbnail}
+                        alt=""
+                        fill
+                        unoptimized
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    ) : null}
+                  </span>
+                  <span
+                    className={cn(
+                      "flex items-baseline gap-1 border-b-2 pb-0.5 text-body-sm whitespace-nowrap",
+                      item.active
+                        ? "border-text-primary font-semibold text-text-primary"
+                        : "border-transparent text-text-secondary group-hover:text-text-primary",
+                    )}
+                  >
+                    {item.label}
+                    <span className="font-mono text-meta text-text-tertiary">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </span>
+                </Link>
+              ))}
+            </nav>
+            <MobileFilterSheet
+              side="right"
+              roleCounts={roleCounts}
+              categoryCounts={categoryCounts}
+              activeCount={activeFilterCount}
+              resultCount={tab === "albums" ? albumResult.total : result.total}
               marketplaceEnabled={features.marketplaceEnabled}
             />
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1440px] px-8 pt-[clamp(28px,4vw,48px)] pb-[72px] max-md:px-4">
+        <div className="flex flex-col gap-3">
+          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+            {t("v2.eyebrow", { tab: t(`v2.tabs.${tab}`) })}
+          </span>
+          <h1 className="max-w-5xl font-display text-[clamp(2.25rem,5.2vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.03em] text-balance text-text-primary">
+            {title}
+          </h1>
+          <p className="text-body-md text-text-secondary">{countLine}</p>
+        </div>
+
+        {activeChips.length > 0 ? (
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            {activeChips.map((chip) => (
+              <Link
+                key={chip.key}
+                href={chipHref(chip)}
+                aria-label={t("removeFilter", { filter: chip.label })}
+                className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-border-default bg-bg-surface py-1.5 pr-2.5 pl-3.5 text-body-sm text-text-primary transition-colors hover:border-border-strong"
+              >
+                {chip.label}
+                <XIcon aria-hidden className="size-3.5 text-text-tertiary" />
+              </Link>
+            ))}
+            <Link
+              href={
+                params.q
+                  ? `/browse?q=${encodeURIComponent(params.q)}`
+                  : "/browse"
+              }
+              className="focus-ring rounded-[4px] px-1 text-body-sm font-semibold! text-text-link"
+            >
+              {t("clearAll")}
+            </Link>
+          </div>
+        ) : null}
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <nav
+            aria-label={t("tabsLabel")}
+            className="flex rounded-full border border-border-default bg-bg-surface p-1"
+          >
+            {(["artists", "photos", "albums"] as const).map((key) => (
+              <Link
+                key={key}
+                href={tabHref(key)}
+                aria-current={tab === key ? "page" : undefined}
+                className={cn(
+                  "focus-ring rounded-full px-4 py-2 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
+                  tab === key
+                    ? "bg-brand-primary font-semibold! text-text-on-brand"
+                    : "text-text-secondary hover:text-text-primary",
+                )}
+              >
+                {t(`v2.tabs.${key}`)}
+              </Link>
+            ))}
+          </nav>
+          <div className="flex flex-wrap items-center gap-2">
+            <SearchInput
+              className="w-full sm:w-64"
+              marketplaceEnabled={features.marketplaceEnabled}
+            />
+            {tab === "artists" ? <SortSelect className="w-52" /> : null}
             <Link
               href={fmapHref}
               className={cn(
@@ -413,269 +631,197 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               )}
             >
               <MapIcon className="size-4" />
-              {t("viewOnMap")}
+              {t("v2.showMap")}
             </Link>
-            <div className="lg:hidden">
-              <MobileFilterSheet
-                roleCounts={roleCounts}
-                categoryCounts={categoryCounts}
-                activeCount={activeFilterCount}
-                resultCount={
-                  tab === "albums" ? albumResult.total : result.total
-                }
-                marketplaceEnabled={features.marketplaceEnabled}
-              />
-            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-[1440px] px-8 pt-8 pb-[72px] max-md:px-5">
-        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[252px_1fr]">
-          <div className="hidden lg:block">
-            <FilterSidebar
-              roleCounts={roleCounts}
-              categoryCounts={categoryCounts}
-              marketplaceEnabled={features.marketplaceEnabled}
-            />
-          </div>
-
-          <div className="min-w-0">
-            <div className="flex items-end justify-between gap-4 border-b border-border-subtle">
-              <nav aria-label={t("tabsLabel")} className="flex gap-6">
-                {(
-                  [
-                    ["artists", t("tabArtists"), result.total],
-                    ["albums", t("tabAlbums"), albumResult.total],
-                  ] as const
-                ).map(([key, label, count]) => (
-                  <Link
-                    key={key}
-                    href={tabHref(key)}
-                    aria-current={tab === key ? "page" : undefined}
-                    className={cn(
-                      "focus-ring relative -mb-px flex items-baseline gap-1.5 border-b-2 pb-3 text-body-md transition-colors duration-[var(--fg-dur-150)]",
-                      tab === key
-                        ? "border-brand-primary font-semibold! text-text-primary"
-                        : "border-transparent text-text-secondary hover:text-text-primary",
-                    )}
-                  >
-                    {label}
-                    <span className="font-mono text-meta tabular-nums text-text-tertiary">
-                      {count}
-                    </span>
-                  </Link>
-                ))}
-              </nav>
-              {tab === "artists" ? (
-                <div className="mb-2 hidden w-56 sm:block">
-                  <SortSelect />
-                </div>
-              ) : null}
-            </div>
-
-            {activeChips.length > 0 ? (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                {activeChips.map((chip) => (
-                  <Link
-                    key={chip.key}
-                    href={chipHref(chip)}
-                    aria-label={t("removeFilter", { filter: chip.label })}
-                    className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-border-default bg-bg-surface py-1 pr-2 pl-3 text-body-sm text-text-primary transition-colors hover:border-border-strong"
-                  >
-                    {chip.label}
-                    <XIcon
-                      aria-hidden
-                      className="size-3.5 text-text-tertiary"
-                    />
-                  </Link>
-                ))}
-                <Link
-                  href={
-                    params.q
-                      ? `/browse?q=${encodeURIComponent(params.q)}`
-                      : "/browse"
+        <div className="mt-8">
+          <FilterResultsPane label={t("updatingResults")}>
+            {tab === "albums" ? (
+              albumResult.data.length === 0 ? (
+                <EmptyState
+                  icon={<SearchX />}
+                  title={t("noAlbums.heading")}
+                  description={t("noAlbums.body")}
+                  primaryAction={
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      nativeButton={false}
+                      render={<Link href={tabHref("artists")} />}
+                    >
+                      {t("noAlbums.seeArtists")}
+                    </Button>
                   }
-                  className="focus-ring rounded-[4px] px-1 text-body-sm font-semibold! text-text-link underline underline-offset-4"
-                >
-                  {t("clearAll")}
-                </Link>
-              </div>
-            ) : null}
-
-            <div className="mt-6">
-              <FilterResultsPane label={t("updatingResults")}>
-                {tab === "albums" ? (
-                  albumResult.data.length === 0 ? (
-                    <EmptyState
-                      icon={<SearchX />}
-                      title={t("noAlbums.heading")}
-                      description={t("noAlbums.body")}
-                      primaryAction={
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          nativeButton={false}
-                          render={<Link href={tabHref("artists")} />}
-                        >
-                          {t("noAlbums.seeArtists")}
-                        </Button>
-                      }
+                />
+              ) : (
+                <div className="grid grid-cols-2 gap-x-5 gap-y-8 max-sm:gap-x-3 xl:grid-cols-3">
+                  {albumResult.data.map((album, index) => (
+                    <AlbumCard
+                      key={album.id}
+                      href={`/profile/${album.providerUsername}?album=${album.id}#portfolio`}
+                      title={album.title}
+                      description={album.description}
+                      coverUrl={album.coverUrl}
+                      countLabel={t("photoCount", { count: album.photoCount })}
+                      byline={[
+                        album.providerName,
+                        album.category ? categoryT(album.category) : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                      revealIndex={index}
                     />
-                  ) : (
-                    <div className="grid grid-cols-2 gap-x-5 gap-y-8 max-sm:gap-x-3 xl:grid-cols-3">
-                      {albumResult.data.map((album, index) => (
-                        <AlbumCard
-                          key={album.id}
-                          href={`/profile/${album.providerUsername}?album=${album.id}#portfolio`}
-                          title={album.title}
-                          description={album.description}
-                          coverUrl={album.coverUrl}
-                          countLabel={t("photoCount", {
-                            count: album.photoCount,
-                          })}
-                          byline={[
-                            album.providerName,
-                            album.category ? categoryT(album.category) : null,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                          revealIndex={index}
-                        />
+                  ))}
+                </div>
+              )
+            ) : result.data.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-16 text-center">
+                <SearchX className="size-12 text-text-tertiary" />
+                <p className="text-body-lg font-semibold! text-text-primary">
+                  {shootDateLabel
+                    ? t("noResults.headingOnDate", { date: shootDateLabel })
+                    : t("noResults.heading")}
+                </p>
+                <p className="text-body-md text-text-secondary">
+                  {t("noResults.body")}
+                </p>
+                {removableFilters.length > 0 ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-body-sm text-text-tertiary">
+                      {t("noResults.tryRemoving")}
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {removableFilters.map((filter) => (
+                        <Tag
+                          key={filter.key}
+                          render={
+                            <Link href={queryWithout(params, filter.drop)} />
+                          }
+                        >
+                          {filter.label}
+                        </Tag>
                       ))}
                     </div>
+                  </div>
+                ) : null}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  nativeButton={false}
+                  render={<Link href="/browse" />}
+                >
+                  {t("clearFilters")}
+                </Button>
+                {result.province ? (
+                  roles && roles.length === 1 ? (
+                    <WaitlistForm
+                      provinceId={result.province.id}
+                      role={roles[0]}
+                    />
+                  ) : (
+                    <p className="text-body-sm text-text-tertiary">
+                      {t("waitlist.roleRequired")}
+                    </p>
                   )
-                ) : result.data.length === 0 ? (
-                  <div className="flex flex-col items-center gap-3 py-16 text-center">
-                    <SearchX className="size-12 text-text-tertiary" />
-                    <p className="text-body-lg font-semibold! text-text-primary">
-                      {shootDateLabel
-                        ? t("noResults.headingOnDate", { date: shootDateLabel })
-                        : t("noResults.heading")}
-                    </p>
-                    <p className="text-body-md text-text-secondary">
-                      {t("noResults.body")}
-                    </p>
-                    {removableFilters.length > 0 ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <p className="text-body-sm text-text-tertiary">
-                          {t("noResults.tryRemoving")}
+                ) : null}
+              </div>
+            ) : tab === "photos" ? (
+              photos.length === 0 ? (
+                <EmptyState
+                  icon={<SearchX />}
+                  title={t("v2.noPhotos")}
+                  primaryAction={
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      nativeButton={false}
+                      render={<Link href={tabHref("artists")} />}
+                    >
+                      {t("noAlbums.seeArtists")}
+                    </Button>
+                  }
+                />
+              ) : (
+                <BrowsePhotoGrid photos={photos} />
+              )
+            ) : (
+              <div className="grid grid-cols-2 gap-x-5 gap-y-9 max-sm:gap-x-3 md:grid-cols-3 xl:grid-cols-4">
+                {result.data.map((profile, index) => (
+                  <Fragment key={profile.userId}>
+                    {/* services/search.ts always ranks profiles with no
+                      portfolio after those with one, whatever the sort.
+                      Naming the group where it starts makes the order
+                      explain itself. */}
+                    {index > 0 && index === firstNoPortfolioIndex ? (
+                      <div className="col-span-full mt-3 flex flex-col gap-1 border-t border-border-subtle pt-5">
+                        <p className="text-body-md font-semibold! text-text-primary">
+                          {t("noPortfolioGroup.heading")}
                         </p>
-                        <div className="flex flex-wrap justify-center gap-2">
-                          {removableFilters.map((filter) => (
-                            <Tag
-                              key={filter.key}
-                              render={
-                                <Link
-                                  href={queryWithout(params, filter.drop)}
-                                />
-                              }
-                            >
-                              {filter.label}
-                            </Tag>
-                          ))}
-                        </div>
+                        <p className="text-body-sm text-text-secondary">
+                          {t("noPortfolioGroup.body")}
+                        </p>
                       </div>
                     ) : null}
+                    <BrowseArtistCard
+                      // The first row is above the fold and holds the LCP.
+                      priority={index < 4}
+                      artist={toArtist(profile)}
+                    />
+                  </Fragment>
+                ))}
+              </div>
+            )}
+
+            {totalPages > 1 ? (
+              <div className="mt-10 flex flex-col items-center gap-3">
+                <p className="text-meta text-text-tertiary">
+                  {t("pageOf", { page, total: totalPages })}
+                </p>
+                <div className="flex gap-2">
+                  {page > 1 ? (
                     <Button
                       variant="outline"
                       size="sm"
                       nativeButton={false}
-                      render={<Link href="/browse" />}
+                      render={<Link href={pageHref(page - 1)} />}
                     >
-                      {t("clearFilters")}
+                      {t("previous")}
                     </Button>
-                    {result.province ? (
-                      roles && roles.length === 1 ? (
-                        <WaitlistForm
-                          provinceId={result.province.id}
-                          role={roles[0]}
-                        />
-                      ) : (
-                        <p className="text-body-sm text-text-tertiary">
-                          {t("waitlist.roleRequired")}
-                        </p>
-                      )
-                    ) : null}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
-                    {result.data.map((profile, index) => (
-                      <Fragment key={profile.userId}>
-                        {/* services/search.ts always ranks profiles with no
-                          portfolio after those with one, whatever the sort.
-                          Naming the group where it starts makes the order
-                          explain itself. */}
-                        {index > 0 && index === firstNoPortfolioIndex ? (
-                          <div className="col-span-full mt-3 flex flex-col gap-1 border-t border-border-subtle pt-5">
-                            <p className="text-body-md font-semibold! text-text-primary">
-                              {t("noPortfolioGroup.heading")}
-                            </p>
-                            <p className="text-body-sm text-text-secondary">
-                              {t("noPortfolioGroup.body")}
-                            </p>
-                          </div>
-                        ) : null}
-                        <ArtistCard
-                          // The first row is above the fold and holds the LCP.
-                          priority={index < 4}
-                          artist={toArtist(profile)}
-                        />
-                      </Fragment>
-                    ))}
-                  </div>
-                )}
+                  ) : null}
+                  {page < totalPages ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      nativeButton={false}
+                      render={<Link href={pageHref(page + 1)} />}
+                    >
+                      {t("loadMore")}
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
-                {totalPages > 1 ? (
-                  <div className="mt-10 flex flex-col items-center gap-3">
-                    <p className="text-meta text-text-tertiary">
-                      {t("pageOf", { page, total: totalPages })}
-                    </p>
-                    <div className="flex gap-2">
-                      {page > 1 ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          nativeButton={false}
-                          render={<Link href={pageHref(page - 1)} />}
-                        >
-                          {t("previous")}
-                        </Button>
-                      ) : null}
-                      {page < totalPages ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          nativeButton={false}
-                          render={<Link href={pageHref(page + 1)} />}
-                        >
-                          {t("loadMore")}
-                        </Button>
-                      ) : null}
-                    </div>
-                  </div>
-                ) : null}
-
-                {tab === "artists" && result.nationwide.length > 0 ? (
-                  <div className="mt-10 flex flex-col gap-4 border-t border-border-subtle pt-8">
-                    <h2 className="text-heading-md text-text-primary">
-                      {t("nationwideSection.heading")}
-                    </h2>
-                    <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
-                      {result.nationwide.map((profile) => (
-                        <ArtistCard
-                          key={profile.userId}
-                          artist={toArtist(profile, {
-                            nationwideLabel: t("nationwideBadge"),
-                          })}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </FilterResultsPane>
-            </div>
-          </div>
+            {tab === "artists" && result.nationwide.length > 0 ? (
+              <div className="mt-10 flex flex-col gap-5 border-t border-border-subtle pt-8">
+                <h2 className="text-heading-md text-text-primary">
+                  {t("nationwideSection.heading")}
+                </h2>
+                <div className="grid grid-cols-2 gap-x-5 gap-y-9 max-sm:gap-x-3 md:grid-cols-3 xl:grid-cols-4">
+                  {result.nationwide.map((profile) => (
+                    <BrowseArtistCard
+                      key={profile.userId}
+                      artist={toArtist(profile, {
+                        badge: t("nationwideBadge"),
+                      })}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </FilterResultsPane>
         </div>
       </div>
     </FilterParamsProvider>

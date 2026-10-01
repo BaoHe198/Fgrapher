@@ -3530,6 +3530,26 @@
         "heading": "No matching project albums yet",
         "body": "Try removing a filter, or look at the artists instead.",
         "seeArtists": "See artists"
+      },
+      "v2": {
+        "subjectDefault": "Artists",
+        "subjectWithStyle": "{style} {role}",
+        "titleAt": "{subject} in {place}",
+        "priceFrom": "From <strong>{price}</strong>",
+        "availableOn": "Free {date}",
+        "railAll": "All",
+        "railLabel": "Roles and styles",
+        "eyebrow": "Ffinding · {tab}",
+        "tabs": {
+          "artists": "Artists",
+          "photos": "By photo",
+          "albums": "Project albums"
+        },
+        "countArtists": "{count, plural, =0 {No matching artists yet} one {# artist · identity verified} other {# artists · all identity verified}}",
+        "countPhotos": "{count} photos from {artists} artists",
+        "countAlbums": "{count, plural, one {# album} other {# albums}}",
+        "showMap": "Show map",
+        "noPhotos": "The matching artists have no public photos yet"
       }
     },
     "profile": {
@@ -4540,6 +4560,23 @@
         "body": "Artists need to know a request comes from a real person. Once signed in, you go straight to the first question.",
         "signIn": "Sign in",
         "register": "Create an account"
+      }
+    },
+    "browseV2": {
+      "pill": {
+        "label": "Search by area and date",
+        "where": "Area",
+        "anywhere": "Any province",
+        "when": "Date & time",
+        "date": "Shoot date",
+        "time": "Start time",
+        "anyTime": "Any time",
+        "submit": "Search"
+      },
+      "photos": {
+        "alt": "Photo by {name}",
+        "viewProfile": "View profile",
+        "book": "Book"
       }
     }
   },

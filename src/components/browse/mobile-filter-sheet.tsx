@@ -22,7 +22,10 @@ export function MobileFilterSheet({
   activeCount,
   resultCount,
   marketplaceEnabled,
+  side = "left",
 }: {
+  /** Tìm kiếm F v2 opens it from the right as the "Bộ lọc" drawer. */
+  side?: "left" | "right";
   roleCounts: Record<string, number>;
   categoryCounts: Partial<Record<string, number>>;
   activeCount: number;
@@ -36,16 +39,20 @@ export function MobileFilterSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button variant="secondary" size="md">
+          <Button variant="outline" size="md" className="shrink-0">
             <SlidersHorizontal className="size-4" />
             {t("filtersButton")}
-            {activeCount > 0 ? ` (${activeCount})` : ""}
+            {activeCount > 0 ? (
+              <span className="grid size-5 place-items-center rounded-full bg-brand-primary text-meta font-semibold text-text-on-brand">
+                {activeCount}
+              </span>
+            ) : null}
           </Button>
         }
       />
       <SheetContent
-        side="left"
-        className="flex w-3/4 flex-col overflow-hidden sm:max-w-xs"
+        side={side}
+        className="flex w-[88%] flex-col overflow-hidden sm:max-w-sm"
       >
         <SheetHeader className="sr-only">
           <SheetTitle>{t("title")}</SheetTitle>
