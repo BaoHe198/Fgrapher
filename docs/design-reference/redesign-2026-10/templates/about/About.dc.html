@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Giới thiệu F (/about)" description="Trang giới thiệu: contact sheet 12 khung, kể chuyện theo cuộn (khoanh → phóng → tráng), hai lối đi, cam kết niềm tin, số liệu có ngưỡng ẩn, hỏi đáp và liên hệ. 1440/390, sáng/tối, đủ trạng thái." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:hsl(30 15% 11%)">
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="width:820px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Quyết định chính</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Trang đi theo sáu khung, mỗi màn cuộn một ý: contact sheet → bốn chương → hai lối đi → cam kết → số liệu → hỏi đáp. Khách đọc lướt vẫn thấy ba nút đi tiếp ở hero, ở hai lối đi và ở số liệu.</li>
+<li>Hero và phần kể chuyện nằm trên Phòng tối vì đó là chỗ xem ảnh. Từ hai lối đi trở xuống là Giấy. Ranh giới là dải dẫn phim từ bộ phần dùng chung đợt 2. Header đổi nền theo bề mặt bên dưới.</li>
+<li>Kể chuyện: trên máy tính, chữ cuộn bình thường, còn ảnh đứng yên bên phải. Khi một chương vào giữa màn hình, khung trên contact sheet được khoanh vàng, phóng lên vị trí ảnh lớn trong 300ms, rồi tráng 400ms. Trên điện thoại, dải 12 khung dính ở đầu màn hình, mỗi chương có ảnh riêng ngay trong dòng chữ. Giảm chuyển động: chỉ đổi vòng khoanh và ảnh.</li>
+<li>Ảnh ở hero và ở phần kể chuyện dùng chung URL nên chỉ tải một lần.</li>
+<li>Số liệu có ngưỡng cho từng chỉ số: 5 tỉnh/thành, 100 nghệ sĩ, 500 buổi. Chỉ số dưới ngưỡng thì ẩn. Còn dưới 2 chỉ số thì cả khối chuyển sang phương án “giai đoạn đầu”, không hiện số nào. Khi lỗi tải số cũng dùng phương án này và không báo lỗi cho khách. Ngưỡng là đề xuất, cần chốt với sản phẩm.</li>
+<li>Nội dung cam kết và hỏi đáp chỉ nói những gì hệ thống đang làm: xác minh qua eKYC trong nước, duyệt ảnh trước khi công khai, cần sự đồng ý của người trong ảnh, không thu tiền trực tuyến.</li>
+</ol>
+</div>
+<div style="width:600px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Component</div>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Dùng từ DS:</strong> FgrapherProvider, LogoFull, Button, Tag, Badge, Skeleton, FrameMark, Accordion, Input, Textarea, Footer.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Từ bộ đợt 2:</strong> bề mặt Phòng tối, dải dẫn phim, tráng ảnh, morph khung → ảnh lớn.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Mới trong trang:</strong> ContactSheet (12 khung, số khung và vai trò), ScrollChapters, PathCard, StatBlock có ngưỡng.</p>
+<p style="margin:0;font-size:14px;line-height:1.5;color:hsl(30 8% 38%)">Ảnh là ảnh mẫu. Số trong khung “Số mẫu” là số minh họa, được đánh dấu ngay trên component, không phải số thật của Fgrapher. Bản mặc định của trang không hiện số.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Màn đầu · cuộn được bên trong khung</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Máy tính · sáng</span><iframe src="AboutPage.dc.html?theme=light" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Màn đầu sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Máy tính · tối</span><iframe src="AboutPage.dc.html?theme=dark" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Màn đầu tối"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Toàn trang · máy tính 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sáng · số liệu mẫu</span><iframe data-fit="1" src="AboutPage.dc.html?theme=light&amp;stats=demo" style="width:1440px;height:7000px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tối · giai đoạn đầu, không hiện số</span><iframe data-fit="1" src="AboutPage.dc.html?theme=dark" style="width:1440px;height:7000px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Tối"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Màn đầu · sáng</span><iframe src="AboutPage.dc.html?theme=light" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT màn đầu"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Màn đầu · tối</span><iframe src="AboutPage.dc.html?theme=dark" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT màn đầu tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Toàn trang · sáng · số mẫu</span><iframe data-fit="1" src="AboutPage.dc.html?theme=light&amp;stats=demo" style="width:390px;height:12000px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Toàn trang · tối</span><iframe data-fit="1" src="AboutPage.dc.html?theme=dark" style="width:390px;height:12000px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT tối"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Trạng thái</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · chữ hiện ngay, ảnh chờ</span><iframe src="AboutPage.dc.html?theme=light&amp;state=loading&amp;stats=loading" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="Tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi ảnh 01E · tối</span><iframe src="AboutPage.dc.html?theme=dark&amp;state=error" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="Lỗi ảnh"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Số liệu · đang tải</span><iframe data-scroll="ab-stats" src="AboutPage.dc.html?theme=light&amp;stats=loading" style="width:390px;height:700px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="Số đang tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Số liệu · lỗi → không hiện số</span><iframe data-scroll="ab-stats" src="AboutPage.dc.html?theme=dark&amp;stats=error" style="width:390px;height:700px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="Số lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Liên hệ · lỗi gửi</span><iframe data-scroll="ab-contact" src="AboutPage.dc.html?theme=light&amp;form=error" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="Lỗi gửi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Liên hệ · đã gửi · tối</span><iframe data-scroll="ab-contact" src="AboutPage.dc.html?theme=dark&amp;form=sent" style="width:390px;height:700px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="Đã gửi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · máy tính</span><iframe data-scroll="ab-story" src="AboutPage.dc.html?theme=light&amp;state=long" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Dài"></iframe></div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    const jump = () => document.querySelectorAll('iframe[data-scroll]').forEach(f => { try { if (f.dataset.done) return; const d = f.contentDocument, el = d && d.getElementById(f.dataset.scroll); if (!el) return; f.contentWindow.scrollTo(0, el.getBoundingClientRect().top + f.contentWindow.scrollY - 60); f.dataset.done = '1'; } catch (e) {} });
+    this.t = setInterval(() => { fit(); jump(); }, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section id="ab-faq" aria-labelledby="ab-faq-t" style="background:var(--bg-page);color:var(--text-primary)">
+<div style="max-width:1440px;margin:0 auto;padding:clamp(40px,5vw,72px) clamp(20px,4vw,64px) clamp(64px,8vw,120px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:clamp(40px,5vw,80px);align-items:start;border-top:1px solid var(--border-default)">
+<div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+<div style="display:flex;flex-direction:column;gap:14px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">KHUNG 06 · HỎI ĐÁP</span><h2 id="ab-faq-t" style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(32px,calc(16px + 2.6vw),56px);line-height:1.02;letter-spacing:-.025em">Câu hỏi thường gặp</h2></div>
+<x-import component-from-global-scope="Fgrapher.Accordion" hint-size="100%,420px">
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="deposit"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Fgrapher có thu tiền đặt cọc không?</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0;padding-bottom:16px;line-height:1.6">Không. Fgrapher không thu tiền trực tuyến. Giá và đặt cọc thỏa thuận trực tiếp với nghệ sĩ, thường trong phần tin nhắn sau khi nghệ sĩ xác nhận lịch.</p></x-import></x-import>
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="verify"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Nghệ sĩ được xác minh như thế nào?</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0;padding-bottom:16px;line-height:1.6">Mọi nhà cung cấp xác minh danh tính qua dịch vụ eKYC trong nước trước khi hồ sơ được công khai và nhận lịch. Dữ liệu xác minh không rời khỏi Việt Nam.</p></x-import></x-import>
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="reply"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Sau khi gửi yêu cầu, bao lâu thì có phản hồi?</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0;padding-bottom:16px;line-height:1.6">{{ replyText }}</p></x-import></x-import>
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="review"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Ai được viết đánh giá?</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0;padding-bottom:16px;line-height:1.6">Chỉ khách đã chụp xong một buổi đặt qua Fgrapher. Nghệ sĩ có thể phản hồi công khai bên dưới đánh giá.</p></x-import></x-import>
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="crop"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Ảnh portfolio có bị cắt hay đổi màu khi hiển thị không?</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0;padding-bottom:16px;line-height:1.6">Không. Fgrapher hiển thị đúng khung hình nghệ sĩ tải lên, không cắt và không lọc màu, ở cả chế độ sáng và tối.</p></x-import></x-import>
+<x-import component-from-global-scope="Fgrapher.AccordionItem" value="takedown"><x-import component-from-global-scope="Fgrapher.AccordionTrigger">Tôi thấy ảnh có mặt mình mà chưa đồng ý, phải làm sao?</x-import><x-import component-from-global-scope="Fgrapher.AccordionPanel"><p style="margin:0;padding-bottom:16px;line-height:1.6">Bấm Báo cáo trên ảnh và chọn lý do liên quan tới hình ảnh cá nhân. Đội Fgrapher xem xét khiếu nại và gỡ ảnh nếu nghệ sĩ chưa có sự đồng ý của bạn.</p></x-import></x-import>
+</x-import>
+</div>
+<div id="ab-contact" style="display:flex;flex-direction:column;gap:20px;padding:clamp(24px,3vw,36px);border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface);min-width:0">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Liên hệ</span><h3 style="margin:0;font:600 26px/1.15 var(--font-display);letter-spacing:-.015em">Chưa thấy câu trả lời?</h3><p style="margin:0;font-size:15px;line-height:1.55;color:var(--text-secondary)">Gửi câu hỏi cho đội Fgrapher. Chúng tôi trả lời qua email hoặc số điện thoại bạn để lại.</p></div>
+<sc-if value="{{ isSent }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:20px;border-radius:var(--fg-radius-md);background:var(--success-bg)"><strong style="font-size:16px;color:var(--success)">Đã nhận câu hỏi của bạn</strong><span style="font-size:15px;line-height:1.55">Fgrapher sẽ trả lời qua {{ sentTo }}.</span><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="sm" on-click="{{ reset }}">Gửi câu hỏi khác</x-import></div></sc-if>
+<sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}"><form onSubmit="{{ submit }}" noValidate="" style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="padding:14px 16px;border-radius:var(--fg-radius-sm);background:var(--danger-bg);font-size:15px;line-height:1.5"><strong style="color:var(--danger)">Chưa gửi được.</strong> Kiểm tra kết nối rồi thử lại. Nội dung bạn viết vẫn còn.</div></sc-if>
+<x-import component-from-global-scope="Fgrapher.Input" label="Họ tên" value="{{ name }}" on-change="{{ onName }}" error="{{ eName }}" autocomplete="name" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="Fgrapher.Input" label="Email hoặc số điện thoại" value="{{ contact }}" on-change="{{ onContact }}" error="{{ eContact }}" autocomplete="email" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="Fgrapher.Textarea" label="Câu hỏi" value="{{ msg }}" on-change="{{ onMsg }}" error="{{ eMsg }}" rows="4" hint-size="100%,140px"></x-import>
+<p style="margin:0;font-size:13px;line-height:1.5;color:var(--text-secondary)">Thông tin này chỉ dùng để trả lời câu hỏi của bạn.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><x-import component-from-global-scope="Fgrapher.Button" type="submit" variant="accent" size="lg" disabled="{{ sending }}">{{ submitLabel }}</x-import></div>
+</form></sc-if>
+</div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;long&quot;,&quot;sent&quot;,&quot;error&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  constructor(p) { super(p); const s = p.state || ''; this.state = { name: s === 'sent' || s === 'error' ? 'Nguyễn Thu Hà' : '', contact: s === 'sent' || s === 'error' ? 'thuha.nguyen@gmail.com' : '', msg: s === 'error' ? 'Tôi muốn đặt chụp kỷ yếu cho lớp 40 người ở Đà Lạt, có cần đặt nhiều nghệ sĩ không?' : '', status: s === 'sent' ? 'sent' : s === 'error' ? 'error' : 'idle', errs: {} }; }
+  validate() {
+    const { name, contact, msg } = this.state, e = {};
+    if (!name.trim()) e.name = 'Nhập họ tên để chúng tôi biết gọi bạn là gì.';
+    if (!contact.trim()) e.contact = 'Nhập email hoặc số điện thoại.';
+    else if (!/^\S+@\S+\.\S+$/.test(contact.trim()) && !/^(\+84|0)\d{9,10}$/.test(contact.replace(/[\s.]/g, ''))) e.contact = 'Email hoặc số điện thoại chưa đúng định dạng, ví dụ ban@vidu.vn hoặc 0901 234 567.';
+    if (msg.trim().length < 10) e.msg = 'Viết câu hỏi dài ít nhất 10 ký tự.';
+    return e;
+  }
+  renderVals() {
+    const { name, contact, msg, status, errs } = this.state, long = this.props.state === 'long';
+    return {
+      replyText: long ? 'Nghệ sĩ xác nhận trong 48 giờ. Nếu lịch đã kín, nghệ sĩ có thể đề xuất một giờ khác để bạn chọn. Trong lúc chờ, bạn vẫn gửi được yêu cầu cho nghệ sĩ khác, nhưng nên báo lại cho người kia khi đã chốt để họ mở lịch cho khách khác. Bạn theo dõi mọi yêu cầu ở trang Lịch đặt của tôi, kèm ngày giờ gửi theo giờ Việt Nam.' : 'Nghệ sĩ xác nhận trong 48 giờ, hoặc đề xuất một giờ khác nếu lịch đã kín. Bạn theo dõi yêu cầu ở trang Lịch đặt của tôi.',
+      isSent: status === 'sent', isForm: status !== 'sent', isError: status === 'error', sending: status === 'sending',
+      submitLabel: status === 'sending' ? 'Đang gửi…' : 'Gửi câu hỏi',
+      sentTo: /@/.test(contact) ? contact : 'số ' + contact,
+      name, contact, msg, eName: errs.name, eContact: errs.contact, eMsg: errs.msg,
+      onName: e => this.setState({ name: e.target.value, errs: { ...errs, name: undefined } }),
+      onContact: e => this.setState({ contact: e.target.value, errs: { ...errs, contact: undefined } }),
+      onMsg: e => this.setState({ msg: e.target.value, errs: { ...errs, msg: undefined } }),
+      reset: () => this.setState({ name: '', contact: '', msg: '', status: 'idle', errs: {} }),
+      submit: e => {
+        e.preventDefault(); const v = this.validate();
+        if (Object.keys(v).length) { this.setState({ errs: v }); return; }
+        this.setState({ status: 'sending', errs: {} });
+        setTimeout(() => this.setState({ status: this.props.state === 'error' ? 'error' : 'sent' }), 900);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

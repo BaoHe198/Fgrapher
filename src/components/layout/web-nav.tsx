@@ -5,11 +5,17 @@ import { useTranslations, useLocale } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+
+import { useDarkroomUnder } from "@/hooks/use-darkroom-under";
 import { useState, useSyncExternalStore, useTransition } from "react";
 import { useTheme } from "next-themes";
 
 import { LogoFull } from "@/components/brand/logo-full";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import {
+  CommandPalette,
+  CommandPaletteTrigger,
+} from "@/components/layout/command-palette";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { useMessaging } from "@/components/providers/messaging-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -86,6 +92,7 @@ export function WebNav({
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const onDarkroom = useDarkroomUnder(72, pathname);
   const isWide = useIsWide();
   const { data: session } = useSession();
   const { isAuthenticated } = useUserRoles();
@@ -102,125 +109,136 @@ export function WebNav({
     : navLinks.filter((link) => link.alwaysVisible);
 
   return (
-    <header
-      className="sticky top-0 z-20 border-b border-border-subtle backdrop-blur-[14px]"
-      style={{
-        background: "color-mix(in srgb, var(--bg-surface) 88%, transparent)",
-      }}
+    <CommandPalette
+      isAuthenticated={isAuthenticated}
+      marketplaceEnabled={marketplaceEnabled}
+      socialFeedEnabled={socialFeedEnabled}
     >
-      {/* Desktop / tablet row (>=640px) — collapses which links show at 1180px */}
-      <div className="mx-auto hidden h-[72px] max-w-[1440px] items-center gap-6 px-6 sm:flex">
-        <LogoFull className="shrink-0" />
+      <header
+        // Takes the Phòng tối surface while a dark block (data-under-header)
+        // is beneath it - colour only, in 260ms (wave 2 kit §01-B).
+        data-surface={onDarkroom ? "darkroom" : undefined}
+        className="sticky top-0 z-20 border-b border-border-subtle backdrop-blur-[14px] transition-[background-color,border-color,color] duration-[var(--fg-dur-260)] ease-fg-out"
+        style={{
+          background: "color-mix(in srgb, var(--bg-surface) 88%, transparent)",
+        }}
+      >
+        {/* Desktop / tablet row (>=640px) — collapses which links show at 1180px */}
+        <div className="mx-auto hidden h-[72px] max-w-[1440px] items-center gap-6 px-6 sm:flex">
+          <LogoFull className="shrink-0" />
 
-        <nav className="flex items-center gap-[18px]">
-          {links.map((link) => {
-            const isActive = pathname === link.href.split("?")[0];
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "text-body-md font-semibold!",
-                  isActive ? "text-text-primary" : "text-text-secondary",
-                )}
-              >
-                {t(link.labelKey)}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-3">
-          {isWide ? (
-            <>
-              {isAuthenticated ? (
-                <button
-                  type="button"
-                  onClick={messaging.toggle}
-                  className="relative"
-                  aria-label={t("messagesAria")}
+          <nav className="flex items-center gap-[18px]">
+            {links.map((link) => {
+              const isActive = pathname === link.href.split("?")[0];
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "text-body-md font-semibold!",
+                    isActive ? "text-text-primary" : "text-text-secondary",
+                  )}
                 >
-                  <MessageCircle className="size-5 text-text-secondary" />
-                  {messaging.unreadCount > 0 ? (
-                    <span className="absolute -top-1 -right-1 size-2 rounded-full bg-danger" />
-                  ) : null}
-                </button>
-              ) : (
-                <MessageCircle className="size-5 text-text-secondary" />
-              )}
-              {marketplaceEnabled ? (
-                isAuthenticated ? (
-                  <CartDrawer />
+                  {t(link.labelKey)}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-3">
+            {isWide ? (
+              <>
+                {isAuthenticated ? (
+                  <button
+                    type="button"
+                    onClick={messaging.toggle}
+                    className="relative"
+                    aria-label={t("messagesAria")}
+                  >
+                    <MessageCircle className="size-5 text-text-secondary" />
+                    {messaging.unreadCount > 0 ? (
+                      <span className="absolute -top-1 -right-1 size-2 rounded-full bg-danger" />
+                    ) : null}
+                  </button>
                 ) : (
-                  <Link href="/shop">
-                    <ShoppingBag className="size-5 text-text-secondary" />
-                  </Link>
-                )
-              ) : null}
-            </>
-          ) : null}
+                  <MessageCircle className="size-5 text-text-secondary" />
+                )}
+                {marketplaceEnabled ? (
+                  isAuthenticated ? (
+                    <CartDrawer />
+                  ) : (
+                    <Link href="/shop">
+                      <ShoppingBag className="size-5 text-text-secondary" />
+                    </Link>
+                  )
+                ) : null}
+              </>
+            ) : null}
 
-          <ThemeToggle />
-          <LangToggle />
+            <CommandPaletteTrigger compact={!isWide} />
+            <ThemeToggle />
+            <LangToggle />
 
-          {isAuthenticated ? (
-            <>
-              <NotificationBell />
+            {isAuthenticated ? (
+              <>
+                <NotificationBell />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  nativeButton={false}
+                  render={<Link href="/dashboard" />}
+                >
+                  {t("dashboard")}
+                </Button>
+                <UserMenu session={session} />
+              </>
+            ) : (
               <Button
-                variant="secondary"
+                variant="accent"
                 size="sm"
                 nativeButton={false}
-                render={<Link href="/dashboard" />}
+                render={<Link href="/login" />}
               >
-                {t("dashboard")}
+                {t("authCta")}
               </Button>
-              <UserMenu session={session} />
-            </>
-          ) : (
-            <Button
-              variant="accent"
-              size="sm"
-              nativeButton={false}
-              render={<Link href="/login" />}
-            >
-              {t("authCta")}
-            </Button>
-          )}
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Mobile row (<640px) — logo + hamburger, everything else moves into
+        {/* Mobile row (<640px) — logo + hamburger, everything else moves into
           a Sheet. Signing up is the exception: burying the only way to
           create an account behind a hamburger left a phone visitor with no
           visible next step anywhere above the page footer. Signed-in users
           keep the plain hamburger — their entry points are already in it. */}
-      <div className="flex h-[72px] items-center justify-between gap-2 px-4 sm:hidden">
-        {/* A step smaller on narrow phones (360px Androids): at full size the
+        <div className="flex h-[72px] items-center justify-between gap-2 px-4 sm:hidden">
+          {/* A step smaller on narrow phones (360px Androids): at full size the
             wordmark pushed the sign-up button and hamburger past the edge. */}
-        <LogoFull
-          size={24}
-          className="min-w-0 max-[389px]:gap-2 max-[389px]:[&_span]:text-heading-md"
-        />
-        <div className="flex items-center gap-1">
-          {isAuthenticated ? null : (
-            <Button
-              variant="accent"
-              size="sm"
-              nativeButton={false}
-              render={<Link href="/login" />}
-            >
-              {t("authCta")}
-            </Button>
-          )}
-          <MobileNavSheet
-            session={session}
-            isAuthenticated={isAuthenticated}
-            marketplaceEnabled={marketplaceEnabled}
-            socialFeedEnabled={socialFeedEnabled}
+          <LogoFull
+            size={24}
+            className="min-w-0 max-[389px]:gap-2 max-[389px]:[&_span]:text-heading-md"
           />
+          <div className="flex items-center gap-1">
+            <CommandPaletteTrigger compact />
+            {isAuthenticated ? null : (
+              <Button
+                variant="accent"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/login" />}
+              >
+                {t("authCta")}
+              </Button>
+            )}
+            <MobileNavSheet
+              session={session}
+              isAuthenticated={isAuthenticated}
+              marketplaceEnabled={marketplaceEnabled}
+              socialFeedEnabled={socialFeedEnabled}
+            />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </CommandPalette>
   );
 }
 

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Cộng đồng F (/community)" description="Bảng tin trên Phòng tối: bài album ảnh lớn + dải khung, bài F Booking dạng call sheet giấy ngà, cột phải album nổi bật và yêu cầu gần bạn, ba phương án hiển thị lượt thích, soạn yêu cầu tìm ê-kíp. 1440/390, đủ trạng thái." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:hsl(30 15% 11%)">
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="width:820px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Quyết định chính</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Toàn trang nằm trên Phòng tối và giữ nguyên ở cả chế độ sáng lẫn tối. Chỉ hộp thoại (đăng nhập, soạn bài) đi theo chế độ. Header, tab và chip thu về chữ và viền mảnh. Logo nằm trên nhãn ngà nhỏ để dấu logo không chìm vào nền đen.</li>
+<li>Bài album: tác giả ở trên, một ảnh lớn giữ đúng khung, dải 4 khung vuông có số khung, rồi dòng mono “MINH ANH · CƯỚI ĐÀ LẠT · CƯỚI · 48 KHUNG”. Ô thứ tư ghi “+43” khi album còn ảnh. Thích, bình luận, lưu là biểu tượng không viền.</li>
+<li>Bài F Booking là tờ giấy ngà có mép lỗ in, số hiệu mono và con dấu “CÒN 9 NGÀY”. Trên nền đen, một tờ giấy sáng thì lướt qua là nhận ra ngay. Hết hạn hoặc đủ người đổi sang dấu đỏ và bỏ nút Gửi đề xuất.</li>
+<li>Chưa đăng nhập vẫn xem được mọi bài. Bấm thích, bình luận, theo dõi hay gửi đề xuất thì mới mở hộp đăng nhập.</li>
+<li>Soạn yêu cầu tìm ê-kíp có bản xem trước tờ call sheet điền dần, giống luồng Đặt lịch F.</li>
+</ol>
+</div>
+<div style="width:620px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Lượt thích: ba phương án để chọn</div>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>A · Ẩn hoàn toàn</strong> (mặc định trong bản này).<br>Ưu: người mới không bị so với người có nhiều lượt thích; ảnh được xem vì ảnh; bớt áp lực đăng. Nhược: người xem mất một tín hiệu nhanh để biết bài nào được quan tâm; nghệ sĩ không biết bài nào hiệu quả.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>B · Chỉ tác giả thấy</strong> (<code>?likes=owner</code>).<br>Ưu: nghệ sĩ vẫn có phản hồi, người xem không bị dẫn dắt bởi số. Nhược: cần thêm một trang thống kê riêng cho tác giả.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>C · Công khai</strong> (<code>?likes=public</code>).<br>Ưu: quen thuộc, dễ hiểu. Nhược: bảng tin dễ biến thành cuộc đua số; số liệu công khai có thể bị làm giả bằng tài khoản ảo.</p>
+<p style="margin:0;font-size:14px;line-height:1.5;color:hsl(30 8% 38%)">Đề xuất B: phù hợp tinh thần “ảnh là trung tâm” mà vẫn cho nghệ sĩ dữ liệu. Số bình luận vẫn hiện vì đó là lời mời tham gia, không phải điểm số. Mọi tên, ảnh, số trong bản này là dữ liệu mẫu.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Máy tính 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Khám phá · chế độ sáng</span><iframe data-fit="1" src="CmPage.dc.html?theme=light" style="width:1440px;height:4800px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Khám phá · chế độ tối · lượt thích công khai (phương án C)</span><iframe data-fit="1" src="CmPage.dc.html?theme=dark&amp;likes=public" style="width:1440px;height:4800px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lọc F Booking · nội dung dài · đủ người</span><iframe data-fit="1" src="CmPage.dc.html?theme=light&amp;filter=booking&amp;state=long" style="width:1440px;height:2000px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Booking"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Soạn yêu cầu tìm ê-kíp · tối</span><iframe src="CmPage.dc.html?theme=dark&amp;compose=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Soạn"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Chưa đăng nhập · bấm Thích → hộp đăng nhập · sáng</span><iframe src="CmPage.dc.html?theme=light&amp;auth=out&amp;login=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Đăng nhập"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang theo dõi · trống · gợi ý theo dõi</span><iframe src="CmPage.dc.html?theme=dark&amp;state=empty" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Ảnh đang tải · khung xương trên nền tối</span><iframe src="CmPage.dc.html?theme=light&amp;state=loading" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Ảnh bị lỗi · bảng tin lỗi</span><div style="display:flex;flex-direction:column;gap:16px"><iframe src="CmPage.dc.html?theme=dark&amp;state=imgerror" style="width:1440px;height:700px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Ảnh lỗi"></iframe><iframe src="CmPage.dc.html?theme=dark&amp;state=error" style="width:1440px;height:420px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 14% 5%)" title="Lỗi"></iframe></div></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Khám phá · sáng</span><iframe data-fit="1" src="CmPage.dc.html?theme=light" style="width:390px;height:5000px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 14% 5%)" title="ĐT"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Chưa đăng nhập · sheet · tối</span><iframe src="CmPage.dc.html?theme=dark&amp;auth=out&amp;login=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 14% 5%)" title="ĐT đăng nhập"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">F Booking · sáng</span><iframe src="CmPage.dc.html?theme=light&amp;filter=booking" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 14% 5%)" title="ĐT booking"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Soạn yêu cầu · tối</span><iframe src="CmPage.dc.html?theme=dark&amp;compose=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 14% 5%)" title="ĐT soạn"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trống · sáng</span><iframe src="CmPage.dc.html?theme=light&amp;state=empty" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 14% 5%)" title="ĐT trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · tối</span><iframe src="CmPage.dc.html?theme=dark&amp;state=loading" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 14% 5%)" title="ĐT tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · sáng</span><iframe src="CmPage.dc.html?theme=light&amp;state=long" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 14% 5%)" title="ĐT dài"></iframe></div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

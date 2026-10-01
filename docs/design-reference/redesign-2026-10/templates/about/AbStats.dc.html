@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section id="ab-stats" aria-labelledby="ab-stats-t" style="background:var(--bg-page);color:var(--text-primary)">
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,64px) clamp(56px,7vw,112px)">
+<sc-if value="{{ showNums }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:28px;padding:clamp(24px,3vw,40px);border-radius:var(--fg-radius-lg);background:var(--bg-sunken)">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px"><h2 id="ab-stats-t" style="margin:0;font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">KHUNG 05 · SỐ LIỆU</h2><span style="display:flex;flex-wrap:wrap;align-items:center;gap:10px"><sc-if value="{{ isDemo }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Fgrapher.Badge" variant="outline">Số mẫu · không phải số thật</x-import></sc-if><span style="font:600 12px/1.4 var(--font-mono);letter-spacing:.12em;color:var(--text-secondary)">{{ source }}</span></span></div>
+<dl style="margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:24px">
+<sc-for list="{{ metrics }}" as="m" hint-placeholder-count="3"><div style="display:flex;flex-direction:column-reverse;gap:8px;padding-top:16px;border-top:1px solid var(--border-default)"><dt style="font-size:15px;line-height:1.4;color:var(--text-secondary)">{{ m.label }}</dt><dd style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(48px,calc(20px + 3.6vw),80px);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums">{{ m.value }}</dd></div></sc-for>
+</dl>
+</div></sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}"><div aria-busy="true" style="display:flex;flex-direction:column;gap:28px;padding:clamp(24px,3vw,40px);border-radius:var(--fg-radius-lg);background:var(--bg-sunken)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">KHUNG 05 · SỐ LIỆU</span><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:24px"><div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid var(--border-default)"><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:64px;width:60%" hint-size="60%,64px"></x-import><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:14px;width:80%" hint-size="80%,14px"></x-import></div><div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid var(--border-default)"><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:64px;width:50%" hint-size="50%,64px"></x-import><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:14px;width:70%" hint-size="70%,14px"></x-import></div><div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid var(--border-default)"><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:64px;width:66%" hint-size="66%,64px"></x-import><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:14px;width:60%" hint-size="60%,14px"></x-import></div></div></div></sc-if>
+<sc-if value="{{ showEarly }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px 48px;align-items:end;padding:clamp(24px,3vw,40px);border-radius:var(--fg-radius-lg);background:var(--bg-sunken)">
+<div style="display:flex;flex-direction:column;gap:14px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">KHUNG 05 · GIAI ĐOẠN ĐẦU</span><h2 id="ab-stats-t" style="margin:0;font:600 clamp(26px,2.4vw,34px)/1.15 var(--font-display);letter-spacing:-.02em;text-wrap:balance">Chúng tôi chưa công bố số liệu</h2><p style="margin:0;max-width:560px;font-size:16px;line-height:1.6;color:var(--text-secondary);text-wrap:pretty">Fgrapher đang ở giai đoạn đầu. Số tỉnh/thành đang phục vụ, số nghệ sĩ đã xác minh và số buổi đã chụp sẽ hiện ở đây khi đủ lớn để có ý nghĩa. Số được lấy thẳng từ hệ thống và không làm tròn lên.</p></div>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="lg">Đăng ký làm nghệ sĩ</x-import></div>
+</div></sc-if>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;demo&quot;,&quot;loading&quot;,&quot;error&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;'none'|'demo'|'loading'|'error'&quot;},&quot;data&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{ provinces?: number; artists?: number; sessions?: number; updatedAt: string } | null&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const mode = this.props.mode || 'none';
+    const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    // Only metrics above their threshold are shown; fewer than 2 → early-stage variant.
+    const src = mode === 'demo' ? { provinces: 12, artists: 340, sessions: 1250, updatedAt: '30/09/2026 07:00' } : (this.props.data || null);
+    const T = [['provinces', 'tỉnh/thành đang có nghệ sĩ nhận lịch', 5], ['artists', 'nghệ sĩ đã xác minh danh tính', 100], ['sessions', 'buổi chụp đã hoàn tất qua Fgrapher', 500]];
+    const metrics = src && mode !== 'error' ? T.filter(([k, , min]) => typeof src[k] === 'number' && src[k] >= min).map(([k, label]) => ({ value: fmt(src[k]), label })) : [];
+    const nums = mode !== 'loading' && metrics.length >= 2;
+    return {
+      isDemo: mode === 'demo', isLoading: mode === 'loading', showNums: nums, showEarly: mode !== 'loading' && !nums, metrics,
+      source: src ? `SỐ TỪ HỆ THỐNG · CẬP NHẬT ${src.updatedAt} (GIỜ VIỆT NAM)` : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Claude Design export (01/10/2026, wave 2). Only the screen templates, their
+# screenshots and the README are the design reference; the rest duplicates
+# the component library that .design-sync/ rebuilds from src/ (bundle,
+# vendored React, previews). Re-export from Claude Design to get them back.
+/*
+!/.gitignore
+!/README.md
+!/templates/
+!/screenshots/

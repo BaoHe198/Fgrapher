@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<article aria-labelledby="{{ hid }}" style="position:relative;display:flex;flex-direction:column;background:var(--gold-50);color:var(--dr-bg);font-family:var(--font-body);border-radius:4px;box-shadow:0 1px 0 hsl(38 30% 70%),0 10px 30px hsl(30 14% 2% / .5);overflow:hidden">
+<div aria-hidden="true" style="height:10px;background:repeating-linear-gradient(90deg,var(--dr-bg) 0 2px,transparent 2px 14px);opacity:.14"></div>
+<div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px 14px;border-bottom:2px solid var(--dr-bg)">
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font:700 12px/1 var(--font-mono);letter-spacing:.12em">F BOOKING · TÌM Ê-KÍP</span><strong id="{{ hid }}" style="font:600 22px/1 var(--font-mono);letter-spacing:.02em;font-variant-numeric:tabular-nums">{{ c.code }}</strong></div>
+<sc-if value="{{ isOpen }}" hint-placeholder-val="{{ true }}"><span style="padding:6px 10px;border:1.5px solid var(--dr-bg);border-radius:4px;font:700 12px/1 var(--font-mono);letter-spacing:.12em;transform:rotate(-2deg)">{{ c.leftLabel }}</span></sc-if>
+<sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}"><span style="padding:6px 10px;border:1.5px solid var(--danger);border-radius:4px;color:var(--danger);font:700 12px/1 var(--font-mono);letter-spacing:.12em;transform:rotate(-3deg)">{{ closedLabel }}</span></sc-if>
+</div>
+<dl style="margin:0;display:flex;flex-direction:column">
+<div style="display:grid;grid-template-columns:minmax(96px,.3fr) 1fr;gap:12px;padding:12px 20px;border-bottom:1px solid hsl(38 30% 80%)"><dt style="font:700 12px/1.5 var(--font-body);letter-spacing:.12em;text-transform:uppercase">Người đăng</dt><dd style="margin:0;display:flex;align-items:center;gap:8px;font-size:15px;line-height:1.4;min-width:0"><strong style="overflow-wrap:anywhere">{{ c.by }}</strong><span style="font-size:13px">· {{ c.byRole }}</span></dd></div>
+<div style="display:grid;grid-template-columns:minmax(96px,.3fr) 1fr;gap:12px;padding:12px 20px;border-bottom:1px solid hsl(38 30% 80%)"><dt style="font:700 12px/1.5 var(--font-body);letter-spacing:.12em;text-transform:uppercase">Cần tìm</dt><dd style="margin:0;display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ c.roles }}" as="r" hint-placeholder-count="2"><span style="padding:5px 10px;border:1px solid var(--dr-bg);border-radius:999px;font-size:14px;font-weight:600">{{ r }}</span></sc-for></dd></div>
+<div style="display:grid;grid-template-columns:minmax(96px,.3fr) 1fr;gap:12px;padding:12px 20px;border-bottom:1px solid hsl(38 30% 80%)"><dt style="font:700 12px/1.5 var(--font-body);letter-spacing:.12em;text-transform:uppercase">Ngày</dt><dd style="margin:0;font:600 15px/1.4 var(--font-mono);font-variant-numeric:tabular-nums">{{ c.when }}</dd></div>
+<div style="display:grid;grid-template-columns:minmax(96px,.3fr) 1fr;gap:12px;padding:12px 20px;border-bottom:1px solid hsl(38 30% 80%)"><dt style="font:700 12px/1.5 var(--font-body);letter-spacing:.12em;text-transform:uppercase">Khu vực</dt><dd style="margin:0;font-size:15px;line-height:1.4">{{ c.where }}</dd></div>
+<div style="display:grid;grid-template-columns:minmax(96px,.3fr) 1fr;gap:12px;padding:12px 20px;border-bottom:1px solid hsl(38 30% 80%)"><dt style="font:700 12px/1.5 var(--font-body);letter-spacing:.12em;text-transform:uppercase">Ngân sách</dt><dd style="margin:0;font:600 17px/1.3 var(--font-body);font-variant-numeric:tabular-nums">{{ c.budget }}</dd></div>
+<div style="display:grid;grid-template-columns:minmax(96px,.3fr) 1fr;gap:12px;padding:12px 20px;border-bottom:1px solid hsl(38 30% 80%)"><dt style="font:700 12px/1.5 var(--font-body);letter-spacing:.12em;text-transform:uppercase">Hạn đề xuất</dt><dd style="margin:0;font:600 15px/1.4 var(--font-mono);font-variant-numeric:tabular-nums">{{ c.deadline }}</dd></div>
+<sc-if value="{{ hasNote }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:minmax(96px,.3fr) 1fr;gap:12px;padding:12px 20px;border-bottom:1px solid hsl(38 30% 80%)"><dt style="font:700 12px/1.5 var(--font-body);letter-spacing:.12em;text-transform:uppercase">Ghi chú</dt><dd style="margin:0;font-size:15px;line-height:1.55;overflow-wrap:anywhere;text-wrap:pretty">{{ c.note }}</dd></div></sc-if>
+</dl>
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:14px 20px">
+<sc-if value="{{ canSend }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ send }}" style="min-height:48px;padding:0 20px;border:0;border-radius:var(--fg-radius-sm);background:var(--dr-bg);color:var(--gold-50);font:700 15px/1 var(--font-body);cursor:pointer">Gửi đề xuất</button></sc-if>
+<sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}"><span role="status" style="font-size:14px;font-weight:600;color:var(--success)">✓ Đã gửi đề xuất {{ sentAt }}</span></sc-if>
+<sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px">Yêu cầu không còn nhận đề xuất.</span></sc-if>
+<span style="font-size:13px;line-height:1.45">Thù lao và đặt cọc thỏa thuận trực tiếp giữa hai bên.</span>
+</div>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:600,&quot;height&quot;:620},&quot;c&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;CallSheet&quot;},&quot;loggedIn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onNeedLogin&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { sent: false };
+  renderVals() {
+    const c = this.props.c || { roles: [] }, closed = !!c.closed;
+    const t = new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date()).replace(',', '');
+    return {
+      c, hid: 'cs-' + c.code, isOpen: !closed, isClosed: closed, closedLabel: c.closed === 'full' ? 'ĐÃ ĐỦ NGƯỜI' : 'HẾT HẠN',
+      hasNote: !!c.note, canSend: !closed && !this.state.sent && !c.mine, sent: this.state.sent, sentAt: t,
+      send: () => { if (!this.props.loggedIn) return this.props.onNeedLogin && this.props.onNeedLogin(); this.setState({ sent: true }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

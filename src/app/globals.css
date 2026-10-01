@@ -2,7 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Inside a Phòng tối section the dark palette applies whatever the theme,
+   so dark: utilities apply there too (redesign 09/2026 wave 2). */
+@custom-variant dark (&:is(.dark *, [data-surface="darkroom"], [data-surface="darkroom"] *));
 
 /* Fgrapher brand tokens (docs/design-reference/design-tokens.md) are added
    throughout this file, alongside the shadcn tokens already here. Additive
@@ -123,6 +125,14 @@
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
   --color-scrim: var(--fg-scrim);
+  --color-dr-bg: var(--dr-bg);
+  --color-dr-surface: var(--dr-surface);
+  --color-dr-raised: var(--dr-raised);
+  --color-dr-line: var(--dr-line);
+  --color-dr-line-2: var(--dr-line-2);
+  --color-dr-text: var(--dr-text);
+  --color-dr-text-2: var(--dr-text-2);
+  --color-dr-text-3: var(--dr-text-3);
   --color-surface-raised: var(--surface-raised);
   --ease-fg-out: var(--fg-ease-out);
   --ease-fg-in: var(--fg-ease-in);
@@ -329,7 +339,11 @@
   --fg-image-ring: hsl(0 0% 0% / 0.06);
 }
 
-.dark {
+/* [data-surface="darkroom"] takes the whole dark palette too, in either
+   theme: Phòng tối is where people sit and look at photographs (lightbox,
+   album, profile hero, Cộng đồng F). Its own surfaces follow below. */
+.dark,
+[data-surface="darkroom"] {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -415,6 +429,46 @@
   --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.55);
   --fg-image-ring: hsl(0 0% 100% / 0.06);
   --surface-raised: hsl(30 9% 16%);
+}
+
+/* Phòng tối (wave 2 kit, docs/design-reference/redesign-2026-10/templates/
+   darkroom-kit). Values do not change with the theme. Layers are told apart
+   by background steps, never shadows; photos get a 6% inner line, never a
+   light frame; gold is the only accent. Contrast measured on --dr-bg:
+   text 16.5:1, text-2 10:1, text-3 7:1, gold 8.4:1. */
+:root {
+  --dr-bg: hsl(30 14% 5%);
+  --dr-surface: hsl(30 11% 8%);
+  --dr-raised: hsl(30 9% 12%);
+  --dr-line: hsl(0 0% 100% / 0.06);
+  --dr-line-2: hsl(0 0% 100% / 0.12);
+  --dr-text: hsl(38 33% 92%);
+  --dr-text-2: hsl(34 12% 72%);
+  --dr-text-3: hsl(32 8% 60%);
+  --dr-accent: var(--gold-400);
+  --dr-scrim: hsl(30 14% 5% / 0.72);
+}
+[data-surface="darkroom"] {
+  color-scheme: dark;
+  --bg-page: var(--dr-bg);
+  --bg-surface: var(--dr-surface);
+  --bg-sunken: var(--dr-surface);
+  --surface-card: var(--dr-surface);
+  --surface-raised: var(--dr-raised);
+  --text-primary: var(--dr-text);
+  --text-secondary: var(--dr-text-2);
+  --text-tertiary: var(--dr-text-3);
+  --border-subtle: var(--dr-line);
+  --border-default: var(--dr-line-2);
+  --border-strong: hsl(0 0% 100% / 0.22);
+  --border-focus: var(--gold-400);
+  --fg-image-ring: var(--dr-line);
+  --fg-scrim: var(--dr-scrim);
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  background-color: var(--dr-bg);
+  color: var(--dr-text);
 }
 
 /*

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px">
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 260px">
+<h1 style="margin:0;font-family:var(--font-display);font-size:22px;line-height:1.2;letter-spacing:-.01em;font-weight:700;text-wrap:pretty">{{ title }}</h1>
+<span style="font-size:14px;color:var(--text-secondary)">{{ subtitle }}</span>
+</div>
+<div style="width:220px;flex:none"><x-import component-from-global-scope="Fgrapher.NativeSelect" label="Sắp xếp" options="{{ sortOptions }}" value="{{ sort }}" on-change="{{ setSort }}" hint-size="220px,64px"></x-import></div>
+</div>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:20px">
+<sc-for list="{{ artists }}" as="a" hint-placeholder-count="4">
+<div data-cid="{{ a.id }}" style="position:relative;border-radius:var(--fg-radius-lg);transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms ease-out">
+<x-import component-from-global-scope="Fgrapher.ArtistCard" artist="{{ a }}" hint-size="100%,440px"></x-import>
+<sc-if value="{{ a.avail }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:8px;right:8px;z-index:25;display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font-size:12px;font-weight:700;box-shadow:var(--shadow-sm)"><span style="width:7px;height:7px;border-radius:50%;background:var(--success)"></span>{{ a.avail }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;justify-content:center;padding:8px 0 24px"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Xem thêm nghệ sĩ</x-import></div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Đang tải kết quả" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:20px">
+<sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:12px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);overflow:hidden;padding-bottom:16px">
+<div style="aspect-ratio:4/5"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full rounded-none" hint-size="100%,100%"></x-import></div>
+<div style="padding:0 16px;display:flex;flex-direction:column;gap:10px"><div style="height:18px;width:65%"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,18px"></x-import></div><div style="height:14px;width:90%"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,14px"></x-import></div><div style="height:14px;width:40%"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,14px"></x-import></div></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px;padding:clamp(20px,3vw,32px);border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Khung trống</span>
+<h2 style="margin:0;font-family:var(--font-display);font-size:20px;line-height:1.25;font-weight:700;text-wrap:pretty">Chưa có nhiếp ảnh gia còn lịch ngày 12/10/2026 tại Phường Long Trường</h2>
+<p style="margin:0;font-size:15px;line-height:1.5;color:var(--text-secondary)">Thử nới một bộ lọc:</p>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="Fgrapher.Tag">Bỏ lọc ngày 12/10/2026 · 34 người</x-import>
+<x-import component-from-global-scope="Fgrapher.Tag">Mở rộng ra Thành phố Hồ Chí Minh · 128 người</x-import>
+<x-import component-from-global-scope="Fgrapher.Tag">Ngân sách đến 5.000.000₫ · 9 người</x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid var(--border-subtle)">
+<strong style="font-size:16px">Báo tôi khi có nghệ sĩ ở khu vực này</strong>
+<span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Chúng tôi gửi email ngay khi có nhiếp ảnh gia nhận việc tại Phường Long Trường.</span>
+<x-import component-from-global-scope="Fgrapher.WaitlistForm" province-id="p-hcm" role="PHOTOGRAPHER" hint-size="100%,56px"></x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="Fgrapher.Alert" variant="destructive" hint-size="100%,88px"><x-import component-from-global-scope="Fgrapher.AlertTitle">Mất kết nối mạng</x-import><x-import component-from-global-scope="Fgrapher.AlertDescription">Không tải được kết quả tìm kiếm. Bộ lọc của bạn vẫn được giữ nguyên.</x-import></x-import>
+<div><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Thử lại</x-import></div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;128 nhiếp ảnh gia&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;subtitle&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;compact&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;artists&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object[]&quot;}}">
+class Component extends DCLogic {
+  state = { sort: 'Đánh giá cao nhất' };
+  renderVals() {
+    const mode = this.props.mode || 'ok';
+    return {
+      title: this.props.title || '', subtitle: this.props.subtitle || '',
+      artists: this.props.artists || [],
+      sortOptions: ['Đánh giá cao nhất', 'Giá thấp → cao', 'Mới nhất'],
+      sort: this.state.sort, setSort: v => this.setState({ sort: v && v.target ? v.target.value : v }),
+      isOk: mode === 'ok', isLoading: mode === 'loading', isEmpty: mode === 'empty', isError: mode === 'error',
+      skeletons: this.props.compact ? [1, 2] : [1, 2, 3, 4]
+    };
+  }
+}
+</script>
+</body>
+</html>

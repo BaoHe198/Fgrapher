@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Hồ sơ nghệ sĩ v2 (/profile/[username])" description="Phòng triển lãm cá nhân: đầu trang điện ảnh trên Phòng tối, album như photo essay, lightbox giữ màu có vuốt ngang, cột đặt lịch nhẹ viền. Biến thể nhiếp ảnh gia, studio, người mẫu, shop trang phục. 1440/390 sáng/tối, đủ trạng thái." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:hsl(30 15% 11%)">
+<div style="width:1100px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Quyết định chính</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Đầu trang chiếm 76% chiều cao màn hình, trên nền Phòng tối. Ảnh tràn khung theo điểm lấy nét nghệ sĩ chọn, và có nút “Xem nguyên khung” mở ảnh đầy đủ. Tên 44–112px đè góc dưới, trên một lớp phủ tối để chữ đạt AA. Dãy số liệu chỉ gồm số có thật; người mới chưa có số thì bỏ cả dãy.</li>
+<li>Chuyển Phòng tối → Giấy: mép cứng với dải dẫn phim, header đổi nền khi rời khối tối. Tôi không làm nền chuyển dần như trong brief vì vùng giữa của dải chuyển màu làm chữ xám mất tương phản. Đây là quy tắc đã chốt ở bộ phần dùng chung đợt 2.</li>
+<li>Album là bìa lớn: album đầu tràn hai cột 21:9, các album sau 3:2. Bấm bìa thì bìa bay lên thành ảnh đầu của trang photo essay (300ms). Trong album, ảnh giữ nguyên khung, xếp nhịp lớn · đôi · lệch, mỗi ảnh có số khung (12A…) và một dòng chú thích. Cuối album có lời mời đặt lịch và album tiếp theo.</li>
+<li>Lightbox không lọc hay làm tối ảnh. Chú thích dạng “KHUNG 07 / 48 · CƯỚI Ở ĐÀ LẠT · CƯỚI”. Có vuốt ngang, phím ← →, vuốt xuống để đóng.</li>
+<li>Cột đặt lịch không có khung viền, chỉ có đường kẻ mảnh. Ngày và giờ đã kín gạch ngang với viền đứt, không làm mờ. “Giờ vàng” là 05:45 và 16:15 ở TP. Hồ Chí Minh. Trên điện thoại cột này mở dạng sheet từ thanh dính đáy.</li>
+<li>Biến thể: studio có mục Không gian dạng contact sheet và thuê theo giờ; người mẫu có Thông số, độ tuổi theo khoảng; shop trang phục bỏ cột lịch và gói, chỉ có danh mục trang phục cùng “Nhắn tin để thuê”.</li>
+</ol>
+<p style="margin:0;font-size:14px;line-height:1.5;color:hsl(30 8% 38%)">Tên, ảnh, giá, đánh giá, số liệu là dữ liệu mẫu.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Nhiếp ảnh gia · máy tính 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Màn đầu · sáng</span><iframe src="PvPage.dc.html?theme=light" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Màn đầu sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Màn đầu · tối</span><iframe src="PvPage.dc.html?theme=dark" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Màn đầu tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Toàn trang · sáng</span><iframe data-fit="1" src="PvPage.dc.html?theme=light" style="width:1440px;height:5200px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Toàn trang"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Album photo essay · tối</span><iframe data-fit="1" src="PvPage.dc.html?theme=dark&amp;album=al0" style="width:1440px;height:5200px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Album"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Biến thể</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Studio · Không gian · sáng</span><iframe data-fit="1" src="PvPage.dc.html?theme=light&amp;kind=studio" style="width:1440px;height:4800px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Studio"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Người mẫu · Thông số · tối</span><iframe data-fit="1" src="PvPage.dc.html?theme=dark&amp;kind=model" style="width:1440px;height:4800px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Người mẫu"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Shop trang phục · không lịch · sáng</span><iframe data-fit="1" src="PvPage.dc.html?theme=light&amp;kind=costume" style="width:1440px;height:3600px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Trang phục"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Trạng thái · máy tính</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · sáng</span><iframe src="PvPage.dc.html?theme=light&amp;state=loading" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi ảnh và portfolio · tối</span><iframe data-fit="1" src="PvPage.dc.html?theme=dark&amp;state=error" style="width:1440px;height:3600px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ mới · trống · sáng</span><iframe data-fit="1" src="PvPage.dc.html?theme=light&amp;state=empty" style="width:1440px;height:3600px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · tối</span><iframe src="PvPage.dc.html?theme=dark&amp;state=long" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Dài"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiếp ảnh gia · sáng</span><iframe data-fit="1" src="PvPage.dc.html?theme=light" style="width:390px;height:7000px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiếp ảnh gia · tối</span><iframe data-fit="1" src="PvPage.dc.html?theme=dark" style="width:390px;height:7000px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sheet đặt lịch · sáng</span><iframe src="PvPage.dc.html?theme=light&amp;sheet=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT sheet"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Album · tối</span><iframe src="PvPage.dc.html?theme=dark&amp;album=al0" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT album"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Studio · tối</span><iframe src="PvPage.dc.html?theme=dark&amp;kind=studio" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT studio"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Shop trang phục · sáng</span><iframe src="PvPage.dc.html?theme=light&amp;kind=costume" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT trang phục"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · tối</span><iframe src="PvPage.dc.html?theme=dark&amp;state=loading" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · sáng</span><iframe src="PvPage.dc.html?theme=light&amp;state=long" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT dài"></iframe></div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

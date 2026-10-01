@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Rà soát toàn hệ thống" description="Audit nhất quán cho mọi màn: token khoảng cách/bo góc/độ nổi/chữ, ma trận trạng thái, motion spec có demo, đo tương phản trực tiếp sáng/tối, danh sách component cần chỉnh/thêm, bản sắc Fgrapher." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1d1b16">
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="width:780px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Quyết định chính</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Rà soát dựa trên số đo lấy từ mã của 6 màn và từ mã component của design system, không dựa vào cảm nhận. Mỗi chỗ lệch đều ghi giá trị thật và đề xuất giá trị thay.</li>
+<li>Sửa bằng token trước, sửa từng màn sau. Cần thêm vào DS:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>5 token thời lượng, 3 đường cong.</li><li>--fg-scrim cho lớp phủ trên ảnh.</li><li>Cỡ chữ meta 12px.</li></ul>Sau đó mọi màn chỉ cần tham chiếu các token này.</li>
+<li>Một bộ quy tắc trạng thái:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Focus: vòng vàng.</li><li>Đang chọn: brand-primary.</li><li>Hết chỗ: gạch ngang hoặc viền đứt, không giảm opacity.</li><li>Vô hiệu: opacity .5.</li><li>Hover: thẻ nhấc 2px, nút nhấc 1px.</li></ul></li>
+<li>Chế độ tối:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Phân lớp bằng bậc nền thay cho bóng.</li><li>Không lọc màu ảnh portfolio.</li><li>Ảnh không có khung sáng, chỉ có viền trong 6% trắng.</li><li>Tương phản được đo trực tiếp trên token đang chạy ở cả hai chế độ.</li></ul></li>
+<li>Chuyển động nằm trong 150–400ms. Riêng skeleton được phép vượt vì là chỉ báo đang tải. Bỏ kiểu nảy spring. Khi bật giảm chuyển động thì đổi trạng thái tức thì nhưng vẫn giữ tín hiệu về trạng thái (viền, màu).</li>
+<li>Bản sắc: thay các mẫu quen thuộc bằng ngôn ngữ phim và contact sheet mà Fgrapher đã có:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Marker khung ảnh.</li><li>Giờ vàng.</li><li>Bộ đếm khung phim.</li><li>Tráng ảnh là hiệu ứng nhận diện duy nhất.</li></ul></li>
+</ol>
+</div>
+<div style="width:640px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Component</div>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Dùng lại để trình bày rà soát:</strong> FgrapherProvider, LogoFull, Badge, Button, Alert, Skeleton. Input, Textarea và Progress được đặt thật trên trang để làm bằng chứng cho chỗ lệch.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Cần chỉnh trong DS (9):</strong> Textarea, Progress, Skeleton, Dialog/Sheet/Dropdown/Toast, Button, Avatar, viền ô nhập, Alert, RoleSelectionForm.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Cần thêm (10):</strong> FgImage, ChoiceCard, AvailabilityCalendar, TimeSlotGrid, StickyActionBar, BookingSummary, BookingListItem + BookingStatusBadge, EmptyState/ErrorState, MapMarker, SectionNav. Đây là những phần các màn đang tự dựng lặp lại. Chi tiết props và trạng thái ở mục 05.</p>
+<p style="margin:0;font-size:14px;line-height:1.5;color:#6b665c">Các file DS là bản đồng bộ, chỉ đọc ở đây. Thay đổi cần làm trong repo rồi chạy lại /design-sync. Bảng tương phản đo lúc trang chạy nên số hiển thị luôn khớp token hiện tại.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Trang rà soát · máy tính 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sáng</span><iframe data-fit="1" src="AuditPage.dc.html?theme=light" style="width:1440px;height:7000px;border:1px solid #d9d4ca;border-radius:12px" title="Rà soát sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tối</span><iframe data-fit="1" src="AuditPage.dc.html?theme=dark" style="width:1440px;height:7000px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Rà soát tối"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Trang rà soát · điện thoại 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sáng</span><iframe data-fit="1" src="AuditPage.dc.html?theme=light" style="width:390px;height:12000px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tối</span><iframe data-fit="1" src="AuditPage.dc.html?theme=dark" style="width:390px;height:12000px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="ĐT tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Màn đầu · sáng</span><iframe src="AuditPage.dc.html?theme=light" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT màn đầu"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Màn đầu · tối</span><iframe src="AuditPage.dc.html?theme=dark" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="ĐT màn đầu tối"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Độ phủ chế độ tối · mọi màn</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trang chủ</span><iframe src="../home/HomePage.dc.html?theme=dark" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Trang chủ tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tìm kiếm F</span><iframe src="../search/SearchPage.dc.html?theme=dark" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Tìm kiếm tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Bản đồ F</span><iframe src="../search-map/SearchMapPage.dc.html?theme=dark" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Bản đồ tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Hồ sơ</span><iframe src="../profile/ProfilePage.dc.html?theme=dark" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Hồ sơ tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đặt lịch · khung giờ</span><iframe src="../booking/BookingPage.dc.html?theme=dark&amp;step=3" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Đặt lịch tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt của tôi</span><iframe src="../booking/MyBookings.dc.html?theme=dark" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Lịch đặt tối"></iframe></div>
+</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Bản đồ F · máy tính</span><iframe src="../search-map/SearchMapPage.dc.html?theme=dark" style="width:1440px;height:900px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Bản đồ máy tính tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Hồ sơ · máy tính</span><iframe src="../profile/ProfilePage.dc.html?theme=dark" style="width:1440px;height:900px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Hồ sơ máy tính tối"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Trạng thái trên các màn · tối</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · Trang chủ</span><iframe src="../home/HomePage.dc.html?theme=dark&amp;state=loading" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trống · Tìm kiếm F</span><iframe src="../search/SearchPage.dc.html?theme=dark&amp;state=empty" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi · Bản đồ F</span><iframe src="../search-map/SearchMapPage.dc.html?theme=dark&amp;state=error" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi · Đặt lịch</span><iframe src="../booking/BookingPage.dc.html?theme=dark&amp;step=3&amp;err=1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Lỗi đặt lịch"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · Hồ sơ</span><iframe src="../profile/ProfilePage.dc.html?theme=dark&amp;state=long" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Dài"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trống · Lịch đặt</span><iframe src="../booking/MyBookings.dc.html?theme=dark&amp;state=empty" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Trống lịch đặt"></iframe></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

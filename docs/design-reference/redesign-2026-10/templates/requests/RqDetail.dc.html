@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./fg-kit.js"></script><style>body{margin:0;background:var(--bg-page)}:root{--dr-bg:hsl(30 14% 5%);--dr-surface:hsl(30 11% 8%);--dr-raised:hsl(30 9% 12%);--dr-text:hsl(38 33% 92%);--dr-text-2:hsl(34 12% 72%);--dr-text-3:hsl(32 8% 60%);--dr-line:hsl(0 0% 100% / .06);--dr-line-2:hsl(0 0% 100% / .12);--dr-accent:var(--gold-400);--dr-scrim:hsl(30 14% 5% / .72)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div ref="{{ rootRef }}" style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<dc-import name="RqHeader" is-mobile="{{ isMobile }}" logged-in="{{ true }}" hint-size="100%,60px"></dc-import>
+<main style="max-width:1440px;margin:0 auto;padding:clamp(24px,4vw,56px) clamp(16px,4vw,64px) clamp(120px,10vw,120px);display:flex;flex-direction:column;gap:clamp(24px,3vw,40px)">
+<div style="display:flex;flex-direction:column;gap:14px">
+<nav aria-label="Vị trí" style="font-size:14px;color:var(--text-secondary)"><a href="#" style="color:var(--text-secondary)">Đặt lịch F</a> › <a href="#" style="color:var(--text-secondary)">Yêu cầu của tôi</a></nav>
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px">
+<div style="display:flex;flex-direction:column;gap:10px;min-width:0"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">YC-2026-00012 · ĐĂNG 30/09/2026 09:15</span><h1 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(30px,calc(14px + 2.4vw),52px);line-height:1.02;letter-spacing:-.025em;text-wrap:balance">Chụp ảnh cưới ở Hội An</h1><span style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><sc-if value="{{ stOpen }}" hint-placeholder-val="{{ true }}"><span style="padding:6px 10px;border-radius:4px;background:var(--success-bg);color:var(--success);font:700 12px/1 var(--font-mono);letter-spacing:.12em">ĐANG NHẬN ĐỀ XUẤT · MỞ TỚI 07/10/2026 23:59</span></sc-if><sc-if value="{{ stExpired }}" hint-placeholder-val="{{ false }}"><span style="padding:6px 10px;border:1.5px dashed var(--border-strong);border-radius:4px;color:var(--text-secondary);font:700 12px/1 var(--font-mono);letter-spacing:.12em">ĐÃ HẾT HẠN · 07/10/2026 23:59</span></sc-if><sc-if value="{{ stChosen }}" hint-placeholder-val="{{ false }}"><span style="padding:6px 10px;border-radius:4px;background:var(--brand-primary);color:var(--text-on-brand);font:700 12px/1 var(--font-mono);letter-spacing:.12em">ĐÃ CHỌN · {{ chosenNameUp }}</span></sc-if></span></div>
+<sc-if value="{{ stOpen }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-wrap:wrap;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Sửa yêu cầu</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md">Đóng yêu cầu</x-import></div></sc-if>
+<sc-if value="{{ stExpired }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md">Đăng lại yêu cầu này</x-import></sc-if>
+</div>
+</div>
+<sc-if value="{{ stExpired }}" hint-placeholder-val="{{ false }}"><div role="status" style="padding:14px 16px;border-radius:var(--fg-radius-md);background:var(--warning-bg);font-size:15px;line-height:1.5">Yêu cầu đã hết hạn lúc 07/10/2026 23:59 nên nghệ sĩ không gửi thêm đề xuất được. Bạn vẫn nhắn tin được với người đã gửi. Muốn nhận đề xuất mới thì đăng lại, mọi câu trả lời được giữ nguyên.</div></sc-if>
+<sc-if value="{{ stChosen }}" hint-placeholder-val="{{ false }}"><div role="status" style="padding:14px 16px;border-radius:var(--fg-radius-md);background:var(--success-bg);font-size:15px;line-height:1.5"><strong>Bạn đã chọn {{ chosenName }}.</strong> Nghệ sĩ đã nhận thông báo. Hẹn giờ và đặt cọc thỏa thuận trực tiếp với nghệ sĩ trong tin nhắn. Các nghệ sĩ khác được báo là yêu cầu đã có người nhận.</div></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:clamp(24px,3vw,48px);align-items:flex-start">
+<aside aria-label="Yêu cầu" style="flex:1 1 340px;max-width:440px;min-width:0;display:flex;flex-direction:column;gap:10px">
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ toggleSheet }}" aria-expanded="{{ sheetOpenA }}" style="display:flex;justify-content:space-between;align-items:center;min-height:48px;padding:0 16px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:600 15px/1 var(--font-body);cursor:pointer"><span>Xem call sheet</span><span aria-hidden="true">{{ sheetIcon }}</span></button></sc-if>
+<sc-if value="{{ showSheet }}" hint-placeholder-val="{{ true }}"><dc-import name="RqCallSheet" num="YC-2026-00012" stamp="{{ stamp }}" data="{{ sheet }}" hint-size="100%,560px"></dc-import></sc-if>
+</aside>
+<section aria-labelledby="rq-props" style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px"><h2 id="rq-props" style="margin:0;font:600 24px/1.2 var(--font-display)">{{ propsTitle }}</h2>
+<sc-if value="{{ hasProps }}" hint-placeholder-val="{{ true }}"><div role="group" aria-label="Sắp xếp" style="display:flex;gap:4px;padding:4px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface)"><sc-for list="{{ sorts }}" as="s" hint-placeholder-count="3"><button type="button" data-seg="" aria-pressed="{{ s.on }}" onClick="{{ s.pick }}" style="min-height:36px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:var(--text-primary);font:600 13px/1 var(--font-body);cursor:pointer">{{ s.label }}</button></sc-for></div></sc-if></div>
+<sc-if value="{{ showHint }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;color:var(--text-secondary)">Bấm “So sánh” trên 2–3 đề xuất để đặt cạnh nhau.</p></sc-if>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><div aria-busy="true" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px"><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:520px;border-radius:16px" hint-size="100%,520px"></x-import><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:520px;border-radius:16px" hint-size="100%,520px"></x-import></div></sc-if>
+<sc-if value="{{ error }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:17px">Không tải được đề xuất</strong><span style="font-size:15px;line-height:1.5;color:var(--text-secondary)">Yêu cầu của bạn vẫn đang mở. Kiểm tra kết nối rồi thử lại.</span><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="sm">Thử lại</x-import></div></sc-if>
+<sc-if value="{{ emptyOpen }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:56px 24px;text-align:center;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg);color:var(--text-tertiary)"><x-import component-from-global-scope="Fgrapher.FrameMark" size="56" hint-size="56px,56px"></x-import><strong style="font-size:18px;color:var(--text-primary)">Chưa có đề xuất nào</strong><span style="max-width:460px;font-size:15px;line-height:1.55;color:var(--text-secondary)">Yêu cầu đã tới các nghệ sĩ chụp cưới ở Thành phố Đà Nẵng. Bạn nhận thông báo khi có đề xuất đầu tiên. Yêu cầu mở tới 07/10/2026 23:59.</span><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Sửa yêu cầu</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md">Tìm nghệ sĩ trực tiếp</x-import></div></div></sc-if>
+<sc-if value="{{ emptyExpired }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:56px 24px;text-align:center;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg);color:var(--text-tertiary)"><x-import component-from-global-scope="Fgrapher.FrameMark" size="56" hint-size="56px,56px"></x-import><strong style="font-size:18px;color:var(--text-primary)">Không có nghệ sĩ nào gửi đề xuất</strong><span style="max-width:460px;font-size:15px;line-height:1.55;color:var(--text-secondary)">Có thể ngày này nhiều người đã kín lịch. Thử đăng lại với ngày linh hoạt hơn, hoặc tìm và nhắn trực tiếp cho nghệ sĩ ở Đà Nẵng.</span><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md">Đăng lại yêu cầu này</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md">Tìm nghệ sĩ trực tiếp</x-import></div></div></sc-if>
+<sc-if value="{{ hasProps }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px;align-items:start"><sc-for list="{{ list }}" as="p" hint-placeholder-count="3"><dc-import name="RqProposal" p="{{ p.data }}" mode="{{ p.mode }}" cmp="{{ p.cmp }}" on-toggle="{{ toggleCmp }}" on-choose="{{ askChoose }}" on-message="{{ message }}" hint-size="100%,560px"></dc-import></sc-for></div></sc-if>
+</section>
+</div>
+</main>
+<sc-if value="{{ showTray }}" hint-placeholder-val="{{ false }}"><div role="region" aria-label="So sánh" style="position:fixed;left:50%;bottom:16px;z-index:40;transform:translateX(-50%);width:min(560px,calc(100% - 24px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 18px;border-radius:999px;background:var(--green-900);color:var(--gold-50);box-shadow:var(--shadow-lg)"><span style="font-size:15px;font-weight:600">{{ trayLabel }}</span><span style="display:flex;gap:6px"><button type="button" onClick="{{ clearCmp }}" style="min-height:44px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--gold-50);font:600 14px/1 var(--font-body);cursor:pointer">Bỏ chọn</button><button type="button" onClick="{{ openCmp }}" disabled="{{ cmpDisabled }}" style="min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--gold-400);color:var(--gold-900);font:700 14px/1 var(--font-body);cursor:pointer">So sánh</button></span></div></sc-if>
+<sc-if value="{{ cmpOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;padding:clamp(0px,3vw,32px)"><div onClick="{{ closeCmp }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ cmpRef }}" role="dialog" aria-modal="true" aria-labelledby="rq-cmp-t" onKeyDown="{{ dlgKey }}" style="position:relative;width:min(1180px,100%);max-height:100%;display:flex;flex-direction:column;border-radius:var(--fg-radius-lg);background:var(--bg-surface);box-shadow:var(--shadow-lg);overflow:hidden">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border-subtle)"><h2 id="rq-cmp-t" style="margin:0;font:600 20px/1.2 var(--font-display)">So sánh {{ cmpCount }} đề xuất</h2><button type="button" data-close="" onClick="{{ closeCmp }}" style="min-height:44px;padding:0 12px;border:0;background:none;color:var(--text-link);font:600 15px/1 var(--font-body);cursor:pointer">Đóng</button></div>
+<div style="flex:1;overflow:auto;scroll-snap-type:x mandatory">
+<div style="display:flex;flex-direction:column;min-width:max-content">
+<sc-for list="{{ cmpRows }}" as="row" hint-placeholder-count="7"><div style="display:flex;border-bottom:1px solid var(--border-subtle)"><span style="position:sticky;left:0;z-index:1;flex:0 0 112px;padding:14px 16px;background:var(--bg-sunken);font:600 12px/1.4 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">{{ row.label }}</span><sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="2"><div style="flex:0 0 clamp(236px,30vw,340px);padding:14px 16px;scroll-snap-align:start;border-left:1px solid var(--border-subtle);min-width:0">
+<sc-if value="{{ c.isText }}" hint-placeholder-val="{{ true }}"><span style="font-size:15px;line-height:1.5;overflow-wrap:anywhere">{{ c.text }}</span></sc-if>
+<sc-if value="{{ c.isPrice }}" hint-placeholder-val="{{ false }}"><strong style="font:600 26px/1 var(--font-display);font-variant-numeric:tabular-nums">{{ c.text }}</strong></sc-if>
+<sc-if value="{{ c.isName }}" hint-placeholder-val="{{ false }}"><strong style="font-size:16px;line-height:1.3">{{ c.text }}</strong></sc-if>
+<sc-if value="{{ c.isImgs }}" hint-placeholder-val="{{ false }}"><span style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;background:var(--dr-line)"><sc-for list="{{ c.imgs }}" as="im" hint-placeholder-count="3"><span style="aspect-ratio:1;display:grid;place-items:center;padding:3px;background:var(--dr-bg)"><img src="{{ im }}" alt="" style="display:block;max-width:100%;max-height:100%"></span></sc-for></span></sc-if>
+<sc-if value="{{ c.isAct }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-wrap:wrap;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="sm" on-click="{{ c.choose }}">Chọn đề xuất này</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="sm">Nhắn tin</x-import></span></sc-if>
+</div></sc-for></div></sc-for>
+</div></div></div></div></sc-if>
+<sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:950;display:grid;place-items:center;padding:16px"><div onClick="{{ cancelChoose }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ confRef }}" role="alertdialog" aria-modal="true" aria-labelledby="rq-conf-t" aria-describedby="rq-conf-d" onKeyDown="{{ dlgKey }}" style="position:relative;width:min(480px,100%);display:flex;flex-direction:column;gap:16px;padding:24px;border-radius:var(--fg-radius-lg);background:var(--bg-surface);box-shadow:var(--shadow-lg)"><h2 id="rq-conf-t" style="margin:0;font:600 22px/1.2 var(--font-display);text-wrap:balance">Chọn {{ confName }} cho YC-2026-00012?</h2><p id="rq-conf-d" style="margin:0;font-size:15px;line-height:1.55;color:var(--text-secondary)">Nghệ sĩ nhận thông báo để chốt lịch với bạn. Các nghệ sĩ khác được báo là yêu cầu đã có người nhận. Giá đề xuất {{ confPrice }}. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ, Fgrapher không thu tiền.</p><div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md" on-click="{{ cancelChoose }}">Để sau</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md" on-click="{{ doChoose }}">Chọn nghệ sĩ này</x-import></div></div></div></sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p); this.q = new URLSearchParams(window.location.search); const st = this.q.get('state') || '';
+    this.state = { w: window.innerWidth, st, sort: 'new', cmp: this.q.get('cmp') ? this.q.get('cmp').split(',') : [], cmpOpen: this.q.get('cmp') === 'p1,p2' && this.q.get('open') === '1', confirm: null, chosen: st === 'chosen' ? 'p1' : null, sheetOpen: false };
+  }
+  rootRef = React.createRef(); cmpRef = React.createRef(); confRef = React.createRef();
+  componentDidMount() { this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR); this.paint(); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  componentDidUpdate(pp, ps) {
+    this.paint();
+    const open = (el, was, now) => { if (!was && now && el) { const b = el.querySelector('button'); b && b.focus({ preventScroll: true }); if (el.animate && !(window.fgKit && window.fgKit.reduced())) el.animate([{ opacity: 0, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 200, easing: 'cubic-bezier(0,0,.2,1)' }); } };
+    open(this.cmpRef.current, ps.cmpOpen, this.state.cmpOpen); open(this.confRef.current, !!ps.confirm, !!this.state.confirm);
+  }
+  paint() { const r = this.rootRef.current; if (!r) return; r.querySelectorAll('[data-seg]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--brand-primary)' : 'transparent'; b.style.color = on ? 'var(--text-on-brand)' : 'var(--text-primary)'; }); }
+  data(long) {
+    const img = (s, i) => `https://picsum.photos/seed/fgrq-${s}${i}/${i === 1 ? 360 : 300}/${i === 1 ? 240 : 380}`;
+    const P = [
+      { id: 'p1', name: 'Minh Anh Nhiếp Ảnh', initials: 'MA', role: 'Nhiếp ảnh gia', area: 'Phường Hội An, Thành phố Đà Nẵng', price: '7.500.000₫', n: 7500000, includes: '4 giờ chụp · 150 ảnh chỉnh màu · 1 album in 20×30cm', after: '2 giờ', h: 2, sentAt: '30/09/2026 11:20', rating: '4,9', r: 4.9, reviews: 23, msg: 'Chào chị Hà, em chụp ở An Bàng nhiều lần nên biết giờ nào nắng đẹp nhất tháng 11. Em đề xuất bắt đầu 16:00 để có 30 phút trước hoàng hôn. Ảnh giao trong 14 ngày, kịp in thiệp trước 20/11/2026.' },
+      { id: 'p2', name: 'Đặng Khôi Nguyên Film & Photography Collective', initials: 'KN', role: 'Nhiếp ảnh gia, Quay phim', area: 'Phường Sơn Trà, Thành phố Đà Nẵng', price: '9.800.000₫', n: 9800000, includes: '5 giờ · 2 người chụp · phim phóng sự 3 phút · 200 ảnh', after: '5 giờ', h: 5, sentAt: '30/09/2026 14:02', rating: '5,0', r: 5, reviews: 8, msg: 'Nhóm mình có một người chụp ảnh và một người quay nên không bỏ lỡ khoảnh khắc nào của 40 khách. Tone màu phim như ảnh tham khảo 02A.' },
+      { id: 'p3', name: 'Lê Hải Studio', initials: 'LH', role: 'Nhiếp ảnh gia', area: 'Phường Hải Châu, Thành phố Đà Nẵng', price: '5.200.000₫', n: 5200000, includes: '3 giờ chụp · 100 ảnh chỉnh màu', after: '1 ngày', h: 24, sentAt: '01/10/2026 09:40', rating: '', r: 0, reviews: 0, msg: 'Mình mới lên Fgrapher nhưng đã chụp cưới ở Hội An 4 năm. Có thể thêm 1 giờ chụp gia tiên buổi sáng với giá 1.200.000₫.' }
+    ];
+    if (long) {
+      P[0].msg = 'Chào chị Hà, em chụp ở An Bàng nhiều lần nên biết giờ nào nắng đẹp nhất tháng 11. Em đề xuất bắt đầu 16:00 để có 30 phút trước hoàng hôn, sau đó về nhà hàng bên sông Hoài chụp tiệc tối. Nếu trời mưa, em có phương án chụp trong nhà cổ Tấn Ký, đã xin phép chủ nhà từ trước. Ảnh chỉnh màu giao trong 14 ngày, kịp in thiệp trước 20/11/2026. Album in 20×30cm giao sau 21 ngày. Chị cần thêm ảnh gia tiên buổi sáng thì em báo thêm giá.';
+      P.push({ id: 'p4', name: 'Trần Quốc Bảo', initials: 'QB', role: 'Quay phim', area: 'Phường Ngũ Hành Sơn, Thành phố Đà Nẵng', price: '6.000.000₫', n: 6000000, includes: 'Phim ngắn 5 phút · flycam nếu thời tiết cho phép', after: '1 ngày', h: 26, sentAt: '01/10/2026 11:30', rating: '4,7', r: 4.7, reviews: 12, msg: 'Em chỉ nhận quay, có thể phối hợp với người chụp chị chọn.' }, { id: 'p5', name: 'Nguyễn Hoàng Phương Thảo', initials: 'PT', role: 'Nhiếp ảnh gia', area: 'Phường Hội An Tây, Thành phố Đà Nẵng', price: '4.800.000₫', n: 4800000, includes: '3 giờ · 120 ảnh', after: '2 ngày', h: 50, sentAt: '02/10/2026 12:10', rating: '', r: 0, reviews: 0, msg: 'Em chụp phong cách tự nhiên, không tạo dáng nhiều.' });
+    }
+    P.forEach(p => { p.avatar = `https://picsum.photos/seed/fgrq-av${p.id}/80/80`; p.imgs = [0, 1, 2].map(i => img(p.id, i)); });
+    return P;
+  }
+  renderVals() {
+    const { w, st, sort, cmp, chosen, confirm } = this.state, m = w < 1024;
+    const expired = st === 'expired' || st === 'expired-empty', empty = st === 'empty' || st === 'expired-empty', loading = st === 'loading', error = st === 'error';
+    let P = empty || loading || error ? [] : this.data(st === 'long');
+    const S = { new: (a, b) => a.h - b.h, price: (a, b) => a.n - b.n, rating: (a, b) => b.r - a.r || b.reviews - a.reviews };
+    P = [...P].sort(S[sort]);
+    const byId = id => P.find(p => p.id === id) || this.data(true).find(p => p.id === id);
+    const mode = p => chosen ? (p.id === chosen ? 'chosen-this' : 'chosen-other') : expired ? 'expired' : 'open';
+    const cols = cmp.map(byId).filter(Boolean);
+    const chosenP = chosen && byId(chosen);
+    const stOpen = !expired && !chosen, sheetVisible = !m || this.state.sheetOpen;
+    return {
+      theme: this.q.get('theme') || 'light', isMobile: m, rootRef: this.rootRef, cmpRef: this.cmpRef, confRef: this.confRef,
+      stOpen, stExpired: expired && !chosen, stChosen: !!chosen, chosenName: chosenP ? chosenP.name : '', chosenNameUp: chosenP ? chosenP.name.toUpperCase() : '',
+      stamp: chosen ? 'ĐÃ CHỌN' : expired ? 'HẾT HẠN' : 'ĐANG NHẬN',
+      sheet: { need: 'Chụp ảnh · Cưới', when: '15/11/2026 · Hoàng hôn (16:30–18:30)\nLinh hoạt ± 3 ngày', where: 'Phường Hội An\nThành phố Đà Nẵng\nBãi biển An Bàng', style: 'Ánh sáng tự nhiên · Màu rực rỡ · Phóng sự', refs: [0, 3, 5].map((i, k) => ({ src: `https://picsum.photos/seed/fgrq-ref${i}/${i % 3 === 1 ? 360 : 300}/${i % 3 === 1 ? 240 : 380}`, alt: 'Ảnh tham khảo ' + (k + 1), num: '0' + (k + 1) + 'A' })), budget: '5.000.000–10.000.000₫', note: 'Khoảng 40 khách, chụp lúc hoàng hôn. Cần ảnh trước 20/11/2026.' },
+      showSheet: sheetVisible, sheetOpenA: this.state.sheetOpen ? 'true' : 'false', sheetIcon: this.state.sheetOpen ? '−' : '+', toggleSheet: () => this.setState(s => ({ sheetOpen: !s.sheetOpen })),
+      propsTitle: loading ? 'Đề xuất' : P.length ? `${P.length} đề xuất` : 'Đề xuất',
+      hasProps: P.length > 0, showHint: P.length > 1 && stOpen, loading, error, emptyOpen: empty && !expired, emptyExpired: empty && expired,
+      sorts: [['new', 'Gửi sớm nhất'], ['price', 'Giá thấp'], ['rating', 'Đánh giá']].map(([k, label]) => ({ label, on: sort === k ? 'true' : 'false', pick: () => this.setState({ sort: k }) })),
+      list: P.map(p => ({ data: p, mode: mode(p), cmp: cmp.includes(p.id) })),
+      toggleCmp: id => this.setState(s => ({ cmp: s.cmp.includes(id) ? s.cmp.filter(x => x !== id) : s.cmp.length >= 3 ? s.cmp : [...s.cmp, id] })),
+      askChoose: id => { this.prev = document.activeElement; this.setState({ confirm: id, cmpOpen: false }); },
+      message: () => {},
+      showTray: stOpen && cmp.length > 0 && !this.state.cmpOpen, trayLabel: cmp.length === 1 ? 'Chọn thêm 1–2 đề xuất' : `Đã chọn ${cmp.length}/3 đề xuất`, cmpDisabled: cmp.length < 2,
+      clearCmp: () => this.setState({ cmp: [] }), openCmp: () => { this.prev = document.activeElement; this.setState({ cmpOpen: true }); }, closeCmp: () => { this.setState({ cmpOpen: false }); this.prev && this.prev.focus && this.prev.focus(); },
+      cmpOpen: this.state.cmpOpen && cols.length > 1, cmpCount: cols.length,
+      cmpRows: [
+        ['Nghệ sĩ', p => ({ isName: true, text: p.name })], ['Giá', p => ({ isPrice: true, text: p.price })], ['Gồm', p => ({ isText: true, text: p.includes })],
+        ['Gửi sau', p => ({ isText: true, text: `${p.after} · ${p.sentAt}` })], ['Đánh giá', p => ({ isText: true, text: p.reviews > 0 ? `★ ${p.rating} · ${p.reviews} đánh giá` : 'Chưa có đánh giá' })],
+        ['Khu vực', p => ({ isText: true, text: p.area })], ['Ảnh mẫu', p => ({ isImgs: true, imgs: p.imgs })], ['Lời nhắn', p => ({ isText: true, text: p.msg })], ['', p => ({ isAct: true, choose: () => this.setState({ confirm: p.id, cmpOpen: false }) })]
+      ].map(([label, f]) => ({ label, cells: cols.map(p => ({ isText: false, isPrice: false, isName: false, isImgs: false, isAct: false, ...f(p) })) })),
+      confirmOpen: !!confirm, confName: confirm ? byId(confirm).name : '', confPrice: confirm ? byId(confirm).price : '',
+      cancelChoose: () => { this.setState({ confirm: null }); this.prev && this.prev.focus && this.prev.focus(); },
+      doChoose: () => this.setState({ chosen: confirm, confirm: null, cmp: [] }),
+      dlgKey: e => { if (e.key === 'Escape') this.setState({ confirm: null, cmpOpen: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

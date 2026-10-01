@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<svg aria-hidden="true" width="{{ s }}" height="{{ s }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ sw }}" stroke-linecap="round" stroke-linejoin="round" style="display:block">
+<sc-if value="{{ body }}" hint-placeholder-val="{{ true }}"><path d="M2.5 8.5h4.2l1.8-2.8h7l1.8 2.8h4.2v10.8h-19z"></path><circle cx="12" cy="13.6" r="3.7"></circle><path d="M18.2 11h.8"></path></sc-if>
+<sc-if value="{{ lens }}" hint-placeholder-val="{{ false }}"><path d="M3 8.5h13.5v7H3z"></path><path d="M16.5 9.5 21 8.5v7l-4.5-1"></path><path d="M7 8.5v7M10.5 8.5v7"></path></sc-if>
+<sc-if value="{{ light }}" hint-placeholder-val="{{ false }}"><path d="M3 8h9v8H3z"></path><path d="M12 9.5 20.5 5v14L12 14.5"></path><path d="M7.5 16v4.5M5 20.5h5"></path></sc-if>
+<sc-if value="{{ audio }}" hint-placeholder-val="{{ false }}"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v3.5M8.5 21h7"></path></sc-if>
+<sc-if value="{{ acc }}" hint-placeholder-val="{{ false }}"><path d="M8.5 3h7v3h-7z"></path><path d="M12 6v5M12 11 5 21M12 11l7 10M12 11v10"></path></sc-if>
+</svg>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:120,&quot;height&quot;:120},&quot;kind&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;body&quot;,&quot;lens&quot;,&quot;light&quot;,&quot;audio&quot;,&quot;acc&quot;],&quot;default&quot;:&quot;body&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:24,&quot;tsType&quot;:&quot;number&quot;},&quot;stroke&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1.5,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() { const k = this.props.kind || 'body'; return { s: this.props.size || 24, sw: this.props.stroke || 1.5, body: k === 'body', lens: k === 'lens', light: k === 'light', audio: k === 'audio', acc: k === 'acc' }; }
+}
+</script>
+</body>
+</html>

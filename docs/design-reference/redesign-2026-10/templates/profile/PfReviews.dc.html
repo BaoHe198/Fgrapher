@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:24px">
+<sc-if value="{{ hasReviews }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:24px;align-items:center;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font-family:var(--font-display);font-size:56px;line-height:1;font-weight:700;letter-spacing:-.03em">4,9</span>
+<x-import component-from-global-scope="Fgrapher.StarRating" rating="4.9" reviews="{{ 128 }}" size="{{ 18 }}" hint-size="160px,22px"></x-import>
+<span style="font-size:13px;color:var(--text-secondary)">Chỉ khách đã hoàn thành buổi chụp mới được đánh giá.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px" aria-label="Phân bổ số sao">
+<div style="display:grid;grid-template-columns:28px 1fr 36px;align-items:center;gap:10px"><span>5★</span><span style="height:6px;border-radius:3px;background:var(--bg-sunken);overflow:hidden"><span style="display:block;height:100%;width:88%;background:var(--gold-500)"></span></span><span style="text-align:right;color:var(--text-secondary)">113</span></div>
+<div style="display:grid;grid-template-columns:28px 1fr 36px;align-items:center;gap:10px"><span>4★</span><span style="height:6px;border-radius:3px;background:var(--bg-sunken);overflow:hidden"><span style="display:block;height:100%;width:9%;background:var(--gold-500)"></span></span><span style="text-align:right;color:var(--text-secondary)">11</span></div>
+<div style="display:grid;grid-template-columns:28px 1fr 36px;align-items:center;gap:10px"><span>3★</span><span style="height:6px;border-radius:3px;background:var(--bg-sunken);overflow:hidden"><span style="display:block;height:100%;width:2%;background:var(--gold-500)"></span></span><span style="text-align:right;color:var(--text-secondary)">3</span></div>
+<div style="display:grid;grid-template-columns:28px 1fr 36px;align-items:center;gap:10px"><span>2★</span><span style="height:6px;border-radius:3px;background:var(--bg-sunken);overflow:hidden"><span style="display:block;height:100%;width:1%;background:var(--gold-500)"></span></span><span style="text-align:right;color:var(--text-secondary)">1</span></div>
+<div style="display:grid;grid-template-columns:28px 1fr 36px;align-items:center;gap:10px"><span>1★</span><span style="height:6px;border-radius:3px;background:var(--bg-sunken);overflow:hidden"><span style="display:block;height:100%;width:0%;background:var(--gold-500)"></span></span><span style="text-align:right;color:var(--text-secondary)">0</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ reviews }}" as="r" hint-placeholder-count="3">
+<article style="display:flex;flex-direction:column;gap:10px;padding:20px 0;border-bottom:1px solid var(--border-subtle)">
+<div style="display:flex;align-items:center;gap:12px">
+<img src="{{ r.avatar }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1"><strong style="font-size:15px">{{ r.name }}</strong><span style="font-size:13px;color:var(--text-secondary)">{{ r.service }} · {{ r.date }}</span></div>
+<x-import component-from-global-scope="Fgrapher.StarRating" rating="{{ r.stars }}" hint-size="90px,18px"></x-import>
+</div>
+<p style="margin:0;font-size:15px;line-height:1.6;text-wrap:pretty">{{ r.text }}</p>
+<sc-if value="{{ r.reply }}" hint-placeholder-val="{{ false }}"><div style="margin-left:52px;padding:12px 14px;border-left:2px solid var(--gold-400);background:var(--bg-sunken);border-radius:0 var(--fg-radius-sm) var(--fg-radius-sm) 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;font-weight:700;color:var(--text-secondary)">Phản hồi của {{ artist }}</span><p style="margin:0;font-size:14px;line-height:1.55">{{ r.reply }}</p></div></sc-if>
+</article>
+</sc-for>
+</div>
+<div><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Xem tất cả 128 đánh giá</x-import></div>
+</sc-if>
+<sc-if value="{{ noReviews }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px;padding:24px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg)">
+<x-import component-from-global-scope="Fgrapher.StarRating" rating="Mới" reviews="{{ 0 }}" hide-count-when-zero="{{ true }}" hint-size="80px,20px"></x-import>
+<strong style="font-size:16px">Chưa có đánh giá</strong>
+<span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Nghệ sĩ mới tham gia Fgrapher. Danh tính đã được xác minh; đánh giá sẽ hiện sau buổi chụp đầu tiên.</span>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;empty&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;reviews&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object[]&quot;},&quot;artist&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Minh Anh&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const reviews = this.props.reviews || [];
+    const empty = this.props.mode === 'empty' || reviews.length === 0;
+    return { reviews, hasReviews: !empty, noReviews: empty, artist: this.props.artist || 'nghệ sĩ' };
+  }
+}
+</script>
+</body>
+</html>

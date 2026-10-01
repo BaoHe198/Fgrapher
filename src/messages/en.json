@@ -643,6 +643,12 @@
     },
     "sectionNav": {
       "label": "Sections on this page"
+    },
+    "masonry": {
+      "modeLabel": "Photo layout",
+      "masonry": "Original framing",
+      "contact": "Contact sheet",
+      "open": "Open photo {frame}"
     }
   },
   "accountFlows": {
@@ -4395,7 +4401,9 @@
     "mediaLightbox": {
       "close": "Close",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "label": "Photo viewer",
+      "frame": "Frame {current} / {total}"
     },
     "reviewModal": {
       "editTitle": "Edit your review",
@@ -4572,6 +4580,49 @@
       "errorLimit": "You can add up to {max} files. Skipped {skipped}.",
       "viewPhoto": "View photo",
       "viewVideo": "Play video"
+    },
+    "commandPalette": {
+      "title": "Quick search",
+      "open": "Open quick search",
+      "triggerLabel": "Search",
+      "inputLabel": "Search artists, albums, styles or pages",
+      "placeholder": "Search artists, albums, styles…",
+      "resultsLabel": "Results",
+      "searching": "Searching",
+      "cancel": "Cancel",
+      "groups": {
+        "recent": "Recent",
+        "goto": "Go to",
+        "artists": "Artists",
+        "albums": "Albums",
+        "styles": "Styles",
+        "pages": "Pages"
+      },
+      "pageSub": "Page · {path}",
+      "albumSub": "Album · {name}",
+      "styleSub": "Style · {role}",
+      "error": "Couldn't load artists and albums. Pages can still be searched.",
+      "retry": "Try again",
+      "emptyTitle": "Nothing found for “{query}”",
+      "emptyHint": "Check the spelling, or try an area or a style. Typing without accents works too.",
+      "resultCount": "{count, plural, =0 {No results} one {# result} other {# results}}",
+      "hintMove": "Move",
+      "hintOpen": "Open",
+      "hintEverywhere": "⌘K · every page",
+      "pages": {
+        "browse": "Ffinding",
+        "fmap": "Fmap",
+        "requests": "FBooking",
+        "shop": "Fmarket",
+        "community": "Fcommunity",
+        "about": "FIntroduce",
+        "dashboard": "Dashboard",
+        "bookings": "My bookings",
+        "messages": "Messages",
+        "notifications": "Notifications",
+        "settings": "Account settings",
+        "help": "Help"
+      }
     }
   },
   "serviceKind": {

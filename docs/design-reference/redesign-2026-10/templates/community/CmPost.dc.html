@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<article ref="{{ rootRef }}" aria-labelledby="{{ hid }}" style="display:flex;flex-direction:column;gap:14px;color:var(--dr-text);font-family:var(--font-body);min-width:0">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+<a href="#" style="display:flex;align-items:center;gap:10px;min-width:0;color:var(--dr-text);text-decoration:none"><x-import component-from-global-scope="Fgrapher.Avatar" size="sm" hint-size="32px,32px"><x-import component-from-global-scope="Fgrapher.AvatarImage" src="{{ p.author.avatar }}" alt=""></x-import><x-import component-from-global-scope="Fgrapher.AvatarFallback">{{ p.author.initials }}</x-import></x-import><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><strong style="font-size:15px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.author.name }}</strong><span style="font-size:13px;color:var(--dr-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.author.role }} · {{ p.date }}</span></span></a>
+<button type="button" data-follow="" aria-pressed="{{ followOn }}" onClick="{{ follow }}" style="flex:none;min-height:36px;padding:0 14px;border:1px solid var(--dr-line-2);border-radius:999px;background:transparent;color:var(--dr-text);font:600 13px/1 var(--font-body);cursor:pointer">{{ followLabel }}</button>
+</div>
+<sc-if value="{{ isStory }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><h3 style="margin:0;font:600 clamp(22px,2vw,28px)/1.15 var(--font-display);letter-spacing:-.015em;text-wrap:balance">{{ p.title }}</h3><p ref="{{ txtRef }}" style="margin:0;font-size:16px;line-height:1.65;color:var(--dr-text);text-wrap:pretty;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">{{ p.text }}</p><sc-if value="{{ canMore }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ more }}" aria-expanded="{{ moreOpen }}" style="align-self:flex-start;min-height:32px;padding:0;border:0;background:none;color:var(--gold-300);font:600 14px/1 var(--font-body);cursor:pointer">{{ moreLabel }}</button></sc-if></div></sc-if>
+<div ref="{{ gRef }}" style="display:flex;flex-direction:column;gap:3px">
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ open0 }}" aria-label="Xem lớn ảnh đầu của bài" style="display:grid;place-items:center;padding:0;border:0;background:var(--dr-surface);cursor:zoom-in"><img data-dev="" data-i="0" data-caption="{{ cap }}" src="{{ p.cover.src }}" width="{{ p.cover.w }}" height="{{ p.cover.h }}" alt="{{ p.cover.alt }}" loading="lazy" style="display:block;max-width:100%;max-height:78vh;width:auto;height:auto"></button></sc-if>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" viewBox="0 0 {{ p.cover.w }} {{ p.cover.h }}" style="display:block;width:100%;height:auto;max-height:78vh;background:var(--dr-raised)"></svg></sc-if>
+<sc-if value="{{ err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="position:relative"><svg aria-hidden="true" viewBox="0 0 {{ p.cover.w }} {{ p.cover.h }}" style="display:block;width:100%;height:auto;max-height:60vh;background:var(--dr-surface)"></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--dr-text-3)"><x-import component-from-global-scope="Fgrapher.FrameMark" size="44" hint-size="44px,44px"></x-import><span style="font-size:14px;color:var(--dr-text-2)">Không tải được ảnh</span><button type="button" onClick="{{ retry }}" style="min-height:40px;padding:0 14px;border:1px solid var(--dr-line-2);border-radius:999px;background:transparent;color:var(--dr-text);font:600 14px/1 var(--font-body);cursor:pointer">Thử lại</button></div></div></sc-if>
+<sc-if value="{{ hasStrip }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px"><sc-for list="{{ strip }}" as="s" hint-placeholder-count="4"><button type="button" onClick="{{ s.open }}" aria-label="Xem khung {{ s.num }}" style="position:relative;aspect-ratio:1;display:grid;place-items:center;padding:4px;border:0;background:var(--dr-surface);cursor:zoom-in"><sc-if value="{{ s.ok }}" hint-placeholder-val="{{ true }}"><img data-dev="" data-i="{{ s.i }}" data-caption="{{ cap }}" src="{{ s.src }}" alt="{{ s.alt }}" loading="lazy" style="display:block;max-width:100%;max-height:100%"></sc-if><sc-if value="{{ s.loading }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:100%;height:100%;background:var(--dr-raised)"></span></sc-if><span style="position:absolute;left:6px;bottom:5px;font:600 12px/1 var(--font-mono);color:var(--dr-text);text-shadow:0 1px 2px var(--dr-bg)">{{ s.num }}</span><sc-if value="{{ s.more }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:4px;display:grid;place-items:center;background:hsl(30 14% 5% / .72);font:600 14px/1 var(--font-mono);color:var(--dr-text)">+{{ s.rest }}</span></sc-if></button></sc-for></div></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font:600 12px/1.4 var(--font-mono);letter-spacing:.12em;color:var(--dr-text-2)">{{ mono }}</span><sc-if value="{{ hasCaption }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:15px;line-height:1.55;color:var(--dr-text);text-wrap:pretty">{{ p.caption }}</p></sc-if></div>
+<div style="display:flex;align-items:center;gap:4px;margin-left:-8px">
+<button type="button" data-like="" aria-pressed="{{ likeOn }}" aria-label="{{ likeAria }}" onClick="{{ like }}" style="display:flex;align-items:center;gap:6px;min-height:44px;min-width:44px;padding:0 8px;border:0;border-radius:999px;background:transparent;color:var(--dr-text-2);font:600 14px/1 var(--font-body);cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path data-heart="" d="M12 20s-7-4.4-9-9.2C1.8 7.4 4 4 7.4 4c2 0 3.4 1.2 4.6 2.8C13.2 5.2 14.6 4 16.6 4 20 4 22.2 7.4 21 10.8 19 15.6 12 20 12 20Z"></path></svg><sc-if value="{{ showLikeCount }}" hint-placeholder-val="{{ false }}"><span style="font-variant-numeric:tabular-nums">{{ likeCount }}</span></sc-if></button>
+<button type="button" onClick="{{ comment }}" aria-label="{{ cmtAria }}" style="display:flex;align-items:center;gap:6px;min-height:44px;min-width:44px;padding:0 8px;border:0;border-radius:999px;background:transparent;color:var(--dr-text-2);font:600 14px/1 var(--font-body);cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4V5Z"></path></svg><sc-if value="{{ hasCmt }}" hint-placeholder-val="{{ true }}"><span style="font-variant-numeric:tabular-nums">{{ p.comments }}</span></sc-if></button>
+<button type="button" data-save="" aria-pressed="{{ saveOn }}" aria-label="Lưu bài" onClick="{{ save }}" style="display:flex;align-items:center;min-height:44px;min-width:44px;padding:0 8px;border:0;border-radius:999px;background:transparent;color:var(--dr-text-2);cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path data-bm="" d="M6 3h12v18l-6-4-6 4V3Z"></path></svg></button>
+<sc-if value="{{ ownerNote }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font-size:13px;color:var(--dr-text-3)">{{ ownerLikes }}</span></sc-if>
+</div>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:900},&quot;p&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Post&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;likes&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;hidden&quot;,&quot;owner&quot;,&quot;public&quot;],&quot;default&quot;:&quot;hidden&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;isOwner&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;loggedIn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onNeedLogin&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { liked: false, saved: false, followed: false, more: false, clamp: false, st: null };
+  rootRef = React.createRef(); gRef = React.createRef(); txtRef = React.createRef();
+  componentDidMount() { this.paint(); const t = this.txtRef.current; if (t && t.scrollHeight > t.clientHeight + 2) this.setState({ clamp: true }); }
+  componentDidUpdate() { this.paint(); }
+  paint() {
+    const r = this.rootRef.current; if (!r) return;
+    const h = r.querySelector('[data-heart]'), lb = r.querySelector('[data-like]'); if (h) h.setAttribute('fill', this.state.liked ? 'currentColor' : 'none'); if (lb) lb.style.color = this.state.liked ? 'var(--dr-accent)' : 'var(--dr-text-2)';
+    const bm = r.querySelector('[data-bm]'), sb = r.querySelector('[data-save]'); if (bm) bm.setAttribute('fill', this.state.saved ? 'currentColor' : 'none'); if (sb) sb.style.color = this.state.saved ? 'var(--dr-accent)' : 'var(--dr-text-2)';
+    const f = r.querySelector('[data-follow]'); if (f) { f.style.background = this.state.followed ? 'transparent' : 'var(--dr-text)'; f.style.color = this.state.followed ? 'var(--dr-text-2)' : 'var(--dr-bg)'; f.style.borderColor = this.state.followed ? 'var(--dr-line-2)' : 'var(--dr-text)'; }
+    const t = this.txtRef.current; if (t) t.style.webkitLineClamp = this.state.more ? 'unset' : '5';
+  }
+  gate(fn) { if (!this.props.loggedIn) { this.props.onNeedLogin && this.props.onNeedLogin(); return; } fn(); }
+  open(i) {
+    const g = [...this.gRef.current.querySelectorAll('img')].sort((a, b) => a.dataset.i - b.dataset.i), im = g.find(x => +x.dataset.i === i) || g[0], p = this.props.p;
+    window.fgKit && im && window.fgKit.lightbox(im, { group: g, meta: (k, c, len) => `KHUNG ${String(k + 1).padStart(2, '0')} / ${String(p.frames || len).padStart(2, '0')} · ${p.title} · ${p.style}`.toUpperCase(), actions: () => [{ label: 'Xem album' }, { label: 'Xem hồ sơ' }] });
+  }
+  renderVals() {
+    const p = this.props.p || { author: {}, cover: {}, strip: [] }, st = this.state.st || this.props.state || '', lm = this.props.likes || 'hidden';
+    const lc = (p.likes || 0) + (this.state.liked ? 1 : 0);
+    const strip = (p.strip || []).slice(0, 4);
+    return {
+      rootRef: this.rootRef, gRef: this.gRef, txtRef: this.txtRef, p, hid: 'cm-' + p.id,
+      isStory: p.kind === 'story', ok: st !== 'loading' && st !== 'error', loading: st === 'loading', err: st === 'error', retry: () => this.setState({ st: 'ok' }),
+      cap: `${p.author.name} · ${p.title}`,
+      hasStrip: strip.length > 0, strip: strip.map((src, i) => ({ src, i: i + 1, num: (p.frameCode || '01') + 'ABCD'[i], alt: `Khung ${i + 2} của ${p.title}`, ok: st !== 'loading', loading: st === 'loading', more: i === 3 && p.frames > 5, rest: p.frames - 5, open: () => this.open(i + 1) })),
+      open0: () => this.open(0),
+      mono: [p.author.short, p.title, p.style, p.frames ? p.frames + ' khung' : '', p.area].filter(Boolean).join(' · ').toUpperCase(),
+      hasCaption: !!p.caption,
+      followOn: this.state.followed ? 'true' : 'false', followLabel: this.state.followed ? 'Đang theo dõi' : 'Theo dõi', follow: () => this.gate(() => this.setState(s => ({ followed: !s.followed }))),
+      likeOn: this.state.liked ? 'true' : 'false', likeAria: this.state.liked ? 'Bỏ thích' : 'Thích', like: () => this.gate(() => this.setState(s => ({ liked: !s.liked }))),
+      showLikeCount: lm === 'public' && lc > 0, likeCount: lc, ownerNote: lm === 'owner' && this.props.isOwner && lc > 0, ownerLikes: `${lc} lượt thích · chỉ bạn thấy`,
+      hasCmt: p.comments > 0, cmtAria: p.comments > 0 ? `${p.comments} bình luận` : 'Bình luận', comment: () => this.gate(() => {}),
+      saveOn: this.state.saved ? 'true' : 'false', save: () => this.gate(() => this.setState(s => ({ saved: !s.saved }))),
+      canMore: this.state.clamp, moreOpen: this.state.more ? 'true' : 'false', moreLabel: this.state.more ? 'Thu gọn' : 'Đọc tiếp', more: () => this.setState(s => ({ more: !s.more }))
+    };
+  }
+}
+</script>
+</body>
+</html>

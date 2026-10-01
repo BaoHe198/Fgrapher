@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section ref="{{ rootRef }}" id="pv-portfolio" aria-labelledby="pv-port-t" style="scroll-margin-top:120px;display:flex;flex-direction:column;gap:clamp(28px,4vw,56px);color:var(--text-primary);font-family:var(--font-body)">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">KHUNG 01 · PORTFOLIO</span><h2 id="pv-port-t" style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(30px,calc(12px + 2.6vw),52px);line-height:1;letter-spacing:-.025em">Album dự án</h2></div>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><div aria-busy="true" style="display:flex;flex-direction:column;gap:20px"><svg aria-hidden="true" viewBox="0 0 21 9" style="display:block;width:100%;height:auto;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></svg><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px"><svg aria-hidden="true" viewBox="0 0 3 2" style="display:block;width:100%;height:auto;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></svg><svg aria-hidden="true" viewBox="0 0 3 2" style="display:block;width:100%;height:auto;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></svg></div></div></sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:20px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg)"><span style="font-size:15px;line-height:1.5"><strong>Không tải được portfolio.</strong> <span style="color:var(--text-secondary)">Gói dịch vụ và lịch trống bên dưới vẫn dùng được.</span></span><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="sm">Thử lại</x-import></div></sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:48px 20px;text-align:center;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg);color:var(--text-tertiary)"><x-import component-from-global-scope="Fgrapher.FrameMark" size="56" hint-size="56px,56px"></x-import><strong style="font-size:17px;color:var(--text-primary)">{{ name }} chưa đăng album nào</strong><span style="max-width:420px;font-size:15px;line-height:1.55;color:var(--text-secondary)">Ảnh mới được duyệt trước khi hiển thị. Bạn vẫn xem được gói dịch vụ và gửi yêu cầu đặt lịch.</span></div></sc-if>
+<sc-if value="{{ hasAlbums }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:clamp(20px,3vw,40px) clamp(16px,2vw,28px)">
+<sc-for list="{{ albums }}" as="a" hint-placeholder-count="3"><article data-lead="{{ a.lead }}" style="display:flex;flex-direction:column;gap:14px;min-width:0"><button type="button" onClick="{{ a.open }}" aria-label="Mở album {{ a.title }}" style="display:block;width:100%;padding:0;border:0;border-radius:var(--fg-radius-md);overflow:hidden;background:var(--dr-bg);cursor:pointer"><img data-dev="" data-cover="{{ a.id }}" src="{{ a.cover }}" alt="{{ a.coverAlt }}" loading="lazy" style="display:block;width:100%;aspect-ratio:3/2;object-fit:cover;transition:transform 400ms cubic-bezier(0,0,.2,1)" style-hover="transform:scale(1.02)"></button><div style="display:flex;flex-direction:column;gap:6px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ a.eyebrow }}</span><h3 style="margin:0;font:600 clamp(22px,2vw,30px)/1.1 var(--font-display);letter-spacing:-.02em;text-wrap:balance">{{ a.title }}</h3><span style="font-size:14px;color:var(--text-secondary)">{{ a.meta }}</span></div></article></sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;padding-top:clamp(12px,2vw,24px)">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px"><h3 style="margin:0;font:600 24px/1.2 var(--font-display)">Tất cả ảnh</h3><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ photoCount }}</span></div>
+<div role="group" aria-label="Lọc theo phong cách" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ chips }}" as="c" hint-placeholder-count="5"><button type="button" data-chip="" aria-pressed="{{ c.on }}" onClick="{{ c.pick }}" style="display:flex;align-items:baseline;gap:6px;min-height:40px;padding:0 14px;border:1px solid var(--border-default);border-radius:999px;background:transparent;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer;transition:background-color 150ms,color 150ms"><span>{{ c.label }}</span><span style="font:600 12px/1 var(--font-mono);opacity:.8">{{ c.n }}</span></button></sc-for></div>
+<div ref="{{ gridRef }}" style="display:flex;gap:clamp(6px,.8vw,10px);align-items:flex-start"><sc-for list="{{ cols }}" as="col" hint-placeholder-count="3"><div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:clamp(6px,.8vw,10px)"><sc-for list="{{ col.items }}" as="p" hint-placeholder-count="4"><button type="button" onClick="{{ p.open }}" aria-label="{{ p.aria }}" style="display:block;width:100%;padding:0;border:0;background:var(--bg-sunken);cursor:zoom-in"><img data-dev="" data-i="{{ p.i }}" data-caption="{{ p.caption }}" src="{{ p.src }}" width="{{ p.w }}" height="{{ p.h }}" alt="{{ p.alt }}" loading="lazy" style="display:block;width:100%;height:auto"></button></sc-for></div></sc-for></div>
+</div>
+</sc-if>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;albums&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Album[]&quot;},&quot;photos&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Photo[]&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;name&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;kind&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;photo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onOpenAlbum&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id, img) =&gt; void&quot;},&quot;onBook&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { style: '', w: 900 };
+  rootRef = React.createRef(); gridRef = React.createRef();
+  componentDidMount() { this.paint(); const el = this.rootRef.current; if (el) { this.ro = new ResizeObserver(([e]) => { const w = Math.round(e.contentRect.width); if (Math.abs(w - this.state.w) > 8) this.setState({ w }); }); this.ro.observe(el); } }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); }
+  componentDidUpdate() { this.paint(); }
+  paint() {
+    const r = this.rootRef.current; if (!r) return;
+    r.querySelectorAll('[data-chip]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--brand-primary)' : 'transparent'; b.style.color = on ? 'var(--text-on-brand)' : 'var(--text-primary)'; b.style.borderColor = on ? 'var(--brand-primary)' : 'var(--border-default)'; });
+    r.querySelectorAll('[data-lead]').forEach(a => { a.style.gridColumn = a.dataset.lead === '1' ? '1 / -1' : ''; const im = a.querySelector('img'); if (im) im.style.aspectRatio = a.dataset.lead === '1' && this.state.w > 700 ? '21/9' : '3/2'; });
+  }
+  renderVals() {
+    const st = this.props.state || '', A = this.props.albums || [], P = this.props.photos || [];
+    const styles = [...new Set(P.map(p => p.style))];
+    const F = this.state.style ? P.filter(p => p.style === this.state.style) : P;
+    const n = this.state.w < 560 ? 2 : this.state.w < 980 ? 3 : 4;
+    const cols = Array.from({ length: n }, () => ({ items: [], hh: 0 }));
+    F.forEach((p, i) => { const c = cols.reduce((m, x) => x.hh < m.hh ? x : m, cols[0]); c.items.push({ ...p, i, aria: `Mở ảnh khung ${String(i + 1).padStart(2, '0')}, ${p.caption}`, open: e => this.open(e, F) }); c.hh += p.h / p.w; });
+    const empty = st === 'empty', ready = !st || st === 'long';
+    return {
+      rootRef: this.rootRef, gridRef: this.gridRef, name: this.props.name || '',
+      loading: st === 'loading', isError: st === 'error', isEmpty: empty, hasAlbums: ready && A.length > 0,
+      albums: A.map((a, i) => ({ ...a, lead: i === 0 ? '1' : '0', eyebrow: `ALBUM · KHUNG ${a.frame} · ${a.count} ẢNH`, meta: `${a.place} · ${a.date} · ${a.style}`, open: e => this.props.onOpenAlbum && this.props.onOpenAlbum(a.id, e.currentTarget.querySelector('img')) })),
+      photoCount: `${F.length} ẢNH`,
+      chips: [{ label: 'Tất cả', n: P.length, k: '' }, ...styles.map(s => ({ label: s, n: P.filter(p => p.style === s).length, k: s }))].map(c => ({ ...c, on: this.state.style === c.k ? 'true' : 'false', pick: () => this.setState({ style: c.k }) })),
+      cols
+    };
+  }
+  open(e, F) {
+    const im = e.currentTarget.querySelector('img'); const g = [...this.gridRef.current.querySelectorAll('img')].sort((a, b) => a.dataset.i - b.dataset.i);
+    const pad = n => String(n).padStart(2, '0');
+    window.fgKit && window.fgKit.lightbox(im, { group: g, meta: (i, cur, len) => `KHUNG ${pad(i + 1)} / ${pad(len)} · ${F[+cur.dataset.i] ? F[+cur.dataset.i].album + ' · ' + F[+cur.dataset.i].style : ''}`.toUpperCase(), actions: () => this.props.kind === 'costume' ? [] : [{ label: 'Đặt lịch', primary: true, onClick: this.props.onBook }] });
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section id="dk-masonry" style="scroll-margin-top:120px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">03 · COMPONENT</span><h2 style="margin:0;font:var(--text-heading-xl);letter-spacing:-.01em">MasonryGrid</h2><p style="margin:0;max-width:680px;font:var(--text-body-md);color:var(--text-secondary);text-wrap:pretty">Lưới ảnh giữ đúng tỉ lệ gốc. Nhiếp ảnh gia đã bố cục khung hình nên lưới không được cắt ảnh. Chế độ contact sheet xếp ảnh vào ô vuông đều nhau, ảnh vẫn nguyên khung (contain) và có số khung mono bên dưới. Bấm vào ảnh bất kỳ để xem chuyển cảnh lưới → lightbox ở mục 05.</p></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center">
+<div role="group" aria-label="Chế độ xem" style="display:flex;gap:4px;padding:4px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface)"><sc-for list="{{ modes }}" as="s" hint-placeholder-count="2"><button type="button" data-seg="" aria-pressed="{{ s.on }}" onClick="{{ s.pick }}" style="min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer;transition:background-color 150ms,color 150ms">{{ s.label }}</button></sc-for></div>
+<div role="group" aria-label="Bề mặt" style="display:flex;gap:4px;padding:4px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface)"><sc-for list="{{ surfs }}" as="s" hint-placeholder-count="2"><button type="button" data-seg="" aria-pressed="{{ s.on }}" onClick="{{ s.pick }}" style="min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer;transition:background-color 150ms,color 150ms">{{ s.label }}</button></sc-for></div>
+<div role="group" aria-label="Trạng thái" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface)"><sc-for list="{{ states }}" as="s" hint-placeholder-count="5"><button type="button" data-seg="" aria-pressed="{{ s.on }}" onClick="{{ s.pick }}" style="min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer;transition:background-color 150ms,color 150ms">{{ s.label }}</button></sc-for></div>
+</div>
+<div data-surface="{{ surf }}" style="display:flex;flex-direction:column;gap:20px;padding:clamp(12px,2.4vw,32px);border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-page);color:var(--text-primary);transition:background-color 260ms var(--ease-out)">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between"><strong style="font:600 20px/1.2 var(--font-display)">Cưới ở Hội An, mùa mưa</strong><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ countLabel }}</span></div>
+<div ref="{{ gridRef }}" style="min-width:0">
+<sc-if value="{{ showMasonry }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:clamp(8px,1.2vw,12px);align-items:flex-start"><sc-for list="{{ cols }}" as="col" hint-placeholder-count="4"><div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:clamp(8px,1.2vw,12px)"><sc-for list="{{ col.items }}" as="it" hint-placeholder-count="4">
+<sc-if value="{{ it.ok }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ it.open }}" aria-label="Mở ảnh {{ it.num }}" style="display:block;width:100%;padding:0;border:0;background:var(--bg-sunken);cursor:zoom-in;border-radius:2px"><img data-dev="" data-i="{{ it.i }}" data-caption="{{ it.caption }}" src="{{ it.src }}" alt="{{ it.alt }}" width="{{ it.w }}" height="{{ it.h }}" loading="lazy" style="display:block;width:100%;height:auto;box-shadow:0 0 0 1px var(--border-subtle)"></button></sc-if>
+<sc-if value="{{ it.loading }}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" viewBox="0 0 {{ it.w }} {{ it.h }}" style="display:block;width:100%;height:auto;background:var(--bg-sunken);border-radius:2px"></svg></sc-if>
+<sc-if value="{{ it.err }}" hint-placeholder-val="{{ false }}"><div style="position:relative;width:100%"><svg aria-hidden="true" viewBox="0 0 {{ it.w }} {{ it.h }}" style="display:block;width:100%;height:auto"></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px dashed var(--border-default);border-radius:2px;color:var(--text-secondary);font-size:13px;text-align:center;padding:8px"><span>Không tải được {{ it.num }}</span><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="sm">Thử lại</x-import></div></div></sc-if>
+</sc-for></div></sc-for></div></sc-if>
+<sc-if value="{{ showContact }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(104px,14vw,148px),1fr));gap:14px 4px"><sc-for list="{{ flat }}" as="it" hint-placeholder-count="12"><figure style="margin:0;display:flex;flex-direction:column;gap:6px">
+<sc-if value="{{ it.ok }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ it.open }}" aria-label="Mở ảnh {{ it.num }}" style="aspect-ratio:1;display:grid;place-items:center;padding:6px;border:0;background:var(--bg-sunken);cursor:zoom-in"><img data-dev="" data-i="{{ it.i }}" data-caption="{{ it.caption }}" src="{{ it.src }}" alt="{{ it.alt }}" loading="lazy" style="display:block;max-width:100%;max-height:100%;box-shadow:0 0 0 1px var(--border-subtle)"></button></sc-if>
+<sc-if value="{{ it.loading }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="display:block;aspect-ratio:1;background:var(--bg-sunken)"></span></sc-if>
+<sc-if value="{{ it.err }}" hint-placeholder-val="{{ false }}"><span style="aspect-ratio:1;display:grid;place-items:center;padding:6px;border:1px dashed var(--border-default);font-size:12px;text-align:center;color:var(--text-secondary)">Không tải được</span></sc-if>
+<figcaption style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ it.num }}</figcaption>
+</figure></sc-for></div></sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:56px 20px;text-align:center;color:var(--text-tertiary)"><x-import component-from-global-scope="Fgrapher.FrameMark" size="56" hint-size="56px,56px"></x-import><strong style="font-size:16px;color:var(--text-primary)">Album này chưa có ảnh</strong><span style="max-width:360px;font-size:14px;line-height:1.5;color:var(--text-secondary)">Nghệ sĩ chưa đăng ảnh vào album này. Xem các album khác trong hồ sơ.</span><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="sm">Về hồ sơ</x-import></div></sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:56px 20px;text-align:center"><strong style="font-size:16px">Không tải được album</strong><span style="max-width:360px;font-size:14px;line-height:1.5;color:var(--text-secondary)">Kiểm tra kết nối mạng rồi thử lại. Ảnh đã xem vẫn còn trong bộ nhớ đệm.</span><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="sm" on-click="{{ retry }}">Thử lại</x-import></div></sc-if>
+</div>
+<sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md" on-click="{{ more }}">{{ moreLabel }}</x-import><span style="font-size:13px;color:var(--text-secondary)">Tải thêm theo lô 24 ảnh khi người dùng bấm. Không tự cuộn vô tận.</span></div></sc-if>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Bố cục gốc</strong><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--text-secondary)"><li>Cột chia theo chiều rộng khung: 2 cột dưới 480px, 3 cột dưới 900px, 4 cột từ 900px trở lên.</li><li>Ảnh xếp theo thứ tự nhiếp ảnh gia đặt, mỗi ảnh vào cột đang ngắn nhất. Chiều cao tính trước từ width/height nên trang không nhảy.</li><li>Khe 8px trên điện thoại, 12px trên máy tính. Không có hover nhấc thẻ, lưới đứng yên.</li></ul></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Contact sheet</strong><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--text-secondary)"><li>Ô vuông tối thiểu 104px trên điện thoại, 148px trên máy tính. Ảnh nằm gọn trong ô, phần thừa để nền --bg-sunken.</li><li>Số khung = cuộn + chữ cái: 6 khung một cuộn (01A…01F, 02A…).</li><li>Khi đổi chế độ, lựa chọn được lưu theo từng người dùng. Vị trí cuộn bám theo ảnh đang ở đầu khung nhìn.</li></ul></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Props · a11y · hiệu năng</strong><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--text-secondary)"><li><code style="font:500 12px/1 var(--font-mono)">items[{ src, width, height, alt }]</code>, <code style="font:500 12px/1 var(--font-mono)">mode</code>, <code style="font:500 12px/1 var(--font-mono)">onOpen(index)</code>, <code style="font:500 12px/1 var(--font-mono)">pageSize = 24</code>.</li><li>Mỗi ảnh là một nút có nhãn “Mở ảnh 01A”. Tab đi theo thứ tự ảnh, không theo cột.</li><li>Ảnh lazy, srcset theo độ rộng cột. Tráng ảnh chỉ chạy lần đầu tải, ảnh đã có trong bộ nhớ đệm thì hiện ngay.</li></ul></div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { mode: 'masonry', surf: 'darkroom', s: 'ok', w: 900, shown: 24 };
+  gridRef = React.createRef();
+  componentDidMount() {
+    const el = this.gridRef.current; if (!el) return;
+    this.ro = new ResizeObserver(([e]) => { const w = Math.round(e.contentRect.width); if (Math.abs(w - this.state.w) > 8) this.setState({ w }); });
+    this.ro.observe(el); this.paint();
+  }
+  paint() { window.fgKit && window.fgKit.paintSeg(document.getElementById('dk-masonry')); }
+  componentDidUpdate() { this.paint(); }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); }
+  seg(list, key) { return list.map(([k, label]) => ({ label, on: this.state[key] === k ? 'true' : 'false', pick: () => this.setState({ [key]: k, shown: 24 }) })); }
+  open(e) {
+    const img = e.currentTarget.querySelector('img'); if (!img || !window.fgKit) return;
+    const grid = this.gridRef.current;
+    const group = [...grid.querySelectorAll('img')].sort((a, b) => (+a.dataset.i || 0) - (+b.dataset.i || 0));
+    window.fgKit.lightbox(img, { group, label: i => this.num(i) });
+  }
+  num(i) { return String(Math.floor(i / 6) + 1).padStart(2, '0') + 'ABCDEF'[i % 6]; }
+  renderVals() {
+    const { mode, surf, s, w, shown } = this.state;
+    const R = [[4, 5], [3, 2], [2, 3], [4, 5], [1, 1], [3, 2], [4, 5], [16, 9], [2, 3], [3, 2], [4, 5], [3, 4]];
+    const total = s === 'long' ? 48 : 12, n = Math.min(total, s === 'long' ? shown : 12);
+    const caps = ['Nhà cổ Tấn Ký', 'Bến sông Hoài', 'Chùa Cầu', 'Rặng dừa Cẩm Thanh', 'Đèn lồng phố Nguyễn Thái Học', 'Mưa trên mái ngói'];
+    const items = Array.from({ length: s === 'empty' || s === 'error' ? 0 : n }, (_, i) => {
+      const [a, b] = R[i % R.length], W = 600, H = Math.round(W * b / a);
+      return { i, w: W, h: H, ratio: `${a}/${b}`, src: `https://picsum.photos/seed/fgdk-m${i}/${W}/${H}`, num: this.num(i), alt: `Ảnh ${this.num(i)} · ${caps[i % 6]}`, caption: caps[i % 6], ok: s !== 'loading' && !(s === 'ok' && i === 5), loading: s === 'loading', err: s === 'ok' && i === 5, open: e => this.open(e) };
+    });
+    const colsN = w < 480 ? 2 : w < 900 ? 3 : 4;
+    const cols = Array.from({ length: colsN }, () => ({ items: [], hgt: 0 }));
+    items.forEach(it => { const c = cols.reduce((m, x) => x.hgt < m.hgt ? x : m, cols[0]); c.items.push(it); c.hgt += it.h / it.w; });
+    const masonry = mode === 'masonry' && items.length > 0;
+    return {
+      modes: this.seg([['masonry', 'Bố cục gốc'], ['contact', 'Contact sheet']], 'mode'),
+      surfs: this.seg([['darkroom', 'Phòng tối'], ['paper', 'Giấy']], 'surf'),
+      states: this.seg([['ok', 'Bình thường'], ['loading', 'Đang tải'], ['empty', 'Trống'], ['error', 'Lỗi'], ['long', 'Album dài']], 's'),
+      surf: surf === 'darkroom' ? 'darkroom' : 'paper',
+      gridRef: this.gridRef, gap: w < 600 ? '8px' : '12px', cell: w < 600 ? '104px' : '148px',
+      cols, flat: items, showMasonry: masonry, showContact: mode === 'contact' && items.length > 0,
+      isEmpty: s === 'empty', isError: s === 'error',
+      countLabel: s === 'empty' || s === 'error' ? 'KHUNG 12' : `KHUNG 12 · ${total} ẢNH`,
+      retry: () => this.setState({ s: 'loading' }, () => setTimeout(() => this.setState({ s: 'ok' }), 900)),
+      hasMore: s === 'long' && shown < total, more: () => this.setState({ shown: shown + 24 }), moreLabel: `Xem thêm ${Math.min(24, total - shown)} ảnh`
+    };
+  }
+}
+</script>
+</body>
+</html>

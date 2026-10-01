@@ -643,6 +643,12 @@
     },
     "sectionNav": {
       "label": "Các mục trong trang"
+    },
+    "masonry": {
+      "modeLabel": "Cách xem ảnh",
+      "masonry": "Bố cục gốc",
+      "contact": "Contact sheet",
+      "open": "Mở ảnh {frame}"
     }
   },
   "accountFlows": {
@@ -4395,7 +4401,9 @@
     "mediaLightbox": {
       "close": "Đóng",
       "previous": "Ảnh trước",
-      "next": "Ảnh sau"
+      "next": "Ảnh sau",
+      "label": "Xem ảnh",
+      "frame": "Khung {current} / {total}"
     },
     "reviewModal": {
       "editTitle": "Chỉnh sửa đánh giá",
@@ -4572,6 +4580,49 @@
       "errorLimit": "Chỉ thêm được tối đa {max} tệp. Đã bỏ qua {skipped} tệp.",
       "viewPhoto": "Xem ảnh lớn",
       "viewVideo": "Phát video"
+    },
+    "commandPalette": {
+      "title": "Tìm nhanh",
+      "open": "Mở tìm nhanh",
+      "triggerLabel": "Tìm",
+      "inputLabel": "Tìm nghệ sĩ, album, phong cách hoặc trang",
+      "placeholder": "Tìm nghệ sĩ, album, phong cách…",
+      "resultsLabel": "Kết quả",
+      "searching": "Đang tìm",
+      "cancel": "Huỷ",
+      "groups": {
+        "recent": "Gần đây",
+        "goto": "Đi tới",
+        "artists": "Nghệ sĩ",
+        "albums": "Album",
+        "styles": "Phong cách",
+        "pages": "Trang"
+      },
+      "pageSub": "Trang · {path}",
+      "albumSub": "Album · {name}",
+      "styleSub": "Phong cách · {role}",
+      "error": "Không tải được nghệ sĩ và album. Trang trong hệ thống vẫn tìm được.",
+      "retry": "Thử lại",
+      "emptyTitle": "Không tìm thấy “{query}”",
+      "emptyHint": "Kiểm tra chính tả, hoặc thử tìm theo khu vực hay phong cách. Gõ không dấu cũng được.",
+      "resultCount": "{count, plural, =0 {Không có kết quả} other {# kết quả}}",
+      "hintMove": "Di chuyển",
+      "hintOpen": "Mở",
+      "hintEverywhere": "⌘K · mọi trang",
+      "pages": {
+        "browse": "Tìm kiếm F",
+        "fmap": "Bản đồ F",
+        "requests": "Đặt lịch F",
+        "shop": "Chợ F",
+        "community": "Cộng đồng F",
+        "about": "Giới thiệu F",
+        "dashboard": "Bảng điều khiển",
+        "bookings": "Lịch đặt của tôi",
+        "messages": "Tin nhắn",
+        "notifications": "Thông báo",
+        "settings": "Cài đặt tài khoản",
+        "help": "Trợ giúp"
+      }
     }
   },
   "serviceKind": {

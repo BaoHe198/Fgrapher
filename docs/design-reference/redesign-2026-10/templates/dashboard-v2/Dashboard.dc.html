@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Tổng quan nghệ sĩ v2" description="/dashboard: Hôm nay theo giờ + giờ vàng, yêu cầu đếm ngược 48 giờ, cuộn phim hồ sơ, số liệu tuần, ⌘K; 5 biến thể" -->
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--neutral-100)}</style></helmet>
+<div style="display:flex;flex-direction:column;gap:56px;padding:48px;font-family:var(--font-body);color:var(--neutral-900)">
+<div style="display:flex;flex-direction:column;gap:10px;max-width:900px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em">KHUNG 09 · TỔNG QUAN</span><h1 style="margin:0;font:700 56px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em">Tổng quan nghệ sĩ</h1><p style="margin:0;font-size:16px;line-height:1.55">Mở trang là thấy việc hôm nay: buổi chụp xếp theo giờ trên nền giờ vàng, yêu cầu chờ phản hồi có đếm ngược 48 giờ và nút xử lý tại chỗ. Mỗi khung chưa tráng trong cuộn phim là một việc hồ sơ còn thiếu. Số liệu luôn so với tuần trước, và chỉ hiện khi có dữ liệu thật. Phím tắt: A chấp nhận, X từ chối, M nhắn tin; ⌘K mở bảng lệnh (trên điện thoại mở dạng sheet từ dưới lên).</p></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font:700 28px/1 'Bricolage Grotesque',sans-serif">Máy tính 1440px</div><div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiếp ảnh gia · sáng</span><iframe src="DbPage.dc.html?theme=light&amp;variant=photo" style="width:1440px;height:1500px;border:0;background:white"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ bận · nội dung dài · tối</span><iframe src="DbPage.dc.html?theme=dark&amp;variant=busy" style="width:1440px;height:1500px;border:0;background:black"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ mới · chưa có dữ liệu · sáng</span><iframe src="DbPage.dc.html?theme=light&amp;variant=new" style="width:1440px;height:1100px;border:0;background:white"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Shop thiết bị · tối</span><iframe src="DbPage.dc.html?theme=dark&amp;variant=gear" style="width:1440px;height:1100px;border:0;background:black"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Shop trang phục · sáng</span><iframe src="DbPage.dc.html?theme=light&amp;variant=wear" style="width:1440px;height:1100px;border:0;background:white"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:16px"><span style="font-size:14px;font-weight:600">Đang tải · tối / Lỗi · sáng</span><iframe src="DbPage.dc.html?theme=dark&amp;state=loading" style="width:1440px;height:700px;border:0;background:black"></iframe><iframe src="DbPage.dc.html?theme=light&amp;state=error" style="width:1440px;height:900px;border:0;background:white"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font:700 28px/1 'Bricolage Grotesque',sans-serif">Điện thoại 390px</div><div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiếp ảnh gia · sáng</span><iframe src="DbPage.dc.html?theme=light&amp;device=mobile" style="width:390px;height:2200px;border:0;background:white"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ bận · tối</span><iframe src="DbPage.dc.html?theme=dark&amp;device=mobile&amp;variant=busy" style="width:390px;height:2200px;border:0;background:black"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ mới · tối</span><iframe src="DbPage.dc.html?theme=dark&amp;device=mobile&amp;variant=new" style="width:390px;height:1600px;border:0;background:black"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Shop trang phục · lỗi · sáng</span><iframe src="DbPage.dc.html?theme=light&amp;device=mobile&amp;variant=wear&amp;state=error" style="width:390px;height:1600px;border:0;background:white"></iframe></div>
+</div></div>
+</div>
+</x-dc>
+</body>
+</html>

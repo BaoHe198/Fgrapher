@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ rootRef }}" role="region" aria-label="{{ aria }}" style="display:flex;flex-direction:column;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-body);overflow:hidden">
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px;padding:18px 20px 14px;border-bottom:2px solid var(--text-primary)">
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">CALL SHEET · ĐẶT LỊCH F</span><strong style="font:600 22px/1 var(--font-mono);letter-spacing:.02em;font-variant-numeric:tabular-nums">{{ num }}</strong></div>
+<span style="padding:6px 10px;border:1.5px solid var(--text-primary);border-radius:4px;font:700 12px/1 var(--font-mono);letter-spacing:.12em;transform:rotate(-2deg)">{{ stamp }}</span>
+</div>
+<dl style="margin:0;display:flex;flex-direction:column">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="6"><div data-row="{{ r.key }}" style="display:grid;grid-template-columns:28px minmax(92px,.36fr) minmax(0,1fr);gap:4px 12px;align-items:baseline;padding:12px 20px;border-bottom:1px solid var(--border-subtle);transition:background-color 150ms">
+<span aria-hidden="true" style="font:600 12px/1.5 var(--font-mono);color:var(--text-tertiary)">{{ r.n }}</span>
+<dt style="font:600 12px/1.5 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">{{ r.label }}</dt>
+<dd style="margin:0;min-width:0;display:flex;flex-direction:column;gap:8px">
+<sc-if value="{{ r.has }}" hint-placeholder-val="{{ false }}"><span style="font-size:15px;line-height:1.45;overflow-wrap:anywhere;white-space:pre-line">{{ r.val }}</span></sc-if>
+<sc-if value="{{ r.empty }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;line-height:1.45;color:var(--text-tertiary)">Chưa điền</span></sc-if>
+<sc-if value="{{ r.hasRefs }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:4px"><sc-for list="{{ r.refs }}" as="f" hint-placeholder-count="3"><span style="display:flex;flex-direction:column;gap:4px;width:64px"><span style="width:64px;height:64px;display:grid;place-items:center;padding:3px;background:var(--dr-bg)"><img src="{{ f.src }}" alt="{{ f.alt }}" style="display:block;max-width:100%;max-height:100%"></span><span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">{{ f.num }}</span></span></sc-for></span></sc-if>
+</dd>
+</div></sc-for>
+</dl>
+<div style="padding:12px 20px;font-size:12px;line-height:1.5;color:var(--text-secondary);background:var(--bg-sunken)">Đặt cọc thỏa thuận trực tiếp với nghệ sĩ. Fgrapher không thu tiền trực tuyến.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:620},&quot;num&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;YC-2026-00012&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;stamp&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;NHÁP&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;need&quot;,&quot;when&quot;,&quot;where&quot;,&quot;style&quot;,&quot;budget&quot;,&quot;note&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;data&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{ need?, when?, where?, style?, refs?: {src,alt,num}[], budget?, note? }&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  componentDidMount() { this.paint(); }
+  componentDidUpdate() { this.paint(); }
+  paint() { const r = this.rootRef.current; if (!r) return; r.querySelectorAll('[data-row]').forEach(el => { el.style.background = el.dataset.row === this.props.active ? 'var(--bg-sunken)' : 'transparent'; }); }
+  renderVals() {
+    const d = this.props.data || {};
+    const L = [['need', 'Dịch vụ'], ['when', 'Thời gian'], ['where', 'Khu vực'], ['style', 'Phong cách'], ['budget', 'Ngân sách'], ['note', 'Mô tả thêm']];
+    return {
+      rootRef: this.rootRef, num: this.props.num || 'YC-2026-00012', stamp: this.props.stamp || 'NHÁP',
+      aria: 'Call sheet ' + (this.props.num || 'YC-2026-00012'),
+      rows: L.map(([key, label], i) => { const v = d[key]; const refs = key === 'style' ? (d.refs || []) : []; return { key, label, n: '0' + (i + 1), val: v || '', has: !!v, empty: !v && !refs.length, hasRefs: refs.length > 0, refs }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

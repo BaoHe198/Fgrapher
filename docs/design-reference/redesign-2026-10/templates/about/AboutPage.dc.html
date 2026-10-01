@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./fg-kit.js"></script><style>body{margin:0;background:var(--bg-page)}:root{--dr-bg:hsl(30 14% 5%);--dr-surface:hsl(30 11% 8%);--dr-raised:hsl(30 9% 12%);--dr-text:hsl(38 33% 92%);--dr-text-2:hsl(34 12% 72%);--dr-text-3:hsl(32 8% 60%);--dr-line:hsl(0 0% 100% / .06);--dr-line-2:hsl(0 0% 100% / .12);--dr-accent:var(--gold-400);--dr-scrim:hsl(30 14% 5% / .72)}[data-surface="darkroom"]{color-scheme:dark;--bg-page:var(--dr-bg);--bg-surface:var(--dr-surface);--bg-sunken:var(--dr-raised);--surface-card:var(--dr-surface);--text-primary:var(--dr-text);--text-secondary:var(--dr-text-2);--text-tertiary:var(--dr-text-3);--text-link:var(--gold-300);--border-subtle:var(--dr-line);--border-default:var(--dr-line-2);--border-strong:hsl(0 0% 100% / .2);--border-focus:var(--dr-accent);--brand-primary:hsl(168 38% 50%);--text-on-brand:hsl(168 62% 7%);--background:var(--dr-bg);--foreground:var(--dr-text);--card:var(--dr-surface);--card-foreground:var(--dr-text);--popover:var(--dr-surface);--popover-foreground:var(--dr-text);--muted:var(--dr-raised);--muted-foreground:var(--dr-text-2);--accent:var(--dr-raised);--accent-foreground:var(--dr-text);--secondary:var(--dr-raised);--secondary-foreground:var(--dr-text);--border:var(--dr-line-2);--input:var(--dr-line-2)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<a href="#ab-main" style="position:absolute;left:-9999px;top:8px;z-index:50;padding:10px 14px;border-radius:var(--fg-radius-sm);background:var(--bg-surface);color:var(--text-primary)" style-focus="left:8px">Bỏ qua tới nội dung</a>
+<header ref="{{ hdrRef }}" style="position:sticky;top:0;z-index:20;background:var(--dr-bg);box-shadow:0 1px 0 hsl(0 0% 100% / .06);transition:background-color 260ms cubic-bezier(0,0,.2,1)">
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,64px);height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+<a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a>
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><nav aria-label="Chính" style="display:flex;align-items:center;gap:4px"><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Tìm nghệ sĩ</a><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Bản đồ F</a><a href="#" aria-current="page" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-300);text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px">Giới thiệu F</a></nav></sc-if>
+<div style="display:flex;align-items:center;gap:8px"><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Đăng nhập</a></div>
+</div>
+</header>
+<main id="ab-main">
+<dc-import name="AbHero" state="{{ st }}" hint-size="100%,1000px"></dc-import>
+<dc-import name="AbStory" state="{{ st }}" is-mobile="{{ isMobile }}" hint-size="100%,2400px"></dc-import>
+<dc-import name="AbPaths" hint-size="100%,900px"></dc-import>
+<dc-import name="AbTrust" hint-size="100%,800px"></dc-import>
+<dc-import name="AbStats" mode="{{ stats }}" hint-size="100%,360px"></dc-import>
+<dc-import name="AbFaq" state="{{ faqState }}" hint-size="100%,900px"></dc-import>
+</main>
+<x-import component-from-global-scope="Fgrapher.Footer" hint-size="100%,320px"></x-import>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.q = new URLSearchParams(window.location.search); this.state = { w: window.innerWidth, dr: true }; }
+  hdrRef = React.createRef();
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR);
+    let raf = 0;
+    this.onS = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; const on = [...document.querySelectorAll('main [data-surface="darkroom"]')].some(n => { const r = n.getBoundingClientRect(); return r.top <= 30 && r.bottom > 30; }); if (on !== this.state.dr) this.setState({ dr: on }); }); };
+    window.addEventListener('scroll', this.onS, { passive: true }); setTimeout(this.onS, 300);
+  }
+  componentDidUpdate() { const h = this.hdrRef.current; if (h) h.style.background = this.state.dr ? 'var(--dr-bg)' : 'var(--green-900)'; }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); window.removeEventListener('scroll', this.onS); }
+  renderVals() {
+    const d = this.state.w >= 1024, st = this.q.get('state') || '';
+    return { theme: this.q.get('theme') || 'light', isDesktop: d, isMobile: !d, hdrRef: this.hdrRef, st, stats: this.q.get('stats') || 'none', faqState: this.q.get('form') || (st === 'long' ? 'long' : '') };
+  }
+}
+</script>
+</body>
+</html>
