@@ -14,8 +14,16 @@ type Media =
   | { type: "image"; src: string | null; alt: string }
   | {
       type: "contact";
-      frames: { src: string | null; label: string; alt?: string }[];
+      /** Six to a row; twelve make two rolls. `meta` sits under the frame. */
+      frames: {
+        src: string | null;
+        label: string;
+        alt?: string;
+        meta?: string;
+      }[];
       picked?: number;
+      /** Edge print above the sheet, e.g. ["FGRAPHER 400", "12 KHUNG"]. */
+      edge?: [string, string];
     };
 
 interface EditorialHeroProps {
@@ -86,37 +94,50 @@ export function EditorialHero({
           />
         ) : null}
         {media?.type === "contact" ? (
-          <ol className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-6 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
-            {media.frames.map((item, index) => {
-              const picked = media.picked === index;
-              return (
-                <li
-                  key={item.label}
-                  className="flex w-32 shrink-0 snap-start flex-col gap-1.5 md:w-auto"
-                >
-                  <span
-                    className={cn(
-                      "block rounded-[var(--fg-radius-sm)] p-0.5",
-                      picked && "ring-2 ring-gold-400",
-                    )}
+          <div className="flex min-w-0 flex-col gap-3">
+            {media.edge ? (
+              <p className="flex justify-between font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+                <span>{media.edge[0]}</span>
+                <span>{media.edge[1]}</span>
+              </p>
+            ) : null}
+            <ol className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-6 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
+              {media.frames.map((item, index) => {
+                const picked = media.picked === index;
+                return (
+                  <li
+                    key={item.label}
+                    className="flex w-32 shrink-0 snap-start flex-col gap-1.5 md:w-auto"
                   >
-                    <FgImage
-                      src={item.src}
-                      alt={item.alt ?? ""}
-                      ratio="1/1"
-                      revealIndex={index}
-                      sizes="(min-width: 768px) 16vw, 128px"
-                      imageClassName="object-cover"
-                    />
-                  </span>
-                  <span className="flex justify-between font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-                    <span>{item.label}</span>
-                    {picked ? <span className="text-gold-400">●</span> : null}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+                    <span
+                      className={cn(
+                        "block rounded-[var(--fg-radius-sm)] p-0.5",
+                        picked && "ring-2 ring-gold-400",
+                      )}
+                    >
+                      <FgImage
+                        src={item.src}
+                        alt={item.alt ?? ""}
+                        ratio="1/1"
+                        revealIndex={index}
+                        sizes="(min-width: 768px) 16vw, 128px"
+                        // Contact sheets never crop (kit §03).
+                        className="bg-bg-surface"
+                        imageClassName="object-contain"
+                      />
+                    </span>
+                    <span className="flex justify-between gap-2 font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+                      <span>{item.label}</span>
+                      {item.meta ? (
+                        <span className="truncate">{item.meta}</span>
+                      ) : null}
+                      {picked ? <span className="text-gold-400">●</span> : null}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         ) : null}
       </div>
     </section>

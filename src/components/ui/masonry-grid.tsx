@@ -4,7 +4,10 @@ import * as React from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
+import { frameLabel } from "@/lib/media/frame-label";
 import { cn } from "@/lib/utils";
+
+export { frameLabel };
 
 // A photo grid that never crops (wave 2 kit §03): the photographer framed
 // the shot, so every photo keeps its own ratio. Photos go, in the order the
@@ -36,11 +39,6 @@ interface MasonryGridProps {
   renderOverlay?: (item: MasonryItem, index: number) => React.ReactNode;
   sizes?: string;
   className?: string;
-}
-
-export function frameLabel(index: number) {
-  const roll = String(Math.floor(index / 6) + 1).padStart(2, "0");
-  return `${roll}${"ABCDEF"[index % 6]}`;
 }
 
 // Literal classes so Tailwind generates them: the first roll develops in

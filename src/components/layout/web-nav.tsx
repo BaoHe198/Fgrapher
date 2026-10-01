@@ -218,7 +218,12 @@ export function WebNav({
             className="min-w-0 max-[389px]:gap-2 max-[389px]:[&_span]:text-heading-md"
           />
           <div className="flex items-center gap-1">
-            <CommandPaletteTrigger compact />
+            {/* Signed out, a 360px phone has no room next to the sign-up
+              button: the wordmark got clipped. */}
+            <CommandPaletteTrigger
+              compact
+              className={isAuthenticated ? undefined : "max-[389px]:hidden"}
+            />
             {isAuthenticated ? null : (
               <Button
                 variant="accent"

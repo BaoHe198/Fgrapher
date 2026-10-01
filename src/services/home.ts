@@ -163,3 +163,62 @@ const getHomeShowcaseCached = unstable_cache(
 export async function getHomeShowcase() {
   return reviveDates(await getHomeShowcaseCached());
 }
+
+// ---------------------------------------------------------------------------
+// Giới thiệu F (wave 2): a 12-frame contact sheet, two rolls of the six
+// roles in HOME_ROLES order - 01A-01F the newest photo of each role, 02A-02F
+// the next one, from a different provider where there is one. Same public
+// bar as the rest of this file; an empty slot stays empty (null), it is
+// never filled with stock imagery.
+// ---------------------------------------------------------------------------
+
+export interface AboutFrame {
+  role: Role;
+  url: string | null;
+  width: number | null;
+  height: number | null;
+}
+
+async function loadAboutFrames(): Promise<AboutFrame[]> {
+  const perRole = await Promise.all(
+    HOME_ROLES.map((role) =>
+      db.profileMedia.findMany({
+        where: {
+          ...PUBLIC_IMAGE_WHERE,
+          profile: { ...PUBLIC_IMAGE_WHERE.profile, role },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+        select: { url: true, width: true, height: true, profileId: true },
+      }),
+    ),
+  );
+  // The second roll prefers another provider, else that provider's next photo.
+  const picks = perRole.map((rows) => {
+    const first = rows[0];
+    const second =
+      rows.find((row) => first && row.profileId !== first.profileId) ?? rows[1];
+    return [first, second];
+  });
+  return [0, 1].flatMap((roll) =>
+    HOME_ROLES.map((role, i) => {
+      const media = picks[i][roll];
+      return {
+        role,
+        url: media?.url ?? null,
+        width: media?.width ?? null,
+        height: media?.height ?? null,
+      };
+    }),
+  );
+}
+
+const getAboutFramesCached = unstable_cache(
+  loadAboutFrames,
+  [CACHE_KEY_VERSION, "home", "about-frames"],
+  { tags: [CACHE_TAGS.search], revalidate: CACHE_TTL.featured },
+);
+
+export async function getAboutFrames() {
+  return getAboutFramesCached();
+}

@@ -562,8 +562,10 @@ export function CommandPalette({
 /** The search button in the header: opens the palette, shows ⌘K. */
 export function CommandPaletteTrigger({
   compact = false,
+  className,
 }: {
   compact?: boolean;
+  className?: string;
 }) {
   const t = useTranslations("sharedComponents.commandPalette");
   const palette = useCommandPalette();
@@ -585,6 +587,7 @@ export function CommandPaletteTrigger({
       className={cn(
         "focus-ring flex items-center gap-2 rounded-full border border-border-subtle bg-bg-surface text-text-secondary transition-colors duration-[var(--fg-dur-150)] hover:text-text-primary",
         compact ? "size-9 justify-center" : "h-9 pr-2 pl-3",
+        className,
       )}
     >
       <Search aria-hidden className="size-4" />
