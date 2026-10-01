@@ -5014,6 +5014,17 @@
         "budget": "Budget",
         "note": "Notes"
       }
+    },
+    "sunArc": {
+      "riseSet": "Sunrise {rise} · sunset {set}",
+      "clock": "Vietnam time (UTC+7), in the artist's area",
+      "goldenNote": "Golden hour: about 40 minutes around sunrise, and from 90 to 20 minutes before sunset. Low, soft, warm light."
+    },
+    "bookingVisual": {
+      "frame": "Frame 0{n}A",
+      "portfolio": "A few frames from the artist's portfolio.",
+      "skyAt": "An illustration of the light at {time}. The sun's position is worked out for the chosen day in the artist's area.",
+      "skyPick": "Sunrise {rise}, sunset {set}. Pick a time to see the light."
     }
   },
   "serviceKind": {

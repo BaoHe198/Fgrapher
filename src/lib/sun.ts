@@ -76,15 +76,15 @@ export function minutesToTime(minutes: number): string {
 }
 
 /**
- * Whether a slot starting at `start` catches golden light: from half an
- * hour before sunrise to an hour after it, and from an hour and a half
- * before sunset to sunset. A slot that starts in the window is enough -
- * shoots run past their start time.
+ * Whether a slot starting at `start` catches golden light (wave 2 booking
+ * design): about forty minutes around sunrise, and from an hour and a half
+ * to twenty minutes before sunset - low, soft, warm light. A slot that
+ * starts in the window is enough; shoots run past their start time.
  */
 export function isGoldenHourSlot(start: string, sun: SunTimes): boolean {
   const t = timeToMinutes(start);
   return (
-    (t >= sun.sunrise - 30 && t <= sun.sunrise + 60) ||
-    (t >= sun.sunset - 90 && t <= sun.sunset)
+    (t >= sun.sunrise - 20 && t <= sun.sunrise + 20) ||
+    (t >= sun.sunset - 90 && t <= sun.sunset - 20)
   );
 }

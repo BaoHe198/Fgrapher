@@ -317,6 +317,18 @@ export async function getProviderForBooking(providerId: string) {
           latitude: true,
           longitude: true,
           services: { where: { isActive: true }, orderBy: { price: "asc" } },
+          // The booking flow's darkroom pane (wave 2): a few of the
+          // artist's own approved photos, never stock imagery.
+          media: {
+            where: {
+              type: "IMAGE",
+              moderationStatus: "APPROVED",
+              deletedAt: null,
+            },
+            orderBy: { order: "asc" },
+            take: 6,
+            select: { url: true },
+          },
         },
       },
       roles: { select: { role: true, verificationStatus: true } },

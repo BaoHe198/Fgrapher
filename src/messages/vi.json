@@ -5014,6 +5014,17 @@
         "budget": "Ngân sách",
         "note": "Mô tả thêm"
       }
+    },
+    "sunArc": {
+      "riseSet": "Mặt trời mọc {rise} · lặn {set}",
+      "clock": "Giờ Việt Nam (UTC+7), tại khu vực của nghệ sĩ",
+      "goldenNote": "Giờ vàng: khoảng 40 phút quanh lúc mặt trời mọc, và từ 90 đến 20 phút trước khi lặn. Nắng thấp, mềm và ấm."
+    },
+    "bookingVisual": {
+      "frame": "Khung 0{n}A",
+      "portfolio": "Vài khung từ portfolio của nghệ sĩ.",
+      "skyAt": "Minh hoạ ánh sáng lúc {time}. Vị trí mặt trời tính theo ngày đã chọn tại khu vực của nghệ sĩ.",
+      "skyPick": "Mặt trời mọc {rise}, lặn {set}. Chọn một khung giờ để xem ánh sáng."
     }
   },
   "serviceKind": {

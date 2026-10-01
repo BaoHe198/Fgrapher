@@ -151,6 +151,9 @@ export default async function BookingFlowPage({
           : t("flow.confirmWithin48h")
       }
       sunPoint={sunPoint}
+      providerPhotos={provider.profiles
+        .flatMap((profile) => profile.media.map((media) => media.url))
+        .slice(0, 6)}
       services={services}
       contactPhoneDefault={customer?.phone ?? ""}
       isModel={isModel}

@@ -49,14 +49,19 @@ describe("isGoldenHourSlot", () => {
     sunset: timeToMinutes("18:00"),
   };
 
-  it("marks slots around sunrise and before sunset", () => {
+  it("marks about 40 minutes around sunrise", () => {
     assert.equal(isGoldenHourSlot("05:00", sun), false);
+    assert.equal(isGoldenHourSlot("05:20", sun), true);
     assert.equal(isGoldenHourSlot("05:30", sun), true);
     assert.equal(isGoldenHourSlot("06:00", sun), true);
-    assert.equal(isGoldenHourSlot("07:00", sun), false);
+    assert.equal(isGoldenHourSlot("06:30", sun), false);
+  });
+
+  it("marks 90 to 20 minutes before sunset, not sunset itself", () => {
     assert.equal(isGoldenHourSlot("16:00", sun), false);
     assert.equal(isGoldenHourSlot("16:30", sun), true);
     assert.equal(isGoldenHourSlot("17:30", sun), true);
-    assert.equal(isGoldenHourSlot("18:30", sun), false);
+    assert.equal(isGoldenHourSlot("17:45", sun), false);
+    assert.equal(isGoldenHourSlot("18:00", sun), false);
   });
 });

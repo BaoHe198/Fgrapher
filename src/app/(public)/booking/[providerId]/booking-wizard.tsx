@@ -20,6 +20,8 @@ import {
   type BookingSummaryRow,
 } from "@/components/booking/booking-summary";
 import { ModelSafetyNotice } from "@/components/booking/model-safety-notice";
+import { BookingVisual } from "@/components/booking/booking-visual";
+import { SunArc } from "@/components/booking/sun-arc";
 import { TimeSlotGrid } from "@/components/booking/time-slot-grid";
 import {
   ReferenceMediaField,
@@ -80,6 +82,8 @@ interface BookingWizardProps {
   responseNote: string;
   /** ~10 km-rounded coordinates for golden-hour hints, or null. */
   sunPoint: { latitude: number; longitude: number } | null;
+  /** The artist's own approved photos for the darkroom pane. */
+  providerPhotos: string[];
   services: ServiceOption[];
   contactPhoneDefault: string;
   isModel?: boolean;
@@ -217,6 +221,7 @@ export function BookingWizard({
   providerVerified,
   responseNote,
   sunPoint,
+  providerPhotos,
   services,
   contactPhoneDefault,
   isModel,
@@ -438,17 +443,21 @@ export function BookingWizard({
     monthCursor.getFullYear() === new Date().getFullYear() &&
     monthCursor.getMonth() === new Date().getMonth();
   const activeDay = days.find((d) => d.date === draft.date);
+  const sun = useMemo(
+    () =>
+      sunPoint && draft.date
+        ? sunTimes(draft.date, sunPoint.latitude, sunPoint.longitude)
+        : null,
+    [draft.date, sunPoint],
+  );
   const slots = useMemo(() => {
     if (!activeDay || !draft.date) return [];
-    const sun = sunPoint
-      ? sunTimes(draft.date, sunPoint.latitude, sunPoint.longitude)
-      : null;
     return activeDay.slots.map((slot) => ({
       start: slot.time,
       status: slot.available ? ("available" as const) : ("booked" as const),
       golden: sun ? isGoldenHourSlot(slot.time, sun) : false,
     }));
-  }, [activeDay, draft.date, sunPoint]);
+  }, [activeDay, draft.date, sun]);
 
   const stepValid = (index: number): boolean => {
     switch (STEPS[index]) {
@@ -880,6 +889,14 @@ export function BookingWizard({
                     </button>
                   </div>
                 ) : null}
+                {sun && slots.length > 0 && !daysLoading ? (
+                  <SunArc
+                    sun={sun}
+                    slots={slots}
+                    selected={draft.time}
+                    onSelect={(time) => update("time", time)}
+                  />
+                ) : null}
                 <TimeSlotGrid
                   slots={slots}
                   selected={draft.time}
@@ -1126,7 +1143,15 @@ export function BookingWizard({
           ) : null}
         </div>
 
-        <aside className="hidden lg:sticky lg:top-[96px] lg:block">
+        <aside className="hidden flex-col gap-4 lg:sticky lg:top-[96px] lg:flex">
+          <BookingVisual
+            step={step}
+            stepName={stepNames[step]}
+            photos={providerPhotos}
+            sun={sun}
+            time={draft.time}
+            showSky={current === "time"}
+          />
           <BookingSummary
             provider={{
               name: providerName,
