@@ -1,10 +1,11 @@
 "use client";
 
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Maximize2, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
+import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAccountMediaUpload } from "@/hooks/use-account-media-upload";
@@ -25,7 +26,17 @@ export function ProfileCover({
   coverImage,
   fallbackImage,
   isOwnProfile,
+  variant = "banner",
+  name,
 }: {
+  /**
+   * "hero" (wave 2 profile): fills its darkroom parent edge to edge, with a
+   * "Xem nguyên khung" button - the cover is the one place the photo is
+   * cropped, so the full frame is always one press away.
+   */
+  variant?: "banner" | "hero";
+  /** The person's name, for the full-frame viewer's caption. */
+  name?: string;
   coverImage: string | null;
   // A provider's own best approved photo, used when they haven't set a
   // cover. A photographer's page whose largest element is a brand
@@ -58,9 +69,17 @@ export function ProfileCover({
   // Only when we fell back — an owner-chosen cover is their composition
   // to frame, so it is left untouched.
   const needsScrim = !chosenCover && Boolean(fallbackImage);
+  const hero = variant === "hero";
+  const [fullFrame, setFullFrame] = useState(false);
 
   return (
-    <div className="relative h-[180px] w-full bg-bg-sunken sm:h-[260px]">
+    <div
+      className={
+        hero
+          ? "absolute inset-0 bg-dr-bg"
+          : "relative h-[180px] w-full bg-bg-sunken sm:h-[260px]"
+      }
+    >
       {displayCover ? (
         <>
           <Image
@@ -72,11 +91,32 @@ export function ProfileCover({
             className="object-cover"
             unoptimized={isOwnProfile}
           />
-          {needsScrim ? (
+          {needsScrim && !hero ? (
             <div className="absolute inset-0 bg-gradient-to-t from-scrim via-transparent to-transparent opacity-70" />
           ) : null}
+          {hero ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setFullFrame(true)}
+                className="focus-ring absolute top-4 right-5 z-10 inline-flex items-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 py-1.5 font-mono text-meta tracking-[0.12em] text-dr-text uppercase sm:right-8"
+              >
+                <Maximize2 aria-hidden className="size-3.5" />
+                {t("fullFrame")}
+              </button>
+              {fullFrame ? (
+                <MediaLightbox
+                  items={[{ url: displayCover, title: name, type: "IMAGE" }]}
+                  index={0}
+                  onClose={() => setFullFrame(false)}
+                  onIndexChange={() => {}}
+                  title={name}
+                />
+              ) : null}
+            </>
+          ) : null}
         </>
-      ) : (
+      ) : hero ? null : (
         <div
           className="size-full"
           style={{
@@ -92,7 +132,11 @@ export function ProfileCover({
             type="button"
             onClick={() => fileInput.current?.click()}
             aria-label={t("editCoverAria")}
-            className="absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-body-sm text-white"
+            className={
+              hero
+                ? "focus-ring absolute top-14 right-5 z-10 flex items-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 py-1.5 text-body-sm text-dr-text sm:right-8"
+                : "absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-body-sm text-white"
+            }
           >
             {uploading === "cover" ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -138,7 +182,10 @@ export function ProfileAvatar({
   avatar,
   displayName,
   isOwnProfile,
+  compact = false,
 }: {
+  /** Inline in the darkroom hero's meta row rather than overlapping a banner. */
+  compact?: boolean;
   avatar: string | null;
   displayName: string;
   isOwnProfile: boolean;
@@ -164,11 +211,21 @@ export function ProfileAvatar({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Avatar className="-mt-14 size-24 shrink-0 border-4 border-bg-page bg-bg-page sm:-mt-20 sm:size-[132px]">
+      <Avatar
+        className={
+          compact
+            ? "size-12 shrink-0 border border-dr-line-2 bg-dr-surface"
+            : "-mt-14 size-24 shrink-0 border-4 border-bg-page bg-bg-page sm:-mt-20 sm:size-[132px]"
+        }
+      >
         {displayAvatar ? (
           <AvatarImage src={displayAvatar} alt={displayName} />
         ) : null}
-        <AvatarFallback className="text-heading-lg sm:text-display-md">
+        <AvatarFallback
+          className={
+            compact ? "text-heading-sm" : "text-heading-lg sm:text-display-md"
+          }
+        >
           {displayName[0]?.toUpperCase()}
         </AvatarFallback>
 

@@ -3615,7 +3615,9 @@
         "upgradeHintSupport": "Gói của bạn đã hết hạn nên chưa tạo được album mới. <link>Liên hệ Fgrapher</link> để được gia hạn.",
         "albumsHeading": "Album dự án",
         "allPhotos": "Tất cả ảnh",
-        "filterByStyle": "Lọc theo phong cách"
+        "filterByStyle": "Lọc theo phong cách",
+        "albumsEyebrow": "Khung 01 · Portfolio",
+        "albumFrame": "Album · khung {frame} · {count} ảnh"
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
@@ -3693,7 +3695,11 @@
       "hero": {
         "editCoverAria": "Sửa ảnh bìa",
         "editCoverLabel": "Sửa ảnh bìa",
-        "editAvatarAria": "Sửa ảnh đại diện"
+        "editAvatarAria": "Sửa ảnh đại diện",
+        "frame": "Khung 00 · Hồ sơ",
+        "leader": "Portfolio ▸",
+        "book": "Đặt lịch",
+        "fullFrame": "Xem nguyên khung"
       },
       "albumEditDialog": {
         "title": "Chỉnh sửa album",
@@ -4578,6 +4584,19 @@
         "viewProfile": "Xem hồ sơ",
         "book": "Đặt lịch"
       }
+    },
+    "album": {
+      "metaTitle": "{title} — {name}",
+      "metaDescription": "Album ảnh của {name} trên Fgrapher.",
+      "photoAlt": "Khung {frame}",
+      "open": "Mở ảnh {frame}",
+      "bar": "Album · {count} ảnh",
+      "eyebrow": "Album · {count} khung",
+      "count": "{count} ảnh",
+      "book": "Đặt lịch",
+      "end": "Hết album",
+      "by": "Album của {name}",
+      "viewProfile": "Xem hồ sơ"
     }
   },
   "sharedComponents": {

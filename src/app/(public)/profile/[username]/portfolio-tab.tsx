@@ -20,10 +20,17 @@ import { GripVertical, Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
-import { startTransition, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  ViewTransition,
+} from "react";
 
 import { FrameMark } from "@/components/brand/frame-mark";
-import { FgImage } from "@/components/ui/fg-image";
+import { MasonryGrid } from "@/components/ui/masonry-grid";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { PostEngagement } from "@/components/social/post-engagement";
 import { buildMediaVariants } from "@/lib/media/variants";
@@ -200,6 +207,8 @@ function AlbumChip({
 }
 
 interface PortfolioTabProps {
+  /** For the album pages' URLs. */
+  username: string;
   albums: AlbumItem[];
   // Only present (non-null) when isOwnProfile — see profile-interactive.tsx.
   ownerAlbums: OwnerAlbum[] | null;
@@ -217,6 +226,7 @@ interface PortfolioTabProps {
 }
 
 export function PortfolioTab({
+  username,
   albums,
   ownerAlbums,
   profileId,
@@ -250,15 +260,23 @@ export function PortfolioTab({
   // /browse's "Album dự án" tab links to /profile/<name>?album=<id>#albums.
   // Read once on mount (a Client Component can't take searchParams here
   // without making the whole page dynamic on it).
+  // Older links (/browse's album tab, ⌘K) carry ?album=<id>: send them
+  // to the album's own page.
+  const router = useRouter();
   useEffect(() => {
     const albumId = new URLSearchParams(window.location.search).get("album");
     if (albumId && albums.some((album) => album.id === albumId)) {
-      startTransition(() => {
-        setOpenAlbumId(albumId);
-        setLightboxIndex(0);
-      });
+      router.replace(`/profile/${username}/albums/${albumId}`);
     }
-  }, [albums]);
+  }, [albums, router, username]);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const originFor = useCallback(
+    (index: number) =>
+      gridRef.current?.querySelector<HTMLElement>(
+        `[data-frame-index="${index}"]`,
+      ) ?? null,
+    [],
+  );
 
   if (!showOwnerGrid && albums.length === 0) {
     return (
@@ -287,8 +305,10 @@ export function PortfolioTab({
     activeCategory === null
       ? allPhotos
       : allPhotos.filter((photo) => photo.album.category === activeCategory);
+  // The grid shows photos; videos stay reachable inside their album.
+  const visibleImages = visiblePhotos.filter((photo) => photo.type === "IMAGE");
   const openPhoto =
-    photoIndex === null ? null : (visiblePhotos[photoIndex] ?? null);
+    photoIndex === null ? null : (visibleImages[photoIndex] ?? null);
 
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -371,57 +391,92 @@ export function PortfolioTab({
         </DndContext>
       ) : (
         <>
-          {/* "Album dự án" (redesign 09/2026): each album as a project -
-              cover, photo count, title and what the shoot was - opening
-              in the lightbox. /browse's album tab links here with
-              ?album=<id>, which opens it straight away. */}
-          <section className="flex flex-col gap-3">
-            <h3 className="text-heading-md text-text-primary">
-              {t("albumsHeading")}
-            </h3>
-            <ul className="-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
+          {/* Albums as projects (wave 2): big covers - the first across
+              the full width at 21:9, the rest 3:2 - each opening the
+              album's own photo-essay page, the cover flying there. The
+              cover is cropped here; the essay never crops. */}
+          <section className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+                {t("albumsEyebrow")}
+              </span>
+              <h3 className="text-heading-lg text-text-primary">
+                {t("albumsHeading")}
+              </h3>
+            </div>
+            <ul className="grid gap-x-5 gap-y-8 sm:grid-cols-2">
               {albums.map((album, index) => {
                 const cover = album.coverMedia ?? album.media[0] ?? null;
+                const wide = index === 0;
                 return (
                   <li
                     key={album.id}
                     id={`album-${album.id}`}
-                    className="flex w-[220px] shrink-0 snap-start flex-col gap-2 sm:w-auto"
+                    className={cn(
+                      "flex flex-col gap-2.5",
+                      wide && "sm:col-span-2",
+                    )}
                   >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenAlbumId(album.id);
-                        setLightboxIndex(0);
-                      }}
-                      className="group/album focus-ring flex flex-col gap-2 rounded-[var(--fg-radius-sm)] text-left"
+                    <Link
+                      href={`/profile/${username}/albums/${album.id}`}
+                      className="group/album focus-ring flex flex-col gap-2.5 rounded-[var(--fg-radius-sm)]"
                     >
-                      <FgImage
-                        src={
-                          cover && cover.type === "IMAGE"
-                            ? buildMediaVariants(cover.url).medium
-                            : null
-                        }
-                        alt=""
-                        ratio="4/3"
-                        revealIndex={index}
-                        sizes="(min-width: 1024px) 18vw, 220px"
-                        className="transition-[transform,box-shadow] duration-[var(--fg-dur-260)] ease-fg-out group-hover/album:-translate-y-0.5 group-hover/album:shadow-[var(--shadow-md)] motion-reduce:group-hover/album:translate-y-0"
-                        imageClassName="transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/album:scale-[1.03]"
+                      <span
+                        className={cn(
+                          "relative block overflow-hidden rounded-[var(--fg-radius-md)] bg-bg-sunken",
+                          wide
+                            ? "aspect-[3/2] sm:aspect-[21/9]"
+                            : "aspect-[3/2]",
+                        )}
                       >
-                        <span className="absolute bottom-2 left-2 rounded-[4px] bg-scrim px-1.5 py-0.5 font-mono text-meta text-gold-50">
-                          {t("photoCount", { count: album.media.length })}
-                        </span>
-                      </FgImage>
-                      <span className="line-clamp-2 text-heading-sm text-text-primary">
+                        {cover && cover.type === "IMAGE" ? (
+                          <ViewTransition
+                            name={`album-${album.id}`}
+                            share="morph"
+                            default="none"
+                          >
+                            <Image
+                              src={buildMediaVariants(cover.url).medium}
+                              alt=""
+                              fill
+                              unoptimized
+                              sizes={
+                                wide
+                                  ? "(min-width: 1024px) 66vw, 100vw"
+                                  : "(min-width: 640px) 33vw, 100vw"
+                              }
+                              className="object-cover transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/album:scale-[1.02] motion-reduce:transition-none"
+                            />
+                          </ViewTransition>
+                        ) : (
+                          <span className="absolute inset-0 grid place-items-center">
+                            <FrameMark
+                              size={34}
+                              className="text-text-tertiary"
+                            />
+                          </span>
+                        )}
+                      </span>
+                      <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+                        {t("albumFrame", {
+                          frame: String(albums.length - index).padStart(2, "0"),
+                          count: album.media.length,
+                        })}
+                      </span>
+                      <span className="text-heading-md text-text-primary group-hover/album:underline group-hover/album:underline-offset-4">
                         {album.title}
                       </span>
-                      {album.description ? (
+                      {album.category || album.description ? (
                         <span className="line-clamp-2 text-body-sm text-text-secondary">
-                          {album.description}
+                          {[
+                            album.category ? categoryT(album.category) : null,
+                            album.description,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </span>
                       ) : null}
-                    </button>
+                    </Link>
                     {album.socialPost ? (
                       <PostEngagement
                         postId={album.socialPost.id}
@@ -440,16 +495,16 @@ export function PortfolioTab({
             </ul>
           </section>
 
-          <section className="mt-6 flex flex-col gap-3">
+          <section className="mt-10 flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="flex items-baseline gap-2 text-heading-md text-text-primary">
                 {t("allPhotos")}
                 <span className="font-mono text-meta tabular-nums text-text-tertiary">
-                  {allPhotos.length}
+                  {t("photoCount", { count: allPhotos.length })}
                 </span>
               </h3>
               {/* Styles, not folder names: "Cưới / Kỷ yếu" is how a
-                  customer thinks; the album titles are the strip above. */}
+                  customer thinks; the album titles are the covers above. */}
               {photoCategories.length > 1 ? (
                 <div
                   role="group"
@@ -472,40 +527,23 @@ export function PortfolioTab({
                 </div>
               ) : null}
             </div>
-            {/* Every photo at its own aspect ratio: a photographer framed
-                the shot, so the mosaic never crops it to a uniform tile. */}
-            <div className="columns-2 gap-3 sm:columns-3 [&>*]:mb-3">
-              {visiblePhotos.map((photo, index) => (
-                <button
-                  key={photo.id}
-                  type="button"
-                  onClick={() => setPhotoIndex(index)}
-                  aria-label={photo.title ?? t("photoAria")}
-                  className="focus-ring block w-full cursor-pointer overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken break-inside-avoid"
-                >
-                  {photo.type === "VIDEO" ? (
-                    <video
-                      src={photo.url}
-                      className="w-full"
-                      muted
-                      playsInline
-                    />
-                  ) : (
-                    <Image
-                      src={buildMediaVariants(photo.url).medium}
-                      alt={photo.title ?? ""}
-                      width={photo.width ?? 800}
-                      height={photo.height ?? 1000}
-                      className={cn(
-                        "h-auto w-full",
-                        index < 6 && "animate-develop",
-                      )}
-                      sizes="(min-width: 640px) 30vw, 45vw"
-                      unoptimized
-                    />
-                  )}
-                </button>
-              ))}
+            {/* Every photo at its own ratio (MasonryGrid never crops), or
+                the contact sheet; the choice is remembered per viewer. */}
+            <div ref={gridRef}>
+              <MasonryGrid
+                items={visiblePhotos
+                  .filter((photo) => photo.type === "IMAGE")
+                  .map((photo) => ({
+                    id: photo.id,
+                    src: buildMediaVariants(photo.url).medium,
+                    width: photo.width,
+                    height: photo.height,
+                    alt: photo.title ?? photo.album.title,
+                  }))}
+                showModeSwitch
+                storageKey="fg:profile-photo-mode"
+                onOpen={setPhotoIndex}
+              />
             </div>
           </section>
         </>
@@ -538,7 +576,8 @@ export function PortfolioTab({
 
       {openPhoto ? (
         <MediaLightbox
-          items={visiblePhotos}
+          items={visibleImages}
+          originFor={originFor}
           index={photoIndex ?? 0}
           onClose={() => setPhotoIndex(null)}
           onIndexChange={setPhotoIndex}

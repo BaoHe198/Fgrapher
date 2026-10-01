@@ -3615,7 +3615,9 @@
         "upgradeHintSupport": "Your plan has expired, so you can't create new albums yet. <link>Contact Fgrapher</link> to have it renewed.",
         "albumsHeading": "Project albums",
         "allPhotos": "All photos",
-        "filterByStyle": "Filter by style"
+        "filterByStyle": "Filter by style",
+        "albumsEyebrow": "Frame 01 · Portfolio",
+        "albumFrame": "Album · frame {frame} · {count} photos"
       },
       "servicesTab": {
         "empty": "No service packages listed",
@@ -3693,7 +3695,11 @@
       "hero": {
         "editCoverAria": "Edit cover photo",
         "editCoverLabel": "Edit cover",
-        "editAvatarAria": "Edit avatar"
+        "editAvatarAria": "Edit avatar",
+        "frame": "Frame 00 · Profile",
+        "leader": "Portfolio ▸",
+        "book": "Book",
+        "fullFrame": "View full frame"
       },
       "albumEditDialog": {
         "title": "Edit album",
@@ -4578,6 +4584,19 @@
         "viewProfile": "View profile",
         "book": "Book"
       }
+    },
+    "album": {
+      "metaTitle": "{title} — {name}",
+      "metaDescription": "A photo album by {name} on Fgrapher.",
+      "photoAlt": "Frame {frame}",
+      "open": "Open photo {frame}",
+      "bar": "Album · {count} photos",
+      "eyebrow": "Album · {count} frames",
+      "count": "{count, plural, one {# photo} other {# photos}}",
+      "book": "Book",
+      "end": "End of album",
+      "by": "An album by {name}",
+      "viewProfile": "View profile"
     }
   },
   "sharedComponents": {

@@ -86,6 +86,19 @@ test("an album with no approved photos is hidden from the public profile, one wi
 
   await expect(page.getByText("Album có ảnh")).toBeVisible();
   await expect(page.getByText("Album rỗng")).not.toBeVisible();
+
+  // The album opens as its own photo-essay page; the empty one has none.
+  await page.getByRole("link", { name: /Album có ảnh/ }).click();
+  await expect(page).toHaveURL(
+    new RegExp(`/profile/${provider.username}/albums/${visibleAlbum.id}$`),
+  );
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Album có ảnh" }),
+  ).toBeVisible();
+  const empty = await page.request.get(
+    `/profile/${provider.username}/albums/${emptyAlbum.id}`,
+  );
+  expect(empty.status()).toBe(404);
 });
 
 test("the portfolio photo limit is enforced across ALL of a profile's albums combined, not per album", async ({

@@ -35,6 +35,7 @@ interface OwnerAlbum {
 }
 
 interface ProfileInteractiveProps {
+  username: string;
   providerId: string;
   profileId: string;
   role: Role;
@@ -124,6 +125,7 @@ interface ProfileInteractiveProps {
 }
 
 export function ProfileInteractive({
+  username,
   providerId,
   profileId,
   role,
@@ -290,6 +292,7 @@ export function ProfileInteractive({
           <>
             <section id="portfolio" className={sectionClass}>
               <PortfolioTab
+                username={username}
                 albums={albums}
                 ownerAlbums={ownerAlbums}
                 profileId={profileId}

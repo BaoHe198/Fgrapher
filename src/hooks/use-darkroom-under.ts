@@ -1,17 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 
-// True while a Phòng tối section sits under the top `band` pixels of the
-// viewport - the sticky header uses it to switch to the darkroom surface
-// as its bottom edge meets a dark block (wave 2 kit §01-B). Colour only:
-// the header never moves or changes height.
-export function useDarkroomUnder(band: number, key: string): boolean {
+// True while a Phòng tối section sits under (or touches) the header - the
+// sticky header uses it to switch to the darkroom surface as its bottom
+// edge meets a dark block (wave 2 kit §01-B), and a page that opens on
+// Phòng tối gets a dark header from the first frame. The band is measured
+// from the header itself, so a banner above it doesn't throw it off.
+// Colour only: the header never moves or changes height.
+export function useDarkroomUnder(
+  headerRef: RefObject<HTMLElement | null>,
+  key: string,
+): boolean {
   const [under, setUnder] = useState(false);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
     const visible = new Set<Element>();
+    // 2px past the header's bottom, so a block starting right under it
+    // counts as being under it.
+    const band = () =>
+      (headerRef.current?.getBoundingClientRect().bottom ?? 72) + 2;
     let observer: IntersectionObserver | null = null;
 
     const connect = () => {
@@ -34,7 +43,7 @@ export function useDarkroomUnder(band: number, key: string): boolean {
         },
         // Only the strip directly beneath the header counts.
         {
-          rootMargin: `0px 0px -${Math.max(0, window.innerHeight - band)}px 0px`,
+          rootMargin: `0px 0px -${Math.max(0, window.innerHeight - band())}px 0px`,
         },
       );
       targets.forEach((target) => observer!.observe(target));
@@ -50,13 +59,27 @@ export function useDarkroomUnder(band: number, key: string): boolean {
     const main = document.querySelector("main");
     if (main) mutations.observe(main, { childList: true, subtree: true });
     window.addEventListener("resize", connect);
+    // Something above the header (the environment banner, a cookie notice)
+    // can appear after this ran and move the header down: measure again.
+    let lastBottom = band();
+    const layout =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            const bottom = band();
+            if (bottom === lastBottom) return;
+            lastBottom = bottom;
+            connect();
+          });
+    layout?.observe(document.body);
     return () => {
       observer?.disconnect();
+      layout?.disconnect();
       mutations.disconnect();
       window.clearTimeout(pending);
       window.removeEventListener("resize", connect);
     };
-  }, [band, key]);
+  }, [headerRef, key]);
 
   return under;
 }

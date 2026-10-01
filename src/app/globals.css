@@ -856,3 +856,18 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Shared-element morph (wave 2 kit §05): an album cover flies from the
+   profile into the album page's first photo. Transform only, the kit's
+   ease-out; under reduced motion the pages simply swap. */
+::view-transition-group(.morph) {
+  animation-duration: 300ms;
+  animation-timing-function: var(--fg-ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

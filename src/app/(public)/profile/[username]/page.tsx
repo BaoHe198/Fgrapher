@@ -6,7 +6,8 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Tag } from "@/components/ui/tag";
+import { Button } from "@/components/ui/button";
+import { FilmLeader } from "@/components/ui/film-leader";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { ProfileViewBeacon } from "@/components/profile/profile-view-beacon";
 import { auth } from "@/lib/auth";
@@ -17,7 +18,7 @@ import { formatAdministrativeLocation } from "@/lib/location";
 import { PROVIDER_ROLES, type ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { responseBucket } from "@/lib/response-time";
-import { formatCurrency, jsonLdScriptProps } from "@/lib/utils";
+import { cn, formatCurrency, jsonLdScriptProps } from "@/lib/utils";
 import { listAlbums } from "@/services/albums";
 import {
   getProfileReviews,
@@ -361,106 +362,133 @@ export default async function PublicProfilePage({
           counted, and a Server Component cannot set one — so the count is
           reported by this beacon after mount instead of inline here. */}
       {isOwnProfile ? null : <ProfileViewBeacon profileId={activeProfile.id} />}
-      <ProfileCover
-        coverImage={user.coverImage}
-        fallbackImage={activeProfile.media[0]?.url ?? null}
-        isOwnProfile={isOwnProfile}
-      />
-
-      <div className="mx-auto w-full max-w-[1440px] px-5 pb-[72px] sm:px-8">
-        <div className="flex flex-col gap-[18px] pt-4">
-          <div className="flex flex-wrap items-start justify-between gap-[18px]">
-            <div className="flex flex-wrap items-start gap-[18px]">
-              <ProfileAvatar
-                avatar={user.avatar}
-                displayName={displayName}
-                isOwnProfile={isOwnProfile}
-              />
-
-              <div className="flex min-w-0 flex-col gap-2 pt-2">
-                <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-display-md text-text-primary sm:text-display-lg">
-                  {displayName}
-                  {isVerified ? (
-                    <Badge variant="success" className="gap-1 align-middle">
-                      <BadgeCheck className="size-3.5" />
-                      {t("status.verified")}
-                    </Badge>
-                  ) : null}
-                </h1>
-                <div className="flex flex-wrap items-center gap-2">
-                  {user.profiles.length > 1 ? (
-                    user.profiles.map((profile) => (
-                      <Tag
-                        key={profile.id}
-                        selected={profile.role === activeProfile.role}
-                        render={
-                          <Link
-                            href={`/profile/${username}?role=${profile.role}`}
-                          />
-                        }
-                      >
-                        {roleT(profile.role)}
-                      </Tag>
-                    ))
-                  ) : (
-                    <span className="text-body-md text-text-secondary">
-                      {roleT(activeProfile.role)}
-                    </span>
-                  )}
-                  {isProviderRole && !user.acceptingBookings ? (
-                    <Badge variant="warning">{t("status.bookedOut")}</Badge>
-                  ) : null}
-                  {reviewStats.count === 0 ? (
-                    <Badge variant="neutral">{t("status.new")}</Badge>
-                  ) : null}
-                </div>
-                {profileLocation ||
-                ageRangeLabel ||
-                activeProfile.servesNationwide ? (
-                  <div className="flex flex-wrap items-center gap-2 text-body-sm text-text-secondary">
-                    {profileLocation ? (
-                      <span className="inline-flex items-center gap-1">
-                        <MapPin className="size-3.5" />
-                        {profileLocation}
-                      </span>
-                    ) : null}
-                    {activeProfile.servesNationwide ? (
-                      <Badge variant="outline" className="text-meta">
-                        {t("nationwide")}
-                      </Badge>
-                    ) : null}
-                    {ageRangeLabel ? (
-                      <span>{t("age", { age: ageRangeLabel })}</span>
-                    ) : null}
-                  </div>
-                ) : null}
-                {headerStats.length > 0 ? (
-                  <dl className="mt-1 flex flex-wrap gap-x-8 gap-y-2">
-                    {headerStats.map((stat) => (
-                      <div key={stat.label} className="flex flex-col">
-                        <dt className="order-last text-meta text-text-tertiary">
-                          {stat.label}
-                        </dt>
-                        <dd className="font-mono text-heading-lg font-semibold! tabular-nums text-text-primary">
-                          {stat.value}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : null}
-              </div>
-            </div>
-
-            <ProfileActions
-              targetUserId={user.id}
-              profileId={activeProfile.id}
-              initialFollowerCount={followerCount}
-              shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/profile/${username}`}
-              socialFeedEnabled={features.socialFeedEnabled}
+      {/* Wave 2: the profile opens on Phòng tối - the cover full-bleed at
+          about three quarters of the screen, the name set large over a
+          scrim, then a film leader cuts back to Paper for everything one
+          reads and fills in. */}
+      <section
+        data-surface="darkroom"
+        data-under-header=""
+        aria-labelledby="profile-name"
+        className="relative isolate flex min-h-[76vh] flex-col justify-end overflow-hidden bg-dr-bg text-dr-text max-md:min-h-[68vh]"
+      >
+        <ProfileCover
+          variant="hero"
+          name={displayName}
+          coverImage={user.coverImage}
+          fallbackImage={activeProfile.media[0]?.url ?? null}
+          isOwnProfile={isOwnProfile}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-linear-to-t from-dr-bg via-[var(--dr-scrim)] via-50% to-transparent to-90%"
+        />
+        <span className="absolute top-4 left-5 rounded-full bg-[var(--dr-scrim)] px-3 py-1.5 font-mono text-meta tracking-[0.12em] text-dr-text-2 uppercase sm:left-8">
+          {t("hero.frame")}
+        </span>
+        <div className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-5 pt-32 pb-8 sm:px-8 sm:pb-10">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-body-sm text-dr-text-2">
+            <ProfileAvatar
+              compact
+              avatar={user.avatar}
+              displayName={displayName}
               isOwnProfile={isOwnProfile}
             />
+            {user.profiles.length > 1 ? (
+              user.profiles.map((profile) => (
+                <Link
+                  key={profile.id}
+                  href={`/profile/${username}?role=${profile.role}`}
+                  aria-current={
+                    profile.role === activeProfile.role ? "page" : undefined
+                  }
+                  className={cn(
+                    "focus-ring rounded-full border px-2.5 py-1",
+                    profile.role === activeProfile.role
+                      ? "border-gold-400 text-dr-text"
+                      : "border-dr-line-2 hover:text-dr-text",
+                  )}
+                >
+                  {roleT(profile.role)}
+                </Link>
+              ))
+            ) : (
+              <span>{roleT(activeProfile.role)}</span>
+            )}
+            {profileLocation ? (
+              <span className="inline-flex items-center gap-1">
+                <MapPin aria-hidden className="size-3.5" />
+                {profileLocation}
+              </span>
+            ) : null}
+            {isVerified ? (
+              <span className="inline-flex items-center gap-1 text-gold-400">
+                <BadgeCheck aria-hidden className="size-3.5" />
+                {t("status.verified")}
+              </span>
+            ) : null}
+            {activeProfile.servesNationwide ? (
+              <span>{t("nationwide")}</span>
+            ) : null}
+            {ageRangeLabel ? (
+              <span>{t("age", { age: ageRangeLabel })}</span>
+            ) : null}
+            {isProviderRole && !user.acceptingBookings ? (
+              <Badge variant="warning">{t("status.bookedOut")}</Badge>
+            ) : null}
           </div>
+          <h1
+            id="profile-name"
+            className="max-w-6xl font-display text-[clamp(2.75rem,8vw,7rem)] leading-[0.92] font-semibold tracking-[-0.035em] text-balance break-words text-dr-text"
+          >
+            {displayName}
+          </h1>
+          <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
+            {headerStats.length > 0 ? (
+              <dl className="flex flex-wrap gap-x-8 gap-y-2">
+                {headerStats.map((stat) => (
+                  <div key={stat.label} className="flex flex-col">
+                    <dt className="order-last text-meta text-dr-text-2">
+                      {stat.label}
+                    </dt>
+                    <dd className="font-mono text-heading-lg font-semibold! tabular-nums text-dr-text">
+                      {stat.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            ) : reviewStats.count === 0 ? (
+              <span className="text-body-sm text-dr-text-2">
+                {t("status.new")}
+              </span>
+            ) : null}
+            <div className="flex flex-wrap items-center gap-3">
+              {isProviderRole && user.acceptingBookings && !isOwnProfile ? (
+                <Button
+                  variant="accent"
+                  size="lg"
+                  nativeButton={false}
+                  render={<Link href={`/booking/${user.id}`} />}
+                >
+                  {t("hero.book")}
+                </Button>
+              ) : null}
+              <ProfileActions
+                targetUserId={user.id}
+                profileId={activeProfile.id}
+                initialFollowerCount={followerCount}
+                shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/profile/${username}`}
+                socialFeedEnabled={features.socialFeedEnabled}
+                isOwnProfile={isOwnProfile}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+      <FilmLeader label="00A" trailing={t("hero.leader")} />
 
+      <div className="mx-auto w-full max-w-[1440px] px-5 pb-[72px] sm:px-8">
+        <div className="flex flex-col gap-[18px] pt-8">
           {activeProfile.description ? (
             <p className="my-5 max-w-[640px] text-body-lg text-text-secondary">
               {activeProfile.description}
@@ -483,6 +511,7 @@ export default async function PublicProfilePage({
           ) : null}
 
           <ProfileInteractive
+            username={username}
             providerId={user.id}
             profileId={activeProfile.id}
             role={activeProfile.role}
