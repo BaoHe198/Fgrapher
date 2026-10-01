@@ -10,14 +10,18 @@ import { RequestWizard } from "./request-wizard";
 export default async function NewServiceRequestPage({
   searchParams,
 }: {
-  searchParams: Promise<{ draft?: string }>;
+  /** draft: resume a saved draft. copy: "Đăng lại yêu cầu này" - a new
+   * request prefilled from one of the customer's own (expired) requests. */
+  searchParams: Promise<{ draft?: string; copy?: string }>;
 }) {
   const session = await auth();
   if (!session?.user) {
-    redirect("/login");
+    redirect(`/login?callbackUrl=${encodeURIComponent("/requests/new")}`);
   }
 
-  const { draft: draftId } = await searchParams;
+  const { draft: draftParam, copy: copyId } = await searchParams;
+  const draftId = draftParam ?? copyId;
+  const isCopy = !draftParam && Boolean(copyId);
 
   const [user, provinces, draft] = await Promise.all([
     db.user.findUniqueOrThrow({
@@ -35,13 +39,16 @@ export default async function NewServiceRequestPage({
 
   if (
     draftId &&
-    (!draft || draft.customerId !== session.user.id || !draft.isDraft)
+    (!draft ||
+      draft.customerId !== session.user.id ||
+      (!isCopy && !draft.isDraft))
   ) {
     redirect("/dashboard/requests");
   }
 
   return (
     <RequestWizard
+      userId={session.user.id}
       // Twilio isn't paid/configured yet — while PHONE_VERIFICATION_REQUIRED
       // is off, skip the client-side verify-phone gate too (the server-side
       // check in services/service-requests.ts is skipped the same way, so
@@ -59,7 +66,9 @@ export default async function NewServiceRequestPage({
       draft={
         draft
           ? {
-              id: draft.id,
+              // A copy starts a new request: no id, so nothing is saved
+              // over the old one, and no reference files, which belong to it.
+              id: isCopy ? "" : draft.id,
               title: draft.title,
               description: draft.description,
               role: draft.role,
@@ -76,7 +85,7 @@ export default async function NewServiceRequestPage({
               detailedAddress: draft.detailedAddress,
               budgetMin: draft.budgetMin,
               budgetMax: draft.budgetMax,
-              references: draft.references.map((r) => ({
+              references: (isCopy ? [] : draft.references).map((r) => ({
                 mediaUrl: r.mediaUrl,
                 publicId: r.publicId ?? "",
               })),

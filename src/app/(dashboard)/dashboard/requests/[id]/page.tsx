@@ -5,10 +5,20 @@ import { auth } from "@/lib/auth";
 import { resolvePartyName } from "@/lib/party-name";
 import {
   ServiceRequestError,
+  getOfferProviderExtras,
   getServiceRequestForCustomer,
 } from "@/services/service-requests";
 
 import { RequestDetail } from "./request-detail";
+
+// Whole days left before an open request expires, rounded up ("còn 1
+// ngày" until the last hour).
+function daysUntil(expiresAt: Date) {
+  return Math.max(
+    0,
+    Math.ceil((expiresAt.getTime() - Date.now()) / 86_400_000),
+  );
+}
 
 export default async function ServiceRequestDetailPage({
   params,
@@ -35,6 +45,11 @@ export default async function ServiceRequestDetailPage({
     redirect(`/requests/new?draft=${request.id}`);
   }
 
+  const extras = await getOfferProviderExtras(
+    request.offers.map((offer) => offer.provider.id),
+    request.role,
+  );
+
   return (
     <RequestDetail
       backLabel={t("back")}
@@ -56,6 +71,7 @@ export default async function ServiceRequestDetailPage({
         budgetMin: request.budgetMin,
         budgetMax: request.budgetMax,
         moderationReason: request.moderationReason,
+        daysLeft: daysUntil(request.expiresAt),
         references: request.references,
         offers: request.offers.map((offer) => ({
           id: offer.id,
@@ -73,6 +89,11 @@ export default async function ServiceRequestDetailPage({
               (r) =>
                 r.role === request.role && r.verificationStatus === "VERIFIED",
             ),
+            ...(extras.get(offer.provider.id) ?? {
+              avgRating: null,
+              reviewCount: 0,
+              samples: [],
+            }),
           },
         })),
       }}

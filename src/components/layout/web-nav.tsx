@@ -135,7 +135,7 @@ export function WebNav({
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "text-body-md font-semibold!",
+                    "text-body-md font-semibold! whitespace-nowrap",
                     isActive ? "text-text-primary" : "text-text-secondary",
                   )}
                 >

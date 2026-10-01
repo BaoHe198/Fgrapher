@@ -668,3 +668,86 @@ export async function nudgeUnansweredRequests() {
 
   return { nudged: stale.length };
 }
+
+/**
+ * Đặt lịch F's public page (wave 2): the latest open requests reduced to
+ * what a stranger may see - the service, the first style, the province and
+ * the budget. No title, description, date, ward or requester: those can
+ * identify a person and stay behind sign-in in listBrowsableRequests.
+ */
+export async function listRecentRequestTeasers(limit = 6) {
+  const requests = await db.serviceRequest.findMany({
+    where: { isDraft: false, status: { in: OPEN_STATUSES } },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    select: {
+      id: true,
+      role: true,
+      categories: true,
+      budgetMin: true,
+      budgetMax: true,
+      province: { select: { name: true } },
+    },
+  });
+  return requests.map((request) => ({
+    id: request.id,
+    role: request.role,
+    category: request.categories[0] ?? null,
+    province: request.province.name,
+    budgetMin: request.budgetMin,
+    budgetMax: request.budgetMax,
+  }));
+}
+
+/**
+ * What a proposal card shows beside the offer itself (wave 2, request
+ * page): the artist's real rating - or nothing, never a 0-star row - and
+ * three approved photos from the profile for the requested role, in the
+ * artist's own order. Public data only, the same bar as the profile page.
+ */
+export async function getOfferProviderExtras(
+  providerIds: string[],
+  role: Role,
+) {
+  if (providerIds.length === 0) return new Map<string, OfferProviderExtras>();
+  const [ratings, profiles] = await Promise.all([
+    db.review.groupBy({
+      by: ["reviewedId"],
+      where: { reviewedId: { in: providerIds } },
+      _avg: { rating: true },
+      _count: { _all: true },
+    }),
+    db.profile.findMany({
+      where: { userId: { in: providerIds }, role, isPublished: true },
+      select: {
+        userId: true,
+        media: {
+          where: {
+            type: "IMAGE",
+            moderationStatus: "APPROVED",
+            deletedAt: null,
+          },
+          orderBy: { order: "asc" },
+          take: 3,
+          select: { url: true, width: true, height: true },
+        },
+      },
+    }),
+  ]);
+  const extras = new Map<string, OfferProviderExtras>();
+  for (const id of providerIds) {
+    const rating = ratings.find((r) => r.reviewedId === id);
+    extras.set(id, {
+      avgRating: rating?._avg.rating ?? null,
+      reviewCount: rating?._count._all ?? 0,
+      samples: profiles.find((p) => p.userId === id)?.media ?? [],
+    });
+  }
+  return extras;
+}
+
+export interface OfferProviderExtras {
+  avgRating: number | null;
+  reviewCount: number;
+  samples: { url: string; width: number | null; height: number | null }[];
+}

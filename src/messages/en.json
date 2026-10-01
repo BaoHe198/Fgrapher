@@ -1636,7 +1636,41 @@
         "cancel": "Cancel",
         "confirmAccept": "Confirm",
         "offerAcceptedToast": "Offer accepted and booking created",
-        "genericError": "Something went wrong, please try again"
+        "genericError": "Something went wrong, please try again",
+        "stamp": {
+          "daysLeft": "{days, plural, =0 {Expires today} one {# day left} other {# days left}}",
+          "expired": "Expired"
+        },
+        "rating": "{rating} · {count, plural, one {# review} other {# reviews}}",
+        "noRating": "No reviews yet",
+        "sampleAlt": "Sample photo {n} by {name}",
+        "noSamples": "No public sample photos yet",
+        "proposedDate": "Proposed date: {date}",
+        "proposedDateNone": "Your chosen date",
+        "chosen": "Chosen",
+        "verified": "Identity verified",
+        "sentOn": "Sent {date}",
+        "compare": "Compare",
+        "compareHint": "Pick 2–{max} proposals to compare side by side.",
+        "trayLabel": "Compare tray",
+        "trayCount": "{count}/{max} proposals selected",
+        "trayClear": "Clear",
+        "trayOpen": "Compare",
+        "compareTitle": "Compare {count} proposals",
+        "compareRows": {
+          "price": "Price",
+          "date": "Proposed date",
+          "rating": "Reviews",
+          "samples": "Sample photos",
+          "message": "Message"
+        },
+        "acceptDialogBody": "Choose {name} at {price}. Once chosen, the other proposals can only be messaged. The deposit is agreed directly with the artist.",
+        "repost": "Post this request again",
+        "expiredNoOffers": "The request expired without proposals",
+        "noOffersBody": "You'll be notified of the first proposal.",
+        "refCount": "{count} reference photos",
+        "showMore": "Show more",
+        "showLess": "Show less"
       }
     },
     "opportunities": {
@@ -2301,6 +2335,99 @@
       },
       "markReadyForPickup": "Ready for collection",
       "markPickedUpByBuyer": "Buyer has collected"
+    },
+    "requestCompose": {
+      "exit": "Exit",
+      "draftCode": "New request",
+      "stampDraft": "Draft",
+      "stampPosted": "In review",
+      "autosave": "Draft saves itself",
+      "savedAt": "Draft saved · {time}",
+      "resume": {
+        "body": "You have a draft saved at {time}. Continue from question {n}?",
+        "continue": "Continue",
+        "restart": "Start over"
+      },
+      "questionLabel": "Question {n}/06",
+      "q": {
+        "need": {
+          "title": "What do you need?",
+          "help": "Pick the service and the occasion. Only artists with that speciality receive the request."
+        },
+        "when": {
+          "title": "When?",
+          "help": "Dates are in Vietnam time. Say how flexible you are so more artists can fit you in."
+        },
+        "where": {
+          "title": "Where?",
+          "help": "Artists based in or serving this area will see the request."
+        },
+        "style": {
+          "title": "What style do you like?",
+          "help": "Add a few photos close to what you want. You can skip this."
+        },
+        "budget": {
+          "title": "Roughly what budget?",
+          "help": "A price range helps artists propose the right package."
+        },
+        "note": {
+          "title": "Anything else artists should know?",
+          "help": "Number of people, outfits, when you need the photos… The title is suggested for you, edit it if you like."
+        }
+      },
+      "occasion": "For what occasion · up to {max}",
+      "dateLabel": "Shoot date",
+      "flex": {
+        "label": "How flexible are you",
+        "exact": "This exact day",
+        "3d": "Flexible ± 3 days",
+        "month": "Flexible within the month",
+        "between": "Flexible {start} – {end}",
+        "keptRange": "This draft has the range {start} – {end}. Pick a date below to change it."
+      },
+      "wardFirst": "Pick a province first",
+      "spotLabel": "Specific place · optional",
+      "spotPlaceholder": "For example: a beach, a restaurant, a home",
+      "addressLabel": "Detailed address · optional",
+      "refHint": "Photos keep their framing, never cropped. Only artists viewing the request see them.",
+      "refCount": "{count} reference photos",
+      "refAlt": "Reference photo {n}",
+      "budget": {
+        "ask": "Let the artist quote",
+        "custom": "Enter another range",
+        "hint": "Artists quote an exact price in their proposal. The deposit is agreed directly with the artist."
+      },
+      "noteLabel": "More details · optional",
+      "notePlaceholder": "For example: about 40 guests, family photos of both sides, photos needed within two weeks.",
+      "errors": {
+        "role": "Pick a service to continue.",
+        "categories": "Pick the occasion so artists can quote properly.",
+        "maxCategories": "Pick at most {max}.",
+        "date": "Pick a shoot date. If it isn't fixed, pick a rough date and “Flexible within the month”.",
+        "past": "That day has passed. Pick today or later.",
+        "flex": "Tell artists how flexible the date is.",
+        "province": "Pick a province.",
+        "budget": "Pick a budget range, or “Let the artist quote”.",
+        "budgetCustom": "Enter at least one amount, with the low one not above the high one.",
+        "title": "The title needs at least 3 characters."
+      },
+      "next": "Next",
+      "previous": "Previous question",
+      "post": "Send request",
+      "postAgain": "Send again",
+      "posting": "Sending…",
+      "enterHint": "or press <kbd>Enter ↵</kbd>",
+      "submitFailed": "Not sent yet.",
+      "offline": "Check your connection and press Send again. Your draft is still saved.",
+      "previewLabel": "Preview · what artists will see",
+      "sheetButton": "Call sheet",
+      "done": {
+        "eyebrow": "Sent · in review",
+        "title": "Request {code} has been sent",
+        "body": "The Fgrapher team reviews requests before artists see them. Once approved, the request stays open for 7 days and you're notified of the first proposal.",
+        "view": "View request",
+        "back": "Back to FBooking"
+      }
     }
   },
   "dashboardSettings": {
@@ -4361,6 +4488,59 @@
       "loadFailed": "Could not load the feed. Please try again.",
       "retry": "Try again",
       "openPhoto": "View photo {index} of {total}"
+    },
+    "requestsF": {
+      "metaTitle": "FBooking — Post a shoot request, get proposals",
+      "metaDescription": "Describe the shoot once. Verified artists in your area send a price and a message; you compare and pick one.",
+      "eyebrow": "FBooking",
+      "title": "Describe the shoot you need. The right artists send proposals.",
+      "lede": "Describe it once: service, date, area, style, budget. Verified artists in your area send a price and a message. You compare, then pick one.",
+      "post": "Post a request",
+      "findDirect": "Find an artist directly",
+      "noteSignedOut": "You need to sign in to post. The deposit is agreed directly with the artist.",
+      "noteSignedIn": "Requests are reviewed by the Fgrapher team before artists see them. The deposit is agreed directly with the artist.",
+      "service": {
+        "PHOTOGRAPHER": "Photography",
+        "VIDEOGRAPHER": "Videography",
+        "MAKEUP_ARTIST": "Make-up",
+        "MODEL": "Model",
+        "STUDIO": "Studio rental"
+      },
+      "example": {
+        "stamp": "Example",
+        "need": "Photography · Wedding",
+        "flex": "Flexible ± 3 days",
+        "style": "Natural light, warm tones",
+        "note": "Outdoors at sunset, about 40 guests."
+      },
+      "steps": {
+        "title": "Three steps",
+        "s1tag": "Describe",
+        "s1t": "Answer six short questions",
+        "s1b": "What you need, when, where, style, budget and a few lines. One question per screen, the draft saves itself.",
+        "s2tag": "Get proposals",
+        "s2t": "Matching artists send a price",
+        "s2b": "Each proposal has a price, the date the artist suggests and a message. Requests stay open for {days} days after approval.",
+        "s3tag": "Pick an artist",
+        "s3t": "Compare, then choose one",
+        "s3b": "Put proposals side by side, message to ask more, then choose. The deposit is agreed directly with the artist."
+      },
+      "recent": {
+        "title": "Recent requests",
+        "privacy": "Anonymous · service, province and budget only",
+        "askPrice": "Artist quotes"
+      },
+      "trust": {
+        "title": "Every artist who sends a proposal has verified their identity.",
+        "body": "Fgrapher does not take payment for shoots. You agree the price and deposit directly with the artist."
+      },
+      "login": {
+        "eyebrow": "Post a request",
+        "title": "Sign in to post a request",
+        "body": "Artists need to know a request comes from a real person. Once signed in, you go straight to the first question.",
+        "signIn": "Sign in",
+        "register": "Create an account"
+      }
     }
   },
   "sharedComponents": {
@@ -4717,6 +4897,20 @@
         "notifications": "Notifications",
         "settings": "Account settings",
         "help": "Help"
+      }
+    },
+    "callSheet": {
+      "label": "Call sheet {code}",
+      "heading": "Call sheet · FBooking",
+      "empty": "Not filled in",
+      "footer": "The deposit is agreed directly with the artist. Fgrapher does not take payment for shoots.",
+      "rows": {
+        "need": "Service",
+        "when": "When",
+        "where": "Area",
+        "style": "Style",
+        "budget": "Budget",
+        "note": "Notes"
       }
     }
   },

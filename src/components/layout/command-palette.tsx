@@ -586,15 +586,19 @@ export function CommandPaletteTrigger({
       aria-keyshortcuts={isMac ? "Meta+K" : "Control+K"}
       className={cn(
         "focus-ring flex items-center gap-2 rounded-full border border-border-subtle bg-bg-surface text-text-secondary transition-colors duration-[var(--fg-dur-150)] hover:text-text-primary",
-        compact ? "size-9 justify-center" : "h-9 pr-2 pl-3",
+        compact
+          ? "size-9 justify-center"
+          : "size-9 justify-center min-[1400px]:w-auto min-[1400px]:pr-2 min-[1400px]:pl-3",
         className,
       )}
     >
       <Search aria-hidden className="size-4" />
       {compact ? null : (
         <>
-          <span className="text-body-sm">{t("triggerLabel")}</span>
-          <kbd className="rounded-[var(--fg-radius-sm)] border border-border-default px-1.5 font-mono text-meta text-text-tertiary">
+          <span className="text-body-sm max-[1399px]:hidden">
+            {t("triggerLabel")}
+          </span>
+          <kbd className="rounded-[var(--fg-radius-sm)] border max-[1399px]:hidden border-border-default px-1.5 font-mono text-meta text-text-tertiary">
             {isMac ? "⌘K" : "Ctrl K"}
           </kbd>
         </>

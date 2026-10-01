@@ -1636,7 +1636,41 @@
         "cancel": "Hủy",
         "confirmAccept": "Xác nhận",
         "offerAcceptedToast": "Đã chấp nhận đề nghị và tạo lịch đặt",
-        "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+        "genericError": "Có lỗi xảy ra, vui lòng thử lại",
+        "stamp": {
+          "daysLeft": "{days, plural, =0 {Hết hạn hôm nay} other {Còn # ngày}}",
+          "expired": "Hết hạn"
+        },
+        "rating": "{rating} · {count} đánh giá",
+        "noRating": "Chưa có đánh giá",
+        "sampleAlt": "Ảnh mẫu {n} của {name}",
+        "noSamples": "Chưa có ảnh mẫu công khai",
+        "proposedDate": "Ngày đề xuất: {date}",
+        "proposedDateNone": "Theo ngày bạn chọn",
+        "chosen": "Đã chọn",
+        "verified": "Đã xác minh danh tính",
+        "sentOn": "Gửi {date}",
+        "compare": "So sánh",
+        "compareHint": "Chọn 2–{max} đề xuất để so sánh cạnh nhau.",
+        "trayLabel": "Khay so sánh",
+        "trayCount": "Đã chọn {count}/{max} đề xuất",
+        "trayClear": "Bỏ chọn",
+        "trayOpen": "So sánh",
+        "compareTitle": "So sánh {count} đề xuất",
+        "compareRows": {
+          "price": "Giá",
+          "date": "Ngày đề xuất",
+          "rating": "Đánh giá",
+          "samples": "Ảnh mẫu",
+          "message": "Lời nhắn"
+        },
+        "acceptDialogBody": "Chọn {name} với giá {price}. Sau khi chọn, các đề xuất khác chỉ còn nhắn tin được. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ.",
+        "repost": "Đăng lại yêu cầu này",
+        "expiredNoOffers": "Yêu cầu đã hết hạn mà chưa có đề xuất",
+        "noOffersBody": "Bạn nhận thông báo khi có đề xuất đầu tiên.",
+        "refCount": "{count} ảnh tham khảo",
+        "showMore": "Xem thêm",
+        "showLess": "Thu gọn"
       }
     },
     "opportunities": {
@@ -2301,6 +2335,99 @@
       },
       "markReadyForPickup": "Báo khách đến nhận",
       "markPickedUpByBuyer": "Khách đã nhận hàng"
+    },
+    "requestCompose": {
+      "exit": "Thoát",
+      "draftCode": "Yêu cầu mới",
+      "stampDraft": "Nháp",
+      "stampPosted": "Chờ duyệt",
+      "autosave": "Nháp tự lưu",
+      "savedAt": "Đã lưu nháp · {time}",
+      "resume": {
+        "body": "Bạn có bản nháp lưu lúc {time}. Tiếp tục từ câu {n}?",
+        "continue": "Tiếp tục",
+        "restart": "Bắt đầu lại"
+      },
+      "questionLabel": "Câu {n}/06",
+      "q": {
+        "need": {
+          "title": "Bạn cần gì?",
+          "help": "Chọn dịch vụ và dịp chụp. Nghệ sĩ đúng chuyên môn mới nhận được yêu cầu."
+        },
+        "when": {
+          "title": "Khi nào?",
+          "help": "Ngày theo giờ Việt Nam. Nói rõ mức linh hoạt để có thêm nghệ sĩ còn lịch."
+        },
+        "where": {
+          "title": "Ở đâu?",
+          "help": "Nghệ sĩ ở gần hoặc nhận lịch ở khu vực này sẽ thấy yêu cầu."
+        },
+        "style": {
+          "title": "Bạn thích phong cách nào?",
+          "help": "Thêm vài ảnh gần với điều bạn muốn. Có thể bỏ qua."
+        },
+        "budget": {
+          "title": "Ngân sách khoảng bao nhiêu?",
+          "help": "Một khoảng giá giúp nghệ sĩ đề xuất gói phù hợp."
+        },
+        "note": {
+          "title": "Còn điều gì nghệ sĩ nên biết?",
+          "help": "Số người, trang phục, thời hạn nhận ảnh… Tiêu đề đã được gợi ý sẵn, bạn sửa nếu muốn."
+        }
+      },
+      "occasion": "Cho dịp nào · chọn tối đa {max}",
+      "dateLabel": "Ngày chụp",
+      "flex": {
+        "label": "Có linh hoạt không",
+        "exact": "Đúng ngày này",
+        "3d": "Linh hoạt ± 3 ngày",
+        "month": "Linh hoạt trong tháng",
+        "between": "Linh hoạt {start} – {end}",
+        "keptRange": "Bản nháp đang để khoảng ngày {start} – {end}. Chọn một ngày bên dưới nếu muốn đổi."
+      },
+      "wardFirst": "Chọn tỉnh/thành trước",
+      "spotLabel": "Địa điểm cụ thể · không bắt buộc",
+      "spotPlaceholder": "Ví dụ: bãi biển, nhà hàng, tư gia",
+      "addressLabel": "Địa chỉ chi tiết · không bắt buộc",
+      "refHint": "Ảnh giữ nguyên khung, không cắt. Chỉ nghệ sĩ xem yêu cầu mới thấy.",
+      "refCount": "{count} ảnh tham khảo",
+      "refAlt": "Ảnh tham khảo {n}",
+      "budget": {
+        "ask": "Để nghệ sĩ báo giá",
+        "custom": "Tự nhập khoảng khác",
+        "hint": "Nghệ sĩ báo giá cụ thể trong đề xuất. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ."
+      },
+      "noteLabel": "Mô tả thêm · không bắt buộc",
+      "notePlaceholder": "Ví dụ: khoảng 40 khách, muốn có ảnh gia đình hai họ, cần nhận ảnh trong hai tuần.",
+      "errors": {
+        "role": "Chọn một dịch vụ để tiếp tục.",
+        "categories": "Chọn dịp chụp để nghệ sĩ báo giá đúng.",
+        "maxCategories": "Chọn tối đa {max} dịp.",
+        "date": "Chọn ngày chụp. Chưa chốt ngày thì chọn ngày gần đúng và “Linh hoạt trong tháng”.",
+        "past": "Ngày này đã qua. Chọn từ hôm nay trở đi.",
+        "flex": "Cho nghệ sĩ biết bạn có linh hoạt ngày không.",
+        "province": "Chọn tỉnh/thành.",
+        "budget": "Chọn một khoảng ngân sách, hoặc “Để nghệ sĩ báo giá”.",
+        "budgetCustom": "Nhập ít nhất một mức, và mức thấp không lớn hơn mức cao.",
+        "title": "Tiêu đề cần ít nhất 3 ký tự."
+      },
+      "next": "Tiếp",
+      "previous": "Câu trước",
+      "post": "Gửi yêu cầu",
+      "postAgain": "Gửi lại",
+      "posting": "Đang gửi…",
+      "enterHint": "hoặc nhấn <kbd>Enter ↵</kbd>",
+      "submitFailed": "Chưa gửi được.",
+      "offline": "Kiểm tra kết nối rồi bấm Gửi lại. Bản nháp vẫn được lưu.",
+      "previewLabel": "Xem trước · nghệ sĩ sẽ thấy",
+      "sheetButton": "Call sheet",
+      "done": {
+        "eyebrow": "Đã gửi · chờ duyệt",
+        "title": "Yêu cầu {code} đã được gửi",
+        "body": "Đội Fgrapher duyệt yêu cầu trước khi nghệ sĩ thấy. Sau khi được duyệt, yêu cầu mở trong 7 ngày và bạn nhận thông báo khi có đề xuất đầu tiên.",
+        "view": "Xem yêu cầu",
+        "back": "Về Đặt lịch F"
+      }
     }
   },
   "dashboardSettings": {
@@ -4361,6 +4488,59 @@
       "loadFailed": "Không tải được bảng tin. Vui lòng thử lại.",
       "retry": "Thử lại",
       "openPhoto": "Xem ảnh {index}/{total}"
+    },
+    "requestsF": {
+      "metaTitle": "Đặt lịch F — Đăng yêu cầu chụp, nhận đề xuất",
+      "metaDescription": "Kể buổi chụp bạn cần một lần. Nghệ sĩ đã xác minh ở khu vực của bạn gửi giá và lời nhắn, bạn so sánh rồi chọn một người.",
+      "eyebrow": "Đặt lịch F",
+      "title": "Kể buổi chụp bạn cần. Nghệ sĩ phù hợp gửi đề xuất.",
+      "lede": "Mô tả một lần: dịch vụ, ngày, khu vực, phong cách, ngân sách. Nghệ sĩ đã xác minh ở khu vực của bạn gửi giá và lời nhắn. Bạn so sánh rồi chọn một người.",
+      "post": "Đăng yêu cầu",
+      "findDirect": "Tìm nghệ sĩ trực tiếp",
+      "noteSignedOut": "Cần đăng nhập để đăng. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ.",
+      "noteSignedIn": "Yêu cầu được đội Fgrapher duyệt trước khi nghệ sĩ thấy. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ.",
+      "service": {
+        "PHOTOGRAPHER": "Chụp ảnh",
+        "VIDEOGRAPHER": "Quay phim",
+        "MAKEUP_ARTIST": "Trang điểm",
+        "MODEL": "Người mẫu",
+        "STUDIO": "Thuê studio"
+      },
+      "example": {
+        "stamp": "Ví dụ",
+        "need": "Chụp ảnh · Cưới",
+        "flex": "Linh hoạt ± 3 ngày",
+        "style": "Ánh sáng tự nhiên, tông ấm",
+        "note": "Chụp ngoài trời lúc hoàng hôn, khoảng 40 khách."
+      },
+      "steps": {
+        "title": "Ba bước",
+        "s1tag": "Mô tả",
+        "s1t": "Trả lời sáu câu ngắn",
+        "s1b": "Bạn cần gì, khi nào, ở đâu, phong cách, ngân sách và vài dòng mô tả. Mỗi màn một câu, nháp tự lưu.",
+        "s2tag": "Nhận đề xuất",
+        "s2t": "Nghệ sĩ phù hợp gửi giá",
+        "s2b": "Mỗi đề xuất có giá, ngày nghệ sĩ đề nghị và lời nhắn. Yêu cầu mở trong {days} ngày sau khi được duyệt.",
+        "s3tag": "Chọn nghệ sĩ",
+        "s3t": "So sánh rồi chọn một",
+        "s3b": "Đặt các đề xuất cạnh nhau, nhắn tin hỏi thêm, rồi chọn. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ."
+      },
+      "recent": {
+        "title": "Yêu cầu gần đây",
+        "privacy": "Ẩn danh · chỉ hiện loại buổi, tỉnh/thành, ngân sách",
+        "askPrice": "Để nghệ sĩ báo giá"
+      },
+      "trust": {
+        "title": "Mọi nghệ sĩ gửi đề xuất đều đã xác minh danh tính.",
+        "body": "Fgrapher không thu tiền buổi chụp. Giá và đặt cọc bạn thỏa thuận trực tiếp với nghệ sĩ."
+      },
+      "login": {
+        "eyebrow": "Đăng yêu cầu",
+        "title": "Đăng nhập để đăng yêu cầu",
+        "body": "Nghệ sĩ cần biết yêu cầu đến từ một người thật. Đăng nhập xong, bạn vào thẳng câu hỏi đầu tiên.",
+        "signIn": "Đăng nhập",
+        "register": "Tạo tài khoản"
+      }
     }
   },
   "sharedComponents": {
@@ -4717,6 +4897,20 @@
         "notifications": "Thông báo",
         "settings": "Cài đặt tài khoản",
         "help": "Trợ giúp"
+      }
+    },
+    "callSheet": {
+      "label": "Call sheet {code}",
+      "heading": "Call sheet · Đặt lịch F",
+      "empty": "Chưa điền",
+      "footer": "Đặt cọc thỏa thuận trực tiếp với nghệ sĩ. Fgrapher không thu tiền buổi chụp.",
+      "rows": {
+        "need": "Dịch vụ",
+        "when": "Thời gian",
+        "where": "Khu vực",
+        "style": "Phong cách",
+        "budget": "Ngân sách",
+        "note": "Mô tả thêm"
       }
     }
   },
