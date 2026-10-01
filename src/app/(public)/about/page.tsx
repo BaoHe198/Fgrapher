@@ -32,11 +32,12 @@ export async function generateMetadata(): Promise<Metadata> {
 // 01C make-up, 02D studio, 02F costume rental (wave 2 About design).
 const CHAPTER_FRAMES = [0, 2, 9, 11] as const;
 
-// Every claim on this page is checked against what the product does - the
+// Every claim on this page is checked against what the product does. The
 // design draft's "eKYC trong nước" and "dữ liệu không rời Việt Nam" were
-// not true (an admin reviews ID photos by hand, stored on Cloudinary), and
-// neither was a subject-consent step on upload, so those lines were
-// rewritten or dropped. Change the copy together with the behaviour.
+// not true (an admin reviews ID photos by hand, stored on Cloudinary), so
+// that copy was rewritten. The subject-consent line is true: uploading
+// requires the rights checkbox (ProfileMedia.rightsConfirmedAt). Change
+// the copy together with the behaviour.
 export default async function AboutPage() {
   const t = await getTranslations("publicPages.about");
   const tRole = await getTranslations("role");

@@ -4096,7 +4096,7 @@
         "s4t": "Xác minh danh tính",
         "s4b": "Gửi ảnh hai mặt căn cước và một ảnh chân dung. Đội Fgrapher duyệt trước khi hồ sơ được công khai.",
         "s5t": "Đăng portfolio",
-        "s5b": "Ảnh được duyệt trước khi công khai và hiển thị đúng khung hình bạn đã chọn.",
+        "s5b": "Ảnh được duyệt trước khi công khai và hiển thị đúng khung hình bạn đã chọn. Ảnh có người nhận diện được cần bạn xác nhận đã có sự đồng ý của họ.",
         "s6t": "Nhận yêu cầu",
         "s6b": "Xác nhận hoặc từ chối trong 48 giờ. Giá và đặt cọc do bạn thỏa thuận với khách.",
         "rolesLabel": "Đăng ký theo vai trò",
@@ -4112,7 +4112,7 @@
         "t3": "Fgrapher không giữ tiền buổi chụp.",
         "b3": "Giá và đặt cọc thỏa thuận trực tiếp với nghệ sĩ. Fgrapher không yêu cầu bạn chuyển tiền buổi chụp cho Fgrapher.",
         "t4": "Ảnh portfolio được duyệt trước khi công khai.",
-        "b4": "Ảnh mới ở trạng thái chờ duyệt cho tới khi đội Fgrapher xem xong. Fgrapher không có danh mục nội dung người lớn.",
+        "b4": "Ảnh mới ở trạng thái chờ duyệt cho tới khi đội Fgrapher xem xong. Khi đăng, nghệ sĩ phải xác nhận đã có sự đồng ý của người xuất hiện trong ảnh. Fgrapher không có danh mục nội dung người lớn.",
         "reportLead": "Thấy hồ sơ hoặc ảnh không đúng?",
         "report": "Báo cáo cho Fgrapher"
       },

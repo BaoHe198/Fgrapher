@@ -4096,7 +4096,7 @@
         "s4t": "Verify your identity",
         "s4b": "Send both sides of your ID card and a portrait photo. The Fgrapher team reviews them before your profile goes public.",
         "s5t": "Post your portfolio",
-        "s5b": "Photos are reviewed before they go public and are shown in the framing you chose.",
+        "s5b": "Photos are reviewed before they go public and are shown in the framing you chose. For photos with recognisable people, you confirm you have their consent.",
         "s6t": "Receive requests",
         "s6b": "Accept or decline within 48 hours. You agree the price and deposit with the customer.",
         "rolesLabel": "Sign up by role",
@@ -4112,7 +4112,7 @@
         "t3": "Fgrapher does not hold money for shoots.",
         "b3": "Price and deposit are agreed directly with the artist. Fgrapher never asks you to transfer money for a shoot to Fgrapher.",
         "t4": "Portfolio photos are reviewed before going public.",
-        "b4": "New photos stay pending until the Fgrapher team has reviewed them. Fgrapher has no adult content category.",
+        "b4": "New photos stay pending until the Fgrapher team has reviewed them. When uploading, artists must confirm they have the consent of the people in the photos. Fgrapher has no adult content category.",
         "reportLead": "Seen a profile or photo that isn't right?",
         "report": "Report it to Fgrapher"
       },
