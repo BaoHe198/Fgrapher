@@ -2,15 +2,15 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { MediaPlaceholder } from "@/components/ui/media-placeholder";
-import { formatCurrency } from "@/lib/utils";
+import { GearIcon } from "@/components/shop/gear-icon";
+import { normalizeProductCategory } from "@/lib/validations/product";
+import { cn, formatCurrency } from "@/lib/utils";
 
 interface ProductCardProps {
   product: {
     id: string;
     name: string;
+    category: string;
     type: "SALE" | "RENT" | "BOTH";
     price: number | null;
     rentalPrice: number | null;
@@ -22,9 +22,14 @@ interface ProductCardProps {
   };
 }
 
+// Chợ F's card as a spec sheet (wave 2): the equipment on a plain ground,
+// never cropped; a mono line for category and condition; prices in mono.
+// No photo yet shows a dashed frame with the icon of what is missing, and
+// out of stock is a dashed label rather than a red badge.
 export async function ProductCard({ product }: ProductCardProps) {
   const t = await getTranslations("uiKit.productCard");
   const tCondition = await getTranslations("uiKit.condition");
+  const tCategory = await getTranslations("productCategory");
   const CONDITION_LABEL: Record<string, string> = {
     NEW: tCondition("new"),
     LIKE_NEW: tCondition("likeNew"),
@@ -34,80 +39,79 @@ export async function ProductCard({ product }: ProductCardProps) {
   const shopName =
     product.user.firstName ?? product.user.name ?? t("shopFallback");
   const outOfStock = product.type !== "RENT" && product.stock === 0;
+  const category = normalizeProductCategory(product.category);
+  const typeLabel =
+    product.type === "RENT"
+      ? t("rentalBadge")
+      : product.type === "BOTH"
+        ? t("saleAndRentalBadge")
+        : t("forSaleBadge");
 
   return (
-    // h-full on both, so every card in a grid row is the same height no
-    // matter how long its name is; the price and shop name then line up
-    // across the row via mt-auto below.
-    <Link href={`/shop/${product.id}`} className="h-full">
-      <Card padding={false} interactive className="flex h-full flex-col">
-        <div className="relative aspect-[4/3] w-full shrink-0">
-          {product.images[0] ? (
-            <Image
-              src={product.images[0].url}
-              alt={product.name}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <MediaPlaceholder
-              tint="neutral-300"
-              height="100%"
-              className="absolute inset-0"
-            />
-          )}
-          <span className="absolute top-2.5 left-2.5">
-            <Badge variant={product.type === "RENT" ? "accent" : "neutral"}>
-              {product.type === "RENT"
-                ? t("rentalBadge")
-                : product.type === "BOTH"
-                  ? t("saleAndRentalBadge")
-                  : t("forSaleBadge")}
-            </Badge>
+    <Link
+      href={`/shop/${product.id}`}
+      className="group focus-ring flex h-full flex-col gap-2.5 rounded-[var(--fg-radius-md)]"
+    >
+      <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-[var(--fg-radius-md)] bg-bg-sunken">
+        {product.images[0] ? (
+          <Image
+            src={product.images[0].url}
+            alt={product.name}
+            fill
+            sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
+            className="object-contain p-4 transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover:scale-[1.03] motion-reduce:transition-none"
+          />
+        ) : (
+          <span className="absolute inset-3 flex flex-col items-center justify-center gap-2 rounded-[var(--fg-radius-sm)] border border-dashed border-border-strong text-text-tertiary">
+            <GearIcon category={product.category} className="size-10" />
+            <span className="font-mono text-meta tracking-[0.12em] uppercase">
+              {t("noPhoto")}
+            </span>
           </span>
-          {outOfStock ? (
-            <span className="absolute top-2.5 right-2.5">
-              <Badge variant="destructive">{t("outOfStock")}</Badge>
+        )}
+        <span className="absolute top-2.5 left-2.5 rounded-[4px] bg-bg-surface px-1.5 py-1 font-mono text-meta tracking-[0.12em] text-text-primary uppercase">
+          {typeLabel}
+        </span>
+        {outOfStock ? (
+          <span className="absolute top-2.5 right-2.5 rounded-[4px] border border-dashed border-text-secondary bg-bg-surface px-1.5 py-1 font-mono text-meta tracking-[0.12em] text-text-secondary uppercase">
+            {t("outOfStock")}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="flex flex-1 flex-col gap-1">
+        <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+          {[
+            category ? tCategory(category) : null,
+            CONDITION_LABEL[product.condition] ?? product.condition,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </span>
+        <span className="line-clamp-2 text-heading-sm text-text-primary group-hover:underline group-hover:underline-offset-4">
+          {product.name}
+        </span>
+        <span className="mt-auto flex flex-col gap-0.5 pt-1.5 font-mono text-body-md tabular-nums text-text-primary">
+          {product.type !== "RENT" && product.price ? (
+            <span className="font-semibold">
+              {formatCurrency(product.price, product.currency)}
             </span>
           ) : null}
-        </div>
-
-        <div className="flex flex-1 flex-col gap-1.5 p-3.5">
-          <span className="line-clamp-2 text-heading-sm text-text-primary">
-            {product.name}
-          </span>
-          <Badge variant="neutral" className="w-fit">
-            {CONDITION_LABEL[product.condition] ?? product.condition}
-          </Badge>
-          <span className="mt-auto text-body-md font-semibold! text-text-primary">
-            {product.type === "RENT" && product.rentalPrice
-              ? `${formatCurrency(product.rentalPrice, product.currency)}${t("perDay")}`
-              : product.price
-                ? formatCurrency(product.price, product.currency)
-                : product.rentalPrice
-                  ? `${formatCurrency(product.rentalPrice, product.currency)}${t("perDay")}`
-                  : "—"}
-          </span>
-          {/* "Sale & rental" showed only the sale price, so someone who
-              only wanted to rent had to open the listing to learn whether
-              it was affordable. */}
-          {/* Always rendered, blank when there's nothing to say, so the
-              extra line on one card doesn't lift its price out of line
-              with the rest of the row. */}
-          {product.type === "BOTH" && product.price && product.rentalPrice ? (
-            <span className="text-body-sm text-text-secondary">
-              {t("orRent", {
-                price: formatCurrency(product.rentalPrice, product.currency),
-              })}
+          {product.type !== "SALE" && product.rentalPrice ? (
+            <span
+              className={cn(
+                product.type === "BOTH"
+                  ? "text-body-sm text-text-secondary"
+                  : "font-semibold",
+              )}
+            >
+              {formatCurrency(product.rentalPrice, product.currency)}
+              {t("perDay")}
             </span>
-          ) : (
-            <span aria-hidden className="text-body-sm">
-              {"\u00a0"}
-            </span>
-          )}
-          <span className="text-body-sm text-text-secondary">{shopName}</span>
-        </div>
-      </Card>
+          ) : null}
+        </span>
+        <span className="text-body-sm text-text-secondary">{shopName}</span>
+      </div>
     </Link>
   );
 }

@@ -8,10 +8,12 @@ import {
   FilterParamsProvider,
   FilterResultsPane,
 } from "@/components/filters/filter-params-provider";
-import { ShopFilters } from "@/components/shop/shop-filters";
+import { GearIcon } from "@/components/shop/gear-icon";
+import { ShopQuickBar } from "@/components/shop/shop-quick-bar";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
+import { cn } from "@/lib/utils";
 import { searchProducts } from "@/services/marketplace";
 
 interface ShopPageProps {
@@ -29,6 +31,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   }
 
   const t = await getTranslations("publicPages.shop");
+  const categoryT = await getTranslations("productCategory");
   const params = await searchParams;
 
   const type =
@@ -75,90 +78,160 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         ? t("filters.sortPriceDesc")
         : t("filters.sortNewest");
 
+  // The five big tiles (wave 2): the equipment kinds people come for, each
+  // with its line icon and a frame number. "Other" stays in the drawer.
+  const TILES = ["Camera body", "Lens", "Lighting", "Audio", "Support"];
+  const activeCategories = category ?? [];
+  const tileHref = (value: string | null) => {
+    const next = new URLSearchParams(
+      Object.entries(params).filter(
+        (entry): entry is [string, string] =>
+          Boolean(entry[1]) && entry[0] !== "category" && entry[0] !== "page",
+      ),
+    );
+    if (value) next.set("category", value);
+    const qs = next.toString();
+    return qs ? `/shop?${qs}` : "/shop";
+  };
+  const activeCount = [
+    params.q,
+    category?.length,
+    condition?.length,
+    params.priceMin,
+    params.priceMax,
+    params.inStockOnly,
+    params.provinceId,
+  ].filter(Boolean).length;
+
   return (
-    <div className="mx-auto max-w-[1440px] px-4 pt-8 pb-[72px] sm:px-8">
+    <div className="mx-auto max-w-[1440px] px-4 pt-[clamp(28px,4vw,56px)] pb-[72px] sm:px-8">
       <FilterParamsProvider>
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[268px_1fr]">
-          <div className="hidden lg:block">
-            <ShopFilters
-              categoryCounts={categoryCounts}
-              provinces={provinces}
-            />
-          </div>
+        <header className="flex flex-col gap-3">
+          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+            {t("v2.eyebrow")}
+          </span>
+          <h1 className="max-w-4xl font-display text-[clamp(2.25rem,5vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.03em] text-balance text-text-primary">
+            {type === "RENT" ? t("v2.titleRent") : t("v2.title")}
+          </h1>
+          <p className="max-w-2xl text-body-md text-text-secondary">
+            {t("v2.lede")}
+          </p>
+        </header>
 
-          <div className="min-w-0">
-            <div className="mb-5">
-              <h1 className="text-display-md text-text-primary">
-                {t("heading")}
-              </h1>
-              <p className="text-body-md text-text-secondary">
-                {t("count", { count: result.total, sort: sortLabel })}
-              </p>
-            </div>
+        <nav
+          aria-label={t("filters.category")}
+          className="mt-8 grid grid-cols-5 gap-2 max-md:-mx-4 max-md:flex max-md:overflow-x-auto max-md:px-4 sm:gap-3"
+        >
+          {TILES.map((value, index) => {
+            const active = activeCategories.includes(value);
+            return (
+              <Link
+                key={value}
+                href={tileHref(active ? null : value)}
+                aria-current={active ? "true" : undefined}
+                className={cn(
+                  "focus-ring group flex min-w-[132px] flex-col justify-between gap-6 rounded-[var(--fg-radius-md)] border p-4 transition-colors duration-[var(--fg-dur-150)]",
+                  active
+                    ? "border-brand-primary bg-bg-surface shadow-[inset_0_0_0_1px_var(--brand-primary)]"
+                    : "border-border-subtle bg-bg-surface hover:border-border-strong",
+                )}
+              >
+                <span className="flex items-start justify-between">
+                  <GearIcon
+                    category={value}
+                    className="size-8 text-text-secondary group-hover:text-text-primary"
+                  />
+                  <span className="font-mono text-meta text-text-tertiary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </span>
+                <span className="flex items-baseline justify-between gap-2">
+                  <span className="text-body-md font-semibold! text-text-primary">
+                    {categoryT(value)}
+                  </span>
+                  <span className="font-mono text-meta tabular-nums text-text-tertiary">
+                    {categoryCounts[value] ?? 0}
+                  </span>
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
 
-            <FilterResultsPane label={t("updatingResults")}>
-              {result.data.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-20 text-center">
-                  <SearchX className="size-12 text-text-tertiary" />
-                  <p className="text-body-lg font-semibold! text-text-primary">
-                    {t("emptyTitle")}
-                  </p>
-                  <p className="text-body-md text-text-secondary">
-                    {t("emptyBody")}
-                  </p>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    nativeButton={false}
-                    render={<Link href="/shop" />}
-                  >
-                    {t("clearAll")}
-                  </Button>
+        <div className="mt-6">
+          <ShopQuickBar
+            categoryCounts={categoryCounts}
+            provinces={provinces}
+            activeCount={activeCount}
+          />
+        </div>
+
+        <div className="mt-6 min-w-0">
+          <p className="mb-5 font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+            {t("count", { count: result.total, sort: sortLabel })}
+          </p>
+          <FilterResultsPane label={t("updatingResults")}>
+            {result.data.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-20 text-center">
+                <SearchX className="size-12 text-text-tertiary" />
+                <p className="text-body-lg font-semibold! text-text-primary">
+                  {t("emptyTitle")}
+                </p>
+                <p className="text-body-md text-text-secondary">
+                  {t("emptyBody")}
+                </p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  nativeButton={false}
+                  render={<Link href="/shop" />}
+                >
+                  {t("clearAll")}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-x-5 gap-y-9 max-sm:gap-x-3 md:grid-cols-3 xl:grid-cols-4">
+                  {result.data.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
                 </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                    {result.data.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </div>
 
-                  {result.totalPages > 1 ? (
-                    <div className="mt-6 flex justify-center gap-2">
-                      {page > 1 ? (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          nativeButton={false}
-                          render={
-                            <Link
-                              href={`?${new URLSearchParams({ ...params, page: String(page - 1) } as Record<string, string>).toString()}`}
-                            />
-                          }
-                        >
-                          {t("prev")}
-                        </Button>
-                      ) : null}
-                      {page < result.totalPages ? (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          nativeButton={false}
-                          render={
-                            <Link
-                              href={`?${new URLSearchParams({ ...params, page: String(page + 1) } as Record<string, string>).toString()}`}
-                            />
-                          }
-                        >
-                          {t("next")}
-                        </Button>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </>
-              )}
-            </FilterResultsPane>
-          </div>
+                {result.totalPages > 1 ? (
+                  <div className="mt-6 flex justify-center gap-2">
+                    {page > 1 ? (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        nativeButton={false}
+                        render={
+                          <Link
+                            href={`?${new URLSearchParams({ ...params, page: String(page - 1) } as Record<string, string>).toString()}`}
+                          />
+                        }
+                      >
+                        {t("prev")}
+                      </Button>
+                    ) : null}
+                    {page < result.totalPages ? (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        nativeButton={false}
+                        render={
+                          <Link
+                            href={`?${new URLSearchParams({ ...params, page: String(page + 1) } as Record<string, string>).toString()}`}
+                          />
+                        }
+                      >
+                        {t("next")}
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </>
+            )}
+          </FilterResultsPane>
         </div>
       </FilterParamsProvider>
     </div>

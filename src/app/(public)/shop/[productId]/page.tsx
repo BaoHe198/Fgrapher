@@ -13,6 +13,7 @@ import { StarRating } from "@/components/ui/star-rating";
 import { auth } from "@/lib/auth";
 import { features } from "@/lib/features";
 import { jsonLdScriptProps } from "@/lib/utils";
+import { normalizeProductCategory } from "@/lib/validations/product";
 import { getProductDetail } from "@/services/marketplace";
 import {
   getProductRating,
@@ -51,6 +52,7 @@ export default async function ProductDetailPage({
   params: Promise<{ productId: string }>;
 }) {
   const t = await getTranslations("publicPages.productDetail");
+  const categoryT = await getTranslations("productCategory");
   if (!features.marketplaceEnabled) {
     notFound();
   }
@@ -99,7 +101,20 @@ export default async function ProductDetailPage({
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.1fr_400px] lg:gap-12">
         <div className="flex flex-col gap-8">
-          <ProductGallery images={product.images} name={product.name} />
+          <ProductGallery
+            images={product.images}
+            name={product.name}
+            category={product.category}
+            askHref={
+              isOwner
+                ? null
+                : `/dashboard/messages?${new URLSearchParams({
+                    to: product.user.id,
+                    product: product.id,
+                    productName: product.name,
+                  }).toString()}`
+            }
+          />
 
           {product.description ? (
             <div className="flex flex-col gap-2">
@@ -216,6 +231,9 @@ export default async function ProductDetailPage({
             product={{
               id: product.id,
               name: product.name,
+              categoryLabel: normalizeProductCategory(product.category)
+                ? categoryT(normalizeProductCategory(product.category)!)
+                : null,
               type: product.type,
               price: product.price,
               rentalPrice: product.rentalPrice,
@@ -234,7 +252,7 @@ export default async function ProductDetailPage({
       {related.length > 0 ? (
         <div className="mt-12">
           <SectionHead title={t("moreFromShop")} />
-          <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-x-5 gap-y-9 max-sm:gap-x-3 md:grid-cols-3 xl:grid-cols-4">
             {related.map((p) => (
               <ProductCard
                 key={p.id}

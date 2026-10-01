@@ -504,7 +504,8 @@
       "outOfStock": "Out of stock",
       "perDay": "/day",
       "shopFallback": "Shop",
-      "orRent": "or rent for {price}/day"
+      "orRent": "or rent for {price}/day",
+      "noPhoto": "No photo yet"
     },
     "productForm": {
       "nameLabel": "Name",
@@ -2218,7 +2219,8 @@
       "selectConversationHint": "Choose from the list to start chatting",
       "rentalDraft": "Hi, I'd like to rent {product}. Product: {url}",
       "pageTitle": "Messages",
-      "costumeDraft": "Hi, I'd like to rent “{costume}”. I need it on … — is it available?"
+      "costumeDraft": "Hi, I'd like to rent “{costume}”. I need it on … — is it available?",
+      "rentalDraftDates": "Hi, I'd like to rent {product} from {from} for {days, plural, one {# day} other {# days}}. Product: {url}"
     },
     "shopOrders": {
       "title": "Shop orders",
@@ -4365,6 +4367,18 @@
         "reset": "Reset filters",
         "searchLabel": "Search gear",
         "searchPlaceholder": "Name, brand..."
+      },
+      "v2": {
+        "eyebrow": "Fmarket · equipment",
+        "title": "Cameras, lenses, lights. Buy, or rent by the day.",
+        "titleRent": "Equipment to rent by the day",
+        "lede": "Gear listed for sale or rent by verified artists and shops. Payment and handover are agreed directly with the seller.",
+        "buy": "Buy",
+        "rent": "Rent",
+        "inStock": "In stock",
+        "sort": "Sort",
+        "filters": "Filters",
+        "showResults": "Show results"
       }
     },
     "productDetail": {
@@ -4413,7 +4427,24 @@
       "decreaseQuantity": "Decrease quantity",
       "increaseQuantity": "Increase quantity",
       "ownProductNote": "This is your listing. Customers see the buy or message buttons here.",
-      "editOwnProduct": "Edit listing"
+      "editOwnProduct": "Edit listing",
+      "v2": {
+        "sellerStated": "Seller-stated",
+        "mode": "Buy or rent",
+        "pickup": "Pick-up date",
+        "days": "Rental days",
+        "fewerDays": "One day fewer",
+        "moreDays": "One more day",
+        "dayCount": "{count, plural, one {# day} other {# days}}",
+        "rentFor": "Rent for {count, plural, one {# day} other {# days}}",
+        "deposit": "Deposit",
+        "totalToPrepare": "Total to have ready",
+        "returnOn": "Return on",
+        "noPhoto": "No photo yet",
+        "askForPhotos": "Ask for real photos",
+        "openPhoto": "Enlarge angle {frame}",
+        "angle": "Angle {frame}"
+      }
     },
     "community": {
       "heading": "Community",

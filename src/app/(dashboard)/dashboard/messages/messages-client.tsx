@@ -38,11 +38,22 @@ export function MessagesClient({
   // (project owner, 22/09/2026), so the draft asks for it.
   const costumeId = searchParams.get("costume");
   const costumeName = searchParams.get("costumeName");
+  // Chợ F's rental calculator (wave 2) sends the chosen pickup day and
+  // length, so the draft already says what the customer wants.
+  const rentFrom = searchParams.get("rentFrom");
+  const rentDays = Number(searchParams.get("rentDays")) || 0;
   const rentalDraft = productId
-    ? t("rentalDraft", {
-        product: productName || productId,
-        url: `/shop/${productId}`,
-      })
+    ? rentFrom && rentDays > 0
+      ? t("rentalDraftDates", {
+          product: productName || productId,
+          from: rentFrom,
+          days: rentDays,
+          url: `/shop/${productId}`,
+        })
+      : t("rentalDraft", {
+          product: productName || productId,
+          url: `/shop/${productId}`,
+        })
     : costumeId
       ? t("costumeDraft", { costume: costumeName || costumeId })
       : undefined;
@@ -81,6 +92,8 @@ export function MessagesClient({
             const nextParams = new URLSearchParams({ c: body.data.id });
             if (productId) nextParams.set("product", productId);
             if (productName) nextParams.set("productName", productName);
+            if (rentFrom) nextParams.set("rentFrom", rentFrom);
+            if (rentDays > 0) nextParams.set("rentDays", String(rentDays));
             if (costumeId) nextParams.set("costume", costumeId);
             if (costumeName) nextParams.set("costumeName", costumeName);
             router.replace(`/dashboard/messages?${nextParams.toString()}`);

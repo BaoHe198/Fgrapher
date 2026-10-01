@@ -504,7 +504,8 @@
       "outOfStock": "Hết hàng",
       "perDay": "/ngày",
       "shopFallback": "Cửa hàng",
-      "orRent": "hoặc thuê {price}/ngày"
+      "orRent": "hoặc thuê {price}/ngày",
+      "noPhoto": "Chưa có ảnh"
     },
     "productForm": {
       "nameLabel": "Tên sản phẩm",
@@ -2218,7 +2219,8 @@
       "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin",
       "rentalDraft": "Chào shop, tôi muốn thuê {product}. Sản phẩm: {url}",
       "pageTitle": "Tin nhắn",
-      "costumeDraft": "Chào shop, mình muốn thuê “{costume}”. Mình cần thuê vào ngày … — shop còn trống không ạ?"
+      "costumeDraft": "Chào shop, mình muốn thuê “{costume}”. Mình cần thuê vào ngày … — shop còn trống không ạ?",
+      "rentalDraftDates": "Chào shop, tôi muốn thuê {product} từ ngày {from}, trong {days} ngày. Sản phẩm: {url}"
     },
     "shopOrders": {
       "title": "Đơn hàng cửa hàng",
@@ -4365,6 +4367,18 @@
         "reset": "Đặt lại bộ lọc",
         "searchLabel": "Tìm thiết bị",
         "searchPlaceholder": "Tên thiết bị, hãng..."
+      },
+      "v2": {
+        "eyebrow": "Chợ F · thiết bị",
+        "title": "Máy ảnh, ống kính, ánh sáng. Mua hoặc thuê theo ngày.",
+        "titleRent": "Thiết bị cho thuê theo ngày",
+        "lede": "Thiết bị do nghệ sĩ và cửa hàng đã xác minh đăng bán hoặc cho thuê. Thanh toán và giao nhận thỏa thuận trực tiếp với người bán.",
+        "buy": "Mua",
+        "rent": "Thuê",
+        "inStock": "Còn hàng",
+        "sort": "Sắp xếp",
+        "filters": "Bộ lọc",
+        "showResults": "Xem kết quả"
       }
     },
     "productDetail": {
@@ -4413,7 +4427,24 @@
       "decreaseQuantity": "Giảm số lượng",
       "increaseQuantity": "Tăng số lượng",
       "ownProductNote": "Đây là sản phẩm của bạn. Khách sẽ thấy nút mua hoặc nhắn tin ở đây.",
-      "editOwnProduct": "Sửa sản phẩm"
+      "editOwnProduct": "Sửa sản phẩm",
+      "v2": {
+        "sellerStated": "Người bán khai",
+        "mode": "Mua hoặc thuê",
+        "pickup": "Nhận máy ngày",
+        "days": "Số ngày thuê",
+        "fewerDays": "Bớt một ngày",
+        "moreDays": "Thêm một ngày",
+        "dayCount": "{count} ngày",
+        "rentFor": "Tiền thuê {count} ngày",
+        "deposit": "Tiền cọc",
+        "totalToPrepare": "Tổng cần chuẩn bị",
+        "returnOn": "Trả máy ngày",
+        "noPhoto": "Chưa có ảnh",
+        "askForPhotos": "Xin ảnh thật",
+        "openPhoto": "Xem lớn góc {frame}",
+        "angle": "Góc {frame}"
+      }
     },
     "community": {
       "heading": "Cộng đồng F",
