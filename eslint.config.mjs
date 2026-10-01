@@ -24,6 +24,11 @@ const eslintConfig = defineConfig([
     ".design-sync/**",
     ".ds-sync/**",
     "ds-bundle/**",
+    // Claude Design exports kept as reference (bundles, vendored React,
+    // template scripts): generated code, never imported by the app.
+    "docs/design-reference/**",
+    // Third-party map library copied as-is.
+    "public/vendor/**",
   ]),
 ]);
 
