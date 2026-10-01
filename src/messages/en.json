@@ -2212,7 +2212,57 @@
         "fallbackSender": "Someone"
       },
       "manageCostumes": "Manage outfits",
-      "manageListings": "Manage listings"
+      "manageListings": "Manage listings",
+      "v2": {
+        "hello": "Hello {name}.",
+        "summary": "{shoots, plural, =0 {No shoots today} one {# shoot today} other {# shoots today}} · {requests, plural, =0 {no requests waiting} one {# request to answer} other {# requests to answer}}.",
+        "today": {
+          "title": "Today",
+          "sun": "Sunrise {rise} · sunset {set} · golden hour {morning} and {evening}",
+          "none": "No confirmed shoots today yet.",
+          "golden": "In golden hour"
+        },
+        "pending": {
+          "title": "Requests waiting · 48-hour window",
+          "keys": "Press A to accept · X to decline · M to message the selected request",
+          "empty": "No requests are waiting on you.",
+          "custom": "Custom package",
+          "quoteLater": "awaiting your quote",
+          "hoursLeft": "{hours} h left",
+          "deadline": "due {time} {date}",
+          "accept": "Accept",
+          "decline": "Decline",
+          "message": "Message"
+        },
+        "roll": {
+          "title": "Profile film roll",
+          "count": "{done}/{total} frames developed",
+          "lede": "Each frame is something still missing. Finish it and the frame develops.",
+          "undeveloped": "Undeveloped",
+          "done": "Done",
+          "items": {
+            "verify": "Identity verification",
+            "avatar": "Profile photo",
+            "cover": "Cover image",
+            "services": "Service packages",
+            "album": "First album",
+            "policies": "Deposit & cancellation policy",
+            "area": "Service area",
+            "calendar": "Availability"
+          }
+        },
+        "week": {
+          "title": "Last 7 days",
+          "requests": "New requests",
+          "lastWeek": "last week {count}",
+          "legend": "Solid: this week · dashed: last week",
+          "views": "Profile views",
+          "viewsNote": "Total since the profile went public.",
+          "completed": "Completed this month",
+          "value": "package value {value}",
+          "completedNote": "Counted from completed shoots. Fgrapher takes no payment."
+        }
+      }
     },
     "messages": {
       "selectConversation": "Select a conversation",

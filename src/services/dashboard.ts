@@ -348,3 +348,250 @@ export async function getRecentActivity(
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     .slice(0, 5);
 }
+
+// ---------------------------------------------------------------------------
+// Dashboard v2 (wave 2): what a provider's day looks like. Everything here
+// is real data - no estimated response times, no view trend the database
+// cannot draw (profile views are a running total, so only the requests
+// chart compares this week with last).
+// ---------------------------------------------------------------------------
+
+function vietnamDayKey(date: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+  }).format(date);
+}
+
+export interface ProviderOverview {
+  today: {
+    id: string;
+    startTime: string;
+    endTime: string | null;
+    service: string | null;
+    customer: string;
+    place: string | null;
+  }[];
+  pending: {
+    id: string;
+    customerId: string;
+    customer: string;
+    date: string;
+    startTime: string;
+    service: string | null;
+    totalPrice: number | null;
+    notes: string | null;
+    expiresAt: string | null;
+  }[];
+  sunPoint: { latitude: number; longitude: number } | null;
+  roll: { key: string; done: boolean; href: string }[];
+  rollPhotos: string[];
+  /** Requests received per Vietnam day: index 0 = 13 days ago. */
+  requestsByDay: number[];
+  completedThisMonth: { count: number; value: number };
+  views: number;
+}
+
+export async function getProviderOverview(
+  userId: string,
+): Promise<ProviderOverview> {
+  const now = new Date();
+  const todayKey = vietnamDayKey(now);
+  const fortnightAgo = new Date(now.getTime() - 14 * 86_400_000);
+  const startOfMonth = startOfMonthInVietnam(now);
+
+  const [user, today, pending, recent, completed] = await Promise.all([
+    db.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: {
+        avatar: true,
+        coverImage: true,
+        roles: { select: { role: true, verificationStatus: true } },
+        profiles: {
+          where: { role: { in: PROVIDER_ROLES } },
+          select: {
+            latitude: true,
+            longitude: true,
+            provinceId: true,
+            viewCount: true,
+            depositPolicy: true,
+            cancellationPolicy: true,
+            _count: {
+              select: {
+                services: { where: { isActive: true } },
+                serviceAreas: true,
+              },
+            },
+            albums: {
+              where: {
+                deletedAt: null,
+                isPublished: true,
+                media: {
+                  some: { moderationStatus: "APPROVED", deletedAt: null },
+                },
+              },
+              select: { id: true },
+              take: 1,
+            },
+            media: {
+              where: {
+                type: "IMAGE",
+                moderationStatus: "APPROVED",
+                deletedAt: null,
+              },
+              orderBy: { order: "asc" },
+              take: 8,
+              select: { url: true },
+            },
+            resources: {
+              select: {
+                _count: { select: { rules: { where: { isActive: true } } } },
+              },
+            },
+          },
+        },
+      },
+    }),
+    db.booking.findMany({
+      where: {
+        providerId: userId,
+        status: "CONFIRMED",
+        date: new Date(`${todayKey}T00:00:00.000Z`),
+      },
+      orderBy: { startTime: "asc" },
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        locationAddress: true,
+        service: { select: { name: true } },
+        customer: { select: { name: true, firstName: true } },
+      },
+    }),
+    db.booking.findMany({
+      where: { providerId: userId, status: "PENDING" },
+      orderBy: [{ expiresAt: "asc" }, { createdAt: "asc" }],
+      take: 6,
+      select: {
+        id: true,
+        customerId: true,
+        date: true,
+        startTime: true,
+        totalPrice: true,
+        notes: true,
+        expiresAt: true,
+        service: { select: { name: true } },
+        customer: { select: { name: true, firstName: true } },
+      },
+    }),
+    db.booking.findMany({
+      where: { providerId: userId, createdAt: { gte: fortnightAgo } },
+      select: { createdAt: true },
+    }),
+    db.booking.findMany({
+      where: {
+        providerId: userId,
+        status: "COMPLETED",
+        completedAt: { gte: startOfMonth },
+      },
+      select: { totalPrice: true },
+    }),
+  ]);
+
+  const profiles = user.profiles;
+  const located = profiles.find(
+    (p) => p.latitude != null && p.longitude != null,
+  );
+  const providerRoles = user.roles.filter((r) =>
+    PROVIDER_ROLES.includes(r.role),
+  );
+
+  const dayKeys = Array.from({ length: 14 }, (_, i) =>
+    vietnamDayKey(new Date(now.getTime() - (13 - i) * 86_400_000)),
+  );
+  const requestsByDay = dayKeys.map(
+    (key) => recent.filter((b) => vietnamDayKey(b.createdAt) === key).length,
+  );
+
+  const name = (c: { name: string | null; firstName: string | null }) =>
+    c.firstName ?? c.name ?? "";
+
+  return {
+    today: today.map((b) => ({
+      id: b.id,
+      startTime: b.startTime,
+      endTime: b.endTime,
+      service: b.service?.name ?? null,
+      customer: name(b.customer),
+      place: b.locationAddress,
+    })),
+    pending: pending.map((b) => ({
+      id: b.id,
+      customerId: b.customerId,
+      customer: name(b.customer),
+      date: b.date.toISOString(),
+      startTime: b.startTime,
+      service: b.service?.name ?? null,
+      totalPrice: b.totalPrice,
+      notes: b.notes,
+      expiresAt: b.expiresAt?.toISOString() ?? null,
+    })),
+    // ~10 km rounding, as on the public booking page.
+    sunPoint: located
+      ? {
+          latitude: Math.round(located.latitude! * 10) / 10,
+          longitude: Math.round(located.longitude! * 10) / 10,
+        }
+      : null,
+    roll: [
+      {
+        key: "verify",
+        done:
+          providerRoles.length > 0 &&
+          providerRoles.every((r) => r.verificationStatus === "VERIFIED"),
+        href: "/dashboard/settings/roles",
+      },
+      {
+        key: "avatar",
+        done: Boolean(user.avatar),
+        href: "/dashboard/settings/profile",
+      },
+      {
+        key: "cover",
+        done: Boolean(user.coverImage),
+        href: "/dashboard/settings/profile",
+      },
+      {
+        key: "services",
+        done: profiles.some((p) => p._count.services > 0),
+        href: "/dashboard/settings/profile?section=roleProfile",
+      },
+      {
+        key: "album",
+        done: profiles.some((p) => p.albums.length > 0),
+        href: "/dashboard/portfolio",
+      },
+      {
+        key: "policies",
+        done: profiles.some((p) => p.depositPolicy && p.cancellationPolicy),
+        href: "/dashboard/settings/profile?section=roleProfile",
+      },
+      {
+        key: "area",
+        done: profiles.some((p) => p.provinceId || p._count.serviceAreas > 0),
+        href: "/dashboard/settings/profile?section=roleProfile",
+      },
+      {
+        key: "calendar",
+        done: profiles.some((p) => p.resources.some((r) => r._count.rules > 0)),
+        href: "/dashboard/calendar",
+      },
+    ],
+    rollPhotos: profiles.flatMap((p) => p.media.map((m) => m.url)).slice(0, 8),
+    requestsByDay,
+    completedThisMonth: {
+      count: completed.length,
+      value: completed.reduce((sum, b) => sum + (b.totalPrice ?? 0), 0),
+    },
+    views: profiles.reduce((sum, p) => sum + p.viewCount, 0),
+  };
+}

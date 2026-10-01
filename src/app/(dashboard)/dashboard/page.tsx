@@ -26,6 +26,7 @@ import {
   getCostumeShopStats,
   getCustomerStats,
   getProviderStats,
+  getProviderOverview,
   getRecentActivity,
   isProviderRoleSet,
   type CameraShopStats,
@@ -37,6 +38,7 @@ import {
 
 import { AcceptingBookingsToggle } from "./accepting-bookings-toggle";
 import { CheckoutSuccessToast } from "./checkout-success-toast";
+import { ProviderOverview } from "./provider-overview";
 
 type Translator = (
   key: string,
@@ -201,6 +203,31 @@ function customerStatCards(stats: CustomerStats, t: Translator): StatCard[] {
   ];
 }
 
+// "THỨ NĂM · 01/10/2026 · 09:12" in Vietnam time, plus the instant and the
+// day key the overview is drawn for. Read once per request.
+function vietnamNow() {
+  const now = new Date();
+  const zone = { timeZone: "Asia/Ho_Chi_Minh" } as const;
+  const weekday = new Intl.DateTimeFormat("vi-VN", {
+    ...zone,
+    weekday: "long",
+  }).format(now);
+  const date = new Intl.DateTimeFormat("en-GB", {
+    ...zone,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(now);
+  const time = new Intl.DateTimeFormat("en-GB", {
+    ...zone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(now);
+  const dateKey = new Intl.DateTimeFormat("en-CA", zone).format(now);
+  return { at: now.getTime(), dateKey, weekday, date, time };
+}
+
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) {
@@ -243,7 +270,8 @@ export default async function DashboardPage() {
     features.marketplaceEnabled &&
     roles.includes("CAMERA_SHOP");
 
-  const [activity, statCards] = await Promise.all([
+  const clock = vietnamNow();
+  const [activity, statCards, overview] = await Promise.all([
     getRecentActivity(user.id, isProvider),
     isProvider
       ? getProviderStats(user.id).then((stats) => providerStatCards(stats, t))
@@ -258,6 +286,7 @@ export default async function DashboardPage() {
           : getCustomerStats(user.id).then((stats) =>
               customerStatCards(stats, t),
             ),
+    isProvider ? getProviderOverview(user.id) : Promise.resolve(null),
   ]);
 
   // Prompt G2, VIỆC 6 — "Nêu rõ còn thiếu gì thay vì chỉ hiện phần trăm":
@@ -317,49 +346,76 @@ export default async function DashboardPage() {
           marketplace-related despite the filename; dormant while
           BILLING_ENABLED=false since that Checkout route itself 404s. */}
       {features.billingEnabled ? <CheckoutSuccessToast /> : null}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-heading-lg text-text-primary sm:text-display-md">
-          {greeting(firstName, t)}
-        </h1>
-        {isProvider ? (
-          <AcceptingBookingsToggle initialValue={user.acceptingBookings} />
-        ) : null}
-      </div>
-
-      <div
-        // Two up from the smallest screen: one card per row put four
-        // numbers in ~500px on a phone, above anything to act on.
-        className={`grid grid-cols-2 gap-3 sm:gap-4 ${
-          statCards.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
-        }`}
-      >
-        {statCards.map((stat) => {
-          const card = (
-            <Card
-              interactive={Boolean(stat.href)}
-              className="flex h-full flex-col gap-1.5 [--card-spacing:--spacing(4)] sm:[--card-spacing:--spacing(5)]"
-            >
-              <span className="text-body-sm text-text-secondary">
-                {stat.label}
+      {overview ? (
+        <>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-2">
+              <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+                {clock.weekday} · {clock.date} · {clock.time}
               </span>
-              {/* nowrap + a step smaller on phones: break-words split
+              <h1 className="font-display text-[clamp(2.25rem,4.5vw,3.5rem)] leading-[1] font-semibold tracking-[-0.03em] text-text-primary">
+                {t("v2.hello", { name: firstName })}
+              </h1>
+              <p className="text-body-md text-text-secondary">
+                {t("v2.summary", {
+                  shoots: overview.today.length,
+                  requests: overview.pending.length,
+                })}
+              </p>
+            </div>
+            <AcceptingBookingsToggle initialValue={user.acceptingBookings} />
+          </div>
+          <ProviderOverview
+            overview={overview}
+            dateKey={clock.dateKey}
+            now={clock.at}
+          />
+        </>
+      ) : (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-heading-lg text-text-primary sm:text-display-md">
+            {greeting(firstName, t)}
+          </h1>
+        </div>
+      )}
+
+      {overview ? null : (
+        <div
+          // Two up from the smallest screen: one card per row put four
+          // numbers in ~500px on a phone, above anything to act on.
+          className={`grid grid-cols-2 gap-3 sm:gap-4 ${
+            statCards.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
+          }`}
+        >
+          {statCards.map((stat) => {
+            const card = (
+              <Card
+                interactive={Boolean(stat.href)}
+                className="flex h-full flex-col gap-1.5 [--card-spacing:--spacing(4)] sm:[--card-spacing:--spacing(5)]"
+              >
+                <span className="text-body-sm text-text-secondary">
+                  {stat.label}
+                </span>
+                {/* nowrap + a step smaller on phones: break-words split
                   "2.500.000₫" before the ₫ in a half-width card. */}
-              <span className="text-heading-md whitespace-nowrap text-text-primary tabular-nums sm:text-display-md">
-                {stat.value}
-              </span>
-            </Card>
-          );
-          return stat.href ? (
-            <Link key={stat.label} href={stat.href}>
-              {card}
-            </Link>
-          ) : (
-            <div key={stat.label}>{card}</div>
-          );
-        })}
-      </div>
+                <span className="text-heading-md whitespace-nowrap text-text-primary tabular-nums sm:text-display-md">
+                  {stat.value}
+                </span>
+              </Card>
+            );
+            return stat.href ? (
+              <Link key={stat.label} href={stat.href}>
+                {card}
+              </Link>
+            ) : (
+              <div key={stat.label}>{card}</div>
+            );
+          })}
+        </div>
+      )}
 
-      {hasIncompleteProfile ? (
+      {/* Providers see these as the film roll above. */}
+      {hasIncompleteProfile && !overview ? (
         <Card className="flex flex-col gap-3 border border-warning bg-warning-bg">
           <span className="text-body-md font-semibold! text-text-primary">
             {t("completeProfile.title")}

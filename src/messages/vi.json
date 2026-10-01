@@ -2212,7 +2212,57 @@
         "fallbackSender": "Ai đó"
       },
       "manageCostumes": "Quản lý trang phục",
-      "manageListings": "Quản lý tin đăng"
+      "manageListings": "Quản lý tin đăng",
+      "v2": {
+        "hello": "Chào {name}.",
+        "summary": "{shoots, plural, =0 {Hôm nay không có buổi chụp} other {# buổi chụp hôm nay}} · {requests, plural, =0 {không có yêu cầu chờ} other {# yêu cầu cần trả lời}}.",
+        "today": {
+          "title": "Hôm nay",
+          "sun": "Mọc {rise} · lặn {set} · giờ vàng {morning} và {evening}",
+          "none": "Hôm nay chưa có buổi chụp nào được xác nhận.",
+          "golden": "Trong giờ vàng"
+        },
+        "pending": {
+          "title": "Yêu cầu chờ phản hồi · hạn 48 giờ",
+          "keys": "Phím A chấp nhận · X từ chối · M nhắn tin yêu cầu đang chọn",
+          "empty": "Không có yêu cầu nào đang chờ bạn.",
+          "custom": "Gói tùy chỉnh",
+          "quoteLater": "chờ bạn báo giá",
+          "hoursLeft": "còn {hours} giờ",
+          "deadline": "hạn {time} {date}",
+          "accept": "Chấp nhận",
+          "decline": "Từ chối",
+          "message": "Nhắn tin"
+        },
+        "roll": {
+          "title": "Cuộn phim hồ sơ",
+          "count": "{done}/{total} khung đã tráng",
+          "lede": "Mỗi khung là một việc còn thiếu. Làm xong, khung được tráng.",
+          "undeveloped": "Chưa tráng",
+          "done": "Đã xong",
+          "items": {
+            "verify": "Xác minh danh tính",
+            "avatar": "Ảnh đại diện",
+            "cover": "Ảnh đầu trang",
+            "services": "Gói dịch vụ",
+            "album": "Album đầu tiên",
+            "policies": "Chính sách đặt cọc & hủy",
+            "area": "Khu vực phục vụ",
+            "calendar": "Lịch trống"
+          }
+        },
+        "week": {
+          "title": "7 ngày qua",
+          "requests": "Yêu cầu mới",
+          "lastWeek": "tuần trước {count}",
+          "legend": "Đường liền: tuần này · đứt: tuần trước",
+          "views": "Lượt xem hồ sơ",
+          "viewsNote": "Tổng từ khi hồ sơ công khai.",
+          "completed": "Buổi hoàn thành tháng này",
+          "value": "giá trị theo gói {value}",
+          "completedNote": "Tính từ các buổi đã hoàn thành. Fgrapher không thu tiền."
+        }
+      }
     },
     "messages": {
       "selectConversation": "Chọn một cuộc trò chuyện",
