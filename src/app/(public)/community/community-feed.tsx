@@ -14,14 +14,12 @@ import {
   Flag,
   ImageIcon,
   Loader2,
-  MapPin,
   MessageSquareText,
   PenSquare,
   Send,
   Sparkles,
   Trash2,
   Users,
-  WalletCards,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -54,6 +52,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { formatDate } from "@/lib/format";
 import {
   cn,
@@ -99,6 +98,7 @@ interface FeedRequest {
   budgetMax: number | null;
   currency: string;
   status: ServiceRequestStatus;
+  expiresAt: string;
   province: { name: string };
   ward: { name: string } | null;
   offerCount: number;
@@ -121,7 +121,13 @@ interface FeedPost {
     username: string | null;
     avatar: string | null;
   };
-  media: { id: string; url: string; type: string }[];
+  media: {
+    id: string;
+    url: string;
+    type: string;
+    width?: number | null;
+    height?: number | null;
+  }[];
   album: {
     id: string;
     title: string;
@@ -158,7 +164,14 @@ async function fetchFeed(
   };
 }
 
-export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
+export function CommunityFeed({
+  viewerId,
+  rail,
+}: {
+  viewerId: string | null;
+  /** Server-rendered blocks for the right column (featured albums…). */
+  rail?: React.ReactNode;
+}) {
   const t = useTranslations("publicPages.community");
   const { canReceiveBookings } = useUserRoles();
   const [tab, setTab] = useState<"discover" | "following">("discover");
@@ -367,7 +380,8 @@ export function CommunityFeed({ viewerId }: { viewerId: string | null }) {
         </div>
       </section>
 
-      <aside className="sticky top-[96px] hidden flex-col gap-4 xl:flex">
+      <aside className="sticky top-[96px] hidden flex-col gap-6 xl:flex">
+        {rail}
         {/* "Create F Booking" was offered twice on one screen — a gold
             button alone in a "quick actions" card, and again in the
             composer — while the card explaining what an F Booking is had
@@ -609,18 +623,7 @@ function PostCard({
         ) : null}
       </div>
 
-      {post.kind === "PORTFOLIO_ALBUM" && post.album ? (
-        <div>
-          <p className="text-heading-md text-text-primary">
-            {post.album.title}
-          </p>
-          {post.album.description ? (
-            <p className="mt-1 whitespace-pre-wrap [overflow-wrap:anywhere] text-body-md text-text-secondary">
-              {post.album.description}
-            </p>
-          ) : null}
-        </div>
-      ) : post.caption ? (
+      {post.kind === "PORTFOLIO_ALBUM" && post.album ? null : post.caption ? (
         <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-md text-text-primary">
           {post.caption}
         </p>
@@ -635,7 +638,13 @@ function PostCard({
         />
       ) : null}
 
-      {post.media.length > 0 ? <PostMedia media={post.media} /> : null}
+      {post.kind === "PORTFOLIO_ALBUM" &&
+      post.album &&
+      post.media.length > 0 ? (
+        <AlbumPostMedia post={post} />
+      ) : post.media.length > 0 ? (
+        <PostMedia media={post.media} />
+      ) : null}
 
       <PostEngagement
         postId={post.id}
@@ -653,6 +662,104 @@ function PostCard({
         targetId={post.id}
       />
     </Card>
+  );
+}
+
+// An album post (wave 2): the first photo large at its own ratio, then a
+// strip of the next four frames with "+N" for the rest, and a mono line
+// naming who, what and how many frames. Pressing the photo opens the
+// album's own page; the strip opens the lightbox at that frame.
+function AlbumPostMedia({ post }: { post: FeedPost }) {
+  const t = useTranslations("publicPages.community");
+  const categoryT = useTranslations("profileCategory");
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const album = post.album!;
+  const [first, ...rest] = post.media;
+  const strip = rest.slice(0, 4);
+  const hidden = post.media.length - 1 - strip.length;
+  const albumHref = post.user.username
+    ? `/profile/${post.user.username}/albums/${album.id}`
+    : null;
+  const cover = (
+    <Image
+      src={buildMediaVariants(first.url).large}
+      alt={album.title}
+      width={first.width ?? 1200}
+      height={first.height ?? 900}
+      unoptimized
+      sizes="(min-width: 768px) 680px, 100vw"
+      className="block h-auto max-h-[78vh] w-full object-contain"
+    />
+  );
+  return (
+    <div className="flex flex-col gap-2">
+      {albumHref ? (
+        <Link href={albumHref} className="focus-ring block bg-dr-bg">
+          {cover}
+        </Link>
+      ) : (
+        <div className="bg-dr-bg">{cover}</div>
+      )}
+      {strip.length > 0 ? (
+        <ol className="grid grid-cols-4 gap-1.5">
+          {strip.map((item, index) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                onClick={() => setOpenIndex(index + 1)}
+                aria-label={t("openPhoto", {
+                  index: index + 2,
+                  total: post.media.length,
+                })}
+                className="focus-ring relative block aspect-square w-full cursor-zoom-in bg-dr-bg"
+              >
+                <Image
+                  src={buildMediaVariants(item.url).thumbnail}
+                  alt=""
+                  fill
+                  unoptimized
+                  sizes="160px"
+                  className="object-contain p-0.5"
+                />
+                {index === strip.length - 1 && hidden > 0 ? (
+                  <span className="absolute inset-0 grid place-items-center bg-[var(--dr-scrim)] font-mono text-heading-sm text-dr-text">
+                    +{hidden}
+                  </span>
+                ) : null}
+              </button>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+      <p className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+        {[
+          authorName(post.user),
+          album.title,
+          album.category ? categoryT(album.category) : null,
+          t("frames", { count: post.media.length }),
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+      </p>
+      {album.description ? (
+        <p className="text-body-md whitespace-pre-wrap text-text-primary [overflow-wrap:anywhere]">
+          {album.description}
+        </p>
+      ) : null}
+      {openIndex !== null ? (
+        <MediaLightbox
+          items={post.media.map((item) => ({
+            url: item.url,
+            type: "IMAGE" as const,
+          }))}
+          index={openIndex}
+          onClose={() => setOpenIndex(null)}
+          onIndexChange={setOpenIndex}
+          title={album.title}
+          categoryLabel={album.category ? categoryT(album.category) : undefined}
+        />
+      ) : null}
+    </div>
   );
 }
 
@@ -735,6 +842,7 @@ function RequestPostPanel({
   const roleT = useTranslations("role");
   const categoryT = useTranslations("profileCategory");
   const isOwner = viewerId === ownerId;
+  const open = request.status === "OPEN" || request.status === "HAS_OFFERS";
   const myOffer = request.offers.find((offer) => offer.providerId === viewerId);
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [price, setPrice] = useState(myOffer?.proposedPrice.toString() ?? "");
@@ -863,45 +971,52 @@ function RequestPostPanel({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-[var(--fg-radius-lg)] border border-border-subtle bg-bg-sunken p-4">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <div className="mb-1 flex flex-wrap items-center gap-2">
-            <Badge variant="accent">{t("bookingBadge")}</Badge>
-            <Badge variant="neutral">{roleT(request.role)}</Badge>
-          </div>
-          <h3 className="text-heading-md text-text-primary">{request.title}</h3>
-          <p className="text-body-sm text-text-tertiary">{request.code}</p>
+    // An ivory call sheet on the darkroom feed (wave 2): a Paper island,
+    // stamped with the days it stays open - red once it has closed.
+    <div
+      data-surface="paper"
+      className="flex flex-col gap-4 rounded-[var(--fg-radius-md)] border border-border-default bg-gold-50 pb-4 text-text-primary"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-default px-5 pt-4 pb-3">
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+            {t("sheet.heading")}
+          </span>
+          <strong className="font-mono text-body-lg tracking-[0.04em] whitespace-nowrap">
+            {request.code}
+          </strong>
         </div>
-        <Badge
-          variant={
-            request.status === "FULFILLED"
-              ? "success"
-              : request.status === "CANCELLED" || request.status === "EXPIRED"
-                ? "destructive"
-                : "warning"
-          }
+        <span
+          className={cn(
+            "shrink-0 -rotate-3 rounded-[var(--fg-radius-sm)] border-2 px-2 py-1 font-mono text-meta font-semibold tracking-[0.12em] uppercase",
+            open
+              ? "border-gold-600 text-gold-700"
+              : "border-danger text-danger",
+          )}
         >
-          {t(`requestStatus.${request.status}`)}
-        </Badge>
+          {open
+            ? t("sheet.daysLeft", { days: daysLeft(request.expiresAt) })
+            : t(`requestStatus.${request.status}`)}
+        </span>
       </div>
 
-      {request.description ? (
-        <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-body-sm text-text-secondary">
-          {request.description}
-        </p>
-      ) : null}
-
-      <div className="flex flex-wrap gap-1.5">
-        {request.categories.map((category) => (
-          <Badge key={category} variant="neutral">
-            {categoryT(category)}
-          </Badge>
-        ))}
-      </div>
-
-      <div className="grid gap-2 sm:grid-cols-3">
-        <InfoTile icon={CalendarDays} label={t("whenLabel")}>
+      <dl className="flex flex-col px-5 text-body-sm">
+        <SheetRow label={t("sheet.wanted")}>
+          <span className="flex flex-wrap gap-1.5">
+            <span className="rounded-full border border-border-strong px-2.5 py-0.5">
+              {roleT(request.role)}
+            </span>
+            {request.categories.map((category) => (
+              <span
+                key={category}
+                className="rounded-full border border-border-default px-2.5 py-0.5 text-text-secondary"
+              >
+                {categoryT(category)}
+              </span>
+            ))}
+          </span>
+        </SheetRow>
+        <SheetRow label={t("whenLabel")}>
           {request.isDateFlexible
             ? request.dateRangeStart && request.dateRangeEnd
               ? t("flexibleDate", {
@@ -912,230 +1027,230 @@ function RequestPostPanel({
             : request.shootDate
               ? formatDate(request.shootDate)
               : t("notSet")}
-        </InfoTile>
-        <InfoTile icon={MapPin} label={t("whereLabel")}>
+        </SheetRow>
+        <SheetRow label={t("whereLabel")}>
           {request.ward ? `${request.ward.name}, ` : ""}
           {request.province.name}
-        </InfoTile>
-        <InfoTile icon={WalletCards} label={t("budgetLabel")} accent>
-          {formatBudgetRange(request.budgetMin, request.budgetMax) ??
-            t("notSet")}
-        </InfoTile>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-body-sm text-text-secondary">
-          {t("offer.count", { count: request.offerCount })}
-        </span>
-        {request.canOffer ? (
-          <Button
-            size="sm"
-            variant={myOffer?.status === "PENDING" ? "secondary" : "accent"}
-            onClick={() => setShowOfferForm((open) => !open)}
-          >
-            <Send className="size-4" />
-            {myOffer?.status === "PENDING" ? t("offer.edit") : t("offer.send")}
-          </Button>
-        ) : null}
-      </div>
-
-      {showOfferForm && request.canOffer ? (
-        <div className="flex flex-col gap-3 border-t border-border-subtle pt-3">
-          <CurrencyInput
-            label={t("offer.price")}
-            value={price}
-            onChange={setPrice}
-          />
-          {request.isDateFlexible ? (
-            <DateField
-              label={t("offer.date")}
-              value={proposedDate}
-              onChange={setProposedDate}
-            />
-          ) : null}
-          <Textarea
-            rows={2}
-            value={message}
-            maxLength={1000}
-            placeholder={t("offer.message")}
-            onChange={(event) => setMessage(event.target.value)}
-          />
-          {error ? <p className="text-body-sm text-danger">{error}</p> : null}
-          <Button
-            variant="accent"
-            disabled={busy || !price}
-            onClick={() => void submitOffer()}
-          >
-            {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-            {t("offer.submit")}
-          </Button>
-        </div>
-      ) : null}
-
-      {myOffer && !isOwner ? (
-        <div className="flex items-center gap-2 text-body-sm text-text-secondary">
-          <Badge
-            variant={myOffer.status === "ACCEPTED" ? "success" : "neutral"}
-          >
-            {t(`offer.status.${myOffer.status}`)}
-          </Badge>
-          {formatCurrency(myOffer.proposedPrice, myOffer.currency)}
-        </div>
-      ) : null}
-
-      {isOwner && request.offers.length > 0 ? (
-        <div className="flex flex-col gap-2 border-t border-border-subtle pt-3">
-          <span className="text-body-sm font-semibold! text-text-primary">
-            {t("offer.received")}
+        </SheetRow>
+        <SheetRow label={t("budgetLabel")}>
+          <span className="font-semibold">
+            {formatBudgetRange(request.budgetMin, request.budgetMax) ??
+              t("notSet")}
           </span>
-          {request.offers.map((offer) => (
-            <div
-              key={offer.id}
-              className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-bg-surface p-3"
+        </SheetRow>
+        <SheetRow label={t("sheet.note")}>
+          <span className="flex flex-col gap-1">
+            <span className="font-semibold">{request.title}</span>
+            {request.description ? (
+              <span className="whitespace-pre-wrap text-text-secondary [overflow-wrap:anywhere]">
+                {request.description}
+              </span>
+            ) : null}
+          </span>
+        </SheetRow>
+      </dl>
+      <div className="flex flex-col gap-4 px-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-body-sm text-text-secondary">
+            {t("offer.count", { count: request.offerCount })}
+          </span>
+          {request.canOffer ? (
+            <Button
+              size="sm"
+              variant={myOffer?.status === "PENDING" ? "secondary" : "accent"}
+              onClick={() => setShowOfferForm((open) => !open)}
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1.5 text-body-sm font-semibold! text-text-primary">
-                  {providerName(offer)}
-                  {offer.provider.profiles.length > 0 ? (
-                    <BadgeCheck className="size-4 text-info" />
-                  ) : null}
-                </span>
-                <span className="font-semibold! text-gold-700">
-                  {formatCurrency(offer.proposedPrice, offer.currency)}
-                </span>
-              </div>
-              {offer.message ? (
-                <p className="text-body-sm text-text-secondary">
-                  {offer.message}
-                </p>
-              ) : null}
-              {offer.status === "PENDING" &&
-              (request.status === "OPEN" || request.status === "HAS_OFFERS") ? (
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="accent"
-                    disabled={busy}
-                    onClick={() => openAccept(offer)}
-                  >
-                    {t("offer.accept")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={() => void decline(offer)}
-                  >
-                    {t("offer.decline")}
-                  </Button>
-                </div>
-              ) : (
-                <Badge
-                  variant={offer.status === "ACCEPTED" ? "success" : "neutral"}
-                  className="w-fit"
-                >
-                  {t(`offer.status.${offer.status}`)}
-                </Badge>
-              )}
-            </div>
-          ))}
+              <Send className="size-4" />
+              {myOffer?.status === "PENDING"
+                ? t("offer.edit")
+                : t("offer.send")}
+            </Button>
+          ) : null}
         </div>
-      ) : null}
 
-      <Dialog
-        open={accepting !== null}
-        onOpenChange={(open) => !open && setAccepting(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("offer.acceptTitle")}</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-3">
-            <DateField
-              label={t("offer.bookingDate")}
-              value={acceptDate}
-              onChange={setAcceptDate}
+        {showOfferForm && request.canOffer ? (
+          <div className="flex flex-col gap-3 border-t border-border-subtle pt-3">
+            <CurrencyInput
+              label={t("offer.price")}
+              value={price}
+              onChange={setPrice}
             />
-            <Input
-              type="time"
-              value={acceptTime}
-              aria-label={t("offer.bookingTime")}
-              onChange={(event) => setAcceptTime(event.target.value)}
-            />
-            <NativeSelect
-              label={t("offer.location")}
-              value={locationType}
-              onChange={setLocationType}
-              options={(["OUTDOOR", "PROVIDER", "CUSTOMER"] as const).map(
-                (type) => ({
-                  value: type,
-                  label: t(`offer.locationType.${type}`),
-                }),
-              )}
+            {request.isDateFlexible ? (
+              <DateField
+                label={t("offer.date")}
+                value={proposedDate}
+                onChange={setProposedDate}
+              />
+            ) : null}
+            <Textarea
+              rows={2}
+              value={message}
+              maxLength={1000}
+              placeholder={t("offer.message")}
+              onChange={(event) => setMessage(event.target.value)}
             />
             {error ? <p className="text-body-sm text-danger">{error}</p> : null}
-          </div>
-          <DialogFooter>
-            <Button variant="secondary" onClick={() => setAccepting(null)}>
-              {t("offer.cancel")}
-            </Button>
             <Button
               variant="accent"
-              disabled={busy || !acceptDate || !acceptTime}
-              onClick={() => void accept()}
+              disabled={busy || !price}
+              onClick={() => void submitOffer()}
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              {t("offer.confirmAccept")}
+              {t("offer.submit")}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        ) : null}
+
+        {myOffer && !isOwner ? (
+          <div className="flex items-center gap-2 text-body-sm text-text-secondary">
+            <Badge
+              variant={myOffer.status === "ACCEPTED" ? "success" : "neutral"}
+            >
+              {t(`offer.status.${myOffer.status}`)}
+            </Badge>
+            {formatCurrency(myOffer.proposedPrice, myOffer.currency)}
+          </div>
+        ) : null}
+
+        {isOwner && request.offers.length > 0 ? (
+          <div className="flex flex-col gap-2 border-t border-border-subtle pt-3">
+            <span className="text-body-sm font-semibold! text-text-primary">
+              {t("offer.received")}
+            </span>
+            {request.offers.map((offer) => (
+              <div
+                key={offer.id}
+                className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-bg-surface p-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5 text-body-sm font-semibold! text-text-primary">
+                    {providerName(offer)}
+                    {offer.provider.profiles.length > 0 ? (
+                      <BadgeCheck className="size-4 text-info" />
+                    ) : null}
+                  </span>
+                  <span className="font-semibold! text-gold-700">
+                    {formatCurrency(offer.proposedPrice, offer.currency)}
+                  </span>
+                </div>
+                {offer.message ? (
+                  <p className="text-body-sm text-text-secondary">
+                    {offer.message}
+                  </p>
+                ) : null}
+                {offer.status === "PENDING" &&
+                (request.status === "OPEN" ||
+                  request.status === "HAS_OFFERS") ? (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="accent"
+                      disabled={busy}
+                      onClick={() => openAccept(offer)}
+                    >
+                      {t("offer.accept")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() => void decline(offer)}
+                    >
+                      {t("offer.decline")}
+                    </Button>
+                  </div>
+                ) : (
+                  <Badge
+                    variant={
+                      offer.status === "ACCEPTED" ? "success" : "neutral"
+                    }
+                    className="w-fit"
+                  >
+                    {t(`offer.status.${offer.status}`)}
+                  </Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        <Dialog
+          open={accepting !== null}
+          onOpenChange={(open) => !open && setAccepting(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("offer.acceptTitle")}</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              <DateField
+                label={t("offer.bookingDate")}
+                value={acceptDate}
+                onChange={setAcceptDate}
+              />
+              <Input
+                type="time"
+                value={acceptTime}
+                aria-label={t("offer.bookingTime")}
+                onChange={(event) => setAcceptTime(event.target.value)}
+              />
+              <NativeSelect
+                label={t("offer.location")}
+                value={locationType}
+                onChange={setLocationType}
+                options={(["OUTDOOR", "PROVIDER", "CUSTOMER"] as const).map(
+                  (type) => ({
+                    value: type,
+                    label: t(`offer.locationType.${type}`),
+                  }),
+                )}
+              />
+              {error ? (
+                <p className="text-body-sm text-danger">{error}</p>
+              ) : null}
+            </div>
+            <DialogFooter>
+              <Button variant="secondary" onClick={() => setAccepting(null)}>
+                {t("offer.cancel")}
+              </Button>
+              <Button
+                variant="accent"
+                disabled={busy || !acceptDate || !acceptTime}
+                onClick={() => void accept()}
+              >
+                {busy ? <Loader2 className="size-4 animate-spin" /> : null}
+                {t("offer.confirmAccept")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <p className="text-body-sm text-text-tertiary">{t("sheet.footer")}</p>
+      </div>
     </div>
   );
 }
 
-function InfoTile({
-  icon: Icon,
+// Whole days until a request closes, rounded up.
+function daysLeft(expiresAt: string) {
+  return Math.max(
+    0,
+    Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86_400_000),
+  );
+}
+
+function SheetRow({
   label,
-  accent = false,
   children,
 }: {
-  icon: typeof CalendarDays;
   label: string;
-  accent?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className={cn(
-        "flex gap-2 rounded-[var(--fg-radius-md)] p-3",
-        accent
-          ? "bg-gold-100 text-gold-800 dark:bg-gold-900/30 dark:text-gold-100"
-          : "bg-bg-surface",
-      )}
-    >
-      <Icon className="mt-0.5 size-4 shrink-0" />
-      {/* The gold scale does not flip in dark mode, so the accent tile sets
-          its own dark pair (the Fmap price chip's) — the theme's text
-          colours turn light and vanished on the light gold fill. */}
-      <div className="min-w-0">
-        <span
-          className={cn(
-            "text-caption",
-            accent ? "text-gold-700 dark:text-gold-200" : "text-text-tertiary",
-          )}
-        >
-          {label}
-        </span>
-        <p
-          className={cn(
-            "text-body-sm font-semibold!",
-            accent ? "text-gold-900 dark:text-gold-100" : "text-text-primary",
-          )}
-        >
-          {children}
-        </p>
-      </div>
+    <div className="grid grid-cols-[7.5rem_1fr] gap-x-3 border-b border-border-subtle py-2.5 last:border-b-0 max-sm:grid-cols-1 max-sm:gap-y-1">
+      <dt className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+        {label}
+      </dt>
+      <dd className="min-w-0">{children}</dd>
     </div>
   );
 }

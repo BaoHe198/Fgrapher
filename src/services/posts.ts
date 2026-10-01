@@ -218,6 +218,7 @@ const FEED_SELECT = {
       budgetMax: true,
       currency: true,
       status: true,
+      expiresAt: true,
       province: { select: { name: true } },
       ward: { select: { name: true } },
       references: { select: { id: true, mediaUrl: true } },
@@ -346,6 +347,7 @@ async function addViewerState(posts: SelectedPost[], viewerId: string | null) {
             budgetMax: request.budgetMax,
             currency: request.currency,
             status: request.status,
+            expiresAt: request.expiresAt,
             province: request.province,
             ward: request.ward,
             offerCount: request._count.offers,
@@ -675,4 +677,68 @@ export async function getPost(postId: string, viewerId: string | null) {
     : null;
 
   return { ...post, likedByViewer: Boolean(liked) };
+}
+
+/**
+ * Cộng đồng F's "Album nổi bật tuần này" (wave 2): album posts ranked by
+ * the likes they received in the last 7 days, one per artist, at most
+ * `limit`. Only public album posts count; an album nobody liked this week
+ * is not "featured", so the list can be empty and the block hides.
+ */
+export async function listFeaturedAlbums(limit = 4) {
+  const since = new Date(Date.now() - 7 * 86_400_000);
+  const ranked = await db.like.groupBy({
+    by: ["postId"],
+    where: {
+      createdAt: { gte: since },
+      post: { AND: [PUBLIC_POST_WHERE, { kind: "PORTFOLIO_ALBUM" }] },
+    },
+    _count: { _all: true },
+    orderBy: { _count: { postId: "desc" } },
+    take: limit * 4,
+  });
+  if (ranked.length === 0) return [];
+  const posts = await db.post.findMany({
+    where: { id: { in: ranked.map((row) => row.postId) } },
+    select: {
+      id: true,
+      userId: true,
+      user: { select: { username: true, name: true } },
+      album: {
+        select: {
+          id: true,
+          title: true,
+          profile: { select: { displayName: true } },
+          media: {
+            where: {
+              type: "IMAGE",
+              moderationStatus: "APPROVED",
+              deletedAt: null,
+            },
+            orderBy: { order: "asc" },
+            take: 1,
+            select: { url: true },
+          },
+        },
+      },
+    },
+  });
+  const byId = new Map(posts.map((post) => [post.id, post]));
+  const seenArtists = new Set<string>();
+  const featured = [];
+  for (const row of ranked) {
+    const post = byId.get(row.postId);
+    if (!post?.album || !post.user.username || seenArtists.has(post.userId))
+      continue;
+    seenArtists.add(post.userId);
+    featured.push({
+      albumId: post.album.id,
+      title: post.album.title,
+      artist: post.album.profile.displayName ?? post.user.name ?? "",
+      username: post.user.username,
+      cover: post.album.media[0]?.url ?? null,
+    });
+    if (featured.length >= limit) break;
+  }
+  return featured;
 }

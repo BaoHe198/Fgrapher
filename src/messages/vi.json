@@ -4513,7 +4513,22 @@
       },
       "loadFailed": "Không tải được bảng tin. Vui lòng thử lại.",
       "retry": "Thử lại",
-      "openPhoto": "Xem ảnh {index}/{total}"
+      "openPhoto": "Xem ảnh {index}/{total}",
+      "frames": "{count} khung",
+      "sheet": {
+        "heading": "F Booking · Tìm ê-kíp",
+        "daysLeft": "{days, plural, =0 {Hết hạn hôm nay} other {Còn # ngày}}",
+        "wanted": "Cần tìm",
+        "note": "Ghi chú",
+        "footer": "Thù lao và đặt cọc thỏa thuận trực tiếp giữa hai bên."
+      },
+      "rail": {
+        "featured": "Album nổi bật tuần này",
+        "featuredNote": "Chọn theo lượt thích trong 7 ngày, mỗi nghệ sĩ tối đa một album.",
+        "requests": "Yêu cầu mới",
+        "askPrice": "Để nghệ sĩ báo giá",
+        "allRequests": "Xem Đặt lịch F"
+      }
     },
     "requestsF": {
       "metaTitle": "Đặt lịch F — Đăng yêu cầu chụp, nhận đề xuất",

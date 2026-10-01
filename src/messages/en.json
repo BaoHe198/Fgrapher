@@ -4513,7 +4513,22 @@
       },
       "loadFailed": "Could not load the feed. Please try again.",
       "retry": "Try again",
-      "openPhoto": "View photo {index} of {total}"
+      "openPhoto": "View photo {index} of {total}",
+      "frames": "{count, plural, one {# frame} other {# frames}}",
+      "sheet": {
+        "heading": "F Booking · Crew call",
+        "daysLeft": "{days, plural, =0 {Closes today} one {# day left} other {# days left}}",
+        "wanted": "Looking for",
+        "note": "Notes",
+        "footer": "Fee and deposit are agreed directly between both sides."
+      },
+      "rail": {
+        "featured": "Featured albums this week",
+        "featuredNote": "Picked by likes over 7 days, at most one album per artist.",
+        "requests": "New requests",
+        "askPrice": "Artist quotes",
+        "allRequests": "Open FBooking"
+      }
     },
     "requestsF": {
       "metaTitle": "FBooking — Post a shoot request, get proposals",
