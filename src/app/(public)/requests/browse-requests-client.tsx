@@ -42,7 +42,10 @@ export function BrowseRequestsClient({
   heading,
   subheading,
   provinces,
+  showPostButton = true,
 }: {
+  /** Off when the page already has its one "Đăng yêu cầu" above. */
+  showPostButton?: boolean;
   heading: string;
   subheading: string;
   provinces: { id: string; code: string; name: string }[];
@@ -144,19 +147,21 @@ export function BrowseRequestsClient({
           heading. */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-display-md text-text-primary">{heading}</h1>
+          <h2 className="text-display-sm text-text-primary">{heading}</h2>
           <p className="max-w-2xl text-body-md text-text-secondary">
             {subheading}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="accent"
-            nativeButton={false}
-            render={<Link href="/requests/new" />}
-          >
-            {t("postRequest")}
-          </Button>
+          {showPostButton ? (
+            <Button
+              variant="accent"
+              nativeButton={false}
+              render={<Link href="/requests/new" />}
+            >
+              {t("postRequest")}
+            </Button>
+          ) : null}
           <Button
             variant="secondary"
             className="lg:hidden"
@@ -195,13 +200,15 @@ export function BrowseRequestsClient({
               <p className="text-body-sm text-text-secondary">
                 {t("empty.body")}
               </p>
-              <Button
-                variant="secondary"
-                nativeButton={false}
-                render={<Link href="/requests/new" />}
-              >
-                {t("emptyCta")}
-              </Button>
+              {showPostButton ? (
+                <Button
+                  variant="secondary"
+                  nativeButton={false}
+                  render={<Link href="/requests/new" />}
+                >
+                  {t("emptyCta")}
+                </Button>
+              ) : null}
             </Card>
           ) : (
             <div className="flex flex-col gap-3">
@@ -222,8 +229,8 @@ export function BrowseRequestsClient({
                         "border-brand-primary/40 bg-success-bg/30",
                     )}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1 basis-56">
                         <p className="truncate text-body-md font-semibold! text-text-primary">
                           {request.title}
                         </p>
@@ -236,7 +243,7 @@ export function BrowseRequestsClient({
                           })}
                         </p>
                       </div>
-                      <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                      <div className="flex flex-wrap gap-1.5 sm:justify-end">
                         {request.isOwner ? (
                           <Badge variant="success">{t("yourRequest")}</Badge>
                         ) : null}

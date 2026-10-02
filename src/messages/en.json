@@ -4700,7 +4700,11 @@
         "need": "Photography · Wedding",
         "flex": "Flexible ± 3 days",
         "style": "Natural light, warm tones",
-        "note": "Outdoors at sunset, about 40 guests."
+        "note": "Outdoors at sunset, about 40 guests.",
+        "open": "See an example call sheet",
+        "title": "Example call sheet",
+        "close": "Close",
+        "useIt": "Use this as a start"
       },
       "steps": {
         "title": "Three steps",
@@ -4729,6 +4733,21 @@
         "body": "Artists need to know a request comes from a real person. Once signed in, you go straight to the first question.",
         "signIn": "Sign in",
         "register": "Create an account"
+      },
+      "mine": {
+        "title": "Your requests",
+        "filterLabel": "Filter by status",
+        "filters": {
+          "all": "All",
+          "open": "Open",
+          "chosen": "Chosen",
+          "closed": "Closed"
+        },
+        "filterEmpty": "No “{filter}” requests",
+        "filterEmptyBody": "You have {total} requests in other states.",
+        "showAll": "Show all requests",
+        "draft": "Draft",
+        "newOffers": "{count, plural, one {# proposal} other {# proposals}} waiting for you"
       }
     },
     "browseV2": {

@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
-import { CallSheet } from "@/components/requests/call-sheet";
-import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
-import { frameLabel } from "@/lib/media/frame-label";
 import { formatBudgetRange } from "@/lib/utils";
 import { listProvinces } from "@/services/geography";
 import {
+  listCustomerRequests,
   listRecentRequestTeasers,
   REQUEST_TTL_DAYS,
 } from "@/services/service-requests";
 
 import { BrowseRequestsClient } from "./browse-requests-client";
+import { CallSheetExample } from "./call-sheet-example";
+import { MyRequests } from "./my-requests";
 import { PostRequestButton } from "./post-request-button";
 
 // The example call sheet is dated a month from today and placed in the
@@ -47,10 +47,12 @@ export default async function RequestsPage() {
   const session = await auth();
   const isAuthenticated = Boolean(session?.user);
 
-  const [provinces, teasers] = await Promise.all([
+  const [provinces, teasers, mine] = await Promise.all([
     listProvinces(),
     isAuthenticated ? Promise.resolve([]) : listRecentRequestTeasers(6),
+    session?.user ? listCustomerRequests(session.user.id) : Promise.resolve([]),
   ]);
+  const statusT = await getTranslations("dashboardCore.serviceRequests.detail");
 
   const exampleDate = exampleShootDate();
   const example = {
@@ -61,20 +63,70 @@ export default async function RequestsPage() {
     budget: formatBudgetRange(5_000_000, 10_000_000) ?? "",
     note: t("example.note"),
   };
+  const exampleButton = (
+    <CallSheetExample
+      data={example}
+      stamp={t("example.stamp")}
+      composeHref="/requests/new"
+    />
+  );
+  const postButton = <PostRequestButton isAuthenticated={isAuthenticated} />;
+  // The open requests of everyone else are what providers come here for;
+  // a customer has no use for them.
+  const isProvider = Boolean(
+    session?.user?.roles.some((role) => PROVIDER_ROLES.includes(role)),
+  );
+  const browseList = isProvider ? (
+    <BrowseRequestsClient
+      heading={tBrowse("heading")}
+      subheading={tBrowse("subheading")}
+      showPostButton={false}
+      provinces={provinces.map((p) => ({
+        id: p.id,
+        code: p.code,
+        name: p.name,
+      }))}
+    />
+  ) : null;
+
+  // Someone who has posted before lands on their own requests (Core MVP
+  // pass, 02/10/2026); providers still get the open requests below.
+  if (mine.length > 0) {
+    return (
+      <div className="bg-bg-page">
+        <MyRequests
+          postButton={postButton}
+          example={exampleButton}
+          requests={mine.map((request) => ({
+            id: request.id,
+            code: request.code,
+            title: request.title,
+            status: request.status,
+            isDraft: request.isDraft,
+            when: request.shootDate
+              ? formatDate(request.shootDate)
+              : request.isDateFlexible
+                ? statusT("flexibleNoRange")
+                : "",
+            province: request.province.name,
+            pendingOffers: request._count.offers,
+          }))}
+        />
+        {browseList}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-bg-page">
       <section
         aria-labelledby="rq-title"
-        className="mx-auto grid max-w-[1440px] items-center gap-10 px-5 pt-[clamp(40px,6vw,88px)] pb-[clamp(40px,5vw,72px)] sm:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16"
+        className="mx-auto max-w-[1440px] px-5 pt-[clamp(40px,6vw,88px)] pb-[clamp(40px,5vw,72px)] sm:px-8"
       >
-        <div className="flex flex-col gap-6">
-          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-            {t("eyebrow")}
-          </span>
+        <div className="flex max-w-3xl flex-col gap-6">
           <h1
             id="rq-title"
-            className="font-display text-[clamp(2.5rem,5.4vw,5rem)] leading-[0.98] font-semibold tracking-[-0.03em] text-balance text-text-primary"
+            className="font-display text-[clamp(2.25rem,5vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.03em] text-balance text-text-primary"
           >
             {t("title")}
           </h1>
@@ -82,26 +134,13 @@ export default async function RequestsPage() {
             {t("lede")}
           </p>
           <div className="flex flex-wrap gap-3">
-            <PostRequestButton isAuthenticated={isAuthenticated} />
-            <Button
-              variant="ghost"
-              size="lg"
-              nativeButton={false}
-              render={<Link href="/browse" />}
-            >
-              {t("findDirect")}
-            </Button>
+            {postButton}
+            {exampleButton}
           </div>
           <span className="text-body-sm text-text-tertiary">
             {isAuthenticated ? t("noteSignedIn") : t("noteSignedOut")}
           </span>
         </div>
-        <CallSheet
-          code="YC-2026-00012"
-          stamp={t("example.stamp")}
-          data={example}
-          className="lg:rotate-[0.6deg]"
-        />
       </section>
 
       <section
@@ -119,7 +158,7 @@ export default async function RequestsPage() {
                 className="flex flex-col gap-2 border-t border-border-default pt-4"
               >
                 <span className="font-mono text-meta tracking-[0.12em] text-gold-700 uppercase dark:text-gold-400">
-                  {frameLabel(n - 1)} · {t(`steps.s${n}tag`)}
+                  {n} · {t(`steps.s${n}tag`)}
                 </span>
                 <strong className="text-heading-sm text-text-primary">
                   {t(`steps.s${n}t`)}
@@ -134,15 +173,7 @@ export default async function RequestsPage() {
       </section>
 
       {isAuthenticated ? (
-        <BrowseRequestsClient
-          heading={tBrowse("heading")}
-          subheading={tBrowse("subheading")}
-          provinces={provinces.map((p) => ({
-            id: p.id,
-            code: p.code,
-            name: p.name,
-          }))}
-        />
+        browseList
       ) : teasers.length > 0 ? (
         <section
           aria-labelledby="rq-recent"
@@ -157,14 +188,11 @@ export default async function RequestsPage() {
             </span>
           </div>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {teasers.map((teaser, index) => (
+            {teasers.map((teaser) => (
               <li
                 key={teaser.id}
                 className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-surface p-4"
               >
-                <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary">
-                  {frameLabel(index)}
-                </span>
                 <strong className="text-body-lg font-semibold! text-text-primary">
                   {[
                     tService(teaser.role as "PHOTOGRAPHER"),
@@ -197,7 +225,6 @@ export default async function RequestsPage() {
                 {t("trust.body")}
               </span>
             </span>
-            <PostRequestButton isAuthenticated={false} />
           </div>
         </section>
       )}

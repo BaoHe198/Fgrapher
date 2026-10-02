@@ -4700,7 +4700,11 @@
         "need": "Chụp ảnh · Cưới",
         "flex": "Linh hoạt ± 3 ngày",
         "style": "Ánh sáng tự nhiên, tông ấm",
-        "note": "Chụp ngoài trời lúc hoàng hôn, khoảng 40 khách."
+        "note": "Chụp ngoài trời lúc hoàng hôn, khoảng 40 khách.",
+        "open": "Xem ví dụ call sheet",
+        "title": "Ví dụ call sheet",
+        "close": "Đóng",
+        "useIt": "Dùng mẫu này"
       },
       "steps": {
         "title": "Ba bước",
@@ -4729,6 +4733,21 @@
         "body": "Nghệ sĩ cần biết yêu cầu đến từ một người thật. Đăng nhập xong, bạn vào thẳng câu hỏi đầu tiên.",
         "signIn": "Đăng nhập",
         "register": "Tạo tài khoản"
+      },
+      "mine": {
+        "title": "Yêu cầu của bạn",
+        "filterLabel": "Lọc theo trạng thái",
+        "filters": {
+          "all": "Tất cả",
+          "open": "Đang mở",
+          "chosen": "Đã chọn",
+          "closed": "Đã đóng"
+        },
+        "filterEmpty": "Không có yêu cầu “{filter}”",
+        "filterEmptyBody": "Bạn có {total} yêu cầu ở trạng thái khác.",
+        "showAll": "Xem tất cả yêu cầu",
+        "draft": "Nháp",
+        "newOffers": "{count} đề xuất chờ bạn xem"
       }
     },
     "browseV2": {
