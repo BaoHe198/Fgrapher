@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./fg-kit.js"></script><style>body{margin:0;background:var(--bg-page)}:root{--dr-bg:hsl(30 14% 5%);--dr-surface:hsl(30 11% 8%);--dr-raised:hsl(30 9% 12%);--dr-text:hsl(38 33% 92%);--dr-line:hsl(0 0% 100% / .06);--dr-accent:var(--gold-400);--dr-scrim:hsl(30 14% 5% / .72)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}input[type=date]::-webkit-calendar-picker-indicator{filter:var(--rq-cal-filter,none)}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div ref="{{ rootRef }}" onKeyDown="{{ onKey }}" style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh;display:flex;flex-direction:column">
+<header style="position:sticky;top:0;z-index:20;background:var(--bg-surface);border-bottom:1px solid var(--border-subtle)">
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,64px);height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+<a href="#" style="display:flex;align-items:center;gap:8px;min-height:44px;font-size:15px;font-weight:600;color:var(--text-primary);text-decoration:none"><span aria-hidden="true">×</span>Thoát</a>
+<span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">YC-2026-00012 · NHÁP</span>
+<span role="status" aria-live="polite" style="font-size:13px;color:var(--text-secondary);text-align:right">{{ savedLabel }}</span>
+</div>
+<div aria-hidden="true" style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:0 clamp(16px,4vw,64px) 0;max-width:1440px;margin:0 auto;height:4px"><sc-for list="{{ segs }}" as="s" hint-placeholder-count="6"><span data-seg="{{ s.st }}" style="height:4px;border-radius:2px;background:var(--border-default);transition:background-color 260ms cubic-bezier(0,0,.2,1)"></span></sc-for></div>
+</header>
+<sc-if value="{{ showDraft }}" hint-placeholder-val="{{ false }}"><div role="status" style="max-width:1440px;width:100%;box-sizing:border-box;margin:0 auto;padding:14px clamp(16px,4vw,64px) 0"><div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:14px 16px;border-radius:var(--fg-radius-md);background:var(--info-bg)"><span style="font-size:15px;line-height:1.45">Bạn có bản nháp lưu lúc {{ draftAt }}. Tiếp tục từ câu {{ draftQ }}?</span><span style="display:flex;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="primary" size="sm" on-click="{{ resume }}">Tiếp tục</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="sm" on-click="{{ restart }}">Bắt đầu lại</x-import></span></div></div></sc-if>
+<main style="flex:1;max-width:1440px;width:100%;box-sizing:border-box;margin:0 auto;padding:clamp(28px,5vw,72px) clamp(16px,4vw,64px) clamp(120px,10vw,96px);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(32px,5vw,96px);align-items:start">
+<section aria-labelledby="rq-q" style="display:flex;flex-direction:column;gap:28px;min-width:0;max-width:720px">
+<sc-if value="{{ asking }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ qLabel }}</span><h1 id="rq-q" tabindex="-1" ref="{{ qRef }}" style="margin:0;outline:none;font-family:var(--font-display);font-weight:600;font-size:clamp(32px,calc(14px + 2.8vw),56px);line-height:1.02;letter-spacing:-.025em;text-wrap:balance">{{ qTitle }}</h1><p style="margin:0;font-size:16px;line-height:1.55;color:var(--text-secondary)">{{ qHelp }}</p></div>
+<sc-if value="{{ q1 }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:24px">
+<div role="group" aria-label="Dịch vụ" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:10px"><sc-for list="{{ services }}" as="o" hint-placeholder-count="6"><button type="button" data-opt="" aria-pressed="{{ o.on }}" onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:12px;min-height:60px;padding:0 16px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:600 17px/1.2 var(--font-body);text-align:left;cursor:pointer;transition:border-color 150ms,background-color 150ms"><kbd style="flex:none;width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--border-default);border-radius:6px;font:600 12px/1 var(--font-mono);color:var(--text-secondary)">{{ o.key }}</kbd>{{ o.label }}</button></sc-for></div>
+<sc-if value="{{ hasService }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px"><span id="rq-occ" style="font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Cho dịp nào</span><div role="group" aria-labelledby="rq-occ" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ occasions }}" as="o" hint-placeholder-count="8"><button type="button" data-chip="" aria-pressed="{{ o.on }}" onClick="{{ o.pick }}" style="min-height:44px;padding:0 16px;border:1px solid var(--border-default);border-radius:999px;background:transparent;color:var(--text-primary);font:600 15px/1 var(--font-body);cursor:pointer;transition:background-color 150ms,color 150ms">{{ o.label }}</button></sc-for></div></div></sc-if>
+</div></sc-if>
+<sc-if value="{{ q2 }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:24px">
+<label style="display:flex;flex-direction:column;gap:8px;max-width:320px"><span style="font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Ngày chụp</span><input type="date" min="{{ today }}" value="{{ date }}" onChange="{{ onDate }}" aria-describedby="rq-err" style="min-height:52px;padding:0 14px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:500 18px/1 var(--font-body);color-scheme:light dark"><span style="font-size:13px;color:var(--text-secondary)">{{ dateHuman }}</span></label>
+<div style="display:flex;flex-direction:column;gap:12px"><span id="rq-tod" style="font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Khung giờ · không bắt buộc</span><div role="group" aria-labelledby="rq-tod" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ tods }}" as="o" hint-placeholder-count="5"><button type="button" data-chip="" aria-pressed="{{ o.on }}" onClick="{{ o.pick }}" style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-height:52px;padding:6px 16px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:transparent;color:var(--text-primary);font:600 15px/1.2 var(--font-body);cursor:pointer;transition:background-color 150ms,color 150ms"><span>{{ o.label }}</span><span style="font:500 12px/1 var(--font-mono);opacity:.85">{{ o.sub }}</span></button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:12px"><span id="rq-flex" style="font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Có linh hoạt không</span><div role="radiogroup" aria-labelledby="rq-flex" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:10px"><sc-for list="{{ flexes }}" as="o" hint-placeholder-count="3"><button type="button" role="radio" data-opt="" aria-pressed="{{ o.on }}" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:600 16px/1.2 var(--font-body);text-align:left;cursor:pointer;transition:border-color 150ms,background-color 150ms">{{ o.label }}</button></sc-for></div></div>
+</div></sc-if>
+<sc-if value="{{ q3 }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px">
+<label style="display:flex;flex-direction:column;gap:8px"><span style="font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Tỉnh/thành</span><select value="{{ prov }}" onChange="{{ onProv }}" style="min-height:52px;padding:0 12px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:500 17px/1 var(--font-body)"><option value="">Chọn tỉnh/thành</option><sc-for list="{{ provs }}" as="p" hint-placeholder-count="7"><option value="{{ p }}">{{ p }}</option></sc-for></select></label>
+<label style="display:flex;flex-direction:column;gap:8px"><span style="font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Phường/xã</span><select value="{{ ward }}" onChange="{{ onWard }}" disabled="{{ noProv }}" style="min-height:52px;padding:0 12px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:500 17px/1 var(--font-body)"><option value="">{{ wardPh }}</option><sc-for list="{{ wards }}" as="p" hint-placeholder-count="4"><option value="{{ p }}">{{ p }}</option></sc-for></select></label>
+<div style="grid-column:1/-1"><x-import component-from-global-scope="Fgrapher.Input" label="Địa điểm cụ thể · không bắt buộc" placeholder="Ví dụ: bãi biển An Bàng, nhà hàng, tư gia" value="{{ spot }}" on-change="{{ onSpot }}" hint-size="100%,72px"></x-import></div>
+</div></sc-if>
+<sc-if value="{{ q4 }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px"><div role="group" aria-label="Ảnh tham khảo" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px"><sc-for list="{{ refs }}" as="r" hint-placeholder-count="9"><button type="button" data-ref="{{ r.on }}" aria-pressed="{{ r.on }}" onClick="{{ r.pick }}" aria-label="{{ r.aria }}" style="position:relative;display:flex;flex-direction:column;gap:6px;padding:6px;border:0;border-radius:var(--fg-radius-sm);background:var(--bg-surface);color:var(--text-primary);cursor:pointer;text-align:left"><span style="aspect-ratio:1;display:grid;place-items:center;padding:4px;background:var(--dr-bg)"><img data-dev="" src="{{ r.src }}" alt="" style="display:block;max-width:100%;max-height:100%"></span><span style="display:flex;justify-content:space-between;gap:6px;font-size:13px;font-weight:600"><span>{{ r.label }}</span><span style="font:600 12px/1.1 var(--font-mono);color:var(--text-link)">{{ r.order }}</span></span></button></sc-for></div><span style="font-size:13px;color:var(--text-secondary)">Chọn tối đa 3 ảnh. Ảnh giữ nguyên khung, không cắt.</span></div></sc-if>
+<sc-if value="{{ q5 }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Ngân sách" style="display:flex;flex-direction:column;gap:10px;max-width:520px"><sc-for list="{{ budgets }}" as="o" hint-placeholder-count="6"><button type="button" role="radio" data-opt="" aria-pressed="{{ o.on }}" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:600 17px/1.2 var(--font-body);text-align:left;cursor:pointer;font-variant-numeric:tabular-nums;transition:border-color 150ms,background-color 150ms"><kbd style="flex:none;width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--border-default);border-radius:6px;font:600 12px/1 var(--font-mono);color:var(--text-secondary)">{{ o.key }}</kbd>{{ o.label }}</button></sc-for><span style="font-size:13px;line-height:1.5;color:var(--text-secondary)">Nghệ sĩ báo giá cụ thể trong đề xuất. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ.</span></div></sc-if>
+<sc-if value="{{ q6 }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:8px"><x-import component-from-global-scope="Fgrapher.Textarea" label="Mô tả thêm · không bắt buộc" rows="6" maxLength="1000" placeholder="Ví dụ: khoảng 40 khách, muốn có ảnh gia đình hai họ, cần ảnh trước 20/11/2026." value="{{ note }}" on-change="{{ onNote }}" hint-size="100%,180px"></x-import><span style="align-self:flex-end;font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">{{ noteCount }}</span></div></sc-if>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><p id="rq-err" role="alert" style="margin:0;font-size:15px;font-weight:600;color:var(--danger)">{{ err }}</p></sc-if>
+<sc-if value="{{ submitErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="padding:14px 16px;border-radius:var(--fg-radius-md);background:var(--danger-bg);font-size:15px;line-height:1.5"><strong style="color:var(--danger)">Chưa đăng được.</strong> Kiểm tra kết nối rồi bấm Đăng lại. Bản nháp vẫn được lưu.</div></sc-if>
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px"><sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="lg" on-click="{{ back }}">‹ Câu trước</x-import></sc-if><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ next }}" disabled="{{ sending }}">{{ nextLabel }}</x-import><span style="font-size:13px;color:var(--text-secondary)">hoặc nhấn <kbd style="padding:2px 6px;border:1px solid var(--border-default);border-radius:5px;font:600 12px/1 var(--font-mono)">Enter ↵</kbd></span></div></sc-if>
+</sc-if>
+<sc-if value="{{ done }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;flex-direction:column;gap:18px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--success)">ĐÃ ĐĂNG · 30/09/2026 09:15</span><h1 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(32px,calc(14px + 2.8vw),56px);line-height:1.02;letter-spacing:-.025em">Yêu cầu YC-2026-00012 đã được đăng</h1><p style="margin:0;font-size:17px;line-height:1.55;color:var(--text-secondary);text-wrap:pretty">Nghệ sĩ phù hợp ở {{ provName }} nhận được yêu cầu của bạn. Bạn nhận thông báo khi có đề xuất đầu tiên. Yêu cầu mở tới 07/10/2026 23:59.</p><div style="display:flex;flex-wrap:wrap;gap:10px"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg">Xem yêu cầu</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="lg">Về Đặt lịch F</x-import></div></div></sc-if>
+</section>
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><aside aria-label="Bản xem trước" style="position:sticky;top:88px;width:min(460px,34vw);display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">XEM TRƯỚC · NGHỆ SĨ SẼ THẤY</span><dc-import name="RqCallSheet" num="YC-2026-00012" stamp="{{ stamp }}" active="{{ activeKey }}" data="{{ sheet }}" hint-size="100%,600px"></dc-import></aside></sc-if>
+</main>
+<sc-if value="{{ mobileBar }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bg-surface);border-top:1px solid var(--border-subtle)"><sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ back }}" aria-label="Câu trước" style="flex:none;width:48px;height:48px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:transparent;color:var(--text-primary);font-size:20px;cursor:pointer">‹</button></sc-if><button type="button" onClick="{{ openSheet }}" style="flex:none;min-height:48px;padding:0 14px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:transparent;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer">Call sheet</button><span style="flex:1;display:flex"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ next }}" disabled="{{ sending }}" style="width:100%">{{ nextLabel }}</x-import></span></div></sc-if>
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:flex;flex-direction:column;justify-content:flex-end"><div onClick="{{ closeSheet }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ sheetRef }}" role="dialog" aria-modal="true" aria-label="Call sheet" style="position:relative;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:10px 16px 24px;border-radius:var(--fg-radius-xl) var(--fg-radius-xl) 0 0;background:var(--bg-page)"><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">XEM TRƯỚC</span><button type="button" onClick="{{ closeSheet }}" style="min-height:44px;padding:0 4px;border:0;background:none;color:var(--text-link);font:600 15px/1 var(--font-body);cursor:pointer">Đóng</button></div><dc-import name="RqCallSheet" num="YC-2026-00012" stamp="{{ stamp }}" active="{{ activeKey }}" data="{{ sheet }}" hint-size="100%,560px"></dc-import></div></div></sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p); this.q = new URLSearchParams(window.location.search);
+    const fill = this.q.get('fill') === '1', long = this.q.get('state') === 'long';
+    const full = { service: 'photo', occasion: 'Cưới', date: '2026-11-15', tod: 'hoanghon', flex: '3d', prov: 'Thành phố Đà Nẵng', ward: 'Phường Hội An', spot: long ? 'Bãi biển An Bàng, sau đó về nhà hàng bên sông Hoài để chụp tiệc tối cùng gia đình hai bên' : 'Bãi biển An Bàng', refs: [0, 3, 5], budget: '5-10', note: long ? 'Khoảng 40 khách. Muốn có ảnh gia đình hai họ, ảnh cô dâu chuẩn bị, lễ gia tiên buổi sáng và tiệc tối. Cô dâu mặc áo dài đỏ lúc sáng, váy trắng lúc chiều. Nhà hàng cho phép dùng đèn flash. Cần nhận ảnh chỉnh màu trước 20/11/2026 để in thiệp cảm ơn, và một album in cho bố mẹ.' : 'Khoảng 40 khách, chụp lúc hoàng hôn. Cần ảnh trước 20/11/2026.' };
+    const empty = { service: '', occasion: '', date: '', tod: '', flex: '', prov: '', ward: '', spot: '', refs: [], budget: '', note: '' };
+    this.state = { w: window.innerWidth, step: +(this.q.get('q') || 1), a: fill ? full : empty, err: '', status: this.q.get('state') === 'error' ? 'error' : this.q.get('state') === 'done' ? 'done' : '', savedAt: fill ? '09:12' : '', draft: this.q.get('draft') === '1', sheetOpen: this.q.get('sheet') === '1' };
+    if (this.state.status === 'done') this.state.step = 7;
+  }
+  rootRef = React.createRef(); qRef = React.createRef(); sheetRef = React.createRef();
+  componentDidMount() { this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR); this.paint(); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  componentDidUpdate(pp, ps) {
+    this.paint();
+    if (ps.step !== this.state.step) { const h = this.qRef.current; h && h.focus({ preventScroll: true }); window.scrollTo(0, 0); }
+    if (!ps.sheetOpen && this.state.sheetOpen) { const s = this.sheetRef.current; if (s && s.animate && !(window.fgKit && window.fgKit.reduced())) s.animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(0,0,.2,1)' }); }
+  }
+  paint() {
+    const r = this.rootRef.current; if (!r) return;
+    r.querySelectorAll('[data-opt]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.borderColor = on ? 'var(--brand-primary)' : 'var(--border-default)'; b.style.boxShadow = on ? 'inset 0 0 0 1px var(--brand-primary)' : 'none'; b.style.background = on ? 'var(--bg-sunken)' : 'var(--bg-surface)'; });
+    r.querySelectorAll('[data-chip]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--brand-primary)' : 'transparent'; b.style.color = on ? 'var(--text-on-brand)' : 'var(--text-primary)'; b.style.borderColor = on ? 'var(--brand-primary)' : 'var(--border-default)'; });
+    r.querySelectorAll('[data-ref]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.boxShadow = on ? '0 0 0 2px var(--dr-accent)' : 'none'; });
+    r.querySelectorAll('[data-seg]').forEach(s => { const v = s.dataset.seg; s.style.background = v === 'done' ? 'var(--brand-primary)' : v === 'now' ? 'var(--brand-accent)' : 'var(--border-default)'; });
+  }
+  set(patch) {
+    const t = new Intl.DateTimeFormat('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
+    this.setState(s => ({ a: { ...s.a, ...patch }, err: '', savedAt: t }), () => { try { localStorage.setItem('fgrq-draft-v1', JSON.stringify({ a: this.state.a, step: this.state.step })); } catch (e) {} });
+  }
+  today() { const d = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date()); return d; }
+  dmy(iso) { if (!iso) return ''; const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; }
+  check(step) {
+    const a = this.state.a;
+    if (step === 1 && !a.service) return 'Chọn một dịch vụ để tiếp tục.';
+    if (step === 1 && !a.occasion) return 'Chọn dịp chụp để nghệ sĩ báo giá đúng.';
+    if (step === 2 && !a.date) return 'Chọn ngày chụp. Chưa chốt ngày thì chọn ngày gần đúng và “Linh hoạt trong tháng”.';
+    if (step === 2 && a.date < this.today()) return 'Ngày này đã qua. Chọn từ hôm nay trở đi.';
+    if (step === 2 && !a.flex) return 'Cho nghệ sĩ biết bạn có linh hoạt ngày không.';
+    if (step === 3 && (!a.prov || !a.ward)) return 'Chọn tỉnh/thành và phường/xã.';
+    if (step === 5 && !a.budget) return 'Chọn một khoảng ngân sách, hoặc “Để nghệ sĩ báo giá”.';
+    return '';
+  }
+  next() {
+    const s = this.state.step; const e = this.check(s); if (e) return this.setState({ err: e });
+    if (s < 6) return this.setState({ step: s + 1, err: '' });
+    this.setState({ status: 'sending' });
+    setTimeout(() => this.setState(this.q.get('state') === 'error' ? { status: 'error' } : { status: 'done', step: 7 }), 900);
+  }
+  renderVals() {
+    const { step, a, err, status, w, savedAt } = this.state, m = w < 1024;
+    const K = 'ABCDEF';
+    const S = [['photo', 'Chụp ảnh'], ['video', 'Quay phim'], ['makeup', 'Trang điểm'], ['model', 'Người mẫu'], ['studio', 'Thuê studio'], ['costume', 'Thuê trang phục']];
+    const O = ['Cưới', 'Kỷ yếu', 'Chân dung', 'Gia đình', 'Sản phẩm', 'Sự kiện', 'Thời trang', 'Áo dài Tết'];
+    const T = [['sang', 'Buổi sáng', '06:00–11:00'], ['chieu', 'Buổi chiều', '13:00–17:00'], ['hoanghon', 'Hoàng hôn', '16:30–18:30'], ['toi', 'Buổi tối', '18:00–22:00'], ['ca', 'Cả ngày', '08:00–20:00']];
+    const F = [['exact', 'Đúng ngày này'], ['3d', 'Linh hoạt ± 3 ngày'], ['month', 'Linh hoạt trong tháng']];
+    const P = { 'Thành phố Hồ Chí Minh': ['Phường Sài Gòn', 'Phường Bến Thành', 'Phường Thủ Đức', 'Phường Bình Thạnh', 'Phường Tân Định'], 'Thành phố Hà Nội': ['Phường Hoàn Kiếm', 'Phường Ba Đình', 'Phường Tây Hồ', 'Phường Cầu Giấy'], 'Thành phố Đà Nẵng': ['Phường Hải Châu', 'Phường Sơn Trà', 'Phường Ngũ Hành Sơn', 'Phường Hội An', 'Phường Hội An Tây'], 'Thành phố Huế': ['Phường Thuận Hóa', 'Phường Phú Xuân'], 'Lâm Đồng': ['Phường Xuân Hương - Đà Lạt', 'Phường Lâm Viên - Đà Lạt'], 'Thành phố Cần Thơ': ['Phường Ninh Kiều', 'Phường Cái Khế'], 'Khánh Hòa': ['Phường Nha Trang', 'Phường Bắc Nha Trang'] };
+    const RF = ['Ánh sáng tự nhiên', 'Tông phim cũ', 'Tối giản', 'Màu rực rỡ', 'Đen trắng', 'Phóng sự', 'Cổ điển', 'Đèn studio', 'Ngoài trời'];
+    const B = [['<1', 'Dưới 1.000.000₫'], ['1-3', '1.000.000–3.000.000₫'], ['3-5', '3.000.000–5.000.000₫'], ['5-10', '5.000.000–10.000.000₫'], ['>10', 'Trên 10.000.000₫'], ['ask', 'Để nghệ sĩ báo giá']];
+    const Q = [['Bạn cần gì?', 'Chọn dịch vụ và dịp chụp. Nghệ sĩ đúng chuyên môn mới nhận được yêu cầu.'], ['Khi nào?', 'Ngày theo giờ Việt Nam. Nói rõ mức linh hoạt để có thêm nghệ sĩ còn lịch.'], ['Ở đâu?', 'Nghệ sĩ ở gần hoặc nhận lịch ở khu vực này sẽ thấy yêu cầu.'], ['Bạn thích phong cách nào?', 'Chọn tối đa 3 ảnh gần với điều bạn muốn. Có thể bỏ qua.'], ['Ngân sách khoảng bao nhiêu?', 'Một khoảng giá giúp nghệ sĩ đề xuất gói phù hợp.'], ['Còn điều gì nghệ sĩ nên biết?', 'Số người, trang phục, thời hạn nhận ảnh… Có thể bỏ qua.']];
+    const refImg = i => `https://picsum.photos/seed/fgrq-ref${i}/${i % 3 === 1 ? 360 : 300}/${i % 3 === 1 ? 240 : 380}`;
+    const tod = T.find(t => t[0] === a.tod), fl = F.find(f => f[0] === a.flex), bu = B.find(b => b[0] === a.budget), sv = S.find(s => s[0] === a.service);
+    const whenParts = [a.date && this.dmy(a.date), tod && `${tod[1]} (${tod[2]})`].filter(Boolean).join(' · ');
+    const sheet = {
+      need: sv ? sv[1] + (a.occasion ? ' · ' + a.occasion : '') : '',
+      when: whenParts ? whenParts + (fl ? '\n' + fl[1] : '') : '',
+      where: a.ward ? `${a.ward}\n${a.prov}${a.spot ? '\n' + a.spot : ''}` : (a.prov || ''),
+      style: a.refs.length ? a.refs.map(i => RF[i]).join(' · ') : '',
+      refs: a.refs.map((i, k) => ({ src: refImg(i), alt: RF[i], num: '0' + (k + 1) + 'A' })),
+      budget: bu ? bu[1] : '', note: a.note
+    };
+    const keys = ['need', 'when', 'where', 'style', 'budget', 'note'];
+    const stored = (() => { try { return JSON.parse(localStorage.getItem('fgrq-draft-v1') || 'null'); } catch (e) { return null; } })();
+    const asking = step <= 6;
+    return {
+      theme: this.q.get('theme') || 'light', rootRef: this.rootRef, qRef: this.qRef, sheetRef: this.sheetRef,
+      isDesktop: !m, mobileBar: m && asking,
+      savedLabel: savedAt ? `Đã lưu nháp · ${savedAt}` : 'Nháp tự lưu',
+      segs: [1, 2, 3, 4, 5, 6].map(i => ({ st: i < step ? 'done' : i === step ? 'now' : 'todo' })),
+      showDraft: this.state.draft, draftAt: '29/09/2026 21:04', draftQ: stored && stored.step ? stored.step : 4,
+      resume: () => this.setState({ draft: false, step: stored && stored.step ? stored.step : 4, a: stored && stored.a ? stored.a : a }),
+      restart: () => { try { localStorage.removeItem('fgrq-draft-v1'); } catch (e) {} this.setState({ draft: false, step: 1 }); },
+      asking, done: status === 'done', q1: step === 1, q2: step === 2, q3: step === 3, q4: step === 4, q5: step === 5, q6: step === 6,
+      qLabel: `CÂU 0${Math.min(step, 6)}/06`, qTitle: (Q[step - 1] || Q[5])[0], qHelp: (Q[step - 1] || Q[5])[1],
+      services: S.map(([k, label], i) => ({ label, key: K[i], on: a.service === k ? 'true' : 'false', pick: () => this.set({ service: k }) })), hasService: !!a.service,
+      occasions: O.map(o => ({ label: o, on: a.occasion === o ? 'true' : 'false', pick: () => this.set({ occasion: o }) })),
+      today: this.today(), date: a.date, dateHuman: a.date ? 'Ngày ' + this.dmy(a.date) : 'Định dạng ngày/tháng/năm', onDate: e => this.set({ date: e.target.value }),
+      tods: T.map(([k, label, sub]) => ({ label, sub, on: a.tod === k ? 'true' : 'false', pick: () => this.set({ tod: a.tod === k ? '' : k }) })),
+      flexes: F.map(([k, label]) => ({ label, on: a.flex === k ? 'true' : 'false', pick: () => this.set({ flex: k }) })),
+      provs: Object.keys(P), prov: a.prov, ward: a.ward, wards: P[a.prov] || [], noProv: !a.prov, wardPh: a.prov ? 'Chọn phường/xã' : 'Chọn tỉnh/thành trước',
+      onProv: e => this.set({ prov: e.target.value, ward: '' }), onWard: e => this.set({ ward: e.target.value }), spot: a.spot, onSpot: e => this.set({ spot: e.target.value }),
+      refs: RF.map((label, i) => { const k = a.refs.indexOf(i); return { label, src: refImg(i), on: k >= 0 ? 'true' : 'false', order: k >= 0 ? '0' + (k + 1) + 'A' : '', aria: `${label}${k >= 0 ? ', đã chọn thứ ' + (k + 1) : ''}`, pick: () => { if (k >= 0) return this.set({ refs: a.refs.filter(x => x !== i) }); if (a.refs.length >= 3) return this.setState({ err: 'Đã chọn đủ 3 ảnh. Bỏ chọn một ảnh để đổi.' }); this.set({ refs: [...a.refs, i] }); } }; }),
+      budgets: B.map(([k, label], i) => ({ label, key: K[i], on: a.budget === k ? 'true' : 'false', pick: () => this.set({ budget: k }) })),
+      note: a.note, onNote: e => this.set({ note: e.target.value.slice(0, 1000) }), noteCount: `${a.note.length}/1000`,
+      err, hasErr: !!err, submitErr: status === 'error' && step === 6, sending: status === 'sending',
+      canBack: step > 1 && asking, back: () => this.setState({ step: Math.max(1, step - 1), err: '' }),
+      next: () => this.next(), nextLabel: status === 'sending' ? 'Đang đăng…' : step === 6 ? (status === 'error' ? 'Đăng lại' : 'Đăng yêu cầu') : 'Tiếp',
+      stamp: status === 'done' ? 'ĐANG NHẬN ĐỀ XUẤT' : 'NHÁP', activeKey: asking ? keys[step - 1] : '', sheet, provName: a.prov || 'khu vực của bạn',
+      sheetOpen: this.state.sheetOpen && m, openSheet: () => this.setState({ sheetOpen: true }), closeSheet: () => this.setState({ sheetOpen: false }),
+      onKey: e => {
+        const tag = e.target.tagName;
+        if (e.key === 'Escape' && this.state.sheetOpen) return this.setState({ sheetOpen: false });
+        if (e.key === 'Enter' && !e.shiftKey && tag !== 'TEXTAREA' && tag !== 'BUTTON' && tag !== 'SELECT' && asking) { e.preventDefault(); this.next(); return; }
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.metaKey || e.ctrlKey) return;
+        const i = K.indexOf(e.key.toUpperCase()); if (i < 0) return;
+        if (step === 1 && S[i]) this.set({ service: S[i][0] }); else if (step === 5 && B[i]) this.set({ budget: B[i][0] });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

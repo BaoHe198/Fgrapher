@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./fg-kit.js"></script><style>body{margin:0;background:var(--bg-page)}:root{--dr-bg:hsl(30 14% 5%);--dr-surface:hsl(30 11% 8%);--dr-raised:hsl(30 9% 12%);--dr-text:hsl(38 33% 92%);--dr-text-2:hsl(34 12% 72%);--dr-text-3:hsl(32 8% 60%);--dr-line:hsl(0 0% 100% / .06);--dr-line-2:hsl(0 0% 100% / .12);--dr-accent:var(--gold-400);--dr-scrim:hsl(30 14% 5% / .72)}[data-surface="darkroom"]{color-scheme:dark;--bg-page:var(--dr-bg);--bg-surface:var(--dr-surface);--bg-sunken:var(--dr-raised);--surface-card:var(--dr-surface);--text-primary:var(--dr-text);--text-secondary:var(--dr-text-2);--text-tertiary:var(--dr-text-3);--text-link:var(--gold-300);--border-subtle:var(--dr-line);--border-default:var(--dr-line-2);--border-strong:hsl(0 0% 100% / .2);--border-focus:var(--dr-accent);--brand-primary:hsl(168 38% 50%);--text-on-brand:hsl(168 62% 7%);--background:var(--dr-bg);--foreground:var(--dr-text);--card:var(--dr-surface);--card-foreground:var(--dr-text);--popover:var(--dr-surface);--popover-foreground:var(--dr-text);--muted:var(--dr-raised);--muted-foreground:var(--dr-text-2);--accent:var(--dr-raised);--accent-foreground:var(--dr-text);--secondary:var(--dr-raised);--secondary-foreground:var(--dr-text);--border:var(--dr-line-2);--input:var(--dr-line-2)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}html{scroll-behavior:smooth}.dk-x::-webkit-scrollbar{display:none}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<header ref="{{ hdrRef }}" style="position:sticky;top:0;z-index:20;background:var(--green-900);box-shadow:0 1px 0 hsl(0 0% 100% / .06);transition:background-color 260ms cubic-bezier(0,0,.2,1)">
+<div style="max-width:1440px;margin:0 auto;padding:0 clamp(20px,2.4vw,32px);height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+<a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a>
+<div style="display:flex;align-items:center;gap:16px">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><span ref="{{ metaRef }}" style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--green-200);transition:color 260ms">HỆ THỐNG · ĐỢT 2 · 09/2026</span></sc-if>
+<button type="button" ref="{{ palBtn }}" onClick="{{ openPal }}" aria-label="Tìm nhanh" aria-keyshortcuts="Meta+K Control+K" style="display:flex;align-items:center;gap:10px;min-height:40px;min-width:44px;padding:0 12px;border:1px solid hsl(0 0% 100% / .16);border-radius:999px;background:hsl(0 0% 100% / .06);color:var(--gold-50);font:500 14px/1 var(--font-body);cursor:pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><span>Tìm nhanh</span><kbd style="padding:3px 6px;border:1px solid hsl(0 0% 100% / .2);border-radius:5px;font:600 12px/1 var(--font-mono)">{{ kbd }}</kbd></sc-if></button>
+</div>
+</div>
+</header>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Mục" class="dk-x" style="position:sticky;top:60px;z-index:15;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 20px;background:var(--bg-page);border-bottom:1px solid var(--border-subtle)">
+<a href="#dk-surface" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Phòng tối</a>
+<a href="#dk-hero" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">EditorialHero</a>
+<a href="#dk-masonry" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">MasonryGrid</a>
+<a href="#dk-palette" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Thanh lệnh</a>
+<a href="#dk-motion" style="flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-default);font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none">Chuyển cảnh</a>
+</nav>
+</sc-if>
+<div style="max-width:1320px;margin:0 auto;padding:clamp(32px,5vw,72px) clamp(20px,2.4vw,32px) clamp(64px,8vw,120px);display:flex;gap:64px;align-items:flex-start">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Mục" style="flex:0 0 200px;position:sticky;top:100px;display:flex;flex-direction:column;gap:2px">
+<span style="padding:0 12px 10px;font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">MỤC LỤC</span>
+<a href="#dk-surface" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">01</span>Phòng tối</a>
+<a href="#dk-hero" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">02</span>EditorialHero</a>
+<a href="#dk-masonry" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">03</span>MasonryGrid</a>
+<a href="#dk-palette" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">04</span>Thanh lệnh ⌘K</a>
+<a href="#dk-motion" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--fg-radius-sm);font-size:14px;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 150ms,color 150ms" style-hover="background:var(--bg-sunken);color:var(--text-primary)"><span style="font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">05</span>Chuyển cảnh</a>
+</nav>
+</sc-if>
+<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:clamp(64px,7vw,96px)">
+<div style="display:flex;flex-direction:column;gap:20px">
+<span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">KHUNG 00 · HƯỚNG DẪN</span>
+<h1 style="margin:0;font:var(--text-display-lg);letter-spacing:-.02em;text-wrap:balance">Phần dùng chung · đợt 2</h1>
+<p style="margin:0;max-width:680px;font:var(--text-body-lg);color:var(--text-secondary);text-wrap:pretty">Đợt 1 đã chuẩn hóa token và component. Đợt này thêm năm phần để các trang về sau có điểm nhấn: một bề mặt để xem ảnh, một kiểu đầu trang, một lưới ảnh không cắt, thanh lệnh ⌘K và chuyển cảnh cho ảnh. Mỗi phần có trạng thái và ví dụ trong ngữ cảnh. Token mới đặt tên --dr-*, dựng trên thang neutral hue 30 và gold có sẵn.</p>
+</div>
+<dc-import name="DkSurface" hint-size="100%,1400px"></dc-import>
+<dc-import name="DkHero" hint-size="100%,1500px"></dc-import>
+<dc-import name="DkMasonry" hint-size="100%,1300px"></dc-import>
+<dc-import name="DkPalette" on-open-palette="{{ openPal }}" hint-size="100%,1600px"></dc-import>
+<dc-import name="DkMotion" hint-size="100%,1300px"></dc-import>
+</main>
+</div>
+</div>
+<dc-import name="CommandPalette" mode="overlay" open="{{ palOpen }}" on-close="{{ closePal }}" preset-query="{{ pq }}" preset-state="{{ ps }}" hint-size="0px,0px"></dc-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.q = new URLSearchParams(window.location.search); this.state = { w: window.innerWidth, pal: this.q.get('palette') === 'open', dr: false }; }
+  palBtn = React.createRef(); hdrRef = React.createRef(); metaRef = React.createRef();
+  componentDidUpdate() { const h = this.hdrRef.current, m = this.metaRef.current, d = this.state.dr; if (h) h.style.background = d ? 'var(--dr-bg)' : 'var(--green-900)'; if (m) m.style.color = d ? 'var(--dr-text-3)' : 'var(--green-200)'; }
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR);
+    this.onK = e => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); this.setState(s => ({ pal: !s.pal })); } };
+    window.addEventListener('keydown', this.onK);
+    let raf = 0;
+    this.onS = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; const y = 30; const on = [...document.querySelectorAll('main [data-surface="darkroom"]')].some(n => { const r = n.getBoundingClientRect(); return r.top <= y && r.bottom > y; }); if (on !== this.state.dr) this.setState({ dr: on }); }); };
+    window.addEventListener('scroll', this.onS, { passive: true });
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); window.removeEventListener('keydown', this.onK); window.removeEventListener('scroll', this.onS); }
+  renderVals() {
+    const d = this.state.w >= 1024;
+    return {
+      theme: this.q.get('theme') || 'light', isDesktop: d, isMobile: !d,
+      hdrRef: this.hdrRef, metaRef: this.metaRef,
+      kbd: /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K',
+      palBtn: this.palBtn, palOpen: this.state.pal,
+      openPal: () => this.setState({ pal: true }),
+      closePal: () => { this.setState({ pal: false }); const b = this.palBtn.current; b && b.focus({ preventScroll: true }); },
+      pq: this.q.get('q') || '', ps: this.q.get('pstate') || ''
+    };
+  }
+}
+</script>
+</body>
+</html>

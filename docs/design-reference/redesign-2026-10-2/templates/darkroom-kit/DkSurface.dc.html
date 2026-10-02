@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section id="dk-surface" style="scroll-margin-top:120px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">01 · BỀ MẶT</span><h2 style="margin:0;font:var(--text-heading-xl);letter-spacing:-.01em">Phòng tối</h2><p style="margin:0;max-width:680px;font:var(--text-body-md);color:var(--text-secondary);text-wrap:pretty">Bề mặt riêng cho những chỗ người dùng ngồi xem ảnh: lightbox, đầu trang hồ sơ, feed Cộng đồng F, trang album. Đây không phải chế độ tối. Người dùng đang ở chế độ sáng vẫn thấy Phòng tối khi mở album, và giá trị không đổi giữa hai chế độ.</p></div>
+<div data-surface="darkroom" data-darkroom="" style="display:flex;flex-direction:column;gap:24px;padding:clamp(20px,3vw,36px);border-radius:var(--fg-radius-lg);background:var(--dr-bg);color:var(--dr-text)">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px"><strong style="font:var(--text-heading-md)">Token bề mặt</strong><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--dr-text-3)">HUE 30 · ĐO TRỰC TIẾP</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1px;background:var(--dr-line);border:1px solid var(--dr-line);border-radius:var(--fg-radius-md);overflow:hidden">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--dr-bg)"><span style="flex:none;width:36px;height:36px;border-radius:var(--fg-radius-sm);background:var(--dr-bg);box-shadow:inset 0 0 0 1px var(--dr-line-2)"></span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><code style="font:600 12px/1.2 var(--font-mono)">--dr-bg</code><span style="font-size:13px;color:var(--dr-text-2)">hsl(30 14% 5%) · nền</span></span></div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--dr-bg)"><span style="flex:none;width:36px;height:36px;border-radius:var(--fg-radius-sm);background:var(--dr-surface);box-shadow:inset 0 0 0 1px var(--dr-line-2)"></span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><code style="font:600 12px/1.2 var(--font-mono)">--dr-surface</code><span style="font-size:13px;color:var(--dr-text-2)">hsl(30 11% 8%) · thanh, thẻ</span></span></div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--dr-bg)"><span style="flex:none;width:36px;height:36px;border-radius:var(--fg-radius-sm);background:var(--dr-raised);box-shadow:inset 0 0 0 1px var(--dr-line-2)"></span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><code style="font:600 12px/1.2 var(--font-mono)">--dr-raised</code><span style="font-size:13px;color:var(--dr-text-2)">hsl(30 9% 12%) · hover, đang chọn</span></span></div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--dr-bg)"><span style="flex:none;width:36px;height:36px;border-radius:var(--fg-radius-sm);background:var(--dr-bg);box-shadow:inset 0 0 0 1px var(--dr-line)"></span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><code style="font:600 12px/1.2 var(--font-mono)">--dr-line · --dr-line-2</code><span style="font-size:13px;color:var(--dr-text-2)">trắng 6% · trắng 12%</span></span></div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--dr-bg)"><span style="flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:var(--fg-radius-sm);background:var(--dr-surface);font:700 16px/1 var(--font-display);color:var(--dr-text)">Aa</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><code style="font:600 12px/1.2 var(--font-mono)">--dr-text · {{ c1 }}</code><span style="font-size:13px;color:var(--dr-text-2)">hsl(38 33% 92%) · ngà</span></span></div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--dr-bg)"><span style="flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:var(--fg-radius-sm);background:var(--dr-surface);font:700 16px/1 var(--font-display);color:var(--dr-text-2)">Aa</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><code style="font:600 12px/1.2 var(--font-mono)">--dr-text-2 · {{ c2 }}</code><span style="font-size:13px;color:var(--dr-text-2)">hsl(34 12% 72%) · chú thích</span></span></div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--dr-bg)"><span style="flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:var(--fg-radius-sm);background:var(--dr-surface);font:700 16px/1 var(--font-display);color:var(--dr-text-3)">Aa</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><code style="font:600 12px/1.2 var(--font-mono)">--dr-text-3 · {{ c3 }}</code><span style="font-size:13px;color:var(--dr-text-2)">hsl(32 8% 60%) · số khung, meta</span></span></div>
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--dr-bg)"><span style="flex:none;width:36px;height:36px;border-radius:var(--fg-radius-sm);background:var(--dr-accent)"></span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><code style="font:600 12px/1.2 var(--font-mono)">--dr-accent · {{ c4 }}</code><span style="font-size:13px;color:var(--dr-text-2)">= gold-400 · nhấn duy nhất, focus</span></span></div>
+</div>
+<p style="margin:0;font-size:14px;line-height:1.6;color:var(--dr-text-2);text-wrap:pretty">Tỉ lệ tương phản đo trên --dr-bg lúc trang chạy. Trong khối <code style="font:500 13px/1 var(--font-mono);color:var(--dr-text)">[data-surface="darkroom"]</code>, các token ngữ nghĩa (--bg-surface, --text-primary, --border-subtle, --brand-primary…) được trỏ lại sang bộ trên. Nhờ vậy Button, Badge, Tag của DS tự hiện đúng mà không cần biến thể riêng:</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md">Đặt lịch</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md">Nhắn tin</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md">Lưu album</x-import><x-import component-from-global-scope="Fgrapher.Tag">Cưới</x-import><x-import component-from-global-scope="Fgrapher.Badge" variant="secondary">Phong cách phim</x-import></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Dùng ở đâu</strong><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--text-secondary)"><li>Lightbox, trang album, feed Cộng đồng F: toàn trang.</li><li>Đầu trang hồ sơ: chỉ khối EditorialHero, phần dưới trở lại Giấy.</li><li>Không dùng cho biểu mẫu, đặt lịch, tin nhắn, cài đặt. Những chỗ phải đọc và nhập lâu thì ở lại Giấy.</li></ul></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Quy tắc</strong><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--text-secondary)"><li>Không có bóng. Phân lớp bằng bậc nền bg → surface → raised.</li><li>Ảnh không có khung sáng, chỉ viền trong 6% trắng.</li><li>Vàng là màu nhấn duy nhất. Xanh brand dùng bản sáng của chế độ tối.</li><li>Chữ trên ảnh phải có --dr-scrim phía sau, không đặt thẳng lên ảnh.</li></ul></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Ở chế độ tối</strong><p style="margin:0;font-size:14px;line-height:1.5;color:var(--text-secondary);text-wrap:pretty">Giấy tối (L 7%) và Phòng tối (L 5%) gần nhau. Ranh giới khi đó do dải dẫn phim đảm nhận, không cần làm Phòng tối đen hơn nữa. Viền trong 6% vẫn giữ để ảnh tối không chìm vào nền.</p></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px"><strong style="font:var(--text-heading-md)">Chuyển từ Giấy sang Phòng tối trong một trang</strong><p style="margin:0;max-width:680px;font-size:15px;line-height:1.55;color:var(--text-secondary);text-wrap:pretty">Ranh giới là một mép cứng, có dải dẫn phim đánh dấu, không dùng dải chuyển màu. Vùng giữa của một dải chuyển màu làm chữ xám mất tương phản và làm ảnh ở đó trông đục. Thanh trên cùng đổi nền theo bề mặt đang nằm dưới nó.</p></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:20px;align-items:start">
+<div style="position:relative;height:480px;border:1px solid var(--border-default);border-radius:var(--fg-radius-lg);overflow:hidden;background:var(--bg-page)">
+<div ref="{{ boxRef }}" onScroll="{{ onBox }}" tabindex="0" aria-label="Ví dụ trang hồ sơ, cuộn để xem chuyển bề mặt" style="position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain">
+<div ref="{{ miniRef }}" style="position:sticky;top:0;z-index:2;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--bg-surface);color:var(--text-primary);box-shadow:0 1px 0 var(--border-subtle);transition:background-color 260ms var(--ease-out),color 260ms var(--ease-out)"><strong style="font:700 15px/1 var(--font-display)">Minh Anh</strong><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em">{{ miniLabel }}</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px 16px 28px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">KHUNG 04 · HỒ SƠ</span><strong style="font:600 30px/1 var(--font-display);letter-spacing:-.03em">Minh Anh Nhiếp Ảnh</strong><span style="font-size:14px;color:var(--text-secondary)">Nhiếp ảnh gia · Phường Thủ Đức, Thành phố Hồ Chí Minh</span><p style="margin:0;font-size:14px;line-height:1.6;color:var(--text-secondary)">Chụp cưới và chân dung bằng ánh sáng tự nhiên. Nhận lịch ở TP. Hồ Chí Minh và các tỉnh lân cận.</p></div>
+<div data-leader="" style="position:relative;height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--dr-bg);font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--dr-text-3)"><span style="position:absolute;left:0;right:0;top:4px;height:4px;background:repeating-linear-gradient(90deg,var(--dr-line-2) 0 8px,transparent 8px 20px)"></span><span>ALBUM</span><span>04A ▸</span><span style="position:absolute;left:0;right:0;bottom:4px;height:4px;background:repeating-linear-gradient(90deg,var(--dr-line-2) 0 8px,transparent 8px 20px)"></span></div>
+<div data-dr="" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 10px 20px;background:var(--dr-bg)">
+<img data-dev="" src="https://picsum.photos/seed/fgdk-s1/400/500" alt="Ảnh album 1" style="width:100%;aspect-ratio:4/5;display:block;box-shadow:0 0 0 1px var(--dr-line)">
+<img data-dev="" src="https://picsum.photos/seed/fgdk-s2/400/500" alt="Ảnh album 2" style="width:100%;aspect-ratio:4/5;display:block;box-shadow:0 0 0 1px var(--dr-line)">
+<img data-dev="" src="https://picsum.photos/seed/fgdk-s3/800/533" alt="Ảnh album 3" style="grid-column:span 2;width:100%;aspect-ratio:3/2;display:block;box-shadow:0 0 0 1px var(--dr-line)">
+<img data-dev="" src="https://picsum.photos/seed/fgdk-s4/400/500" alt="Ảnh album 4" style="width:100%;aspect-ratio:4/5;display:block;box-shadow:0 0 0 1px var(--dr-line)">
+<img data-dev="" src="https://picsum.photos/seed/fgdk-s5/400/500" alt="Ảnh album 5" style="width:100%;aspect-ratio:4/5;display:block;box-shadow:0 0 0 1px var(--dr-line)">
+</div>
+<div data-leader="" style="position:relative;height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--dr-bg);font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--dr-text-3)"><span style="position:absolute;left:0;right:0;top:4px;height:4px;background:repeating-linear-gradient(90deg,var(--dr-line-2) 0 8px,transparent 8px 20px)"></span><span>◂ 04F</span><span>ĐÁNH GIÁ</span><span style="position:absolute;left:0;right:0;bottom:4px;height:4px;background:repeating-linear-gradient(90deg,var(--dr-line-2) 0 8px,transparent 8px 20px)"></span></div>
+<div style="display:flex;flex-direction:column;gap:12px;padding:20px 16px 120px"><strong style="font-size:16px">Đánh giá</strong><p style="margin:0;font-size:14px;line-height:1.6;color:var(--text-secondary)">“Chị Anh chụp rất tự nhiên, ảnh giao đúng hẹn.” · Thảo, 14/08/2026</p></div>
+</div>
+</div>
+<ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<li style="display:flex;flex-direction:column;gap:4px;padding:16px 20px;border-bottom:1px solid var(--border-subtle)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">A · RANH GIỚI</span><span style="font-size:14px;line-height:1.55">Dải dẫn phim cao 32px trên nền --dr-bg: hai hàng lỗ phim bằng --dr-line-2, nhãn mono cho khối tiếp theo (ALBUM, 04A ▸). Đặt ở cả lối vào và lối ra.</span></li>
+<li style="display:flex;flex-direction:column;gap:4px;padding:16px 20px;border-bottom:1px solid var(--border-subtle)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">B · THANH TRÊN CÙNG</span><span style="font-size:14px;line-height:1.55">Khi mép khối Phòng tối chạm đáy header, header đổi nền và màu chữ trong 260ms, --ease-out. Chỉ đổi màu, không dịch chuyển, không đổi chiều cao. Thanh trên của chính trang này cũng làm vậy khi cuộn qua các khối tối.</span></li>
+<li style="display:flex;flex-direction:column;gap:4px;padding:16px 20px;border-bottom:1px solid var(--border-subtle)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">C · VÀO TỪ ĐIỀU HƯỚNG</span><span style="font-size:14px;line-height:1.55">Mở album hay lightbox thì nền đổi ở khung đầu tiên. Ảnh tráng sau đó, chữ và nút hiện ngay.</span></li>
+<li style="display:flex;flex-direction:column;gap:4px;padding:16px 20px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">GIẢM CHUYỂN ĐỘNG</span><span style="font-size:14px;line-height:1.55">Header đổi màu tức thì. Dải dẫn phim giữ nguyên vì nó là tín hiệu tĩnh.</span></li>
+</ol>
+</div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { dark: false, c: {} };
+  boxRef = React.createRef(); miniRef = React.createRef();
+  componentDidUpdate() { const m = this.miniRef.current, d = this.state.dark; if (!m) return; m.style.background = d ? 'var(--dr-surface)' : 'var(--bg-surface)'; m.style.color = d ? 'var(--dr-text)' : 'var(--text-primary)'; m.style.boxShadow = '0 1px 0 ' + (d ? 'var(--dr-line)' : 'var(--border-subtle)'); }
+  componentDidMount() {
+    const run = () => { const k = window.fgKit, el = document.getElementById('dk-surface'); if (!k || !el) return; const f = (a, b) => k.contrast(el, a, b).toFixed(1).replace('.', ',') + ':1'; this.setState({ c: { c1: f('var(--dr-text)', 'var(--dr-bg)'), c2: f('var(--dr-text-2)', 'var(--dr-bg)'), c3: f('var(--dr-text-3)', 'var(--dr-bg)'), c4: f('var(--dr-accent)', 'var(--dr-bg)') } }); };
+    this.t = setTimeout(run, 600); this.t2 = setTimeout(run, 2000);
+  }
+  componentWillUnmount() { clearTimeout(this.t); clearTimeout(this.t2); }
+  renderVals() {
+    const d = this.state.dark, c = this.state.c;
+    return {
+      c1: c.c1 || '…', c2: c.c2 || '…', c3: c.c3 || '…', c4: c.c4 || '…',
+      boxRef: this.boxRef,
+      onBox: () => {
+        const box = this.boxRef.current; if (!box) return;
+        const top = box.getBoundingClientRect().top + 48;
+        const on = [...box.querySelectorAll('[data-dr],[data-leader]')].some(n => { const r = n.getBoundingClientRect(); return r.top <= top && r.bottom > top; });
+        if (on !== this.state.dark) this.setState({ dark: on });
+      },
+      miniRef: this.miniRef, miniLabel: d ? 'PHÒNG TỐI' : 'GIẤY'
+    };
+  }
+}
+</script>
+</body>
+</html>

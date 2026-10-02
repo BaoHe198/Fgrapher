@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ rootRef }}" style="display:flex;flex-direction:column;height:100%;min-height:0;background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-body)">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border-subtle)"><h2 id="br-f-t" style="margin:0;font:600 20px/1.2 var(--font-display)">Bộ lọc</h2><button type="button" onClick="{{ close }}" aria-label="Đóng bộ lọc" style="width:44px;height:44px;border:0;border-radius:999px;background:transparent;color:var(--text-secondary);font-size:22px;cursor:pointer">×</button></div>
+<div style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 20px 20px;display:flex;flex-direction:column">
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="5"><fieldset style="margin:0;padding:18px 0;border:0;border-bottom:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:12px;min-width:0"><legend style="padding:0;margin-bottom:12px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">{{ g.label }}</legend><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="6"><button type="button" data-chip="" aria-pressed="{{ o.on }}" onClick="{{ o.pick }}" style="min-height:44px;padding:0 16px;border:1px solid var(--border-default);border-radius:999px;background:transparent;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer;transition:background-color 150ms,color 150ms">{{ o.label }}</button></sc-for></div></fieldset></sc-for>
+<fieldset style="margin:0;padding:18px 0;border:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px"><legend style="padding:0;margin-bottom:12px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Ngày &amp; giờ cần chụp · chỉ hiện nghệ sĩ còn lịch</legend><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-secondary)">Ngày<input type="date" value="{{ date }}" min="2026-09-30" onChange="{{ onDate }}" style="min-height:48px;padding:0 12px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:500 16px/1 var(--font-body);color-scheme:light dark"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-secondary)">Giờ bắt đầu<select value="{{ time }}" onChange="{{ onTime }}" style="min-height:48px;padding:0 10px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:500 16px/1 var(--font-body)"><option value="">Giờ nào cũng được</option><sc-for list="{{ times }}" as="t" hint-placeholder-count="6"><option value="{{ t }}">{{ t }}</option></sc-for></select></label></fieldset>
+</div>
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;border-top:1px solid var(--border-subtle)"><button type="button" onClick="{{ clear }}" style="min-height:44px;padding:0 4px;border:0;background:none;color:var(--text-primary);font:600 15px/1 var(--font-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer">Xoá tất cả</button><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ close }}">{{ showLabel }}</x-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:720},&quot;f&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Filters&quot;},&quot;count&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:12,&quot;tsType&quot;:&quot;number&quot;},&quot;onChange&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(patch) =&gt; void&quot;},&quot;onClear&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  componentDidMount() { this.paint(); } componentDidUpdate() { this.paint(); }
+  paint() { const r = this.rootRef.current; if (!r) return; r.querySelectorAll('[data-chip]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--brand-primary)' : 'transparent'; b.style.color = on ? 'var(--text-on-brand)' : 'var(--text-primary)'; b.style.borderColor = on ? 'var(--brand-primary)' : 'var(--border-default)'; }); }
+  renderVals() {
+    const f = this.props.f || {}, set = p => this.props.onChange && this.props.onChange(p);
+    const one = (key, val) => () => set({ [key]: f[key] === val ? '' : val });
+    const many = (key, val) => () => { const a = f[key] || []; set({ [key]: a.includes(val) ? a.filter(x => x !== val) : [...a, val] }); };
+    const G = [
+      ['Vai trò', 'role', false, [['photo', 'Nhiếp ảnh gia'], ['video', 'Quay phim'], ['makeup', 'Trang điểm'], ['model', 'Người mẫu'], ['studio', 'Studio'], ['costume', 'Trang phục']]],
+      ['Phong cách', 'styles', true, ['Cưới', 'Chân dung', 'Kỷ yếu', 'Gia đình', 'Sản phẩm', 'Sự kiện', 'Áo dài'].map(x => [x, x])],
+      ['Dịch vụ', 'services', true, [['album', 'Album in'], ['film', 'Phim ngắn'], ['flycam', 'Flycam'], ['makeup', 'Kèm trang điểm'], ['costume', 'Kèm trang phục']]],
+      ['Tỉnh/thành', 'prov', false, ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội', 'Thành phố Đà Nẵng'].map(x => [x, x])],
+      ['Ngân sách khởi điểm', 'budget', false, [['<2', 'Dưới 2.000.000₫'], ['2-5', '2.000.000–5.000.000₫'], ['5-10', '5.000.000–10.000.000₫'], ['>10', 'Trên 10.000.000₫']]],
+      ['Đánh giá', 'rating', false, [['4.5', 'Từ 4,5 ★'], ['4', 'Từ 4,0 ★']]]
+    ];
+    return {
+      rootRef: this.rootRef,
+      groups: G.map(([label, key, multi, opts]) => ({ label, opts: opts.map(([v, l]) => ({ label: l, on: (multi ? (f[key] || []).includes(v) : f[key] === v) ? 'true' : 'false', pick: multi ? many(key, v) : one(key, v) })) })),
+      date: f.date || '', time: f.time || '', times: ['06:00', '08:00', '10:00', '14:00', '16:00', '18:00'],
+      onDate: e => set({ date: e.target.value }), onTime: e => set({ time: e.target.value }),
+      clear: () => this.props.onClear && this.props.onClear(), close: () => this.props.onClose && this.props.onClose(),
+      showLabel: this.props.count > 0 ? `Hiện ${this.props.count} nghệ sĩ` : 'Không có nghệ sĩ phù hợp'
+    };
+  }
+}
+</script>
+</body>
+</html>

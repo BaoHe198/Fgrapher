@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="height:100%;display:flex;flex-direction:column;color:var(--text-primary);font-family:var(--font-body)">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border-subtle)"><h2 id="sh-c-t" style="margin:0;font:600 20px/1.2 var(--font-display)">Giỏ hàng</h2><button type="button" onClick="{{ close }}" aria-label="Đóng giỏ hàng" style="width:44px;height:44px;border:0;border-radius:999px;background:transparent;color:var(--text-secondary);font-size:22px;cursor:pointer">×</button></div>
+<sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;color:var(--text-tertiary)"><dc-import name="ShIcon" kind="body" size="{{ 48 }}" stroke="{{ 1.2 }}" hint-size="48px,48px"></dc-import><strong style="font-size:17px;color:var(--text-primary)">Giỏ hàng trống</strong><span style="font-size:14px;color:var(--text-secondary)">Thêm thiết bị để gửi đơn cho người bán.</span></div></sc-if>
+<sc-if value="{{ has }}" hint-placeholder-val="{{ true }}"><div style="flex:1;min-height:0;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:20px">
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="2"><section aria-label="Đơn gửi {{ g.name }}" style="display:flex;flex-direction:column;gap:0;padding-top:16px">
+<div style="display:flex;justify-content:space-between;gap:10px;padding-bottom:10px"><span style="display:flex;flex-direction:column;gap:2px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">ĐƠN GỬI NGƯỜI BÁN</span><strong style="font-size:15px">{{ g.name }}</strong></span><span style="font-size:13px;color:var(--success);font-weight:600;align-self:flex-end">Đã xác minh</span></div>
+<sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="2"><div style="display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:start;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:56px;height:56px;display:grid;place-items:center;border-radius:6px;background:var(--bg-sunken);color:var(--text-secondary)"><dc-import name="ShIcon" kind="{{ l.cat }}" size="{{ 30 }}" stroke="{{ 1.2 }}" hint-size="30px,30px"></dc-import></span><span style="display:flex;flex-direction:column;gap:3px;min-width:0"><strong style="font-size:14px;line-height:1.35">{{ l.name }}</strong><span style="font-size:13px;color:var(--text-secondary)">{{ l.how }}</span><button type="button" onClick="{{ l.remove }}" style="align-self:flex-start;min-height:32px;padding:0;border:0;background:none;color:var(--text-link);font:600 13px/1 var(--font-body);cursor:pointer">Bỏ khỏi giỏ</button></span><span style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-family:var(--font-mono);font-variant-numeric:tabular-nums"><strong style="font-size:14px">{{ l.total }}</strong><sc-if value="{{ l.hasDep }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--text-secondary)">cọc {{ l.dep }}</span></sc-if></span></div></sc-for>
+<div style="display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--border-default);font-family:var(--font-mono);font-variant-numeric:tabular-nums"><span style="font-family:var(--font-body);font-size:14px;color:var(--text-secondary)">Cần chuẩn bị</span><strong style="font-size:15px">{{ g.sum }}</strong></div>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md" style="width:100%">Gửi đơn cho {{ g.short }}</x-import>
+</section></sc-for>
+</div>
+<div style="flex:none;padding:14px 20px;border-top:1px solid var(--border-subtle);background:var(--bg-sunken);font-size:13px;line-height:1.5;color:var(--text-secondary)">Mỗi người bán nhận một đơn riêng. Thanh toán, tiền cọc và giao nhận thỏa thuận trực tiếp với người bán. Fgrapher không thu tiền trực tuyến.</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:760},&quot;lines&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;CartLine[]&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onRemove&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const L = this.props.lines || [], f = window.fgShop ? window.fgShop.fmt : n => n;
+    const by = {}; L.forEach(l => { (by[l.it.seller.id] = by[l.it.seller.id] || { name: l.it.seller.name, lines: [] }).lines.push(l); });
+    const groups = Object.values(by).map(g => { let sum = 0; const lines = g.lines.map(l => { const rent = l.how === 'rent'; const t = rent ? l.it.rent * l.days : l.it.price; const d = rent ? l.it.deposit || 0 : 0; sum += t + d; return { cat: l.it.cat, name: l.it.name, how: rent ? `Thuê ${l.days} ngày · ${l.it.rentTxt}/ngày` : 'Mua', total: f(t), dep: f(d), hasDep: d > 0, remove: () => this.props.onRemove && this.props.onRemove(l.id) }; }); return { name: g.name, short: g.name.split(' · ')[0], lines, sum: f(sum) }; });
+    return { empty: !L.length, has: L.length > 0, groups, close: () => this.props.onClose && this.props.onClose() };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Chợ F v2 (/shop + chi tiết)" description="Danh sách thiết bị với ô thể loại có hình, lưới nền trơn giá mono, thanh chip; chi tiết có Mua | Thuê tính tiền ngay, thẻ kiểm định 5 mức, tờ thông số, khối người bán; giỏ tách đơn theo người bán. 1440/390 sáng/tối, đủ trạng thái." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:hsl(30 15% 11%)">
+<div style="width:1100px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Quyết định chính</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Chợ F ở trên Giấy, không dùng Phòng tối, để khác Tìm kiếm F và Cộng đồng F. Giao diện đi theo tinh thần tờ spec: chữ mono cho giá, số hiệu và nhãn; kẻ đường mảnh; ảnh thiết bị trên nền trơn. Năm ô thể loại lớn có biểu tượng thiết bị và số 01–05.</li>
+<li>Bỏ cột lọc trái. Thanh dính có công tắc “Tất cả | Mua | Thuê”, chip lọc nhanh (tình trạng, còn hàng, khu vực) cuộn ngang, và nút Bộ lọc mở ngăn bên phải với đủ bộ lọc cũ. Khoảng giá tự đổi sang giá thuê theo ngày khi chọn Thuê.</li>
+<li>Chi tiết: công tắc Mua | Thuê ghi luôn giá trên nút. Chọn Thuê thì chọn ngày nhận và số ngày; tiền thuê, giảm giá theo người bán, tiền cọc, tổng cần chuẩn bị và ngày trả cập nhật ngay. Thêm vào giỏ như hiện nay; giỏ tách một đơn cho mỗi người bán. Không có bước thanh toán.</li>
+<li>Thẻ kiểm định ghi rõ “người bán khai”. Fgrapher không tự kiểm định thiết bị, nên thẻ không được trông như chứng nhận. Thang 5 mức: Mới, Như mới, Tốt, Khá, Trung bình. “Trung bình” là mức mới, cần thêm vào bộ lọc hiện có (đang có 4 mức). Số lần chụp chỉ hiện với thân máy có khai báo.</li>
+<li>Chưa có ảnh: khung viền đứt có biểu tượng đúng loại thiết bị, nhãn “CHƯA CÓ ẢNH” và nút “Xin ảnh thật”. Hết hàng: nhãn viền đứt, bỏ nút thêm vào giỏ, thay bằng “Báo cho tôi khi có hàng”.</li>
+</ol>
+<p style="margin:0;font-size:14px;line-height:1.5;color:hsl(30 8% 38%)">Ảnh sản phẩm trong bản này là biểu tượng minh hoạ, ghi “ẢNH MINH HOẠ”; khi làm thật thì thay bằng ảnh người bán chụp trên nền trơn. Giá, người bán, số lần chụp, quy tắc giảm 10% khi thuê từ 7 ngày đều là dữ liệu mẫu.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Danh sách · máy tính 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tất cả · sáng</span><iframe data-fit="1" src="ShList.dc.html?theme=light" style="width:1440px;height:2400px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Danh sách sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Thuê · ánh sáng · tối</span><iframe data-fit="1" src="ShList.dc.html?theme=dark&amp;mode=rent&amp;cat=light" style="width:1440px;height:1600px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Thuê tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Ngăn bộ lọc · sáng</span><iframe src="ShList.dc.html?theme=light&amp;filters=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Bộ lọc"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Giỏ hàng · tách đơn theo người bán · tối</span><iframe src="ShList.dc.html?theme=dark&amp;cart=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Giỏ"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Không có kết quả · sáng</span><iframe src="ShList.dc.html?theme=light&amp;state=empty" style="width:1440px;height:1100px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · tối</span><iframe src="ShList.dc.html?theme=dark&amp;state=loading" style="width:1440px;height:1100px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi · bộ lọc giữ nguyên · sáng</span><iframe src="ShList.dc.html?theme=light&amp;state=error&amp;cat=lens" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · tối</span><iframe src="ShList.dc.html?theme=dark&amp;state=long" style="width:1440px;height:1100px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Dài"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Chi tiết · máy tính 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Mua · sáng</span><iframe data-fit="1" src="ShDetail.dc.html?theme=light&amp;how=buy" style="width:1440px;height:2000px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Mua"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Thuê 7 ngày · giảm giá · tối</span><iframe data-fit="1" src="ShDetail.dc.html?theme=dark&amp;how=rent&amp;days=7" style="width:1440px;height:2000px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Thuê"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Hết hàng · sáng</span><iframe src="ShDetail.dc.html?theme=light&amp;state=out" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Hết hàng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Chưa có ảnh · tối</span><iframe src="ShDetail.dc.html?theme=dark&amp;state=nophoto" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Chưa có ảnh"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · sáng</span><iframe data-fit="1" src="ShDetail.dc.html?theme=light&amp;state=long" style="width:1440px;height:2000px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Dài"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · lỗi · tối</span><div style="display:flex;flex-direction:column;gap:16px"><iframe src="ShDetail.dc.html?theme=dark&amp;state=loading" style="width:1440px;height:700px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Tải"></iframe><iframe src="ShDetail.dc.html?theme=dark&amp;state=error" style="width:1440px;height:420px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Lỗi"></iframe></div></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Danh sách · sáng</span><iframe data-fit="1" src="ShList.dc.html?theme=light" style="width:390px;height:4000px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT danh sách"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Chi tiết thuê · thanh dính đáy · tối</span><iframe data-fit="1" src="ShDetail.dc.html?theme=dark&amp;how=rent" style="width:390px;height:3400px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT chi tiết"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Bộ lọc · tối</span><iframe src="ShList.dc.html?theme=dark&amp;filters=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT lọc"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Giỏ · sáng</span><iframe src="ShList.dc.html?theme=light&amp;cart=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT giỏ"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Hết hàng · tối</span><iframe src="ShDetail.dc.html?theme=dark&amp;state=out" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT hết"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Không có kết quả · sáng</span><iframe src="ShList.dc.html?theme=light&amp;state=empty" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT trống"></iframe></div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

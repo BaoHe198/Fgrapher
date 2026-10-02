@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section id="au-states" style="scroll-margin-top:120px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">02 · TRẠNG THÁI TƯƠNG TÁC</span><h2 style="margin:0;font:var(--text-heading-xl);letter-spacing:-.01em">Một bộ quy tắc hover, focus, vô hiệu, lỗi</h2><p style="margin:0;max-width:640px;font:var(--text-body-md);color:var(--text-secondary);text-wrap:pretty">Hiện mỗi màn tự đặt quy tắc riêng. Ví dụ ngày đang chọn ở Hồ sơ tô green-900, còn ở Đặt lịch tô brand-primary. Các ô tự dựng như ô lịch, khung giờ, thẻ chọn chưa có viền focus. Bảng dưới là quy tắc chung.</p></div>
+<div style="overflow-x:auto;margin:0 -4px;padding:0 4px 4px">
+<div style="min-width:760px;display:grid;grid-template-columns:132px repeat(5,minmax(0,1fr));gap:12px 14px;align-items:center">
+<span></span><span style="font:600 12px/1.3 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Mặc định</span><span style="font:600 12px/1.3 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Rê chuột</span><span style="font:600 12px/1.3 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Focus phím</span><span style="font:600 12px/1.3 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Vô hiệu</span><span style="font:600 12px/1.3 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Lỗi / hết chỗ</span>
+<strong style="font-size:14px">Nút chính</strong>
+<span style="display:flex;align-items:center;justify-content:center;height:44px;border-radius:var(--fg-radius-md);background:var(--gold-400);color:var(--gold-900);font-weight:600;font-size:15px">Tiếp tục</span>
+<span style="display:flex;align-items:center;justify-content:center;height:44px;border-radius:var(--fg-radius-md);background:var(--gold-500);color:var(--gold-900);font-weight:600;font-size:15px;transform:translateY(-1px);box-shadow:var(--shadow-md)">Tiếp tục</span>
+<span style="display:flex;align-items:center;justify-content:center;height:44px;border-radius:var(--fg-radius-md);background:var(--gold-400);color:var(--gold-900);font-weight:600;font-size:15px;box-shadow:0 0 0 2px var(--bg-surface),0 0 0 4px var(--border-focus)">Tiếp tục</span>
+<span style="display:flex;align-items:center;justify-content:center;height:44px;border-radius:var(--fg-radius-md);background:var(--gold-400);color:var(--gold-900);font-weight:600;font-size:15px;opacity:.5">Tiếp tục</span>
+<span style="display:flex;align-items:center;justify-content:center;height:44px;border-radius:var(--fg-radius-md);background:var(--danger-bg);color:var(--danger);font-weight:600;font-size:15px">Thử gửi lại</span>
+<strong style="font-size:14px">Ô nhập · Textarea</strong>
+<span style="display:flex;align-items:center;height:44px;padding:0 14px;border-radius:var(--fg-radius-md);border:1px solid var(--border-default);background:var(--bg-surface);color:var(--text-tertiary);font-size:15px">Số nhà, tên đường</span>
+<span style="display:flex;align-items:center;height:44px;padding:0 14px;border-radius:var(--fg-radius-md);border:1px solid var(--border-strong);background:var(--bg-surface);color:var(--text-tertiary);font-size:15px">Số nhà, tên đường</span>
+<span style="display:flex;align-items:center;height:44px;padding:0 14px;border-radius:var(--fg-radius-md);border:1px solid var(--border-focus);box-shadow:var(--shadow-focus);background:var(--bg-surface);color:var(--text-primary);font-size:15px">12 Võ Văn Ngân</span>
+<span style="display:flex;align-items:center;height:44px;padding:0 14px;border-radius:var(--fg-radius-md);border:1px solid var(--border-default);background:var(--bg-sunken);color:var(--text-tertiary);font-size:15px;opacity:.5">Không sửa được</span>
+<span style="display:flex;flex-direction:column;gap:4px"><span style="display:flex;align-items:center;height:44px;padding:0 14px;border-radius:var(--fg-radius-md);border:1px solid var(--danger);box-shadow:0 0 0 3px var(--danger-bg);background:var(--bg-surface);color:var(--text-tertiary);font-size:15px">Số nhà, tên đường</span><span style="font-size:12px;color:var(--danger)">Nhập địa chỉ chụp</span></span>
+<strong style="font-size:14px">Thẻ chọn</strong>
+<span style="display:flex;align-items:center;gap:10px;height:56px;padding:0 14px;border-radius:var(--fg-radius-lg);border:1px solid var(--border-subtle);background:var(--bg-surface);font-size:14px;font-weight:600"><span style="width:16px;height:16px;border-radius:50%;border:2px solid var(--border-default)"></span>Ngoài trời</span>
+<span style="display:flex;align-items:center;gap:10px;height:56px;padding:0 14px;border-radius:var(--fg-radius-lg);border:1px solid var(--border-strong);background:var(--bg-surface);font-size:14px;font-weight:600;transform:translateY(-2px);box-shadow:var(--shadow-md)"><span style="width:16px;height:16px;border-radius:50%;border:2px solid var(--border-default)"></span>Ngoài trời</span>
+<span style="display:flex;align-items:center;gap:10px;height:56px;padding:0 14px;border-radius:var(--fg-radius-lg);border:1px solid var(--brand-primary);box-shadow:inset 0 0 0 1px var(--brand-primary),0 0 0 4px var(--bg-surface),0 0 0 6px var(--border-focus);background:var(--bg-surface);font-size:14px;font-weight:600"><span style="width:16px;height:16px;border-radius:50%;border:5px solid var(--brand-primary)"></span>Ngoài trời</span>
+<span style="display:flex;align-items:center;gap:10px;height:56px;padding:0 14px;border-radius:var(--fg-radius-lg);border:1px solid var(--border-subtle);background:var(--bg-surface);font-size:14px;font-weight:600;opacity:.5"><span style="width:16px;height:16px;border-radius:50%;border:2px solid var(--border-default)"></span>Tại nhà</span>
+<span style="display:flex;align-items:center;gap:10px;height:56px;padding:0 14px;border-radius:var(--fg-radius-lg);border:1px solid var(--danger);background:var(--bg-surface);font-size:14px;font-weight:600"><span style="width:16px;height:16px;border-radius:50%;border:2px solid var(--danger)"></span>Chưa chọn</span>
+<strong style="font-size:14px">Ô lịch · khung giờ</strong>
+<span style="display:flex;align-items:center;justify-content:center;height:48px;border-radius:var(--fg-radius-md);border:1px solid var(--border-subtle);background:var(--bg-surface);font:700 15px/1 var(--font-body);font-variant-numeric:tabular-nums">06:00</span>
+<span style="display:flex;align-items:center;justify-content:center;height:48px;border-radius:var(--fg-radius-md);border:1px solid var(--border-strong);background:var(--bg-surface);font:700 15px/1 var(--font-body);font-variant-numeric:tabular-nums">06:00</span>
+<span style="display:flex;align-items:center;justify-content:center;height:48px;border-radius:var(--fg-radius-md);border:1px solid var(--brand-primary);background:var(--brand-primary);color:var(--text-on-brand);box-shadow:0 0 0 2px var(--bg-surface),0 0 0 4px var(--border-focus);font:700 15px/1 var(--font-body);font-variant-numeric:tabular-nums">06:00</span>
+<span style="display:flex;align-items:center;justify-content:center;height:48px;border-radius:var(--fg-radius-md);background:var(--bg-sunken);color:var(--text-tertiary);font:600 12px/1 var(--font-body)">Nghỉ</span>
+<span style="display:flex;align-items:center;justify-content:center;height:48px;border-radius:var(--fg-radius-md);border:1px dashed var(--border-default);color:var(--text-tertiary);font:600 15px/1 var(--font-body);text-decoration:line-through">06:00</span>
+</div>
+</div>
+<ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:6px;font:var(--text-body-sm);color:var(--text-secondary)">
+<li><strong style="color:var(--text-primary)">Focus:</strong> luôn là vòng vàng 2px, cách 2px, theo token border-focus. Không bỏ outline mà không thay bằng gì.</li>
+<li><strong style="color:var(--text-primary)">Đang chọn:</strong> luôn là nền brand-primary, chữ text-on-brand. Ở chế độ tối brand-primary tự sáng lên. Không dùng green-900 cố định.</li>
+<li><strong style="color:var(--text-primary)">Hết chỗ khác vô hiệu:</strong> "Đã kín" hay "Đã có người đặt" là thông tin, nên dùng gạch ngang hoặc viền đứt, giữ chữ text-tertiary đủ đọc. Chỉ nút thực sự bị khóa mới giảm opacity .5.</li>
+<li><strong style="color:var(--text-primary)">Rê chuột:</strong> nút nhấc 1px (theo DS), thẻ bấm được nhấc 2px. Hiện đang có 4 mức khác nhau: 1, 2, 3, 4px.</li>
+</ul>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px">
+<div style="display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><strong style="font:var(--text-heading-sm)">Input và Textarea lệch nhau</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="destructive">Cao</x-import></div>
+<span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">INPUT (ĐÚNG TOKEN)</span>
+<x-import component-from-global-scope="Fgrapher.Input" placeholder="Số nhà, tên đường" hint-size="100%,46px"></x-import>
+<span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">TEXTAREA (HIỆN TẠI)</span>
+<x-import component-from-global-scope="Fgrapher.Textarea" rows="{{ 2 }}" placeholder="Lời nhắn cho nghệ sĩ" hint-size="100%,64px"></x-import>
+<p style="margin:0;font:var(--text-body-sm);color:var(--text-secondary)">Textarea dùng token trung tính của shadcn: border-input, rounded-lg, px-2.5, chữ 14px trên máy tính, viền focus xám ring/50, nền trong suốt. Input dùng fg-radius-md, border-default, chữ body-md và focus vàng.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><strong style="font:var(--text-heading-sm)">Progress tô gần đen</strong><x-import component-from-global-scope="Fgrapher.Badge" variant="destructive">Cao</x-import></div>
+<span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">HIỆN TẠI · bg-primary / bg-muted</span>
+<x-import component-from-global-scope="Fgrapher.Progress" value="{{ 60 }}" hint-size="100%,24px"><x-import component-from-global-scope="Fgrapher.ProgressLabel">Hoàn thiện hồ sơ</x-import><x-import component-from-global-scope="Fgrapher.ProgressValue"></x-import></x-import>
+<span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">ĐỀ XUẤT · brand-primary / bg-sunken</span>
+<div style="display:flex;flex-wrap:wrap;gap:12px"><span style="font-size:14px;font-weight:600">Hoàn thiện hồ sơ</span><span style="margin-left:auto;font-size:14px;color:var(--text-secondary);font-variant-numeric:tabular-nums">60%</span><span style="flex:1 1 100%;height:6px;border-radius:999px;background:var(--bg-sunken);overflow:hidden"><span style="display:block;width:60%;height:100%;border-radius:999px;background:var(--brand-primary)"></span></span></div>
+<p style="margin:0;font:var(--text-body-sm);color:var(--text-secondary)">bg-primary là oklch(0.205 0 0), gần như đen. Ở chế độ tối nó thành oklch(0.922 0 0), gần như trắng. Đổi sang brand-primary và thêm biến thể steps để thay cho thanh 6 đoạn tự dựng ở Đặt lịch.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<strong style="font:var(--text-heading-md)">Mẫu trạng thái chuẩn</strong>
+<p style="margin:0;max-width:640px;font:var(--text-body-sm);color:var(--text-secondary)">Có 6 khối "trống/lỗi" đang dùng 3 mức đệm khác nhau (18, 28, 32px). Gom về EmptyState và ErrorState: đệm 24px, bo lg, viền đứt cho trống, Alert cho lỗi, luôn có một hành động.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">ĐANG TẢI</span><div aria-busy="true" style="display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><div style="aspect-ratio:4/3"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,100%"></x-import></div><div style="height:16px;width:70%"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,16px"></x-import></div><div style="height:12px;width:45%"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,12px"></x-import></div></div><span style="font-size:12px;line-height:1.5;color:var(--text-secondary)">Khung xương đúng kích thước thật. Nhấp nháy 1,2s, tắt khi giảm chuyển động.</span></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">TRỐNG</span><div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:24px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg)"><strong style="font-size:16px">Chưa có album nào</strong><span style="font-size:14px;line-height:1.55;color:var(--text-secondary)">Nhắn tin để xin thêm ảnh mẫu.</span><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="sm">Nhắn tin</x-import></div><span style="font-size:12px;line-height:1.5;color:var(--text-secondary)">Tiêu đề nói điều gì trống, mô tả nói bước tiếp theo.</span></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">LỖI</span><div style="display:flex;flex-direction:column;align-items:flex-start;gap:10px"><x-import component-from-global-scope="Fgrapher.Alert" variant="destructive" hint-size="100%,80px"><x-import component-from-global-scope="Fgrapher.AlertTitle">Không tải được kết quả</x-import><x-import component-from-global-scope="Fgrapher.AlertDescription">Bộ lọc của bạn vẫn được giữ.</x-import></x-import><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="sm">Thử lại</x-import></div><span style="font-size:12px;line-height:1.5;color:var(--text-secondary)">Luôn nói dữ liệu nào vẫn được giữ.</span></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">NỘI DUNG DÀI</span><div style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface);min-width:0"><strong style="font-size:15px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">Studio Ảnh Cưới Và Kỷ Yếu Hoàng Gia Sài Gòn Chi Nhánh Thủ Đức</strong><span style="font-size:14px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Studio · Nhiếp ảnh gia · Quay phim · Chuyên viên trang điểm</span><span style="font-size:14px;font-weight:700;overflow-wrap:anywhere">Từ 18.500.000₫</span></div><span style="font-size:12px;line-height:1.5;color:var(--text-secondary)">Tên thẻ tối đa 2 dòng, vai trò 1 dòng. Trang chi tiết không cắt chữ.</span></div>
+</div>
+</div>
+</section>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./fg-kit.js"></script><script src="./sh-data.js"></script><style>body{margin:0;background:var(--bg-page)}:root{--dr-scrim:hsl(30 14% 5% / .72)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}.sh-x{scrollbar-width:none}.sh-x::-webkit-scrollbar{display:none}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div ref="{{ rootRef }}" style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<header style="background:var(--green-900)"><div style="max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,48px);height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px"><a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a><sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><nav aria-label="Chính" style="display:flex;gap:4px"><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Tìm kiếm F</a><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Cộng đồng F</a><a href="#" aria-current="page" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-300);text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px">Chợ F</a></nav></sc-if><button type="button" onClick="{{ openCart }}" aria-label="{{ cartAria }}" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid hsl(0 0% 100% / .16);border-radius:999px;background:transparent;color:var(--gold-50);font:600 14px/1 var(--font-body);cursor:pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.2 12.2H6.2z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg>Giỏ<sc-if value="{{ hasCart }}" hint-placeholder-val="{{ true }}"><span style="min-width:22px;height:22px;display:grid;place-items:center;padding:0 6px;border-radius:999px;background:var(--gold-400);color:var(--gold-900);font:700 12px/1 var(--font-mono)">{{ cartN }}</span></sc-if></button></div></header>
+<section aria-labelledby="sh-title" style="max-width:1440px;margin:0 auto;padding:clamp(32px,5vw,72px) clamp(16px,4vw,48px) clamp(20px,3vw,32px);display:flex;flex-direction:column;gap:clamp(24px,3vw,40px)">
+<div style="display:flex;flex-direction:column;gap:14px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">CHỢ F · THIẾT BỊ QUAY CHỤP</span><h1 id="sh-title" lang="vi" style="margin:0;max-width:1080px;font-family:var(--font-display);font-weight:600;font-size:clamp(38px,calc(12px + 4.4vw),84px);line-height:.96;letter-spacing:-.03em;text-wrap:balance">{{ title }}</h1><p style="margin:0;max-width:620px;font-size:16px;line-height:1.55;color:var(--text-secondary)">Người bán là cửa hàng máy ảnh, nhiếp ảnh gia, người quay phim và studio, tất cả đã xác minh danh tính. Thanh toán và tiền cọc thỏa thuận trực tiếp với người bán.</p></div>
+<div role="group" aria-label="Thể loại" class="sh-x" style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:10px;overflow-x:auto;scroll-snap-type:x mandatory">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><button type="button" data-cat="" aria-pressed="{{ c.on }}" onClick="{{ c.pick }}" style="display:flex;flex-direction:column;justify-content:space-between;gap:24px;min-height:clamp(150px,14vw,210px);padding:16px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);text-align:left;cursor:pointer;scroll-snap-align:start;transition:border-color 150ms,box-shadow 150ms"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ c.num }}</span><span style="align-self:center;color:var(--text-secondary)"><dc-import name="ShIcon" kind="{{ c.k }}" size="{{ 64 }}" stroke="{{ 1 }}" hint-size="64px,64px"></dc-import></span><strong style="font:600 18px/1.1 var(--font-display)">{{ c.label }}</strong></button></sc-for>
+</div>
+</section>
+<div style="position:sticky;top:0;z-index:20;background:var(--bg-page);border-bottom:1px solid var(--border-subtle)"><div style="max-width:1440px;margin:0 auto;padding:10px clamp(16px,4vw,48px);display:flex;align-items:center;gap:10px">
+<div role="group" aria-label="Hình thức" style="flex:none;display:flex;gap:4px;padding:3px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface)"><sc-for list="{{ modes }}" as="s" hint-placeholder-count="3"><button type="button" data-seg="" aria-pressed="{{ s.on }}" onClick="{{ s.pick }}" style="min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer">{{ s.label }}</button></sc-for></div>
+<div role="group" aria-label="Lọc nhanh" class="sh-x" style="flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto"><sc-for list="{{ quick }}" as="q" hint-placeholder-count="6"><button type="button" data-chip="" aria-pressed="{{ q.on }}" onClick="{{ q.pick }}" style="flex:none;min-height:36px;padding:0 14px;border:1px solid var(--border-default);border-radius:999px;background:transparent;color:var(--text-primary);font:600 13px/1 var(--font-body);cursor:pointer;transition:background-color 150ms,color 150ms">{{ q.label }}</button></sc-for></div>
+<button type="button" onClick="{{ openFilters }}" aria-haspopup="dialog" style="flex:none;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg><sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><span>Bộ lọc</span></sc-if><sc-if value="{{ hasActive }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;display:grid;place-items:center;padding:0 5px;border-radius:999px;background:var(--brand-primary);color:var(--text-on-brand);font:700 12px/1 var(--font-mono)">{{ activeN }}</span></sc-if></button>
+</div></div>
+<main style="max-width:1440px;margin:0 auto;padding:20px clamp(16px,4vw,48px) 96px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px"><sc-if value="{{ showCount }}" hint-placeholder-val="{{ true }}"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ countLabel }}</span></sc-if><sc-for list="{{ chips }}" as="c" hint-placeholder-count="2"><button type="button" onClick="{{ c.remove }}" aria-label="Bỏ lọc {{ c.label }}" style="display:flex;align-items:center;gap:6px;min-height:32px;padding:0 6px 0 12px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 13px/1 var(--font-body);cursor:pointer">{{ c.label }}<span aria-hidden="true" style="width:18px;height:18px;display:grid;place-items:center;border-radius:999px;background:var(--bg-sunken)">×</span></button></sc-for></div><label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-secondary)">Sắp xếp<select value="{{ sort }}" onChange="{{ onSort }}" style="min-height:40px;padding:0 10px;border:1px solid var(--border-default);border-radius:var(--fg-radius-sm);background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body)"><option value="new">Mới đăng</option><option value="low">Giá thấp đến cao</option><option value="high">Giá cao đến thấp</option><option value="cond">Tình trạng tốt nhất</option></select></label></div>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-radius:var(--fg-radius-md);background:var(--danger-bg)"><span style="font-size:15px;line-height:1.5"><strong style="color:var(--danger)">Không tải được thiết bị.</strong> Bộ lọc của bạn vẫn được giữ.</span><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="sm" on-click="{{ retry }}">Thử lại</x-import></div></sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:56px 20px;text-align:center;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg);color:var(--text-tertiary)"><dc-import name="ShIcon" kind="{{ emptyIcon }}" size="{{ 56 }}" stroke="{{ 1.2 }}" hint-size="56px,56px"></dc-import><strong style="font:600 22px/1.2 var(--font-display);color:var(--text-primary)">Không có thiết bị khớp mọi bộ lọc</strong><span style="max-width:440px;font-size:15px;line-height:1.55;color:var(--text-secondary)">Bỏ bớt một bộ lọc dưới đây. Số bên cạnh là số thiết bị sẽ hiện ra.</span><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px"><sc-for list="{{ relax }}" as="r" hint-placeholder-count="3"><button type="button" onClick="{{ r.go }}" style="min-height:44px;padding:0 16px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer">Bỏ “{{ r.label }}” · {{ r.n }}</button></sc-for></div></div></sc-if>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><div aria-busy="true" aria-label="Đang tải" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:32px 20px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="8"><div style="display:flex;flex-direction:column;gap:10px"><span style="aspect-ratio:1;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></span><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:16px;width:75%" hint-size="75%,16px"></x-import><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:14px;width:45%" hint-size="45%,14px"></x-import></div></sc-for></div></sc-if>
+<sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:36px 20px"><sc-for list="{{ items }}" as="it" hint-placeholder-count="8"><dc-import name="ShCard" it="{{ it }}" mode="{{ mode }}" small="{{ isMobile }}" on-open="{{ openItem }}" hint-size="100%,380px"></dc-import></sc-for></div></sc-if>
+</main>
+<sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:flex;justify-content:flex-end"><div onClick="{{ closeFilters }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ fRef }}" role="dialog" aria-modal="true" aria-labelledby="sh-f-t" onKeyDown="{{ esc }}" style="position:relative;width:min(440px,100%);height:100%;display:flex;flex-direction:column;background:var(--bg-surface);box-shadow:var(--shadow-lg)">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border-subtle)"><h2 id="sh-f-t" style="margin:0;font:600 20px/1.2 var(--font-display)">Bộ lọc</h2><button type="button" onClick="{{ closeFilters }}" aria-label="Đóng" style="width:44px;height:44px;border:0;border-radius:999px;background:transparent;color:var(--text-secondary);font-size:22px;cursor:pointer">×</button></div>
+<div style="flex:1;min-height:0;overflow-y:auto;padding:4px 20px 20px"><sc-for list="{{ fgroups }}" as="g" hint-placeholder-count="5"><fieldset style="margin:0;padding:16px 0;border:0;border-bottom:1px solid var(--border-subtle)"><legend style="padding:0;margin-bottom:12px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">{{ g.label }}</legend><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="4"><button type="button" data-chip="" aria-pressed="{{ o.on }}" onClick="{{ o.pick }}" style="min-height:40px;padding:0 14px;border:1px solid var(--border-default);border-radius:999px;background:transparent;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer">{{ o.label }}</button></sc-for></div></fieldset></sc-for></div>
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;border-top:1px solid var(--border-subtle)"><button type="button" onClick="{{ clearAll }}" style="min-height:44px;padding:0 4px;border:0;background:none;color:var(--text-primary);font:600 15px/1 var(--font-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer">Xoá tất cả</button><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ closeFilters }}">{{ showLabel }}</x-import></div>
+</div></div></sc-if>
+<sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:flex;justify-content:flex-end"><div onClick="{{ closeCart }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ cRef }}" role="dialog" aria-modal="true" aria-labelledby="sh-c-t" onKeyDown="{{ esc }}" style="position:relative;width:min(460px,100%);height:100%;display:flex;flex-direction:column;background:var(--bg-surface);box-shadow:var(--shadow-lg)"><dc-import name="ShCart" lines="{{ cart }}" on-close="{{ closeCart }}" on-remove="{{ removeLine }}" hint-size="100%,100%" style="height:100%"></dc-import></div></div></sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p); this.q = new URLSearchParams(window.location.search); const st = this.q.get('state') || '';
+    const f = { cat: this.q.get('cat') || '', conds: [], price: '', prov: '', stock: false };
+    if (st === 'empty') Object.assign(f, { cat: 'audio', conds: ['new'], stock: true });
+    this.state = { w: window.innerWidth, st, mode: this.q.get('mode') || 'all', f, sort: 'new', filters: this.q.get('filters') === '1', cartOpen: this.q.get('cart') === '1', cart: this.q.get('cart') === '1' ? [{ id: 'p01', how: 'rent', days: 3 }, { id: 'p05', how: 'buy' }, { id: 'p03', how: 'rent', days: 1 }] : [], ready: !!window.fgShop };
+  }
+  rootRef = React.createRef(); fRef = React.createRef(); cRef = React.createRef();
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR);
+    if (!window.fgShop) this.poll = setInterval(() => { if (window.fgShop) { clearInterval(this.poll); this.setState({ ready: true }); } }, 60);
+    this.paint();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); clearInterval(this.poll); }
+  componentDidUpdate(pp, ps) {
+    this.paint();
+    [['filters', this.fRef], ['cartOpen', this.cRef]].forEach(([k, ref]) => { if (!ps[k] && this.state[k]) { const el = ref.current; if (!el) return; const b = el.querySelector('button'); b && b.focus({ preventScroll: true }); if (el.animate && !(window.fgKit && window.fgKit.reduced())) el.animate([{ transform: 'translateX(100%)' }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(0,0,.2,1)' }); } });
+  }
+  paint() {
+    const r = this.rootRef.current; if (!r) return;
+    r.querySelectorAll('[data-seg]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--brand-primary)' : 'transparent'; b.style.color = on ? 'var(--text-on-brand)' : 'var(--text-primary)'; });
+    r.querySelectorAll('[data-chip]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--brand-primary)' : 'transparent'; b.style.color = on ? 'var(--text-on-brand)' : 'var(--text-primary)'; b.style.borderColor = on ? 'var(--brand-primary)' : 'var(--border-default)'; });
+    r.querySelectorAll('[data-cat]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.borderColor = on ? 'var(--brand-primary)' : 'var(--border-subtle)'; b.style.boxShadow = on ? 'inset 0 0 0 1px var(--brand-primary)' : 'none'; });
+  }
+  match(it, f, mode, skip) {
+    const t = k => k !== skip;
+    if (t('mode') && mode === 'sell' && it.mode === 'rent') return false;
+    if (t('mode') && mode === 'rent' && it.mode === 'sell') return false;
+    if (t('cat') && f.cat && it.cat !== f.cat) return false;
+    if (t('conds') && f.conds.length && !f.conds.includes(it.cond)) return false;
+    if (t('prov') && f.prov && it.prov !== f.prov) return false;
+    if (t('stock') && f.stock && it.stock === 0) return false;
+    if (t('price') && f.price) { const v = mode === 'rent' ? it.rent : it.price; const R = mode === 'rent' ? { a: [0, 3e5], b: [3e5, 5e5], c: [5e5, 1e9] } : { a: [0, 5e6], b: [5e6, 2e7], c: [2e7, 4e7], d: [4e7, 1e12] }; const r = R[f.price]; if (!v || !r || v < r[0] || v >= r[1]) return false; }
+    return true;
+  }
+  renderVals() {
+    const D = window.fgShop || { items: [], cond: {}, condOrder: [], cats: [], fmt: n => n };
+    const { w, st, mode, f, sort, cart } = this.state, m = w < 1024;
+    let all = D.items.map(x => ({ ...x }));
+    if (st === 'long') all = all.map((x, i) => i === 0 ? { ...x, model: 'Alpha 7 IV (thân máy) kèm grip VG-C4EM, 3 pin chính hãng và thẻ CFexpress Type A 160GB', seller: { ...x.seller, name: 'Máy Ảnh Sài Gòn · Chi nhánh Bến Thành & Thủ Đức' } } : x).concat(all.map(x => ({ ...x, id: x.id + 'b' })));
+    const S = { new: () => 0, low: (a, b) => ((mode === 'rent' ? a.rent : a.price) || 1e13) - ((mode === 'rent' ? b.rent : b.price) || 1e13), high: (a, b) => ((mode === 'rent' ? b.rent : b.price) || 0) - ((mode === 'rent' ? a.rent : a.price) || 0), cond: (a, b) => D.condOrder.indexOf(a.cond) - D.condOrder.indexOf(b.cond) };
+    const res = st === 'error' ? [] : all.filter(x => this.match(x, f, mode)).sort(S[sort]);
+    const patch = p => this.setState(s => ({ f: { ...s.f, ...p }, st: s.st === 'empty' ? '' : s.st }));
+    const catName = Object.fromEntries(D.cats);
+    const PR = mode === 'rent' ? [['a', 'Dưới 300.000₫/ngày'], ['b', '300.000–500.000₫/ngày'], ['c', 'Trên 500.000₫/ngày']] : [['a', 'Dưới 5.000.000₫'], ['b', '5–20 triệu'], ['c', '20–40 triệu'], ['d', 'Trên 40 triệu']];
+    const provs = ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội', 'Thành phố Đà Nẵng'];
+    const chipsRaw = [f.cat && ['cat', catName[f.cat], { cat: '' }], ...f.conds.map(c => ['conds', D.cond[c][0], { conds: f.conds.filter(x => x !== c) }]), f.price && ['price', (PR.find(p => p[0] === f.price) || [0, ''])[1], { price: '' }], f.prov && ['prov', f.prov, { prov: '' }], f.stock && ['stock', 'Còn hàng', { stock: false }]].filter(Boolean);
+    const relax = [...chipsRaw.map(([k, label, p]) => ({ label, n: all.filter(x => this.match(x, { ...f, ...p }, mode)).length, go: () => patch(p) })), mode !== 'all' ? { label: mode === 'rent' ? 'Cho thuê' : 'Bán', n: all.filter(x => this.match(x, f, 'all')).length, go: () => this.setState({ mode: 'all', st: '' }) } : null].filter(r => r && r.n > 0).sort((a, b) => b.n - a.n).slice(0, 3);
+    const loading = st === 'loading';
+    const cartLines = cart.map(c => { const it = D.items.find(x => x.id === c.id); return it ? { ...c, it } : null; }).filter(Boolean);
+    return {
+      theme: this.q.get('theme') || 'light', rootRef: this.rootRef, fRef: this.fRef, cRef: this.cRef, isDesktop: !m, isMobile: m,
+      title: f.cat ? `${catName[f.cat]}${mode === 'rent' ? ' cho thuê theo ngày' : mode === 'sell' ? ' để mua' : ', mua hoặc thuê theo ngày'}` : 'Máy ảnh, ống kính, ánh sáng. Mua hoặc thuê theo ngày.',
+      cats: D.cats.map(([k, label], i) => ({ k, label, num: '0' + (i + 1) + ' · ' + label.toUpperCase(), on: f.cat === k ? 'true' : 'false', pick: () => patch({ cat: f.cat === k ? '' : k }) })),
+      modes: [['all', 'Tất cả'], ['sell', 'Mua'], ['rent', 'Thuê']].map(([k, label]) => ({ label, on: mode === k ? 'true' : 'false', pick: () => this.setState({ mode: k, f: { ...f, price: '' } }) })),
+      quick: [...D.condOrder.slice(0, 4).map(c => ({ label: D.cond[c][0], on: f.conds.includes(c) ? 'true' : 'false', pick: () => patch({ conds: f.conds.includes(c) ? f.conds.filter(x => x !== c) : [...f.conds, c] }) })), { label: 'Còn hàng', on: f.stock ? 'true' : 'false', pick: () => patch({ stock: !f.stock }) }, ...provs.map(p => ({ label: p.replace('Thành phố ', 'TP. '), on: f.prov === p ? 'true' : 'false', pick: () => patch({ prov: f.prov === p ? '' : p }) }))],
+      hasActive: chipsRaw.length > 0, activeN: chipsRaw.length, chips: chipsRaw.map(([k, label, p]) => ({ label, remove: () => patch(p) })),
+      clearAll: () => { patch({ cat: '', conds: [], price: '', prov: '', stock: false }); this.setState({ mode: 'all' }); },
+      showCount: !loading && st !== 'error' && res.length > 0, countLabel: `${res.length} THIẾT BỊ`,
+      sort, onSort: e => this.setState({ sort: e.target.value }),
+      isError: st === 'error', retry: () => this.setState({ st: 'loading' }, () => setTimeout(() => this.setState({ st: '' }), 900)),
+      isEmpty: !loading && st !== 'error' && D.items.length > 0 && res.length === 0, relax, emptyIcon: f.cat || 'body',
+      loading: loading || !this.state.ready, skel: Array.from({ length: 8 }, (_, i) => ({ i })),
+      hasItems: !loading && this.state.ready && res.length > 0, items: res, mode,
+      openItem: id => { location.href = 'ShDetail.dc.html?id=' + id.replace(/b$/, '') + '&theme=' + (this.q.get('theme') || 'light'); },
+      filtersOpen: this.state.filters, openFilters: () => { this.prev = document.activeElement; this.setState({ filters: true }); }, closeFilters: () => { this.setState({ filters: false }); this.prev && this.prev.focus && this.prev.focus(); },
+      fgroups: [
+        { label: 'Thể loại', opts: D.cats.map(([k, l]) => ({ label: l, on: f.cat === k ? 'true' : 'false', pick: () => patch({ cat: f.cat === k ? '' : k }) })) },
+        { label: 'Tình trạng', opts: D.condOrder.map(c => ({ label: D.cond[c][0], on: f.conds.includes(c) ? 'true' : 'false', pick: () => patch({ conds: f.conds.includes(c) ? f.conds.filter(x => x !== c) : [...f.conds, c] }) })) },
+        { label: mode === 'rent' ? 'Giá thuê mỗi ngày' : 'Khoảng giá', opts: PR.map(([k, l]) => ({ label: l, on: f.price === k ? 'true' : 'false', pick: () => patch({ price: f.price === k ? '' : k }) })) },
+        { label: 'Khu vực người bán', opts: provs.map(p => ({ label: p, on: f.prov === p ? 'true' : 'false', pick: () => patch({ prov: f.prov === p ? '' : p }) })) },
+        { label: 'Tình trạng kho', opts: [{ label: 'Chỉ hiện còn hàng', on: f.stock ? 'true' : 'false', pick: () => patch({ stock: !f.stock }) }] }
+      ],
+      showLabel: (() => { const n = all.filter(x => this.match(x, f, mode)).length; return n ? `Hiện ${n} thiết bị` : 'Không có thiết bị phù hợp'; })(),
+      esc: e => { if (e.key === 'Escape') this.setState({ filters: false, cartOpen: false }); },
+      hasCart: cartLines.length > 0, cartN: cartLines.length, cartAria: cartLines.length ? `Giỏ hàng, ${cartLines.length} thiết bị` : 'Giỏ hàng trống',
+      cartOpen: this.state.cartOpen, openCart: () => { this.prev = document.activeElement; this.setState({ cartOpen: true }); }, closeCart: () => { this.setState({ cartOpen: false }); this.prev && this.prev.focus && this.prev.focus(); },
+      cart: cartLines, removeLine: id => this.setState(s => ({ cart: s.cart.filter(c => c.id !== id) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

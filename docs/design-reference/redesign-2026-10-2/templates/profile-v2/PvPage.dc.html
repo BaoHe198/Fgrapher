@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./fg-kit.js"></script><style>body{margin:0;background:var(--bg-page)}:root{--dr-bg:hsl(30 14% 5%);--dr-surface:hsl(30 11% 8%);--dr-raised:hsl(30 9% 12%);--dr-text:hsl(38 33% 92%);--dr-text-2:hsl(34 12% 72%);--dr-text-3:hsl(32 8% 60%);--dr-line:hsl(0 0% 100% / .06);--dr-line-2:hsl(0 0% 100% / .12);--dr-accent:var(--gold-400);--dr-scrim:hsl(30 14% 5% / .72)}[data-surface="darkroom"]{color-scheme:dark;--bg-page:var(--dr-bg);--bg-surface:var(--dr-surface);--bg-sunken:var(--dr-raised);--text-primary:var(--dr-text);--text-secondary:var(--dr-text-2);--text-tertiary:var(--dr-text-3);--text-link:var(--gold-300);--border-subtle:var(--dr-line);--border-default:var(--dr-line-2);--border-focus:var(--dr-accent);--brand-primary:hsl(168 38% 50%);--text-on-brand:hsl(168 62% 7%);--background:var(--dr-bg);--foreground:var(--dr-text);--accent:var(--dr-raised);--accent-foreground:var(--dr-text);--border:var(--dr-line-2);--input:var(--dr-line-2)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}.pv-x{scrollbar-width:none}.pv-x::-webkit-scrollbar{display:none}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div ref="{{ rootRef }}" style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<sc-if value="{{ inAlbum }}" hint-placeholder-val="{{ false }}"><dc-import name="PvAlbum" album="{{ album }}" next="{{ nextAlbum }}" artist="{{ p.name }}" kind="{{ p.kind }}" on-back="{{ closeAlbum }}" on-book="{{ bookFromAlbum }}" on-next="{{ openAlbumId }}" hint-size="100%,100vh"></dc-import></sc-if>
+<sc-if value="{{ onProfile }}" hint-placeholder-val="{{ true }}">
+<header ref="{{ hdrRef }}" style="position:sticky;top:0;z-index:25;background:var(--dr-bg);box-shadow:0 1px 0 hsl(0 0% 100% / .06);transition:background-color 260ms cubic-bezier(0,0,.2,1)"><div style="max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,48px);height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px"><a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a><sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><nav aria-label="Chính" style="display:flex;gap:4px"><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Tìm kiếm F</a><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Bản đồ F</a><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Đặt lịch F</a></nav></sc-if><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none">Đăng nhập</a></div></header>
+<dc-import name="PvHero" p="{{ p }}" state="{{ heroState }}" on-primary="{{ primary }}" hint-size="100%,80vh"></dc-import>
+<nav aria-label="Mục hồ sơ" class="pv-x" style="position:sticky;top:60px;z-index:20;background:var(--bg-page);border-bottom:1px solid var(--border-subtle);overflow-x:auto"><div style="max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,48px);display:flex;gap:clamp(4px,1.6vw,24px)"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4"><a href="{{ t.href }}" data-tab="{{ t.id }}" onClick="{{ t.go }}" style="flex:none;display:flex;align-items:center;gap:8px;min-height:52px;padding:0 4px;border-bottom:2px solid transparent;font-size:15px;font-weight:600;color:var(--text-secondary);text-decoration:none;white-space:nowrap"><span style="font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">{{ t.n }}</span>{{ t.label }}</a></sc-for></div></nav>
+<div style="max-width:1440px;margin:0 auto;padding:clamp(40px,5vw,80px) clamp(16px,4vw,48px) clamp(96px,10vw,120px);display:flex;gap:clamp(40px,5vw,88px);align-items:flex-start">
+<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:clamp(56px,7vw,104px)">
+<sc-if value="{{ hasBio }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:760px;font:400 clamp(19px,1.6vw,24px)/1.55 var(--font-body);text-wrap:pretty">{{ p.bio }}</p></sc-if>
+<sc-if value="{{ notCostume }}" hint-placeholder-val="{{ true }}"><dc-import name="PvWork" albums="{{ p.albums }}" photos="{{ p.photos }}" state="{{ workState }}" name="{{ p.name }}" kind="{{ p.kind }}" on-open-album="{{ openAlbum }}" on-book="{{ primary }}" hint-size="100%,1600px"></dc-import></sc-if>
+<dc-import name="PvDetails" p="{{ p }}" state="{{ st }}" on-pick="{{ pickPkg }}" hint-size="100%,1600px"></dc-import>
+</main>
+<sc-if value="{{ bookAside }}" hint-placeholder-val="{{ true }}"><aside id="pv-book" aria-label="Đặt lịch" style="flex:0 0 360px;position:sticky;top:140px;padding-top:4px"><dc-import name="PvBooking" pkgs="{{ p.pkgs }}" sel="{{ sel }}" hourly="{{ hourly }}" on-sel="{{ pickPkg }}" hint-size="100%,760px"></dc-import></aside></sc-if>
+</div>
+<x-import component-from-global-scope="Fgrapher.Footer" hint-size="100%,320px"></x-import>
+<sc-if value="{{ mobileBar }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bg-surface);border-top:1px solid var(--border-subtle)"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><strong style="font-size:16px;font-variant-numeric:tabular-nums">{{ barPrice }}</strong><span style="font-size:13px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ barSub }}</span></span><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ primary }}">{{ barCta }}</x-import></div></sc-if>
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:flex;flex-direction:column;justify-content:flex-end"><div onClick="{{ closeSheet }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ sheetRef }}" role="dialog" aria-modal="true" aria-label="Đặt lịch" onKeyDown="{{ sheetKey }}" style="position:relative;max-height:90vh;overflow-y:auto;overscroll-behavior:contain;padding:10px 20px 28px;border-radius:var(--fg-radius-xl) var(--fg-radius-xl) 0 0;background:var(--bg-page)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span aria-hidden="true" style="width:36px;height:4px;border-radius:999px;background:var(--border-default)"></span><button type="button" onClick="{{ closeSheet }}" style="min-height:44px;padding:0 4px;border:0;background:none;color:var(--text-link);font:600 15px/1 var(--font-body);cursor:pointer">Đóng</button></div><dc-import name="PvBooking" pkgs="{{ p.pkgs }}" sel="{{ sel }}" hourly="{{ hourly }}" on-sel="{{ pickPkg }}" hint-size="100%,720px"></dc-import></div></div></sc-if>
+</sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.q = new URLSearchParams(window.location.search); this.state = { w: window.innerWidth, dr: true, sel: null, sheet: this.q.get('sheet') === '1', album: this.q.get('album') || null, tab: '' }; }
+  rootRef = React.createRef(); hdrRef = React.createRef(); sheetRef = React.createRef();
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR);
+    let raf = 0;
+    this.onS = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; const on = [...document.querySelectorAll('[data-surface="darkroom"]')].some(n => { const r = n.getBoundingClientRect(); return r.top <= 70 && r.bottom > 70; }); let tab = ''; document.querySelectorAll('main section[id^="pv-"]').forEach(s => { if (s.getBoundingClientRect().top < 180) tab = s.id; }); if (on !== this.state.dr || tab !== this.state.tab) this.setState({ dr: on, tab }); }); };
+    window.addEventListener('scroll', this.onS, { passive: true }); setTimeout(this.onS, 400); this.paint();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); window.removeEventListener('scroll', this.onS); }
+  componentDidUpdate(pp, ps) {
+    this.paint();
+    if (!ps.sheet && this.state.sheet) { const s = this.sheetRef.current; if (s) { const b = s.querySelector('button'); b && b.focus({ preventScroll: true }); if (s.animate && !(window.fgKit && window.fgKit.reduced())) s.animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(0,0,.2,1)' }); } }
+    if (ps.album && !this.state.album && this.back != null) window.scrollTo(0, this.back);
+  }
+  paint() {
+    const h = this.hdrRef.current; if (h) h.style.background = this.state.dr ? 'var(--dr-bg)' : 'var(--green-900)';
+    const r = this.rootRef.current; if (!r) return;
+    r.querySelectorAll('[data-tab]').forEach(a => { const on = a.dataset.tab === this.state.tab; a.style.color = on ? 'var(--text-primary)' : 'var(--text-secondary)'; a.style.borderBottomColor = on ? 'var(--text-primary)' : 'transparent'; on ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current'); });
+  }
+  profile(kind, st) {
+    const long = st === 'long', empty = st === 'empty';
+    const img = (s, w, h) => `https://picsum.photos/seed/fgpv-${s}/${w}/${h}`;
+    const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '₫';
+    const R = [[3, 2], [2, 3], [4, 5], [1, 1], [16, 9], [4, 5], [3, 2], [2, 3]];
+    const base = {
+      photo: { name: long ? 'Nguyễn Hoàng Minh Anh — Nhiếp ảnh cưới & phóng sự gia đình' : 'Minh Anh Nhiếp Ảnh', roleTxt: 'Nhiếp ảnh gia', area: 'Phường Thủ Đức, Thành phố Hồ Chí Minh', bio: long ? 'Tôi chụp cưới và gia đình bằng ánh sáng tự nhiên từ năm 2020. Tôi thích những khoảnh khắc không tạo dáng: bố chỉnh cà vạt cho con trai, bà ngoại lau nước mắt ở góc phòng, cơn mưa bất chợt ở phố cổ. Mỗi buổi chụp tôi đi một mình hoặc cùng một trợ lý, mang hai máy và không dùng đèn flash trừ khi tiệc trong nhà quá tối. Ảnh chỉnh màu giao trong 14 ngày, album in giao sau 21 ngày. Tôi nhận lịch ở TP. Hồ Chí Minh, Đà Lạt và các tỉnh lân cận, chi phí di chuyển thỏa thuận trước.' : 'Chụp cưới và gia đình bằng ánh sáng tự nhiên. Ít tạo dáng, nhiều khoảnh khắc thật.', stats: empty ? [] : [{ value: '312', label: 'buổi đã chụp' }, { value: '4,9', label: 'điểm · 23 đánh giá' }, { value: '6', label: 'năm kinh nghiệm' }], pk: [['Chân dung', 'Một người hoặc cặp đôi, một địa điểm.', 40, 7, '2 giờ', 2500000], ['Cưới ngoài trời', 'Hai địa điểm, có trợ lý.', 150, 14, '4 giờ', 7500000], ['Phóng sự cưới', 'Cả ngày, từ lễ gia tiên tới tiệc.', 400, 21, '10 giờ', 15000000]] },
+      studio: { name: 'Studio Mộc', roleTxt: 'Studio', area: 'Phường Bình Thạnh, Thành phố Hồ Chí Minh', bio: 'Ba phòng chụp ánh sáng tự nhiên và một phòng phông liền, cho thuê theo giờ. Có phòng thay đồ riêng và chỗ đỗ xe máy.', stats: empty ? [] : [{ value: '4,8', label: 'điểm · 41 đánh giá' }, { value: '188', label: 'lượt thuê đã hoàn tất' }], pk: [['Thuê 2 giờ', 'Một phòng, đèn cơ bản.', null, null, '2 giờ', 800000], ['Thuê nửa ngày', 'Hai phòng, đèn và phông tùy chọn.', null, null, '5 giờ', 1800000], ['Thuê cả ngày', 'Toàn bộ studio.', null, null, '10 giờ', 3200000]] },
+      model: { name: 'Lê Thảo Vy', roleTxt: 'Người mẫu', area: 'Phường Bến Thành, Thành phố Hồ Chí Minh', bio: 'Người mẫu ảnh thời trang, áo dài và sản phẩm. Quen làm việc với đèn studio và ngoài trời.', stats: empty ? [] : [{ value: '4,7', label: 'điểm · 9 đánh giá' }], pk: [['Buổi chụp 2 giờ', 'Một bộ trang phục do khách chuẩn bị.', null, null, '2 giờ', 1500000], ['Nửa ngày', 'Tối đa 3 bộ trang phục.', null, null, '4 giờ', 2800000]] },
+      costume: { name: 'Áo dài Mộc Lan', roleTxt: 'Cho thuê trang phục', area: 'Phường Sài Gòn, Thành phố Hồ Chí Minh', bio: 'Áo dài may đo và Việt phục cho chụp ảnh, cưới hỏi, lễ Tết. Có sửa nhanh trong ngày.', stats: empty ? [] : [{ value: '4,9', label: 'điểm · 52 đánh giá' }], pk: [] }
+    }[kind];
+    const pkgs = base.pk.map(([name, desc, photos, days, hours, price], i) => ({ id: 'k' + i, name, desc, hours, priceTxt: fmt(price), short: [photos && `${photos} ảnh chỉnh sửa`, days && `giao sau ${days} ngày`, !photos && hours].filter(Boolean).join(' · '), l1: photos ? 'Ảnh chỉnh sửa' : 'Phòng', v1: photos ? String(photos) : ['1 phòng', '2 phòng', 'Toàn bộ'][i], l2: days ? 'Giao ảnh' : 'Đèn', v2: days ? `sau ${days} ngày` : ['Cơ bản', 'Tùy chọn', 'Đầy đủ'][i] }));
+    const AL = [['Cưới ở Đà Lạt', 'Lâm Đồng', '14/09/2026', 'Cưới', '12'], ['Mưa ở phố cổ Hội An', 'Thành phố Đà Nẵng', '22/08/2026', 'Cưới', '11'], ['Gia đình ngày Tết', 'Thành phố Hồ Chí Minh', '10/02/2026', 'Gia đình', '09'], ['Chân dung ánh sáng cửa sổ', 'Thành phố Hồ Chí Minh', '03/06/2026', 'Chân dung', '10']];
+    const caps = ['Cô dâu chờ ở hành lang khách sạn, 06:10', 'Bố chỉnh cà vạt cho chú rể', 'Đồi thông lúc sương còn dày', 'Cặp đôi đi qua cánh đồng cỏ hồng', 'Khách mời trú mưa dưới hiên', 'Nhẫn cưới trên tay bà ngoại', 'Tiệc tối ngoài trời, đèn dây', 'Điệu nhảy đầu tiên'];
+    const albums = kind === 'costume' || empty ? [] : AL.slice(0, kind === 'photo' ? 4 : 2).map(([title, place, date, style, frame], i) => ({ id: 'al' + i, title, place, date, style, frame, count: 8, cover: img(`al${i}c`, 1200, 800), coverAlt: `Bìa album ${title}`, intro: i === 0 ? 'Hạnh và Tùng cưới vào một sáng tháng Chín ở Đà Lạt, sương dày tới 08:00. Chúng tôi đi bộ từ khách sạn ra đồi thông, rồi quay về khu vườn nhỏ cho tiệc trưa với 30 khách.' : 'Một buổi chụp ngắn, không kịch bản.', images: R.map(([a, b], k) => ({ src: img(`al${i}i${k}`, a >= b ? 1400 : Math.round(1400 * a / b), a >= b ? Math.round(1400 * b / a) : 1400), w: a >= b ? 1400 : Math.round(1400 * a / b), h: a >= b ? Math.round(1400 * b / a) : 1400, caption: caps[k] })) }));
+    const photos = kind === 'costume' || empty ? [] : albums.flatMap(a => a.images.slice(0, 6).map((im, k) => ({ src: im.src.replace('/1400/', '/600/').replace(/\/(\d+)\/(\d+)$/, (m, w, h) => `/${Math.round(w * .43)}/${Math.round(h * .43)}`), w: im.w, h: im.h, style: a.style, album: a.title, caption: `${a.title} · ${im.caption}`, alt: im.caption })));
+    const rv = [['Thu Hà', 5, '28/09/2026', 'Cưới ngoài trời', 'Chị Anh rất kiên nhẫn với hai bên gia đình. Ảnh giao đúng hẹn, màu giữ đúng như ngoài đời.', 'Cảm ơn Hà và Tùng, chúc hai bạn trăm năm hạnh phúc.'], ['Quốc Việt', 5, '15/09/2026', 'Chân dung', 'Buổi chụp nhẹ nhàng, không bị gượng.', ''], ['Mai Phương', 4, '02/09/2026', 'Phóng sự cưới', long ? 'Ảnh đẹp, nhiều khoảnh khắc tự nhiên. Có một đoạn tiệc tối hơi thiếu sáng vì nhà hàng không cho dùng đèn flash, nhưng chị Anh đã báo trước và vẫn xử lý màu rất ổn. Album in giao chậm hơn 3 ngày so với hẹn vì nhà in nghỉ lễ, chị có nhắn báo trước. Nhìn chung mình rất hài lòng và sẽ giới thiệu cho bạn bè.' : 'Ảnh đẹp, album in giao chậm 3 ngày nhưng có báo trước.', 'Cảm ơn Phương đã thông cảm. Lần sau mình sẽ chốt lịch in sớm hơn.']];
+    return {
+      kind, ...base, pkgs, albums, photos, hero: img(`hero-${kind}`, 1920, 1280), heroAlt: `Ảnh tiêu biểu của ${base.name}`, focus: '50% 38%',
+      ratingTxt: base.stats.find(s => s.label.includes('điểm'))?.value || '', reviewCount: kind === 'studio' ? 41 : kind === 'costume' ? 52 : kind === 'model' ? 9 : 23,
+      dist: kind === 'studio' ? [34, 5, 2, 0, 0] : kind === 'costume' ? [47, 5, 0, 0, 0] : kind === 'model' ? [6, 3, 0, 0, 0] : [21, 1, 1, 0, 0],
+      reviews: empty ? [] : rv.map(([who, stars, date, pkg, text, reply]) => ({ who, stars, date, pkg: kind === 'photo' ? pkg : base.pk[0] ? base.pk[0][0] : 'Thuê áo dài', text, reply })),
+      areas: ['Thành phố Hồ Chí Minh', 'Lâm Đồng', 'Đồng Nai', 'Tây Ninh'].slice(0, kind === 'studio' ? 1 : 4), travel: kind === 'studio' ? 'Chụp tại studio: 128/4 đường Nơ Trang Long, Phường Bình Thạnh.' : 'Ngoài TP. Hồ Chí Minh: chi phí di chuyển thỏa thuận trực tiếp với nghệ sĩ.',
+      kycDate: '12/03/2026', cancel: 'Hủy trước 7 ngày: nghệ sĩ hoàn cọc theo thỏa thuận. Hủy sát ngày: trao đổi trực tiếp.', reschedule: 'Đổi lịch miễn phí một lần nếu báo trước 72 giờ và nghệ sĩ còn lịch.',
+      spaces: ['Phòng Sáng · 40m²', 'Phòng Gỗ · 32m²', 'Phòng Phông liền · 55m²', 'Sân thượng · 60m²', 'Phòng thay đồ', 'Góc cửa sổ'].map((n, i) => ({ name: n.split(' · ')[0], spec: [n.split(' · ')[1], ['Cửa sổ hướng đông', 'Sàn gỗ, tường vôi', 'Phông trắng cong', 'Ánh sáng chiều', 'Gương, bàn trang điểm', 'Rèm voan'][i]].filter(Boolean).join(' · '), num: '0' + (i + 1) + 'S', src: img(`sp${i}`, i % 2 ? 360 : 480, i % 2 ? 480 : 360) })),
+      specs: [['Chiều cao', '168 cm'], ['Số đo', '82 – 60 – 88'], ['Cỡ giày', '37'], ['Tóc', 'Đen, dài'], ['Mắt', 'Nâu'], ['Độ tuổi', '20–25']].map(([k, v]) => ({ k, v })),
+      costumes: [['Áo dài truyền thống', 'Cỡ S–XL', 150000], ['Áo dài cưới', 'Cỡ S–L · may đo', 450000], ['Việt phục', 'Cỡ M–L', 250000], ['Áo tấc cho chú rể', 'Cỡ M–XXL', 200000], ['Áo dài trẻ em', '3–12 tuổi', 100000], ['Khăn vấn, phụ kiện', 'Một cỡ', 50000]].map(([name, sizes, p], i) => ({ name, sizes, price: fmt(p), a: img(`co${i}a`, 400, 560), b: img(`co${i}b`, 300, 400), c: img(`co${i}c`, 300, 400) }))
+    };
+  }
+  renderVals() {
+    const { w, sel, sheet, album } = this.state, m = w < 1024, st = this.q.get('state') || '', kind = this.q.get('kind') || 'photo';
+    const p = this.profile(kind, st);
+    const tabs = [['pv-portfolio', 'Portfolio', kind !== 'costume'], ['pv-costumes', 'Trang phục', kind === 'costume'], ['pv-space', 'Không gian', kind === 'studio'], ['pv-specs', 'Thông số', kind === 'model'], ['pv-packages', 'Gói dịch vụ', kind !== 'costume'], ['pv-reviews', 'Đánh giá', true], ['pv-area', 'Khu vực phục vụ', true]].filter(t => t[2]);
+    const a = album && p.albums.find(x => x.id === album), ai = a ? p.albums.indexOf(a) : -1;
+    const pk = p.pkgs.find(k => k.id === sel) || p.pkgs[0];
+    const open = (id, img) => { this.back = window.scrollY; const go = () => this.setState({ album: id }); if (img && window.fgKit && !window.fgKit.reduced()) { this.setState({ album: id }, () => requestAnimationFrame(() => { window.scrollTo(0, 0); const d = document.querySelector('[data-cover-dest="1"]'); if (d) { d.style.visibility = 'hidden'; window.fgKit.morph(img, d, { duration: 300, onDone: () => { d.style.visibility = ''; } }); } })); } else go(); };
+    return {
+      theme: this.q.get('theme') || 'light', rootRef: this.rootRef, hdrRef: this.hdrRef, sheetRef: this.sheetRef, isDesktop: !m, p, st,
+      inAlbum: !!a, onProfile: !a, album: a || null, nextAlbum: a ? p.albums[(ai + 1) % p.albums.length] : null,
+      openAlbum: open, openAlbumId: id => { window.scrollTo(0, 0); this.setState({ album: id }); }, closeAlbum: () => this.setState({ album: null }),
+      bookFromAlbum: () => this.setState({ album: null, sheet: m }),
+      heroState: st === 'loading' || st === 'error' ? st : '', workState: st,
+      tabs: tabs.map(([id, label], i) => ({ id, label, n: String(i + 1).padStart(2, '0'), href: '#' + id, go: e => { e.preventDefault(); const el = document.getElementById(id); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 118, behavior: window.fgKit && window.fgKit.reduced() ? 'auto' : 'smooth' }); } })),
+      hasBio: !!p.bio, notCostume: kind !== 'costume',
+      sel: pk ? pk.id : '', pickPkg: id => { this.setState({ sel: id }); if (m) this.setState({ sheet: true }); }, hourly: kind === 'studio' || kind === 'model',
+      bookAside: !m && kind !== 'costume', mobileBar: m,
+      barPrice: kind === 'costume' ? `Từ ${p.costumes[0].price}/ngày` : `Từ ${p.pkgs[0].priceTxt}`, barSub: kind === 'costume' ? 'Không đặt lịch · nhắn để thuê' : 'Xác nhận trong 48 giờ', barCta: kind === 'costume' ? 'Nhắn tin để thuê' : 'Đặt lịch',
+      primary: () => { if (kind === 'costume') return; if (m) this.setState({ sheet: true }); else { const el = document.getElementById('pv-book'); el && el.querySelector('button') && el.querySelector('button').focus(); } },
+      sheetOpen: sheet && m && kind !== 'costume', closeSheet: () => this.setState({ sheet: false }), sheetKey: e => { if (e.key === 'Escape') this.setState({ sheet: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:14px;font-family:var(--font-body);color:var(--text-primary)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><button type="button" aria-label="Tháng trước" aria-disabled="true" style="width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--border-subtle);border-radius:999px;background:transparent;color:var(--text-tertiary);cursor:not-allowed"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg></button><h3 id="{{ hid }}" aria-live="polite" style="margin:0;font:600 17px/1.2 var(--font-body)">Tháng 10, 2026</h3><button type="button" aria-label="Tháng sau" style="width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);cursor:pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></button></div>
+<div ref="{{ gRef }}" role="grid" aria-labelledby="{{ hid }}" onKeyDown="{{ onKey }}" style="display:flex;flex-direction:column;gap:8px">
+<div role="row" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px"><sc-for list="{{ wds }}" as="w" hint-placeholder-count="7"><span role="columnheader" aria-label="{{ w.full }}" style="text-align:center;font-size:12px;font-weight:600;color:var(--text-secondary)">{{ w.s }}</span></sc-for></div>
+<sc-for list="{{ weeks }}" as="wk" hint-placeholder-count="5"><div role="row" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px"><sc-for list="{{ wk.days }}" as="d" hint-placeholder-count="7"><div role="gridcell" aria-selected="{{ d.sel }}" style="min-width:0"><button type="button" data-iso="{{ d.iso }}" tabIndex="{{ d.tab }}" aria-label="{{ d.aria }}" aria-disabled="{{ d.dis }}" aria-current="{{ d.cur }}" aria-hidden="{{ d.hide }}" onClick="{{ d.pick }}" style="position:relative;width:100%;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;border:{{ d.bd }};border-radius:var(--fg-radius-sm);background:{{ d.bg }};color:{{ d.fg }};box-shadow:{{ d.ring }};font-family:var(--font-body);cursor:{{ d.cursor }};outline-offset:2px"><span style="font-size:16px;font-weight:{{ d.fw }};line-height:1;font-variant-numeric:tabular-nums;text-decoration:{{ d.deco }}">{{ d.n }}</span><sc-if value="{{ d.hasTag }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="font-size:12px;line-height:1;white-space:nowrap;letter-spacing:-.01em">{{ d.tag }}</span></sc-if><sc-if value="{{ d.isSel }}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;right:3px;top:3px"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></button></div></sc-for></div></sc-for>
+</div>
+<p role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">{{ live }}</p>
+<sc-if value="{{ showLegend }}" hint-placeholder-val="{{ true }}"><ul aria-label="Chú thích lịch" style="margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--text-secondary)"><li style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:20px;height:20px;border-radius:4px;background:var(--brand-primary)"></span>Đang chọn ✓</li><li style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:20px;height:20px;border-radius:4px;border:2px solid var(--text-primary)"></span>Hôm nay</li><li>“Kín”: đã đủ lịch</li><li>“Nghỉ”: provider không nhận</li><li>“Chưa mở”: ngoài thời gian nhận lịch</li></ul></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:358,&quot;height&quot;:460},&quot;date&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;2026-10-08&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;focusDate&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;legend&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;uid&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;a&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;busy&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;onDate&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(iso)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { focus: '' };
+  gRef = React.createRef();
+  iso(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+  kind(iso) {
+    const today = this.props.today || '2026-10-01', busy = this.props.busy || ['2026-10-10', '2026-10-11', '2026-10-17'], off = this.props.offWeekday ?? 1, last = this.props.lastOpen || '2026-10-28';
+    const d = new Date(iso + 'T00:00:00');
+    if (iso.slice(0, 7) !== '2026-10') return 'outside';
+    if (iso < today || iso > last) return 'closed';
+    if (d.getDay() === off) return 'off';
+    if (busy.includes(iso)) return 'full';
+    return 'open';
+  }
+  move(iso, n) { const d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() + n); const t = this.iso(d); return t.slice(0, 7) === '2026-10' ? t : iso; }
+  componentDidUpdate(pp, ps) { if (this.state.focus && ps.focus !== this.state.focus) { const b = this.gRef.current && this.gRef.current.querySelector(`[data-iso="${this.state.focus}"]`); b && b.focus({ preventScroll: true }); } }
+  renderVals() {
+    const sel = this.props.date || '', today = this.props.today || '2026-10-01', fd = this.props.focusDate || '';
+    const WD = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+    const roving = this.state.focus || sel || today;
+    const start = new Date(2026, 8, 28), weeks = [];
+    for (let w = 0; w < 5; w++) { const days = []; for (let k = 0; k < 7; k++) { const d = new Date(start); d.setDate(start.getDate() + w * 7 + k); const iso = this.iso(d), kd = this.kind(iso), isSel = iso === sel && kd === 'open', isToday = iso === today, n = d.getDate();
+      const S = { open: ['1px solid var(--border-default)', 'var(--bg-surface)', 'var(--text-primary)'], full: ['1px solid var(--border-subtle)', 'var(--bg-sunken)', 'var(--text-secondary)'], off: ['1px dashed var(--border-default)', 'transparent', 'var(--text-secondary)'], closed: ['1px solid transparent', 'transparent', 'var(--text-secondary)'], outside: ['1px solid transparent', 'transparent', 'var(--text-tertiary)'] }[kd];
+      const tag = isToday ? 'Hôm nay' : kd === 'full' ? 'Kín' : kd === 'off' ? 'Nghỉ' : kd === 'closed' ? 'Chưa mở' : '';
+      const note = { open: 'còn lịch', full: 'kín lịch', off: 'provider nghỉ', closed: 'chưa mở nhận lịch', outside: '' }[kd];
+      days.push({ iso, n, isSel, sel: isSel ? 'true' : 'false', tag, hasTag: !!tag && kd !== 'outside' && !(isSel && !isToday),
+        bd: isSel ? '1px solid var(--brand-primary)' : isToday ? '2px solid var(--text-primary)' : S[0], bg: isSel ? 'var(--brand-primary)' : S[1], fg: isSel ? 'var(--text-on-brand)' : S[2],
+        fw: isToday || isSel ? 700 : 500, deco: kd === 'full' ? 'line-through' : 'none', ring: iso === fd ? '0 0 0 2px var(--bg-page),0 0 0 4px var(--border-focus)' : 'none',
+        cursor: kd === 'open' ? 'pointer' : 'default', dis: kd === 'open' ? 'false' : 'true', cur: isToday ? 'date' : 'false', hide: kd === 'outside' ? 'true' : 'false',
+        tab: kd === 'outside' ? -1 : iso === roving ? 0 : -1,
+        aria: kd === 'outside' ? '' : `${WD[(d.getDay() + 6) % 7]}, ${n} tháng 10 năm 2026${isToday ? ', hôm nay' : ''}, ${isSel ? 'đang chọn' : note}`,
+        pick: () => { if (kd !== 'open') return; this.setState({ focus: iso }); this.props.onDate && this.props.onDate(iso); } }); }
+      weeks.push({ days }); }
+    const live = sel ? `Đã chọn ${sel.split('-').reverse().join('/')}` : '';
+    return {
+      hid: 'mc-cal-' + (this.props.uid || 'a'), gRef: this.gRef, weeks, live, showLegend: this.props.legend !== false,
+      wds: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((s, i) => ({ s, full: WD[i] })),
+      onKey: e => { const cur = e.target.dataset && e.target.dataset.iso; if (!cur) return; const map = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }; let t = null;
+        if (map[e.key] != null) t = this.move(cur, map[e.key]);
+        else if (e.key === 'Home') t = this.move(cur, -((new Date(cur + 'T00:00:00').getDay() + 6) % 7));
+        else if (e.key === 'End') t = this.move(cur, 6 - ((new Date(cur + 'T00:00:00').getDay() + 6) % 7));
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (this.kind(cur) === 'open') this.props.onDate && this.props.onDate(cur); return; }
+        if (t) { e.preventDefault(); this.setState({ focus: t }); } }
+    };
+  }
+}
+</script>
+</body>
+</html>

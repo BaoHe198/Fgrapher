@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;min-width:0">
+<div ref="{{ sRef }}" onScroll="{{ onScroll }}" role="group" aria-label="{{ label }}" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:16px;padding:2px {{ pad }}px">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="7"><button type="button" aria-pressed="{{ c.on }}" onClick="{{ c.pick }}" style="flex:none;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font:600 14px/1 var(--font-body);white-space:nowrap;cursor:pointer;scroll-snap-align:start">{{ c.label }}</button></sc-for>
+<span aria-hidden="true" style="flex:none;width:{{ tail }}px"></span>
+</div>
+<sc-if value="{{ showL }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;left:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,var(--bg-page) 20%,transparent);pointer-events:none"></span></sc-if>
+<sc-if value="{{ showR }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:0;top:0;bottom:0;width:84px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;background:linear-gradient(to left,var(--bg-page) 48%,transparent);pointer-events:none"><button type="button" onClick="{{ more }}" aria-label="Xem thêm vai trò" style="pointer-events:auto;width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);box-shadow:var(--shadow-sm);cursor:pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></button></span></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:60},&quot;items&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{k:string,label:string}[]&quot;},&quot;value&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onPick&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(k:string)=&gt;void&quot;},&quot;start&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;start&quot;,&quot;mid&quot;,&quot;end&quot;],&quot;default&quot;:&quot;start&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;label&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Vai trò&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;pad&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  state = { l: false, r: false };
+  sRef = React.createRef();
+  componentDidMount() {
+    const s = this.sRef.current; if (!s) return;
+    const go = () => { const st = this.props.start; if (st === 'end') s.scrollLeft = s.scrollWidth; else if (st === 'mid') s.scrollLeft = 150; this.measure(); };
+    requestAnimationFrame(go); setTimeout(go, 400);
+    this.ro = new ResizeObserver(() => this.measure()); this.ro.observe(s);
+  }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); }
+  measure() { const s = this.sRef.current; if (!s) return; const l = s.scrollLeft > 4, r = s.scrollLeft + s.clientWidth < s.scrollWidth - 4; if (l !== this.state.l || r !== this.state.r) this.setState({ l, r }); }
+  renderVals() {
+    const v = this.props.value ?? '', items = this.props.items || [];
+    return {
+      sRef: this.sRef, label: this.props.label || 'Vai trò', pad: this.props.pad ?? 16, tail: this.state.r || this.state.l ? 40 : 0,
+      onScroll: () => this.measure(), showL: this.state.l, showR: this.state.r,
+      more: () => { const s = this.sRef.current; s && s.scrollBy({ left: Math.round(s.clientWidth * .6), behavior: window.fgKit && window.fgKit.reduced() ? 'auto' : 'smooth' }); },
+      chips: items.map(it => { const on = it.k === v; return { label: it.label, on: on ? 'true' : 'false', bd: on ? 'var(--brand-primary)' : 'var(--border-default)', bg: on ? 'var(--brand-primary)' : 'var(--bg-surface)', fg: on ? 'var(--text-on-brand)' : 'var(--text-primary)', pick: () => this.props.onPick && this.props.onPick(it.k) }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

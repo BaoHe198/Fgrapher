@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ rootRef }}" role="region" aria-label="Bản đồ kết quả" style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:var(--fg-radius-lg);border:1px solid var(--border-subtle);background-color:var(--bg-sunken);background-image:linear-gradient(90deg,var(--border-subtle) 1px,transparent 1px),linear-gradient(var(--border-subtle) 1px,transparent 1px);background-size:56px 56px;font-family:var(--font-body)">
+<span aria-hidden="true" style="position:absolute;left:-10%;top:58%;width:130%;height:14px;background:var(--bg-surface);transform:rotate(-8deg)"></span>
+<span aria-hidden="true" style="position:absolute;left:44%;top:-10%;width:12px;height:130%;background:var(--bg-surface);transform:rotate(12deg)"></span>
+<span aria-hidden="true" style="position:absolute;left:70%;top:8%;width:32%;height:44%;border-radius:40% 0 0 60%;background:var(--info-bg)"></span>
+<span aria-hidden="true" style="position:absolute;left:8%;top:12%;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Phường Sài Gòn</span>
+<span aria-hidden="true" style="position:absolute;left:56%;top:70%;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Phường Thủ Đức</span>
+<sc-for list="{{ items }}" as="m" hint-placeholder-count="8"><button type="button" data-mk="{{ m.id }}" onClick="{{ m.pick }}" aria-label="{{ m.aria }}" data-x="{{ m.x }}" data-y="{{ m.y }}" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;border:1px solid var(--border-default);border-radius:6px;background:var(--bg-surface);color:var(--text-primary);box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 200ms cubic-bezier(0,0,.2,1),background-color 200ms,color 200ms"><span style="width:26px;height:26px;display:grid;place-items:center;padding:2px;background:var(--dr-bg)"><img src="{{ m.thumb }}" alt="" style="display:block;max-width:100%;max-height:100%"></span><span style="font:700 12px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ m.price }}</span></button></sc-for>
+<span style="position:absolute;left:12px;bottom:12px;padding:5px 8px;border-radius:4px;background:var(--bg-surface);font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-secondary)">BẢN ĐỒ MINH HOẠ</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:560,&quot;height&quot;:640},&quot;items&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Marker[]&quot;},&quot;hot&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onPick&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  componentDidMount() { this.paint(); }
+  componentDidUpdate() { this.paint(); }
+  paint() {
+    const r = this.rootRef.current; if (!r) return; const hot = this.props.hot;
+    r.querySelectorAll('[data-mk]').forEach(b => { b.style.left = b.dataset.x; b.style.top = b.dataset.y; const on = b.dataset.mk === hot; b.style.background = on ? 'var(--brand-primary)' : 'var(--bg-surface)'; b.style.color = on ? 'var(--text-on-brand)' : 'var(--text-primary)'; b.style.zIndex = on ? '5' : '1'; b.style.transform = on ? 'translate(-50%,-100%) scale(1.12)' : 'translate(-50%,-100%)'; b.style.boxShadow = on ? '0 0 0 4px color-mix(in srgb,var(--brand-primary) 24%,transparent)' : 'var(--shadow-sm)'; });
+  }
+  renderVals() {
+    return { rootRef: this.rootRef, items: (this.props.items || []).map(m => ({ ...m, x: m.x + '%', y: m.y + '%', aria: `${m.name}, từ ${m.priceFull}`, pick: () => this.props.onPick && this.props.onPick(m.id) })) };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<article data-album="" style="display:flex;flex-direction:column;background:var(--bg-page);color:var(--text-primary)">
+<div style="position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:8px;height:56px;padding:0 clamp(8px,2vw,24px);background:color-mix(in srgb,var(--bg-page) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border-subtle)">
+<button type="button" onClick="{{ back }}" style="display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border:0;background:none;color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer"><span aria-hidden="true" style="font-size:20px">‹</span>{{ backLabel }}</button>
+<div style="flex:1"></div>
+<x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md" on-click="{{ openAll }}">Xem toàn màn hình</x-import>
+</div>
+<div style="position:relative;height:clamp(320px,56vw,640px);background:var(--bg-sunken);overflow:hidden"><img src="{{ cover }}" alt="{{ title }}" style="width:100%;height:100%;object-fit:cover;display:block;animation:pf-dev 600ms ease-out both"></div>
+<div style="max-width:760px;width:100%;margin:0 auto;padding:clamp(24px,4vw,48px) clamp(20px,2.4vw,32px) 0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--gold-700)"><span>{{ category }}</span><span style="color:var(--text-tertiary)">{{ count }}</span></div>
+<h1 style="margin:0;font-family:var(--font-display);font-size:clamp(30px,4vw,52px);line-height:1.05;letter-spacing:-.025em;font-weight:700;text-wrap:balance">{{ title }}</h1>
+<span style="font-size:14px;color:var(--text-secondary)">{{ meta }}</span>
+<p style="margin:6px 0 0;font-size:17px;line-height:1.7;text-wrap:pretty">{{ desc }}</p>
+</div>
+<div style="max-width:1200px;width:100%;margin:0 auto;padding:clamp(24px,4vw,48px) clamp(20px,2.4vw,32px);display:flex;flex-direction:column;gap:clamp(12px,1.6vw,20px)">
+<sc-for list="{{ blocks }}" as="b" hint-placeholder-count="5">
+<sc-if value="{{ b.isFull }}" hint-placeholder-val="{{ true }}"><button type="button" data-open="{{ b.i }}" style="display:block;padding:0;border:0;background:var(--bg-sunken);cursor:zoom-in;border-radius:var(--fg-radius-sm);overflow:hidden"><img src="{{ b.a }}" alt="{{ b.alt }}" loading="lazy" style="width:100%;height:auto;display:block;animation:pf-dev 500ms ease-out both"></button></sc-if>
+<sc-if value="{{ b.isPair }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(12px,1.6vw,20px);align-items:start"><button type="button" data-open="{{ b.i }}" style="display:block;padding:0;border:0;background:var(--bg-sunken);cursor:zoom-in;border-radius:var(--fg-radius-sm);overflow:hidden"><img src="{{ b.a }}" alt="{{ b.alt }}" loading="lazy" style="width:100%;height:auto;display:block;animation:pf-dev 500ms ease-out both"></button><button type="button" data-open="{{ b.j }}" style="display:block;padding:0;border:0;background:var(--bg-sunken);cursor:zoom-in;border-radius:var(--fg-radius-sm);overflow:hidden"><img src="{{ b.b }}" alt="{{ b.alt }}" loading="lazy" style="width:100%;height:auto;display:block;animation:pf-dev 500ms 100ms ease-out both"></button></div></sc-if>
+<sc-if value="{{ b.isText }}" hint-placeholder-val="{{ false }}"><div style="max-width:620px;margin:clamp(12px,3vw,32px) auto;display:flex;flex-direction:column;gap:8px;text-align:center"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">{{ b.kicker }}</span><h2 style="margin:0;font-family:var(--font-display);font-size:clamp(22px,2.4vw,30px);line-height:1.2;font-weight:700">{{ b.title }}</h2><p style="margin:0;font-size:16px;line-height:1.7;color:var(--text-secondary);text-wrap:pretty">{{ b.text }}</p></div></sc-if>
+</sc-for>
+</div>
+<div style="max-width:760px;width:100%;margin:0 auto;padding:0 clamp(20px,2.4vw,32px) clamp(40px,5vw,72px)">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<div style="display:flex;flex-direction:column;gap:4px"><strong style="font-size:16px">Muốn có bộ ảnh tương tự?</strong><span style="font-size:14px;color:var(--text-secondary)">{{ pkgLine }}</span></div>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ back }}">Chọn gói này</x-import>
+</div>
+</div>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;album&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;onBack&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onOpen&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(i)=&gt;void&quot;},&quot;backLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Quay lại hồ sơ&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    if (!document.getElementById('pf-kf')) { const s = document.createElement('style'); s.id = 'pf-kf'; s.textContent = '@keyframes pf-dev{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:none}}'; document.head.appendChild(s); }
+    this.h = e => { const b = e.target.closest && e.target.closest('[data-open]'); if (b && b.closest('[data-album]')) this.props.onOpen && this.props.onOpen(+b.dataset.open); };
+    document.addEventListener('click', this.h);
+  }
+  componentWillUnmount() { document.removeEventListener('click', this.h); }
+  renderVals() {
+    const a = this.props.album || {}, ph = a.photos || [];
+    const u = i => (ph[i] || {}).url || '';
+    const blocks = [
+      { isFull: true, a: u(1), i: 1 },
+      { isText: true, kicker: 'Ngày 1', title: 'Đồi thông Đa Phú lúc chiều muộn', text: 'Hai bạn muốn ảnh tự nhiên, ít tạo dáng. Chúng tôi chờ nắng xiên qua rừng thông khoảng 16:30 rồi mới bắt đầu.' },
+      { isPair: true, a: u(2), b: u(3), i: 2, j: 3 },
+      { isFull: true, a: u(4), i: 4 },
+      { isText: true, kicker: 'Ngày 2', title: 'Hồ Tuyền Lâm trong sương sớm', text: 'Xuất phát 05:00 để kịp lớp sương trên mặt hồ. Váy cưới thứ hai được giữ cho buổi này.' },
+      { isPair: true, a: u(5), b: u(6), i: 5, j: 6 }
+    ].map(b => ({ isFull: false, isPair: false, isText: false, alt: a.title || '', ...b }));
+    return {
+      title: a.title || '', desc: a.desc || '', cover: u(0), count: a.count || '', category: a.category || '', meta: a.meta || '', pkgLine: a.pkgLine || '',
+      blocks, backLabel: this.props.backLabel || 'Quay lại hồ sơ',
+      back: () => this.props.onBack && this.props.onBack(), openAll: () => this.props.onOpen && this.props.onOpen(0)
+    };
+  }
+}
+</script>
+</body>
+</html>

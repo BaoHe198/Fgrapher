@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="font-family:var(--font-body);color:var(--text-primary)">
+<section data-surface="darkroom" aria-labelledby="mc-pname" style="position:relative;background:var(--dr-bg);color:var(--dr-text)">
+<div style="position:relative;height:{{ heroH }};overflow:hidden">
+<sc-if value="{{ hasHero }}" hint-placeholder-val="{{ true }}"><img data-dev="" data-hero="" src="{{ p.hero }}" alt="{{ heroAlt }}" fetchpriority="high" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%"></sc-if><sc-if value="{{ noHero }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;padding-bottom:80px;background:var(--dr-raised);color:var(--dr-text-2);font-size:14px"><x-import component-from-global-scope="Fgrapher.FrameMark" size="48" hint-size="48px,48px"></x-import><span>Provider chưa tải ảnh đầu trang</span></span></sc-if>
+<span aria-hidden="true" style="position:absolute;left:0;right:0;top:0;height:120px;background:linear-gradient(to bottom,hsl(30 14% 5% / .6),transparent)"></span>
+<span aria-hidden="true" style="position:absolute;inset:0;background:{{ heroScrim }}"></span>
+<div style="position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;gap:12px;padding:{{ topPad }}">
+<button type="button" onClick="{{ back }}" aria-label="Quay lại kết quả" style="height:44px;display:flex;align-items:center;gap:6px;padding:0 {{ backPad }};border:1px solid var(--dr-line-2);border-radius:999px;background:hsl(30 14% 5% / .6);color:var(--dr-text);font:600 14px/1 var(--font-body);cursor:pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg><sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><span>Kết quả</span></sc-if></button>
+<button type="button" onClick="{{ viewFull }}" aria-label="Xem ảnh đầu trang đầy đủ" style="height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 {{ backPad }};border:1px solid var(--dr-line-2);border-radius:999px;background:hsl(30 14% 5% / .6);color:var(--dr-text);font:600 14px/1 var(--font-body);cursor:zoom-in"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg><sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><span>Xem ảnh đầy đủ</span></sc-if></button>
+</div>
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:0;right:0;bottom:0"><div style="max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px 48px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:14px;min-width:0;flex:1 1 560px">
+<span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:16px;color:var(--dr-text-2)"><span>{{ p.roleTxt }}</span><span aria-hidden="true">·</span><span>{{ p.place }}</span><span aria-hidden="true">·</span><span style="color:var(--dr-accent);font-weight:600">✓ Đã xác minh</span></span>
+<h1 id="mc-pname" style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(44px,5vw,88px);line-height:.95;letter-spacing:-.035em;text-wrap:balance;overflow-wrap:anywhere">{{ p.name }}</h1>
+<sc-if value="{{ hasFacts }}" hint-placeholder-val="{{ true }}"><span style="display:flex;flex-wrap:wrap;gap:6px 20px;font-size:16px;color:var(--dr-text)"><sc-for list="{{ facts }}" as="x" hint-placeholder-count="3"><span>{{ x }}</span></sc-for></span></sc-if>
+</div>
+<div style="display:flex;align-items:center;gap:12px"><button ref="{{ ctaRefD }}" type="button" onClick="{{ heroCta }}" style="min-height:52px;padding:0 28px;border:0;border-radius:var(--fg-radius-md);background:var(--gold-400);color:var(--gold-900);font:700 17px/1 var(--font-body);cursor:pointer">{{ heroLabel }}</button>
+<div role="group" aria-label="Thao tác khác" style="display:flex;gap:8px"><sc-for list="{{ sec }}" as="s" hint-placeholder-count="3"><button type="button" onClick="{{ s.go }}" aria-pressed="{{ s.on }}" aria-label="{{ s.aria }}" title="{{ s.aria }}" style="width:52px;height:52px;display:grid;place-items:center;border:1px solid var(--dr-line-2);border-radius:var(--fg-radius-md);background:hsl(30 14% 5% / .5);color:{{ s.color }};cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="{{ s.fill }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ s.d }}"></path></svg></button></sc-for></div></div>
+</div></div></sc-if>
+</div>
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><div style="position:relative;margin-top:-64px;padding:0 16px 24px;display:flex;flex-direction:column;gap:12px">
+<span style="display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:14px;color:var(--dr-text-2)"><span>{{ p.role1 }}</span><span aria-hidden="true">·</span><span>{{ p.place }}</span><span style="color:var(--dr-accent);font-weight:600">✓ Đã xác minh</span></span>
+<h1 id="mc-pname" style="margin:0;font-family:var(--font-display);font-weight:600;font-size:34px;line-height:1;letter-spacing:-.03em;text-wrap:balance;overflow-wrap:anywhere">{{ p.name }}</h1>
+<sc-if value="{{ hasFacts }}" hint-placeholder-val="{{ true }}"><span style="display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--dr-text)"><sc-for list="{{ facts }}" as="x" hint-placeholder-count="3"><span>{{ x }}</span></sc-for></span></sc-if>
+<button ref="{{ ctaRef }}" type="button" onClick="{{ heroCta }}" style="margin-top:4px;min-height:52px;border:0;border-radius:var(--fg-radius-md);background:var(--gold-400);color:var(--gold-900);font:700 17px/1 var(--font-body);cursor:pointer">{{ heroLabel }}</button>
+<div role="group" aria-label="Thao tác khác" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><sc-for list="{{ sec }}" as="s" hint-placeholder-count="3"><button type="button" onClick="{{ s.go }}" aria-pressed="{{ s.on }}" style="min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--dr-line-2);border-radius:var(--fg-radius-md);background:transparent;color:{{ s.color }};font:600 14px/1 var(--font-body);cursor:pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="{{ s.fill }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ s.d }}"></path></svg>{{ s.label }}</button></sc-for></div>
+</div></sc-if>
+</section>
+<div style="max-width:1440px;margin:0 auto;padding:{{ bodyPad }};display:grid;grid-template-columns:{{ bodyCols }};gap:48px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:{{ secGap }};min-width:0">
+<section aria-labelledby="mc-pk"><h2 id="mc-pk" style="margin:0 0 14px;font:600 clamp(22px,2vw,28px)/1.2 var(--font-display);letter-spacing:-.02em">Gói dịch vụ</h2>
+<sc-if value="{{ hasPk }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:{{ pkCols }};gap:12px"><sc-for list="{{ pks }}" as="k" hint-placeholder-count="3"><button type="button" onClick="{{ k.pick }}" aria-pressed="{{ k.on }}" style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid {{ k.bd }};border-radius:var(--fg-radius-md);background:{{ k.bg }};color:var(--text-primary);text-align:left;font-family:var(--font-body);cursor:pointer"><span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%"><strong style="font-size:16px">{{ k.name }}</strong><strong style="flex:none;font-size:16px;font-variant-numeric:tabular-nums">{{ k.priceTxt }}</strong></span><span style="font-size:14px;line-height:1.45;color:var(--text-secondary)">{{ k.dur }} · {{ k.inc }}</span></button></sc-for></div></sc-if>
+<sc-if value="{{ noPk }}" hint-placeholder-val="{{ false }}"><div style="padding:18px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-md);font-size:15px;line-height:1.5;color:var(--text-secondary)">Provider chưa đăng gói dịch vụ. Gửi câu hỏi để nhận báo giá theo nhu cầu của bạn.</div></sc-if>
+</section>
+<section aria-labelledby="mc-pf" data-surface="darkroom" style="margin:{{ pfMargin }};padding:{{ pfPad }};background:var(--dr-bg);color:var(--dr-text);border-radius:{{ pfR }}">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px"><h2 id="mc-pf" style="margin:0;font:600 clamp(22px,2vw,28px)/1.2 var(--font-display);letter-spacing:-.02em">Portfolio</h2><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--dr-text-3)">{{ pfCount }} KHUNG</span></div>
+<sc-if value="{{ noPf }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:15px;color:var(--dr-text-2)">Provider chưa đăng ảnh portfolio.</p></sc-if><div ref="{{ pfRef }}" style="display:grid;grid-template-columns:{{ pfCols }};gap:{{ pfGap }}"><sc-for list="{{ pf }}" as="f" hint-placeholder-count="9"><figure style="margin:0;display:flex;flex-direction:column;gap:6px"><button type="button" onClick="{{ f.open }}" aria-label="Mở ảnh {{ f.num }}" style="aspect-ratio:1;display:grid;place-items:center;padding:4px;border:0;background:var(--dr-surface);cursor:zoom-in"><img data-dev="" data-i="{{ f.i }}" src="{{ f.src }}" width="{{ f.w }}" height="{{ f.h }}" alt="Ảnh portfolio {{ f.num }} của {{ p.name }}" loading="lazy" style="display:block;max-width:100%;max-height:100%;width:auto;height:auto"></button><figcaption aria-hidden="true" style="font:600 12px/1 var(--font-mono);color:var(--dr-text-3)">{{ f.num }}</figcaption></figure></sc-for></div>
+</section>
+<section aria-labelledby="mc-rv"><h2 id="mc-rv" style="margin:0 0 14px;font:600 clamp(22px,2vw,28px)/1.2 var(--font-display);letter-spacing:-.02em">Đánh giá</h2>
+<sc-if value="{{ hasRv }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:16px"><p style="margin:0;font-size:16px"><strong>★ {{ p.ratingTxt }}</strong><span style="color:var(--text-secondary)"> · {{ p.reviews }} đánh giá từ khách đã đặt qua Fgrapher</span></p><sc-for list="{{ rv }}" as="r" hint-placeholder-count="2"><article style="display:flex;flex-direction:column;gap:6px;padding:16px 0;border-top:1px solid var(--border-subtle)"><span style="display:flex;justify-content:space-between;gap:12px;font-size:14px"><strong>{{ r.by }}</strong><span style="color:var(--text-secondary)">{{ r.date }}</span></span><p style="margin:0;font-size:15px;line-height:1.55">{{ r.text }}</p></article></sc-for></div></sc-if>
+<sc-if value="{{ noRv }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:15px;color:var(--text-secondary)">Chưa có đánh giá. Provider mới tham gia Fgrapher.</p></sc-if>
+</section>
+<section aria-labelledby="mc-ab"><h2 id="mc-ab" style="margin:0 0 14px;font:600 clamp(22px,2vw,28px)/1.2 var(--font-display);letter-spacing:-.02em">Giới thiệu</h2><p style="margin:0 0 12px;max-width:640px;font-size:16px;line-height:1.6;text-wrap:pretty">{{ p.bio }}</p><p style="margin:0;font-size:14px;color:var(--text-secondary)">Khu vực: {{ p.placeFull }}</p></section>
+</div>
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><aside ref="{{ asideRef }}" aria-labelledby="mc-bk" style="position:sticky;top:24px;display:flex;flex-direction:column;gap:18px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface);box-shadow:var(--shadow-md)">
+<div style="display:flex;flex-direction:column;gap:4px"><h2 id="mc-bk" style="margin:0;font-size:15px;font-weight:600;color:var(--text-secondary)">Đặt lịch</h2><sc-if value="{{ hasPk }}" hint-placeholder-val="{{ true }}"><span style="font-size:22px"><span style="color:var(--text-secondary)">Từ </span><strong style="font-variant-numeric:tabular-nums">{{ p.fromTxt }}</strong></span></sc-if><sc-if value="{{ noPk }}" hint-placeholder-val="{{ false }}"><strong style="font-size:20px">Chưa có gói dịch vụ</strong></sc-if></div>
+<sc-if value="{{ hasPk }}" hint-placeholder-val="{{ true }}"><dc-import name="McDatePick" busy="{{ p.busy }}" date="{{ date }}" time="{{ time }}" on-date="{{ setDate }}" on-time="{{ setTime }}" hint-size="100%,340px"></dc-import></sc-if>
+<button type="button" onClick="{{ asideCta }}" disabled="{{ asideOff }}" style="min-height:52px;border:0;border-radius:var(--fg-radius-md);background:{{ aBg }};color:{{ aFg }};font:700 16px/1 var(--font-body);cursor:{{ aCur }}">{{ asideLabel }}</button>
+<p style="margin:0;font-size:13px;line-height:1.45;color:var(--text-secondary)">Chưa thanh toán cho đến khi provider xác nhận.</p>
+</aside></sc-if>
+</div>
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><dc-import name="McSticky" kind="{{ sKind }}" price="{{ p.fromTxt }}" date-txt="{{ whenShort }}" safe="{{ safe }}" fixed="{{ true }}" show="{{ sShow }}" mark-safe="{{ markSafe }}" on-cta="{{ stickyCta }}" hint-size="100%,64px"></dc-import></sc-if>
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:flex;flex-direction:column;justify-content:{{ shJ }};align-items:center;padding:{{ shPad }}"><div onClick="{{ closeSheet }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ sheetRef }}" role="dialog" aria-modal="true" aria-labelledby="mc-b-t" onKeyDown="{{ dlgKey }}" style="position:relative;width:{{ shW }};height:{{ shH }};border-radius:{{ shR }};overflow:hidden;box-shadow:var(--shadow-lg)"><dc-import name="McBookSheet" p="{{ p }}" step="{{ sheet }}" date="{{ date }}" time="{{ time }}" pkg="{{ pkg }}" mode="{{ shMode }}" safe="{{ safe }}" date-only="{{ dateOnly }}" on-date="{{ setDate }}" on-time="{{ setTime }}" on-pkg="{{ setPkg }}" on-step="{{ setStep }}" on-close="{{ closeSheet }}" hint-size="100%,100%" style="height:100%"></dc-import></div></div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pid&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;p0&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;m&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;w&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:390,&quot;tsType&quot;:&quot;number&quot;},&quot;init&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;safe&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;},&quot;forceSticky&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;markSafe&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onBack&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  constructor(p) {
+    super(p); const i = p.init || {};
+    this.state = { date: i.date || '', time: i.time || '', pkg: '', sheet: i.sheet || '', dateOnly: !!i.dateOnly, show: false, follow: false, saved: false };
+  }
+  ctaRef = React.createRef(); ctaRefD = React.createRef(); sheetRef = React.createRef(); pfRef = React.createRef(); asideRef = React.createRef();
+  componentDidMount() { this.obs(); this.onS = () => { const el = this.ctaRef.current; if (!el) return; const show = el.getBoundingClientRect().bottom < 0; if (show !== this.state.show) this.setState({ show }); }; window.addEventListener('scroll', this.onS, { passive: true }); setTimeout(this.onS, 600); setTimeout(this.onS, 3200); }
+  componentDidUpdate(pp, ps) {
+    if (pp.m !== this.props.m) this.obs();
+    if (!ps.sheet && this.state.sheet) { const s = this.sheetRef.current; if (s && s.animate && !(window.fgKit && window.fgKit.reduced())) s.animate(this.props.m ? [{ transform: 'translateY(100%)' }, { transform: 'none' }] : [{ opacity: 0, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: this.props.m ? 300 : 200, easing: 'cubic-bezier(0,0,.2,1)' }); const b = s && s.querySelector('button'); b && b.focus({ preventScroll: true }); }
+  }
+  componentWillUnmount() { this.io && this.io.disconnect(); window.removeEventListener('scroll', this.onS); }
+  obs() {
+    this.io && this.io.disconnect(); const el = this.ctaRef.current; if (!el) return;
+    this.io = new IntersectionObserver(([e]) => { const show = !e.isIntersecting && e.boundingClientRect.top < 0; if (show !== this.state.show) this.setState({ show }); }, { threshold: 0 });
+    this.io.observe(el);
+  }
+  renderVals() {
+    const D = window.mcData, m = !!this.props.m, p = D.providers.find(x => x.id === this.props.pid) || D.providers[0];
+    const { date, time, sheet } = this.state, nosvc = !p.packages.length, pkg = this.state.pkg || (p.packages[0] || {}).id || '';
+    const ready = !!(date && time), whenShort = date ? `${D.wd(date)}, ${D.dm(date)}${time ? ' · ' + time : ''}` : '';
+    const open = (s, dateOnly) => { this.prev = document.activeElement; this.setState({ sheet: s, dateOnly: !!dateOnly }); };
+    const toWiz = () => this.props.onBook ? this.props.onBook({ pid: p.id, pkg, date, time }) : open('req');
+    this.toWiz = toWiz;
+    const book = () => nosvc ? open('req') : ready ? toWiz() : open('date');
+    const facts = [p.reviews > 0 && `★ ${p.ratingTxt} · ${p.reviews} đánh giá`, p.resp != null && `Phản hồi ~${p.resp} giờ`, p.sessions && `${p.sessions} buổi đã nhận`].filter(Boolean);
+    const IC = { follow: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M19 8v6M22 11h-6', save: 'M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z', share: 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13' };
+    const sec = [['follow', this.state.follow ? 'Đang theo dõi' : 'Theo dõi', this.state.follow, () => this.setState({ follow: !this.state.follow })], ['save', this.state.saved ? 'Đã lưu' : 'Lưu', this.state.saved, () => this.setState({ saved: !this.state.saved })], ['share', 'Chia sẻ', null, () => navigator.share ? navigator.share({ title: p.name, url: location.href }).catch(() => {}) : null]].map(([k, label, on, go], i) => ({ label: k === 'follow' && on ? 'Đang theo' : label, aria: label, on: on == null ? 'false' : on ? 'true' : 'false', go, d: IC[k], bl: i ? '1px solid var(--dr-line-2)' : '0', color: on ? 'var(--dr-accent)' : 'var(--dr-text)', fill: on && k === 'save' ? 'currentColor' : 'none' }));
+    const w = this.props.w || 1440, pfCols = m ? 3 : w < 1200 ? 3 : 4;
+    const pf = p.portfolio.slice(0, m ? 9 : 12).map((f, i) => ({ ...f, i, open: e => { const im = e.currentTarget.querySelector('img'); const g = [...this.pfRef.current.querySelectorAll('img')].sort((a, b) => a.dataset.i - b.dataset.i); window.fgKit && window.fgKit.lightbox(im, { group: g, label: j => String(j + 1).padStart(2, '0') + 'A' }); } }));
+    const aOff = !nosvc && !ready;
+    return {
+      hasHero: !!p.hero, noHero: !p.hero, noPf: !p.portfolio.length,
+      p, isMob: m, isDesk: !m, heroAlt: `Ảnh đầu trang của ${p.name}`,
+      heroH: m ? 'clamp(320px,52vh,460px)' : 'clamp(560px,70vh,720px)', topPad: m ? '12px 16px' : '20px clamp(16px,4vw,48px)', backPad: m ? '13px' : '16px',
+      heroScrim: m ? 'linear-gradient(to top,var(--dr-bg) 0,var(--dr-bg) 64px,hsl(30 14% 5% / .6) 34%,transparent 62%)' : 'linear-gradient(to top,var(--dr-bg) 0%,hsl(30 14% 5% / .92) 26%,hsl(30 14% 5% / .45) 55%,transparent 78%)',
+      facts, hasFacts: facts.length > 0, heroLabel: nosvc ? 'Nhắn hỏi giá' : 'Đặt lịch', heroCta: book, ctaRef: this.ctaRef, ctaRefD: this.ctaRefD, sec,
+      back: () => this.props.onBack && this.props.onBack(),
+      viewFull: e => { const im = e.currentTarget.closest('section').querySelector('img[data-hero]'); window.fgKit && im && window.fgKit.lightbox(im, { label: () => '00' }); },
+      bodyPad: m ? '28px 16px 32px' : '48px clamp(16px,4vw,48px) 96px', bodyCols: m ? 'minmax(0,1fr)' : 'minmax(0,1fr) 380px', secGap: m ? '36px' : '56px',
+      hasPk: !nosvc, noPk: nosvc, pkCols: m ? 'minmax(0,1fr)' : 'repeat(auto-fill,minmax(260px,1fr))',
+      pks: p.packages.map(k => { const on = k.id === pkg; return { ...k, on: on ? 'true' : 'false', bd: on ? 'var(--brand-primary)' : 'var(--border-subtle)', bg: on ? 'var(--bg-sunken)' : 'var(--bg-surface)', pick: () => this.setState({ pkg: k.id }) }; }),
+      pfMargin: m ? '0 -16px' : '0', pfPad: m ? '24px 16px' : '28px', pfR: m ? '0' : 'var(--fg-radius-lg)', pfCols: `repeat(${pfCols},minmax(0,1fr))`, pfGap: m ? '8px 6px' : '14px 12px', pf, pfRef: this.pfRef, pfCount: p.portfolio.length,
+      hasRv: p.reviews > 0, noRv: !(p.reviews > 0), rv: D.reviews,
+      date, time, pkg, setDate: iso => this.setState({ date: iso, time: '' }), setTime: t => this.setState({ time: t }), setPkg: id => this.setState({ pkg: id }),
+      asideRef: this.asideRef, asideCta: book, asideOff: aOff, asideLabel: nosvc ? 'Nhắn hỏi giá' : ready ? `Gửi yêu cầu · ${whenShort}` : 'Chọn ngày và giờ để tiếp tục',
+      aBg: aOff ? 'var(--bg-sunken)' : 'var(--gold-400)', aFg: aOff ? 'var(--text-tertiary)' : 'var(--gold-900)', aCur: aOff ? 'not-allowed' : 'pointer',
+      sKind: nosvc ? 'nosvc' : ready ? 'date' : 'none', whenShort, safe: this.props.safe || 0, sShow: this.props.forceSticky || (this.state.show && !sheet), markSafe: !!this.props.markSafe,
+      stickyCta: k => k === 'none' ? open('date', true) : k === 'date' ? toWiz() : open('req'),
+      sheetOpen: !!sheet && sheet !== 'done', sheet, sheetRef: this.sheetRef, dateOnly: this.state.dateOnly, shMode: m ? 'sheet' : 'dialog',
+      shJ: m ? 'flex-end' : 'center', shPad: m ? '0' : '24px', shW: m ? '100%' : 'min(520px,100%)', shH: m ? (sheet === 'sent' ? 'auto' : 'min(88vh,720px)') : 'min(720px,calc(100vh - 48px))', shR: m ? 'var(--fg-radius-xl) var(--fg-radius-xl) 0 0' : 'var(--fg-radius-lg)',
+      setStep: s => s === 'done' ? this.setState({ sheet: '' }) : s === 'req' && !nosvc && this.props.onBook ? (this.setState({ sheet: '' }), toWiz()) : this.setState({ sheet: s }),
+      closeSheet: () => { this.setState({ sheet: '' }); this.prev && this.prev.focus && this.prev.focus({ preventScroll: true }); },
+      dlgKey: e => { if (e.key === 'Escape') this.setState({ sheet: '' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

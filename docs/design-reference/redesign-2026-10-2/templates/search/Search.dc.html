@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Tìm kiếm F" description="Trang tìm kiếm không bản đồ: thanh tìm, bộ lọc bên, tab Nghệ sĩ / Album dự án; điện thoại + máy tính, sáng/tối, đủ trạng thái." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1d1b16">
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="width:720px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Quyết định UX</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Tách hẳn khỏi Bản đồ F. Trang này dành cho việc duyệt bằng ảnh, không có bản đồ. Muốn xem theo vị trí thì vào tab "Bản đồ F" trên menu.</li>
+<li>Bộ lọc nằm cố định ở cột trái trên máy tính, luôn mở sẵn nên không cần popover hay cửa sổ nào. Cột này dùng lại đúng khối lọc của Bản đồ F.</li>
+<li>Hai tab kết quả: "Nghệ sĩ" (ArtistCard) và "Album dự án". Tab album cho khách xem theo buổi chụp cụ thể, ví dụ một bộ ảnh cưới hay kỷ yếu, rồi mới tới nghệ sĩ.</li>
+<li>Bộ lọc đang bật hiện thành chip có × ngay trên kết quả. Khi đã chọn ngày, thẻ nghệ sĩ gắn chip "Còn lịch".</li>
+<li>Điện thoại: dùng nút "Bộ lọc (n)" và ô Sắp xếp, cùng một hàng tag loại nhà cung cấp chọn nhanh. Bộ lọc mở toàn màn hình, nút "Xem 128 kết quả" cố định dưới cùng.</li>
+<li>Chuyển động:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Thẻ nhấc 3px khi rê chuột.</li><li>Ảnh trong album phóng nhẹ khi rê chuột.</li><li>Lưới hiện lần lượt khi đổi tab.</li><li>Tất cả tắt khi bật prefers-reduced-motion.</li></ul></li>
+</ol>
+</div>
+<div style="width:620px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Component</div>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Dùng lại:</strong> FgrapherProvider, LogoFull, SearchInput, FilterSidebar, NativeSelect, DateField, Tag, Badge, Button, ArtistCard, Skeleton, Alert, WaitlistForm, Footer.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Tạo mới</strong> (chỉ dùng token của design system):</p>
+<ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.5">
+<li>Thẻ Album dự án: design system chưa có thẻ cho một bộ ảnh.</li>
+<li>Tab kết quả và chip bộ lọc có ×.</li>
+</ul>
+<p style="margin:0;font-size:14px;line-height:1.5;color:#6b665c">Ảnh là ảnh giữ chỗ.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Máy tính · 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:80px 64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ · sáng</span><iframe data-fit="1" src="SearchPage.dc.html?theme=light" style="width:1440px;height:1600px;border:1px solid #d9d4ca;border-radius:12px" title="Máy tính sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Album dự án · tối</span><iframe data-fit="1" src="SearchPage.dc.html?theme=dark&amp;tab=albums" style="width:1440px;height:1600px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Máy tính tối album"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại · 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:2800px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ · sáng</span><iframe src="SearchPage.dc.html?theme=light" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Điện thoại sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ · tối</span><iframe src="SearchPage.dc.html?theme=dark" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Điện thoại tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Album dự án</span><iframe src="SearchPage.dc.html?theme=light&amp;tab=albums" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Album"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Bộ lọc · sáng</span><iframe src="SearchPage.dc.html?theme=light&amp;view=filters" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Bộ lọc sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Bộ lọc · tối</span><iframe src="SearchPage.dc.html?theme=dark&amp;view=filters" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Bộ lọc tối"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Trạng thái</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:2800px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải</span><iframe src="SearchPage.dc.html?theme=light&amp;state=loading" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Đang tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Không có kết quả</span><iframe src="SearchPage.dc.html?theme=light&amp;state=empty" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi mạng · tối</span><iframe src="SearchPage.dc.html?theme=dark&amp;state=error" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · album</span><iframe src="SearchPage.dc.html?theme=light&amp;state=long&amp;tab=albums" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Nội dung dài"></iframe></div>
+</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:80px 64px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nhiều bộ lọc đang bật · nội dung dài</span><iframe src="SearchPage.dc.html?theme=light&amp;state=filters" style="width:1440px;height:900px;border:1px solid #d9d4ca;border-radius:12px" title="Nhiều bộ lọc"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Không có kết quả · tối</span><iframe src="SearchPage.dc.html?theme=dark&amp;state=empty" style="width:1440px;height:900px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Trống máy tính"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải</span><iframe src="SearchPage.dc.html?theme=light&amp;state=loading" style="width:1440px;height:900px;border:1px solid #d9d4ca;border-radius:12px" title="Đang tải máy tính"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi mạng</span><iframe src="SearchPage.dc.html?theme=light&amp;state=error" style="width:1440px;height:900px;border:1px solid #d9d4ca;border-radius:12px" title="Lỗi máy tính"></iframe></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 15000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

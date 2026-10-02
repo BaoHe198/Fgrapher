@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section data-surface="darkroom" aria-labelledby="pv-name" style="position:relative;background:var(--dr-bg);color:var(--dr-text)">
+<div style="position:relative;height:clamp(520px,76vh,900px);overflow:hidden">
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}"><img data-dev="" src="{{ p.hero }}" alt="{{ p.heroAlt }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%" data-focus="{{ focus }}"></sc-if>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-raised)"></span></sc-if>
+<sc-if value="{{ err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;color:var(--dr-text-3);font-size:14px"><x-import component-from-global-scope="Fgrapher.FrameMark" size="56" hint-size="56px,56px"></x-import><span style="color:var(--dr-text-2)">Không tải được ảnh đầu trang</span></div></sc-if>
+<span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:72%;background:linear-gradient(to top,var(--dr-bg) 0%,hsl(30 14% 5% / .88) 42%,hsl(30 14% 5% / .5) 70%,transparent 100%)"></span>
+<div style="position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;gap:12px;padding:20px clamp(16px,4vw,48px);font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--dr-text)"><span style="padding:6px 8px;background:hsl(30 14% 5% / .55);border-radius:4px">KHUNG 00 · HỒ SƠ</span><sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ viewFull }}" style="padding:6px 10px;border:1px solid var(--dr-line-2);border-radius:4px;background:hsl(30 14% 5% / .55);color:var(--dr-text);font:600 12px/1 var(--font-mono);letter-spacing:.12em;cursor:zoom-in">XEM NGUYÊN KHUNG</button></sc-if></div>
+<div style="position:absolute;left:0;right:0;bottom:0;max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,48px) clamp(24px,3.5vw,48px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px 40px">
+<div style="display:flex;flex-direction:column;gap:14px;min-width:0;flex:1 1 560px">
+<span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:15px;color:var(--dr-text-2)"><span>{{ p.roleTxt }}</span><span aria-hidden="true">·</span><span>{{ p.area }}</span><span aria-hidden="true">·</span><span style="display:inline-flex;align-items:center;gap:6px;color:var(--dr-accent);font-weight:600"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Đã xác minh</span></span>
+<h1 id="pv-name" lang="vi" style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(44px,calc(16px + 5.6vw),112px);line-height:.92;letter-spacing:-.035em;text-wrap:balance;overflow-wrap:anywhere">{{ p.name }}</h1>
+<sc-if value="{{ hasStats }}" hint-placeholder-val="{{ true }}"><dl style="margin:0;display:flex;flex-wrap:wrap;gap:12px 32px"><sc-for list="{{ stats }}" as="s" hint-placeholder-count="3"><div style="display:flex;flex-direction:column-reverse;gap:4px"><dt style="font-size:13px;color:var(--dr-text-2)">{{ s.label }}</dt><dd style="margin:0;font:600 28px/1 var(--font-display);font-variant-numeric:tabular-nums">{{ s.value }}</dd></div></sc-for></dl></sc-if>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ primary }}">{{ primaryLabel }}</x-import><sc-if value="{{ showMsg }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="lg">Nhắn tin</x-import></sc-if><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="lg" aria-label="Lưu hồ sơ">Lưu</x-import></div>
+</div>
+</div>
+<div aria-hidden="true" style="position:relative;height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);background:var(--dr-bg);font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--dr-text-3)"><span style="position:absolute;left:0;right:0;top:4px;height:4px;background:repeating-linear-gradient(90deg,var(--dr-line-2) 0 8px,transparent 8px 20px)"></span><span>00A</span><span>{{ nextLabel }} ▸</span><span style="position:absolute;left:0;right:0;bottom:4px;height:4px;background:repeating-linear-gradient(90deg,var(--dr-line-2) 0 8px,transparent 8px 20px)"></span></div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;p&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Profile&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;loading&quot;,&quot;error&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onPrimary&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { this.f(); } componentDidUpdate() { this.f(); }
+  f() { document.querySelectorAll('img[data-focus]').forEach(i => { i.style.objectPosition = i.dataset.focus; }); }
+  renderVals() {
+    const p = this.props.p || {}, st = this.props.state || '';
+    return {
+      p, focus: p.focus || '50% 40%', ok: st !== 'loading' && st !== 'error', loading: st === 'loading', err: st === 'error',
+      stats: p.stats || [], hasStats: (p.stats || []).length > 0,
+      primaryLabel: p.kind === 'costume' ? 'Nhắn tin để thuê' : 'Đặt lịch', showMsg: p.kind !== 'costume',
+      primary: () => this.props.onPrimary && this.props.onPrimary(), nextLabel: p.kind === 'costume' ? 'TRANG PHỤC' : 'PORTFOLIO',
+      viewFull: e => { const im = e.currentTarget.closest('section').querySelector('img[data-dev]'); window.fgKit && im && window.fgKit.lightbox(im, { meta: () => `KHUNG 00 · ẢNH ĐẦU TRANG · ${p.name.toUpperCase()}` }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

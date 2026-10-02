@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="font-family:var(--font-body);color:var(--text-primary)">
+<section aria-labelledby="pr-h" data-surface="darkroom" style="background:var(--dr-bg);color:var(--dr-text)"><div style="max-width:1080px;margin:0 auto;padding:{{ heroPad }};display:flex;flex-direction:column;gap:16px">
+<span style="font-size:14px;font-weight:600;color:var(--dr-accent)">Bảng giá cho provider</span>
+<h1 id="pr-h" style="margin:0;max-width:760px;font:600 clamp(32px,4.4vw,60px)/1.02 var(--font-display);letter-spacing:-.03em;text-wrap:balance">Miễn phí trong giai đoạn ra mắt</h1>
+<p style="margin:0;max-width:640px;font-size:16px;line-height:1.6;color:var(--dr-text-2);text-wrap:pretty">Fgrapher chưa thu phí đăng hồ sơ, phí nhận yêu cầu hay phí trên mỗi lượt đặt lịch. Khi có thay đổi, bạn được báo trước ít nhất 30 ngày qua email và thông báo trong ứng dụng.</p>
+<div><button type="button" style="min-height:52px;padding:0 24px;border:0;border-radius:var(--fg-radius-md);background:var(--gold-400);color:var(--gold-900);font:700 16px/1 var(--font-body);cursor:pointer">Tạo hồ sơ provider</button></div>
+</div></section>
+<section aria-labelledby="pr-b" style="max-width:1080px;margin:0 auto;padding:{{ secPad }}"><h2 id="pr-b" style="margin:0 0 16px;font:600 clamp(22px,2.2vw,30px)/1.2 var(--font-display);letter-spacing:-.02em">Bạn dùng được những gì</h2>
+<ul style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px"><sc-for list="{{ benefits }}" as="b" hint-placeholder-count="6"><li style="display:flex;flex-direction:column;gap:6px;padding:18px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:16px;line-height:1.3">{{ b.t }}</strong><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">{{ b.d }}</span></li></sc-for></ul></section>
+<section aria-labelledby="pr-g" style="max-width:1080px;margin:0 auto;padding:{{ secPad2 }}"><h2 id="pr-g" style="margin:0 0 6px;font:600 clamp(22px,2.2vw,30px)/1.2 var(--font-display);letter-spacing:-.02em">Áp dụng cho</h2><p style="margin:0 0 16px;font-size:15px;color:var(--text-secondary)">Mọi provider đã xác minh danh tính, cá nhân hoặc doanh nghiệp.</p>
+<ul style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr));gap:12px"><sc-for list="{{ groups }}" as="g" hint-placeholder-count="6"><li style="display:flex;align-items:center;gap:12px;padding:8px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md);background:var(--bg-surface)"><span style="flex:none;width:48px;height:48px;border-radius:var(--fg-radius-sm);overflow:hidden;background:var(--bg-sunken)"><sc-if value="{{ g.img }}" hint-placeholder-val="{{ true }}"><img src="{{ g.img }}" alt="" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.88) contrast(1.04)"></sc-if></span><span style="font-size:15px;font-weight:600;line-height:1.3">{{ g.label }}</span></li></sc-for></ul></section>
+<section aria-labelledby="pr-f" style="max-width:1080px;margin:0 auto;padding:{{ secPad3 }}"><h2 id="pr-f" style="margin:0 0 12px;font:600 clamp(22px,2.2vw,30px)/1.2 var(--font-display);letter-spacing:-.02em">Câu hỏi thường gặp</h2>
+<div style="display:flex;flex-direction:column;border-top:1px solid var(--border-subtle)"><sc-for list="{{ faq }}" as="q" hint-placeholder-count="5"><details style="border-bottom:1px solid var(--border-subtle)"><summary style="min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 0;font-size:16px;font-weight:600;line-height:1.35;cursor:pointer;list-style:none"><span>{{ q.q }}</span><span aria-hidden="true" style="flex:none;width:44px;height:44px;display:grid;place-items:center;font-size:20px;color:var(--text-secondary)">+</span></summary><p style="margin:0 0 18px;max-width:720px;font-size:15px;line-height:1.6;color:var(--text-secondary)">{{ q.a }}</p></details></sc-for></div>
+<p style="margin:20px 0 0;font-size:15px;color:var(--text-secondary)">Câu hỏi khác? <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-weight:600">Liên hệ hỗ trợ</a></p></section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;m&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;mkt&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;feed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const D = window.mcData, m = !!this.props.m, mkt = !!this.props.mkt, feed = !!this.props.feed;
+    return {
+      heroPad: m ? '36px 16px 32px' : '80px 24px 72px', secPad: m ? '32px 16px 8px' : '64px 24px 16px', secPad2: m ? '32px 16px 8px' : '48px 24px 16px', secPad3: m ? '32px 16px 48px' : '48px 24px 96px',
+      benefits: [
+        { t: 'Hồ sơ công khai và portfolio', d: 'Trang hồ sơ có ảnh đầu trang, gói dịch vụ, đánh giá và album.' },
+        { t: 'Nhận yêu cầu đặt lịch', d: 'Khách gửi yêu cầu kèm ngày giờ, địa điểm. Bạn xác nhận hoặc đề xuất giờ khác.' },
+        { t: 'Gửi đề xuất trên Đặt lịch F', d: 'Trả lời các yêu cầu công khai phù hợp vai trò và khu vực của bạn.' },
+        { t: 'Lịch trống và nhắc lịch', d: 'Đánh dấu ngày nghỉ, ngày kín. Nhận nhắc lịch qua Zalo và email.' },
+        { t: 'Hiện trên Tìm kiếm F và Bản đồ F', d: 'Khách lọc theo vai trò, khu vực, ngày còn lịch và ngân sách.' },
+        { t: 'Huy hiệu đã xác minh', d: 'Hiện sau khi hoàn tất xác minh danh tính.' },
+        mkt && { t: 'Đăng bán, cho thuê trên Chợ F', d: 'Đăng thiết bị kèm tình trạng, giá bán hoặc giá thuê theo ngày.' },
+        feed && { t: 'Đăng bài trên Cộng đồng F', d: 'Chia sẻ bộ ảnh, tìm cộng sự cho dự án.' }
+      ].filter(Boolean),
+      groups: [...D.roles.map(r => ({ label: r.label, img: r.img.replace('600/750', '120/120') })), ...(mkt ? [{ label: 'Người bán thiết bị', img: '' }] : [])],
+      faq: [
+        { q: 'Khi nào Fgrapher bắt đầu thu phí?', a: 'Chưa có ngày cụ thể. Trước khi áp dụng bất kỳ khoản phí nào, Fgrapher công bố mức phí và báo trước ít nhất 30 ngày. Các lịch đã xác nhận trước ngày áp dụng không bị tính phí.' },
+        { q: 'Tôi có bị trừ tiền tự động không?', a: 'Không. Fgrapher không lưu thẻ hay tài khoản ngân hàng của provider trong giai đoạn này, nên không có khoản trừ tự động nào.' },
+        { q: 'Đặt cọc hoạt động thế nào?', a: 'Fgrapher chưa thu hộ đặt cọc. Bạn và khách tự thoả thuận mức cọc, thời hạn và hình thức nhận. Nên ghi rõ trong đề xuất hoặc tin nhắn để hai bên cùng đối chiếu.' },
+        { q: 'Khách thanh toán cho tôi bằng cách nào?', a: 'Khách thanh toán trực tiếp cho bạn bằng chuyển khoản hoặc tiền mặt. Fgrapher không giữ tiền và không thu phần trăm trên giá trị buổi chụp.' },
+        { q: 'Huỷ lịch thì xử lý ra sao?', a: 'Chính sách huỷ và hoàn cọc do bạn đặt trong gói dịch vụ. Khách thấy chính sách này trước khi gửi yêu cầu.' },
+        mkt && { q: 'Đăng bán trên Chợ F có mất phí không?', a: 'Trong giai đoạn ra mắt, đăng tin và giao dịch trên Chợ F cũng miễn phí. Người mua và người bán tự thoả thuận thanh toán.' }
+      ].filter(Boolean)
+    };
+  }
+}
+</script>
+</body>
+</html>

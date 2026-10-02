@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ rootRef }}" data-surface="darkroom" style="position:relative;width:100%;height:100%;overflow:hidden;background:var(--dr-bg);color:var(--dr-text);font-family:var(--font-body)">
+<sc-if value="{{ isPhoto }}" hint-placeholder-val="{{ true }}"><img data-dev="" src="{{ src }}" alt="{{ alt }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></sc-if>
+<sc-if value="{{ isSky }}" hint-placeholder-val="{{ false }}"><div data-sky="{{ sky }}" aria-hidden="true" style="position:absolute;inset:0"><span data-sunball="" style="position:absolute;width:clamp(48px,6vw,88px);aspect-ratio:1;border-radius:999px;transform:translate(-50%,-50%)"></span><span style="position:absolute;left:0;right:0;bottom:0;height:26%;background:var(--dr-bg);clip-path:polygon(0 38%,14% 22%,28% 34%,44% 12%,60% 30%,76% 18%,100% 32%,100% 100%,0 100%)"></span></div></sc-if>
+<sc-if value="{{ isMap }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="position:absolute;inset:0;background-color:var(--dr-surface);background-image:linear-gradient(90deg,var(--dr-line-2) 1px,transparent 1px),linear-gradient(var(--dr-line-2) 1px,transparent 1px);background-size:64px 64px"><span style="position:absolute;left:-10%;top:56%;width:130%;height:18px;background:var(--dr-raised);transform:rotate(-9deg)"></span><span style="position:absolute;left:38%;top:-10%;width:14px;height:130%;background:var(--dr-raised);transform:rotate(14deg)"></span><span style="position:absolute;left:64%;top:6%;width:40%;height:40%;border-radius:44% 0 0 60%;background:color-mix(in srgb,var(--info) 22%,var(--dr-surface))"></span><span style="position:absolute;left:10%;top:14%;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--dr-text-3)">Phường Thủ Đức</span><span style="position:absolute;left:46%;top:47%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%)"><span style="padding:6px 10px;border-radius:6px;background:var(--gold-400);color:var(--gold-900);font:700 12px/1 var(--font-mono);letter-spacing:.08em;white-space:nowrap">{{ pinLabel }}</span><span style="width:2px;height:22px;background:var(--gold-400)"></span><span style="width:10px;height:10px;border-radius:999px;background:var(--gold-400);box-shadow:0 0 0 6px color-mix(in srgb,var(--gold-400) 30%,transparent)"></span></span></div></sc-if>
+<sc-if value="{{ isSheet }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:3px;padding:3px;background:var(--dr-line)"><sc-for list="{{ sheet }}" as="s" hint-placeholder-count="6"><span style="position:relative;display:grid;place-items:center;padding:6px;background:var(--dr-surface)"><img src="{{ s.src }}" alt="" style="display:block;max-width:100%;max-height:100%"><span style="position:absolute;left:8px;bottom:6px;font:600 12px/1 var(--font-mono);color:var(--dr-text);text-shadow:0 1px 2px var(--dr-bg)">{{ s.n }}</span></span></sc-for></div></sc-if>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-raised)"></span></sc-if>
+<span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(to top,hsl(30 14% 5% / .86),transparent)"></span>
+<div style="position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:6px;padding:clamp(14px,2vw,28px)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--dr-text-2)">{{ kicker }}</span><sc-if value="{{ showCap }}" hint-placeholder-val="{{ true }}"><span style="max-width:560px;font:500 clamp(15px,1.3vw,18px)/1.45 var(--font-body);color:var(--dr-text);text-wrap:pretty">{{ caption }}</span></sc-if></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:760},&quot;step&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;},&quot;v&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;compact&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  componentDidMount() { this.paint(); } componentDidUpdate() { this.paint(); }
+  paint() {
+    const r = this.rootRef.current; if (!r) return; const sky = r.querySelector('[data-sky]'); if (!sky) return;
+    const [x, y, warm] = sky.dataset.sky.split(',').map(Number);
+    sky.style.background = warm > .6 ? 'linear-gradient(to bottom,var(--green-900) 0%,var(--gold-700) 55%,var(--gold-300) 100%)' : warm > .2 ? 'linear-gradient(to bottom,var(--green-800) 0%,var(--green-600) 60%,var(--gold-200) 100%)' : 'linear-gradient(to bottom,var(--green-950) 0%,var(--green-900) 70%,var(--green-800) 100%)';
+    const b = r.querySelector('[data-sunball]'); if (b) { b.style.left = x + '%'; b.style.top = y + '%'; b.style.background = warm > .6 ? 'var(--gold-300)' : warm > .2 ? 'var(--gold-100)' : 'var(--neutral-300)'; b.style.boxShadow = warm > .2 ? '0 0 60px 20px color-mix(in srgb,var(--gold-300) 45%,transparent)' : '0 0 30px 6px hsl(0 0% 100% / .15)'; }
+  }
+  renderVals() {
+    const step = this.props.step || 1, v = this.props.v || {}, st = this.props.state || '', S = window.fgSun;
+    const img = (s, w, h) => `https://picsum.photos/seed/fgbv-${s}/${w}/${h}`;
+    let mode = 'photo', src = img('pk' + (v.pkgIdx ?? 1), 1200, 1500), alt = 'Ảnh mẫu của gói', kicker = `KHUNG 0${step}A · ${['GÓI', 'NGÀY', 'GIỜ', 'ĐỊA ĐIỂM', 'GHI CHÚ', 'XEM LẠI'][step - 1]}`, caption = '', sky = '50,40,0';
+    if (step === 1) { caption = v.pkgName ? `${v.pkgName} · ảnh mẫu từ album “${v.pkgAlbum}”` : 'Chọn một gói để xem ảnh mẫu.'; if (v.custom) { mode = 'sheet'; caption = 'Gói tùy chỉnh: nghệ sĩ báo giá sau khi đọc yêu cầu. Đây là vài khung từ portfolio.'; } }
+    if (step === 2) { src = img('month10', 1200, 1500); alt = 'Ảnh chụp tháng 10'; caption = 'Tháng 10 ở TP. Hồ Chí Minh: mưa chiều thường tạnh trước 17:00. Ảnh của nghệ sĩ chụp ngày 14/10/2025, 16:52.'; }
+    if (step === 3) {
+      const t = v.time; const has = t && ['05:40', '05:45', '16:45', '16:50'].includes(t);
+      if (has) { src = img('gold' + t.replace(':', ''), 1200, 1500); alt = `Ảnh chụp lúc ${t}`; caption = `Ảnh của nghệ sĩ chụp lúc ${t}, 12/10/2025, cùng khu vực. Ánh sáng ngày bạn chọn sẽ gần như vậy.`; }
+      else if (S && v.date) { mode = 'sky'; const { sun } = S.slots(v.date, 10.85, 106.77); const m = t ? +t.slice(0, 2) * 60 + +t.slice(3) : Math.round((sun.rise + sun.set) / 2); const u = (m - sun.rise) / (sun.set - sun.rise); const inDay = u >= 0 && u <= 1; const x = 8 + Math.max(0, Math.min(1, u)) * 84, y = inDay ? 72 - 58 * Math.sin(Math.PI * u) : 82; const warm = !inDay ? 0 : (u < .12 || u > .86) ? 1 : .4; sky = `${x},${y},${warm}`; caption = t ? `Minh hoạ ánh sáng lúc ${t}. Nghệ sĩ chưa có ảnh chụp đúng khung giờ này.` : 'Chọn một khung giờ để xem ánh sáng.'; }
+    }
+    if (step === 4) { mode = 'map'; caption = v.where || 'Chọn địa điểm chụp.'; }
+    if (step === 5) { src = img('ref', 1200, 1500); alt = 'Ảnh tham khảo'; caption = v.note ? '“' + v.note.slice(0, 120) + (v.note.length > 120 ? '…' : '') + '”' : 'Mô tả thêm giúp nghệ sĩ chuẩn bị đúng.'; }
+    if (step === 6) { mode = 'sheet'; caption = 'Tờ in thử buổi chụp của bạn.'; }
+    return {
+      rootRef: this.rootRef, loading: st === 'loading', isPhoto: st !== 'loading' && mode === 'photo', isSky: st !== 'loading' && mode === 'sky', isMap: st !== 'loading' && mode === 'map', isSheet: st !== 'loading' && mode === 'sheet',
+      src, alt, sky, kicker, caption, showCap: !!caption && !this.props.compact, pinLabel: v.atStudio ? 'STUDIO CỦA NGHỆ SĨ' : 'ĐỊA ĐIỂM CỦA BẠN',
+      sheet: [0, 1, 2, 3, 4, 5].map(i => ({ src: img('sh' + i, i % 2 ? 360 : 280, i % 2 ? 260 : 360), n: '0' + (i + 1) + 'A' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

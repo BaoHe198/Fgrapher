@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}"><sc-if value="{{ isRow }}" hint-placeholder-val="{{ true }}"><div aria-hidden="true" style="display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px"><span style="aspect-ratio:4/5;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></span><span style="display:flex;flex-direction:column;gap:8px;padding-top:4px"><span style="height:16px;width:80%;border-radius:4px;background:var(--bg-sunken)"></span><span style="height:12px;width:60%;border-radius:4px;background:var(--bg-sunken)"></span><span style="margin-top:auto;height:14px;width:45%;border-radius:4px;background:var(--bg-sunken)"></span><span style="height:12px;width:35%;border-radius:4px;background:var(--bg-sunken)"></span></span></div></sc-if><sc-if value="{{ isCol }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="display:flex;flex-direction:column;gap:10px"><span style="aspect-ratio:4/5;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></span><span style="height:16px;width:75%;border-radius:4px;background:var(--bg-sunken)"></span><span style="height:12px;width:55%;border-radius:4px;background:var(--bg-sunken)"></span><span style="height:14px;width:40%;border-radius:4px;background:var(--bg-sunken)"></span></div></sc-if></sc-if>
+<sc-if value="{{ showRow }}" hint-placeholder-val="{{ true }}"><a href="#" onClick="{{ open }}" aria-label="{{ aria }}" style="display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;color:var(--text-primary);text-decoration:none;font-family:var(--font-body);border-radius:var(--fg-radius-md);outline-offset:4px">
+<span style="position:relative;display:block;aspect-ratio:4/5;border-radius:var(--fg-radius-md);overflow:hidden;background:var(--bg-sunken)"><sc-if value="{{ hasImg }}" hint-placeholder-val="{{ true }}"><img data-dev="" src="{{ a.cover }}" alt="" loading="{{ loadMode }}" sizes="112px" style="display:block;width:100%;height:100%;object-fit:cover"></sc-if><sc-if value="{{ noImg }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;padding:8px;text-align:center;font-size:12px;line-height:1.3;color:var(--text-secondary)"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="m21 16-5-5-8 8"></path></svg>Chưa có ảnh</span></sc-if></span>
+<span style="display:flex;flex-direction:column;gap:4px;min-width:0;padding:2px 0">
+<strong style="font:600 16px/1.3 var(--font-body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere">{{ a.name }}</strong>
+<span style="font-size:14px;line-height:1.4;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.role1 }} · {{ a.place }}</span>
+<span style="margin-top:auto;display:flex;flex-direction:column;gap:4px">
+<span style="font-size:15px;line-height:1.3"><sc-if value="{{ hasPrice }}" hint-placeholder-val="{{ true }}"><span style="color:var(--text-secondary)">Từ </span><strong style="font-variant-numeric:tabular-nums">{{ a.fromTxt }}</strong></sc-if><sc-if value="{{ noPrice }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-secondary)">Hỏi giá trực tiếp</span></sc-if></span>
+<span style="display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.3;color:var(--text-secondary);min-width:0"><sc-if value="{{ hasRating }}" hint-placeholder-val="{{ true }}"><span style="flex:none;color:var(--text-primary);font-weight:600">★ {{ a.ratingTxt }} <span style="font-weight:400;color:var(--text-secondary)">({{ a.reviews }})</span></span></sc-if><sc-if value="{{ isNew }}" hint-placeholder-val="{{ false }}"><span style="flex:none;padding:3px 7px;border-radius:4px;background:var(--bg-sunken);color:var(--text-primary);font-weight:600">Mới</span></sc-if><sc-if value="{{ hasStatus }}" hint-placeholder-val="{{ true }}"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ statusColor }}">{{ status }}</span></sc-if></span>
+</span>
+</span>
+</a></sc-if>
+<sc-if value="{{ showCol }}" hint-placeholder-val="{{ false }}"><a href="#" onClick="{{ open }}" aria-label="{{ aria }}" style="display:flex;flex-direction:column;gap:10px;min-width:0;color:var(--text-primary);text-decoration:none;font-family:var(--font-body);border-radius:var(--fg-radius-md);outline-offset:4px">
+<span style="position:relative;display:block;aspect-ratio:4/5;border-radius:var(--fg-radius-md);overflow:hidden;background:var(--bg-sunken)"><sc-if value="{{ hasImg }}" hint-placeholder-val="{{ true }}"><img data-dev="" src="{{ a.cover }}" alt="" loading="{{ loadMode }}" sizes="(max-width: 767px) 50vw, (max-width: 1439px) 33vw, 320px" style="display:block;width:100%;height:100%;object-fit:cover"></sc-if><sc-if value="{{ noImg }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:8px;font-size:13px;color:var(--text-secondary)"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="m21 16-5-5-8 8"></path></svg>Chưa có ảnh</span></sc-if>
+<sc-if value="{{ hasRating }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;right:8px;top:8px;padding:5px 8px;border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 13px/1 var(--font-body);box-shadow:var(--shadow-sm)">★ {{ a.ratingTxt }} <span style="font-weight:400;color:var(--text-secondary)">({{ a.reviews }})</span></span></sc-if>
+<sc-if value="{{ isNew }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:8px;top:8px;padding:5px 8px;border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 13px/1 var(--font-body);box-shadow:var(--shadow-sm)">Mới</span></sc-if>
+<sc-if value="{{ hasDate }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:8px;top:8px;padding:5px 8px;border-radius:999px;background:var(--success-bg);color:var(--success);font:600 13px/1 var(--font-body)">Còn lịch {{ dateShort }}</span></sc-if>
+</span>
+<span style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<strong style="min-height:2.6em;font:600 16px/1.3 var(--font-body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere">{{ a.name }}</strong>
+<span style="font-size:14px;line-height:1.4;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.role1 }} · {{ a.place }}</span>
+<span style="font-size:15px;line-height:1.3;margin-top:2px"><sc-if value="{{ hasPrice }}" hint-placeholder-val="{{ true }}"><span style="color:var(--text-secondary)">Từ </span><strong style="font-variant-numeric:tabular-nums">{{ a.fromTxt }}</strong></sc-if><sc-if value="{{ noPrice }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-secondary)">Hỏi giá trực tiếp</span></sc-if></span>
+</span>
+</a></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:358,&quot;height&quot;:160},&quot;a&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Provider&quot;},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;row&quot;,&quot;col&quot;],&quot;default&quot;:&quot;row&quot;,&quot;tsType&quot;:&quot;'row'|'col'&quot;},&quot;date&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;loading&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onOpen&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const a = this.props.a || {}, row = (this.props.layout || 'row') === 'row', ld = this.props.state === 'loading', D = window.mcData;
+    const date = this.props.date || '';
+    const status = date ? `Còn lịch ${D ? D.dm(date) : date}` : a.resp != null ? `Phản hồi ~${a.resp} giờ` : '';
+    return {
+      hasImg: !!a.cover, noImg: !a.cover, loadMode: this.props.eager ? 'eager' : 'lazy',
+      a, isLoading: ld, isRow: row, isCol: !row, showRow: !ld && row, showCol: !ld && !row,
+      hasPrice: a.from != null, noPrice: a.from == null, hasRating: a.reviews > 0, isNew: !(a.reviews > 0),
+      hasStatus: !!status, status, statusColor: date ? 'var(--success)' : 'var(--text-secondary)', hasDate: !!date && !row, dateShort: D && date ? D.dm(date) : '',
+      aria: `${a.name}, ${a.role1}, ${a.place}${a.from != null ? ', từ ' + a.fromTxt : ''}${a.reviews > 0 ? ', ' + a.ratingTxt + ' sao' : ''}`,
+      open: e => { e.preventDefault(); this.props.onOpen && this.props.onOpen(a.id); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ rootRef }}" style="display:flex;flex-direction:column;gap:22px;color:var(--text-primary);font-family:var(--font-body)">
+<p style="margin:0;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--text-secondary)"><span><strong style="color:var(--text-primary)">Mặt trời mọc {{ rise }} · lặn {{ set }}</strong> tại {{ place }}</span><span>Ngày {{ dateTxt }} · giờ Việt Nam (UTC+7)</span></p>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><div aria-busy="true" aria-label="Đang tải khung giờ" style="display:flex;flex-direction:column;gap:14px"><span style="display:block;height:190px;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></span><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="8"><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:52px;border-radius:8px" hint-size="100%,52px"></x-import></sc-for></div></div></sc-if>
+<sc-if value="{{ isErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-radius:var(--fg-radius-md);background:var(--danger-bg)"><span style="font-size:15px;line-height:1.5"><strong style="color:var(--danger)">Không tải được lịch trống.</strong> Các lựa chọn trước vẫn được giữ.</span><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="sm" on-click="{{ retry }}">Thử lại</x-import></div></sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px;padding:20px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-md)"><strong style="font-size:16px">Ngày {{ dateTxt }} đã kín lịch</strong><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">Chọn một ngày gần nhất còn giờ trống:</span><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ near }}" as="n" hint-placeholder-count="3"><button type="button" onClick="{{ n.go }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer">{{ n.label }}</button></sc-for></div></div></sc-if>
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<div aria-hidden="true" style="position:relative;height:clamp(170px,18vw,230px);margin:0 6px">
+<svg viewBox="0 0 1000 220" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible"><defs><linearGradient id="bv-arc" x1="0" x2="1"><stop offset="0" stop-color="var(--gold-400)"></stop><stop offset=".22" stop-color="var(--gold-200)"></stop><stop offset=".78" stop-color="var(--gold-200)"></stop><stop offset="1" stop-color="var(--gold-400)"></stop></linearGradient></defs><line x1="0" y1="176" x2="1000" y2="176" stroke="var(--border-default)" stroke-width="1.5" vector-effect="non-scaling-stroke"></line><path d="{{ arcD }}" fill="none" stroke="url(#bv-arc)" stroke-width="3" vector-effect="non-scaling-stroke"></path><rect x="{{ nightX }}" y="176" width="{{ nightW }}" height="44" fill="var(--bg-sunken)"></rect><circle data-sun="" cx="{{ sunX }}" cy="{{ sunY }}" r="9" fill="var(--gold-400)" stroke="var(--bg-page)" stroke-width="3" vector-effect="non-scaling-stroke"></circle></svg>
+<span data-lx="{{ riseX }}" style="position:absolute;top:184px;transform:translateX(-50%);font:600 12px/1 var(--font-mono);color:var(--text-secondary);white-space:nowrap">↑ {{ rise }}</span>
+<span data-lx="{{ setX }}" style="position:absolute;top:184px;transform:translateX(-50%);font:600 12px/1 var(--font-mono);color:var(--text-secondary);white-space:nowrap">↓ {{ set }}</span>
+<sc-for list="{{ marks }}" as="k" hint-placeholder-count="12"><button type="button" tabindex="-1" data-mk="{{ k.st }}" data-lx="{{ k.x }}" data-y="{{ k.y }}" onClick="{{ k.pick }}" style="position:absolute;transform:translate(-50%,-50%);width:18px;height:18px;padding:0;border:2px solid var(--text-primary);border-radius:999px;background:var(--bg-page);cursor:pointer;transition:transform 150ms,box-shadow 150ms"></button></sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-for list="{{ parts }}" as="p" hint-placeholder-count="3"><fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:8px"><legend style="margin-bottom:8px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">{{ p.label }}</legend><div role="radiogroup" aria-label="{{ p.label }}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px"><sc-for list="{{ p.items }}" as="s" hint-placeholder-count="4"><button type="button" role="radio" data-slot="{{ s.st }}" aria-checked="{{ s.on }}" aria-label="{{ s.aria }}" aria-disabled="{{ s.booked }}" onClick="{{ s.pick }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:54px;padding:6px 4px;border:1px solid var(--border-default);border-radius:var(--fg-radius-sm);background:var(--bg-surface);color:var(--text-primary);cursor:pointer;transition:background-color 150ms,box-shadow 150ms"><span style="font:600 15px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ s.t }}</span><sc-if value="{{ s.gold }}" hint-placeholder-val="{{ false }}"><span style="font:600 12px/1 var(--font-body)">Giờ vàng</span></sc-if><sc-if value="{{ s.full }}" hint-placeholder-val="{{ false }}"><span style="font:600 12px/1 var(--font-body)">Đã đặt</span></sc-if></button></sc-for></div></fieldset></sc-for>
+</div>
+<p style="margin:0;font-size:13px;line-height:1.5;color:var(--text-secondary)">Giờ vàng: khoảng 40 phút quanh lúc mặt trời mọc, và từ 90 đến 20 phút trước khi lặn. Nắng thấp, mềm và ấm. Giờ mọc/lặn tính theo ngày đã chọn tại khu vực của nghệ sĩ.</p>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:560},&quot;date&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;2026-10-17&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;value&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;loading&quot;,&quot;error&quot;,&quot;empty&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;place&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Phường Thủ Đức, Thành phố Hồ Chí Minh&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;lat&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:10.85,&quot;tsType&quot;:&quot;number&quot;},&quot;lng&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:106.77,&quot;tsType&quot;:&quot;number&quot;},&quot;seed&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;},&quot;onPick&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(t) =&gt; void&quot;},&quot;onDate&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(iso) =&gt; void&quot;},&quot;onRetry&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  componentDidMount() { this.paint(); this.t = setTimeout(() => this.forceUpdate(), 300); }
+  componentWillUnmount() { clearTimeout(this.t); }
+  componentDidUpdate() { this.paint(); }
+  paint() {
+    const r = this.rootRef.current; if (!r) return;
+    r.querySelectorAll('[data-lx]').forEach(el => { el.style.left = el.dataset.lx + '%'; if (el.dataset.y) el.style.top = el.dataset.y + '%'; });
+    r.querySelectorAll('[data-mk]').forEach(b => { const s = b.dataset.mk; b.style.background = s.includes('on') ? 'var(--brand-primary)' : s.includes('gold') ? 'var(--gold-400)' : 'var(--bg-page)'; b.style.borderColor = s.includes('on') ? 'var(--brand-primary)' : s.includes('booked') ? 'var(--border-strong)' : s.includes('gold') ? 'var(--gold-600)' : 'var(--text-primary)'; b.style.borderStyle = s.includes('booked') ? 'dashed' : 'solid'; b.style.boxShadow = s.includes('gold') && !s.includes('booked') ? '0 0 0 6px color-mix(in srgb,var(--gold-400) 30%,transparent),0 0 18px var(--gold-300)' : 'none'; b.style.transform = s.includes('on') ? 'translate(-50%,-50%) scale(1.35)' : 'translate(-50%,-50%)'; b.style.cursor = s.includes('booked') ? 'not-allowed' : 'pointer'; });
+    r.querySelectorAll('[data-slot]').forEach(b => { const s = b.dataset.slot; const on = s.includes('on'), bk = s.includes('booked'), g = s.includes('gold'); b.style.background = on ? 'var(--brand-primary)' : g && !bk ? 'color-mix(in srgb,var(--gold-400) 16%,var(--bg-surface))' : 'var(--bg-surface)'; b.style.color = on ? 'var(--text-on-brand)' : bk ? 'var(--text-tertiary)' : 'var(--text-primary)'; b.style.borderColor = on ? 'var(--brand-primary)' : g && !bk ? 'var(--gold-500)' : 'var(--border-default)'; b.style.borderStyle = bk ? 'dashed' : 'solid'; b.style.textDecoration = bk ? 'line-through' : 'none'; b.style.boxShadow = g && !bk && !on ? '0 0 14px color-mix(in srgb,var(--gold-400) 35%,transparent)' : 'none'; b.style.cursor = bk ? 'not-allowed' : 'pointer'; });
+  }
+  renderVals() {
+    const S = window.fgSun, iso = this.props.date || '2026-10-17', st = this.props.state || '';
+    const dmy = v => v.split('-').reverse().join('/');
+    if (!S) return { rootRef: this.rootRef, loading: true, isErr: false, isEmpty: false, ready: false, skel: [1, 2, 3, 4, 5, 6, 7, 8], rise: '', set: '', place: '', dateTxt: dmy(iso), near: [], parts: [], marks: [] };
+    const { sun, list } = S.slots(iso, this.props.lat || 10.85, this.props.lng || 106.77, this.props.seed);
+    const L = st === 'empty' ? list.map(s => ({ ...s, booked: true })) : list;
+    const x0 = 300, x1 = 1260, X = m => Math.max(1, Math.min(99, (m - x0) / (x1 - x0) * 100));
+    const px = m => (m - x0) / (x1 - x0) * 1000;
+    const rx = px(sun.rise), sx = px(sun.set), mid = (rx + sx) / 2, halfW = (sx - rx) / 2;
+    const yAt = m => { if (m < sun.rise || m > sun.set) return 176 + 22; const u = (px(m) - mid) / halfW; return 176 - 150 * Math.sqrt(Math.max(0, 1 - u * u)); };
+    const sel = this.props.value;
+    const pick = s => () => { if (s.booked) return; this.props.onPick && this.props.onPick(s.t); };
+    const selM = L.find(s => s.t === sel);
+    const sunM = selM ? selM.m : Math.round((sun.rise + sun.set) / 2);
+    const P = [['sang', 'Sáng'], ['chieu', 'Chiều'], ['toi', 'Tối']];
+    const allBooked = L.every(s => s.booked);
+    return {
+      rootRef: this.rootRef, rise: sun.riseTxt, set: sun.setTxt, place: this.props.place || 'khu vực này', dateTxt: dmy(iso),
+      loading: st === 'loading', isErr: st === 'error', isEmpty: st !== 'loading' && st !== 'error' && allBooked, ready: st !== 'loading' && st !== 'error' && !allBooked,
+      skel: [1, 2, 3, 4, 5, 6, 7, 8], retry: () => this.props.onRetry && this.props.onRetry(),
+      near: [1, 2, 4].map(k => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + k); const v = d.toISOString().slice(0, 10); return { label: dmy(v), go: () => this.props.onDate && this.props.onDate(v) }; }),
+      arcD: `M ${rx} 176 A ${halfW} 150 0 0 1 ${sx} 176`, nightX: String(sx), nightW: String(Math.max(0, 1000 - sx)),
+      sunX: String(px(sunM)), sunY: String(yAt(sunM)), riseX: String(X(sun.rise)), setX: String(X(sun.set)),
+      marks: L.map(s => ({ x: String(X(s.m)), y: String(yAt(s.m) / 220 * 100), st: [s.t === sel && 'on', s.gold && 'gold', s.booked && 'booked'].filter(Boolean).join(' ') || 'free', pick: pick(s) })),
+      parts: P.map(([k, label]) => ({ label, items: L.filter(s => s.part === k).map(s => ({ t: s.t, gold: s.gold && !s.booked, full: s.booked, booked: s.booked ? 'true' : 'false', on: s.t === sel ? 'true' : 'false', st: [s.t === sel && 'on', s.gold && 'gold', s.booked && 'booked'].filter(Boolean).join(' ') || 'free', aria: `${s.t}${s.gold ? ', giờ vàng' : ''}${s.booked ? ', đã có người đặt' : ''}`, pick: pick(s) })) })).filter(p => p.items.length)
+    };
+  }
+}
+</script>
+</body>
+</html>

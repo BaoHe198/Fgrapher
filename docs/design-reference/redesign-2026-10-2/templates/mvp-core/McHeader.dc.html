@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<header style="background:var(--green-900);font-family:var(--font-body)"><div style="max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,48px);height:{{ h }}px;display:flex;align-items:center;gap:clamp(12px,2vw,32px)">
+<a href="#" onClick="{{ home }}" aria-label="Fgrapher, trang chủ" style="flex:none;display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a>
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><nav aria-label="Chính" style="flex:1;min-width:0;display:flex;gap:4px"><sc-for list="{{ items }}" as="it" hint-placeholder-count="3"><a href="#" onClick="{{ it.go }}" aria-current="{{ it.cur }}" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:600;white-space:nowrap;color:{{ it.color }};text-decoration:{{ it.deco }};text-underline-offset:6px;text-decoration-thickness:2px">{{ it.label }}</a></sc-for></nav></sc-if>
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><span style="flex:1"></span></sc-if>
+<div style="flex:none;display:flex;align-items:center;gap:4px">
+<sc-if value="{{ cart }}" hint-placeholder-val="{{ false }}"><a href="#" aria-label="Giỏ hàng Chợ F" style="width:44px;height:44px;display:grid;place-items:center;color:var(--gold-50)"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.5 9h-11z"></path><path d="M9 7V5a3 3 0 0 1 6 0v2"></path></svg></a></sc-if>
+<sc-if value="{{ showPr }}" hint-placeholder-val="{{ true }}"><a href="#" onClick="{{ pricing }}" aria-current="{{ prCur }}" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none;white-space:nowrap">Dành cho provider</a></sc-if><sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:600;color:var(--gold-50);text-decoration:none;white-space:nowrap">Đăng nhập</a></sc-if>
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ menu }}" aria-label="Mở menu" aria-haspopup="dialog" style="width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;color:var(--gold-50);cursor:pointer"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button></sc-if>
+</div>
+</div></header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:64},&quot;flag&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;core&quot;,&quot;expanded&quot;],&quot;default&quot;:&quot;core&quot;,&quot;tsType&quot;:&quot;'core'|'expanded'&quot;},&quot;m&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;cur&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;browse&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onNav&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(k)=&gt;void&quot;},&quot;onMenu&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  static items(mkt, feed) {
+    return [['browse', 'Tìm provider'], ['map', 'Bản đồ F'], ['requests', 'Đặt lịch F'], ...(mkt ? [['shop', 'Chợ F']] : []), ...(feed ? [['community', 'Cộng đồng F']] : [])];
+  }
+  renderVals() {
+    const flag = this.props.flag || 'core', m = !!this.props.m, cur = this.props.cur || '', mkt = this.props.mkt ?? flag === 'expanded', feed = this.props.feed ?? flag === 'expanded';
+    return {
+      h: m ? 56 : 64, showPr: !m && !this.props.compact, isDesk: !m, isMob: m, cart: !!mkt, pricing: e => { e.preventDefault(); this.props.onNav && this.props.onNav('pricing'); }, prCur: cur === 'pricing' ? 'page' : 'false',
+      home: e => { e.preventDefault(); this.props.onNav && this.props.onNav('home'); },
+      menu: () => this.props.onMenu && this.props.onMenu(),
+      items: Component.items(mkt, feed).map(([k, label]) => ({ label, cur: k === cur ? 'page' : 'false', color: k === cur ? 'var(--gold-300)' : 'var(--gold-50)', deco: k === cur ? 'underline' : 'none', go: e => { e.preventDefault(); this.props.onNav && this.props.onNav(k); } }))
+    };
+  }
+}
+</script>
+</body>
+</html>

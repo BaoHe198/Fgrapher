@@ -1,0 +1,9 @@
+# Claude Design export (02/10/2026, Core MVP pass from Codex review). Only the screen templates, their
+# screenshots and the README are the design reference; the rest duplicates
+# the component library that .design-sync/ rebuilds from src/ (bundle,
+# vendored React, previews). Re-export from Claude Design to get them back.
+/*
+!/.gitignore
+!/README.md
+!/templates/
+!/screenshots/

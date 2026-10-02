@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="font-family:var(--font-body);color:var(--text-primary)">
+<div style="position:sticky;top:0;z-index:20;background:var(--bg-page);border-bottom:1px solid var(--border-subtle)">
+<div style="max-width:1440px;margin:0 auto;padding:{{ barPad }};display:flex;flex-direction:column;gap:{{ barGap }}">
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;padding:0 16px">
+<button type="button" onClick="{{ openSheet }}" aria-haspopup="dialog" style="flex:1;min-width:0;display:flex;align-items:center;gap:12px;min-height:48px;padding:0 16px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);text-align:left;cursor:pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span style="min-width:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>{{ provShort }}</strong><span style="color:var(--text-secondary)"> · {{ dateShort }}</span></span></button>
+<button type="button" onClick="{{ openSheet }}" aria-haspopup="dialog" aria-label="{{ filterAria }}" style="position:relative;flex:none;width:48px;height:48px;display:grid;place-items:center;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);cursor:pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg><sc-if value="{{ hasAdv }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;right:-2px;top:-2px;min-width:20px;height:20px;display:grid;place-items:center;padding:0 5px;border-radius:999px;background:var(--brand-primary);color:var(--text-on-brand);font:700 12px/1 var(--font-body)">{{ advCount }}</span></sc-if></button>
+</div></sc-if>
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><form role="search" onSubmit="{{ noop }}" style="padding:0 clamp(16px,4vw,48px);display:flex;gap:12px;align-items:stretch">
+<div style="flex:1;max-width:760px;display:flex;align-items:stretch;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface)">
+<label style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 22px;min-width:0"><span style="font-size:12px;font-weight:600;color:var(--text-secondary)">Khu vực</span><select value="{{ f.prov }}" onChange="{{ onProv }}" style="border:0;padding:0;background:transparent;color:var(--text-primary);font:600 15px/1.4 var(--font-body)"><option value="">Mọi tỉnh/thành</option><option>Thành phố Hồ Chí Minh</option><option>Thành phố Hà Nội</option><option>Thành phố Đà Nẵng</option></select></label>
+<span aria-hidden="true" style="width:1px;margin:12px 0;background:var(--border-default)"></span>
+<label style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 22px;min-width:0"><span style="font-size:12px;font-weight:600;color:var(--text-secondary)">Ngày cần chụp</span><input type="date" value="{{ f.date }}" min="2026-10-02" onChange="{{ onDate }}" style="border:0;padding:0;background:transparent;color:var(--text-primary);font:600 15px/1.4 var(--font-body);color-scheme:light dark"></label>
+<span style="display:flex;align-items:center;padding:6px"><button type="submit" style="min-height:48px;padding:0 24px;border:0;border-radius:999px;background:var(--gold-400);color:var(--gold-900);font:700 16px/1 var(--font-body);cursor:pointer">Tìm</button></span>
+</div>
+<button type="button" onClick="{{ openSheet }}" aria-haspopup="dialog" style="flex:none;display:flex;align-items:center;gap:8px;padding:0 18px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 15px/1 var(--font-body);cursor:pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>Bộ lọc<sc-if value="{{ hasAdv }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;display:grid;place-items:center;padding:0 6px;border-radius:999px;background:var(--brand-primary);color:var(--text-on-brand);font:700 12px/1 var(--font-body)">{{ advCount }}</span></sc-if></button>
+</form></sc-if>
+<dc-import name="McRail" items="{{ roleItems }}" value="{{ f.role }}" on-pick="{{ pickRole }}" start="{{ railStart }}" pad="{{ railPad }}" label="Vai trò" hint-size="100%,44px"></dc-import>
+</div>
+</div>
+<main style="max-width:1440px;margin:0 auto;padding:{{ mainPad }};display:flex;flex-direction:column;gap:{{ mainGap }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px">
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<h1 style="margin:0;font-family:{{ h1Font }};font-weight:600;font-size:{{ h1Size }};line-height:1.15;letter-spacing:{{ h1Track }};text-wrap:balance">{{ title }}</h1>
+<sc-if value="{{ showCount }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:{{ countSize }};color:var(--text-secondary)">{{ countLine }}</p></sc-if>
+</div>
+<label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-secondary)"><span>Sắp xếp</span><select value="{{ sort }}" onChange="{{ onSort }}" style="min-height:44px;padding:0 10px;border:1px solid var(--border-default);border-radius:var(--fg-radius-sm);background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body)"><option value="fit">Phù hợp nhất</option><option value="price">Giá thấp đến cao</option><option value="rating">Đánh giá cao</option></select></label>
+</div>
+<sc-if value="{{ showChips }}" hint-placeholder-val="{{ false }}"><div role="group" aria-label="Bộ lọc đang bật" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><sc-for list="{{ chips }}" as="c" hint-placeholder-count="2"><button type="button" onClick="{{ c.remove }}" aria-label="Bỏ lọc {{ c.label }}" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 8px 0 14px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer"><span>{{ c.label }}</span><span aria-hidden="true" style="width:20px;height:20px;display:grid;place-items:center;border-radius:999px;background:var(--bg-sunken)">×</span></button></sc-for><button type="button" onClick="{{ clearAll }}" style="min-height:44px;padding:0 10px;border:0;background:none;color:var(--text-link);font:600 14px/1 var(--font-body);cursor:pointer">Xoá tất cả</button></div></sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:16px;border-radius:var(--fg-radius-md);background:var(--danger-bg)"><span style="font-size:15px;line-height:1.5"><strong style="color:var(--danger)">Không tải được kết quả.</strong> Bộ lọc vẫn được giữ.</span><button type="button" onClick="{{ retry }}" style="min-height:44px;padding:0 16px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:600 15px/1 var(--font-body);cursor:pointer">Thử lại</button></div></sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 16px;text-align:center;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg)"><strong style="font:600 20px/1.25 var(--font-display)">Chưa có provider khớp mọi bộ lọc</strong><span style="max-width:420px;font-size:15px;line-height:1.5;color:var(--text-secondary)">Bỏ bớt một bộ lọc. Số bên cạnh là số provider sẽ hiện ra.</span><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px"><sc-for list="{{ relax }}" as="r" hint-placeholder-count="2"><button type="button" onClick="{{ r.go }}" style="min-height:44px;padding:0 16px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer">Bỏ “{{ r.label }}” · {{ r.n }}</button></sc-for></div></div></sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}"><div aria-busy="true" aria-label="Đang tải kết quả" style="display:grid;grid-template-columns:{{ cols }};gap:{{ gridGap }}"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="6"><dc-import name="McCard" layout="{{ layout }}" state="loading" hint-size="100%,140px"></dc-import></sc-for></div></sc-if>
+<sc-if value="{{ showRes }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:{{ cols }};gap:{{ gridGap }}"><sc-for list="{{ res }}" as="a" hint-placeholder-count="6"><dc-import name="McCard" a="{{ a }}" layout="{{ layout }}" date="{{ f.date }}" eager="{{ a.eager }}" on-open="{{ open }}" hint-size="100%,140px"></dc-import></sc-for></div></sc-if>
+</main>
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:flex;flex-direction:column;justify-content:{{ sheetJustify }};align-items:center;padding:{{ sheetOuterPad }}"><div onClick="{{ closeSheet }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ panelRef }}" role="dialog" aria-modal="true" aria-labelledby="mc-f-t" onKeyDown="{{ dlgKey }}" style="position:relative;width:{{ sheetW }};height:{{ sheetH }};border-radius:{{ sheetR }};overflow:hidden;box-shadow:var(--shadow-lg)"><dc-import name="McFilterSheet" f="{{ f }}" count="{{ count }}" mode="{{ sheetMode }}" safe="{{ safe }}" on-change="{{ patch }}" on-clear="{{ clearAll }}" on-close="{{ closeSheet }}" hint-size="100%,100%" style="height:100%"></dc-import></div></div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;m&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;w&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:390,&quot;tsType&quot;:&quot;number&quot;},&quot;init&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;safe&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;},&quot;onOpen&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  constructor(p) {
+    super(p); const i = p.init || {};
+    this.state = { f: { role: i.role ?? 'photo', styles: i.styles || [], services: [], prov: i.prov ?? 'Thành phố Hồ Chí Minh', budget: i.budget || '', rating: i.rating || '', date: i.date || '', time: '' }, sort: 'fit', sheet: !!i.sheet, st: i.state || '' };
+  }
+  panelRef = React.createRef();
+  componentDidUpdate(pp, ps) {
+    if (!ps.sheet && this.state.sheet) { const p = this.panelRef.current; if (!p) return; if (p.animate && !(window.fgKit && window.fgKit.reduced())) p.animate(this.props.m ? [{ transform: 'translateY(100%)' }, { transform: 'none' }] : [{ opacity: 0, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: this.props.m ? 300 : 200, easing: 'cubic-bezier(0,0,.2,1)' }); const b = p.querySelector('button'); b && b.focus({ preventScroll: true }); }
+  }
+  renderVals() {
+    const D = window.mcData, { f, sort, st } = this.state, m = !!this.props.m, w = this.props.w || 1440, narrow = w < 430;
+    const S = { fit: () => 0, price: (a, b) => (a.from ?? 1e12) - (b.from ?? 1e12), rating: (a, b) => (b.rating || 0) - (a.rating || 0) };
+    const all = D.providers, ld = st === 'loading', er = st === 'error';
+    const res = er || ld ? [] : all.filter(a => D.match(a, f)).sort(S[sort]);
+    const patch = p => this.setState(s => ({ f: { ...s.f, ...p }, st: s.st === 'empty' ? '' : s.st }));
+    const RT = { photo: 'Nhiếp ảnh gia', video: 'Quay phim', makeup: 'Trang điểm', model: 'Người mẫu', studio: 'Studio', costume: 'Cho thuê trang phục' };
+    const provS = f.prov ? D.short(f.prov) : 'Mọi tỉnh/thành';
+    const BL = Object.fromEntries(D.budgets.map(b => [b[0], b[1]]));
+    const adv = [...f.styles.map(s => ['styles:' + s, s]), ...f.services.map(s => ['services:' + s, (D.svcs.find(x => x[0] === s) || [])[1]]), f.budget && ['budget', BL[f.budget]], f.rating && ['rating', `Từ ${f.rating.replace('.', ',')} ★`]].filter(Boolean);
+    const rm = k => { const [key, val] = k.split(':'); return val ? { [key]: f[key].filter(x => x !== val) } : { [key]: '' }; };
+    const relaxSrc = [...adv, f.date && ['date', 'Ngày ' + D.dm(f.date)], f.role && ['role', RT[f.role]]].filter(Boolean);
+    const relax = relaxSrc.map(([k, label]) => { const nf = { ...f, ...(k === 'date' ? { date: '' } : k === 'role' ? { role: '' } : rm(k)) }; return { label, n: all.filter(a => D.match(a, nf)).length, go: () => patch(k === 'date' ? { date: '' } : k === 'role' ? { role: '' } : rm(k)) }; }).filter(r => r.n > 0).sort((a, b) => b.n - a.n).slice(0, 3);
+    const count = all.filter(a => D.match(a, f)).length;
+    const unit = f.role ? RT[f.role].toLowerCase() : 'provider';
+    return {
+      isMob: m, isDesk: !m, f, safe: this.props.safe || 0, noop: e => e.preventDefault(),
+      barPad: m ? '8px 0 8px' : '14px 0 12px', barGap: m ? '8px' : '12px', railPad: m ? 16 : Math.max(16, Math.min(48, Math.round(w * .04))),
+      provShort: provS, dateShort: f.date ? `${D.wd(f.date)}, ${D.dm(f.date)}` : 'Mọi ngày',
+      hasAdv: adv.length > 0, advCount: adv.length, filterAria: adv.length ? `Bộ lọc, ${adv.length} đang bật` : 'Bộ lọc',
+      onProv: e => patch({ prov: e.target.value }), onDate: e => patch({ date: e.target.value }),
+      roleItems: [{ k: '', label: 'Tất cả' }, ...D.roles.map(r => ({ k: r.k, label: r.short }))], pickRole: k => patch({ role: k }), railStart: (this.props.init || {}).rail || 'start',
+      mainPad: m ? `12px 16px 40px` : '28px clamp(16px,4vw,48px) 80px', mainGap: m ? '14px' : '20px',
+      h1Font: m ? 'var(--font-body)' : 'var(--font-display)', h1Size: m ? '17px' : 'clamp(32px,3vw,48px)', h1Track: m ? '0' : '-.03em', countSize: m ? '14px' : '16px',
+      title: m ? (ld || er ? `${f.role ? RT[f.role] : 'Provider'} tại ${provS}` : `${count} ${unit} tại ${provS}`) : `${f.role ? RT[f.role] : 'Provider'} tại ${f.prov || 'mọi tỉnh/thành'}`,
+      showCount: !m && !ld && !er && res.length > 0, countLine: `${res.length} kết quả${f.date ? ' còn lịch ' + D.dmy(f.date) : ''} · đã xác minh danh tính`,
+      sort, onSort: e => this.setState({ sort: e.target.value }),
+      showChips: !m && adv.length > 0, chips: adv.map(([k, label]) => ({ label, remove: () => patch(rm(k)) })),
+      clearAll: () => patch({ styles: [], services: [], budget: '', rating: '', date: '', time: '' }),
+      isError: er, retry: () => this.setState({ st: 'loading' }, () => setTimeout(() => this.setState({ st: '' }), 900)),
+      isEmpty: !ld && !er && res.length === 0, relax, isLoading: ld, skel: Array.from({ length: 6 }, (_, i) => ({ i })),
+      showRes: !ld && res.length > 0, res: res.map((a, i) => ({ ...a, eager: i < 2 })), layout: narrow ? 'row' : 'col',
+      cols: narrow ? 'minmax(0,1fr)' : 'repeat(auto-fill,minmax(min(100%,240px),1fr))', gridGap: narrow ? '20px' : '32px 20px',
+      open: id => this.props.onOpen && this.props.onOpen(id),
+      sheetOpen: this.state.sheet, panelRef: this.panelRef, count, patch, sheetMode: m ? 'sheet' : 'dialog',
+      sheetJustify: m ? 'flex-end' : 'center', sheetOuterPad: m ? '0' : '24px', sheetW: m ? '100%' : 'min(640px,100%)', sheetH: m ? 'min(88vh,760px)' : 'min(720px,calc(100vh - 48px))', sheetR: m ? 'var(--fg-radius-xl) var(--fg-radius-xl) 0 0' : 'var(--fg-radius-lg)',
+      openSheet: () => { this.prev = document.activeElement; this.setState({ sheet: true }); },
+      closeSheet: () => { this.setState({ sheet: false }); this.prev && this.prev.focus && this.prev.focus({ preventScroll: true }); },
+      dlgKey: e => { if (e.key === 'Escape') this.setState({ sheet: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

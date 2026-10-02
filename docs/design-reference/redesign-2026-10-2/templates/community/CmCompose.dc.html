@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ rootRef }}" role="dialog" aria-modal="true" aria-labelledby="cm-cp-t" onKeyDown="{{ onKey }}" style="display:flex;flex-direction:column;max-height:90vh;border-radius:var(--fg-radius-lg);background:var(--dr-surface);color:var(--dr-text);font-family:var(--font-body);box-shadow:var(--shadow-lg);overflow:hidden">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--dr-line)"><h2 id="cm-cp-t" style="margin:0;font:600 20px/1.2 var(--font-display)">Tạo yêu cầu tìm ê-kíp</h2><button type="button" onClick="{{ close }}" style="min-height:44px;padding:0 8px;border:0;background:none;color:var(--gold-300);font:600 15px/1 var(--font-body);cursor:pointer">Đóng</button></div>
+<div style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-wrap:wrap;gap:28px;padding:20px">
+<form onSubmit="{{ submit }}" noValidate="" style="flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:18px">
+<fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:10px"><legend style="margin-bottom:10px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--dr-text-2)">Cần tìm</legend><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ roles }}" as="r" hint-placeholder-count="6"><button type="button" data-chip="" aria-pressed="{{ r.on }}" onClick="{{ r.pick }}" style="min-height:40px;padding:0 14px;border:1px solid var(--dr-line-2);border-radius:999px;background:transparent;color:var(--dr-text);font:600 14px/1 var(--font-body);cursor:pointer">{{ r.label }}</button></sc-for></div></fieldset>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dr-text-2)">Ngày<input type="date" min="2026-10-01" value="{{ date }}" onChange="{{ onDate }}" style="min-height:48px;padding:0 12px;border:1px solid var(--dr-line-2);border-radius:var(--fg-radius-sm);background:var(--dr-bg);color:var(--dr-text);font:500 16px/1 var(--font-body);color-scheme:dark"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dr-text-2)">Từ<input type="time" value="{{ from }}" onChange="{{ onFrom }}" style="min-height:48px;padding:0 12px;border:1px solid var(--dr-line-2);border-radius:var(--fg-radius-sm);background:var(--dr-bg);color:var(--dr-text);font:500 16px/1 var(--font-body);color-scheme:dark"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dr-text-2)">Đến<input type="time" value="{{ to }}" onChange="{{ onTo }}" style="min-height:48px;padding:0 12px;border:1px solid var(--dr-line-2);border-radius:var(--fg-radius-sm);background:var(--dr-bg);color:var(--dr-text);font:500 16px/1 var(--font-body);color-scheme:dark"></label></div>
+<x-import component-from-global-scope="Fgrapher.Input" label="Khu vực (phường, tỉnh/thành)" value="{{ where }}" on-change="{{ onWhere }}" placeholder="Phường Sài Gòn, Thành phố Hồ Chí Minh" hint-size="100%,72px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px"><x-import component-from-global-scope="Fgrapher.Input" label="Ngân sách mỗi người" inputMode="numeric" value="{{ budget }}" on-change="{{ onBudget }}" placeholder="1.500.000₫" hint-size="100%,72px"></x-import><label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500;color:var(--dr-text)">Hạn nhận đề xuất<input type="date" min="2026-10-01" value="{{ deadline }}" onChange="{{ onDeadline }}" style="min-height:44px;padding:0 12px;border:1px solid var(--dr-line-2);border-radius:var(--fg-radius-sm);background:var(--dr-bg);color:var(--dr-text);font:500 16px/1 var(--font-body);color-scheme:dark"></label></div>
+<x-import component-from-global-scope="Fgrapher.Textarea" label="Ghi chú" rows="3" value="{{ note }}" on-change="{{ onNote }}" placeholder="Loại buổi chụp, số người, thiết bị cần mang…" hint-size="100%,120px"></x-import>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;font-size:14px;font-weight:600;color:var(--danger)">{{ err }}</p></sc-if>
+<sc-if value="{{ done }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin:0;font-size:14px;font-weight:600;color:var(--success)">Đã đăng FB-2026-00088. Nghệ sĩ phù hợp ở khu vực này sẽ thấy yêu cầu.</p></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><button type="submit" style="min-height:48px;padding:0 20px;border:0;border-radius:999px;background:var(--gold-400);color:var(--gold-900);font:700 15px/1 var(--font-body);cursor:pointer">Đăng lên Cộng đồng F</button><button type="button" onClick="{{ close }}" style="min-height:48px;padding:0 16px;border:1px solid var(--dr-line-2);border-radius:999px;background:transparent;color:var(--dr-text);font:600 15px/1 var(--font-body);cursor:pointer">Lưu nháp</button></div>
+</form>
+<div style="flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--dr-text-3)">XEM TRƯỚC TRÊN BẢNG TIN</span><dc-import name="CmCallSheet" c="{{ preview }}" hint-size="100%,560px"></dc-import></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1080,&quot;height&quot;:760},&quot;isMobile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { roles: ['Chuyên viên trang điểm'], date: '2026-10-18', from: '05:30', to: '11:00', where: 'Phường Xuân Hương - Đà Lạt, Lâm Đồng', budget: '1500000', deadline: '2026-10-10', note: '', err: '', done: false };
+  rootRef = React.createRef();
+  componentDidMount() { this.paint(); const b = this.rootRef.current && this.rootRef.current.querySelector('button'); b && b.focus({ preventScroll: true }); }
+  componentDidUpdate() { this.paint(); }
+  paint() { const r = this.rootRef.current; if (!r) return; r.querySelectorAll('[data-chip]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--dr-text)' : 'transparent'; b.style.color = on ? 'var(--dr-bg)' : 'var(--dr-text)'; }); }
+  renderVals() {
+    const s = this.state, dmy = v => v ? v.split('-').reverse().join('/') : '—';
+    const money = v => { const n = v.replace(/\D/g, ''); return n ? n.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '₫' : ''; };
+    const days = s.deadline ? Math.ceil((Date.parse(s.deadline + 'T23:59:00+07:00') - Date.parse('2026-10-01T00:00:00+07:00')) / 864e5) : null;
+    const R = ['Chuyên viên trang điểm', 'Trợ lý ánh sáng', 'Người chụp thứ hai', 'Quay phim', 'Người mẫu', 'Stylist trang phục'];
+    const set = k => e => this.setState({ [k]: e.target.value, err: '', done: false });
+    return {
+      rootRef: this.rootRef,
+      roles: R.map(r => ({ label: r, on: s.roles.includes(r) ? 'true' : 'false', pick: () => this.setState({ roles: s.roles.includes(r) ? s.roles.filter(x => x !== r) : [...s.roles, r], err: '' }) })),
+      date: s.date, from: s.from, to: s.to, where: s.where, budget: money(s.budget), deadline: s.deadline, note: s.note,
+      onDate: set('date'), onFrom: set('from'), onTo: set('to'), onWhere: set('where'), onBudget: e => this.setState({ budget: e.target.value.replace(/\D/g, '') }), onDeadline: set('deadline'), onNote: set('note'),
+      preview: { code: 'FB-2026-00088 · NHÁP', by: 'Minh Anh Nhiếp Ảnh', byRole: 'Nhiếp ảnh gia', roles: s.roles.length ? s.roles : ['Chưa chọn vai trò'], when: `${dmy(s.date)} · ${s.from || '--:--'}–${s.to || '--:--'}`, where: s.where || '—', budget: s.budget ? money(s.budget) + ' mỗi người' : 'Thỏa thuận', deadline: s.deadline ? `${dmy(s.deadline)} 23:59` : '—', leftLabel: days > 0 ? `CÒN ${days} NGÀY` : 'NHÁP', note: s.note, mine: true },
+      err: s.err, hasErr: !!s.err, done: s.done,
+      close: () => this.props.onClose && this.props.onClose(),
+      onKey: e => { if (e.key === 'Escape') this.props.onClose && this.props.onClose(); },
+      submit: e => { e.preventDefault(); if (!s.roles.length) return this.setState({ err: 'Chọn ít nhất một vai trò cần tìm.' }); if (!s.date || !s.where) return this.setState({ err: 'Điền ngày và khu vực.' }); if (s.deadline && s.date && s.deadline > s.date) return this.setState({ err: 'Hạn nhận đề xuất phải trước ngày làm việc.' }); this.setState({ done: true }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

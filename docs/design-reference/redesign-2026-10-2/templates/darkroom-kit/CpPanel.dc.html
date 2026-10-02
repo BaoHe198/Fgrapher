@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="width:100%;height:100%;display:flex;flex-direction:column;background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-body)">
+<sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="flex:none;align-self:center;width:36px;height:4px;margin:8px 0 2px;border-radius:999px;background:var(--border-default)"></span></sc-if>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;min-height:60px;border-bottom:1px solid var(--border-subtle)">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none;color:var(--text-tertiary)"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+<input ref="{{ inputRef }}" role="combobox" aria-expanded="true" aria-controls="cp-list" aria-activedescendant="{{ activeId }}" aria-autocomplete="list" aria-label="Tìm nhanh" value="{{ q }}" onChange="{{ onInput }}" onKeyDown="{{ onKey }}" placeholder="Tìm nghệ sĩ, album, phong cách, trang…" autocomplete="off" spellcheck="false" style="flex:1;min-width:0;height:44px;border:0;outline:0;background:transparent;color:var(--text-primary);font:500 17px/1.2 var(--font-body)">
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><span role="status" style="flex:none;font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">ĐANG TÌM</span></sc-if>
+<sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ close }}" style="flex:none;min-height:44px;padding:0 4px;border:0;background:none;color:var(--text-link);font:600 15px/1 var(--font-body);cursor:pointer">Huỷ</button></sc-if>
+<sc-if value="{{ notSheet }}" hint-placeholder-val="{{ true }}"><kbd style="flex:none;padding:4px 7px;border:1px solid var(--border-default);border-radius:6px;font:600 12px/1 var(--font-mono);color:var(--text-secondary)">Esc</kbd></sc-if>
+</div>
+<div ref="{{ listRef }}" id="cp-list" role="listbox" aria-label="Kết quả" style="flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:6px 8px 10px">
+<sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:6px 4px 4px;padding:12px 14px;border-radius:var(--fg-radius-sm);background:var(--warning-bg);color:var(--text-primary);font-size:14px;line-height:1.45"><span>Không tải được nghệ sĩ và album. Trang trong hệ thống vẫn tìm được.</span><button type="button" onClick="{{ retry }}" style="min-height:36px;padding:0 12px;border:1px solid var(--border-default);border-radius:var(--fg-radius-sm);background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer">Thử lại</button></div></sc-if>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="display:flex;flex-direction:column;gap:2px;padding:4px 0"><span style="padding:10px 8px 6px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">Nghệ sĩ · Album</span>
+<div style="display:flex;align-items:center;gap:12px;padding:8px"><span style="flex:none;width:32px;height:32px;border-radius:999px;background:var(--bg-sunken)"></span><span style="display:flex;flex-direction:column;gap:6px;flex:1"><span style="height:12px;width:46%;border-radius:4px;background:var(--bg-sunken)"></span><span style="height:10px;width:70%;border-radius:4px;background:var(--bg-sunken)"></span></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:8px"><span style="flex:none;width:32px;height:32px;border-radius:999px;background:var(--bg-sunken)"></span><span style="display:flex;flex-direction:column;gap:6px;flex:1"><span style="height:12px;width:38%;border-radius:4px;background:var(--bg-sunken)"></span><span style="height:10px;width:58%;border-radius:4px;background:var(--bg-sunken)"></span></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:8px"><span style="flex:none;width:32px;height:32px;border-radius:999px;background:var(--bg-sunken)"></span><span style="display:flex;flex-direction:column;gap:6px;flex:1"><span style="height:12px;width:52%;border-radius:4px;background:var(--bg-sunken)"></span><span style="height:10px;width:64%;border-radius:4px;background:var(--bg-sunken)"></span></span></div>
+</div></sc-if>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="2"><div role="group" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:2px;padding-top:4px">
+<span style="padding:10px 8px 6px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary)">{{ g.label }}</span>
+<sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3"><div id="{{ r.id }}" role="option" aria-selected="{{ r.sel }}" data-cp-i="{{ r.i }}" onMouseMove="{{ r.hover }}" onClick="{{ r.pick }}" style="display:flex;align-items:center;gap:12px;min-height:52px;padding:6px 8px;border-radius:var(--fg-radius-sm);cursor:pointer">
+<sc-if value="{{ r.isArtist }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Fgrapher.Avatar" size="sm" hint-size="32px,32px"><x-import component-from-global-scope="Fgrapher.AvatarImage" src="{{ r.img }}" alt=""></x-import><x-import component-from-global-scope="Fgrapher.AvatarFallback">{{ r.initials }}</x-import></x-import></sc-if>
+<sc-if value="{{ r.isAlbum }}" hint-placeholder-val="{{ false }}"><span style="flex:none;width:40px;height:40px;display:grid;place-items:center;padding:3px;border-radius:4px;background:var(--dr-bg)"><img src="{{ r.img }}" alt="" style="display:block;max-width:100%;max-height:100%"></span></sc-if>
+<sc-if value="{{ r.isGlyph }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:none;width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-sm);font:600 12px/1 var(--font-mono);color:var(--text-secondary)">{{ r.glyph }}</span></sc-if>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:600 15px/1.3 var(--font-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.title }}</span><span style="font-size:13px;line-height:1.35;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.sub }}</span></span>
+<sc-if value="{{ r.showEnter }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="flex:none;font:600 12px/1 var(--font-mono);color:var(--text-tertiary)">↵</span></sc-if>
+</div></sc-for>
+</div></sc-for>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 20px 28px;text-align:center"><strong style="font-size:16px;overflow-wrap:anywhere">Không tìm thấy “{{ q }}”</strong><span style="max-width:380px;font-size:14px;line-height:1.5;color:var(--text-secondary)">Kiểm tra chính tả, hoặc thử tìm theo khu vực như “Đà Nẵng”, phong cách như “Kỷ yếu”. Gõ không dấu cũng được.</span><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:4px"><sc-for list="{{ suggest }}" as="sg" hint-placeholder-count="3"><button type="button" onClick="{{ sg.go }}" style="min-height:36px;padding:0 12px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer">{{ sg.label }}</button></sc-for></div></div></sc-if>
+</div>
+<sc-if value="{{ notSheet }}" hint-placeholder-val="{{ true }}"><div style="flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:10px 16px;border-top:1px solid var(--border-subtle);background:var(--bg-sunken);font-size:13px;color:var(--text-secondary)"><span style="display:flex;gap:14px;align-items:center"><span style="display:flex;gap:6px;align-items:center"><kbd style="padding:3px 6px;border:1px solid var(--border-default);border-radius:5px;background:var(--bg-surface);font:600 12px/1 var(--font-mono)">↑↓</kbd>Di chuyển</span><span style="display:flex;gap:6px;align-items:center"><kbd style="padding:3px 6px;border:1px solid var(--border-default);border-radius:5px;background:var(--bg-surface);font:600 12px/1 var(--font-mono)">↵</kbd>Mở</span></span><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ footRight }}</span></div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:480},&quot;sheet&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;presetQuery&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;presetState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;loading&quot;,&quot;error&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;''|'loading'|'error'&quot;},&quot;autoFocus&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onRequestClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { q: p.presetQuery || '', active: 0, loading: false, err: p.presetState === 'error', picked: '' }; }
+  inputRef = React.createRef(); listRef = React.createRef();
+  componentDidMount() {
+    this.paint();
+    if (this.state.q) this.search(this.state.q);
+    if (this.props.autoFocus) requestAnimationFrame(() => { const i = this.inputRef.current; i && i.focus({ preventScroll: true }); });
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  paint() { const L = this.listRef.current; if (!L) return; L.querySelectorAll('[data-cp-i]').forEach(el => { el.style.background = +el.dataset.cpI === this.state.active ? 'var(--bg-sunken)' : 'transparent'; }); }
+  componentDidUpdate(pp, ps) {
+    this.paint();
+    if (ps.active !== this.state.active) { const L = this.listRef.current, el = L && L.querySelector(`[data-cp-i="${this.state.active}"]`); if (el) { const t = el.offsetTop, b = t + el.offsetHeight; if (t < L.scrollTop + 36) L.scrollTop = t - 36; else if (b > L.scrollTop + L.clientHeight) L.scrollTop = b - L.clientHeight + 8; } }
+  }
+  search(q) {
+    clearTimeout(this.t);
+    if (!q.trim()) { this.setState({ loading: false }); return; }
+    if (this.props.presetState === 'loading') { this.setState({ loading: true }); return; }
+    this.setState({ loading: true }); this.t = setTimeout(() => this.setState({ loading: false }), 320);
+  }
+  norm(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase(); }
+  data() {
+    const P = s => `https://picsum.photos/seed/${s}/80/80`;
+    return {
+      artists: [
+        ['Minh Anh Nhiếp Ảnh', 'Nhiếp ảnh gia', 'Phường Thủ Đức, Thành phố Hồ Chí Minh', 'MA'],
+        ['Ngọc Linh Makeup', 'Chuyên viên trang điểm', 'Phường Hải Châu, Thành phố Đà Nẵng', 'NL'],
+        ['Hoàng Phúc Studio', 'Studio', 'Phường Ba Đình, Thành phố Hà Nội', 'HP'],
+        ['Lê Thảo Vy', 'Người mẫu', 'Phường Hội An, Thành phố Đà Nẵng', 'TV'],
+        ['Trần Quốc Bảo', 'Quay phim', 'Phường Ninh Kiều, Thành phố Cần Thơ', 'QB'],
+        ['Đặng Khôi Nguyên Film & Photography Collective', 'Nhiếp ảnh gia, Quay phim', 'Phường Sơn Trà, Thành phố Đà Nẵng', 'KN'],
+        ['Áo dài Mộc Lan', 'Cho thuê trang phục', 'Phường Thuận Hóa, Thành phố Huế', 'ML']
+      ].map(([t, r, a, ini], i) => ({ kind: 'artist', title: t, sub: `${r} · ${a}`, img: P('fgdk-a' + i), initials: ini, key: t + r + a })),
+      albums: [
+        ['Cưới ở Hội An, mùa mưa', 'Minh Anh Nhiếp Ảnh'], ['Kỷ yếu 12A1 · Đà Lạt', 'Hoàng Phúc Studio'], ['Chân dung trong ánh sáng tự nhiên', 'Lê Thảo Vy'],
+        ['Áo dài Tết Bính Ngọ', 'Áo dài Mộc Lan'], ['Gia đình bên biển Sơn Trà', 'Đặng Khôi Nguyên Film & Photography Collective']
+      ].map(([t, o], i) => ({ kind: 'album', title: t, sub: `Album · ${o}`, img: `https://picsum.photos/seed/fgdk-al${i}/${i % 2 ? 80 : 64}/${i % 2 ? 60 : 80}`, key: t + o })),
+      styles: ['Cưới', 'Kỷ yếu', 'Chân dung', 'Gia đình', 'Sản phẩm', 'Thời trang', 'Sự kiện', 'Áo dài'].map(t => ({ kind: 'style', title: t, sub: 'Phong cách · xem nghệ sĩ và album', glyph: '#', key: t + ' phong cach' })),
+      pages: [['Bản đồ F', '/fmap'], ['Chợ F', '/cho-f'], ['Cộng đồng F', '/cong-dong'], ['Lịch đặt của tôi', '/lich-dat'], ['Tin nhắn', '/tin-nhan'], ['Hồ sơ của tôi', '/ho-so'], ['Cài đặt tài khoản', '/cai-dat'], ['Trợ giúp', '/tro-giup']].map(([t, u]) => ({ kind: 'page', title: t, sub: 'Trang · fgrapher.vn' + u, glyph: '↗', key: t + ' ' + u }))
+    };
+  }
+  close() { if (this.props.onRequestClose) this.props.onRequestClose(); else this.setState({ q: '', active: 0 }); }
+  pick(r) { this.setState({ picked: r.title }); if (this.props.onRequestClose) this.props.onRequestClose(); }
+  renderVals() {
+    const { q, active, loading, err } = this.state, sheet = !!this.props.sheet;
+    const D = this.data(), toks = this.norm(q).split(/\s+/).filter(Boolean);
+    const m = x => toks.every(t => this.norm(x.key + ' ' + x.title).includes(t));
+    let groups;
+    if (!toks.length) groups = [['Gần đây', [D.artists[0], D.albums[0]]], ['Đi tới', D.pages.slice(0, 5)]];
+    else {
+      const remote = loading || err ? [] : [['Nghệ sĩ', D.artists.filter(m).slice(0, 4)], ['Album', D.albums.filter(m).slice(0, 3)], ['Phong cách', D.styles.filter(m).slice(0, 3)]];
+      groups = [...remote, ['Trang', D.pages.filter(m).slice(0, 4)]];
+    }
+    groups = groups.filter(g => g[1].length);
+    let i = 0; const flat = [];
+    const G = groups.map(([label, rows]) => ({ label, rows: rows.map(r => { const k = i++; flat.push(r); const on = k === active; return { ...r, i: k, id: 'cp-o' + k, sel: on ? 'true' : 'false', showEnter: on && !sheet, isArtist: r.kind === 'artist', isAlbum: r.kind === 'album', isGlyph: r.kind === 'style' || r.kind === 'page', hover: () => { if (this.state.active !== k) this.setState({ active: k }); }, pick: () => this.pick(r) }; }) }));
+    const n = flat.length, overlay = !!this.props.onRequestClose;
+    const setQ = v => { this.setState({ q: v, active: 0 }); this.search(v); };
+    return {
+      sheet, notSheet: !sheet,
+      footRight: this.state.picked ? 'ĐÃ MỞ · ' + this.state.picked.toUpperCase() : (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'CTRL K') + ' · MỌI TRANG',
+      inputRef: this.inputRef, listRef: this.listRef,
+      q, loading, hasError: err && toks.length > 0, groups: G, activeId: n ? 'cp-o' + active : '',
+      isEmpty: toks.length > 0 && !loading && !err && n === 0,
+      suggest: ['Đà Nẵng', 'Kỷ yếu', 'Bản đồ F'].map(l => ({ label: l, go: () => setQ(l) })),
+      onInput: e => setQ(e.target.value),
+      onKey: e => {
+        if (e.key === 'ArrowDown' && n) { e.preventDefault(); this.setState({ active: (active + 1) % n }); }
+        else if (e.key === 'ArrowUp' && n) { e.preventDefault(); this.setState({ active: (active - 1 + n) % n }); }
+        else if (e.key === 'Enter' && flat[active]) { e.preventDefault(); this.pick(flat[active]); }
+        else if (e.key === 'Escape') { e.preventDefault(); if (q && !overlay) setQ(''); else if (q) setQ(''); else this.close(); }
+      },
+      close: () => this.close(),
+      retry: () => { this.setState({ err: false }); this.search(q); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ rootRef }}" style="display:flex;flex-direction:column;gap:22px;color:var(--text-primary);font-family:var(--font-body)">
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">ĐẶT LỊCH</span><span style="display:flex;align-items:baseline;gap:8px"><strong style="font:600 28px/1 var(--font-display);font-variant-numeric:tabular-nums">{{ priceTxt }}</strong><span style="font-size:14px;color:var(--text-secondary)">{{ pkgName }}</span></span></div>
+<fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:6px"><legend style="margin-bottom:8px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Gói</legend><sc-for list="{{ pkgs }}" as="k" hint-placeholder-count="3"><button type="button" role="radio" data-opt="" aria-checked="{{ k.on }}" aria-pressed="{{ k.on }}" onClick="{{ k.pick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:0 12px;border:0;border-radius:var(--fg-radius-sm);background:transparent;color:var(--text-primary);text-align:left;cursor:pointer;transition:background-color 150ms"><span style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:15px">{{ k.name }}</span><span style="font-size:13px;color:var(--text-secondary)">{{ k.short }}</span></span><span style="font-weight:600;font-size:14px;font-variant-numeric:tabular-nums">{{ k.priceTxt }}</span></button></sc-for></fieldset>
+<fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:8px"><legend style="margin-bottom:8px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">7 ngày tới</legend><div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px"><sc-for list="{{ days }}" as="d" hint-placeholder-count="7"><button type="button" data-day="{{ d.st }}" aria-pressed="{{ d.on }}" aria-label="{{ d.aria }}" disabled="{{ d.full }}" onClick="{{ d.pick }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;min-height:60px;padding:6px 0;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-sm);background:transparent;color:var(--text-primary);cursor:pointer"><span style="font:600 12px/1 var(--font-body);color:var(--text-secondary)">{{ d.wd }}</span><span style="font:600 16px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ d.dd }}</span></button></sc-for></div><span style="font-size:12px;color:var(--text-secondary)">Ngày gạch ngang đã kín lịch.</span></fieldset>
+<sc-if value="{{ hasDay }}" hint-placeholder-val="{{ true }}"><fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:8px"><legend style="margin-bottom:8px;font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)">Giờ bắt đầu · {{ dayLabel }}</legend><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px"><sc-for list="{{ slots }}" as="s" hint-placeholder-count="6"><button type="button" data-slot="{{ s.st }}" aria-pressed="{{ s.on }}" aria-label="{{ s.aria }}" disabled="{{ s.full }}" onClick="{{ s.pick }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-sm);background:transparent;color:var(--text-primary);cursor:pointer"><span style="font:600 15px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ s.t }}</span><sc-if value="{{ s.gold }}" hint-placeholder-val="{{ false }}"><span style="font:600 12px/1 var(--font-body);color:var(--text-link)">Giờ vàng</span></sc-if></button></sc-for></div><span style="font-size:12px;line-height:1.5;color:var(--text-secondary)">{{ goldNote }}</span></fieldset></sc-if>
+<div style="display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid var(--border-subtle)"><sc-if value="{{ ready }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;line-height:1.5">{{ summary }}</span></sc-if><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" disabled="{{ notReady }}" style="width:100%">{{ ctaLabel }}</x-import><span style="font-size:13px;line-height:1.5;color:var(--text-secondary)">Nghệ sĩ xác nhận trong 48 giờ. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ. Fgrapher không thu tiền trực tuyến.</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:380,&quot;height&quot;:760},&quot;pkgs&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Pkg[]&quot;},&quot;sel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;hourly&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;fullDays&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number[]&quot;},&quot;onSel&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { day: null, slot: null };
+  rootRef = React.createRef();
+  componentDidMount() { this.paint(); } componentDidUpdate() { this.paint(); }
+  paint() {
+    const r = this.rootRef.current; if (!r) return;
+    r.querySelectorAll('[data-opt]').forEach(b => { const on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--bg-sunken)' : 'transparent'; b.style.boxShadow = on ? 'inset 3px 0 0 var(--brand-primary)' : 'none'; });
+    r.querySelectorAll('[data-day],[data-slot]').forEach(b => { const st = b.dataset.day || b.dataset.slot, on = b.getAttribute('aria-pressed') === 'true'; b.style.background = on ? 'var(--brand-primary)' : 'transparent'; b.style.color = on ? 'var(--text-on-brand)' : st === 'full' ? 'var(--text-tertiary)' : 'var(--text-primary)'; b.style.borderColor = on ? 'var(--brand-primary)' : 'var(--border-subtle)'; b.style.borderStyle = st === 'full' ? 'dashed' : 'solid'; b.style.textDecoration = st === 'full' ? 'line-through' : 'none'; b.style.cursor = st === 'full' ? 'not-allowed' : 'pointer'; });
+  }
+  renderVals() {
+    const P = this.props.pkgs || [], sel = this.props.sel || (P[0] && P[0].id), pk = P.find(k => k.id === sel) || P[0] || {};
+    const WD = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    const full = this.props.fullDays || [2, 5];
+    const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(Date.UTC(2026, 9, 1 + i)); const dd = String(d.getUTCDate()).padStart(2, '0') + '/10'; const f = full.includes(i); return { i, wd: WD[d.getUTCDay()], dd, full: f, st: f ? 'full' : 'ok', on: this.state.day === i ? 'true' : 'false', aria: `${WD[d.getUTCDay()]} ${dd}/2026${f ? ', đã kín lịch' : ''}`, pick: () => this.setState({ day: i, slot: null }) }; });
+    const T = this.props.hourly ? ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'] : ['05:45', '08:00', '10:00', '14:00', '16:15', '18:00'];
+    const fullS = this.state.day === 0 ? [1, 3] : [2];
+    const d = this.state.day != null ? days[this.state.day] : null;
+    const slots = T.map((t, i) => ({ t, gold: !this.props.hourly && (t === '05:45' || t === '16:15'), full: fullS.includes(i), st: fullS.includes(i) ? 'full' : 'ok', on: this.state.slot === t ? 'true' : 'false', aria: `${t}${(t === '05:45' || t === '16:15') && !this.props.hourly ? ', giờ vàng' : ''}${fullS.includes(i) ? ', đã có người đặt' : ''}`, pick: () => this.setState({ slot: t }) }));
+    const ready = d && this.state.slot;
+    return {
+      rootRef: this.rootRef, priceTxt: pk.priceTxt || '', pkgName: pk.name ? '· ' + pk.name : '',
+      pkgs: P.map(k => ({ ...k, on: k.id === pk.id ? 'true' : 'false', pick: () => this.props.onSel && this.props.onSel(k.id) })),
+      days, hasDay: !!d, dayLabel: d ? `${d.wd} ${d.dd}` : '', slots,
+      goldNote: this.props.hourly ? 'Thuê theo giờ. Khung đã có người đặt được gạch ngang.' : 'Giờ vàng: nắng thấp, mềm, thường 30–60 phút sau bình minh và trước hoàng hôn ở TP. Hồ Chí Minh. Giờ theo giờ Việt Nam.',
+      ready: !!ready, notReady: !ready, summary: ready ? `${pk.name} · ${d.wd} ${d.dd}/2026 · ${this.state.slot}` : '',
+      ctaLabel: ready ? 'Gửi yêu cầu đặt lịch' : !d ? 'Chọn ngày để tiếp tục' : 'Chọn giờ để tiếp tục'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><script src="./ds-base.js"></script><script src="./fg-kit.js"></script><script src="./mc-data.js"></script><style>body{margin:0;background:var(--bg-page)}:root{--dr-bg:hsl(30 14% 5%);--dr-surface:hsl(30 11% 8%);--dr-raised:hsl(30 9% 12%);--dr-text:hsl(38 33% 92%);--dr-text-2:hsl(34 12% 72%);--dr-text-3:hsl(32 8% 60%);--dr-line:hsl(0 0% 100% / .06);--dr-line-2:hsl(0 0% 100% / .12);--dr-accent:var(--gold-400);--dr-scrim:hsl(30 14% 5% / .72)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}summary::-webkit-details-marker{display:none}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh;padding-bottom:{{ padB }}px">
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}"><dc-import name="McHeader" mkt="{{ mkt }}" feed="{{ feed }}" m="{{ hm }}" compact="{{ hCompact }}" cur="{{ navCur }}" on-nav="{{ nav }}" on-menu="{{ openMenu }}" hint-size="100%,56px"></dc-import></sc-if>
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}"><dc-import name="McHome" m="{{ m }}" w="{{ w }}" mkt="{{ mkt }}" feed="{{ feed }}" on-search="{{ search }}" on-open="{{ openP }}" hint-size="100%,1600px"></dc-import></sc-if>
+<sc-if value="{{ isBrowse }}" hint-placeholder-val="{{ false }}"><dc-import name="McBrowse" key="{{ bKey }}" m="{{ m }}" w="{{ w }}" init="{{ bInit }}" safe="{{ safe }}" on-open="{{ openP }}" hint-size="100%,1600px"></dc-import></sc-if>
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}"><dc-import name="McProfile" key="{{ pid }}" pid="{{ pid }}" m="{{ m }}" w="{{ w }}" init="{{ pInit }}" safe="{{ safe }}" force-sticky="{{ forceSticky }}" mark-safe="{{ markSafe }}" on-back="{{ backToBrowse }}" on-book="{{ book }}" hint-size="100%,2000px"></dc-import></sc-if>
+<sc-if value="{{ isWizard }}" hint-placeholder-val="{{ false }}"><dc-import name="McWizard" key="{{ wKey }}" pid="{{ pid }}" pkg="{{ wPkg }}" date="{{ wDate }}" time="{{ wTime }}" m="{{ m }}" safe="{{ safe }}" init="{{ wInit }}" on-exit="{{ exitWizard }}" hint-size="100%,100vh"></dc-import></sc-if>
+<sc-if value="{{ isMap }}" hint-placeholder-val="{{ false }}"><dc-import name="McMap" m="{{ m }}" hh="{{ hh }}" safe="{{ safe }}" init="{{ mInit }}" on-open="{{ openP }}" hint-size="100%,100vh"></dc-import></sc-if>
+<sc-if value="{{ isReq }}" hint-placeholder-val="{{ false }}"><dc-import name="McRequests" m="{{ m }}" safe="{{ safe }}" variant="{{ rVariant }}" init="{{ rInit }}" hint-size="100%,900px"></dc-import></sc-if>
+<sc-if value="{{ isPricing }}" hint-placeholder-val="{{ false }}"><dc-import name="McPricing" m="{{ m }}" mkt="{{ mkt }}" feed="{{ feed }}" hint-size="100%,1800px"></dc-import></sc-if>
+<sc-if value="{{ showFooter }}" hint-placeholder-val="{{ true }}"><footer style="background:var(--green-900);color:var(--gold-50)"><div style="max-width:1440px;margin:0 auto;padding:{{ footPad }};display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px 40px"><div style="display:flex;flex-direction:column;gap:8px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import><span style="font-size:14px;color:var(--green-200)">© 2026 Fgrapher · Thành phố Hồ Chí Minh</span></div><nav aria-label="Chân trang" style="display:flex;flex-wrap:wrap;gap:8px 20px"><sc-for list="{{ footLinks }}" as="l" hint-placeholder-count="5"><a href="#" style="display:flex;align-items:center;min-height:44px;font-size:14px;font-weight:600;color:var(--gold-50);text-decoration:none">{{ l }}</a></sc-for></nav></div></footer></sc-if>
+</sc-if>
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:950;display:flex;justify-content:flex-end"><div onClick="{{ closeMenu }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><nav role="dialog" aria-modal="true" aria-label="Menu" style="position:relative;width:min(320px,86vw);height:100%;display:flex;flex-direction:column;background:var(--bg-surface);box-shadow:var(--shadow-lg)"><div style="display:flex;justify-content:flex-end;padding:6px"><button type="button" onClick="{{ closeMenu }}" aria-label="Đóng menu" style="width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;color:var(--text-primary);cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div><sc-for list="{{ menuItems }}" as="it" hint-placeholder-count="4"><a href="#" onClick="{{ it.go }}" style="display:flex;align-items:center;min-height:52px;padding:0 24px;border-bottom:1px solid var(--border-subtle);font-size:16px;font-weight:600;color:var(--text-primary);text-decoration:none">{{ it.label }}</a></sc-for><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 24px;font-size:16px;font-weight:600;color:var(--text-link)">Đăng nhập</a></nav></div></sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p); const q = new URLSearchParams(window.location.search); this.q = q;
+    this.state = { w: window.innerWidth, ready: !!window.mcData, screen: q.get('screen') || 'home', pid: q.get('pid') || 'p0', bInit: { role: q.get('role') ?? 'photo', prov: q.has('prov') ? q.get('prov') : 'Thành phố Hồ Chí Minh', date: q.get('date') || '', sheet: q.get('sheet') === '1', state: q.get('state') || '', rail: q.get('rail') || 'start', styles: q.get('styles') ? q.get('styles').split(',') : [], budget: q.get('budget') || '' }, bKey: 0, wKey: 0, wPkg: q.get('pkg') || '', wDate: q.get('screen') === 'wizard' ? q.get('date') || '' : '', wTime: q.get('screen') === 'wizard' ? q.get('time') || '' : '', menu: q.get('menu') === '1' };
+  }
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR);
+    if (!this.state.ready) { const t = setInterval(() => { if (window.mcData) { clearInterval(t); this.setState({ ready: true }); } }, 30); }
+    const y = +this.q.get('scroll'); if (y) { let n = 0; const s = setInterval(() => { window.scrollTo(0, y); window.dispatchEvent(new Event('scroll')); if (++n > 12) clearInterval(s); }, 250); }
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  go(screen, extra) { this.setState({ screen, menu: false, ...(extra || {}) }, () => window.scrollTo(0, 0)); }
+  renderVals() {
+    const q = this.q, { w, screen } = this.state, m = w < 768, ex = q.get('flag') === 'expanded', mkt = ex || q.get('mkt') === '1', feed = ex || q.get('feed') === '1', safe = +(q.get('safe') || 0);
+    const items = [['browse', 'Tìm provider'], ['map', 'Bản đồ F'], ['requests', 'Đặt lịch F'], ...(mkt ? [['shop', 'Chợ F']] : []), ...(feed ? [['community', 'Cộng đồng F']] : []), ['pricing', 'Dành cho provider']];
+    const nav = k => k === 'home' ? this.go('home') : k === 'browse' ? this.go('browse', { bKey: this.state.bKey + 1 }) : ['map', 'requests', 'pricing'].includes(k) ? this.go(k) : this.setState({ menu: false });
+    const pi = screen === 'profile' && (q.get('date') || q.get('time') || q.get('psheet')) ? { date: q.get('date') || '', time: q.get('time') || '', sheet: q.get('psheet') || '', dateOnly: q.get('dateOnly') === '1' } : {};
+    const focused = screen === 'wizard';
+    return {
+      theme: q.get('theme') || 'light', ready: this.state.ready, mkt, feed, m, w, safe, hh: w < 1024 ? 56 : 64, hm: w < 1024, hCompact: w < 1280,
+      showHeader: !focused, isHome: screen === 'home', isBrowse: screen === 'browse', isProfile: screen === 'profile', isWizard: focused, isMap: screen === 'map', isReq: screen === 'requests', isPricing: screen === 'pricing',
+      navCur: ['browse', 'map', 'requests', 'pricing'].includes(screen) ? screen : '',
+      nav, openMenu: () => this.setState({ menu: true }), closeMenu: () => this.setState({ menu: false }), menuOpen: this.state.menu,
+      menuItems: items.map(([k, label]) => ({ label, go: e => { e.preventDefault(); nav(k); } })),
+      search: f => this.go('browse', { bInit: { role: f.role || '', prov: f.prov ?? '', date: f.date || '', styles: [] }, bKey: this.state.bKey + 1 }),
+      openP: id => this.go('profile', { pid: id }), backToBrowse: () => this.go('browse'),
+      book: o => this.go('wizard', { pid: o.pid, wPkg: o.pkg, wDate: o.date, wTime: o.time, wKey: this.state.wKey + 1 }), exitWizard: () => this.go('profile'),
+      bInit: this.state.bInit, bKey: 'b' + this.state.bKey, wKey: 'w' + this.state.wKey, pid: this.state.pid, pInit: pi,
+      wPkg: this.state.wPkg, wDate: this.state.wDate, wTime: this.state.wTime, wInit: { wstate: q.get('wstate') || '', wstep: q.get('wstep') },
+      mInit: { sheet: q.get('msheet') || 'collapsed', sel: q.get('sel') || '', panned: q.get('panned') === '1', filters: q.get('sheet') === '1' && screen === 'map' },
+      rVariant: q.get('rv') || 'returning', rInit: { state: q.get('rstate') || '', filter: q.get('rfilter') || '', modal: q.get('rmodal') === '1' },
+      forceSticky: q.get('sticky') === '1', markSafe: q.get('markSafe') === '1',
+      padB: m && screen === 'profile' ? 64 + safe + 24 : 0,
+      showFooter: !(m && screen === 'profile') && !focused && screen !== 'map', footPad: m ? '28px 16px 32px' : '40px clamp(16px,4vw,48px)',
+      footLinks: ['Về Fgrapher', 'Dành cho provider', 'Trợ giúp', 'Điều khoản', 'Quyền riêng tư', ...(mkt ? ['Chợ F'] : []), ...(feed ? ['Cộng đồng F'] : [])]
+    };
+  }
+}
+</script>
+</body>
+</html>

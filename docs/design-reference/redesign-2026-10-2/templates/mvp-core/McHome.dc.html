@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="font-family:var(--font-body);color:var(--text-primary)">
+<section data-surface="darkroom" aria-labelledby="mc-h1" style="background:var(--dr-bg);color:var(--dr-text)">
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><div style="position:relative;height:200px;overflow:hidden"><img data-dev="" src="{{ heroImg }}" alt="Cô dâu chú rể trên đồi cát lúc hoàng hôn" fetchpriority="high" loading="eager" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%"><span aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(to top,var(--dr-bg) 0%,transparent 55%)"></span></div></sc-if>
+<div style="max-width:1440px;margin:0 auto;padding:{{ heroPad }};display:grid;grid-template-columns:{{ heroCols }};gap:56px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+<h1 id="mc-h1" style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(30px,calc(14px + 3.6vw),68px);line-height:1;letter-spacing:-.03em;text-wrap:balance">Tìm đúng người cho ngày quan trọng của bạn</h1>
+<p style="margin:0;max-width:520px;font-size:clamp(15px,1.2vw,18px);line-height:1.55;color:var(--dr-text-2);text-wrap:pretty">Nhiếp ảnh gia, quay phim, trang điểm, người mẫu, studio và trang phục đã xác minh. Xem portfolio, so sánh giá, gửi yêu cầu đặt lịch miễn phí.</p>
+<form role="search" onSubmit="{{ submit }}" style="display:grid;grid-template-columns:{{ formCols }};gap:8px;padding:8px;border-radius:var(--fg-radius-lg);background:var(--bg-surface);color:var(--text-primary);box-shadow:var(--shadow-md)">
+<label style="grid-column:{{ roleSpan }};display:flex;flex-direction:column;gap:2px;padding:8px 12px;min-width:0"><span style="font-size:12px;font-weight:600;color:var(--text-secondary)">Bạn cần</span><select value="{{ role }}" onChange="{{ onRole }}" style="border:0;padding:0;min-height:28px;background:transparent;color:var(--text-primary);font:600 15px/1 var(--font-body)"><option value="">Mọi vai trò</option><sc-for list="{{ roles }}" as="r" hint-placeholder-count="6"><option value="{{ r.k }}">{{ r.label }}</option></sc-for></select></label>
+<label style="display:flex;flex-direction:column;gap:2px;padding:8px 12px;min-width:0;border-left:{{ divider }}"><span style="font-size:12px;font-weight:600;color:var(--text-secondary)">Khu vực</span><select value="{{ prov }}" onChange="{{ onProv }}" style="border:0;padding:0;min-height:28px;background:transparent;color:var(--text-primary);font:600 15px/1 var(--font-body);min-width:0"><option value="">Mọi tỉnh/thành</option><option value="Thành phố Hồ Chí Minh">TP.HCM</option><option value="Thành phố Hà Nội">Hà Nội</option><option value="Thành phố Đà Nẵng">Đà Nẵng</option></select></label>
+<label style="display:flex;flex-direction:column;gap:2px;padding:8px 12px;min-width:0;border-left:1px solid var(--border-subtle)"><span style="font-size:12px;font-weight:600;color:var(--text-secondary)">Ngày</span><input type="date" value="{{ date }}" min="2026-10-02" onChange="{{ onDate }}" style="border:0;padding:0;min-height:28px;background:transparent;color:var(--text-primary);font:600 15px/1 var(--font-body);color-scheme:light dark;min-width:0"></label>
+<button type="submit" style="grid-column:{{ btnSpan }};min-height:52px;padding:0 24px;border:0;border-radius:var(--fg-radius-md);background:var(--gold-400);color:var(--gold-900);font:700 16px/1 var(--font-body);cursor:pointer">Tìm provider</button>
+</form>
+</div>
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><figure style="margin:0;display:flex;flex-direction:column;gap:10px;justify-self:end;width:min(100%,560px)"><span style="display:block;aspect-ratio:4/5;padding:6px;background:var(--dr-surface);border:1px solid var(--dr-line-2)"><img data-dev="" src="{{ heroImg }}" alt="Cô dâu chú rể trên đồi cát lúc hoàng hôn" fetchpriority="high" loading="eager" style="display:block;width:100%;height:100%;object-fit:cover"></span><figcaption style="display:flex;justify-content:space-between;gap:12px;font:600 12px/1.3 var(--font-mono);letter-spacing:.08em;color:var(--dr-text-3)"><span>01A · CƯỚI Ở MŨI NÉ</span><span>MINH ANH NHIẾP ẢNH</span></figcaption></figure></sc-if>
+</div>
+</section>
+<section aria-labelledby="mc-roles" style="max-width:1440px;margin:0 auto;padding:{{ secPad }}">
+<h2 id="mc-roles" style="margin:0 0 16px;font:600 clamp(22px,2vw,32px)/1.15 var(--font-display);letter-spacing:-.02em">Bạn cần ai?</h2>
+<div style="display:grid;grid-template-columns:{{ roleCols }};gap:{{ roleGap }}"><sc-for list="{{ roles }}" as="r" hint-placeholder-count="6"><button type="button" onClick="{{ r.go }}" style="display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:transparent;color:var(--text-primary);text-align:left;cursor:pointer;min-width:0"><span style="display:block;width:100%;aspect-ratio:4/5;border-radius:var(--fg-radius-md);overflow:hidden;background:var(--bg-sunken)"><img data-dev="" src="{{ r.img }}" alt="" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.88) contrast(1.04)"></span><span style="font-size:14px;font-weight:600;line-height:1.3">{{ r.label }}</span></button></sc-for></div>
+</section>
+<section aria-labelledby="mc-near" style="max-width:1440px;margin:0 auto;padding:{{ secPad2 }}">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px"><h2 id="mc-near" style="margin:0;font:600 clamp(22px,2vw,32px)/1.15 var(--font-display);letter-spacing:-.02em">Đang nhận lịch tại TP.HCM</h2><a href="#" onClick="{{ all }}" style="flex:none;display:flex;align-items:center;min-height:44px;font-size:15px;font-weight:600;color:var(--text-link)">Xem tất cả</a></div>
+<div style="display:grid;grid-template-columns:{{ cardCols }};gap:{{ cardGap }}"><sc-for list="{{ near }}" as="a" hint-placeholder-count="4"><dc-import name="McCard" a="{{ a }}" layout="{{ layout }}" on-open="{{ open }}" hint-size="100%,140px"></dc-import></sc-for></div>
+</section>
+<section aria-labelledby="mc-steps" style="max-width:1440px;margin:0 auto;padding:{{ secPad2 }}">
+<h2 id="mc-steps" style="margin:0 0 16px;font:600 clamp(22px,2vw,32px)/1.15 var(--font-display);letter-spacing:-.02em">Đặt lịch trong ba bước</h2>
+<ol style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:{{ stepCols }};gap:12px"><sc-for list="{{ steps }}" as="s" hint-placeholder-count="3"><li style="display:flex;gap:14px;padding:18px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><span aria-hidden="true" style="flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:999px;background:var(--green-900);color:var(--gold-50);font:700 15px/1 var(--font-body)">{{ s.n }}</span><span style="display:flex;flex-direction:column;gap:4px"><strong style="font-size:16px">{{ s.t }}</strong><span style="font-size:14px;line-height:1.5;color:var(--text-secondary)">{{ s.d }}</span></span></li></sc-for></ol>
+</section>
+<sc-if value="{{ expanded }}" hint-placeholder-val="{{ false }}"><section aria-labelledby="mc-more" style="max-width:1440px;margin:0 auto;padding:{{ secPad2 }}"><h2 id="mc-more" style="margin:0 0 16px;font:600 clamp(22px,2vw,32px)/1.15 var(--font-display);letter-spacing:-.02em">Thêm từ Fgrapher</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px"><sc-if value="{{ showMkt }}" hint-placeholder-val="{{ false }}"><a href="#" style="display:flex;flex-direction:column;gap:4px;padding:20px;border-radius:var(--fg-radius-lg);background:var(--bg-sunken);color:var(--text-primary);text-decoration:none"><strong style="font-size:17px">Chợ F</strong><span style="font-size:14px;color:var(--text-secondary)">Mua, bán và thuê máy ảnh, ống kính, đèn.</span></a></sc-if><sc-if value="{{ showFeed }}" hint-placeholder-val="{{ false }}"><a href="#" style="display:flex;flex-direction:column;gap:4px;padding:20px;border-radius:var(--fg-radius-lg);background:var(--bg-sunken);color:var(--text-primary);text-decoration:none"><strong style="font-size:17px">Cộng đồng F</strong><span style="font-size:14px;color:var(--text-secondary)">Tìm cộng sự, chia sẻ bộ ảnh và kinh nghiệm.</span></a></sc-if></div></section></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;m&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;w&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:1440,&quot;tsType&quot;:&quot;number&quot;},&quot;flag&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;core&quot;,&quot;expanded&quot;],&quot;default&quot;:&quot;core&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onSearch&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(f)=&gt;void&quot;},&quot;onOpen&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { role: '', prov: 'Thành phố Hồ Chí Minh', date: '' };
+  renderVals() {
+    const D = window.mcData, m = !!this.props.m, w = this.props.w || 1440, narrow = w < 430;
+    const go = p => this.props.onSearch && this.props.onSearch(p);
+    const near = D.providers.filter(a => a.prov === 'Thành phố Hồ Chí Minh' && a.reviews > 0).slice(0, m ? 3 : 4);
+    return {
+      isMob: m, isDesk: !m, heroImg: 'https://picsum.photos/seed/fgmc-home/1000/1250',
+      heroPad: m ? '0 16px 28px' : '72px clamp(16px,4vw,48px) 80px', heroCols: m ? 'minmax(0,1fr)' : 'minmax(0,1.1fr) minmax(0,.9fr)',
+      formCols: m ? 'minmax(0,1fr) minmax(0,1fr)' : 'minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr) auto', roleSpan: m ? '1 / -1' : 'auto', btnSpan: m ? '1 / -1' : 'auto', divider: m ? '0' : '1px solid var(--border-subtle)',
+      role: this.state.role, prov: this.state.prov, date: this.state.date,
+      onRole: e => this.setState({ role: e.target.value }), onProv: e => this.setState({ prov: e.target.value }), onDate: e => this.setState({ date: e.target.value }),
+      submit: e => { e.preventDefault(); go({ ...this.state }); },
+      roles: D.roles.map(r => ({ ...r, go: () => go({ role: r.k, prov: this.state.prov }) })),
+      secPad: m ? '28px 16px 8px' : '64px clamp(16px,4vw,48px) 16px', secPad2: m ? '28px 16px 8px' : '48px clamp(16px,4vw,48px) 16px',
+      roleCols: m ? 'repeat(3,minmax(0,1fr))' : 'repeat(6,minmax(0,1fr))', roleGap: m ? '16px 10px' : '20px',
+      near, layout: narrow ? 'row' : 'col', cardCols: narrow ? 'minmax(0,1fr)' : m ? 'repeat(2,minmax(0,1fr))' : 'repeat(4,minmax(0,1fr))', cardGap: narrow ? '16px' : '28px 20px',
+      open: id => this.props.onOpen && this.props.onOpen(id), all: e => { e.preventDefault(); go({ prov: 'Thành phố Hồ Chí Minh' }); },
+      stepCols: m ? 'minmax(0,1fr)' : 'repeat(3,minmax(0,1fr))',
+      steps: [{ n: 1, t: 'Tìm và lọc', d: 'Chọn vai trò, khu vực và ngày. Chỉ hiện người còn lịch trống.' }, { n: 2, t: 'So sánh hồ sơ', d: 'Xem portfolio, gói dịch vụ, giá và đánh giá thật từ khách đã đặt.' }, { n: 3, t: 'Gửi yêu cầu', d: 'Chọn ngày giờ và gửi yêu cầu. Chưa thanh toán cho đến khi provider xác nhận.' }],
+      expanded: !!(this.props.mkt || this.props.feed), showMkt: !!this.props.mkt, showFeed: !!this.props.feed
+    };
+  }
+}
+</script>
+</body>
+</html>

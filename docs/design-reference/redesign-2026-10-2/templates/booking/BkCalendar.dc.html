@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+<strong style="font-family:var(--font-display);font-size:18px;letter-spacing:-.01em">{{ title }}</strong>
+<div style="display:flex;gap:4px">
+<button type="button" onClick="{{ onPrev }}" disabled="{{ prevDisabled }}" aria-label="Tháng trước" style="width:44px;height:44px;border-radius:var(--fg-radius-md);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);font-size:18px;cursor:pointer;transition:border-color 150ms" style-hover="border-color:var(--border-strong)">‹</button>
+<button type="button" onClick="{{ onNext }}" disabled="{{ nextDisabled }}" aria-label="Tháng sau" style="width:44px;height:44px;border-radius:var(--fg-radius-md);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);font-size:18px;cursor:pointer;transition:border-color 150ms" style-hover="border-color:var(--border-strong)">›</button>
+</div>
+</div>
+<div role="grid" aria-label="{{ title }}" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+<span style="text-align:center;font-size:12px;font-weight:700;color:var(--text-tertiary);padding:4px 0">T2</span><span style="text-align:center;font-size:12px;font-weight:700;color:var(--text-tertiary);padding:4px 0">T3</span><span style="text-align:center;font-size:12px;font-weight:700;color:var(--text-tertiary);padding:4px 0">T4</span><span style="text-align:center;font-size:12px;font-weight:700;color:var(--text-tertiary);padding:4px 0">T5</span><span style="text-align:center;font-size:12px;font-weight:700;color:var(--text-tertiary);padding:4px 0">T6</span><span style="text-align:center;font-size:12px;font-weight:700;color:var(--text-tertiary);padding:4px 0">T7</span><span style="text-align:center;font-size:12px;font-weight:700;color:var(--text-tertiary);padding:4px 0">CN</span>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel }}" as="s" hint-placeholder-count="35"><div style="height:52px"><x-import component-from-global-scope="Fgrapher.Skeleton" class-name="h-full w-full" hint-size="100%,100%"></x-import></div></sc-for></sc-if>
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+<sc-if value="{{ c.blank }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true"></span></sc-if>
+<sc-if value="{{ c.free }}" hint-placeholder-val="{{ true }}"><button type="button" role="gridcell" onClick="{{ c.pick }}" aria-label="{{ c.aria }}" style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;border-radius:var(--fg-radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);font:700 15px/1 var(--font-body);cursor:pointer;transition:border-color 150ms,transform 150ms" style-hover="border-color:var(--border-strong)">{{ c.day }}<span aria-hidden="true" style="width:5px;height:5px;border-radius:50%;background:var(--success)"></span></button></sc-if>
+<sc-if value="{{ c.sel }}" hint-placeholder-val="{{ false }}"><button type="button" role="gridcell" aria-selected="true" onClick="{{ c.pick }}" aria-label="{{ c.aria }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;border-radius:var(--fg-radius-sm);border:1px solid var(--brand-primary);background:var(--brand-primary);color:var(--text-on-brand);font:700 15px/1 var(--font-body);cursor:pointer;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand-primary) 22%,transparent)">{{ c.day }}<span aria-hidden="true" style="width:5px;height:5px;border-radius:50%;background:currentColor"></span></button></sc-if>
+<sc-if value="{{ c.full }}" hint-placeholder-val="{{ false }}"><span role="gridcell" aria-disabled="true" aria-label="{{ c.aria }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;border-radius:var(--fg-radius-sm);background:repeating-linear-gradient(135deg,var(--border-subtle) 0 1px,transparent 1px 7px);color:var(--text-tertiary);font:600 15px/1 var(--font-body);text-decoration:line-through">{{ c.day }}<span style="font-size:10px;font-weight:600;text-decoration:none">Kín</span></span></sc-if>
+<sc-if value="{{ c.off }}" hint-placeholder-val="{{ false }}"><span role="gridcell" aria-disabled="true" aria-label="{{ c.aria }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;border-radius:var(--fg-radius-sm);background:var(--bg-sunken);color:var(--text-tertiary);font:600 15px/1 var(--font-body)">{{ c.day }}<span style="font-size:10px;font-weight:600">Nghỉ</span></span></sc-if>
+<sc-if value="{{ c.past }}" hint-placeholder-val="{{ false }}"><span role="gridcell" aria-disabled="true" aria-label="{{ c.aria }}" style="display:flex;align-items:center;justify-content:center;min-height:52px;color:var(--text-tertiary);opacity:.55;font:500 15px/1 var(--font-body)">{{ c.day }}</span></sc-if>
+</sc-for>
+</sc-if>
+</div>
+<sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;padding:18px;border:1px dashed var(--border-default);border-radius:var(--fg-radius-lg)"><strong style="font-size:15px">{{ emptyTitle }}</strong><span style="font-size:14px;line-height:1.55;color:var(--text-secondary)">Nghệ sĩ thường mở lịch trước 6–8 tuần. Xem tháng sau hoặc nhắn tin để hỏi ngày bạn cần.</span><div style="display:flex;flex-wrap:wrap;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="outline" size="md" on-click="{{ onNext }}">Xem tháng sau</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md">Nhắn tin hỏi lịch</x-import></div></div></sc-if>
+<ul aria-label="Chú thích" style="margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--text-secondary)">
+<li style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border-radius:4px;border:1px solid var(--border-default);background:var(--bg-surface);display:flex;align-items:center;justify-content:center"><span style="width:4px;height:4px;border-radius:50%;background:var(--success)"></span></span>Còn trống</li>
+<li style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border-radius:4px;background:var(--brand-primary)"></span>Đang chọn</li>
+<li style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border-radius:4px;border:1px solid var(--border-subtle);background:repeating-linear-gradient(135deg,var(--border-default) 0 1px,transparent 1px 4px)"></span>Đã kín</li>
+<li style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border-radius:4px;background:var(--bg-sunken);border:1px solid var(--border-subtle)"></span>Nghệ sĩ nghỉ</li>
+</ul>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Tháng 10, 2026&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cells&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object[]&quot;},&quot;loading&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;empty&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;compact&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onPrev&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onNext&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    return {
+      title: p.title || 'Tháng 10, 2026', cells: p.cells || [], loading: !!p.loading, ready: !p.loading,
+      skel: Array.from({ length: 35 }, (_, i) => i), cellH: p.compact ? '48px' : '60px',
+      empty: !!p.empty && !p.loading, emptyTitle: p.emptyTitle || 'Tháng này không còn ngày trống',
+      onPrev: p.onPrev, onNext: p.onNext, prevDisabled: !!p.prevDisabled, nextDisabled: !!p.nextDisabled
+    };
+  }
+}
+</script>
+</body>
+</html>

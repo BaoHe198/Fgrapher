@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Trang chủ" description="Trang chủ Fgrapher responsive: điện thoại 390px và máy tính 1440px, sáng/tối, kèm trạng thái tải, trống, lỗi, nội dung dài." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1d1b16">
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="width:620px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Quyết định UX</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Ô tìm kiếm nằm ở màn đầu. Trên điện thoại, ô tìm kiếm đứng trước ảnh vì tìm nghệ sĩ là việc đầu tiên khách cần làm.</li>
+<li>Header thu gọn từ 72px xuống 56px và nền mờ khi cuộn. Trên điện thoại, menu gom vào nút "Menu" 44px.</li>
+<li>Nghệ sĩ nổi bật: trên điện thoại là băng trượt ngang có snap, luôn lộ một phần thẻ kế tiếp. Trên máy tính là lưới 4 cột.</li>
+<li>Bản đồ F dùng ghim đánh số khung thay cho ghim giá, vừa giữ mô-típ contact sheet vừa khác sản phẩm tham chiếu.</li>
+<li>Phần niềm tin minh họa bằng chính giao diện (huy hiệu, đánh giá, tin nhắn), không dùng icon trang trí.</li>
+<li>Chuyển động:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Thẻ nhấc 3px trong 200ms.</li><li>Ảnh "tráng" dần trong 400ms.</li><li>Mỗi mục hiện dần trong 320ms khi cuộn tới.</li><li>Tất cả tắt khi bật prefers-reduced-motion.</li></ul></li>
+</ol>
+</div>
+<div style="width:620px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Component</div>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Dùng lại:</strong> FgrapherProvider, LogoFull, HeroSearch, HeroContactSheet, ArtistCard, SectionHead, Tag, Badge, Button, Alert, Skeleton, Footer.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Tạo mới</strong> (dựng tại chỗ, chỉ dùng token của design system):</p>
+<ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.5">
+<li>Header trang chủ: design system chưa có header điều hướng.</li>
+<li>Dải phim hero trên điện thoại: HeroContactSheet tự ẩn dưới 1024px.</li>
+<li>Ô phong cách dạng bộ sưu tập, xem trước Bản đồ F kèm thẻ nổi, khối niềm tin, khối mời nhà cung cấp.</li>
+</ul>
+<p style="margin:0;font-size:14px;line-height:1.5;color:#6b665c">Ảnh hiện tại là ảnh ngẫu nhiên giữ chỗ, cần thay bằng ảnh portfolio thật.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại · 390px</div>
+<div style="display:flex;gap:48px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sáng</span><iframe data-fit="1" src="HomePage.dc.html?theme=light" style="width:390px;height:2400px;border:1px solid #d9d4ca;border-radius:24px;background:#fff" title="Trang chủ điện thoại sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tối</span><iframe data-fit="1" src="HomePage.dc.html?theme=dark" style="width:390px;height:2400px;border:1px solid #d9d4ca;border-radius:24px;background:#111" title="Trang chủ điện thoại tối"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Máy tính · 1440px</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sáng</span><iframe data-fit="1" src="HomePage.dc.html?theme=light" style="width:1440px;height:3200px;border:1px solid #d9d4ca;border-radius:12px;background:#fff" title="Trang chủ máy tính sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tối</span><iframe data-fit="1" src="HomePage.dc.html?theme=dark" style="width:1440px;height:3200px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Trang chủ máy tính tối"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Trạng thái</div>
+<div style="display:flex;gap:48px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải</span><iframe data-fit="1" src="HomePage.dc.html?theme=light&amp;state=loading" style="width:390px;height:2400px;border:1px solid #d9d4ca;border-radius:24px" title="Đang tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trống</span><iframe data-fit="1" src="HomePage.dc.html?theme=light&amp;state=empty" style="width:390px;height:2400px;border:1px solid #d9d4ca;border-radius:24px" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi · tối</span><iframe data-fit="1" src="HomePage.dc.html?theme=dark&amp;state=error" style="width:390px;height:2400px;border:1px solid #d9d4ca;border-radius:24px;background:#111" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài</span><iframe data-fit="1" src="HomePage.dc.html?theme=light&amp;state=long" style="width:390px;height:2400px;border:1px solid #d9d4ca;border-radius:24px" title="Nội dung dài"></iframe></div>
+</div>
+<div style="display:flex;gap:48px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Header khi cuộn · điện thoại</span><iframe src="HomePage.dc.html?theme=light&amp;scrolled=1" style="width:390px;height:240px;border:1px solid #d9d4ca;border-radius:24px" title="Header thu gọn điện thoại"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Header khi cuộn · máy tính, tối</span><iframe src="HomePage.dc.html?theme=dark&amp;scrolled=1" style="width:1440px;height:240px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Header thu gọn máy tính"></iframe></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => {
+      try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 200 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {}
+    });
+    this.t = setInterval(fit, 700);
+    setTimeout(() => clearInterval(this.t), 15000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

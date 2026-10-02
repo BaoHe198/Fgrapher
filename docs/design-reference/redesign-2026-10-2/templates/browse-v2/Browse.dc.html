@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Tìm kiếm F v2 (/browse)" description="Bỏ cột lọc trái: ô tìm kép + dải danh mục có ảnh và số khung, chế độ Nghệ sĩ / Theo ảnh / Album dự án, chia đôi bản đồ, tiêu đề theo ngữ cảnh, bảng bộ lọc, đủ trạng thái. 1440/390 sáng/tối." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:hsl(30 15% 11%)">
+<div style="width:1100px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Quyết định chính</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Bỏ cột lọc trái. Thanh dính gồm ô tìm kép “Khu vực | Ngày &amp; giờ”, dải 14 danh mục có ảnh và số khung (vai trò 02–07, phong cách 08–14), và nút Bộ lọc có số bộ lọc đang bật. Mọi bộ lọc cũ nằm trong bảng Bộ lọc. Trên điện thoại, ô tìm thu thành một nút, danh mục thành chip chữ cuộn ngang, bộ lọc mở dạng sheet.</li>
+<li>Tab “Nghệ sĩ / Album dự án” và công tắc “Theo ảnh” gộp thành một điều khiển ba lựa chọn, để người dùng chỉ phải chọn một chỗ.</li>
+<li>Thẻ nghệ sĩ: ảnh 4:5 chiếm phần lớn thẻ. Rê chuột hoặc focus thì hiện dải 3 khung gần nhất. Dòng tin cậy chỉ ghép những số có thật; nghệ sĩ chưa có số liệu thì bỏ cả dòng. Nhãn “CÒN LỊCH dd/MM” chỉ hiện khi đang lọc theo ngày.</li>
+<li>Theo ảnh: masonry giữ tỉ lệ gốc. Rê chuột hiện tên và giá khởi điểm. Bấm mở lightbox Phòng tối có nút Xem hồ sơ và Đặt lịch. Trên điện thoại tên và giá nằm dưới ảnh vì không có hover.</li>
+<li>Tiêu đề ghép từ bộ lọc: vai trò + phong cách + khu vực. Khi không có kết quả, trang gợi ý bỏ bộ lọc nào kèm số nghệ sĩ sẽ hiện ra, tính thật trên dữ liệu. Khi lỗi, chip bộ lọc và tiêu đề vẫn giữ nguyên.</li>
+</ol>
+<p style="margin:0;font-size:14px;line-height:1.5;color:hsl(30 8% 38%)">Dữ liệu nghệ sĩ, giá, đánh giá, số buổi là mẫu. Bản đồ là bản minh hoạ; khi làm thật thì dùng lớp bản đồ và marker khung ảnh của Bản đồ F.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Máy tính 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ · sáng</span><iframe data-fit="1" src="BrPage.dc.html?theme=light" style="width:1440px;height:1600px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Nghệ sĩ sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Theo ảnh · tối</span><iframe data-fit="1" src="BrPage.dc.html?theme=dark&amp;mode=photos" style="width:1440px;height:1600px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Theo ảnh tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Chia đôi bản đồ · lọc ngày 15/11/2026 · sáng</span><iframe src="BrPage.dc.html?theme=light&amp;map=1&amp;date=2026-11-15" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Bản đồ"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Bảng bộ lọc · tối</span><iframe src="BrPage.dc.html?theme=dark&amp;filters=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Bộ lọc"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Album dự án · sáng</span><iframe src="BrPage.dc.html?theme=light&amp;mode=albums" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Album"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · nhiều bộ lọc · tối</span><iframe src="BrPage.dc.html?theme=dark&amp;state=long" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Dài"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Không có kết quả · sáng</span><iframe src="BrPage.dc.html?theme=light&amp;state=empty" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · tối</span><iframe src="BrPage.dc.html?theme=dark&amp;state=loading" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi · bộ lọc vẫn giữ · sáng</span><iframe src="BrPage.dc.html?theme=light&amp;state=error" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Theo ảnh · đang tải · sáng</span><iframe src="BrPage.dc.html?theme=light&amp;mode=photos&amp;state=loading" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Ảnh tải"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nghệ sĩ · sáng</span><iframe data-fit="1" src="BrPage.dc.html?theme=light" style="width:390px;height:3000px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Theo ảnh · tối</span><iframe data-fit="1" src="BrPage.dc.html?theme=dark&amp;mode=photos" style="width:390px;height:3000px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT ảnh"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sheet bộ lọc · sáng</span><iframe src="BrPage.dc.html?theme=light&amp;filters=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT bộ lọc"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Bản đồ · tối</span><iframe src="BrPage.dc.html?theme=dark&amp;map=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT bản đồ"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Không có kết quả · tối</span><iframe src="BrPage.dc.html?theme=dark&amp;state=empty" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi · sáng</span><iframe src="BrPage.dc.html?theme=light&amp;state=error" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · sáng</span><iframe src="BrPage.dc.html?theme=light&amp;state=loading" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT tải"></iframe></div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

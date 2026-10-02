@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section id="dk-palette" style="scroll-margin-top:120px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">04 · COMPONENT</span><h2 style="margin:0;font:var(--text-heading-xl);letter-spacing:-.01em">CommandPalette ⌘K</h2><p style="margin:0;max-width:680px;font:var(--text-body-md);color:var(--text-secondary);text-wrap:pretty">Mở được từ mọi trang bằng ⌘K (Ctrl K trên Windows) hoặc nút tìm trên thanh đầu. Tìm nghệ sĩ, album, phong cách và trang trong hệ thống, kết quả chia nhóm. Thanh lệnh là phần giao diện điều khiển nên dùng bề mặt Giấy theo chế độ sáng/tối, không dùng Phòng tối.</p></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md" on-click="{{ openPal }}">Mở thanh lệnh</x-import><span style="font-size:14px;color:var(--text-secondary)">hoặc bấm {{ kbd }} ở bất kỳ đâu trên trang này. Ô bên dưới là bản chạy thật: gõ “da nang”, dùng ↑ ↓ và ↵.</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">MÁY TÍNH · CHẠY THẬT</span><div style="padding:clamp(16px,3vw,40px);border-radius:var(--fg-radius-lg);background:var(--bg-sunken)"><dc-import name="CommandPalette" mode="inline" hint-size="100%,440px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">ĐIỆN THOẠI · SHEET TỪ DƯỚI LÊN</span><div style="position:relative;width:min(100%,390px);height:700px;border:1px solid var(--border-default);border-radius:28px;overflow:hidden;background:var(--bg-page)"><div aria-hidden="true" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;padding:64px 20px"><span style="height:28px;width:60%;border-radius:6px;background:var(--bg-sunken)"></span><span style="height:180px;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></span><span style="height:14px;width:80%;border-radius:4px;background:var(--bg-sunken)"></span></div><div style="position:absolute;inset:0"><dc-import name="CommandPalette" mode="inline-sheet" preset-query="minh" hint-size="100%,100%" style="height:100%"></dc-import></div></div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px"><strong style="font:var(--text-heading-md)">Trạng thái</strong>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">ĐANG TÌM · TRANG HIỆN NGAY, NGHỆ SĨ CHỜ MẠNG</span><dc-import name="CommandPalette" mode="inline" preset-query="lich" preset-state="loading" hint-size="100%,360px"></dc-import></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">TRỐNG</span><dc-import name="CommandPalette" mode="inline" preset-query="flycam Côn Đảo" hint-size="100%,360px"></dc-import></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">LỖI MẠNG · VẪN TÌM ĐƯỢC TRANG</span><dc-import name="CommandPalette" mode="inline" preset-query="cai dat" preset-state="error" hint-size="100%,360px"></dc-import></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">NỘI DUNG DÀI · CẮT MỘT DÒNG, TÊN ĐẦY ĐỦ Ở TRANG ĐÍCH</span><dc-import name="CommandPalette" mode="inline" preset-query="son tra" hint-size="100%,360px"></dc-import></div>
+</div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Tìm</strong><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--text-secondary)"><li>Không phân biệt dấu: “da nang” khớp “Đà Nẵng”. Mọi từ gõ vào đều phải khớp.</li><li>Ô trống: hiện Gần đây và Đi tới. Không hiện gợi ý “xu hướng” khi chưa có dữ liệu thật.</li><li>Nhóm theo thứ tự Nghệ sĩ (4) · Album (3) · Phong cách (3) · Trang (4). Nhóm nào không có kết quả thì ẩn.</li><li>Trang lọc ngay trên máy. Nghệ sĩ và album gọi mạng sau 150ms ngừng gõ.</li></ul></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Phím và a11y</strong><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--text-secondary)"><li>↑ ↓ đi qua mọi dòng, vòng lại ở hai đầu. ↵ mở. Esc xoá ô, bấm Esc lần nữa để đóng.</li><li>Ô nhập là combobox, danh sách là listbox, dòng đang chọn gắn qua aria-activedescendant. Focus luôn ở ô nhập.</li><li>Đóng thì trả focus về nút đã mở. Rê chuột chỉ đổi dòng đang chọn khi chuột thật sự di chuyển.</li></ul></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)"><strong style="font-size:15px">Chuyển động · điện thoại</strong><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--text-secondary)"><li>Máy tính: mờ + 0,98→1 trong 200ms, đóng 150ms ease-in. Nền phủ --dr-scrim.</li><li>Điện thoại dưới 768px: sheet cao 88%, trượt lên 320ms, đóng 200ms. Có tay nắm, nút Huỷ, vuốt xuống để đóng. Bàn phím mở ngay.</li><li>Giảm chuyển động: hiện và ẩn tức thì.</li></ul></div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { kbd: /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K', openPal: () => this.props.onOpenPalette && this.props.onOpenPalette() };
+  }
+}
+</script>
+</body>
+</html>

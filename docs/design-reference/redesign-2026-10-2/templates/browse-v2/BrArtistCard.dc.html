@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<article ref="{{ rootRef }}" onMouseEnter="{{ enter }}" onMouseLeave="{{ leave }}" onFocus="{{ enter }}" onBlur="{{ leaveBlur }}" aria-labelledby="{{ hid }}" style="position:relative;display:flex;flex-direction:column;gap:12px;min-width:0;color:var(--text-primary);font-family:var(--font-body)">
+<a href="#" aria-labelledby="{{ hid }}" style="position:relative;display:block;aspect-ratio:4/5;border-radius:var(--fg-radius-md);overflow:hidden;background:var(--bg-sunken)">
+<img data-dev="" src="{{ a.cover }}" alt="{{ a.coverAlt }}" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;transition:transform 400ms cubic-bezier(0,0,.2,1)">
+<sc-if value="{{ hasAvail }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:10px;top:10px;padding:6px 9px;border-radius:4px;background:var(--bg-surface);color:var(--text-primary);font:700 12px/1 var(--font-mono);letter-spacing:.12em;box-shadow:var(--shadow-sm)">{{ availLabel }}</span></sc-if>
+<span data-strip="" aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:28px 8px 8px;background:linear-gradient(to top,var(--dr-scrim),transparent);opacity:0;transform:translateY(8px);transition:opacity 200ms cubic-bezier(0,0,.2,1),transform 200ms cubic-bezier(0,0,.2,1)"><sc-for list="{{ recent }}" as="r" hint-placeholder-count="3"><span style="display:flex;flex-direction:column;gap:4px"><span style="aspect-ratio:1;display:grid;place-items:center;padding:2px;background:var(--dr-bg)"><img src="{{ r.src }}" alt="" loading="lazy" style="display:block;max-width:100%;max-height:100%"></span><span style="font:600 12px/1 var(--font-mono);color:var(--dr-text)">{{ r.num }}</span></span></sc-for></span>
+</a>
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px"><h3 id="{{ hid }}" style="margin:0;font:600 17px/1.3 var(--font-body);min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ a.name }}</h3><sc-if value="{{ hasRating }}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-size:14px;font-weight:600">★ {{ a.ratingTxt }} <span style="font-weight:400;color:var(--text-secondary)">({{ a.reviews }})</span></span></sc-if></div>
+<span style="font-size:14px;line-height:1.4;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.roleTxt }} · {{ a.place }}</span>
+<sc-if value="{{ hasTrust }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;line-height:1.4;color:var(--text-secondary)">{{ trust }}</span></sc-if>
+<span style="font-size:15px;margin-top:2px"><span style="color:var(--text-secondary)">Từ </span><strong style="font-variant-numeric:tabular-nums">{{ a.priceTxt }}</strong></span>
+</div>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:320,&quot;height&quot;:520},&quot;a&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Artist&quot;},&quot;date&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onHover&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id|null) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  show(on) {
+    const r = this.rootRef.current; if (!r) return;
+    const s = r.querySelector('[data-strip]'), im = r.querySelector('a > img');
+    if (s) { s.style.opacity = on ? '1' : '0'; s.style.transform = on ? 'none' : 'translateY(8px)'; }
+    if (im && !(window.fgKit && window.fgKit.reduced())) im.style.transform = on ? 'scale(1.03)' : '';
+    this.props.onHover && this.props.onHover(on ? this.props.a.id : null);
+  }
+  renderVals() {
+    const a = this.props.a || {};
+    const t = [a.resp != null && `Phản hồi trong ${a.resp} giờ`, a.sessions != null && `${a.sessions} buổi đã chụp`].filter(Boolean).join(' · ');
+    return {
+      rootRef: this.rootRef, a, hid: 'bra-' + a.id,
+      hasAvail: !!this.props.date, availLabel: 'CÒN LỊCH ' + (this.props.date || ''),
+      recent: (a.recent || []).map((src, i) => ({ src, num: '0' + (i + 1) + 'A' })),
+      hasRating: a.reviews > 0, hasTrust: !!t, trust: t,
+      enter: () => this.show(true), leave: () => this.show(false),
+      leaveBlur: e => { if (!e.currentTarget.contains(e.relatedTarget)) this.show(false); }
+    };
+  }
+}
+</script>
+</body>
+</html>

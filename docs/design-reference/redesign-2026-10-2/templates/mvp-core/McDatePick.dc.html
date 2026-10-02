@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;font-family:var(--font-body);color:var(--text-primary)">
+<fieldset style="margin:0;padding:0;border:0;min-width:0"><legend style="padding:0;margin-bottom:10px;font-size:15px;font-weight:600">Ngày · tháng 10/2026</legend>
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px"><sc-for list="{{ days }}" as="d" hint-placeholder-count="14"><button type="button" onClick="{{ d.pick }}" disabled="{{ d.busy }}" aria-pressed="{{ d.on }}" aria-label="{{ d.aria }}" style="min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;border:1px solid {{ d.bd }};border-radius:var(--fg-radius-sm);background:{{ d.bg }};color:{{ d.fg }};text-decoration:{{ d.deco }};font-family:var(--font-body);cursor:{{ d.cur }}"><span style="font-size:12px;line-height:1">{{ d.wd }}</span><span style="font-size:16px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums">{{ d.n }}</span></button></sc-for></div>
+</fieldset>
+<fieldset style="margin:0;padding:0;border:0;min-width:0"><legend style="padding:0;margin-bottom:10px;font-size:15px;font-weight:600">Giờ bắt đầu</legend>
+<sc-if value="{{ noDate }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;color:var(--text-secondary)">Chọn ngày trước để xem giờ trống.</p></sc-if>
+<sc-if value="{{ hasDate }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><sc-for list="{{ times }}" as="t" hint-placeholder-count="6"><button type="button" onClick="{{ t.pick }}" disabled="{{ t.busy }}" aria-pressed="{{ t.on }}" style="min-height:44px;border:1px solid {{ t.bd }};border-radius:var(--fg-radius-sm);background:{{ t.bg }};color:{{ t.fg }};text-decoration:{{ t.deco }};font:600 15px/1 var(--font-body);font-variant-numeric:tabular-nums;cursor:{{ t.cur }}">{{ t.label }}</button></sc-for></div></sc-if>
+</fieldset>
+<p style="margin:0;font-size:13px;line-height:1.4;color:var(--text-secondary)">Ô gạch ngang là ngày hoặc giờ đã kín lịch.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:358,&quot;height&quot;:360},&quot;busy&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;date&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;time&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onDate&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(iso)=&gt;void&quot;},&quot;onTime&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(t)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const D = window.mcData, busy = this.props.busy || [], date = this.props.date || '', time = this.props.time || '';
+    const sty = (on, off) => off ? { bd: 'var(--border-subtle)', bg: 'var(--bg-sunken)', fg: 'var(--text-tertiary)', deco: 'line-through', cur: 'not-allowed' } : on ? { bd: 'var(--brand-primary)', bg: 'var(--brand-primary)', fg: 'var(--text-on-brand)', deco: 'none', cur: 'pointer' } : { bd: 'var(--border-default)', bg: 'var(--bg-surface)', fg: 'var(--text-primary)', deco: 'none', cur: 'pointer' };
+    const di = D.days.indexOf(date), tb = di < 0 ? [] : di % 3 === 0 ? ['06:00', '14:00'] : di % 4 === 1 ? ['16:00', '18:00'] : ['10:00'];
+    return {
+      noDate: !date, hasDate: !!date,
+      days: D.days.map(iso => { const b = busy.includes(iso), on = iso === date; return { ...sty(on, b), wd: D.wd(iso), n: iso.slice(8), busy: b, on: on ? 'true' : 'false', aria: `${D.wd(iso)} ${D.dmy(iso)}${b ? ', kín lịch' : ''}`, pick: () => this.props.onDate && this.props.onDate(iso) }; }),
+      times: D.times.map(t => { const b = tb.includes(t), on = t === time; return { ...sty(on, b), label: t, busy: b, on: on ? 'true' : 'false', pick: () => this.props.onTime && this.props.onTime(t) }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

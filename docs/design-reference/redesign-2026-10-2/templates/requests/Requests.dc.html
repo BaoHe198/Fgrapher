@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Đặt lịch F · yêu cầu và đề xuất" description="Trang công khai /requests, đăng yêu cầu từng câu với call sheet điền dần, chi tiết yêu cầu có so sánh đề xuất. 1440/390, sáng/tối, trống, hết hạn, lỗi, đang tải, nội dung dài." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:hsl(30 15% 11%)">
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="width:860px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Quyết định chính</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Khách chưa đăng nhập vào /requests thấy trang giải thích thay vì màn đăng nhập. Chỉ khi bấm “Đăng yêu cầu” mới mở hộp đăng nhập bằng số điện thoại và OTP, trên điện thoại là sheet. Đăng nhập xong khách vào thẳng câu 01.</li>
+<li>Tờ “call sheet” là vật thể trung tâm của cả luồng: ví dụ ở trang công khai, bản nháp điền dần khi đăng, và bản tóm tắt ở trang chi tiết. Dòng đang hỏi được tô nền, dòng chưa trả lời ghi “Chưa điền”.</li>
+<li>Mỗi màn một câu, chữ lớn. Phím A–F chọn nhanh, Enter đi tiếp. Nháp tự lưu sau mỗi thay đổi, kèm giờ lưu theo giờ Việt Nam. Khi đổi câu, chữ và nút hiện ngay, chỉ thanh tiến độ đổi màu trong 260ms. Focus chuyển về tiêu đề câu hỏi.</li>
+<li>Thẻ đề xuất đưa giá và những gì bao gồm lên đầu. Tiếp theo là đánh giá, thời gian phản hồi, ba ảnh mẫu dạng contact sheet, rồi lời nhắn rút gọn 3 dòng. Nghệ sĩ chưa có đánh giá thì ghi “Chưa có đánh giá”, không hiện 0 sao.</li>
+<li>So sánh: chọn 2–3 đề xuất, một khay nổi hiện ra, mở bảng cạnh nhau. Trên điện thoại bảng cuộn ngang, bám theo từng cột, cột nhãn đứng yên.</li>
+<li>Chọn đề xuất cần xác nhận. Sau khi chọn, các đề xuất khác chỉ còn nút Nhắn tin. Hết hạn thì viền đứt và có nút “Đăng lại yêu cầu này”.</li>
+</ol>
+</div>
+<div style="width:580px;background:#fff;border:1px solid hsl(30 12% 90%);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:hsl(38 48% 36%)">Component</div>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Dùng từ DS:</strong> FgrapherProvider, LogoFull, Button, Input, Textarea, Avatar, Skeleton, FrameMark.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Mới:</strong> CallSheet, ProposalCard, CompareTable, QuestionStep, lightbox và tráng ảnh từ bộ đợt 2.</p>
+<p style="margin:0;font-size:14px;line-height:1.5;color:hsl(30 8% 38%)">Cần chốt với sản phẩm: yêu cầu mở 7 ngày; yêu cầu gần đây chỉ hiện loại buổi, tỉnh/thành và khoảng ngân sách. Tên, giá, đánh giá trong đề xuất và danh sách yêu cầu gần đây là dữ liệu mẫu để minh họa.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">01 · Trang công khai /requests</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Máy tính · sáng</span><iframe data-fit="1" src="RqPublic.dc.html?theme=light" style="width:1440px;height:2200px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Công khai sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Máy tính · tối</span><iframe data-fit="1" src="RqPublic.dc.html?theme=dark" style="width:1440px;height:2200px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Công khai tối"></iframe></div>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Điện thoại · sáng</span><iframe data-fit="1" src="RqPublic.dc.html?theme=light" style="width:390px;height:3600px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Điện thoại · tối</span><iframe data-fit="1" src="RqPublic.dc.html?theme=dark" style="width:390px;height:3600px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Bấm Đăng yêu cầu · sheet đăng nhập</span><iframe src="RqPublic.dc.html?theme=light&amp;login=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="Đăng nhập ĐT"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đăng nhập · máy tính · tối</span><iframe src="RqPublic.dc.html?theme=dark&amp;login=1" style="width:1440px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Đăng nhập máy tính"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Yêu cầu gần đây · đang tải</span><iframe data-scroll="rq-recent" src="RqPublic.dc.html?theme=light&amp;recent=loading" style="width:390px;height:700px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="Gần đây tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Yêu cầu gần đây · trống hoặc lỗi → ẩn khối</span><iframe data-fit="1" src="RqPublic.dc.html?theme=dark&amp;recent=empty" style="width:390px;height:3000px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="Gần đây trống"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">02 · Đăng yêu cầu từng câu</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Câu 01 · trống · sáng</span><iframe src="RqCompose.dc.html?theme=light&amp;q=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Câu 1"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Câu 04 · phong cách · tối · đã điền</span><iframe src="RqCompose.dc.html?theme=dark&amp;q=4&amp;fill=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Câu 4"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Có bản nháp · câu 01 · sáng</span><iframe src="RqCompose.dc.html?theme=light&amp;q=1&amp;draft=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Nháp"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Câu 06 · nội dung dài · tối</span><iframe src="RqCompose.dc.html?theme=dark&amp;q=6&amp;fill=1&amp;state=long" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Câu 6 dài"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Câu 06 · đăng lỗi · sáng</span><iframe src="RqCompose.dc.html?theme=light&amp;q=6&amp;fill=1&amp;state=error" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đã đăng · sáng</span><iframe src="RqCompose.dc.html?theme=light&amp;fill=1&amp;state=done" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Đã đăng"></iframe></div>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Câu 01 · sáng</span><iframe src="RqCompose.dc.html?theme=light&amp;q=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT câu 1"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Câu 02 · khi nào · tối</span><iframe src="RqCompose.dc.html?theme=dark&amp;q=2&amp;fill=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT câu 2"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Câu 03 · ở đâu · sáng</span><iframe src="RqCompose.dc.html?theme=light&amp;q=3&amp;fill=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT câu 3"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Call sheet mở · tối</span><iframe src="RqCompose.dc.html?theme=dark&amp;q=5&amp;fill=1&amp;sheet=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT sheet"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đã đăng · tối</span><iframe src="RqCompose.dc.html?theme=dark&amp;fill=1&amp;state=done" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT đã đăng"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">03 · Chi tiết yêu cầu và đề xuất</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">3 đề xuất · sáng</span><iframe data-fit="1" src="RqDetail.dc.html?theme=light" style="width:1440px;height:1400px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Chi tiết sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">So sánh 2 đề xuất · tối</span><iframe src="RqDetail.dc.html?theme=dark&amp;cmp=p1,p2&amp;open=1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="So sánh"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đã chọn · sáng</span><iframe src="RqDetail.dc.html?theme=light&amp;state=chosen" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Đã chọn"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Hết hạn, có đề xuất · tối</span><iframe src="RqDetail.dc.html?theme=dark&amp;state=expired" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Hết hạn"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài, 5 đề xuất · sáng</span><iframe data-fit="1" src="RqDetail.dc.html?theme=light&amp;state=long" style="width:1440px;height:1800px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Dài"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang chọn so sánh, khay nổi · tối</span><iframe src="RqDetail.dc.html?theme=dark&amp;cmp=p1" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Khay"></iframe></div>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Điện thoại · sáng</span><iframe data-fit="1" src="RqDetail.dc.html?theme=light" style="width:390px;height:3200px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT chi tiết"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">So sánh · điện thoại · tối</span><iframe src="RqDetail.dc.html?theme=dark&amp;cmp=p1,p2&amp;open=1" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT so sánh"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Chưa có đề xuất · sáng</span><iframe src="RqDetail.dc.html?theme=light&amp;state=empty" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="Trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Hết hạn, không có đề xuất · tối</span><iframe src="RqDetail.dc.html?theme=dark&amp;state=expired-empty" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="Hết hạn trống"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · sáng</span><iframe src="RqDetail.dc.html?theme=light&amp;state=loading" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="Tải"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lỗi · tối</span><iframe src="RqDetail.dc.html?theme=dark&amp;state=error" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="Lỗi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đã chọn · tối</span><iframe src="RqDetail.dc.html?theme=dark&amp;state=chosen" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT đã chọn"></iframe></div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    const jump = () => document.querySelectorAll('iframe[data-scroll]').forEach(f => { try { if (f.dataset.done) return; const d = f.contentDocument, el = d && d.getElementById(f.dataset.scroll); if (!el) return; f.contentWindow.scrollTo(0, el.getBoundingClientRect().top + f.contentWindow.scrollY - 80); f.dataset.done = '1'; } catch (e) {} });
+    this.t = setInterval(() => { fit(); jump(); }, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

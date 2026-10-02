@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--bg-page)}a{color:inherit}.fg-x::-webkit-scrollbar{display:none}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body)">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<div style="height:100vh;display:flex;flex-direction:column;overflow:hidden">
+<header style="flex:none;background:var(--green-900)">
+<div style="max-width:1440px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;gap:24px">
+<a href="#" aria-label="Fgrapher, trang chủ" style="display:flex;align-items:center;min-height:44px;--text-primary:var(--gold-50)"><x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import></a>
+<nav aria-label="Điều hướng chính" style="display:flex;align-items:center;gap:4px;flex:1;justify-content:center">
+<a href="../search/SearchPage.dc.html" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Tìm kiếm F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--gold-50);text-decoration:none;box-shadow:inset 0 -2px 0 var(--gold-400)" aria-current="page">Bản đồ F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Đặt lịch F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Chợ F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Cộng đồng F</a>
+<a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:600;color:var(--green-200);text-decoration:none" style-hover="color:var(--gold-50)">Giới thiệu F</a>
+</nav>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="md">Đăng nhập / Đăng ký</x-import>
+</div>
+</header>
+<div style="flex:none;border-bottom:1px solid var(--border-subtle);background:var(--bg-surface)">
+<div style="padding:10px 32px;display:flex;align-items:center;gap:16px">
+<div style="position:relative;flex:none">
+<button type="button" data-pill="where" aria-expanded="{{ whereOpen }}" aria-label="Đổi khu vực và thời gian" style="display:flex;align-items:center;min-height:52px;padding:0 6px 0 0;border-radius:999px;border:1px solid var(--border-default);background:var(--bg-surface);color:var(--text-primary);cursor:pointer;font-family:inherit;text-align:left;box-shadow:var(--shadow-sm);transition:border-color 150ms,box-shadow 150ms" style-hover="border-color:var(--text-tertiary);box-shadow:var(--shadow-md)">
+<span style="display:flex;flex-direction:column;gap:2px;padding:0 18px"><span style="font-size:11px;font-weight:600;color:var(--text-tertiary)">Khu vực</span><span style="font-size:14px;font-weight:600;white-space:nowrap">{{ whereLabel }}</span></span>
+<span style="width:1px;height:28px;background:var(--border-subtle)"></span>
+<span style="display:flex;flex-direction:column;gap:2px;padding:0 18px"><span style="font-size:11px;font-weight:600;color:var(--text-tertiary)">Ngày &amp; giờ cần chụp</span><span style="font-size:14px;font-weight:600;white-space:nowrap">{{ whenLabel }}</span></span>
+<span aria-hidden="true" style="width:40px;height:40px;border-radius:50%;background:var(--green-900);color:var(--gold-50);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="6"></circle><path d="m14 14 4 4"></path></svg></span>
+</button>
+<sc-if value="{{ whereOpen }}" hint-placeholder-val="{{ false }}">
+<div data-pop="" style="position:absolute;top:calc(100% + 8px);left:0;z-index:40;width:520px;padding:20px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);box-shadow:var(--shadow-lg)">
+<span style="grid-column:1 / -1;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Khu vực</span>
+<button type="button" data-nearme="" style="grid-column:1 / -1;display:flex;align-items:center;gap:12px;min-height:52px;padding:0 14px;border-radius:var(--fg-radius-md);border:1px solid var(--border-default);background:var(--bg-surface);color:var(--text-primary);font:600 14px/1.3 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--bg-sunken)"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;background:var(--green-900);color:var(--gold-50);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="3"></circle><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3"></path></svg></span><span style="display:flex;flex-direction:column;gap:2px"><span>Tìm quanh vị trí của tôi</span><span style="font-size:12px;font-weight:500;color:var(--text-secondary)">Nghệ sĩ trong bán kính 5 km</span></span></button>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Tỉnh/thành phố" options="{{ provinces }}" value="Thành phố Hồ Chí Minh" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Phường/xã" options="{{ wards }}" value="Phường Thủ Đức" hint-size="100%,64px"></x-import>
+<span style="grid-column:1 / -1;margin-top:6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--text-tertiary)">Ngày &amp; giờ cần chụp</span>
+<div style="grid-column:1 / -1"><x-import component-from-global-scope="Fgrapher.DateField" label="Ngày chụp" value="2026-10-12" hint-size="100%,64px"></x-import></div>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Từ" options="{{ hours }}" value="08:00" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="Fgrapher.NativeSelect" label="Đến" options="{{ hours }}" value="11:00" hint-size="100%,64px"></x-import>
+<div style="grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:6px"><span style="font-size:13px;color:var(--text-secondary)">Chỉ hiện nghệ sĩ còn lịch trống.</span><div style="display:flex;gap:8px"><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md">Bỏ lọc ngày</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="primary" size="md" on-click="{{ closePanel }}">Áp dụng</x-import></div></div>
+</div>
+</sc-if>
+</div>
+<div role="group" aria-label="Loại nhà cung cấp" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0">
+<sc-for list="{{ roleTags }}" as="r" hint-placeholder-count="5"><span data-role="{{ r.key }}" style="display:flex"><x-import component-from-global-scope="Fgrapher.Tag" selected="{{ r.on }}">{{ r.label }}</x-import></span></sc-for>
+</div>
+<div style="flex:1"></div>
+<button type="button" data-pill="more" style="flex:none;display:flex;align-items:center;gap:8px;min-height:48px;padding:0 16px;border-radius:var(--fg-radius-md);border:1px solid var(--border-default);background:var(--bg-surface);color:var(--text-primary);font:600 14px/1 var(--font-body);cursor:pointer" style-hover="background:var(--bg-sunken)"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 5h9M15 5h2M3 15h2M8 15h9M3 10h4M10 10h7"></path><circle cx="13.5" cy="5" r="1.6"></circle><circle cx="6.5" cy="15" r="1.6"></circle><circle cx="8.5" cy="10" r="1.6"></circle></svg>Bộ lọc<sc-if value="{{ hasExtra }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--green-900);color:var(--gold-50);font-size:12px;display:flex;align-items:center;justify-content:center">{{ extraCount }}</span></sc-if></button>
+</div>
+<sc-if value="{{ hasExtra }}" hint-placeholder-val="{{ false }}">
+<div style="padding:0 32px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ extraChips }}" as="c" hint-placeholder-count="3"><span style="display:flex;align-items:center;height:34px;padding-left:12px;border-radius:999px;background:var(--bg-sunken);border:1px solid var(--border-subtle);font-size:13px;font-weight:600">{{ c.label }}<button type="button" data-chip="{{ c.id }}" aria-label="{{ c.aria }}" style="width:44px;height:44px;margin:-5px 0;border:0;background:none;color:var(--text-secondary);font-size:18px;line-height:1;cursor:pointer" style-hover="color:var(--text-primary)">×</button></span></sc-for>
+<button type="button" data-clear="" style="min-height:44px;padding:0 10px;border:0;background:none;font:600 13px/1 var(--font-body);color:var(--text-primary);text-decoration:underline;text-underline-offset:3px;cursor:pointer">Xóa tất cả</button>
+</div>
+</sc-if>
+</div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="position:relative;flex:1;min-width:0">
+<div aria-live="polite" style="position:absolute;left:50%;bottom:20px;transform:translateX(-50%);z-index:12;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--green-900);color:var(--gold-50);box-shadow:var(--shadow-lg);font:700 14px/1 var(--font-body);white-space:nowrap;pointer-events:none">{{ mapCount }}</div>
+<dc-import name="FmMapCanvas" mode="{{ listMode }}" locate-now="{{ locateNow }}" zoom-out="{{ zoomOut }}" hover-id="{{ hoverId }}" selected-id="{{ selectedId }}" selected="{{ selected }}" on-hover="{{ onMapHover }}" on-select="{{ onSelect }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+</div>
+</div>
+<x-import component-from-global-scope="Fgrapher.Sheet" open="{{ sheetOpen }}" on-open-change="{{ onSheetChange }}" hint-size="0,0">
+<x-import component-from-global-scope="Fgrapher.SheetContent" side="right" initial-focus="{{ false }}" style="width:440px;max-width:440px">
+<x-import component-from-global-scope="Fgrapher.SheetHeader"><x-import component-from-global-scope="Fgrapher.SheetTitle">Bộ lọc</x-import><x-import component-from-global-scope="Fgrapher.SheetDescription">Thu hẹp kết quả tại Phường Thủ Đức, Thành phố Hồ Chí Minh.</x-import></x-import>
+<div style="flex:1;overflow:auto;padding:0 16px 16px"><dc-import name="FmFilterPanel" hint-size="100%,1200px"></dc-import></div>
+<x-import component-from-global-scope="Fgrapher.SheetFooter"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ closePanel }}">{{ resultBtn }}</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="md">Xóa tất cả</x-import></x-import>
+</x-import>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isMobileMap }}" hint-placeholder-val="{{ false }}">
+<div style="position:relative;height:100vh;overflow:hidden">
+<dc-import name="FmMapCanvas" mode="{{ listMode }}" compact="{{ true }}" zoom-out="{{ zoomOut }}" hover-id="{{ hoverId }}" selected-id="{{ selectedId }}" selected="{{ selected }}" on-hover="{{ onMapHover }}" on-select="{{ onSelect }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+<div aria-live="polite" style="position:absolute;left:50%;bottom:20px;transform:translateX(-50%);z-index:12;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--green-900);color:var(--gold-50);box-shadow:var(--shadow-lg);font:700 14px/1 var(--font-body);white-space:nowrap;pointer-events:none">{{ mapCount }}</div>
+<div style="position:absolute;top:0;left:0;right:0;z-index:30;padding:12px 12px 0;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px">
+<button type="button" onClick="{{ openFilters }}" style="flex:1;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:6px 16px;border-radius:999px;border:1px solid var(--border-subtle);background:var(--bg-surface);box-shadow:var(--shadow-md);color:var(--text-primary);font-family:inherit;text-align:left;cursor:pointer"><span style="font-size:14px;font-weight:700;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Phường Thủ Đức · Nhiếp ảnh gia</span><span style="font-size:12px;color:var(--text-secondary)">12/10/2026 · 08:00–11:00</span></button>
+<button type="button" onClick="{{ openFilters }}" aria-label="{{ filterBtn }}" style="position:relative;flex:none;width:52px;height:52px;border-radius:50%;border:1px solid var(--border-subtle);background:var(--bg-surface);box-shadow:var(--shadow-md);color:var(--text-primary);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 5h9M15 5h2M3 15h2M8 15h9M3 10h4M10 10h7"></path><circle cx="13.5" cy="5" r="1.6"></circle><circle cx="6.5" cy="15" r="1.6"></circle><circle cx="8.5" cy="10" r="1.6"></circle></svg><span style="position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--gold-400);color:var(--gold-900);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ chipCount }}</span></button>
+</div>
+<div class="fg-x" style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 12px 4px">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="3"><span style="flex:none;display:flex;align-items:center;height:34px;padding-left:12px;border-radius:999px;background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-sm);font-size:13px;font-weight:600">{{ c.label }}<button type="button" data-chip="{{ c.id }}" aria-label="{{ c.aria }}" style="width:40px;height:44px;margin:-5px 0;border:0;background:none;color:var(--text-secondary);font-size:18px;line-height:1;cursor:pointer">×</button></span></sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isMobileFilters }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Bộ lọc" style="height:100vh;display:flex;flex-direction:column;background:var(--bg-page)">
+<div style="flex:none;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 4px;border-bottom:1px solid var(--border-subtle)">
+<button type="button" onClick="{{ closeFilters }}" aria-label="Đóng bộ lọc" style="width:44px;height:44px;border:0;background:none;color:var(--text-primary);font-size:24px;line-height:1;cursor:pointer">×</button>
+<strong style="font-family:var(--font-display);font-size:18px">Bộ lọc</strong>
+<button type="button" style="min-height:44px;padding:0 12px;border:0;background:none;font:600 14px/1 var(--font-body);color:var(--text-primary);text-decoration:underline;text-underline-offset:3px;cursor:pointer">Xóa tất cả</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:20px"><dc-import name="FmFilterPanel" hint-size="100%,1200px"></dc-import></div>
+<div style="flex:none;padding:12px 20px 20px;border-top:1px solid var(--border-subtle);background:var(--bg-surface)"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" style="width:100%" on-click="{{ closeFilters }}">{{ resultBtn }}</x-import></div>
+</div>
+</sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const q = new URLSearchParams(window.location.search);
+    this.q = q;
+    const st = q.get('state') || 'default';
+    const base = [['area', 'Phường Thủ Đức'], ['date', '12/10/2026 · 08:00–11:00'], ['role', 'Nhiếp ảnh gia']];
+    const more = [['s1', 'Cưới'], ['s2', 'Chân dung'], ['budget', '2.000.000₫–5.000.000₫'], ['rating', 'Từ 4,5★']];
+    this.state = {
+      w: window.innerWidth, hoverId: q.get('hover'), selectedId: q.get('sel'), panel: q.get('panel'),
+      view: q.get('view') || 'map', st, roles: ['PHOTOGRAPHER'], listOpen: q.get('list') !== 'closed', near: false,
+      chips: (st === 'filters' ? base.concat(more) : base).map(([id, label]) => ({ id, label, aria: 'Xóa bộ lọc ' + label }))
+    };
+  }
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth });
+    window.addEventListener('resize', this.onR);
+    this.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.onOver = e => { const c = e.target.closest && e.target.closest('[data-cid]'); const id = c ? c.dataset.cid : null; if (c || e.target.closest('[data-list]') || e.target.closest('[data-sheet-body]')) { if (id !== this.state.hoverId) this.setState({ hoverId: id }); } };
+    this.onClick = e => {
+      const t = e.target; if (!t.closest) return;
+      const pill = t.closest('[data-pill]');
+      if (pill) { const k = pill.dataset.pill; this.setState(s => ({ panel: k === 'where' ? (s.panel === 'where' ? null : 'where') : 'filters' })); return; }
+      if (t.closest('[data-nearme]')) { this.setState({ near: true, panel: null }); return; }
+      const role = t.closest('[data-role]'); if (role) { const k = role.dataset.role; this.setState(s => { const r = new Set(s.roles); r.has(k) ? r.delete(k) : r.add(k); return { roles: [...r] }; }); return; }
+      const chip = t.closest('[data-chip]'); if (chip) { const id = chip.dataset.chip; this.setState(s => ({ chips: s.chips.filter(c => c.id !== id) })); return; }
+      if (t.closest('[data-clear]')) { this.setState({ chips: [] }); return; }
+      const v = t.closest('[data-view]'); if (v) { this.snap(v.dataset.view === 'list' ? 'full' : 'peek'); return; }
+      if (this.state.panel === 'where' && !t.closest('[data-pop]')) this.setState({ panel: null });
+    };
+    document.addEventListener('pointerover', this.onOver);
+    document.addEventListener('click', this.onClick);
+    setTimeout(() => { this.bindSheet(); this.paint(); }, 60);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); document.removeEventListener('pointerover', this.onOver); document.removeEventListener('click', this.onClick); }
+  componentDidUpdate(pp, ps) { if (ps.view !== this.state.view || ps.w !== this.state.w) setTimeout(() => this.bindSheet(), 60); this.paint(); }
+  bindSheet() {
+    const sh = document.querySelector('[data-sheet]'); if (!sh || sh.dataset.bound) return; sh.dataset.bound = 1;
+    const h = sh.querySelector('[data-handle]');
+    this.snap(this.state.view === 'list' ? 'full' : 'peek', true);
+    let d = null;
+    h.addEventListener('pointerdown', e => { d = { y: e.clientY, s: this.sheetY || 0 }; h.setPointerCapture(e.pointerId); sh.style.transition = 'none'; });
+    h.addEventListener('pointermove', e => { if (!d) return; const y = Math.max(0, Math.min(this.peekY(), d.s + e.clientY - d.y)); this.sheetY = y; sh.style.transform = `translateY(${y}px)`; });
+    h.addEventListener('pointerup', e => { if (!d) return; const moved = Math.abs(e.clientY - d.y) > 6; const y = this.sheetY, P = this.peekY(), M = P * .5; d = null; if (!moved) { this.snap(y > M ? 'half' : 'peek'); return; } const opts = [['full', 0], ['half', M], ['peek', P]]; opts.sort((a, b) => Math.abs(a[1] - y) - Math.abs(b[1] - y)); this.snap(opts[0][0]); });
+  }
+  peekY() { const sh = document.querySelector('[data-sheet]'); return sh ? sh.offsetHeight - 156 : 0; }
+  snap(pos, instant) {
+    const sh = document.querySelector('[data-sheet]'); if (!sh) return;
+    const P = this.peekY(), y = pos === 'full' ? 0 : pos === 'half' ? P * .5 : P;
+    this.sheetY = y; this.sheetPos = pos;
+    sh.style.transition = instant || this.reduce ? 'none' : 'transform 340ms cubic-bezier(.2,.7,.2,1)';
+    sh.style.transform = `translateY(${y}px)`;
+    document.querySelectorAll('[data-view]').forEach(b => { const on = (b.dataset.view === 'list') === (pos === 'full'); b.style.background = on ? 'var(--gold-400)' : 'transparent'; b.style.color = on ? 'var(--gold-900)' : 'var(--green-200)'; b.setAttribute('aria-pressed', on); });
+  }
+  paint() {
+    const hov = this.state.hoverId, sel = this.state.selectedId;
+    document.querySelectorAll('[data-cid]').forEach(c => {
+      const on = c.dataset.cid === hov, s = c.dataset.cid === sel;
+      c.style.transform = on && !this.reduce ? 'translateY(-3px)' : 'none';
+      c.style.boxShadow = s ? '0 0 0 2px var(--gold-500), var(--shadow-md)' : on ? '0 0 0 2px var(--green-700), var(--shadow-md)' : 'none';
+    });
+  }
+  renderVals() {
+    const S = this.state, isDesktop = S.w >= 1024, st = S.st;
+    const pic = (s, w = 600, h = 750) => `https://picsum.photos/seed/fg-${s}/${w}/${h}`;
+    const med = (k, n = 3) => Array.from({ length: n }, (_, i) => ({ url: pic(k + i), alt: 'Ảnh portfolio' }));
+    const dated = S.chips.some(c => c.id === 'date');
+    const av = dated ? 'Còn lịch 12/10/2026' : '';
+    const mk = (id, name, roles, ward, province, rating, reviews, price, k, extra = {}) => ({ id, name, username: k, roles, city: `${ward}, ${province}`, rating, reviews, price, media: med(k), avail: av, img: pic(k + '0', 720, 400), roleText: roles.join(', '), ratingText: reviews ? `${rating.replace('.', ',')} (${reviews})` : 'Mới', ward, ...extra });
+    let artists = [
+      mk('a1', 'Minh Anh Nhiếp Ảnh', ['Nhiếp ảnh gia'], 'Phường Thủ Đức', 'Thành phố Hồ Chí Minh', '5.0', 12, 'Từ 2.000.000₫', 'ma'),
+      mk('a2', 'Ngọc Linh', ['Nhiếp ảnh gia', 'Người mẫu'], 'Phường Linh Xuân', 'Thành phố Hồ Chí Minh', 'Mới', 0, 'Liên hệ để báo giá', 'nl', { nationwideLabel: 'Nhận việc toàn quốc' }),
+      mk('a3', 'Studio Rừng Thông', ['Studio', 'Nhiếp ảnh gia'], 'Phường Thủ Đức', 'Thành phố Hồ Chí Minh', '4.9', 38, 'Từ 1.500.000₫', 'rt'),
+      mk('a4', 'Hoàng Phim', ['Nhiếp ảnh gia', 'Quay phim'], 'Phường Tăng Nhơn Phú', 'Thành phố Hồ Chí Minh', '4.8', 21, 'Từ 3.500.000₫', 'hp'),
+      mk('a5', 'Thu Trang', ['Nhiếp ảnh gia'], 'Phường Linh Xuân', 'Thành phố Hồ Chí Minh', '4.7', 9, 'Từ 800.000₫', 'tt'),
+      mk('a6', 'Khánh Vy', ['Nhiếp ảnh gia'], 'Phường Thủ Đức', 'Thành phố Hồ Chí Minh', '5.0', 4, 'Liên hệ để báo giá', 'kv'),
+      mk('a7', 'Lam Film', ['Nhiếp ảnh gia', 'Quay phim'], 'Phường Tăng Nhơn Phú', 'Thành phố Hồ Chí Minh', '4.9', 56, 'Từ 4.000.000₫', 'lf'),
+      mk('a8', 'Bảo Ngọc Studio', ['Studio'], 'Phường Thủ Đức', 'Thành phố Hồ Chí Minh', '4.6', 17, 'Từ 1.200.000₫', 'bn')
+    ];
+    if (st === 'long') {
+      artists[0] = mk('a1', 'Studio Ảnh Cưới Và Kỷ Yếu Hoàng Gia Sài Gòn Chi Nhánh Thủ Đức', ['Studio', 'Nhiếp ảnh gia', 'Quay phim', 'Chuyên viên trang điểm'], 'Phường Long Trường', 'Thành phố Hồ Chí Minh', '4.7', 1284, 'Từ 12.500.000₫', 'l1', { nationwideLabel: 'Nhận việc toàn quốc' });
+      artists[1] = mk('a2', 'Nguyễn Trần Phương Uyên Photography & Makeup', ['Nhiếp ảnh gia', 'Chuyên viên trang điểm', 'Người mẫu'], 'Xã Phú Quốc', 'Tỉnh An Giang', '5.0', 3, 'Liên hệ để báo giá', 'l2');
+    }
+    const listMode = st === 'loading' ? 'loading' : st === 'empty' ? 'empty' : st === 'error' ? 'error' : 'ok';
+    const count = st === 'long' ? '1.284' : st === 'filters' ? '23' : '128';
+    const title = listMode === 'loading' ? 'Đang tìm nghệ sĩ…' : listMode === 'empty' ? '0 kết quả tại Phường Long Trường' : listMode === 'error' ? 'Không tải được kết quả' : st === 'long' ? `${count} nhà cung cấp tại Phường Long Trường, Thành phố Hồ Chí Minh` : `${count} nhiếp ảnh gia tại Phường Thủ Đức`;
+    const has = id => S.chips.find(c => c.id === id);
+    const extraChips = S.chips.filter(c => !['area', 'date', 'role'].includes(c.id));
+    const roleTags = [['PHOTOGRAPHER', 'Nhiếp ảnh gia'], ['VIDEOGRAPHER', 'Quay phim'], ['MAKEUP_ARTIST', 'Trang điểm'], ['MODEL', 'Người mẫu'], ['STUDIO', 'Studio']].map(([key, label]) => ({ key, label, on: S.roles.includes(key) }));
+    const selected = artists.find(a => a.id === S.selectedId) || null;
+    return {
+      theme: this.q.get('theme') || 'light', isDesktop,
+      isMobileMap: !isDesktop && S.view !== 'filters', isMobileFilters: !isDesktop && S.view === 'filters',
+      whereOpen: S.panel === 'where', whereLabel: S.near ? 'Quanh vị trí của tôi · 5 km' : has('area') ? 'Phường Thủ Đức, Thành phố Hồ Chí Minh' : 'Toàn quốc',
+      mapCount: listMode === 'loading' ? 'Đang tìm nghệ sĩ…' : listMode === 'empty' ? 'Không có nghệ sĩ trong khung này' : listMode === 'error' ? 'Mất kết nối mạng' : `${count} nghệ sĩ trong khung bản đồ`,
+      listOpen: S.listOpen, mapOnly: !S.listOpen, listToggleText: S.listOpen ? 'Chỉ xem bản đồ' : `Hiện danh sách (${count})`, toggleList: () => this.setState(s => ({ listOpen: !s.listOpen })),
+      locateNow: S.near, whenLabel: dated ? '12/10/2026 · 08:00–11:00' : 'Bất kỳ ngày nào',
+      roleTags, extraChips, hasExtra: extraChips.length > 0, extraCount: extraChips.length,
+      chips: S.chips, hasChips: S.chips.length > 0, chipCount: S.chips.length, filterBtn: `Bộ lọc, ${S.chips.length} đang bật`,
+      provinces: ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội', 'Thành phố Đà Nẵng', 'Thành phố Cần Thơ', 'Tỉnh Lâm Đồng'],
+      wards: ['Tất cả phường/xã', 'Phường Thủ Đức', 'Phường Linh Xuân', 'Phường Tăng Nhơn Phú', 'Phường Long Trường'],
+      hours: Array.from({ length: 16 }, (_, i) => String(i + 5).padStart(2, '0') + ':00'),
+      closePanel: () => this.setState({ panel: null }),
+      sheetOpen: S.panel === 'filters', onSheetChange: o => this.setState({ panel: o ? 'filters' : null }),
+      resultBtn: `Xem ${count} kết quả`,
+      listMode, title, subtitle: dated ? 'Còn lịch ngày 12/10/2026 · 08:00–11:00' : 'Tất cả ngày', artists,
+      zoomOut: this.q.get('zoom') === 'out',
+      hoverId: S.hoverId, selectedId: S.selectedId, selected,
+      onMapHover: id => { if (id !== S.hoverId) this.setState({ hoverId: id }); },
+      onSelect: id => { this.setState({ selectedId: id });  },
+      openFilters: () => this.setState({ view: 'filters' }), closeFilters: () => this.setState({ view: 'map' })
+    };
+  }
+}
+</script>
+</body>
+</html>

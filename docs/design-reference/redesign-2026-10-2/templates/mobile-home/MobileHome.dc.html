@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Trang chủ mobile" description="Trang chủ Fgrapher trên điện thoại: hero tìm kiếm, danh mục dạng dải phim, nghệ sĩ nổi bật, F Booking." -->
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:#e9e6e1}.fg-strip::-webkit-scrollbar{display:none}</style></helmet>
+<div style="display:flex;justify-content:center;padding:24px 0;min-height:100vh">
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="390px,1600px">
+<div style="width:390px;background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);overflow:hidden;border-radius:28px;box-shadow:var(--shadow-lg)">
+<header style="position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 20px;background:var(--green-900)">
+<x-import component-from-global-scope="Fgrapher.LogoFull" hint-size="110px,28px"></x-import>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="sm">Đăng nhập</x-import>
+</header>
+<section data-hero-still="" style="background:var(--green-900);color:var(--gold-50);padding:20px 20px 28px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-400);font-weight:600"><span>Khung 01</span><span style="flex:1;height:1px;background:currentColor;opacity:.4"></span><span>Toàn quốc</span></div>
+<h1 style="margin:0;font-family:var(--font-display);font-size:34px;line-height:1.08;letter-spacing:-.02em;font-weight:700;text-wrap:pretty">Tìm nghệ sĩ giúp bạn lưu giữ những kỷ niệm đẹp nhất</h1>
+<p style="margin:0;font-size:15px;line-height:1.5;color:var(--green-200)">Nhiếp ảnh gia, quay phim, trang điểm, người mẫu và studio. Tất cả đã xác minh danh tính.</p>
+<x-import component-from-global-scope="Fgrapher.HeroSearch" marketplace-enabled="{{ true }}" hint-size="100%,120px"></x-import>
+</section>
+<section style="padding:28px 0 8px;display:flex;flex-direction:column;gap:14px">
+<div style="padding:0 20px"><x-import component-from-global-scope="Fgrapher.SectionHead" title="Bạn cần ai?" hint-size="100%,32px"></x-import></div>
+<div class="fg-strip" style="display:flex;gap:10px;overflow-x:auto;padding:0 20px 4px;scrollbar-width:none;scroll-snap-type:x mandatory">
+<sc-for list="{{ categories }}" as="c" hint-placeholder-count="6">
+<a href="#" style="flex:0 0 116px;scroll-snap-align:start;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:var(--text-primary)">
+<div style="position:relative;height:140px;border-radius:var(--fg-radius-sm);background:repeating-linear-gradient(135deg,var(--bg-sunken) 0 8px,var(--bg-surface) 8px 16px);border:1px solid var(--border-subtle);display:flex;align-items:flex-end;padding:8px">
+<span style="position:absolute;top:8px;left:8px;font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--text-secondary)">{{ c.no }}</span>
+<span style="font-family:ui-monospace,monospace;font-size:10px;color:var(--text-tertiary)">{{ c.hint }}</span>
+</div>
+<span style="font-size:14px;font-weight:600;min-height:44px">{{ c.label }}</span>
+</a>
+</sc-for>
+</div>
+</section>
+<section style="padding:20px 20px 32px;display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="Fgrapher.SectionHead" title="Nghệ sĩ nổi bật" action-label="Xem tất cả" action-href="#" hint-size="100%,32px"></x-import>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="Fgrapher.Tag" selected="{{ true }}">Ảnh cưới</x-import>
+<x-import component-from-global-scope="Fgrapher.Tag">Kỷ yếu</x-import>
+<x-import component-from-global-scope="Fgrapher.Tag">Chân dung</x-import>
+<x-import component-from-global-scope="Fgrapher.Tag">Áo dài Tết</x-import>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr);gap:16px">
+<sc-for list="{{ artists }}" as="a" hint-placeholder-count="3">
+<x-import component-from-global-scope="Fgrapher.ArtistCard" artist="{{ a }}" hint-size="100%,420px"></x-import>
+</sc-for>
+</div>
+</section>
+<section style="margin:0 20px 32px;padding:24px 20px;border-radius:var(--fg-radius-lg);background:var(--green-900);color:var(--gold-50);display:flex;flex-direction:column;gap:12px">
+<div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-400);font-weight:600">F Booking</div>
+<h2 style="margin:0;font-family:var(--font-display);font-size:24px;line-height:1.15;font-weight:700">Đăng yêu cầu, nhận đề xuất từ nghệ sĩ</h2>
+<p style="margin:0;font-size:14px;line-height:1.5;color:var(--green-200)">Mô tả buổi chụp, ngày và ngân sách. Nghệ sĩ phù hợp gửi đề xuất cho bạn chọn. Đặt cọc thỏa thuận trực tiếp.</p>
+<x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" style="width:100%">Đăng yêu cầu</x-import>
+</section>
+<x-import component-from-global-scope="Fgrapher.Footer" hint-size="100%,400px"></x-import>
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot;|\&quot;dark\&quot;&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      theme: this.props.theme ?? "light",
+      categories: [
+        ["01","Nhiếp ảnh gia","ảnh chân dung"],["02","Quay phim","khung video"],["03","Trang điểm","ảnh makeup"],
+        ["04","Người mẫu","ảnh mẫu"],["05","Studio","ảnh studio"],["06","Thuê trang phục","ảnh trang phục"],["07","Chợ F","ảnh thiết bị"]
+      ].map(([no,label,hint]) => ({ no, label, hint })),
+      artists: [
+        { id:"a1", name:"Minh Anh Nhiếp Ảnh", username:"minhanh", roles:["Nhiếp ảnh gia"], city:"Phường Thủ Đức, Thành phố Hồ Chí Minh", rating:"5.0", reviews:12, price:"Từ 2.000.000₫", media:[] },
+        { id:"a2", name:"Ngọc Linh", username:"ngoclinh", roles:["Người mẫu","Chuyên viên trang điểm"], city:"Phường Hải Châu, Thành phố Đà Nẵng", rating:"Mới", reviews:0, price:"Liên hệ để báo giá", media:[], nationwideLabel:"Nhận việc toàn quốc" },
+        { id:"a3", name:"Studio Rừng Thông", username:"rungthong", roles:["Studio"], city:"Phường Hoàn Kiếm, Thành phố Hà Nội", rating:"4.9", reviews:38, price:"Từ 1.500.000₫", media:[] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

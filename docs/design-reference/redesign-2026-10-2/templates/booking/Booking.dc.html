@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Đặt lịch &amp; Lịch đặt của tôi" description="Luồng gửi yêu cầu đặt lịch 6 bước (gói, ngày, giờ, địa điểm, ghi chú, xem lại) + màn Đã gửi + trang Lịch đặt của tôi; sáng/tối, 390/1440, đủ lỗi và trạng thái." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1d1b16">
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="width:780px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Quyết định UX</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Sáu bước, mỗi bước một quyết định: Gói → Ngày → Giờ → Địa điểm → Ghi chú → Xem lại. Giờ tách khỏi ngày vì khung giờ phụ thuộc thời lượng gói; đổi gói thì danh sách khung tính lại.</li>
+<li>Luôn biết mình ở đâu: máy tính có thanh bước 6 ô, bước đã xong bấm được để quay lại. Điện thoại có thanh tiến trình 6 đoạn và dòng "Bước 3/6 · Chọn khung giờ" ở trên cùng.</li>
+<li>Quay lại không mất dữ liệu: nút ←/Quay lại, bước đã xong trên thanh bước và nút "Sửa" trong tóm tắt đều chỉ đổi bước, không xóa gì. Thoát giữa chừng thì lưu nháp.</li>
+<li>Vào từ nút "Chọn gói" ở hồ sơ thì gói đã được chọn sẵn. "Tùy chỉnh" luôn có ở cuối danh sách cho khách cần báo giá riêng.</li>
+<li>Lịch tháng phân biệt 4 trạng thái bằng cả hình lẫn màu, người mù màu vẫn đọc được: còn trống (viền + chấm), đã kín (gạch ngang + sọc + chữ "Kín"), nghệ sĩ nghỉ (nền chìm + chữ "Nghỉ"), đang chọn (nền thương hiệu). Có chú thích ngay dưới lịch.</li>
+<li>Khung giờ 24h ghi dạng "06:00 – 14:00", chia Sáng/Chiều/Tối. Khung đã có người đặt bị làm mờ, gạch ngang và không bấm được. Múi giờ "Giờ Việt Nam (GMT+7)" nằm cạnh ngày đã chọn.</li>
+<li>Tiền: tóm tắt luôn ghi "Tổng dự kiến" kèm hai dòng "Chưa thanh toán trực tuyến — đặt cọc thỏa thuận trực tiếp với nghệ sĩ" và "Nghệ sĩ phản hồi trong 48 giờ". Gói Tùy chỉnh ghi "Báo giá sau". Địa điểm xa hơn 20 km thì ghi thêm "chưa gồm phí di chuyển".</li>
+<li>Đồng ý tách thành 2 ô riêng: điều khoản đặt lịch, và chia sẻ số điện thoại/thông tin buổi chụp với nghệ sĩ. Luật 91/2025 yêu cầu đồng ý theo từng mục đích nên không gộp.</li>
+<li>Lỗi hiện ngay trong bước, luôn nói rõ dữ liệu nào vẫn được giữ, ví dụ "Khung 06:00 – 14:00 vừa có người đặt… Gói, ngày và địa điểm vẫn giữ nguyên".</li>
+<li>"Lịch đặt của tôi" có 5 tab trạng thái kèm số lượng. Lời nhắc đánh giá xuất hiện ở 2 chỗ: banner trên cùng và khối "Viết đánh giá" trong thẻ lịch đã hoàn thành.</li>
+<li>Chuyển động:<ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Đổi bước: nội dung trượt 12px theo hướng đi, dài 260ms.</li><li>Thẻ nhấc 2px khi rê chuột, trong 200ms.</li><li>Ô chọn đổi màu trong 150ms.</li><li>Ảnh hiện dần trong 400ms.</li><li>Tắt hết khi bật prefers-reduced-motion.</li></ul></li>
+</ol>
+</div>
+<div style="width:640px;background:#fff;border:1px solid #e3ded4;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8a6a2a">Component</div>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Dùng lại từ design system:</strong> FgrapherProvider, LogoFull, Button, Badge, Alert, Skeleton, NativeSelect (thời lượng, tỉnh/thành, phường/xã), Textarea, Checkbox, AddressAutocomplete (địa chỉ có gợi ý, gắn điểm lên bản đồ), ReferenceMediaField (tối đa 5 ảnh/video, purpose="booking"), Tabs, ReviewReminderBannerClient.</p>
+<p style="margin:0;font-size:15px;line-height:1.5"><strong>Tạo mới</strong> (chỉ dùng token có sẵn):</p>
+<ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.5">
+<li><strong>BkCalendar:</strong> lịch tháng 4 trạng thái có chú thích. DateField chỉ là ô nhập ngày, không cho thấy ngày nào trống. AvailabilityDialog là công cụ nghệ sĩ dùng để sửa lịch tuần.</li>
+<li><strong>BkSummary:</strong> tóm tắt có nút "Sửa" từng dòng, tổng dự kiến và ghi chú thanh toán. Dùng chung cho cột dính trên máy tính, bước Xem lại và màn Đã gửi trên điện thoại.</li>
+<li><strong>Lưới khung giờ:</strong> nhóm Sáng/Chiều/Tối, ô đã đặt làm mờ. NativeSelect ở PfBooking không cho thấy khung nào đã kín.</li>
+<li><strong>Thanh bước và thanh tiến trình 6 đoạn:</strong> Progress có sẵn là thanh liên tục kèm nhãn % (dùng cho hoàn thiện hồ sơ), không cho thấy từng bước và không bấm để quay lại được.</li>
+<li><strong>Thẻ chọn (gói, loại địa điểm)</strong> và <strong>thẻ lịch đặt</strong> trong "Lịch đặt của tôi".</li>
+</ul>
+<p style="margin:0;font-size:14px;line-height:1.5;color:#6b665c">Lưu ý: trạng thái "Hết hạn" chưa có trong booking state machine (REQUESTED → REJECTED/CANCELLED…). Cần thêm EXPIRED qua transition service, hoặc hiển thị REJECTED do hệ thống tự hủy thành "Hết hạn". Ảnh là ảnh giữ chỗ.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Máy tính · 1440px · sáng</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">1 · Chọn gói</span><iframe src="BookingPage.dc.html?theme=light&amp;step=1" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Bước 1"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">2 · Chọn ngày</span><iframe src="BookingPage.dc.html?theme=light&amp;step=2" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Bước 2"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">3 · Chọn khung giờ</span><iframe src="BookingPage.dc.html?theme=light&amp;step=3" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Bước 3"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">4 · Địa điểm</span><iframe src="BookingPage.dc.html?theme=light&amp;step=4" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Bước 4"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">5 · Ghi chú &amp; tham khảo</span><iframe src="BookingPage.dc.html?theme=light&amp;step=5" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Bước 5"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">6 · Xem lại &amp; gửi</span><iframe src="BookingPage.dc.html?theme=light&amp;step=6" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Bước 6"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">7 · Đã gửi</span><iframe src="BookingPage.dc.html?theme=light&amp;step=7" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Đã gửi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt của tôi</span><iframe src="MyBookings.dc.html?theme=light&amp;tab=pending" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Lịch đặt"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Máy tính · 1440px · tối</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">2 · Chọn ngày</span><iframe src="BookingPage.dc.html?theme=dark&amp;step=2" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Bước 2 tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">3 · Lỗi: khung giờ vừa có người đặt</span><iframe src="BookingPage.dc.html?theme=dark&amp;step=3&amp;err=1" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Bước 3 lỗi tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">6 · Xem lại</span><iframe src="BookingPage.dc.html?theme=dark&amp;step=6" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Bước 6 tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt của tôi · Đã hoàn thành</span><iframe src="MyBookings.dc.html?theme=dark&amp;tab=completed" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px;background:#111" title="Lịch đặt tối"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại · 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3400px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">1 · Gói</span><iframe src="BookingPage.dc.html?theme=light&amp;step=1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT bước 1"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">2 · Ngày</span><iframe src="BookingPage.dc.html?theme=light&amp;step=2" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT bước 2"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">3 · Giờ</span><iframe src="BookingPage.dc.html?theme=light&amp;step=3" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT bước 3"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">4 · Địa điểm</span><iframe src="BookingPage.dc.html?theme=light&amp;step=4" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT bước 4"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">5 · Ghi chú</span><iframe src="BookingPage.dc.html?theme=light&amp;step=5" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT bước 5"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">6 · Xem lại</span><iframe src="BookingPage.dc.html?theme=light&amp;step=6" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT bước 6"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">7 · Đã gửi</span><iframe src="BookingPage.dc.html?theme=light&amp;step=7" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT đã gửi"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt của tôi</span><iframe src="MyBookings.dc.html?theme=light&amp;tab=pending" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="ĐT lịch đặt"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">2 · Ngày · tối</span><iframe src="BookingPage.dc.html?theme=dark&amp;step=2" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="ĐT bước 2 tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">3 · Giờ · tối</span><iframe src="BookingPage.dc.html?theme=dark&amp;step=3" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="ĐT bước 3 tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">6 · Xem lại · tối</span><iframe src="BookingPage.dc.html?theme=dark&amp;step=6" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="ĐT bước 6 tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">7 · Đã gửi · tối</span><iframe src="BookingPage.dc.html?theme=dark&amp;step=7" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="ĐT đã gửi tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt · Đã hoàn thành · tối</span><iframe src="MyBookings.dc.html?theme=dark&amp;tab=completed" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="ĐT lịch đặt tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt · Hết hạn · tối</span><iframe src="MyBookings.dc.html?theme=dark&amp;tab=expired" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="ĐT hết hạn tối"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Lỗi từng bước</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3400px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">1 · Chưa chọn gói</span><iframe src="BookingPage.dc.html?theme=light&amp;step=1&amp;err=1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Lỗi 1"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">2 · Ngày vừa kín</span><iframe src="BookingPage.dc.html?theme=light&amp;step=2&amp;err=1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Lỗi 2"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">3 · Khung giờ vừa có người đặt</span><iframe src="BookingPage.dc.html?theme=light&amp;step=3&amp;err=1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Lỗi 3"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">4 · Thiếu địa chỉ</span><iframe src="BookingPage.dc.html?theme=light&amp;step=4&amp;err=1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Lỗi 4"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">5 · Tệp quá lớn</span><iframe src="BookingPage.dc.html?theme=light&amp;step=5&amp;err=1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Lỗi 5"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">6 · Gửi thất bại · tối</span><iframe src="BookingPage.dc.html?theme=dark&amp;step=6&amp;err=1" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px;background:#111" title="Lỗi 6"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt · lỗi tải</span><iframe src="MyBookings.dc.html?theme=light&amp;state=error" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Lỗi lịch đặt"></iframe></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Đang tải · Trống · Nội dung dài</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3400px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải lịch trống</span><iframe src="BookingPage.dc.html?theme=light&amp;step=2&amp;state=loading" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Tải lịch"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải khung giờ</span><iframe src="BookingPage.dc.html?theme=light&amp;step=3&amp;state=loading" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Tải giờ"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trống · nghệ sĩ chưa có gói</span><iframe src="BookingPage.dc.html?theme=light&amp;step=1&amp;state=empty" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Trống gói"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trống · tháng kín lịch</span><iframe src="BookingPage.dc.html?theme=light&amp;step=2&amp;state=empty" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Trống tháng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Trống · không còn khung</span><iframe src="BookingPage.dc.html?theme=light&amp;step=3&amp;state=empty" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Trống giờ"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · xem lại</span><iframe data-fit="1" src="BookingPage.dc.html?theme=light&amp;step=6&amp;state=long" style="width:390px;height:1800px;border:1px solid #d9d4ca;border-radius:28px" title="Dài"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt · đang tải</span><iframe src="MyBookings.dc.html?theme=light&amp;state=loading" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Tải lịch đặt"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt · trống</span><iframe src="MyBookings.dc.html?theme=light&amp;state=empty" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Trống lịch đặt"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Lịch đặt · nội dung dài</span><iframe src="MyBookings.dc.html?theme=light&amp;state=long" style="width:390px;height:844px;border:1px solid #d9d4ca;border-radius:28px" title="Dài lịch đặt"></iframe></div>
+</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Đang tải · máy tính</span><iframe src="BookingPage.dc.html?theme=light&amp;step=2&amp;state=loading" style="width:1440px;height:960px;border:1px solid #d9d4ca;border-radius:12px" title="Tải máy tính"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Nội dung dài · máy tính</span><iframe data-fit="1" src="BookingPage.dc.html?theme=light&amp;step=1&amp;state=long" style="width:1440px;height:1100px;border:1px solid #d9d4ca;border-radius:12px" title="Dài máy tính"></iframe></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

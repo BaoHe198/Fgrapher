@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<section id="au-foundations" style="scroll-margin-top:120px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">01 · NỀN TẢNG</span><h2 style="margin:0;font:var(--text-heading-xl);letter-spacing:-.01em">Khoảng cách, bo góc, độ nổi, kiểu chữ</h2><p style="margin:0;max-width:640px;font:var(--text-body-md);color:var(--text-secondary);text-wrap:pretty">Số liệu lấy từ mã của 6 màn hiện có (Trang chủ, Tìm kiếm F, Bản đồ F, Hồ sơ, Đặt lịch, Lịch đặt của tôi). Cột trái là thang chuẩn, cột phải là giá trị lệch cần gom về.</p></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<strong style="font:var(--text-heading-sm)">Khoảng cách · thang 4</strong>
+<div style="display:flex;flex-direction:column;gap:8px;font:500 12px/1 var(--font-mono);color:var(--text-secondary)">
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">4</span><span style="width:4px;height:12px;background:var(--brand-primary)"></span><span>trong nút, icon–chữ</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">8</span><span style="width:8px;height:12px;background:var(--brand-primary)"></span><span>nhãn–ô nhập, chip</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">12</span><span style="width:12px;height:12px;background:var(--brand-primary)"></span><span>phần tử cùng nhóm</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">16</span><span style="width:16px;height:12px;background:var(--brand-primary)"></span><span>thẻ trong lưới</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">24</span><span style="width:24px;height:12px;background:var(--brand-primary)"></span><span>đệm thẻ, giữa nhóm</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">32</span><span style="width:32px;height:12px;background:var(--brand-primary)"></span><span>lề trang máy tính</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">48</span><span style="width:48px;height:12px;background:var(--brand-primary)"></span><span>giữa khối trong trang</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">64</span><span style="width:64px;height:12px;background:var(--brand-primary)"></span><span>giữa section (ĐT: 40)</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:28px">96</span><span style="width:96px;height:12px;background:var(--brand-primary)"></span><span>đầu/cuối trang</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--border-subtle);font:var(--text-body-sm);color:var(--text-secondary)"><strong style="color:var(--text-primary)">Lệch thang: 1, 3, 5, 6, 10, 14, 18, 28, 72px</strong><span>3/5/6 → 4 hoặc 8 · 10 → 8 · 14 → 12 hoặc 16 · 18 → 16 · 28 → 24 · 72 → 64. Lề trang ĐT cố định 20px.</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<strong style="font:var(--text-heading-sm)">Bo góc · 5 token</strong>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="height:56px;border:1px solid var(--border-default);border-radius:var(--fg-radius-sm);background:var(--bg-sunken)"></span><span style="font:600 12px/1.4 var(--font-mono)">sm · 8</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Ảnh trong thẻ, ô lịch</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="height:56px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-sunken)"></span><span style="font:600 12px/1.4 var(--font-mono)">md · 12</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Nút, ô nhập, khung giờ</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="height:56px;border:1px solid var(--border-default);border-radius:var(--fg-radius-lg);background:var(--bg-sunken)"></span><span style="font:600 12px/1.4 var(--font-mono)">lg · 16</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Thẻ, khối trống/lỗi</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="height:56px;border:1px solid var(--border-default);border-radius:var(--fg-radius-xl);background:var(--bg-sunken)"></span><span style="font:600 12px/1.4 var(--font-mono)">xl · 20</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Sheet, dialog, cột tóm tắt</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="height:56px;border:1px solid var(--border-default);border-radius:999px;background:var(--bg-sunken)"></span><span style="font:600 12px/1.4 var(--font-mono)">pill</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Tag, badge</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="width:56px;height:56px;border:1px solid var(--border-default);border-radius:50%;background:var(--bg-sunken)"></span><span style="font:600 12px/1.4 var(--font-mono)">tròn</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Chỉ ảnh đại diện</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--border-subtle);font:var(--text-body-sm);color:var(--text-secondary)"><strong style="color:var(--text-primary)">Lệch: 2, 3, 4, 18px và "14 14 14 4"</strong><span>Nhãn ảnh, marker, bong bóng tooltip đều gom về sm. Dialog, Dropdown, Textarea, Toast của DS đang dùng rounded-lg/xl/2xl mặc định thay vì token fg-radius.</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<strong style="font:var(--text-heading-sm)">Độ nổi · sáng dùng bóng, tối dùng bậc nền</strong>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:16px;border-radius:var(--fg-radius-md);background:var(--bg-page)">
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span style="width:100%;height:56px;border-radius:var(--fg-radius-md);background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-sm)"></span><span style="font:600 12px/1.4 var(--font-mono)">sm</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Thẻ đứng yên</span></div>
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span style="width:100%;height:56px;border-radius:var(--fg-radius-md);background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-md)"></span><span style="font:600 12px/1.4 var(--font-mono)">md</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Thẻ khi rê chuột, cột dính</span></div>
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span style="width:100%;height:56px;border-radius:var(--fg-radius-md);background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-lg)"></span><span style="font:600 12px/1.4 var(--font-mono)">lg</span><span style="font-size:12px;line-height:1.4;color:var(--text-secondary)">Sheet, thẻ nổi trên bản đồ</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--border-subtle);font:var(--text-body-sm);color:var(--text-secondary)"><strong style="color:var(--text-primary)">Lệch: thanh dính đáy</strong><span>Hồ sơ dùng bóng riêng rgba(18,16,10,.08), Đặt lịch không có bóng. Chuẩn chung: chỉ viền trên border-subtle. Ở chế độ tối, bóng đen gần như vô hình nên phân lớp bằng bg-page → bg-surface → surface-card cộng viền mảnh.</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-lg);background:var(--bg-surface)">
+<strong style="font:var(--text-heading-sm)">Kiểu chữ · theo thang của DS</strong>
+<div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font:var(--text-display-lg);letter-spacing:-.02em">Đặt lịch</span><span style="flex:none;font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">display-lg 36</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font:var(--text-heading-xl)">Chọn khung giờ</span><span style="flex:none;font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">heading-xl 26</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font:var(--text-heading-md)">Gói dịch vụ</span><span style="flex:none;font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">heading-md 20</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font:var(--text-heading-sm)">Minh Anh Nhiếp Ảnh</span><span style="flex:none;font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">heading-sm 17</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font:var(--text-body-md)">Chụp ảnh cưới theo lối tự nhiên.</span><span style="flex:none;font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">body-md 16</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font:var(--text-body-sm);color:var(--text-secondary)">Phường Thủ Đức, TP. Hồ Chí Minh</span><span style="flex:none;font:500 12px/1 var(--font-mono);color:var(--text-tertiary)">body-sm 14</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font:600 12px/1.4 var(--font-body);color:var(--text-secondary)">48 ảnh · 4,9★</span><span style="flex:none;font:500 12px/1 var(--font-mono);color:var(--gold-700)">meta 12 · mới</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--border-subtle);font:var(--text-body-sm);color:var(--text-secondary)"><strong style="color:var(--text-primary)">Lệch: 9, 10, 11px ở 6 file và 13px ở 13 file</strong><span>Không dùng chữ dưới 12px. 13px đổi thành body-sm 14 hoặc meta 12. Nhãn in hoa thống nhất letter-spacing .12em (hiện dùng .06–.14em).</span></div>
+</div>
+</div>
+</section>
+</x-dc>
+</body>
+</html>

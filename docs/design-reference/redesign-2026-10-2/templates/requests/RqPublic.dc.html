@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./fg-kit.js"></script><style>body{margin:0;background:var(--bg-page)}:root{--dr-bg:hsl(30 14% 5%);--dr-surface:hsl(30 11% 8%);--dr-raised:hsl(30 9% 12%);--dr-text:hsl(38 33% 92%);--dr-text-2:hsl(34 12% 72%);--dr-text-3:hsl(32 8% 60%);--dr-line:hsl(0 0% 100% / .06);--dr-line-2:hsl(0 0% 100% / .12);--dr-accent:var(--gold-400);--dr-scrim:hsl(30 14% 5% / .72)}a{color:var(--text-link)}a:hover{color:var(--text-primary)}:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style></helmet>
+<x-import component-from-global-scope="Fgrapher.FgrapherProvider" theme="{{ theme }}" hint-size="100%,100vh">
+<div style="background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);min-height:100vh">
+<dc-import name="RqHeader" is-mobile="{{ isMobile }}" on-login="{{ openLogin }}" hint-size="100%,60px"></dc-import>
+<main>
+<section aria-labelledby="rq-title" style="max-width:1440px;margin:0 auto;padding:clamp(40px,6vw,96px) clamp(20px,4vw,64px) clamp(48px,6vw,88px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:clamp(40px,5vw,80px);align-items:center">
+<div style="display:flex;flex-direction:column;gap:clamp(18px,2vw,28px);min-width:0">
+<span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">ĐẶT LỊCH F</span>
+<h1 id="rq-title" lang="vi" style="margin:0;font-family:var(--font-display);font-weight:600;font-size:clamp(44px,calc(16px + 4.6vw),88px);line-height:.95;letter-spacing:-.03em;text-wrap:balance">Kể buổi chụp bạn cần. Nghệ sĩ phù hợp gửi đề xuất.</h1>
+<p style="margin:0;max-width:540px;font:var(--text-body-lg);color:var(--text-secondary);text-wrap:pretty">Mô tả một lần: dịch vụ, ngày, khu vực, phong cách, ngân sách. Nghệ sĩ đã xác minh ở khu vực của bạn gửi giá và lời nhắn. Bạn so sánh rồi chọn một người.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ openLogin }}">Đăng yêu cầu</x-import><x-import component-from-global-scope="Fgrapher.Button" variant="ghost" size="lg">Tìm nghệ sĩ trực tiếp</x-import></div>
+<span style="font-size:14px;color:var(--text-secondary)">Cần đăng nhập để đăng. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ.</span>
+</div>
+<div style="position:relative;min-width:0;max-width:520px;justify-self:end;width:100%">
+<dc-import name="RqCallSheet" num="YC-2026-00012" stamp="VÍ DỤ" data="{{ sample }}" hint-size="100%,560px"></dc-import>
+</div>
+</section>
+<section aria-labelledby="rq-steps" style="background:var(--bg-sunken)">
+<div style="max-width:1440px;margin:0 auto;padding:clamp(48px,6vw,88px) clamp(20px,4vw,64px);display:flex;flex-direction:column;gap:32px">
+<h2 id="rq-steps" style="margin:0;font:600 clamp(28px,2.6vw,40px)/1.1 var(--font-display);letter-spacing:-.02em">Ba bước</h2>
+<ol style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:2px;background:var(--border-subtle);border:1px solid var(--border-subtle)">
+<li style="display:flex;flex-direction:column;gap:12px;padding:28px;background:var(--bg-surface)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-link)">01A · MÔ TẢ</span><strong style="font:600 22px/1.2 var(--font-display)">Trả lời sáu câu ngắn</strong><span style="font-size:15px;line-height:1.55;color:var(--text-secondary)">Bạn cần gì, khi nào, ở đâu, phong cách, ngân sách và vài dòng mô tả. Mỗi màn một câu, lưu nháp tự động.</span></li>
+<li style="display:flex;flex-direction:column;gap:12px;padding:28px;background:var(--bg-surface)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-link)">01B · NHẬN ĐỀ XUẤT</span><strong style="font:600 22px/1.2 var(--font-display)">Nghệ sĩ phù hợp gửi giá</strong><span style="font-size:15px;line-height:1.55;color:var(--text-secondary)">Mỗi đề xuất có giá, những gì bao gồm, ba ảnh mẫu và lời nhắn. Yêu cầu mở trong 7 ngày.</span></li>
+<li style="display:flex;flex-direction:column;gap:12px;padding:28px;background:var(--bg-surface)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-link)">01C · CHỌN NGHỆ SĨ</span><strong style="font:600 22px/1.2 var(--font-display)">So sánh rồi chọn một</strong><span style="font-size:15px;line-height:1.55;color:var(--text-secondary)">Đặt các đề xuất cạnh nhau, nhắn tin hỏi thêm, rồi chọn. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ.</span></li>
+</ol>
+</div>
+</section>
+<section aria-labelledby="rq-recent" style="max-width:1440px;margin:0 auto;padding:clamp(48px,6vw,88px) clamp(20px,4vw,64px);display:flex;flex-direction:column;gap:24px">
+<sc-if value="{{ recentVisible }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px"><h2 id="rq-recent" style="margin:0;font:600 clamp(28px,2.6vw,40px)/1.1 var(--font-display);letter-spacing:-.02em">Yêu cầu gần đây</h2><span style="font:600 12px/1.4 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">ĐÃ ẨN DANH · CHỈ HIỆN LOẠI BUỔI, TỈNH/THÀNH, NGÂN SÁCH</span></div>
+<sc-if value="{{ recentLoading }}" hint-placeholder-val="{{ false }}"><div aria-busy="true" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px"><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:128px" hint-size="100%,128px"></x-import><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:128px" hint-size="100%,128px"></x-import><x-import component-from-global-scope="Fgrapher.Skeleton" style="height:128px" hint-size="100%,128px"></x-import></div></sc-if>
+<sc-if value="{{ recentReady }}" hint-placeholder-val="{{ true }}"><ul style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px"><sc-for list="{{ recent }}" as="r" hint-placeholder-count="6"><li style="display:flex;flex-direction:column;gap:14px;padding:20px;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md);background:var(--bg-surface)"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">{{ r.frame }}</span><strong style="font:600 19px/1.25 var(--font-display);overflow-wrap:anywhere">{{ r.type }}</strong><span style="display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--text-secondary)"><span>{{ r.province }}</span><span style="font-weight:600;color:var(--text-primary)">{{ r.budget }}</span></span></li></sc-for></ul></sc-if>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:24px;border-radius:var(--fg-radius-lg);background:var(--green-900);color:var(--gold-50)"><span style="display:flex;flex-direction:column;gap:6px"><strong style="font:600 22px/1.2 var(--font-display)">Mọi nghệ sĩ gửi đề xuất đều đã xác minh danh tính.</strong><span style="font-size:15px;color:var(--green-200)">Fgrapher không thu tiền trực tuyến. Giá và đặt cọc bạn thỏa thuận trực tiếp với nghệ sĩ.</span></span><x-import component-from-global-scope="Fgrapher.Button" variant="accent" size="lg" on-click="{{ openLogin }}">Đăng yêu cầu</x-import></div>
+</section>
+</main>
+<sc-if value="{{ loginDesk }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:grid;place-items:center;padding:16px"><div ref="{{ scrimRef }}" onClick="{{ closeLogin }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ panelRef }}" role="dialog" aria-modal="true" aria-labelledby="rq-login-t" onKeyDown="{{ onDlgKey }}" style="position:relative;width:min(460px,100%);display:flex;flex-direction:column;gap:18px;padding:28px;border:1px solid var(--border-default);border-radius:var(--fg-radius-lg);background:var(--bg-surface);box-shadow:var(--shadow-lg)"><dc-import name="RqLogin" on-close="{{ closeLogin }}" hint-size="100%,360px"></dc-import></div></div></sc-if>
+<sc-if value="{{ loginSheet }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:900;display:flex;flex-direction:column;justify-content:flex-end"><div ref="{{ scrimRef }}" onClick="{{ closeLogin }}" aria-hidden="true" style="position:absolute;inset:0;background:var(--dr-scrim)"></div><div ref="{{ panelRef }}" role="dialog" aria-modal="true" aria-labelledby="rq-login-t" onKeyDown="{{ onDlgKey }}" style="position:relative;display:flex;flex-direction:column;gap:18px;padding:12px 20px 28px;border-radius:var(--fg-radius-xl) var(--fg-radius-xl) 0 0;background:var(--bg-surface);box-shadow:var(--shadow-lg)"><span aria-hidden="true" style="align-self:center;width:36px;height:4px;border-radius:999px;background:var(--border-default)"></span><dc-import name="RqLogin" on-close="{{ closeLogin }}" hint-size="100%,360px"></dc-import></div></div></sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.q = new URLSearchParams(window.location.search); this.state = { w: window.innerWidth, login: this.q.get('login') === '1' }; }
+  panelRef = React.createRef(); scrimRef = React.createRef();
+  componentDidMount() { this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR); if (this.state.login) this.enter(); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  enter() {
+    this.prev = document.activeElement;
+    requestAnimationFrame(() => {
+      const p = this.panelRef.current, s = this.scrimRef.current; if (!p) return;
+      const f = p.querySelector('input'); f && f.focus({ preventScroll: true });
+      if (!p.animate || (window.fgKit && window.fgKit.reduced())) return;
+      p.animate(this.state.w < 768 ? [{ transform: 'translateY(100%)' }, { transform: 'none' }] : [{ opacity: 0, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: this.state.w < 768 ? 320 : 200, easing: 'cubic-bezier(0,0,.2,1)' });
+      s && s.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260 });
+    });
+  }
+  close() { this.setState({ login: false }); this.prev && this.prev.focus && this.prev.focus({ preventScroll: true }); }
+  renderVals() {
+    const m = this.state.w < 768, rs = this.q.get('recent') || '';
+    const R = [['Chụp ảnh kỷ yếu', 'Lâm Đồng', '3.000.000–5.000.000₫'], ['Trang điểm cô dâu', 'Thành phố Hồ Chí Minh', '1.000.000–3.000.000₫'], ['Quay phim sự kiện công ty', 'Thành phố Hà Nội', '5.000.000–10.000.000₫'], ['Chụp ảnh sản phẩm', 'Thành phố Đà Nẵng', 'Để nghệ sĩ báo giá'], ['Chụp ảnh gia đình', 'Thành phố Cần Thơ', '1.000.000–3.000.000₫'], ['Thuê áo dài chụp Tết', 'Thành phố Huế', 'Dưới 1.000.000₫']];
+    return {
+      theme: this.q.get('theme') || 'light', isMobile: this.state.w < 1024,
+      sample: { need: 'Chụp ảnh · Cưới', when: '15/11/2026 · Buổi chiều\nLinh hoạt ± 3 ngày', where: 'Phường Hội An\nThành phố Đà Nẵng', refs: [0, 1, 2].map(i => ({ src: `https://picsum.photos/seed/fgrq-ref${i}/240/300`, alt: 'Ảnh tham khảo ' + (i + 1), num: '0' + (i + 1) + 'A' })), budget: '5.000.000–10.000.000₫', note: 'Chụp ngoài trời lúc hoàng hôn, khoảng 40 khách.' },
+      recentVisible: rs !== 'empty' && rs !== 'error', recentLoading: rs === 'loading', recentReady: rs !== 'loading',
+      recent: R.map(([type, province, budget], i) => ({ type, province, budget, frame: 'KHUNG 0' + (i + 1) + 'A' })),
+      loginDesk: this.state.login && !m, loginSheet: this.state.login && m,
+      panelRef: this.panelRef, scrimRef: this.scrimRef,
+      openLogin: () => this.setState({ login: true }, () => this.enter()),
+      closeLogin: () => this.close(),
+      onDlgKey: e => { if (e.key === 'Escape') this.close(); if (e.key === 'Tab') { const f = [...this.panelRef.current.querySelectorAll('button,input,a[href]')].filter(x => !x.disabled); if (!f.length) return; const i = f.indexOf(document.activeElement); if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } } }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Phần dùng chung · đợt 2" description="Bề mặt Phòng tối (--dr-*), EditorialHero, MasonryGrid không cắt ảnh + contact sheet, CommandPalette ⌘K (sheet trên điện thoại), chuyển cảnh chung phần tử có storyboard. Máy tính 1440 và điện thoại 390, sáng và tối, đủ trạng thái." -->
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0}</style></helmet>
+<div style="position:absolute;left:0;top:0;padding:80px;display:flex;flex-direction:column;gap:96px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:hsl(30 15% 11%)">
+<div style="width:1100px;background:var(--bg-surface,#fff);border:1px solid var(--border-subtle);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--gold-700)">Quyết định chính</div>
+<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5">
+<li>Phòng tối là một khối <code>[data-surface="darkroom"]</code>. Khối này trỏ lại các token ngữ nghĩa (--bg-*, --text-*, --border-*) sang --dr-*, nên Button, Badge, Tag của DS hiện đúng mà không cần biến thể mới. Giá trị giống nhau ở cả chế độ sáng và tối.</li>
+<li>Từ Giấy sang Phòng tối dùng mép cứng và dải dẫn phim, không dùng dải chuyển màu. Header đổi nền trong 260ms khi đi qua khối tối.</li>
+<li>Lưới và dải khung không bao giờ cắt ảnh. Contact sheet đặt ảnh gọn trong ô vuông. Nhờ không cắt nên lưới → lightbox chỉ cần transform.</li>
+<li>Thanh lệnh là phần điều khiển nên ở trên Giấy theo chế độ. Tìm không cần dấu. Trang lọc ngay trên máy, nghệ sĩ và album chờ mạng, có trạng thái đang tìm, trống và lỗi riêng.</li>
+<li>Chuyển cảnh: 300ms (thẻ → hồ sơ) và 280/260ms (lightbox), dùng --ease-out có sẵn. Chỉ ảnh chuyển động, chữ hiện ngay. Bật giảm chuyển động thì đổi tức thì.</li>
+</ol>
+<p style="margin:0;font-size:14px;line-height:1.5;color:hsl(30 8% 38%)">Các token --dr-* và bảng trỏ lại hiện nằm trong helmet của KitPage. Khi đưa vào DS: thêm vào tokens trong repo, bên cạnh .dark, rồi chạy lại /design-sync. Mọi ảnh là ảnh mẫu.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Máy tính 1440px</div>
+<div style="display:grid;grid-template-columns:1440px 1440px;gap:64px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sáng</span><iframe data-fit="1" src="KitPage.dc.html?theme=light" style="width:1440px;height:8000px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tối</span><iframe data-fit="1" src="KitPage.dc.html?theme=dark" style="width:1440px;height:8000px;border:1px solid hsl(30 10% 82%);border-radius:12px;background:hsl(30 10% 7%)" title="Tối"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Thanh lệnh đang mở</div>
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;max-width:3000px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Máy tính · sáng · “da nang”</span><iframe src="KitPage.dc.html?theme=light&amp;palette=open&amp;q=da%20nang" style="width:1440px;height:900px;border:1px solid hsl(30 10% 82%);border-radius:12px" title="Thanh lệnh sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Điện thoại · tối · ô trống</span><iframe src="KitPage.dc.html?theme=dark&amp;palette=open" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="Sheet tối"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Điện thoại · sáng · lỗi mạng</span><iframe src="KitPage.dc.html?theme=light&amp;palette=open&amp;q=minh&amp;pstate=error" style="width:390px;height:844px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="Sheet lỗi"></iframe></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:20px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">Điện thoại 390px</div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Sáng</span><iframe data-fit="1" src="KitPage.dc.html?theme=light" style="width:390px;height:14000px;border:1px solid hsl(30 10% 82%);border-radius:28px" title="ĐT sáng"></iframe></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:600">Tối</span><iframe data-fit="1" src="KitPage.dc.html?theme=dark" style="width:390px;height:14000px;border:1px solid hsl(30 10% 82%);border-radius:28px;background:hsl(30 10% 7%)" title="ĐT tối"></iframe></div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => document.querySelectorAll('iframe[data-fit]').forEach(f => { try { const d = f.contentDocument; if (!d || !d.body) return; const h = d.documentElement.scrollHeight; if (h > 400 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px'; } catch (e) {} });
+    this.t = setInterval(fit, 800); setTimeout(() => clearInterval(this.t), 20000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

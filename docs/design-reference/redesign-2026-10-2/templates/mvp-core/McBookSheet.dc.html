@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="height:100%;display:flex;flex-direction:column;background:var(--bg-surface);color:var(--text-primary);font-family:var(--font-body)">
+<sc-if value="{{ isSheet }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="align-self:center;width:40px;height:4px;margin-top:8px;border-radius:999px;background:var(--border-default)"></span></sc-if>
+<div style="flex:none;display:flex;align-items:center;gap:4px;padding:8px 8px 8px 8px;border-bottom:1px solid var(--border-subtle)">
+<sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ back }}" aria-label="Quay lại chọn ngày" style="width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--text-primary);cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg></button></sc-if>
+<h2 id="mc-b-t" style="flex:1;margin:0;padding-left:{{ tPad }}px;font:600 20px/1.2 var(--font-display)">{{ title }}</h2>
+<button type="button" onClick="{{ close }}" aria-label="Đóng" style="width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--text-primary);cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+<div style="flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:20px">
+<sc-if value="{{ isDate }}" hint-placeholder-val="{{ true }}"><dc-import name="McDatePick" busy="{{ p.busy }}" date="{{ date }}" time="{{ time }}" on-date="{{ onDate }}" on-time="{{ onTime }}" hint-size="100%,340px"></dc-import></sc-if>
+<sc-if value="{{ isReq }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px"><span style="flex:none;width:48px;height:60px;border-radius:var(--fg-radius-sm);overflow:hidden;background:var(--bg-sunken)"><sc-if value="{{ p.cover }}" hint-placeholder-val="{{ true }}"><img src="{{ p.cover }}" alt="" style="display:block;width:100%;height:100%;object-fit:cover"></sc-if></span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><strong style="font-size:16px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ p.name }}</strong><span style="font-size:14px;color:var(--text-secondary)">{{ p.role1 }} · {{ p.place }}</span></span></div>
+<sc-if value="{{ hasPk }}" hint-placeholder-val="{{ true }}"><fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:8px"><legend style="padding:0;margin-bottom:10px;font-size:15px;font-weight:600">Gói dịch vụ</legend><sc-for list="{{ pks }}" as="k" hint-placeholder-count="3"><label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid {{ k.bd }};border-radius:var(--fg-radius-md);background:{{ k.bg }};cursor:pointer"><input type="radio" name="mc-pk" checked="{{ k.on }}" onChange="{{ k.pick }}" style="margin:3px 0 0;width:18px;height:18px;accent-color:var(--brand-primary)"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="display:flex;justify-content:space-between;gap:12px"><strong style="font-size:15px">{{ k.name }}</strong><strong style="flex:none;font-size:15px;font-variant-numeric:tabular-nums">{{ k.priceTxt }}</strong></span><span style="font-size:13px;line-height:1.4;color:var(--text-secondary)">{{ k.dur }} · {{ k.inc }}</span></span></label></sc-for></fieldset></sc-if>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:var(--fg-radius-md);background:var(--bg-sunken)"><span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;color:var(--text-secondary)">Ngày giờ</span><strong style="font-size:15px">{{ whenTxt }}</strong></span><button type="button" onClick="{{ toDate }}" style="min-height:44px;padding:0 12px;border:0;background:transparent;color:var(--text-link);font:600 15px/1 var(--font-body);cursor:pointer">{{ whenAction }}</button></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:600">Địa điểm chụp<input type="text" placeholder="Ví dụ: Phường Thủ Đức, TP.HCM" style="min-height:48px;padding:0 14px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:400 15px/1 var(--font-body)"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:600">{{ noteLabel }}<textarea rows="3" placeholder="{{ notePh }}" style="padding:12px 14px;border:1px solid var(--border-default);border-radius:var(--fg-radius-md);background:var(--bg-surface);color:var(--text-primary);font:400 15px/1.5 var(--font-body);resize:vertical"></textarea></label>
+<p style="margin:0;font-size:14px;line-height:1.5;color:var(--text-secondary)">{{ reassure }}</p>
+</div></sc-if>
+<sc-if value="{{ isSent }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 0;text-align:center"><span aria-hidden="true" style="width:56px;height:56px;display:grid;place-items:center;border-radius:999px;background:var(--success-bg);color:var(--success)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span><strong style="font:600 24px/1.2 var(--font-display)">Đã gửi yêu cầu</strong><span style="max-width:340px;font-size:15px;line-height:1.5;color:var(--text-secondary)">{{ sentLine }}</span>
+<dl style="align-self:stretch;margin:8px 0 0;display:flex;flex-direction:column;border:1px solid var(--border-subtle);border-radius:var(--fg-radius-md);text-align:left"><sc-for list="{{ summary }}" as="s" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:16px;padding:12px 14px;border-bottom:1px solid var(--border-subtle)"><dt style="font-size:14px;color:var(--text-secondary)">{{ s.k }}</dt><dd style="margin:0;font-size:14px;font-weight:600;text-align:right;min-width:0;overflow-wrap:anywhere">{{ s.v }}</dd></div></sc-for></dl></div></sc-if>
+</div>
+<div style="flex:none;display:flex;flex-direction:column;gap:8px;padding:12px 20px {{ pb }}px;border-top:1px solid var(--border-subtle)">
+<button type="button" onClick="{{ primary }}" disabled="{{ primaryOff }}" style="min-height:52px;padding:0 16px;border:0;border-radius:var(--fg-radius-md);background:{{ pBg }};color:{{ pFg }};font:700 16px/1 var(--font-body);cursor:{{ pCur }}">{{ primaryLabel }}</button>
+<sc-if value="{{ isSent }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ close }}" style="min-height:44px;border:0;background:transparent;color:var(--text-primary);font:600 15px/1 var(--font-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer">Quay lại hồ sơ</button></sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:760},&quot;p&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Provider&quot;},&quot;step&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;date&quot;,&quot;req&quot;,&quot;sent&quot;],&quot;default&quot;:&quot;date&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;date&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;time&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;pkg&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sheet&quot;,&quot;dialog&quot;],&quot;default&quot;:&quot;sheet&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;safe&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;},&quot;dateOnly&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onDate&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;fn&quot;},&quot;onTime&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;fn&quot;},&quot;onPkg&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;fn&quot;},&quot;onStep&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;fn&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;fn&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const D = window.mcData, p = this.props.p || {}, step = this.props.step || 'date', date = this.props.date || '', time = this.props.time || '';
+    const nosvc = !(p.packages || []).length, pkg = (p.packages || []).find(k => k.id === this.props.pkg) || (p.packages || [])[0];
+    const when = date ? `${D.wd(date)}, ${D.dmy(date)}${time ? ' · ' + time : ''}` : '';
+    const go = s => this.props.onStep && this.props.onStep(s);
+    const ready = !!(date && time);
+    const P = step === 'date' ? { label: ready ? `Xác nhận · ${D.wd(date)} ${D.dm(date)}, ${time}` : 'Chọn ngày và giờ', off: !ready, go: () => go(this.props.dateOnly ? 'done' : 'req') }
+      : step === 'req' ? { label: nosvc ? 'Gửi câu hỏi' : 'Gửi yêu cầu đặt lịch', off: !nosvc && !ready, go: () => go('sent') }
+      : { label: 'Xem lịch đặt của tôi', off: false, go: () => this.props.onClose && this.props.onClose() };
+    return {
+      p, isSheet: this.props.mode !== 'dialog', isDate: step === 'date', isReq: step === 'req', isSent: step === 'sent',
+      canBack: step === 'req' && !nosvc, tPad: step === 'req' && !nosvc ? 0 : 12,
+      title: step === 'date' ? 'Chọn ngày và giờ' : step === 'req' ? (nosvc ? 'Nhắn hỏi giá' : 'Gửi yêu cầu đặt lịch') : 'Hoàn tất',
+      date, time, onDate: iso => this.props.onDate && this.props.onDate(iso), onTime: t => this.props.onTime && this.props.onTime(t),
+      hasPk: !nosvc, pks: (p.packages || []).map(k => { const on = pkg && k.id === pkg.id; return { ...k, on, bd: on ? 'var(--brand-primary)' : 'var(--border-default)', bg: on ? 'var(--bg-sunken)' : 'var(--bg-surface)', pick: () => this.props.onPkg && this.props.onPkg(k.id) }; }),
+      whenTxt: when || (nosvc ? 'Chưa chọn · không bắt buộc' : 'Chưa chọn'), whenAction: when ? 'Đổi' : 'Chọn', toDate: () => go('date'),
+      noteLabel: nosvc ? 'Câu hỏi của bạn' : 'Ghi chú cho provider', notePh: nosvc ? 'Ví dụ: Chụp gia đình 5 người, khoảng 2 giờ, báo giá giúp mình.' : 'Số người, phong cách mong muốn, yêu cầu riêng…',
+      reassure: `Bạn chưa phải thanh toán. ${p.name || 'Provider'}${p.resp != null ? ` thường phản hồi trong khoảng ${p.resp} giờ` : ' sẽ phản hồi qua thông báo'}.`,
+      sentLine: `${p.name || 'Provider'} sẽ xác nhận hoặc đề xuất giờ khác. Bạn nhận thông báo qua Zalo và email.`,
+      summary: [{ k: 'Provider', v: p.name }, pkg && !nosvc ? { k: 'Gói', v: `${pkg.name} · ${pkg.priceTxt}` } : null, when ? { k: 'Ngày giờ', v: when } : null].filter(Boolean),
+      pb: 12 + (this.props.safe || 0), primary: P.go, primaryOff: P.off, primaryLabel: P.label,
+      pBg: P.off ? 'var(--bg-sunken)' : 'var(--gold-400)', pFg: P.off ? 'var(--text-tertiary)' : 'var(--gold-900)', pCur: P.off ? 'not-allowed' : 'pointer',
+      back: () => go('date'), close: () => this.props.onClose && this.props.onClose()
+    };
+  }
+}
+</script>
+</body>
+</html>

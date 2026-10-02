@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div role="region" aria-label="Đặt lịch nhanh" aria-hidden="{{ hid }}" style="position:{{ pos }};left:0;right:0;bottom:0;z-index:40;background:var(--bg-surface);border-top:1px solid var(--border-subtle);box-shadow:0 -8px 24px hsl(30 14% 5% / .10);padding:0 16px {{ pb }}px;transform:{{ tf }};transition:transform 220ms cubic-bezier(0,0,.2,1);font-family:var(--font-body);color:var(--text-primary)">
+<div style="height:64px;max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px">
+<div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+<sc-if value="{{ hasPrice }}" hint-placeholder-val="{{ true }}"><span style="font-size:16px;line-height:1.2;white-space:nowrap"><span style="color:var(--text-secondary)">Từ </span><strong style="font-variant-numeric:tabular-nums">{{ price }}</strong></span></sc-if>
+<sc-if value="{{ noPrice }}" hint-placeholder-val="{{ false }}"><strong style="font-size:16px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Chưa có gói dịch vụ</strong></sc-if>
+<span style="font-size:13px;line-height:1.2;color:{{ subColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sub }}</span>
+</div>
+<button type="button" onClick="{{ cta }}" tabIndex="{{ tab }}" style="flex:none;min-height:48px;min-width:128px;padding:0 20px;border:0;border-radius:var(--fg-radius-md);background:var(--gold-400);color:var(--gold-900);font:700 16px/1 var(--font-body);cursor:pointer">{{ label }}</button>
+</div>
+<sc-if value="{{ showSafe }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:{{ safe }}px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,hsl(0 80% 60% / .10) 0 6px,transparent 6px 12px);font:600 12px/1 var(--font-mono);letter-spacing:.06em;color:var(--danger)">safe-area-inset-bottom · {{ safe }}px</span></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:100},&quot;kind&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;date&quot;,&quot;nosvc&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;'none'|'date'|'nosvc'&quot;},&quot;price&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;2.500.000₫&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dateTxt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;T7, 10/10 · 08:00&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;safe&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:34,&quot;tsType&quot;:&quot;number&quot;},&quot;fixed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;show&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;markSafe&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onCta&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(kind)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const k = this.props.kind || 'none', show = this.props.show !== false, safe = this.props.safe ?? 0;
+    const sub = k === 'nosvc' ? 'Nhắn để hỏi giá và lịch trống' : k === 'date' ? `${this.props.dateTxt || ''} · đã chọn` : 'Chưa chọn ngày chụp';
+    return {
+      pos: this.props.fixed ? 'fixed' : 'relative', pb: safe, safe, showSafe: !!this.props.markSafe && safe > 0,
+      tf: show ? 'none' : 'translateY(110%)', hid: show ? 'false' : 'true', tab: show ? 0 : -1,
+      hasPrice: k !== 'nosvc', noPrice: k === 'nosvc', price: this.props.price || '', sub, subColor: k === 'date' ? 'var(--success)' : 'var(--text-secondary)',
+      label: k === 'nosvc' ? 'Nhắn hỏi giá' : k === 'date' ? 'Đặt lịch' : 'Chọn ngày',
+      cta: () => this.props.onCta && this.props.onCta(k)
+    };
+  }
+}
+</script>
+</body>
+</html>

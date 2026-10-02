@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;color:var(--text-primary);font-family:var(--font-body)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-tertiary)">ĐĂNG YÊU CẦU</span><h2 id="rq-login-t" style="margin:0;font:600 26px/1.15 var(--font-display);letter-spacing:-.015em">Đăng nhập để đăng yêu cầu</h2></div><button type="button" onClick="{{ close }}" aria-label="Đóng" style="flex:none;width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--text-secondary);font-size:22px;cursor:pointer">×</button></div>
+<p style="margin:0;font-size:15px;line-height:1.55;color:var(--text-secondary)">Nghệ sĩ cần biết yêu cầu đến từ một người thật. Đăng nhập xong, bạn vào thẳng câu hỏi đầu tiên.</p>
+<sc-if value="{{ stepPhone }}" hint-placeholder-val="{{ true }}"><form onSubmit="{{ sendCode }}" noValidate="" style="display:flex;flex-direction:column;gap:14px"><x-import component-from-global-scope="Fgrapher.Input" label="Số điện thoại" type="tel" inputMode="tel" autocomplete="tel" placeholder="0901 234 567" value="{{ phone }}" on-change="{{ onPhone }}" error="{{ err }}" hint-size="100%,72px"></x-import><x-import component-from-global-scope="Fgrapher.Button" type="submit" variant="accent" size="lg" disabled="{{ busy }}">{{ sendLabel }}</x-import></form></sc-if>
+<sc-if value="{{ stepCode }}" hint-placeholder-val="{{ false }}"><form onSubmit="{{ verify }}" noValidate="" style="display:flex;flex-direction:column;gap:14px"><span role="status" style="font-size:14px;color:var(--text-secondary)">Đã gửi mã 6 số tới {{ phone }}.</span><x-import component-from-global-scope="Fgrapher.Input" label="Mã xác nhận" inputMode="numeric" autocomplete="one-time-code" maxLength="6" value="{{ code }}" on-change="{{ onCode }}" error="{{ err }}" hint-size="100%,72px"></x-import><x-import component-from-global-scope="Fgrapher.Button" type="submit" variant="accent" size="lg" disabled="{{ busy }}">{{ verifyLabel }}</x-import><button type="button" onClick="{{ back }}" style="align-self:flex-start;min-height:44px;padding:0;border:0;background:none;color:var(--text-link);font:600 14px/1 var(--font-body);cursor:pointer">Đổi số điện thoại</button></form></sc-if>
+<sc-if value="{{ stepDone }}" hint-placeholder-val="{{ false }}"><div role="status" style="padding:16px;border-radius:var(--fg-radius-md);background:var(--success-bg);font-size:15px;line-height:1.5"><strong style="color:var(--success)">Đã đăng nhập.</strong> Đang mở câu hỏi đầu tiên…</div></sc-if>
+<p style="margin:0;font-size:13px;line-height:1.5;color:var(--text-secondary)">Số điện thoại chỉ dùng để đăng nhập và để nghệ sĩ bạn chọn liên hệ. Nghệ sĩ khác không thấy số này.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:420},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { step: 'phone', phone: '', code: '', err: undefined, busy: false };
+  renderVals() {
+    const { step, phone, code, err, busy } = this.state;
+    return {
+      stepPhone: step === 'phone', stepCode: step === 'code', stepDone: step === 'done', phone, code, err, busy,
+      sendLabel: busy ? 'Đang gửi mã…' : 'Nhận mã xác nhận', verifyLabel: busy ? 'Đang kiểm tra…' : 'Đăng nhập',
+      onPhone: e => this.setState({ phone: e.target.value, err: undefined }),
+      onCode: e => this.setState({ code: e.target.value.replace(/\D/g, '').slice(0, 6), err: undefined }),
+      close: () => this.props.onClose && this.props.onClose(),
+      back: () => this.setState({ step: 'phone', code: '', err: undefined }),
+      sendCode: e => { e.preventDefault(); const p = phone.replace(/[\s.]/g, ''); if (!/^(\+84|0)\d{9}$/.test(p)) return this.setState({ err: 'Số điện thoại gồm 10 số, ví dụ 0901 234 567.' }); this.setState({ busy: true }); setTimeout(() => this.setState({ busy: false, step: 'code' }), 700); },
+      verify: e => { e.preventDefault(); if (code.length !== 6) return this.setState({ err: 'Nhập đủ 6 số trong tin nhắn.' }); this.setState({ busy: true }); setTimeout(() => this.setState({ busy: false, step: 'done' }), 700); }
+    };
+  }
+}
+</script>
+</body>
+</html>
