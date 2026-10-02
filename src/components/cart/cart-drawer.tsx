@@ -39,13 +39,13 @@ export function CartDrawer() {
         render={
           <button
             type="button"
-            className="relative"
+            className="focus-ring relative grid size-11 place-items-center rounded-full"
             // Icon-only: without a name a screen reader announced "button".
             aria-label={t("title", { count: itemCount })}
           >
             <ShoppingBag className="size-5 text-text-secondary" />
             {itemCount > 0 ? (
-              <span className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-brand-primary text-sm font-bold text-text-on-brand">
+              <span className="absolute top-0 right-0 flex size-5 items-center justify-center rounded-full bg-brand-primary text-sm font-bold text-text-on-brand">
                 {itemCount}
               </span>
             ) : null}

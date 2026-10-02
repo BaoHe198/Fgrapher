@@ -350,7 +350,7 @@ export default async function DashboardPage() {
         <>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col gap-2">
-              <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+              <span className="text-body-sm font-semibold text-text-tertiary">
                 {clock.weekday} · {clock.date} · {clock.time}
               </span>
               <h1 className="font-display text-[clamp(2.25rem,4.5vw,3.5rem)] leading-[1] font-semibold tracking-[-0.03em] text-text-primary">

@@ -65,23 +65,21 @@ export async function ProductCard({ product }: ProductCardProps) {
         ) : (
           <span className="absolute inset-3 flex flex-col items-center justify-center gap-2 rounded-[var(--fg-radius-sm)] border border-dashed border-border-strong text-text-tertiary">
             <GearIcon category={product.category} className="size-10" />
-            <span className="font-mono text-meta tracking-[0.12em] uppercase">
-              {t("noPhoto")}
-            </span>
+            <span className="text-body-sm font-semibold">{t("noPhoto")}</span>
           </span>
         )}
-        <span className="absolute top-2.5 left-2.5 rounded-[4px] bg-bg-surface px-1.5 py-1 font-mono text-meta tracking-[0.12em] text-text-primary uppercase">
+        <span className="absolute top-2.5 left-2.5 rounded-[4px] bg-bg-surface px-1.5 py-1 text-body-sm font-semibold text-text-primary">
           {typeLabel}
         </span>
         {outOfStock ? (
-          <span className="absolute top-2.5 right-2.5 rounded-[4px] border border-dashed border-text-secondary bg-bg-surface px-1.5 py-1 font-mono text-meta tracking-[0.12em] text-text-secondary uppercase">
+          <span className="absolute top-2.5 right-2.5 rounded-[4px] border border-dashed border-text-secondary bg-bg-surface px-1.5 py-1 text-body-sm font-semibold text-text-secondary">
             {t("outOfStock")}
           </span>
         ) : null}
       </div>
 
       <div className="flex flex-1 flex-col gap-1">
-        <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+        <span className="text-body-sm font-semibold text-text-tertiary">
           {[
             category ? tCategory(category) : null,
             CONDITION_LABEL[product.condition] ?? product.condition,
@@ -92,7 +90,7 @@ export async function ProductCard({ product }: ProductCardProps) {
         <span className="line-clamp-2 text-heading-sm text-text-primary group-hover:underline group-hover:underline-offset-4">
           {product.name}
         </span>
-        <span className="mt-auto flex flex-col gap-0.5 pt-1.5 font-mono text-body-md tabular-nums text-text-primary">
+        <span className="mt-auto flex flex-col gap-0.5 pt-1.5 text-body-md tabular-nums text-text-primary">
           {product.type !== "RENT" && product.price ? (
             <span className="font-semibold">
               {formatCurrency(product.price, product.currency)}

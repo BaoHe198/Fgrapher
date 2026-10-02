@@ -397,7 +397,7 @@ export function FilterSidebar({
                 aria-pressed={active}
                 onClick={() => applyFilters({ minRating: option.value }, true)}
                 className={cn(
-                  "focus-ring rounded-full border px-3 py-1.5 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
+                  "focus-ring min-h-11 rounded-full border px-4 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
                   active
                     ? "border-brand-primary bg-brand-primary text-text-on-brand"
                     : "border-border-default bg-bg-surface text-text-primary hover:border-border-strong",

@@ -189,7 +189,7 @@ export function BookingsClient({
             <TabsTab key={value} value={value}>
               {t(`tabs.${value.toLowerCase()}`)}
               {value !== "ALL" && counts[value] > 0 ? (
-                <span className="ml-1 font-mono text-meta tabular-nums text-text-tertiary">
+                <span className="ml-1 text-meta tabular-nums text-text-tertiary">
                   {counts[value]}
                 </span>
               ) : null}

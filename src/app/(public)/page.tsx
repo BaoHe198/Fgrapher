@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { ClosingCta } from "@/components/home/closing-cta";
 import { FeaturedArtists } from "@/components/home/featured-artists";
 import { MapTeaser } from "@/components/home/map-teaser";
+import { MoreFromFgrapher } from "@/components/home/more-from-fgrapher";
 import { RoleTiles } from "@/components/home/role-tiles";
 import { StyleGrid } from "@/components/home/style-grid";
 import { TrustSection } from "@/components/home/trust-section";
@@ -172,6 +173,11 @@ export default async function LandingPage() {
       />
 
       <TrustSection review={showcase.review} />
+
+      <MoreFromFgrapher
+        marketplaceEnabled={features.marketplaceEnabled}
+        socialFeedEnabled={features.socialFeedEnabled}
+      />
 
       <ClosingCta />
     </>

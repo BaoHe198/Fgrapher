@@ -135,7 +135,7 @@ function ChoiceCard({
           {price ? (
             <span
               className={cn(
-                "shrink-0 font-mono font-semibold! tabular-nums text-text-primary",
+                "shrink-0 font-semibold! tabular-nums text-text-primary",
                 size === "sm" ? "text-body-sm" : "text-body-md",
               )}
             >

@@ -641,7 +641,7 @@ export function RequestWizard({
             <X aria-hidden className="size-4" />
             {t("exit")}
           </Link>
-          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+          <span className="text-body-sm font-semibold text-text-tertiary">
             {sheetCode} · {stamp}
           </span>
           <span
@@ -719,7 +719,7 @@ export function RequestWizard({
         >
           {posted ? (
             <div role="status" className="flex flex-col gap-5">
-              <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+              <span className="text-body-sm font-semibold text-text-tertiary">
                 {t("done.eyebrow")}
               </span>
               <h1
@@ -755,7 +755,7 @@ export function RequestWizard({
           ) : (
             <>
               <div className="flex flex-col gap-3">
-                <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+                <span className="text-body-sm font-semibold text-text-tertiary">
                   {t("questionLabel", {
                     n: String(step + 1).padStart(2, "0"),
                   })}
@@ -1044,7 +1044,7 @@ export function RequestWizard({
                       value={form.description}
                       onChange={(e) => update({ description: e.target.value })}
                     />
-                    <span className="self-end font-mono text-meta text-text-tertiary">
+                    <span className="self-end text-meta text-text-tertiary">
                       {form.description.length}/2000
                     </span>
                   </div>
@@ -1106,7 +1106,7 @@ export function RequestWizard({
           aria-label={t("previewLabel")}
           className="hidden flex-col gap-3 lg:flex"
         >
-          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+          <span className="text-body-sm font-semibold text-text-tertiary">
             {t("previewLabel")}
           </span>
           <CallSheet

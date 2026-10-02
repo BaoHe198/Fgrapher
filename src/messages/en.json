@@ -3,7 +3,13 @@
     "title": "Page not found",
     "body": "The page you're looking for doesn't exist, or may have been moved.",
     "home": "Go home",
-    "browse": "Browse artists"
+    "browse": "Browse artists",
+    "closed": {
+      "title": "Not open yet",
+      "market": "Chợ F isn't open during launch. You can still find and book providers as usual.",
+      "community": "Cộng đồng F isn't open during launch. You can still find and book providers as usual.",
+      "browse": "Find a provider"
+    }
   },
   "rootError": {
     "title": "Something went wrong",
@@ -288,6 +294,17 @@
       "title": "Post a request, get offers from artists",
       "sub": "Describe the shoot, date and budget. Matching artists send offers for you to choose from. Deposit agreed directly.",
       "cta": "Post a request"
+    },
+    "more": {
+      "title": "More from Fgrapher",
+      "market": {
+        "title": "Chợ F",
+        "body": "Buy, sell and rent cameras, lenses and lights."
+      },
+      "community": {
+        "title": "Cộng đồng F",
+        "body": "Find collaborators, share shoots and know-how."
+      }
     }
   },
   "foot": {
@@ -303,7 +320,8 @@
     "support": "Support",
     "terms": "Terms",
     "privacy": "Privacy policy",
-    "cookieSettings": "Cookie settings"
+    "cookieSettings": "Cookie settings",
+    "community": "Cộng đồng F"
   },
   "browse": {
     "role": "ROLE",
@@ -2258,10 +2276,10 @@
           "message": "Message"
         },
         "roll": {
-          "title": "Profile film roll",
-          "count": "{done}/{total} frames developed",
-          "lede": "Each frame is something still missing. Finish it and the frame develops.",
-          "undeveloped": "Undeveloped",
+          "title": "Finish your profile",
+          "count": "{done}/{total} done",
+          "lede": "Each item is something clients look for before they book.",
+          "undeveloped": "Not done",
           "done": "Done",
           "items": {
             "verify": "Identity verification",

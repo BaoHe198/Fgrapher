@@ -145,7 +145,7 @@ export function BookingSummary({
         {loading ? (
           <Skeleton className="h-7 w-32" />
         ) : (
-          <span className="font-mono text-heading-md font-semibold! tabular-nums text-text-primary">
+          <span className="text-heading-md font-semibold! tabular-nums text-text-primary">
             {total ?? t("quoteLater")}
           </span>
         )}

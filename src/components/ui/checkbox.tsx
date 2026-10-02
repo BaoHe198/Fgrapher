@@ -42,7 +42,7 @@ function Checkbox({ className, id, label, ...props }: CheckboxProps) {
   return (
     <label
       htmlFor={checkboxId}
-      className="inline-flex cursor-pointer items-center gap-2"
+      className="inline-flex cursor-pointer items-center gap-2 max-md:min-h-11"
     >
       {box}
       <span className="text-body-sm text-text-secondary">{label}</span>

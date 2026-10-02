@@ -68,7 +68,7 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-2 right-2"
+                className="absolute top-0.5 right-0.5 size-11"
                 size="icon-sm"
               />
             }

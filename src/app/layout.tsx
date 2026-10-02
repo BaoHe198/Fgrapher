@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import {
@@ -37,6 +37,14 @@ const fontMono = IBM_Plex_Mono({
 // template would double it up. This is just the fallback for routes with
 // no metadata of their own (not-found.tsx, error.tsx) — locale-aware via
 // next-intl rather than a hardcoded English string, per CLAUDE.md rule 10.
+// viewport-fit=cover lets env(safe-area-inset-*) report the iPhone home
+// indicator, which every sticky bar and sheet footer pads for.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getTranslations("seo.default");

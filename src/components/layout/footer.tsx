@@ -9,6 +9,7 @@ const PROVIDER_LINKS = [
   { labelKey: "pricing", href: "/pricing" },
   { labelKey: "tools", href: "/pricing" },
   { labelKey: "sell", href: "/shop" },
+  { labelKey: "community", href: "/community" },
   { labelKey: "guidelines", href: "/guidelines" },
 ] as const;
 
@@ -22,9 +23,12 @@ const COMPANY_LINKS = [
 
 export function Footer() {
   const t = useTranslations();
-  const providerLinks = features.marketplaceEnabled
-    ? PROVIDER_LINKS
-    : PROVIDER_LINKS.filter((link) => link.labelKey !== "sell");
+  // Built from the flags, so a switched-off product leaves no gap.
+  const providerLinks = PROVIDER_LINKS.filter(
+    (link) =>
+      (features.marketplaceEnabled || link.labelKey !== "sell") &&
+      (features.socialFeedEnabled || link.labelKey !== "community"),
+  );
 
   return (
     <footer className="border-t border-border-subtle bg-bg-surface">
@@ -44,7 +48,7 @@ export function Footer() {
           </div>
 
           <div className="flex gap-24 max-lg:gap-16 max-md:grid max-md:grid-cols-2 max-md:gap-6">
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 max-md:gap-2">
               <span className="text-body-sm font-semibold! text-text-primary">
                 {t("foot.providers")}
               </span>
@@ -52,14 +56,14 @@ export function Footer() {
                 <Link
                   key={link.labelKey}
                   href={link.href}
-                  className="text-body-sm text-text-secondary hover:text-text-primary"
+                  className="text-body-sm text-text-secondary hover:text-text-primary max-md:flex max-md:min-h-11 max-md:items-center"
                 >
                   {t(`foot.${link.labelKey}`)}
                 </Link>
               ))}
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 max-md:gap-2">
               <span className="text-body-sm font-semibold! text-text-primary">
                 {t("foot.company")}
               </span>
@@ -67,7 +71,7 @@ export function Footer() {
                 <Link
                   key={link.labelKey}
                   href={link.href}
-                  className="text-body-sm text-text-secondary hover:text-text-primary"
+                  className="text-body-sm text-text-secondary hover:text-text-primary max-md:flex max-md:min-h-11 max-md:items-center"
                 >
                   {t(`foot.${link.labelKey}`)}
                 </Link>

@@ -188,7 +188,7 @@ export function BookingSidebar({
   return (
     <div className="flex flex-col gap-5 rounded-[var(--fg-radius-xl)] border border-border-subtle bg-bg-surface p-6 shadow-[var(--shadow-sm)]">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="font-mono text-heading-md font-semibold! tabular-nums text-text-primary">
+        <span className="text-heading-md font-semibold! tabular-nums text-text-primary">
           {priceLabel ?? t("book", { name: firstName })}
         </span>
         {rating !== null ? (

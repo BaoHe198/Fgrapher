@@ -208,32 +208,33 @@ export function ArtistCard({ artist, onClick, priority }: ArtistCardProps) {
                     type="button"
                     onClick={(e) => stopAndGo(e, activeIndex - 1, -1)}
                     aria-label={t("previousPhoto")}
-                    className="absolute top-1/2 left-2 z-20 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-[background-color,opacity,box-shadow] duration-200 hover:bg-black/60 hover:opacity-100 hover:shadow-[0_2px_8px_rgba(0,0,0,0.4)] focus-visible:opacity-100"
+                    className="group/nav absolute top-1/2 left-0.5 z-20 grid size-11 -translate-y-1/2 place-items-center rounded-full text-white focus-visible:outline-2 focus-visible:outline-white"
                   >
-                    <ChevronLeft className="size-4" />
+                    <span
+                      aria-hidden
+                      className="grid size-8 place-items-center rounded-full bg-black/40 opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-[background-color,opacity] duration-200 group-hover/nav:bg-black/60 group-hover/nav:opacity-100"
+                    >
+                      <ChevronLeft className="size-4" />
+                    </span>
                   </button>
                   <button
                     type="button"
                     onClick={(e) => stopAndGo(e, activeIndex + 1, 1)}
                     aria-label={t("nextPhoto")}
-                    className="absolute top-1/2 right-2 z-20 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-[background-color,opacity,box-shadow] duration-200 hover:bg-black/60 hover:opacity-100 hover:shadow-[0_2px_8px_rgba(0,0,0,0.4)] focus-visible:opacity-100"
+                    className="group/nav absolute top-1/2 right-0.5 z-20 grid size-11 -translate-y-1/2 place-items-center rounded-full text-white focus-visible:outline-2 focus-visible:outline-white"
                   >
-                    <ChevronRight className="size-4" />
+                    <span
+                      aria-hidden
+                      className="grid size-8 place-items-center rounded-full bg-black/40 opacity-80 shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-[background-color,opacity] duration-200 group-hover/nav:bg-black/60 group-hover/nav:opacity-100"
+                    >
+                      <ChevronRight className="size-4" />
+                    </span>
                   </button>
-                  <div className="absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/25 px-2 py-1.5">
-                    {photos.map((photo, index) => (
-                      <button
-                        key={photo.url}
-                        type="button"
-                        onClick={(e) => stopAndGo(e, index)}
-                        aria-label={t("viewPhoto", { index: index + 1 })}
-                        className={cn(
-                          "h-1.5 w-1.5 rounded-full bg-white/60 transition-[width,background-color,opacity] duration-300 ease-out hover:bg-white/90",
-                          index === activeIndex && "w-4 bg-white",
-                        )}
-                      />
-                    ))}
-                  </div>
+                  {/* A counter, not dots: 6px dots were tap targets far
+                      under 44px (Core MVP pass, 02/10/2026). */}
+                  <span className="absolute bottom-2 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/45 px-2.5 py-1 text-body-sm font-semibold text-white tabular-nums">
+                    {activeIndex + 1}/{photos.length}
+                  </span>
                 </>
               ) : null}
             </>

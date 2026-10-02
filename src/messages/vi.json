@@ -3,7 +3,13 @@
     "title": "Không tìm thấy trang",
     "body": "Trang bạn tìm không tồn tại hoặc đã được chuyển đi.",
     "home": "Về trang chủ",
-    "browse": "Tìm nghệ sĩ"
+    "browse": "Tìm nghệ sĩ",
+    "closed": {
+      "title": "Tính năng chưa mở",
+      "market": "Chợ F chưa mở trong giai đoạn ra mắt. Bạn vẫn có thể tìm và đặt lịch nhà cung cấp như bình thường.",
+      "community": "Cộng đồng F chưa mở trong giai đoạn ra mắt. Bạn vẫn có thể tìm và đặt lịch nhà cung cấp như bình thường.",
+      "browse": "Tìm nhà cung cấp"
+    }
   },
   "rootError": {
     "title": "Đã xảy ra lỗi",
@@ -288,6 +294,17 @@
       "title": "Đăng yêu cầu, nhận đề xuất từ nghệ sĩ",
       "sub": "Mô tả buổi chụp, ngày và ngân sách. Nghệ sĩ phù hợp gửi đề xuất cho bạn chọn. Đặt cọc thỏa thuận trực tiếp.",
       "cta": "Đăng yêu cầu"
+    },
+    "more": {
+      "title": "Thêm từ Fgrapher",
+      "market": {
+        "title": "Chợ F",
+        "body": "Mua, bán và thuê máy ảnh, ống kính, đèn."
+      },
+      "community": {
+        "title": "Cộng đồng F",
+        "body": "Tìm cộng sự, chia sẻ bộ ảnh và kinh nghiệm."
+      }
     }
   },
   "foot": {
@@ -303,7 +320,8 @@
     "support": "Hỗ trợ",
     "terms": "Điều khoản",
     "privacy": "Chính sách bảo mật",
-    "cookieSettings": "Cài đặt cookie"
+    "cookieSettings": "Cài đặt cookie",
+    "community": "Cộng đồng F"
   },
   "browse": {
     "role": "VAI TRÒ",
@@ -2258,10 +2276,10 @@
           "message": "Nhắn tin"
         },
         "roll": {
-          "title": "Cuộn phim hồ sơ",
-          "count": "{done}/{total} khung đã tráng",
-          "lede": "Mỗi khung là một việc còn thiếu. Làm xong, khung được tráng.",
-          "undeveloped": "Chưa tráng",
+          "title": "Hoàn thiện hồ sơ",
+          "count": "{done}/{total} việc đã xong",
+          "lede": "Mỗi mục là một việc còn thiếu để khách tin và đặt lịch bạn.",
+          "undeveloped": "Chưa xong",
           "done": "Đã xong",
           "items": {
             "verify": "Xác minh danh tính",

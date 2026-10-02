@@ -157,7 +157,7 @@ export default async function RequestsPage() {
                 key={n}
                 className="flex flex-col gap-2 border-t border-border-default pt-4"
               >
-                <span className="font-mono text-meta tracking-[0.12em] text-gold-700 uppercase dark:text-gold-400">
+                <span className="text-body-sm font-semibold text-gold-700 dark:text-gold-400">
                   {n} · {t(`steps.s${n}tag`)}
                 </span>
                 <strong className="text-heading-sm text-text-primary">
@@ -183,7 +183,7 @@ export default async function RequestsPage() {
             <h2 id="rq-recent" className="text-heading-lg text-text-primary">
               {t("recent.title")}
             </h2>
-            <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+            <span className="text-body-sm font-semibold text-text-tertiary">
               {t("recent.privacy")}
             </span>
           </div>

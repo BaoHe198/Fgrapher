@@ -1,6 +1,13 @@
 "use client";
 
-import { Menu, MessageCircle, Moon, ShoppingBag, Sun } from "lucide-react";
+import {
+  Menu,
+  MessageCircle,
+  Moon,
+  Search,
+  ShoppingBag,
+  Sun,
+} from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -15,6 +22,7 @@ import { CartDrawer } from "@/components/cart/cart-drawer";
 import {
   CommandPalette,
   CommandPaletteTrigger,
+  useCommandPalette,
 } from "@/components/layout/command-palette";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { useMessaging } from "@/components/providers/messaging-provider";
@@ -125,8 +133,8 @@ export function WebNav({
           background: "color-mix(in srgb, var(--bg-surface) 88%, transparent)",
         }}
       >
-        {/* Desktop / tablet row (>=640px) — collapses which links show at 1180px */}
-        <div className="mx-auto hidden h-[72px] max-w-[1440px] items-center gap-6 px-6 sm:flex">
+        {/* Desktop / tablet row (>=768px) — collapses which links show at 1180px */}
+        <div className="mx-auto hidden h-[72px] max-w-[1440px] items-center gap-6 px-6 md:flex">
           <LogoFull className="shrink-0" />
 
           <nav className="flex items-center gap-[18px]">
@@ -207,35 +215,29 @@ export function WebNav({
           </div>
         </div>
 
-        {/* Mobile row (<640px) — logo + hamburger, everything else moves into
-          a Sheet. Signing up is the exception: burying the only way to
-          create an account behind a hamburger left a phone visitor with no
-          visible next step anywhere above the page footer. Signed-in users
-          keep the plain hamburger — their entry points are already in it. */}
-        <div className="flex h-[72px] items-center justify-between gap-2 px-4 sm:hidden">
-          {/* A step smaller on narrow phones (360px Androids): at full size the
-            wordmark pushed the sign-up button and hamburger past the edge. */}
+        {/* Phones (<768px, Core MVP pass 02/10/2026): logo, the cart when
+          Chợ F is on, and the menu - nothing else. Search, sign-in and the
+          rest live at the top of the menu, so the page's own gold button
+          is the only gold on screen. */}
+        <div className="flex h-[72px] items-center justify-between gap-2 px-4 md:hidden">
           <LogoFull
             size={24}
             className="min-w-0 max-[389px]:gap-2 max-[389px]:[&_span]:text-heading-md"
           />
-          <div className="flex items-center gap-1">
-            {/* Signed out, a 360px phone has no room next to the sign-up
-              button: the wordmark got clipped. */}
-            <CommandPaletteTrigger
-              compact
-              className={isAuthenticated ? undefined : "max-[389px]:hidden"}
-            />
-            {isAuthenticated ? null : (
-              <Button
-                variant="accent"
-                size="sm"
-                nativeButton={false}
-                render={<Link href="/login" />}
-              >
-                {t("authCta")}
-              </Button>
-            )}
+          <div className="flex items-center gap-2">
+            {marketplaceEnabled ? (
+              isAuthenticated ? (
+                <CartDrawer />
+              ) : (
+                <Link
+                  href="/shop"
+                  aria-label={t("market")}
+                  className="focus-ring grid size-11 place-items-center rounded-full"
+                >
+                  <ShoppingBag className="size-5 text-text-secondary" />
+                </Link>
+              )
+            ) : null}
             <MobileNavSheet
               session={session}
               isAuthenticated={isAuthenticated}
@@ -310,9 +312,12 @@ function MobileNavSheet({
 }) {
   const t = useTranslations("nav");
   const ts = useTranslations("sharedComponents.webNav");
+  const tp = useTranslations("sharedComponents.commandPalette");
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const messaging = useMessaging();
+  const palette = useCommandPalette();
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const { isPaid } = useUserRoles();
   const navLinks = NAV_LINKS.filter(
     (link) =>
@@ -325,7 +330,12 @@ function MobileNavSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button variant="ghost" size="icon">
+          <Button
+            ref={menuButtonRef}
+            variant="ghost"
+            size="icon"
+            className="size-11"
+          >
             <Menu className="size-5" />
             <span className="sr-only">{ts("openNavigation")}</span>
           </Button>
@@ -337,42 +347,34 @@ function MobileNavSheet({
           <SheetDescription>{ts("navigationDescription")}</SheetDescription>
         </SheetHeader>
 
-        <nav className="flex flex-col gap-1 p-4">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href.split("?")[0];
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold!",
-                  isActive ? "text-text-primary" : "text-text-secondary",
-                )}
-              >
-                {t(link.labelKey)}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-3 border-t border-border-subtle px-4 py-4">
-          <ThemeToggle />
-          <LangToggle />
-        </div>
-
-        <div className="flex flex-col gap-2 px-4 pb-4">
+        <div className="flex flex-col gap-2 px-4 pt-14">
+          {palette ? (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                palette.openPalette(menuButtonRef.current);
+              }}
+              className="focus-ring flex min-h-11 items-center gap-2.5 rounded-full border border-border-default bg-bg-surface px-4 text-left text-body-md text-text-secondary"
+            >
+              <Search aria-hidden className="size-4 shrink-0" />
+              {tp("triggerLabel")}
+            </button>
+          ) : null}
           {isAuthenticated ? (
             <Button
               variant="primary"
+              size="lg"
               nativeButton={false}
+              onClick={() => setOpen(false)}
               render={<Link href="/dashboard" />}
             >
               {t("dashboard")}
             </Button>
           ) : (
             <Button
-              variant="accent"
+              variant="primary"
+              size="lg"
               nativeButton={false}
               className="w-full"
               onClick={() => setOpen(false)}
@@ -381,6 +383,38 @@ function MobileNavSheet({
               {t("authCta")}
             </Button>
           )}
+        </div>
+
+        <nav className="flex flex-col gap-1 p-4">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href.split("?")[0];
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "focus-ring flex min-h-11 items-center rounded-[var(--fg-radius-sm)] px-3 text-body-md font-semibold!",
+                  isActive ? "text-text-primary" : "text-text-secondary",
+                )}
+              >
+                {t(link.labelKey)}
+              </Link>
+            );
+          })}
+          <Link
+            href="/pricing"
+            onClick={() => setOpen(false)}
+            className="focus-ring flex min-h-11 items-center rounded-[var(--fg-radius-sm)] px-3 text-body-md font-semibold! text-text-secondary"
+          >
+            {t("providers")}
+          </Link>
+        </nav>
+
+        <div className="flex items-center gap-3 border-t border-border-subtle px-4 py-4">
+          <ThemeToggle className="size-11" />
+          <LangToggle className="[&_button]:min-h-11" />
         </div>
 
         {isAuthenticated && session?.user ? (
@@ -407,7 +441,7 @@ function MobileNavSheet({
                 setOpen(false);
                 messaging.toggle();
               }}
-              className="flex items-center gap-2 rounded-[var(--fg-radius-sm)] px-3 py-2 text-left text-body-md font-semibold! text-text-secondary"
+              className="focus-ring flex min-h-11 items-center gap-2 rounded-[var(--fg-radius-sm)] px-3 text-left text-body-md font-semibold! text-text-secondary"
             >
               {t("messages")}
               {messaging.unreadCount > 0 ? (
@@ -420,7 +454,7 @@ function MobileNavSheet({
               <Link
                 href="/profile/me"
                 onClick={() => setOpen(false)}
-                className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
+                className="focus-ring flex min-h-11 items-center rounded-[var(--fg-radius-sm)] px-3 text-body-md font-semibold! text-text-secondary"
               >
                 {t("viewPublicProfile")}
               </Link>
@@ -428,28 +462,28 @@ function MobileNavSheet({
             <Link
               href="/dashboard/notifications"
               onClick={() => setOpen(false)}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
+              className="focus-ring flex min-h-11 items-center rounded-[var(--fg-radius-sm)] px-3 text-body-md font-semibold! text-text-secondary"
             >
               {ts("notifications")}
             </Link>
             <Link
               href="/dashboard/settings"
               onClick={() => setOpen(false)}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
+              className="focus-ring flex min-h-11 items-center rounded-[var(--fg-radius-sm)] px-3 text-body-md font-semibold! text-text-secondary"
             >
               {t("settings")}
             </Link>
             <Link
               href="/dashboard/settings/billing"
               onClick={() => setOpen(false)}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-body-md font-semibold! text-text-secondary"
+              className="focus-ring flex min-h-11 items-center rounded-[var(--fg-radius-sm)] px-3 text-body-md font-semibold! text-text-secondary"
             >
               {t("billing")}
             </Link>
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="rounded-[var(--fg-radius-sm)] px-3 py-2 text-left text-body-md font-semibold! text-danger"
+              className="focus-ring flex min-h-11 items-center rounded-[var(--fg-radius-sm)] px-3 text-left text-body-md font-semibold! text-danger"
             >
               {t("signout")}
             </button>
@@ -460,7 +494,7 @@ function MobileNavSheet({
   );
 }
 
-function ThemeToggle() {
+function ThemeToggle({ className }: { className?: string }) {
   const ts = useTranslations("sharedComponents.webNav");
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
@@ -470,7 +504,10 @@ function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="flex size-9 items-center justify-center rounded-full border border-border-subtle bg-bg-surface transition-colors duration-150"
+      className={cn(
+        "flex size-9 items-center justify-center rounded-full border border-border-subtle bg-bg-surface transition-colors duration-150",
+        className,
+      )}
       aria-label={ts("toggleTheme")}
     >
       {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -478,7 +515,7 @@ function ThemeToggle() {
   );
 }
 
-function LangToggle() {
+function LangToggle({ className }: { className?: string }) {
   const locale = useLocale();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -492,7 +529,12 @@ function LangToggle() {
   };
 
   return (
-    <div className="inline-flex overflow-hidden rounded-full border border-border-subtle bg-bg-surface">
+    <div
+      className={cn(
+        "inline-flex overflow-hidden rounded-full border border-border-subtle bg-bg-surface",
+        className,
+      )}
+    >
       {routing.locales.map((code) => (
         <button
           key={code}

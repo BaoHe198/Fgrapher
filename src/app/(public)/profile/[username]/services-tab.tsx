@@ -102,7 +102,7 @@ export function ServicesTab({
                 </p>
               ) : null}
               <div className="mt-auto flex items-center justify-between gap-3 border-t border-border-subtle pt-4">
-                <span className="font-mono text-body-md font-semibold! tabular-nums text-text-primary">
+                <span className="text-body-md font-semibold! tabular-nums text-text-primary">
                   {service.price === 0
                     ? t("tfpCollab")
                     : t("from", {

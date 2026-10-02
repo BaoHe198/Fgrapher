@@ -51,7 +51,7 @@ export function PostRequestButton({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+            <span className="text-body-sm font-semibold text-text-tertiary">
               {t("login.eyebrow")}
             </span>
             <DialogTitle>{t("login.title")}</DialogTitle>

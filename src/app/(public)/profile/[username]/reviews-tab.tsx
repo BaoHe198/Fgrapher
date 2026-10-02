@@ -103,7 +103,7 @@ export function ReviewsTab({
         <div className="flex flex-1 flex-col gap-1.5">
           {breakdown.map((b) => (
             <div key={b.stars} className="flex items-center gap-3">
-              <span className="w-7 font-mono text-meta text-text-tertiary">
+              <span className="w-7 text-meta text-text-tertiary">
                 {b.stars}★
               </span>
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-bg-sunken">
@@ -112,7 +112,7 @@ export function ReviewsTab({
                   style={{ width: `${b.percent}%` }}
                 />
               </div>
-              <span className="w-8 text-right font-mono text-meta text-text-tertiary tabular-nums">
+              <span className="w-8 text-right text-meta text-text-tertiary tabular-nums">
                 {b.count}
               </span>
             </div>

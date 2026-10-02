@@ -14,7 +14,7 @@ export function CookieSettingsLink({ label }: CookieSettingsLinkProps) {
       onClick={() =>
         window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS_EVENT))
       }
-      className="text-left text-body-sm text-text-secondary hover:text-text-primary"
+      className="text-left text-body-sm text-text-secondary hover:text-text-primary max-md:flex max-md:min-h-11 max-md:items-center"
     >
       {label}
     </button>

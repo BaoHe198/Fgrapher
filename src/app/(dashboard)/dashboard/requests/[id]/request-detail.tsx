@@ -282,7 +282,7 @@ export function RequestDetail({
                 className="object-contain"
               />
             </span>
-            <span className="font-mono text-meta text-text-tertiary">
+            <span className="text-meta text-text-tertiary">
               {frameLabel(i)}
             </span>
           </li>
@@ -303,7 +303,7 @@ export function RequestDetail({
       </Link>
 
       <div className="flex flex-col gap-2">
-        <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
+        <span className="text-body-sm font-semibold text-text-tertiary">
           {request.code} · {statusT(status)}
         </span>
         <h1 className="text-display-md text-balance text-text-primary">

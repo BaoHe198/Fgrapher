@@ -97,7 +97,7 @@ export function TimeSlotGrid({
       {!loading
         ? groups.map((group) => (
             <div key={group.period} className="flex flex-col gap-2">
-              <span className="text-meta tracking-[0.12em] text-text-tertiary uppercase">
+              <span className="text-body-sm font-semibold text-text-secondary">
                 {t(`period.${group.period}`)}
               </span>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -139,7 +139,7 @@ export function TimeSlotGrid({
                     >
                       <span
                         className={cn(
-                          "font-mono text-body-sm font-semibold! tabular-nums",
+                          "text-body-sm font-semibold! tabular-nums",
                           slot.status === "booked" && "line-through",
                         )}
                       >

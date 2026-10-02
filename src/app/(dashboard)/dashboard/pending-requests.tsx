@@ -167,7 +167,7 @@ export function PendingRequests({
               <div className="flex w-40 shrink-0 flex-col gap-1">
                 <span
                   className={cn(
-                    "font-mono text-body-md font-semibold tabular-nums",
+                    "text-body-md font-semibold tabular-nums",
                     urgent ? "text-danger" : "text-text-primary",
                   )}
                 >

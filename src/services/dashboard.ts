@@ -384,7 +384,6 @@ export interface ProviderOverview {
   }[];
   sunPoint: { latitude: number; longitude: number } | null;
   roll: { key: string; done: boolean; href: string }[];
-  rollPhotos: string[];
   /** Requests received per Vietnam day: index 0 = 13 days ago. */
   requestsByDay: number[];
   completedThisMonth: { count: number; value: number };
@@ -431,16 +430,6 @@ export async function getProviderOverview(
               },
               select: { id: true },
               take: 1,
-            },
-            media: {
-              where: {
-                type: "IMAGE",
-                moderationStatus: "APPROVED",
-                deletedAt: null,
-              },
-              orderBy: { order: "asc" },
-              take: 8,
-              select: { url: true },
             },
             resources: {
               select: {
@@ -586,7 +575,6 @@ export async function getProviderOverview(
         href: "/dashboard/calendar",
       },
     ],
-    rollPhotos: profiles.flatMap((p) => p.media.map((m) => m.url)).slice(0, 8),
     requestsByDay,
     completedThisMonth: {
       count: completed.length,

@@ -114,13 +114,13 @@ export function SunArc({ sun, slots, selected, onSelect }: SunArcProps) {
           }}
         />
         <span
-          className="absolute top-[86%] -translate-x-1/2 font-mono text-meta whitespace-nowrap text-text-secondary"
+          className="absolute top-[86%] -translate-x-1/2 text-meta whitespace-nowrap text-text-secondary"
           style={{ left: `${x(sun.sunrise) / 10}%` }}
         >
           ↑ {minutesToTime(sun.sunrise)}
         </span>
         <span
-          className="absolute top-[86%] -translate-x-1/2 font-mono text-meta whitespace-nowrap text-text-secondary"
+          className="absolute top-[86%] -translate-x-1/2 text-meta whitespace-nowrap text-text-secondary"
           style={{ left: `${x(sun.sunset) / 10}%` }}
         >
           ↓ {minutesToTime(sun.sunset)}

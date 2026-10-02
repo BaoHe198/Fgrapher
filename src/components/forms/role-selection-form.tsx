@@ -138,7 +138,7 @@ export function RoleSelectionForm({
                 </Badge>
               )}
               {paid && isSelected && price ? (
-                <span className="font-mono text-body-sm text-text-secondary tabular-nums">
+                <span className="text-body-sm text-text-secondary tabular-nums">
                   {formatCurrency(price, "VND")}
                   {t("perMonth")}
                 </span>
