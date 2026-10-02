@@ -2,7 +2,6 @@ import type { ExperienceLevel, ProfileCategory, Role } from "@prisma/client";
 import { MapIcon, SearchX, XIcon } from "lucide-react";
 import { Fragment } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 
 import { AlbumCard } from "@/components/cards/album-card";
@@ -14,12 +13,12 @@ import {
   BrowsePhotoGrid,
   type BrowsePhoto,
 } from "@/components/browse/browse-photo-grid";
-import { BrowseSearchPill } from "@/components/browse/browse-search-pill";
+import { BrowseSearchBar } from "@/components/browse/browse-search-bar";
+import { RoleRail } from "@/components/browse/role-rail";
 import {
   FilterParamsProvider,
   FilterResultsPane,
 } from "@/components/filters/filter-params-provider";
-import { MobileFilterSheet } from "@/components/browse/mobile-filter-sheet";
 import { SearchInput } from "@/components/browse/search-input";
 import { SortSelect } from "@/components/browse/sort-select";
 import { WaitlistForm } from "@/components/browse/waitlist-form";
@@ -28,15 +27,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Tag } from "@/components/ui/tag";
 import { features } from "@/lib/features";
 import { formatDate } from "@/lib/format";
-import { PROVIDER_ROLES } from "@/lib/constants";
-import { buildMediaVariants } from "@/lib/media/variants";
+import { DISCOVERABLE_ROLES, PROVIDER_ROLES } from "@/lib/constants";
+import { shortPlace } from "@/lib/location";
 import { cn, formatBudgetRange, formatCurrency } from "@/lib/utils";
 import type { ServiceKind } from "@prisma/client";
 
-import { serviceKindsForRole } from "@/lib/constants/service-matrix";
 import { normalizeSort, sanitizeShootWindow } from "@/lib/search/params";
 import { listProvinces, listWards } from "@/services/geography";
-import { getHomeShowcase } from "@/services/home";
 import { searchAlbums, searchProfiles } from "@/services/search";
 import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
 
@@ -101,7 +98,6 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   const params = await searchParams;
   const locale = await getLocale();
-  const tShort = await getTranslations("publicPages.about.roleShort");
   const provinceOptions = await listProvinces();
 
   const roles = params.roles?.split(",").filter(Boolean) as Role[] | undefined;
@@ -208,28 +204,6 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       ? [{ key: "roles", label: t("noResults.removeRoles"), drop: ["roles"] }]
       : []),
   ];
-
-  // QA: selecting Photographer + Portrait (a role AND a category) still
-  // showed "Bộ lọc (1)" — this array drove that badge but never included
-  // `categories` at all (nor experienceLevel/height/travelWilling, the
-  // Model-specific filters), so only role/city/ward/budget/rating ever
-  // counted. Each entry counts as at most 1 regardless of how many values
-  // are selected within it (roles?.length was already doing this for
-  // multi-select roles) — the badge means "N filter types active", not a
-  // literal sum of every checked box.
-  const activeFilterCount = [
-    roles?.length,
-    categories?.length,
-    params.city,
-    params.ward,
-    params.minPrice,
-    params.maxPrice,
-    params.minRating,
-    experienceLevel?.length,
-    params.heightMin,
-    params.heightMax,
-    params.travelWilling,
-  ].filter(Boolean).length;
 
   const albumResult = await searchAlbums({
     q: params.q,
@@ -360,40 +334,40 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     id: profile.userId,
     name: profile.displayName ?? profile.user.name ?? t("unnamed"),
     username: profile.user.username ?? "",
-    // Role first, then anything extra they can be hired for - a studio
-    // that also shoots reads "Studio · Chụp ảnh" rather than just "Studio".
-    roles: [
-      ...profile.roles.map((role) => roleT(role)),
-      ...profile.serviceKinds
-        .filter(
-          (kind) =>
-            !profile.roles.some(
-              (role) => serviceKindsForRole(role)[0] === kind,
-            ),
-        )
-        .map((kind) => serviceKindT(kind)),
-    ].join(", "),
-    place: profile.location,
+    // The first role only, so the line never wraps.
+    role: profile.roles[0] ? roleT(profile.roles[0]) : "",
+    place: profile.location ? shortPlace(profile.location) : "",
     rating:
       profile.reviewCount > 0
         ? profile.avgRating.toFixed(1).replace(".", ",")
         : null,
     reviews: profile.reviewCount,
-    price: profile.priceMin
-      ? t.rich("v2.priceFrom", {
-          price: formatCurrency(profile.priceMin),
-          strong: (chunks) => (
-            <strong className="font-semibold tabular-nums">{chunks}</strong>
-          ),
-        })
-      : t("contactForPricing"),
-    photos: profile.media
-      .filter((media) => media.type === "IMAGE")
-      .map((media) => media.url),
+    priceFrom: profile.priceMin ? formatCurrency(profile.priceMin) : null,
+    cover: profile.media.find((media) => media.type === "IMAGE")?.url ?? null,
     availability: shootDateLabel
-      ? t("v2.availableOn", { date: shootDateLabel })
+      ? t("v3.availableOn", { date: shootDateLabel.slice(0, 5) })
       : undefined,
     ...extra,
+  });
+  const cardLabels = (artist: BrowseArtist) => ({
+    from: t("v3.from"),
+    askPrice: t("v3.askPrice"),
+    isNew: t("v3.isNew"),
+    noPhoto: t("v3.noPhoto"),
+    aria: [
+      artist.name,
+      artist.role,
+      artist.place,
+      artist.priceFrom
+        ? t("v3.ariaPrice", { price: artist.priceFrom })
+        : t("v3.askPrice"),
+      artist.rating
+        ? t("v3.ariaRating", { rating: artist.rating, count: artist.reviews })
+        : t("v3.isNew"),
+      artist.availability,
+    ]
+      .filter(Boolean)
+      .join(", "),
   });
 
   const photos: BrowsePhoto[] = result.data.flatMap((profile) =>
@@ -425,7 +399,9 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         ? 1
         : result.totalPages;
 
-  // The contextual title: "Nhiếp ảnh gia cưới tại Thành phố Hồ Chí Minh".
+  // The title is the search in words: "Nhiếp ảnh gia tại Thành phố Hồ Chí
+  // Minh"; on a phone it shrinks to the count, "8 nghệ sĩ tại TP. Hồ Chí
+  // Minh", so the first card starts high on the screen.
   const subjectRole =
     roles && roles.length === 1 ? roleT(roles[0]) : t("v2.subjectDefault");
   const subjectStyle =
@@ -436,47 +412,23 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     ? t("v2.subjectWithStyle", { role: subjectRole, style: subjectStyle })
     : subjectRole;
   const title = place ? t("v2.titleAt", { subject, place }) : subject;
+  const mobileTitle = t("v3.mobileTitle", {
+    count: tab === "albums" ? albumResult.total : result.total,
+    unit: tab === "albums" ? t("v3.unitAlbums") : t("v3.unitArtists"),
+    place: place ? shortPlace(place) : t("v3.everywhere"),
+  });
 
-  // The rail: everyone, the six roles, then six styles - each with a real
-  // approved photo when there is one, and its frame number.
-  const showcase = await getHomeShowcase();
-  const singleRole = roles?.length === 1 ? roles[0] : null;
-  const singleCategory = categories?.length === 1 ? categories[0] : null;
-  const rail = [
-    {
-      key: "all",
-      label: t("v2.railAll"),
-      photo: showcase.roles.find((r) => r.photoUrl)?.photoUrl ?? null,
-      active: !singleRole && !singleCategory,
-      href: queryWithout(params, ["roles", "categories", "page"]),
-    },
-    ...showcase.roles.map((tile) => ({
-      key: tile.role,
-      // Short labels ("Trang điểm", not "Chuyên viên trang điểm") keep
-      // the rail to one line per tile.
-      label: tShort(tile.role as "STUDIO"),
-      photo: tile.photoUrl,
-      active: singleRole === tile.role,
-      href:
-        singleRole === tile.role
-          ? queryWithout(params, ["roles", "page"])
-          : queryWith(queryWithoutParams(params, ["page", "categories"]), {
-              roles: tile.role,
-            }),
-    })),
-    ...showcase.styles.map((tile) => ({
-      key: tile.category,
-      label: categoryT(tile.category),
-      photo: tile.photoUrls[0] ?? null,
-      active: singleCategory === tile.category,
-      href:
-        singleCategory === tile.category
-          ? queryWithout(params, ["categories", "page"])
-          : queryWith(queryWithoutParams(params, ["page"]), {
-              categories: tile.category,
-            }),
-    })),
-  ];
+  // Only the filters not already on screen: role and area have the rail
+  // and the search row, so they don't count toward the Bộ lọc badge.
+  const advancedCount = [
+    categories?.length,
+    serviceKinds?.length,
+    params.minPrice || params.maxPrice,
+    params.minRating,
+    experienceLevel?.length,
+    params.heightMin || params.heightMax,
+    params.travelWilling,
+  ].filter(Boolean).length;
 
   const countLine =
     tab === "albums"
@@ -490,84 +442,38 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   return (
     <FilterParamsProvider>
-      <div className="border-b border-border-subtle bg-bg-page">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-8 pt-4 pb-3 max-md:px-4">
-          <BrowseSearchPill
+      {/* The search block stays in reach while the results scroll. */}
+      <div className="sticky top-[72px] z-10 border-b border-border-subtle bg-bg-page">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-8 pt-3 pb-3 max-md:px-4">
+          <BrowseSearchBar
             provinces={provinceOptions.map((p) => ({
               code: p.code,
               name: p.name,
             }))}
+            roleCounts={roleCounts}
+            categoryCounts={categoryCounts}
+            advancedCount={advancedCount}
+            resultCount={tab === "albums" ? albumResult.total : result.total}
+            marketplaceEnabled={features.marketplaceEnabled}
           />
-          <div className="flex items-center gap-3">
-            <nav
-              aria-label={t("v2.railLabel")}
-              className="-mb-3 flex min-w-0 flex-1 snap-x gap-1 overflow-x-auto pb-3 [scrollbar-width:thin]"
-            >
-              {rail.map((item, index) => (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  aria-current={item.active ? "true" : undefined}
-                  className={cn(
-                    "focus-ring group flex shrink-0 snap-start flex-col items-center gap-1.5 rounded-[var(--fg-radius-sm)] px-2 pt-1 pb-1.5",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "relative block size-12 overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken",
-                      item.active
-                        ? "ring-2 ring-gold-400 ring-offset-2 ring-offset-bg-page"
-                        : "opacity-85 group-hover:opacity-100",
-                    )}
-                  >
-                    {item.photo ? (
-                      <Image
-                        src={buildMediaVariants(item.photo).thumbnail}
-                        alt=""
-                        fill
-                        unoptimized
-                        sizes="48px"
-                        className="object-cover"
-                      />
-                    ) : null}
-                  </span>
-                  <span
-                    className={cn(
-                      "flex items-baseline gap-1 border-b-2 pb-0.5 text-body-sm whitespace-nowrap",
-                      item.active
-                        ? "border-text-primary font-semibold text-text-primary"
-                        : "border-transparent text-text-secondary group-hover:text-text-primary",
-                    )}
-                  >
-                    {item.label}
-                    <span className="font-mono text-meta text-text-tertiary">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </span>
-                </Link>
-              ))}
-            </nav>
-            <MobileFilterSheet
-              side="right"
-              roleCounts={roleCounts}
-              categoryCounts={categoryCounts}
-              activeCount={activeFilterCount}
-              resultCount={tab === "albums" ? albumResult.total : result.total}
-              marketplaceEnabled={features.marketplaceEnabled}
-            />
-          </div>
+          <RoleRail roles={DISCOVERABLE_ROLES} />
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1440px] px-8 pt-[clamp(28px,4vw,48px)] pb-[72px] max-md:px-4">
-        <div className="flex flex-col gap-3">
-          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-            {t("v2.eyebrow", { tab: t(`v2.tabs.${tab}`) })}
-          </span>
-          <h1 className="max-w-5xl font-display text-[clamp(2.25rem,5.2vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.03em] text-balance text-text-primary">
+      <div className="mx-auto max-w-[1440px] px-8 pt-6 pb-[72px] max-md:px-4 max-md:pt-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-display text-display-sm text-balance text-text-primary max-md:hidden lg:text-display-md">
             {title}
           </h1>
-          <p className="text-body-md text-text-secondary">{countLine}</p>
+          <h1 className="text-heading-md text-text-primary md:hidden">
+            {mobileTitle}
+          </h1>
+          <p
+            role="status"
+            className="text-body-sm text-text-secondary max-md:hidden"
+          >
+            {countLine}
+          </p>
         </div>
 
         {activeChips.length > 0 ? (
@@ -596,10 +502,12 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
           </div>
         ) : null}
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        {/* One row on a phone: the views and a map button. Sort and the
+            keyword search live in the filter sheet and ⌘K there. */}
+        <div className="mt-4 flex items-center justify-between gap-3 md:mt-6">
           <nav
             aria-label={t("tabsLabel")}
-            className="flex rounded-full border border-border-default bg-bg-surface p-1"
+            className="flex min-w-0 rounded-full border border-border-default bg-bg-surface p-1"
           >
             {(["artists", "photos", "albums"] as const).map((key) => (
               <Link
@@ -607,7 +515,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 href={tabHref(key)}
                 aria-current={tab === key ? "page" : undefined}
                 className={cn(
-                  "focus-ring rounded-full px-4 py-2 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
+                  "focus-ring flex min-h-11 items-center rounded-full px-3.5 text-body-sm whitespace-nowrap transition-colors duration-[var(--fg-dur-150)] md:px-4",
                   tab === key
                     ? "bg-brand-primary font-semibold! text-text-on-brand"
                     : "text-text-secondary hover:text-text-primary",
@@ -617,26 +525,31 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               </Link>
             ))}
           </nav>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2">
             <SearchInput
-              className="w-full sm:w-64"
+              className="w-64 max-lg:hidden"
               marketplaceEnabled={features.marketplaceEnabled}
             />
-            {tab === "artists" ? <SortSelect className="w-52" /> : null}
+            {tab === "artists" ? (
+              <div className="w-52 max-md:hidden">
+                <SortSelect />
+              </div>
+            ) : null}
             <Link
               href={fmapHref}
+              aria-label={t("v2.showMap")}
               className={cn(
                 buttonVariants({ variant: "outline", size: "md" }),
-                "shrink-0",
+                "min-h-11 shrink-0 max-md:size-11 max-md:px-0",
               )}
             >
-              <MapIcon className="size-4" />
-              {t("v2.showMap")}
+              <MapIcon aria-hidden className="size-4" />
+              <span className="max-md:hidden">{t("v2.showMap")}</span>
             </Link>
           </div>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-5 md:mt-8">
           <FilterResultsPane label={t("updatingResults")}>
             {tab === "albums" ? (
               albumResult.data.length === 0 ? (
@@ -747,7 +660,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 <BrowsePhotoGrid photos={photos} />
               )
             ) : (
-              <div className="grid grid-cols-2 gap-x-5 gap-y-9 max-sm:gap-x-3 md:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-5 min-[430px]:grid-cols-2 min-[430px]:gap-y-8 md:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] md:gap-x-5">
                 {result.data.map((profile, index) => (
                   <Fragment key={profile.userId}>
                     {/* services/search.ts always ranks profiles with no
@@ -764,11 +677,18 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                         </p>
                       </div>
                     ) : null}
-                    <BrowseArtistCard
-                      // The first row is above the fold and holds the LCP.
-                      priority={index < 4}
-                      artist={toArtist(profile)}
-                    />
+                    {(() => {
+                      const artist = toArtist(profile);
+                      return (
+                        <BrowseArtistCard
+                          // The first two images are eager (LCP), the rest
+                          // lazy.
+                          eager={index < 2}
+                          artist={artist}
+                          labels={cardLabels(artist)}
+                        />
+                      );
+                    })()}
                   </Fragment>
                 ))}
               </div>
@@ -809,13 +729,16 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 <h2 className="text-heading-md text-text-primary">
                   {t("nationwideSection.heading")}
                 </h2>
-                <div className="grid grid-cols-2 gap-x-5 gap-y-9 max-sm:gap-x-3 md:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-x-4 gap-y-5 min-[430px]:grid-cols-2 min-[430px]:gap-y-8 md:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] md:gap-x-5">
                   {result.nationwide.map((profile) => (
                     <BrowseArtistCard
                       key={profile.userId}
                       artist={toArtist(profile, {
                         badge: t("nationwideBadge"),
                       })}
+                      labels={cardLabels(
+                        toArtist(profile, { badge: t("nationwideBadge") }),
+                      )}
                     />
                   ))}
                 </div>

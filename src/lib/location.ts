@@ -44,3 +44,23 @@ export function formatFullAddress(
   );
   return [street, ...extra].filter(Boolean).join(", ");
 }
+
+/**
+ * A place short enough for one line on a card or in a search summary:
+ * "Phường Thủ Đức, Thành phố Hồ Chí Minh" → "Thủ Đức, TP. Hồ Chí Minh".
+ * Drops the ward-level prefix and shortens the province's; works on any
+ * name from the registry, no list of places involved.
+ */
+export function shortPlace(place: string) {
+  return place
+    .split(",")
+    .map((part) =>
+      part
+        .trim()
+        .replace(/^(Phường|Xã|Thị trấn|Đặc khu)\s+/u, "")
+        .replace(/^Thành phố\s+/u, "TP. ")
+        .replace(/^Tỉnh\s+/u, ""),
+    )
+    .filter(Boolean)
+    .join(", ");
+}

@@ -3607,6 +3607,39 @@
         "countAlbums": "{count} album",
         "showMap": "Hiện bản đồ",
         "noPhotos": "Các nghệ sĩ phù hợp chưa có ảnh công khai"
+      },
+      "v3": {
+        "allRoles": "Tất cả",
+        "roleRail": "Vai trò",
+        "moreRoles": "Xem thêm vai trò",
+        "anywhere": "Mọi tỉnh/thành",
+        "anyDate": "Ngày bất kỳ",
+        "filters": "Bộ lọc",
+        "filtersWithCount": "Bộ lọc, {count} đang bật",
+        "filtersDescription": "Khu vực, ngày giờ, phong cách, ngân sách, đánh giá và dịch vụ kèm.",
+        "clearAll": "Xoá tất cả",
+        "seeResults": "Xem {count} kết quả",
+        "noResults": "Không có kết quả",
+        "availableOn": "Còn lịch {date}",
+        "from": "Từ",
+        "askPrice": "Hỏi giá trực tiếp",
+        "isNew": "Mới",
+        "noPhoto": "Chưa có ảnh",
+        "ariaPrice": "từ {price}",
+        "ariaRating": "{rating} sao, {count} đánh giá",
+        "mobileTitle": "{count} {unit} tại {place}",
+        "unitArtists": "nghệ sĩ",
+        "unitAlbums": "album",
+        "everywhere": "mọi tỉnh/thành",
+        "railRoles": {
+          "PHOTOGRAPHER": "Nhiếp ảnh gia",
+          "VIDEOGRAPHER": "Quay phim",
+          "MAKEUP_ARTIST": "Trang điểm",
+          "MODEL": "Người mẫu",
+          "STUDIO": "Studio",
+          "COSTUME_SHOP": "Thuê trang phục",
+          "CAMERA_SHOP": "Cửa hàng máy ảnh"
+        }
       }
     },
     "profile": {

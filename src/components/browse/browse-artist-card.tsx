@@ -1,146 +1,143 @@
-import { Star } from "lucide-react";
+import { ImageIcon, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { frameLabel } from "@/lib/media/frame-label";
 import { buildMediaVariants } from "@/lib/media/variants";
 
 export interface BrowseArtist {
   id: string;
   name: string;
   username: string;
-  /** "Nhiếp ảnh gia, Quay phim". */
-  roles: string;
+  /** The first role only ("Nhiếp ảnh gia"). */
+  role: string;
+  /** Short place ("Thủ Đức, TP. Hồ Chí Minh"), or "". */
   place: string;
-  /** null until the first review: no stars, not "0,0". */
+  /** "4,9", or null before the first review. */
   rating: string | null;
   reviews: number;
-  /** "Từ 2.500.000₫" or "Liên hệ báo giá". */
-  price: React.ReactNode;
-  /** Approved images, the cover first. */
-  photos: string[];
-  /** "Còn lịch 12/10/2026" when the search has a shoot date. */
+  /** "2.500.000₫", or null when the artist quotes on request. */
+  priceFrom: string | null;
+  cover: string | null;
+  /** "Còn lịch 10/10" when the search has a shoot date. */
   availability?: string;
   /** "Nhận lịch toàn quốc" in the nationwide backfill. */
   badge?: string;
 }
 
-// Tìm kiếm F v2's card: a 4:5 cover with nothing on it but an availability
-// tag, and on hover or focus a strip of the next three frames over a
-// darkroom scrim - a glance at the portfolio without leaving the grid.
-// The cover is the one image a card may crop (kit §05); the profile and
-// its albums never do.
+interface Labels {
+  from: string;
+  askPrice: string;
+  isNew: string;
+  noPhoto: string;
+  /** The whole card's accessible name. */
+  aria: string;
+}
+
+// Tìm kiếm F's artist card (Core MVP pass, 02/10/2026). The whole card is
+// one link - one tab stop, the image's alt left empty because the name is
+// in the link's label. Under 430px it is a row (a 112×140 photo beside the
+// text); from 430px a column whose name always keeps two lines so prices
+// line up. The rating never shares a line with the name: on the photo in
+// a column, on the last line in a row. No film motifs on cards.
 export function BrowseArtistCard({
   artist,
-  priority = false,
+  labels,
+  eager = false,
 }: {
   artist: BrowseArtist;
-  priority?: boolean;
+  labels: Labels;
+  eager?: boolean;
 }) {
-  const [cover, ...rest] = artist.photos;
-  const strip = rest.slice(0, 3);
-  const headingId = `artist-${artist.id}`;
+  const rating = artist.rating ? (
+    <span className="inline-flex items-center gap-1 font-semibold text-text-primary">
+      <Star aria-hidden className="size-3.5 fill-current" />
+      {artist.rating}
+      <span className="font-normal text-text-secondary">
+        ({artist.reviews})
+      </span>
+    </span>
+  ) : (
+    <span className="rounded-[4px] bg-bg-sunken px-1.5 py-0.5 font-semibold text-text-primary">
+      {labels.isNew}
+    </span>
+  );
+  const price = artist.priceFrom ? (
+    <span className="text-[15px] leading-[1.3]">
+      <span className="text-text-secondary">{labels.from} </span>
+      <strong className="font-semibold tabular-nums">{artist.priceFrom}</strong>
+    </span>
+  ) : (
+    <span className="text-[15px] leading-[1.3] text-text-secondary">
+      {labels.askPrice}
+    </span>
+  );
+  const subline = [artist.role, artist.place].filter(Boolean).join(" · ");
+
   return (
-    <article
-      aria-labelledby={headingId}
-      className="group/card flex min-w-0 flex-col gap-3"
+    <Link
+      href={`/profile/${artist.username}`}
+      aria-label={labels.aria}
+      className="focus-ring group grid min-w-0 grid-cols-[112px_minmax(0,1fr)] gap-3.5 rounded-[var(--fg-radius-md)] text-text-primary min-[430px]:flex min-[430px]:flex-col min-[430px]:gap-2.5"
     >
-      <Link
-        href={`/profile/${artist.username}`}
-        aria-labelledby={headingId}
-        className="focus-ring relative block aspect-[4/5] overflow-hidden rounded-[var(--fg-radius-md)] bg-bg-sunken"
-      >
-        {cover ? (
+      <span className="relative block aspect-[4/5] overflow-hidden rounded-[var(--fg-radius-md)] bg-bg-sunken">
+        {artist.cover ? (
           <Image
-            src={buildMediaVariants(cover).medium}
+            src={buildMediaVariants(artist.cover).medium}
             alt=""
             fill
             unoptimized
-            priority={priority}
-            sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
-            className="object-cover transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/card:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover/card:scale-100"
+            priority={eager}
+            loading={eager ? "eager" : "lazy"}
+            sizes="(max-width: 429px) 112px, (max-width: 767px) 50vw, (max-width: 1439px) 33vw, 320px"
+            className="object-cover transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         ) : (
-          // No approved photo yet: the initial on the sunken ground, never
-          // a stock picture.
-          <span
-            aria-hidden
-            className="absolute inset-0 grid place-items-center font-display text-[4rem] font-semibold text-text-tertiary"
-          >
-            {artist.name[0]?.toUpperCase()}
+          <span className="absolute inset-0 grid place-content-center justify-items-center gap-1.5 p-2 text-center text-meta text-text-secondary">
+            <ImageIcon aria-hidden className="size-6" />
+            {labels.noPhoto}
           </span>
         )}
+        {/* On the photo in the column layout only. */}
+        <span className="absolute top-2 right-2 hidden rounded-full bg-bg-surface px-2 py-1 text-body-sm shadow-[var(--shadow-sm)] min-[430px]:block">
+          {rating}
+        </span>
         {artist.availability || artist.badge ? (
-          <span className="absolute top-2.5 left-2.5 flex flex-col items-start gap-1.5">
+          <span className="absolute top-2 left-2 hidden flex-col items-start gap-1 min-[430px]:flex">
             {artist.availability ? (
-              <span className="rounded-[4px] bg-bg-surface px-2 py-1.5 font-mono text-meta font-bold tracking-[0.12em] text-text-primary uppercase shadow-[var(--shadow-sm)]">
+              <span className="rounded-full bg-success-bg px-2 py-1 text-body-sm font-semibold text-success">
                 {artist.availability}
               </span>
             ) : null}
             {artist.badge ? (
-              <span className="rounded-[4px] bg-bg-surface px-2 py-1.5 text-meta font-semibold text-text-primary shadow-[var(--shadow-sm)]">
+              <span className="rounded-full bg-bg-surface px-2 py-1 text-body-sm font-semibold text-text-primary shadow-[var(--shadow-sm)]">
                 {artist.badge}
               </span>
             ) : null}
           </span>
         ) : null}
-        {strip.length > 0 ? (
-          <span
-            aria-hidden
-            className="absolute inset-x-0 bottom-0 grid translate-y-2 grid-cols-3 gap-0.5 bg-linear-to-t from-[var(--dr-scrim)] to-transparent px-2 pt-7 pb-2 opacity-0 transition-[opacity,translate] duration-[var(--fg-dur-200)] ease-fg-out group-focus-within/card:translate-y-0 group-focus-within/card:opacity-100 group-hover/card:translate-y-0 group-hover/card:opacity-100 max-md:hidden motion-reduce:transition-none"
-          >
-            {strip.map((src, i) => (
-              <span key={src} className="flex flex-col gap-1">
-                <span className="relative block aspect-square bg-dr-bg">
-                  <Image
-                    src={buildMediaVariants(src).thumbnail}
-                    alt=""
-                    fill
-                    unoptimized
-                    sizes="96px"
-                    className="object-contain p-0.5"
-                  />
-                </span>
-                <span className="font-mono text-meta text-dr-text">
-                  {frameLabel(i * 6)}
-                </span>
-              </span>
-            ))}
+      </span>
+      <span className="flex min-w-0 flex-col gap-1 py-0.5 min-[430px]:py-0">
+        <strong className="line-clamp-2 text-[16px] leading-[1.3] font-semibold break-words min-[430px]:min-h-[2.6em]">
+          {artist.name}
+        </strong>
+        {subline ? (
+          <span className="truncate text-body-sm text-text-secondary">
+            {subline}
           </span>
         ) : null}
-      </Link>
-      <div className="flex min-w-0 flex-col gap-1">
-        <div className="flex items-baseline justify-between gap-2.5">
-          <h3
-            id={headingId}
-            className="line-clamp-2 min-w-0 text-[17px] leading-[1.3] font-semibold text-text-primary"
-          >
-            <Link
-              href={`/profile/${artist.username}`}
-              className="focus-visible:underline"
-              tabIndex={-1}
-            >
-              {artist.name}
-            </Link>
-          </h3>
-          {artist.rating ? (
-            <span className="inline-flex shrink-0 items-center gap-1 text-body-sm font-semibold text-text-primary">
-              <Star aria-hidden className="size-3.5 fill-current" />
-              {artist.rating}
-              <span className="font-normal text-text-secondary">
-                ({artist.reviews})
+        <span className="mt-auto flex flex-col gap-1 min-[430px]:mt-0.5">
+          {price}
+          {/* The row layout keeps rating and availability on the last line. */}
+          <span className="flex min-w-0 items-center gap-2.5 text-[13px] leading-[1.3] text-text-secondary min-[430px]:hidden">
+            {rating}
+            {artist.availability ? (
+              <span className="truncate text-success">
+                {artist.availability}
               </span>
-            </span>
-          ) : null}
-        </div>
-        <span className="truncate text-body-sm text-text-secondary">
-          {artist.roles}
-          {artist.place ? ` · ${artist.place}` : ""}
+            ) : null}
+          </span>
         </span>
-        <span className="mt-0.5 text-[15px] text-text-primary">
-          {artist.price}
-        </span>
-      </div>
-    </article>
+      </span>
+    </Link>
   );
 }

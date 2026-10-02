@@ -3607,6 +3607,39 @@
         "countAlbums": "{count, plural, one {# album} other {# albums}}",
         "showMap": "Show map",
         "noPhotos": "The matching artists have no public photos yet"
+      },
+      "v3": {
+        "allRoles": "All",
+        "roleRail": "Roles",
+        "moreRoles": "More roles",
+        "anywhere": "Any province",
+        "anyDate": "Any date",
+        "filters": "Filters",
+        "filtersWithCount": "Filters, {count} on",
+        "filtersDescription": "Area, date and time, style, budget, rating and add-on services.",
+        "clearAll": "Clear all",
+        "seeResults": "Show {count} results",
+        "noResults": "No results",
+        "availableOn": "Free {date}",
+        "from": "From",
+        "askPrice": "Ask for a price",
+        "isNew": "New",
+        "noPhoto": "No photo yet",
+        "ariaPrice": "from {price}",
+        "ariaRating": "{rating} stars, {count} reviews",
+        "mobileTitle": "{count} {unit} in {place}",
+        "unitArtists": "artists",
+        "unitAlbums": "albums",
+        "everywhere": "any province",
+        "railRoles": {
+          "PHOTOGRAPHER": "Photographers",
+          "VIDEOGRAPHER": "Videographers",
+          "MAKEUP_ARTIST": "Make-up",
+          "MODEL": "Models",
+          "STUDIO": "Studios",
+          "COSTUME_SHOP": "Costume rental",
+          "CAMERA_SHOP": "Camera shops"
+        }
       }
     },
     "profile": {

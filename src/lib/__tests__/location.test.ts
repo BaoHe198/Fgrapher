@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   formatAdministrativeLocation,
+  shortPlace,
   formatFullAddress,
 } from "@/lib/location";
 
@@ -70,5 +71,17 @@ describe("formatFullAddress", () => {
       formatFullAddress(null, ward, province),
       "Phường Tân Bình, Thành phố Hồ Chí Minh",
     );
+  });
+});
+
+describe("shortPlace", () => {
+  it("drops the ward prefix and shortens the province", () => {
+    assert.equal(
+      shortPlace("Phường Thủ Đức, Thành phố Hồ Chí Minh"),
+      "Thủ Đức, TP. Hồ Chí Minh",
+    );
+    assert.equal(shortPlace("Xã Tà Xùa, Tỉnh Sơn La"), "Tà Xùa, Sơn La");
+    assert.equal(shortPlace("Thành phố Cần Thơ"), "TP. Cần Thơ");
+    assert.equal(shortPlace(""), "");
   });
 });
