@@ -1,6 +1,6 @@
 "use client";
 
-import { LocateFixed, X } from "lucide-react";
+import { LocateFixed, Minus, Plus, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
@@ -15,12 +15,15 @@ import {
 import {
   FmapFilterBar,
   type FmapFilterValue,
+  fmapRolesParam,
 } from "@/components/fmap/fmap-filter-bar";
 import type { FmapBounds, MarkerLabels } from "@/components/fmap/fmap-map";
 import { FmapProviderPreviewCard } from "@/components/fmap/fmap-provider-preview";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { FgImage } from "@/components/ui/fg-image";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatDate, formatVND, vietnamDateKey } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { FmapMarker, FmapProviderPreview } from "@/services/fmap";
 
 const FmapMap = dynamic(
@@ -104,12 +107,11 @@ function boundsOf(markers: FmapMarker[]): FmapBounds {
   };
 }
 
-export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
-  const t = useTranslations("fmap");
-  // The page heading is the same name the site nav uses — "Bản đồ F" in
-  // Vietnamese — rather than a hardcoded "Fmap" the nav never called it.
-  const navT = useTranslations("nav");
-  const [filters, setFilters] = useState<FmapFilterValue>({
+function defaultFilters(
+  role: FmapFilterValue["role"],
+  category: FmapFilterValue["category"],
+): FmapFilterValue {
+  return {
     provinceId: "",
     wardId: "",
     // Two days out: past the 24-hour minimum booking notice, so the first
@@ -117,9 +119,100 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
     date: vietnamDateKey(2),
     start: "09:00",
     end: "11:00",
-    role: initialRole,
-    category: initialCategory,
-  });
+    role,
+    category,
+  };
+}
+
+/** Height of the collapsed results sheet on phones, before the safe area. */
+const SHEET_COLLAPSED_PX = 100;
+
+function ResultRow({
+  marker,
+  selected,
+  onSelect,
+  roleLabel,
+  priceLabel,
+}: {
+  marker: FmapMarker;
+  selected: boolean;
+  onSelect: () => void;
+  roleLabel: string;
+  priceLabel: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={cn(
+        "focus-ring grid w-full grid-cols-[88px_minmax(0,1fr)] items-center gap-3 rounded-[var(--fg-radius-md)] border p-2 text-left transition-colors duration-[var(--fg-dur-150)]",
+        selected
+          ? "border-brand-primary bg-bg-surface"
+          : "border-border-subtle bg-bg-surface hover:border-border-strong",
+      )}
+    >
+      {marker.thumbnailUrl ? (
+        <FgImage
+          src={marker.thumbnailUrl}
+          alt=""
+          ratio="1/1"
+          rounded="sm"
+          sizes="88px"
+        />
+      ) : (
+        <span
+          aria-hidden
+          className="aspect-square rounded-[var(--fg-radius-sm)] bg-bg-sunken"
+        />
+      )}
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <strong className="truncate text-body-md font-semibold text-text-primary">
+          {marker.displayName}
+        </strong>
+        <span className="truncate text-body-sm text-text-secondary">
+          {roleLabel}
+        </span>
+        <span className="text-body-sm font-semibold text-text-primary tabular-nums">
+          {priceLabel}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function MapControl({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className="focus-ring grid size-11 place-items-center rounded-full border border-border-default bg-bg-surface text-text-primary shadow-[var(--shadow-sm)] hover:bg-bg-sunken"
+    >
+      {children}
+    </button>
+  );
+}
+
+export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
+  const t = useTranslations("fmap");
+  const v2 = useTranslations("fmap.v2");
+  const railT = useTranslations("publicPages.browse.v3.railRoles");
+  // The page heading is the same name the site nav uses — "Bản đồ F" in
+  // Vietnamese — rather than a hardcoded "Fmap" the nav never called it.
+  const navT = useTranslations("nav");
+  const isMobile = useIsMobile();
+  const [filters, setFilters] = useState<FmapFilterValue>(() =>
+    defaultFilters(initialRole, initialCategory),
+  );
   const [bounds, setBounds] = useState<FmapBounds | null>(null);
   const [markers, setMarkers] = useState<FmapMarker[]>([]);
   const [loading, setLoading] = useState(false);
@@ -153,12 +246,18 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   // editing a field without searching can't send a stale availability
   // claim into the booking flow.
   const [searchedFor, setSearchedFor] = useState<FmapFilterValue | null>(null);
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
-  // "Tìm khi di chuyển bản đồ" (redesign 09/2026): on by default, the map
-  // re-searches a moment after the customer stops panning. Off, it falls
-  // back to the "search this area" button.
-  const [searchOnMove, setSearchOnMove] = useState(true);
-  const moveSearchTimerRef = useRef<number | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  // Phones (Core MVP pass): the results live in a sheet over the map,
+  // collapsed to its count, or expanded to the list. A chosen provider
+  // shows in the collapsed sheet. Panning never re-searches by itself -
+  // "Tìm trong khu vực này" appears instead.
+  const [sheetExpanded, setSheetExpanded] = useState(false);
+  const [sheetHeight, setSheetHeight] = useState(SHEET_COLLAPSED_PX);
+  const sheetRef = useRef<HTMLElement>(null);
+  const [zoomRequest, setZoomRequest] = useState<{
+    delta: number;
+    nonce: number;
+  } | null>(null);
 
   const filtersRef = useRef(filters);
   const boundsRef = useRef(bounds);
@@ -201,7 +300,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
         date: current.date,
         start: current.start,
         end: current.end,
-        roles: current.role,
+        roles: fmapRolesParam(current.role),
       });
       if (current.category) params.set("categories", current.category);
       if (current.wardId) params.set("wardId", current.wardId);
@@ -235,7 +334,6 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
         setHasSearched(true);
         setSearchedFor(current);
         setMapMoved(false);
-        setFiltersExpanded(false);
       } catch (error) {
         if ((error as Error).name !== "AbortError")
           setSearchError(t("errors.search"));
@@ -280,7 +378,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
     const controller = new AbortController();
     const params = new URLSearchParams({
       provinceId,
-      roles: filtersRef.current.role,
+      roles: fmapRolesParam(filtersRef.current.role),
     });
     if (wardId) params.set("wardId", wardId);
     startTransition(() => setNotice(null));
@@ -313,8 +411,6 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
     () => () => {
       requestRef.current?.abort();
       if (moveFallbackRef.current) window.clearTimeout(moveFallbackRef.current);
-      if (moveSearchTimerRef.current)
-        window.clearTimeout(moveSearchTimerRef.current);
     },
     [],
   );
@@ -325,6 +421,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
       ignoreNextMoveRef.current = false;
     }, MOVE_FALLBACK_MS);
     setClusterIds(null);
+    setSheetExpanded(false);
     setSelectedProfileId(profileId);
     setPreview(null);
     setPreviewError(false);
@@ -373,7 +470,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
       date: searchedFor.date,
       time: searchedFor.start,
       end: searchedFor.end,
-      role: searchedFor.role,
+      role: searchedFor.role || preview.role,
       source: "fmap",
     });
     if (searchedFor.category) params.set("category", searchedFor.category);
@@ -396,12 +493,32 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
     [clusterIds, markers],
   );
 
-  const openFilters = useCallback(() => {
-    setFiltersExpanded(true);
-    document
-      .getElementById("fmap-filters")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const openFilters = useCallback(() => setFiltersOpen(true), []);
+
+  const resetFilters = useCallback(
+    () =>
+      setFilters((previous) => ({
+        ...defaultFilters(previous.role, ""),
+      })),
+    [],
+  );
+
+  const closePreview = useCallback(() => {
+    setSelectedProfileId(null);
+    setPreview(null);
+    setPreviewError(false);
   }, []);
+
+  // The controls and the map's centring follow the sheet's real height.
+  useEffect(() => {
+    const el = sheetRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() =>
+      setSheetHeight(Math.round(el.getBoundingClientRect().height)),
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isMobile]);
 
   // Doubles the visible span around the same centre and re-searches there.
   // Capped well under the API's 6° limit because fitBounds adds padding, so
@@ -426,20 +543,116 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
     });
   }, [bounds, searchAfterMove]);
 
+  const priceOf = (marker: FmapMarker) =>
+    marker.startingPrice != null
+      ? t("marker.from", { price: formatVND(marker.startingPrice) })
+      : t("marker.contact");
+
+  const countText = loading
+    ? t("filters.searching")
+    : searchError
+      ? searchError
+      : searchedFor
+        ? markers.length > 0
+          ? v2("countInView", {
+              count: markers.length,
+              more: truncated ? "+" : "",
+            })
+          : v2("countNone")
+        : "";
+  const contextText = searchedFor
+    ? t("context", {
+        date: formatDate(`${searchedFor.date}T00:00:00.000Z`),
+        start: searchedFor.start,
+        end: searchedFor.end,
+      })
+    : "";
+
+  const resultList = (
+    <ul className="flex flex-col gap-3">
+      {markers.map((marker) => (
+        <li key={marker.profileId}>
+          <ResultRow
+            marker={marker}
+            selected={marker.profileId === selectedProfileId}
+            onSelect={() => void selectProvider(marker.profileId)}
+            roleLabel={railT(marker.role)}
+            priceLabel={priceOf(marker)}
+          />
+        </li>
+      ))}
+    </ul>
+  );
+
+  const clusterList =
+    clusterMarkers.length > 0 ? (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-semibold text-text-primary">
+            {t("cluster.title", { count: clusterMarkers.length })}
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={t("cluster.close")}
+            className="size-11"
+            onClick={() => setClusterIds(null)}
+          >
+            <X />
+          </Button>
+        </div>
+        <ul className="flex flex-col gap-1">
+          {clusterMarkers.map((marker) => (
+            <li key={marker.profileId}>
+              <button
+                type="button"
+                onClick={() => void selectProvider(marker.profileId)}
+                className="focus-ring flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-[var(--fg-radius-md)] px-2 text-left hover:bg-bg-sunken"
+              >
+                <span className="truncate text-body-md text-text-primary">
+                  {marker.displayName}
+                </span>
+                <span className="shrink-0 text-body-sm font-semibold text-text-secondary">
+                  {priceOf(marker)}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null;
+
+  const previewCard = selectedProfileId ? (
+    <FmapProviderPreviewCard
+      preview={preview}
+      loading={previewLoading}
+      error={previewError}
+      onRetry={() => void selectProvider(selectedProfileId)}
+      bookingHref={bookingHref}
+      onClose={closePreview}
+      inline={isMobile}
+    />
+  ) : null;
+
+  const controlsBottom = isMobile ? sheetHeight + 12 : 24;
+
   return (
-    // Full-bleed under the site header (redesign 09/2026): the compact
-    // filter bar on top, the map filling the rest of the screen.
+    // Full-bleed under the site header: the compact search row and role
+    // rail on top; the results list on the left from 768px, or a sheet
+    // over the map on phones.
     <div className="flex h-[calc(100dvh-73px)] min-h-[560px] flex-col">
       <h1 className="sr-only">{navT("fmap")}</h1>
       <FmapFilterBar
         value={filters}
         onChange={setFilters}
-        onSearch={() => void search()}
+        onReset={resetFilters}
         onUseLocation={useMyLocation}
         isLoading={loading}
         invalidReason={invalidReason}
-        expanded={filtersExpanded}
-        onExpandedChange={setFiltersExpanded}
+        resultCount={searchedFor ? markers.length : null}
+        open={filtersOpen}
+        onOpenChange={setFiltersOpen}
       />
       {notice ? (
         <p
@@ -454,215 +667,224 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
         </p>
       ) : null}
 
-      <div className="relative flex-1 overflow-hidden bg-bg-sunken">
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-2 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-surface py-1.5 pr-2 pl-3 shadow-[var(--shadow-md)]">
-          <Switch
-            label={<span className="text-body-sm">{t("searchOnMove")}</span>}
-            checked={searchOnMove}
-            onChange={(checked) => {
-              setSearchOnMove(checked);
-              if (checked && mapMoved) void search();
-            }}
-          />
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={useMyLocation}
-          className="absolute right-3 bottom-28 z-10 bg-bg-surface shadow-[var(--shadow-md)]"
+      <div className="relative flex min-h-0 flex-1">
+        <aside
+          aria-label={v2("results")}
+          className="flex w-[400px] shrink-0 flex-col border-r border-border-subtle bg-bg-page max-md:hidden"
         >
-          <LocateFixed />
-          {t("filters.myLocation")}
-        </Button>
-
-        {/* How many are in view, and for when: the one line that tells the
-            customer the map has answered. */}
-        {searchedFor && !loading && !searchError ? (
-          <p
-            role="status"
-            className="absolute bottom-6 left-1/2 z-10 max-w-[calc(100%-2rem)] -translate-x-1/2 truncate rounded-full bg-green-900 px-4 py-2 text-body-sm font-semibold! text-gold-50 shadow-[var(--shadow-lg)]"
-          >
-            {t("inView", { count: markers.length })}
-            {truncated ? "+" : ""}
-            <span className="font-normal text-green-200">
-              {" · "}
-              {t("context", {
-                date: formatDate(`${searchedFor.date}T00:00:00.000Z`),
-                start: searchedFor.start,
-                end: searchedFor.end,
-              })}
-            </span>
-          </p>
-        ) : loading ? (
-          <p
-            role="status"
-            className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-bg-surface px-4 py-2 text-body-sm text-text-secondary shadow-[var(--shadow-lg)]"
-          >
-            {t("filters.searching")}
-          </p>
-        ) : null}
-        <FmapMap
-          markers={markers}
-          selectedProfileId={selectedProfileId}
-          centreRequest={centreRequest}
-          fitRequest={fitRequest}
-          onBoundsChange={(nextBounds) => {
-            setBounds(nextBounds);
-            if (ignoreNextMoveRef.current) {
-              ignoreNextMoveRef.current = false;
-              return;
-            }
-            if (searchAfterMoveRef.current) {
-              searchAfterMoveRef.current = false;
-              void search(nextBounds);
-              return;
-            }
-            if (!hasSearched) return;
-            if (searchOnMove) {
-              if (moveSearchTimerRef.current)
-                window.clearTimeout(moveSearchTimerRef.current);
-              moveSearchTimerRef.current = window.setTimeout(
-                () => void search(nextBounds),
-                AUTO_SEARCH_DELAY_MS,
-              );
-              return;
-            }
-            setMapMoved(true);
-          }}
-          onSelectProvider={(profileId) => void selectProvider(profileId)}
-          onSelectCluster={(profileIds) => {
-            setSelectedProfileId(null);
-            setPreview(null);
-            setClusterIds(profileIds);
-          }}
-          labels={markerLabels}
-        />
-
-        {mapMoved ? (
-          <Button
-            type="button"
-            variant="secondary"
-            className="absolute top-3 left-1/2 z-10 -translate-x-1/2 shadow-[var(--shadow-md)] max-sm:top-16"
-            disabled={loading || invalidReason != null}
-            onClick={() => void search()}
-          >
-            {t("searchArea")}
-          </Button>
-        ) : null}
-
-        {hasSearched && !loading && !searchError && markers.length === 0 ? (
-          <div className="absolute top-14 left-1/2 z-10 w-[min(92%,440px)] -translate-x-1/2 rounded-[var(--fg-radius-lg)] border border-border-default bg-bg-surface/95 p-4 text-center shadow-[var(--shadow-md)] backdrop-blur">
-            <p className="font-semibold text-text-primary">
-              {t("empty.title")}
+          <div className="px-4 py-3">
+            <p
+              role={isMobile ? undefined : "status"}
+              aria-live={isMobile ? undefined : "polite"}
+              className="text-body-md font-semibold text-text-primary"
+            >
+              {countText}
             </p>
-            <p className="mt-1 text-body-sm text-text-secondary">
-              {t("empty.body")}
-            </p>
-            <div className="mt-3 flex flex-wrap justify-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={openFilters}
-              >
-                {t("empty.changeTime")}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={expandSearchArea}
-              >
-                {t("empty.expandArea")}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={openFilters}
-              >
-                {t("empty.changeService")}
-              </Button>
-              {filters.wardId ? (
+            {contextText ? (
+              <p className="text-body-sm text-text-secondary">{contextText}</p>
+            ) : null}
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
+            {resultList}
+          </div>
+        </aside>
+
+        <div
+          role="region"
+          aria-label={navT("fmap")}
+          className="relative min-w-0 flex-1 overflow-hidden bg-bg-sunken"
+        >
+          <FmapMap
+            markers={markers}
+            selectedProfileId={selectedProfileId}
+            centreRequest={centreRequest}
+            fitRequest={fitRequest}
+            zoomRequest={zoomRequest}
+            bottomInset={isMobile ? sheetHeight : 0}
+            onBoundsChange={(nextBounds, byUser) => {
+              setBounds(nextBounds);
+              if (ignoreNextMoveRef.current) {
+                ignoreNextMoveRef.current = false;
+                return;
+              }
+              if (searchAfterMoveRef.current) {
+                searchAfterMoveRef.current = false;
+                void search(nextBounds);
+                return;
+              }
+              if (!hasSearched || !byUser) return;
+              setMapMoved(true);
+            }}
+            onSelectProvider={(profileId) => void selectProvider(profileId)}
+            onSelectCluster={(profileIds) => {
+              setSelectedProfileId(null);
+              setPreview(null);
+              setSheetExpanded(false);
+              setClusterIds(profileIds);
+            }}
+            labels={markerLabels}
+          />
+
+          {mapMoved ? (
+            <Button
+              type="button"
+              variant="primary"
+              className="absolute top-3 left-1/2 z-10 min-h-11 -translate-x-1/2 rounded-full px-5 whitespace-nowrap shadow-[var(--shadow-md)]"
+              disabled={loading || invalidReason != null}
+              onClick={() => void search()}
+            >
+              {t("searchArea")}
+            </Button>
+          ) : null}
+
+          {hasSearched && !loading && !searchError && markers.length === 0 ? (
+            <div
+              className={cn(
+                "absolute left-1/2 z-10 w-[min(92%,440px)] -translate-x-1/2 rounded-[var(--fg-radius-lg)] border border-border-default bg-bg-surface/95 p-4 text-center shadow-[var(--shadow-md)] backdrop-blur",
+                mapMoved ? "top-16" : "top-3",
+              )}
+            >
+              <p className="font-semibold text-text-primary">
+                {t("empty.title")}
+              </p>
+              <p className="mt-1 text-body-sm text-text-secondary">
+                {t("empty.body")}
+              </p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                <Button type="button" variant="secondary" onClick={openFilters}>
+                  {t("empty.changeTime")}
+                </Button>
                 <Button
                   type="button"
                   variant="secondary"
-                  size="sm"
-                  onClick={() =>
-                    setFilters((previous) => ({ ...previous, wardId: "" }))
-                  }
+                  onClick={expandSearchArea}
                 >
-                  {t("empty.clearWard")}
+                  {t("empty.expandArea")}
                 </Button>
-              ) : null}
+                {filters.wardId ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() =>
+                      setFilters((previous) => ({ ...previous, wardId: "" }))
+                    }
+                  >
+                    {t("empty.clearWard")}
+                  </Button>
+                ) : null}
+              </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {searchError ? (
-          <div
-            role="alert"
-            className="absolute top-14 left-1/2 z-10 w-max max-w-[92%] -translate-x-1/2 rounded-[var(--fg-radius-lg)] bg-danger-bg px-4 py-2 text-center text-body-sm text-danger shadow-md"
-          >
-            {searchError}
-          </div>
-        ) : null}
+          {searchError ? (
+            <div
+              role="alert"
+              className="absolute top-3 left-1/2 z-10 w-max max-w-[92%] -translate-x-1/2 rounded-[var(--fg-radius-lg)] bg-danger-bg px-4 py-2 text-center text-body-sm text-danger shadow-md"
+            >
+              {searchError}
+            </div>
+          ) : null}
 
-        {clusterMarkers.length > 0 ? (
-          <aside className="absolute right-3 bottom-3 left-3 z-10 max-h-[60%] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card p-3 shadow-[var(--shadow-lg)] sm:top-3 sm:bottom-auto sm:left-auto sm:w-[340px]">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="font-semibold text-text-primary">
-                {t("cluster.title", { count: clusterMarkers.length })}
-              </p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label={t("cluster.close")}
-                onClick={() => setClusterIds(null)}
+          {/* Locate, zoom in, zoom out: 44px, 8px apart, always above the
+              sheet's edge; hidden while the list covers the map. */}
+          {!(isMobile && sheetExpanded) ? (
+            <div
+              role="group"
+              aria-label={v2("controls")}
+              style={{ bottom: controlsBottom }}
+              className="absolute right-3 z-15 flex flex-col gap-2 transition-[bottom] duration-[var(--fg-dur-260)] ease-fg-out motion-reduce:transition-none"
+            >
+              <MapControl
+                label={t("filters.myLocation")}
+                onClick={useMyLocation}
               >
-                <X />
-              </Button>
+                <LocateFixed className="size-5" />
+              </MapControl>
+              <MapControl
+                label={v2("zoomIn")}
+                onClick={() => setZoomRequest({ delta: 1, nonce: Date.now() })}
+              >
+                <Plus className="size-5" />
+              </MapControl>
+              <MapControl
+                label={v2("zoomOut")}
+                onClick={() => setZoomRequest({ delta: -1, nonce: Date.now() })}
+              >
+                <Minus className="size-5" />
+              </MapControl>
             </div>
-            <ul className="space-y-1">
-              {clusterMarkers.map((marker) => (
-                <li key={marker.profileId}>
+          ) : null}
+
+          {!isMobile ? (
+            <>
+              {clusterList ? (
+                <aside className="absolute top-3 right-3 z-20 max-h-[60%] w-[340px] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card p-3 shadow-[var(--shadow-lg)]">
+                  {clusterList}
+                </aside>
+              ) : null}
+              {previewCard}
+            </>
+          ) : (
+            <section
+              ref={sheetRef}
+              aria-label={v2("results")}
+              className={cn(
+                "absolute inset-x-0 bottom-0 z-25 flex flex-col rounded-t-[var(--fg-radius-xl)] bg-bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_hsl(30_14%_5%/0.14)]",
+                sheetExpanded
+                  ? "h-[78%]"
+                  : selectedProfileId || clusterList
+                    ? "max-h-[75%]"
+                    : "min-h-[100px]",
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => setSheetExpanded((open) => !open)}
+                aria-expanded={sheetExpanded}
+                aria-label={
+                  sheetExpanded ? v2("collapseList") : v2("expandList")
+                }
+                className="focus-ring flex h-11 shrink-0 items-center justify-center rounded-t-[var(--fg-radius-xl)]"
+              >
+                <span
+                  aria-hidden
+                  className="h-1 w-10 rounded-full bg-border-default"
+                />
+              </button>
+              <div className="flex shrink-0 items-center justify-between gap-3 px-4 pb-2.5">
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="min-w-0 text-body-md font-semibold text-pretty text-text-primary"
+                >
+                  {countText}
+                </p>
+                {markers.length > 0 ? (
                   <button
                     type="button"
-                    onClick={() => void selectProvider(marker.profileId)}
-                    className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-[var(--fg-radius-md)] px-2 py-2 text-left hover:bg-bg-sunken"
+                    onClick={() => setSheetExpanded((open) => !open)}
+                    className="focus-ring min-h-11 shrink-0 rounded-[var(--fg-radius-sm)] px-1 text-body-md font-semibold text-text-link"
                   >
-                    <span className="truncate text-body-md text-text-primary">
-                      {marker.displayName}
-                    </span>
-                    <span className="shrink-0 text-body-sm font-semibold text-text-secondary">
-                      {marker.startingPrice != null
-                        ? formatVND(marker.startingPrice)
-                        : t("marker.contact")}
-                    </span>
+                    {sheetExpanded ? v2("seeMap") : v2("seeList")}
                   </button>
-                </li>
-              ))}
-            </ul>
-          </aside>
-        ) : null}
-
-        {selectedProfileId ? (
-          <FmapProviderPreviewCard
-            preview={preview}
-            loading={previewLoading}
-            error={previewError}
-            onRetry={() => void selectProvider(selectedProfileId)}
-            bookingHref={bookingHref}
-            onClose={() => {
-              setSelectedProfileId(null);
-              setPreview(null);
-              setPreviewError(false);
-            }}
-          />
-        ) : null}
+                ) : null}
+              </div>
+              {sheetExpanded ? (
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+                  {resultList}
+                </div>
+              ) : clusterList ? (
+                <div className="min-h-0 overflow-y-auto px-4 pb-4">
+                  {clusterList}
+                </div>
+              ) : previewCard ? (
+                <div className="min-h-0 overflow-y-auto border-t border-border-subtle">
+                  {previewCard}
+                </div>
+              ) : null}
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );

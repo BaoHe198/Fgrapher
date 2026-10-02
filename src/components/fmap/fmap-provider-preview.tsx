@@ -22,6 +22,8 @@ interface FmapProviderPreviewCardProps {
   onRetry: () => void;
   bookingHref: string | null;
   onClose: () => void;
+  /** Phones: drawn inside the results sheet instead of floating. */
+  inline?: boolean;
 }
 
 export function FmapProviderPreviewCard({
@@ -31,6 +33,7 @@ export function FmapProviderPreviewCard({
   onRetry,
   bookingHref,
   onClose,
+  inline = false,
 }: FmapProviderPreviewCardProps) {
   const t = useTranslations("fmap");
   const roleT = useTranslations("role");
@@ -45,19 +48,22 @@ export function FmapProviderPreviewCard({
   }, [onClose]);
 
   return (
-    // Phones: a bottom sheet over the map (rounded top, handle). Larger
-    // screens: a floating card on the right. Enters with fade + rise 6px.
-    <aside className="absolute inset-x-0 bottom-0 z-20 max-h-[75%] animate-page-in overflow-y-auto rounded-t-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card pt-2 shadow-[var(--shadow-lg)] sm:top-3 sm:right-3 sm:bottom-auto sm:left-auto sm:max-h-[calc(100%-1.5rem)] sm:w-[370px] sm:rounded-[var(--fg-radius-xl)] sm:pt-0">
-      <span
-        aria-hidden
-        className="mx-auto mb-1 block h-1 w-10 rounded-full bg-border-strong sm:hidden"
-      />
+    // Phones: inside the results sheet (Core MVP pass). Larger screens: a
+    // floating card on the right. Enters with fade + rise 6px.
+    <aside
+      className={cn(
+        "relative animate-page-in",
+        inline
+          ? "bg-bg-surface"
+          : "absolute top-3 right-3 z-20 max-h-[calc(100%-1.5rem)] w-[370px] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card shadow-[var(--shadow-lg)]",
+      )}
+    >
       <Button
         type="button"
         variant="secondary"
-        size="icon-sm"
+        size="icon"
         aria-label={t("preview.close")}
-        className="absolute top-3 right-3 z-10 rounded-full"
+        className="absolute top-2 right-2 z-10 size-11 rounded-full"
         onClick={onClose}
       >
         <X />

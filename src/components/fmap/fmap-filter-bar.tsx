@@ -5,9 +5,18 @@ import { LocateFixed, Search, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
+import { ChipRail } from "@/components/browse/chip-rail";
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/components/ui/date-field";
 import { NativeSelect } from "@/components/ui/native-select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 import { formatDate, vietnamDateKey } from "@/lib/format";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
@@ -20,7 +29,8 @@ export type FmapFilterValue = {
   date: string;
   start: string;
   end: string;
-  role: (typeof FMAP_PROVIDER_ROLES)[number];
+  /** "" is every role on the map. */
+  role: "" | (typeof FMAP_PROVIDER_ROLES)[number];
   category: "" | ProfileCategory;
 };
 
@@ -44,30 +54,46 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
   return { value: time, label: time };
 });
 
+/** The roles param for the API: one role, or every role on the map. */
+export function fmapRolesParam(role: FmapFilterValue["role"]) {
+  return role || FMAP_PROVIDER_ROLES.join(",");
+}
+
 interface FmapFilterBarProps {
   value: FmapFilterValue;
   onChange: (next: FmapFilterValue) => void;
-  onSearch: () => void;
+  onReset: () => void;
   onUseLocation: () => void;
   isLoading: boolean;
   /** Translated reason the current filters can't be searched, if any. */
   invalidReason: string | null;
-  expanded: boolean;
-  onExpandedChange: (expanded: boolean) => void;
+  /** Providers found by the latest search, for the sheet's main button. */
+  resultCount: number | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
+// Bản đồ F's search controls (Core MVP pass, 02/10/2026): one compact row -
+// "khu vực · ngày giờ" and a Bộ lọc button, both opening the same sheet
+// (from the bottom on phones, the right from 768px) - and the role rail
+// under it. The map re-searches as filters change, so the sheet's main
+// button only closes it, saying how many it found. The badge counts only
+// the filters not already on screen (ward, style).
 export function FmapFilterBar({
   value,
   onChange,
-  onSearch,
+  onReset,
   onUseLocation,
   isLoading,
   invalidReason,
-  expanded,
-  onExpandedChange,
+  resultCount,
+  open,
+  onOpenChange,
 }: FmapFilterBarProps) {
   const t = useTranslations("fmap");
-  const roleT = useTranslations("role");
+  const v2 = useTranslations("fmap.v2");
+  const railT = useTranslations("publicPages.browse.v3.railRoles");
+  const isMobile = useIsMobile();
   const categoryT = useTranslations("profileCategory");
   const today = vietnamDateKey();
   const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
@@ -107,7 +133,7 @@ export function FmapFilterBar({
     const controller = new AbortController();
     const params = new URLSearchParams({
       provinceId: value.provinceId,
-      roles: value.role,
+      roles: fmapRolesParam(value.role),
     });
     fetch(`/api/fmap/ward-counts?${params}`, { signal: controller.signal })
       .then((res) => res.json())
@@ -134,10 +160,11 @@ export function FmapFilterBar({
     if (staleWard) startTransition(() => onChange({ ...value, wardId: "" }));
   }, [staleWard, onChange, value]);
 
-  const categoryOptions = CATEGORIES_BY_ROLE[value.role] ?? [];
-  const searchDisabled = isLoading || invalidReason != null;
-  const sectionTitle =
-    "text-meta tracking-[0.12em] text-text-tertiary uppercase sm:col-span-2 lg:col-span-12";
+  const categoryOptions = value.role
+    ? (CATEGORIES_BY_ROLE[value.role] ?? [])
+    : [];
+  const advancedCount = (value.wardId ? 1 : 0) + (value.category ? 1 : 0);
+  const sectionTitle = "text-body-sm font-semibold text-text-primary";
 
   const provinceName = provinces.find((p) => p.id === value.provinceId)?.name;
   const wardName = wards.find((w) => w.id === value.wardId)?.name;
@@ -145,179 +172,158 @@ export function FmapFilterBar({
     ? `${wardName}, ${provinceName ?? ""}`
     : (provinceName ?? t("filters.wholeMap"));
   const whenLabel = value.date
-    ? `${formatDate(`${value.date}T00:00:00.000Z`)} · ${value.start}–${value.end}`
+    ? `${formatDate(`${value.date}T00:00:00.000Z`).slice(0, 5)}, ${value.start}–${value.end}`
     : "—";
 
   return (
-    <div id="fmap-filters" className="relative z-30">
-      {/* The compact bar (redesign 09/2026): where and when in one pill
-          with the search button, the role as chips, and "Bộ lọc" for the
-          full form. Both halves of the pill open that form too. */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border-subtle bg-bg-surface px-4 py-3 md:flex-nowrap md:gap-3 md:px-6">
-        <div className="flex min-w-0 flex-1 items-center rounded-full border border-border-strong bg-bg-surface py-1 pr-1 pl-4 shadow-[var(--shadow-sm)] md:w-[500px] md:flex-none">
-          <button
-            type="button"
-            aria-expanded={expanded}
-            aria-controls="fmap-filter-panel"
-            onClick={() => onExpandedChange(!expanded)}
-            className="focus-ring flex min-w-0 flex-1 flex-col items-start rounded-[var(--fg-radius-sm)] py-1 text-left"
-          >
-            <span className="text-meta text-text-tertiary">
-              {t("filters.areaTitle")}
-            </span>
-            <span className="w-full truncate text-body-sm font-semibold! text-text-primary">
+    <div className="relative z-30 flex flex-col gap-2 border-b border-border-subtle bg-bg-page px-4 pt-2 pb-2 shadow-[var(--shadow-sm)] md:px-6 md:pt-3">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onOpenChange(true)}
+          aria-haspopup="dialog"
+          className="focus-ring flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-full border border-border-default bg-bg-surface px-4 text-left text-body-md md:max-w-[520px]"
+        >
+          <Search aria-hidden className="size-4 shrink-0 text-text-secondary" />
+          <span className="truncate">
+            <strong className="font-semibold text-text-primary">
               {placeLabel}
-            </span>
-          </button>
-          <span
-            aria-hidden
-            className="mx-3 h-8 w-px shrink-0 bg-border-subtle"
-          />
-          <button
-            type="button"
-            aria-expanded={expanded}
-            aria-controls="fmap-filter-panel"
-            onClick={() => onExpandedChange(!expanded)}
-            className="focus-ring flex min-w-0 flex-1 flex-col items-start rounded-[var(--fg-radius-sm)] py-1 text-left"
-          >
-            <span className="text-meta text-text-tertiary">
-              {t("filters.whenPill")}
-            </span>
-            <span className="w-full truncate font-mono text-body-sm font-semibold! text-text-primary tabular-nums">
+            </strong>
+            <span className="text-text-secondary tabular-nums">
+              {" · "}
               {whenLabel}
             </span>
-          </button>
-          <Button
-            type="button"
-            size="icon"
-            aria-label={t("filters.search")}
-            disabled={searchDisabled}
-            onClick={onSearch}
-            className="ml-2 shrink-0 rounded-full"
-          >
-            <Search />
-          </Button>
-        </div>
-
-        <div
-          role="group"
-          aria-label={t("filters.role")}
-          className="-mx-4 flex w-[calc(100%+2rem)] gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:w-auto md:px-0 [&::-webkit-scrollbar]:hidden"
-        >
-          {FMAP_PROVIDER_ROLES.map((role) => {
-            const active = value.role === role;
-            return (
-              <button
-                key={role}
-                type="button"
-                data-interactive="true"
-                aria-pressed={active}
-                onClick={() => onChange({ ...value, role, category: "" })}
-                className={cn(
-                  "focus-ring shrink-0 rounded-full border px-3.5 py-2 text-body-sm whitespace-nowrap transition-colors duration-[var(--fg-dur-150)]",
-                  active
-                    ? "border-brand-primary bg-brand-primary font-semibold! text-text-on-brand"
-                    : "border-border-default bg-bg-surface text-text-primary hover:border-border-strong",
-                )}
-              >
-                {roleT(role)}
-              </button>
-            );
-          })}
-        </div>
-
+          </span>
+        </button>
         <Button
           type="button"
           variant="outline"
-          aria-expanded={expanded}
-          aria-controls="fmap-filter-panel"
-          onClick={() => onExpandedChange(!expanded)}
-          className="ml-auto shrink-0 max-md:hidden"
+          onClick={() => onOpenChange(true)}
+          aria-haspopup="dialog"
+          aria-label={
+            isMobile
+              ? advancedCount > 0
+                ? v2("filtersWithCount", { count: advancedCount })
+                : t("filters.more")
+              : undefined
+          }
+          className="relative size-12 shrink-0 rounded-full px-0 md:w-auto md:px-4"
         >
-          <SlidersHorizontal />
-          {t("filters.more")}
+          <SlidersHorizontal aria-hidden className="size-4" />
+          <span className="max-md:hidden">{t("filters.more")}</span>
+          {advancedCount > 0 ? (
+            <span
+              aria-hidden={isMobile}
+              className="grid size-5 place-items-center rounded-full bg-brand-primary text-meta font-semibold text-text-on-brand max-md:absolute max-md:-top-1 max-md:-right-1"
+            >
+              {advancedCount}
+            </span>
+          ) : null}
         </Button>
       </div>
 
+      <ChipRail
+        label={t("filters.role")}
+        moreLabel={v2("moreRoles")}
+        value={value.role}
+        onPick={(role) =>
+          onChange({
+            ...value,
+            role: role as FmapFilterValue["role"],
+            category: "",
+          })
+        }
+        items={[
+          { value: "", label: v2("allRoles") },
+          ...FMAP_PROVIDER_ROLES.map((role) => ({
+            value: role,
+            label: railT(role),
+          })),
+        ]}
+      />
+
       {invalidReason ? (
-        <p
-          role="alert"
-          className="border-b border-border-subtle bg-danger-bg px-4 py-2 text-body-sm text-danger md:px-6"
-        >
+        <p role="alert" className="text-body-sm text-danger">
           {invalidReason}
         </p>
       ) : null}
 
-      {expanded ? (
-        <div
-          id="fmap-filter-panel"
-          className="absolute inset-x-3 top-full mt-2 max-h-[calc(100dvh-180px)] overflow-y-auto rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card p-4 shadow-[var(--shadow-lg)] animate-page-in md:left-6 md:right-auto md:w-[min(960px,calc(100%-3rem))] md:p-5"
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side={isMobile ? "bottom" : "right"}
+          className={cn(
+            "flex flex-col overflow-hidden",
+            isMobile ? "max-h-[88dvh]" : "w-[88%] sm:max-w-md",
+          )}
         >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+          <SheetHeader>
+            <SheetTitle>{t("filters.more")}</SheetTitle>
+            <SheetDescription className="sr-only">
+              {t("filters.mapHint")}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
             <p className={sectionTitle}>{t("filters.areaTitle")}</p>
-            <div className="lg:col-span-4">
-              <NativeSelect
-                label={t("filters.province")}
-                value={value.provinceId}
-                options={[
-                  { value: "", label: t("filters.chooseProvince") },
-                  ...provinces.map((province) => ({
-                    value: province.id,
-                    label: province.name,
-                  })),
-                ]}
-                onChange={(provinceId) =>
-                  onChange({ ...value, provinceId, wardId: "" })
-                }
-              />
-            </div>
-            <div className="lg:col-span-4">
-              <NativeSelect
-                label={t("filters.ward")}
-                value={value.wardId}
-                disabled={!value.provinceId || wardOptions.length === 0}
-                options={[
-                  {
-                    value: "",
-                    label: !value.provinceId
-                      ? t("filters.wardNeedsProvince")
-                      : wardCounts && wardOptions.length === 0
-                        ? t("filters.noWardsWithProviders")
-                        : t("filters.allWards"),
-                  },
-                  ...wardOptions.map((ward) => ({
-                    value: ward.id,
-                    label: t("filters.wardOption", {
-                      name: ward.name,
-                      count: wardCounts?.get(ward.id) ?? 0,
-                    }),
-                  })),
-                ]}
-                onChange={(wardId) => onChange({ ...value, wardId })}
-              />
-            </div>
+            <NativeSelect
+              label={t("filters.province")}
+              value={value.provinceId}
+              options={[
+                { value: "", label: t("filters.chooseProvince") },
+                ...provinces.map((province) => ({
+                  value: province.id,
+                  label: province.name,
+                })),
+              ]}
+              onChange={(provinceId) =>
+                onChange({ ...value, provinceId, wardId: "" })
+              }
+            />
+            <NativeSelect
+              label={t("filters.ward")}
+              value={value.wardId}
+              disabled={!value.provinceId || wardOptions.length === 0}
+              options={[
+                {
+                  value: "",
+                  label: !value.provinceId
+                    ? t("filters.wardNeedsProvince")
+                    : wardCounts && wardOptions.length === 0
+                      ? t("filters.noWardsWithProviders")
+                      : t("filters.allWards"),
+                },
+                ...wardOptions.map((ward) => ({
+                  value: ward.id,
+                  label: t("filters.wardOption", {
+                    name: ward.name,
+                    count: wardCounts?.get(ward.id) ?? 0,
+                  }),
+                })),
+              ]}
+              onChange={(wardId) => onChange({ ...value, wardId })}
+            />
             <Button
               type="button"
               variant="secondary"
-              onClick={onUseLocation}
-              className="h-[46px] sm:col-span-2 lg:col-span-4"
+              size="lg"
+              onClick={() => {
+                onOpenChange(false);
+                onUseLocation();
+              }}
             >
               <LocateFixed />
               {t("filters.myLocation")}
             </Button>
 
-            <div className="my-1 h-px bg-border-subtle sm:col-span-2 lg:col-span-12" />
+            <div className="h-px bg-border-subtle" />
 
             <p className={sectionTitle}>{t("filters.whenTitle")}</p>
-            <div className="sm:col-span-2 lg:col-span-4">
-              <DateField
-                label={t("filters.date")}
-                min={today}
-                value={value.date}
-                onChange={(date) => onChange({ ...value, date })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2 sm:col-span-2 lg:col-span-4">
+            <DateField
+              label={t("filters.date")}
+              min={today}
+              value={value.date}
+              onChange={(date) => onChange({ ...value, date })}
+            />
+            <div className="grid grid-cols-2 gap-2">
               <NativeSelect
                 label={t("filters.start")}
                 value={value.start}
@@ -331,7 +337,7 @@ export function FmapFilterBar({
                 onChange={(end) => onChange({ ...value, end })}
               />
             </div>
-            <div className="sm:col-span-2 lg:col-span-4">
+            {value.role ? (
               <NativeSelect
                 label={t("filters.category")}
                 value={value.category}
@@ -349,32 +355,41 @@ export function FmapFilterBar({
                   })
                 }
               />
-            </div>
+            ) : (
+              <p className="text-body-sm text-text-secondary">
+                {v2("categoryNeedsRole")}
+              </p>
+            )}
+            {invalidReason ? (
+              <p role="alert" className="text-body-sm text-danger">
+                {invalidReason}
+              </p>
+            ) : null}
           </div>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-4">
-            <p className="text-meta text-text-tertiary">
-              {t("filters.mapHint")}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => onExpandedChange(false)}
-              >
-                {t("filters.close")}
-              </Button>
-              <Button
-                type="button"
-                disabled={searchDisabled}
-                onClick={onSearch}
-              >
-                <Search />
-                {isLoading ? t("filters.searching") : t("filters.search")}
-              </Button>
-            </div>
+          <div className="flex items-center gap-3 border-t border-border-subtle px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))]">
+            <button
+              type="button"
+              onClick={onReset}
+              className="focus-ring min-h-12 rounded-[var(--fg-radius-sm)] px-2 text-body-md font-semibold text-text-primary underline underline-offset-4"
+            >
+              {v2("reset")}
+            </button>
+            <Button
+              variant="primary"
+              className="h-12 flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              {isLoading
+                ? t("filters.searching")
+                : resultCount == null
+                  ? t("filters.close")
+                  : resultCount > 0
+                    ? v2("seeResults", { count: resultCount })
+                    : v2("noResults")}
+            </Button>
           </div>
-        </div>
-      ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

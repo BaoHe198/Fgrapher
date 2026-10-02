@@ -152,6 +152,8 @@ export function FmapMap({
   onSelectProvider,
   onSelectCluster,
   labels,
+  zoomRequest,
+  bottomInset = 0,
 }: {
   markers: FmapMarker[];
   selectedProfileId: string | null;
@@ -159,11 +161,16 @@ export function FmapMap({
   /** keepZoom: centre the bounds without zooming in past the current
    * level — used to pull results off the edge, not to re-frame the map. */
   fitRequest: { bounds: FmapBounds; nonce: number; keepZoom?: boolean } | null;
-  onBoundsChange: (bounds: FmapBounds) => void;
+  /** byUser: the customer moved the map themselves. */
+  onBoundsChange: (bounds: FmapBounds, byUser: boolean) => void;
   onSelectProvider: (profileId: string) => void;
   /** Providers that share one spot and can't be split by zooming. */
   onSelectCluster: (profileIds: string[]) => void;
   labels: MarkerLabels;
+  /** One step in (+1) or out (-1), from the page's own 44px controls. */
+  zoomRequest?: { delta: number; nonce: number } | null;
+  /** Height covered by the results sheet on phones, kept out of centring. */
+  bottomInset?: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapInstance | null>(null);
@@ -204,13 +211,19 @@ export function FmapMap({
       attributionControl: false,
     });
     mapRef.current = map;
-    map.addControl(
-      new maplibregl.NavigationControl({ showCompass: false }),
-      "bottom-right",
-    );
+    // Zoom buttons are the page's own (44px, stacked above the results
+    // sheet); MapLibre's 29px ones are too small to tap. Attribution sits
+    // top-right, where the sheet never covers it.
     map.addControl(
       new maplibregl.AttributionControl({ compact: true }),
-      "bottom-left",
+      "top-right",
+    );
+    // Compact attribution opens expanded and only folds on the first drag;
+    // folded from the start, it is one (i) button, not a strip over the map.
+    map.once("load", () =>
+      containerRef.current
+        ?.querySelector(".maplibregl-ctrl-attrib")
+        ?.classList.remove("maplibregl-compact-show"),
     );
 
     const refreshDomMarkers = () => {
@@ -305,7 +318,7 @@ export function FmapMap({
         filter: ["!", ["has", "point_count"]],
         paint: { "circle-radius": 24, "circle-opacity": 0 },
       });
-      boundsCallbackRef.current(toBounds(map.getBounds()));
+      boundsCallbackRef.current(toBounds(map.getBounds()), false);
     });
 
     map.on("click", CLUSTERS_LAYER, async (event: MapMouseEvent) => {
@@ -330,10 +343,13 @@ export function FmapMap({
         return;
       }
       if (feature.geometry.type === "Point") {
-        map.easeTo({
-          center: feature.geometry.coordinates as [number, number],
-          zoom,
-        });
+        map.easeTo(
+          {
+            center: feature.geometry.coordinates as [number, number],
+            zoom,
+          },
+          { fgUser: true },
+        );
       }
     });
     map.on("mouseenter", CLUSTERS_LAYER, () => {
@@ -342,10 +358,19 @@ export function FmapMap({
     map.on("mouseleave", CLUSTERS_LAYER, () => {
       map.getCanvas().style.cursor = "";
     });
-    map.on("moveend", () => {
-      boundsCallbackRef.current(toBounds(map.getBounds()));
-      refreshDomMarkers();
-    });
+    // A move is the customer's when it came from a gesture (originalEvent)
+    // or from one of our own zoom/cluster controls (fgUser); centring on a
+    // chosen provider, fitting results or resizing the sheet is not.
+    map.on(
+      "moveend",
+      (event: { originalEvent?: unknown; fgUser?: boolean }) => {
+        boundsCallbackRef.current(
+          toBounds(map.getBounds()),
+          event.originalEvent != null || event.fgUser === true,
+        );
+        refreshDomMarkers();
+      },
+    );
     // "render" fires every animation frame while panning; querying rendered
     // features that often is wasted work, so sync at most every 120 ms.
     // moveend above still does a final exact sync.
@@ -387,6 +412,22 @@ export function FmapMap({
   }, [markers]);
 
   useEffect(() => {
+    if (!zoomRequest || !mapRef.current) return;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const map = mapRef.current;
+    const options = { duration: reduced ? 0 : 250 };
+    if (zoomRequest.delta > 0) map.zoomIn(options, { fgUser: true });
+    else map.zoomOut(options, { fgUser: true });
+  }, [zoomRequest]);
+
+  const bottomInsetRef = useRef(bottomInset);
+  useEffect(() => {
+    bottomInsetRef.current = bottomInset;
+  }, [bottomInset]);
+
+  useEffect(() => {
     if (!centreRequest || !mapRef.current) return;
     mapRef.current.flyTo({
       center: [centreRequest.longitude, centreRequest.latitude],
@@ -404,7 +445,12 @@ export function FmapMap({
         [east, north],
       ],
       {
-        padding: 64,
+        padding: {
+          top: 64,
+          right: 64,
+          left: 64,
+          bottom: 64 + bottomInsetRef.current,
+        },
         maxZoom: fitRequest.keepZoom
           ? Math.min(13, mapRef.current.getZoom())
           : 13,
@@ -417,8 +463,10 @@ export function FmapMap({
     if (!selectedProfileId) return;
     const marker = markers.find((item) => item.profileId === selectedProfileId);
     if (marker)
+      // Centred in the part of the map the results sheet leaves visible.
       mapRef.current?.easeTo({
         center: [marker.longitude, marker.latitude],
+        offset: [0, -bottomInsetRef.current / 2],
         duration: 500,
       });
   }, [markers, selectedProfileId]);

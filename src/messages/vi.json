@@ -119,8 +119,25 @@
       "close": "Đóng danh sách"
     },
     "resultCount": "{count, plural, other {# nhà cung cấp}}",
-    "searchOnMove": "Tìm khi di chuyển bản đồ",
-    "inView": "{count} nghệ sĩ trong khung bản đồ"
+    "v2": {
+      "allRoles": "Tất cả",
+      "moreRoles": "Xem thêm vai trò",
+      "filtersWithCount": "Bộ lọc, {count} đang chọn",
+      "categoryNeedsRole": "Chọn một vai trò để lọc theo thể loại.",
+      "reset": "Đặt lại",
+      "seeResults": "Xem {count} kết quả",
+      "noResults": "Chưa có kết quả",
+      "countInView": "{count}{more} nhà cung cấp trong vùng đang xem",
+      "countNone": "Không có nhà cung cấp trong vùng này",
+      "seeList": "Xem danh sách",
+      "seeMap": "Xem bản đồ",
+      "expandList": "Mở rộng danh sách",
+      "collapseList": "Thu gọn danh sách",
+      "results": "Kết quả trên bản đồ",
+      "controls": "Điều khiển bản đồ",
+      "zoomIn": "Phóng to",
+      "zoomOut": "Thu nhỏ"
+    }
   },
   "role": {
     "PHOTOGRAPHER": "Nhiếp ảnh gia",

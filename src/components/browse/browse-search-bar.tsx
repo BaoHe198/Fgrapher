@@ -2,7 +2,7 @@
 
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 
 import { useSharedFilterParams } from "@/components/filters/filter-params-provider";
 import { Button } from "@/components/ui/button";
@@ -13,28 +13,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatDate } from "@/lib/format";
 import { shortPlace } from "@/lib/location";
 import { cn } from "@/lib/utils";
 
 import { BrowseSearchPill } from "./browse-search-pill";
 import { FilterSidebar } from "./filter-sidebar";
-
-const MOBILE_QUERY = "(max-width: 767px)";
-
-function subscribeMobile(callback: () => void) {
-  const query = window.matchMedia(MOBILE_QUERY);
-  query.addEventListener("change", callback);
-  return () => query.removeEventListener("change", callback);
-}
-
-function useIsMobile() {
-  return useSyncExternalStore(
-    subscribeMobile,
-    () => window.matchMedia(MOBILE_QUERY).matches,
-    () => false,
-  );
-}
 
 // Tìm kiếm F's search controls (Core MVP pass, 02/10/2026). Phones get one
 // compact row - "khu vực · ngày" and a Bộ lọc button - and both open the

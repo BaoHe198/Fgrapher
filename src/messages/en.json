@@ -119,8 +119,25 @@
       "close": "Close list"
     },
     "resultCount": "{count, plural, one {# provider} other {# providers}}",
-    "searchOnMove": "Search as I move the map",
-    "inView": "{count} artists in view"
+    "v2": {
+      "allRoles": "All",
+      "moreRoles": "More roles",
+      "filtersWithCount": "Filters, {count} selected",
+      "categoryNeedsRole": "Pick a role to filter by style.",
+      "reset": "Reset",
+      "seeResults": "See {count} results",
+      "noResults": "No results yet",
+      "countInView": "{count}{more} {count, plural, one {provider} other {providers}} in view",
+      "countNone": "No providers in this area",
+      "seeList": "Show list",
+      "seeMap": "Show map",
+      "expandList": "Expand list",
+      "collapseList": "Collapse list",
+      "results": "Results on the map",
+      "controls": "Map controls",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    }
   },
   "role": {
     "PHOTOGRAPHER": "Photographer",
