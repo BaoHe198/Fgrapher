@@ -4102,6 +4102,79 @@
         "profile": "Đăng hồ sơ, portfolio và dịch vụ không giới hạn",
         "bookings": "Nhận yêu cầu đặt lịch và tin nhắn từ khách hàng",
         "noCard": "Không cần thẻ thanh toán, không có phí ẩn"
+      },
+      "launch": {
+        "eyebrow": "Bảng giá cho provider",
+        "title": "Miễn phí trong giai đoạn ra mắt",
+        "lead": "Fgrapher chưa thu phí đăng hồ sơ, phí nhận yêu cầu hay phí trên mỗi lượt đặt lịch. Khi có thay đổi, bạn được báo trước ít nhất 30 ngày qua email và thông báo trong ứng dụng.",
+        "cta": "Tạo hồ sơ provider",
+        "benefitsHeading": "Bạn dùng được những gì",
+        "benefits": {
+          "profile": {
+            "t": "Hồ sơ công khai và portfolio",
+            "d": "Trang hồ sơ có ảnh đầu trang, gói dịch vụ, đánh giá và album."
+          },
+          "bookings": {
+            "t": "Nhận yêu cầu đặt lịch",
+            "d": "Khách gửi yêu cầu kèm ngày giờ, địa điểm. Bạn xác nhận hoặc đề xuất giờ khác."
+          },
+          "offers": {
+            "t": "Gửi đề xuất trên Đặt lịch F",
+            "d": "Trả lời các yêu cầu công khai phù hợp vai trò và khu vực của bạn."
+          },
+          "calendar": {
+            "t": "Lịch trống và nhắc lịch",
+            "d": "Đánh dấu ngày nghỉ, ngày kín. Nhận nhắc lịch qua thông báo và email."
+          },
+          "discovery": {
+            "t": "Hiện trên Tìm kiếm F và Bản đồ F",
+            "d": "Khách lọc theo vai trò, khu vực, ngày còn lịch và ngân sách."
+          },
+          "verified": {
+            "t": "Huy hiệu đã xác minh",
+            "d": "Hiện sau khi hoàn tất xác minh danh tính."
+          },
+          "market": {
+            "t": "Đăng bán, cho thuê trên Chợ F",
+            "d": "Đăng thiết bị kèm tình trạng, giá bán hoặc giá thuê theo ngày."
+          },
+          "community": {
+            "t": "Đăng bài trên Cộng đồng F",
+            "d": "Chia sẻ bộ ảnh, tìm cộng sự cho dự án."
+          }
+        },
+        "groupsHeading": "Áp dụng cho",
+        "groupsLead": "Mọi provider đã xác minh danh tính, cá nhân hoặc doanh nghiệp.",
+        "sellerGroup": "Người bán thiết bị",
+        "faqHeading": "Câu hỏi thường gặp",
+        "faq": {
+          "when": {
+            "q": "Khi nào Fgrapher bắt đầu thu phí?",
+            "a": "Chưa có ngày cụ thể. Trước khi áp dụng bất kỳ khoản phí nào, Fgrapher công bố mức phí và báo trước ít nhất 30 ngày. Các lịch đã xác nhận trước ngày áp dụng không bị tính phí."
+          },
+          "autoCharge": {
+            "q": "Tôi có bị trừ tiền tự động không?",
+            "a": "Không. Fgrapher không lưu thẻ hay tài khoản ngân hàng của provider trong giai đoạn này, nên không có khoản trừ tự động nào."
+          },
+          "deposit": {
+            "q": "Đặt cọc hoạt động thế nào?",
+            "a": "Fgrapher chưa thu hộ đặt cọc. Bạn và khách tự thoả thuận mức cọc, thời hạn và hình thức nhận. Nên ghi rõ trong đề xuất hoặc tin nhắn để hai bên cùng đối chiếu."
+          },
+          "payout": {
+            "q": "Khách thanh toán cho tôi bằng cách nào?",
+            "a": "Khách thanh toán trực tiếp cho bạn bằng chuyển khoản hoặc tiền mặt. Fgrapher không giữ tiền và không thu phần trăm trên giá trị buổi chụp."
+          },
+          "cancel": {
+            "q": "Huỷ lịch thì xử lý ra sao?",
+            "a": "Chính sách huỷ và hoàn cọc do bạn ghi trong hồ sơ. Khách thấy chính sách này trước khi gửi yêu cầu."
+          },
+          "market": {
+            "q": "Đăng bán trên Chợ F có mất phí không?",
+            "a": "Trong giai đoạn ra mắt, đăng tin và giao dịch trên Chợ F cũng miễn phí. Người mua và người bán tự thoả thuận thanh toán."
+          }
+        },
+        "moreQuestions": "Câu hỏi khác?",
+        "contact": "Liên hệ hỗ trợ"
       }
     },
     "about": {

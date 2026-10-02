@@ -4102,6 +4102,79 @@
         "profile": "Unlimited profile, portfolio, and service listings",
         "bookings": "Receive booking requests and messages from customers",
         "noCard": "No payment card required, no hidden fees"
+      },
+      "launch": {
+        "eyebrow": "Pricing for providers",
+        "title": "Free during launch",
+        "lead": "Fgrapher charges no listing fee, no fee for receiving requests and no fee per booking yet. If that changes, you'll be told at least 30 days ahead by email and in the app.",
+        "cta": "Create a provider profile",
+        "benefitsHeading": "What you get",
+        "benefits": {
+          "profile": {
+            "t": "Public profile and portfolio",
+            "d": "A profile page with a cover photo, service packages, reviews and albums."
+          },
+          "bookings": {
+            "t": "Booking requests",
+            "d": "Clients send a request with date, time and place. You confirm or suggest another time."
+          },
+          "offers": {
+            "t": "Send offers on Đặt lịch F",
+            "d": "Answer public requests that match your role and area."
+          },
+          "calendar": {
+            "t": "Availability and reminders",
+            "d": "Mark days off and fully booked days. Get reminders in the app and by email."
+          },
+          "discovery": {
+            "t": "Listed on Tìm kiếm F and Bản đồ F",
+            "d": "Clients filter by role, area, open dates and budget."
+          },
+          "verified": {
+            "t": "Verified badge",
+            "d": "Shown once your identity check is complete."
+          },
+          "market": {
+            "t": "Sell and rent on Chợ F",
+            "d": "List gear with its condition, sale price or daily rental price."
+          },
+          "community": {
+            "t": "Post on Cộng đồng F",
+            "d": "Share shoots and find collaborators for projects."
+          }
+        },
+        "groupsHeading": "Who it covers",
+        "groupsLead": "Every identity-verified provider, individual or business.",
+        "sellerGroup": "Gear sellers",
+        "faqHeading": "Frequently asked questions",
+        "faq": {
+          "when": {
+            "q": "When will Fgrapher start charging?",
+            "a": "There is no date yet. Before any fee applies, Fgrapher will publish it and give at least 30 days' notice. Bookings confirmed before that date are never charged."
+          },
+          "autoCharge": {
+            "q": "Will I be charged automatically?",
+            "a": "No. Fgrapher does not store providers' cards or bank accounts during this phase, so there is nothing to charge automatically."
+          },
+          "deposit": {
+            "q": "How do deposits work?",
+            "a": "Fgrapher does not collect deposits. You and the client agree the amount, deadline and method yourselves. Write it in the offer or chat so both sides can check it."
+          },
+          "payout": {
+            "q": "How do clients pay me?",
+            "a": "Clients pay you directly by bank transfer or cash. Fgrapher holds no money and takes no percentage of the shoot."
+          },
+          "cancel": {
+            "q": "What happens if a booking is cancelled?",
+            "a": "Your cancellation and deposit refund policy is the one you write on your profile. Clients see it before they send a request."
+          },
+          "market": {
+            "q": "Does listing on Chợ F cost anything?",
+            "a": "During launch, listing and trading on Chợ F is free too. Buyers and sellers agree payment between themselves."
+          }
+        },
+        "moreQuestions": "Other questions?",
+        "contact": "Contact support"
       }
     },
     "about": {
