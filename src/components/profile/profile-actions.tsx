@@ -1,6 +1,14 @@
 "use client";
 
-import { Bookmark, Check, Flag, Link2, QrCode, Share2 } from "lucide-react";
+import {
+  Bookmark,
+  Flag,
+  Link2,
+  QrCode,
+  Share2,
+  UserCheck,
+  UserPlus,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
@@ -9,7 +17,6 @@ import { startTransition, useEffect, useState } from "react";
 
 import { QrCodeDialog } from "@/components/profile/qr-code-dialog";
 import { ReportModal } from "@/components/modals/report-modal";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +29,8 @@ import { cn } from "@/lib/utils";
 interface ProfileActionsProps {
   targetUserId: string;
   profileId: string;
-  initialFollowerCount: number;
+  /** No longer shown: counts stay off the public page (wave 2, option B). */
+  initialFollowerCount?: number;
   shareUrl: string;
   socialFeedEnabled: boolean;
   // Follow/save/report all target another account — none of them make
@@ -36,7 +44,6 @@ interface ProfileActionsProps {
 export function ProfileActions({
   targetUserId,
   profileId,
-  initialFollowerCount,
   shareUrl,
   socialFeedEnabled,
   isOwnProfile,
@@ -57,7 +64,6 @@ export function ProfileActions({
   };
 
   const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(initialFollowerCount);
   const [isSaved, setIsSaved] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
@@ -93,7 +99,6 @@ export function ProfileActions({
     if (requireSignIn()) return;
     const next = !isFollowing;
     setIsFollowing(next);
-    setFollowerCount((c) => c + (next ? 1 : -1));
 
     if (next) {
       await fetch("/api/follows", {
@@ -131,33 +136,54 @@ export function ProfileActions({
     toast.add({ title: t("linkCopied"), type: "success" });
   };
 
+  // Three separate 44px buttons, 8px apart (Core MVP pass, 02/10/2026):
+  // Theo dõi, Lưu, Chia sẻ. Report moved into the share menu. On a phone
+  // each carries its label; from 768px the icons alone, named for
+  // assistive tech and on hover.
+  const action =
+    "focus-ring inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-border-default bg-bg-surface px-3 text-body-sm font-semibold text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:border-border-strong md:px-0";
+
   return (
-    <div className="flex items-center gap-2">
+    <div
+      role="group"
+      aria-label={t("moreActions")}
+      className="flex items-center gap-2"
+    >
       {socialFeedEnabled && !isOwnProfile ? (
-        <>
-          <Button
-            variant={isFollowing ? "ghost" : "secondary"}
-            size="sm"
-            onClick={toggleFollow}
-          >
-            {isFollowing ? <Check className="size-4" /> : null}
+        <button
+          type="button"
+          onClick={toggleFollow}
+          aria-pressed={isFollowing}
+          aria-label={isFollowing ? t("following") : t("follow")}
+          title={isFollowing ? t("following") : t("follow")}
+          className={action}
+        >
+          {isFollowing ? (
+            <UserCheck aria-hidden className="size-[18px]" />
+          ) : (
+            <UserPlus aria-hidden className="size-[18px]" />
+          )}
+          <span className="md:hidden">
             {isFollowing ? t("following") : t("follow")}
-          </Button>
-          <span className="text-body-sm text-text-tertiary">
-            {t("followers", { count: followerCount })}
           </span>
-        </>
+        </button>
       ) : null}
 
       {!isOwnProfile ? (
-        <Button
-          variant="ghost"
-          size="icon-sm"
+        <button
+          type="button"
           onClick={toggleSave}
+          aria-pressed={isSaved}
           aria-label={isSaved ? t("removeFromSaved") : t("saveProfile")}
+          title={isSaved ? t("removeFromSaved") : t("saveProfile")}
+          className={action}
         >
-          <Bookmark className={cn("size-4", isSaved && "fill-current")} />
-        </Button>
+          <Bookmark
+            aria-hidden
+            className={cn("size-[18px]", isSaved && "fill-current")}
+          />
+          <span className="md:hidden">{t("saveShort")}</span>
+        </button>
       ) : null}
 
       {zaloOaId ? (
@@ -167,9 +193,15 @@ export function ProfileActions({
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="ghost" size="icon-sm" aria-label={t("share")}>
-              <Share2 className="size-4" />
-            </Button>
+            <button
+              type="button"
+              aria-label={t("share")}
+              title={t("share")}
+              className={action}
+            >
+              <Share2 aria-hidden className="size-[18px]" />
+              <span className="md:hidden">{t("share")}</span>
+            </button>
           }
         />
         <DropdownMenuContent align="end">
@@ -203,21 +235,19 @@ export function ProfileActions({
             <QrCode className="size-4" />
             {t("showQrCode")}
           </DropdownMenuItem>
+          {!isOwnProfile ? (
+            <DropdownMenuItem
+              onClick={() => {
+                if (!requireSignIn()) setReportOpen(true);
+              }}
+            >
+              <Flag className="size-4" />
+              {t("report")}
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {!isOwnProfile ? (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => {
-            if (!requireSignIn()) setReportOpen(true);
-          }}
-          aria-label={t("report")}
-        >
-          <Flag className="size-4" />
-        </Button>
-      ) : null}
       <ReportModal
         open={reportOpen}
         onOpenChange={setReportOpen}

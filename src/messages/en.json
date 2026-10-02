@@ -3685,7 +3685,9 @@
         "showQrCode": "Show QR code",
         "qrCodeTitle": "Profile QR code",
         "qrCodeAlt": "QR code linking to this profile",
-        "qrCodeHint": "Scan to open this profile — handy for printing or a social media bio."
+        "qrCodeHint": "Scan to open this profile — handy for printing or a social media bio.",
+        "moreActions": "More actions",
+        "saveShort": "Save"
       },
       "metadata": {
         "title": "{name} — {role} | Fgrapher",
@@ -3773,7 +3775,9 @@
         "finalPriceNote": "The final price is set when the artist confirms.",
         "sendRequest": "Send booking request",
         "messageFirst": "Message first",
-        "noChargeNote": "Nothing charged yet. The artist confirms within 48 hours; the deposit is agreed directly."
+        "noChargeNote": "Nothing charged yet. The artist confirms within 48 hours; the deposit is agreed directly.",
+        "quickBook": "Quick booking",
+        "askPrice": "Ask for a price"
       },
       "productTab": {
         "empty": "This shop has not listed any products yet",
@@ -3789,7 +3793,10 @@
         "frame": "Frame 00 · Profile",
         "leader": "Portfolio ▸",
         "book": "Book",
-        "fullFrame": "View full frame"
+        "fullFrame": "View full image",
+        "backToResults": "Back to search results",
+        "results": "Results",
+        "rating": "{rating} · {count, plural, one {# review} other {# reviews}}"
       },
       "albumEditDialog": {
         "title": "Edit album",

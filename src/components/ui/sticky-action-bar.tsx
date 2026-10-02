@@ -23,6 +23,13 @@ interface StickyActionBarProps {
   busy?: boolean;
   /** Breakpoint from which the bar hides; defaults to lg. */
   hideFrom?: "md" | "lg";
+  /**
+   * Slides the bar out (220ms, instant under reduced motion) and takes it
+   * out of the tab order and the accessibility tree while hidden.
+   */
+  visible?: boolean;
+  /** Accessible name of the bar's region, e.g. "Đặt lịch nhanh". */
+  label?: string;
   className?: string;
 }
 
@@ -33,13 +40,20 @@ function StickyActionBar({
   secondary,
   busy = false,
   hideFrom = "lg",
+  visible = true,
+  label,
   className,
 }: StickyActionBarProps) {
   return (
     <div
       data-slot="sticky-action-bar"
+      role={label ? "region" : undefined}
+      aria-label={label}
+      aria-hidden={visible ? undefined : true}
+      inert={!visible}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border-subtle bg-bg-surface px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-border-subtle bg-bg-surface px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-transform duration-[220ms] ease-fg-out motion-reduce:transition-none",
+        !visible && "translate-y-full",
         hideFrom === "lg" ? "lg:hidden" : "md:hidden",
         className,
       )}

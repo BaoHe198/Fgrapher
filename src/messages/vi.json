@@ -3685,7 +3685,9 @@
         "showQrCode": "Tạo mã QR",
         "qrCodeTitle": "Mã QR hồ sơ",
         "qrCodeAlt": "Mã QR liên kết đến hồ sơ này",
-        "qrCodeHint": "Quét mã để mở hồ sơ này — tiện để in ra hoặc đăng trong bio mạng xã hội."
+        "qrCodeHint": "Quét mã để mở hồ sơ này — tiện để in ra hoặc đăng trong bio mạng xã hội.",
+        "moreActions": "Thao tác khác",
+        "saveShort": "Lưu"
       },
       "metadata": {
         "title": "{name} — {role} | Fgrapher",
@@ -3773,7 +3775,9 @@
         "finalPriceNote": "Giá cuối cùng chốt khi nghệ sĩ xác nhận.",
         "sendRequest": "Gửi yêu cầu đặt lịch",
         "messageFirst": "Nhắn tin trước",
-        "noChargeNote": "Chưa mất phí. Nghệ sĩ xác nhận trong 48 giờ, đặt cọc thỏa thuận trực tiếp."
+        "noChargeNote": "Chưa mất phí. Nghệ sĩ xác nhận trong 48 giờ, đặt cọc thỏa thuận trực tiếp.",
+        "quickBook": "Đặt lịch nhanh",
+        "askPrice": "Nhắn hỏi giá"
       },
       "productTab": {
         "empty": "Shop chưa đăng sản phẩm nào",
@@ -3789,7 +3793,10 @@
         "frame": "Khung 00 · Hồ sơ",
         "leader": "Portfolio ▸",
         "book": "Đặt lịch",
-        "fullFrame": "Xem nguyên khung"
+        "fullFrame": "Xem ảnh đầy đủ",
+        "backToResults": "Quay lại kết quả tìm kiếm",
+        "results": "Kết quả",
+        "rating": "{rating} · {count} đánh giá"
       },
       "albumEditDialog": {
         "title": "Chỉnh sửa album",

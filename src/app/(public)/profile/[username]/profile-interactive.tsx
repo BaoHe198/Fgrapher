@@ -4,7 +4,7 @@ import type { MediaType, ProfileCategory, Role } from "@prisma/client";
 import { CalendarDays, Loader2, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 
 import { BookingSidebar } from "@/components/profile/booking-sidebar";
 import { useMessaging } from "@/components/providers/messaging-provider";
@@ -171,6 +171,24 @@ export function ProfileInteractive({
   const [isOpeningChat, setIsOpeningChat] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [sidebarInView, setSidebarInView] = useState(false);
+  // The hero's own "Đặt lịch" (#hero-book). The sticky bar appears only
+  // once it has scrolled out above the screen (Core MVP pass, 02/10/2026).
+  const [heroCtaAbove, setHeroCtaAbove] = useState(false);
+  useEffect(() => {
+    const el = document.getElementById("hero-book");
+    if (!el || typeof IntersectionObserver === "undefined") {
+      startTransition(() => setHeroCtaAbove(true));
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry) return;
+      setHeroCtaAbove(
+        !entry.isIntersecting && entry.boundingClientRect.top < 0,
+      );
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // The sticky bar exists only to reach actions that are off-screen. Once the
   // BookingSidebar itself is on screen it carries the same two actions, so
@@ -410,39 +428,50 @@ export function ProfileInteractive({
         )}
       </div>
 
-      {isOwnProfile || sidebarInView ? null : (
+      {isOwnProfile ? null : (
         <StickyActionBar
+          label={stickyT("quickBook")}
+          visible={heroCtaAbove && !sidebarInView}
           title={
             isProductShop || costumes.length > 0 ? displayName : priceLabel
           }
           subtitle={trustLine}
           secondary={
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label={stickyT("stickyMessage")}
-              disabled={isOpeningChat}
-              onClick={onStickyMessage}
-            >
-              {isOpeningChat ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <MessageCircle className="size-4" />
-              )}
-            </Button>
-          }
-          primary={
-            isProductShop || costumes.length > 0 ? (
+            services.length === 0 ? undefined : (
               <Button
-                variant="accent"
+                variant="outline"
+                size="icon"
+                aria-label={stickyT("stickyMessage")}
                 disabled={isOpeningChat}
                 onClick={onStickyMessage}
               >
-                {stickyT("stickyMessage")}
+                {isOpeningChat ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <MessageCircle className="size-4" />
+                )}
+              </Button>
+            )
+          }
+          primary={
+            // No packages to pick a date for: ask for a price instead.
+            isProductShop || costumes.length > 0 || services.length === 0 ? (
+              <Button
+                variant="accent"
+                className="min-w-32"
+                disabled={isOpeningChat}
+                onClick={onStickyMessage}
+              >
+                {services.length === 0 &&
+                !isProductShop &&
+                costumes.length === 0
+                  ? stickyT("askPrice")
+                  : stickyT("stickyMessage")}
               </Button>
             ) : (
               <Button
                 variant="accent"
+                className="min-w-32"
                 onClick={() =>
                   document
                     .getElementById("booking-sidebar")

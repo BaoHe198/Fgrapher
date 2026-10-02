@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BadgeCheck, MapPin } from "lucide-react";
+import { BadgeCheck, ChevronLeft, MapPin, Star } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,14 +7,12 @@ import { cache } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FilmLeader } from "@/components/ui/film-leader";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { ProfileViewBeacon } from "@/components/profile/profile-view-beacon";
 import { auth } from "@/lib/auth";
 import { requireActiveSubscription } from "@/lib/auth-helpers";
-import { db } from "@/lib/db";
 import { getAgeRangeLabel } from "@/lib/account/age-gate";
-import { formatAdministrativeLocation } from "@/lib/location";
+import { formatAdministrativeLocation, shortPlace } from "@/lib/location";
 import { PROVIDER_ROLES, type ROLE_LABELS } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { responseBucket } from "@/lib/response-time";
@@ -141,7 +139,6 @@ export default async function PublicProfilePage({
     reviews,
     reviewStats,
     products,
-    followerCount,
     ownerAlbums,
     posts,
     costumes,
@@ -153,9 +150,6 @@ export default async function PublicProfilePage({
     features.marketplaceEnabled
       ? getShopProducts(user.id, activeProfile.role)
       : Promise.resolve([]),
-    features.socialFeedEnabled
-      ? db.follow.count({ where: { followingId: user.id } })
-      : Promise.resolve(0),
     // getPublicProfileUser's activeProfile.albums (below) is filtered to
     // isPublished albums with at least one APPROVED photo — correct for
     // what a visitor sees, but the owner needs to see and reorder
@@ -288,12 +282,6 @@ export default async function PublicProfilePage({
     stats.completedShoots > 0
       ? { value: String(stats.completedShoots), label: t("stats.shoots") }
       : null,
-    reviewStats.count > 0
-      ? {
-          value: averageRating.replace(".", ","),
-          label: t("stats.rating", { count: reviewStats.count }),
-        }
-      : null,
     activeProfile.yearsExperience
       ? {
           value: String(activeProfile.yearsExperience),
@@ -362,31 +350,39 @@ export default async function PublicProfilePage({
           counted, and a Server Component cannot set one — so the count is
           reported by this beacon after mount instead of inline here. */}
       {isOwnProfile ? null : <ProfileViewBeacon profileId={activeProfile.id} />}
-      {/* Wave 2: the profile opens on Phòng tối - the cover full-bleed at
-          about three quarters of the screen, the name set large over a
-          scrim, then a film leader cuts back to Paper for everything one
-          reads and fills in. */}
+      {/* The profile opens on Phòng tối (Core MVP pass, 02/10/2026): the
+          cover leads, and the name, facts and actions sit on solid
+          darkroom ground - below the photo on a phone, over a dense
+          scrim from 768px - so they never depend on how bright the cover
+          is. "Đặt lịch" is the one gold button. */}
       <section
         data-surface="darkroom"
         data-under-header=""
         aria-labelledby="profile-name"
-        className="relative isolate flex min-h-[76vh] flex-col justify-end overflow-hidden bg-dr-bg text-dr-text max-md:min-h-[68vh]"
+        className="relative isolate overflow-hidden bg-dr-bg text-dr-text md:flex md:min-h-[72vh] md:flex-col md:justify-end"
       >
-        <ProfileCover
-          variant="hero"
-          name={displayName}
-          coverImage={user.coverImage}
-          fallbackImage={activeProfile.media[0]?.url ?? null}
-          isOwnProfile={isOwnProfile}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-linear-to-t from-dr-bg via-[var(--dr-scrim)] via-50% to-transparent to-90%"
-        />
-        <span className="absolute top-4 left-5 rounded-full bg-[var(--dr-scrim)] px-3 py-1.5 font-mono text-meta tracking-[0.12em] text-dr-text-2 uppercase sm:left-8">
-          {t("hero.frame")}
-        </span>
-        <div className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-5 pt-32 pb-8 sm:px-8 sm:pb-10">
+        <div className="relative aspect-[4/3] md:absolute md:inset-0 md:aspect-auto">
+          <ProfileCover
+            variant="hero"
+            name={displayName}
+            coverImage={user.coverImage}
+            fallbackImage={activeProfile.media[0]?.url ?? null}
+            isOwnProfile={isOwnProfile}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-linear-to-t from-dr-bg via-transparent via-40% to-transparent md:via-[var(--dr-scrim)] md:via-50% md:to-90%"
+          />
+          <Link
+            href="/browse"
+            aria-label={t("hero.backToResults")}
+            className="focus-ring absolute top-4 left-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 text-body-sm font-semibold text-dr-text sm:left-8"
+          >
+            <ChevronLeft aria-hidden className="size-[18px]" />
+            <span className="max-md:hidden">{t("hero.results")}</span>
+          </Link>
+        </div>
+        <div className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-3 px-5 pt-2 pb-8 sm:px-8 md:gap-4 md:pt-32 md:pb-10">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-body-sm text-dr-text-2">
             <ProfileAvatar
               compact
@@ -403,7 +399,7 @@ export default async function PublicProfilePage({
                     profile.role === activeProfile.role ? "page" : undefined
                   }
                   className={cn(
-                    "focus-ring rounded-full border px-2.5 py-1",
+                    "focus-ring inline-flex min-h-11 items-center rounded-full border px-3",
                     profile.role === activeProfile.role
                       ? "border-gold-400 text-dr-text"
                       : "border-dr-line-2 hover:text-dr-text",
@@ -418,7 +414,7 @@ export default async function PublicProfilePage({
             {profileLocation ? (
               <span className="inline-flex items-center gap-1">
                 <MapPin aria-hidden className="size-3.5" />
-                {profileLocation}
+                {shortPlace(profileLocation)}
               </span>
             ) : null}
             {isVerified ? (
@@ -439,55 +435,53 @@ export default async function PublicProfilePage({
           </div>
           <h1
             id="profile-name"
-            className="max-w-6xl font-display text-[clamp(2.75rem,8vw,7rem)] leading-[0.92] font-semibold tracking-[-0.035em] text-balance break-words text-dr-text"
+            className="max-w-6xl font-display text-[clamp(2.25rem,7vw,6rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-balance break-words text-dr-text"
           >
             {displayName}
           </h1>
-          <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
-            {headerStats.length > 0 ? (
-              <dl className="flex flex-wrap gap-x-8 gap-y-2">
-                {headerStats.map((stat) => (
-                  <div key={stat.label} className="flex flex-col">
-                    <dt className="order-last text-meta text-dr-text-2">
-                      {stat.label}
-                    </dt>
-                    <dd className="font-mono text-heading-lg font-semibold! tabular-nums text-dr-text">
-                      {stat.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            ) : reviewStats.count === 0 ? (
-              <span className="text-body-sm text-dr-text-2">
-                {t("status.new")}
+          <p className="flex flex-wrap gap-x-4 gap-y-1 text-body-md text-dr-text-2">
+            {reviewStats.count > 0 ? (
+              <span className="inline-flex items-center gap-1 text-dr-text">
+                <Star aria-hidden className="size-4 fill-current" />
+                {t("hero.rating", {
+                  rating: averageRating.replace(".", ","),
+                  count: reviewStats.count,
+                })}
               </span>
+            ) : (
+              <span>{t("status.new")}</span>
+            )}
+            {headerStats.map((stat) => (
+              <span key={stat.label}>
+                {stat.value} {stat.label}
+              </span>
+            ))}
+          </p>
+          <div className="mt-1 flex flex-col gap-3 md:flex-row md:items-center">
+            {isProviderRole && user.acceptingBookings && !isOwnProfile ? (
+              <Button
+                id="hero-book"
+                variant="accent"
+                size="lg"
+                nativeButton={false}
+                className="max-md:w-full"
+                render={<Link href={`/booking/${user.id}`} />}
+              >
+                {t("hero.book")}
+              </Button>
             ) : null}
-            <div className="flex flex-wrap items-center gap-3">
-              {isProviderRole && user.acceptingBookings && !isOwnProfile ? (
-                <Button
-                  variant="accent"
-                  size="lg"
-                  nativeButton={false}
-                  render={<Link href={`/booking/${user.id}`} />}
-                >
-                  {t("hero.book")}
-                </Button>
-              ) : null}
-              <ProfileActions
-                targetUserId={user.id}
-                profileId={activeProfile.id}
-                initialFollowerCount={followerCount}
-                shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/profile/${username}`}
-                socialFeedEnabled={features.socialFeedEnabled}
-                isOwnProfile={isOwnProfile}
-              />
-            </div>
+            <ProfileActions
+              targetUserId={user.id}
+              profileId={activeProfile.id}
+              shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/profile/${username}`}
+              socialFeedEnabled={features.socialFeedEnabled}
+              isOwnProfile={isOwnProfile}
+            />
           </div>
         </div>
       </section>
-      <FilmLeader label="00A" trailing={t("hero.leader")} />
 
-      <div className="mx-auto w-full max-w-[1440px] px-5 pb-[72px] sm:px-8">
+      <div className="mx-auto w-full max-w-[1440px] px-5 pb-[72px] max-lg:pb-[calc(112px+env(safe-area-inset-bottom))] sm:px-8">
         <div className="flex flex-col gap-[18px] pt-8">
           {activeProfile.description ? (
             <p className="my-5 max-w-[640px] text-body-lg text-text-secondary">

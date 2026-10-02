@@ -99,10 +99,11 @@ export function ProfileCover({
               <button
                 type="button"
                 onClick={() => setFullFrame(true)}
-                className="focus-ring absolute top-4 right-5 z-10 inline-flex items-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 py-1.5 font-mono text-meta tracking-[0.12em] text-dr-text uppercase sm:right-8"
+                aria-label={t("fullFrame")}
+                className="focus-ring absolute top-4 right-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 text-body-sm font-semibold text-dr-text sm:right-8"
               >
-                <Maximize2 aria-hidden className="size-3.5" />
-                {t("fullFrame")}
+                <Maximize2 aria-hidden className="size-4" />
+                <span className="max-md:hidden">{t("fullFrame")}</span>
               </button>
               {fullFrame ? (
                 <MediaLightbox
@@ -134,7 +135,7 @@ export function ProfileCover({
             aria-label={t("editCoverAria")}
             className={
               hero
-                ? "focus-ring absolute top-14 right-5 z-10 flex items-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 py-1.5 text-body-sm text-dr-text sm:right-8"
+                ? "focus-ring absolute top-[4.25rem] right-4 z-10 min-h-11 sm:right-8 flex items-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 py-1.5 text-body-sm text-dr-text sm:right-8"
                 : "absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-body-sm text-white"
             }
           >
