@@ -12,7 +12,7 @@ const read = (rel: string) => readFileSync(path.join(repoRoot, rel), "utf8");
 
 const CONSENT_CHECKBOXES = [
   {
-    file: "src/app/(public)/booking/[providerId]/booking-wizard.tsx",
+    file: "src/app/(focus)/booking/[providerId]/booking-wizard.tsx",
     key: "stepReview.agreeTerms",
   },
   {

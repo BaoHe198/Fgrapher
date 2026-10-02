@@ -615,7 +615,12 @@
         "available": "Còn trống",
         "full": "Đã kín",
         "off": "Nghệ sĩ nghỉ"
-      }
+      },
+      "today": "Hôm nay",
+      "selected": "đã chọn",
+      "fullShort": "Kín",
+      "weekLabel": "7 ngày tới",
+      "announceSelected": "Đã chọn {date}"
     },
     "timeSlotGrid": {
       "goldenLegend": "Giờ vàng: ánh sáng đẹp gần lúc mặt trời mọc và lặn",
@@ -3517,7 +3522,14 @@
           "PROVIDER": "Studio hoặc địa điểm quen của nghệ sĩ",
           "CUSTOMER": "Nhà riêng, văn phòng, nhà hàng… bạn chọn",
           "OUTDOOR": "Công viên, phố, bãi biển… ghi địa chỉ hoặc tên nơi chụp"
-        }
+        },
+        "exit": "Thoát",
+        "bookingWith": "Đặt lịch với",
+        "savedAt": "✓ Đã lưu nháp {time}",
+        "autosaves": "Nháp tự lưu",
+        "stepDone": "đã xong",
+        "stepCurrent": "bước hiện tại",
+        "stepTodo": "chưa làm"
       }
     },
     "browse": {

@@ -615,7 +615,12 @@
         "available": "Available",
         "full": "Fully booked",
         "off": "Artist's day off"
-      }
+      },
+      "today": "Today",
+      "selected": "selected",
+      "fullShort": "Full",
+      "weekLabel": "Next 7 days",
+      "announceSelected": "Selected {date}"
     },
     "timeSlotGrid": {
       "goldenLegend": "Golden hour: soft light near sunrise and sunset",
@@ -3517,7 +3522,14 @@
           "PROVIDER": "The artist's studio or usual place",
           "CUSTOMER": "A home, office, restaurant… of your choice",
           "OUTDOOR": "A park, street, beach… give the address or name"
-        }
+        },
+        "exit": "Exit",
+        "bookingWith": "Booking with",
+        "savedAt": "✓ Draft saved {time}",
+        "autosaves": "Draft saves itself",
+        "stepDone": "done",
+        "stepCurrent": "current step",
+        "stepTodo": "to do"
       }
     },
     "browse": {

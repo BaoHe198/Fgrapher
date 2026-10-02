@@ -36,7 +36,7 @@ test("customer books the fixture provider, who accepts it", async ({
   await page.getByRole("button", { name: "Next month" }).click();
   await page
     .locator(
-      '[data-slot="availability-calendar"] button[aria-pressed]:not([aria-disabled])',
+      '[data-slot="availability-calendar"] button[data-date]:not([aria-disabled])',
     )
     .first()
     .click();

@@ -88,65 +88,64 @@ interface StepProgressProps {
   onStepClick?: (index: number) => void;
   /** Accessible name for the whole strip, e.g. "Tiến trình đặt lịch". */
   label: string;
+  /** Hidden status read after each step's name. */
+  statusLabels?: { done: string; current: string; todo: string };
   className?: string;
 }
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
-// The steps variant: a strip of film frames with a mono frame counter
-// ("03/06"), the Fgrapher answer to numbered circles (audit §06). Finished
-// frames are brand-primary, the current one is gold - a "develop" moment -
-// and the rest wait on the sunken track. Frame labels hide on phones; the
-// counter and the current step's name above the strip carry it there.
+// The steps variant (Core MVP pass, 02/10/2026): every step's name under
+// its bar - no mono counter, no frame numbers in a booking flow. Finished
+// steps carry a ✓ and can be revisited; each step also says, out of
+// sight, whether it is done, current or still to do.
 function StepProgress({
   steps,
   current,
   onStepClick,
   label,
+  statusLabels,
   className,
 }: StepProgressProps) {
   return (
-    <nav aria-label={label} className={cn("flex flex-col gap-3", className)}>
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-body-sm font-semibold! text-text-primary md:invisible">
-          {steps[current]}
-        </span>
-        <span className="font-mono text-meta tabular-nums text-text-tertiary">
-          {pad(current + 1)}/{pad(steps.length)}
-        </span>
-      </div>
+    <nav aria-label={label} className={cn("flex flex-col", className)}>
       <ol className="flex gap-1.5 md:gap-2">
         {steps.map((name, index) => {
           const done = index < current;
           const active = index === current;
           const clickable = done && onStepClick !== undefined;
+          const status = statusLabels
+            ? done
+              ? statusLabels.done
+              : active
+                ? statusLabels.current
+                : statusLabels.todo
+            : null;
           const frame = (
             <>
               <span
                 aria-hidden
                 className={cn(
-                  "block h-1.5 w-full rounded-full transition-colors duration-[var(--fg-dur-260)] ease-fg-out",
+                  "block h-1 w-full rounded-full transition-colors duration-[var(--fg-dur-260)] ease-fg-out",
                   done
                     ? "bg-brand-primary"
                     : active
                       ? "bg-gold-400"
-                      : "bg-bg-sunken",
+                      : "bg-border-default",
                 )}
               />
               <span
                 className={cn(
-                  "hidden items-center gap-2 text-body-sm md:flex",
+                  "flex items-center gap-1 text-meta sm:text-body-sm",
                   active
                     ? "font-semibold! text-text-primary"
                     : done
                       ? "text-text-secondary"
                       : "text-text-tertiary",
+                  !active && "max-sm:sr-only",
                 )}
               >
-                <span className="font-mono text-meta tabular-nums">
-                  {pad(index + 1)}
-                </span>
+                {done ? <span aria-hidden>✓</span> : null}
                 <span className="truncate">{name}</span>
+                {status ? <span className="sr-only">, {status}</span> : null}
               </span>
             </>
           );
@@ -161,12 +160,14 @@ function StepProgress({
                   type="button"
                   data-interactive="true"
                   onClick={() => onStepClick(index)}
-                  className="focus-ring flex w-full flex-col gap-2 rounded-[var(--fg-radius-sm)] text-left hover:[&>span:last-child]:text-text-primary"
+                  className="focus-ring flex min-h-11 w-full flex-col gap-1.5 rounded-[var(--fg-radius-sm)] pt-1 text-left hover:[&>span:last-child]:text-text-primary"
                 >
                   {frame}
                 </button>
               ) : (
-                <span className="flex w-full flex-col gap-2">{frame}</span>
+                <span className="flex w-full flex-col gap-1.5 pt-1">
+                  {frame}
+                </span>
               )}
             </li>
           );

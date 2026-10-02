@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
-import { frameLabel } from "@/lib/media/frame-label";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { minutesToTime, type SunTimes, timeToMinutes } from "@/lib/sun";
 import { cn } from "@/lib/utils";
@@ -34,7 +33,9 @@ export function BookingVisual({
   showSky,
 }: BookingVisualProps) {
   const t = useTranslations("sharedComponents.bookingVisual");
-  const kicker = `${t("frame", { n: step + 1 })} · ${stepName}`;
+  // A plain step name - no frame numbers in a booking flow (Core MVP pass).
+  const kicker = stepName;
+  void step;
 
   let body: React.ReactNode = null;
   let caption: string | null = null;
@@ -94,7 +95,7 @@ export function BookingVisual({
               : "grid-cols-3 grid-rows-2",
         )}
       >
-        {sheet.map((src, index) => (
+        {sheet.map((src) => (
           <span key={src} className="relative block bg-dr-surface">
             <Image
               src={buildMediaVariants(src).medium}
@@ -104,9 +105,6 @@ export function BookingVisual({
               sizes="200px"
               className="object-contain p-1.5"
             />
-            <span className="absolute bottom-1.5 left-2 font-mono text-meta text-dr-text [text-shadow:0_1px_2px_var(--dr-bg)]">
-              {frameLabel(index)}
-            </span>
           </span>
         ))}
       </div>
@@ -127,7 +125,7 @@ export function BookingVisual({
         className="absolute inset-x-0 bottom-0 h-2/5 bg-linear-to-t from-[hsl(30_14%_5%/0.86)] to-transparent"
       />
       <figcaption className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-[clamp(14px,2vw,24px)]">
-        <span className="font-mono text-meta tracking-[0.12em] text-dr-text-2 uppercase">
+        <span className="text-body-sm font-semibold text-dr-text-2">
           {kicker}
         </span>
         {caption ? (
