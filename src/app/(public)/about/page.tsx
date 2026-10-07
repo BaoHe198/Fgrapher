@@ -11,7 +11,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { EditorialHero } from "@/components/ui/editorial-hero";
-import { buildMediaVariants } from "@/lib/media/variants";
 import { getAboutFrames, HOME_ROLES } from "@/services/home";
 
 import { ContactForm } from "../contact/contact-form";
@@ -102,7 +101,7 @@ export default async function AboutPage() {
         media={{
           type: "contact",
           frames: sheetFrames.map(({ src, label, alt, meta }) => ({
-            src: src ? buildMediaVariants(src).medium : null,
+            src,
             label,
             alt,
             meta,

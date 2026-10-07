@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 export interface StoryFrame {
@@ -73,10 +72,9 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
         >
           {frame.src ? (
             <Image
-              src={buildMediaVariants(frame.src).thumbnail}
+              src={frame.src}
               alt=""
               fill
-              unoptimized
               sizes="80px"
               className={cn("object-contain", !compact && "p-[3px]")}
             />
@@ -121,10 +119,9 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
                 <Image
                   // A new key re-runs the develop for each chapter's photo.
                   key={stage.src}
-                  src={buildMediaVariants(stage.src).medium}
+                  src={stage.src}
                   alt={stage.alt}
                   fill
-                  unoptimized
                   sizes="(min-width: 1024px) 55vw, 100vw"
                   className="animate-develop object-contain"
                 />
@@ -159,11 +156,11 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
                 <div className="grid aspect-square place-items-center border border-border-subtle bg-bg-sunken p-3">
                   {frame?.src ? (
                     <Image
-                      src={buildMediaVariants(frame.src).medium}
+                      src={frame.src}
                       alt={frame.alt}
                       width={frame.width ?? 1200}
                       height={frame.height ?? 900}
-                      unoptimized
+                      sizes="(min-width: 1024px) 40vw, 90vw"
                       loading="lazy"
                       className="max-h-full w-auto max-w-full object-contain"
                     />

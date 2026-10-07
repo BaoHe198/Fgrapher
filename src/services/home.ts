@@ -1,5 +1,6 @@
 import type { ProfileCategory, Role } from "@prisma/client";
 
+import { ROLE_PHOTOS, STYLE_PHOTOS } from "@/lib/constants/showcase-images";
 import { db } from "@/lib/db";
 import {
   CACHE_KEY_VERSION,
@@ -13,25 +14,12 @@ import { PUBLIC_USER_FILTER, SEARCHABLE_ROLES } from "@/services/search";
 
 // Reads for the landing page's redesign sections (09/2026): the "Bạn cần
 // ai?" role tiles, "Duyệt theo phong cách" collages and the trust block.
-// Every photo here is an APPROVED, not-deleted portfolio image of a
-// published, public provider - the same bar the featured strip and the
-// public profile already apply - so nothing reaches the home page that
-// isn't already public elsewhere. The hero stays on the brand's own
-// artwork (see the comment in app/(public)/page.tsx).
+// The tiles, collages and the About sheet show fixed showcase artwork
+// (lib/constants/showcase-images.ts, owner 08/10/2026), never a provider's
+// upload; only the review quote and province count are read here.
 //
 // Cached for the featured strip's TTL under the `search` tag, which every
-// profile / media-moderation / review mutation already invalidates.
-
-const PUBLIC_IMAGE_WHERE = {
-  type: "IMAGE",
-  moderationStatus: "APPROVED",
-  deletedAt: null,
-  profile: {
-    isPublished: true,
-    role: { in: SEARCHABLE_ROLES },
-    user: PUBLIC_USER_FILTER,
-  },
-} as const;
+// review mutation already invalidates.
 
 /** Role tiles, in the order the design shows them. */
 export const HOME_ROLES: Role[] = [
@@ -55,7 +43,7 @@ export const HOME_STYLES: ProfileCategory[] = [
 
 export interface HomeRoleTile {
   role: Role;
-  photoUrl: string | null;
+  photoUrl: string;
 }
 
 export interface HomeStyleTile {
@@ -70,51 +58,20 @@ export interface HomeReviewQuote {
   createdAt: Date;
 }
 
-async function loadRoleTiles(): Promise<HomeRoleTile[]> {
-  const roles = HOME_ROLES.filter((role) => SEARCHABLE_ROLES.includes(role));
-  return Promise.all(
-    roles.map(async (role) => {
-      const media = await db.profileMedia.findFirst({
-        where: {
-          ...PUBLIC_IMAGE_WHERE,
-          profile: { ...PUBLIC_IMAGE_WHERE.profile, role },
-        },
-        orderBy: { createdAt: "desc" },
-        select: { url: true },
-      });
-      return { role, photoUrl: media?.url ?? null };
-    }),
+type ShowcaseRole = keyof typeof ROLE_PHOTOS;
+type ShowcaseStyle = keyof typeof STYLE_PHOTOS;
+
+function loadRoleTiles(): HomeRoleTile[] {
+  return HOME_ROLES.filter((role) => SEARCHABLE_ROLES.includes(role)).map(
+    (role) => ({ role, photoUrl: ROLE_PHOTOS[role as ShowcaseRole][0].src }),
   );
 }
 
-async function loadStyleTiles(): Promise<HomeStyleTile[]> {
-  return Promise.all(
-    HOME_STYLES.map(async (category) => {
-      // A photo counts for a style when its album is filed under it, or -
-      // for photos outside any categorised album - when the provider lists
-      // the style. `distinct` spreads the three frames across providers.
-      const media = await db.profileMedia.findMany({
-        where: {
-          ...PUBLIC_IMAGE_WHERE,
-          OR: [
-            { album: { category, deletedAt: null, isPublished: true } },
-            {
-              album: null,
-              profile: {
-                ...PUBLIC_IMAGE_WHERE.profile,
-                categories: { has: category },
-              },
-            },
-          ],
-        },
-        orderBy: { createdAt: "desc" },
-        distinct: ["profileId"],
-        take: 3,
-        select: { url: true },
-      });
-      return { category, photoUrls: media.map((m) => m.url) };
-    }),
-  );
+function loadStyleTiles(): HomeStyleTile[] {
+  return HOME_STYLES.map((category) => ({
+    category,
+    photoUrls: STYLE_PHOTOS[category as ShowcaseStyle].map((p) => p.src),
+  }));
 }
 
 async function loadReviewQuote(): Promise<HomeReviewQuote | null> {
@@ -145,31 +102,30 @@ async function loadReviewQuote(): Promise<HomeReviewQuote | null> {
 }
 
 async function loadHomeShowcase() {
-  const [roles, styles, review, provinceCount] = await Promise.all([
-    loadRoleTiles(),
-    loadStyleTiles(),
+  const [review, provinceCount] = await Promise.all([
     loadReviewQuote(),
     db.province.count(),
   ]);
-  return { roles, styles, review, provinceCount };
+  return { review, provinceCount };
 }
 
 const getHomeShowcaseCached = unstable_cache(
   loadHomeShowcase,
-  [CACHE_KEY_VERSION, "home", "showcase"],
+  [CACHE_KEY_VERSION, "home", "showcase-quote"],
   { tags: [CACHE_TAGS.search], revalidate: CACHE_TTL.featured },
 );
 
 export async function getHomeShowcase() {
-  return reviveDates(await getHomeShowcaseCached());
+  return {
+    ...reviveDates(await getHomeShowcaseCached()),
+    roles: loadRoleTiles(),
+    styles: loadStyleTiles(),
+  };
 }
 
 // ---------------------------------------------------------------------------
-// Giới thiệu F (wave 2): a 12-frame contact sheet, two rolls of the six
-// roles in HOME_ROLES order - 01A-01F the newest photo of each role, 02A-02F
-// the next one, from a different provider where there is one. Same public
-// bar as the rest of this file; an empty slot stays empty (null), it is
-// never filled with stock imagery.
+// Giới thiệu F (wave 2): a 12-photo sheet, two rows of the six roles in
+// HOME_ROLES order - the role tile's photo, then a second showcase photo.
 // ---------------------------------------------------------------------------
 
 export interface AboutFrame {
@@ -179,46 +135,16 @@ export interface AboutFrame {
   height: number | null;
 }
 
-async function loadAboutFrames(): Promise<AboutFrame[]> {
-  const perRole = await Promise.all(
-    HOME_ROLES.map((role) =>
-      db.profileMedia.findMany({
-        where: {
-          ...PUBLIC_IMAGE_WHERE,
-          profile: { ...PUBLIC_IMAGE_WHERE.profile, role },
-        },
-        orderBy: { createdAt: "desc" },
-        take: 8,
-        select: { url: true, width: true, height: true, profileId: true },
-      }),
-    ),
-  );
-  // The second roll prefers another provider, else that provider's next photo.
-  const picks = perRole.map((rows) => {
-    const first = rows[0];
-    const second =
-      rows.find((row) => first && row.profileId !== first.profileId) ?? rows[1];
-    return [first, second];
-  });
-  return [0, 1].flatMap((roll) =>
-    HOME_ROLES.map((role, i) => {
-      const media = picks[i][roll];
+export async function getAboutFrames(): Promise<AboutFrame[]> {
+  return [0, 1].flatMap((row) =>
+    HOME_ROLES.map((role) => {
+      const photo = ROLE_PHOTOS[role as ShowcaseRole][row];
       return {
         role,
-        url: media?.url ?? null,
-        width: media?.width ?? null,
-        height: media?.height ?? null,
+        url: photo?.src ?? null,
+        width: photo?.width ?? null,
+        height: photo?.height ?? null,
       };
     }),
   );
-}
-
-const getAboutFramesCached = unstable_cache(
-  loadAboutFrames,
-  [CACHE_KEY_VERSION, "home", "about-frames"],
-  { tags: [CACHE_TAGS.search], revalidate: CACHE_TTL.featured },
-);
-
-export async function getAboutFrames() {
-  return getAboutFramesCached();
 }

@@ -11,10 +11,10 @@ interface StyleGridProps {
 }
 
 // "Duyệt theo phong cách" - each style is a three-frame cut of a contact
-// sheet (one large frame, two small) from real approved portfolio photos,
-// opening search filtered to that style. A style with no photo yet is left
-// out rather than shown as empty frames or padded with stock imagery, and
-// the block disappears if no style has a photo. Phones skip this block (the design's mobile home filters the featured list by
+// sheet (one large frame, two small) of fixed showcase artwork
+// (lib/constants/showcase-images.ts), opening search filtered to that
+// style. A style without photos is left out, and the block disappears if
+// none has any. Phones skip this block (the design's mobile home filters the featured list by
 // style instead).
 export async function StyleGrid({ tiles }: StyleGridProps) {
   const t = await getTranslations();

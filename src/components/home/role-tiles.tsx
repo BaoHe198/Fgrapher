@@ -1,19 +1,10 @@
-import type { Role } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { FgImage } from "@/components/ui/fg-image";
 import { RiseOnView } from "@/components/ui/rise-on-view";
+import { ROLE_PHOTOS } from "@/lib/constants/showcase-images";
 import type { HomeRoleTile } from "@/services/home";
-
-// Brand artwork for the four roles the hero already illustrates, used
-// until a provider of that role has an approved photo to show instead.
-const FALLBACK_PHOTO: Partial<Record<Role, string>> = {
-  PHOTOGRAPHER: "/images/hero-professions/photographer.jpg",
-  VIDEOGRAPHER: "/images/hero-professions/videographer.jpg",
-  MAKEUP_ARTIST: "/images/hero-professions/makeup-artist.jpg",
-  STUDIO: "/images/hero-professions/studio.jpg",
-};
 
 interface RoleTilesProps {
   tiles: HomeRoleTile[];
@@ -30,7 +21,7 @@ export async function RoleTiles({ tiles, marketplaceEnabled }: RoleTilesProps) {
       key: tile.role,
       href: `/browse?roles=${tile.role}`,
       label: t(`roleTiles.${tile.role}`),
-      photo: tile.photoUrl ?? FALLBACK_PHOTO[tile.role] ?? null,
+      photo: tile.photoUrl,
       phoneOnly: false,
     })),
     ...(marketplaceEnabled
@@ -39,7 +30,7 @@ export async function RoleTiles({ tiles, marketplaceEnabled }: RoleTilesProps) {
             key: "CAMERA_SHOP",
             href: "/shop",
             label: t("roleTiles.CAMERA_SHOP"),
-            photo: null,
+            photo: ROLE_PHOTOS.CAMERA_SHOP[0].src,
             phoneOnly: true,
           },
         ]
