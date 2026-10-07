@@ -44,7 +44,7 @@ export default async function CommunityPage() {
             {t("rail.featured")}
           </h2>
           <ol className="flex flex-col gap-3">
-            {featured.map((album, index) => (
+            {featured.map((album) => (
               <li key={album.albumId}>
                 <Link
                   href={`/profile/${album.username}/albums/${album.albumId}`}
@@ -63,9 +63,6 @@ export default async function CommunityPage() {
                     ) : null}
                   </span>
                   <span className="flex min-w-0 flex-col">
-                    <span className="font-mono text-meta text-dr-text-3">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
                     <span className="truncate text-body-sm font-semibold text-dr-text group-hover:underline">
                       {album.title}
                     </span>

@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 
 import { FgImage } from "./fg-image";
 
-// Magazine-style page head (wave 2 kit §02): a mono frame eyebrow
-// ("KHUNG 04 · HỒ SƠ"), a title set as the image of the page, and beside
+// Magazine-style page head (wave 2 kit §02): a mono section eyebrow
+// ("GIỚI THIỆU"), a title set as the image of the page, and beside
 // it one large photo or a strip of contact-sheet frames. Text and buttons
 // appear at once; only the photo develops. On Phòng tối it is also a block
 // the sticky header switches colour over.
@@ -17,19 +17,18 @@ type Media =
       /** Six to a row; twelve make two rolls. `meta` sits under the frame. */
       frames: {
         src: string | null;
+        /** Unique per frame; used as the list key, never shown. */
         label: string;
         alt?: string;
         meta?: string;
       }[];
       picked?: number;
-      /** Edge print above the sheet, e.g. ["FGRAPHER 400", "12 KHUNG"]. */
+      /** Optional caption pair printed above the sheet. */
       edge?: [string, string];
     };
 
 interface EditorialHeroProps {
   surface?: "paper" | "darkroom";
-  /** "04" + "HỒ SƠ" → "KHUNG 04 · HỒ SƠ". */
-  frame: string;
   section: string;
   title: React.ReactNode;
   lede?: React.ReactNode;
@@ -42,7 +41,6 @@ interface EditorialHeroProps {
 
 export function EditorialHero({
   surface = "paper",
-  frame,
   section,
   title,
   lede,
@@ -67,7 +65,7 @@ export function EditorialHero({
       >
         <div className="flex min-w-0 flex-col gap-5">
           <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-            KHUNG {frame} · {section}
+            {section}
           </span>
           <h1 className="font-display text-[clamp(2.75rem,6.6vw,6rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-balance break-words text-text-primary">
             {title}
@@ -127,7 +125,6 @@ export function EditorialHero({
                       />
                     </span>
                     <span className="flex justify-between gap-2 font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-                      <span>{item.label}</span>
                       {item.meta ? (
                         <span className="truncate">{item.meta}</span>
                       ) : null}

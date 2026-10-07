@@ -94,26 +94,13 @@ export default async function LandingPage() {
     categories: profile.categories,
   }));
 
-  // Contact-sheet frame numbers run down the page: the hero is 01, the
-  // role tiles follow, then the style collages (redesign 09/2026, §06).
-  const roleFrame = 2;
-  const styleFrame = roleFrame + showcase.roles.length;
-
   return (
     <>
-      {/* HERO - frame 01 */}
+      {/* HERO */}
       <section className="relative bg-green-900 text-gold-50">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-7 px-8 py-12 max-md:gap-5 max-md:px-5 max-md:py-8">
           <div className="grid grid-cols-[1.4fr_1fr] items-center gap-10 max-lg:contents">
             <div className="flex flex-col gap-5 max-lg:contents">
-              <span className="flex items-center gap-3 font-mono text-meta tracking-[0.12em] text-gold-400 uppercase">
-                {t("home.frameLabel", { n: "01" })}
-                <span
-                  aria-hidden
-                  className="h-px flex-1 bg-gold-400/40 lg:max-w-16"
-                />
-                {t("home.scope")}
-              </span>
               <h1 className="m-0 text-display-lg tracking-[-0.02em] lg:text-display-xl">
                 {t("hero.title")}
               </h1>
@@ -143,7 +130,6 @@ export default async function LandingPage() {
       <RoleTiles
         tiles={showcase.roles}
         marketplaceEnabled={features.marketplaceEnabled}
-        firstFrame={roleFrame}
       />
 
       {artists.length > 0 ? (
@@ -159,7 +145,7 @@ export default async function LandingPage() {
         </section>
       ) : null}
 
-      <StyleGrid tiles={showcase.styles} firstFrame={styleFrame} />
+      <StyleGrid tiles={showcase.styles} />
 
       <MapTeaser
         artists={featuredProfiles.map((profile) => ({

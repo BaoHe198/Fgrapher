@@ -32,7 +32,6 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/format";
-import { frameLabel } from "@/lib/media/frame-label";
 import { buildMediaVariants } from "@/lib/media/variants";
 import {
   avatarFallbackColor,
@@ -281,9 +280,6 @@ export function RequestDetail({
                 sizes={size === "card" ? "120px" : "90px"}
                 className="object-contain"
               />
-            </span>
-            <span className="text-meta text-text-tertiary">
-              {frameLabel(i)}
             </span>
           </li>
         ))}

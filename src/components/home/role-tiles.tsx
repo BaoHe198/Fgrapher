@@ -6,8 +6,6 @@ import { FgImage } from "@/components/ui/fg-image";
 import { RiseOnView } from "@/components/ui/rise-on-view";
 import type { HomeRoleTile } from "@/services/home";
 
-import { FrameNumber } from "./frame-number";
-
 // Brand artwork for the four roles the hero already illustrates, used
 // until a provider of that role has an approved photo to show instead.
 const FALLBACK_PHOTO: Partial<Record<Role, string>> = {
@@ -21,17 +19,11 @@ interface RoleTilesProps {
   tiles: HomeRoleTile[];
   /** Adds the Chợ F tile (phones only, as in the design). */
   marketplaceEnabled: boolean;
-  /** Frame number of the first tile; the hero is frame 01. */
-  firstFrame: number;
 }
 
 // "Bạn cần ai?" - one photo tile per role, each opening search filtered to
 // that role. Six across on a desktop; a sideways-scrolling strip on phones.
-export async function RoleTiles({
-  tiles,
-  marketplaceEnabled,
-  firstFrame,
-}: RoleTilesProps) {
+export async function RoleTiles({ tiles, marketplaceEnabled }: RoleTilesProps) {
   const t = await getTranslations("home");
   const items = [
     ...tiles.map((tile) => ({
@@ -83,12 +75,7 @@ export async function RoleTiles({
                 sizes="(min-width: 768px) 16vw, 132px"
                 className="transition-[transform,box-shadow] duration-[var(--fg-dur-260)] ease-fg-out group-hover/tile:-translate-y-0.5 group-hover/tile:shadow-[var(--shadow-md)] motion-reduce:group-hover/tile:translate-y-0"
                 imageClassName="transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/tile:scale-[1.03]"
-              >
-                <FrameNumber
-                  n={firstFrame + index}
-                  className="absolute top-2 left-2"
-                />
-              </FgImage>
+              />
               <span className="text-body-sm font-semibold! text-text-primary">
                 {item.label}
               </span>

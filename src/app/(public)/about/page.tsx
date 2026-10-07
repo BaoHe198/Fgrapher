@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/accordion";
 import { EditorialHero } from "@/components/ui/editorial-hero";
 import { FilmLeader } from "@/components/ui/film-leader";
-import { frameLabel } from "@/lib/media/frame-label";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { getAboutFrames, HOME_ROLES } from "@/services/home";
 
@@ -51,7 +50,7 @@ export default async function AboutPage() {
     src: frame.url,
     width: frame.width,
     height: frame.height,
-    label: frameLabel(index),
+    label: String(index + 1),
     meta: roleShort(frame.role),
     alt: t("hero.frameAlt", { role: tRole(frame.role) }),
   }));
@@ -59,8 +58,7 @@ export default async function AboutPage() {
   const chapters: StoryChapter[] = CHAPTER_FRAMES.map((frame, i) => ({
     frame,
     eyebrow: t("story.chapter", {
-      n: String(i + 1).padStart(2, "0"),
-      frame: frameLabel(frame),
+      n: i + 1,
       role: roleShort(HOME_ROLES[frame % 6]),
     }),
     problem: t(`story.c${i + 1}p`),
@@ -68,12 +66,12 @@ export default async function AboutPage() {
   }));
 
   const customerSteps = [1, 2, 3].map((n) => ({
-    label: `03${"ABC"[n - 1]}`,
+    label: String(n),
     title: t(`paths.s${n}t`),
     body: t(`paths.s${n}b`),
   }));
   const artistSteps = [4, 5, 6].map((n) => ({
-    label: `03${"DEF"[n - 4]}`,
+    label: String(n - 3),
     title: t(`paths.s${n}t`),
     body: t(`paths.s${n}b`),
   }));
@@ -82,7 +80,6 @@ export default async function AboutPage() {
     <>
       <EditorialHero
         surface="darkroom"
-        frame="00"
         section={t("hero.section")}
         title={t("hero.title")}
         lede={t("hero.lede")}
@@ -112,7 +109,6 @@ export default async function AboutPage() {
             alt,
             meta,
           })),
-          edge: [t("hero.edgeLeft"), t("hero.edgeRight")],
         }}
       />
 
@@ -136,10 +132,7 @@ export default async function AboutPage() {
           </div>
           <AboutStory frames={sheetFrames} chapters={chapters} />
         </div>
-        <FilmLeader
-          label={`◂ ${frameLabel(11)}`}
-          trailing={t("story.leader")}
-        />
+        <FilmLeader trailing={t("story.leader")} />
       </section>
 
       <div className="bg-bg-page">
@@ -218,7 +211,7 @@ export default async function AboutPage() {
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className="grid grid-cols-[3rem_1fr] gap-x-4 gap-y-2">
                 <span className="pt-1 font-mono text-meta tracking-[0.12em] text-text-tertiary">
-                  04{"ABCD"[n - 1]}
+                  {n}
                 </span>
                 <div className="flex flex-col gap-2">
                   <h3 className="text-heading-sm text-text-primary">

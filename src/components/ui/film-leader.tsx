@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 // The edge between Giấy and Phòng tối (wave 2 kit §01): a hard cut marked
 // by a 32px film leader - two rows of sprocket holes and a mono label for
-// the block it leads into ("ALBUM", "04A ▸"). Never a colour fade: the
+// the block it leads into ("ALBUM", "HAI LỐI ĐI"). Never a colour fade: the
 // middle of a gradient leaves grey text without contrast and makes photos
 // there look muddy. Static, so it stays under reduced motion.
 export function FilmLeader({

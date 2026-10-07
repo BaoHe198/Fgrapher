@@ -39,9 +39,6 @@ export function StudioSpace({
                 revealIndex={index}
                 sizes="176px"
               />
-              <span className="font-mono text-meta text-gold-400 tabular-nums">
-                {String(index + 1).padStart(2, "0")}A
-              </span>
             </li>
           ))}
         </ol>

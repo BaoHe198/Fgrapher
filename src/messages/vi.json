@@ -245,8 +245,6 @@
     "ctaTitle": "Đưa dịch vụ của bạn đến khách hàng đang tìm kiếm",
     "ctaSub": "Miễn phí tham gia trong giai đoạn đầu — khách hàng tìm kiếm và đặt lịch với bạn hoàn toàn miễn phí.",
     "ctaBtn": "Trở thành nhà cung cấp",
-    "frameLabel": "Khung {n}",
-    "scope": "Toàn quốc",
     "heroSub": "Nhiếp ảnh gia, quay phim, trang điểm, người mẫu và studio trên khắp {count} tỉnh, thành. Mọi nhà cung cấp đều đã xác minh danh tính.",
     "heroSubShort": "Nhiếp ảnh gia, quay phim, trang điểm, người mẫu và studio. Tất cả đã xác minh danh tính.",
     "whoTitle": "Bạn cần ai?",
@@ -3755,8 +3753,7 @@
         "albumsHeading": "Album dự án",
         "allPhotos": "Tất cả ảnh",
         "filterByStyle": "Lọc theo phong cách",
-        "albumsEyebrow": "Khung 01 · Portfolio",
-        "albumFrame": "Album · khung {frame} · {count} ảnh"
+        "albumFrame": "{count} ảnh"
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
@@ -3837,7 +3834,6 @@
         "editCoverAria": "Sửa ảnh bìa",
         "editCoverLabel": "Sửa ảnh bìa",
         "editAvatarAria": "Sửa ảnh đại diện",
-        "frame": "Khung 00 · Hồ sơ",
         "leader": "Portfolio ▸",
         "book": "Đặt lịch",
         "fullFrame": "Xem ảnh đầy đủ",
@@ -4221,8 +4217,6 @@
         "lede": "Fgrapher là nơi đặt lịch với nhiếp ảnh gia, người quay phim, chuyên viên trang điểm, người mẫu, studio và tiệm cho thuê trang phục. Mọi nghệ sĩ trên đây đã xác minh danh tính.",
         "findArtist": "Tìm nghệ sĩ",
         "iAmArtist": "Tôi là nghệ sĩ",
-        "edgeLeft": "Fgrapher 400 · ▸ 01–02",
-        "edgeRight": "12 khung",
         "frameAlt": "Ảnh portfolio: {role}"
       },
       "story": {
@@ -4230,8 +4224,8 @@
         "title": "Bốn khung hình, bốn chỗ hay vướng khi thuê người chụp",
         "problem": "Vấn đề",
         "answer": "Fgrapher",
-        "chapter": "Chương {n} · Khung {frame} · {role}",
-        "sheetLabel": "Contact sheet, khung {frame} đang được chọn",
+        "chapter": "Chương {n} · {role}",
+        "sheetLabel": "Bảng ảnh, ảnh {frame} đang được chọn",
         "count": "Chương {n}/04",
         "c1p": "Tìm người chụp qua bài đăng trong nhóm, không biết ai đứng sau tài khoản.",
         "c1a": "Mọi nghệ sĩ xác minh danh tính trước khi hồ sơ được công khai. Bạn tìm theo khu vực, phong cách và ngày còn trống.",
@@ -4244,7 +4238,7 @@
         "leader": "Hai lối đi"
       },
       "paths": {
-        "eyebrow": "Khung 03 · Hai lối đi",
+        "eyebrow": "Hai lối đi",
         "title": "Bạn đến Fgrapher để làm gì?",
         "customerTag": "Khách hàng",
         "customerTitle": "Tôi cần thuê nghệ sĩ",
@@ -4268,7 +4262,7 @@
         "register": "Đăng ký làm nghệ sĩ"
       },
       "trust": {
-        "eyebrow": "Khung 04 · Nói thẳng",
+        "eyebrow": "Nói thẳng",
         "title": "Bốn điều Fgrapher cam kết",
         "t1": "Mọi nhà cung cấp đã xác minh danh tính.",
         "b1": "Nhiếp ảnh gia, người quay phim, chuyên viên trang điểm, người mẫu, studio và tiệm cho thuê trang phục đều gửi giấy tờ tùy thân để đội Fgrapher duyệt trước khi hồ sơ được công khai. Ảnh giấy tờ lưu riêng, không công khai và tự xoá sau 90 ngày.",
@@ -4282,13 +4276,13 @@
         "report": "Báo cáo cho Fgrapher"
       },
       "stats": {
-        "eyebrow": "Khung 05 · Giai đoạn đầu",
+        "eyebrow": "Giai đoạn đầu",
         "title": "Chúng tôi chưa công bố số liệu",
         "body": "Fgrapher đang ở giai đoạn đầu. Số tỉnh/thành đang phục vụ, số nghệ sĩ đã xác minh và số buổi đã chụp sẽ hiện ở đây khi đủ lớn để có ý nghĩa. Số được lấy thẳng từ hệ thống và không làm tròn lên.",
         "cta": "Đăng ký làm nghệ sĩ"
       },
       "faq": {
-        "eyebrow": "Khung 06 · Hỏi đáp",
+        "eyebrow": "Hỏi đáp",
         "title": "Câu hỏi thường gặp",
         "q1": "Fgrapher có thu tiền đặt cọc không?",
         "a1": "Không. Đặt cọc và thanh toán buổi chụp do bạn và nghệ sĩ thỏa thuận trực tiếp. Fgrapher không giữ tiền của bạn.",
@@ -4659,8 +4653,7 @@
         "returnOn": "Trả máy ngày",
         "noPhoto": "Chưa có ảnh",
         "askForPhotos": "Xin ảnh thật",
-        "openPhoto": "Xem lớn góc {frame}",
-        "angle": "Góc {frame}",
+        "openPhoto": "Xem lớn ảnh {frame}",
         "alertAsk": "Báo cho tôi khi có hàng",
         "alertOn": "Sẽ báo khi có hàng · Bỏ theo dõi",
         "alertOnToast": "Bạn sẽ nhận thông báo khi có hàng trở lại",
@@ -4767,7 +4760,7 @@
       "loadFailed": "Không tải được bảng tin. Vui lòng thử lại.",
       "retry": "Thử lại",
       "openPhoto": "Xem ảnh {index}/{total}",
-      "frames": "{count} khung",
+      "frames": "{count} ảnh",
       "sheet": {
         "heading": "F Booking · Tìm ê-kíp",
         "daysLeft": "{days, plural, =0 {Hết hạn hôm nay} other {Còn # ngày}}",
@@ -4878,10 +4871,10 @@
     "album": {
       "metaTitle": "{title} — {name}",
       "metaDescription": "Album ảnh của {name} trên Fgrapher.",
-      "photoAlt": "Khung {frame}",
+      "photoAlt": "Ảnh {frame}",
       "open": "Mở ảnh {frame}",
       "bar": "Album · {count} ảnh",
-      "eyebrow": "Album · {count} khung",
+      "eyebrow": "Album · {count} ảnh",
       "count": "{count} ảnh",
       "book": "Đặt lịch",
       "end": "Hết album",
@@ -5024,7 +5017,7 @@
       "previous": "Ảnh trước",
       "next": "Ảnh sau",
       "label": "Xem ảnh",
-      "frame": "Khung {current} / {total}"
+      "frame": "Ảnh {current}/{total}"
     },
     "reviewModal": {
       "editTitle": "Chỉnh sửa đánh giá",
@@ -5265,8 +5258,7 @@
       "goldenNote": "Giờ vàng: khoảng 40 phút quanh lúc mặt trời mọc, và từ 90 đến 20 phút trước khi lặn. Nắng thấp, mềm và ấm."
     },
     "bookingVisual": {
-      "frame": "Khung 0{n}A",
-      "portfolio": "Vài khung từ portfolio của nghệ sĩ.",
+      "portfolio": "Vài ảnh từ portfolio của nghệ sĩ.",
       "skyAt": "Minh hoạ ánh sáng lúc {time}. Vị trí mặt trời tính theo ngày đã chọn tại khu vực của nghệ sĩ.",
       "skyPick": "Mặt trời mọc {rise}, lặn {set}. Chọn một khung giờ để xem ánh sáng."
     }

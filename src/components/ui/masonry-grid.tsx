@@ -4,10 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-import { frameLabel } from "@/lib/media/frame-label";
 import { cn } from "@/lib/utils";
-
-export { frameLabel };
 
 // A photo grid that never crops (wave 2 kit §03): the photographer framed
 // the shot, so every photo keeps its own ratio. Photos go, in the order the
@@ -130,7 +127,7 @@ export function MasonryGrid({
       // Lets a lightbox find the tile it should fly back to.
       data-frame-index={index}
       onClick={() => onOpen?.(index)}
-      aria-label={t("open", { frame: frameLabel(index) })}
+      aria-label={t("open", { frame: index + 1 })}
       className={cn(
         "group/tile focus-ring relative block w-full overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken text-left",
         contact && "aspect-square",
@@ -192,9 +189,6 @@ export function MasonryGrid({
             {items.map((item, index) => (
               <li key={item.id} className="flex flex-col gap-1">
                 {tile(item, index, true)}
-                <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary">
-                  {frameLabel(index)}
-                </span>
               </li>
             ))}
           </ol>

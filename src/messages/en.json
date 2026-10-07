@@ -245,8 +245,6 @@
     "ctaTitle": "Bring your services to clients already searching",
     "ctaSub": "Free to join during our early access period — clients search for and book with you at no cost.",
     "ctaBtn": "Become a provider",
-    "frameLabel": "Frame {n}",
-    "scope": "Nationwide",
     "heroSub": "Photographers, videographers, make-up artists, models and studios across {count} provinces and cities. Every provider is identity-verified.",
     "heroSubShort": "Photographers, videographers, make-up artists, models and studios. All identity-verified.",
     "whoTitle": "Who do you need?",
@@ -3755,8 +3753,7 @@
         "albumsHeading": "Project albums",
         "allPhotos": "All photos",
         "filterByStyle": "Filter by style",
-        "albumsEyebrow": "Frame 01 · Portfolio",
-        "albumFrame": "Album · frame {frame} · {count} photos"
+        "albumFrame": "{count} photos"
       },
       "servicesTab": {
         "empty": "No service packages listed",
@@ -3837,7 +3834,6 @@
         "editCoverAria": "Edit cover photo",
         "editCoverLabel": "Edit cover",
         "editAvatarAria": "Edit avatar",
-        "frame": "Frame 00 · Profile",
         "leader": "Portfolio ▸",
         "book": "Book",
         "fullFrame": "View full image",
@@ -4221,8 +4217,6 @@
         "lede": "Fgrapher is where you book photographers, videographers, make-up artists, models, studios and costume rental shops. Every artist here has verified their identity.",
         "findArtist": "Find an artist",
         "iAmArtist": "I'm an artist",
-        "edgeLeft": "Fgrapher 400 · ▸ 01–02",
-        "edgeRight": "12 frames",
         "frameAlt": "Portfolio photo: {role}"
       },
       "story": {
@@ -4230,8 +4224,8 @@
         "title": "Four frames, four things that go wrong when hiring a photographer",
         "problem": "The problem",
         "answer": "Fgrapher",
-        "chapter": "Chapter {n} · Frame {frame} · {role}",
-        "sheetLabel": "Contact sheet, frame {frame} selected",
+        "chapter": "Chapter {n} · {role}",
+        "sheetLabel": "Photo sheet, photo {frame} selected",
         "count": "Chapter {n}/04",
         "c1p": "You find a photographer through a group post and have no idea who is behind the account.",
         "c1a": "Every artist verifies their identity before their profile goes public. Search by area, style and free dates.",
@@ -4244,7 +4238,7 @@
         "leader": "Two paths"
       },
       "paths": {
-        "eyebrow": "Frame 03 · Two paths",
+        "eyebrow": "Two paths",
         "title": "What brings you to Fgrapher?",
         "customerTag": "Customer",
         "customerTitle": "I need to hire an artist",
@@ -4268,7 +4262,7 @@
         "register": "Sign up as an artist"
       },
       "trust": {
-        "eyebrow": "Frame 04 · Straight talk",
+        "eyebrow": "Straight talk",
         "title": "Four things Fgrapher commits to",
         "t1": "Every provider has verified their identity.",
         "b1": "Photographers, videographers, make-up artists, models, studios and costume rental shops all send an ID document for the Fgrapher team to review before their profile goes public. ID photos are stored privately and deleted after 90 days.",
@@ -4282,13 +4276,13 @@
         "report": "Report it to Fgrapher"
       },
       "stats": {
-        "eyebrow": "Frame 05 · Early days",
+        "eyebrow": "Early days",
         "title": "We haven't published numbers yet",
         "body": "Fgrapher is in its early days. The number of provinces served, verified artists and completed shoots will appear here once they are large enough to mean something. They come straight from the system and are never rounded up.",
         "cta": "Sign up as an artist"
       },
       "faq": {
-        "eyebrow": "Frame 06 · Questions",
+        "eyebrow": "Questions",
         "title": "Frequently asked questions",
         "q1": "Does Fgrapher collect the deposit?",
         "a1": "No. The deposit and payment for a shoot are agreed directly between you and the artist. Fgrapher does not hold your money.",
@@ -4659,8 +4653,7 @@
         "returnOn": "Return on",
         "noPhoto": "No photo yet",
         "askForPhotos": "Ask for real photos",
-        "openPhoto": "Enlarge angle {frame}",
-        "angle": "Angle {frame}",
+        "openPhoto": "Enlarge photo {frame}",
         "alertAsk": "Tell me when it's back",
         "alertOn": "We'll tell you · Stop following",
         "alertOnToast": "You'll be notified when it's back in stock",
@@ -4767,7 +4760,7 @@
       "loadFailed": "Could not load the feed. Please try again.",
       "retry": "Try again",
       "openPhoto": "View photo {index} of {total}",
-      "frames": "{count, plural, one {# frame} other {# frames}}",
+      "frames": "{count, plural, one {# photo} other {# photos}}",
       "sheet": {
         "heading": "F Booking · Crew call",
         "daysLeft": "{days, plural, =0 {Closes today} one {# day left} other {# days left}}",
@@ -4878,10 +4871,10 @@
     "album": {
       "metaTitle": "{title} — {name}",
       "metaDescription": "A photo album by {name} on Fgrapher.",
-      "photoAlt": "Frame {frame}",
+      "photoAlt": "Photo {frame}",
       "open": "Open photo {frame}",
       "bar": "Album · {count} photos",
-      "eyebrow": "Album · {count} frames",
+      "eyebrow": "Album · {count} photos",
       "count": "{count, plural, one {# photo} other {# photos}}",
       "book": "Book",
       "end": "End of album",
@@ -5024,7 +5017,7 @@
       "previous": "Previous",
       "next": "Next",
       "label": "Photo viewer",
-      "frame": "Frame {current} / {total}"
+      "frame": "Photo {current}/{total}"
     },
     "reviewModal": {
       "editTitle": "Edit your review",
@@ -5265,8 +5258,7 @@
       "goldenNote": "Golden hour: about 40 minutes around sunrise, and from 90 to 20 minutes before sunset. Low, soft, warm light."
     },
     "bookingVisual": {
-      "frame": "Frame 0{n}A",
-      "portfolio": "A few frames from the artist's portfolio.",
+      "portfolio": "A few photos from the artist's portfolio.",
       "skyAt": "An illustration of the light at {time}. The sun's position is worked out for the chosen day in the artist's area.",
       "skyPick": "Sunrise {rise}, sunset {set}. Pick a time to see the light."
     }

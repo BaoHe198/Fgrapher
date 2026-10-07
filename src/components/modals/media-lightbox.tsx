@@ -195,9 +195,8 @@ export function MediaLightbox({
   const current = items[index];
   if (!current || !isClient) return null;
 
-  const frame = (n: number) => String(n).padStart(2, "0");
   const caption = [
-    t("frame", { current: frame(index + 1), total: frame(items.length) }),
+    t("frame", { current: index + 1, total: items.length }),
     title,
     categoryLabel,
   ]

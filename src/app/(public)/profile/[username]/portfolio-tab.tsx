@@ -396,14 +396,9 @@ export function PortfolioTab({
               album's own photo-essay page, the cover flying there. The
               cover is cropped here; the essay never crops. */}
           <section className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-                {t("albumsEyebrow")}
-              </span>
-              <h3 className="text-heading-lg text-text-primary">
-                {t("albumsHeading")}
-              </h3>
-            </div>
+            <h3 className="text-heading-lg text-text-primary">
+              {t("albumsHeading")}
+            </h3>
             <ul className="grid gap-x-5 gap-y-8 sm:grid-cols-2">
               {albums.map((album, index) => {
                 const cover = album.coverMedia ?? album.media[0] ?? null;
@@ -458,10 +453,7 @@ export function PortfolioTab({
                         )}
                       </span>
                       <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-                        {t("albumFrame", {
-                          frame: String(albums.length - index).padStart(2, "0"),
-                          count: album.media.length,
-                        })}
+                        {t("albumFrame", { count: album.media.length })}
                       </span>
                       <span className="text-heading-md text-text-primary group-hover/album:underline group-hover/album:underline-offset-4">
                         {album.title}

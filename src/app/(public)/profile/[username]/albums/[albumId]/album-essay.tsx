@@ -8,7 +8,6 @@ import { useCallback, useState, ViewTransition } from "react";
 
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { Button } from "@/components/ui/button";
-import { frameLabel } from "@/lib/media/frame-label";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
@@ -73,12 +72,6 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
     [],
   );
 
-  const frame = (index: number) => (
-    <span className="shrink-0 font-mono text-meta leading-relaxed tracking-[0.12em] text-dr-text-3">
-      {frameLabel(index)}
-    </span>
-  );
-
   const photo = (index: number, sizes: string, eager = false) => {
     const item = photos[index];
     const image =
@@ -92,7 +85,7 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
       ) : (
         <Image
           src={buildMediaVariants(item.url).large}
-          alt={item.caption ?? t("photoAlt", { frame: frameLabel(index) })}
+          alt={item.caption ?? t("photoAlt", { frame: index + 1 })}
           width={item.width ?? 1600}
           height={item.height ?? 1067}
           unoptimized
@@ -109,7 +102,7 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
         type="button"
         data-essay-index={index}
         onClick={() => setOpen(index)}
-        aria-label={t("open", { frame: frameLabel(index) })}
+        aria-label={t("open", { frame: index + 1 })}
         className="focus-ring block w-full cursor-zoom-in"
       >
         {index === 0 ? (
@@ -197,7 +190,6 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
                   <figure key={index} className="flex flex-col gap-3">
                     {photo(index, "(min-width: 640px) 50vw, 100vw")}
                     <figcaption className="flex gap-3 text-body-sm text-dr-text-2">
-                      {frame(index)}
                       {caption(index)}
                     </figcaption>
                   </figure>
@@ -216,7 +208,6 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
                   {photo(index, "(min-width: 768px) 60vw, 100vw")}
                 </div>
                 <figcaption className="flex flex-col gap-2.5 pb-2">
-                  {frame(index)}
                   {photos[index].caption ? (
                     <span className="text-[17px] leading-[1.6] text-pretty">
                       {photos[index].caption}
@@ -233,7 +224,6 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
             >
               {photo(index, "100vw", b === 0)}
               <figcaption className="flex gap-3 text-body-sm text-dr-text-2">
-                {frame(index)}
                 {caption(index)}
               </figcaption>
             </figure>
@@ -247,7 +237,6 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
           className="flex justify-between border-t border-dr-line-2 pt-4 font-mono text-meta tracking-[0.12em] text-dr-text-3 uppercase"
         >
           <span>{t("end")}</span>
-          <span>{photos.length > 0 ? frameLabel(photos.length - 1) : ""}</span>
         </div>
         <div className="flex flex-wrap items-end justify-between gap-5">
           <p className="text-heading-md">{t("by", { name: artist.name })}</p>

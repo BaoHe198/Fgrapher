@@ -6,11 +6,8 @@ import { cn } from "@/lib/utils";
 import { RiseOnView } from "@/components/ui/rise-on-view";
 import type { HomeStyleTile } from "@/services/home";
 
-import { FrameNumber } from "./frame-number";
-
 interface StyleGridProps {
   tiles: HomeStyleTile[];
-  firstFrame: number;
 }
 
 // "Duyệt theo phong cách" - each style is a three-frame cut of a contact
@@ -19,7 +16,7 @@ interface StyleGridProps {
 // out rather than shown as empty frames or padded with stock imagery, and
 // the block disappears if no style has a photo. Phones skip this block (the design's mobile home filters the featured list by
 // style instead).
-export async function StyleGrid({ tiles, firstFrame }: StyleGridProps) {
+export async function StyleGrid({ tiles }: StyleGridProps) {
   const t = await getTranslations();
   const shown = tiles.filter((tile) => tile.photoUrls.length > 0);
   if (shown.length === 0) return null;
@@ -71,14 +68,8 @@ export async function StyleGrid({ tiles, firstFrame }: StyleGridProps) {
                     />
                   ))}
                 </div>
-                <span className="flex items-baseline gap-2">
-                  <FrameNumber
-                    n={firstFrame + index}
-                    className="bg-transparent px-0 text-text-tertiary"
-                  />
-                  <span className="text-heading-sm text-text-primary">
-                    {label}
-                  </span>
+                <span className="text-heading-sm text-text-primary">
+                  {label}
                 </span>
               </Link>
             </li>

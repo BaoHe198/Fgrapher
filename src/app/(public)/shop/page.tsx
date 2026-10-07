@@ -122,7 +122,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           aria-label={t("filters.category")}
           className="mt-8 grid grid-cols-5 gap-2 max-md:-mx-4 max-md:flex max-md:overflow-x-auto max-md:px-4 sm:gap-3"
         >
-          {TILES.map((value, index) => {
+          {TILES.map((value) => {
             const active = activeCategories.includes(value);
             return (
               <Link
@@ -136,15 +136,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                     : "border-border-subtle bg-bg-surface hover:border-border-strong",
                 )}
               >
-                <span className="flex items-start justify-between">
-                  <GearIcon
-                    category={value}
-                    className="size-8 text-text-secondary group-hover:text-text-primary"
-                  />
-                  <span className="font-mono text-meta text-text-tertiary">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </span>
+                <GearIcon
+                  category={value}
+                  className="size-8 text-text-secondary group-hover:text-text-primary"
+                />
                 <span className="flex items-baseline justify-between gap-2">
                   <span className="text-body-md font-semibold! text-text-primary">
                     {categoryT(value)}

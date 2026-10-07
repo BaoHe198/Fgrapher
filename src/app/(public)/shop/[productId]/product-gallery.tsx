@@ -9,7 +9,6 @@ import { useState } from "react";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { GearIcon } from "@/components/shop/gear-icon";
 import { Button } from "@/components/ui/button";
-import { frameLabel } from "@/lib/media/frame-label";
 import { cn } from "@/lib/utils";
 
 // The listing's photos on a plain ground, never cropped, each angle
@@ -59,7 +58,7 @@ export function ProductGallery({
       <button
         type="button"
         onClick={() => setLightboxOpen(true)}
-        aria-label={t("openPhoto", { frame: frameLabel(activeIndex * 6) })}
+        aria-label={t("openPhoto", { frame: activeIndex + 1 })}
         className="focus-ring relative aspect-[4/3] w-full cursor-zoom-in overflow-hidden rounded-[var(--fg-radius-lg)] bg-bg-sunken"
       >
         <Image
@@ -69,9 +68,6 @@ export function ProductGallery({
           sizes="(min-width: 1024px) 60vw, 100vw"
           className="object-contain p-6"
         />
-        <span className="absolute bottom-3 left-4 font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-          {t("angle", { frame: frameLabel(activeIndex * 6) })}
-        </span>
       </button>
 
       {images.length > 1 ? (
@@ -83,7 +79,7 @@ export function ProductGallery({
               onClick={() => setActiveIndex(index)}
               aria-pressed={index === activeIndex}
               className={cn(
-                "focus-ring flex flex-col items-center gap-1 rounded-[var(--fg-radius-sm)] border bg-bg-sunken p-1.5",
+                "focus-ring flex flex-col items-center rounded-[var(--fg-radius-sm)] border bg-bg-sunken p-1.5",
                 index === activeIndex
                   ? "border-text-primary"
                   : "border-transparent hover:border-border-strong",
@@ -97,9 +93,6 @@ export function ProductGallery({
                   sizes="120px"
                   className="object-contain"
                 />
-              </span>
-              <span className="font-mono text-meta text-text-tertiary">
-                {frameLabel(index * 6)}
               </span>
             </button>
           ))}
