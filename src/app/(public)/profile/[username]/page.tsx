@@ -350,18 +350,15 @@ export default async function PublicProfilePage({
           counted, and a Server Component cannot set one — so the count is
           reported by this beacon after mount instead of inline here. */}
       {isOwnProfile ? null : <ProfileViewBeacon profileId={activeProfile.id} />}
-      {/* The profile opens on Phòng tối (Core MVP pass, 02/10/2026): the
-          cover leads, and the name, facts and actions sit on solid
-          darkroom ground - below the photo on a phone, over a dense
-          scrim from 768px - so they never depend on how bright the cover
-          is. "Đặt lịch" is the one gold button. */}
+      {/* The cover leads (Core MVP pass, 02/10/2026) and the name, facts
+          and actions sit below it on the page background, in the viewer's
+          theme - never over the photo, so they never depend on how bright
+          the cover is. "Đặt lịch" is the one gold button. */}
       <section
-        data-surface="darkroom"
-        data-under-header=""
         aria-labelledby="profile-name"
-        className="relative isolate overflow-hidden bg-dr-bg text-dr-text md:flex md:min-h-[72vh] md:flex-col md:justify-end"
+        className="relative isolate overflow-hidden bg-dr-bg text-dr-text"
       >
-        <div className="relative aspect-[4/3] md:absolute md:inset-0 md:aspect-auto">
+        <div className="relative aspect-[4/3] md:aspect-auto md:h-[min(60vh,640px)]">
           <ProfileCover
             variant="hero"
             name={displayName}
@@ -371,18 +368,18 @@ export default async function PublicProfilePage({
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-linear-to-t from-dr-bg via-transparent via-40% to-transparent md:via-[var(--dr-scrim)] md:via-50% md:to-90%"
+            className="pointer-events-none absolute inset-0 bg-linear-to-t from-dr-bg via-transparent via-30% to-transparent"
           />
           <Link
             href="/browse"
             aria-label={t("hero.backToResults")}
-            className="focus-ring absolute top-4 left-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 text-body-sm font-semibold text-dr-text sm:left-8"
+            className="focus-ring absolute top-4 left-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-on-photo-line bg-[var(--dr-scrim)] px-3 text-body-sm font-semibold text-on-photo sm:left-8"
           >
             <ChevronLeft aria-hidden className="size-[18px]" />
             <span className="max-md:hidden">{t("hero.results")}</span>
           </Link>
         </div>
-        <div className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-3 px-5 pt-2 pb-8 sm:px-8 md:gap-4 md:pt-32 md:pb-10">
+        <div className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-3 px-5 pt-2 pb-8 sm:px-8 md:gap-4 md:pt-4 md:pb-10">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-body-sm text-dr-text-2">
             <ProfileAvatar
               compact
@@ -401,7 +398,7 @@ export default async function PublicProfilePage({
                   className={cn(
                     "focus-ring inline-flex min-h-11 items-center rounded-full border px-3",
                     profile.role === activeProfile.role
-                      ? "border-gold-400 text-dr-text"
+                      ? "border-gold-600 text-dr-text dark:border-gold-400"
                       : "border-dr-line-2 hover:text-dr-text",
                   )}
                 >
@@ -418,7 +415,7 @@ export default async function PublicProfilePage({
               </span>
             ) : null}
             {isVerified ? (
-              <span className="inline-flex items-center gap-1 text-gold-400">
+              <span className="inline-flex items-center gap-1 text-gold-600 dark:text-gold-400">
                 <BadgeCheck aria-hidden className="size-3.5" />
                 {t("status.verified")}
               </span>

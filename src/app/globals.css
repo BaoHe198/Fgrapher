@@ -2,10 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Inside a Phòng tối section the dark palette applies whatever the theme,
-   so dark: utilities apply there too (redesign 09/2026 wave 2). */
-/* Dark mode, Phòng tối blocks, minus Paper islands inside either. */
-@custom-variant dark (&:is(.dark *, [data-surface="darkroom"], [data-surface="darkroom"] *):not([data-surface="paper"], [data-surface="paper"] *));
+/* dark: follows the theme the viewer picked, and nothing else. No block
+   forces its own palette (owner, 07/10/2026). */
+@custom-variant dark (&:is(.dark *));
 
 /* Fgrapher brand tokens (docs/design-reference/design-tokens.md) are added
    throughout this file, alongside the shadcn tokens already here. Additive
@@ -134,6 +133,9 @@
   --color-dr-text: var(--dr-text);
   --color-dr-text-2: var(--dr-text-2);
   --color-dr-text-3: var(--dr-text-3);
+  --color-on-photo: var(--on-photo);
+  --color-on-photo-2: var(--on-photo-2);
+  --color-on-photo-line: var(--on-photo-line);
   --color-surface-raised: var(--surface-raised);
   --ease-fg-out: var(--fg-ease-out);
   --ease-fg-in: var(--fg-ease-in);
@@ -340,11 +342,7 @@
   --fg-image-ring: hsl(0 0% 0% / 0.06);
 }
 
-/* [data-surface="darkroom"] takes the whole dark palette too, in either
-   theme: Phòng tối is where people sit and look at photographs (lightbox,
-   album, profile hero, Cộng đồng F). Its own surfaces follow below. */
-.dark,
-[data-surface="darkroom"] {
+.dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -433,126 +431,30 @@
 }
 
 /* Phòng tối (wave 2 kit, docs/design-reference/redesign-2026-10/templates/
-   darkroom-kit). Values do not change with the theme. Layers are told apart
-   by background steps, never shadows; photos get a 6% inner line, never a
-   light frame; gold is the only accent. Contrast measured on --dr-bg:
-   text 16.5:1, text-2 10:1, text-3 7:1, gold 8.4:1. */
+   darkroom-kit) used to be a fixed near-black surface that pages, the
+   lightbox and the sticky header switched into whatever the theme. The
+   owner ruled that out (07/10/2026): every surface follows the viewer's
+   theme. The dr-* names stay as aliases of the theme tokens so the photo
+   pages built on them keep working, light in light mode, dark in dark. */
 :root {
-  --dr-bg: hsl(30 14% 5%);
-  --dr-surface: hsl(30 11% 8%);
-  --dr-raised: hsl(30 9% 12%);
-  --dr-line: hsl(0 0% 100% / 0.06);
-  --dr-line-2: hsl(0 0% 100% / 0.12);
-  --dr-text: hsl(38 33% 92%);
-  --dr-text-2: hsl(34 12% 72%);
-  --dr-text-3: hsl(32 8% 60%);
-  --dr-accent: var(--gold-400);
+  --dr-bg: var(--bg-page);
+  --dr-surface: var(--bg-sunken);
+  --dr-raised: var(--border-subtle);
+  --dr-line: var(--border-subtle);
+  --dr-line-2: var(--border-default);
+  --dr-text: var(--text-primary);
+  --dr-text-2: var(--text-secondary);
+  --dr-text-3: var(--text-tertiary);
+  --dr-accent: var(--gold-600);
+  /* Over a photo, not a surface: a dark wash with light type stays legible
+     on any picture, so these do not change with the theme. */
   --dr-scrim: hsl(30 14% 5% / 0.72);
+  --on-photo: hsl(38 33% 92%);
+  --on-photo-2: hsl(34 12% 82%);
+  --on-photo-line: hsl(0 0% 100% / 0.22);
 }
-[data-surface="darkroom"] {
-  color-scheme: dark;
-  --bg-page: var(--dr-bg);
-  --bg-surface: var(--dr-surface);
-  --bg-sunken: var(--dr-surface);
-  --surface-card: var(--dr-surface);
-  --surface-raised: var(--dr-raised);
-  --text-primary: var(--dr-text);
-  --text-secondary: var(--dr-text-2);
-  --text-tertiary: var(--dr-text-3);
-  --border-subtle: var(--dr-line);
-  --border-default: var(--dr-line-2);
-  --border-strong: hsl(0 0% 100% / 0.22);
-  --border-focus: var(--gold-400);
-  --fg-image-ring: var(--dr-line);
-  --fg-scrim: var(--dr-scrim);
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  background-color: var(--dr-bg);
-  color: var(--dr-text);
-}
-
-/* A Paper island inside Phòng tối (wave 2): the F Booking call sheet in
-   Cộng đồng F is ivory paper on the darkroom feed, in either theme. It
-   re-declares the light values of every token the dark theme and the
-   darkroom surface override, so components inside render as on Paper. */
-[data-surface="paper"] {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --popover-elevated: oklch(1 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --neutral-50: hsl(30 20% 98%);
-  --neutral-100: hsl(30 15% 95%);
-  --neutral-200: hsl(30 12% 90%);
-  --neutral-300: hsl(30 10% 82%);
-  --neutral-400: hsl(30 8% 68%);
-  --neutral-500: hsl(30 7% 52%);
-  --neutral-600: hsl(30 8% 38%);
-  --neutral-700: hsl(30 10% 28%);
-  --neutral-800: hsl(30 12% 18%);
-  --neutral-900: hsl(30 15% 11%);
-  --neutral-950: hsl(30 18% 7%);
-  --brand-primary: hsl(168 58% 15%);
-  --brand-primary-hover: hsl(168 55% 20%);
-  --brand-accent: hsl(38 46% 60%);
-  --bg-page: hsl(30 20% 98%);
-  --bg-surface: #ffffff;
-  --bg-sunken: hsl(30 15% 95%);
-  --bg-inverse: hsl(168 60% 11%);
-  --surface-card: #ffffff;
-  --text-primary: hsl(30 15% 11%);
-  --text-secondary: hsl(30 8% 38%);
-  --text-tertiary: hsl(30 7% 44%);
-  --text-on-brand: #ffffff;
-  --text-link: hsl(168 55% 20%);
-  --border-subtle: hsl(30 12% 90%);
-  --border-default: hsl(30 10% 82%);
-  --border-strong: hsl(30 8% 68%);
-  --border-focus: hsl(38 44% 52%);
-  --success: hsl(168 50% 26%);
-  --success-bg: hsl(168 40% 96%);
-  --warning: hsl(32 88% 34%);
-  --warning-bg: hsl(35 90% 96%);
-  --danger: hsl(6 70% 46%);
-  --danger-bg: hsl(6 70% 96%);
-  --info: hsl(205 65% 38%);
-  --info-bg: hsl(205 65% 96%);
-  --shadow-sm: 0 1px 2px rgba(18, 16, 10, 0.06);
-  --shadow-md: 0 4px 14px rgba(18, 16, 10, 0.08);
-  --shadow-lg: 0 14px 36px rgba(18, 16, 10, 0.14);
-  --fg-image-ring: hsl(0 0% 0% / 0.06);
-  --surface-raised: #ffffff;
-  --fg-scrim: hsl(168 62% 7% / 0.64);
-  color-scheme: light;
-  color: var(--text-primary);
+.dark {
+  --dr-accent: var(--gold-400);
 }
 
 /*

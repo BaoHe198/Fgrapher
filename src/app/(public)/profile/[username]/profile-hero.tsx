@@ -30,7 +30,7 @@ export function ProfileCover({
   name,
 }: {
   /**
-   * "hero" (wave 2 profile): fills its darkroom parent edge to edge, with a
+   * "hero" (wave 2 profile): fills its parent edge to edge, with a
    * "Xem nguyên khung" button - the cover is the one place the photo is
    * cropped, so the full frame is always one press away.
    */
@@ -100,7 +100,7 @@ export function ProfileCover({
                 type="button"
                 onClick={() => setFullFrame(true)}
                 aria-label={t("fullFrame")}
-                className="focus-ring absolute top-4 right-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 text-body-sm font-semibold text-dr-text sm:right-8"
+                className="focus-ring absolute top-4 right-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-on-photo-line bg-[var(--dr-scrim)] px-3 text-body-sm font-semibold text-on-photo sm:right-8"
               >
                 <Maximize2 aria-hidden className="size-4" />
                 <span className="max-md:hidden">{t("fullFrame")}</span>
@@ -135,7 +135,7 @@ export function ProfileCover({
             aria-label={t("editCoverAria")}
             className={
               hero
-                ? "focus-ring absolute top-[4.25rem] right-4 z-10 min-h-11 sm:right-8 flex items-center gap-1.5 rounded-full border border-dr-line-2 bg-[var(--dr-scrim)] px-3 py-1.5 text-body-sm text-dr-text sm:right-8"
+                ? "focus-ring absolute top-[4.25rem] right-4 z-10 min-h-11 sm:right-8 flex items-center gap-1.5 rounded-full border border-on-photo-line bg-[var(--dr-scrim)] px-3 py-1.5 text-body-sm text-on-photo sm:right-8"
                 : "absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-body-sm text-white"
             }
           >
@@ -185,7 +185,7 @@ export function ProfileAvatar({
   isOwnProfile,
   compact = false,
 }: {
-  /** Inline in the darkroom hero's meta row rather than overlapping a banner. */
+  /** Inline in the hero's meta row rather than overlapping a banner. */
   compact?: boolean;
   avatar: string | null;
   displayName: string;

@@ -19,7 +19,7 @@ interface BookingVisualProps {
   showSky: boolean;
 }
 
-// The darkroom pane beside the booking steps (wave 2): the artist's real
+// The picture pane beside the booking steps (wave 2): the artist's real
 // work as a contact sheet, and on the time step an illustration of where
 // the sun will be at the chosen start - labelled as an illustration, since
 // it is drawn, not photographed. Never stock pictures, never a claim about
@@ -73,7 +73,7 @@ export function BookingVisual({
           )}
           style={{ left: `${left}%`, top: `${top}%` }}
         />
-        <span className="absolute inset-x-0 bottom-0 h-[26%] bg-dr-bg [clip-path:polygon(0_38%,14%_22%,28%_34%,44%_12%,60%_30%,76%_18%,100%_32%,100%_100%,0_100%)]" />
+        <span className="absolute inset-x-0 bottom-0 h-[26%] bg-green-950 [clip-path:polygon(0_38%,14%_22%,28%_34%,44%_12%,60%_30%,76%_18%,100%_32%,100%_100%,0_100%)]" />
       </div>
     );
     caption = time
@@ -115,21 +115,18 @@ export function BookingVisual({
   }
 
   return (
-    <figure
-      data-surface="darkroom"
-      className="relative aspect-[4/5] w-full overflow-hidden rounded-[var(--fg-radius-lg)] bg-dr-bg text-dr-text"
-    >
+    <figure className="relative aspect-[4/5] w-full overflow-hidden rounded-[var(--fg-radius-lg)] bg-dr-bg text-dr-text">
       {body}
       <span
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-2/5 bg-linear-to-t from-[hsl(30_14%_5%/0.86)] to-transparent"
       />
       <figcaption className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-[clamp(14px,2vw,24px)]">
-        <span className="text-body-sm font-semibold text-dr-text-2">
+        <span className="text-body-sm font-semibold text-on-photo-2">
           {kicker}
         </span>
         {caption ? (
-          <span className="text-[15px] leading-[1.45] font-medium text-pretty text-dr-text">
+          <span className="text-[15px] leading-[1.45] font-medium text-pretty text-on-photo">
             {caption}
           </span>
         ) : null}

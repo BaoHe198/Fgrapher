@@ -317,7 +317,7 @@ export async function getProviderForBooking(providerId: string) {
           latitude: true,
           longitude: true,
           services: { where: { isActive: true }, orderBy: { price: "asc" } },
-          // The booking flow's darkroom pane (wave 2): a few of the
+          // The booking flow's picture pane (wave 2): a few of the
           // artist's own approved photos, never stock imagery.
           media: {
             where: {

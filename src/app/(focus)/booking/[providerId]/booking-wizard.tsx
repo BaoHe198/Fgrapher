@@ -83,7 +83,7 @@ interface BookingWizardProps {
   responseNote: string;
   /** ~10 km-rounded coordinates for golden-hour hints, or null. */
   sunPoint: { latitude: number; longitude: number } | null;
-  /** The artist's own approved photos for the darkroom pane. */
+  /** The artist's own approved photos for the picture pane. */
   providerPhotos: string[];
   services: ServiceOption[];
   contactPhoneDefault: string;

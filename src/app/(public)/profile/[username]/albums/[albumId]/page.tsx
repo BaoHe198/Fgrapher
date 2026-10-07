@@ -47,9 +47,9 @@ export async function generateMetadata({
   };
 }
 
-// An album as a photo essay on Phòng tối (wave 2, profile): title large,
+// An album as a photo essay (wave 2, profile): title large,
 // where/when/style, the artist's words, then the photos one after another
-// at their own ratio, numbered like a contact sheet.
+// at their own ratio.
 export default async function AlbumPage({ params }: AlbumPageProps) {
   const { username, albumId } = await params;
   const found = await loadAlbum(username, albumId);

@@ -84,7 +84,7 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
           {index === picked ? (
             <span
               aria-hidden
-              className="pointer-events-none absolute -inset-px rounded-full border-2 border-gold-400"
+              className="pointer-events-none absolute -inset-px rounded-full border-2 border-gold-600 dark:border-gold-400"
             />
           ) : null}
         </div>

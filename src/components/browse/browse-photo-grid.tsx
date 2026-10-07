@@ -20,7 +20,7 @@ export interface BrowsePhoto {
 }
 
 // "Theo ảnh": every approved photo of the artists matching the search, in
-// a grid that keeps each photo's own ratio. A photo opens in the darkroom
+// a grid that keeps each photo's own ratio. A photo opens in the
 // lightbox, flying from its tile, with the way on to that artist.
 export function BrowsePhotoGrid({ photos }: { photos: BrowsePhoto[] }) {
   const t = useTranslations("publicPages.browseV2.photos");
@@ -51,7 +51,7 @@ export function BrowsePhotoGrid({ photos }: { photos: BrowsePhoto[] }) {
         storageKey="fg:browse-photo-mode"
         onOpen={setOpen}
         renderOverlay={(_, index) => (
-          <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-[var(--dr-scrim)] to-transparent px-2.5 pt-6 pb-2 text-body-sm font-semibold text-dr-text opacity-0 transition-opacity duration-[var(--fg-dur-200)] group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100">
+          <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-[var(--dr-scrim)] to-transparent px-2.5 pt-6 pb-2 text-body-sm font-semibold text-on-photo opacity-0 transition-opacity duration-[var(--fg-dur-200)] group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100">
             {photos[index].artistName}
           </span>
         )}

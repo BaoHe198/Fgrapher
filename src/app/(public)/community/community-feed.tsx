@@ -722,7 +722,7 @@ function AlbumPostMedia({ post }: { post: FeedPost }) {
                   className="object-contain p-0.5"
                 />
                 {index === strip.length - 1 && hidden > 0 ? (
-                  <span className="absolute inset-0 grid place-items-center bg-[var(--dr-scrim)] font-mono text-heading-sm text-dr-text">
+                  <span className="absolute inset-0 grid place-items-center bg-[var(--dr-scrim)] font-mono text-heading-sm text-on-photo">
                     +{hidden}
                   </span>
                 ) : null}
@@ -971,12 +971,10 @@ function RequestPostPanel({
   };
 
   return (
-    // An ivory call sheet in the feed (wave 2): a Paper island,
-    // stamped with the days it stays open - red once it has closed.
-    <div
-      data-surface="paper"
-      className="flex flex-col gap-4 rounded-[var(--fg-radius-md)] border border-border-default bg-gold-50 pb-4 text-text-primary"
-    >
+    // A call sheet in the feed (wave 2): ivory in the light theme, a card
+    // in the dark one, stamped with the days it stays open - red once it
+    // has closed.
+    <div className="flex flex-col gap-4 rounded-[var(--fg-radius-md)] border border-border-default bg-gold-50 pb-4 text-text-primary dark:bg-surface-card">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-default px-5 pt-4 pb-3">
         <div className="flex min-w-0 flex-col gap-1">
           <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
@@ -990,7 +988,7 @@ function RequestPostPanel({
           className={cn(
             "shrink-0 -rotate-3 rounded-[var(--fg-radius-sm)] border-2 px-2 py-1 font-mono text-meta font-semibold tracking-[0.12em] uppercase",
             open
-              ? "border-gold-600 text-gold-700"
+              ? "border-gold-600 text-gold-700 dark:border-gold-400 dark:text-gold-400"
               : "border-danger text-danger",
           )}
         >
@@ -1129,7 +1127,7 @@ function RequestPostPanel({
                       <BadgeCheck className="size-4 text-info" />
                     ) : null}
                   </span>
-                  <span className="font-semibold! text-gold-700">
+                  <span className="font-semibold! text-gold-700 dark:text-gold-400">
                     {formatCurrency(offer.proposedPrice, offer.currency)}
                   </span>
                 </div>

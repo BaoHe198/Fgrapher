@@ -65,8 +65,8 @@ function inViewport(rect: DOMRect) {
   );
 }
 
-// Viewing photos happens in Phòng tối (darkroom kit §01): the backdrop is
-// the darkroom ground, not a black wash, whatever theme the page is in.
+// The viewer's backdrop is the page ground in the viewer's theme (owner,
+// 07/10/2026) - light in light mode, dark in dark mode.
 export function MediaLightbox({
   items,
   index,
@@ -215,7 +215,6 @@ export function MediaLightbox({
       role="dialog"
       aria-modal="true"
       aria-label={title ?? t("label")}
-      data-surface="darkroom"
       className="fixed inset-0 z-50 flex flex-col bg-dr-bg text-dr-text"
       onClick={requestClose}
       onTouchStart={onTouchStart}

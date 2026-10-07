@@ -79,7 +79,6 @@ export default async function PricingPage() {
     <div className="text-text-primary">
       <section
         aria-labelledby="pricing-title"
-        data-surface="darkroom"
         className="bg-dr-bg text-dr-text"
       >
         <div className="mx-auto flex max-w-[1080px] flex-col gap-4 px-4 pt-9 pb-8 sm:px-6 md:pt-20 md:pb-18">

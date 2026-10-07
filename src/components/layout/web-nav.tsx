@@ -13,7 +13,6 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { useDarkroomUnder } from "@/hooks/use-darkroom-under";
 import { useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { useTheme } from "next-themes";
 
@@ -100,8 +99,6 @@ export function WebNav({
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
-  const headerRef = useRef<HTMLElement>(null);
-  const onDarkroom = useDarkroomUnder(headerRef, pathname);
   const isWide = useIsWide();
   const { data: session } = useSession();
   const { isAuthenticated } = useUserRoles();
@@ -124,10 +121,6 @@ export function WebNav({
       socialFeedEnabled={socialFeedEnabled}
     >
       <header
-        ref={headerRef}
-        // Takes the Phòng tối surface while a dark block (data-under-header)
-        // is beneath it - colour only, in 260ms (wave 2 kit §01-B).
-        data-surface={onDarkroom ? "darkroom" : undefined}
         className="sticky top-0 z-20 border-b border-border-subtle backdrop-blur-[14px] transition-[background-color,border-color,color] duration-[var(--fg-dur-260)] ease-fg-out"
         style={{
           background: "color-mix(in srgb, var(--bg-surface) 88%, transparent)",

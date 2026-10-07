@@ -126,8 +126,6 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
 
   return (
     <article
-      data-surface="darkroom"
-      data-under-header=""
       aria-labelledby="album-title"
       className="min-h-screen bg-dr-bg text-dr-text"
     >

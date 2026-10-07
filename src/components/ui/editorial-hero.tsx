@@ -7,8 +7,7 @@ import { FgImage } from "./fg-image";
 // Magazine-style page head (wave 2 kit §02): a mono section eyebrow
 // ("GIỚI THIỆU"), a title set as the image of the page, and beside
 // it one large photo or a strip of contact-sheet frames. Text and buttons
-// appear at once; only the photo develops. On Phòng tối it is also a block
-// the sticky header switches colour over.
+// appear at once; only the photo develops. Colours follow the theme.
 
 type Media =
   | { type: "image"; src: string | null; alt: string }
@@ -28,7 +27,6 @@ type Media =
     };
 
 interface EditorialHeroProps {
-  surface?: "paper" | "darkroom";
   section: string;
   title: React.ReactNode;
   lede?: React.ReactNode;
@@ -40,7 +38,6 @@ interface EditorialHeroProps {
 }
 
 export function EditorialHero({
-  surface = "paper",
   section,
   title,
   lede,
@@ -49,14 +46,8 @@ export function EditorialHero({
   className,
   children,
 }: EditorialHeroProps) {
-  const dark = surface === "darkroom";
   return (
-    <section
-      data-surface={dark ? "darkroom" : undefined}
-      data-under-header={dark ? "" : undefined}
-      data-slot="editorial-hero"
-      className={cn(dark ? "bg-dr-bg" : "bg-bg-page", className)}
-    >
+    <section data-slot="editorial-hero" className={cn("bg-bg-page", className)}>
       <div
         className={cn(
           "mx-auto grid max-w-[1440px] gap-10 px-8 py-14 max-md:gap-8 max-md:px-5 max-md:py-10",
