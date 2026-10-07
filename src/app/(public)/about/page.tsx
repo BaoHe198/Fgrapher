@@ -11,7 +11,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { EditorialHero } from "@/components/ui/editorial-hero";
-import { FilmLeader } from "@/components/ui/film-leader";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { getAboutFrames, HOME_ROLES } from "@/services/home";
 
@@ -79,7 +78,6 @@ export default async function AboutPage() {
   return (
     <>
       <EditorialHero
-        surface="darkroom"
         section={t("hero.section")}
         title={t("hero.title")}
         lede={t("hero.lede")}
@@ -113,14 +111,12 @@ export default async function AboutPage() {
       />
 
       <section
-        data-surface="darkroom"
-        data-under-header=""
         aria-labelledby="about-story"
-        className="bg-dr-bg text-dr-text"
+        className="bg-bg-page text-text-primary"
       >
         <div className="mx-auto flex max-w-[1440px] flex-col gap-[clamp(24px,4vw,48px)] px-[clamp(20px,4vw,64px)] pt-[clamp(56px,7vw,112px)] pb-[clamp(40px,5vw,80px)]">
           <div className="flex max-w-[820px] flex-col gap-3.5">
-            <span className="font-mono text-meta tracking-[0.12em] text-dr-text-3 uppercase">
+            <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
               {t("story.eyebrow")}
             </span>
             <h2
@@ -132,7 +128,6 @@ export default async function AboutPage() {
           </div>
           <AboutStory frames={sheetFrames} chapters={chapters} />
         </div>
-        <FilmLeader trailing={t("story.leader")} />
       </section>
 
       <div className="bg-bg-page">

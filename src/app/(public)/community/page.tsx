@@ -17,9 +17,9 @@ export async function generateMetadata() {
   return { title: `${t("heading")} — Fgrapher` };
 }
 
-// Cộng đồng F on Phòng tối (wave 2): the whole page is a place to look at
-// work, so it sits on the darkroom surface; the F Booking call sheets in it
-// stay ivory paper. Guests can read everything; acting asks for an account.
+// Cộng đồng F: shared albums and F Booking call sheets, on the same light
+// surface as the rest of the site (the owner dropped the darkroom page,
+// 07/10/2026). Guests can read everything; acting asks for an account.
 export default async function CommunityPage() {
   // Dormant while SOCIAL_FEED_ENABLED=false — see CLAUDE.md.
   if (!features.socialFeedEnabled) notFound();
@@ -39,7 +39,7 @@ export default async function CommunityPage() {
         <section aria-labelledby="cm-featured" className="flex flex-col gap-3">
           <h2
             id="cm-featured"
-            className="font-mono text-meta tracking-[0.12em] text-dr-text-3 uppercase"
+            className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase"
           >
             {t("rail.featured")}
           </h2>
@@ -50,7 +50,7 @@ export default async function CommunityPage() {
                   href={`/profile/${album.username}/albums/${album.albumId}`}
                   className="focus-ring group flex items-center gap-3 rounded-[var(--fg-radius-sm)]"
                 >
-                  <span className="relative block size-14 shrink-0 overflow-hidden bg-dr-surface">
+                  <span className="relative block size-14 shrink-0 overflow-hidden bg-bg-sunken">
                     {album.cover ? (
                       <Image
                         src={buildMediaVariants(album.cover).thumbnail}
@@ -63,10 +63,10 @@ export default async function CommunityPage() {
                     ) : null}
                   </span>
                   <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-body-sm font-semibold text-dr-text group-hover:underline">
+                    <span className="truncate text-body-sm font-semibold text-text-primary group-hover:underline">
                       {album.title}
                     </span>
-                    <span className="truncate text-meta text-dr-text-2">
+                    <span className="truncate text-meta text-text-secondary">
                       {album.artist}
                     </span>
                   </span>
@@ -74,21 +74,23 @@ export default async function CommunityPage() {
               </li>
             ))}
           </ol>
-          <p className="text-meta text-dr-text-3">{t("rail.featuredNote")}</p>
+          <p className="text-meta text-text-tertiary">
+            {t("rail.featuredNote")}
+          </p>
         </section>
       ) : null}
       {requests.length > 0 ? (
         <section aria-labelledby="cm-requests" className="flex flex-col gap-3">
           <h2
             id="cm-requests"
-            className="font-mono text-meta tracking-[0.12em] text-dr-text-3 uppercase"
+            className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase"
           >
             {t("rail.requests")}
           </h2>
-          <ul className="flex flex-col divide-y divide-dr-line">
+          <ul className="flex flex-col divide-y divide-border-subtle">
             {requests.map((request) => (
               <li key={request.id} className="flex flex-col gap-0.5 py-2.5">
-                <span className="text-body-sm font-semibold text-dr-text">
+                <span className="text-body-sm font-semibold text-text-primary">
                   {[
                     tService(request.role as "PHOTOGRAPHER"),
                     request.category ? categoryT(request.category) : null,
@@ -96,7 +98,7 @@ export default async function CommunityPage() {
                     .filter(Boolean)
                     .join(" · ")}
                 </span>
-                <span className="text-meta text-dr-text-2">
+                <span className="text-meta text-text-secondary">
                   {request.province} ·{" "}
                   {formatBudgetRange(request.budgetMin, request.budgetMax) ??
                     t("rail.askPrice")}
@@ -106,7 +108,7 @@ export default async function CommunityPage() {
           </ul>
           <Link
             href="/requests"
-            className="focus-ring w-fit rounded-[4px] text-body-sm font-semibold text-gold-400"
+            className="focus-ring w-fit rounded-[4px] text-body-sm font-semibold text-gold-600 dark:text-gold-400"
           >
             {t("rail.allRequests")}
           </Link>
@@ -116,20 +118,16 @@ export default async function CommunityPage() {
   );
 
   return (
-    <div
-      data-surface="darkroom"
-      data-under-header=""
-      className="min-h-screen bg-dr-bg text-dr-text"
-    >
+    <div className="min-h-screen bg-bg-page text-text-primary">
       <div className="mx-auto max-w-[1440px] px-4 py-8 sm:px-8 sm:py-10">
         <header className="mb-8 flex flex-col gap-3">
-          <span className="font-mono text-meta tracking-[0.12em] text-dr-text-3 uppercase">
+          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
             {t("eyebrow")}
           </span>
           <h1 className="font-display text-[clamp(2.25rem,5vw,4rem)] leading-[0.98] font-semibold tracking-[-0.03em]">
             {t("heading")}
           </h1>
-          <p className="max-w-2xl text-body-md text-dr-text-2">
+          <p className="max-w-2xl text-body-md text-text-secondary">
             {t("subtitle")}
           </p>
         </header>

@@ -694,11 +694,11 @@ function AlbumPostMedia({ post }: { post: FeedPost }) {
   return (
     <div className="flex flex-col gap-2">
       {albumHref ? (
-        <Link href={albumHref} className="focus-ring block bg-dr-bg">
+        <Link href={albumHref} className="focus-ring block bg-bg-sunken">
           {cover}
         </Link>
       ) : (
-        <div className="bg-dr-bg">{cover}</div>
+        <div className="bg-bg-sunken">{cover}</div>
       )}
       {strip.length > 0 ? (
         <ol className="grid grid-cols-4 gap-1.5">
@@ -711,7 +711,7 @@ function AlbumPostMedia({ post }: { post: FeedPost }) {
                   index: index + 2,
                   total: post.media.length,
                 })}
-                className="focus-ring relative block aspect-square w-full cursor-zoom-in bg-dr-bg"
+                className="focus-ring relative block aspect-square w-full cursor-zoom-in bg-bg-sunken"
               >
                 <Image
                   src={buildMediaVariants(item.url).thumbnail}
@@ -971,7 +971,7 @@ function RequestPostPanel({
   };
 
   return (
-    // An ivory call sheet on the darkroom feed (wave 2): a Paper island,
+    // An ivory call sheet in the feed (wave 2): a Paper island,
     // stamped with the days it stays open - red once it has closed.
     <div
       data-surface="paper"

@@ -64,12 +64,12 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
     <div
       role="img"
       aria-label={t("sheetLabel", { frame: frames[picked]?.label ?? "" })}
-      className="grid grid-cols-12 gap-0.5 bg-dr-line p-0.5"
+      className="grid grid-cols-12 gap-0.5 bg-border-subtle p-0.5"
     >
       {frames.map((frame, index) => (
         <div
           key={frame.label}
-          className={cn("relative aspect-square bg-dr-surface")}
+          className={cn("relative aspect-square bg-bg-sunken")}
         >
           {frame.src ? (
             <Image
@@ -109,11 +109,11 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
         </div>
         <div className="sticky top-[84px] flex h-[min(calc(100vh-116px),780px)] min-h-[520px] flex-col gap-3.5">
           {sheet(false)}
-          <p className="flex justify-between font-mono text-meta tracking-[0.12em] text-dr-text-3 uppercase">
+          <p className="flex justify-between font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
             <span>{chapters[active]?.eyebrow}</span>
             <span>{t("count", { n: active + 1 })}</span>
           </p>
-          <div className="relative grid min-h-0 flex-1 place-items-center border border-dr-line bg-dr-surface">
+          <div className="relative grid min-h-0 flex-1 place-items-center border border-border-subtle bg-bg-sunken">
             {stage?.src ? (
               // `fill` + contain inside a 24px inset: the stage has a fixed
               // height, so percentage max-sizes on a plain <img> overflowed.
@@ -130,7 +130,7 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
                 />
               </div>
             ) : (
-              <span aria-hidden className="absolute inset-6 bg-dr-raised" />
+              <span aria-hidden className="absolute inset-6 bg-border-subtle" />
             )}
           </div>
         </div>
@@ -140,7 +140,7 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
       <div className="lg:hidden">
         <div
           aria-hidden
-          className="sticky top-[72px] z-[5] -mx-5 border-b border-dr-line bg-dr-bg px-5 py-2.5"
+          className="sticky top-[72px] z-[5] -mx-5 border-b border-border-subtle bg-bg-page px-5 py-2.5"
         >
           {sheet(true)}
         </div>
@@ -153,10 +153,10 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
                 data-chapter={index}
                 className="flex flex-col gap-4"
               >
-                <span className="font-mono text-meta tracking-[0.12em] text-gold-400 uppercase">
+                <span className="font-mono text-meta tracking-[0.12em] text-gold-600 uppercase dark:text-gold-400">
                   {chapter.eyebrow}
                 </span>
-                <div className="grid aspect-square place-items-center border border-dr-line bg-dr-surface p-3">
+                <div className="grid aspect-square place-items-center border border-border-subtle bg-bg-sunken p-3">
                   {frame?.src ? (
                     <Image
                       src={buildMediaVariants(frame.src).medium}
@@ -168,7 +168,7 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
                       className="max-h-full w-auto max-w-full object-contain"
                     />
                   ) : (
-                    <span aria-hidden className="size-full bg-dr-raised" />
+                    <span aria-hidden className="size-full bg-border-subtle" />
                   )}
                 </div>
                 <ChapterText chapter={chapter} hideEyebrow />
@@ -192,21 +192,23 @@ function ChapterText({
   return (
     <>
       {hideEyebrow ? null : (
-        <span className="font-mono text-meta tracking-[0.12em] text-gold-400 uppercase">
+        <span className="font-mono text-meta tracking-[0.12em] text-gold-600 uppercase dark:text-gold-400">
           {chapter.eyebrow}
         </span>
       )}
       <div className="flex flex-col gap-2">
-        <span className="text-caption-upper text-dr-text-3">
+        <span className="text-caption-upper text-text-tertiary">
           {t("problem")}
         </span>
-        <h3 className="font-display text-[clamp(1.375rem,2.2vw,2rem)] leading-[1.2] font-medium tracking-[-0.015em] text-pretty text-dr-text-2">
+        <h3 className="font-display text-[clamp(1.375rem,2.2vw,2rem)] leading-[1.2] font-medium tracking-[-0.015em] text-pretty text-text-secondary">
           {chapter.problem}
         </h3>
       </div>
-      <div className="flex flex-col gap-2 border-t border-dr-line pt-5">
-        <span className="text-caption-upper text-dr-text-3">{t("answer")}</span>
-        <p className="text-[17px] leading-[1.55] text-pretty text-dr-text lg:text-[19px]">
+      <div className="flex flex-col gap-2 border-t border-border-subtle pt-5">
+        <span className="text-caption-upper text-text-tertiary">
+          {t("answer")}
+        </span>
+        <p className="text-[17px] leading-[1.55] text-pretty text-text-primary lg:text-[19px]">
           {chapter.answer}
         </p>
       </div>

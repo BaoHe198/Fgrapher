@@ -4234,8 +4234,7 @@
         "c3p": "Days of back-and-forth messages before the time, price and place are settled.",
         "c3a": "You send one request with the date, time, place and notes. The artist confirms within 48 hours. The deposit is agreed directly with the artist.",
         "c4p": "Reviews from who knows whom, sometimes people who never hired anyone.",
-        "c4a": "Only customers who finished a shoot booked through Fgrapher can write a review. Artists can reply publicly.",
-        "leader": "Two paths"
+        "c4a": "Only customers who finished a shoot booked through Fgrapher can write a review. Artists can reply publicly."
       },
       "paths": {
         "eyebrow": "Two paths",
