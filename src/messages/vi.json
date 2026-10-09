@@ -3660,7 +3660,6 @@
         "anywhere": "Mọi tỉnh/thành",
         "anyDate": "Ngày bất kỳ",
         "filters": "Bộ lọc",
-        "filtersWithCount": "Bộ lọc, {count} đang bật",
         "filtersDescription": "Khu vực, ngày giờ, phong cách, ngân sách, đánh giá và dịch vụ kèm.",
         "clearAll": "Xoá tất cả",
         "seeResults": "Xem {count} kết quả",

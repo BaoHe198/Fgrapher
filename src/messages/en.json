@@ -3660,7 +3660,6 @@
         "anywhere": "Any province",
         "anyDate": "Any date",
         "filters": "Filters",
-        "filtersWithCount": "Filters, {count} on",
         "filtersDescription": "Area, date and time, style, budget, rating and add-on services.",
         "clearAll": "Clear all",
         "seeResults": "Show {count} results",

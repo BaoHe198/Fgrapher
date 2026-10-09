@@ -64,7 +64,8 @@ interface FilterSidebarProps {
   roleCounts: Record<string, number>;
   categoryCounts: Partial<Record<string, number>>;
   marketplaceEnabled: boolean;
-  /** Rendered inside the phone filter sheet: not sticky, and carries sort. */
+  /** Inside the phone/tablet sheet: every filter, plus sort. Without it,
+   *  the lean always-open column of a wide screen. */
   inSheet?: boolean;
 }
 
@@ -300,6 +301,192 @@ export function FilterSidebar({
   // Section label: small caps with the audit's one tracking value (.12em).
   const sectionLabel =
     "text-meta tracking-[0.12em] text-text-tertiary uppercase";
+
+  // The phone/tablet sheet carries every filter. The always-open column
+  // on a wide screen leaves out what the search bar and role rail above
+  // already show (province, date, role) and leads with style and budget.
+  if (!inSheet) {
+    return (
+      <div className="flex flex-col gap-6">
+        {hasAnyCategory ? (
+          <section className="flex flex-col gap-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className={sectionLabel}>{t("styleLabel")}</span>
+              {filters.roles.length === 0 && !showAllCategories ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllCategories(true)}
+                  className="focus-ring rounded-[4px] text-body-sm font-semibold! text-text-link"
+                >
+                  {t("seeAllCategories")}
+                </button>
+              ) : null}
+            </div>
+            {categoryGroups.map((group) => {
+              const isExpanded = group.role
+                ? expandedGroups.has(group.role)
+                : true;
+              const visible = isExpanded
+                ? group.categories
+                : group.categories.slice(0, COLLAPSE_THRESHOLD);
+              const hasMore =
+                group.role != null &&
+                group.categories.length > COLLAPSE_THRESHOLD;
+              return (
+                <div
+                  key={group.role ?? "popular"}
+                  className="flex flex-col gap-2.5"
+                >
+                  {group.role ? (
+                    <span className="text-body-sm font-semibold! text-text-secondary">
+                      {roleT(group.role)}
+                    </span>
+                  ) : null}
+                  {visible.map((category) => {
+                    const count = categoryCounts[category] ?? 0;
+                    return (
+                      <Checkbox
+                        key={category}
+                        checked={filters.categories.includes(category)}
+                        onCheckedChange={() => toggleCategory(category)}
+                        disabled={count === 0}
+                        label={`${categoryT(category)} (${count})`}
+                      />
+                    );
+                  })}
+                  {hasMore ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        group.role && toggleGroupExpand(group.role)
+                      }
+                      className="focus-ring self-start rounded-[4px] text-body-sm font-semibold! text-text-link"
+                    >
+                      {isExpanded
+                        ? t("showLess")
+                        : t("showMore", {
+                            count: group.categories.length - COLLAPSE_THRESHOLD,
+                          })}
+                    </button>
+                  ) : null}
+                </div>
+              );
+            })}
+          </section>
+        ) : null}
+
+        {singleRole === "MODEL" ? (
+          <section className="flex flex-col gap-3">
+            <span className={sectionLabel}>{t("heightLabel")}</span>
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                aria-label={t("heightMinPh")}
+                placeholder={t("heightMinPh")}
+                value={filters.heightMin}
+                onChange={(e) => applyFilters({ heightMin: e.target.value })}
+              />
+              <Input
+                type="number"
+                aria-label={t("heightMaxPh")}
+                placeholder={t("heightMaxPh")}
+                value={filters.heightMax}
+                onChange={(e) => applyFilters({ heightMax: e.target.value })}
+              />
+            </div>
+            <span className={sectionLabel}>{t("experienceLabel")}</span>
+            {EXPERIENCE_LEVELS.map((level) => (
+              <Checkbox
+                key={level}
+                checked={filters.experienceLevel.includes(level)}
+                onCheckedChange={() => toggleExperienceLevel(level)}
+                label={experienceLevelT(level)}
+              />
+            ))}
+            <Checkbox
+              checked={filters.travelWilling}
+              onCheckedChange={(checked) =>
+                applyFilters({ travelWilling: checked })
+              }
+              label={t("travelWillingLabel")}
+            />
+          </section>
+        ) : null}
+
+        <div className="h-px bg-border-subtle" />
+
+        <NativeSelect
+          label={t("budgetLabel")}
+          value={budget}
+          onChange={onBudgetChange}
+          options={BUDGET_OPTIONS}
+        />
+
+        <section className="flex flex-col gap-3">
+          <span className={sectionLabel}>{t("ratingLabel")}</span>
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label={t("ratingLabel")}
+          >
+            {RATING_OPTIONS.map((option) => {
+              const active = filters.minRating === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  data-interactive="true"
+                  aria-pressed={active}
+                  onClick={() =>
+                    applyFilters({ minRating: option.value }, true)
+                  }
+                  className={cn(
+                    "focus-ring min-h-11 rounded-full border px-4 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
+                    active
+                      ? "border-brand-primary bg-brand-primary text-text-on-brand"
+                      : "border-border-default bg-bg-surface text-text-primary hover:border-border-strong",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="h-px bg-border-subtle" />
+
+        <section className="flex flex-col gap-2.5">
+          <span className={sectionLabel}>{t("serviceLabel")}</span>
+          {SERVICE_KINDS.map((kind) => (
+            <Checkbox
+              key={kind}
+              checked={filters.serviceKinds.includes(kind)}
+              onCheckedChange={() => toggleServiceKind(kind)}
+              label={serviceKindT(kind)}
+            />
+          ))}
+        </section>
+
+        {filters.city ? (
+          <NativeSelect
+            label={t("wardLabel")}
+            value={filters.ward}
+            onChange={(value) => applyFilters({ ward: value })}
+            disabled={wards.length === 0}
+            options={[
+              { value: "", label: t("allWards") },
+              ...wards.map((w) => ({ value: w.id, label: w.name })),
+            ]}
+          />
+        ) : null}
+
+        <Button variant="outline" className="w-full" onClick={resetFilters}>
+          {t("resetFilters")}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     // Not sticky: with the date, rating and style groups it is taller than
@@ -556,20 +743,18 @@ export function FilterSidebar({
 
       {/* Sort lives above the results on a desktop; the phone sheet has no
           such header, so it keeps a copy here. */}
-      {inSheet ? (
-        <section className="flex flex-col gap-2.5">
-          <span className={sectionLabel}>{t("sortByLabel")}</span>
-          {SORT_OPTIONS.map((option) => (
-            <Radio
-              key={option.value}
-              name="sort"
-              checked={filters.sort === option.value}
-              onChange={() => applyFilters({ sort: option.value })}
-              label={option.label}
-            />
-          ))}
-        </section>
-      ) : null}
+      <section className="flex flex-col gap-2.5">
+        <span className={sectionLabel}>{t("sortByLabel")}</span>
+        {SORT_OPTIONS.map((option) => (
+          <Radio
+            key={option.value}
+            name="sort"
+            checked={filters.sort === option.value}
+            onChange={() => applyFilters({ sort: option.value })}
+            label={option.label}
+          />
+        ))}
+      </section>
 
       <Button variant="outline" className="w-full" onClick={resetFilters}>
         {t("resetFilters")}

@@ -59,25 +59,12 @@ export function BrowseSearchBar({
       variant="outline"
       onClick={() => setOpen(true)}
       aria-haspopup="dialog"
-      aria-label={
-        compact
-          ? advancedCount > 0
-            ? t("filtersWithCount", { count: advancedCount })
-            : t("filters")
-          : undefined
-      }
-      className={cn("relative shrink-0", compact ? "size-12 px-0" : "h-12")}
+      className={cn("relative h-12 shrink-0", compact && "px-3.5")}
     >
       <SlidersHorizontal aria-hidden className="size-4" />
-      {compact ? null : t("filters")}
+      {t("filters")}
       {advancedCount > 0 ? (
-        <span
-          aria-hidden={compact}
-          className={cn(
-            "grid size-5 place-items-center rounded-full bg-brand-primary text-meta font-semibold text-text-on-brand",
-            compact && "absolute -top-1 -right-1",
-          )}
-        >
+        <span className="grid size-5 place-items-center rounded-full bg-brand-primary text-meta font-semibold text-text-on-brand">
           {advancedCount}
         </span>
       ) : null}
@@ -107,7 +94,8 @@ export function BrowseSearchBar({
         <div className="min-w-0 flex-1">
           <BrowseSearchPill provinces={provinces} />
         </div>
-        {filterButton(false)}
+        {/* Wide screens have the filter column beside the results. */}
+        <div className="lg:hidden">{filterButton(false)}</div>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
