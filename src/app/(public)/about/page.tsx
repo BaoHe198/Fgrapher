@@ -100,12 +100,16 @@ export default async function AboutPage() {
         }
         media={{
           type: "contact",
-          frames: sheetFrames.map(({ src, label, alt, meta }) => ({
-            src,
-            label,
-            alt,
-            meta,
-          })),
+          // One photo per role: the second showcase set, so the row
+          // repeats neither a role nor a home-page tile.
+          frames: sheetFrames
+            .slice(HOME_ROLES.length)
+            .map(({ src, label, alt, meta }) => ({
+              src,
+              label,
+              alt,
+              meta,
+            })),
         }}
       />
 

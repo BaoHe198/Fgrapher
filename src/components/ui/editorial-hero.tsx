@@ -13,7 +13,7 @@ type Media =
   | { type: "image"; src: string | null; alt: string }
   | {
       type: "contact";
-      /** Six to a row; twelve make two rolls. `meta` sits under the frame. */
+      /** Six to a row. `meta` sits under the photo. */
       frames: {
         src: string | null;
         /** Unique per frame; used as the list key, never shown. */
@@ -107,12 +107,9 @@ export function EditorialHero({
                       <FgImage
                         src={item.src}
                         alt={item.alt ?? ""}
-                        ratio="1/1"
+                        ratio="4/5"
                         revealIndex={index}
                         sizes="(min-width: 768px) 16vw, 128px"
-                        // Contact sheets never crop (kit §03).
-                        className="bg-bg-surface"
-                        imageClassName="object-contain"
                       />
                     </span>
                     <span className="flex justify-between gap-2 font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">

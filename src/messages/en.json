@@ -4217,7 +4217,7 @@
         "lede": "Fgrapher is where you book photographers, videographers, make-up artists, models, studios and costume rental shops. Every artist here has verified their identity.",
         "findArtist": "Find an artist",
         "iAmArtist": "I'm an artist",
-        "frameAlt": "Portfolio photo: {role}"
+        "frameAlt": "Illustration: {role}"
       },
       "story": {
         "eyebrow": "How Fgrapher works",
