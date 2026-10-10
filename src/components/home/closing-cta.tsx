@@ -34,7 +34,6 @@ export async function ClosingCta() {
           {t("request.eyebrow")}
         </span>
         <h2 className="text-heading-lg">{t("request.title")}</h2>
-        <p className="text-body-sm text-green-200">{t("request.sub")}</p>
         <Button
           variant="accent"
           className="self-start"

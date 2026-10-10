@@ -120,17 +120,8 @@ export default async function CommunityPage() {
   return (
     <div className="min-h-screen bg-bg-page text-text-primary">
       <div className="mx-auto max-w-[1440px] px-4 py-8 sm:px-8 sm:py-10">
-        <header className="mb-8 flex flex-col gap-3">
-          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-            {t("eyebrow")}
-          </span>
-          <h1 className="font-display text-[clamp(2.25rem,5vw,4rem)] leading-[0.98] font-semibold tracking-[-0.03em]">
-            {t("heading")}
-          </h1>
-          <p className="max-w-2xl text-body-md text-text-secondary">
-            {t("subtitle")}
-          </p>
-        </header>
+        {/* No intro block (owner, 10/10/2026): the feed explains itself. */}
+        <h1 className="sr-only">{t("heading")}</h1>
         <CommunityFeed viewerId={session?.user?.id ?? null} rail={rail} />
       </div>
     </div>

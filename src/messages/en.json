@@ -245,8 +245,6 @@
     "ctaTitle": "Bring your services to clients already searching",
     "ctaSub": "Free to join during our early access period — clients search for and book with you at no cost.",
     "ctaBtn": "Become a provider",
-    "heroSub": "Photographers, videographers, make-up artists, models and studios across {count} provinces and cities. Every provider is identity-verified.",
-    "heroSubShort": "Photographers, videographers, make-up artists, models and studios. All identity-verified.",
     "whoTitle": "Who do you need?",
     "roleTiles": {
       "PHOTOGRAPHER": "Photographer",
@@ -260,9 +258,7 @@
     "stylesTitle": "Browse by style",
     "allStyles": "All",
     "map": {
-      "eyebrow": "Bản đồ F",
       "title": "Find artists near where you shoot",
-      "sub": "Filter by role, style and budget right on the map. Tap a frame for a quick look at the profile.",
       "cta": "Open Bản đồ F",
       "chipStyle": "Wedding",
       "chipBudget": "Under 3,000,000₫",
@@ -290,7 +286,6 @@
     "request": {
       "eyebrow": "Đặt lịch F",
       "title": "Post a request, get offers from artists",
-      "sub": "Describe the shoot, date and budget. Matching artists send offers for you to choose from. Deposit agreed directly.",
       "cta": "Post a request"
     },
     "more": {
@@ -4578,10 +4573,8 @@
         "conditionAverage": "Average"
       },
       "v2": {
-        "eyebrow": "Fmarket · equipment",
         "title": "Cameras, lenses, lights. Buy, or rent by the day.",
         "titleRent": "Equipment to rent by the day",
-        "lede": "Gear listed for sale or rent by verified artists and shops. Payment and handover are agreed directly with the seller.",
         "buy": "Buy",
         "rent": "Rent",
         "inStock": "In stock",
@@ -4661,7 +4654,6 @@
     },
     "community": {
       "heading": "Community",
-      "subtitle": "Discover work, share stories, and find the right crew for your next shoot.",
       "tabDiscover": "Discover",
       "tabFollowing": "Following",
       "composerPlaceholder": "Share something with the community...",
@@ -4685,7 +4677,6 @@
       "pendingBanner": "{count} of your posts are waiting on photo moderation. They go public once the photos are approved.",
       "submittedForReview": "Post submitted. Its photos are awaiting moderation and it will appear once approved.",
       "report": "Report post",
-      "eyebrow": "Fgrapher's creative space",
       "noComments": "No comments yet. Start the conversation.",
       "loginToInteract": "Sign in to like and comment",
       "filter": {

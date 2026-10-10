@@ -38,15 +38,11 @@ export async function MapTeaser({ artists }: { artists: TeaserArtist[] }) {
   return (
     <section className="mx-auto grid max-w-[1440px] grid-cols-[5fr_7fr] items-center gap-12 px-8 pt-20 max-lg:grid-cols-1 max-lg:gap-8 max-md:hidden">
       <div className="flex flex-col gap-4">
-        <span className="font-mono text-meta tracking-[0.12em] text-gold-700 uppercase dark:text-gold-400">
-          {t("eyebrow")}
-        </span>
         <RiseOnView>
           <h2 className="max-w-sm text-display-md text-text-primary">
             {t("title")}
           </h2>
         </RiseOnView>
-        <p className="max-w-md text-body-md text-text-secondary">{t("sub")}</p>
         <Button
           className="mt-2 self-start"
           nativeButton={false}

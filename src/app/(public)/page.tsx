@@ -8,7 +8,6 @@ import { MoreFromFgrapher } from "@/components/home/more-from-fgrapher";
 import { RoleTiles } from "@/components/home/role-tiles";
 import { StyleGrid } from "@/components/home/style-grid";
 import { TrustSection } from "@/components/home/trust-section";
-import { HeroContactSheet } from "@/components/sections/hero-contact-sheet";
 import { HeroSearch } from "@/components/sections/hero-search";
 import { RiseOnView } from "@/components/ui/rise-on-view";
 import { SectionHead } from "@/components/ui/section-head";
@@ -36,29 +35,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Hero artwork is deliberately isolated from provider/customer uploads.
-// Replace these files in public/images/hero-professions/ when the brand has
-// new artwork; the landing page must never source this area from portfolio
-// media or any other user-owned content.
-const HERO_PHOTOS = [
-  {
-    url: "/images/hero-professions/photographer.jpg",
-    altKey: "hero.imageAlt.photographer",
-  },
-  {
-    url: "/images/hero-professions/makeup-artist.jpg",
-    altKey: "hero.imageAlt.makeupArtist",
-  },
-  {
-    url: "/images/hero-professions/videographer.jpg",
-    altKey: "hero.imageAlt.videographer",
-  },
-  {
-    url: "/images/hero-professions/studio.jpg",
-    altKey: "hero.imageAlt.studio",
-  },
-] as const;
-
 export default async function LandingPage() {
   const t = await getTranslations();
   const tLanding = await getTranslations("publicPages.landing");
@@ -67,10 +43,6 @@ export default async function LandingPage() {
     getFeaturedProfiles(4),
     getHomeShowcase(),
   ]);
-  const heroPhotos = HERO_PHOTOS.map((photo) => ({
-    url: photo.url,
-    alt: t(photo.altKey),
-  }));
 
   const artists = featuredProfiles.map((profile) => ({
     id: profile.userId,
@@ -96,34 +68,13 @@ export default async function LandingPage() {
 
   return (
     <>
-      {/* HERO */}
+      {/* HERO: just the search (owner, 10/10/2026 - the page explains
+          itself, so the headline and intro line went). The h1 stays for
+          screen readers and search engines. */}
       <section className="relative bg-green-900 text-gold-50">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-7 px-8 py-12 max-md:gap-5 max-md:px-5 max-md:py-8">
-          <div className="grid grid-cols-[1.4fr_1fr] items-center gap-10 max-lg:contents">
-            <div className="flex flex-col gap-5 max-lg:contents">
-              <h1 className="m-0 text-display-lg tracking-[-0.02em] lg:text-display-xl">
-                {t("hero.title")}
-              </h1>
-              {/* One line, under the title: the owner cut a longer intro
-                  (21/09/2026) because it pushed the search box down on a
-                  phone. The redesign brings back a single sentence; phones
-                  get the shorter one. */}
-              <p className="max-w-xl text-body-md text-green-200 max-md:text-body-sm">
-                <span className="max-md:hidden">
-                  {t("home.heroSub", { count: showcase.provinceCount })}
-                </span>
-                <span className="md:hidden">{t("home.heroSubShort")}</span>
-              </p>
-            </div>
-
-            <HeroContactSheet photos={heroPhotos} />
-          </div>
-
-          {/* Full hero width: five filters and a button need more room
-              than the text column leaves. */}
-          <div className="max-lg:order-1">
-            <HeroSearch marketplaceEnabled={features.marketplaceEnabled} />
-          </div>
+        <h1 className="sr-only">{t("hero.title")}</h1>
+        <div className="mx-auto max-w-[1440px] px-8 py-10 max-md:px-5 max-md:py-5">
+          <HeroSearch marketplaceEnabled={features.marketplaceEnabled} />
         </div>
       </section>
 

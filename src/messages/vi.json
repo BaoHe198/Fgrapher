@@ -245,8 +245,6 @@
     "ctaTitle": "Đưa dịch vụ của bạn đến khách hàng đang tìm kiếm",
     "ctaSub": "Miễn phí tham gia trong giai đoạn đầu — khách hàng tìm kiếm và đặt lịch với bạn hoàn toàn miễn phí.",
     "ctaBtn": "Trở thành nhà cung cấp",
-    "heroSub": "Nhiếp ảnh gia, quay phim, trang điểm, người mẫu và studio trên khắp {count} tỉnh, thành. Mọi nhà cung cấp đều đã xác minh danh tính.",
-    "heroSubShort": "Nhiếp ảnh gia, quay phim, trang điểm, người mẫu và studio. Tất cả đã xác minh danh tính.",
     "whoTitle": "Bạn cần ai?",
     "roleTiles": {
       "PHOTOGRAPHER": "Nhiếp ảnh gia",
@@ -260,9 +258,7 @@
     "stylesTitle": "Duyệt theo phong cách",
     "allStyles": "Tất cả",
     "map": {
-      "eyebrow": "Bản đồ F",
       "title": "Xem nghệ sĩ gần nơi bạn chụp",
-      "sub": "Lọc theo vai trò, phong cách và ngân sách ngay trên bản đồ. Chạm vào một khung để xem nhanh hồ sơ.",
       "cta": "Mở Bản đồ F",
       "chipStyle": "Ảnh cưới",
       "chipBudget": "Dưới 3.000.000₫",
@@ -290,7 +286,6 @@
     "request": {
       "eyebrow": "Đặt lịch F",
       "title": "Đăng yêu cầu, nhận đề xuất từ nghệ sĩ",
-      "sub": "Mô tả buổi chụp, ngày và ngân sách. Nghệ sĩ phù hợp gửi đề xuất cho bạn chọn. Đặt cọc thỏa thuận trực tiếp.",
       "cta": "Đăng yêu cầu"
     },
     "more": {
@@ -4578,10 +4573,8 @@
         "conditionAverage": "Trung bình"
       },
       "v2": {
-        "eyebrow": "Chợ F · thiết bị",
         "title": "Máy ảnh, ống kính, ánh sáng. Mua hoặc thuê theo ngày.",
         "titleRent": "Thiết bị cho thuê theo ngày",
-        "lede": "Thiết bị do nghệ sĩ và cửa hàng đã xác minh đăng bán hoặc cho thuê. Thanh toán và giao nhận thỏa thuận trực tiếp với người bán.",
         "buy": "Mua",
         "rent": "Thuê",
         "inStock": "Còn hàng",
@@ -4661,7 +4654,6 @@
     },
     "community": {
       "heading": "Cộng đồng F",
-      "subtitle": "Khám phá tác phẩm, chia sẻ câu chuyện và tìm ekip cho buổi chụp tiếp theo.",
       "tabDiscover": "Khám phá",
       "tabFollowing": "Đang theo dõi",
       "composerPlaceholder": "Chia sẻ điều gì đó với cộng đồng...",
@@ -4685,7 +4677,6 @@
       "pendingBanner": "{count} bài của bạn đang chờ kiểm duyệt ảnh. Bài chỉ hiện công khai sau khi ảnh được duyệt.",
       "submittedForReview": "Đã gửi bài. Ảnh đang chờ kiểm duyệt, bài sẽ hiện sau khi được duyệt.",
       "report": "Báo cáo bài đăng",
-      "eyebrow": "Không gian sáng tạo của Fgrapher",
       "noComments": "Chưa có bình luận. Hãy bắt đầu cuộc trò chuyện.",
       "loginToInteract": "Đăng nhập để thích và bình luận",
       "filter": {

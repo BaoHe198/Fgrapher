@@ -106,21 +106,15 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   return (
     <div className="mx-auto max-w-[1440px] px-4 pt-[clamp(28px,4vw,56px)] pb-[72px] sm:px-8">
       <FilterParamsProvider>
-        <header className="flex flex-col gap-3">
-          <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-            {t("v2.eyebrow")}
-          </span>
-          <h1 className="max-w-4xl font-display text-[clamp(2.25rem,5vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.03em] text-balance text-text-primary">
-            {type === "RENT" ? t("v2.titleRent") : t("v2.title")}
-          </h1>
-          <p className="max-w-2xl text-body-md text-text-secondary">
-            {t("v2.lede")}
-          </p>
-        </header>
+        {/* No intro block (owner, 10/10/2026): the categories and listings
+            explain themselves. */}
+        <h1 className="sr-only">
+          {type === "RENT" ? t("v2.titleRent") : t("v2.title")}
+        </h1>
 
         <nav
           aria-label={t("filters.category")}
-          className="mt-8 grid grid-cols-5 gap-2 max-md:-mx-4 max-md:flex max-md:overflow-x-auto max-md:px-4 sm:gap-3"
+          className="grid grid-cols-5 gap-2 max-md:-mx-4 max-md:flex max-md:overflow-x-auto max-md:px-4 sm:gap-3"
         >
           {TILES.map((value) => {
             const active = activeCategories.includes(value);
