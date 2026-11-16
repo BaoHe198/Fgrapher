@@ -3,32 +3,35 @@ import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 import { createEmailVerificationToken } from "../src/services/email-verification";
+import { login } from "./helpers/auth";
 import { db, TEST_PASSWORD } from "./helpers/db";
 
-// Register as provider -> role activates automatically -> create profile ->
-// upload portfolio -> appear in search.
+// Register as provider -> verify email -> role active on a free plan ->
+// build a profile -> try a portfolio upload -> profile goes live on its own
+// -> appear in search.
 //
 // Stripe is disabled (BILLING_ENABLED=false — see CLAUDE.md's MVP-scope
-// section and src/services/subscription.ts's assignFreePlan): the register
-// route grants every selected paid role a free plan immediately, and
-// /onboarding/billing itself redirects straight past to /dashboard, so
-// there's no Checkout handoff to drive or degraded-mode message to assert
-// here anymore.
+// section): registration grants the selected paid role a free plan at once
+// (FREE_ROLE_GRANT_ENABLED), so there is no checkout step to drive.
 //
-// One step still can't be driven for real without live credentials this
-// environment doesn't have (Cloudinary is unconfigured — confirmed empty,
-// see e2e/README.md): "Upload portfolio" mocks the two network calls that
-// leave this app's code (the Cloudinary upload itself, and Cloudinary's
-// response shape) while exercising every line of first-party code around
-// it for real: the signature request, the XHR upload call, and the
-// POST /api/portfolio that persists the result.
+// Two outcomes come from outside the provider's own UI and are written
+// directly, each standing in for one real event:
 //
-// A second gap, unrelated to third-party services: there is no UI path
-// anywhere in the app that sets Profile.isPublished (grepped every read/
-// write site — see e2e/README.md) — search silently excludes every
-// profile a real user creates, forever, with no error or affordance to
-// fix it. This test documents that by flipping it directly via Prisma
-// rather than pretending a "publish" button exists.
+// 1. The portfolio upload. After the browser uploads to Cloudinary,
+//    POST /api/portfolio re-checks the asset with Cloudinary's Admin API
+//    (verifyPortfolioUpload) and refuses it when Cloudinary isn't
+//    configured. Playwright can mock the browser half but not that
+//    server-to-server check, so the spec asserts the upload fails closed —
+//    no row written — and then seeds one approved photo as moderation
+//    would leave it.
+// 2. Identity verification. An admin approves it at /admin/verifications;
+//    that flow has its own spec, so the role is marked VERIFIED here.
+//
+// Publishing itself is NOT written directly. There is no publish button:
+// a profile goes live on its own once identity, plan, an approved photo, a
+// category and a location are all in place (tryAutoPublish). Saving the
+// profile again runs that real gate, so a regression in any of the checks
+// fails this spec instead of being papered over.
 test("provider registers, activates a role, builds a profile, and appears in search", async ({
   page,
 }) => {
@@ -38,15 +41,11 @@ test("provider registers, activates a role, builds a profile, and appears in sea
   await page.getByLabel("Full name").fill("Provider Persona");
   await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
   await page.getByLabel("Password").fill(TEST_PASSWORD);
-  // dd/mm/yyyy — DateField (src/components/ui/date-field.tsx) replaced the
-  // native <input type="date">, whose value was ISO. An ISO string here is
-  // simply not a parseable date to it, so the form fails validation and
-  // never submits.
+  // dd/mm/yyyy — DateField (src/components/ui/date-field.tsx) does not
+  // accept the ISO value a native date input would take.
   await page.getByLabel("Date of birth").fill("01/01/1995");
   await page.getByRole("button", { name: "Creative pro" }).click();
-  // A radio, not a checkbox, since the MVP capped an account at one active
-  // provider role (CLAUDE.md) — picking a role now replaces the previous
-  // selection instead of adding to it.
+  // A radio, not a checkbox: an account holds one provider role at a time.
   await page.getByRole("radio", { name: "Photographer" }).check();
   await page
     .getByRole("checkbox", {
@@ -55,11 +54,9 @@ test("provider registers, activates a role, builds a profile, and appears in sea
     .check();
   await page.getByRole("button", { name: "Create account" }).click();
 
-  // Registration doesn't sign anyone in any more — a credential signup is
-  // created unverified and authorize() refuses it until the emailed link is
-  // clicked (docs/ops/email-verification.md). Same approach as
-  // auth-customer.spec.ts: mint a token through the real code path and hit
-  // the real /verify-email endpoint rather than flipping the column.
+  // A credential signup can't sign in until its emailed link is clicked
+  // (docs/ops/email-verification.md). Mint the token through the real code
+  // path and open the real /verify-email page rather than flip the column.
   await expect(page.getByText("Check your inbox")).toBeVisible({
     timeout: 15_000,
   });
@@ -71,62 +68,69 @@ test("provider registers, activates a role, builds a profile, and appears in sea
     page.getByRole("heading", { name: "Email verified" }),
   ).toBeVisible({ timeout: 15_000 });
 
-  await page.goto("/login");
-  await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
-  await page.getByLabel("Password").fill(TEST_PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+  await login(page, email, TEST_PASSWORD);
 
   const userRole = await db.userRole.findUniqueOrThrow({
     where: { userId_role: { userId: user.id, role: "PHOTOGRAPHER" } },
+    include: { subscription: true },
   });
-  expect(userRole.active).toBe(true); // assignFreePlan activates it at registration time
+  expect(userRole.active).toBe(true);
+  expect(userRole.subscription?.status).toBe("ACTIVE");
+  expect(userRole.verificationStatus).not.toBe("VERIFIED");
 
   // --- Profile ---
   await page.goto("/dashboard/settings/profile");
-  // The editor is an accordion and only "Basic information" starts open —
-  // everything this test touches lives in the collapsed "Role profile"
-  // panel, so its fields are not just hidden, they are absent from the DOM.
+  // Accordion: only "Basic information" starts open, and the collapsed
+  // "Role profile" panel's fields are not in the DOM until it opens.
   await page.getByRole("button", { name: "Role profile" }).click();
   await page.getByLabel("Display name").fill("Provider Persona Photography");
-  // The Description field's <label> has no htmlFor (a real accessibility
-  // bug, confirmed by reading profile-settings-form.tsx — worth fixing
-  // separately), so getByLabel can't find it; fall back to DOM structure.
   await page
     .getByText("Description", { exact: true })
     .locator("xpath=../..")
     .locator("textarea")
     .fill("E2E test provider — portrait and event photography.");
-  // A published-ready profile needs a province, ward and detailed address
-  // (CLAUDE.md rule 9's location model); without them Save is refused with
-  // "Enter a province, ward, and detailed address." and no PATCH is sent.
-  const province = page.getByLabel("Main province");
-  await province.selectOption({ index: 1 });
+  // At least one category is required before a profile can go public.
+  await page.getByRole("button", { name: "Portrait", exact: true }).click();
+
+  // Pick the location by its reference names, which survive a database
+  // reset; the generated ids do not.
+  const province = await db.province.findFirstOrThrow({
+    include: { wards: { take: 1, orderBy: { code: "asc" } } },
+    orderBy: { code: "asc" },
+  });
+  const ward = province.wards[0];
+  expect(ward).toBeTruthy();
+  await page.getByLabel("Main province").selectOption({ label: province.name });
   // The open "Basic information" panel has its own Ward field; the role
   // profile's comes after it.
-  const ward = page.getByLabel("Ward", { exact: true }).last();
-  await expect(ward.locator("option")).not.toHaveCount(1);
-  await ward.selectOption({ index: 1 });
+  const wardSelect = page.getByLabel("Ward", { exact: true }).last();
+  await expect(wardSelect.locator("option")).not.toHaveCount(1);
+  await wardSelect.selectOption({ label: ward.name });
   await page.getByLabel("Detailed address").fill("12 Lê Lợi");
-  // onSave() sets the "Saved" text regardless of the PATCH response status
-  // (confirmed by reading profile-settings-form.tsx — another real bug,
-  // worth fixing separately) so it isn't a reliable signal that the write
-  // actually landed; wait on the response itself instead.
-  await Promise.all([
-    page.waitForResponse(
-      (res) =>
-        res.url().includes("/api/profiles/PHOTOGRAPHER") &&
-        res.request().method() === "PATCH",
-    ),
-    page.getByRole("button", { name: "Save changes" }).click(),
-  ]);
+
+  const saveProfile = async () => {
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (res) =>
+          res.url().includes("/api/profiles/PHOTOGRAPHER") &&
+          res.request().method() === "PATCH",
+      ),
+      page.getByRole("button", { name: "Save changes" }).click(),
+    ]);
+    expect(response.ok(), await response.text()).toBe(true);
+  };
+  await saveProfile();
 
   const profile = await db.profile.findUniqueOrThrow({
     where: { userId_role: { userId: user.id, role: "PHOTOGRAPHER" } },
   });
-  expect(profile.isPublished).toBe(false); // no UI sets this true — see comment above
+  expect(profile.categories).toContain("PORTRAIT");
+  expect(profile.provinceId).toBe(province.id);
+  expect(profile.wardId).toBe(ward.id);
+  // Identity and an approved photo are still missing.
+  expect(profile.isPublished).toBe(false);
 
-  // --- Portfolio upload (Cloudinary mocked, everything else real) ---
+  // --- Portfolio upload: browser half mocked, server check fails closed ---
   await page.route("**/api/upload/signature", async (route) => {
     await route.fulfill({
       status: 200,
@@ -137,7 +141,7 @@ test("provider registers, activates a role, builds a profile, and appears in sea
           signature: "fake",
           apiKey: "fake",
           cloudName: "fake",
-          folder: "fake",
+          folder: `fgrapher/portfolio/${user.id}`,
         },
         error: null,
         message: null,
@@ -150,7 +154,7 @@ test("provider registers, activates a role, builds a profile, and appears in sea
       contentType: "application/json",
       body: JSON.stringify({
         secure_url: "https://example.com/fake-e2e-upload.jpg",
-        public_id: "fake-e2e-upload",
+        public_id: `fgrapher/portfolio/${user.id}/fake-e2e-upload`,
         resource_type: "image",
         width: 800,
         height: 600,
@@ -160,8 +164,7 @@ test("provider registers, activates a role, builds a profile, and appears in sea
 
   await page.goto("/dashboard/portfolio");
   await page.getByRole("button", { name: "Upload" }).click();
-  // Photos live in albums. With none yet, the dialog opens straight on the
-  // create-album form (a new provider used to face an empty picker).
+  // With no album yet, the dialog opens straight on the create-album form.
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Album title").fill("Wedding highlights");
   await dialog.getByLabel("Category").selectOption({ index: 1 });
@@ -169,20 +172,26 @@ test("provider registers, activates a role, builds a profile, and appears in sea
   await page
     .locator('input[type="file"]')
     .setInputFiles(path.join(__dirname, "fixtures", "test-image.jpg"));
-  // Rights / consent confirmation — required before any upload.
+  // Rights / consent confirmation is required before any upload.
   await dialog
     .getByRole("checkbox", { name: /I confirm I have the rights/ })
     .check();
-  await expect(
-    page.getByRole("button", { name: /^Upload \d+$/ }),
-  ).toBeEnabled();
 
-  // The upload itself can't round-trip here: the server re-checks every
-  // Cloudinary asset against Cloudinary's API before saving it
-  // (verifyPortfolioUpload) and fails closed when Cloudinary isn't
-  // configured, which the browser-side mocks above can't reach. The UI
-  // path is proven up to an enabled Upload; the row it would create is
-  // written directly, into the album the dialog just created.
+  const [portfolioResponse] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.url().endsWith("/api/portfolio") &&
+        res.request().method() === "POST",
+    ),
+    dialog.getByRole("button", { name: /^Upload \d+$/ }).click(),
+  ]);
+  expect(portfolioResponse.ok()).toBe(false);
+  await expect(dialog.getByText("Upload failed")).toBeVisible();
+  expect(
+    await db.profileMedia.count({ where: { profileId: profile.id } }),
+  ).toBe(0);
+
+  // --- The two outside outcomes (see the header comment) ---
   const album = await db.album.findFirstOrThrow({
     where: { profileId: profile.id, title: "Wedding highlights" },
   });
@@ -191,16 +200,32 @@ test("provider registers, activates a role, builds a profile, and appears in sea
       profileId: profile.id,
       albumId: album.id,
       url: "https://example.com/fake-e2e-upload.jpg",
+      publicId: `fgrapher/portfolio/${user.id}/fake-e2e-upload`,
       type: "IMAGE",
       moderationStatus: "APPROVED",
+      rightsConfirmedAt: new Date(),
     },
   });
-
-  // --- Publish + appear in search (bridging the gap documented above) ---
-  await db.profile.update({
-    where: { id: profile.id },
-    data: { isPublished: true },
+  await db.userRole.update({
+    where: { id: userRole.id },
+    data: { verificationStatus: "VERIFIED" },
   });
+
+  // --- Goes live on its own: saving re-runs the real publish gate ---
+  await page.goto("/dashboard/settings/profile");
+  await page.getByRole("button", { name: "Role profile" }).click();
+  await expect(page.getByLabel("Display name")).toHaveValue(
+    "Provider Persona Photography",
+  );
+  await saveProfile();
+
+  await expect
+    .poll(
+      async () =>
+        (await db.profile.findUniqueOrThrow({ where: { id: profile.id } }))
+          .isPublished,
+    )
+    .toBe(true);
 
   // Searched by name, as a customer would: in a full run other specs add
   // enough providers that a brand-new one with no reviews isn't on the
