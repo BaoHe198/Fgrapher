@@ -88,7 +88,9 @@ export function ProfileCover({
             fill
             priority
             sizes="100vw"
-            className="object-cover"
+            className={
+              hero ? "animate-cover-settle object-cover" : "object-cover"
+            }
             unoptimized={isOwnProfile}
           />
           {needsScrim && !hero ? (

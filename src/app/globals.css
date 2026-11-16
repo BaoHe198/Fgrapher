@@ -692,6 +692,20 @@
   animation: fg-drift-x 60s linear infinite;
 }
 
+/* Profile cover: settles from slightly enlarged to its true frame, once,
+   as the page opens. Scale only - the photo's colours are never touched. */
+@keyframes fg-cover-settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@utility animate-cover-settle {
+  animation: fg-cover-settle 1400ms var(--fg-ease-out) both;
+}
+
 /* Page entrance: fade + up 8px. */
 @keyframes fg-page-in {
   from {

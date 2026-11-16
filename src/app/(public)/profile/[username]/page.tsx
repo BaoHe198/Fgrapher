@@ -432,7 +432,7 @@ export default async function PublicProfilePage({
           </div>
           <h1
             id="profile-name"
-            className="max-w-6xl font-display text-[clamp(2.25rem,7vw,6rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-balance break-words text-dr-text"
+            className="max-w-6xl animate-rise font-display text-[clamp(2.25rem,7vw,6rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-balance break-words text-dr-text"
           >
             {displayName}
           </h1>

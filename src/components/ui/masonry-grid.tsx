@@ -72,11 +72,17 @@ export function MasonryGrid({
   // Shortest-column placement, keeping each photo's index for the lightbox
   // and its frame number.
   const placed = React.useMemo(() => {
+    // A short roll gets fewer, larger columns (owner, 16/11/2026): six
+    // photos across four columns left holes and showed each one small.
+    const count = Math.min(
+      columns,
+      items.length <= 4 ? 2 : items.length <= 8 ? 3 : columns,
+    );
     const cols: { item: MasonryItem; index: number }[][] = Array.from(
-      { length: columns },
+      { length: count },
       () => [],
     );
-    const heights = new Array(columns).fill(0);
+    const heights = new Array(count).fill(0);
     items.forEach((item, index) => {
       const ratio = item.width && item.height ? item.height / item.width : 1.25;
       const target = heights.indexOf(Math.min(...heights));
@@ -104,7 +110,7 @@ export function MasonryGrid({
         height={item.height ?? 1000}
         sizes={sizes}
         className={cn(
-          "h-auto w-full",
+          "h-auto w-full transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/tile:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover/tile:scale-100",
           index < 6 && ["animate-develop", DEVELOP_DELAY[index]],
         )}
       />
