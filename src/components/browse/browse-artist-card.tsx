@@ -40,7 +40,8 @@ interface Labels {
 // text); from 430px a column with the name and place on the photo and the
 // price on one line below, so prices line up whatever the name's length.
 // The rating never shares a line with the name: on the photo's corner in
-// a column, on the last line in a row. No film motifs on cards.
+// a column, on the last line in a row. One film motif since 16/11/2026 (owner): the
+// viewfinder corners on hover and the shutter on press.
 export function BrowseArtistCard({
   artist,
   labels,
@@ -79,6 +80,8 @@ export function BrowseArtistCard({
     <Link
       href={`/profile/${artist.username}`}
       aria-label={labels.aria}
+      data-viewfinder
+      data-shutter
       className="focus-ring group grid min-w-0 grid-cols-[112px_minmax(0,1fr)] gap-3.5 rounded-[var(--fg-radius-md)] text-text-primary min-[430px]:flex min-[430px]:flex-col min-[430px]:gap-2.5"
     >
       <span className="relative block aspect-[4/5] overflow-hidden rounded-[var(--fg-radius-md)] bg-bg-sunken transition-[transform,box-shadow] duration-[var(--fg-dur-260)] ease-fg-out min-[430px]:group-hover:-translate-y-1 min-[430px]:group-hover:shadow-[var(--shadow-lg)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
@@ -99,6 +102,12 @@ export function BrowseArtistCard({
             {labels.noPhoto}
           </span>
         )}
+        {artist.cover ? (
+          <span
+            aria-hidden
+            className="viewfinder top-12! bottom-20! max-[429px]:hidden"
+          />
+        ) : null}
         {/* On the photo in the column layout only. */}
         <span className="absolute top-2 right-2 hidden rounded-full bg-bg-surface px-2 py-1 text-body-sm shadow-[var(--shadow-sm)] min-[430px]:block">
           {rating}

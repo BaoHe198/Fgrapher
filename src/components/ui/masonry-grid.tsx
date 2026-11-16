@@ -99,6 +99,7 @@ export function MasonryGrid({
       data-interactive="true"
       // Lets a lightbox find the tile it should fly back to.
       data-frame-index={index}
+      data-viewfinder
       onClick={() => onOpen?.(index)}
       aria-label={t("open", { frame: index + 1 })}
       className="group/tile focus-ring relative block w-full overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken text-left"
@@ -118,6 +119,7 @@ export function MasonryGrid({
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_var(--fg-image-ring)]"
       />
+      <span aria-hidden className="viewfinder" />
       {renderOverlay?.(item, index)}
     </button>
   );

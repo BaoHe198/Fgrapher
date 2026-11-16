@@ -706,6 +706,74 @@
   animation: fg-cover-settle 1400ms var(--fg-ease-out) both;
 }
 
+/* Viewfinder (owner, 16/11/2026): four frame corners close in on a photo
+   when its link is hovered or focused - the camera's own "you are about to
+   take this one". Put `data-viewfinder` on the link and a
+   `<span class="viewfinder">` inside the photo frame. Pointer devices
+   only; a touch screen has no hover to announce. */
+@utility viewfinder {
+  --vf: rgb(255 255 255 / 0.92);
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.07);
+  transition:
+    opacity var(--fg-dur-200) var(--fg-ease-out),
+    transform var(--fg-dur-260) var(--fg-ease-out);
+  background:
+    linear-gradient(var(--vf), var(--vf)) top left / 18px 2px,
+    linear-gradient(var(--vf), var(--vf)) top left / 2px 18px,
+    linear-gradient(var(--vf), var(--vf)) top right / 18px 2px,
+    linear-gradient(var(--vf), var(--vf)) top right / 2px 18px,
+    linear-gradient(var(--vf), var(--vf)) bottom left / 18px 2px,
+    linear-gradient(var(--vf), var(--vf)) bottom left / 2px 18px,
+    linear-gradient(var(--vf), var(--vf)) bottom right / 18px 2px,
+    linear-gradient(var(--vf), var(--vf)) bottom right / 2px 18px;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 0.55));
+}
+@media (hover: hover) {
+  [data-viewfinder]:hover .viewfinder,
+  [data-viewfinder]:focus-visible .viewfinder {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Shutter: two blades meet in the middle and part again (see
+   components/ui/shutter-transition.tsx). */
+@keyframes fg-shutter-top {
+  0% {
+    transform: translateY(-100%);
+  }
+  40%,
+  55% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+@keyframes fg-shutter-bottom {
+  0% {
+    transform: translateY(100%);
+  }
+  40%,
+  55% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+@utility animate-shutter-top {
+  animation: fg-shutter-top 420ms var(--fg-ease-in-out) both;
+}
+@utility animate-shutter-bottom {
+  animation: fg-shutter-bottom 420ms var(--fg-ease-in-out) both;
+}
+
 /* Page entrance: fade + up 8px. */
 @keyframes fg-page-in {
   from {

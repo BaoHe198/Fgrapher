@@ -1,5 +1,6 @@
 import { Footer } from "@/components/layout/footer";
 import { WebNav } from "@/components/layout/web-nav";
+import { ShutterTransition } from "@/components/ui/shutter-transition";
 import { features } from "@/lib/features";
 
 export default function PublicLayout({
@@ -17,6 +18,7 @@ export default function PublicLayout({
         {children}
       </main>
       <Footer />
+      <ShutterTransition />
     </div>
   );
 }
