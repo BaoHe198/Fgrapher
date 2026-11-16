@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
-import { CURRENT_POLICY_VERSION, SELLER_ROLES } from "@/lib/constants";
+import { CURRENT_POLICY_VERSION } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { checkSharedRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRequestMeta } from "@/lib/request-meta";
@@ -73,13 +73,11 @@ export async function POST(request: Request) {
   } = parsed.data;
 
   // The schema cannot read the runtime flag, so enforce it here as well as
-  // hiding the role in the registration UI. Gated on SELLER_ROLES, not on
-  // SHOP_ROLES: a costume shop does not list on Chợ F at all, so it must
-  // stay registrable while the marketplace is off.
-  if (
-    !features.marketplaceEnabled &&
-    roles.some((role) => SELLER_ROLES.includes(role))
-  ) {
+  // hiding the role in the registration UI. Only CAMERA_SHOP exists purely for
+  // Chợ F. This used to test SELLER_ROLES, which since 21/09/2026 also holds
+  // PHOTOGRAPHER, VIDEOGRAPHER and STUDIO - so turning the marketplace off
+  // would have blocked their sign-up too (audit 16/11/2026).
+  if (!features.marketplaceEnabled && roles.includes("CAMERA_SHOP")) {
     return NextResponse.json(
       {
         data: null,

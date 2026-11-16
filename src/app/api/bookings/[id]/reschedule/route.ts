@@ -9,6 +9,7 @@ import {
 import {
   BookingActionError,
   bookingErrorMessage,
+  bookingForViewer,
   proposeReschedule,
   respondToReschedule,
 } from "@/services/bookings";
@@ -42,7 +43,11 @@ export async function POST(
     });
 
     return NextResponse.json(
-      { data: booking, error: null, message: t("rescheduleProposed") },
+      {
+        data: bookingForViewer(booking, session.user.id),
+        error: null,
+        message: t("rescheduleProposed"),
+      },
       { status: 200 },
     );
   } catch (err) {
@@ -104,7 +109,7 @@ export async function PATCH(
 
     return NextResponse.json(
       {
-        data: booking,
+        data: bookingForViewer(booking, session.user.id),
         error: null,
         message: parsed.data.accept
           ? t("rescheduleAccepted")

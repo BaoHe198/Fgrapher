@@ -410,6 +410,18 @@ export async function getOpportunityDetail(
   providerId: string,
   role: Role,
 ) {
+  // Only a provider who actually holds this role, verified, may read a
+  // request in full. The role used to come from the query string unchecked,
+  // so any signed-in account could read every open request (audit
+  // 16/11/2026). Same rule as createOffer and listOpportunitiesForProvider.
+  const userRole = await db.userRole.findUnique({
+    where: { userId_role: { userId: providerId, role } },
+    select: { active: true, verificationStatus: true },
+  });
+  if (!userRole?.active || userRole.verificationStatus !== "VERIFIED") {
+    throw new OfferNotFoundError();
+  }
+
   const request = await db.serviceRequest.findUnique({
     where: { id: requestId },
     include: {
@@ -457,7 +469,14 @@ export async function getOpportunityDetail(
     targetId: requestId,
   });
 
-  return request;
+  // detailedAddress is "withheld until an offer for this request is
+  // ACCEPTED" (schema.prisma) and customerId is not the provider's to know.
+  // The query has no `select`, so both came back with the row; the comment
+  // above claiming otherwise was wrong.
+  const { detailedAddress, customerId, ...visible } = request;
+  void detailedAddress;
+  void customerId;
+  return visible;
 }
 
 export interface CreateOfferInput {

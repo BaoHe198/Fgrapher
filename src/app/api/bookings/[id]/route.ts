@@ -5,6 +5,7 @@ import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import {
   BookingActionError,
   bookingErrorMessage,
+  bookingForViewer,
   getBookingDetail,
   transitionBooking,
 } from "@/services/bookings";
@@ -76,7 +77,11 @@ export async function PATCH(
     });
 
     return NextResponse.json(
-      { data: booking, error: null, message: t("updated") },
+      {
+        data: bookingForViewer(booking, session.user.id),
+        error: null,
+        message: t("updated"),
+      },
       { status: 200 },
     );
   } catch (err) {

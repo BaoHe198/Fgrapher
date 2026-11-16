@@ -194,6 +194,33 @@ export async function listBookings({
   };
 }
 
+/**
+ * A booking as its viewer may see it: no party emails (they are loaded for
+ * notification mail only) and no customer contact details for a provider
+ * who has not accepted yet. The mutation routes (transition, reschedule)
+ * returned the raw row before 16/11/2026, leaking exactly what the list and
+ * detail reads hide - every route that returns a booking must use this.
+ */
+export function bookingForViewer<
+  T extends {
+    providerId: string;
+    status: BookingStatus;
+    contactPhone: string | null;
+    locationAddress: string | null;
+    customer: { email?: unknown };
+    provider: { email?: unknown };
+  },
+>(booking: T, viewerId: string) {
+  return redactContactInfo(
+    {
+      ...booking,
+      customer: withoutEmail(booking.customer),
+      provider: withoutEmail(booking.provider),
+    },
+    viewerId,
+  );
+}
+
 function withoutEmail<T extends { email?: unknown }>(
   party: T,
 ): Omit<T, "email"> {

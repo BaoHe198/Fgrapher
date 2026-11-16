@@ -33,7 +33,17 @@ export async function GET() {
 
     // Saving a public profile does not count as a booking. Keep the private
     // street address and post-booking Zalo contact out of this legacy list.
-    const publicProfiles = profiles.map(omitPrivateProfileFields);
+    // Nor the coordinates: they are the geocoded private address, shown
+    // elsewhere only blurred (Fmap) or rounded server-side (profile page).
+    // This list returned them exact to any signed-in user (audit 16/11/2026).
+    const publicProfiles = profiles.map((profile) => {
+      const { latitude, longitude, geocodeAddressHash, ...rest } =
+        omitPrivateProfileFields(profile);
+      void latitude;
+      void longitude;
+      void geocodeAddressHash;
+      return rest;
+    });
 
     return NextResponse.json(
       { data: publicProfiles, error: null, message: null },
