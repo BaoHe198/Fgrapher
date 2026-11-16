@@ -16,6 +16,7 @@ import { Prisma } from "@prisma/client";
 import { toE164VN } from "@/lib/vietnam/phone";
 import { getUpdateMeSchema } from "@/lib/validations/user";
 import { contentScanner } from "@/services/moderation";
+import { sendVerificationEmail } from "@/services/email-verification";
 
 // Shared allowlist for GET and PATCH — both used to return whatever
 // `db.user.findUnique`/`db.user.update` handed back with no `select`,
@@ -31,6 +32,7 @@ const ME_SELECT = {
   id: true,
   email: true,
   emailVerified: true,
+  pendingEmail: true,
   firstName: true,
   lastName: true,
   username: true,
@@ -184,18 +186,23 @@ export async function PATCH(request: Request) {
     // to one an attacker controls, then use "forgot password" (which
     // sends the reset link to whatever `email` currently is) to take the
     // account over permanently, long after the original session is gone.
-    // This app has no real "click the link we emailed you" verification
-    // flow yet (emailVerified is only ever set once, at registration —
-    // see auth.ts's signIn callback, which trusts it as proof credentials
-    // login is allowed) — until one exists, this password re-check is the
-    // actual barrier, not resetting emailVerified to something with no
-    // way back.
-    if (rest.email !== undefined) {
+    // Since 16/11/2026 the password alone is no longer enough: the new
+    // address is only stored as pendingEmail and replaces `email` once the
+    // link sent to it is clicked (services/email-verification.ts). Until
+    // then the account keeps signing in with the old address, so a typo in
+    // the new one can't lock anyone out.
+    const { email: requestedEmail, ...fields } = rest;
+    let pendingEmailUpdate: { pendingEmail?: string | null } = {};
+    let emailChangeTo: string | null = null;
+    if (requestedEmail !== undefined) {
       const current = await db.user.findUnique({
         where: { id: session.user.id },
-        select: { email: true, passwordHash: true },
+        select: { email: true, passwordHash: true, pendingEmail: true },
       });
-      if (current && rest.email !== current.email) {
+      if (current && requestedEmail === current.email) {
+        // Typing the current address back cancels a pending change.
+        if (current.pendingEmail) pendingEmailUpdate = { pendingEmail: null };
+      } else if (current) {
         const t = await getTranslations("apiMessages.users");
         if (!current.passwordHash) {
           return NextResponse.json(
@@ -220,6 +227,22 @@ export async function PATCH(request: Request) {
             { status: 400 },
           );
         }
+        const holder = await db.user.findUnique({
+          where: { email: requestedEmail },
+          select: { id: true },
+        });
+        if (holder) {
+          return NextResponse.json(
+            {
+              data: null,
+              error: "email_taken",
+              message: t("emailChangeTaken"),
+            },
+            { status: 409 },
+          );
+        }
+        pendingEmailUpdate = { pendingEmail: requestedEmail };
+        emailChangeTo = requestedEmail;
       }
     }
 
@@ -286,7 +309,8 @@ export async function PATCH(request: Request) {
     const user = await db.user.update({
       where: { id: session.user.id },
       data: {
-        ...rest,
+        ...fields,
+        ...pendingEmailUpdate,
         ...(parsed.data.avatar !== undefined && {
           avatarPublicId: parsed.data.avatar ? avatarPublicId : null,
         }),
@@ -311,6 +335,23 @@ export async function PATCH(request: Request) {
       // holds the pre-rename data — bump it explicitly (revalidatePublicProfile
       // only knows the new username).
       revalidateProfileUsername(previous.username);
+    }
+
+    if (emailChangeTo) {
+      // Never throws; the user can request the link again by saving again.
+      await sendVerificationEmail({
+        userId: session.user.id,
+        email: emailChangeTo,
+      });
+      const t = await getTranslations("apiMessages.users");
+      return NextResponse.json(
+        {
+          data: user,
+          error: null,
+          message: t("emailChangePending", { email: emailChangeTo }),
+        },
+        { status: 200 },
+      );
     }
 
     return NextResponse.json(

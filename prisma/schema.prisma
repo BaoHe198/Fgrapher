@@ -28,6 +28,14 @@ model User {
   id                      String    @id @default(cuid())
   email                   String    @unique
   emailVerified           DateTime?
+  // An email change waiting for its confirmation link (16/11/2026). The
+  // account keeps signing in with `email` until the link sent to this
+  // address is clicked; only then does it replace `email`. Changing the
+  // address directly let anyone point an account at a mailbox they don't
+  // own, and resetting emailVerified instead would lock out anyone who
+  // mistyped the new address. Not unique: uniqueness is checked when the
+  // swap happens (services/email-verification.ts).
+  pendingEmail            String?
   passwordHash            String?
   firstName               String?
   lastName                String?

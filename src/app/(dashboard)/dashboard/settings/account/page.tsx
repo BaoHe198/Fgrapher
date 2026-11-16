@@ -18,6 +18,7 @@ export default async function AccountSettingsPage() {
   return (
     <AccountSettingsForm
       initialEmail={user.email}
+      initialPendingEmail={user.pendingEmail}
       initialPhone={user.phone}
       initialPhoneVerified={user.phoneVerified}
     />

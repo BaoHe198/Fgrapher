@@ -22,7 +22,12 @@ interface StoreState {
   tokens: Map<string, { id: string; userId: string; expiresAt: Date }>;
   users: Map<
     string,
-    { email: string; emailVerified: Date | null; deletedAt: Date | null }
+    {
+      email: string;
+      emailVerified: Date | null;
+      deletedAt: Date | null;
+      pendingEmail?: string | null;
+    }
   >;
   // The row id is stable per user, exactly as the upsert-on-userId in the
   // Prisma store makes it. That stability is what made keying the outbox on
@@ -78,6 +83,32 @@ function makeStore(state: StoreState): EmailVerificationStore {
       const user = state.users.get(userId);
       if (user) user.emailVerified = verifiedAt;
       return true;
+    },
+
+    async confirmPendingEmail(tokenId, userId, newEmail, verifiedAt) {
+      await tick();
+      let deleted = false;
+      for (const [hash, token] of state.tokens) {
+        if (token.id === tokenId) {
+          state.tokens.delete(hash);
+          deleted = true;
+          break;
+        }
+      }
+      if (!deleted) return "lost";
+      const user = state.users.get(userId);
+      if (!user) return "lost";
+      for (const [id, other] of state.users) {
+        if (id !== userId && other.email === newEmail) {
+          user.pendingEmail = null;
+          return "taken";
+        }
+      }
+      if (user.pendingEmail !== newEmail) return "lost";
+      user.email = newEmail;
+      user.pendingEmail = null;
+      user.emailVerified = verifiedAt;
+      return "changed";
     },
 
     async discard(tokenId) {
@@ -392,5 +423,60 @@ describe("verifyEmailToken — concurrency", () => {
     const result = await verifyEmailToken(RAW_TOKEN, store);
 
     assert.equal(result.status, "already_verified");
+  });
+});
+
+describe("verifyEmailToken — email change (pendingEmail)", () => {
+  const verifiedAt = new Date("2026-11-01T00:00:00Z");
+
+  it("moves the pending address into email only when its link is used", async () => {
+    const state = seed({ emailVerified: verifiedAt });
+    state.users.get("usr_1")!.pendingEmail = "moi@example.com";
+
+    const result = await verifyEmailToken(RAW_TOKEN, makeStore(state));
+
+    assert.deepEqual(result, {
+      status: "email_changed",
+      email: "moi@example.com",
+      userId: "usr_1",
+    });
+    const user = state.users.get("usr_1")!;
+    assert.equal(user.email, "moi@example.com");
+    assert.equal(user.pendingEmail, null);
+    assert.ok(user.emailVerified && user.emailVerified > verifiedAt);
+    assert.equal(state.tokens.size, 0, "token must be single-use");
+  });
+
+  it("keeps the old address when another account took the new one", async () => {
+    const state = seed({ emailVerified: verifiedAt });
+    state.users.get("usr_1")!.pendingEmail = "moi@example.com";
+    state.users.set("usr_2", {
+      email: "moi@example.com",
+      emailVerified: verifiedAt,
+      deletedAt: null,
+    });
+
+    const result = await verifyEmailToken(RAW_TOKEN, makeStore(state));
+
+    assert.deepEqual(result, { status: "email_taken" });
+    const user = state.users.get("usr_1")!;
+    assert.equal(user.email, "nguyen@example.com");
+    assert.equal(user.pendingEmail, null);
+    assert.equal(state.tokens.size, 0);
+  });
+
+  it("does not report a change twice when the link is opened twice", async () => {
+    const state = seed({ emailVerified: verifiedAt });
+    state.users.get("usr_1")!.pendingEmail = "moi@example.com";
+    const store = makeStore(state);
+
+    const [first, second] = await Promise.all([
+      verifyEmailToken(RAW_TOKEN, store),
+      verifyEmailToken(RAW_TOKEN, store),
+    ]);
+
+    const statuses = [first.status, second.status].sort();
+    assert.ok(statuses.includes("email_changed"));
+    assert.equal(state.users.get("usr_1")!.email, "moi@example.com");
   });
 });

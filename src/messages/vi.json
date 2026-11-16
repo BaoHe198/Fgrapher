@@ -1201,7 +1201,12 @@
       "resending": "Đang gửi...",
       "resendSent": "Nếu địa chỉ này cần xác minh, chúng tôi đã gửi một liên kết mới.",
       "resendFailed": "Không thể gửi lúc này. Vui lòng thử lại sau.",
-      "goToLogin": "Đăng nhập"
+      "goToLogin": "Đăng nhập",
+      "changedTitle": "Đã đổi email",
+      "changedBody": "Từ giờ bạn đăng nhập bằng địa chỉ email mới. Mật khẩu giữ nguyên.",
+      "changedCta": "Về cài đặt tài khoản",
+      "takenTitle": "Không đổi được email",
+      "takenBody": "Trong lúc chờ xác nhận, địa chỉ này đã được một tài khoản khác sử dụng. Email đăng nhập của bạn vẫn như cũ."
     }
   },
   "apiMessages": {
@@ -1269,7 +1274,9 @@
       "invalidPhone": "Số điện thoại không hợp lệ. Nhập số di động Việt Nam 10 chữ số, ví dụ 0901 234 567.",
       "noPasswordToChange": "Tài khoản này đăng nhập qua mạng xã hội nên không có mật khẩu để đổi.",
       "passwordUpdated": "Đã cập nhật mật khẩu",
-      "passwordUpdateFailed": "Không thể cập nhật mật khẩu, vui lòng thử lại"
+      "passwordUpdateFailed": "Không thể cập nhật mật khẩu, vui lòng thử lại",
+      "emailChangeTaken": "Email này đã được một tài khoản khác sử dụng.",
+      "emailChangePending": "Đã gửi link xác nhận tới {email}. Email đăng nhập chỉ đổi sau khi bạn bấm link đó."
     },
     "profiles": {
       "unknownRole": "Vai trò không xác định",
@@ -1427,7 +1434,9 @@
       "emailAlreadyVerified": "Email này đã được xác minh trước đó",
       "verifyEmailExpired": "Liên kết xác minh đã hết hạn",
       "verifyEmailInvalid": "Liên kết xác minh không hợp lệ hoặc đã được sử dụng",
-      "verificationEmailSent": "Nếu địa chỉ này cần xác minh, chúng tôi đã gửi một liên kết mới"
+      "verificationEmailSent": "Nếu địa chỉ này cần xác minh, chúng tôi đã gửi một liên kết mới",
+      "emailChanged": "Đã đổi email đăng nhập",
+      "emailChangeTakenOnConfirm": "Email mới đã được một tài khoản khác sử dụng nên không thể đổi."
     },
     "availability": {
       "loadFailed": "Không thể tải lịch làm việc",
@@ -2616,7 +2625,9 @@
       "cancel": "Hủy",
       "toastAccountUpdated": "Đã cập nhật tài khoản",
       "toastPasswordUpdated": "Đã cập nhật mật khẩu",
-      "emailChangeHint": "Đổi email cần xác nhận mật khẩu hiện tại."
+      "emailChangeHint": "Đổi email cần xác nhận mật khẩu hiện tại, rồi bấm link chúng tôi gửi tới email mới.",
+      "toastEmailPending": "Đã gửi link xác nhận tới {email}",
+      "pendingEmailNotice": "Đang chờ xác nhận email mới: {email}. Mở hộp thư đó và bấm link để hoàn tất; trước đó bạn vẫn đăng nhập bằng email hiện tại."
     },
     "billing": {
       "status": {
@@ -3033,7 +3044,8 @@
       "notFound": "Hãy lưu thông tin hồ sơ trước khi công khai",
       "noApprovedMedia": "Hãy tải lên ít nhất một ảnh portfolio đã được duyệt trước khi công khai",
       "missingCategory": "Hãy chọn ít nhất một danh mục sở trường trước khi công khai",
-      "missingLocation": "Hãy thêm địa chỉ chi tiết, tỉnh/thành và phường/xã trước khi công khai hồ sơ"
+      "missingLocation": "Hãy thêm địa chỉ chi tiết, tỉnh/thành và phường/xã trước khi công khai hồ sơ",
+      "noActivePlan": "Hồ sơ chỉ công khai được khi gói của bạn còn hiệu lực"
     },
     "email": {
       "footer": {

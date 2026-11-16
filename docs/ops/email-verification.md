@@ -167,3 +167,20 @@ gửi email đã xác minh.
 - **Replay:** dùng lại token đã tiêu thụ.
 - **Enumeration:** dò xem email nào có tài khoản bằng khác biệt trong phản hồi.
 - **Defence in depth:** nhiều lớp kiểm tra độc lập bảo vệ cùng một mục tiêu.
+
+## Đổi email (từ 16/11/2026)
+
+Đổi email ở `/dashboard/settings/account` cần mật khẩu hiện tại, rồi **bấm link gửi
+tới email mới**. Email mới được lưu tạm ở `User.pendingEmail` (migration
+`20261116130000_add_user_pending_email`); `User.email` chỉ đổi khi link được bấm
+(`confirmPendingEmail` trong `services/email-verification.ts`). Trong lúc chờ, tài
+khoản vẫn đăng nhập và nhận thư bằng email cũ, nên gõ nhầm email mới không khoá ai ra
+ngoài.
+
+- Dùng chung bảng token với xác minh lúc đăng ký (mỗi tài khoản một link còn hiệu lực,
+  24 giờ); link mới thay link cũ.
+- Email mới đã thuộc tài khoản khác: báo ngay khi lưu (409), và kiểm tra lại lúc bấm
+  link; nếu khi đó đã bị lấy thì không đổi, xoá `pendingEmail`, trang báo "Không đổi
+  được email".
+- Nhập lại email hiện tại rồi lưu thì huỷ yêu cầu đổi đang chờ.
+- Tài khoản đăng nhập bằng Google (không có mật khẩu) vẫn không đổi email theo cách này.

@@ -26,6 +26,8 @@ import { routing } from "@/i18n/routing";
 
 interface AccountSettingsFormProps {
   initialEmail: string;
+  /** An email change waiting for its confirmation link. */
+  initialPendingEmail: string | null;
   initialPhone: string | null;
   initialPhoneVerified: boolean;
 }
@@ -37,6 +39,7 @@ const LANGUAGE_NAMES: Record<(typeof routing.locales)[number], string> = {
 
 export function AccountSettingsForm({
   initialEmail,
+  initialPendingEmail,
   initialPhone,
   initialPhoneVerified,
 }: AccountSettingsFormProps) {
@@ -48,6 +51,7 @@ export function AccountSettingsForm({
   const t = useTranslations("dashboardSettings.account");
 
   const [email, setEmail] = useState(initialEmail);
+  const [pendingEmail, setPendingEmail] = useState(initialPendingEmail);
   const [phone, setPhone] = useState(initialPhone ?? "");
   const [savingBasics, setSavingBasics] = useState(false);
   const [basicsError, setBasicsError] = useState<string | null>(null);
@@ -100,7 +104,18 @@ export function AccountSettingsForm({
     }
 
     setEmailChangePassword("");
-    toast.add({ title: t("toastAccountUpdated"), type: "success" });
+    // The address only changes once the link sent to it is clicked: the
+    // field goes back to the address the account still signs in with.
+    const nextPending: string | null = body.data?.pendingEmail ?? null;
+    setPendingEmail(nextPending);
+    if (emailChanged) setEmail(initialEmail);
+    toast.add({
+      title:
+        emailChanged && nextPending
+          ? t("toastEmailPending", { email: nextPending })
+          : t("toastAccountUpdated"),
+      type: "success",
+    });
   };
 
   const changePassword = async () => {
@@ -161,6 +176,11 @@ export function AccountSettingsForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+        {pendingEmail ? (
+          <p className="text-body-sm text-text-secondary">
+            {t("pendingEmailNotice", { email: pendingEmail })}
+          </p>
+        ) : null}
         {emailChanged ? (
           <div className="flex flex-col gap-1.5">
             <Input

@@ -22,6 +22,8 @@ type PanelState =
   | "verifying"
   | "verified"
   | "already_verified"
+  | "email_changed"
+  | "email_taken"
   | "expired"
   | "invalid"
   | "missing_token";
@@ -66,6 +68,8 @@ export function VerifyEmailPanel({
           setState(
             status === "verified" ||
               status === "already_verified" ||
+              status === "email_changed" ||
+              status === "email_taken" ||
               status === "expired"
               ? status
               : "invalid",
@@ -92,6 +96,37 @@ export function VerifyEmailPanel({
       <div className="flex flex-col items-center gap-3 text-center">
         <Loader2 className="size-8 animate-spin text-brand-primary" />
         <p className="text-body-md text-text-secondary">{t("verifying")}</p>
+      </div>
+    );
+  }
+
+  if (state === "email_changed" || state === "email_taken") {
+    const changed = state === "email_changed";
+    return (
+      <div className="flex flex-col items-center gap-3 text-center">
+        {changed ? (
+          <CheckCircle className="size-10 text-brand-primary" />
+        ) : (
+          <AlertCircle className="size-10 text-danger" />
+        )}
+        <h1 className="text-display-md text-text-primary">
+          {changed ? t("changedTitle") : t("takenTitle")}
+        </h1>
+        <p className="text-body-md text-text-secondary">
+          {changed ? t("changedBody") : t("takenBody")}
+        </p>
+        <Link
+          href="/dashboard/settings/account"
+          className={cn(
+            buttonVariants({
+              variant: changed ? "accent" : "outline",
+              size: "lg",
+            }),
+            "w-full",
+          )}
+        >
+          {t("changedCta")}
+        </Link>
       </div>
     );
   }

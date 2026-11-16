@@ -117,6 +117,26 @@ export async function POST(request: Request) {
         },
         { status: 200 },
       );
+    case "email_changed":
+      // An email change confirmed from the new address. No onboarding step
+      // follows: the account was already set up.
+      return NextResponse.json(
+        {
+          data: { status: result.status },
+          error: null,
+          message: t("emailChanged"),
+        },
+        { status: 200 },
+      );
+    case "email_taken":
+      return NextResponse.json(
+        {
+          data: { status: result.status },
+          error: "email_taken",
+          message: t("emailChangeTakenOnConfirm"),
+        },
+        { status: 409 },
+      );
     case "expired":
       return NextResponse.json(
         {

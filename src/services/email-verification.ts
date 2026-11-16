@@ -133,6 +133,10 @@ export type VerifyEmailResult =
   // the user next). It is never returned to the browser.
   | { status: "verified"; email: string; userId: string }
   | { status: "already_verified"; email: string; userId: string }
+  // A confirmed email change: `email` is the account's new address.
+  | { status: "email_changed"; email: string; userId: string }
+  // The new address was taken by another account before the link was used.
+  | { status: "email_taken" }
   | { status: "invalid" }
   | { status: "expired" };
 
@@ -140,7 +144,13 @@ interface TokenRecord {
   id: string;
   userId: string;
   expiresAt: Date;
-  user: { email: string; emailVerified: Date | null; deletedAt: Date | null };
+  user: {
+    email: string;
+    emailVerified: Date | null;
+    deletedAt: Date | null;
+    /** Set while an email change waits for this link. */
+    pendingEmail?: string | null;
+  };
 }
 
 /**
@@ -167,6 +177,18 @@ export interface EmailVerificationStore {
    * race, so it has to be the thing that can only succeed once.
    */
   consume(tokenId: string, userId: string, verifiedAt: Date): Promise<boolean>;
+  /**
+   * Consumes the token and moves `pendingEmail` into `email` (verified now)
+   * in one transaction. "lost": the token was already gone (another request
+   * used it). "taken": another account holds that address by now — nothing
+   * changes, and the pending address is cleared so it can't be retried.
+   */
+  confirmPendingEmail(
+    tokenId: string,
+    userId: string,
+    newEmail: string,
+    verifiedAt: Date,
+  ): Promise<"changed" | "lost" | "taken">;
   /** Discards a token without verifying anyone (expired, already done). */
   discard(tokenId: string): Promise<void>;
   /**
@@ -205,7 +227,12 @@ const prismaStore: EmailVerificationStore = {
         userId: true,
         expiresAt: true,
         user: {
-          select: { email: true, emailVerified: true, deletedAt: true },
+          select: {
+            email: true,
+            emailVerified: true,
+            deletedAt: true,
+            pendingEmail: true,
+          },
         },
       },
     }),
@@ -227,6 +254,38 @@ const prismaStore: EmailVerificationStore = {
       });
       return true;
     }),
+
+  confirmPendingEmail: async (tokenId, userId, newEmail, verifiedAt) => {
+    const outcome = await db.$transaction(async (tx) => {
+      const { count } = await tx.emailVerificationToken.deleteMany({
+        where: { id: tokenId },
+      });
+      if (count !== 1) return "lost" as const;
+      const holder = await tx.user.findUnique({
+        where: { email: newEmail },
+        select: { id: true },
+      });
+      if (holder && holder.id !== userId) return "taken" as const;
+      // Only if the pending address is still the one this link was sent
+      // for: a newer change request issues a new token anyway.
+      const { count: changed } = await tx.user.updateMany({
+        where: { id: userId, pendingEmail: newEmail },
+        data: {
+          email: newEmail,
+          pendingEmail: null,
+          emailVerified: verifiedAt,
+        },
+      });
+      return changed === 1 ? ("changed" as const) : ("lost" as const);
+    });
+    if (outcome === "taken") {
+      await db.user.update({
+        where: { id: userId },
+        data: { pendingEmail: null },
+      });
+    }
+    return outcome;
+  },
 
   discard: async (tokenId) => {
     await db.emailVerificationToken.deleteMany({ where: { id: tokenId } });
@@ -266,6 +325,28 @@ export async function verifyEmailToken(
     // Clear it out so a stale row can't linger; the user asks for a new one.
     await store.discard(record.id);
     return { status: "expired" };
+  }
+
+  // A link sent for an email change: the address moves only now, once its
+  // owner has shown they read mail there.
+  const pendingEmail = record.user.pendingEmail;
+  if (pendingEmail) {
+    const outcome = await store.confirmPendingEmail(
+      record.id,
+      record.userId,
+      pendingEmail,
+      new Date(),
+    );
+    if (outcome === "changed") {
+      return {
+        status: "email_changed",
+        email: pendingEmail,
+        userId: record.userId,
+      };
+    }
+    return outcome === "taken"
+      ? { status: "email_taken" }
+      : { status: "invalid" };
   }
 
   if (record.user.emailVerified) {

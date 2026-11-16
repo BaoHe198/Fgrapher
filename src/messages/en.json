@@ -1201,7 +1201,12 @@
       "resending": "Sending...",
       "resendSent": "If this address needs verifying, we've sent a new link.",
       "resendFailed": "Couldn't send right now. Try again shortly.",
-      "goToLogin": "Sign in"
+      "goToLogin": "Sign in",
+      "changedTitle": "Email changed",
+      "changedBody": "From now on, sign in with your new email address. Your password stays the same.",
+      "changedCta": "Back to account settings",
+      "takenTitle": "Email not changed",
+      "takenBody": "While waiting for confirmation, this address was taken by another account. Your sign-in email is unchanged."
     }
   },
   "apiMessages": {
@@ -1269,7 +1274,9 @@
       "invalidPhone": "That phone number isn't valid. Enter a 10-digit Vietnamese mobile number, e.g. 0901 234 567.",
       "noPasswordToChange": "This account signs in with a social provider and has no password to change.",
       "passwordUpdated": "Password updated",
-      "passwordUpdateFailed": "Couldn't update your password, please try again"
+      "passwordUpdateFailed": "Couldn't update your password, please try again",
+      "emailChangeTaken": "This email is already used by another account.",
+      "emailChangePending": "We sent a confirmation link to {email}. Your sign-in email changes only after you click it."
     },
     "profiles": {
       "unknownRole": "Unknown role",
@@ -1427,7 +1434,9 @@
       "emailAlreadyVerified": "This email was already verified",
       "verifyEmailExpired": "This verification link has expired",
       "verifyEmailInvalid": "This verification link is invalid or has already been used",
-      "verificationEmailSent": "If this address needs verifying, we've sent a new link"
+      "verificationEmailSent": "If this address needs verifying, we've sent a new link",
+      "emailChanged": "Sign-in email changed",
+      "emailChangeTakenOnConfirm": "The new email is already used by another account, so it could not be changed."
     },
     "availability": {
       "loadFailed": "Failed to load availability",
@@ -2616,7 +2625,9 @@
       "cancel": "Cancel",
       "toastAccountUpdated": "Account updated",
       "toastPasswordUpdated": "Password updated",
-      "emailChangeHint": "Changing your email requires confirming your current password."
+      "emailChangeHint": "Changing your email requires your current password, then clicking the link we send to the new address.",
+      "toastEmailPending": "Confirmation link sent to {email}",
+      "pendingEmailNotice": "Waiting to confirm your new email: {email}. Open that inbox and click the link to finish; until then you still sign in with your current email."
     },
     "billing": {
       "status": {
@@ -3033,7 +3044,8 @@
       "notFound": "Save your profile details before publishing",
       "noApprovedMedia": "Upload at least one approved portfolio photo before publishing",
       "missingCategory": "Choose at least one specialty category before publishing",
-      "missingLocation": "Add a detailed address, province, and ward before publishing the profile"
+      "missingLocation": "Add a detailed address, province, and ward before publishing the profile",
+      "noActivePlan": "A profile can only be published while your plan is active"
     },
     "email": {
       "footer": {
