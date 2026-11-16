@@ -30,7 +30,13 @@ liệu mà các bản Preview đang đọc.
 6. Commit `schema.prisma` và thư mục migration trong cùng thay đổi.
 
 Script `scripts/check-db-safety.mjs` sẽ từ chối nếu kết nối không phải database dev
-đã cho phép. Không vô hiệu hoá chốt chặn này để “chạy cho nhanh”.
+đã cho phép. Không vô hiệu hoá chốt chặn này để “chạy cho nhanh”. Từ 16/11/2026 script
+tự đọc `.env` giống Prisma (trước đó nó từ chối mọi lần chạy vì không thấy biến nào).
+
+Trên Windows, **tắt dev server trước** khi chạy `pnpm db:migrate:dev`: bước generate
+Prisma Client ở cuối lệnh bị treo khi dev server đang giữ file engine. Migration chỉ
+có dữ liệu (không đổi schema) có thể áp vào dev bằng `pnpm exec prisma migrate deploy`
+sau khi chạy `node scripts/check-db-safety.mjs`.
 
 ## 3. Kiểu thay đổi và mức rủi ro
 

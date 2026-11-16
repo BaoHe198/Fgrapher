@@ -22,6 +22,19 @@ const SAFE_DB_REFS = [
   "oikhakndcpezqaxpakzv", // fgrapher-dev — the only ref these destructive commands may touch
 ];
 
+// The Prisma CLI that runs right after this reads `.env` on its own, but a
+// plain `node` process does not — so `pnpm db:migrate:dev` was refused with
+// "could not parse" on every machine that keeps the URL in `.env` (the
+// documented setup), not just on unsafe ones. Load the same file Prisma
+// will use. Variables already set in the environment win, as with Prisma.
+if (!process.env.DATABASE_URL && !process.env.DIRECT_URL) {
+  try {
+    process.loadEnvFile(".env");
+  } catch {
+    // No .env: fall through to the refusal below, which says what's missing.
+  }
+}
+
 const url = process.env.DATABASE_URL ?? process.env.DIRECT_URL ?? "";
 const ref = url.match(/postgres\.([a-z0-9]+):/)?.[1];
 
