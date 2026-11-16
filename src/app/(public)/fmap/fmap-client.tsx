@@ -1,6 +1,6 @@
 "use client";
 
-import { LocateFixed, Minus, Plus, X } from "lucide-react";
+import { LocateFixed, Minus, Plus, Sunset, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { FgImage } from "@/components/ui/fg-image";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatDate, formatVND, vietnamDateKey } from "@/lib/format";
+import { minutesToTime, sunTimes } from "@/lib/sun";
 import { cn } from "@/lib/utils";
 import type { FmapMarker, FmapProviderPreview } from "@/services/fmap";
 
@@ -575,6 +576,27 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
       })
     : "";
 
+  // Golden hour on the first searched day at the middle of the map (owner,
+  // 16/11/2026): outdoor shoots are planned around it, and the map already
+  // knows the day and the place. Same windows the booking flow marks
+  // (lib/sun.ts isGoldenHourSlot).
+  const goldenText = (() => {
+    if (!searchedFor || !bounds || !searchedFor.dates[0]) return "";
+    const sun = sunTimes(
+      searchedFor.dates[0],
+      (bounds.north + bounds.south) / 2,
+      (bounds.east + bounds.west) / 2,
+    );
+    if (!sun) return "";
+    return t("golden", {
+      date: formatDate(`${searchedFor.dates[0]}T00:00:00.000Z`).slice(0, 5),
+      morningStart: minutesToTime(sun.sunrise - 20),
+      morningEnd: minutesToTime(sun.sunrise + 20),
+      eveningStart: minutesToTime(sun.sunset - 90),
+      eveningEnd: minutesToTime(sun.sunset - 20),
+    });
+  })();
+
   const resultList = (
     <ul className="flex flex-col gap-3">
       {markers.map((marker) => (
@@ -689,6 +711,12 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
             </p>
             {contextText ? (
               <p className="text-body-sm text-text-secondary">{contextText}</p>
+            ) : null}
+            {goldenText ? (
+              <p className="mt-1.5 flex items-start gap-1.5 text-body-sm text-gold-700 dark:text-gold-300">
+                <Sunset aria-hidden className="mt-0.5 size-4 shrink-0" />
+                {goldenText}
+              </p>
             ) : null}
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">

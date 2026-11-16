@@ -56,6 +56,7 @@
     "subtitle": "Chọn thời gian và khu vực trên bản đồ để tìm nhà cung cấp đang sẵn lịch.",
     "searchArea": "Tìm trong khu vực này",
     "truncated": "Hãy phóng to bản đồ để xem thêm kết quả",
+    "golden": "Giờ vàng {date}: sáng {morningStart}–{morningEnd}, chiều {eveningStart}–{eveningEnd}",
     "context": "Rảnh {date}, {start}–{end}",
     "marker": {
       "from": "Từ {price}",

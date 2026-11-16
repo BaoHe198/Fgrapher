@@ -56,6 +56,7 @@
     "subtitle": "Choose a time and map area to find providers who are available.",
     "searchArea": "Search this area",
     "truncated": "Zoom in to see more results",
+    "golden": "Golden hour {date}: morning {morningStart}–{morningEnd}, evening {eveningStart}–{eveningEnd}",
     "context": "Available {date}, {start}–{end}",
     "marker": {
       "from": "From {price}",
