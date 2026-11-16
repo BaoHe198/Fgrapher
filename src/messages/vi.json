@@ -264,6 +264,8 @@
     "stylesTitle": "Duyệt theo phong cách",
     "allStyles": "Tất cả",
     "map": {
+      "eyebrow": "Bản đồ F",
+      "sub": "Chọn ngày chụp và khu vực, bản đồ chỉ hiện những nghệ sĩ còn trống lịch quanh đó.",
       "title": "Xem nghệ sĩ gần nơi bạn chụp",
       "cta": "Mở Bản đồ F",
       "chipStyle": "Ảnh cưới",

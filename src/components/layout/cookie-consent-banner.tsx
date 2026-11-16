@@ -70,12 +70,12 @@ export function CookieConsentBanner({
     <section
       role="region"
       aria-label={t("regionLabel")}
-      className="fixed inset-x-3 bottom-3 z-50 flex flex-col gap-3 rounded-[var(--fg-radius-lg)] border border-border-subtle bg-bg-surface p-4 shadow-[var(--shadow-md)] sm:right-auto sm:left-4 sm:max-w-[440px] sm:p-5"
+      className="fixed inset-x-3 bottom-3 z-50 flex flex-col gap-2 rounded-[var(--fg-radius-lg)] border border-border-subtle bg-bg-surface p-3.5 shadow-[var(--shadow-md)] sm:right-auto sm:left-4 sm:max-w-[440px] sm:gap-3 sm:p-5"
     >
       <h2 className="text-body-md font-semibold! text-text-primary">
         {t("title")}
       </h2>
-      <p className="text-body-sm text-text-secondary">
+      <p className="text-[13px] leading-[1.45] text-text-secondary sm:text-body-sm">
         {t("body")}{" "}
         <Link
           href="/privacy#cookie"
@@ -97,11 +97,13 @@ export function CookieConsentBanner({
         </p>
       ) : null}
       {/* Stacked at every width: side by side, the two labels do not fit the
-          card and the second button spilled past its edge. */}
-      <div className="flex flex-col gap-2">
+          card and the second button spilled past its edge. Phones get the
+          small size (16/11/2026): the banner covered half the first screen.
+          Same words, same two equal buttons - only less room. */}
+      <div className="flex flex-col gap-1.5 sm:gap-2">
         <Button
           variant="secondary"
-          className="w-full"
+          className="w-full max-sm:h-9 max-sm:text-body-sm"
           disabled={saving}
           onClick={() => choose(false)}
         >
@@ -109,7 +111,7 @@ export function CookieConsentBanner({
         </Button>
         <Button
           variant="secondary"
-          className="w-full"
+          className="w-full max-sm:h-9 max-sm:text-body-sm"
           disabled={saving}
           onClick={() => choose(true)}
         >
