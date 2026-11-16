@@ -45,4 +45,7 @@ export const features = {
   // Read together with isContentModerationConfigured() — on without a key
   // falls back to the human queue rather than pretending to scan.
   contentModerationEnabled: env.CONTENT_MODERATION_ENABLED,
+  // Vercel Web Analytics — off until the privacy text covers it; even on,
+  // only for visitors who allowed analytics cookies (app/layout.tsx).
+  vercelAnalyticsEnabled: env.VERCEL_ANALYTICS_ENABLED,
 } as const;

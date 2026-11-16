@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ export function CookieConsentBanner({
   initialAnalytics,
 }: CookieConsentBannerProps) {
   const t = useTranslations("cookieConsent");
+  const router = useRouter();
   const [analytics, setAnalytics] = useState(initialAnalytics);
   const [open, setOpen] = useState(initialAnalytics === null);
   const [saving, setSaving] = useState(false);
@@ -49,8 +51,14 @@ export function CookieConsentBanner({
         body: JSON.stringify({ analytics: allow }),
       });
       if (!res.ok) throw new Error("save failed");
+      const withdrawn = analytics === true && !allow;
       setAnalytics(allow);
       setOpen(false);
+      // The root layout decides from this cookie whether page-view analytics
+      // loads, so it must re-render now. Withdrawing needs a full reload:
+      // a script already running doesn't stop when its tag is removed.
+      if (withdrawn) window.location.reload();
+      else router.refresh();
     } catch {
       setError(t("saveFailed"));
     } finally {

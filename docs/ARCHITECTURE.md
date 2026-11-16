@@ -234,7 +234,9 @@ Feature flag nằm ở `src/lib/env.ts` và `src/lib/features.ts`. Các công t�
 - `MARKETPLACE_ENABLED`, `SOCIAL_FEED_ENABLED`;
 - `PHONE_VERIFICATION_REQUIRED`;
 - `MOMO_ENABLED`, `ZALOPAY_ENABLED`, `BANK_TRANSFER_ENABLED`;
-- `CONTENT_MODERATION_ENABLED`.
+- `CONTENT_MODERATION_ENABLED`;
+- `VERCEL_ANALYTICS_ENABLED` (chỉ tải khi khách đã đồng ý cookie thống kê; đổi lựa
+  chọn cookie thì layout gốc render lại, rút đồng ý thì tải lại trang).
 
 Flag phải được kiểm tra trên server và giao diện. Khi tắt, API liên quan cũng phải
 từ chối hoặc không trả dữ liệu, không chỉ ẩn nút.

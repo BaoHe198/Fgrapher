@@ -147,6 +147,12 @@ const serverSchema = z.object({
   // human queue in the same order it always did — the scan only sorts
   // that queue, so this gates an optimisation, never the feature itself.
   CONTENT_MODERATION_ENABLED: booleanFlag("false"),
+  // Vercel Web Analytics (page views). Off by default: turning it on sends
+  // visit data to Vercel (outside Vietnam), a purpose the cookie banner and
+  // /privacy don't describe yet - update both, bump the policy version and
+  // have the lawyer confirm first (CLAUDE.md rule 6, checklist #13). Even
+  // on, it loads only for a visitor who allowed analytics cookies.
+  VERCEL_ANALYTICS_ENABLED: booleanFlag("false"),
   // MapTiler forward geocoding for fixed provider service locations.
   // No-ops gracefully without it, same as other integrations above.
   MAPTILER_API_KEY: z.string().optional(),

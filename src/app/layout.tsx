@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
@@ -13,6 +14,7 @@ import { CookieConsentBanner } from "@/components/layout/cookie-consent-banner";
 import { EnvironmentBanner } from "@/components/layout/environment-banner";
 import { Toaster } from "@/components/ui/toast";
 import { auth } from "@/lib/auth";
+import { features } from "@/lib/features";
 import { readCookieConsent } from "@/lib/privacy/cookie-consent-server";
 import "./globals.css";
 
@@ -100,6 +102,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
+        {/* Page-view analytics: only when the owner has switched it on AND
+            this visitor allowed analytics cookies (checklist #13; see
+            VERCEL_ANALYTICS_ENABLED in lib/env.ts for what has to happen
+            before switching it on). */}
+        {features.vercelAnalyticsEnabled && cookieConsent?.analytics ? (
+          <Analytics />
+        ) : null}
       </body>
     </html>
   );

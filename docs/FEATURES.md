@@ -8,17 +8,23 @@ lịch sử lúc xây dựng.
 
 Các giá trị nằm trong `src/lib/env.ts`, được gom tại `src/lib/features.ts`.
 
-| Công tắc                      | Mặc định      | Ý nghĩa                                           |
-| ----------------------------- | ------------- | ------------------------------------------------- |
-| `BILLING_ENABLED`             | Tắt           | Thanh toán subscription bằng Stripe               |
-| `FREE_ROLE_GRANT_ENABLED`     | Bật           | Cấp gói miễn phí cho vai trò mới khi chưa thu phí |
-| `MARKETPLACE_ENABLED`         | Tắt           | Shop, sản phẩm, giỏ hàng và đơn hàng              |
-| `SOCIAL_FEED_ENABLED`         | Tắt           | Follow, post, like và comment                     |
-| `PHONE_VERIFICATION_REQUIRED` | Theo cấu hình | Bắt xác minh SMS trước khi đăng yêu cầu dịch vụ   |
-| `MOMO_ENABLED`                | Tắt           | Thanh toán subscription bằng MoMo                 |
-| `ZALOPAY_ENABLED`             | Tắt           | Thanh toán subscription bằng ZaloPay              |
-| `BANK_TRANSFER_ENABLED`       | Tắt           | Thanh toán chuyển khoản và admin xác nhận         |
-| `CONTENT_MODERATION_ENABLED`  | Tắt           | Máy quét ảnh tự động trước hàng chờ người duyệt   |
+| Công tắc                      | Mặc định      | Ý nghĩa                                                           |
+| ----------------------------- | ------------- | ----------------------------------------------------------------- |
+| `BILLING_ENABLED`             | Tắt           | Thanh toán subscription bằng Stripe                               |
+| `FREE_ROLE_GRANT_ENABLED`     | Bật           | Cấp gói miễn phí cho vai trò mới khi chưa thu phí                 |
+| `MARKETPLACE_ENABLED`         | Tắt           | Shop, sản phẩm, giỏ hàng và đơn hàng                              |
+| `SOCIAL_FEED_ENABLED`         | Tắt           | Follow, post, like và comment                                     |
+| `PHONE_VERIFICATION_REQUIRED` | Theo cấu hình | Bắt xác minh SMS trước khi đăng yêu cầu dịch vụ                   |
+| `MOMO_ENABLED`                | Tắt           | Thanh toán subscription bằng MoMo                                 |
+| `ZALOPAY_ENABLED`             | Tắt           | Thanh toán subscription bằng ZaloPay                              |
+| `BANK_TRANSFER_ENABLED`       | Tắt           | Thanh toán chuyển khoản và admin xác nhận                         |
+| `CONTENT_MODERATION_ENABLED`  | Tắt           | Máy quét ảnh tự động trước hàng chờ người duyệt                   |
+| `VERCEL_ANALYTICS_ENABLED`    | Tắt           | Đếm lượt xem trang (Vercel), chỉ với khách đồng ý cookie thống kê |
+
+`VERCEL_ANALYTICS_ENABLED` gửi dữ liệu lượt xem sang Vercel (ngoài Việt Nam), một
+mục đích mà thông báo cookie và `/privacy` chưa nêu. Trước khi bật: sửa hai chỗ đó,
+tăng `CURRENT_POLICY_VERSION` để hỏi lại người dùng, có xác nhận của luật sư, rồi bật
+Analytics cho project trong Vercel (checklist việc 13).
 
 Khi flag tắt, server phải chặn API hoặc không trả dữ liệu liên quan. Chỉ ẩn giao
 diện không đủ bảo vệ.
