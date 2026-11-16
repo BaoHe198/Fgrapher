@@ -1,0 +1,15 @@
+# One line-ending for every text file on every machine: LF, the same as CI
+# (Linux) and Vercel. Without this, Git for Windows (core.autocrlf=true)
+# checked files out as CRLF, and the unit tests that read source files and
+# match across lines failed on Windows only.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff2 binary
+*.xlsx binary
+*.pdf binary
