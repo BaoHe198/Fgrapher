@@ -519,8 +519,7 @@ export function PortfolioTab({
                 </div>
               ) : null}
             </div>
-            {/* Every photo at its own ratio (MasonryGrid never crops), or
-                the contact sheet; the choice is remembered per viewer. */}
+            {/* Every photo at its own ratio (MasonryGrid never crops). */}
             <div ref={gridRef}>
               <MasonryGrid
                 items={visiblePhotos
@@ -532,8 +531,6 @@ export function PortfolioTab({
                     height: photo.height,
                     alt: photo.title ?? photo.album.title,
                   }))}
-                showModeSwitch
-                storageKey="fg:profile-photo-mode"
                 onOpen={setPhotoIndex}
               />
             </div>

@@ -53,6 +53,8 @@ export interface FmapMarker {
   currency: string;
   latitude: number;
   longitude: number;
+  /** Which of the searched days ("yyyy-MM-dd") this provider is free on. */
+  availableDates: string[];
 }
 
 export interface FmapProviderPreview {
@@ -382,15 +384,26 @@ export async function findAvailableProvidersOnMap(
   const boundedCandidates = candidates.slice(0, MAX_SPATIAL_CANDIDATES);
   if (boundedCandidates.length === 0) return { markers: [], truncated: false };
 
-  const availableIds = await providersAvailableForInterval(
-    boundedCandidates.map((profile) => profile.userId),
-    input.date,
-    input.start,
-    input.end,
-  );
+  // One availability pass per searched day; a provider free on any of them
+  // is shown, carrying the days it is free on (the booking link opens on
+  // the first). Sequential so a week of days does not take seven pooled
+  // connections at once.
+  const candidateIds = boundedCandidates.map((profile) => profile.userId);
+  const datesByProvider = new Map<string, string[]>();
+  for (const dateKey of input.dates) {
+    const free = await providersAvailableForInterval(
+      candidateIds,
+      dateKey,
+      input.start,
+      input.end,
+    );
+    for (const id of free) {
+      datesByProvider.set(id, [...(datesByProvider.get(id) ?? []), dateKey]);
+    }
+  }
 
   const available = boundedCandidates
-    .filter((profile) => availableIds.has(profile.userId))
+    .filter((profile) => datesByProvider.has(profile.userId))
     .sort(
       (a, b) =>
         distanceSquaredFromCentre(
@@ -425,6 +438,7 @@ export async function findAvailableProvidersOnMap(
       startingPrice: profile.priceMin,
       currency: profile.currency,
       ...profile.publicPoint,
+      availableDates: datesByProvider.get(profile.userId) ?? [],
     };
   });
 

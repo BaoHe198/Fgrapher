@@ -9,10 +9,9 @@ import { cn } from "@/lib/utils";
 // A photo grid that never crops (wave 2 kit §03): the photographer framed
 // the shot, so every photo keeps its own ratio. Photos go, in the order the
 // artist set, into whichever column is shortest - heights come from the
-// stored width/height, so the page does not jump as images arrive. The
-// contact-sheet mode puts every frame in an equal square cell (contained,
-// never cropped) with a mono frame number under it: 6 frames to a roll,
-// 01A…01F, 02A… The chosen mode is remembered per viewer.
+// stored width/height, so the page does not jump as images arrive. (A
+// "contact sheet" square-cell mode and its switch were removed at the
+// owner's request: the two looked too alike to be worth a choice.)
 
 export interface MasonryItem {
   id: string;
@@ -22,16 +21,9 @@ export interface MasonryItem {
   alt: string;
 }
 
-type Mode = "masonry" | "contact";
-
 interface MasonryGridProps {
   items: MasonryItem[];
   onOpen?: (index: number) => void;
-  /** Show the "Bố cục gốc / Contact sheet" switch above the grid. */
-  showModeSwitch?: boolean;
-  defaultMode?: Mode;
-  /** Remembers the mode per viewer under this key. */
-  storageKey?: string;
   /** Overlay drawn on each photo (name and price in Tìm kiếm F). */
   renderOverlay?: (item: MasonryItem, index: number) => React.ReactNode;
   sizes?: string;
@@ -58,28 +50,13 @@ function columnsFor(width: number) {
 export function MasonryGrid({
   items,
   onOpen,
-  showModeSwitch = false,
-  defaultMode = "masonry",
-  storageKey,
   renderOverlay,
   sizes = "(min-width: 900px) 25vw, (min-width: 480px) 33vw, 50vw",
   className,
 }: MasonryGridProps) {
   const t = useTranslations("uiKit.masonry");
-  const [mode, setMode] = React.useState<Mode>(defaultMode);
   const [columns, setColumns] = React.useState(3);
   const ref = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (!storageKey) return;
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved === "masonry" || saved === "contact")
-        React.startTransition(() => setMode(saved));
-    } catch {
-      // Storage blocked: keep the default.
-    }
-  }, [storageKey]);
 
   React.useEffect(() => {
     const node = ref.current;
@@ -91,16 +68,6 @@ export function MasonryGrid({
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-
-  const changeMode = (next: Mode) => {
-    setMode(next);
-    if (!storageKey) return;
-    try {
-      localStorage.setItem(storageKey, next);
-    } catch {
-      // Not remembered; fine.
-    }
-  };
 
   // Shortest-column placement, keeping each photo's index for the lightbox
   // and its frame number.
@@ -119,7 +86,7 @@ export function MasonryGrid({
     return cols;
   }, [items, columns]);
 
-  const tile = (item: MasonryItem, index: number, contact: boolean) => (
+  const tile = (item: MasonryItem, index: number) => (
     <button
       key={item.id}
       type="button"
@@ -128,10 +95,7 @@ export function MasonryGrid({
       data-frame-index={index}
       onClick={() => onOpen?.(index)}
       aria-label={t("open", { frame: index + 1 })}
-      className={cn(
-        "group/tile focus-ring relative block w-full overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken text-left",
-        contact && "aspect-square",
-      )}
+      className="group/tile focus-ring relative block w-full overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken text-left"
     >
       <Image
         src={item.src}
@@ -140,7 +104,7 @@ export function MasonryGrid({
         height={item.height ?? 1000}
         sizes={sizes}
         className={cn(
-          contact ? "size-full object-contain" : "h-auto w-full",
+          "h-auto w-full",
           index < 6 && ["animate-develop", DEVELOP_DELAY[index]],
         )}
       />
@@ -154,57 +118,15 @@ export function MasonryGrid({
 
   return (
     <div
-      className={cn("flex flex-col gap-4", className)}
+      ref={ref}
+      className={cn("flex gap-2 md:gap-3", className)}
       data-slot="masonry-grid"
     >
-      {showModeSwitch ? (
-        <div
-          role="radiogroup"
-          aria-label={t("modeLabel")}
-          className="flex w-fit rounded-full border border-border-default p-0.5"
-        >
-          {(["masonry", "contact"] as const).map((value) => (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              aria-checked={mode === value}
-              onClick={() => changeMode(value)}
-              className={cn(
-                "focus-ring rounded-full px-3.5 py-1.5 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
-                mode === value
-                  ? "bg-brand-primary font-semibold! text-text-on-brand"
-                  : "text-text-secondary hover:text-text-primary",
-              )}
-            >
-              {t(value)}
-            </button>
-          ))}
+      {placed.map((column, c) => (
+        <div key={c} className="flex min-w-0 flex-1 flex-col gap-2 md:gap-3">
+          {column.map(({ item, index }) => tile(item, index))}
         </div>
-      ) : null}
-
-      <div ref={ref}>
-        {mode === "contact" ? (
-          <ol className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-x-2 gap-y-3 md:grid-cols-[repeat(auto-fill,minmax(148px,1fr))] md:gap-x-3">
-            {items.map((item, index) => (
-              <li key={item.id} className="flex flex-col gap-1">
-                {tile(item, index, true)}
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <div className="flex gap-2 md:gap-3">
-            {placed.map((column, c) => (
-              <div
-                key={c}
-                className="flex min-w-0 flex-1 flex-col gap-2 md:gap-3"
-              >
-                {column.map(({ item, index }) => tile(item, index, false))}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      ))}
     </div>
   );
 }

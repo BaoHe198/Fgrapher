@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AlbumQuickView } from "@/components/media/album-quick-view";
 import { auth } from "@/lib/auth";
 import { features } from "@/lib/features";
 import { buildMediaVariants } from "@/lib/media/variants";
@@ -46,31 +47,36 @@ export default async function CommunityPage() {
           <ol className="flex flex-col gap-3">
             {featured.map((album) => (
               <li key={album.albumId}>
-                <Link
-                  href={`/profile/${album.username}/albums/${album.albumId}`}
-                  className="focus-ring group flex items-center gap-3 rounded-[var(--fg-radius-sm)]"
+                <AlbumQuickView
+                  albumId={album.albumId}
+                  username={album.username}
                 >
-                  <span className="relative block size-14 shrink-0 overflow-hidden bg-bg-sunken">
-                    {album.cover ? (
-                      <Image
-                        src={buildMediaVariants(album.cover).thumbnail}
-                        alt=""
-                        fill
-                        unoptimized
-                        sizes="56px"
-                        className="object-cover"
-                      />
-                    ) : null}
-                  </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-body-sm font-semibold text-text-primary group-hover:underline">
-                      {album.title}
+                  <Link
+                    href={`/profile/${album.username}/albums/${album.albumId}`}
+                    className="focus-ring group flex items-center gap-3 rounded-[var(--fg-radius-sm)]"
+                  >
+                    <span className="relative block size-14 shrink-0 overflow-hidden bg-bg-sunken">
+                      {album.cover ? (
+                        <Image
+                          src={buildMediaVariants(album.cover).thumbnail}
+                          alt=""
+                          fill
+                          unoptimized
+                          sizes="56px"
+                          className="object-cover"
+                        />
+                      ) : null}
                     </span>
-                    <span className="truncate text-meta text-text-secondary">
-                      {album.artist}
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate text-body-sm font-semibold text-text-primary group-hover:underline">
+                        {album.title}
+                      </span>
+                      <span className="truncate text-meta text-text-secondary">
+                        {album.artist}
+                      </span>
                     </span>
-                  </span>
-                </Link>
+                  </Link>
+                </AlbumQuickView>
               </li>
             ))}
           </ol>

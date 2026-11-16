@@ -35,8 +35,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Đặt lịch F (wave 2). Readable without an account: what a request is, an
-// example call sheet and the three steps. Signed out, the latest requests
+// Đặt lịch F (wave 2). Readable without an account: the three steps, the
+// post button and an example call sheet. Signed out, the latest requests
 // show only service, style, province and budget; signed in, the full list
 // of open requests (what providers come here for) takes that place.
 export default async function RequestsPage() {
@@ -119,35 +119,15 @@ export default async function RequestsPage() {
 
   return (
     <div className="bg-bg-page">
-      <section
-        aria-labelledby="rq-title"
-        className="mx-auto max-w-[1440px] px-5 pt-[clamp(40px,6vw,88px)] pb-[clamp(40px,5vw,72px)] sm:px-8"
-      >
-        <div className="flex max-w-3xl flex-col gap-6">
-          <h1
-            id="rq-title"
-            className="font-display text-[clamp(2.25rem,5vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.03em] text-balance text-text-primary"
-          >
-            {t("title")}
-          </h1>
-          <p className="max-w-xl text-body-lg text-text-secondary">
-            {t("lede")}
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {postButton}
-            {exampleButton}
-          </div>
-          <span className="text-body-sm text-text-tertiary">
-            {isAuthenticated ? t("noteSignedIn") : t("noteSignedOut")}
-          </span>
-        </div>
-      </section>
-
+      {/* No intro block (owner, 16/11/2026): the three steps come first,
+          with the post button right under them. The h1 stays for screen
+          readers and search engines. */}
+      <h1 className="sr-only">{t("title")}</h1>
       <section
         aria-labelledby="rq-steps"
-        className="border-y border-border-subtle bg-bg-surface"
+        className="border-b border-border-subtle bg-bg-surface"
       >
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-5 py-[clamp(40px,5vw,72px)] sm:px-8">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-5 py-[clamp(32px,5vw,64px)] sm:px-8">
           <h2 id="rq-steps" className="text-heading-lg text-text-primary">
             {t("steps.title")}
           </h2>
@@ -169,6 +149,15 @@ export default async function RequestsPage() {
               </li>
             ))}
           </ol>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-3">
+              {postButton}
+              {exampleButton}
+            </div>
+            <span className="text-body-sm text-text-tertiary">
+              {isAuthenticated ? t("noteSignedIn") : t("noteSignedOut")}
+            </span>
+          </div>
         </div>
       </section>
 

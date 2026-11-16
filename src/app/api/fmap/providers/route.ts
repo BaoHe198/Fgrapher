@@ -35,7 +35,10 @@ export async function GET(request: Request) {
     south: searchParams.get("south"),
     east: searchParams.get("east"),
     west: searchParams.get("west"),
-    date: searchParams.get("date"),
+    // `dates` is a comma list; `date` (one day) is what older links carry.
+    dates: parseCommaSeparated(
+      searchParams.get("dates") ?? searchParams.get("date"),
+    ),
     start: searchParams.get("start"),
     end: searchParams.get("end"),
     roles: roles.length > 0 ? roles : [...FMAP_PROVIDER_ROLES],

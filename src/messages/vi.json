@@ -67,7 +67,8 @@
       "province": "Tỉnh/Thành",
       "chooseProvince": "Chọn tỉnh/thành",
       "provinceEmpty": "Tỉnh/thành này chưa có nhà cung cấp nào trên Bản đồ F.",
-      "date": "Ngày",
+      "date": "Ngày (chọn được nhiều ngày)",
+      "daysShort": "{first} +{more} ngày",
       "start": "Bắt đầu",
       "end": "Kết thúc",
       "invalidTime": "Giờ kết thúc phải sau giờ bắt đầu",
@@ -118,7 +119,7 @@
       "geolocationDenied": "Không lấy được vị trí. Bạn vẫn có thể kéo bản đồ để chọn khu vực.",
       "tooLarge": "Khu vực đang xem quá rộng. Hãy phóng to bản đồ rồi tìm lại.",
       "timeRange": "Khung giờ phải dài từ 30 phút đến 12 tiếng.",
-      "missingDate": "Hãy chọn ngày."
+      "missingDate": "Hãy chọn ít nhất một ngày."
     },
     "cluster": {
       "title": "{count} nhà cung cấp ở cùng vị trí",
@@ -679,10 +680,26 @@
     "sectionNav": {
       "label": "Các mục trong trang"
     },
+    "multiDate": {
+      "month": "Tháng {month}/{year}",
+      "previousMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "day": "Ngày {date}",
+      "weekday": {
+        "mon": "T2",
+        "tue": "T3",
+        "wed": "T4",
+        "thu": "T5",
+        "fri": "T6",
+        "sat": "T7",
+        "sun": "CN"
+      },
+      "none": "Chưa chọn ngày nào",
+      "count": "Đã chọn {count} ngày",
+      "full": "Đã chọn tối đa {count} ngày",
+      "clear": "Bỏ chọn"
+    },
     "masonry": {
-      "modeLabel": "Cách xem ảnh",
-      "masonry": "Bố cục gốc",
-      "contact": "Contact sheet",
       "open": "Mở ảnh {frame}"
     }
   },
@@ -4773,7 +4790,6 @@
       "metaDescription": "Kể buổi chụp bạn cần một lần. Nghệ sĩ đã xác minh ở khu vực của bạn gửi giá và lời nhắn, bạn so sánh rồi chọn một người.",
       "eyebrow": "Đặt lịch F",
       "title": "Kể buổi chụp bạn cần. Nghệ sĩ phù hợp gửi đề xuất.",
-      "lede": "Mô tả một lần: dịch vụ, ngày, khu vực, phong cách, ngân sách. Nghệ sĩ đã xác minh ở khu vực của bạn gửi giá và lời nhắn. Bạn so sánh rồi chọn một người.",
       "post": "Đăng yêu cầu",
       "findDirect": "Tìm nghệ sĩ trực tiếp",
       "noteSignedOut": "Cần đăng nhập để đăng. Đặt cọc thỏa thuận trực tiếp với nghệ sĩ.",
@@ -4858,6 +4874,12 @@
       }
     },
     "album": {
+      "quickView": {
+        "viewProfile": "Xem trang của {name}",
+        "book": "Đặt lịch",
+        "loading": "Đang mở album…",
+        "loadFailed": "Không mở được album ở đây, đang chuyển sang trang album."
+      },
       "metaTitle": "{title} — {name}",
       "metaDescription": "Album ảnh của {name} trên Fgrapher.",
       "photoAlt": "Ảnh {frame}",

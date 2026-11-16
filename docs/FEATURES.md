@@ -131,13 +131,19 @@ Từ 09/2026:
   (`providersAvailableForInterval` trong `services/fmap.ts`). Không chọn giờ thì
   chỉ cần còn ít nhất một giờ trống trong ngày. Mỗi thẻ ghi "Còn lịch dd/MM/yyyy".
 - **Tab Album dự án** (`tab=albums`): album đã xuất bản có ít nhất một ảnh được
-  duyệt, lọc theo cùng bộ lọc của tab Nghệ sĩ (`searchAlbums`). Bấm album mở thẳng
-  album đó trên hồ sơ (`?album=<id>`).
+  duyệt, lọc theo cùng bộ lọc của tab Nghệ sĩ (`searchAlbums`). Bấm album mở ảnh
+  ngay tại chỗ trong lightbox (trước/sau, nút sang trang cá nhân và "Đặt lịch"),
+  không rời trang (`AlbumQuickView`, đọc qua `GET /api/albums/[id]/public`). Mở
+  tab mới (Ctrl/Cmd + bấm) vẫn tới trang album. Cộng đồng F làm giống vậy với bài
+  album và mục album nổi bật (16/11/2026).
+- Lưới ảnh (hồ sơ, tab Theo ảnh) chỉ còn "Bố cục gốc"; chế độ Contact sheet đã bỏ
+  (16/11/2026).
 - Chip cho từng bộ lọc đang bật (bỏ riêng từng cái) và "Xóa tất cả" (giữ từ khoá).
 
 **Fmap** (`/fmap`) là cách tìm thứ hai, trên bản đồ: khách chọn khu vực (GPS, tỉnh/thành
-hoặc kéo bản đồ), ngày giờ, vai trò và thể loại, và chỉ thấy provider **đang rảnh** vào
-khung giờ đó. Marker là một khung ảnh — ảnh portfolio mới nhất đã duyệt — kèm giá
+hoặc kéo bản đồ), một hoặc nhiều ngày (tối đa 7, lịch tháng `MultiDateCalendar`), giờ,
+vai trò và thể loại, và chỉ thấy provider **đang rảnh** vào khung giờ đó ở **ít nhất
+một** ngày đã chọn; "Đặt lịch" mở sẵn ngày rảnh đầu tiên của provider đó. Marker là một khung ảnh — ảnh portfolio mới nhất đã duyệt — kèm giá
 khởi điểm viết gọn ("2,0tr"); bấm vào mở thẻ xem nhanh có dải 3 ảnh gần nhất, nút "Xem
 hồ sơ" và "Đặt lịch" (trang đặt lịch nhận sẵn ngày giờ đã chọn). "Tìm khi di chuyển bản
 đồ" (bật mặc định) tự tìm lại khi thôi kéo bản đồ. Vị trí

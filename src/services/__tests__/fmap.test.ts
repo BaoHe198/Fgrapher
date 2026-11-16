@@ -13,7 +13,7 @@ const baseSearch = {
   south: 10.7,
   east: 106.8,
   west: 106.6,
-  date: "2099-09-20",
+  dates: ["2099-09-20"],
   start: "09:00",
   end: "11:00",
   roles: ["PHOTOGRAPHER"] as const,
@@ -27,7 +27,12 @@ describe("Fmap query validation", () => {
 
   it("rejects invalid dates, reversed times and country-sized queries", () => {
     assert.equal(
-      fmapSearchSchema.safeParse({ ...baseSearch, date: "2099-02-30" }).success,
+      fmapSearchSchema.safeParse({ ...baseSearch, dates: ["2099-02-30"] })
+        .success,
+      false,
+    );
+    assert.equal(
+      fmapSearchSchema.safeParse({ ...baseSearch, dates: [] }).success,
       false,
     );
     assert.equal(
@@ -41,6 +46,28 @@ describe("Fmap query validation", () => {
     assert.equal(
       fmapSearchSchema.safeParse({ ...baseSearch, north: 23, south: 8 })
         .success,
+      false,
+    );
+  });
+});
+
+describe("Fmap multi-day search", () => {
+  it("accepts several days, de-duplicated and in order", () => {
+    const parsed = fmapSearchSchema.safeParse({
+      ...baseSearch,
+      dates: ["2099-09-22", "2099-09-20", "2099-09-22"],
+    });
+    assert.equal(parsed.success, true);
+    assert.deepEqual(parsed.data?.dates, ["2099-09-20", "2099-09-22"]);
+  });
+
+  it("rejects more than a week of days", () => {
+    const dates = Array.from(
+      { length: 8 },
+      (_, i) => `2099-09-${String(10 + i).padStart(2, "0")}`,
+    );
+    assert.equal(
+      fmapSearchSchema.safeParse({ ...baseSearch, dates }).success,
       false,
     );
   });

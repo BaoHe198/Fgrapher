@@ -22,13 +22,21 @@ const calendarDate = z
     );
   }, "Invalid calendar date");
 
+/** Most days one map search may cover (owner, 16/11/2026: several days). */
+export const MAX_FMAP_DATES = 7;
+
 export const fmapSearchSchema = z
   .object({
     north: coordinate.min(-90).max(90),
     south: coordinate.min(-90).max(90),
     east: coordinate.min(-180).max(180),
     west: coordinate.min(-180).max(180),
-    date: calendarDate,
+    // A provider shows when free on ANY of these days.
+    dates: z
+      .array(calendarDate)
+      .min(1)
+      .max(MAX_FMAP_DATES)
+      .transform((dates) => [...new Set(dates)].sort()),
     start: time,
     end: time,
     roles: z

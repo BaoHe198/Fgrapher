@@ -5,6 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { AlbumCard } from "@/components/cards/album-card";
+import { AlbumQuickView } from "@/components/media/album-quick-view";
 import {
   BrowseArtistCard,
   type BrowseArtist,
@@ -592,23 +593,28 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 ) : (
                   <div className="grid grid-cols-2 gap-x-5 gap-y-8 max-sm:gap-x-3 xl:grid-cols-3">
                     {albumResult.data.map((album, index) => (
-                      <AlbumCard
+                      <AlbumQuickView
                         key={album.id}
-                        href={`/profile/${album.providerUsername}?album=${album.id}#portfolio`}
-                        title={album.title}
-                        description={album.description}
-                        coverUrl={album.coverUrl}
-                        countLabel={t("photoCount", {
-                          count: album.photoCount,
-                        })}
-                        byline={[
-                          album.providerName,
-                          album.category ? categoryT(album.category) : null,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                        revealIndex={index}
-                      />
+                        albumId={album.id}
+                        username={album.providerUsername}
+                      >
+                        <AlbumCard
+                          href={`/profile/${album.providerUsername}/albums/${album.id}`}
+                          title={album.title}
+                          description={album.description}
+                          coverUrl={album.coverUrl}
+                          countLabel={t("photoCount", {
+                            count: album.photoCount,
+                          })}
+                          byline={[
+                            album.providerName,
+                            album.category ? categoryT(album.category) : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                          revealIndex={index}
+                        />
+                      </AlbumQuickView>
                     ))}
                   </div>
                 )

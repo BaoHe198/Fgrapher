@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { ShopFilters } from "./shop-filters";
+import { ShopSearchBox } from "./shop-search-box";
 
 const CONDITIONS = [
   ["NEW", "conditionNew"],
@@ -25,9 +26,9 @@ const CONDITIONS = [
   ["AVERAGE", "conditionAverage"],
 ] as const;
 
-// Chợ F's sticky bar (wave 2): Tất cả | Mua | Thuê, quick chips for
-// condition and stock that scroll sideways, sort, and "Bộ lọc" opening the
-// full panel from the right. Everything goes through the page's single
+// Chợ F's sticky bar (wave 2): the keyword box, Tất cả | Mua | Thuê, quick
+// chips for condition and stock that scroll sideways, sort, and "Bộ lọc"
+// opening the full panel from the right. Everything goes through the page's single
 // filter controller, so the bar and the drawer never disagree.
 export function ShopQuickBar({
   categoryCounts,
@@ -65,94 +66,105 @@ export function ShopQuickBar({
 
   return (
     <div className="sticky top-[72px] z-10 -mx-4 border-y border-border-subtle bg-bg-page/95 px-4 py-3 backdrop-blur-sm sm:-mx-8 sm:px-8">
-      <div className="flex items-center gap-3">
-        <div
-          role="radiogroup"
-          aria-label={t("type")}
-          className="flex shrink-0 rounded-full border border-border-default bg-bg-surface p-0.5"
-        >
-          {(
-            [
-              ["", t("typeAll")],
-              ["SALE", tv("buy")],
-              ["RENT", tv("rent")],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value || "all"}
-              type="button"
-              role="radio"
-              aria-checked={type === value}
-              onClick={() => set("type", value)}
-              className={cn(
-                "focus-ring rounded-full px-3.5 py-1.5 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
-                type === value
-                  ? "bg-brand-primary font-semibold! text-text-on-brand"
-                  : "text-text-secondary hover:text-text-primary",
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {CONDITIONS.map(([value, key]) => {
-            const on = conditions.includes(value);
-            return (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={on}
-                onClick={() =>
-                  set(
-                    "condition",
-                    (on
-                      ? conditions.filter((c) => c !== value)
-                      : [...conditions, value]
-                    ).join(","),
-                  )
-                }
-                className={chip(on)}
-              >
-                {t(key)}
-              </button>
-            );
-          })}
-          <button
-            type="button"
-            aria-pressed={inStockOnly}
-            onClick={() => set("inStockOnly", inStockOnly ? "" : "true")}
-            className={chip(inStockOnly)}
+      {/* Two rows on a phone - the keyword box with "Bộ lọc", then Mua/Thuê
+          with the chips - so the chips are never squeezed to one letter
+          behind the switch (owner, 16/11/2026). One row from lg up. */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="flex items-center gap-2 lg:order-last lg:shrink-0">
+          <ShopSearchBox className="min-w-0 flex-1 lg:w-60 lg:flex-none" />
+          {/* Hidden on the wrapper: NativeSelect puts className on the
+              <select>, so hiding that alone left its chevron behind, drawn
+              over the keyword box on a phone. */}
+          <div className="w-48 shrink-0 max-md:hidden">
+            <NativeSelect
+              aria-label={tv("sort")}
+              value={sort}
+              onChange={(value) => set("sort", value === "newest" ? "" : value)}
+              options={[
+                { value: "newest", label: t("sortNewest") },
+                { value: "price_asc", label: t("sortPriceAsc") },
+                { value: "price_desc", label: t("sortPriceDesc") },
+              ]}
+            />
+          </div>
+          <Button
+            variant="outline"
+            className="shrink-0"
+            onClick={() => setOpen(true)}
           >
-            {tv("inStock")}
-          </button>
+            <SlidersHorizontal aria-hidden className="size-4" />
+            {tv("filters")}
+            {activeCount > 0 ? (
+              <span className="grid size-5 place-items-center rounded-full bg-brand-primary text-meta font-semibold text-text-on-brand">
+                {activeCount}
+              </span>
+            ) : null}
+          </Button>
         </div>
-
-        <NativeSelect
-          aria-label={tv("sort")}
-          className="w-48 shrink-0 max-md:hidden"
-          value={sort}
-          onChange={(value) => set("sort", value === "newest" ? "" : value)}
-          options={[
-            { value: "newest", label: t("sortNewest") },
-            { value: "price_asc", label: t("sortPriceAsc") },
-            { value: "price_desc", label: t("sortPriceDesc") },
-          ]}
-        />
-        <Button
-          variant="outline"
-          className="shrink-0"
-          onClick={() => setOpen(true)}
-        >
-          <SlidersHorizontal aria-hidden className="size-4" />
-          {tv("filters")}
-          {activeCount > 0 ? (
-            <span className="grid size-5 place-items-center rounded-full bg-brand-primary text-meta font-semibold text-text-on-brand">
-              {activeCount}
-            </span>
-          ) : null}
-        </Button>
+        {/* The whole row scrolls sideways as one strip. */}
+        <div className="flex min-w-0 items-center gap-3 overflow-x-auto [scrollbar-width:none] lg:flex-1 [&::-webkit-scrollbar]:hidden">
+          <div
+            role="radiogroup"
+            aria-label={t("type")}
+            className="flex shrink-0 rounded-full border border-border-default bg-bg-surface p-0.5"
+          >
+            {(
+              [
+                ["", t("typeAll")],
+                ["SALE", tv("buy")],
+                ["RENT", tv("rent")],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value || "all"}
+                type="button"
+                role="radio"
+                aria-checked={type === value}
+                onClick={() => set("type", value)}
+                className={cn(
+                  "focus-ring rounded-full px-3.5 py-1.5 text-body-sm transition-colors duration-[var(--fg-dur-150)]",
+                  type === value
+                    ? "bg-brand-primary font-semibold! text-text-on-brand"
+                    : "text-text-secondary hover:text-text-primary",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="flex shrink-0 gap-2">
+            {CONDITIONS.map(([value, key]) => {
+              const on = conditions.includes(value);
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() =>
+                    set(
+                      "condition",
+                      (on
+                        ? conditions.filter((c) => c !== value)
+                        : [...conditions, value]
+                      ).join(","),
+                    )
+                  }
+                  className={chip(on)}
+                >
+                  {t(key)}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              aria-pressed={inStockOnly}
+              onClick={() => set("inStockOnly", inStockOnly ? "" : "true")}
+              className={chip(inStockOnly)}
+            >
+              {tv("inStock")}
+            </button>
+          </div>
+        </div>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>

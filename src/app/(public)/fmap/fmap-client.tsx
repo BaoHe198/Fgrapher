@@ -62,7 +62,7 @@ function minutes(time: string) {
 }
 
 function filtersProblem(filters: FmapFilterValue, t: Translate) {
-  if (!filters.date) return t("errors.missingDate");
+  if (filters.dates.length === 0) return t("errors.missingDate");
   const duration = minutes(filters.end) - minutes(filters.start);
   if (duration <= 0) return t("filters.invalidTime");
   if (duration < MIN_WINDOW_MINUTES || duration > MAX_WINDOW_MINUTES)
@@ -116,7 +116,7 @@ function defaultFilters(
     wardId: "",
     // Two days out: past the 24-hour minimum booking notice, so the first
     // search can actually return providers.
-    date: vietnamDateKey(2),
+    dates: [vietnamDateKey(2)],
     start: "09:00",
     end: "11:00",
     role,
@@ -297,7 +297,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
         south: String(area.south),
         east: String(area.east),
         west: String(area.west),
-        date: current.date,
+        dates: current.dates.join(","),
         start: current.start,
         end: current.end,
         roles: fmapRolesParam(current.role),
@@ -363,12 +363,13 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   }, [bounds, search]);
 
   // Results follow the time/service filters without an extra click.
-  const { date, start, end, role, category } = filters;
+  const { start, end, role, category } = filters;
+  const datesKey = filters.dates.join(",");
   useEffect(() => {
     if (!initialSearchRef.current) return;
     const timer = window.setTimeout(() => void search(), AUTO_SEARCH_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [date, start, end, role, category, search]);
+  }, [datesKey, start, end, role, category, search]);
 
   // Province/ward: zoom to where that area's providers are, then search
   // (restricted to the ward, if one is chosen).
@@ -466,8 +467,12 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
 
   const bookingHref = useMemo(() => {
     if (!preview || !searchedFor) return null;
+    // The first searched day this provider is free on.
+    const date =
+      markers.find((m) => m.profileId === preview.profileId)
+        ?.availableDates[0] ?? searchedFor.dates[0];
     const params = new URLSearchParams({
-      date: searchedFor.date,
+      date,
       time: searchedFor.start,
       end: searchedFor.end,
       role: searchedFor.role || preview.role,
@@ -475,7 +480,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
     });
     if (searchedFor.category) params.set("category", searchedFor.category);
     return `/booking/${preview.providerId}?${params}`;
-  }, [searchedFor, preview]);
+  }, [searchedFor, preview, markers]);
 
   const markerLabels = useMemo<MarkerLabels>(
     () => ({
@@ -562,7 +567,9 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
         : "";
   const contextText = searchedFor
     ? t("context", {
-        date: formatDate(`${searchedFor.date}T00:00:00.000Z`),
+        date: searchedFor.dates
+          .map((day) => formatDate(`${day}T00:00:00.000Z`).slice(0, 5))
+          .join(", "),
         start: searchedFor.start,
         end: searchedFor.end,
       })

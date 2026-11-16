@@ -67,7 +67,8 @@
       "province": "Province/City",
       "chooseProvince": "Choose a province",
       "provinceEmpty": "No providers on Fmap in this province yet.",
-      "date": "Date",
+      "date": "Days (pick several)",
+      "daysShort": "{first} +{more} {more, plural, one {day} other {days}}",
       "start": "Start",
       "end": "End",
       "invalidTime": "End time must be after start time",
@@ -118,7 +119,7 @@
       "geolocationDenied": "Location was unavailable. You can still pan the map to choose an area.",
       "tooLarge": "This area is too large. Zoom in on the map and search again.",
       "timeRange": "The time window must be between 30 minutes and 12 hours.",
-      "missingDate": "Please pick a date."
+      "missingDate": "Pick at least one day."
     },
     "cluster": {
       "title": "{count} providers at this spot",
@@ -679,10 +680,26 @@
     "sectionNav": {
       "label": "Sections on this page"
     },
+    "multiDate": {
+      "month": "{month}/{year}",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "day": "{date}",
+      "weekday": {
+        "mon": "Mo",
+        "tue": "Tu",
+        "wed": "We",
+        "thu": "Th",
+        "fri": "Fr",
+        "sat": "Sa",
+        "sun": "Su"
+      },
+      "none": "No days chosen",
+      "count": "{count, plural, one {# day} other {# days}} chosen",
+      "full": "Up to {count} days chosen",
+      "clear": "Clear"
+    },
     "masonry": {
-      "modeLabel": "Photo layout",
-      "masonry": "Original framing",
-      "contact": "Contact sheet",
       "open": "Open photo {frame}"
     }
   },
@@ -4773,7 +4790,6 @@
       "metaDescription": "Describe the shoot once. Verified artists in your area send a price and a message; you compare and pick one.",
       "eyebrow": "FBooking",
       "title": "Describe the shoot you need. The right artists send proposals.",
-      "lede": "Describe it once: service, date, area, style, budget. Verified artists in your area send a price and a message. You compare, then pick one.",
       "post": "Post a request",
       "findDirect": "Find an artist directly",
       "noteSignedOut": "You need to sign in to post. The deposit is agreed directly with the artist.",
@@ -4858,6 +4874,12 @@
       }
     },
     "album": {
+      "quickView": {
+        "viewProfile": "See {name}'s profile",
+        "book": "Book",
+        "loading": "Opening the album…",
+        "loadFailed": "Couldn't open the album here, taking you to its page."
+      },
       "metaTitle": "{title} — {name}",
       "metaDescription": "A photo album by {name} on Fgrapher.",
       "photoAlt": "Photo {frame}",

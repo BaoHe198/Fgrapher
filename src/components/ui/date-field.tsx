@@ -162,7 +162,11 @@ export function DateField({
         {/* The OS picker's anchor. Rendered (not display:none — showPicker()
             needs a laid-out element) but invisible and out of the tab order:
             the button above opens it, and the text input above is where
-            keyboard users type. */}
+            keyboard users type. On a touch screen it lies over the calendar
+            button and takes the tap itself: iOS Safari ignores showPicker()
+            on a date input without throwing, so the button did nothing there
+            and the date had to be typed (owner, 16/11/2026). A real tap on
+            the native input always opens the OS date wheel. */}
         <input
           ref={pickerRef}
           type="date"
@@ -173,7 +177,7 @@ export function DateField({
           max={max}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
-          className="pointer-events-none absolute inset-y-0 right-4 w-px opacity-0"
+          className="pointer-events-none absolute inset-y-0 right-4 w-px opacity-0 pointer-coarse:pointer-events-auto pointer-coarse:right-0 pointer-coarse:z-10 pointer-coarse:h-full pointer-coarse:w-11 pointer-coarse:cursor-pointer pointer-coarse:appearance-none"
         />
       </div>
 

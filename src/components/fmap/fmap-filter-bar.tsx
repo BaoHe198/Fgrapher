@@ -7,7 +7,7 @@ import { startTransition, useEffect, useState } from "react";
 
 import { ChipRail } from "@/components/browse/chip-rail";
 import { Button } from "@/components/ui/button";
-import { DateField } from "@/components/ui/date-field";
+import { MultiDateCalendar } from "@/components/ui/multi-date-calendar";
 import { NativeSelect } from "@/components/ui/native-select";
 import {
   Sheet,
@@ -21,12 +21,13 @@ import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 import { formatDate, vietnamDateKey } from "@/lib/format";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
 import { cn } from "@/lib/utils";
-import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
+import { FMAP_PROVIDER_ROLES, MAX_FMAP_DATES } from "@/lib/validations/fmap";
 
 export type FmapFilterValue = {
   provinceId: string;
   wardId: string;
-  date: string;
+  /** "yyyy-MM-dd", sorted; a provider shows when free on any of them. */
+  dates: string[];
   start: string;
   end: string;
   /** "" is every role on the map. */
@@ -171,8 +172,18 @@ export function FmapFilterBar({
   const placeLabel = wardName
     ? `${wardName}, ${provinceName ?? ""}`
     : (provinceName ?? t("filters.wholeMap"));
-  const whenLabel = value.date
-    ? `${formatDate(`${value.date}T00:00:00.000Z`).slice(0, 5)}, ${value.start}–${value.end}`
+  const firstDay = value.dates[0]
+    ? formatDate(`${value.dates[0]}T00:00:00.000Z`).slice(0, 5)
+    : null;
+  const whenLabel = firstDay
+    ? `${
+        value.dates.length > 1
+          ? t("filters.daysShort", {
+              first: firstDay,
+              more: value.dates.length - 1,
+            })
+          : firstDay
+      }, ${value.start}–${value.end}`
     : "—";
 
   return (
@@ -317,11 +328,12 @@ export function FmapFilterBar({
             <div className="h-px bg-border-subtle" />
 
             <p className={sectionTitle}>{t("filters.whenTitle")}</p>
-            <DateField
+            <MultiDateCalendar
               label={t("filters.date")}
               min={today}
-              value={value.date}
-              onChange={(date) => onChange({ ...value, date })}
+              maxCount={MAX_FMAP_DATES}
+              value={value.dates}
+              onChange={(dates) => onChange({ ...value, dates })}
             />
             <div className="grid grid-cols-2 gap-2">
               <NativeSelect

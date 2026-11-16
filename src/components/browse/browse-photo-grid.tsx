@@ -47,8 +47,6 @@ export function BrowsePhotoGrid({ photos }: { photos: BrowsePhoto[] }) {
           height: photo.height,
           alt: t("alt", { name: photo.artistName }),
         }))}
-        showModeSwitch
-        storageKey="fg:browse-photo-mode"
         onOpen={setOpen}
         renderOverlay={(_, index) => (
           <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-[var(--dr-scrim)] to-transparent px-2.5 pt-6 pb-2 text-body-sm font-semibold text-on-photo opacity-0 transition-opacity duration-[var(--fg-dur-200)] group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100">

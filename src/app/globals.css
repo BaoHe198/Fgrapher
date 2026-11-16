@@ -543,6 +543,14 @@
   }
   html {
     @apply font-sans;
+    /* Tells the browser which theme its own widgets are drawn in: the
+       option list of a native <select> (Khu vực on Tìm kiếm F), the date
+       picker, scrollbars. Without it a dark page opened a white list with
+       the page's light text on it - unreadable. */
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
   /* A word or link longer than its line (a pasted URL, text typed without
      spaces) breaks instead of pushing the page wider than the phone — the

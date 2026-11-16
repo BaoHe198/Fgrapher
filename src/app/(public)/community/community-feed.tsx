@@ -30,6 +30,7 @@ import {
   ProductImageUploader,
   type ProductImage,
 } from "@/components/forms/product-image-uploader";
+import { AlbumLightboxActions } from "@/components/media/album-quick-view";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ReportModal } from "@/components/modals/report-modal";
 import { PostEngagement } from "@/components/social/post-engagement";
@@ -667,18 +668,20 @@ function PostCard({
 
 // An album post (wave 2): the first photo large at its own ratio, then a
 // strip of the next four frames with "+N" for the rest, and a mono line
-// naming who, what and how many frames. Pressing the photo opens the
-// album's own page; the strip opens the lightbox at that frame.
+// naming who, what and how many frames. Every photo opens the lightbox in
+// place (owner, 16/11/2026 - no jump to the album page), with the way on to
+// the artist's profile.
 function AlbumPostMedia({ post }: { post: FeedPost }) {
   const t = useTranslations("publicPages.community");
+  const quickT = useTranslations("publicPages.album.quickView");
   const categoryT = useTranslations("profileCategory");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const album = post.album!;
   const [first, ...rest] = post.media;
   const strip = rest.slice(0, 4);
   const hidden = post.media.length - 1 - strip.length;
-  const albumHref = post.user.username
-    ? `/profile/${post.user.username}/albums/${album.id}`
+  const profileHref = post.user.username
+    ? `/profile/${post.user.username}`
     : null;
   const cover = (
     <Image
@@ -693,13 +696,14 @@ function AlbumPostMedia({ post }: { post: FeedPost }) {
   );
   return (
     <div className="flex flex-col gap-2">
-      {albumHref ? (
-        <Link href={albumHref} className="focus-ring block bg-bg-sunken">
-          {cover}
-        </Link>
-      ) : (
-        <div className="bg-bg-sunken">{cover}</div>
-      )}
+      <button
+        type="button"
+        onClick={() => setOpenIndex(0)}
+        aria-label={t("openPhoto", { index: 1, total: post.media.length })}
+        className="focus-ring block w-full cursor-zoom-in bg-bg-sunken"
+      >
+        {cover}
+      </button>
       {strip.length > 0 ? (
         <ol className="grid grid-cols-4 gap-1.5">
           {strip.map((item, index) => (
@@ -757,6 +761,14 @@ function AlbumPostMedia({ post }: { post: FeedPost }) {
           onIndexChange={setOpenIndex}
           title={album.title}
           categoryLabel={album.category ? categoryT(album.category) : undefined}
+          actions={
+            <AlbumLightboxActions
+              profileHref={profileHref}
+              profileLabel={quickT("viewProfile", {
+                name: authorName(post.user),
+              })}
+            />
+          }
         />
       ) : null}
     </div>

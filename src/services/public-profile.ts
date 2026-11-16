@@ -292,6 +292,32 @@ export async function getPublicProfileUser(username: string) {
   return reviveDates(await cached());
 }
 
+// One published album of a published profile, read through the same cached
+// public loader — so only approved photos ever come back. Shared by the
+// album page and the quick-view lightbox (/api/albums/[id]/public).
+export async function findPublicAlbum(username: string, albumId: string) {
+  const user = await getPublicProfileUser(username);
+  if (!user) return null;
+  for (const profile of user.profiles) {
+    const album = profile.albums.find((a) => a.id === albumId);
+    if (album) {
+      // The cover first (it is what the visitor pressed), then the rest in
+      // the artist's order.
+      const cover = album.coverMedia;
+      const photos = [
+        ...(cover ? album.media.filter((m) => m.id === cover.id) : []),
+        ...album.media.filter((m) => m.id !== cover?.id),
+      ];
+      const bookingHref =
+        PROVIDER_ROLES.includes(profile.role) && user.acceptingBookings
+          ? `/booking/${user.id}`
+          : null;
+      return { user, profile, album, photos, bookingHref };
+    }
+  }
+  return null;
+}
+
 export async function getProviderForBooking(providerId: string) {
   return db.user.findFirst({
     // A suspended provider can't take new bookings.

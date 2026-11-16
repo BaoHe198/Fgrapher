@@ -5,7 +5,6 @@ import { startTransition, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Radio } from "@/components/ui/radio";
@@ -58,44 +57,36 @@ export function ShopFilters({
   const sort = params.get("sort") ?? "newest";
   const provinceId = params.get("provinceId") ?? "";
 
-  const urlQuery = params.get("q") ?? "";
   const urlPriceMin = params.get("priceMin") ?? "";
   const urlPriceMax = params.get("priceMax") ?? "";
 
-  // These three are typed into, so they keep a draft of their own between
-  // keystrokes. They still have to follow the URL when it moves for a
+  // These two are typed into, so they keep a draft of their own between
+  // keystrokes. (The keyword box moved to the bar above the listings -
+  // ShopSearchBox.) They still have to follow the URL when it moves for a
   // reason they didn't cause — back/forward, or the reset button — which
   // they never did before: going back left "Canon" sitting in a box that
   // was no longer filtering anything.
-  const [query, setQuery] = useState(urlQuery);
   const [priceMin, setPriceMin] = useState(urlPriceMin);
   const [priceMax, setPriceMax] = useState(urlPriceMax);
   const syncedRef = useRef({
-    q: urlQuery,
     priceMin: urlPriceMin,
     priceMax: urlPriceMax,
   });
 
   useEffect(() => {
     const synced = syncedRef.current;
-    if (
-      synced.q === urlQuery &&
-      synced.priceMin === urlPriceMin &&
-      synced.priceMax === urlPriceMax
-    ) {
+    if (synced.priceMin === urlPriceMin && synced.priceMax === urlPriceMax) {
       return;
     }
     syncedRef.current = {
-      q: urlQuery,
       priceMin: urlPriceMin,
       priceMax: urlPriceMax,
     };
     startTransition(() => {
-      setQuery(urlQuery);
       setPriceMin(urlPriceMin);
       setPriceMax(urlPriceMax);
     });
-  }, [urlQuery, urlPriceMin, urlPriceMax]);
+  }, [urlPriceMin, urlPriceMax]);
 
   const update = (mutate: (params: URLSearchParams) => void) =>
     navigate(mutate);
@@ -113,32 +104,8 @@ export function ShopFilters({
     });
   };
 
-  const applyQuery = () => {
-    const trimmed = query.trim();
-    if (trimmed === urlQuery) return;
-    syncedRef.current = { ...syncedRef.current, q: trimmed };
-    update((next) => setOrDelete(next, "q", trimmed));
-  };
-
   return (
     <div className="flex flex-col gap-6" aria-busy={isPending}>
-      {/* Submitting on Enter rather than on every keystroke: each change is a
-          router.push, so typing would queue one navigation per letter. */}
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          applyQuery();
-        }}
-      >
-        <Input
-          label={t("searchLabel")}
-          placeholder={t("searchPlaceholder")}
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          onBlur={applyQuery}
-        />
-      </form>
-
       <div className="flex items-center justify-between">
         <NativeSelect
           value={sort}
@@ -258,8 +225,7 @@ export function ShopFilters({
         variant="ghost"
         size="sm"
         onClick={() => {
-          syncedRef.current = { q: "", priceMin: "", priceMax: "" };
-          setQuery("");
+          syncedRef.current = { priceMin: "", priceMax: "" };
           setPriceMin("");
           setPriceMax("");
           reset();
