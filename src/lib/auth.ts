@@ -25,7 +25,7 @@ import {
   EMAIL_NOT_VERIFIED_CODE,
 } from "@/lib/account/auth-errors";
 import { db } from "@/lib/db";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkSharedRateLimit, getClientIp } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations/auth";
 import { PAID_ROLES } from "@/lib/constants";
 import { resolvePartyName } from "@/lib/party-name";
@@ -112,13 +112,18 @@ const {
         if (!parsed.success) return null;
 
         const ip = getClientIp(request);
-        if (!checkRateLimit(`login-ip:${ip}`, LOGIN_IP_RATE_LIMIT).allowed) {
+        if (
+          !(await checkSharedRateLimit(`login-ip:${ip}`, LOGIN_IP_RATE_LIMIT))
+            .allowed
+        ) {
           return null;
         }
         if (
-          !checkRateLimit(
-            `login-email:${parsed.data.email}`,
-            LOGIN_EMAIL_RATE_LIMIT,
+          !(
+            await checkSharedRateLimit(
+              `login-email:${parsed.data.email}`,
+              LOGIN_EMAIL_RATE_LIMIT,
+            )
           ).allowed
         ) {
           return null;

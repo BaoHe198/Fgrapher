@@ -75,6 +75,11 @@ const serverSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
 
   RESEND_API_KEY: z.string().optional(),
+  // Shared rate-limit store (lib/rate-limit.ts checkSharedRateLimit) —
+  // optional; without both, those limits count per serverless instance.
+  // "" allowed: .env.example ships it empty, and empty means "not set".
+  UPSTASH_REDIS_REST_URL: z.string().url().or(z.literal("")).optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   // NOT a bare z.string().email(): the documented Resend "from" format —
   // and this app's own fallback — is the display-name form
   // `Fgrapher <noreply@fgrapher.com>`, which z.email() rejects. Requiring

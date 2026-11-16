@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { getSupportEmail, sendEmail } from "@/lib/email";
 import { escapeHtml } from "@/lib/utils";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkSharedRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const contactSchema = z.object({
   name: z.string().min(1, "Enter your name").max(100),
@@ -25,7 +25,10 @@ export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.contact");
 
   const ip = getClientIp(request);
-  const rateLimit = checkRateLimit(`contact:${ip}`, CONTACT_RATE_LIMIT);
+  const rateLimit = await checkSharedRateLimit(
+    `contact:${ip}`,
+    CONTACT_RATE_LIMIT,
+  );
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { data: null, error: "too_many_requests", message: t("tooManyRequests") },

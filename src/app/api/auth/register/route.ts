@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { CURRENT_POLICY_VERSION, SELLER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkSharedRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getRequestMeta } from "@/lib/request-meta";
 import { getRegisterSchema } from "@/lib/validations/auth";
 import { splitVietnameseName } from "@/lib/vietnam/name";
@@ -31,7 +31,10 @@ export async function POST(request: Request) {
   ]);
 
   const ip = getClientIp(request);
-  const rateLimit = checkRateLimit(`register:${ip}`, REGISTER_RATE_LIMIT);
+  const rateLimit = await checkSharedRateLimit(
+    `register:${ip}`,
+    REGISTER_RATE_LIMIT,
+  );
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { data: null, error: "too_many_requests", message: t("tooManyRequests") },

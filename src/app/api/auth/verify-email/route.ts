@@ -8,7 +8,7 @@ import {
   parseBillingInterval,
   resolveOnboardingNext,
 } from "@/lib/account/onboarding-destination";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkSharedRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   getPendingPaidRoles,
   verifyEmailToken,
@@ -65,7 +65,10 @@ export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.auth");
 
   const ip = getClientIp(request);
-  const rateLimit = checkRateLimit(`verify-email:${ip}`, VERIFY_RATE_LIMIT);
+  const rateLimit = await checkSharedRateLimit(
+    `verify-email:${ip}`,
+    VERIFY_RATE_LIMIT,
+  );
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { data: null, error: "too_many_requests", message: t("tooManyRequests") },

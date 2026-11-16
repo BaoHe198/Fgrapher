@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
 import { isZalopayConfigured } from "@/lib/payments/zalopay";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkSharedRateLimit } from "@/lib/rate-limit";
 import { createPaymentIntentSchema } from "@/lib/validations/payments";
 import { createZalopayPaymentIntent, PaymentError } from "@/services/payments";
 
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   try {
     const session = await requireAuth();
 
-    const rateLimit = checkRateLimit(
+    const rateLimit = await checkSharedRateLimit(
       `payment-create:${session.user.id}`,
       CREATE_RATE_LIMIT,
     );

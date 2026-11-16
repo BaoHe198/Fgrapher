@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { toE164VN } from "@/lib/vietnam/phone";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkSharedRateLimit } from "@/lib/rate-limit";
 import {
   DEV_BYPASS_CODE,
   canVerifyPhone,
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   try {
     const session = await requireAuth();
 
-    const rateLimit = checkRateLimit(
+    const rateLimit = await checkSharedRateLimit(
       `phone-send:${session.user.id}`,
       PHONE_SEND_RATE_LIMIT,
     );

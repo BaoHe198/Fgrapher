@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkSharedRateLimit, getClientIp } from "@/lib/rate-limit";
 import { resendVerificationEmail } from "@/services/email-verification";
 
 const resendSchema = z.object({
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.auth");
 
   const ip = getClientIp(request);
-  const ipLimit = checkRateLimit(
+  const ipLimit = await checkSharedRateLimit(
     `resend-verification-ip:${ip}`,
     RESEND_IP_RATE_LIMIT,
   );
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
   // Lower-cased for the bucket key only, never for the lookup: otherwise
   // "a@b.com", "A@b.com" and "A@B.COM" each get their own budget and the
   // per-address limit is trivially multiplied.
-  const emailLimit = checkRateLimit(
+  const emailLimit = await checkSharedRateLimit(
     `resend-verification-email:${email.toLowerCase()}`,
     RESEND_EMAIL_RATE_LIMIT,
   );

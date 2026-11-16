@@ -156,8 +156,14 @@ loạt, đặt rộng; giới hạn **chặt** nằm theo tài khoản/email:
 | API khách chưa đăng nhập | 300 / phút     | 300 / phút mỗi tài khoản đã đăng nhập |
 | Tìm kiếm, Bản đồ F       | 200–300 / phút | —                                     |
 
-Bộ đếm hiện nằm trong bộ nhớ từng máy chủ (không dùng Redis), nên thực tế còn
-lỏng hơn bảng trên khi Vercel chạy nhiều máy.
+Từ 16/11/2026, các giới hạn chống lạm dụng (đăng nhập, đăng ký, quên mật khẩu, gửi
+lại/bấm link xác minh, liên hệ, gửi mã SMS, tạo thanh toán) đếm chung cho mọi máy chủ
+qua Upstash Redis khi có `UPSTASH_REDIS_REST_URL` và `UPSTASH_REDIS_REST_TOKEN`
+(`checkSharedRateLimit` trong `src/lib/rate-limit.ts`, một lệnh Redis mỗi lần kiểm
+tra). Chưa đặt hai biến này, hoặc Upstash lỗi/chậm quá 0,8 giây, thì quay về đếm trong
+bộ nhớ từng máy như trước, không chặn nhầm ai. Tìm kiếm, Bản đồ F và trần chung của
+API vẫn đếm trong bộ nhớ từng máy: chúng được gọi rất thường xuyên, đưa qua Redis sẽ
+tốn hạn mức mà không chống thêm được gì đáng kể.
 
 ## 10c. Thông báo cookie
 

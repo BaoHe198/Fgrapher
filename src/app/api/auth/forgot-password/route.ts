@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkSharedRateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendPasswordResetEmail } from "@/services/password-reset";
 
 const forgotPasswordSchema = z.object({
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.auth");
 
   const ip = getClientIp(request);
-  const rateLimit = checkRateLimit(
+  const rateLimit = await checkSharedRateLimit(
     `forgot-password:${ip}`,
     FORGOT_PASSWORD_RATE_LIMIT,
   );
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   // a 500 that only registered addresses would ever produce.
   // Over the per-address limit, answer exactly as usual and send nothing,
   // so the response still reveals nothing about which emails exist.
-  const emailLimit = checkRateLimit(
+  const emailLimit = await checkSharedRateLimit(
     `forgot-password:email:${email.toLowerCase()}`,
     FORGOT_PASSWORD_EMAIL_RATE_LIMIT,
   );
