@@ -2285,6 +2285,17 @@
           "decline": "Decline",
           "message": "Message"
         },
+        "findability": {
+          "title": "Customers can't find you yet",
+          "hours": {
+            "body": "You haven't set your working hours, so you don't appear on Bản đồ F and customers can't book you.",
+            "action": "Set working hours"
+          },
+          "mapPoint": {
+            "body": "Your address has no point on the map yet, so you don't appear on Bản đồ F. Pick your address from the suggestions in your profile.",
+            "action": "Update address"
+          }
+        },
         "roll": {
           "title": "Finish your profile",
           "count": "{done}/{total} done",

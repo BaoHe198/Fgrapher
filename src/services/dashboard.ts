@@ -384,6 +384,12 @@ export interface ProviderOverview {
   }[];
   sunPoint: { latitude: number; longitude: number } | null;
   roll: { key: string; done: boolean; href: string }[];
+  /**
+   * What keeps this provider off Bản đồ F and out of booking, beyond
+   * verification (which the roll already shows): no weekly hours means never
+   * free; no map point means no marker.
+   */
+  findability: { hasHours: boolean; hasMapPoint: boolean };
   /** Requests received per Vietnam day: index 0 = 13 days ago. */
   requestsByDay: number[];
   completedThisMonth: { count: number; value: number };
@@ -410,6 +416,7 @@ export async function getProviderOverview(
           select: {
             latitude: true,
             longitude: true,
+            geocodingStatus: true,
             provinceId: true,
             viewCount: true,
             depositPolicy: true,
@@ -501,6 +508,10 @@ export async function getProviderOverview(
     (key) => recent.filter((b) => vietnamDayKey(b.createdAt) === key).length,
   );
 
+  const hasWeeklyHours = profiles.some((p) =>
+    p.resources.some((r) => r._count.rules > 0),
+  );
+
   const name = (c: { name: string | null; firstName: string | null }) =>
     c.firstName ?? c.name ?? "";
 
@@ -571,10 +582,19 @@ export async function getProviderOverview(
       },
       {
         key: "calendar",
-        done: profiles.some((p) => p.resources.some((r) => r._count.rules > 0)),
+        done: hasWeeklyHours,
         href: "/dashboard/calendar",
       },
     ],
+    findability: {
+      hasHours: hasWeeklyHours,
+      hasMapPoint: profiles.some(
+        (p) =>
+          p.geocodingStatus === "READY" &&
+          p.latitude != null &&
+          p.longitude != null,
+      ),
+    },
     requestsByDay,
     completedThisMonth: {
       count: completed.length,

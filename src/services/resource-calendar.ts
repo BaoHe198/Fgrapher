@@ -108,6 +108,38 @@ export async function replaceWeeklyRules(
   return rules.length;
 }
 
+/**
+ * The week a new provider starts with (owner, 16/11/2026): every day,
+ * 08:00–20:00. Without any weekly hours a provider is never free — not on
+ * Bản đồ F, not in the /browse date filter, not on their own booking page —
+ * and a new provider had no way to know that. They narrow it on
+ * /dashboard/calendar. The same week is backfilled for existing providers
+ * by migration 20261116120000_default_provider_weekly_hours.
+ */
+export const DEFAULT_WEEKLY_HOURS = { startTime: "08:00", endTime: "20:00" };
+
+/**
+ * Gives a provider the default week if their calendar has no weekly rule at
+ * all. A provider who already set (or edited) their hours is left alone.
+ * Returns whether the default was written.
+ */
+export async function ensureDefaultWeeklyHours(userId: string) {
+  return db.$transaction(async (tx) => {
+    const resourceId = await resourceIdForProvider(userId, tx);
+    if (!resourceId) return false;
+    const existing = await tx.availabilityRule.count({ where: { resourceId } });
+    if (existing > 0) return false;
+    await tx.availabilityRule.createMany({
+      data: Array.from({ length: 7 }, (_, dayOfWeek) => ({
+        resourceId,
+        dayOfWeek,
+        ...DEFAULT_WEEKLY_HOURS,
+      })),
+    });
+    return true;
+  });
+}
+
 export interface CalendarBlock {
   id: string;
   /** Local calendar day, "YYYY-MM-DD". */

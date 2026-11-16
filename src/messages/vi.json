@@ -2285,6 +2285,17 @@
           "decline": "Từ chối",
           "message": "Nhắn tin"
         },
+        "findability": {
+          "title": "Khách chưa tìm thấy bạn",
+          "hours": {
+            "body": "Bạn chưa khai giờ làm việc, nên bạn không hiện trên Bản đồ F và khách không đặt lịch được với bạn.",
+            "action": "Khai giờ làm việc"
+          },
+          "mapPoint": {
+            "body": "Địa chỉ của bạn chưa có vị trí trên bản đồ, nên bạn chưa hiện trên Bản đồ F. Hãy chọn địa chỉ từ danh sách gợi ý trong hồ sơ.",
+            "action": "Cập nhật địa chỉ"
+          }
+        },
         "roll": {
           "title": "Hoàn thiện hồ sơ",
           "count": "{done}/{total} việc đã xong",

@@ -164,6 +164,19 @@ hợp:
 Server phải kiểm tra lại availability ngay trước khi tạo booking để hai khách không
 giành cùng một khung giờ.
 
+Không có lịch làm việc thường lệ thì nhà cung cấp không bao giờ rảnh: không hiện trên
+Bản đồ F, không qua được bộ lọc ngày của /browse và không có khung giờ để đặt. Vì vậy
+(16/11/2026):
+
+- lần đầu lưu hồ sơ nhà cung cấp, hệ thống đặt sẵn 08:00–20:00 mỗi ngày
+  (`ensureDefaultWeeklyHours`, `DEFAULT_WEEKLY_HOURS` trong
+  `services/resource-calendar.ts`); ai đã có giờ thì không bị đụng tới;
+- migration `20261116120000_default_provider_weekly_hours` bổ sung cùng tuần đó cho
+  nhà cung cấp cũ chưa có giờ nào (có hướng dẫn hoàn tác trong file);
+- bảng điều khiển của nhà cung cấp hiện khối "Khách chưa tìm thấy bạn" khi chưa có
+  giờ làm việc đang bật hoặc địa chỉ chưa có vị trí trên bản đồ, kèm nút tới đúng chỗ
+  cần sửa.
+
 ## 8. Đặt lịch
 
 Luồng cơ bản:

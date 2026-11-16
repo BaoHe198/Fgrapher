@@ -4,10 +4,12 @@ import { getTranslations } from "next-intl/server";
 
 import { revalidatePublicProfile } from "@/lib/cache";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { getUpdateProfileSchema } from "@/lib/validations/profile";
 import { buildGeocodeAddressHash, forwardGeocode } from "@/services/geocoding";
 import { tryAutoPublish } from "@/services/public-profile";
+import { ensureDefaultWeeklyHours } from "@/services/resource-calendar";
 import { syncPrimaryServiceArea } from "@/services/service-areas";
 
 export async function GET(
@@ -217,6 +219,13 @@ export async function PATCH(
     // find the separate "Khu vực phục vụ" panel and re-enter their own
     // province for anything to reach them.
     await syncPrimaryServiceArea(profile.id, profile.provinceId);
+
+    // A provider's first profile save starts their week at the default
+    // hours, so they can be found and booked before they ever open the
+    // calendar (owner, 16/11/2026). No-op once they have any hours.
+    if (!existingProfile && PROVIDER_ROLES.includes(role as Role)) {
+      await ensureDefaultWeeklyHours(session.user.id);
+    }
 
     // Categories and location are requirements
     // gating auto-publish (see tryAutoPublish) — saving them here may be

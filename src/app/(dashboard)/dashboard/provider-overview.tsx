@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { CalendarClock, Check, MapPinOff } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -8,6 +8,7 @@ import {
   sunTimes,
   timeToMinutes,
 } from "@/lib/sun";
+import { Button } from "@/components/ui/button";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { ProviderOverview as Overview } from "@/services/dashboard";
 
@@ -73,8 +74,71 @@ export async function ProviderOverview({
   const sparkMax = Math.max(1, ...overview.requestsByDay);
   const developed = overview.roll.filter((frame) => frame.done).length;
 
+  // What keeps them off Bản đồ F and out of booking, said plainly at the
+  // top (owner, 16/11/2026) - the roll's "Lịch trống" tile alone did not
+  // tell a provider that with no hours nobody could find or book them.
+  const gaps = [
+    ...(overview.findability.hasHours
+      ? []
+      : [
+          {
+            key: "hours",
+            icon: CalendarClock,
+            href: "/dashboard/calendar",
+          },
+        ]),
+    ...(overview.findability.hasMapPoint
+      ? []
+      : [
+          {
+            key: "mapPoint",
+            icon: MapPinOff,
+            href: "/dashboard/settings/profile?section=roleProfile",
+          },
+        ]),
+  ] as const;
+
   return (
     <div className="flex flex-col gap-10">
+      {gaps.length > 0 ? (
+        <section
+          aria-labelledby="db-findability"
+          className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-gold-400 bg-gold-50 p-4 sm:p-5 dark:border-gold-700 dark:bg-gold-900/30"
+        >
+          <h2
+            id="db-findability"
+            className="text-body-md font-semibold! text-text-primary"
+          >
+            {t("findability.title")}
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {gaps.map(({ key, icon: Icon, href }) => (
+              <li
+                key={key}
+                className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="flex items-start gap-2.5 text-body-sm text-text-primary">
+                  <Icon
+                    aria-hidden
+                    className="mt-0.5 size-4 shrink-0 text-gold-700 dark:text-gold-400"
+                  />
+                  {t(`findability.${key}.body`)}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 self-start sm:self-auto"
+                  nativeButton={false}
+                  render={<Link href={href} />}
+                >
+                  {t(`findability.${key}.action`)}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section aria-labelledby="db-today" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 id="db-today" className="text-heading-lg text-text-primary">
