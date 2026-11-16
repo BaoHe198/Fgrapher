@@ -12,6 +12,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tag } from "@/components/ui/tag";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
 
 interface ReviewItem {
@@ -148,28 +149,46 @@ export function ReviewsTab({
         />
       </div>
 
-      <div className="flex flex-col gap-[18px]">
+      {/* Each review is a print taped to the wall (owner, 16/11/2026):
+          cream paper in both themes, the customer's words as the caption.
+          Alternate prints lean opposite ways and straighten on hover. */}
+      <div className="grid gap-x-6 gap-y-8 pt-3 sm:grid-cols-2">
         {(showAll ? filtered : filtered.slice(0, INITIAL_REVIEWS)).map(
-          (review) => {
+          (review, index) => {
             const name =
               review.reviewer.firstName ??
               review.reviewer.name ??
               t("anonymous");
             return (
-              <div key={review.id} className="flex gap-3">
-                <Avatar size="lg" className="shrink-0">
-                  {review.reviewer.avatar ? (
-                    <AvatarImage src={review.reviewer.avatar} alt="" />
-                  ) : null}
-                  <AvatarFallback>{name[0]?.toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-1 flex-col gap-1">
-                  <span className="text-heading-sm text-text-primary">
-                    {name}
-                  </span>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                    <StarRating rating={review.rating} />
-                    <span className="text-meta text-text-tertiary">
+              <article
+                key={review.id}
+                className={cn(
+                  "relative flex flex-col gap-3 rounded-[4px] bg-[#f6f1e7] p-5 pt-7 text-[#2a251c] shadow-[var(--shadow-md)] transition-transform duration-[var(--fg-dur-260)] ease-fg-out hover:rotate-0 motion-reduce:rotate-0 motion-reduce:transition-none",
+                  index % 2 === 0 ? "-rotate-1" : "rotate-1",
+                )}
+              >
+                <span
+                  aria-hidden
+                  className="absolute -top-2.5 left-1/2 h-5 w-24 -translate-x-1/2 -rotate-2 bg-gold-300/80 shadow-[0_1px_2px_rgb(0_0_0_/_0.15)]"
+                />
+                <StarRating rating={review.rating} />
+                {review.content ? (
+                  <p className="font-display text-[1.125rem] leading-[1.45] [overflow-wrap:anywhere] text-[#2a251c] italic">
+                    “{review.content}”
+                  </p>
+                ) : null}
+                <div className="mt-auto flex items-center gap-2.5">
+                  <Avatar className="shrink-0">
+                    {review.reviewer.avatar ? (
+                      <AvatarImage src={review.reviewer.avatar} alt="" />
+                    ) : null}
+                    <AvatarFallback>{name[0]?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate text-body-md font-semibold text-[#2a251c]">
+                      {name}
+                    </span>
+                    <span className="truncate font-mono text-meta text-[#756c5b]">
                       {[
                         review.booking?.service?.name,
                         formatDate(review.createdAt),
@@ -178,28 +197,25 @@ export function ReviewsTab({
                         .join(" · ")}
                     </span>
                   </div>
-                  {review.content ? (
-                    <p className="text-body-md text-text-secondary">
-                      {review.content}
+                </div>
+                {review.response ? (
+                  <div className="rounded-[4px] border-l-2 border-[#8a5a12] bg-[#ebe4d4] px-3.5 py-2.5">
+                    <p className="text-meta text-[#756c5b]">
+                      {t("responseFrom", { name: providerName })}
                     </p>
-                  ) : null}
-                  {review.response ? (
-                    <div className="mt-2 rounded-[var(--fg-radius-md)] border-l-2 border-brand-primary bg-bg-sunken px-3.5 py-2.5">
-                      <p className="text-meta text-text-tertiary">
-                        {t("responseFrom", { name: providerName })}
-                      </p>
-                      <p className="text-body-sm text-text-secondary">
-                        {review.response}
-                      </p>
-                    </div>
-                  ) : null}
+                    <p className="text-body-sm text-[#3b352a]">
+                      {review.response}
+                    </p>
+                  </div>
+                ) : null}
 
-                  <div className="mt-1.5 flex gap-3">
+                {(isOwner && !review.response) || !isOwner ? (
+                  <div className="flex gap-3">
                     {isOwner && !review.response ? (
                       <button
                         type="button"
                         onClick={() => setRespondTarget(review)}
-                        className="text-body-sm font-semibold! text-brand-primary"
+                        className="focus-ring rounded-[4px] text-body-sm font-semibold! text-[#0f4a3c]"
                       >
                         {t("respond")}
                       </button>
@@ -208,14 +224,14 @@ export function ReviewsTab({
                       <button
                         type="button"
                         onClick={() => setReportTarget(review.id)}
-                        className="text-body-sm text-text-tertiary"
+                        className="focus-ring rounded-[4px] text-body-sm text-[#756c5b]"
                       >
                         {t("report")}
                       </button>
                     ) : null}
                   </div>
-                </div>
-              </div>
+                ) : null}
+              </article>
             );
           },
         )}

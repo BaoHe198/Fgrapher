@@ -9,7 +9,15 @@ export default async function NotFound() {
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 px-6 text-center">
-      <Compass className="size-14 text-text-tertiary" />
+      {/* An undeveloped print: the page that is not there. */}
+      <div
+        aria-hidden
+        className="mb-2 flex w-40 -rotate-3 flex-col gap-2 rounded-[4px] bg-[#f6f1e7] p-2.5 pb-7 shadow-[var(--shadow-lg)]"
+      >
+        <div className="grid aspect-[4/5] place-content-center bg-[#e4dccb] text-[#a39a86]">
+          <Compass className="size-9" />
+        </div>
+      </div>
       <h1 className="text-display-lg text-text-primary">{t("title")}</h1>
       <p className="max-w-md text-body-md text-text-secondary">{t("body")}</p>
       <div className="flex flex-wrap justify-center gap-3">
