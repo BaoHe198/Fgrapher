@@ -2156,6 +2156,16 @@
       },
       "notes": "Notes",
       "reviewPrompt": "How was your session with {name}?",
+      "film": {
+        "title": "Booking journey",
+        "requested": "Request sent",
+        "confirmed": "Artist confirms",
+        "shoot": "The shoot",
+        "review": "Review",
+        "done": "done",
+        "current": "waiting",
+        "upcoming": "not yet"
+      },
       "timeline": {
         "title": "Timeline",
         "requestCreated": "Request created",

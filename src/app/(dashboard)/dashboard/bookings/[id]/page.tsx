@@ -17,6 +17,7 @@ import { useParams } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
 import { ReferenceMediaGallery } from "@/components/media/reference-media-gallery";
+import { BookingFilmStrip } from "@/components/booking/booking-film-strip";
 import { ReviewModal } from "@/components/modals/review-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -325,6 +326,22 @@ export default function BookingDetailPage() {
           ) : null}
         </Card>
       ) : null}
+
+      <BookingFilmStrip
+        status={booking.status}
+        hasReview={Boolean(booking.review)}
+        labels={{
+          title: t("film.title"),
+          requested: t("film.requested"),
+          confirmed: t("film.confirmed"),
+          shoot: t("film.shoot"),
+          review: t("film.review"),
+          done: t("film.done"),
+          current: t("film.current"),
+          upcoming: t("film.upcoming"),
+          stopped: tBookings(`status.${booking.status}`),
+        }}
+      />
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-4">

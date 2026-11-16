@@ -2156,6 +2156,16 @@
       },
       "notes": "Ghi chú",
       "reviewPrompt": "Buổi làm việc với {name} thế nào?",
+      "film": {
+        "title": "Hành trình đặt lịch",
+        "requested": "Gửi yêu cầu",
+        "confirmed": "Nghệ sĩ xác nhận",
+        "shoot": "Buổi chụp",
+        "review": "Đánh giá",
+        "done": "đã xong",
+        "current": "đang chờ",
+        "upcoming": "chưa tới"
+      },
       "timeline": {
         "title": "Dòng thời gian",
         "requestCreated": "Đã tạo yêu cầu",
