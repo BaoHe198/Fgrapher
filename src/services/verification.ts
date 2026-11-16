@@ -2,7 +2,11 @@ import { createHash } from "node:crypto";
 
 import type { LegalEntityType, Role } from "@prisma/client";
 
-import { deleteKycAsset, isCloudinaryConfigured } from "@/lib/media/cloudinary";
+import {
+  deleteKycAsset,
+  isCloudinaryConfigured,
+  isOwnKycAsset,
+} from "@/lib/media/cloudinary";
 import { CURRENT_POLICY_VERSION, KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { logAudit, recordConsent } from "@/services/compliance";
@@ -62,6 +66,19 @@ export async function submitVerification({
     throw new VerificationError(
       "This role is already verified or under review",
     );
+  }
+
+  // Every document must be this user's own upload (fgrapher-kyc/<userId>/).
+  const documents: [string | undefined, string | undefined][] = [
+    [idFrontPublicId, idFrontUrl],
+    [idBackPublicId, idBackUrl],
+    [selfiePublicId, selfieUrl],
+    [businessDocPublicId, businessDocUrl],
+  ];
+  for (const [publicId, url] of documents) {
+    if (publicId && !isOwnKycAsset(userId, publicId, url)) {
+      throw new VerificationError("Uploaded documents could not be verified");
+    }
   }
 
   const updated = await db.userRole.update({

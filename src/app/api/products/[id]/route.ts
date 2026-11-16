@@ -24,23 +24,43 @@ export async function GET(
     );
   }
 
-  const { id } = await params;
-  const product = await db.product.findUnique({
-    where: { id },
-    include: { images: { orderBy: { order: "asc" } } },
-  });
+  // The seller's own edit read: it returns inactive listings and images
+  // still awaiting moderation, so only the seller gets it (audit
+  // 16/11/2026; it used to need no sign-in at all). Shoppers read
+  // /api/shop-products/[id], which filters both.
+  try {
+    const session = await requireAuth();
+    const { id } = await params;
+    const product = await db.product.findUnique({
+      where: { id },
+      include: { images: { orderBy: { order: "asc" } } },
+    });
 
-  if (!product || product.deletedAt) {
+    // Someone else's listing answers exactly like a missing one, so ids
+    // can't be probed.
+    if (!product || product.deletedAt || product.userId !== session.user.id) {
+      return NextResponse.json(
+        { data: null, error: "not_found", message: "Product not found" },
+        { status: 404 },
+      );
+    }
+
     return NextResponse.json(
-      { data: null, error: "not_found", message: "Product not found" },
-      { status: 404 },
+      { data: product, error: null, message: null },
+      { status: 200 },
+    );
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json(
+        { data: null, error: "unauthorized", message: err.message },
+        { status: err.status },
+      );
+    }
+    return NextResponse.json(
+      { data: null, error: "server_error", message: "Failed to load product" },
+      { status: 500 },
     );
   }
-
-  return NextResponse.json(
-    { data: product, error: null, message: null },
-    { status: 200 },
-  );
 }
 
 export async function PATCH(

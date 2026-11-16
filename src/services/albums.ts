@@ -154,6 +154,19 @@ export async function updateAlbum(
 ) {
   await assertOwnsAlbum(albumId, userId);
 
+  // The cover must be a photo of this album. Any media id used to be
+  // accepted, so an owner could set another user's photo — moderated or
+  // not — as their cover and read its URL back (audit 16/11/2026).
+  if (data.coverMediaId) {
+    const cover = await db.profileMedia.findFirst({
+      where: { id: data.coverMediaId, albumId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!cover) {
+      throw new AlbumNotFoundError("Cover photo is not in this album");
+    }
+  }
+
   const updated = await db.album.update({
     where: { id: albumId },
     data: {

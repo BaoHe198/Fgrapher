@@ -77,14 +77,21 @@ export async function POST(request: Request) {
       new Set([...parsed.data.roles, "CUSTOMER" as const]),
     );
 
+    // A paid role starts inactive, exactly as at registration, and an
+    // existing one keeps whatever state it has: only a plan turns it on
+    // (assignManualPlan, via assignFreePlan below or a payment). This used
+    // to set active: true unconditionally, so once charging starts a
+    // provider whose plan had expired could switch their role back on here
+    // without paying (audit 16/11/2026).
     const userRoles = await db.$transaction(
-      roles.map((role) =>
-        db.userRole.upsert({
+      roles.map((role) => {
+        const paid = (PAID_ROLES as string[]).includes(role);
+        return db.userRole.upsert({
           where: { userId_role: { userId: session.user.id, role } },
-          create: { userId: session.user.id, role, active: true },
-          update: { active: true },
-        }),
-      ),
+          create: { userId: session.user.id, role, active: !paid },
+          update: paid ? {} : { active: true },
+        });
+      }),
     );
 
     // Mirrors /api/auth/register's own assignFreePlan call (CLAUDE.md's

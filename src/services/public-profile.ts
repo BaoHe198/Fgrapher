@@ -1,6 +1,7 @@
 import type { Role } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
+import { isSubscriptionUsable } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { PAID_ROLES, PROVIDER_ROLES, SHOP_ROLES } from "@/lib/constants";
 import { omitPrivateProfileFields } from "@/lib/privacy/profile-privacy";
@@ -23,6 +24,7 @@ class ProfileNotFoundError extends Error {}
 class ProfileHasNoApprovedMediaError extends Error {}
 class ProfileMissingLocationError extends Error {}
 class ProfileMissingCategoryError extends Error {}
+class ProfileNoActivePlanError extends Error {}
 
 // The single write path for Profile.isPublished (Prompt B3, VIỆC 4) —
 // every other read site (search.ts, sitemap.ts, this file's own queries
@@ -43,6 +45,20 @@ export async function setProfilePublished(
     });
     if (userRole?.verificationStatus !== "VERIFIED") {
       throw new ProfileNotVerifiedError(t("notVerified"));
+    }
+    // A paid role goes public only while its plan is usable (a free plan
+    // counts while free grants are on). Without this, a provider whose plan
+    // expired could republish just by saving their profile (audit
+    // 16/11/2026).
+    if (PAID_ROLES.includes(role)) {
+      const subscription = userRole.active
+        ? await db.subscription.findUnique({
+            where: { userRoleId: userRole.id },
+          })
+        : null;
+      if (!subscription || !isSubscriptionUsable(subscription)) {
+        throw new ProfileNoActivePlanError(t("noActivePlan"));
+      }
     }
   }
 

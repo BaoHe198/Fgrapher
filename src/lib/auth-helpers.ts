@@ -110,7 +110,7 @@ export async function requireRole(userId: string, role: Role) {
 // without this every paid-role check refused the provider for the hours in
 // between — the studio seen on 24/09 couldn't create an album for exactly
 // that reason.
-function isSubscriptionUsable(subscription: {
+export function isSubscriptionUsable(subscription: {
   status: string;
   plan: string | null;
   stripeSubscriptionId: string | null;

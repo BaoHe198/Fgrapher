@@ -309,6 +309,23 @@ const KYC_SIGNED_URL_TTL_SECONDS = 5 * 60;
 // account-level cap, same residual gap noted above.
 const KYC_ALLOWED_FORMATS = "jpg,jpeg,png,webp";
 
+/**
+ * Whether a KYC asset is one this user uploaded: their signed uploads all
+ * land in `fgrapher-kyc/<userId>/`. Checked on submission so a provider
+ * can't attach someone else's document id — which the admin viewer would
+ * then sign a URL for, and the 90-day purge would delete (audit 16/11/2026).
+ * The URL, when given, must point at that same asset.
+ */
+export function isOwnKycAsset(
+  userId: string,
+  publicId: string,
+  url?: string | null,
+) {
+  if (!publicId.startsWith(`${KYC_FOLDER_PREFIX}/${userId}/`)) return false;
+  if (publicId.includes("..")) return false;
+  return !url || url.includes(`/${publicId}`);
+}
+
 export function generateKycUploadSignature(userId: string) {
   const timestamp = Math.round(Date.now() / 1000);
   const folder = `${KYC_FOLDER_PREFIX}/${userId}`;
