@@ -1390,6 +1390,15 @@
       "loadFailed": "Không thể tải ảnh",
       "tooMany": "Bạn rửa ảnh hơi nhanh. Chờ một chút rồi thử lại."
     },
+    "moodboard": {
+      "loadFailed": "Không thể tải bảng ý tưởng",
+      "invalidInput": "Dữ liệu không hợp lệ",
+      "pinned": "Đã ghim ảnh",
+      "unpinned": "Đã bỏ ghim",
+      "photoNotFound": "Ảnh này không còn hiển thị công khai",
+      "boardFull": "Bảng ý tưởng đã đầy. Bỏ ghim bớt ảnh cũ rồi thử lại.",
+      "saveFailed": "Chưa lưu được, vui lòng thử lại"
+    },
     "albums": {
       "invalidInput": "Dữ liệu không hợp lệ",
       "loadFailed": "Không thể tải album",
@@ -1869,6 +1878,20 @@
       "body": "Trang này gặp lỗi ngoài ý muốn. Hãy thử lại, hoặc quay về bảng điều khiển.",
       "retry": "Thử lại",
       "backToDashboard": "Về bảng điều khiển"
+    },
+    "moodboard": {
+      "title": "Bảng ý tưởng",
+      "intro": "Những tấm ảnh bạn đã ghim, xếp theo nghệ sĩ. Gửi cả nhóm ảnh cho nghệ sĩ để nói bạn muốn chụp theo phong cách nào.",
+      "photoCount": "{count} ảnh đã ghim",
+      "sendBrief": "Gửi cho nghệ sĩ",
+      "remove": "Bỏ ghim",
+      "removeFailed": "Không bỏ ghim được, vui lòng thử lại",
+      "unnamed": "Nghệ sĩ Fgrapher",
+      "empty": {
+        "title": "Chưa ghim ảnh nào",
+        "body": "Mở một tấm ảnh bạn thích rồi bấm “Ghim vào bảng ý tưởng”. Ảnh sẽ nằm ở đây, xếp theo nghệ sĩ.",
+        "cta": "Xem ảnh"
+      }
     },
     "saved": {
       "title": "Nghệ sĩ đã lưu",
@@ -2382,6 +2405,8 @@
       "selectConversationHint": "Chọn từ danh sách để bắt đầu nhắn tin",
       "rentalDraft": "Chào shop, tôi muốn thuê {product}. Sản phẩm: {url}",
       "pageTitle": "Tin nhắn",
+      "boardDraft": "Chào bạn, mình đã ghim {count} tấm ảnh của bạn trên Fgrapher và muốn chụp theo phong cách đó. Mình dự định chụp vào ngày … — bạn còn lịch không ạ?",
+      "boardDraftAlbums": "Chào bạn, mình đã ghim {count} tấm ảnh của bạn trên Fgrapher (trong album {albums}) và muốn chụp theo phong cách đó. Mình dự định chụp vào ngày … — bạn còn lịch không ạ?",
       "costumeDraft": "Chào shop, mình muốn thuê “{costume}”. Mình cần thuê vào ngày … — shop còn trống không ạ?",
       "rentalDraftDates": "Chào shop, tôi muốn thuê {product} từ ngày {from}, trong {days} ngày. Sản phẩm: {url}"
     },
@@ -5229,6 +5254,7 @@
       "listings": "Tin đăng",
       "shopOrders": "Đơn hàng cửa hàng",
       "myOrders": "Đơn hàng của tôi",
+      "moodboard": "Bảng ý tưởng",
       "saved": "Đã lưu",
       "messages": "Tin nhắn",
       "settings": "Cài đặt",
@@ -5327,6 +5353,11 @@
         "budget": "Ngân sách",
         "note": "Mô tả thêm"
       }
+    },
+    "pinButton": {
+      "pin": "Ghim vào bảng ý tưởng",
+      "pinned": "Đã ghim",
+      "failed": "Chưa ghim được"
     },
     "sunArc": {
       "riseSet": "Mặt trời mọc {rise} · lặn {set}",

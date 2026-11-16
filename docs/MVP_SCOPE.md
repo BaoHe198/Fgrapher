@@ -45,6 +45,16 @@ migration phá huỷ. Server phải chặn tạo mới và bề mặt công khai
 - Hồ sơ công khai, location/vùng phục vụ và publish gate.
 - Album/portfolio, Cloudinary, moderation và thùng rác.
 - Browse/search và saved profile.
+- "Bảng ý tưởng" (thêm 16/11/2026): khách đã đăng nhập ghim từng tấm ảnh
+  portfolio vào bảng riêng (`SavedMedia`, bảng `saved_media`, tối đa 200
+  ảnh mỗi tài khoản), xem tại `/moodboard`, rồi gửi cho nghệ sĩ bằng tin
+  nhắn soạn sẵn. Chỉ ghim được ảnh đang công khai và bảng luôn đọc qua cùng
+  bộ lọc công khai với tìm kiếm (`publicPhotoWhere` trong
+  `services/search.ts`), nên ảnh bị gỡ/từ chối sẽ tự biến mất khỏi bảng. Là
+  dữ liệu cá nhân (người dùng thích ảnh của ai): có trong xuất dữ liệu và
+  bị xoá khi xoá tài khoản.
+- "Phòng tối" trên trang chủ (thêm 16/11/2026): `GET /api/darkroom` trả một
+  ảnh công khai ngẫu nhiên, cùng bộ lọc công khai đó, giới hạn theo IP.
 - Dịch vụ, availability, blocked date và booking.
 - Service request, matching và offer.
 - Messaging bằng polling, block/report.

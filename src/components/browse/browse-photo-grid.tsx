@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 
+import { PinButton } from "@/components/media/pin-button";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { Button } from "@/components/ui/button";
 import { MasonryGrid } from "@/components/ui/masonry-grid";
@@ -67,6 +68,7 @@ export function BrowsePhotoGrid({ photos }: { photos: BrowsePhoto[] }) {
           originFor={originFor}
           actions={
             <>
+              <PinButton mediaId={current.id} />
               <Button
                 variant="outline"
                 size="sm"

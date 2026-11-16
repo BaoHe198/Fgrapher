@@ -42,6 +42,14 @@ export function MessagesClient({
   // length, so the draft already says what the customer wants.
   const rentFrom = searchParams.get("rentFrom");
   const rentDays = Number(searchParams.get("rentDays")) || 0;
+  // "Bảng ý tưởng": the customer pinned some of this artist's photos and
+  // is sending them as the brief. The draft names how many and from which
+  // albums; the customer still presses send.
+  const boardCount = Math.min(
+    Math.max(0, Number(searchParams.get("board")) || 0),
+    200,
+  );
+  const boardAlbums = (searchParams.get("boardAlbums") ?? "").slice(0, 300);
   const rentalDraft = productId
     ? rentFrom && rentDays > 0
       ? t("rentalDraftDates", {
@@ -56,7 +64,11 @@ export function MessagesClient({
         })
     : costumeId
       ? t("costumeDraft", { costume: costumeName || costumeId })
-      : undefined;
+      : boardCount > 0
+        ? boardAlbums
+          ? t("boardDraftAlbums", { count: boardCount, albums: boardAlbums })
+          : t("boardDraft", { count: boardCount })
+        : undefined;
 
   const loadConversations = () => {
     fetch("/api/conversations")
@@ -96,6 +108,8 @@ export function MessagesClient({
             if (rentDays > 0) nextParams.set("rentDays", String(rentDays));
             if (costumeId) nextParams.set("costume", costumeId);
             if (costumeName) nextParams.set("costumeName", costumeName);
+            if (boardCount > 0) nextParams.set("board", String(boardCount));
+            if (boardAlbums) nextParams.set("boardAlbums", boardAlbums);
             router.replace(`/dashboard/messages?${nextParams.toString()}`);
             loadConversations();
           }

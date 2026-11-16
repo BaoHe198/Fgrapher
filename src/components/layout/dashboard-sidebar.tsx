@@ -2,6 +2,7 @@
 
 import {
   Bookmark,
+  Pin,
   Calendar,
   CalendarDays,
   Handshake,
@@ -178,6 +179,7 @@ export function DashboardSidebar({
         { href: "/dashboard/requests", label: t("myRequests"), icon: Send },
         ...(marketplaceEnabled && canSell ? [] : myOrdersItem),
         { href: "/saved", label: t("saved"), icon: Bookmark },
+        { href: "/moodboard", label: t("moodboard"), icon: Pin },
       ],
     },
     {

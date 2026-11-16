@@ -31,6 +31,7 @@ import {
 
 import { FrameMark } from "@/components/brand/frame-mark";
 import { MasonryGrid } from "@/components/ui/masonry-grid";
+import { PinButton } from "@/components/media/pin-button";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { PostEngagement } from "@/components/social/post-engagement";
 import { buildMediaVariants } from "@/lib/media/variants";
@@ -570,6 +571,9 @@ export function PortfolioTab({
           index={photoIndex ?? 0}
           onClose={() => setPhotoIndex(null)}
           onIndexChange={setPhotoIndex}
+          actions={
+            isOwnProfile ? undefined : <PinButton mediaId={openPhoto.id} />
+          }
           title={openPhoto.album.title}
           description={openPhoto.album.description}
           categoryLabel={

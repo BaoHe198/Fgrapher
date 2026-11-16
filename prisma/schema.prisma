@@ -124,6 +124,7 @@ model User {
   followers                Follow[]                  @relation("following")
   notifications            Notification[]
   savedProfiles            SavedProfile[]
+  savedMedia               SavedMedia[]
   payments                 Payment[]
   conversationParticipants ConversationParticipant[]
   consentRecords           ConsentRecord[]
@@ -1038,6 +1039,7 @@ model ProfileMedia {
   profile       Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
   album         Album?        @relation("AlbumMedia", fields: [albumId], references: [id], onDelete: SetNull)
   coverOfAlbums Album[]       @relation("AlbumCover")
+  savedBy       SavedMedia[]
   costumeItems  CostumeItem[]
 
   @@index([profileId, order])
@@ -2082,6 +2084,28 @@ model EmailVerificationToken {
   // No @@index([userId]) — @unique above already provides one.
   @@index([expiresAt])
   @@map("email_verification_tokens")
+}
+
+/// "Bảng ý tưởng" (owner, 16/11/2026): a signed-in visitor pins single
+/// portfolio photos they like, then sends the board to an artist as the
+/// brief. One row per (user, photo). Only a photo that is public when it
+/// is pinned can be saved, and every read re-checks that it still is
+/// (services/moodboard.ts). Personal data (what someone likes): included
+/// in exportUserData() and removed by processDeletion(). The row goes with
+/// the photo when the photo is purged.
+model SavedMedia {
+  id        String   @id @default(cuid())
+  userId    String
+  mediaId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media ProfileMedia @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, mediaId])
+  @@index([mediaId])
+  @@map("saved_media")
 }
 
 model SavedProfile {

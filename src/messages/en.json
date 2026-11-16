@@ -1390,6 +1390,15 @@
       "loadFailed": "Couldn't load a photo",
       "tooMany": "That's a lot of prints. Wait a moment and try again."
     },
+    "moodboard": {
+      "loadFailed": "Couldn't load the mood board",
+      "invalidInput": "Invalid input",
+      "pinned": "Photo pinned",
+      "unpinned": "Photo unpinned",
+      "photoNotFound": "This photo is no longer public",
+      "boardFull": "Your mood board is full. Unpin some older photos and try again.",
+      "saveFailed": "Couldn't save, please try again"
+    },
     "albums": {
       "invalidInput": "Invalid input",
       "loadFailed": "Failed to load albums",
@@ -1869,6 +1878,20 @@
       "body": "This page hit an unexpected error. Try again, or head back to your dashboard.",
       "retry": "Try again",
       "backToDashboard": "Back to dashboard"
+    },
+    "moodboard": {
+      "title": "Mood board",
+      "intro": "The photos you pinned, grouped by artist. Send a group to its artist to show the style you want.",
+      "photoCount": "{count} pinned",
+      "sendBrief": "Send to artist",
+      "remove": "Unpin",
+      "removeFailed": "Couldn't unpin, please try again",
+      "unnamed": "Fgrapher artist",
+      "empty": {
+        "title": "Nothing pinned yet",
+        "body": "Open a photo you like and press “Pin to mood board”. It will show up here, grouped by artist.",
+        "cta": "Browse photos"
+      }
     },
     "saved": {
       "title": "Saved artists",
@@ -2382,6 +2405,8 @@
       "selectConversationHint": "Choose from the list to start chatting",
       "rentalDraft": "Hi, I'd like to rent {product}. Product: {url}",
       "pageTitle": "Messages",
+      "boardDraft": "Hi, I pinned {count} of your photos on Fgrapher and would like a shoot in that style. I'm planning for … — are you available?",
+      "boardDraftAlbums": "Hi, I pinned {count} of your photos on Fgrapher (from {albums}) and would like a shoot in that style. I'm planning for … — are you available?",
       "costumeDraft": "Hi, I'd like to rent “{costume}”. I need it on … — is it available?",
       "rentalDraftDates": "Hi, I'd like to rent {product} from {from} for {days, plural, one {# day} other {# days}}. Product: {url}"
     },
@@ -5229,6 +5254,7 @@
       "listings": "Listings",
       "shopOrders": "Shop orders",
       "myOrders": "My orders",
+      "moodboard": "Mood board",
       "saved": "Saved",
       "messages": "Messages",
       "settings": "Settings",
@@ -5327,6 +5353,11 @@
         "budget": "Budget",
         "note": "Notes"
       }
+    },
+    "pinButton": {
+      "pin": "Pin to mood board",
+      "pinned": "Pinned",
+      "failed": "Couldn't pin"
     },
     "sunArc": {
       "riseSet": "Sunrise {rise} · sunset {set}",

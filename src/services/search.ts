@@ -876,6 +876,20 @@ export async function getFeaturedProfiles(limit = 4) {
 }
 
 /**
+ * What makes a single photo public: an approved, undeleted image, inside
+ * a published album, of a published profile whose account is live. The
+ * darkroom and the mood board (services/moodboard.ts) both read through
+ * this, so neither can show a photo that search would not.
+ */
+export function publicPhotoWhere(): Prisma.ProfileMediaWhereInput {
+  return {
+    ...APPROVED_ALBUM_IMAGE,
+    album: { isPublished: true, deletedAt: null },
+    profile: buildBaseWhere({}),
+  };
+}
+
+/**
  * One random public photo for the home page's darkroom ("Rửa một tấm").
  * The same public rules as search: an approved, undeleted image, inside a
  * published album, of a published profile whose account is live. Not
@@ -885,11 +899,7 @@ export async function getFeaturedProfiles(limit = 4) {
  * starts over.
  */
 export async function getDarkroomPrint(exclude: string[] = []) {
-  const base: Prisma.ProfileMediaWhereInput = {
-    ...APPROVED_ALBUM_IMAGE,
-    album: { isPublished: true, deletedAt: null },
-    profile: buildBaseWhere({}),
-  };
+  const base = publicPhotoWhere();
   let where: Prisma.ProfileMediaWhereInput =
     exclude.length > 0 ? { ...base, id: { notIn: exclude } } : base;
   let total = await db.profileMedia.count({ where });

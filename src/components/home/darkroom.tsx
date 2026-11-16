@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 
+import { PinButton } from "@/components/media/pin-button";
 import { Button } from "@/components/ui/button";
 import { shortPlace } from "@/lib/location";
 import { buildMediaVariants } from "@/lib/media/variants";
@@ -158,7 +159,15 @@ export function Darkroom() {
                       imageLoaded ? "animate-darkroom-develop" : "opacity-0",
                     )}
                   />
-                ) : (
+                ) : null}
+                {print && imageLoaded ? (
+                  <PinButton
+                    mediaId={print.id}
+                    variant="onPhoto"
+                    className="absolute top-2 right-2"
+                  />
+                ) : null}
+                {print ? null : (
                   <span className="absolute inset-0 grid place-content-center px-6 text-center font-mono text-meta tracking-[0.12em] text-[#9a917e] uppercase">
                     {t("blank")}
                   </span>
