@@ -1,7 +1,9 @@
 # Ảnh minh họa cố định (showcase)
 
 Ảnh trong thư mục này dùng cho các ô "Bạn cần ai?", "Duyệt theo phong cách" ở
-trang chủ và bảng ảnh ở trang Giới thiệu. Đây là ảnh minh họa cố định, không
+trang chủ, bảng ảnh ở trang Giới thiệu, và (từ 16/11/2026) khung ảnh cạnh form ở
+các trang đăng nhập/đăng ký (`roles/*-2.jpg` của nhiếp ảnh, quay phim, trang điểm,
+studio, xem `src/app/(auth)/layout.tsx`). Đây là ảnh minh họa cố định, không
 lấy từ portfolio người dùng, nên luôn đẹp và đúng chủ đề kể cả khi chưa có
 nhà cung cấp nào.
 

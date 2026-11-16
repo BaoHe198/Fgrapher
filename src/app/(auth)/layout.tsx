@@ -3,6 +3,16 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { LogoFull } from "@/components/brand/logo-full";
+import { ROLE_PHOTOS } from "@/lib/constants/showcase-images";
+
+// The second photo of each role, so the auth pages don't repeat the home
+// page's role tiles.
+const AUTH_PHOTOS = [
+  { photo: ROLE_PHOTOS.PHOTOGRAPHER[1], alt: "photographer" },
+  { photo: ROLE_PHOTOS.VIDEOGRAPHER[1], alt: "videographer" },
+  { photo: ROLE_PHOTOS.MAKEUP_ARTIST[1], alt: "makeupArtist" },
+  { photo: ROLE_PHOTOS.STUDIO[1], alt: "studio" },
+] as const;
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -28,46 +38,25 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
         </main>
 
         <div className="relative hidden items-end bg-green-900 p-10 lg:flex">
+          {/* Self-hosted showcase photos with recorded credit
+              (public/images/showcase/README.md) - these four used to be
+              hotlinked from Unsplash with no record of who took them
+              (owner checklist #41, 16/11/2026). */}
           <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 opacity-50">
-            <div className="relative h-full w-full">
-              <Image
-                src="https://images.unsplash.com/photo-1497316730643-415fac54a2af?q=80&w=800&auto=format&fit=crop"
-                alt={t("imageAlt.photographer")}
-                fill
-                sizes="(min-width: 1024px) 400px, 0px"
-                className="object-cover"
-                // The largest element on every auth page, so it should not
-                // wait for lazy-loading to notice it.
-                priority
-              />
-            </div>
-            <div className="relative h-full w-full">
-              <Image
-                src="https://images.unsplash.com/photo-1497015289639-54688650d173?q=80&w=800&auto=format&fit=crop"
-                alt={t("imageAlt.videographer")}
-                fill
-                sizes="(min-width: 1024px) 400px, 0px"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative h-full w-full">
-              <Image
-                src="https://images.unsplash.com/photo-1622336889416-8d790ad807d7?q=80&w=800&auto=format&fit=crop"
-                alt={t("imageAlt.makeupArtist")}
-                fill
-                sizes="(min-width: 1024px) 400px, 0px"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative h-full w-full">
-              <Image
-                src="https://images.unsplash.com/photo-1617463874381-85b513b3e991?q=80&w=800&auto=format&fit=crop"
-                alt={t("imageAlt.studio")}
-                fill
-                sizes="(min-width: 1024px) 400px, 0px"
-                className="object-cover"
-              />
-            </div>
+            {AUTH_PHOTOS.map(({ photo, alt }, index) => (
+              <div key={photo.src} className="relative h-full w-full">
+                <Image
+                  src={photo.src}
+                  alt={t(`imageAlt.${alt}`)}
+                  fill
+                  sizes="(min-width: 1024px) 400px, 0px"
+                  className="object-cover"
+                  // The largest element on every auth page, so the first
+                  // should not wait for lazy-loading to notice it.
+                  priority={index === 0}
+                />
+              </div>
+            ))}
           </div>
           {/* Not a testimonial: Fgrapher has no users yet, so a quote
               attributed to a "verified provider" would be invented. States
