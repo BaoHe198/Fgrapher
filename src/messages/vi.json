@@ -263,6 +263,26 @@
     },
     "stylesTitle": "Duyệt theo phong cách",
     "allStyles": "Tất cả",
+    "darkroom": {
+      "eyebrow": "Phòng tối",
+      "title": "Chưa biết chọn ai? Rửa thử một tấm.",
+      "sub": "Mỗi lần rửa là một tấm ảnh thật của một nghệ sĩ đã xác minh trên Fgrapher. Thích thì lật mặt sau xem ai chụp.",
+      "develop": "Rửa một tấm",
+      "another": "Rửa tấm khác",
+      "developing": "Đang hiện ảnh…",
+      "flip": "Lật mặt sau",
+      "flipBack": "Xem lại ảnh",
+      "viewProfile": "Xem hồ sơ",
+      "blank": "Giấy ảnh chưa lộ sáng",
+      "photoAlt": "Ảnh của {name}",
+      "shotBy": "Người chụp",
+      "from": "Từ {price}",
+      "askPrice": "Hỏi giá trực tiếp",
+      "count": "Đã rửa {count} tấm",
+      "empty": "Chưa có ảnh nào để rửa. Quay lại sau nhé.",
+      "error": "Chưa rửa được ảnh. Thử lại nhé.",
+      "unnamed": "Nghệ sĩ Fgrapher"
+    },
     "map": {
       "eyebrow": "Bản đồ F",
       "sub": "Chọn ngày chụp và khu vực, bản đồ chỉ hiện những nghệ sĩ còn trống lịch quanh đó.",
@@ -1364,6 +1384,10 @@
       "notOwned": "Bạn không sở hữu một số ảnh trong danh sách này",
       "orderUpdated": "Đã cập nhật thứ tự",
       "reorderFailed": "Không thể cập nhật thứ tự"
+    },
+    "darkroom": {
+      "loadFailed": "Không thể tải ảnh",
+      "tooMany": "Bạn rửa ảnh hơi nhanh. Chờ một chút rồi thử lại."
     },
     "albums": {
       "invalidInput": "Dữ liệu không hợp lệ",

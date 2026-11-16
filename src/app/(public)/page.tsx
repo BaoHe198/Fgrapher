@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { ClosingCta } from "@/components/home/closing-cta";
 import { HeroCollage, HeroStrip } from "@/components/home/hero-collage";
+import { Darkroom } from "@/components/home/darkroom";
 import { FeaturedArtists } from "@/components/home/featured-artists";
 import { MapTeaser } from "@/components/home/map-teaser";
 import { MoreFromFgrapher } from "@/components/home/more-from-fgrapher";
@@ -127,6 +128,8 @@ export default async function LandingPage() {
       ) : null}
 
       <StyleGrid tiles={showcase.styles} />
+
+      <Darkroom />
 
       <MapTeaser
         artists={featuredProfiles.map((profile) => ({

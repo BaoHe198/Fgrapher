@@ -874,3 +874,65 @@ const getFeaturedProfilesCached = unstable_cache(
 export async function getFeaturedProfiles(limit = 4) {
   return reviveDates(await getFeaturedProfilesCached(limit));
 }
+
+/**
+ * One random public photo for the home page's darkroom ("Rửa một tấm").
+ * The same public rules as search: an approved, undeleted image, inside a
+ * published album, of a published profile whose account is live. Not
+ * cached - the point is a different print each time. `exclude` holds the
+ * photos this visitor has already developed, so a small catalogue does not
+ * hand the same one back twice in a row; when everything is excluded it
+ * starts over.
+ */
+export async function getDarkroomPrint(exclude: string[] = []) {
+  const base: Prisma.ProfileMediaWhereInput = {
+    ...APPROVED_ALBUM_IMAGE,
+    album: { isPublished: true, deletedAt: null },
+    profile: buildBaseWhere({}),
+  };
+  let where: Prisma.ProfileMediaWhereInput =
+    exclude.length > 0 ? { ...base, id: { notIn: exclude } } : base;
+  let total = await db.profileMedia.count({ where });
+  if (total === 0 && exclude.length > 0) {
+    where = base;
+    total = await db.profileMedia.count({ where });
+  }
+  if (total === 0) return null;
+
+  const media = await db.profileMedia.findFirst({
+    where,
+    orderBy: { id: "asc" },
+    skip: Math.floor(Math.random() * total),
+    select: {
+      id: true,
+      url: true,
+      width: true,
+      height: true,
+      album: { select: { category: true } },
+      profile: {
+        select: {
+          role: true,
+          displayName: true,
+          priceMin: true,
+          province: { select: { name: true } },
+          ward: { select: { name: true } },
+          user: { select: { name: true, username: true } },
+        },
+      },
+    },
+  });
+  if (!media || !media.profile.user.username) return null;
+  return {
+    id: media.id,
+    url: media.url,
+    width: media.width,
+    height: media.height,
+    category: media.album?.category ?? null,
+    role: media.profile.role,
+    name: media.profile.displayName ?? media.profile.user.name ?? null,
+    username: media.profile.user.username,
+    priceMin: media.profile.priceMin,
+    province: media.profile.province?.name ?? null,
+    ward: media.profile.ward?.name ?? null,
+  };
+}

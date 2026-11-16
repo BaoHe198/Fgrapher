@@ -263,6 +263,26 @@
     },
     "stylesTitle": "Browse by style",
     "allStyles": "All",
+    "darkroom": {
+      "eyebrow": "Darkroom",
+      "title": "Not sure who to pick? Develop a print.",
+      "sub": "Each print is a real photo by an identity-verified artist on Fgrapher. Like it? Flip it over to see who took it.",
+      "develop": "Develop a print",
+      "another": "Develop another",
+      "developing": "Developing…",
+      "flip": "Flip it over",
+      "flipBack": "Back to the photo",
+      "viewProfile": "View profile",
+      "blank": "Unexposed photo paper",
+      "photoAlt": "Photo by {name}",
+      "shotBy": "Taken by",
+      "from": "From {price}",
+      "askPrice": "Ask for a quote",
+      "count": "{count} developed",
+      "empty": "No photos to develop yet. Check back later.",
+      "error": "Couldn't develop a print. Try again.",
+      "unnamed": "Fgrapher artist"
+    },
     "map": {
       "eyebrow": "F Map",
       "sub": "Pick a shoot date and an area; the map shows only artists who are free nearby.",
@@ -1364,6 +1384,10 @@
       "notOwned": "You don't own some of these photos",
       "orderUpdated": "Order updated",
       "reorderFailed": "Failed to update order"
+    },
+    "darkroom": {
+      "loadFailed": "Couldn't load a photo",
+      "tooMany": "That's a lot of prints. Wait a moment and try again."
     },
     "albums": {
       "invalidInput": "Invalid input",

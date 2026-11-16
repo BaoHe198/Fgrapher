@@ -774,6 +774,27 @@
   animation: fg-shutter-bottom 420ms var(--fg-ease-in-out) both;
 }
 
+/* Darkroom print (home page): the photograph comes up in the tray - pale
+   and colourless first, then density, then colour. Ends on the untouched
+   photo. */
+@keyframes fg-darkroom-develop {
+  0% {
+    opacity: 0;
+    filter: blur(10px) grayscale(1) brightness(1.7) contrast(0.6);
+  }
+  45% {
+    opacity: 0.75;
+    filter: blur(3px) grayscale(1) brightness(1.25) contrast(0.85);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) grayscale(0) brightness(1) contrast(1);
+  }
+}
+@utility animate-darkroom-develop {
+  animation: fg-darkroom-develop 2600ms var(--fg-ease-out) both;
+}
+
 /* Page entrance: fade + up 8px. */
 @keyframes fg-page-in {
   from {
