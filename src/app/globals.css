@@ -662,6 +662,36 @@
   animation: fg-rise var(--fg-dur-320) var(--fg-ease-out) both;
 }
 
+/* Home hero photo wall: each strip holds its photos twice and drifts by
+   half its own length, so the loop is seamless. Slow enough to read as
+   ambience, not a carousel. The reduced-motion rule below stops it. */
+@keyframes fg-drift-y {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-50% - 0.375rem));
+  }
+}
+@keyframes fg-drift-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 0.3125rem));
+  }
+}
+
+@utility animate-drift-up {
+  animation: fg-drift-y 70s linear infinite;
+}
+@utility animate-drift-down {
+  animation: fg-drift-y 90s linear infinite reverse;
+}
+@utility animate-drift-left {
+  animation: fg-drift-x 60s linear infinite;
+}
+
 /* Page entrance: fade + up 8px. */
 @keyframes fg-page-in {
   from {

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { BadgeCheck, CalendarCheck, Star } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { ClosingCta } from "@/components/home/closing-cta";
+import { HeroCollage, HeroStrip } from "@/components/home/hero-collage";
 import { FeaturedArtists } from "@/components/home/featured-artists";
 import { MapTeaser } from "@/components/home/map-teaser";
 import { MoreFromFgrapher } from "@/components/home/more-from-fgrapher";
@@ -68,12 +70,40 @@ export default async function LandingPage() {
 
   return (
     <>
-      {/* HERO: just the search (owner, 10/10/2026 - the page explains
-          itself, so the headline and intro line went). The h1 stays for
-          screen readers and search engines. */}
-      <section className="relative bg-green-900 text-gold-50">
-        <h1 className="sr-only">{t("hero.title")}</h1>
-        <div className="mx-auto max-w-[1440px] px-8 py-10 max-md:px-5 max-md:py-5">
+      {/* HERO (owner, 16/11/2026, replacing the search-only band of
+          10/10/2026): the page opens on a headline and a drifting wall of
+          photographs, with the search sitting right under them. */}
+      <section className="relative overflow-hidden bg-green-900 text-gold-50">
+        <div className="mx-auto grid max-w-[1440px] items-center gap-12 px-8 max-md:px-5 lg:h-[540px] lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)]">
+          <div className="flex flex-col gap-5 pt-14 pb-6 max-md:gap-4 max-md:pt-8 max-md:pb-2 lg:py-0">
+            <span className="font-mono text-meta tracking-[0.14em] text-gold-400 uppercase">
+              {t("hero.eyebrow")}
+            </span>
+            <h1 className="max-w-[15ch] text-display-2xl text-balance text-gold-50 max-md:text-display-lg">
+              {t("hero.title")}
+            </h1>
+            <p className="max-w-xl text-body-lg text-green-200 max-md:text-body-md">
+              {t("hero.sub")}
+            </p>
+            <ul className="flex flex-wrap gap-x-5 gap-y-2 text-body-sm text-gold-50 max-md:hidden">
+              <li className="flex items-center gap-1.5">
+                <BadgeCheck aria-hidden className="size-4 text-gold-400" />
+                {t("hero.pointVerified")}
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Star aria-hidden className="size-4 text-gold-400" />
+                {t("hero.pointReviews")}
+              </li>
+              <li className="flex items-center gap-1.5">
+                <CalendarCheck aria-hidden className="size-4 text-gold-400" />
+                {t("hero.pointFree")}
+              </li>
+            </ul>
+          </div>
+          <HeroCollage className="max-lg:hidden" />
+        </div>
+        <HeroStrip className="mt-4 lg:hidden" />
+        <div className="relative mx-auto max-w-[1440px] px-8 pt-6 pb-10 max-md:px-5 max-md:pt-5 max-md:pb-6 lg:-mt-10 lg:pt-0">
           <HeroSearch marketplaceEnabled={features.marketplaceEnabled} />
         </div>
       </section>

@@ -67,7 +67,7 @@ export async function TrustSection({
     {
       key: "chat",
       art: (
-        <span className="inline-block max-w-[260px] rounded-[var(--fg-radius-md)] rounded-bl-[4px] bg-surface-card px-3 py-2 text-body-sm text-text-primary shadow-[var(--shadow-sm)]">
+        <span className="inline-block max-w-[260px] rounded-[var(--fg-radius-md)] rounded-bl-[4px] bg-bg-sunken px-3 py-2 text-body-sm text-text-primary">
           {t("chatSample")}
         </span>
       ),
@@ -76,28 +76,36 @@ export async function TrustSection({
     },
   ];
 
+  // A full-width dark band (owner, 16/11/2026): identity checks and real
+  // reviews are the reason to trust a stranger with a wedding, so they get
+  // the page's second-loudest block instead of three grey slots.
   return (
-    <section className="mx-auto max-w-[1440px] px-8 pt-20 max-md:hidden">
-      <div className="border-t border-border-subtle pt-12">
+    <section className="mt-20 bg-green-900 text-gold-50 max-md:mt-12">
+      <div className="mx-auto max-w-[1440px] px-8 py-16 max-md:px-5 max-md:py-10">
         <RiseOnView>
-          <h2 className="mb-6 text-display-md text-text-primary">
+          <h2 className="mb-8 max-w-[18ch] text-display-lg text-gold-50 max-md:mb-6 max-md:text-display-md">
             {t("title")}
           </h2>
         </RiseOnView>
         <ul className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
           {items.map((item) => (
-            <li key={item.key} className="flex flex-col gap-3">
-              <div className="flex min-h-24 items-center rounded-[var(--fg-radius-lg)] bg-bg-sunken p-4">
+            <li
+              key={item.key}
+              className="flex flex-col gap-4 rounded-[var(--fg-radius-lg)] bg-green-800 p-5"
+            >
+              <div className="flex min-h-28 items-center rounded-[var(--fg-radius-md)] bg-bg-surface p-4">
                 {item.art}
               </div>
-              <h3 className="text-heading-sm text-text-primary">
-                {item.title}
-              </h3>
-              <p className="text-body-sm text-text-secondary">{item.desc}</p>
+              <div className="flex flex-col gap-1.5">
+                <h3 className="text-heading-md text-gold-50">{item.title}</h3>
+                <p className="text-body-md text-green-200">{item.desc}</p>
+              </div>
             </li>
           ))}
         </ul>
-        <p className="mt-6 text-body-sm text-text-tertiary">{t("footnote")}</p>
+        <p className="mt-8 max-w-3xl text-body-sm text-green-200">
+          {t("footnote")}
+        </p>
       </div>
     </section>
   );

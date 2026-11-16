@@ -222,6 +222,11 @@
   },
   "hero": {
     "title": "Find the artist who'll capture your best memories",
+    "eyebrow": "Photography booking across Vietnam",
+    "sub": "Identity-verified photographers, videographers, makeup artists, models and studios. See real work, read real reviews, then pick a date.",
+    "pointVerified": "Identity verified",
+    "pointReviews": "Real reviews after the shoot",
+    "pointFree": "Free to book",
     "searchPh": "Search artists or studios",
     "city": "Ho Chi Minh City",
     "cta": "Search",

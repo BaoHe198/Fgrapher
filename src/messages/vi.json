@@ -222,6 +222,11 @@
   },
   "hero": {
     "title": "Tìm nghệ sĩ giúp bạn lưu giữ những kỷ niệm đẹp nhất",
+    "eyebrow": "Đặt lịch nhiếp ảnh trên toàn quốc",
+    "sub": "Nhiếp ảnh gia, quay phim, trang điểm, người mẫu và studio đã xác minh danh tính. Xem ảnh thật, đọc đánh giá thật, rồi chọn ngày.",
+    "pointVerified": "Đã xác minh danh tính",
+    "pointReviews": "Đánh giá thật sau buổi chụp",
+    "pointFree": "Đặt lịch không mất phí",
     "searchPh": "Tìm nghệ sĩ hoặc studio",
     "city": "Thành phố Hồ Chí Minh",
     "cta": "Tìm kiếm",

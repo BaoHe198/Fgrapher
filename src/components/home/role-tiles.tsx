@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -56,20 +57,30 @@ export async function RoleTiles({ tiles, marketplaceEnabled }: RoleTilesProps) {
           >
             <Link
               href={item.href}
-              className="group/tile focus-ring flex flex-col gap-2 rounded-[var(--fg-radius-sm)]"
+              className="group/tile focus-ring block rounded-[var(--fg-radius-md)]"
             >
+              {/* The label sits on the photo (owner, 16/11/2026): the tile
+                  reads as one picture, not a thumbnail with a caption. */}
               <FgImage
                 src={item.photo}
                 alt=""
-                ratio="4/5"
+                ratio="3/4"
+                rounded="md"
                 revealIndex={index}
                 sizes="(min-width: 768px) 16vw, 132px"
-                className="transition-[transform,box-shadow] duration-[var(--fg-dur-260)] ease-fg-out group-hover/tile:-translate-y-0.5 group-hover/tile:shadow-[var(--shadow-md)] motion-reduce:group-hover/tile:translate-y-0"
-                imageClassName="transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/tile:scale-[1.03]"
-              />
-              <span className="text-body-sm font-semibold! text-text-primary">
-                {item.label}
-              </span>
+                className="transition-[transform,box-shadow] duration-[var(--fg-dur-260)] ease-fg-out group-hover/tile:-translate-y-1 group-hover/tile:shadow-[var(--shadow-lg)] motion-reduce:group-hover/tile:translate-y-0"
+                imageClassName="transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/tile:scale-[1.06]"
+              >
+                <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/75 via-black/30 to-transparent px-3 pt-10 pb-3 text-white">
+                  <span className="text-heading-sm max-md:text-body-sm max-md:font-semibold!">
+                    {item.label}
+                  </span>
+                  <ArrowUpRight
+                    aria-hidden
+                    className="size-4 shrink-0 -translate-x-1 opacity-0 transition-[opacity,transform] duration-[var(--fg-dur-260)] ease-fg-out group-hover/tile:translate-x-0 group-hover/tile:opacity-100 max-md:hidden"
+                  />
+                </span>
+              </FgImage>
             </Link>
           </li>
         ))}
