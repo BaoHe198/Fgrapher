@@ -41,7 +41,7 @@ jobs:
       DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
       DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Fail in seconds with a message that says which secret is wrong,
       # instead of Prisma's P1013/P1001 half-way through the job. Never
@@ -66,9 +66,9 @@ jobs:
             *":6543/"*) fail "PRODUCTION_DIRECT_URL uses port 6543; migrations need the session pooler on 5432." ;;
           esac
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Built on Vercel, not here: the production env vars are marked
       # sensitive, so `vercel pull` would hand a local build empty values.
