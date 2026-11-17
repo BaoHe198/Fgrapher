@@ -4139,7 +4139,8 @@
         "area": "Floor area",
         "squareMeters": "{area} m²",
         "amenities": "Amenities"
-      }
+      },
+      "roleIn": "{role} in {place}"
     },
     "roleProvinceLanding": {
       "metaTitle": "{role}s in {province} — Fgrapher",
@@ -5524,168 +5525,102 @@
       "rating": "★ {rating} ({count} reviews)",
       "verified": "Identity verified",
       "cta": "See free dates and prices, and book on Fgrapher"
-    },
-    "header": {
-      "fullProfile": "Full profile"
-    },
+    }
+  },
+  "profilePage": {
     "own": {
-      "body": "This is the page customers see when they open your link or scan your QR code.",
-      "action": "Get link & QR code"
+      "body": "This is the page customers see when they open your profile or your link.",
+      "hours": "Working hours",
+      "share": "Link & QR code"
     },
-    "hero": {
-      "from": "From {price}",
-      "rating": "{rating} · {count, plural, one {# review} other {# reviews}}",
-      "new": "New on Fgrapher",
-      "shoots": "{count, plural, one {# shoot done} other {# shoots done}}",
-      "years": "{count, plural, one {# year of experience} other {# years of experience}}",
-      "response": {
-        "hour": "Replies within 1 hour",
-        "hours": "Replies within {count} hours",
-        "day": "Replies within 1 day",
-        "days": "Replies within {count} days"
-      },
-      "coverAlt": "{name}'s cover photo",
-      "verified": "Identity verified",
-      "seeCalendar": "See free dates",
-      "message": "Ask a question",
-      "workTitle": "Recent work",
-      "photoAlt": "{album}, a photo by {name}",
-      "allWork": "See the full portfolio"
+    "price": {
+      "ask": "Ask for a price",
+      "noCharge": "Requests cost nothing",
+      "paused": "Not taking new bookings",
+      "shop": "Message to rent",
+      "showDates": "Show dates",
+      "message": "Message"
     },
-    "nav": {
-      "label": "Page sections",
+    "sections": {
+      "space": "The space",
+      "services": "Packages",
+      "portfolio": "Work",
       "reviews": "Reviews",
-      "prices": "Prices",
-      "terms": "What you get",
-      "calendar": "Free dates",
-      "contact": "Contact"
+      "about": "About {name}",
+      "area": "Where they work",
+      "know": "Things to know"
     },
-    "steps": {
-      "reviews": {
-        "title": "What customers say",
-        "intro": "Only customers who finished a shoot booked on Fgrapher can write a review."
-      },
-      "prices": {
-        "title": "Prices",
-        "intro": "Pick a package to see what it includes and its free dates."
-      },
-      "terms": {
-        "title": "Terms & what you get",
-        "intro": "Read before you book: what you get, and what to know about deposits, cancelling and rescheduling."
-      },
-      "calendar": {
-        "title": "Free dates",
-        "intro": "{name}'s free days, from their real working calendar. Pick a day, then a time."
-      },
-      "contact": {
-        "title": "Ready to work with {name}?"
-      }
+    "packages": {
+      "tfpBadge": "Open to TFP collaborations",
+      "customize": "Want a different time, place or group size? <link>Message {name}</link> to adjust a package.",
+      "emptyTitle": "{name} hasn't posted prices yet. Send a message for a quote.",
+      "askPrice": "Ask for a price",
+      "tfp": "TFP / Collaboration",
+      "price": "{price}",
+      "photos": "{count, plural, one {# edited photo} other {# edited photos}}",
+      "delivery": "{count, plural, one {delivered in # day} other {delivered in # days}}"
     },
     "reviews": {
+      "heading": "★ {rating} · {count, plural, one {# review} other {# reviews}}",
       "newBadge": "On Fgrapher since {date}",
       "emptyTitle": "{name} has no reviews on Fgrapher yet.",
       "emptyBody": "Reviews can only be written after a real shoot booked through Fgrapher, so new profiles usually have none. Look through the work and ask questions before you book.",
-      "countLine": "{count, plural, one {# review from a customer who shot} other {# reviews from customers who shot}}",
-      "breakdownLabel": "Rating breakdown",
       "anonymous": "Fgrapher customer",
-      "shotOn": "Reviewed on {date}",
       "starsLabel": "{count} out of 5 stars",
       "responseFrom": "{name} replied",
-      "seeAll": "See all {count} reviews"
+      "seeAll": "Show all {count} reviews"
     },
-    "packages": {
-      "emptyTitle": "{name} hasn't posted prices yet.",
-      "emptyBody": "Send a message for a quote based on what you need.",
-      "askPrice": "Ask for a price",
-      "photos": "{count, plural, one {# edited photo} other {# edited photos}}",
-      "delivery": "{count, plural, one {Delivered after # day} other {Delivered after # days}}",
-      "chosen": "Chosen",
-      "tfp": "TFP / Collaboration",
-      "from": "From {price}",
-      "pickDate": "Pick a date for this package",
-      "choose": "Choose this package",
-      "finalPriceNote": "The final price is agreed between you and {name} when the booking is confirmed."
-    },
-    "terms": {
-      "getTitle": "What you get",
-      "getForPackage": "With the “{name}” package",
-      "get": {
-        "photos": "{count, plural, one {# edited photo} other {# edited photos}}",
-        "delivery": "{count, plural, one {Photos after # day} other {Photos after # days}}",
-        "verifiedOn": "{name}'s identity was verified by Fgrapher ({date})",
-        "verified": "{name}'s identity was verified by Fgrapher",
-        "phone": "Phone number verified",
-        "moderated": "Profile photos are reviewed before they are shown",
-        "record": "The package, date, time and price are recorded in the booking, for both of you to look back on",
-        "review": "After the shoot, you can leave a public review",
-        "free": "Requests and messages are free; Fgrapher charges you nothing"
+    "about": {
+      "years": "{count, plural, one {# year of experience} other {# years of experience}}",
+      "shoots": "{count, plural, one {# shoot completed on Fgrapher} other {# shoots completed on Fgrapher}}",
+      "shootsBody": "Only finished shoots count.",
+      "verified": "Identity verified",
+      "verifiedBody": "Fgrapher checked their ID in {date}.",
+      "phone": "Phone number verified",
+      "response": {
+        "hour": "Usually replies within 1 hour",
+        "hours": "Usually replies within {count} hours",
+        "day": "Usually replies within 1 day",
+        "days": "Usually replies within {count} days"
       },
-      "needTitle": "Before you book",
-      "need": {
-        "deposit": "Deposit",
-        "depositPercent": "{percent}% deposit.",
-        "depositDirect": "Paid directly to {name}; Fgrapher never holds the money.",
-        "depositAsk": "{name} hasn't stated a deposit. Ask in a message before sending any money.",
-        "cancel": "Cancelling",
-        "reschedule": "Rescheduling",
-        "askInChat": "Not stated. Ask {name} in a message.",
-        "notice": "Notice",
-        "noticeValue": "At least {hours} hours before the shoot",
-        "confirm": "Confirmation",
-        "confirmValue": "{name} accepts or declines within 48 hours. If not, the request lapses and you lose nothing.",
-        "response": "Message replies",
-        "responseValue": {
-          "hour": "Usually within 1 hour",
-          "hours": "Usually within {count} hours",
-          "day": "Usually within 1 day",
-          "days": "Usually within {count} days"
-        },
-        "area": "Area",
-        "areaNationwide": "Works nationwide",
-        "areaRadius": "Within about {km} km of {place}"
-      },
-      "safetyTitle": "Keep your deposit safe",
-      "safetyBody": "Only send a deposit after {name} has confirmed the booking on Fgrapher, and keep the transfer receipt. Don't send money to anyone claiming to be {name} outside this page."
+      "tfp": "Open to TFP collaborations",
+      "joined": "On Fgrapher since {date}"
     },
-    "calendar": {
-      "packageLegend": "Package",
-      "pausedBody": "{name} isn't taking new bookings right now. You can still message to ask about upcoming dates.",
-      "loadFailed": "Couldn't load free dates. Try reloading the page.",
-      "noFreeDays": "{name} has no free days left this month. Check next month or send a message.",
-      "freeCount": "{count, plural, one {# free day this month} other {# free days this month}}",
-      "timesFor": "Free times on {date}",
-      "golden": "Sunrise {sunrise} · Sunset {sunset}",
-      "timezone": "Vietnam time (GMT+7)",
-      "noTimes": "No free times left on this day.",
-      "ownNote": "Customers see this calendar. Change your hours in <link>Working hours</link>.",
-      "from": "From {price}",
-      "noChargeYet": "Sending a request costs nothing. You only send a deposit after the booking is confirmed.",
-      "sendRequest": "Send booking request",
-      "askAboutDay": "Ask about this day",
-      "askAboutDates": "Ask about dates",
-      "pickTimeHint": "Pick a time to send the request.",
-      "pickDayHint": "Pick a free day to see times."
+    "know": {
+      "askInChat": "Not stated. Ask {name} in a message.",
+      "depositPercent": "{percent}% deposit.",
+      "depositDirect": "Paid directly to {name}; Fgrapher never holds the money.",
+      "depositAsk": "{name} hasn't stated a deposit. Ask in a message before sending money.",
+      "deposit": "Deposit",
+      "cancel": "Cancelling",
+      "reschedule": "Rescheduling",
+      "notice": "Notice",
+      "noticeBody": "At least {hours} hours before the shoot.",
+      "confirm": "Confirmed within 48 hours",
+      "confirmBody": "{name} accepts or declines within 48 hours. If not, the request lapses and you lose nothing.",
+      "safety": "Keep your deposit safe",
+      "safetyBody": "Only send a deposit after {name} has confirmed on Fgrapher, and keep the receipt. Don't send money to anyone claiming to be {name} outside this page."
     },
-    "contact": {
-      "messageTitle": "Ask a question",
-      "messageBody": "Ask {name} about the concept, location or price. The first message is already written; edit it and send.",
-      "messageBodyResponse": "Ask {name} about the concept, location or price. {time}.",
-      "messageAction": "Open messages",
-      "bookTitle": "Book",
-      "bookBody": "Pick a package, date and time, then send the request. {name} confirms within 48 hours, and you pay nothing until then.",
-      "bookAction": "Start booking",
-      "bookWithPick": "Send request for the chosen date",
-      "paused": "Not taking bookings",
-      "signInNote": "You'll sign in or create a free account before messaging or sending a request."
-    },
-    "footer": {
-      "about": "{name}'s booking page on Fgrapher.",
-      "fullProfile": "See the full profile"
-    },
+    "messageCta": "Message {name}",
     "sticky": {
       "label": "Quick booking",
-      "book": "Send request",
-      "pickDate": "Pick a date"
+      "pick": "Pick a date"
+    },
+    "schedule": {
+      "title": "Schedule your shoot",
+      "subtitle": "Pick a day, then a start time for the package you want. You'll review everything before the request goes to {name}.",
+      "week": "{from} – {to}",
+      "prevWeek": "Previous week",
+      "nextWeek": "Next week",
+      "dayLabel": "Pick a day",
+      "loadFailed": "Couldn't load free times. Close this and try again.",
+      "anyPackage": "Custom shoot",
+      "price": "From {price}",
+      "tfp": "TFP / Collaboration",
+      "priceInChat": "Price agreed with {name} in chat",
+      "timezone": "Vietnam time (GMT+7)",
+      "noTimes": "No free times left for this package on this day.",
+      "noCharge": "Sending a request costs nothing. {name} confirms within 48 hours."
     }
   }
 }

@@ -4139,7 +4139,8 @@
         "area": "Diện tích",
         "squareMeters": "{area} m²",
         "amenities": "Tiện nghi"
-      }
+      },
+      "roleIn": "{role} ở {place}"
     },
     "roleProvinceLanding": {
       "metaTitle": "{role} tại {province} — Fgrapher",
@@ -5524,168 +5525,102 @@
       "rating": "★ {rating} ({count} đánh giá)",
       "verified": "Đã xác minh danh tính",
       "cta": "Xem lịch trống, bảng giá và đặt lịch trên Fgrapher"
-    },
-    "header": {
-      "fullProfile": "Hồ sơ đầy đủ"
-    },
+    }
+  },
+  "profilePage": {
     "own": {
-      "body": "Đây là trang khách thấy khi mở link hoặc quét mã QR của bạn.",
-      "action": "Lấy link & mã QR"
+      "body": "Đây là trang khách thấy khi mở hồ sơ hoặc link của bạn.",
+      "hours": "Giờ làm việc",
+      "share": "Link & mã QR"
     },
-    "hero": {
-      "from": "Từ {price}",
-      "rating": "{rating} · {count} đánh giá",
-      "new": "Mới trên Fgrapher",
-      "shoots": "{count} buổi đã chụp",
-      "years": "{count} năm kinh nghiệm",
-      "response": {
-        "hour": "Trả lời trong 1 giờ",
-        "hours": "Trả lời trong {count} giờ",
-        "day": "Trả lời trong 1 ngày",
-        "days": "Trả lời trong {count} ngày"
-      },
-      "coverAlt": "Ảnh bìa của {name}",
-      "verified": "Đã xác minh danh tính",
-      "seeCalendar": "Xem lịch trống",
-      "message": "Nhắn tin tư vấn",
-      "workTitle": "Ảnh đã chụp",
-      "photoAlt": "{album}, ảnh của {name}",
-      "allWork": "Xem toàn bộ portfolio"
+    "price": {
+      "ask": "Hỏi giá",
+      "noCharge": "Gửi yêu cầu chưa mất tiền",
+      "paused": "Đang tạm ngưng nhận lịch mới",
+      "shop": "Nhắn tin để hỏi thuê",
+      "showDates": "Xem lịch trống",
+      "message": "Nhắn tin"
     },
-    "nav": {
-      "label": "Các phần của trang",
+    "sections": {
+      "space": "Không gian",
+      "services": "Các gói dịch vụ",
+      "portfolio": "Ảnh đã chụp",
       "reviews": "Đánh giá",
-      "prices": "Bảng giá",
-      "terms": "Quyền lợi",
-      "calendar": "Lịch trống",
-      "contact": "Liên hệ"
+      "about": "Về {name}",
+      "area": "Khu vực làm việc",
+      "know": "Những điều cần biết"
     },
-    "steps": {
-      "reviews": {
-        "title": "Khách nói gì",
-        "intro": "Chỉ khách đã chụp xong qua Fgrapher mới viết được đánh giá."
-      },
-      "prices": {
-        "title": "Bảng giá",
-        "intro": "Chọn một gói để xem quyền lợi và lịch trống theo gói đó."
-      },
-      "terms": {
-        "title": "Yêu cầu & quyền lợi",
-        "intro": "Đọc trước khi đặt: bạn nhận được gì, và cần lưu ý gì về cọc, hủy và dời lịch."
-      },
-      "calendar": {
-        "title": "Lịch trống",
-        "intro": "Ngày còn trống của {name}, lấy từ lịch làm việc thật. Chọn ngày rồi chọn giờ."
-      },
-      "contact": {
-        "title": "Sẵn sàng làm việc với {name}?"
-      }
+    "packages": {
+      "tfpBadge": "Nhận hợp tác TFP",
+      "customize": "Muốn đổi giờ, địa điểm hay thêm người? <link>Nhắn tin cho {name}</link> để điều chỉnh gói.",
+      "emptyTitle": "{name} chưa đăng bảng giá. Nhắn tin để được báo giá theo nhu cầu của bạn.",
+      "askPrice": "Nhắn tin hỏi giá",
+      "tfp": "TFP / Hợp tác",
+      "price": "{price}",
+      "photos": "{count} ảnh chỉnh sửa",
+      "delivery": "giao sau {count} ngày"
     },
     "reviews": {
+      "heading": "★ {rating} · {count} đánh giá",
       "newBadge": "Tham gia Fgrapher từ {date}",
       "emptyTitle": "{name} chưa có đánh giá nào trên Fgrapher.",
       "emptyBody": "Đánh giá chỉ được viết sau một buổi chụp thật đặt qua Fgrapher, nên hồ sơ mới thường chưa có. Bạn có thể xem ảnh đã chụp và nhắn tin hỏi thêm trước khi đặt.",
-      "countLine": "{count} đánh giá từ khách đã chụp",
-      "breakdownLabel": "Phân bố số sao",
       "anonymous": "Khách Fgrapher",
-      "shotOn": "Đánh giá ngày {date}",
       "starsLabel": "{count} trên 5 sao",
       "responseFrom": "{name} trả lời",
       "seeAll": "Xem tất cả {count} đánh giá"
     },
-    "packages": {
-      "emptyTitle": "{name} chưa đăng bảng giá.",
-      "emptyBody": "Nhắn tin để được báo giá theo nhu cầu của bạn.",
-      "askPrice": "Nhắn tin hỏi giá",
-      "photos": "{count} ảnh chỉnh sửa",
-      "delivery": "Giao ảnh sau {count} ngày",
-      "chosen": "Đã chọn",
-      "tfp": "TFP / Hợp tác",
-      "from": "Từ {price}",
-      "pickDate": "Chọn ngày cho gói này",
-      "choose": "Chọn gói này",
-      "finalPriceNote": "Giá cuối cùng do bạn và {name} chốt khi xác nhận lịch."
-    },
-    "terms": {
-      "getTitle": "Bạn nhận được",
-      "getForPackage": "Theo gói “{name}”",
-      "get": {
-        "photos": "{count} ảnh đã chỉnh sửa",
-        "delivery": "Nhận ảnh sau {count} ngày",
-        "verifiedOn": "Danh tính của {name} đã được Fgrapher xác minh ({date})",
-        "verified": "Danh tính của {name} đã được Fgrapher xác minh",
-        "phone": "Số điện thoại đã được xác minh",
-        "moderated": "Ảnh trong hồ sơ đã qua kiểm duyệt trước khi hiển thị",
-        "record": "Gói, ngày, giờ và giá được ghi lại trong lịch hẹn, hai bên cùng xem lại được",
-        "review": "Sau buổi chụp, bạn được viết đánh giá công khai",
-        "free": "Gửi yêu cầu và nhắn tin miễn phí, Fgrapher không thu phí của bạn"
+    "about": {
+      "years": "{count} năm kinh nghiệm",
+      "shoots": "{count} buổi đã chụp qua Fgrapher",
+      "shootsBody": "Chỉ tính các buổi đã hoàn thành.",
+      "verified": "Đã xác minh danh tính",
+      "verifiedBody": "Fgrapher đã kiểm tra giấy tờ tùy thân, tháng {date}.",
+      "phone": "Đã xác minh số điện thoại",
+      "response": {
+        "hour": "Thường trả lời trong 1 giờ",
+        "hours": "Thường trả lời trong {count} giờ",
+        "day": "Thường trả lời trong 1 ngày",
+        "days": "Thường trả lời trong {count} ngày"
       },
-      "needTitle": "Trước khi đặt, bạn cần biết",
-      "need": {
-        "deposit": "Đặt cọc",
-        "depositPercent": "Cọc {percent}% giá gói.",
-        "depositDirect": "Cọc trả trực tiếp cho {name}; Fgrapher không giữ tiền.",
-        "depositAsk": "{name} chưa ghi mức cọc. Hỏi rõ trong tin nhắn trước khi chuyển tiền.",
-        "cancel": "Hủy lịch",
-        "reschedule": "Dời lịch",
-        "askInChat": "Chưa ghi. Hỏi {name} trong tin nhắn.",
-        "notice": "Đặt trước",
-        "noticeValue": "Ít nhất {hours} giờ trước buổi chụp",
-        "confirm": "Xác nhận",
-        "confirmValue": "{name} nhận hoặc từ chối trong 48 giờ. Quá hạn, yêu cầu tự hủy và bạn không mất gì.",
-        "response": "Trả lời tin nhắn",
-        "responseValue": {
-          "hour": "Thường trong 1 giờ",
-          "hours": "Thường trong {count} giờ",
-          "day": "Thường trong 1 ngày",
-          "days": "Thường trong {count} ngày"
-        },
-        "area": "Khu vực",
-        "areaNationwide": "Nhận chụp toàn quốc",
-        "areaRadius": "Trong khoảng {km} km quanh {place}"
-      },
-      "safetyTitle": "Giữ an toàn cho tiền cọc",
-      "safetyBody": "Chỉ chuyển cọc sau khi {name} đã xác nhận lịch trên Fgrapher, và giữ lại biên nhận chuyển khoản. Đừng chuyển tiền cho ai tự xưng là {name} ở ngoài trang này."
+      "tfp": "Nhận hợp tác TFP",
+      "joined": "Tham gia Fgrapher từ {date}"
     },
-    "calendar": {
-      "packageLegend": "Gói",
-      "pausedBody": "{name} đang tạm ngưng nhận lịch mới. Bạn vẫn có thể nhắn tin để hỏi lịch sắp tới.",
-      "loadFailed": "Chưa tải được lịch trống. Thử tải lại trang.",
-      "noFreeDays": "{name} không còn ngày trống trong tháng này. Xem tháng sau hoặc nhắn tin hỏi.",
-      "freeCount": "{count} ngày còn trống trong tháng",
-      "timesFor": "Giờ trống ngày {date}",
-      "golden": "Bình minh {sunrise} · Hoàng hôn {sunset}",
-      "timezone": "Giờ Việt Nam (GMT+7)",
-      "noTimes": "Ngày này không còn giờ trống.",
-      "ownNote": "Khách sẽ thấy lịch này. Sửa giờ làm việc ở <link>Lịch làm việc</link>.",
-      "from": "Từ {price}",
-      "noChargeYet": "Gửi yêu cầu chưa mất tiền. Bạn chỉ chuyển cọc sau khi lịch được xác nhận.",
-      "sendRequest": "Gửi yêu cầu đặt lịch",
-      "askAboutDay": "Hỏi về ngày này",
-      "askAboutDates": "Nhắn tin hỏi lịch",
-      "pickTimeHint": "Chọn một giờ để gửi yêu cầu.",
-      "pickDayHint": "Chọn một ngày còn trống để xem giờ."
+    "know": {
+      "askInChat": "Chưa ghi. Hỏi {name} trong tin nhắn.",
+      "depositPercent": "Cọc {percent}% giá gói.",
+      "depositDirect": "Cọc trả trực tiếp cho {name}; Fgrapher không giữ tiền.",
+      "depositAsk": "{name} chưa ghi mức cọc. Hỏi rõ trong tin nhắn trước khi chuyển tiền.",
+      "deposit": "Đặt cọc",
+      "cancel": "Hủy lịch",
+      "reschedule": "Dời lịch",
+      "notice": "Đặt trước",
+      "noticeBody": "Ít nhất {hours} giờ trước buổi chụp.",
+      "confirm": "Xác nhận trong 48 giờ",
+      "confirmBody": "{name} nhận hoặc từ chối yêu cầu trong 48 giờ. Quá hạn, yêu cầu tự hủy và bạn không mất gì.",
+      "safety": "Giữ an toàn cho tiền cọc",
+      "safetyBody": "Chỉ chuyển cọc sau khi {name} đã xác nhận lịch trên Fgrapher, và giữ lại biên nhận. Đừng chuyển tiền cho ai tự xưng là {name} ở ngoài trang này."
     },
-    "contact": {
-      "messageTitle": "Nhắn tin tư vấn",
-      "messageBody": "Hỏi {name} về concept, địa điểm hay giá. Tin nhắn đầu tiên đã được soạn sẵn, bạn chỉ cần sửa và gửi.",
-      "messageBodyResponse": "Hỏi {name} về concept, địa điểm hay giá. {time}.",
-      "messageAction": "Mở tin nhắn",
-      "bookTitle": "Đặt lịch",
-      "bookBody": "Chọn gói, ngày và giờ rồi gửi yêu cầu. {name} xác nhận trong 48 giờ, và bạn chưa mất tiền cho đến lúc đó.",
-      "bookAction": "Bắt đầu đặt lịch",
-      "bookWithPick": "Gửi yêu cầu với ngày đã chọn",
-      "paused": "Đang tạm ngưng nhận lịch",
-      "signInNote": "Bạn sẽ đăng nhập hoặc tạo tài khoản miễn phí trước khi nhắn tin hoặc gửi yêu cầu."
-    },
-    "footer": {
-      "about": "Trang đặt lịch của {name} trên Fgrapher.",
-      "fullProfile": "Xem hồ sơ đầy đủ"
-    },
+    "messageCta": "Nhắn tin cho {name}",
     "sticky": {
       "label": "Đặt lịch nhanh",
-      "book": "Gửi yêu cầu",
-      "pickDate": "Chọn ngày"
+      "pick": "Chọn ngày"
+    },
+    "schedule": {
+      "title": "Đặt lịch chụp",
+      "subtitle": "Chọn ngày, rồi chọn giờ bắt đầu của gói bạn muốn. Bạn sẽ xem lại mọi thứ trước khi gửi yêu cầu cho {name}.",
+      "week": "{from} – {to}",
+      "prevWeek": "Tuần trước",
+      "nextWeek": "Tuần sau",
+      "dayLabel": "Chọn ngày",
+      "loadFailed": "Chưa tải được lịch trống. Đóng hộp thoại rồi thử lại.",
+      "anyPackage": "Buổi chụp theo yêu cầu",
+      "price": "Từ {price}",
+      "tfp": "TFP / Hợp tác",
+      "priceInChat": "Giá thỏa thuận với {name} trong tin nhắn",
+      "timezone": "Giờ Việt Nam (GMT+7)",
+      "noTimes": "Ngày này không còn giờ trống cho gói này.",
+      "noCharge": "Chưa mất tiền khi gửi yêu cầu. {name} xác nhận trong 48 giờ."
     }
   }
 }

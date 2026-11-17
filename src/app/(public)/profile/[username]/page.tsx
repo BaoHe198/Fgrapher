@@ -6,14 +6,17 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { ProfileViewBeacon } from "@/components/profile/profile-view-beacon";
 import { auth } from "@/lib/auth";
 import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { getAgeRangeLabel } from "@/lib/account/age-gate";
 import { formatAdministrativeLocation, shortPlace } from "@/lib/location";
-import { PROVIDER_ROLES, type ROLE_LABELS } from "@/lib/constants";
+import {
+  MIN_NOTICE_HOURS,
+  PROVIDER_ROLES,
+  type ROLE_LABELS,
+} from "@/lib/constants";
 import { features } from "@/lib/features";
 import { responseBucket } from "@/lib/response-time";
 import { cn, formatCurrency, jsonLdScriptProps } from "@/lib/utils";
@@ -70,9 +73,11 @@ export async function generateMetadata({
   const activeProfile =
     user.profiles.find((p) => p.role === roleParam) ?? user.profiles[0];
   const name = activeProfile.displayName ?? user.name ?? username;
-  const [roleT, t] = await Promise.all([
+  const [roleT, t, factT, stats] = await Promise.all([
     getTranslations("role"),
     getTranslations("publicPages.profile.metadata"),
+    getTranslations("linkPage.metadata"),
+    getProfileReviewStats(user.id),
   ]);
 
   // Prompt F7, VIỆC 3 — always an absolute URL (never window.location,
@@ -84,9 +89,44 @@ export async function generateMetadata({
     name,
     role: joinRoleLabels(user.profiles, roleT),
   });
-  const description = (
-    activeProfile.description || t("fallbackDescription", { name })
-  ).slice(0, 160);
+  // What a Zalo or Messenger link preview shows under the photo: the facts
+  // that decide whether someone taps - price, rating, verified, where -
+  // then the provider's own words. Shared links open this page (the /p/
+  // link redirects here), so this is the preview of a provider's link too.
+  const paidPrices = activeProfile.services
+    .map((s) => s.price)
+    .filter((p) => p > 0);
+  const fromPrice =
+    paidPrices.length > 0
+      ? Math.min(...paidPrices)
+      : (activeProfile.priceMin ?? null);
+  const place = formatAdministrativeLocation(
+    activeProfile,
+    activeProfile.wardId || activeProfile.provinceId
+      ? undefined
+      : { ward: user.ward },
+  );
+  const verified =
+    user.roles.find((r) => r.role === activeProfile.role)
+      ?.verificationStatus === "VERIFIED";
+  const facts = [
+    fromPrice ? factT("from", { price: formatCurrency(fromPrice) }) : null,
+    stats.count > 0
+      ? factT("rating", {
+          rating: stats.avgRating.toFixed(1).replace(".", ","),
+          count: stats.count,
+        })
+      : null,
+    verified ? factT("verified") : null,
+    place ? shortPlace(place) : null,
+  ].filter(Boolean);
+  const description = [
+    facts.join(" · "),
+    activeProfile.description || t("fallbackDescription", { name }),
+  ]
+    .filter(Boolean)
+    .join(". ")
+    .slice(0, 200);
   // Cover photo first, then the first approved portfolio image — no
   // generated branded fallback (would need next/og wired up, deferred).
   // A profile with neither still gets title/description in the share
@@ -278,17 +318,6 @@ export default async function PublicProfilePage({
     stats.responseMinutes !== null
       ? responseBucket(stats.responseMinutes)
       : null;
-  const headerStats = [
-    stats.completedShoots > 0
-      ? { value: String(stats.completedShoots), label: t("stats.shoots") }
-      : null,
-    activeProfile.yearsExperience
-      ? {
-          value: String(activeProfile.yearsExperience),
-          label: t("stats.years"),
-        }
-      : null,
-  ].filter(Boolean) as { value: string; label: string }[];
   const minServicePrice = activeProfile.services.length
     ? Math.min(
         ...activeProfile.services.map((s) => s.price).filter((p) => p > 0),
@@ -343,6 +372,122 @@ export default async function PublicProfilePage({
       : {}),
   };
 
+  // The left card of the Airbnb-style page (owner, 17/11/2026): the cover,
+  // the avatar over its lower edge, the name, what they do and where, the
+  // rating, and the share/save actions. On a phone the cover runs edge to
+  // edge and the rest slides up over it as a sheet.
+  const ratingText =
+    reviewStats.count > 0
+      ? t("hero.rating", {
+          rating: averageRating.replace(".", ","),
+          count: reviewStats.count,
+        })
+      : t("status.new");
+  const header = (
+    <div className="flex flex-col items-center text-center">
+      <div className="relative isolate aspect-[16/10] w-full overflow-hidden bg-bg-sunken max-lg:-mx-5 max-lg:aspect-[4/3] max-lg:w-[calc(100%+2.5rem)] sm:max-lg:-mx-8 sm:max-lg:w-[calc(100%+4rem)] lg:rounded-[var(--fg-radius-xl)]">
+        <ProfileCover
+          variant="hero"
+          name={displayName}
+          coverImage={user.coverImage}
+          fallbackImage={activeProfile.media[0]?.url ?? null}
+          isOwnProfile={isOwnProfile}
+        />
+        <Link
+          href="/browse"
+          aria-label={t("hero.backToResults")}
+          className="focus-ring absolute top-3 left-3 z-10 inline-flex size-10 items-center justify-center rounded-full bg-bg-surface/90 text-text-primary shadow-[var(--shadow-sm)] backdrop-blur"
+        >
+          <ChevronLeft aria-hidden className="size-5" />
+        </Link>
+      </div>
+      <div className="relative z-10 flex w-full flex-col items-center gap-3 px-2 max-lg:-mx-5 max-lg:-mt-6 max-lg:w-[calc(100%+2.5rem)] max-lg:rounded-t-[28px] max-lg:bg-bg-page max-lg:px-5 max-lg:pt-1 sm:max-lg:-mx-8 sm:max-lg:w-[calc(100%+4rem)] sm:max-lg:px-8">
+        <ProfileAvatar
+          avatar={user.avatar}
+          displayName={displayName}
+          isOwnProfile={isOwnProfile}
+        />
+        {user.profiles.length > 1 ? (
+          <div className="flex flex-wrap justify-center gap-2">
+            {user.profiles.map((profile) => (
+              <Link
+                key={profile.id}
+                href={`/profile/${username}?role=${profile.role}`}
+                aria-current={
+                  profile.role === activeProfile.role ? "page" : undefined
+                }
+                className={cn(
+                  "focus-ring inline-flex min-h-9 items-center rounded-full border px-3 text-body-sm",
+                  profile.role === activeProfile.role
+                    ? "border-text-primary font-semibold! text-text-primary"
+                    : "border-border-default text-text-secondary hover:text-text-primary",
+                )}
+              >
+                {roleT(profile.role)}
+              </Link>
+            ))}
+          </div>
+        ) : null}
+        <h1
+          id="profile-name"
+          className="animate-rise text-display-lg text-balance break-words text-text-primary"
+        >
+          {displayName}
+        </h1>
+        {activeProfile.description ? (
+          <p className="line-clamp-4 max-w-[46ch] text-body-md whitespace-pre-line text-text-secondary">
+            {activeProfile.description}
+          </p>
+        ) : null}
+        <div className="flex flex-col items-center gap-0.5 text-body-sm">
+          <span className="inline-flex items-center gap-1.5 font-semibold! text-text-primary">
+            {reviewStats.count > 0 ? (
+              <Star aria-hidden className="size-3.5 fill-current" />
+            ) : null}
+            {ratingText}
+          </span>
+          <span className="text-text-secondary">
+            {profileLocation
+              ? t("roleIn", {
+                  role: roleT(activeProfile.role),
+                  place: shortPlace(profileLocation),
+                })
+              : roleT(activeProfile.role)}
+          </span>
+        </div>
+        <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-meta text-text-secondary">
+          {isVerified ? (
+            <span className="inline-flex items-center gap-1 font-semibold! text-gold-600 dark:text-success">
+              <BadgeCheck aria-hidden className="size-3.5" />
+              {t("status.verified")}
+            </span>
+          ) : null}
+          {activeProfile.servesNationwide ? (
+            <span className="inline-flex items-center gap-1">
+              <MapPin aria-hidden className="size-3.5" />
+              {t("nationwide")}
+            </span>
+          ) : null}
+          {ageRangeLabel ? (
+            <span>{t("age", { age: ageRangeLabel })}</span>
+          ) : null}
+          {isProviderRole && !user.acceptingBookings ? (
+            <Badge variant="warning">{t("status.bookedOut")}</Badge>
+          ) : null}
+        </p>
+        <ProfileActions
+          targetUserId={user.id}
+          profileId={activeProfile.id}
+          // The link page (/p/...) opens this same profile; sharing it
+          // gives the short, tidy link.
+          shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/p/${username}`}
+          socialFeedEnabled={features.socialFeedEnabled}
+          isOwnProfile={isOwnProfile}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col">
       <script {...jsonLdScriptProps(jsonLd)} />
@@ -350,238 +495,92 @@ export default async function PublicProfilePage({
           counted, and a Server Component cannot set one — so the count is
           reported by this beacon after mount instead of inline here. */}
       {isOwnProfile ? null : <ProfileViewBeacon profileId={activeProfile.id} />}
-      {/* The cover leads (Core MVP pass, 02/10/2026) and the name, facts
-          and actions sit below it on the page background, in the viewer's
-          theme - never over the photo, so they never depend on how bright
-          the cover is. "Đặt lịch" is the one gold button. */}
-      <section
-        aria-labelledby="profile-name"
-        className="relative isolate overflow-hidden bg-dr-bg text-dr-text"
-      >
-        <div className="relative aspect-[4/3] md:aspect-auto md:h-[min(60vh,640px)]">
-          <ProfileCover
-            variant="hero"
-            name={displayName}
-            coverImage={user.coverImage}
-            fallbackImage={activeProfile.media[0]?.url ?? null}
-            isOwnProfile={isOwnProfile}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-linear-to-t from-dr-bg via-transparent via-30% to-transparent"
-          />
-          <Link
-            href="/browse"
-            aria-label={t("hero.backToResults")}
-            className="focus-ring absolute top-4 left-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-on-photo-line bg-[var(--dr-scrim)] px-3 text-body-sm font-semibold text-on-photo sm:left-8"
-          >
-            <ChevronLeft aria-hidden className="size-[18px]" />
-            <span className="max-md:hidden">{t("hero.results")}</span>
-          </Link>
-        </div>
-        <div className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-3 px-5 pt-2 pb-8 sm:px-8 md:gap-4 md:pt-4 md:pb-10">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-body-sm text-dr-text-2">
-            <ProfileAvatar
-              compact
-              avatar={user.avatar}
-              displayName={displayName}
-              isOwnProfile={isOwnProfile}
-            />
-            {user.profiles.length > 1 ? (
-              user.profiles.map((profile) => (
-                <Link
-                  key={profile.id}
-                  href={`/profile/${username}?role=${profile.role}`}
-                  aria-current={
-                    profile.role === activeProfile.role ? "page" : undefined
-                  }
-                  className={cn(
-                    "focus-ring inline-flex min-h-11 items-center rounded-full border px-3",
-                    profile.role === activeProfile.role
-                      ? "border-gold-600 text-dr-text dark:border-gold-400"
-                      : "border-dr-line-2 hover:text-dr-text",
-                  )}
-                >
-                  {roleT(profile.role)}
-                </Link>
-              ))
-            ) : (
-              <span>{roleT(activeProfile.role)}</span>
-            )}
-            {profileLocation ? (
-              <span className="inline-flex items-center gap-1">
-                <MapPin aria-hidden className="size-3.5" />
-                {shortPlace(profileLocation)}
-              </span>
-            ) : null}
-            {isVerified ? (
-              <span className="inline-flex items-center gap-1 text-gold-600 dark:text-gold-400">
-                <BadgeCheck aria-hidden className="size-3.5" />
-                {t("status.verified")}
-              </span>
-            ) : null}
-            {activeProfile.servesNationwide ? (
-              <span>{t("nationwide")}</span>
-            ) : null}
-            {ageRangeLabel ? (
-              <span>{t("age", { age: ageRangeLabel })}</span>
-            ) : null}
-            {isProviderRole && !user.acceptingBookings ? (
-              <Badge variant="warning">{t("status.bookedOut")}</Badge>
-            ) : null}
-          </div>
-          <h1
-            id="profile-name"
-            className="max-w-6xl animate-rise font-display text-[clamp(2.25rem,7vw,6rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-balance break-words text-dr-text"
-          >
-            {displayName}
-          </h1>
-          <p className="flex flex-wrap gap-x-4 gap-y-1 text-body-md text-dr-text-2">
-            {reviewStats.count > 0 ? (
-              <span className="inline-flex items-center gap-1 text-dr-text">
-                <Star aria-hidden className="size-4 fill-current" />
-                {t("hero.rating", {
-                  rating: averageRating.replace(".", ","),
-                  count: reviewStats.count,
-                })}
-              </span>
-            ) : (
-              <span>{t("status.new")}</span>
-            )}
-            {headerStats.map((stat) => (
-              <span key={stat.label}>
-                {stat.value} {stat.label}
-              </span>
-            ))}
-          </p>
-          <div className="mt-1 flex flex-col gap-3 md:flex-row md:items-center">
-            {isProviderRole && user.acceptingBookings && !isOwnProfile ? (
-              <Button
-                id="hero-book"
-                variant="accent"
-                size="lg"
-                nativeButton={false}
-                className="max-md:w-full"
-                render={<Link href={`/booking/${user.id}`} />}
-              >
-                {t("hero.book")}
-              </Button>
-            ) : null}
-            <ProfileActions
-              targetUserId={user.id}
-              profileId={activeProfile.id}
-              // The link page (/p/...) is what a shared link should open:
-              // it is built for someone arriving from a chat.
-              shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/p/${username}`}
-              socialFeedEnabled={features.socialFeedEnabled}
-              isOwnProfile={isOwnProfile}
-            />
-          </div>
-        </div>
-      </section>
-
-      <div className="mx-auto w-full max-w-[1440px] px-5 pb-[72px] max-lg:pb-[calc(112px+env(safe-area-inset-bottom))] sm:px-8">
-        <div className="flex flex-col gap-[18px] pt-8">
-          {activeProfile.description ? (
-            <p className="my-5 max-w-[640px] text-body-lg text-text-secondary">
-              {activeProfile.description}
-            </p>
-          ) : null}
-
-          {modelDetails.length > 0 ? (
-            <div className="mb-5 grid grid-cols-2 gap-x-8 gap-y-3 rounded-[var(--fg-radius-lg)] bg-surface-card p-5 sm:grid-cols-4">
-              {modelDetails.map((detail) => (
-                <div key={detail.label} className="flex flex-col gap-0.5">
-                  <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
-                    {detail.label}
-                  </span>
-                  <span className="text-body-md font-semibold! text-text-primary">
-                    {detail.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <ProfileInteractive
-            username={username}
-            providerId={user.id}
-            profileId={activeProfile.id}
-            role={activeProfile.role}
-            firstName={firstName}
-            displayName={displayName}
-            // Chợ F carries equipment from every gear owner, not only
-            // camera shops, so the tab follows the listings themselves. A
-            // camera shop keeps the tab even with nothing listed, because
-            // that tab IS its profile.
-            hasGear={
-              features.marketplaceEnabled &&
-              (activeProfile.role === "CAMERA_SHOP" || products.length > 0)
-            }
-            posts={posts}
-            costumes={costumes}
-            viewerId={session?.user?.id ?? null}
-            albums={activeProfile.albums.map((album) => ({
-              ...album,
-              socialPost: albumSocialById.get(album.id) ?? null,
-            }))}
-            ownerAlbums={
-              ownerAlbums?.map((a) => ({
-                id: a.id,
-                title: a.title,
-                description: a.description,
-                category: a.category,
-                coverMedia: a.coverMedia,
-                mediaCount: a._count.media,
-                isPublished: a.isPublished,
-              })) ?? null
-            }
-            services={activeProfile.services}
-            reviews={reviews.map((r) => ({
-              ...r,
-              createdAt: r.createdAt.toISOString(),
-            }))}
-            reviewStats={reviewStats}
-            products={products}
-            offersTfp={offersTfp}
-            isOwnProfile={isOwnProfile}
-            canEditPortfolio={canEditPortfolio}
-            billingEnabled={features.billingEnabled}
-            facts={
-              isProviderRole
-                ? {
-                    identityVerifiedAt:
-                      isVerified && roleRecord?.verifiedAt
-                        ? roleRecord.verifiedAt.toISOString()
-                        : null,
-                    phoneVerified: user.phoneVerified,
-                    joinedAt: user.createdAt.toISOString(),
-                    response,
-                    depositPercent: activeProfile.depositPercent,
-                    depositPolicy: activeProfile.depositPolicy,
-                    cancellationPolicy: activeProfile.cancellationPolicy,
-                    reschedulePolicy: activeProfile.reschedulePolicy,
-                  }
-                : null
-            }
-            area={{
-              location: profileLocation || null,
-              radiusKm: activeProfile.serviceRadiusKm,
-              nationwide: activeProfile.servesNationwide,
-            }}
-            priceLabel={priceLabel}
-            trustLine={trustLine}
-            sunPoint={sunPoint}
-            studio={
-              activeProfile.role === "STUDIO"
-                ? {
-                    area: activeProfile.area,
-                    amenities: activeProfile.amenities,
-                  }
-                : null
-            }
-          />
-        </div>
+      <div className="mx-auto w-full max-w-[1280px] px-5 pt-0 pb-[calc(112px+env(safe-area-inset-bottom))] sm:px-8 lg:pt-8 lg:pb-24">
+        <ProfileInteractive
+          header={header}
+          username={username}
+          providerId={user.id}
+          profileId={activeProfile.id}
+          role={activeProfile.role}
+          roleLabel={roleT(activeProfile.role)}
+          firstName={firstName}
+          displayName={displayName}
+          avatar={user.avatar}
+          // Chợ F carries equipment from every gear owner, not only camera
+          // shops, so the section follows the listings themselves. A camera
+          // shop keeps it even with nothing listed, because it IS its profile.
+          hasGear={
+            features.marketplaceEnabled &&
+            (activeProfile.role === "CAMERA_SHOP" || products.length > 0)
+          }
+          posts={posts}
+          costumes={costumes}
+          viewerId={session?.user?.id ?? null}
+          albums={activeProfile.albums.map((album) => ({
+            ...album,
+            socialPost: albumSocialById.get(album.id) ?? null,
+          }))}
+          ownerAlbums={
+            ownerAlbums?.map((a) => ({
+              id: a.id,
+              title: a.title,
+              description: a.description,
+              category: a.category,
+              coverMedia: a.coverMedia,
+              mediaCount: a._count.media,
+              isPublished: a.isPublished,
+            })) ?? null
+          }
+          services={activeProfile.services}
+          reviews={reviews.map((r) => ({
+            ...r,
+            createdAt: r.createdAt.toISOString(),
+          }))}
+          reviewStats={reviewStats}
+          products={products}
+          offersTfp={offersTfp}
+          isOwnProfile={isOwnProfile}
+          acceptingBookings={user.acceptingBookings}
+          canEditPortfolio={canEditPortfolio}
+          billingEnabled={features.billingEnabled}
+          facts={
+            isProviderRole
+              ? {
+                  identityVerifiedAt:
+                    isVerified && roleRecord?.verifiedAt
+                      ? roleRecord.verifiedAt.toISOString()
+                      : null,
+                  phoneVerified: user.phoneVerified,
+                  joinedAt: user.createdAt.toISOString(),
+                  response,
+                  depositPercent: activeProfile.depositPercent,
+                  depositPolicy: activeProfile.depositPolicy,
+                  cancellationPolicy: activeProfile.cancellationPolicy,
+                  reschedulePolicy: activeProfile.reschedulePolicy,
+                }
+              : null
+          }
+          yearsExperience={activeProfile.yearsExperience ?? null}
+          completedShoots={stats.completedShoots}
+          modelDetails={modelDetails}
+          area={{
+            location: profileLocation || null,
+            radiusKm: activeProfile.serviceRadiusKm,
+            nationwide: activeProfile.servesNationwide,
+          }}
+          priceLabel={priceLabel}
+          trustLine={trustLine}
+          sunPoint={sunPoint}
+          studio={
+            activeProfile.role === "STUDIO"
+              ? {
+                  area: activeProfile.area,
+                  amenities: activeProfile.amenities,
+                }
+              : null
+          }
+          minNoticeHours={MIN_NOTICE_HOURS}
+        />
       </div>
     </div>
   );
