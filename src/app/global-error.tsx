@@ -49,8 +49,8 @@ export default function GlobalError({
             padding: "10px 20px",
             borderRadius: "999px",
             border: "none",
-            background: "hsl(38 44% 52%)",
-            color: "hsl(30 15% 11%)",
+            background: "hsl(326 100% 64%)",
+            color: "hsl(264 40% 13%)",
             fontWeight: 600,
             cursor: "pointer",
           }}

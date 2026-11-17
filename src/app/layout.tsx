@@ -2,11 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import {
-  Bricolage_Grotesque,
-  IBM_Plex_Mono,
-  Plus_Jakarta_Sans,
-} from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono, Lexend } from "next/font/google";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { MessagingProvider } from "@/components/providers/messaging-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -18,7 +14,7 @@ import { features } from "@/lib/features";
 import { readCookieConsent } from "@/lib/privacy/cookie-consent-server";
 import "./globals.css";
 
-const fontBody = Plus_Jakarta_Sans({
+const fontBody = Lexend({
   variable: "--font-body",
   subsets: ["latin", "vietnamese"],
 });

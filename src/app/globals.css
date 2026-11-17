@@ -183,64 +183,64 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* Fgrapher brand — color scales (green/gold are theme-invariant) */
-  --green-50: hsl(168 40% 96%);
-  --green-100: hsl(168 40% 90%);
-  --green-200: hsl(168 38% 80%);
-  --green-300: hsl(168 36% 66%);
-  --green-400: hsl(168 38% 50%);
-  --green-500: hsl(168 45% 36%);
-  --green-600: hsl(168 50% 26%);
-  --green-700: hsl(168 55% 20%);
-  --green-800: hsl(168 58% 15%);
-  --green-900: hsl(168 60% 11%);
-  --green-950: hsl(168 62% 7%);
-  --gold-50: hsl(38 55% 96%);
-  --gold-100: hsl(38 55% 90%);
-  --gold-200: hsl(38 50% 80%);
-  --gold-300: hsl(38 48% 70%);
-  --gold-400: hsl(38 46% 60%);
-  --gold-500: hsl(38 44% 52%);
-  --gold-600: hsl(38 46% 44%);
-  --gold-700: hsl(38 48% 36%);
-  --gold-800: hsl(38 50% 28%);
-  --gold-900: hsl(38 52% 20%);
+  --green-50: hsl(258 60% 97%);
+  --green-100: hsl(258 55% 92%);
+  --green-200: hsl(256 50% 84%);
+  --green-300: hsl(252 48% 74%);
+  --green-400: hsl(248 44% 62%);
+  --green-500: hsl(247 44% 52%);
+  --green-600: hsl(252 40% 40%);
+  --green-700: hsl(257 35% 30%);
+  --green-800: hsl(260 38% 21%);
+  --green-900: hsl(264 40% 14%);
+  --green-950: hsl(266 42% 9%);
+  --gold-50: hsl(330 100% 97%);
+  --gold-100: hsl(330 95% 93%);
+  --gold-200: hsl(330 92% 86%);
+  --gold-300: hsl(328 95% 78%);
+  --gold-400: hsl(326 100% 64%);
+  --gold-500: hsl(326 88% 56%);
+  --gold-600: hsl(326 78% 47%);
+  --gold-700: hsl(326 74% 38%);
+  --gold-800: hsl(326 70% 29%);
+  --gold-900: hsl(326 66% 20%);
   --neutral-0: #ffffff;
 
   /* Fgrapher brand — light theme (default) */
-  --neutral-50: hsl(30 20% 98%);
-  --neutral-100: hsl(30 15% 95%);
-  --neutral-200: hsl(30 12% 90%);
-  --neutral-300: hsl(30 10% 82%);
-  --neutral-400: hsl(30 8% 68%);
-  --neutral-500: hsl(30 7% 52%);
-  --neutral-600: hsl(30 8% 38%);
-  --neutral-700: hsl(30 10% 28%);
-  --neutral-800: hsl(30 12% 18%);
-  --neutral-900: hsl(30 15% 11%);
-  --neutral-950: hsl(30 18% 7%);
-  --brand-primary: hsl(168 58% 15%);
+  --neutral-50: hsl(260 30% 98%);
+  --neutral-100: hsl(260 22% 95%);
+  --neutral-200: hsl(260 16% 90%);
+  --neutral-300: hsl(260 12% 82%);
+  --neutral-400: hsl(260 9% 66%);
+  --neutral-500: hsl(260 8% 50%);
+  --neutral-600: hsl(262 12% 37%);
+  --neutral-700: hsl(263 18% 27%);
+  --neutral-800: hsl(264 28% 18%);
+  --neutral-900: hsl(265 38% 13%);
+  --neutral-950: hsl(266 42% 8%);
+  --brand-primary: hsl(257 33% 24%);
   /* Primary hover shifts the fill, not its opacity: opacity muddied the
      colour in dark mode (audit §05). */
-  --brand-primary-hover: hsl(168 55% 20%);
-  --brand-accent: hsl(38 46% 60%);
-  --bg-page: hsl(30 20% 98%);
+  --brand-primary-hover: hsl(257 35% 31%);
+  --brand-accent: hsl(326 100% 64%);
+  --bg-page: hsl(260 33% 98.5%);
   --bg-surface: #ffffff;
-  --bg-sunken: hsl(30 15% 95%);
-  --bg-inverse: hsl(168 60% 11%);
+  --bg-sunken: hsl(260 25% 95.5%);
+  --bg-inverse: hsl(264 40% 14%);
   --surface-card: #ffffff;
-  --text-primary: hsl(30 15% 11%);
-  --text-secondary: hsl(30 8% 38%);
+  --text-primary: hsl(264 40% 13%);
+  --text-secondary: hsl(262 12% 37%);
   /* Prompt G6 VIỆC 2 — was hsl(30 7% 52%), 3.27–3.65:1 against bg-page/
      bg-surface/bg-sunken (fails WCAG AA's 4.5:1 for normal text). Darkened
      to clear 4.5:1 on all three; dark-mode's --text-tertiary (line ~312)
      already passed AA as-is and is untouched. */
-  --text-tertiary: hsl(30 7% 44%);
+  --text-tertiary: hsl(262 9% 43%);
   --text-on-brand: #ffffff;
-  --text-link: hsl(168 55% 20%);
-  --border-subtle: hsl(30 12% 90%);
-  --border-default: hsl(30 10% 82%);
-  --border-strong: hsl(30 8% 68%);
-  --border-focus: hsl(38 44% 52%);
+  --text-link: hsl(247 44% 50%);
+  --border-subtle: hsl(260 18% 91%);
+  --border-default: hsl(260 13% 83%);
+  --border-strong: hsl(260 9% 67%);
+  --border-focus: hsl(326 88% 56%);
   --success: hsl(168 50% 26%);
   --success-bg: hsl(168 40% 96%);
   /* 34%/38% lightness, not 48%/45%: as badge text on their -bg tints the
@@ -254,12 +254,12 @@
 
   /* Fgrapher brand — typography (theme-invariant) */
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Lexend", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
-  --text-display-2xl: 600 4rem/1.05 var(--font-display);
-  --text-display-xl: 600 3rem/1.08 var(--font-display);
-  --text-display-lg: 600 2.25rem/1.12 var(--font-display);
-  --text-display-md: 600 1.75rem/1.2 var(--font-display);
+  --text-display-2xl: 700 4rem/1.05 var(--font-display);
+  --text-display-xl: 700 3rem/1.08 var(--font-display);
+  --text-display-lg: 700 2.25rem/1.12 var(--font-display);
+  --text-display-md: 700 1.75rem/1.2 var(--font-display);
   /* Prompt G6 VIỆC 1 found this referenced by 2 files (product H1,
      checkout-success H1) with no token/@utility behind it anywhere —
      silently unstyled. Sized between display-md (28px) and heading-lg
@@ -314,7 +314,7 @@
   --shadow-sm: 0 1px 2px rgba(18, 16, 10, 0.06);
   --shadow-md: 0 4px 14px rgba(18, 16, 10, 0.08);
   --shadow-lg: 0 14px 36px rgba(18, 16, 10, 0.14);
-  --shadow-focus: 0 0 0 3px hsl(38 44% 52% / 0.35);
+  --shadow-focus: 0 0 0 3px hsl(326 88% 56% / 0.35);
 
   /* Redesign 09/2026 (docs/design-reference/redesign-2026-09, system audit
      §03). Five durations and three curves replace the 22 durations and 5
@@ -330,10 +330,10 @@
   --fg-ease-in-out: cubic-bezier(0.45, 0, 0.25, 1); /* dragging, sliding */
 
   /* The one overlay under text laid on a photo (audit §04). */
-  --fg-scrim: hsl(168 62% 7% / 0.64);
+  --fg-scrim: hsl(266 42% 9% / 0.64);
   /* Behind a dialog or sheet: the scrim's hue, lighter, so the page stays
      readable as context. */
-  --fg-backdrop: hsl(168 62% 7% / 0.32);
+  --fg-backdrop: hsl(266 42% 9% / 0.32);
   /* A menu opened on top of a sheet or dialog. Same as surface-card in
      light mode (the shadow separates them); one step lighter in dark,
      where shadows barely show. */
@@ -387,36 +387,36 @@
      and radius are theme-invariant (declared once in :root); neutral scale
      inverts (50=darkest in light mode, 50=lightest in dark), and every
      semantic/status/shadow token below has a distinct dark-mode value. */
-  --neutral-50: hsl(30 8% 10%);
-  --neutral-100: hsl(30 8% 14%);
-  --neutral-200: hsl(30 7% 19%);
-  --neutral-300: hsl(30 6% 26%);
-  --neutral-400: hsl(30 6% 38%);
-  --neutral-500: hsl(30 6% 52%);
-  --neutral-600: hsl(30 8% 68%);
-  --neutral-700: hsl(30 10% 80%);
-  --neutral-800: hsl(30 12% 88%);
-  --neutral-900: hsl(30 15% 95%);
-  --neutral-950: hsl(30 18% 98%);
-  --brand-primary: hsl(168 38% 50%);
-  --brand-primary-hover: hsl(168 38% 58%);
-  --brand-accent: hsl(38 46% 60%);
-  --bg-page: hsl(30 10% 7%);
-  --bg-surface: hsl(30 9% 11%);
-  --bg-sunken: hsl(30 9% 9%);
-  --bg-inverse: hsl(168 62% 7%);
-  --surface-card: hsl(30 9% 12%);
-  --text-primary: hsl(30 15% 95%);
-  --text-secondary: hsl(30 8% 70%);
-  --text-tertiary: hsl(30 7% 55%);
-  --text-on-brand: hsl(168 62% 7%);
-  --text-link: hsl(38 48% 70%);
-  --border-subtle: hsl(30 6% 20%);
-  --border-default: hsl(30 6% 27%);
-  --border-strong: hsl(30 6% 36%);
-  --border-focus: hsl(38 46% 60%);
-  --success: hsl(168 36% 66%);
-  --success-bg: hsl(168 40% 14%);
+  --neutral-50: hsl(264 32% 11%);
+  --neutral-100: hsl(264 28% 15%);
+  --neutral-200: hsl(263 24% 20%);
+  --neutral-300: hsl(262 20% 27%);
+  --neutral-400: hsl(261 14% 40%);
+  --neutral-500: hsl(260 12% 54%);
+  --neutral-600: hsl(260 14% 68%);
+  --neutral-700: hsl(260 18% 80%);
+  --neutral-800: hsl(260 24% 88%);
+  --neutral-900: hsl(260 30% 95%);
+  --neutral-950: hsl(260 35% 98%);
+  --brand-primary: hsl(0 0% 100%);
+  --brand-primary-hover: hsl(260 35% 90%);
+  --brand-accent: hsl(326 100% 64%);
+  --bg-page: hsl(264 40% 12%);
+  --bg-surface: hsl(264 34% 16%);
+  --bg-sunken: hsl(264 40% 10%);
+  --bg-inverse: hsl(266 45% 8%);
+  --surface-card: hsl(264 32% 17%);
+  --text-primary: hsl(260 35% 97%);
+  --text-secondary: hsl(260 16% 78%);
+  --text-tertiary: hsl(260 11% 63%);
+  --text-on-brand: hsl(264 40% 13%);
+  --text-link: hsl(252 85% 82%);
+  --border-subtle: hsl(262 22% 22%);
+  --border-default: hsl(262 20% 29%);
+  --border-strong: hsl(262 17% 39%);
+  --border-focus: hsl(326 100% 70%);
+  --success: hsl(77 83% 62%);
+  --success-bg: hsl(77 40% 13%);
   --warning: hsl(35 85% 62%);
   --warning-bg: hsl(35 60% 14%);
   --danger: hsl(6 75% 64%);
@@ -427,7 +427,7 @@
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.55);
   --fg-image-ring: hsl(0 0% 100% / 0.06);
-  --surface-raised: hsl(30 9% 16%);
+  --surface-raised: hsl(264 28% 21%);
 }
 
 /* Phòng tối (wave 2 kit, docs/design-reference/redesign-2026-10/templates/
@@ -448,8 +448,8 @@
   --dr-accent: var(--gold-600);
   /* Over a photo, not a surface: a dark wash with light type stays legible
      on any picture, so these do not change with the theme. */
-  --dr-scrim: hsl(30 14% 5% / 0.72);
-  --on-photo: hsl(38 33% 92%);
+  --dr-scrim: hsl(266 40% 6% / 0.72);
+  --on-photo: hsl(260 35% 97%);
   --on-photo-2: hsl(34 12% 82%);
   --on-photo-line: hsl(0 0% 100% / 0.22);
 }
@@ -1001,4 +1001,50 @@
   ::view-transition-new(*) {
     animation: none !important;
   }
+}
+
+/* The one word a headline leans on ("Chốt"), tipped and gold, settling in
+   once on load. Under reduced motion it simply appears in place. */
+@keyframes fg-accent-in {
+  from {
+    opacity: 0;
+    transform: rotate(-16deg) translateY(0.35em) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-5deg) translateY(0.06em);
+  }
+}
+@utility accent-word {
+  display: inline-block;
+  color: var(--gold-400);
+  font-weight: 800;
+  margin-inline: 0.04em;
+  transform: rotate(-5deg) translateY(0.06em);
+  animation: fg-accent-in 700ms var(--fg-ease-out) 200ms both;
+}
+
+/* A hairline frame that fades gold to green: phone mock-ups and the link
+   box on the home page. */
+@utility gradient-frame {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box,
+    linear-gradient(
+        135deg,
+        var(--gold-300),
+        var(--green-400) 55%,
+        var(--gold-500)
+      )
+      border-box;
+}
+
+/* The caret after the editable part of a sample link. */
+@keyframes fg-caret {
+  50% {
+    opacity: 0;
+  }
+}
+@utility animate-caret {
+  animation: fg-caret 1.1s steps(1) infinite;
 }

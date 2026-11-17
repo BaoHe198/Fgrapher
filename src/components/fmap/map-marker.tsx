@@ -14,7 +14,7 @@ export const MAP_MARKER_CLASSES = {
   root: "group/marker flex flex-col items-center gap-1 transition-transform duration-[var(--fg-dur-200)] ease-fg-out",
   selected: "scale-[1.12]",
   frame:
-    "relative size-11 overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken shadow-[0_0_0_2px_var(--bg-surface),0_0_0_4px_hsl(168_62%_7%/0.18)]",
+    "relative size-11 overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken shadow-[0_0_0_2px_var(--bg-surface),0_0_0_4px_hsl(266_42%_9%/0.18)]",
   frameSelected:
     "shadow-[0_0_0_2px_var(--bg-surface),0_0_0_4px_var(--gold-400)]",
   frameSeen: "opacity-70",

@@ -8,6 +8,24 @@ Muốn xác minh giá trị chính xác, mở
 `docs/design-reference/Fgrapher Web UI Kit.html` trong trình duyệt. Token đã được
 đưa vào `src/app/globals.css` và font được cấu hình trong `src/app/layout.tsx`.
 
+> **Cập nhật 17/11/2026 (quyết định của chủ dự án): bảng màu, nút và phông
+> chữ chuyển sang phong cách Sentry; bố cục các trang tham khảo Airbnb.**
+> Tên biến giữ nguyên để không phải đổi hàng trăm class trong code, nhưng giá
+> trị đã đổi:
+>
+> - `--green-*` giờ là thang **tím than** (mực), `--green-900` = `#1F1633`.
+> - `--gold-*` giờ là thang **hồng nhấn**, `--gold-400` = `hsl(326 100% 64%)`.
+> - `--neutral-*` chuyển từ xám ấm sang xám ngả tím (hue 260).
+> - Giao diện tối giống Sentry: nền `hsl(264 40% 12%)`, nút chính màu trắng
+>   chữ tím than, màu "thành công" là xanh chanh `hsl(77 83% 62%)`.
+> - Phông chữ thường: **Lexend** (Rubik của Sentry không có dấu tiếng Việt).
+>   Phông tiêu đề: Bricolage Grotesque, đậm 700.
+> - Nút: chữ in hoa, giãn chữ 0,04em, bo góc 8 px; nút viền dày 2 px, viền
+>   hồng ở giao diện tối.
+>
+> Bảng màu ở mục 2 bên dưới là bản cũ (xanh rừng và vàng), giữ lại để tra
+> lịch sử. Giá trị đang dùng nằm trong `src/app/globals.css`.
+
 ## 1. Nhận diện thương hiệu
 
 - Xanh rừng đậm làm màu chính.

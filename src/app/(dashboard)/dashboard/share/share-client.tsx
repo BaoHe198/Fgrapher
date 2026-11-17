@@ -47,10 +47,11 @@ interface ShareClientProps {
 }
 
 // Brand colours as plain hex for the canvas, which cannot read CSS
-// variables: --green-900, --gold-400 and --gold-50 from globals.css.
-const INK = "#0b2d26";
-const GOLD = "#c8a56a";
-const CREAM = "#faf6ef";
+// variables: --green-900, --gold-400 and --gold-50 from globals.css
+// (the Sentry-derived ink, pink and near-white since 17/11/2026).
+const INK = "#1f1633";
+const GOLD = "#ff45a8";
+const CREAM = "#fbf8ff";
 
 const PLATFORMS = ["tiktok", "facebook", "instagram", "zalo"] as const;
 type Platform = (typeof PLATFORMS)[number];

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface SectionHeadProps {
-  title: string;
+  title: React.ReactNode;
   actionLabel?: string;
   actionHref?: string;
   className?: string;
