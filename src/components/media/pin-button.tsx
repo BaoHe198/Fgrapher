@@ -111,7 +111,7 @@ export function PinButton({
           : "h-9 rounded-[var(--fg-radius-sm)] border border-border-default bg-bg-surface px-3 text-body-sm text-text-primary hover:bg-bg-sunken",
         isPinned &&
           (variant === "onPhoto"
-            ? "bg-gold-400 text-neutral-900 hover:bg-gold-300"
+            ? "bg-gold-400 text-white hover:bg-gold-500"
             : "border-gold-500 bg-gold-50 text-neutral-900 dark:bg-gold-900/30 dark:text-gold-100"),
         failed && "text-danger",
         className,

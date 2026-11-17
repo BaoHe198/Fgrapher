@@ -23,7 +23,7 @@ export const MAP_MARKER_CLASSES = {
     "flex size-full items-center justify-center text-body-sm font-semibold text-text-secondary",
   price:
     "rounded-[4px] bg-green-950 px-1.5 py-0.5 text-meta leading-none whitespace-nowrap text-gold-50 tabular-nums",
-  priceSelected: "bg-gold-400 text-gold-900",
+  priceSelected: "bg-gold-400 text-white",
   count:
     "absolute -top-1.5 -right-1.5 flex min-w-5 items-center justify-center rounded-full bg-brand-primary px-1 text-meta leading-5 text-text-on-brand",
 } as const;

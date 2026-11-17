@@ -55,9 +55,9 @@ export function BookingVisual({
         className={cn(
           "absolute inset-0",
           warmth === "gold" &&
-            "bg-linear-to-b from-green-900 via-gold-700 via-55% to-gold-300",
+            "bg-linear-to-b from-green-900 via-amber-700 via-55% to-amber-300",
           warmth === "day" &&
-            "bg-linear-to-b from-green-800 via-green-600 via-60% to-gold-200",
+            "bg-linear-to-b from-green-800 via-green-600 via-60% to-amber-200",
           warmth === "night" &&
             "bg-linear-to-b from-green-950 via-green-900 via-70% to-green-800",
         )}
@@ -66,9 +66,9 @@ export function BookingVisual({
           className={cn(
             "absolute aspect-square w-[clamp(48px,6vw,88px)] -translate-x-1/2 -translate-y-1/2 rounded-full transition-[left,top] duration-[var(--fg-dur-400)] ease-fg-out motion-reduce:transition-none",
             warmth === "gold" &&
-              "bg-gold-300 shadow-[0_0_60px_20px_color-mix(in_srgb,var(--gold-300)_45%,transparent)]",
+              "bg-amber-300 shadow-[0_0_60px_20px_color-mix(in_srgb,var(--color-amber-300)_45%,transparent)]",
             warmth === "day" &&
-              "bg-gold-100 shadow-[0_0_60px_20px_color-mix(in_srgb,var(--gold-300)_45%,transparent)]",
+              "bg-amber-100 shadow-[0_0_60px_20px_color-mix(in_srgb,var(--color-amber-300)_45%,transparent)]",
             warmth === "night" && "bg-neutral-300 opacity-60",
           )}
           style={{ left: `${left}%`, top: `${top}%` }}

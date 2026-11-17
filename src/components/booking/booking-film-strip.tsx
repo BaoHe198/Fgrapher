@@ -102,7 +102,7 @@ export function BookingFilmStrip({
                 "relative flex min-h-[76px] flex-col justify-between rounded-[4px] p-2.5 transition-colors duration-[var(--fg-dur-260)] sm:min-h-[88px] sm:p-3",
                 state === "exposed" && "bg-gold-100 text-neutral-900",
                 state === "current" &&
-                  "bg-gold-400 text-neutral-900 ring-2 ring-gold-200",
+                  "bg-gold-400 text-white ring-2 ring-gold-200",
                 state === "stopped" && "bg-[#5a2420] text-white",
                 state === "dark" && "bg-[#26221e] text-white/45",
               )}

@@ -15,11 +15,11 @@ const buttonVariants = cva(
       variant: {
         primary:
           "bg-brand-primary text-text-on-brand hover:-translate-y-px hover:bg-brand-primary-hover hover:shadow-[var(--shadow-md)]",
-        // text-gold-900, not text-neutral-900: the neutral scale flips in
-        // dark mode while gold does not, so neutral-900 turned near-white
-        // on the unchanged gold fill (contrast ~2:1).
+        // White text, as on Sentry's purple "Sign in" (owner, 17/11/2026).
+        // Forced with `!`: rendered as a link, some containers colour their
+        // links (the header did), which turned the label dark on purple.
         accent:
-          "bg-gold-400 text-green-950 hover:-translate-y-px hover:bg-gold-300 hover:shadow-[var(--shadow-md)]",
+          "bg-gold-400 text-white! hover:-translate-y-px hover:bg-gold-500 hover:shadow-[var(--shadow-md)]",
         secondary:
           "bg-neutral-100 text-text-primary hover:-translate-y-px hover:bg-neutral-200 hover:shadow-[var(--shadow-sm)]",
         ghost: "text-text-secondary hover:bg-bg-sunken hover:text-text-primary",

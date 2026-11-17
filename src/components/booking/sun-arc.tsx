@@ -68,10 +68,10 @@ export function SunArc({ sun, slots, selected, onSelect }: SunArcProps) {
         >
           <defs>
             <linearGradient id="fg-sun-arc" x1="0" x2="1">
-              <stop offset="0" stopColor="var(--gold-400)" />
-              <stop offset=".22" stopColor="var(--gold-200)" />
-              <stop offset=".78" stopColor="var(--gold-200)" />
-              <stop offset="1" stopColor="var(--gold-400)" />
+              <stop offset="0" stopColor="#fbbf24" />
+              <stop offset=".22" stopColor="#fde68a" />
+              <stop offset=".78" stopColor="#fde68a" />
+              <stop offset="1" stopColor="#fbbf24" />
             </linearGradient>
           </defs>
           <rect
@@ -107,7 +107,7 @@ export function SunArc({ sun, slots, selected, onSelect }: SunArcProps) {
         </svg>
         {/* Round marks as HTML, so they stay round in a stretched SVG. */}
         <span
-          className="absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-bg-page bg-gold-400 transition-[left,top] duration-[var(--fg-dur-320)] ease-fg-out motion-reduce:transition-none"
+          className="absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-bg-page bg-amber-400 transition-[left,top] duration-[var(--fg-dur-320)] ease-fg-out motion-reduce:transition-none"
           style={{
             left: `${x(sunAt) / 10}%`,
             top: `${(y(sunAt) / 220) * 100}%`,
@@ -143,7 +143,7 @@ export function SunArc({ sun, slots, selected, onSelect }: SunArcProps) {
                   : booked
                     ? "cursor-not-allowed border-dashed border-border-strong bg-bg-page"
                     : slot.golden
-                      ? "border-gold-600 bg-gold-400 shadow-[0_0_0_6px_color-mix(in_srgb,var(--gold-400)_30%,transparent),0_0_18px_var(--gold-300)]"
+                      ? "border-amber-600 bg-amber-400 shadow-[0_0_0_6px_color-mix(in_srgb,var(--color-amber-400)_30%,transparent),0_0_18px_var(--color-amber-300)]"
                       : "border-text-primary bg-bg-page hover:scale-110",
               )}
               style={{

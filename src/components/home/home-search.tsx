@@ -153,7 +153,7 @@ export function HomeSearch({
         <button
           type="submit"
           aria-label={t("submit")}
-          className="focus-ring flex size-12 shrink-0 items-center justify-center gap-2 rounded-full bg-gold-400 text-green-950 transition-[background-color,transform] duration-[var(--fg-dur-150)] hover:bg-gold-300 active:scale-95 max-md:h-12 max-md:w-full"
+          className="focus-ring flex size-12 shrink-0 items-center justify-center gap-2 rounded-full bg-gold-400 text-white transition-[background-color,transform] duration-[var(--fg-dur-150)] hover:bg-gold-500 active:scale-95 max-md:h-12 max-md:w-full"
         >
           <Search aria-hidden className="size-5" />
           <span className="font-semibold uppercase tracking-[0.04em] md:sr-only">

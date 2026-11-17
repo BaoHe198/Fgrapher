@@ -132,7 +132,7 @@ function markerElement(
   const price = document.createElement("span");
   price.className = [
     MAP_MARKER_CLASSES.price,
-    "transition-colors duration-[var(--fg-dur-200)] group-data-[selected=true]:bg-gold-400 group-data-[selected=true]:text-gold-900",
+    "transition-colors duration-[var(--fg-dur-200)] group-data-[selected=true]:bg-gold-400 group-data-[selected=true]:text-white",
   ].join(" ");
   price.textContent =
     compactVnd(marker.currency === "VND" ? marker.startingPrice : null) ??

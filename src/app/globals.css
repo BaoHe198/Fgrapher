@@ -194,16 +194,16 @@
   --green-800: hsl(260 38% 21%);
   --green-900: hsl(264 40% 14%);
   --green-950: hsl(266 42% 9%);
-  --gold-50: hsl(330 100% 97%);
-  --gold-100: hsl(330 95% 93%);
-  --gold-200: hsl(330 92% 86%);
-  --gold-300: hsl(328 95% 78%);
-  --gold-400: hsl(326 100% 64%);
-  --gold-500: hsl(326 88% 56%);
-  --gold-600: hsl(326 78% 47%);
-  --gold-700: hsl(326 74% 38%);
-  --gold-800: hsl(326 70% 29%);
-  --gold-900: hsl(326 66% 20%);
+  --gold-50: hsl(248 60% 97%);
+  --gold-100: hsl(248 55% 93%);
+  --gold-200: hsl(248 50% 86%);
+  --gold-300: hsl(248 48% 76%);
+  --gold-400: hsl(247 44% 56%);
+  --gold-500: hsl(247 42% 49%);
+  --gold-600: hsl(248 42% 43%);
+  --gold-700: hsl(249 42% 36%);
+  --gold-800: hsl(250 42% 28%);
+  --gold-900: hsl(251 44% 20%);
   --neutral-0: #ffffff;
 
   /* Fgrapher brand — light theme (default) */
@@ -222,7 +222,7 @@
   /* Primary hover shifts the fill, not its opacity: opacity muddied the
      colour in dark mode (audit §05). */
   --brand-primary-hover: hsl(257 35% 31%);
-  --brand-accent: hsl(326 100% 64%);
+  --brand-accent: hsl(247 44% 56%);
   --bg-page: hsl(260 33% 98.5%);
   --bg-surface: #ffffff;
   --bg-sunken: hsl(260 25% 95.5%);
@@ -240,7 +240,7 @@
   --border-subtle: hsl(260 18% 91%);
   --border-default: hsl(260 13% 83%);
   --border-strong: hsl(260 9% 67%);
-  --border-focus: hsl(326 88% 56%);
+  --border-focus: hsl(247 44% 56%);
   --success: hsl(168 50% 26%);
   --success-bg: hsl(168 40% 96%);
   /* 34%/38% lightness, not 48%/45%: as badge text on their -bg tints the
@@ -314,7 +314,7 @@
   --shadow-sm: 0 1px 2px rgba(18, 16, 10, 0.06);
   --shadow-md: 0 4px 14px rgba(18, 16, 10, 0.08);
   --shadow-lg: 0 14px 36px rgba(18, 16, 10, 0.14);
-  --shadow-focus: 0 0 0 3px hsl(326 88% 56% / 0.35);
+  --shadow-focus: 0 0 0 3px hsl(247 44% 56% / 0.35);
 
   /* Redesign 09/2026 (docs/design-reference/redesign-2026-09, system audit
      §03). Five durations and three curves replace the 22 durations and 5
@@ -400,7 +400,7 @@
   --neutral-950: hsl(260 35% 98%);
   --brand-primary: hsl(0 0% 100%);
   --brand-primary-hover: hsl(260 35% 90%);
-  --brand-accent: hsl(326 100% 64%);
+  --brand-accent: hsl(247 44% 56%);
   --bg-page: hsl(264 40% 12%);
   --bg-surface: hsl(264 34% 16%);
   --bg-sunken: hsl(264 40% 10%);
@@ -414,7 +414,7 @@
   --border-subtle: hsl(262 22% 22%);
   --border-default: hsl(262 20% 29%);
   --border-strong: hsl(262 17% 39%);
-  --border-focus: hsl(326 100% 70%);
+  --border-focus: hsl(248 70% 74%);
   --success: hsl(77 83% 62%);
   --success-bg: hsl(77 40% 13%);
   --warning: hsl(35 85% 62%);
