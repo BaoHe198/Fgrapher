@@ -49,7 +49,20 @@
     "signout": "Đăng xuất",
     "messages": "Tin nhắn",
     "messagesAria": "Mở tin nhắn",
-    "viewPublicProfile": "Xem hồ sơ công khai"
+    "viewPublicProfile": "Xem hồ sơ công khai",
+    "sectionsLabel": "Các mục chính",
+    "becomeProvider": "Trở thành nhà cung cấp",
+    "accountMenu": "Menu tài khoản",
+    "myBookings": "Lịch đặt của tôi",
+    "saved": "Đã lưu",
+    "moodboard": "Bảng ý tưởng",
+    "help": "Trợ giúp",
+    "register": "Đăng ký",
+    "languageAndTheme": "Ngôn ngữ và giao diện",
+    "language": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    }
   },
   "fmap": {
     "title": "Bản đồ F — tìm nhà cung cấp theo khu vực và lịch trống",
@@ -5393,7 +5406,9 @@
       "navigationTitle": "Điều hướng",
       "navigationDescription": "Điều hướng chính của trang",
       "notifications": "Thông báo",
-      "toggleTheme": "Chuyển giao diện sáng/tối"
+      "toggleTheme": "Chuyển giao diện sáng/tối",
+      "lightMode": "Giao diện sáng",
+      "darkMode": "Giao diện tối"
     },
     "messagingPopup": {
       "title": "Tin nhắn",

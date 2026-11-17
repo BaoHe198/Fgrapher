@@ -49,7 +49,20 @@
     "signout": "Sign out",
     "messages": "Messages",
     "messagesAria": "Open messages",
-    "viewPublicProfile": "View public profile"
+    "viewPublicProfile": "View public profile",
+    "sectionsLabel": "Main sections",
+    "becomeProvider": "Become a provider",
+    "accountMenu": "Account menu",
+    "myBookings": "My bookings",
+    "saved": "Saved",
+    "moodboard": "Mood board",
+    "help": "Help",
+    "register": "Sign up",
+    "languageAndTheme": "Language and theme",
+    "language": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    }
   },
   "fmap": {
     "title": "Fmap — find providers by area and availability",
@@ -5393,7 +5406,9 @@
       "navigationTitle": "Navigation",
       "navigationDescription": "Main site navigation",
       "notifications": "Notifications",
-      "toggleTheme": "Toggle theme"
+      "toggleTheme": "Toggle theme",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode"
     },
     "messagingPopup": {
       "title": "Messages",

@@ -1,12 +1,15 @@
 "use client";
 
 import {
+  Check,
+  Globe,
   Menu,
   MessageCircle,
   Moon,
   Search,
   ShoppingBag,
   Sun,
+  UserRound,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
@@ -101,7 +104,7 @@ export function WebNav({
   const pathname = usePathname();
   const isWide = useIsWide();
   const { data: session } = useSession();
-  const { isAuthenticated } = useUserRoles();
+  const { isAuthenticated, isPaid } = useUserRoles();
   const messaging = useMessaging();
 
   const navLinks = NAV_LINKS.filter(
@@ -126,20 +129,33 @@ export function WebNav({
           background: "color-mix(in srgb, var(--bg-surface) 88%, transparent)",
         }}
       >
-        {/* Desktop / tablet row (>=768px) — collapses which links show at 1180px */}
-        <div className="mx-auto hidden h-[72px] max-w-[1440px] items-center gap-6 px-6 md:flex">
-          <LogoFull className="shrink-0" />
+        {/* Desktop / tablet row (>=768px), Airbnb's header (owner,
+            17/11/2026): the logo on the left, the sections as tabs in the
+            middle, and on the right the provider call, a few icons, a globe
+            for language and theme, and one round "menu + avatar" button
+            that holds the account. Which tabs show still collapses at
+            1180px. */}
+        <div className="mx-auto hidden h-[80px] max-w-[1440px] items-center gap-4 px-6 md:flex lg:px-8">
+          <div className="flex flex-1 items-center">
+            <LogoFull className="shrink-0" />
+          </div>
 
-          <nav className="flex items-center gap-[18px]">
+          <nav
+            aria-label={t("sectionsLabel")}
+            className="flex items-center gap-1"
+          >
             {links.map((link) => {
               const isActive = pathname === link.href.split("?")[0];
               return (
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "text-body-md font-semibold! whitespace-nowrap",
-                    isActive ? "text-text-primary" : "text-text-secondary",
+                    "focus-ring rounded-full px-4 py-2.5 text-body-md whitespace-nowrap transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken",
+                    isActive
+                      ? "font-semibold! text-text-primary"
+                      : "text-text-secondary hover:text-text-primary",
                   )}
                 >
                   {t(link.labelKey)}
@@ -148,63 +164,52 @@ export function WebNav({
             })}
           </nav>
 
-          <div className="ml-auto flex items-center gap-3">
-            {isWide ? (
-              <>
-                {isAuthenticated ? (
-                  <button
-                    type="button"
-                    onClick={messaging.toggle}
-                    className="relative"
-                    aria-label={t("messagesAria")}
-                  >
-                    <MessageCircle className="size-5 text-text-secondary" />
-                    {messaging.unreadCount > 0 ? (
-                      <span className="absolute -top-1 -right-1 size-2 rounded-full bg-danger" />
-                    ) : null}
-                  </button>
-                ) : (
-                  <MessageCircle className="size-5 text-text-secondary" />
-                )}
-                {marketplaceEnabled ? (
-                  isAuthenticated ? (
-                    <CartDrawer />
-                  ) : (
-                    <Link href="/shop">
-                      <ShoppingBag className="size-5 text-text-secondary" />
-                    </Link>
-                  )
-                ) : null}
-              </>
-            ) : null}
-
-            <CommandPaletteTrigger compact={!isWide} />
-            <ThemeToggle />
-            <LangToggle />
-
-            {isAuthenticated ? (
-              <>
-                <NotificationBell />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  nativeButton={false}
-                  render={<Link href="/dashboard" />}
-                >
-                  {t("dashboard")}
-                </Button>
-                <UserMenu session={session} />
-              </>
-            ) : (
-              <Button
-                variant="accent"
-                size="sm"
-                nativeButton={false}
-                render={<Link href="/login" />}
+          <div className="flex flex-1 items-center justify-end gap-1">
+            {isPaid ? (
+              <Link
+                href="/dashboard"
+                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-sm font-semibold! whitespace-nowrap text-text-primary transition-colors hover:bg-bg-sunken lg:inline-flex"
               >
-                {t("authCta")}
-              </Button>
+                {t("dashboard")}
+              </Link>
+            ) : (
+              <Link
+                href="/pricing"
+                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-sm font-semibold! whitespace-nowrap text-text-primary transition-colors hover:bg-bg-sunken lg:inline-flex"
+              >
+                {t("becomeProvider")}
+              </Link>
             )}
+            {isWide && isAuthenticated ? (
+              <button
+                type="button"
+                onClick={messaging.toggle}
+                className="focus-ring relative grid size-10 place-items-center rounded-full hover:bg-bg-sunken"
+                aria-label={t("messagesAria")}
+              >
+                <MessageCircle className="size-5 text-text-secondary" />
+                {messaging.unreadCount > 0 ? (
+                  <span className="absolute top-2 right-2 size-2 rounded-full bg-danger" />
+                ) : null}
+              </button>
+            ) : null}
+            {isWide && marketplaceEnabled ? (
+              isAuthenticated ? (
+                <CartDrawer />
+              ) : (
+                <Link
+                  href="/shop"
+                  aria-label={t("market")}
+                  className="focus-ring grid size-10 place-items-center rounded-full hover:bg-bg-sunken"
+                >
+                  <ShoppingBag className="size-5 text-text-secondary" />
+                </Link>
+              )
+            ) : null}
+            {isAuthenticated ? <NotificationBell /> : null}
+            <CommandPaletteTrigger compact />
+            <GlobeMenu />
+            <AccountMenu session={session} isAuthenticated={isAuthenticated} />
           </div>
         </div>
 
@@ -244,48 +249,164 @@ export function WebNav({
   );
 }
 
-function UserMenu({
+// Airbnb's account button: a pill with the menu icon and the avatar (a
+// person icon before sign-in). Everything about the account lives in it,
+// so the header stays quiet: sign in or up for a guest; bookings,
+// messages, saved, settings and sign out once signed in.
+function AccountMenu({
   session,
+  isAuthenticated,
 }: {
   session: ReturnType<typeof useSession>["data"];
+  isAuthenticated: boolean;
 }) {
   const t = useTranslations("nav");
   const { isPaid } = useUserRoles();
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus">
-        <Avatar className="size-[34px]">
+      <DropdownMenuTrigger
+        aria-label={t("accountMenu")}
+        className="focus-ring ml-1 flex items-center gap-2.5 rounded-full border border-border-default bg-bg-surface py-1.5 pr-1.5 pl-3.5 transition-shadow duration-[var(--fg-dur-150)] hover:shadow-[var(--shadow-md)]"
+      >
+        <Menu aria-hidden className="size-4 text-text-primary" />
+        <Avatar className="size-8">
           {session?.user?.avatar ? (
             <AvatarImage
               src={session.user.avatar}
               alt={session.user.name ?? ""}
             />
           ) : null}
-          <AvatarFallback>
-            {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
+          <AvatarFallback className="bg-text-secondary text-bg-page">
+            {isAuthenticated ? (
+              (session?.user?.name?.[0]?.toUpperCase() ?? "?")
+            ) : (
+              <UserRound aria-hidden className="size-4" />
+            )}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {/* Providers had no way to see the page customers see. */}
-        {isPaid ? (
-          <DropdownMenuItem render={<Link href="/profile/me" />}>
-            {t("viewPublicProfile")}
+      <DropdownMenuContent align="end" className="min-w-60">
+        {isAuthenticated ? (
+          <>
+            <DropdownMenuItem
+              className="font-semibold"
+              render={<Link href="/dashboard/bookings" />}
+            >
+              {t("myBookings")}
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/dashboard/messages" />}>
+              {t("messages")}
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/saved" />}>
+              {t("saved")}
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/moodboard" />}>
+              {t("moodboard")}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {/* Providers had no way to see the page customers see. */}
+            {isPaid ? (
+              <DropdownMenuItem render={<Link href="/profile/me" />}>
+                {t("viewPublicProfile")}
+              </DropdownMenuItem>
+            ) : null}
+            <DropdownMenuItem render={<Link href="/dashboard" />}>
+              {t("dashboard")}
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
+              {t("settings")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              render={<Link href="/dashboard/settings/billing" />}
+            >
+              {t("billing")}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem render={<Link href="/help" />}>
+              {t("help")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => signOut({ callbackUrl: "/" })}
+            >
+              {t("signout")}
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem
+              className="font-semibold"
+              render={<Link href="/login" />}
+            >
+              {t("signin")}
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/register" />}>
+              {t("register")}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem render={<Link href="/pricing" />}>
+              {t("becomeProvider")}
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/help" />}>
+              {t("help")}
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// Airbnb's globe: language, and here the light/dark switch too, in one
+// small menu instead of two always-visible controls.
+function GlobeMenu() {
+  const t = useTranslations("nav");
+  const ts = useTranslations("sharedComponents.webNav");
+  const locale = useLocale();
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+  const { resolvedTheme, setTheme } = useTheme();
+  const mounted = useMounted();
+  const isDark = mounted && resolvedTheme === "dark";
+
+  const pickLocale = (next: (typeof routing.locales)[number]) => {
+    if (next === locale) return;
+    startTransition(async () => {
+      await setLocale(next);
+      router.refresh();
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={t("languageAndTheme")}
+        className="focus-ring grid size-10 place-items-center rounded-full hover:bg-bg-sunken"
+      >
+        <Globe aria-hidden className="size-5 text-text-primary" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-52">
+        {routing.locales.map((code) => (
+          <DropdownMenuItem
+            key={code}
+            onClick={() => pickLocale(code)}
+            className={code === locale ? "font-semibold" : undefined}
+          >
+            {t(`language.${code}`)}
+            {code === locale ? (
+              <Check aria-hidden className="ml-auto size-4" />
+            ) : null}
           </DropdownMenuItem>
-        ) : null}
-        <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
-          {t("settings")}
-        </DropdownMenuItem>
-        <DropdownMenuItem render={<Link href="/dashboard/settings/billing" />}>
-          {t("billing")}
-        </DropdownMenuItem>
+        ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={() => signOut({ callbackUrl: "/" })}
-        >
-          {t("signout")}
+        <DropdownMenuItem onClick={() => setTheme(isDark ? "light" : "dark")}>
+          {isDark ? (
+            <Sun aria-hidden className="size-4" />
+          ) : (
+            <Moon aria-hidden className="size-4" />
+          )}
+          {isDark ? ts("lightMode") : ts("darkMode")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
