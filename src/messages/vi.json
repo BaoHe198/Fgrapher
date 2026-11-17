@@ -3640,7 +3640,12 @@
       "thanksBody": "Đánh giá của bạn giúp khách hàng khác tìm đúng nghệ sĩ.",
       "viewProfile": "Xem hồ sơ",
       "cantReview": "Không thể đánh giá",
-      "backToBookings": "Về danh sách lịch đặt"
+      "backToBookings": "Về danh sách lịch đặt",
+      "heading": "Buổi chụp với {name} thế nào?",
+      "sub": "Đánh giá của bạn giúp người sau chọn đúng người. Chỉ khách đã chụp xong mới viết được, nên mỗi đánh giá trên Fgrapher là một buổi chụp thật.",
+      "ratingLabel": "Chấm điểm",
+      "shootOn": "Ngày chụp {date}",
+      "publicNote": "Đánh giá sẽ hiện công khai trên hồ sơ của {name}, kèm tên của bạn. {name} có thể trả lời."
     },
     "booking": {
       "fmapContext": {

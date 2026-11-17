@@ -29,9 +29,25 @@ export default async function ReviewPage({
           firstName: true,
           name: true,
           username: true,
+          avatar: true,
           profiles: {
             where: { role: { in: PAID_ROLES } },
-            select: { displayName: true, role: true },
+            select: {
+              displayName: true,
+              role: true,
+              // One approved photo of their work for the page's booking
+              // card, the way Airbnb's review page shows the listing.
+              media: {
+                where: {
+                  moderationStatus: "APPROVED",
+                  deletedAt: null,
+                  type: "IMAGE",
+                },
+                orderBy: { order: "asc" },
+                take: 1,
+                select: { url: true },
+              },
+            },
           },
         },
       },
@@ -51,6 +67,13 @@ export default async function ReviewPage({
       providerName={providerName}
       providerUsername={booking.provider.username}
       serviceName={booking.service?.name}
+      shootDate={booking.date.toISOString()}
+      photoUrl={
+        booking.provider.profiles.find((p) => p.media.length > 0)?.media[0]
+          ?.url ??
+        booking.provider.avatar ??
+        null
+      }
       eligible={eligibility.eligible}
       reason={eligibility.eligible ? null : eligibility.reason}
     />

@@ -3640,7 +3640,12 @@
       "thanksBody": "Your feedback helps other clients find the right artist.",
       "viewProfile": "View profile",
       "cantReview": "Can't leave a review",
-      "backToBookings": "Back to bookings"
+      "backToBookings": "Back to bookings",
+      "heading": "How was your shoot with {name}?",
+      "sub": "Your review helps the next person choose well. Only customers who finished a shoot can write one, so every review on Fgrapher is a real shoot.",
+      "ratingLabel": "Your rating",
+      "shootOn": "Shoot date {date}",
+      "publicNote": "Your review appears publicly on {name}'s profile with your name. {name} can reply."
     },
     "booking": {
       "fmapContext": {
