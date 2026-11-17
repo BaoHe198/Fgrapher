@@ -464,70 +464,78 @@
  * (it only takes a size, optionally paired with a --text-*--line-height).
  * @utility exposes them as plain Tailwind classes instead.
  *
- * IMPORTANT — confirmed by testing, don't re-attempt without re-verifying:
- * moving these blocks earlier in this file (even before `@import
- * "tailwindcss"`) does NOT change their position in Tailwind v4's compiled
- * output — custom @utility-registered classes are consistently emitted
- * AFTER every core Tailwind utility regardless of source position. That
- * means combining one of these with a plain font-weight utility
- * (`text-body-md font-semibold`) always resolves to THIS shorthand's own
- * baked-in weight (confirmed live: computed font-weight was 400, not the
- * intended 600) — source-order tricks can't fix that. Where a call site
- * genuinely needs a different weight than the one baked in here, use
- * Tailwind's `!` important modifier on the weight utility (e.g.
- * `font-semibold!`), or a raw Tailwind size utility instead of one of
- * these for that element, not a plain font-weight class — see
- * components/cards/artist-card.tsx's small-badge treatment for the
- * latter pattern.
+ * Weight: the `font` shorthand resets font-weight, and these classes are
+ * emitted after Tailwind's core utilities, so `text-body-md font-semibold`
+ * used to render at the token's 400 - every Button (base font-semibold,
+ * sizes text-body-*) and ~80 other call sites silently lost their weight.
+ * Each utility now reads Tailwind's own --tw-font-weight, which every
+ * font-* weight class sets on its element (and which does not inherit),
+ * falling back to the token's weight. So a plain `font-semibold` works
+ * again; `font-semibold!` still works too. (Fixed 17/11/2026.)
  */
 @utility text-display-2xl {
   font: var(--text-display-2xl);
+  font-weight: var(--tw-font-weight, 700);
 }
 @utility text-display-xl {
   font: var(--text-display-xl);
+  font-weight: var(--tw-font-weight, 700);
 }
 @utility text-display-lg {
   font: var(--text-display-lg);
+  font-weight: var(--tw-font-weight, 700);
 }
 @utility text-display-md {
   font: var(--text-display-md);
+  font-weight: var(--tw-font-weight, 700);
 }
 @utility text-display-sm {
   font: var(--text-display-sm);
+  font-weight: var(--tw-font-weight, 600);
 }
 @utility text-heading-lg {
   font: var(--text-heading-lg);
+  font-weight: var(--tw-font-weight, 600);
 }
 @utility text-heading-xl {
   font: var(--text-heading-xl);
+  font-weight: var(--tw-font-weight, 600);
 }
 @utility text-heading-md {
   font: var(--text-heading-md);
+  font-weight: var(--tw-font-weight, 600);
 }
 @utility text-heading-sm {
   font: var(--text-heading-sm);
+  font-weight: var(--tw-font-weight, 600);
 }
 @utility text-body-lg {
   font: var(--text-body-lg);
+  font-weight: var(--tw-font-weight, 400);
 }
 @utility text-body-md {
   font: var(--text-body-md);
+  font-weight: var(--tw-font-weight, 400);
 }
 @utility text-body-sm {
   font: var(--text-body-sm);
+  font-weight: var(--tw-font-weight, 400);
 }
 @utility text-caption {
   font: var(--text-caption);
+  font-weight: var(--tw-font-weight, 500);
 }
 /* Caps labels (section labels, table headers): one tracking and always
    upper case (audit 09/2026 §01). Some call sites used the name without
    uppercase and read as widely spaced sentence case. */
 @utility text-caption-upper {
   font: var(--text-caption-upper);
+  font-weight: var(--tw-font-weight, 600);
   text-transform: uppercase;
 }
 @utility text-meta {
   font: var(--text-meta);
+  font-weight: var(--tw-font-weight, 500);
 }
 
 @layer base {

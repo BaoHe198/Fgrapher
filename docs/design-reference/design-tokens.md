@@ -100,16 +100,20 @@ hiểu.
 
 ```css
 --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
---font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+--font-body: "Lexend", ui-sans-serif, system-ui, sans-serif;
 --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 ```
 
+Từ 17/11/2026: thân bài là **Lexend** (thay Plus Jakarta Sans; Rubik của
+Sentry không có dấu tiếng Việt), tiêu đề là **Bricolage Grotesque** đậm 700.
+IBM Plex Mono chỉ có bộ chữ Latin, nên chữ tiếng Việt không đặt bằng mono.
+
 | Token                  | Giá trị                                 |
 | ---------------------- | --------------------------------------- |
-| `--text-display-2xl`   | `600 4rem/1.05 var(--font-display)`     |
-| `--text-display-xl`    | `600 3rem/1.08 var(--font-display)`     |
-| `--text-display-lg`    | `600 2.25rem/1.12 var(--font-display)`  |
-| `--text-display-md`    | `600 1.75rem/1.2 var(--font-display)`   |
+| `--text-display-2xl`   | `700 4rem/1.05 var(--font-display)`     |
+| `--text-display-xl`    | `700 3rem/1.08 var(--font-display)`     |
+| `--text-display-lg`    | `700 2.25rem/1.12 var(--font-display)`  |
+| `--text-display-md`    | `700 1.75rem/1.2 var(--font-display)`   |
 | `--text-display-sm`    | `600 1.625rem/1.2 var(--font-display)`  |
 | `--text-heading-xl`    | `600 1.625rem/1.25 var(--font-display)` |
 | `--text-heading-lg`    | `600 1.5rem/1.3 var(--font-display)`    |
@@ -120,6 +124,12 @@ hiểu.
 | `--text-body-sm`       | `400 0.875rem/1.6 var(--font-body)`     |
 | `--text-caption`       | `500 0.875rem/1.5 var(--font-body)`     |
 | `--text-caption-upper` | `600 0.875rem/1.4 var(--font-body)`     |
+| `--text-meta`          | `500 0.75rem/1.45 var(--font-body)`     |
+
+Độ đậm trong bảng là mặc định. Lớp độ đậm đặt kèm (`text-body-md
+font-semibold`) sẽ thắng: mỗi lớp `text-*` đọc biến `--tw-font-weight` của
+Tailwind trước khi rơi về số trong bảng. Trước 17/11/2026 lớp độ đậm bị bỏ
+qua (mọi nút bấm hiện chữ 400), trừ khi viết `font-semibold!`.
 
 Cỡ chữ đã được tăng để chữ Việt có dấu không bị chật dòng và nội dung thường đạt
 ngưỡng dễ đọc. Chữ phụ không nên nhỏ hơn 14 px; nội dung chính nên từ 16 px. Luôn
