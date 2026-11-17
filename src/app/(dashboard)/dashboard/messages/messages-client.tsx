@@ -50,6 +50,15 @@ export function MessagesClient({
     200,
   );
   const boardAlbums = (searchParams.get("boardAlbums") ?? "").slice(0, 300);
+  // The provider's link page (/p/<username>): "Nhắn tin tư vấn" opens the
+  // chat with a first question already written, naming the package and the
+  // day the customer was looking at there, if any.
+  const consult = searchParams.get("consult") === "1";
+  const consultPackage = (searchParams.get("pkg") ?? "").slice(0, 120);
+  const consultDayRaw = searchParams.get("day") ?? "";
+  const consultDay = /^\d{4}-\d{2}-\d{2}$/.test(consultDayRaw)
+    ? consultDayRaw.split("-").reverse().join("/")
+    : "";
   const rentalDraft = productId
     ? rentFrom && rentDays > 0
       ? t("rentalDraftDates", {
@@ -68,7 +77,18 @@ export function MessagesClient({
         ? boardAlbums
           ? t("boardDraftAlbums", { count: boardCount, albums: boardAlbums })
           : t("boardDraft", { count: boardCount })
-        : undefined;
+        : consult
+          ? consultPackage && consultDay
+            ? t("consultDraftPackageDay", {
+                pkg: consultPackage,
+                day: consultDay,
+              })
+            : consultPackage
+              ? t("consultDraftPackage", { pkg: consultPackage })
+              : consultDay
+                ? t("consultDraftDay", { day: consultDay })
+                : t("consultDraft")
+          : undefined;
 
   const loadConversations = () => {
     fetch("/api/conversations")
@@ -110,6 +130,9 @@ export function MessagesClient({
             if (costumeName) nextParams.set("costumeName", costumeName);
             if (boardCount > 0) nextParams.set("board", String(boardCount));
             if (boardAlbums) nextParams.set("boardAlbums", boardAlbums);
+            if (consult) nextParams.set("consult", "1");
+            if (consultPackage) nextParams.set("pkg", consultPackage);
+            if (consultDayRaw) nextParams.set("day", consultDayRaw);
             router.replace(`/dashboard/messages?${nextParams.toString()}`);
             loadConversations();
           }

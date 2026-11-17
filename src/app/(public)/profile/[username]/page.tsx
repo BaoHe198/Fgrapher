@@ -470,7 +470,9 @@ export default async function PublicProfilePage({
             <ProfileActions
               targetUserId={user.id}
               profileId={activeProfile.id}
-              shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/profile/${username}`}
+              // The link page (/p/...) is what a shared link should open:
+              // it is built for someone arriving from a chat.
+              shareUrl={`${process.env.NEXTAUTH_URL ?? ""}/p/${username}`}
               socialFeedEnabled={features.socialFeedEnabled}
               isOwnProfile={isOwnProfile}
             />

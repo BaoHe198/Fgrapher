@@ -2408,7 +2408,11 @@
       "boardDraft": "Hi, I pinned {count} of your photos on Fgrapher and would like a shoot in that style. I'm planning for … — are you available?",
       "boardDraftAlbums": "Hi, I pinned {count} of your photos on Fgrapher (from {albums}) and would like a shoot in that style. I'm planning for … — are you available?",
       "costumeDraft": "Hi, I'd like to rent “{costume}”. I need it on … — is it available?",
-      "rentalDraftDates": "Hi, I'd like to rent {product} from {from} for {days, plural, one {# day} other {# days}}. Product: {url}"
+      "rentalDraftDates": "Hi, I'd like to rent {product} from {from} for {days, plural, one {# day} other {# days}}. Product: {url}",
+      "consultDraft": "Hi, I just saw your page on Fgrapher and would like to ask a few questions. Are you taking bookings?",
+      "consultDraftPackage": "Hi, I just saw your page on Fgrapher and I'm interested in the “{pkg}” package. Could you tell me more?",
+      "consultDraftDay": "Hi, I just saw your page on Fgrapher. Are you available on {day}?",
+      "consultDraftPackageDay": "Hi, I just saw your page on Fgrapher and I'm interested in the “{pkg}” package on {day}. Are you available that day?"
     },
     "shopOrders": {
       "title": "Shop orders",
@@ -2617,6 +2621,128 @@
         "body": "The Fgrapher team reviews requests before artists see them. Once approved, the request stays open for 7 days and you're notified of the first proposal.",
         "view": "View request",
         "back": "Back to FBooking"
+      }
+    },
+    "share": {
+      "title": "Link & QR code",
+      "intro": "Put this link or QR code on TikTok, Facebook, Instagram and Zalo. Customers who tap it see your reviews, prices, terms and free dates, and can book straight away, so you don't have to send your price list to each person.",
+      "noUsername": "Set a username first to get your own link.",
+      "setUsername": "Set a username",
+      "copyFailed": "Couldn't copy. Select it and copy by hand.",
+      "downloadFailed": "Couldn't download. Please try again.",
+      "link": {
+        "title": "Your link",
+        "body": "Opens without signing in and reads well on a phone.",
+        "copy": "Copy",
+        "copied": "Link copied",
+        "open": "View page",
+        "flow": {
+          "one": "Customer taps the link or scans the code",
+          "two": "Sees reviews, prices, terms, free dates",
+          "three": "Asks a question or sends a booking request"
+        }
+      },
+      "where": {
+        "title": "Where to put it",
+        "body": "Pick where you post most. Each has a ready-made line; adjust it to sound like you.",
+        "captionLabel": "Ready-made line",
+        "copyCaption": "Copy line",
+        "captionCopied": "Line copied"
+      },
+      "platforms": {
+        "tiktok": {
+          "name": "TikTok",
+          "step1": "Open TikTok, go to Profile and tap Edit profile.",
+          "step2": "Paste the link into Website if your account has it; otherwise put it in your Bio.",
+          "step3": "In your videos, tell people to “check free dates via the link in bio”.",
+          "caption": "📅 Free dates & booking: {link}"
+        },
+        "facebook": {
+          "name": "Facebook",
+          "step1": "On your profile or Page, choose Edit details and add the link under Website.",
+          "step2": "Pin a post with the link at the top of your page.",
+          "step3": "When someone asks for prices in Messenger, send this link instead of a price-list image.",
+          "caption": "My prices, customer reviews and free dates are all here, have a look and book: {link}"
+        },
+        "instagram": {
+          "name": "Instagram",
+          "step1": "Go to Profile, Edit profile, then Links and Add link.",
+          "step2": "Paste the link and title it “Book”.",
+          "step3": "Add a Link sticker to a story whenever you open a new month.",
+          "caption": "Book a shoot: {link}"
+        },
+        "zalo": {
+          "name": "Zalo",
+          "step1": "Save the line below to send quickly (Zalo Business accounts have quick messages built in).",
+          "step2": "When someone asks for prices or dates, send it with the link.",
+          "step3": "Print the QR card for people to scan in person.",
+          "caption": "Hi! My prices, reviews and free dates are here: {link}\nPick a date and send a request, and I'll confirm soon."
+        }
+      },
+      "ready": {
+        "title": "Is your page ready for bookings?",
+        "count": "{done}/{total} done",
+        "body": "Someone arriving from a link decides in seconds. Anything missing below makes them message to ask, or leave.",
+        "doneSr": "(done)",
+        "todoSr": "(to do)",
+        "items": {
+          "published": {
+            "label": "Profile is public",
+            "why": "Until your profile is public, the link can't open your page.",
+            "action": "See what's needed"
+          },
+          "verified": {
+            "label": "Identity verified",
+            "why": "The verified label is the first thing people look for when they arrive from social media.",
+            "action": "Verify"
+          },
+          "prices": {
+            "label": "Has prices",
+            "why": "With a “from …₫” price, people don't have to ask.",
+            "action": "Add a package"
+          },
+          "hours": {
+            "label": "Has working hours",
+            "why": "Without working hours, customers see no free days to book.",
+            "action": "Set working hours"
+          },
+          "policies": {
+            "label": "Has deposit and cancellation terms",
+            "why": "People want to know the deposit and what happens if they cancel before sending money.",
+            "action": "Add terms"
+          },
+          "photos": {
+            "label": "At least 6 approved photos",
+            "why": "The photo strip at the top needs enough photos to show your style.",
+            "action": "Upload photos"
+          },
+          "cover": {
+            "label": "Has a cover photo",
+            "why": "The cover shows at the top of the page and in the preview when the link is sent on Zalo or Messenger.",
+            "action": "Add a cover"
+          }
+        }
+      },
+      "qr": {
+        "title": "QR code",
+        "alt": "QR code for {name}'s booking page",
+        "downloadCard": "Download print card (PNG)",
+        "downloadQr": "Download QR code only",
+        "working": "Creating…",
+        "hint": "Put the card on your counter, print it on business cards, or post it as a story. A phone camera opens the page."
+      },
+      "card": {
+        "scan": "Scan for free dates & booking"
+      },
+      "preview": {
+        "title": "When the link is sent in a chat",
+        "body": "Illustration: Zalo and Messenger take the cover, name and these details from your page.",
+        "noCover": "No cover photo yet",
+        "headline": "Book {name} · {role}",
+        "from": "From {price}",
+        "rating": "★ {rating} ({count} reviews)",
+        "verified": "Identity verified",
+        "cta": "See free dates and prices, and book on Fgrapher"
       }
     }
   },
@@ -5270,7 +5396,8 @@
       "sectionWork": "Work",
       "sectionProfile": "Profile",
       "sectionMarket": "Chợ F",
-      "sectionHiring": "Hiring others"
+      "sectionHiring": "Hiring others",
+      "shareLink": "Link & QR code"
     },
     "suspendedAccountNotice": {
       "title": "Your account has been suspended",
@@ -5389,5 +5516,176 @@
     "close": "Close",
     "saveFailed": "Your cookie choice was not saved. Please try again.",
     "regionLabel": "Cookie notice"
+  },
+  "linkPage": {
+    "metadata": {
+      "title": "Book {name} · {role}",
+      "from": "From {price}",
+      "rating": "★ {rating} ({count} reviews)",
+      "verified": "Identity verified",
+      "cta": "See free dates and prices, and book on Fgrapher"
+    },
+    "header": {
+      "fullProfile": "Full profile"
+    },
+    "own": {
+      "body": "This is the page customers see when they open your link or scan your QR code.",
+      "action": "Get link & QR code"
+    },
+    "hero": {
+      "from": "From {price}",
+      "rating": "{rating} · {count, plural, one {# review} other {# reviews}}",
+      "new": "New on Fgrapher",
+      "shoots": "{count, plural, one {# shoot done} other {# shoots done}}",
+      "years": "{count, plural, one {# year of experience} other {# years of experience}}",
+      "response": {
+        "hour": "Replies within 1 hour",
+        "hours": "Replies within {count} hours",
+        "day": "Replies within 1 day",
+        "days": "Replies within {count} days"
+      },
+      "coverAlt": "{name}'s cover photo",
+      "verified": "Identity verified",
+      "seeCalendar": "See free dates",
+      "message": "Ask a question",
+      "workTitle": "Recent work",
+      "photoAlt": "{album}, a photo by {name}",
+      "allWork": "See the full portfolio"
+    },
+    "nav": {
+      "label": "Page sections",
+      "reviews": "Reviews",
+      "prices": "Prices",
+      "terms": "What you get",
+      "calendar": "Free dates",
+      "contact": "Contact"
+    },
+    "steps": {
+      "reviews": {
+        "title": "What customers say",
+        "intro": "Only customers who finished a shoot booked on Fgrapher can write a review."
+      },
+      "prices": {
+        "title": "Prices",
+        "intro": "Pick a package to see what it includes and its free dates."
+      },
+      "terms": {
+        "title": "Terms & what you get",
+        "intro": "Read before you book: what you get, and what to know about deposits, cancelling and rescheduling."
+      },
+      "calendar": {
+        "title": "Free dates",
+        "intro": "{name}'s free days, from their real working calendar. Pick a day, then a time."
+      },
+      "contact": {
+        "title": "Ready to work with {name}?"
+      }
+    },
+    "reviews": {
+      "newBadge": "On Fgrapher since {date}",
+      "emptyTitle": "{name} has no reviews on Fgrapher yet.",
+      "emptyBody": "Reviews can only be written after a real shoot booked through Fgrapher, so new profiles usually have none. Look through the work and ask questions before you book.",
+      "countLine": "{count, plural, one {# review from a customer who shot} other {# reviews from customers who shot}}",
+      "breakdownLabel": "Rating breakdown",
+      "anonymous": "Fgrapher customer",
+      "shotOn": "Reviewed on {date}",
+      "starsLabel": "{count} out of 5 stars",
+      "responseFrom": "{name} replied",
+      "seeAll": "See all {count} reviews"
+    },
+    "packages": {
+      "emptyTitle": "{name} hasn't posted prices yet.",
+      "emptyBody": "Send a message for a quote based on what you need.",
+      "askPrice": "Ask for a price",
+      "photos": "{count, plural, one {# edited photo} other {# edited photos}}",
+      "delivery": "{count, plural, one {Delivered after # day} other {Delivered after # days}}",
+      "chosen": "Chosen",
+      "tfp": "TFP / Collaboration",
+      "from": "From {price}",
+      "pickDate": "Pick a date for this package",
+      "choose": "Choose this package",
+      "finalPriceNote": "The final price is agreed between you and {name} when the booking is confirmed."
+    },
+    "terms": {
+      "getTitle": "What you get",
+      "getForPackage": "With the “{name}” package",
+      "get": {
+        "photos": "{count, plural, one {# edited photo} other {# edited photos}}",
+        "delivery": "{count, plural, one {Photos after # day} other {Photos after # days}}",
+        "verifiedOn": "{name}'s identity was verified by Fgrapher ({date})",
+        "verified": "{name}'s identity was verified by Fgrapher",
+        "phone": "Phone number verified",
+        "moderated": "Profile photos are reviewed before they are shown",
+        "record": "The package, date, time and price are recorded in the booking, for both of you to look back on",
+        "review": "After the shoot, you can leave a public review",
+        "free": "Requests and messages are free; Fgrapher charges you nothing"
+      },
+      "needTitle": "Before you book",
+      "need": {
+        "deposit": "Deposit",
+        "depositPercent": "{percent}% deposit.",
+        "depositDirect": "Paid directly to {name}; Fgrapher never holds the money.",
+        "depositAsk": "{name} hasn't stated a deposit. Ask in a message before sending any money.",
+        "cancel": "Cancelling",
+        "reschedule": "Rescheduling",
+        "askInChat": "Not stated. Ask {name} in a message.",
+        "notice": "Notice",
+        "noticeValue": "At least {hours} hours before the shoot",
+        "confirm": "Confirmation",
+        "confirmValue": "{name} accepts or declines within 48 hours. If not, the request lapses and you lose nothing.",
+        "response": "Message replies",
+        "responseValue": {
+          "hour": "Usually within 1 hour",
+          "hours": "Usually within {count} hours",
+          "day": "Usually within 1 day",
+          "days": "Usually within {count} days"
+        },
+        "area": "Area",
+        "areaNationwide": "Works nationwide",
+        "areaRadius": "Within about {km} km of {place}"
+      },
+      "safetyTitle": "Keep your deposit safe",
+      "safetyBody": "Only send a deposit after {name} has confirmed the booking on Fgrapher, and keep the transfer receipt. Don't send money to anyone claiming to be {name} outside this page."
+    },
+    "calendar": {
+      "packageLegend": "Package",
+      "pausedBody": "{name} isn't taking new bookings right now. You can still message to ask about upcoming dates.",
+      "loadFailed": "Couldn't load free dates. Try reloading the page.",
+      "noFreeDays": "{name} has no free days left this month. Check next month or send a message.",
+      "freeCount": "{count, plural, one {# free day this month} other {# free days this month}}",
+      "timesFor": "Free times on {date}",
+      "golden": "Sunrise {sunrise} · Sunset {sunset}",
+      "timezone": "Vietnam time (GMT+7)",
+      "noTimes": "No free times left on this day.",
+      "ownNote": "Customers see this calendar. Change your hours in <link>Working hours</link>.",
+      "from": "From {price}",
+      "noChargeYet": "Sending a request costs nothing. You only send a deposit after the booking is confirmed.",
+      "sendRequest": "Send booking request",
+      "askAboutDay": "Ask about this day",
+      "askAboutDates": "Ask about dates",
+      "pickTimeHint": "Pick a time to send the request.",
+      "pickDayHint": "Pick a free day to see times."
+    },
+    "contact": {
+      "messageTitle": "Ask a question",
+      "messageBody": "Ask {name} about the concept, location or price. The first message is already written; edit it and send.",
+      "messageBodyResponse": "Ask {name} about the concept, location or price. {time}.",
+      "messageAction": "Open messages",
+      "bookTitle": "Book",
+      "bookBody": "Pick a package, date and time, then send the request. {name} confirms within 48 hours, and you pay nothing until then.",
+      "bookAction": "Start booking",
+      "bookWithPick": "Send request for the chosen date",
+      "paused": "Not taking bookings",
+      "signInNote": "You'll sign in or create a free account before messaging or sending a request."
+    },
+    "footer": {
+      "about": "{name}'s booking page on Fgrapher.",
+      "fullProfile": "See the full profile"
+    },
+    "sticky": {
+      "label": "Quick booking",
+      "book": "Send request",
+      "pickDate": "Pick a date"
+    }
   }
 }

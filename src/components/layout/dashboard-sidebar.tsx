@@ -12,6 +12,7 @@ import {
   Package,
   PanelLeft,
   Plus,
+  QrCode,
   Send,
   Settings,
   Shield,
@@ -132,7 +133,12 @@ export function DashboardSidebar({
             ]
           : []),
         ...(canReceiveBookings
-          ? [{ href: "/dashboard/reviews", label: t("reviews"), icon: Star }]
+          ? [
+              { href: "/dashboard/reviews", label: t("reviews"), icon: Star },
+              // The link and QR code a provider puts on their own social
+              // accounts (owner, 17/11/2026).
+              { href: "/dashboard/share", label: t("shareLink"), icon: QrCode },
+            ]
           : []),
         // A costume shop rents out outfits through chat, so it has no Chợ F
         // listings page — its catalogue lives in Settings → Profile. That is

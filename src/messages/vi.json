@@ -2408,7 +2408,11 @@
       "boardDraft": "Chào bạn, mình đã ghim {count} tấm ảnh của bạn trên Fgrapher và muốn chụp theo phong cách đó. Mình dự định chụp vào ngày … — bạn còn lịch không ạ?",
       "boardDraftAlbums": "Chào bạn, mình đã ghim {count} tấm ảnh của bạn trên Fgrapher (trong album {albums}) và muốn chụp theo phong cách đó. Mình dự định chụp vào ngày … — bạn còn lịch không ạ?",
       "costumeDraft": "Chào shop, mình muốn thuê “{costume}”. Mình cần thuê vào ngày … — shop còn trống không ạ?",
-      "rentalDraftDates": "Chào shop, tôi muốn thuê {product} từ ngày {from}, trong {days} ngày. Sản phẩm: {url}"
+      "rentalDraftDates": "Chào shop, tôi muốn thuê {product} từ ngày {from}, trong {days} ngày. Sản phẩm: {url}",
+      "consultDraft": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher và muốn được tư vấn thêm. Bạn còn nhận lịch không ạ?",
+      "consultDraftPackage": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher và quan tâm gói “{pkg}”. Bạn tư vấn thêm giúp mình nhé?",
+      "consultDraftDay": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher. Ngày {day} bạn còn nhận chụp không ạ?",
+      "consultDraftPackageDay": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher và quan tâm gói “{pkg}” vào ngày {day}. Bạn còn nhận lịch ngày đó không ạ?"
     },
     "shopOrders": {
       "title": "Đơn hàng cửa hàng",
@@ -2617,6 +2621,128 @@
         "body": "Đội Fgrapher duyệt yêu cầu trước khi nghệ sĩ thấy. Sau khi được duyệt, yêu cầu mở trong 7 ngày và bạn nhận thông báo khi có đề xuất đầu tiên.",
         "view": "Xem yêu cầu",
         "back": "Về Đặt lịch F"
+      }
+    },
+    "share": {
+      "title": "Link & mã QR",
+      "intro": "Gắn link hoặc mã QR này lên TikTok, Facebook, Instagram và Zalo. Khách bấm vào sẽ thấy đánh giá, bảng giá, quyền lợi và lịch trống của bạn rồi đặt lịch ngay, bạn không phải gửi bảng giá cho từng người.",
+      "noUsername": "Bạn cần đặt tên người dùng trước khi có link riêng.",
+      "setUsername": "Đặt tên người dùng",
+      "copyFailed": "Không sao chép được. Hãy chọn và sao chép bằng tay.",
+      "downloadFailed": "Chưa tải được. Vui lòng thử lại.",
+      "link": {
+        "title": "Link của bạn",
+        "body": "Mở được không cần đăng nhập, xem tốt trên điện thoại.",
+        "copy": "Sao chép",
+        "copied": "Đã sao chép link",
+        "open": "Xem trang",
+        "flow": {
+          "one": "Khách bấm link hoặc quét mã",
+          "two": "Xem đánh giá, giá, quyền lợi, lịch trống",
+          "three": "Nhắn tin tư vấn hoặc gửi yêu cầu đặt lịch"
+        }
+      },
+      "where": {
+        "title": "Gắn link ở đâu",
+        "body": "Chọn nơi bạn hay đăng bài. Mỗi nơi có sẵn một câu mẫu, sửa lại cho đúng giọng của bạn.",
+        "captionLabel": "Câu mẫu",
+        "copyCaption": "Sao chép câu mẫu",
+        "captionCopied": "Đã sao chép câu mẫu"
+      },
+      "platforms": {
+        "tiktok": {
+          "name": "TikTok",
+          "step1": "Mở TikTok, vào Hồ sơ rồi chọn Sửa hồ sơ.",
+          "step2": "Dán link vào ô Trang web nếu tài khoản của bạn có ô này; nếu chưa có, ghi link vào Tiểu sử.",
+          "step3": "Khi đăng video, nhắc khách “xem lịch trống ở link trong bio”.",
+          "caption": "📅 Xem lịch trống & đặt lịch: {link}"
+        },
+        "facebook": {
+          "name": "Facebook",
+          "step1": "Vào trang cá nhân hoặc Fanpage, chọn Chỉnh sửa chi tiết và thêm link vào mục Trang web.",
+          "step2": "Ghim một bài viết có link ở đầu trang.",
+          "step3": "Khi khách hỏi giá trong Messenger, gửi link này thay cho ảnh bảng giá.",
+          "caption": "Bảng giá, đánh giá của khách và lịch còn trống của mình ở đây, bạn xem rồi đặt lịch luôn nhé: {link}"
+        },
+        "instagram": {
+          "name": "Instagram",
+          "step1": "Vào Hồ sơ, chọn Chỉnh sửa trang cá nhân, rồi Liên kết và Thêm liên kết.",
+          "step2": "Dán link và đặt tên là “Đặt lịch”.",
+          "step3": "Thêm nhãn dán Liên kết vào tin (story) mỗi khi mở lịch tháng mới.",
+          "caption": "Đặt lịch chụp: {link}"
+        },
+        "zalo": {
+          "name": "Zalo",
+          "step1": "Lưu câu mẫu bên dưới để gửi nhanh (tài khoản Zalo Business có sẵn tính năng tin nhắn nhanh).",
+          "step2": "Khi khách hỏi giá hoặc hỏi lịch, gửi câu này kèm link.",
+          "step3": "In thẻ có mã QR để khách quét khi gặp trực tiếp.",
+          "caption": "Chào bạn! Bảng giá, đánh giá và lịch trống của mình ở đây: {link}\nBạn chọn ngày rồi gửi yêu cầu, mình sẽ xác nhận sớm nhé."
+        }
+      },
+      "ready": {
+        "title": "Trang của bạn đã đủ để khách đặt chưa?",
+        "count": "{done}/{total} đã xong",
+        "body": "Khách đến từ link chỉ có vài giây để quyết định. Mục nào còn thiếu sẽ khiến họ phải nhắn hỏi lại, hoặc bỏ đi.",
+        "doneSr": "(đã xong)",
+        "todoSr": "(chưa xong)",
+        "items": {
+          "published": {
+            "label": "Hồ sơ đang công khai",
+            "why": "Khi hồ sơ chưa công khai, link chưa mở được trang của bạn.",
+            "action": "Xem cần làm gì"
+          },
+          "verified": {
+            "label": "Đã xác minh danh tính",
+            "why": "Nhãn xác minh là thứ đầu tiên khách tìm khi mở link từ mạng xã hội.",
+            "action": "Xác minh"
+          },
+          "prices": {
+            "label": "Có bảng giá",
+            "why": "Có giá “từ …₫” thì khách không phải nhắn hỏi giá.",
+            "action": "Thêm gói"
+          },
+          "hours": {
+            "label": "Có giờ làm việc",
+            "why": "Chưa có giờ làm việc thì khách không thấy ngày trống nào để đặt.",
+            "action": "Đặt giờ làm việc"
+          },
+          "policies": {
+            "label": "Có chính sách cọc và hủy lịch",
+            "why": "Khách cần biết cọc bao nhiêu và hủy thì sao trước khi chuyển tiền.",
+            "action": "Thêm chính sách"
+          },
+          "photos": {
+            "label": "Có ít nhất 6 ảnh đã duyệt",
+            "why": "Dải ảnh đầu trang cần đủ ảnh để khách thấy phong cách của bạn.",
+            "action": "Tải ảnh lên"
+          },
+          "cover": {
+            "label": "Có ảnh bìa",
+            "why": "Ảnh bìa hiện ở đầu trang và trong khung xem trước khi gửi link qua Zalo, Messenger.",
+            "action": "Thêm ảnh bìa"
+          }
+        }
+      },
+      "qr": {
+        "title": "Mã QR",
+        "alt": "Mã QR dẫn tới trang đặt lịch của {name}",
+        "downloadCard": "Tải thẻ in (PNG)",
+        "downloadQr": "Tải riêng mã QR",
+        "working": "Đang tạo…",
+        "hint": "Đặt thẻ ở quầy, in lên danh thiếp, hoặc đăng lên tin (story). Khách mở camera điện thoại quét là vào được trang."
+      },
+      "card": {
+        "scan": "Quét để xem lịch trống & đặt lịch"
+      },
+      "preview": {
+        "title": "Khi gửi link trong chat",
+        "body": "Hình minh hoạ: Zalo và Messenger tự lấy ảnh bìa, tên và các thông tin này từ trang của bạn.",
+        "noCover": "Chưa có ảnh bìa",
+        "headline": "Đặt lịch với {name} · {role}",
+        "from": "Từ {price}",
+        "rating": "★ {rating} ({count} đánh giá)",
+        "verified": "Đã xác minh danh tính",
+        "cta": "Xem lịch trống, bảng giá và đặt lịch trên Fgrapher"
       }
     }
   },
@@ -5270,7 +5396,8 @@
       "sectionWork": "Công việc",
       "sectionProfile": "Hồ sơ",
       "sectionMarket": "Chợ F",
-      "sectionHiring": "Thuê dịch vụ"
+      "sectionHiring": "Thuê dịch vụ",
+      "shareLink": "Link & mã QR"
     },
     "suspendedAccountNotice": {
       "title": "Tài khoản của bạn đã bị tạm khóa",
@@ -5389,5 +5516,176 @@
     "close": "Đóng",
     "saveFailed": "Chưa lưu được lựa chọn cookie. Vui lòng thử lại.",
     "regionLabel": "Thông báo cookie"
+  },
+  "linkPage": {
+    "metadata": {
+      "title": "Đặt lịch với {name} · {role}",
+      "from": "Từ {price}",
+      "rating": "★ {rating} ({count} đánh giá)",
+      "verified": "Đã xác minh danh tính",
+      "cta": "Xem lịch trống, bảng giá và đặt lịch trên Fgrapher"
+    },
+    "header": {
+      "fullProfile": "Hồ sơ đầy đủ"
+    },
+    "own": {
+      "body": "Đây là trang khách thấy khi mở link hoặc quét mã QR của bạn.",
+      "action": "Lấy link & mã QR"
+    },
+    "hero": {
+      "from": "Từ {price}",
+      "rating": "{rating} · {count} đánh giá",
+      "new": "Mới trên Fgrapher",
+      "shoots": "{count} buổi đã chụp",
+      "years": "{count} năm kinh nghiệm",
+      "response": {
+        "hour": "Trả lời trong 1 giờ",
+        "hours": "Trả lời trong {count} giờ",
+        "day": "Trả lời trong 1 ngày",
+        "days": "Trả lời trong {count} ngày"
+      },
+      "coverAlt": "Ảnh bìa của {name}",
+      "verified": "Đã xác minh danh tính",
+      "seeCalendar": "Xem lịch trống",
+      "message": "Nhắn tin tư vấn",
+      "workTitle": "Ảnh đã chụp",
+      "photoAlt": "{album}, ảnh của {name}",
+      "allWork": "Xem toàn bộ portfolio"
+    },
+    "nav": {
+      "label": "Các phần của trang",
+      "reviews": "Đánh giá",
+      "prices": "Bảng giá",
+      "terms": "Quyền lợi",
+      "calendar": "Lịch trống",
+      "contact": "Liên hệ"
+    },
+    "steps": {
+      "reviews": {
+        "title": "Khách nói gì",
+        "intro": "Chỉ khách đã chụp xong qua Fgrapher mới viết được đánh giá."
+      },
+      "prices": {
+        "title": "Bảng giá",
+        "intro": "Chọn một gói để xem quyền lợi và lịch trống theo gói đó."
+      },
+      "terms": {
+        "title": "Yêu cầu & quyền lợi",
+        "intro": "Đọc trước khi đặt: bạn nhận được gì, và cần lưu ý gì về cọc, hủy và dời lịch."
+      },
+      "calendar": {
+        "title": "Lịch trống",
+        "intro": "Ngày còn trống của {name}, lấy từ lịch làm việc thật. Chọn ngày rồi chọn giờ."
+      },
+      "contact": {
+        "title": "Sẵn sàng làm việc với {name}?"
+      }
+    },
+    "reviews": {
+      "newBadge": "Tham gia Fgrapher từ {date}",
+      "emptyTitle": "{name} chưa có đánh giá nào trên Fgrapher.",
+      "emptyBody": "Đánh giá chỉ được viết sau một buổi chụp thật đặt qua Fgrapher, nên hồ sơ mới thường chưa có. Bạn có thể xem ảnh đã chụp và nhắn tin hỏi thêm trước khi đặt.",
+      "countLine": "{count} đánh giá từ khách đã chụp",
+      "breakdownLabel": "Phân bố số sao",
+      "anonymous": "Khách Fgrapher",
+      "shotOn": "Đánh giá ngày {date}",
+      "starsLabel": "{count} trên 5 sao",
+      "responseFrom": "{name} trả lời",
+      "seeAll": "Xem tất cả {count} đánh giá"
+    },
+    "packages": {
+      "emptyTitle": "{name} chưa đăng bảng giá.",
+      "emptyBody": "Nhắn tin để được báo giá theo nhu cầu của bạn.",
+      "askPrice": "Nhắn tin hỏi giá",
+      "photos": "{count} ảnh chỉnh sửa",
+      "delivery": "Giao ảnh sau {count} ngày",
+      "chosen": "Đã chọn",
+      "tfp": "TFP / Hợp tác",
+      "from": "Từ {price}",
+      "pickDate": "Chọn ngày cho gói này",
+      "choose": "Chọn gói này",
+      "finalPriceNote": "Giá cuối cùng do bạn và {name} chốt khi xác nhận lịch."
+    },
+    "terms": {
+      "getTitle": "Bạn nhận được",
+      "getForPackage": "Theo gói “{name}”",
+      "get": {
+        "photos": "{count} ảnh đã chỉnh sửa",
+        "delivery": "Nhận ảnh sau {count} ngày",
+        "verifiedOn": "Danh tính của {name} đã được Fgrapher xác minh ({date})",
+        "verified": "Danh tính của {name} đã được Fgrapher xác minh",
+        "phone": "Số điện thoại đã được xác minh",
+        "moderated": "Ảnh trong hồ sơ đã qua kiểm duyệt trước khi hiển thị",
+        "record": "Gói, ngày, giờ và giá được ghi lại trong lịch hẹn, hai bên cùng xem lại được",
+        "review": "Sau buổi chụp, bạn được viết đánh giá công khai",
+        "free": "Gửi yêu cầu và nhắn tin miễn phí, Fgrapher không thu phí của bạn"
+      },
+      "needTitle": "Trước khi đặt, bạn cần biết",
+      "need": {
+        "deposit": "Đặt cọc",
+        "depositPercent": "Cọc {percent}% giá gói.",
+        "depositDirect": "Cọc trả trực tiếp cho {name}; Fgrapher không giữ tiền.",
+        "depositAsk": "{name} chưa ghi mức cọc. Hỏi rõ trong tin nhắn trước khi chuyển tiền.",
+        "cancel": "Hủy lịch",
+        "reschedule": "Dời lịch",
+        "askInChat": "Chưa ghi. Hỏi {name} trong tin nhắn.",
+        "notice": "Đặt trước",
+        "noticeValue": "Ít nhất {hours} giờ trước buổi chụp",
+        "confirm": "Xác nhận",
+        "confirmValue": "{name} nhận hoặc từ chối trong 48 giờ. Quá hạn, yêu cầu tự hủy và bạn không mất gì.",
+        "response": "Trả lời tin nhắn",
+        "responseValue": {
+          "hour": "Thường trong 1 giờ",
+          "hours": "Thường trong {count} giờ",
+          "day": "Thường trong 1 ngày",
+          "days": "Thường trong {count} ngày"
+        },
+        "area": "Khu vực",
+        "areaNationwide": "Nhận chụp toàn quốc",
+        "areaRadius": "Trong khoảng {km} km quanh {place}"
+      },
+      "safetyTitle": "Giữ an toàn cho tiền cọc",
+      "safetyBody": "Chỉ chuyển cọc sau khi {name} đã xác nhận lịch trên Fgrapher, và giữ lại biên nhận chuyển khoản. Đừng chuyển tiền cho ai tự xưng là {name} ở ngoài trang này."
+    },
+    "calendar": {
+      "packageLegend": "Gói",
+      "pausedBody": "{name} đang tạm ngưng nhận lịch mới. Bạn vẫn có thể nhắn tin để hỏi lịch sắp tới.",
+      "loadFailed": "Chưa tải được lịch trống. Thử tải lại trang.",
+      "noFreeDays": "{name} không còn ngày trống trong tháng này. Xem tháng sau hoặc nhắn tin hỏi.",
+      "freeCount": "{count} ngày còn trống trong tháng",
+      "timesFor": "Giờ trống ngày {date}",
+      "golden": "Bình minh {sunrise} · Hoàng hôn {sunset}",
+      "timezone": "Giờ Việt Nam (GMT+7)",
+      "noTimes": "Ngày này không còn giờ trống.",
+      "ownNote": "Khách sẽ thấy lịch này. Sửa giờ làm việc ở <link>Lịch làm việc</link>.",
+      "from": "Từ {price}",
+      "noChargeYet": "Gửi yêu cầu chưa mất tiền. Bạn chỉ chuyển cọc sau khi lịch được xác nhận.",
+      "sendRequest": "Gửi yêu cầu đặt lịch",
+      "askAboutDay": "Hỏi về ngày này",
+      "askAboutDates": "Nhắn tin hỏi lịch",
+      "pickTimeHint": "Chọn một giờ để gửi yêu cầu.",
+      "pickDayHint": "Chọn một ngày còn trống để xem giờ."
+    },
+    "contact": {
+      "messageTitle": "Nhắn tin tư vấn",
+      "messageBody": "Hỏi {name} về concept, địa điểm hay giá. Tin nhắn đầu tiên đã được soạn sẵn, bạn chỉ cần sửa và gửi.",
+      "messageBodyResponse": "Hỏi {name} về concept, địa điểm hay giá. {time}.",
+      "messageAction": "Mở tin nhắn",
+      "bookTitle": "Đặt lịch",
+      "bookBody": "Chọn gói, ngày và giờ rồi gửi yêu cầu. {name} xác nhận trong 48 giờ, và bạn chưa mất tiền cho đến lúc đó.",
+      "bookAction": "Bắt đầu đặt lịch",
+      "bookWithPick": "Gửi yêu cầu với ngày đã chọn",
+      "paused": "Đang tạm ngưng nhận lịch",
+      "signInNote": "Bạn sẽ đăng nhập hoặc tạo tài khoản miễn phí trước khi nhắn tin hoặc gửi yêu cầu."
+    },
+    "footer": {
+      "about": "Trang đặt lịch của {name} trên Fgrapher.",
+      "fullProfile": "Xem hồ sơ đầy đủ"
+    },
+    "sticky": {
+      "label": "Đặt lịch nhanh",
+      "book": "Gửi yêu cầu",
+      "pickDate": "Chọn ngày"
+    }
   }
 }
