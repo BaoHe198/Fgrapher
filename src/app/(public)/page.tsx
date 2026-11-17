@@ -1,28 +1,24 @@
 import type { Metadata } from "next";
-import { BadgeCheck, CalendarCheck, Star } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { ArtistRow, type RowArtist } from "@/components/home/artist-row";
 import { ClosingCta } from "@/components/home/closing-cta";
-import { HeroCollage, HeroStrip } from "@/components/home/hero-collage";
 import { Darkroom } from "@/components/home/darkroom";
-import { FeaturedArtists } from "@/components/home/featured-artists";
+import { HomeSearch } from "@/components/home/home-search";
 import { MapTeaser } from "@/components/home/map-teaser";
 import { MoreFromFgrapher } from "@/components/home/more-from-fgrapher";
-import { RoleTiles } from "@/components/home/role-tiles";
 import { StyleGrid } from "@/components/home/style-grid";
 import { TrustSection } from "@/components/home/trust-section";
-import { HeroSearch } from "@/components/sections/hero-search";
-import { RiseOnView } from "@/components/ui/rise-on-view";
-import { SectionHead } from "@/components/ui/section-head";
-// The "features" and "how it works" sections that sat between the featured
-// artists and the CTA were removed (project owner, 26/09/2026): their copy
-// was too thin to describe the product. Do not bring them back as-is. The
-// 09/2026 redesign's trust block (TrustSection) replaces them with concrete
-// proof - a real review, the verified badge - rather than generic copy.
 import { features } from "@/lib/features";
+import { shortPlace } from "@/lib/location";
 import { formatCurrency } from "@/lib/utils";
-import { getHomeShowcase, HOME_STYLES } from "@/services/home";
-import { getFeaturedProfiles } from "@/services/search";
+import { getHomeShowcase, HOME_ROLES } from "@/services/home";
+import { listProvinces } from "@/services/geography";
+import {
+  getFeaturedProfiles,
+  SEARCHABLE_ROLES,
+  searchProfiles,
+} from "@/services/search";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo.home");
@@ -38,94 +34,102 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// "Được yêu thích" is earned, never assigned: a 4.8 average over at least
+// three reviews, all from completed bookings. Airbnb's Guest Favourite works
+// the same way (a rating bar plus a minimum count), and anything looser
+// would put the badge on a profile one happy friend had reviewed.
+const FAVOURITE_MIN_RATING = 4.8;
+const FAVOURITE_MIN_REVIEWS = 3;
+
+// The home page, laid out like Airbnb's (owner, 17/11/2026): service tabs
+// and one search pill at the top, then rows of photo cards a visitor can
+// scroll sideways - one row per kind of service, best rated first. The
+// sections that are Fgrapher's own (styles, the darkroom, Bản đồ F, the
+// trust band) follow the rows.
 export default async function LandingPage() {
-  const t = await getTranslations();
-  const tLanding = await getTranslations("publicPages.landing");
-
-  const [featuredProfiles, showcase] = await Promise.all([
-    getFeaturedProfiles(4),
-    getHomeShowcase(),
+  const [t, roleT, rowT] = await Promise.all([
+    getTranslations(),
+    getTranslations("role"),
+    getTranslations("home.rows"),
   ]);
+  const rowRoles = HOME_ROLES.filter((role) => SEARCHABLE_ROLES.includes(role));
 
-  const artists = featuredProfiles.map((profile) => ({
-    id: profile.userId,
-    name: profile.displayName ?? profile.user.name ?? tLanding("unnamed"),
-    username: profile.user.username ?? "",
-    roles: profile.roles.map((role) => t(`role.${role}`)),
-    city: profile.location,
-    rating:
-      profile.avgRating > 0
-        ? profile.avgRating.toFixed(1)
-        : tLanding("newBadge"),
-    reviews: profile.reviewCount,
-    price: profile.priceMin
-      ? tLanding("priceFrom", { price: formatCurrency(profile.priceMin) })
-      : tLanding("contactForPricing"),
-    avatar: profile.user.avatar ?? undefined,
-    media: profile.media,
-    nationwideLabel: profile.servesNationwide
-      ? t("publicPages.browse.nationwideBadge")
-      : undefined,
-    categories: profile.categories,
-  }));
+  const [provinces, showcase, featuredProfiles, ...roleResults] =
+    await Promise.all([
+      listProvinces(),
+      getHomeShowcase(),
+      getFeaturedProfiles(4),
+      ...rowRoles.map((role) =>
+        searchProfiles({ roles: [role], sort: "rating", limit: 12 }),
+      ),
+    ]);
+
+  const rows = rowRoles
+    .map((role, index) => {
+      const artists: RowArtist[] = (roleResults[index]?.data ?? []).map(
+        (profile) => {
+          const place = profile.location ? shortPlace(profile.location) : "";
+          return {
+            id: profile.userId,
+            username: profile.user.username ?? "",
+            name:
+              profile.displayName ??
+              profile.user.name ??
+              t("publicPages.landing.unnamed"),
+            subtitle: place
+              ? t("publicPages.profile.roleIn", {
+                  role: roleT(role),
+                  place,
+                })
+              : roleT(role),
+            cover:
+              profile.media.find((media) => media.type === "IMAGE")?.url ??
+              null,
+            priceFrom: profile.priceMin
+              ? formatCurrency(profile.priceMin)
+              : null,
+            rating:
+              profile.reviewCount > 0
+                ? profile.avgRating.toFixed(1).replace(".", ",")
+                : null,
+            reviews: profile.reviewCount,
+            favourite:
+              profile.reviewCount >= FAVOURITE_MIN_REVIEWS &&
+              profile.avgRating >= FAVOURITE_MIN_RATING,
+          };
+        },
+      );
+      return {
+        role,
+        title: rowT(`titles.${role}`),
+        href: `/browse?roles=${role}`,
+        artists: artists.filter((artist) => artist.username),
+      };
+    })
+    .filter((row) => row.artists.length > 0);
 
   return (
     <>
-      {/* HERO (owner, 16/11/2026, replacing the search-only band of
-          10/10/2026): the page opens on a headline and a drifting wall of
-          photographs, with the search sitting right under them. */}
-      <section className="relative overflow-hidden bg-green-900 text-gold-50">
-        <div className="mx-auto grid max-w-[1440px] items-center gap-12 px-8 max-md:px-5 lg:h-[540px] lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)]">
-          <div className="flex flex-col gap-5 pt-14 pb-6 max-md:gap-4 max-md:pt-8 max-md:pb-2 lg:py-0">
-            <span className="font-mono text-meta tracking-[0.14em] text-gold-400 uppercase">
-              {t("hero.eyebrow")}
-            </span>
-            <h1 className="max-w-[15ch] text-display-2xl text-balance text-gold-50 max-md:text-display-lg">
-              {t("hero.title")}
-            </h1>
-            <p className="max-w-xl text-body-lg text-green-200 max-md:text-body-md">
-              {t("hero.sub")}
-            </p>
-            <ul className="flex flex-wrap gap-x-5 gap-y-2 text-body-sm text-gold-50 max-md:hidden">
-              <li className="flex items-center gap-1.5">
-                <BadgeCheck aria-hidden className="size-4 text-gold-400" />
-                {t("hero.pointVerified")}
-              </li>
-              <li className="flex items-center gap-1.5">
-                <Star aria-hidden className="size-4 text-gold-400" />
-                {t("hero.pointReviews")}
-              </li>
-              <li className="flex items-center gap-1.5">
-                <CalendarCheck aria-hidden className="size-4 text-gold-400" />
-                {t("hero.pointFree")}
-              </li>
-            </ul>
-          </div>
-          <HeroCollage className="max-lg:hidden" />
-        </div>
-        <HeroStrip className="mt-4 lg:hidden" />
-        <div className="relative mx-auto max-w-[1440px] px-8 pt-6 pb-10 max-md:px-5 max-md:pt-5 max-md:pb-6 lg:-mt-10 lg:pt-0">
-          <HeroSearch marketplaceEnabled={features.marketplaceEnabled} />
+      <section className="border-b border-border-subtle bg-bg-page pt-6 pb-8 max-md:pt-4 max-md:pb-6">
+        <div className="mx-auto max-w-[1440px] px-8 max-md:px-5">
+          {/* Airbnb opens on the search, not a headline; the page still
+              needs its one h1 for screen readers and search engines. */}
+          <h1 className="sr-only">{t("hero.title")}</h1>
+          <HomeSearch
+            provinces={provinces.map((p) => ({ code: p.code, name: p.name }))}
+            roles={rowRoles}
+          />
         </div>
       </section>
 
-      <RoleTiles
-        tiles={showcase.roles}
-        marketplaceEnabled={features.marketplaceEnabled}
-      />
-
-      {artists.length > 0 ? (
-        <section className="mx-auto max-w-[1440px] px-8 pt-16 max-md:px-5 max-md:pt-10">
-          <RiseOnView>
-            <SectionHead
-              title={t("home.featured")}
-              actionLabel={t("home.seeAll")}
-              actionHref="/browse"
-            />
-          </RiseOnView>
-          <FeaturedArtists artists={artists} styles={HOME_STYLES} />
-        </section>
-      ) : null}
+      {rows.map((row) => (
+        <ArtistRow
+          key={row.role}
+          title={row.title}
+          href={row.href}
+          artists={row.artists}
+        />
+      ))}
 
       <StyleGrid tiles={showcase.styles} />
 
@@ -134,11 +138,14 @@ export default async function LandingPage() {
       <MapTeaser
         artists={featuredProfiles.map((profile) => ({
           id: profile.userId,
-          name: profile.displayName ?? profile.user.name ?? tLanding("unnamed"),
+          name:
+            profile.displayName ??
+            profile.user.name ??
+            t("publicPages.landing.unnamed"),
           photoUrl: profile.media.find((m) => m.type === "IMAGE")?.url ?? null,
           priceMin: profile.priceMin,
           location: profile.location,
-          roleLabel: t(`role.${profile.roles[0]}`),
+          roleLabel: roleT(profile.roles[0]),
         }))}
       />
 

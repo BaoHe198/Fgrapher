@@ -327,6 +327,34 @@
         "title": "Cộng đồng F",
         "body": "Tìm cộng sự, chia sẻ bộ ảnh và kinh nghiệm."
       }
+    },
+    "search": {
+      "tabsLabel": "Loại dịch vụ",
+      "all": "Tất cả",
+      "label": "Tìm nghệ sĩ",
+      "where": "Ở đâu",
+      "anywhere": "Mọi tỉnh/thành",
+      "when": "Ngày nào",
+      "what": "Dịch vụ",
+      "anyService": "Mọi dịch vụ",
+      "submit": "Tìm"
+    },
+    "rows": {
+      "previous": "Xem trước",
+      "next": "Xem tiếp",
+      "favourite": "Được yêu thích",
+      "new": "Mới",
+      "from": "Từ {price}",
+      "askPrice": "Hỏi giá",
+      "titles": {
+        "PHOTOGRAPHER": "Nhiếp ảnh gia cho mọi ngân sách",
+        "VIDEOGRAPHER": "Quay phim cưới, sự kiện và quảng cáo",
+        "MAKEUP_ARTIST": "Trang điểm cô dâu và dự tiệc",
+        "MODEL": "Người mẫu ảnh",
+        "STUDIO": "Studio cho thuê theo giờ",
+        "COSTUME_SHOP": "Thuê trang phục để chụp",
+        "CAMERA_SHOP": "Cửa hàng máy ảnh"
+      }
     }
   },
   "foot": {

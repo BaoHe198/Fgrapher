@@ -327,6 +327,34 @@
         "title": "Cộng đồng F",
         "body": "Find collaborators, share shoots and know-how."
       }
+    },
+    "search": {
+      "tabsLabel": "Kinds of service",
+      "all": "All",
+      "label": "Find an artist",
+      "where": "Where",
+      "anywhere": "Anywhere",
+      "when": "When",
+      "what": "Service",
+      "anyService": "Any service",
+      "submit": "Search"
+    },
+    "rows": {
+      "previous": "Previous",
+      "next": "Next",
+      "favourite": "Customer favourite",
+      "new": "New",
+      "from": "From {price}",
+      "askPrice": "Ask for a price",
+      "titles": {
+        "PHOTOGRAPHER": "Photographers for every budget",
+        "VIDEOGRAPHER": "Videographers for weddings, events and ads",
+        "MAKEUP_ARTIST": "Bridal and party make-up",
+        "MODEL": "Photo models",
+        "STUDIO": "Studios to rent by the hour",
+        "COSTUME_SHOP": "Outfits to rent for a shoot",
+        "CAMERA_SHOP": "Camera shops"
+      }
     }
   },
   "foot": {
