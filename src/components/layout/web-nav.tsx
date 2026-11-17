@@ -168,14 +168,14 @@ export function WebNav({
             {isPaid ? (
               <Link
                 href="/dashboard"
-                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-sm font-semibold! whitespace-nowrap text-text-primary transition-colors hover:bg-bg-sunken lg:inline-flex"
+                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-md whitespace-nowrap text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken lg:inline-flex"
               >
                 {t("dashboard")}
               </Link>
             ) : (
               <Link
                 href="/pricing"
-                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-sm font-semibold! whitespace-nowrap text-text-primary transition-colors hover:bg-bg-sunken lg:inline-flex"
+                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-md whitespace-nowrap text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken lg:inline-flex"
               >
                 {t("becomeProvider")}
               </Link>
