@@ -354,7 +354,8 @@
         "STUDIO": "Studios to rent by the hour",
         "COSTUME_SHOP": "Outfits to rent for a shoot",
         "CAMERA_SHOP": "Camera shops"
-      }
+      },
+      "inProvince": "{role} in {place}"
     }
   },
   "foot": {

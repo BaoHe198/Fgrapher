@@ -354,7 +354,8 @@
         "STUDIO": "Studio cho thuê theo giờ",
         "COSTUME_SHOP": "Thuê trang phục để chụp",
         "CAMERA_SHOP": "Cửa hàng máy ảnh"
-      }
+      },
+      "inProvince": "{role} ở {place}"
     }
   },
   "foot": {
