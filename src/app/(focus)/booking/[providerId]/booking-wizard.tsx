@@ -1150,15 +1150,10 @@ export function BookingWizard({
             </div>
           </div>
 
+          {/* Airbnb's request-to-book column (owner, 17/11/2026): the
+              summary card first and always in view; the sky picture only on
+              the time step, where sunrise and golden hour help choose. */}
           <aside className="hidden flex-col gap-4 lg:sticky lg:top-[132px] lg:flex">
-            <BookingVisual
-              step={step}
-              stepName={stepNames[step]}
-              photos={providerPhotos}
-              sun={sun}
-              time={draft.time}
-              showSky={current === "time"}
-            />
             <BookingSummary
               provider={{
                 name: providerName,
@@ -1166,12 +1161,23 @@ export function BookingWizard({
                 rating: providerRating,
                 reviewCount: providerReviewCount,
                 verified: providerVerified,
+                photoUrl: providerPhotos[0] ?? null,
               }}
               rows={summaryRows}
               total={total}
               totalNote={t("flow.totalNote")}
               responseNote={responseNote}
             />
+            {current === "time" ? (
+              <BookingVisual
+                step={step}
+                stepName={stepNames[step]}
+                photos={providerPhotos}
+                sun={sun}
+                time={draft.time}
+                showSky
+              />
+            ) : null}
           </aside>
         </div>
       </div>

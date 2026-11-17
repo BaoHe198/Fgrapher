@@ -5,6 +5,7 @@ import { BadgeCheck, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FgImage } from "@/components/ui/fg-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,8 @@ interface BookingSummaryProps {
     rating?: number | null;
     reviewCount?: number;
     verified?: boolean;
+    /** A photo of their work for the Airbnb-style header row. */
+    photoUrl?: string | null;
   };
   rows: BookingSummaryRow[];
   /** Formatted, e.g. "5.500.000₫", or null for "Báo giá sau". */
@@ -60,17 +63,31 @@ export function BookingSummary({
         className,
       )}
     >
-      <div className="flex items-center gap-3">
-        <Avatar size="lg" className="size-12">
-          {provider.avatarUrl ? (
-            <AvatarImage src={provider.avatarUrl} alt="" />
-          ) : null}
-          <AvatarFallback>
-            {provider.name.slice(0, 1).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+      {/* Airbnb's request-to-book card opens on the listing: a photo of
+          the work beside the name and rating. Without one, the avatar. */}
+      <div className="flex items-center gap-4">
+        {provider.photoUrl ? (
+          <FgImage
+            src={provider.photoUrl}
+            alt=""
+            ratio="1/1"
+            rounded="lg"
+            reveal={false}
+            sizes="104px"
+            className="w-[104px] shrink-0"
+          />
+        ) : (
+          <Avatar size="lg" className="size-12">
+            {provider.avatarUrl ? (
+              <AvatarImage src={provider.avatarUrl} alt="" />
+            ) : null}
+            <AvatarFallback>
+              {provider.name.slice(0, 1).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        )}
         <div className="flex min-w-0 flex-col">
-          <span className="truncate text-heading-sm text-text-primary">
+          <span className="line-clamp-2 text-heading-sm text-text-primary">
             {provider.name}
           </span>
           <span className="flex flex-wrap items-center gap-x-1.5 text-meta text-text-tertiary">
