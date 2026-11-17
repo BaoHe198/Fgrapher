@@ -1,35 +1,21 @@
 "use client";
 
 import type { Role } from "@prisma/client";
-import {
-  Building2,
-  Camera,
-  LayoutGrid,
-  Palette,
-  Search,
-  Shirt,
-  UserRound,
-  Video,
-  type LucideIcon,
-} from "lucide-react";
+import { Camera, LayoutGrid, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useHomeFilter } from "@/components/home/home-filter";
+import {
+  ProvincePicker,
+  ROLE_ICONS,
+  ServicePicker,
+} from "@/components/home/search-pickers";
 import { DateField } from "@/components/ui/date-field";
 import { cn } from "@/lib/utils";
 import { vietnamDateKey } from "@/lib/vietnam/date";
-
-const TAB_ICONS: Partial<Record<Role, LucideIcon>> = {
-  PHOTOGRAPHER: Camera,
-  VIDEOGRAPHER: Video,
-  MAKEUP_ARTIST: Palette,
-  MODEL: UserRound,
-  STUDIO: Building2,
-  COSTUME_SHOP: Shirt,
-};
 
 // The top of the home page, Airbnb-style (owner, 17/11/2026): a row of
 // service tabs that filter the home page in place (see home-filter.tsx),
@@ -83,15 +69,13 @@ export function HomeSearch({
   const field =
     "flex min-w-0 flex-1 flex-col gap-0.5 rounded-full px-6 py-3 text-left transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken focus-within:bg-bg-sunken max-md:rounded-[var(--fg-radius-lg)] max-md:px-4";
   const label = "text-meta font-semibold! text-text-primary";
-  const control =
-    "w-full min-w-0 cursor-pointer bg-transparent text-body-sm text-text-secondary outline-none";
 
   return (
     <div className="flex flex-col items-center gap-6">
       <nav aria-label={t("tabsLabel")} className="w-full">
         <ul className="mx-auto flex w-fit max-w-full gap-6 overflow-x-auto px-1 pb-1 [scrollbar-width:none] sm:gap-9 [&::-webkit-scrollbar]:hidden">
           {([null, ...roles] as (Role | null)[]).map((r) => {
-            const Icon = r ? (TAB_ICONS[r] ?? Camera) : LayoutGrid;
+            const Icon = r ? (ROLE_ICONS[r] ?? Camera) : LayoutGrid;
             const active = r === tab;
             return (
               <li key={r ?? "all"} className="shrink-0">
@@ -147,21 +131,7 @@ export function HomeSearch({
         onSubmit={submit}
         className="flex w-full max-w-[850px] items-center gap-1 rounded-full border border-border-subtle bg-bg-surface p-2 shadow-[0_6px_24px_-8px_hsl(264_40%_14%/0.25)] max-md:flex-col max-md:items-stretch max-md:rounded-[var(--fg-radius-xl)]"
       >
-        <label className={field}>
-          <span className={label}>{t("where")}</span>
-          <select
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className={control}
-          >
-            <option value="">{t("anywhere")}</option>
-            {provinces.map((p) => (
-              <option key={p.code} value={p.code}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ProvincePicker provinces={provinces} value={city} onChange={setCity} />
         <span aria-hidden className="h-8 w-px bg-border-subtle max-md:hidden" />
         <div className={field}>
           <span className={label}>{t("when")}</span>
@@ -174,21 +144,7 @@ export function HomeSearch({
           />
         </div>
         <span aria-hidden className="h-8 w-px bg-border-subtle max-md:hidden" />
-        <label className={field}>
-          <span className={label}>{t("what")}</span>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className={control}
-          >
-            <option value="">{t("anyService")}</option>
-            {roles.map((r) => (
-              <option key={r} value={r}>
-                {roleT(r)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ServicePicker roles={roles} value={role} onChange={setRole} />
         <button
           type="submit"
           aria-label={t("submit")}

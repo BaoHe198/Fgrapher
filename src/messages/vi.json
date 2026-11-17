@@ -350,7 +350,11 @@
       "when": "Ngày nào",
       "what": "Dịch vụ",
       "anyService": "Mọi dịch vụ",
-      "submit": "Tìm"
+      "submit": "Tìm",
+      "clearWhere": "Xoá tỉnh/thành đã chọn",
+      "pickProvince": "Tìm nghệ sĩ ở tỉnh/thành",
+      "noProvince": "Không có tỉnh/thành nào khớp",
+      "anywhereHint": "Xem nghệ sĩ khắp cả nước"
     },
     "rows": {
       "previous": "Xem trước",

@@ -350,7 +350,11 @@
       "when": "When",
       "what": "Service",
       "anyService": "Any service",
-      "submit": "Search"
+      "submit": "Search",
+      "clearWhere": "Clear the chosen province",
+      "pickProvince": "Find artists in a province",
+      "noProvince": "No province matches",
+      "anywhereHint": "Artists across the country"
     },
     "rows": {
       "previous": "Previous",
