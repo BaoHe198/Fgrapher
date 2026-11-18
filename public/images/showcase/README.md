@@ -48,7 +48,7 @@ khách hàng thật của Fgrapher. Ghi công dưới đây để tiện tra c�
 | `styles/portrait-1.jpg`     | [Cris Trung](https://unsplash.com/@cris_trung)     | https://unsplash.com/photos/3wK7RLRAAkA |
 | `styles/portrait-2.jpg`     | [Tron Le](https://unsplash.com/@tronle_sg)         | https://unsplash.com/photos/aSI_hzGBSY0 |
 | `styles/portrait-3.jpg`     | [Peter Nguyen](https://unsplash.com/@peterng237)   | https://unsplash.com/photos/jVDbmshAl4o |
-| `styles/yearbook-1.jpg`     | KYMCO Việt Nam (Pexels)                            | https://www.pexels.com/photo/34022738/  |
+| `styles/yearbook-1.jpg`     | Luyên TC (Pexels)                                  | https://www.pexels.com/photo/37324146/  |
 | `styles/yearbook-2.jpg`     | [Elist Nguyen](https://unsplash.com/@hieuanhcauam) | https://unsplash.com/photos/GUmICv-AfyI |
 | `styles/yearbook-3.jpg`     | Hồng Quang Official (Pexels)                       | https://www.pexels.com/photo/32859751/  |
 | `styles/event-1.jpg`        | [Vivu Vietnam](https://unsplash.com/@bttsg)        | https://unsplash.com/photos/NVpEcIdclUI |
