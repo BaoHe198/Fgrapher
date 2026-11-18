@@ -1,0 +1,36 @@
+name: Deploy preview
+
+# A shareable test site for manual testing from other machines (18/11/2026).
+# Vercel's own git integration stopped creating Preview deployments after
+# 28/09/2026, so this deploys the `preview` branch with the same Vercel
+# secrets the production workflow uses — but WITHOUT --prod, so Vercel builds
+# it as a Preview deployment with the Preview-scoped env vars (fgrapher-dev
+# database, never fgrapher-prod). No migration step: the dev database is
+# migrated locally per CLAUDE.md's dev → preview → production rule.
+on:
+  push:
+    branches: [preview]
+  workflow_dispatch:
+
+concurrency:
+  group: preview-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Deploy to Vercel preview
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ] \
+            || { echo "::error title=Vercel secrets::VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID must be repository secrets (not only production-environment secrets)."; exit 1; }
+          url=$(npx vercel@latest deploy --yes --token="$VERCEL_TOKEN")
+          echo "## Preview deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "$url" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Preview URL::$url"
