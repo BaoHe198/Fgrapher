@@ -34,8 +34,8 @@ export const ROLE_PHOTOS = {
     photo("roles/makeup-artist-2.jpg", 1200, 1800),
   ],
   MODEL: [
-    photo("roles/model.jpg", 1200, 1524),
-    photo("roles/model-2.jpg", 1200, 1800),
+    photo("roles/model.jpg", 1200, 1800),
+    photo("roles/model-2.jpg", 1200, 1801),
   ],
   STUDIO: [
     photo("roles/studio.jpg", 1200, 800),
@@ -51,13 +51,13 @@ export const ROLE_PHOTOS = {
 /** Per style: the large frame first, then the two small ones. */
 export const STYLE_PHOTOS = {
   WEDDING: [
-    photo("styles/wedding-1.jpg", 1200, 800),
-    photo("styles/wedding-2.jpg", 1200, 1799),
-    photo("styles/wedding-3.jpg", 1200, 1800),
+    photo("styles/wedding-1.jpg", 1200, 1000),
+    photo("styles/wedding-2.jpg", 1200, 1500),
+    photo("styles/wedding-3.jpg", 1200, 1500),
   ],
   PORTRAIT: [
     photo("styles/portrait-1.jpg", 1200, 800),
-    photo("styles/portrait-2.jpg", 1200, 875),
+    photo("styles/portrait-2.jpg", 1200, 1500),
     photo("styles/portrait-3.jpg", 1200, 1800),
   ],
   YEARBOOK: [
