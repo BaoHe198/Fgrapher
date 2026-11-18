@@ -23,16 +23,16 @@ const photo = (file: string, width: number, height: number): ShowcasePhoto => ({
 /** Per role: the tile photo first, then a second one for the About sheet. */
 export const ROLE_PHOTOS = {
   PHOTOGRAPHER: [
-    photo("roles/photographer.jpg", 1200, 800),
-    photo("roles/photographer-2.jpg", 1200, 1801),
+    photo("roles/photographer.jpg", 1200, 1800),
+    photo("roles/photographer-2.jpg", 1200, 1800),
   ],
   VIDEOGRAPHER: [
     photo("roles/videographer.jpg", 1200, 1801),
     photo("roles/videographer-2.jpg", 1200, 1801),
   ],
   MAKEUP_ARTIST: [
-    photo("roles/makeup-artist.jpg", 1200, 1553),
-    photo("roles/makeup-artist-2.jpg", 1200, 1803),
+    photo("roles/makeup-artist.jpg", 1200, 1801),
+    photo("roles/makeup-artist-2.jpg", 1200, 1800),
   ],
   MODEL: [
     photo("roles/model.jpg", 1200, 1407),
@@ -74,11 +74,11 @@ export const STYLE_PHOTOS = {
   FASHION: [
     photo("styles/fashion-1.jpg", 1200, 1799),
     photo("styles/fashion-2.jpg", 1200, 1800),
-    photo("styles/fashion-3.jpg", 1200, 1799),
+    photo("styles/fashion-3.jpg", 1200, 1800),
   ],
   PRODUCT: [
     photo("styles/product-1.jpg", 1200, 1000),
     photo("styles/product-2.jpg", 1200, 800),
-    photo("styles/product-3.jpg", 1200, 1800),
+    photo("styles/product-3.jpg", 1200, 1200),
   ],
 } satisfies Partial<Record<ProfileCategory, ShowcasePhoto[]>>;
