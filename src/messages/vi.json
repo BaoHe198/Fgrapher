@@ -680,6 +680,10 @@
       "continueButton": "Tiếp tục",
       "groupLegend": "Vai trò của bạn"
     },
+    "passwordInput": {
+      "show": "Hiện mật khẩu",
+      "hide": "Ẩn mật khẩu"
+    },
     "dialog": {
       "closeSr": "Đóng",
       "closeButton": "Đóng"

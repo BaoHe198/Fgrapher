@@ -43,6 +43,12 @@ interface MediaLightboxProps {
 const subscribeNoop = () => () => {};
 const OPEN_MS = 280;
 const CLOSE_MS = 260;
+// Moving between photos: the new one slides in from the side it came from
+// while fading up (owner, 18/11/2026). Held back until it has loaded, or
+// the slide would play over an empty frame and the photo pop in after.
+const SLIDE_MS = 320;
+const SLIDE_PX = 48;
+const SLIDE_FALLBACK_MS = 1500;
 const EASE_OUT = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 function prefersReducedMotion() {
@@ -83,6 +89,9 @@ export function MediaLightbox({
   const mediaRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const closing = useRef(false);
+  // 1 = arrived via "next" (enters from the right), -1 via "previous".
+  const slideDir = useRef<0 | 1 | -1>(0);
+  const slideFallback = useRef<number | undefined>(undefined);
 
   const isClient = useSyncExternalStore(
     subscribeNoop,
@@ -90,14 +99,49 @@ export function MediaLightbox({
     () => false,
   );
 
-  const next = useCallback(
-    () => onIndexChange((index + 1) % items.length),
-    [index, items.length, onIndexChange],
-  );
-  const previous = useCallback(
-    () => onIndexChange((index - 1 + items.length) % items.length),
-    [index, items.length, onIndexChange],
-  );
+  const next = useCallback(() => {
+    slideDir.current = 1;
+    onIndexChange((index + 1) % items.length);
+  }, [index, items.length, onIndexChange]);
+  const previous = useCallback(() => {
+    slideDir.current = -1;
+    onIndexChange((index - 1 + items.length) % items.length);
+  }, [index, items.length, onIndexChange]);
+
+  // Called once the new photo (or video frame) is ready to show.
+  const revealSlide = useCallback(() => {
+    const media = mediaRef.current;
+    const dir = slideDir.current;
+    if (!media || dir === 0) return;
+    slideDir.current = 0;
+    window.clearTimeout(slideFallback.current);
+    media.style.opacity = "";
+    media.animate(
+      [
+        { opacity: 0, transform: `translateX(${dir * SLIDE_PX}px)` },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: SLIDE_MS, easing: EASE_OUT },
+    );
+  }, []);
+
+  // Hide the frame as soon as the index changes, before paint, so the new
+  // photo never flashes in unanimated; revealSlide fades it back in. The
+  // timer covers a photo that never fires load (failed request).
+  const shownIndex = useRef(index);
+  useLayoutEffect(() => {
+    if (shownIndex.current === index) return;
+    shownIndex.current = index;
+    const media = mediaRef.current;
+    if (!media || slideDir.current === 0 || prefersReducedMotion()) {
+      slideDir.current = 0;
+      return;
+    }
+    media.style.opacity = "0";
+    window.clearTimeout(slideFallback.current);
+    slideFallback.current = window.setTimeout(revealSlide, SLIDE_FALLBACK_MS);
+  }, [index, revealSlide]);
+  useEffect(() => () => window.clearTimeout(slideFallback.current), []);
 
   // Close runs the open in reverse when the tile is still on screen, a
   // 200ms fade in place when it scrolled away, and nothing when the
@@ -250,6 +294,7 @@ export function MediaLightbox({
               controls
               autoPlay
               playsInline
+              onLoadedData={revealSlide}
               className="max-h-[calc(100dvh-11rem)] max-w-full bg-dr-bg"
             />
           ) : (
@@ -260,6 +305,7 @@ export function MediaLightbox({
               width={1200}
               height={800}
               unoptimized
+              onLoad={revealSlide}
               className="max-h-[calc(100dvh-11rem)] w-auto max-w-full object-contain shadow-[0_0_0_1px_var(--dr-line)]"
             />
           )}

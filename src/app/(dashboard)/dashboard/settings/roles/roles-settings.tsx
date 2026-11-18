@@ -13,10 +13,11 @@ import {
   Shirt,
   type LucideIcon,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -95,6 +96,32 @@ export function RolesSettings({
   const t = useTranslations("dashboardSettings.roles");
   const roleSelectionT = useTranslations("uiKit.roleSelectionForm.roles");
   const router = useRouter();
+  // The page reads roles from the session token, which only re-reads the
+  // database once a minute (lib/auth.ts SESSION_SYNC_MS). Without forcing
+  // that re-read, the success toast showed while the list kept the old
+  // role for up to a minute.
+  const { update: updateSession } = useSession();
+  // The success toast waits for the refreshed list to render, so the
+  // message and the change appear together.
+  const [isRefreshing, startRefresh] = useTransition();
+  const pendingToast = useRef<string | null>(null);
+  useEffect(() => {
+    if (isRefreshing || !pendingToast.current) return;
+    toast.add({ title: pendingToast.current, type: "success" });
+    pendingToast.current = null;
+  }, [isRefreshing]);
+  const syncRoles = async (successTitle: string) => {
+    try {
+      // The argument matters: update() with none is a plain GET that just
+      // re-reads the cached token; any payload makes it a POST, which runs
+      // the jwt callback with trigger "update" and re-reads the roles.
+      await updateSession({});
+    } catch {
+      // The change itself succeeded; the token catches up within a minute.
+    }
+    pendingToast.current = successTitle;
+    startRefresh(() => router.refresh());
+  };
   const [activatingRole, setActivatingRole] = useState<Role | null>(null);
   const [removingRole, setRemovingRole] = useState<Role | null>(null);
   const [changeRequestRole, setChangeRequestRole] = useState<Role | null>(null);
@@ -133,11 +160,7 @@ export function RolesSettings({
         });
         return;
       }
-      toast.add({
-        title: t("activated", { role: roleT(role) }),
-        type: "success",
-      });
-      router.refresh();
+      await syncRoles(t("activated", { role: roleT(role) }));
     } catch {
       toast.add({ title: t("activateFailed"), type: "error" });
     } finally {
@@ -160,11 +183,7 @@ export function RolesSettings({
         toast.add({ title: body.message ?? t("removeFailed"), type: "error" });
         return;
       }
-      toast.add({
-        title: t("removed", { role: roleT(role) }),
-        type: "success",
-      });
-      router.refresh();
+      await syncRoles(t("removed", { role: roleT(role) }));
     } catch {
       toast.add({ title: t("removeFailed"), type: "error" });
     } finally {
@@ -279,7 +298,7 @@ export function RolesSettings({
                       size="sm"
                       variant="ghost"
                       className="text-danger"
-                      disabled={removingRole !== null}
+                      disabled={removingRole !== null || isRefreshing}
                       onClick={() => removeRole(role)}
                     >
                       {isRemoving ? (
@@ -371,7 +390,7 @@ export function RolesSettings({
                       size="sm"
                       variant="secondary"
                       className="shrink-0"
-                      disabled={activatingRole !== null}
+                      disabled={activatingRole !== null || isRefreshing}
                       onClick={() => activateRole(role)}
                     >
                       {isActivating ? (

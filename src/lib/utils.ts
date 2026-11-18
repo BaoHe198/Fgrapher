@@ -39,6 +39,10 @@ const FONT_SIZE_UTILITIES = [
   "text-body-sm",
   "text-caption",
   "text-caption-upper",
+  // Missing until 18/11/2026: unknown to the list, tailwind-merge took it for
+  // a colour and dropped the colour before it, so every size="sm" Button
+  // lost its label colour (primary in dark mode read white on white).
+  "text-meta",
 ];
 
 const TEXT_COLOR_NAMES = [

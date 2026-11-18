@@ -219,13 +219,21 @@ export function AlbumGrid({
           >
             {t("trashButton")}
           </Button>
-          <Button variant="accent" size="sm" onClick={() => setFormOpen(true)}>
-            <Plus className="size-4" />
-            {t("newAlbum")}
-          </Button>
+          {/* With no albums the empty state below offers this action. */}
+          {albums.length > 0 ? (
+            <Button
+              variant="accent"
+              size="sm"
+              onClick={() => setFormOpen(true)}
+            >
+              <Plus className="size-4" />
+              {t("newAlbum")}
+            </Button>
+          ) : null}
           <Button
             variant="primary"
             size="sm"
+            className={albums.length === 0 ? "col-span-2" : undefined}
             onClick={() => setUploadOpen(true)}
           >
             <Upload className="size-4" />

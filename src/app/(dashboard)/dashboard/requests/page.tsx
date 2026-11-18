@@ -48,15 +48,19 @@ export default async function ServiceRequestsPage() {
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-2">
         <SectionHead title={t("title")} as="h1" />
-        <Button
-          variant="accent"
-          size="sm"
-          nativeButton={false}
-          render={<Link href="/requests/new" />}
-        >
-          <Plus className="size-4" />
-          {t("newRequest")}
-        </Button>
+        {/* While the list is empty the empty state carries the same action;
+            two identical buttons on one screen read as two features. */}
+        {requests.length > 0 ? (
+          <Button
+            variant="accent"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/requests/new" />}
+          >
+            <Plus className="size-4" />
+            {t("newRequest")}
+          </Button>
+        ) : null}
       </div>
 
       {requests.length === 0 ? (
