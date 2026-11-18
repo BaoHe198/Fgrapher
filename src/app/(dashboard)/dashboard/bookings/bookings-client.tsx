@@ -169,7 +169,9 @@ export function BookingsClient({
             <p className="text-body-sm text-text-secondary">{summary}</p>
           ) : null}
         </div>
-        {isCustomerOnly ? (
+        {/* Hidden while the empty state below shows the same link. */}
+        {isCustomerOnly &&
+        !(!isLoading && !loadFailed && bookings.length === 0) ? (
           <Button
             variant="outline"
             nativeButton={false}
