@@ -3,6 +3,7 @@
 import type { Role } from "@prisma/client";
 import { Check, Expand, ImageOff, Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   startTransition,
@@ -54,6 +55,7 @@ function isOverdue(createdAt: string) {
 
 export default function AdminModerationPage() {
   const t = useTranslations("accountFlows.admin.moderation");
+  const router = useRouter();
   const roleT = useTranslations("role");
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,19 +115,29 @@ export default function AdminModerationPage() {
     async (ids: string[]) => {
       if (ids.length === 0 || busy) return;
       setBusy(true);
-      await fetch("/api/admin/moderation", {
+      const res = await fetch("/api/admin/moderation", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "approve", mediaIds: ids }),
       });
       setBusy(false);
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        toast.add({
+          title: body?.message ?? t("actionFailed"),
+          type: "error",
+        });
+        return;
+      }
       toast.add({
         title: t("approvedToast", { count: ids.length }),
         type: "success",
       });
       load();
+      // The sidebar's waiting count is rendered by the server layout.
+      router.refresh();
     },
-    [busy, load, t],
+    [busy, load, router, t],
   );
 
   const reject = async () => {
@@ -134,12 +146,17 @@ export default function AdminModerationPage() {
     const reason = reasonNote.trim()
       ? `${reasonPreset} — ${reasonNote.trim()}`
       : reasonPreset;
-    await fetch("/api/admin/moderation", {
+    const res = await fetch("/api/admin/moderation", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "reject", mediaIds: activeIds, reason }),
     });
     setBusy(false);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      toast.add({ title: body?.message ?? t("actionFailed"), type: "error" });
+      return;
+    }
     setShowRejectPanel(false);
     setReasonPreset("");
     setReasonNote("");
@@ -148,6 +165,7 @@ export default function AdminModerationPage() {
       type: "success",
     });
     load();
+    router.refresh();
   };
 
   useEffect(() => {

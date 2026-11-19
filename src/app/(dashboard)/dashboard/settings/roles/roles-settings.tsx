@@ -428,6 +428,18 @@ export function RolesSettings({
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
+            {/* Approval removes the old role's profile outright — albums,
+                photos and service packages with it (services/
+                role-change-requests.ts). Removing an unverified role warns
+                about that; this dialog, for the verified providers who
+                have the most to lose, said nothing (found 19/11/2026). */}
+            {changeRequestRole ? (
+              <p className="rounded-[var(--fg-radius-md)] bg-warning-bg p-3 text-body-sm text-warning">
+                {t("requestRoleChangeWarning", {
+                  role: roleT(changeRequestRole),
+                })}
+              </p>
+            ) : null}
             <NativeSelect
               label={t("requestRoleChangeTargetLabel")}
               value={changeRequestTarget}

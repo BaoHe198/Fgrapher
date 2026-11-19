@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatRating } from "@/lib/format";
 
 interface ReviewRow {
   id: string;
@@ -77,7 +77,7 @@ export function ReviewsDashboardContent({
             {t("stats.avgRating")}
           </span>
           <span className="text-heading-lg text-text-primary">
-            {stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "—"}
+            {stats.avgRating > 0 ? formatRating(stats.avgRating) : "—"}
           </span>
         </Card>
         <Card className="flex flex-col gap-1">

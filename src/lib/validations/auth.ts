@@ -138,7 +138,9 @@ export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
 export function getCompleteProfileSchema(t: (key: string) => string) {
   return z
     .object({
-      dateOfBirth: z.string().min(1, t("dateOfBirthRequired")),
+      dateOfBirth: z
+        .string({ error: t("dateOfBirthRequired") })
+        .min(1, t("dateOfBirthRequired")),
       consentService: z.boolean(),
       consentMarketing: z.boolean(),
       consentAnalytics: z.boolean(),
@@ -170,7 +172,9 @@ export function getRegisterSchema(t: (key: string) => string) {
       // MVP scope decision — one provider role per account (see the
       // matching comment on registerSchema above).
       roles: z.array(z.enum(PAID_ROLE_VALUES)).max(1, t("onlyOneRoleAllowed")),
-      dateOfBirth: z.string().min(1, t("dateOfBirthRequired")),
+      dateOfBirth: z
+        .string({ error: t("dateOfBirthRequired") })
+        .min(1, t("dateOfBirthRequired")),
       acceptedContentGuidelines: z.boolean().optional(),
       consentService: z.boolean(),
       consentMarketing: z.boolean(),

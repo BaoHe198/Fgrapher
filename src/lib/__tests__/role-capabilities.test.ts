@@ -9,6 +9,7 @@ import {
   PROVIDER_ROLES,
   SELLER_ROLES,
   SHOP_ROLES,
+  STOREFRONT_ROLES,
 } from "@/lib/constants";
 import {
   productCategoryAllowedForRole,
@@ -92,6 +93,12 @@ describe("role capability boundaries", () => {
 
   it("still calls both of them shops, for naming and shop-name purposes", () => {
     assert.deepEqual(SHOP_ROLES, ["CAMERA_SHOP", "COSTUME_SHOP"]);
+  });
+
+  it("publishes only the camera shop on its product photos", () => {
+    // A costume shop cannot list on Chợ F, so requiring an approved product
+    // photo of it would keep every costume shop unpublished for good.
+    assert.deepEqual(STOREFRONT_ROLES, ["CAMERA_SHOP"]);
   });
 
   it("carries only equipment categories on Chợ F", () => {

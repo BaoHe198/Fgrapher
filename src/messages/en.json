@@ -62,7 +62,8 @@
     "language": {
       "vi": "Tiếng Việt",
       "en": "English"
-    }
+    },
+    "skipToContent": "Skip to main content"
   },
   "fmap": {
     "title": "Fmap — find providers by area and availability",
@@ -1110,7 +1111,8 @@
         "resolve": "Resolve",
         "dismiss": "Dismiss",
         "reportUpdatedToast": "Report updated",
-        "unknownReporter": "Unknown"
+        "unknownReporter": "Unknown",
+        "actionFailed": "That did not go through, please try again"
       },
       "verifications": {
         "title": "Identity verification",
@@ -1129,7 +1131,8 @@
         "reject": "Reject",
         "failedToLoadDocument": "Failed to load document",
         "selectRejectionReason": "Select a rejection reason",
-        "verificationUpdated": "Verification updated"
+        "verificationUpdated": "Verification updated",
+        "verificationUpdateFailed": "Couldn't update the verification, please try again"
       },
       "roleChangeRequests": {
         "title": "Role change requests",
@@ -1142,7 +1145,9 @@
         "rejectionNotePlaceholder": "Rejection note (optional)",
         "approve": "Approve",
         "reject": "Reject",
-        "requestUpdated": "Request updated"
+        "requestUpdated": "Request updated",
+        "actionFailed": "That did not go through, please try again",
+        "approveWarning": "Approving deletes this person's {role} profile for good (albums, photos, service packages)."
       },
       "moderation": {
         "title": "Content moderation",
@@ -1162,10 +1167,11 @@
         "allRoles": "All roles",
         "emptyFiltered": "Nothing pending for this role",
         "viewLarge": "View full size",
-        "waitingSince": "Waiting {time}",
+        "waitingSince": "Sent {time}",
         "albumLabel": "Album: {title}",
         "autoFlaggedBadge": "Flagged by scan",
-        "autoFlaggedReason": "Flagged by the automated scan: {reason}. A hint about where to look first — the photo is still pending like any other."
+        "autoFlaggedReason": "Flagged by the automated scan: {reason}. A hint about where to look first — the photo is still pending like any other.",
+        "actionFailed": "That did not go through, please try again"
       },
       "compliance": {
         "title": "Compliance",
@@ -1259,7 +1265,8 @@
         "rejectionNotePlaceholder": "Rejection note (optional)",
         "approve": "Approve",
         "reject": "Reject",
-        "awaitingProviderConfirmation": "Waiting on MoMo/ZaloPay to confirm automatically — no admin action needed."
+        "awaitingProviderConfirmation": "Waiting on MoMo/ZaloPay to confirm automatically — no admin action needed.",
+        "actionFailed": "That did not go through, please try again"
       }
     },
     "verifyEmail": {
@@ -2043,7 +2050,9 @@
         "body": "The connection dropped.",
         "kept": "Requests you sent are safe; they just can't be shown right now.",
         "retry": "Try again"
-      }
+      },
+      "placeOwnStudio": "At your studio",
+      "placeCustomer": "At the customer’s place"
     },
     "portfolio": {
       "proOnly": {
@@ -2098,7 +2107,9 @@
         "cancel": "Cancel",
         "create": "Create album",
         "createFailed": "Couldn't create the album, please try again",
-        "createdToast": "Album created"
+        "createdToast": "Album created",
+        "titlePlaceholder": "Optional — left blank, it's named after the category",
+        "defaultTitle": "{category} album"
       },
       "detail": {
         "back": "Back to portfolio",
@@ -2220,7 +2231,8 @@
         "location": "Location",
         "people": "People",
         "total": "Total",
-        "customRequest": "Custom request"
+        "customRequest": "Custom request",
+        "contactPhone": "Contact phone"
       },
       "locationLabel": {
         "PROVIDER": "At provider's studio",
@@ -2435,6 +2447,13 @@
             "policies": "Deposit & cancellation policy",
             "area": "Service area",
             "calendar": "Availability"
+          },
+          "pending": "Waiting for review",
+          "pendingHint": {
+            "verify": "Documents sent — Fgrapher is reviewing them",
+            "album": "Photos uploaded — waiting for Fgrapher's review",
+            "albumEmpty": "Album created — now upload photos",
+            "verifyRejected": "Documents were not accepted — please resubmit"
           }
         },
         "week": {
@@ -2828,7 +2847,8 @@
       "pendingRequestBadge": "Pending review — switching to {role}",
       "changeRequestSubmitted": "Role change request submitted",
       "changeRequestFailed": "Couldn't submit the request, please try again",
-      "oneProviderRoleNote": "An account holds one provider role at a time. You can change it later."
+      "oneProviderRoleNote": "An account holds one provider role at a time. You can change it later.",
+      "requestRoleChangeWarning": "When this is approved, your {role} profile is deleted together with every album, photo and service package in it, and cannot be restored. The new role starts with an empty profile and needs verifying again."
     },
     "nav": {
       "profile": "Profile",
@@ -3030,7 +3050,13 @@
         "addressPinned": "Exact map position set. Save to update it.",
         "fmapNotVisible": "Your profile isn't on Fmap yet because its location couldn't be determined. Pick your address from the suggestions, then save.",
         "addressOtherWard": "Position set, but this address is in {ward}. Check the Ward field above.",
-        "addressResolveFailed": "Couldn't get coordinates for that address. Pick another suggestion, or save and we'll locate it."
+        "addressResolveFailed": "Couldn't get coordinates for that address. Pick another suggestion, or save and we'll locate it.",
+        "provinceRequired": "Choose a province",
+        "wardRequired": "Choose a ward",
+        "addressRequired": "Enter a detailed address (at least 5 characters)",
+        "saveFailedStatus": "Couldn't save the profile (error {status}). What you typed is kept — please try again in a few minutes.",
+        "saveNetworkError": "Couldn't reach the server. What you typed is kept — check your connection and press Save again.",
+        "addressPinnedAreaFilled": "Location pinned on the map and {area} filled in. Press Save to update."
       },
       "editor": {
         "liveStatus": "Live — visible in search",
@@ -3091,7 +3117,9 @@
         "zaloUrlLabel": "Zalo message link",
         "zaloUrlHelper": "Only customers whose booking request went through see this link. Paste your Zalo link: https://zalo.me/..., chat.zalo.me, or the QR link (zaloapp.com/qr/...).",
         "saveChanges": "Save changes",
-        "saved": "Saved"
+        "saved": "Saved",
+        "draftRestored": "Restored what you typed last time. It isn't saved yet — press Save changes at the bottom.",
+        "draftDiscard": "Discard draft"
       },
       "services": {
         "title": "Services",
@@ -3177,7 +3205,7 @@
         "sizeLabel": "Size",
         "colorLabel": "Colour",
         "photoLabel": "Photo",
-        "photoNone": "No photo yet",
+        "photoNone": "No photo",
         "photoNumbered": "Photo {index}",
         "photoHelper": "Pick an uploaded outfit photo. A new photo must clear moderation before it appears publicly.",
         "descriptionLabel": "Description",
@@ -3187,7 +3215,8 @@
         "saveFailed": "Could not save, please try again",
         "editAria": "Edit {name}",
         "deleteAria": "Delete {name}",
-        "missingHint": "Enter the outfit name and daily price to save."
+        "missingHint": "Enter the outfit name and daily price to save.",
+        "photoEmpty": "No photos yet. Close this, press “Upload outfit photos” first, then add the outfit."
       },
       "policy": {
         "title": "Experience & policies",
@@ -3496,7 +3525,8 @@
       "booking": {
         "request": {
           "title": "New booking request",
-          "message": "{otherPartyName} requested {serviceName} on {dateLabel}"
+          "message": "{otherPartyName} requested {serviceName} on {dateLabel}",
+          "chatMessage": "Booking request: {serviceName}, {dateLabel} at {timeLabel}"
         },
         "confirmed": {
           "title": "Booking confirmed",
@@ -3699,7 +3729,7 @@
       "genericError": "Something went wrong. Please try again.",
       "success": {
         "heading": "Booking request sent!",
-        "body": "{providerName} will respond within 24 hours. We'll email you as soon as they confirm.",
+        "body": "{providerName} will respond within 48 hours. We'll email you as soon as they confirm.",
         "zaloNote": "You can open Zalo to discuss the booking you just submitted with {providerName}.",
         "openZalo": "Message on Zalo",
         "viewBookings": "View my bookings",
@@ -5293,7 +5323,8 @@
       "albumCreateButton": "Create album",
       "albumTitleRequired": "Album title must be at least 2 characters",
       "albumCategoryRequired": "Please choose a category",
-      "albumCreateFailed": "Couldn't create the album, please try again"
+      "albumCreateFailed": "Couldn't create the album, please try again",
+      "albumTitlePlaceholder": "Optional — left blank, it is named after the category"
     },
     "mediaLightbox": {
       "close": "Close",

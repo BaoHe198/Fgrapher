@@ -60,7 +60,11 @@ function isFiniteNumber(value: unknown): value is number {
 }
 
 interface GoongPredictions {
-  predictions?: Array<{ description?: unknown; place_id?: unknown }>;
+  predictions?: Array<{
+    description?: unknown;
+    place_id?: unknown;
+    compound?: { commune?: unknown; province?: unknown };
+  }>;
 }
 
 /** Address autocomplete. Coordinates arrive later via resolveGoongPlace. */
@@ -93,9 +97,19 @@ export async function suggestGoongAddresses(
     ) {
       continue;
     }
+    const ward = prediction.compound?.commune;
+    const province = prediction.compound?.province;
     suggestions.push({
       id: prediction.place_id,
       label: prediction.description,
+      ...(typeof ward === "string" || typeof province === "string"
+        ? {
+            area: {
+              ward: typeof ward === "string" ? ward : undefined,
+              province: typeof province === "string" ? province : undefined,
+            },
+          }
+        : {}),
     });
     if (suggestions.length === MAX_SUGGESTIONS) break;
   }

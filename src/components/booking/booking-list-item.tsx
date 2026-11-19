@@ -69,8 +69,10 @@ export function BookingListItem({
     booking.endTime ? ` – ${booking.endTime}` : ""
   }`;
   const placeLabel: Record<string, string> = {
-    PROVIDER: placeT("locationProvider"),
-    CUSTOMER: placeT("locationCustomer"),
+    // The wizard's labels are written for the customer ("my place"); the
+    // provider reading the same booking needs them from their own side.
+    PROVIDER: asProvider ? t("placeOwnStudio") : placeT("locationProvider"),
+    CUSTOMER: asProvider ? t("placeCustomer") : placeT("locationCustomer"),
     OUTDOOR: placeT("locationOutdoor"),
   };
   const where =

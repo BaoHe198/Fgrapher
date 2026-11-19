@@ -87,7 +87,10 @@ export default async function ProfileSettingsPage({
           <AccordionTrigger>{t("roleProfile")}</AccordionTrigger>
           <AccordionPanel>
             <div className="pb-6">
-              <RoleProfileSwitcher roles={providerRoles} />
+              <RoleProfileSwitcher
+                roles={providerRoles}
+                userId={session.user.id}
+              />
             </div>
           </AccordionPanel>
         </AccordionItem>

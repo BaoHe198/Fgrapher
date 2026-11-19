@@ -10,7 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { formatVND } from "@/lib/format";
+import { formatRating, formatVND } from "@/lib/format";
 import { formatAdministrativeLocation } from "@/lib/location";
 
 import { UnsaveButton } from "./unsave-button";
@@ -142,7 +142,7 @@ export default async function SavedProfilesPage() {
                         : { ward: profile.user.ward },
                     ),
                     rating:
-                      stats.avg > 0 ? stats.avg.toFixed(1) : t("newBadge"),
+                      stats.avg > 0 ? formatRating(stats.avg) : t("newBadge"),
                     reviews: stats.count,
                     price: profile.priceMin
                       ? t("priceFrom", { amount: formatVND(profile.priceMin) })

@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { ArtistCard } from "@/components/cards/artist-card";
 import { db } from "@/lib/db";
 import { DISCOVERABLE_ROLES, SLUG_TO_ROLE } from "@/lib/constants";
+import { formatRating } from "@/lib/format";
 import { formatCurrency, jsonLdScriptProps } from "@/lib/utils";
 import { searchProfiles } from "@/services/search";
 
@@ -158,7 +159,7 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
                 city: profile.location,
                 rating:
                   profile.avgRating > 0
-                    ? profile.avgRating.toFixed(1)
+                    ? formatRating(profile.avgRating)
                     : tBrowse("newBadge"),
                 reviews: profile.reviewCount,
                 price: profile.priceMin

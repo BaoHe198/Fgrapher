@@ -20,7 +20,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { COSTUME_CATEGORIES } from "@/lib/validations/costume";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 export interface CostumeMedia {
   id: string;
@@ -91,7 +91,14 @@ export function CostumesManager({
 
   const openCreate = () => {
     setEditingId(null);
-    setDraft(EMPTY_DRAFT);
+    // Start on the first uploaded photo no outfit uses yet: the usual order
+    // is "upload photos, then add the outfit", and an outfit saved without
+    // its photo shows as an empty tile on the public profile.
+    const used = new Set(items.map((item) => item.media?.id));
+    setDraft({
+      ...EMPTY_DRAFT,
+      mediaId: media.find((m) => !used.has(m.id))?.id ?? "",
+    });
     setError(null);
     setModalOpen(true);
   };
@@ -315,21 +322,66 @@ export function CostumesManager({
                 onChange={(e) => setDraft({ ...draft, color: e.target.value })}
               />
             </div>
-            <NativeSelect
-              label={t("photoLabel")}
-              options={[
-                { value: "", label: t("photoNone") },
-                ...media.map((m, index) => ({
-                  value: m.id,
-                  label: m.title ?? t("photoNumbered", { index: index + 1 }),
-                })),
-              ]}
-              value={draft.mediaId}
-              onChange={(value) => setDraft({ ...draft, mediaId: value })}
-            />
-            <p className="text-body-sm text-text-tertiary">
-              {t("photoHelper")}
-            </p>
+            {/* Thumbnails, not a list of "Ảnh số 1, Ảnh số 2": the shop has
+                to see which photo it is attaching (19/11/2026). */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-body-sm font-semibold! text-text-primary">
+                {t("photoLabel")}
+              </span>
+              {media.length === 0 ? (
+                <p className="text-body-sm text-warning">{t("photoEmpty")}</p>
+              ) : (
+                <div
+                  role="radiogroup"
+                  aria-label={t("photoLabel")}
+                  className="flex flex-wrap gap-2"
+                >
+                  {media.map((m, index) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={draft.mediaId === m.id}
+                      aria-label={
+                        m.title ?? t("photoNumbered", { index: index + 1 })
+                      }
+                      onClick={() => setDraft({ ...draft, mediaId: m.id })}
+                      className={cn(
+                        "focus-ring relative size-16 cursor-pointer overflow-hidden rounded-[var(--fg-radius-md)] border-2 bg-bg-sunken",
+                        draft.mediaId === m.id
+                          ? "border-brand-primary"
+                          : "border-transparent opacity-70 hover:opacity-100",
+                      )}
+                    >
+                      <Image
+                        src={m.url}
+                        alt=""
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={draft.mediaId === ""}
+                    onClick={() => setDraft({ ...draft, mediaId: "" })}
+                    className={cn(
+                      "focus-ring flex size-16 cursor-pointer items-center justify-center rounded-[var(--fg-radius-md)] border-2 px-1 text-center text-meta text-text-secondary",
+                      draft.mediaId === ""
+                        ? "border-brand-primary"
+                        : "border-dashed border-border-default",
+                    )}
+                  >
+                    {t("photoNone")}
+                  </button>
+                </div>
+              )}
+              <p className="text-body-sm text-text-tertiary">
+                {t("photoHelper")}
+              </p>
+            </div>
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="costumes-manager-field-1"
