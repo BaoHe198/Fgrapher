@@ -3178,7 +3178,9 @@
         "saveFailed": "Không lưu được lịch làm việc, vui lòng thử lại",
         "blockedDates": "Ngày không nhận lịch",
         "removeAria": "Xóa",
-        "blockDateButton": "Chặn ngày"
+        "blockDateButton": "Chặn ngày",
+        "loadFailed": "Chưa tải được lịch làm việc của bạn. Tải lại trang rồi thử lại — đừng lưu khi lịch chưa hiện.",
+        "blockFailed": "Không chặn được ngày này, vui lòng thử lại"
       },
       "sections": {
         "basics": "Thông tin cơ bản",

@@ -3178,7 +3178,9 @@
         "saveFailed": "Couldn't save your schedule, please try again",
         "blockedDates": "Blocked dates",
         "removeAria": "Remove",
-        "blockDateButton": "Block date"
+        "blockDateButton": "Block date",
+        "loadFailed": "Couldn't load your working hours. Reload the page and try again.",
+        "blockFailed": "Couldn't block this day, please try again"
       },
       "sections": {
         "basics": "Basic information",
