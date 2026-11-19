@@ -62,7 +62,8 @@
     "language": {
       "vi": "Tiếng Việt",
       "en": "English"
-    }
+    },
+    "skipToContent": "Skip to main content"
   },
   "fmap": {
     "title": "Fmap — find providers by area and availability",

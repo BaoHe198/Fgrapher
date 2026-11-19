@@ -62,7 +62,8 @@
     "language": {
       "vi": "Tiếng Việt",
       "en": "English"
-    }
+    },
+    "skipToContent": "Bỏ qua, tới nội dung chính"
   },
   "fmap": {
     "title": "Bản đồ F — tìm nhà cung cấp theo khu vực và lịch trống",
@@ -351,7 +352,7 @@
       "what": "Dịch vụ",
       "anyService": "Mọi dịch vụ",
       "submit": "Tìm",
-      "clearWhere": "Xoá tỉnh/thành đã chọn",
+      "clearWhere": "Xóa tỉnh/thành đã chọn",
       "pickProvince": "Tìm nghệ sĩ ở tỉnh/thành",
       "noProvince": "Không có tỉnh/thành nào khớp",
       "anywhereHint": "Xem nghệ sĩ khắp cả nước"
@@ -1075,7 +1076,7 @@
           "nextWillSuspend": "Cảnh báo: đây sẽ là điểm vi phạm thứ 3 — tài khoản sẽ bị tạm khoá ngay khi bạn ghi nhận.",
           "reasonPlaceholder": "Lý do (bắt buộc khi ghi nhận vi phạm — lưu vào nhật ký)",
           "add": "Ghi nhận vi phạm",
-          "clear": "Xoá hết điểm"
+          "clear": "Xóa hết điểm"
         },
         "subscriptionStatus": {
           "ACTIVE": "Đang hoạt động",
@@ -1135,7 +1136,7 @@
       },
       "roleChangeRequests": {
         "title": "Yêu cầu đổi vai trò",
-        "description": "Vai trò nhà cung cấp đã xác minh không thể tự xoá — người dùng gửi yêu cầu ở đây để đổi sang vai trò khác. Sắp xếp theo lượt gửi cũ nhất trước.",
+        "description": "Vai trò nhà cung cấp đã xác minh không thể tự xóa — người dùng gửi yêu cầu ở đây để đổi sang vai trò khác. Sắp xếp theo lượt gửi cũ nhất trước.",
         "empty": "Không có yêu cầu nào đang chờ",
         "submittedToday": "Gửi hôm nay",
         "waitingOneDay": "Đã chờ 1 ngày",
@@ -1375,15 +1376,15 @@
       "saved": "Đã lưu vai trò",
       "saveFailed": "Không thể lưu vai trò, vui lòng thử lại",
       "invalidRole": "Vai trò không hợp lệ",
-      "onlyOneProviderRole": "Bạn chỉ có thể kích hoạt 1 vai trò nhà cung cấp. Hãy xoá vai trò hiện tại trước khi thêm vai trò khác.",
+      "onlyOneProviderRole": "Bạn chỉ có thể kích hoạt 1 vai trò nhà cung cấp. Hãy xóa vai trò hiện tại trước khi thêm vai trò khác.",
       "roleNotFound": "Bạn chưa có vai trò này",
-      "cannotRemoveVerified": "Không thể xoá vai trò đã được xác minh",
-      "removed": "Đã xoá vai trò",
-      "removeFailed": "Không thể xoá vai trò, vui lòng thử lại",
+      "cannotRemoveVerified": "Không thể xóa vai trò đã được xác minh",
+      "removed": "Đã xóa vai trò",
+      "removeFailed": "Không thể xóa vai trò, vui lòng thử lại",
       "changeRequestSubmitted": "Đã gửi yêu cầu đổi vai trò, chờ quản trị viên duyệt",
       "changeRequestFailed": "Không thể gửi yêu cầu, vui lòng thử lại",
       "changeRequestNoActiveRole": "Bạn chưa có vai trò nhà cung cấp nào đang hoạt động",
-      "changeRequestNotVerified": "Vai trò này chưa được xác minh — bạn có thể tự xoá và thêm vai trò khác trực tiếp",
+      "changeRequestNotVerified": "Vai trò này chưa được xác minh — bạn có thể tự xóa và thêm vai trò khác trực tiếp",
       "changeRequestSameRole": "Vai trò mới phải khác vai trò hiện tại",
       "changeRequestAlreadyPending": "Bạn đã có một yêu cầu đổi vai trò đang chờ duyệt"
     },
@@ -2831,16 +2832,16 @@
       "activate": "Kích hoạt",
       "activated": "Đã kích hoạt vai trò {role}",
       "activateFailed": "Không thể kích hoạt vai trò này, vui lòng thử lại",
-      "removeRole": "Xoá vai trò",
-      "removeRoleConfirm": "Xoá vai trò {role}? Hồ sơ và thông tin đã nhập cho vai trò này (nếu có) sẽ bị xoá.",
-      "removed": "Đã xoá vai trò {role}",
-      "removeFailed": "Không thể xoá vai trò này, vui lòng thử lại",
+      "removeRole": "Xóa vai trò",
+      "removeRoleConfirm": "Xóa vai trò {role}? Hồ sơ và thông tin đã nhập cho vai trò này (nếu có) sẽ bị xóa.",
+      "removed": "Đã xóa vai trò {role}",
+      "removeFailed": "Không thể xóa vai trò này, vui lòng thử lại",
       "requestRoleChange": "Yêu cầu đổi vai trò",
       "requestRoleChangeDialogTitle": "Yêu cầu đổi từ {role} sang vai trò khác",
       "requestRoleChangeTargetLabel": "Vai trò mới",
       "requestRoleChangeTargetPlaceholder": "Chọn vai trò",
       "requestRoleChangeReasonPlaceholder": "Lý do (không bắt buộc)",
-      "requestRoleChangeCancel": "Huỷ",
+      "requestRoleChangeCancel": "Hủy",
       "requestRoleChangeSubmit": "Gửi yêu cầu",
       "pendingRequestBadge": "Đang chờ duyệt đổi sang {role}",
       "changeRequestSubmitted": "Đã gửi yêu cầu đổi vai trò",
@@ -3207,7 +3208,7 @@
         "photoHelper": "Chọn ảnh trang phục đã tải lên. Ảnh mới phải qua kiểm duyệt trước khi hiện công khai.",
         "descriptionLabel": "Mô tả",
         "activeLabel": "Đang cho thuê",
-        "cancel": "Huỷ",
+        "cancel": "Hủy",
         "save": "Lưu",
         "saveFailed": "Không lưu được, vui lòng thử lại",
         "editAria": "Sửa {name}",
@@ -3971,7 +3972,7 @@
         "anyDate": "Ngày bất kỳ",
         "filters": "Bộ lọc",
         "filtersDescription": "Khu vực, ngày giờ, phong cách, ngân sách, đánh giá và dịch vụ kèm.",
-        "clearAll": "Xoá tất cả",
+        "clearAll": "Xóa tất cả",
         "seeResults": "Xem {count} kết quả",
         "noResults": "Không có kết quả",
         "availableOn": "Còn lịch {date}",
@@ -4499,19 +4500,19 @@
           },
           "deposit": {
             "q": "Đặt cọc hoạt động thế nào?",
-            "a": "Fgrapher chưa thu hộ đặt cọc. Bạn và khách tự thoả thuận mức cọc, thời hạn và hình thức nhận. Nên ghi rõ trong đề xuất hoặc tin nhắn để hai bên cùng đối chiếu."
+            "a": "Fgrapher chưa thu hộ đặt cọc. Bạn và khách tự thỏa thuận mức cọc, thời hạn và hình thức nhận. Nên ghi rõ trong đề xuất hoặc tin nhắn để hai bên cùng đối chiếu."
           },
           "payout": {
             "q": "Khách thanh toán cho tôi bằng cách nào?",
             "a": "Khách thanh toán trực tiếp cho bạn bằng chuyển khoản hoặc tiền mặt. Fgrapher không giữ tiền và không thu phần trăm trên giá trị buổi chụp."
           },
           "cancel": {
-            "q": "Huỷ lịch thì xử lý ra sao?",
-            "a": "Chính sách huỷ và hoàn cọc do bạn ghi trong hồ sơ. Khách thấy chính sách này trước khi gửi yêu cầu."
+            "q": "Hủy lịch thì xử lý ra sao?",
+            "a": "Chính sách hủy và hoàn cọc do bạn ghi trong hồ sơ. Khách thấy chính sách này trước khi gửi yêu cầu."
           },
           "market": {
             "q": "Đăng bán trên Chợ F có mất phí không?",
-            "a": "Trong giai đoạn ra mắt, đăng tin và giao dịch trên Chợ F cũng miễn phí. Người mua và người bán tự thoả thuận thanh toán."
+            "a": "Trong giai đoạn ra mắt, đăng tin và giao dịch trên Chợ F cũng miễn phí. Người mua và người bán tự thỏa thuận thanh toán."
           }
         },
         "moreQuestions": "Câu hỏi khác?",
@@ -4574,7 +4575,7 @@
         "eyebrow": "Nói thẳng",
         "title": "Bốn điều Fgrapher cam kết",
         "t1": "Mọi nhà cung cấp đã xác minh danh tính.",
-        "b1": "Nhiếp ảnh gia, người quay phim, chuyên viên trang điểm, người mẫu, studio và tiệm cho thuê trang phục đều gửi giấy tờ tùy thân để đội Fgrapher duyệt trước khi hồ sơ được công khai. Ảnh giấy tờ lưu riêng, không công khai và tự xoá sau 90 ngày.",
+        "b1": "Nhiếp ảnh gia, người quay phim, chuyên viên trang điểm, người mẫu, studio và tiệm cho thuê trang phục đều gửi giấy tờ tùy thân để đội Fgrapher duyệt trước khi hồ sơ được công khai. Ảnh giấy tờ lưu riêng, không công khai và tự xóa sau 90 ngày.",
         "t2": "Chỉ khách đã chụp xong mới được đánh giá.",
         "b2": "Mỗi đánh giá gắn với một buổi đặt lịch đã hoàn tất trên Fgrapher. Nghệ sĩ có thể phản hồi công khai bên dưới.",
         "t3": "Fgrapher không giữ tiền buổi chụp.",
@@ -4596,7 +4597,7 @@
         "q1": "Fgrapher có thu tiền đặt cọc không?",
         "a1": "Không. Đặt cọc và thanh toán buổi chụp do bạn và nghệ sĩ thỏa thuận trực tiếp. Fgrapher không giữ tiền của bạn.",
         "q2": "Nghệ sĩ được xác minh như thế nào?",
-        "a2": "Nghệ sĩ gửi ảnh hai mặt căn cước và một ảnh chân dung. Đội Fgrapher đối chiếu và duyệt thủ công; chỉ sau khi được duyệt, hồ sơ mới được công khai. Ảnh giấy tờ lưu ở nơi không công khai, mỗi lượt xem đều được ghi lại và ảnh tự xoá sau 90 ngày.",
+        "a2": "Nghệ sĩ gửi ảnh hai mặt căn cước và một ảnh chân dung. Đội Fgrapher đối chiếu và duyệt thủ công; chỉ sau khi được duyệt, hồ sơ mới được công khai. Ảnh giấy tờ lưu ở nơi không công khai, mỗi lượt xem đều được ghi lại và ảnh tự xóa sau 90 ngày.",
         "q3": "Sau khi gửi yêu cầu, bao lâu thì có phản hồi?",
         "a3": "Nghệ sĩ có 48 giờ để xác nhận hoặc từ chối. Quá 48 giờ chưa phản hồi, yêu cầu tự hết hạn và bạn có thể gửi cho người khác.",
         "q4": "Ai được viết đánh giá?",
@@ -4823,7 +4824,7 @@
           {
             "heading": "Đổi vai trò",
             "steps": [
-              "Vai trò chưa xác minh: có thể tự xoá và chọn vai trò khác ngay trong Cài đặt → Vai trò.",
+              "Vai trò chưa xác minh: có thể tự xóa và chọn vai trò khác ngay trong Cài đặt → Vai trò.",
               "Vai trò đã xác minh: gửi \"Yêu cầu đổi vai trò\" để admin xem xét, vì đây là bước liên quan đến danh tính đã xác minh nên cần kiểm soát chặt hơn."
             ]
           }
@@ -4848,7 +4849,7 @@
             "heading": "Dữ liệu cá nhân & quyền riêng tư",
             "steps": [
               "Xem lại toàn bộ dữ liệu Fgrapher đang lưu về bạn tại Cài đặt → Dữ liệu & quyền riêng tư.",
-              "Tải về bản sao dữ liệu của bạn, hoặc gửi yêu cầu xoá tài khoản — yêu cầu xoá được xử lý theo đúng quy trình bảo vệ dữ liệu cá nhân."
+              "Tải về bản sao dữ liệu của bạn, hoặc gửi yêu cầu xóa tài khoản — yêu cầu xóa được xử lý theo đúng quy trình bảo vệ dữ liệu cá nhân."
             ]
           }
         ]
@@ -4860,7 +4861,7 @@
       "updatingResults": "Đang cập nhật kết quả…",
       "emptyTitle": "Không tìm thấy thiết bị nào",
       "emptyBody": "Thử bớt bộ lọc lại xem sao.",
-      "clearAll": "Xoá hết bộ lọc",
+      "clearAll": "Xóa hết bộ lọc",
       "prev": "Trang trước",
       "next": "Xem thêm",
       "filters": {
@@ -4987,8 +4988,8 @@
       "commentFailed": "Không gửi được bình luận, vui lòng thử lại",
       "commentPlaceholder": "Viết bình luận...",
       "send": "Gửi",
-      "delete": "Xoá bài",
-      "deleteConfirm": "Xoá bài đăng này?",
+      "delete": "Xóa bài",
+      "deleteConfirm": "Xóa bài đăng này?",
       "loginToPost": "Đăng nhập để đăng bài và tương tác",
       "pendingBanner": "{count} bài của bạn đang chờ kiểm duyệt ảnh. Bài chỉ hiện công khai sau khi ảnh được duyệt.",
       "submittedForReview": "Đã gửi bài. Ảnh đang chờ kiểm duyệt, bài sẽ hiện sau khi được duyệt.",
@@ -5498,7 +5499,7 @@
       "label": "Ảnh/Video tham khảo",
       "hint": "Ảnh hoặc video mẫu cho phong cách bạn muốn. Tối đa {max} tệp; mỗi video không quá {videoMb}MB.",
       "add": "Thêm ảnh hoặc video tham khảo",
-      "remove": "Xoá tệp này",
+      "remove": "Xóa tệp này",
       "video": "Video",
       "count": "{count}/{max}",
       "uploadingPercent": "Đang tải lên {percent}%",
@@ -5518,7 +5519,7 @@
       "placeholder": "Tìm nghệ sĩ, album, phong cách…",
       "resultsLabel": "Kết quả",
       "searching": "Đang tìm",
-      "cancel": "Huỷ",
+      "cancel": "Hủy",
       "groups": {
         "recent": "Gần đây",
         "goto": "Đi tới",
