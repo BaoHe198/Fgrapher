@@ -914,7 +914,7 @@ export async function getOfferProviderExtras(
   role: Role,
 ) {
   if (providerIds.length === 0) return new Map<string, OfferProviderExtras>();
-  const [ratings, profiles] = await Promise.all([
+  const [ratings, profiles, reachable] = await Promise.all([
     db.review.groupBy({
       by: ["reviewedId"],
       where: { reviewedId: { in: providerIds } },
@@ -937,7 +937,22 @@ export async function getOfferProviderExtras(
         },
       },
     }),
+    // Who still has a public page at all. An offer outlives the profile it
+    // was made from — the provider changed role, lost their plan or was
+    // suspended — and "Xem hồ sơ" on that offer then led to a 404. Same
+    // conditions as getPublicProfileUser.
+    db.user.findMany({
+      where: {
+        id: { in: providerIds },
+        deletedAt: null,
+        isSuspended: false,
+        username: { not: null },
+        profiles: { some: { isPublished: true } },
+      },
+      select: { id: true },
+    }),
   ]);
+  const reachableIds = new Set(reachable.map((user) => user.id));
   const extras = new Map<string, OfferProviderExtras>();
   for (const id of providerIds) {
     const rating = ratings.find((r) => r.reviewedId === id);
@@ -945,6 +960,7 @@ export async function getOfferProviderExtras(
       avgRating: rating?._avg.rating ?? null,
       reviewCount: rating?._count._all ?? 0,
       samples: profiles.find((p) => p.userId === id)?.media ?? [],
+      hasPublicProfile: reachableIds.has(id),
     });
   }
   return extras;
@@ -954,4 +970,6 @@ export interface OfferProviderExtras {
   avgRating: number | null;
   reviewCount: number;
   samples: { url: string; width: number | null; height: number | null }[];
+  /** False when /profile/<username> would be a 404 right now. */
+  hasPublicProfile: boolean;
 }

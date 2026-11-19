@@ -84,7 +84,10 @@ export default async function ServiceRequestDetailPage({
             id: offer.provider.id,
             name: resolvePartyName(offer.provider, "", request.role),
             avatar: offer.provider.avatar,
-            username: offer.provider.username,
+            // Only a link that opens: see getOfferProviderExtras.
+            username: extras.get(offer.provider.id)?.hasPublicProfile
+              ? offer.provider.username
+              : null,
             verified: offer.provider.roles.some(
               (r) =>
                 r.role === request.role && r.verificationStatus === "VERIFIED",
@@ -93,6 +96,7 @@ export default async function ServiceRequestDetailPage({
               avgRating: null,
               reviewCount: 0,
               samples: [],
+              hasPublicProfile: false,
             }),
           },
         })),
