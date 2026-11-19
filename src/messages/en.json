@@ -1361,7 +1361,10 @@
       "passwordUpdated": "Password updated",
       "passwordUpdateFailed": "Couldn't update your password, please try again",
       "emailChangeTaken": "This email is already used by another account.",
-      "emailChangePending": "We sent a confirmation link to {email}. Your sign-in email changes only after you click it."
+      "emailChangePending": "We sent a confirmation link to {email}. Your sign-in email changes only after you click it.",
+      "deletionAlreadyPending": "A deletion request is already pending",
+      "deletionSubmitted": "Deletion request submitted",
+      "deletionFailed": "Couldn't submit the deletion request, please try again"
     },
     "profiles": {
       "unknownRole": "Unknown role",

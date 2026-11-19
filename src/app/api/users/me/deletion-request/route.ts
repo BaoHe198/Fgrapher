@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
@@ -9,6 +10,9 @@ import { logAudit, requestDeletion } from "@/services/compliance";
 // /admin/compliance queue), which is what actually anonymizes the User
 // row and hard-deletes owned content.
 export async function POST() {
+  // These three answers were hardcoded English; the settings page shows the
+  // failure one to the user as it comes.
+  const t = await getTranslations("apiMessages.users");
   try {
     const session = await requireAuth();
 
@@ -24,7 +28,7 @@ export async function POST() {
         {
           data: pending,
           error: null,
-          message: "A deletion request is already pending",
+          message: t("deletionAlreadyPending"),
         },
         { status: 200 },
       );
@@ -39,7 +43,11 @@ export async function POST() {
     });
 
     return NextResponse.json(
-      { data: dataRequest, error: null, message: "Deletion request submitted" },
+      {
+        data: dataRequest,
+        error: null,
+        message: t("deletionSubmitted"),
+      },
       { status: 201 },
     );
   } catch (err) {
@@ -54,7 +62,7 @@ export async function POST() {
       {
         data: null,
         error: "server_error",
-        message: "Failed to submit deletion request",
+        message: t("deletionFailed"),
       },
       { status: 500 },
     );

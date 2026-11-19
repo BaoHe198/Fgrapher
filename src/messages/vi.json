@@ -1361,7 +1361,10 @@
       "passwordUpdated": "Đã cập nhật mật khẩu",
       "passwordUpdateFailed": "Không thể cập nhật mật khẩu, vui lòng thử lại",
       "emailChangeTaken": "Email này đã được một tài khoản khác sử dụng.",
-      "emailChangePending": "Đã gửi link xác nhận tới {email}. Email đăng nhập chỉ đổi sau khi bạn bấm link đó."
+      "emailChangePending": "Đã gửi link xác nhận tới {email}. Email đăng nhập chỉ đổi sau khi bạn bấm link đó.",
+      "deletionAlreadyPending": "Bạn đã có một yêu cầu xóa tài khoản đang chờ xử lý",
+      "deletionSubmitted": "Đã gửi yêu cầu xóa tài khoản",
+      "deletionFailed": "Không gửi được yêu cầu xóa tài khoản, vui lòng thử lại"
     },
     "profiles": {
       "unknownRole": "Vai trò không xác định",
