@@ -95,6 +95,10 @@ const BOOKING_INCLUDE = {
       firstName: true,
       avatar: true,
       email: true,
+      // The name the provider trades under: a booking card must call them
+      // what their profile and the chat do (lib/party-name.ts), not by the
+      // account holder's first name.
+      profiles: { select: { displayName: true, role: true } },
     },
   },
   service: { select: { name: true, duration: true } },
@@ -327,6 +331,7 @@ export async function getBookingDetail(bookingId: string, userId: string) {
           // "verified" if the provider holds ANY verified provider role,
           // rather than trying to resolve which one this booking is for.
           roles: VERIFIED_ROLE_SELECT,
+          profiles: { select: { displayName: true, role: true } },
         },
       },
       service: { select: { name: true, description: true, duration: true } },
@@ -756,7 +761,14 @@ export async function createBooking(
   await sendMessage({
     conversationId,
     senderId: booking.customerId,
-    content: `Booking request: ${booking.service?.name ?? "Custom request"} on ${dateLabel(booking.date)} at ${booking.startTime}`,
+    // Shown as text in the provider's "new message" notification and in
+    // the conversation list, so it is written in the app's language (it
+    // used to be a hardcoded English sentence).
+    content: createNotifyT("booking.request.chatMessage", {
+      serviceName: requestServiceName,
+      dateLabel: dateLabel(booking.date),
+      timeLabel: booking.startTime,
+    }),
     type: "booking_link",
     bookingId: booking.id,
   });

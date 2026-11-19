@@ -2048,7 +2048,9 @@
         "body": "The connection dropped.",
         "kept": "Requests you sent are safe; they just can't be shown right now.",
         "retry": "Try again"
-      }
+      },
+      "placeOwnStudio": "At your studio",
+      "placeCustomer": "At the customer’s place"
     },
     "portfolio": {
       "proOnly": {
@@ -2227,7 +2229,8 @@
         "location": "Location",
         "people": "People",
         "total": "Total",
-        "customRequest": "Custom request"
+        "customRequest": "Custom request",
+        "contactPhone": "Contact phone"
       },
       "locationLabel": {
         "PROVIDER": "At provider's studio",
@@ -3518,7 +3521,8 @@
       "booking": {
         "request": {
           "title": "New booking request",
-          "message": "{otherPartyName} requested {serviceName} on {dateLabel}"
+          "message": "{otherPartyName} requested {serviceName} on {dateLabel}",
+          "chatMessage": "Booking request: {serviceName}, {dateLabel} at {timeLabel}"
         },
         "confirmed": {
           "title": "Booking confirmed",
@@ -3721,7 +3725,7 @@
       "genericError": "Something went wrong. Please try again.",
       "success": {
         "heading": "Booking request sent!",
-        "body": "{providerName} will respond within 24 hours. We'll email you as soon as they confirm.",
+        "body": "{providerName} will respond within 48 hours. We'll email you as soon as they confirm.",
         "zaloNote": "You can open Zalo to discuss the booking you just submitted with {providerName}.",
         "openZalo": "Message on Zalo",
         "viewBookings": "View my bookings",

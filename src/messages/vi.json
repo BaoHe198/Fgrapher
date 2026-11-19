@@ -2048,7 +2048,9 @@
         "body": "Kết nối bị gián đoạn.",
         "kept": "Yêu cầu bạn đã gửi vẫn an toàn, chỉ là chưa hiển thị được.",
         "retry": "Thử lại"
-      }
+      },
+      "placeOwnStudio": "Tại studio của bạn",
+      "placeCustomer": "Tại địa điểm của khách"
     },
     "portfolio": {
       "proOnly": {
@@ -2227,7 +2229,8 @@
         "location": "Địa điểm",
         "people": "Số người",
         "total": "Tổng tiền",
-        "customRequest": "Yêu cầu tùy chỉnh"
+        "customRequest": "Yêu cầu tùy chỉnh",
+        "contactPhone": "Số điện thoại liên hệ"
       },
       "locationLabel": {
         "PROVIDER": "Tại studio nhà cung cấp",
@@ -3518,7 +3521,8 @@
       "booking": {
         "request": {
           "title": "Yêu cầu đặt lịch mới",
-          "message": "{otherPartyName} đã yêu cầu {serviceName} vào {dateLabel}"
+          "message": "{otherPartyName} đã yêu cầu {serviceName} vào {dateLabel}",
+          "chatMessage": "Yêu cầu đặt lịch: {serviceName}, {dateLabel} lúc {timeLabel}"
         },
         "confirmed": {
           "title": "Đã xác nhận lịch hẹn",
@@ -3721,7 +3725,7 @@
       "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
       "success": {
         "heading": "Đã gửi yêu cầu đặt lịch!",
-        "body": "{providerName} sẽ phản hồi trong vòng 24 giờ. Chúng tôi sẽ gửi email ngay khi họ xác nhận.",
+        "body": "{providerName} sẽ phản hồi trong vòng 48 giờ. Chúng tôi sẽ gửi email ngay khi họ xác nhận.",
         "zaloNote": "Bạn có thể mở Zalo để trao đổi thêm với {providerName} về lịch hẹn vừa gửi.",
         "openZalo": "Nhắn qua Zalo",
         "viewBookings": "Xem lịch đặt của tôi",

@@ -25,9 +25,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import { resolvePartyName } from "@/lib/party-name";
 import type { BookingTab, BookingTabCounts } from "@/services/bookings";
 
-type BookingParty = Pick<User, "id" | "name" | "firstName" | "avatar">;
+type BookingParty = Pick<User, "id" | "name" | "firstName" | "avatar"> & {
+  // Selected for the provider only; a customer goes by their own name.
+  profiles?: { displayName: string | null; role?: string }[];
+};
 type BookingRow = Booking & {
   customer: BookingParty;
   provider: BookingParty;
@@ -67,7 +71,7 @@ export function BookingsClient({
   const { isCustomerOnly } = useUserRoles();
 
   function partyName(party: BookingParty) {
-    return party.firstName ?? party.name ?? t("unknownParty");
+    return resolvePartyName(party, t("unknownParty"));
   }
   const [tab, setTab] = useState<BookingTab>("ALL");
   const [page, setPage] = useState(1);

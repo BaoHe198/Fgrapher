@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Loader2,
   MapPin,
+  Phone,
   MessageCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -49,6 +50,8 @@ import type { DayAvailability } from "@/services/availability";
 
 type Party = Pick<User, "id" | "name" | "firstName" | "avatar" | "username"> & {
   roles?: { role: string }[];
+  // Selected for the provider only; a customer goes by their own name.
+  profiles?: { displayName: string | null; role?: string }[];
 };
 type BookingDetail = Booking & {
   customer: Party;
@@ -94,7 +97,12 @@ export default function BookingDetailPage() {
   const { data: session } = useSession();
 
   function partyName(party: Party) {
-    return party.firstName ?? party.name ?? tBookings("unknownParty");
+    // Without the handle: this is a name in a sentence, and the provider's
+    // display name comes first anyway.
+    return resolvePartyName(
+      { ...party, username: null },
+      tBookings("unknownParty"),
+    );
   }
 
   const LOCATION_LABEL: Record<string, string> = {
@@ -463,6 +471,24 @@ export default function BookingDetailPage() {
               <span className="text-body-md text-text-primary">
                 {booking.locationAddress}
               </span>
+            </Card>
+          ) : null}
+
+          {/* The wizard requires this number "so the artist can reach you",
+              and the API releases it to the provider once they accept — but
+              no screen showed it (found 19/11/2026). */}
+          {booking.contactPhone ? (
+            <Card className="flex flex-row items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-body-sm text-text-tertiary">
+                <Phone className="size-4 shrink-0" />
+                {t("fields.contactPhone")}
+              </span>
+              <a
+                href={`tel:${booking.contactPhone}`}
+                className="text-body-md font-semibold! text-text-link hover:underline"
+              >
+                {booking.contactPhone}
+              </a>
             </Card>
           ) : null}
 
