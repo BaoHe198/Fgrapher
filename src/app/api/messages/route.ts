@@ -40,7 +40,14 @@ export async function POST(request: Request) {
     }
     if (err instanceof MessagingError) {
       return NextResponse.json(
-        { data: null, error: "messaging_error", message: err.message },
+        {
+          data: null,
+          error: "messaging_error",
+          message:
+            err.code === "blocked"
+              ? (await getTranslations("apiMessages.blocks"))("cannotMessage")
+              : err.message,
+        },
         { status: err.status },
       );
     }

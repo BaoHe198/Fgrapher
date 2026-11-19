@@ -35,10 +35,21 @@ export class MessagingError extends Error {
   constructor(
     message: string,
     public status: 400 | 403 | 404,
+    /** Lets a route answer in the user's language instead of this English. */
+    public code?: "blocked",
   ) {
     super(message);
     this.name = "MessagingError";
   }
+}
+
+/** Whether `blockerId` has blocked `blockedId` — one direction only. */
+export async function hasBlocked(blockerId: string, blockedId: string) {
+  const block = await db.blockedUser.findUnique({
+    where: { blockerId_blockedId: { blockerId, blockedId } },
+    select: { id: true },
+  });
+  return Boolean(block);
 }
 
 async function isBlocked(userId: string, otherUserId: string) {
@@ -134,7 +145,7 @@ export async function getOrCreateConversation(
   }
 
   if (await isBlocked(userId, otherUserId)) {
-    throw new MessagingError("You can't message this user", 403);
+    throw new MessagingError("You can't message this user", 403, "blocked");
   }
 
   const existing = await db.conversationParticipant.findFirst({
@@ -250,7 +261,7 @@ export async function sendMessage({
     throw new MessagingError("Conversation has no other participant", 400);
 
   if (await isBlocked(senderId, receiverId)) {
-    throw new MessagingError("You can't message this user", 403);
+    throw new MessagingError("You can't message this user", 403, "blocked");
   }
 
   if (type === "booking_link") {

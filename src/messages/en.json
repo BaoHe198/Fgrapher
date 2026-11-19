@@ -1564,7 +1564,8 @@
       "blocked": "User blocked",
       "unblocked": "User unblocked",
       "blockFailed": "Failed to block user",
-      "unblockFailed": "Failed to unblock user"
+      "unblockFailed": "Failed to unblock user",
+      "cannotMessage": "You cannot message this person."
     },
     "bookings": {
       "invalidInput": "Invalid input",
@@ -5459,7 +5460,14 @@
       "viewBooking": "View booking",
       "attachImage": "Attach an image",
       "writeMessage": "Write a message...",
-      "sendMessage": "Send message"
+      "sendMessage": "Send message",
+      "unblock": "Unblock",
+      "blockedToast": "Blocked {name}. Neither of you can message the other.",
+      "unblockedToast": "Unblocked {name}.",
+      "blockFailed": "Could not block. Please try again.",
+      "unblockFailed": "Could not unblock. Please try again.",
+      "blockedNotice": "You have blocked this person. Unblock to keep messaging.",
+      "sendFailed": "Your message was not sent. Please try again."
     },
     "conversationList": {
       "title": "Messages",
