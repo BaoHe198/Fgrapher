@@ -8,6 +8,7 @@ import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { assignFreePlan } from "@/services/subscription";
 import { notifyCritical } from "@/services/notification";
+import { purgeKycDocumentsNow } from "@/services/verification";
 
 // MVP scope decision (CLAUDE.md) — an account holds at most one active
 // provider role, and a VERIFIED role can't be self-removed (UserRole.
@@ -106,6 +107,14 @@ export async function reviewRoleChangeRequest({
   ]);
 
   if (approve) {
+    // The old role's row is deleted below, and with it the only reference
+    // to the identity documents it was verified with (kept for 90 days
+    // after approval). Delete the files first — see deleteKycFiles.
+    await purgeKycDocumentsNow(
+      { userId: request.userId, role: request.fromRole },
+      "role_removed",
+    );
+
     await db.$transaction([
       // Same operation DELETE /api/users/roles/[role] already performs
       // for an unverified role — reachable here for a verified one only

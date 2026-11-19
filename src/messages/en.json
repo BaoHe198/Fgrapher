@@ -1136,7 +1136,18 @@
         "failedToLoadDocument": "Failed to load document",
         "selectRejectionReason": "Select a rejection reason",
         "verificationUpdated": "Verification updated",
-        "verificationUpdateFailed": "Couldn't update the verification, please try again"
+        "verificationUpdateFailed": "Couldn't update the verification, please try again",
+        "imageBusiness": "business registration",
+        "legalEntityLine": "Declared legal form: {type}",
+        "legalEntity": {
+          "INDIVIDUAL": "Freelance individual (ID card only)",
+          "HOUSEHOLD_BUSINESS": "Household business (registration required)",
+          "COMPANY": "Company (registration required)"
+        },
+        "businessDocMissing": "Declared as a household business or company, but no registration certificate is on file.",
+        "sameIdWarning": "This ID number was also submitted for another account:",
+        "sameIdAccount": "{name} ({email}), role {role}",
+        "sameIdDeletedAccount": "A deleted account, role {role}"
       },
       "roleChangeRequests": {
         "title": "Role change requests",
@@ -1529,7 +1540,8 @@
       "serviceRequestReviewed": "Request reviewed",
       "serviceRequestNotFound": "Request not found",
       "serviceRequestAlreadyReviewed": "This request has already been reviewed",
-      "serviceRequestReviewFailed": "Couldn't review the request"
+      "serviceRequestReviewFailed": "Couldn't review the request",
+      "documentNotOnFile": "This document is not on file: it was never submitted, or it was deleted when its retention period ended."
     },
     "auth": {
       "invalidInput": "Invalid input",

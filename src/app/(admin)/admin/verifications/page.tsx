@@ -3,6 +3,7 @@
 import { BadgeCheck, Loader2 } from "lucide-react";
 import type { Role } from "@prisma/client";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
@@ -21,6 +22,18 @@ interface VerificationRow {
   role: string;
   verificationStatus: string;
   createdAt: string;
+  /** What the provider declared: decides which documents to expect. */
+  legalEntityType: "INDIVIDUAL" | "HOUSEHOLD_BUSINESS" | "COMPANY";
+  hasBusinessDoc: boolean;
+  /** Other accounts that submitted the same ID number. */
+  sameIdAccounts: {
+    userId: string;
+    role: string;
+    verificationStatus: string;
+    name: string | null;
+    email: string;
+    deleted: boolean;
+  }[];
   user: {
     id: string;
     name: string | null;
@@ -30,17 +43,15 @@ interface VerificationRow {
   };
 }
 
-const IMAGE_KIND_VALUES: ("front" | "back" | "selfie")[] = [
-  "front",
-  "back",
-  "selfie",
-];
+type ImageKind = "front" | "back" | "selfie" | "business";
+
+const IMAGE_KIND_VALUES: ImageKind[] = ["front", "back", "selfie", "business"];
 
 export default function AdminVerificationsPage() {
   const t = useTranslations("accountFlows.admin.verifications");
   const roleT = useTranslations("role");
   const router = useRouter();
-  const IMAGE_KINDS: { kind: "front" | "back" | "selfie"; label: string }[] =
+  const IMAGE_KINDS: { kind: ImageKind; label: string }[] =
     IMAGE_KIND_VALUES.map((kind) => ({
       kind,
       label:
@@ -48,7 +59,9 @@ export default function AdminVerificationsPage() {
           ? t("imageFront")
           : kind === "back"
             ? t("imageBack")
-            : t("imageSelfie"),
+            : kind === "selfie"
+              ? t("imageSelfie")
+              : t("imageBusiness"),
     }));
 
   // Lazy initializer runs once on mount rather than calling Date.now()
@@ -85,10 +98,7 @@ export default function AdminVerificationsPage() {
     load();
   }, []);
 
-  const viewImage = async (
-    userRoleId: string,
-    kind: "front" | "back" | "selfie",
-  ) => {
+  const viewImage = async (userRoleId: string, kind: ImageKind) => {
     setLoadingImage(`${userRoleId}-${kind}`);
     const res = await fetch(
       `/api/admin/verifications/${userRoleId}/image?kind=${kind}`,
@@ -172,9 +182,54 @@ export default function AdminVerificationsPage() {
               <p className="text-body-sm text-text-secondary">
                 {row.user.email}
               </p>
+              <p className="text-body-sm text-text-secondary">
+                {t("legalEntityLine", {
+                  type: t(`legalEntity.${row.legalEntityType}`),
+                })}
+              </p>
+              {row.legalEntityType !== "INDIVIDUAL" && !row.hasBusinessDoc ? (
+                <p
+                  role="alert"
+                  className="rounded-[var(--fg-radius-md)] border border-warning/30 bg-warning-bg p-3 text-body-sm text-text-primary"
+                >
+                  {t("businessDocMissing")}
+                </p>
+              ) : null}
+              {row.sameIdAccounts.length > 0 ? (
+                <div
+                  role="alert"
+                  className="rounded-[var(--fg-radius-md)] border border-danger/30 bg-danger-bg p-3 text-body-sm text-text-primary"
+                >
+                  <p className="font-semibold!">{t("sameIdWarning")}</p>
+                  <ul className="mt-1 list-disc pl-5">
+                    {row.sameIdAccounts.map((other) => (
+                      <li key={`${other.userId}-${other.role}`}>
+                        {other.deleted ? (
+                          t("sameIdDeletedAccount", {
+                            role: roleT(other.role as Role),
+                          })
+                        ) : (
+                          <Link
+                            href={`/admin/users/${other.userId}`}
+                            className="underline"
+                          >
+                            {t("sameIdAccount", {
+                              name: other.name ?? other.email,
+                              email: other.email,
+                              role: roleT(other.role as Role),
+                            })}
+                          </Link>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
               <div className="flex flex-wrap gap-2">
-                {IMAGE_KINDS.map(({ kind, label }) => (
+                {IMAGE_KINDS.filter(
+                  ({ kind }) => kind !== "business" || row.hasBusinessDoc,
+                ).map(({ kind, label }) => (
                   <Button
                     key={kind}
                     size="sm"

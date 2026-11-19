@@ -6,6 +6,7 @@ import {
   deleteKycAsset,
   isCloudinaryConfigured,
   isOwnKycAsset,
+  withoutDeliverySignature,
 } from "@/lib/media/cloudinary";
 import { CURRENT_POLICY_VERSION, KYC_PURGE_AFTER_DAYS } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -35,6 +36,108 @@ interface SubmitVerificationInput {
   selfiePublicId: string;
   ipAddress?: string;
   userAgent?: string;
+}
+
+const KYC_PUBLIC_ID_COLUMNS = [
+  "verificationIdPublicId",
+  "verificationIdBackPublicId",
+  "verificationSelfiePublicId",
+  "verificationBusinessDocPublicId",
+] as const;
+
+type KycPublicIds = Partial<
+  Record<(typeof KYC_PUBLIC_ID_COLUMNS)[number], string | null>
+>;
+
+const KYC_COLUMNS_SELECT = {
+  id: true,
+  userId: true,
+  verificationIdPublicId: true,
+  verificationIdBackPublicId: true,
+  verificationSelfiePublicId: true,
+  verificationBusinessDocPublicId: true,
+} as const;
+
+const KYC_COLUMNS_CLEARED = {
+  verificationIdUrl: null,
+  verificationIdPublicId: null,
+  verificationIdBackUrl: null,
+  verificationIdBackPublicId: null,
+  verificationSelfieUrl: null,
+  verificationSelfiePublicId: null,
+  verificationBusinessDocUrl: null,
+  verificationBusinessDocPublicId: null,
+  purgeAfter: null,
+} as const;
+
+/**
+ * Deletes identity-document files from storage, now. Best effort per file: a
+ * failure is logged and the rest still go, because every caller is in the
+ * middle of something (a resubmission, a role removal, an account deletion)
+ * that must not be undone by a storage hiccup.
+ *
+ * The 90-day cron used to be the only thing that ever deleted these files,
+ * and it finds them through the UserRole columns. Three paths dropped those
+ * columns while the files were still there — a resubmission overwrote them,
+ * removing or changing a role deleted the row, and deleting an account left
+ * them for up to 90 more days — so the documents outlived every reference
+ * to them (CLAUDE.md rule 7). Each of those paths now calls this first.
+ */
+export async function deleteKycFiles(
+  row: KycPublicIds,
+  keep: readonly (string | null | undefined)[] = [],
+) {
+  if (!isCloudinaryConfigured()) return 0;
+  const kept = new Set(keep.filter(Boolean));
+  const publicIds = KYC_PUBLIC_ID_COLUMNS.map((column) => row[column]).filter(
+    (publicId): publicId is string => Boolean(publicId) && !kept.has(publicId),
+  );
+  let deleted = 0;
+  for (const publicId of new Set(publicIds)) {
+    try {
+      await deleteKycAsset(publicId);
+      deleted += 1;
+    } catch (error) {
+      console.error("[KYC] Could not delete an identity document", {
+        publicId,
+        error,
+      });
+    }
+  }
+  return deleted;
+}
+
+/**
+ * Removes the identity documents of roles that are going away or whose
+ * owner is being erased: deletes the files, clears the columns, and writes
+ * the same audit entry the cron writes. The verification outcome
+ * (status, verifiedAt, verifiedBy, idNumberHash) is left alone.
+ */
+export async function purgeKycDocumentsNow(
+  where: { userId: string; role?: Role },
+  reason: "role_removed" | "account_deleted",
+) {
+  const rows = await db.userRole.findMany({
+    where: {
+      ...where,
+      OR: KYC_PUBLIC_ID_COLUMNS.map((column) => ({ [column]: { not: null } })),
+    },
+    select: KYC_COLUMNS_SELECT,
+  });
+  for (const row of rows) {
+    await deleteKycFiles(row);
+    await db.userRole.update({
+      where: { id: row.id },
+      data: KYC_COLUMNS_CLEARED,
+    });
+    await logAudit({
+      action: "KYC_DOCUMENTS_PURGED",
+      targetType: "user_role",
+      targetId: row.id,
+      metadata: { userId: row.userId, reason },
+    });
+  }
+  return rows.length;
 }
 
 export async function submitVerification({
@@ -90,13 +193,17 @@ export async function submitVerification({
       // against.
       legalEntityType,
       legalEntityConfirmedAt: new Date(),
-      verificationBusinessDocUrl: businessDocUrl ?? null,
+      // Stored without their delivery signature — see
+      // withoutDeliverySignature.
+      verificationBusinessDocUrl: businessDocUrl
+        ? withoutDeliverySignature(businessDocUrl)
+        : null,
       verificationBusinessDocPublicId: businessDocPublicId ?? null,
-      verificationIdUrl: idFrontUrl,
+      verificationIdUrl: withoutDeliverySignature(idFrontUrl),
       verificationIdPublicId: idFrontPublicId,
-      verificationIdBackUrl: idBackUrl,
+      verificationIdBackUrl: withoutDeliverySignature(idBackUrl),
       verificationIdBackPublicId: idBackPublicId,
-      verificationSelfieUrl: selfieUrl,
+      verificationSelfieUrl: withoutDeliverySignature(selfieUrl),
       verificationSelfiePublicId: selfiePublicId,
       idNumberHash: hashIdNumber(idNumber),
       verificationRejectedReason: null,
@@ -109,6 +216,15 @@ export async function submitVerification({
       purgeAfter: new Date(Date.now() + KYC_PURGE_AFTER_DAYS * 86_400_000),
     },
   });
+
+  // A resubmission after a rejection: the files of the earlier attempt
+  // are no longer referenced by anything, so they go now.
+  await deleteKycFiles(userRole, [
+    idFrontPublicId,
+    idBackPublicId,
+    selfiePublicId,
+    businessDocPublicId,
+  ]);
 
   await recordConsent({
     userId,
@@ -175,17 +291,7 @@ export async function purgeExpiredKycDocuments() {
 
     await db.userRole.update({
       where: { id: row.id },
-      data: {
-        verificationIdUrl: null,
-        verificationIdPublicId: null,
-        verificationIdBackUrl: null,
-        verificationIdBackPublicId: null,
-        verificationSelfieUrl: null,
-        verificationSelfiePublicId: null,
-        verificationBusinessDocUrl: null,
-        verificationBusinessDocPublicId: null,
-        purgeAfter: null,
-      },
+      data: KYC_COLUMNS_CLEARED,
     });
 
     // No human actor — a system/cron action, matching AuditLog's nullable

@@ -1136,7 +1136,18 @@
         "failedToLoadDocument": "Không thể tải tài liệu",
         "selectRejectionReason": "Vui lòng chọn lý do từ chối",
         "verificationUpdated": "Đã cập nhật xác minh",
-        "verificationUpdateFailed": "Không cập nhật được kết quả xác minh, vui lòng thử lại"
+        "verificationUpdateFailed": "Không cập nhật được kết quả xác minh, vui lòng thử lại",
+        "imageBusiness": "giấy đăng ký kinh doanh",
+        "legalEntityLine": "Hình thức khai báo: {type}",
+        "legalEntity": {
+          "INDIVIDUAL": "Cá nhân tự do (chỉ cần CCCD)",
+          "HOUSEHOLD_BUSINESS": "Hộ kinh doanh (cần giấy đăng ký)",
+          "COMPANY": "Doanh nghiệp (cần giấy đăng ký)"
+        },
+        "businessDocMissing": "Người này khai là hộ kinh doanh hoặc doanh nghiệp nhưng hồ sơ không có giấy đăng ký kinh doanh.",
+        "sameIdWarning": "Số giấy tờ này đã được nộp cho tài khoản khác:",
+        "sameIdAccount": "{name} ({email}), vai trò {role}",
+        "sameIdDeletedAccount": "Một tài khoản đã xóa, vai trò {role}"
       },
       "roleChangeRequests": {
         "title": "Yêu cầu đổi vai trò",
@@ -1529,7 +1540,8 @@
       "serviceRequestReviewed": "Đã xử lý yêu cầu",
       "serviceRequestNotFound": "Không tìm thấy yêu cầu",
       "serviceRequestAlreadyReviewed": "Yêu cầu này đã được xử lý",
-      "serviceRequestReviewFailed": "Không thể xử lý yêu cầu"
+      "serviceRequestReviewFailed": "Không thể xử lý yêu cầu",
+      "documentNotOnFile": "Giấy tờ này không còn trên hệ thống: chưa được nộp, hoặc đã tự xóa khi hết thời hạn lưu."
     },
     "auth": {
       "invalidInput": "Dữ liệu không hợp lệ",

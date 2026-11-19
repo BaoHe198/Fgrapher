@@ -456,9 +456,20 @@ export async function listReports({
 // user-facing upload flow now exists (see services/verification.ts), so
 // this queue is expected to actually fill up.
 export async function listPendingVerifications() {
-  return db.userRole.findMany({
+  const rows = await db.userRole.findMany({
     where: { verificationStatus: "PENDING" },
-    include: {
+    // Named columns, not the whole row: the queue never needs the stored
+    // document references or the ID-number hash in the browser (documents
+    // open through getKycImageUrl, one signed and logged view at a time).
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      verificationStatus: true,
+      createdAt: true,
+      legalEntityType: true,
+      verificationBusinessDocPublicId: true,
+      idNumberHash: true,
       user: {
         select: {
           id: true,
@@ -474,6 +485,45 @@ export async function listPendingVerifications() {
     // createdAt]) added for exactly this query.
     orderBy: { createdAt: "asc" },
   });
+
+  // The ID-number hash was stored "to detect duplicates" and never compared
+  // with anything: two accounts could be verified on one ID card and the
+  // reviewer was none the wiser. Other ACCOUNTS only — one person verifying
+  // a second role of their own reuses their card legitimately.
+  const hashes = [
+    ...new Set(rows.map((row) => row.idNumberHash).filter(Boolean)),
+  ] as string[];
+  const sameId =
+    hashes.length > 0
+      ? await db.userRole.findMany({
+          where: { idNumberHash: { in: hashes } },
+          select: {
+            userId: true,
+            role: true,
+            idNumberHash: true,
+            verificationStatus: true,
+            user: { select: { name: true, email: true, deletedAt: true } },
+          },
+        })
+      : [];
+
+  return rows.map(
+    ({ idNumberHash, verificationBusinessDocPublicId, userId, ...row }) => ({
+      ...row,
+      hasBusinessDoc: Boolean(verificationBusinessDocPublicId),
+      sameIdAccounts: sameId
+        .filter((other) => idNumberHash && other.idNumberHash === idNumberHash)
+        .filter((other) => other.userId !== userId)
+        .map((other) => ({
+          userId: other.userId,
+          role: other.role,
+          verificationStatus: other.verificationStatus,
+          name: other.user.name,
+          email: other.user.email,
+          deleted: Boolean(other.user.deletedAt),
+        })),
+    }),
+  );
 }
 
 export async function reviewVerification({
@@ -623,9 +673,20 @@ const KYC_IMAGE_FIELD = {
     url: "verificationSelfieUrl",
     publicId: "verificationSelfiePublicId",
   },
+  // The registration certificate a household business or company must
+  // upload. It was collected and never shown: the review page offered the
+  // three ID images only, so the one document that backs the declared legal
+  // form could not be looked at.
+  business: {
+    url: "verificationBusinessDocUrl",
+    publicId: "verificationBusinessDocPublicId",
+  },
 } as const;
 
 export type KycImageKind = keyof typeof KYC_IMAGE_FIELD;
+
+/** The document asked for is not on file: never uploaded, or already purged. */
+export class KycDocumentUnavailableError extends Error {}
 
 // Mints a 5-minute signed URL for ONE KYC image and logs the view —
 // VIỆC 3's "mọi lượt sinh signed URL ghi AuditLog" requirement. Never
@@ -642,12 +703,14 @@ export async function getKycImageUrl({
   adminId: string;
   ipAddress?: string;
 }) {
-  const userRole = await db.userRole.findUniqueOrThrow({
+  const userRole = await db.userRole.findUnique({
     where: { id: userRoleId },
   });
-  const publicId = userRole[KYC_IMAGE_FIELD[kind].publicId];
-  if (!publicId) {
-    throw new Error(`No ${kind} image on file for this verification`);
+  const publicId = userRole?.[KYC_IMAGE_FIELD[kind].publicId];
+  if (!userRole || !publicId) {
+    throw new KycDocumentUnavailableError(
+      `No ${kind} image on file for this verification`,
+    );
   }
 
   const url = generateKycSignedUrl(publicId);

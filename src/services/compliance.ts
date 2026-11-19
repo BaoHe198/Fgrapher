@@ -273,6 +273,12 @@ export async function processDeletion(userId: string, requestId?: string) {
   const { windDownAccount } = await import("@/services/account-closure");
   await windDownAccount(userId);
 
+  // Identity documents do not wait out their 90 days once the person has
+  // asked to be erased. The verification outcome itself (status, date,
+  // reviewer, ID-number hash) stays on the role rows as the audit trail.
+  const { purgeKycDocumentsNow } = await import("@/services/verification");
+  await purgeKycDocumentsNow({ userId }, "account_deleted");
+
   const now = new Date();
   // Posts whose like/comment counters must be recounted afterwards.
   const [likedPosts, commentedPosts] = await Promise.all([
