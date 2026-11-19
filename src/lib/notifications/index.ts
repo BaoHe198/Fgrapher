@@ -184,6 +184,29 @@ export const NOTIFICATION_POLICY: Record<
     preferenceKey: "serviceRequests",
     emailScope: "request-nudge",
   },
+  // The review decision on a customer's own request. Critical like a media
+  // decision: nothing else tells them the request is live, and a rejection
+  // needs acting on (fix it and post again).
+  REQUEST_APPROVED: {
+    feature: "core",
+    inApp: true,
+    email: "critical",
+    emailScope: "request-review",
+  },
+  REQUEST_REJECTED: {
+    feature: "core",
+    inApp: true,
+    email: "critical",
+    emailScope: "request-review",
+  },
+  // Closed by the daily cron after its seven days. In-app only: by then the
+  // customer has had the offer emails and the 48-hour nudge.
+  REQUEST_EXPIRED: {
+    feature: "core",
+    inApp: true,
+    email: "none",
+    preferenceKey: "serviceRequests",
+  },
   // --- Account / billing / moderation (core, always emailed) ---------
   // `critical` still carries an emailScope: the send is reserved in the
   // outbox before delivery exactly like a preference email, so a retried

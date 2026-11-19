@@ -1316,7 +1316,9 @@
       "dateRangeBackwards": "Ngày bắt đầu không được sau ngày kết thúc.",
       "budgetBackwards": "Ngân sách tối thiểu không được lớn hơn tối đa.",
       "tooManyOpen": "Bạn đã có 3 yêu cầu đang mở — vui lòng chờ một yêu cầu hoàn tất trước khi đăng thêm.",
-      "unknown": "Không thực hiện được, vui lòng thử lại."
+      "unknown": "Không thực hiện được, vui lòng thử lại.",
+      "dateMissing": "Hãy chọn ngày chụp, hoặc đánh dấu ngày linh hoạt.",
+      "datePast": "Ngày chụp đã qua — hãy chọn một ngày từ hôm nay trở đi."
     },
     "bookingErrors": {
       "notFound": "Không tìm thấy lịch đặt.",
@@ -1785,7 +1787,9 @@
           "PENDING": "Đang chờ",
           "ACCEPTED": "Đã chấp nhận",
           "DECLINED": "Đã từ chối",
-          "WITHDRAWN": "Đã rút"
+          "WITHDRAWN": "Đã rút",
+          "REQUEST_CANCELLED": "Đóng khi hủy yêu cầu",
+          "REQUEST_EXPIRED": "Đóng khi hết hạn"
         },
         "viewProfile": "Xem hồ sơ",
         "message": "Nhắn tin",
@@ -1836,7 +1840,8 @@
         "noOffersBody": "Bạn nhận thông báo khi có đề xuất đầu tiên.",
         "refCount": "{count} ảnh tham khảo",
         "showMore": "Xem thêm",
-        "showLess": "Thu gọn"
+        "showLess": "Thu gọn",
+        "editAndRepost": "Sửa và đăng lại"
       }
     },
     "opportunities": {
@@ -1873,7 +1878,9 @@
         "offerStatus": {
           "ACCEPTED": "Đã được chọn",
           "DECLINED": "Đã bị từ chối",
-          "WITHDRAWN": "Đã rút"
+          "WITHDRAWN": "Đã rút",
+          "REQUEST_CANCELLED": "Khách đã hủy yêu cầu",
+          "REQUEST_EXPIRED": "Yêu cầu đã hết hạn"
         },
         "proposedPriceLabel": "Giá đề xuất",
         "proposedDateLabel": "Ngày đề xuất",
@@ -1884,7 +1891,12 @@
         "withdrawConfirm": "Rút đề nghị này?",
         "offerSentToast": "Đã gửi đề nghị",
         "withdrawnToast": "Đã rút đề nghị",
-        "genericError": "Có lỗi xảy ra, vui lòng thử lại"
+        "genericError": "Có lỗi xảy ra, vui lòng thử lại",
+        "closed": {
+          "CANCELLED": "Khách đã hủy yêu cầu này nên không còn nhận đề nghị.",
+          "EXPIRED": "Yêu cầu này đã hết hạn nhận đề nghị.",
+          "FULFILLED": "Khách đã chọn nhà cung cấp cho yêu cầu này."
+        }
       },
       "unverified": {
         "title": "Xác minh danh tính để nhận yêu cầu",
@@ -1928,7 +1940,9 @@
         "PENDING": "Đang chờ",
         "ACCEPTED": "Đã được chọn",
         "DECLINED": "Đã bị từ chối",
-        "WITHDRAWN": "Đã rút"
+        "WITHDRAWN": "Đã rút",
+        "REQUEST_CANCELLED": "Khách đã hủy yêu cầu",
+        "REQUEST_EXPIRED": "Yêu cầu đã hết hạn"
       }
     },
     "acceptingBookingsToggle": {
@@ -3531,8 +3545,8 @@
       },
       "requestNoOffers": {
         "heading": "Chưa có đề nghị nào cho yêu cầu của bạn",
-        "body": "Yêu cầu “{requestTitle}” ({requestCode}) chưa nhận được đề nghị nào sau 48 giờ. Cân nhắc nới ngân sách, bổ sung mô tả hoặc đặt lịch trực tiếp.",
-        "cta": "Chỉnh sửa yêu cầu",
+        "body": "Yêu cầu “{requestTitle}” ({requestCode}) chưa nhận được đề nghị nào sau 48 giờ. Bạn có thể hủy và đăng lại với ngân sách rộng hơn hoặc mô tả rõ hơn, hoặc đặt lịch trực tiếp với một nghệ sĩ.",
+        "cta": "Xem yêu cầu",
         "subject": "Yêu cầu của bạn chưa có đề nghị — Fgrapher"
       },
       "verificationApproved": {
@@ -3562,6 +3576,19 @@
       "mediaRejectedPost": {
         "heading": "Một ảnh bài đăng bị từ chối",
         "body": "Ảnh trong bài đăng của bạn không được duyệt. Lý do: {reason}"
+      },
+      "requestApproved": {
+        "heading": "Yêu cầu của bạn đã được duyệt",
+        "body": "Yêu cầu “{requestTitle}” ({requestCode}) đã hiển thị cho các nhà cung cấp phù hợp. Fgrapher sẽ báo cho bạn khi có đề nghị.",
+        "cta": "Xem yêu cầu",
+        "subject": "Yêu cầu của bạn đã được duyệt — Fgrapher"
+      },
+      "requestRejected": {
+        "heading": "Yêu cầu của bạn chưa được duyệt",
+        "body": "Yêu cầu “{requestTitle}” ({requestCode}) chưa được đăng lên Fgrapher. Bạn có thể sửa nội dung và đăng lại bất cứ lúc nào.",
+        "bodyWithReason": "Yêu cầu “{requestTitle}” ({requestCode}) chưa được đăng lên Fgrapher. Lý do: {reason}. Bạn có thể sửa nội dung và đăng lại bất cứ lúc nào.",
+        "cta": "Xem và đăng lại",
+        "subject": "Yêu cầu của bạn chưa được duyệt — Fgrapher"
       }
     },
     "notifications": {
@@ -3666,7 +3693,28 @@
         },
         "noOffers": {
           "title": "Chưa có nhà cung cấp nào chào giá",
-          "message": "Yêu cầu “{title}” ({code}) chưa nhận được đề nghị nào sau 48 giờ. Cân nhắc nới ngân sách hoặc đặt lịch trực tiếp."
+          "message": "Yêu cầu “{title}” ({code}) chưa nhận được đề nghị nào sau 48 giờ. Bạn có thể hủy và đăng lại với ngân sách rộng hơn, hoặc đặt lịch trực tiếp với một nghệ sĩ."
+        },
+        "approved": {
+          "title": "Yêu cầu của bạn đã được duyệt",
+          "message": "“{title}” ({code}) đã hiển thị cho các nhà cung cấp phù hợp và mở nhận đề nghị trong {days} ngày."
+        },
+        "rejected": {
+          "title": "Yêu cầu của bạn chưa được duyệt",
+          "message": "“{title}” ({code}) chưa được đăng. Bạn có thể sửa nội dung và đăng lại.",
+          "messageWithReason": "“{title}” ({code}) chưa được đăng. Lý do: {reason}. Bạn có thể sửa nội dung và đăng lại."
+        },
+        "expired": {
+          "title": "Yêu cầu đã hết hạn",
+          "message": "“{title}” ({code}) đã hết hạn nhận đề nghị. Bạn có thể đăng lại nếu vẫn cần."
+        },
+        "closedCancelled": {
+          "title": "Khách đã hủy yêu cầu",
+          "message": "Yêu cầu “{title}” ({code}) đã được khách hủy, nên đề nghị của bạn không còn hiệu lực."
+        },
+        "closedExpired": {
+          "title": "Yêu cầu đã hết hạn",
+          "message": "Yêu cầu “{title}” ({code}) đã hết hạn mà khách chưa chọn ai, nên đề nghị của bạn đã đóng."
         }
       },
       "post": {

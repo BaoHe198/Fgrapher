@@ -24,6 +24,8 @@ export const REQUEST_ERROR_KEYS: Record<string, string> = {
   "Only a pending offer can be declined": "onlyPendingDecline",
   "Date range start can't be after the end": "dateRangeBackwards",
   "Budget minimum can't be greater than the maximum": "budgetBackwards",
+  "Choose a shoot date, or mark the date as flexible": "dateMissing",
+  "The shoot date has already passed": "datePast",
   "You already have ": "tooManyOpen",
 };
 

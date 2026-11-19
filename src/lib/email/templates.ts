@@ -451,6 +451,35 @@ export function requestNoOffersEmailHtml(props: ServiceRequestEmailBase) {
   return serviceRequestEmail("requestNoOffers", props);
 }
 
+export function requestApprovedEmailHtml(props: ServiceRequestEmailBase) {
+  return serviceRequestEmail("requestApproved", props);
+}
+
+export function requestRejectedEmailHtml({
+  t,
+  requestTitle,
+  requestCode,
+  requestUrl,
+  reason,
+}: ServiceRequestEmailBase & { reason?: string }) {
+  const labels = {
+    requestTitle: strong(requestTitle),
+    requestCode: escapeHtml(requestCode),
+  };
+  return bookingEmailShell({
+    t,
+    heading: t("requestRejected.heading"),
+    body: reason
+      ? t("requestRejected.bodyWithReason", {
+          ...labels,
+          reason: strong(reason),
+        })
+      : t("requestRejected.body", labels),
+    ctaLabel: t("requestRejected.cta"),
+    ctaUrl: requestUrl,
+  });
+}
+
 export function bookingCompletedEmailHtml({
   t,
   otherPartyName,

@@ -11,9 +11,14 @@ import { verifyReferenceMediaUpload } from "@/lib/media/cloudinary";
 import { features } from "@/lib/features";
 import { mediaKindFromUrl } from "@/lib/media/kind";
 import { db } from "@/lib/db";
-import { requestNoOffersEmailHtml } from "@/lib/email";
+import {
+  requestApprovedEmailHtml,
+  requestNoOffersEmailHtml,
+  requestRejectedEmailHtml,
+} from "@/lib/email";
 import { resolvePartyName } from "@/lib/party-name";
-import { notify } from "@/services/notification";
+import { requestDateProblem } from "@/lib/validations/service-request";
+import { notify, notifyCritical } from "@/services/notification";
 import { notifyMatchingProviders } from "@/services/request-offers";
 
 // Prompt G7 — reverse marketplace. Simplified from the source prompt's
@@ -276,6 +281,25 @@ export async function publishDraftServiceRequest(
     );
   }
 
+  // Same reason as the two checks above: this path has no request body, so
+  // the schema's "pick a date" and "not in the past" rules never ran. A
+  // draft saved without a date could be published as it was and reached
+  // providers reading "Thời gian: Chưa điền".
+  const dateProblem = requestDateProblem({
+    shootDate: request.shootDate?.toISOString().slice(0, 10),
+    isDateFlexible: request.isDateFlexible,
+    dateRangeEnd: request.dateRangeEnd?.toISOString().slice(0, 10),
+  });
+  if (dateProblem === "missing") {
+    throw new ServiceRequestError(
+      "Choose a shoot date, or mark the date as flexible",
+      400,
+    );
+  }
+  if (dateProblem === "past") {
+    throw new ServiceRequestError("The shoot date has already passed", 400);
+  }
+
   if (features.phoneVerificationRequired) {
     const customer = await db.user.findUnique({
       where: { id: customerId },
@@ -394,8 +418,130 @@ export async function reviewServiceRequest({
     // never presented to the admin as if the status change had failed.
     await notifyMatchingProviders(reviewed);
   }
+  await notifyCustomerOfReview(reviewed, action, moderatedAt);
 
   return reviewed;
+}
+
+// Recipient-facing copy for events the recipient did not trigger (an admin's
+// review, another party's cancellation, the expiry cron): always "vi", for
+// the reason notifyMatchingProviders gives — the actor's locale must not
+// decide the language somebody else reads.
+function recipientTranslations() {
+  return Promise.all([
+    getTranslations({ locale: "vi", namespace: "libServices.email" }),
+    getTranslations({ locale: "vi", namespace: "libServices.notifications" }),
+  ]);
+}
+
+// Never rejects: the review is already committed, and an admin must not be
+// shown "failed" for a decision that went through (a second click would get
+// "already reviewed"). A failure is logged, as notifyMatchingProviders does.
+async function notifyCustomerOfReview(
+  request: {
+    id: string;
+    code: string;
+    title: string;
+    customerId: string;
+    moderationReason: string | null;
+  },
+  action: "approve" | "reject",
+  moderatedAt: Date,
+) {
+  try {
+    const [emailT, nt] = await recipientTranslations();
+    const labels = { title: request.title, code: request.code };
+    const email = {
+      t: emailT,
+      requestTitle: request.title,
+      requestCode: request.code,
+      requestUrl: appUrl(`/dashboard/requests/${request.id}`),
+    };
+    // A request can be reviewed again after being reposted from a draft, so
+    // each decision is its own event.
+    const decision = String(moderatedAt.getTime());
+
+    if (action === "approve") {
+      await notifyCritical({
+        userId: request.customerId,
+        type: "REQUEST_APPROVED",
+        title: nt("request.approved.title"),
+        message: nt("request.approved.message", {
+          ...labels,
+          days: REQUEST_TTL_DAYS,
+        }),
+        data: { requestId: request.id },
+        email: {
+          subject: emailT("requestApproved.subject"),
+          html: requestApprovedEmailHtml(email),
+          dedupe: [request.id, "APPROVED", decision],
+        },
+      });
+      return;
+    }
+
+    // The sentence supplies the full stop after the reason; a reviewer's
+    // note usually ends with one too.
+    const reason =
+      request.moderationReason?.trim().replace(/[.!?…\s]+$/u, "") || undefined;
+    await notifyCritical({
+      userId: request.customerId,
+      type: "REQUEST_REJECTED",
+      title: nt("request.rejected.title"),
+      message: reason
+        ? nt("request.rejected.messageWithReason", { ...labels, reason })
+        : nt("request.rejected.message", labels),
+      data: { requestId: request.id },
+      email: {
+        subject: emailT("requestRejected.subject"),
+        html: requestRejectedEmailHtml({ ...email, reason }),
+        dedupe: [request.id, "REJECTED", decision],
+      },
+    });
+  } catch (error) {
+    console.error("[Service Request] Review notification failed", {
+      requestId: request.id,
+      action,
+      error,
+    });
+  }
+}
+
+// A provider whose offer was still waiting when the request closed. The
+// offer row becomes DECLINED either way (there is no "closed" offer state),
+// which on its own reads as "the customer turned you down" — it was nothing
+// of the kind, so say what did happen. In-app only.
+async function notifyOfferersOfClosure(
+  request: { id: string; code: string; title: string },
+  providerIds: string[],
+  reason: "cancelled" | "expired",
+) {
+  if (providerIds.length === 0) return;
+  try {
+    const [, nt] = await recipientTranslations();
+    const key =
+      reason === "cancelled"
+        ? "request.closedCancelled"
+        : "request.closedExpired";
+    for (const userId of providerIds) {
+      await notify({
+        userId,
+        type: "REQUEST_OFFER_DECLINED",
+        title: nt(`${key}.title`),
+        message: nt(`${key}.message`, {
+          title: request.title,
+          code: request.code,
+        }),
+        data: { requestId: request.id },
+      });
+    }
+  } catch (error) {
+    console.error("[Service Request] Closure notification failed", {
+      requestId: request.id,
+      reason,
+      error,
+    });
+  }
 }
 
 export async function listCustomerRequests(customerId: string) {
@@ -469,6 +615,11 @@ export async function cancelServiceRequest(
     throw new ServiceRequestError("This request can't be cancelled", 400);
   }
 
+  const waiting = await db.requestOffer.findMany({
+    where: { requestId, status: "PENDING" },
+    select: { providerId: true },
+  });
+
   await db.$transaction([
     db.serviceRequest.update({
       where: { id: requestId },
@@ -479,6 +630,12 @@ export async function cancelServiceRequest(
       data: { status: "DECLINED" },
     }),
   ]);
+
+  await notifyOfferersOfClosure(
+    request,
+    waiting.map((offer) => offer.providerId),
+    "cancelled",
+  );
 }
 
 // Top-nav "Danh sách yêu cầu" — a system-wide, filterable browse of every
@@ -601,22 +758,69 @@ export async function expireOverdueRequests() {
       isDraft: false,
       expiresAt: { lt: new Date() },
     },
-    select: { id: true },
+    select: {
+      id: true,
+      code: true,
+      title: true,
+      customerId: true,
+      offers: { where: { status: "PENDING" }, select: { providerId: true } },
+    },
   });
   if (overdue.length === 0) return { expired: 0 };
 
+  // Conditional on the request still being open, so one the customer
+  // cancelled (or whose offer they accepted) between the read above and
+  // this write is left alone, and nobody is told it "expired".
+  const ids = overdue.map((r) => r.id);
   await db.$transaction([
-    db.serviceRequest.updateMany({
-      where: { id: { in: overdue.map((r) => r.id) } },
-      data: { status: "EXPIRED" },
-    }),
     db.requestOffer.updateMany({
-      where: { requestId: { in: overdue.map((r) => r.id) }, status: "PENDING" },
+      where: {
+        requestId: { in: ids },
+        status: "PENDING",
+        request: { status: { in: OPEN_STATUSES } },
+      },
       data: { status: "DECLINED" },
+    }),
+    db.serviceRequest.updateMany({
+      where: { id: { in: ids }, status: { in: OPEN_STATUSES } },
+      data: { status: "EXPIRED" },
     }),
   ]);
 
-  return { expired: overdue.length };
+  const expired = await db.serviceRequest.findMany({
+    where: { id: { in: ids }, status: "EXPIRED" },
+    select: { id: true },
+  });
+  const expiredIds = new Set(expired.map((r) => r.id));
+
+  try {
+    const [, nt] = await recipientTranslations();
+    for (const request of overdue) {
+      if (!expiredIds.has(request.id)) continue;
+      await notify({
+        // Deterministic, so a retried or manually re-run cron cannot tell
+        // the customer twice.
+        notificationId: `request-expired-${request.id}`,
+        userId: request.customerId,
+        type: "REQUEST_EXPIRED",
+        title: nt("request.expired.title"),
+        message: nt("request.expired.message", {
+          title: request.title,
+          code: request.code,
+        }),
+        data: { requestId: request.id },
+      });
+      await notifyOfferersOfClosure(
+        request,
+        request.offers.map((offer) => offer.providerId),
+        "expired",
+      );
+    }
+  } catch (error) {
+    console.error("[Service Request] Expiry notification failed", { error });
+  }
+
+  return { expired: expiredIds.size };
 }
 
 // Ràng buộc #3 — "Sau 48h không có đề nghị nào: thông báo cho khách."

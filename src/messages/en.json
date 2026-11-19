@@ -1316,7 +1316,9 @@
       "dateRangeBackwards": "The start date can't be after the end date.",
       "budgetBackwards": "The minimum budget can't be more than the maximum.",
       "tooManyOpen": "You already have 3 open requests — wait for one to finish before posting another.",
-      "unknown": "Couldn't complete that, please try again."
+      "unknown": "Couldn't complete that, please try again.",
+      "dateMissing": "Choose a shoot date, or mark the date as flexible.",
+      "datePast": "The shoot date has already passed — choose today or a later day."
     },
     "bookingErrors": {
       "notFound": "Booking not found.",
@@ -1785,7 +1787,9 @@
           "PENDING": "Pending",
           "ACCEPTED": "Accepted",
           "DECLINED": "Declined",
-          "WITHDRAWN": "Withdrawn"
+          "WITHDRAWN": "Withdrawn",
+          "REQUEST_CANCELLED": "Closed with the request",
+          "REQUEST_EXPIRED": "Closed at expiry"
         },
         "viewProfile": "View profile",
         "message": "Message",
@@ -1836,7 +1840,8 @@
         "noOffersBody": "You'll be notified of the first proposal.",
         "refCount": "{count} reference photos",
         "showMore": "Show more",
-        "showLess": "Show less"
+        "showLess": "Show less",
+        "editAndRepost": "Edit and post again"
       }
     },
     "opportunities": {
@@ -1873,7 +1878,9 @@
         "offerStatus": {
           "ACCEPTED": "You were chosen",
           "DECLINED": "Declined",
-          "WITHDRAWN": "Withdrawn"
+          "WITHDRAWN": "Withdrawn",
+          "REQUEST_CANCELLED": "Request cancelled by customer",
+          "REQUEST_EXPIRED": "Request expired"
         },
         "proposedPriceLabel": "Proposed price",
         "proposedDateLabel": "Proposed date",
@@ -1884,7 +1891,12 @@
         "withdrawConfirm": "Withdraw this offer?",
         "offerSentToast": "Offer sent",
         "withdrawnToast": "Offer withdrawn",
-        "genericError": "Something went wrong, please try again"
+        "genericError": "Something went wrong, please try again",
+        "closed": {
+          "CANCELLED": "The customer cancelled this request, so it no longer takes offers.",
+          "EXPIRED": "This request is no longer open to offers.",
+          "FULFILLED": "The customer has chosen a provider for this request."
+        }
       },
       "unverified": {
         "title": "Verify your identity to receive requests",
@@ -1928,7 +1940,9 @@
         "PENDING": "Pending",
         "ACCEPTED": "You were chosen",
         "DECLINED": "Declined",
-        "WITHDRAWN": "Withdrawn"
+        "WITHDRAWN": "Withdrawn",
+        "REQUEST_CANCELLED": "Request cancelled by customer",
+        "REQUEST_EXPIRED": "Request expired"
       }
     },
     "acceptingBookingsToggle": {
@@ -3531,8 +3545,8 @@
       },
       "requestNoOffers": {
         "heading": "No offers yet on your request",
-        "body": "Your request “{requestTitle}” ({requestCode}) hasn't received any offers after 48 hours. Consider widening the budget, adding detail, or booking directly.",
-        "cta": "Edit request",
+        "body": "Your request “{requestTitle}” ({requestCode}) has had no offers after 48 hours. You can cancel it and post again with a wider budget or a clearer description, or book an artist directly.",
+        "cta": "View request",
         "subject": "Your request has no offers yet — Fgrapher"
       },
       "verificationApproved": {
@@ -3562,6 +3576,19 @@
       "mediaRejectedPost": {
         "heading": "A post photo was rejected",
         "body": "A photo in your post was not approved. Reason: {reason}"
+      },
+      "requestApproved": {
+        "heading": "Your request was approved",
+        "body": "Your request “{requestTitle}” ({requestCode}) is now visible to matching providers. Fgrapher will let you know when an offer arrives.",
+        "cta": "View request",
+        "subject": "Your request was approved — Fgrapher"
+      },
+      "requestRejected": {
+        "heading": "Your request was not approved",
+        "body": "Your request “{requestTitle}” ({requestCode}) was not posted on Fgrapher. You can edit it and post again at any time.",
+        "bodyWithReason": "Your request “{requestTitle}” ({requestCode}) was not posted on Fgrapher. Reason: {reason}. You can edit it and post again at any time.",
+        "cta": "View and post again",
+        "subject": "Your request was not approved — Fgrapher"
       }
     },
     "notifications": {
@@ -3666,7 +3693,28 @@
         },
         "noOffers": {
           "title": "No offers yet",
-          "message": "Request “{title}” ({code}) has had no offers after 48 hours. Consider widening the budget or booking directly."
+          "message": "Your request “{title}” ({code}) has had no offers after 48 hours. You can cancel it and post again with a wider budget, or book an artist directly."
+        },
+        "approved": {
+          "title": "Your request was approved",
+          "message": "“{title}” ({code}) is now visible to matching providers and open to offers for {days} days."
+        },
+        "rejected": {
+          "title": "Your request was not approved",
+          "message": "“{title}” ({code}) was not posted. You can edit it and post again.",
+          "messageWithReason": "“{title}” ({code}) was not posted. Reason: {reason}. You can edit it and post again."
+        },
+        "expired": {
+          "title": "Your request has expired",
+          "message": "“{title}” ({code}) is no longer open to offers. You can post it again if you still need it."
+        },
+        "closedCancelled": {
+          "title": "The customer cancelled the request",
+          "message": "The request “{title}” ({code}) was cancelled by the customer, so your offer is closed."
+        },
+        "closedExpired": {
+          "title": "The request has expired",
+          "message": "The request “{title}” ({code}) expired before the customer chose anyone, so your offer is closed."
         }
       },
       "post": {
