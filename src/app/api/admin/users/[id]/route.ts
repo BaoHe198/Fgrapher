@@ -69,26 +69,28 @@ export async function PATCH(
       );
     }
 
-    let user;
+    // Every branch performs its action and the response is then read back
+    // through getAdminUserDetail: the helpers return the raw row (password
+    // hash included), which used to be sent to the browser as it was.
     switch (parsed.data.action) {
       case "suspend":
-        user = await suspendUser({
+        await suspendUser({
           userId: id,
           reason: parsed.data.reason,
           until: parsed.data.until ? new Date(parsed.data.until) : undefined,
         });
         break;
       case "unsuspend":
-        user = await unsuspendUser(id);
+        await unsuspendUser(id);
         break;
       case "verify":
-        user = await verifyUser(id);
+        await verifyUser(id);
         break;
       case "delete":
-        user = await softDeleteAdminUser(id);
+        await softDeleteAdminUser(id);
         break;
       case "notes":
-        user = await updateAdminNotes(id, parsed.data.notes);
+        await updateAdminNotes(id, parsed.data.notes);
         break;
       case "add_violation":
         await addViolationPoint({
@@ -96,7 +98,6 @@ export async function PATCH(
           adminId: session.user.id,
           reason: parsed.data.reason,
         });
-        user = await getAdminUserDetail(id);
         break;
       case "clear_violations":
         await clearViolationPoints({
@@ -104,7 +105,6 @@ export async function PATCH(
           adminId: session.user.id,
           reason: parsed.data.reason,
         });
-        user = await getAdminUserDetail(id);
         break;
       case "assign_plan":
         await assignManualPlan({
@@ -113,9 +113,9 @@ export async function PATCH(
           plan: parsed.data.plan,
           expiresAt: new Date(parsed.data.expiresAt),
         });
-        user = await getAdminUserDetail(id);
         break;
     }
+    const user = await getAdminUserDetail(id);
 
     await logAdminAction({
       adminId: session.user.id,

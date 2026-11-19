@@ -251,6 +251,7 @@ export async function listAdminUsers({
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
+      omit: ADMIN_USER_OMIT,
       include: { roles: { where: { active: true }, select: { role: true } } },
     }),
     db.user.count({ where }),
@@ -264,11 +265,34 @@ export async function listAdminUsers({
   };
 }
 
+// What the two admin user endpoints must never send to a browser. Both
+// returned whole rows: /api/admin/users shipped twenty bcrypt hashes per
+// page, and the detail endpoint added each role's identity-document
+// references and ID-number hash. No admin screen shows any of it. An admin
+// is trusted to act on an account, not to hold the material for cracking
+// its password offline — and whatever reaches the browser also reaches its
+// cache, its extensions and anything that can script the page. Identity
+// documents are viewed through /admin/verifications, which signs a
+// short-lived URL and writes an AuditLog row per view (CLAUDE.md rule 7).
+const ADMIN_USER_OMIT = { passwordHash: true } as const;
+const ADMIN_ROLE_OMIT = {
+  verificationIdUrl: true,
+  verificationIdPublicId: true,
+  verificationIdBackUrl: true,
+  verificationIdBackPublicId: true,
+  verificationSelfieUrl: true,
+  verificationSelfiePublicId: true,
+  verificationBusinessDocUrl: true,
+  verificationBusinessDocPublicId: true,
+  idNumberHash: true,
+} as const;
+
 export async function getAdminUserDetail(id: string) {
   const user = await db.user.findUnique({
     where: { id },
+    omit: ADMIN_USER_OMIT,
     include: {
-      roles: { include: { subscription: true } },
+      roles: { omit: ADMIN_ROLE_OMIT, include: { subscription: true } },
       bookingsAsCustomer: { select: { id: true, status: true }, take: 200 },
       bookingsAsProvider: { select: { id: true, status: true }, take: 200 },
     },
