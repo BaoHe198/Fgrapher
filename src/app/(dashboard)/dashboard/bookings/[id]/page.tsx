@@ -1,6 +1,12 @@
 "use client";
 
-import type { Booking, BookingStatus, Service, User } from "@prisma/client";
+import type {
+  Booking,
+  BookingStatus,
+  Role,
+  Service,
+  User,
+} from "@prisma/client";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -93,6 +99,7 @@ const DECLINE_REASON_VALUES = [
 export default function BookingDetailPage() {
   const t = useTranslations("dashboardCore.bookingDetail");
   const tBookings = useTranslations("dashboardCore.bookings");
+  const tRole = useTranslations("role");
   const params = useParams<{ id: string }>();
   const { data: session } = useSession();
 
@@ -291,7 +298,11 @@ export default function BookingDetailPage() {
                 className="text-body-sm text-text-link hover:underline"
               >
                 {resolvePartyName(child.provider, t("crewHire.unknown"))}
-                {child.recipientRole ? ` — ${child.recipientRole}` : ""}
+                {/* The role's name, not its code: this read
+                    "Thái Thị Phấn — MAKEUP_ARTIST". */}
+                {child.recipientRole
+                  ? ` — ${tRole(child.recipientRole as Role)}`
+                  : ""}
               </Link>
               <Badge variant="neutral">
                 {tBookings(`status.${child.status}`)}
