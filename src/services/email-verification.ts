@@ -2,7 +2,10 @@ import crypto from "crypto";
 
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
-import { sendEmail, verifyEmailHtml } from "@/lib/email";
+import { getTranslations } from "next-intl/server";
+
+import { bookingEmailShell, sendEmail, verifyEmailHtml } from "@/lib/email";
+import { escapeHtml } from "@/lib/utils";
 import {
   type BillingInterval,
   pendingPaidRoles,
@@ -73,6 +76,57 @@ export async function createEmailVerificationToken(
  * the token exists, and the user can ask for the link again. The outbox
  * retries on its own.
  */
+/** "an***@gmail.com": enough to recognise, not the whole address. */
+function maskEmail(email: string) {
+  const [local, domain] = email.split("@");
+  if (!domain) return "***";
+  return `${local.slice(0, 2)}***@${domain}`;
+}
+
+/**
+ * Tells the CURRENT sign-in address that a change to another one was asked
+ * for. Sent at the request, not at the confirmation: that is while there is
+ * still time to act. Never throws — the change itself has already been
+ * recorded as pending.
+ */
+export async function sendEmailChangeNotice({
+  userId,
+  oldEmail,
+  newEmail,
+}: {
+  userId: string;
+  oldEmail: string;
+  newEmail: string;
+}) {
+  try {
+    const t = await getTranslations({
+      locale: "vi",
+      namespace: "libServices.email",
+    });
+    await sendEmail({
+      to: oldEmail,
+      subject: t("emailChangeRequested.subject"),
+      html: bookingEmailShell({
+        t,
+        heading: t("emailChangeRequested.heading"),
+        body: t("emailChangeRequested.body", {
+          newEmail: escapeHtml(maskEmail(newEmail)),
+        }),
+        ctaLabel: t("emailChangeRequested.cta"),
+        ctaUrl: appUrl("/dashboard/settings/account"),
+      }),
+      // One notice per requested address: saving the same change twice
+      // must not send it twice.
+      idempotencyKey: `email-change-notice:${userId}:${newEmail}`,
+    });
+  } catch (error) {
+    console.error("[Email change] Notice to the old address failed", {
+      userId,
+      error,
+    });
+  }
+}
+
 export async function sendVerificationEmail({
   userId,
   email,
@@ -261,8 +315,8 @@ const prismaStore: EmailVerificationStore = {
         where: { id: tokenId },
       });
       if (count !== 1) return "lost" as const;
-      const holder = await tx.user.findUnique({
-        where: { email: newEmail },
+      const holder = await tx.user.findFirst({
+        where: { email: { equals: newEmail, mode: "insensitive" } },
         select: { id: true },
       });
       if (holder && holder.id !== userId) return "taken" as const;

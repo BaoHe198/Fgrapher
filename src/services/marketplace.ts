@@ -1,3 +1,4 @@
+import { ACTIVE_ACCOUNT } from "@/lib/account/active-account";
 import { getTranslations } from "next-intl/server";
 import type { Prisma, ProductCondition, ProductType } from "@prisma/client";
 
@@ -45,6 +46,7 @@ export async function searchProducts(params: ShopSearchParams) {
   const where: Prisma.ProductWhereInput = {
     isActive: true,
     deletedAt: null,
+    user: ACTIVE_ACCOUNT,
     ...(params.sellerId ? { userId: params.sellerId } : {}),
   };
 
@@ -129,7 +131,7 @@ export async function searchProducts(params: ShopSearchParams) {
     db.product.count({ where }),
     db.product.groupBy({
       by: ["category"],
-      where: { isActive: true, deletedAt: null },
+      where: { isActive: true, deletedAt: null, user: ACTIVE_ACCOUNT },
       _count: true,
     }),
   ]);
@@ -162,7 +164,7 @@ export async function getProductDetail(id: string) {
     // ALL / query / COMMIT, so the statement count is what this page pays
     // for, not the work.
     relationLoadStrategy: "join",
-    where: { id, isActive: true, deletedAt: null },
+    where: { id, isActive: true, deletedAt: null, user: ACTIVE_ACCOUNT },
     include: {
       images: {
         where: { moderationStatus: "APPROVED" },
@@ -304,7 +306,12 @@ export async function addToCart({
   rentalEnd?: Date;
 }) {
   const product = await db.product.findUnique({
-    where: { id: productId, isActive: true, deletedAt: null },
+    where: {
+      id: productId,
+      isActive: true,
+      deletedAt: null,
+      user: ACTIVE_ACCOUNT,
+    },
   });
   if (!product)
     throw new CartError("Product not found", 404, "productNotFound");

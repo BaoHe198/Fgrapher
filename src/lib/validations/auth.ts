@@ -45,7 +45,8 @@ export type ProviderRole = (typeof PAID_ROLE_VALUES)[number];
 export const registerSchema = z
   .object({
     name: z.string().trim().min(2, "Enter your full name").max(100),
-    email: z.string().email("Enter a valid email address"),
+    // Stored in lower case from here on — see services/user-lookup.ts.
+    email: z.string().trim().toLowerCase().email("Enter a valid email address"),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
@@ -162,7 +163,7 @@ export function getRegisterSchema(t: (key: string) => string) {
   return z
     .object({
       name: z.string().trim().min(2, t("nameRequired")).max(100),
-      email: z.string().email(t("emailInvalid")),
+      email: z.string().trim().toLowerCase().email(t("emailInvalid")),
       password: z
         .string()
         .min(8, t("passwordMinLength"))

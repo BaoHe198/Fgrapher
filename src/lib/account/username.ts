@@ -19,3 +19,33 @@ export function usernameBase(name: string | null | undefined, email: string) {
   if (fromEmail.length >= 3) return fromEmail;
   return `user${fromName}${fromEmail}`.slice(0, MAX_BASE_LENGTH);
 }
+
+// Names a visitor would take for Fgrapher itself, or that mean something in
+// a URL. A username is the public address of a profile
+// (/profile/<username>); "admin" and "support" were free for anyone to take.
+const RESERVED_USERNAMES = new Set([
+  "admin",
+  "administrator",
+  "fgrapher",
+  "support",
+  "hotro",
+  "cskh",
+  "help",
+  "moderator",
+  "staff",
+  "official",
+  "system",
+  "root",
+  "api",
+  "login",
+  "register",
+  "dashboard",
+  "profile",
+  "settings",
+  "null",
+  "undefined",
+]);
+
+export function isReservedUsername(username: string) {
+  return RESERVED_USERNAMES.has(username.toLowerCase());
+}

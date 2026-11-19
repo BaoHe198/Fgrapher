@@ -3343,7 +3343,8 @@
         "passwordUppercase": "Mật khẩu phải chứa ít nhất một chữ cái viết hoa",
         "passwordNumber": "Mật khẩu phải chứa ít nhất một chữ số",
         "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu mới",
-        "passwordsDoNotMatch": "Mật khẩu xác nhận không khớp"
+        "passwordsDoNotMatch": "Mật khẩu xác nhận không khớp",
+        "usernameReserved": "Tên người dùng này không dùng được. Hãy chọn tên khác."
       },
       "verification": {
         "fullNameRequired": "Vui lòng nhập họ tên đầy đủ theo giấy tờ",
@@ -3607,6 +3608,12 @@
         "bodyWithReason": "Yêu cầu “{requestTitle}” ({requestCode}) chưa được đăng lên Fgrapher. Lý do: {reason}. Bạn có thể sửa nội dung và đăng lại bất cứ lúc nào.",
         "cta": "Xem và đăng lại",
         "subject": "Yêu cầu của bạn chưa được duyệt — Fgrapher"
+      },
+      "emailChangeRequested": {
+        "subject": "Có yêu cầu đổi email đăng nhập — Fgrapher",
+        "heading": "Có yêu cầu đổi email đăng nhập",
+        "body": "Tài khoản Fgrapher dùng địa chỉ này vừa yêu cầu đổi email đăng nhập sang {newEmail}. Email đăng nhập chỉ đổi sau khi địa chỉ mới được xác nhận. Nếu không phải bạn yêu cầu, hãy đổi mật khẩu ngay: việc đó giữ tài khoản ở lại với bạn.",
+        "cta": "Mở cài đặt tài khoản"
       }
     },
     "notifications": {

@@ -16,7 +16,12 @@ import { Prisma } from "@prisma/client";
 import { toE164VN } from "@/lib/vietnam/phone";
 import { getUpdateMeSchema } from "@/lib/validations/user";
 import { contentScanner } from "@/services/moderation";
-import { sendVerificationEmail } from "@/services/email-verification";
+import { windDownAccount } from "@/services/account-closure";
+import {
+  sendEmailChangeNotice,
+  sendVerificationEmail,
+} from "@/services/email-verification";
+import { findUserIdByEmail } from "@/services/user-lookup";
 
 // Shared allowlist for GET and PATCH — both used to return whatever
 // `db.user.findUnique`/`db.user.update` handed back with no `select`,
@@ -194,12 +199,16 @@ export async function PATCH(request: Request) {
     const { email: requestedEmail, ...fields } = rest;
     let pendingEmailUpdate: { pendingEmail?: string | null } = {};
     let emailChangeTo: string | null = null;
+    let emailChangeFrom: string | null = null;
     if (requestedEmail !== undefined) {
       const current = await db.user.findUnique({
         where: { id: session.user.id },
         select: { email: true, passwordHash: true, pendingEmail: true },
       });
-      if (current && requestedEmail === current.email) {
+      if (
+        current &&
+        requestedEmail.toLowerCase() === current.email.toLowerCase()
+      ) {
         // Typing the current address back cancels a pending change.
         if (current.pendingEmail) pendingEmailUpdate = { pendingEmail: null };
       } else if (current) {
@@ -227,10 +236,7 @@ export async function PATCH(request: Request) {
             { status: 400 },
           );
         }
-        const holder = await db.user.findUnique({
-          where: { email: requestedEmail },
-          select: { id: true },
-        });
+        const holder = await findUserIdByEmail(requestedEmail);
         if (holder) {
           return NextResponse.json(
             {
@@ -243,6 +249,7 @@ export async function PATCH(request: Request) {
         }
         pendingEmailUpdate = { pendingEmail: requestedEmail };
         emailChangeTo = requestedEmail;
+        emailChangeFrom = current.email;
       }
     }
 
@@ -343,6 +350,16 @@ export async function PATCH(request: Request) {
         userId: session.user.id,
         email: emailChangeTo,
       });
+      // …and the address it is leaving is told. It heard nothing: whoever
+      // holds the session and the password could move the sign-in address
+      // and the owner would only find out when the old one stopped working.
+      if (emailChangeFrom) {
+        await sendEmailChangeNotice({
+          userId: session.user.id,
+          oldEmail: emailChangeFrom,
+          newEmail: emailChangeTo,
+        });
+      }
       const t = await getTranslations("apiMessages.users");
       return NextResponse.json(
         {
@@ -436,6 +453,13 @@ export async function DELETE(request: Request) {
     // Accounts with no password (OAuth-only) have nothing to confirm
     // with — requireAuth()'s live session check is the only gate
     // available for those, same as it always was.
+
+    // "Vô hiệu hóa" locks the account at once. Whatever it still has in
+    // motion with other people is closed first, by name — an open request
+    // kept collecting offers and a confirmed booking stayed on the
+    // provider's calendar with nobody left to turn up. See
+    // services/account-closure.ts.
+    await windDownAccount(session.user.id);
 
     await db.user.update({
       where: { id: session.user.id },

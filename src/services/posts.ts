@@ -1,3 +1,4 @@
+import { ACTIVE_ACCOUNT } from "@/lib/account/active-account";
 import type { PostKind, Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
@@ -132,6 +133,8 @@ export async function ensureAlbumSocialPost(albumId: string) {
 
 const PUBLIC_POST_WHERE: Prisma.PostWhereInput = {
   deletedAt: null,
+  // A suspended or deactivated author's posts leave the feed with them.
+  user: ACTIVE_ACCOUNT,
   OR: [
     {
       kind: "STANDARD",
@@ -653,6 +656,10 @@ export async function getPost(postId: string, viewerId: string | null) {
     where: {
       id: postId,
       deletedAt: null,
+      // Same owner rule as the feed (PUBLIC_POST_WHERE): without it the
+      // permalink found a suspended author's post and the comment loader,
+      // which does apply the rule, then threw — a 500 instead of a 404.
+      user: ACTIVE_ACCOUNT,
       // The author always sees their own — that is how they check what is
       // holding a post up — while everyone else gets the feed's rule.
       ...(viewerId

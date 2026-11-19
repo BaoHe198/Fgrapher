@@ -31,6 +31,7 @@ import {
   SELLER_ROLES,
 } from "@/lib/constants";
 import { ROLE_PLANS } from "@/lib/constants/plans";
+import { windDownAccount } from "@/services/account-closure";
 import { logAudit, processDeletion } from "@/services/compliance";
 import { notifyCritical } from "@/services/notification";
 import { ensureAlbumSocialPost } from "@/services/posts";
@@ -331,6 +332,9 @@ export async function verifyUser(userId: string) {
 }
 
 export async function softDeleteAdminUser(userId: string) {
+  // Same as the owner deactivating their own account: close what is still
+  // in motion with other people before the account goes dark.
+  await windDownAccount(userId);
   const user = await db.user.update({
     where: { id: userId },
     data: { deletedAt: new Date() },

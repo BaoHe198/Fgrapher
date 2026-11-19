@@ -1,3 +1,4 @@
+import { findUserIdByEmail } from "@/services/user-lookup";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
@@ -93,7 +94,9 @@ export async function POST(request: Request) {
   // gate registration itself.
   const { ipAddress, userAgent } = getRequestMeta(request);
 
-  const existing = await db.user.findUnique({ where: { email } });
+  // Any capitalisation: "An@Gmail.com" used to register next to
+  // "an@gmail.com" as a second account for the same inbox.
+  const existing = await findUserIdByEmail(email);
   if (existing) {
     return NextResponse.json(
       {

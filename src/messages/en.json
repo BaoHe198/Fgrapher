@@ -3343,7 +3343,8 @@
         "passwordUppercase": "Password must contain at least one uppercase letter",
         "passwordNumber": "Password must contain at least one number",
         "confirmPasswordRequired": "Please confirm your new password",
-        "passwordsDoNotMatch": "Passwords do not match"
+        "passwordsDoNotMatch": "Passwords do not match",
+        "usernameReserved": "That username is not available. Please choose another."
       },
       "verification": {
         "fullNameRequired": "Enter your full legal name",
@@ -3607,6 +3608,12 @@
         "bodyWithReason": "Your request “{requestTitle}” ({requestCode}) was not posted on Fgrapher. Reason: {reason}. You can edit it and post again at any time.",
         "cta": "View and post again",
         "subject": "Your request was not approved — Fgrapher"
+      },
+      "emailChangeRequested": {
+        "subject": "A change of sign-in email was requested — Fgrapher",
+        "heading": "A change of sign-in email was requested",
+        "body": "The Fgrapher account using this address has asked to change its sign-in email to {newEmail}. The change only takes effect once the new address is confirmed. If this was not you, change your password now: that keeps the account with you.",
+        "cta": "Open account settings"
       }
     },
     "notifications": {
