@@ -13,6 +13,8 @@ import {
   newOrderEmailHtml,
   requestNewOfferEmailHtml,
   resetPasswordEmailHtml,
+  verificationApprovedEmailHtml,
+  verificationRejectedEmailHtml,
   verifyEmailHtml,
 } from "@/lib/email/templates";
 import { escapeHtml } from "@/lib/utils";
@@ -136,6 +138,42 @@ describe("user-controlled values are escaped", () => {
       portfolioUrl: "https://fgrapher.test/dashboard/portfolio",
     });
     assert.ok(!html.includes("<img src=x"));
+  });
+
+  it("escapes the reason an identity review was rejected for", () => {
+    const html = verificationRejectedEmailHtml({
+      t,
+      role: "Nhiếp ảnh gia",
+      reason: XSS,
+      ctaUrl: "https://fgrapher.test/onboarding/verification?role=PHOTOGRAPHER",
+    });
+    assert.ok(!html.includes("<img src=x"));
+    assert.ok(html.includes("verificationRejected.bodyWithReason"));
+  });
+
+  it("words a rejection without a reason, and an approval by publish state", () => {
+    const rejected = verificationRejectedEmailHtml({
+      t,
+      role: "Studio",
+      ctaUrl: "https://fgrapher.test/onboarding/verification?role=STUDIO",
+    });
+    assert.ok(rejected.includes("verificationRejected.body"));
+    assert.ok(!rejected.includes("bodyWithReason"));
+
+    const live = verificationApprovedEmailHtml({
+      t,
+      role: "Studio",
+      published: true,
+      ctaUrl: "https://fgrapher.test/dashboard",
+    });
+    assert.ok(live.includes("verificationApproved.bodyPublished"));
+    const waiting = verificationApprovedEmailHtml({
+      t,
+      role: "Studio",
+      published: false,
+      ctaUrl: "https://fgrapher.test/dashboard",
+    });
+    assert.ok(waiting.includes("verificationApproved.bodyPending"));
   });
 
   it("escapes a customer name and order line summary", () => {

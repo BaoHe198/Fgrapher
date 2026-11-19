@@ -13,6 +13,8 @@ import {
   Image as ImageIcon,
   MessageCircle,
   Package,
+  ShieldAlert,
+  ShieldCheck,
   Star,
   UserPlus,
 } from "lucide-react";
@@ -66,6 +68,8 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   REQUEST_NO_OFFERS_48H: Handshake,
   ROLE_CHANGE_APPROVED: ArrowLeftRight,
   ROLE_CHANGE_REJECTED: ArrowLeftRight,
+  VERIFICATION_APPROVED: ShieldCheck,
+  VERIFICATION_REJECTED: ShieldAlert,
 };
 
 function relativeTime(

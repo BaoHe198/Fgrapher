@@ -2,12 +2,19 @@ import type {
   ConsentPurpose,
   DataRequestStatus,
   DataRequestType,
+  Role,
 } from "@prisma/client";
+import * as Sentry from "@sentry/nextjs";
 import { getTranslations } from "next-intl/server";
 
 import { revalidatePublicProfile } from "@/lib/cache";
 import { generateKycSignedUrl } from "@/lib/media/cloudinary";
-import { mediaApprovedEmailHtml, mediaRejectedEmailHtml } from "@/lib/email";
+import {
+  mediaApprovedEmailHtml,
+  mediaRejectedEmailHtml,
+  verificationApprovedEmailHtml,
+  verificationRejectedEmailHtml,
+} from "@/lib/email";
 import { db } from "@/lib/db";
 import {
   escapeLike,
@@ -419,16 +426,104 @@ export async function reviewVerification({
   // Verification is one of several gates a profile needs to auto-publish
   // (see tryAutoPublish) — approving it here may be the last one a
   // provider was waiting on.
-  if (approve) {
-    await tryAutoPublish(userRole.userId, userRole.role);
-  }
+  const published = approve
+    ? await tryAutoPublish(userRole.userId, userRole.role)
+    : false;
 
   // The "Verified" badge on the public profile is driven by this status, so
   // either outcome needs the profile page (and search) invalidated even
   // when publish state itself doesn't move.
   await revalidatePublicProfile(userRole.userId);
 
+  // Tell the provider. Nothing did: the review changed a status and the
+  // only way to learn the answer was to keep opening the dashboard (found
+  // 19/11/2026). The decision above is already saved, so a notification
+  // that fails must not turn it into an error for the admin.
+  try {
+    await notifyVerificationOutcome({ userRole, approve, published, reason });
+  } catch (err) {
+    Sentry.captureException(err);
+  }
+
   return userRole;
+}
+
+async function notifyVerificationOutcome({
+  userRole,
+  approve,
+  published,
+  reason,
+}: {
+  userRole: { id: string; userId: string; role: Role; updatedAt: Date };
+  approve: boolean;
+  published: boolean;
+  reason?: string;
+}) {
+  const [t, nt, roleT] = await Promise.all([
+    getTranslations("libServices.email"),
+    getTranslations("libServices.notifications"),
+    getTranslations("role"),
+  ]);
+  const role = roleT(userRole.role);
+  const base = process.env.NEXTAUTH_URL ?? "";
+  // The sentence supplies the full stop after the reason; a reviewer's
+  // note usually ends with one too ("…chụp lại.. Bạn có thể gửi lại").
+  const shownReason = reason?.trim().replace(/[.!?…\s]+$/u, "") || undefined;
+  // A role can be reviewed more than once (rejected, resubmitted, reviewed
+  // again): each decision is its own event, told apart by when it was saved.
+  const decision = String(userRole.updatedAt.getTime());
+  // Opens the roles page: it shows the status, the reviewer's reason and
+  // the way back into the verification form.
+  const data = { href: "/dashboard/settings/roles", role: userRole.role };
+
+  if (approve) {
+    await notifyCritical({
+      userId: userRole.userId,
+      type: "VERIFICATION_APPROVED",
+      title: nt("verification.approved.title"),
+      message: nt(
+        published
+          ? "verification.approved.messagePublished"
+          : "verification.approved.messagePending",
+        { role },
+      ),
+      data,
+      email: {
+        subject: t("verificationApproved.heading"),
+        html: verificationApprovedEmailHtml({
+          t,
+          role,
+          published,
+          ctaUrl: `${base}/dashboard`,
+        }),
+        dedupe: [userRole.id, "APPROVED", decision],
+      },
+    });
+    return;
+  }
+
+  await notifyCritical({
+    userId: userRole.userId,
+    type: "VERIFICATION_REJECTED",
+    title: nt("verification.rejected.title"),
+    message: shownReason
+      ? nt("verification.rejected.messageWithReason", {
+          role,
+          reason: shownReason,
+        })
+      : nt("verification.rejected.message", { role }),
+    data,
+    email: {
+      subject: t("verificationRejected.heading"),
+      html: verificationRejectedEmailHtml({
+        t,
+        role,
+        reason: shownReason,
+        ctaUrl: `${base}/onboarding/verification?role=${userRole.role}`,
+      }),
+      dedupe: [userRole.id, "REJECTED", decision],
+    },
+  });
 }
 
 const KYC_IMAGE_FIELD = {

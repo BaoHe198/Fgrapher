@@ -1984,6 +1984,10 @@ enum NotificationType {
   REQUEST_NO_OFFERS_48H
   ROLE_CHANGE_APPROVED
   ROLE_CHANGE_REJECTED
+  // The outcome of an identity (KYC) review at /admin/verifications. Until
+  // 19/11/2026 nothing told the provider; see reviewVerification().
+  VERIFICATION_APPROVED
+  VERIFICATION_REJECTED
   // Wave 2 Chợ F — a product someone asked about is in stock again.
   PRODUCT_BACK_IN_STOCK
 }
