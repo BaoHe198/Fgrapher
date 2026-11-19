@@ -232,6 +232,10 @@ export function RegisterForm({
 
       <form
         method="post"
+        // The schema below validates every field and answers in the app's
+        // language. Without noValidate the browser stepped in first for a
+        // malformed email, with its own bubble in the browser's language.
+        noValidate
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-3.5"
       >
