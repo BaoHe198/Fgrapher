@@ -214,9 +214,9 @@ export function ProfileInteractive({
     album.media.filter((m) => m.type === "IMAGE").map((m) => m.url),
   );
 
-  // Chat needs an account. The proxy's own sign-in redirect keeps only the
-  // path, which would drop who to message and the drafted question, so the
-  // sign-in hop is built here with the whole URL.
+  // Chat needs an account. Built here with the whole URL so a visitor goes
+  // straight to sign-in without a round trip through the proxy (whose own
+  // redirect keeps the query string too, since 19/11/2026).
   const messageHref = (() => {
     const href = `/dashboard/messages?to=${providerId}&consult=1`;
     return viewerId ? href : `/login?callbackUrl=${encodeURIComponent(href)}`;

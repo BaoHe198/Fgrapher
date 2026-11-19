@@ -174,7 +174,16 @@ export default async function proxy(request: NextRequest) {
     !token
   ) {
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+    // The whole address, not just the path. A link into the dashboard
+    // usually says *what* to open: "Nhắn tin để thuê" carries the shop and
+    // the outfit (?to=…&costume=…), an emailed "Tin nhắn mới" the
+    // conversation (?c=…). With the path alone, a signed-out visitor signed
+    // in and landed on an empty messages page with their choice gone. Still
+    // a same-origin relative URL, which is all the login page accepts.
+    loginUrl.searchParams.set(
+      "callbackUrl",
+      `${pathname}${request.nextUrl.search}`,
+    );
     return withLocaleCookie(request, NextResponse.redirect(loginUrl));
   }
 
