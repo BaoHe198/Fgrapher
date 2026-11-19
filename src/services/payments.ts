@@ -33,6 +33,7 @@ import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { FREE_PLAN, freePlanTermEnd } from "@/lib/payments/free-plan";
 import { notifyCritical } from "@/services/notification";
+import { tryAutoPublish } from "@/services/public-profile";
 
 export class PaymentError extends Error {}
 
@@ -221,6 +222,10 @@ async function activateRoleFromPayment({
     });
     return { activated: false, payment };
   }
+
+  // Paying after the plan had lapsed has to bring the profile back too —
+  // see assignManualPlan in services/subscription.ts.
+  await tryAutoPublish(userId, role);
 
   const [roleT, emailT] = await Promise.all([
     getTranslations("role"),
