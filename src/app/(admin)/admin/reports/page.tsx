@@ -3,6 +3,7 @@
 import type { Report, ReportStatus } from "@prisma/client";
 import { Flag } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
@@ -45,6 +46,7 @@ const TAB_VALUES: (ReportStatus | "ALL")[] = [
 
 export default function AdminReportsPage() {
   const t = useTranslations("accountFlows.admin.reports");
+  const router = useRouter();
   const reasonT = useTranslations("sharedComponents.reportModal.reasons");
   const TAB_LABELS: Record<ReportStatus | "ALL", string> = {
     PENDING: t("tabs.pending"),
@@ -80,14 +82,21 @@ export default function AdminReportsPage() {
 
   const resolve = async (id: string, status: "RESOLVED" | "DISMISSED") => {
     setBusyId(id);
-    await fetch(`/api/admin/reports/${id}`, {
+    const res = await fetch(`/api/admin/reports/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status, note: notes[id] }),
     });
     setBusyId(null);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      toast.add({ title: body?.message ?? t("actionFailed"), type: "error" });
+      return;
+    }
     toast.add({ title: t("reportUpdatedToast"), type: "success" });
     load();
+    // The sidebar's waiting count is rendered by the server layout.
+    router.refresh();
   };
 
   return (

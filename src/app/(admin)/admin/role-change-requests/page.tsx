@@ -2,6 +2,7 @@
 
 import { ArrowLeftRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ interface RoleChangeRequestRow {
 
 export default function AdminRoleChangeRequestsPage() {
   const t = useTranslations("accountFlows.admin.roleChangeRequests");
+  const router = useRouter();
   const roleT = useTranslations("role");
 
   // Lazy initializer runs once on mount rather than calling Date.now()
@@ -64,7 +66,7 @@ export default function AdminRoleChangeRequestsPage() {
 
   const review = async (id: string, action: "approve" | "reject") => {
     setBusyId(id);
-    await fetch(`/api/admin/role-change-requests/${id}`, {
+    const res = await fetch(`/api/admin/role-change-requests/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(
@@ -74,8 +76,15 @@ export default function AdminRoleChangeRequestsPage() {
       ),
     });
     setBusyId(null);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      toast.add({ title: body?.message ?? t("actionFailed"), type: "error" });
+      return;
+    }
     toast.add({ title: t("requestUpdated"), type: "success" });
     load();
+    // The sidebar's waiting count is rendered by the server layout.
+    router.refresh();
   };
 
   return (

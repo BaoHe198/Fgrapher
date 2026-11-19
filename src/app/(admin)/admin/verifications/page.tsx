@@ -1,7 +1,9 @@
 "use client";
 
 import { BadgeCheck, Loader2 } from "lucide-react";
+import type { Role } from "@prisma/client";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +38,8 @@ const IMAGE_KIND_VALUES: ("front" | "back" | "selfie")[] = [
 
 export default function AdminVerificationsPage() {
   const t = useTranslations("accountFlows.admin.verifications");
+  const roleT = useTranslations("role");
+  const router = useRouter();
   const IMAGE_KINDS: { kind: "front" | "back" | "selfie"; label: string }[] =
     IMAGE_KIND_VALUES.map((kind) => ({
       kind,
@@ -108,7 +112,7 @@ export default function AdminVerificationsPage() {
     }
 
     setBusyId(id);
-    await fetch(`/api/admin/verifications/${id}`, {
+    const res = await fetch(`/api/admin/verifications/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(
@@ -123,8 +127,20 @@ export default function AdminVerificationsPage() {
       ),
     });
     setBusyId(null);
+    if (!res.ok) {
+      // This used to toast "updated" whatever the answer was.
+      const body = await res.json().catch(() => null);
+      toast.add({
+        title: body?.message ?? t("verificationUpdateFailed"),
+        type: "error",
+      });
+      return;
+    }
     toast.add({ title: t("verificationUpdated"), type: "success" });
     load();
+    // The sidebar's waiting count comes from the server layout; without
+    // this it kept showing the request that was just reviewed.
+    router.refresh();
   };
 
   return (
@@ -144,7 +160,7 @@ export default function AdminVerificationsPage() {
             <Card key={row.id} className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant="neutral">{row.role}</Badge>
+                  <Badge variant="neutral">{roleT(row.role as Role)}</Badge>
                   <span className="text-body-md font-semibold! text-text-primary">
                     {row.user.name ?? row.user.firstName ?? row.user.email}
                   </span>

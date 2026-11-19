@@ -1110,7 +1110,8 @@
         "resolve": "Resolve",
         "dismiss": "Dismiss",
         "reportUpdatedToast": "Report updated",
-        "unknownReporter": "Unknown"
+        "unknownReporter": "Unknown",
+        "actionFailed": "That did not go through, please try again"
       },
       "verifications": {
         "title": "Identity verification",
@@ -1129,7 +1130,8 @@
         "reject": "Reject",
         "failedToLoadDocument": "Failed to load document",
         "selectRejectionReason": "Select a rejection reason",
-        "verificationUpdated": "Verification updated"
+        "verificationUpdated": "Verification updated",
+        "verificationUpdateFailed": "Couldn't update the verification, please try again"
       },
       "roleChangeRequests": {
         "title": "Role change requests",
@@ -1142,7 +1144,8 @@
         "rejectionNotePlaceholder": "Rejection note (optional)",
         "approve": "Approve",
         "reject": "Reject",
-        "requestUpdated": "Request updated"
+        "requestUpdated": "Request updated",
+        "actionFailed": "That did not go through, please try again"
       },
       "moderation": {
         "title": "Content moderation",
@@ -1162,10 +1165,11 @@
         "allRoles": "All roles",
         "emptyFiltered": "Nothing pending for this role",
         "viewLarge": "View full size",
-        "waitingSince": "Waiting {time}",
+        "waitingSince": "Sent {time}",
         "albumLabel": "Album: {title}",
         "autoFlaggedBadge": "Flagged by scan",
-        "autoFlaggedReason": "Flagged by the automated scan: {reason}. A hint about where to look first — the photo is still pending like any other."
+        "autoFlaggedReason": "Flagged by the automated scan: {reason}. A hint about where to look first — the photo is still pending like any other.",
+        "actionFailed": "That did not go through, please try again"
       },
       "compliance": {
         "title": "Compliance",
@@ -1259,7 +1263,8 @@
         "rejectionNotePlaceholder": "Rejection note (optional)",
         "approve": "Approve",
         "reject": "Reject",
-        "awaitingProviderConfirmation": "Waiting on MoMo/ZaloPay to confirm automatically — no admin action needed."
+        "awaitingProviderConfirmation": "Waiting on MoMo/ZaloPay to confirm automatically — no admin action needed.",
+        "actionFailed": "That did not go through, please try again"
       }
     },
     "verifyEmail": {

@@ -2,6 +2,7 @@
 
 import { Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,7 @@ const PROVIDER_BADGE: Record<PaymentRow["provider"], "accent" | "neutral"> = {
 
 export default function AdminPaymentsPage() {
   const t = useTranslations("accountFlows.admin.payments");
+  const router = useRouter();
   const roleT = useTranslations("role");
 
   const [rows, setRows] = useState<PaymentRow[]>([]);
@@ -65,7 +67,7 @@ export default function AdminPaymentsPage() {
 
   const review = async (id: string, action: "approve" | "reject") => {
     setBusyId(id);
-    await fetch(`/api/admin/payments/${id}`, {
+    const res = await fetch(`/api/admin/payments/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(
@@ -75,8 +77,15 @@ export default function AdminPaymentsPage() {
       ),
     });
     setBusyId(null);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      toast.add({ title: body?.message ?? t("actionFailed"), type: "error" });
+      return;
+    }
     toast.add({ title: t("paymentUpdated"), type: "success" });
     load();
+    // The sidebar's waiting count is rendered by the server layout.
+    router.refresh();
   };
 
   return (
