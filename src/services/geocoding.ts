@@ -137,6 +137,29 @@ const ADMINISTRATIVE_PLACE_TYPES = new Set([
 const MAX_SUGGESTIONS = 5;
 
 /**
+ * Ward and province of a MapTiler feature, read from its `context` chain:
+ * since the 2025 merger the ward is the "municipality" entry and the
+ * province the "region" one.
+ */
+function mapTilerArea(context: unknown): AddressSuggestion["area"] {
+  if (!Array.isArray(context)) return undefined;
+  const text = (kind: string) => {
+    const entry = context.find(
+      (item): item is { id: string; text: string } =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as { id?: unknown }).id === "string" &&
+        typeof (item as { text?: unknown }).text === "string" &&
+        (item as { id: string }).id.startsWith(`${kind}.`),
+    );
+    return entry?.text;
+  };
+  const ward = text("municipality");
+  const province = text("region");
+  return ward || province ? { ward, province } : undefined;
+}
+
+/**
  * Autocomplete for the provider's detailed address. `context` (ward and
  * province names already chosen in the form) is appended to the query so
  * suggestions stay in the right place; results are limited to Vietnam.
@@ -180,6 +203,7 @@ async function suggestMapTilerAddresses(
         place_name?: unknown;
         place_type?: unknown;
         geometry?: { coordinates?: unknown };
+        context?: unknown;
       }>;
     };
 
@@ -204,11 +228,13 @@ async function suggestMapTilerAddresses(
           feature.place_name.trim() !== ""
         ) {
           const [longitude, latitude] = feature.geometry.coordinates;
+          const area = mapTilerArea(feature.context);
           suggestions.push({
             id: String(feature.id ?? i),
             label: feature.place_name,
             longitude,
             latitude,
+            ...(area ? { area } : {}),
           });
         }
       }

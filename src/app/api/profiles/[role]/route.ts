@@ -1,4 +1,5 @@
 import { Role } from "@prisma/client";
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
@@ -218,19 +219,23 @@ export async function PATCH(
     // there and left them matched to nothing there (QA-03) — they had to
     // find the separate "Khu vực phục vụ" panel and re-enter their own
     // province for anything to reach them.
-    await syncPrimaryServiceArea(profile.id, profile.provinceId);
-
-    // A provider's first profile save starts their week at the default
-    // hours, so they can be found and booked before they ever open the
-    // calendar (owner, 16/11/2026). No-op once they have any hours.
-    if (!existingProfile && PROVIDER_ROLES.includes(role as Role)) {
-      await ensureDefaultWeeklyHours(session.user.id);
-    }
-
-    // Categories and location are requirements
-    // gating auto-publish (see tryAutoPublish) — saving them here may be
-    // the last one this profile was waiting on.
-    await tryAutoPublish(session.user.id, role as Role);
+    //
+    // The three follow-ups below only need the profile row written above
+    // and do not read each other's results, so they run together: one after
+    // another they made a first save noticeably slow (owner, 19/11/2026).
+    await Promise.all([
+      syncPrimaryServiceArea(profile.id, profile.provinceId),
+      // A provider's first profile save starts their week at the default
+      // hours, so they can be found and booked before they ever open the
+      // calendar (owner, 16/11/2026). No-op once they have any hours.
+      !existingProfile && PROVIDER_ROLES.includes(role as Role)
+        ? ensureDefaultWeeklyHours(session.user.id)
+        : null,
+      // Categories and location are requirements gating auto-publish (see
+      // tryAutoPublish) — saving them here may be the last one this
+      // profile was waiting on.
+      tryAutoPublish(session.user.id, role as Role),
+    ]);
 
     // Description, price, categories, location, Model attributes — all of
     // it feeds the public profile and the browse cards. (tryAutoPublish
@@ -250,6 +255,9 @@ export async function PATCH(
       );
     }
 
+    // Not swallowed: a provider reported "could not save" on the preview
+    // site (19/11/2026) and nothing had been recorded to say why.
+    Sentry.captureException(err);
     return NextResponse.json(
       {
         data: null,

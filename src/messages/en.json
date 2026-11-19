@@ -3030,7 +3030,13 @@
         "addressPinned": "Exact map position set. Save to update it.",
         "fmapNotVisible": "Your profile isn't on Fmap yet because its location couldn't be determined. Pick your address from the suggestions, then save.",
         "addressOtherWard": "Position set, but this address is in {ward}. Check the Ward field above.",
-        "addressResolveFailed": "Couldn't get coordinates for that address. Pick another suggestion, or save and we'll locate it."
+        "addressResolveFailed": "Couldn't get coordinates for that address. Pick another suggestion, or save and we'll locate it.",
+        "provinceRequired": "Choose a province",
+        "wardRequired": "Choose a ward",
+        "addressRequired": "Enter a detailed address (at least 5 characters)",
+        "saveFailedStatus": "Couldn't save the profile (error {status}). What you typed is kept — please try again in a few minutes.",
+        "saveNetworkError": "Couldn't reach the server. What you typed is kept — check your connection and press Save again.",
+        "addressPinnedAreaFilled": "Location pinned on the map and {area} filled in. Press Save to update."
       },
       "editor": {
         "liveStatus": "Live — visible in search",
@@ -3091,7 +3097,9 @@
         "zaloUrlLabel": "Zalo message link",
         "zaloUrlHelper": "Only customers whose booking request went through see this link. Paste your Zalo link: https://zalo.me/..., chat.zalo.me, or the QR link (zaloapp.com/qr/...).",
         "saveChanges": "Save changes",
-        "saved": "Saved"
+        "saved": "Saved",
+        "draftRestored": "Restored what you typed last time. It isn't saved yet — press Save changes at the bottom.",
+        "draftDiscard": "Discard draft"
       },
       "services": {
         "title": "Services",

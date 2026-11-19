@@ -24,6 +24,12 @@ export interface AddressSuggestion {
   /** Absent for providers whose autocomplete needs a second lookup. */
   latitude?: number;
   longitude?: number;
+  /**
+   * The ward and province the provider says this address is in, as it
+   * spells them. The suggest route matches them to Province/Ward rows so
+   * picking the address can fill the form's area selects.
+   */
+  area?: { ward?: string; province?: string };
 }
 
 export type SuggestResult =

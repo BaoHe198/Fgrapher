@@ -9,7 +9,7 @@ import type {
 import { Loader2, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,12 @@ import {
   SHOP_ROLES,
 } from "@/lib/constants";
 import { provincesApiPath, wardsApiPath } from "@/lib/geography-client";
+import {
+  clearSessionDraft,
+  draftKey,
+  readSessionDraft,
+  writeSessionDraft,
+} from "@/lib/session-draft";
 import { AMENITY_OPTIONS } from "@/lib/validations/profile";
 
 import {
@@ -149,7 +155,22 @@ function toFormValues(
   };
 }
 
-export function ProfileSettingsForm({ role }: { role: Role }) {
+type RequiredField = "provinceId" | "wardId" | "address";
+
+/** What a draft holds: everything this form's own Save button sends. */
+interface ProfileDraft {
+  values: ProfileFormValues;
+  extraProvinceIds: string[];
+  addressPoint: AddressPoint | null;
+}
+
+export function ProfileSettingsForm({
+  role,
+  userId,
+}: {
+  role: Role;
+  userId: string;
+}) {
   const t = useTranslations("dashboardSettings.profile.location");
   const tEditor = useTranslations("dashboardSettings.profile.editor");
   const tPolicy = useTranslations("dashboardSettings.profile.policy");
@@ -174,6 +195,16 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   // session; null means "geocode the typed text on save".
   const [addressPoint, setAddressPoint] = useState<AddressPoint | null>(null);
   const [geocodingStatus, setGeocodingStatus] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<RequiredField, string>>
+  >({});
+  const [draftRestored, setDraftRestored] = useState(false);
+  // The form as the server last had it, serialized: the draft is whatever
+  // differs from this, and the extra-areas request is skipped when its part
+  // is unchanged.
+  const savedSnapshot = useRef<{ form: string; areas: string } | null>(null);
+  const requiredRefs = useRef<Partial<Record<RequiredField, HTMLElement>>>({});
+  const storageKey = draftKey("role-profile", userId, role);
 
   useEffect(() => {
     let cancelled = false;
@@ -181,17 +212,32 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
       .then((res) => res.json())
       .then((body) => {
         if (!cancelled) {
-          setValues(toFormValues(body.data));
+          const serverValues = toFormValues(body.data);
+          // The profile's own province is stored as a service area too
+          // (isPrimary); it is not one of the "extra" choices.
+          const serverAreas = (
+            (body.data?.serviceAreas as { provinceId: string }[]) ?? []
+          )
+            .map((a) => a.provinceId)
+            .filter((id) => id !== serverValues.provinceId);
+          savedSnapshot.current = {
+            form: JSON.stringify(serverValues),
+            areas: JSON.stringify([...serverAreas].sort()),
+          };
+          // Input left unsaved earlier in this tab (the user moved away, or
+          // a save failed) comes back on top of what the server has.
+          const draft = readSessionDraft<ProfileDraft>(storageKey);
+          setValues(
+            draft ? { ...serverValues, ...draft.values } : serverValues,
+          );
+          setExtraProvinceIds(draft?.extraProvinceIds ?? serverAreas);
+          setAddressPoint(draft?.addressPoint ?? null);
+          setDraftRestored(Boolean(draft));
           setGeocodingStatus(body.data?.geocodingStatus ?? null);
           setProfileId(body.data?.id ?? null);
           setServices(body.data?.services ?? []);
           setCostumes(body.data?.costumes ?? []);
           setProfileMedia(body.data?.media ?? []);
-          setExtraProvinceIds(
-            ((body.data?.serviceAreas as { provinceId: string }[]) ?? []).map(
-              (a) => a.provinceId,
-            ),
-          );
           setIsPublished(Boolean(body.data?.isPublished));
           setVerificationStatus(body.verificationStatus ?? null);
           setIsLoading(false);
@@ -200,7 +246,28 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
     return () => {
       cancelled = true;
     };
-  }, [role]);
+  }, [role, storageKey]);
+
+  // Keep the draft in step with the form. Once the form matches what the
+  // server has (nothing typed, or just saved) there is no draft to keep.
+  useEffect(() => {
+    if (isLoading || !savedSnapshot.current) return;
+    const timer = window.setTimeout(() => {
+      const unchanged =
+        JSON.stringify(values) === savedSnapshot.current?.form &&
+        JSON.stringify([...extraProvinceIds].sort()) ===
+          savedSnapshot.current?.areas;
+      if (unchanged) clearSessionDraft(storageKey);
+      else {
+        writeSessionDraft(storageKey, {
+          values,
+          extraProvinceIds,
+          addressPoint,
+        } satisfies ProfileDraft);
+      }
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [values, extraProvinceIds, addressPoint, isLoading, storageKey]);
 
   // Real nationwide Province/Ward rows, never a hardcoded UI list.
   useEffect(() => {
@@ -228,6 +295,16 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
     value: ProfileFormValues[K],
   ) => {
     setValues((prev) => ({ ...prev, [key]: value }));
+    if (key === "provinceId" || key === "wardId" || key === "address") {
+      setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
+    }
+  };
+
+  const discardDraft = () => {
+    clearSessionDraft(storageKey);
+    // Reloading re-reads the saved profile; simpler and more certain than
+    // resetting each piece of state by hand.
+    window.location.reload();
   };
 
   const toggleCategory = (category: ProfileCategory) => {
@@ -254,12 +331,27 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
   const onSave = async () => {
     setSaved(false);
     setSaveError(null);
-    if (
-      values.address.trim().length < 5 ||
-      !values.provinceId ||
-      !values.wardId
-    ) {
+    // Say which field is missing on the field itself, and bring it into
+    // view: the form is several screens long, and one line of text next to
+    // the Save button left the provider hunting for what was missing.
+    const missing: Partial<Record<RequiredField, string>> = {
+      ...(values.provinceId ? {} : { provinceId: t("provinceRequired") }),
+      ...(values.wardId ? {} : { wardId: t("wardRequired") }),
+      ...(values.address.trim().length >= 5
+        ? {}
+        : { address: t("addressRequired") }),
+    };
+    setFieldErrors(missing);
+    const firstMissing = (["provinceId", "wardId", "address"] as const).find(
+      (field) => missing[field],
+    );
+    if (firstMissing) {
       setSaveError(t("requiredError"));
+      const target = requiredRefs.current[firstMissing];
+      target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      target
+        ?.querySelector<HTMLElement>("select:not(:disabled), input")
+        ?.focus({ preventScroll: true });
       return;
     }
     setIsSaving(true);
@@ -328,30 +420,50 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         }),
       });
 
-      const profileBody = await profileRes.json();
+      // A platform error page (a timeout, a crashed function) is not
+      // JSON; reading it must not throw and hide the status behind the
+      // generic message.
+      const profileBody = await profileRes.json().catch(() => null);
       if (!profileRes.ok) {
-        setSaveError(profileBody.message ?? t("saveFailed"));
+        setSaveError(
+          profileBody?.message ??
+            t("saveFailedStatus", { status: profileRes.status }),
+        );
         return;
       }
 
-      const areasRes = await fetch(`/api/profiles/${role}/service-areas`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provinceIds: extraProvinceIds }),
-      });
-      if (!areasRes.ok) {
-        const areasBody = await areasRes.json().catch(() => null);
-        setSaveError(areasBody?.message ?? t("saveFailed"));
-        return;
+      // The extra provinces are a second request. Skipping it when they
+      // have not changed halves the wait on an ordinary save; the
+      // profile's own province is kept in step by the request above.
+      const areas = JSON.stringify([...extraProvinceIds].sort());
+      if (areas !== savedSnapshot.current?.areas) {
+        const areasRes = await fetch(`/api/profiles/${role}/service-areas`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provinceIds: extraProvinceIds }),
+        });
+        if (!areasRes.ok) {
+          const areasBody = await areasRes.json().catch(() => null);
+          setSaveError(
+            areasBody?.message ??
+              t("saveFailedStatus", { status: areasRes.status }),
+          );
+          return;
+        }
       }
-      if (profileBody.data) {
+      if (profileBody?.data) {
         setIsPublished(Boolean(profileBody.data.isPublished));
         setGeocodingStatus(profileBody.data.geocodingStatus ?? null);
+        setProfileId(profileBody.data.id ?? null);
         setAddressPoint(null);
       }
+      savedSnapshot.current = { form: JSON.stringify(values), areas };
+      clearSessionDraft(storageKey);
+      setDraftRestored(false);
       setSaved(true);
     } catch {
-      setSaveError(t("saveFailed"));
+      // fetch itself failed: offline, or the connection dropped mid-save.
+      setSaveError(t("saveNetworkError"));
     } finally {
       setIsSaving(false);
     }
@@ -404,6 +516,17 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
           )
         ) : null}
       </div>
+
+      {draftRestored ? (
+        <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-info-bg px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-body-sm text-text-primary">
+            {tEditor("draftRestored")}
+          </p>
+          <Button variant="ghost" size="sm" onClick={discardDraft}>
+            {tEditor("draftDiscard")}
+          </Button>
+        </div>
+      ) : null}
 
       <Input
         label={tEditor("displayNameLabel")}
@@ -478,51 +601,83 @@ export function ProfileSettingsForm({ role }: { role: Role }) {
         </span>
         <p className="text-body-sm text-text-tertiary">{t("requiredNote")}</p>
         <div className="grid grid-cols-2 gap-3">
-          <NativeSelect
-            label={t("provinceLabel")}
-            value={values.provinceId}
-            onChange={(value) => {
-              set("provinceId", value);
-              set("wardId", "");
+          <div
+            ref={(node) => {
+              if (node) requiredRefs.current.provinceId = node;
             }}
-            options={[
-              { value: "", label: t("provinceNotSelected") },
-              ...provinces.map((p) => ({ value: p.id, label: p.name })),
-            ]}
-          />
-          <NativeSelect
-            label={t("wardLabel")}
-            value={values.wardId}
-            onChange={(value) => set("wardId", value)}
-            disabled={!values.provinceId}
-            options={[
-              {
-                value: "",
-                label: values.provinceId
-                  ? t("wardNotSelected")
-                  : t("wardHelperNoProvince"),
-              },
-              ...wards.map((w) => ({ value: w.id, label: w.name })),
-            ]}
-          />
+          >
+            <NativeSelect
+              label={t("provinceLabel")}
+              requiredMark
+              error={fieldErrors.provinceId}
+              value={values.provinceId}
+              onChange={(value) => {
+                set("provinceId", value);
+                set("wardId", "");
+              }}
+              options={[
+                { value: "", label: t("provinceNotSelected") },
+                ...provinces.map((p) => ({ value: p.id, label: p.name })),
+              ]}
+            />
+          </div>
+          <div
+            ref={(node) => {
+              if (node) requiredRefs.current.wardId = node;
+            }}
+          >
+            <NativeSelect
+              label={t("wardLabel")}
+              requiredMark
+              error={fieldErrors.wardId}
+              value={values.wardId}
+              onChange={(value) => set("wardId", value)}
+              disabled={!values.provinceId}
+              options={[
+                {
+                  value: "",
+                  label: values.provinceId
+                    ? t("wardNotSelected")
+                    : t("wardHelperNoProvince"),
+                },
+                ...wards.map((w) => ({ value: w.id, label: w.name })),
+              ]}
+            />
+          </div>
         </div>
 
-        <AddressAutocomplete
-          label={tEditor("addressLabel")}
-          placeholder={t("addressPlaceholder")}
-          value={values.address}
-          point={addressPoint}
-          provinceId={values.provinceId}
-          wardId={values.wardId}
-          areaNames={[
-            provinces.find((p) => p.id === values.provinceId)?.name ?? "",
-            wards.find((w) => w.id === values.wardId)?.name ?? "",
-          ].filter(Boolean)}
-          onChange={(address, point) => {
-            set("address", address);
-            setAddressPoint(point);
+        <div
+          ref={(node) => {
+            if (node) requiredRefs.current.address = node;
           }}
-        />
+        >
+          <AddressAutocomplete
+            label={tEditor("addressLabel")}
+            placeholder={t("addressPlaceholder")}
+            value={values.address}
+            point={addressPoint}
+            provinceId={values.provinceId}
+            wardId={values.wardId}
+            requiredMark
+            error={fieldErrors.address}
+            areaNames={[
+              provinces.find((p) => p.id === values.provinceId)?.name ?? "",
+              wards.find((w) => w.id === values.wardId)?.name ?? "",
+            ].filter(Boolean)}
+            onChange={(address, point) => {
+              set("address", address);
+              setAddressPoint(point);
+            }}
+            onAreaPicked={({ provinceId, wardId }) => {
+              setValues((prev) => ({ ...prev, provinceId, wardId }));
+              setFieldErrors((prev) => ({
+                ...prev,
+                provinceId: undefined,
+                wardId: undefined,
+              }));
+            }}
+          />
+        </div>
         {geocodingStatus && geocodingStatus !== "READY" && !addressPoint ? (
           <p className="rounded-[var(--fg-radius-md)] bg-warning-bg px-3 py-2 text-body-sm text-warning">
             {t("fmapNotVisible")}

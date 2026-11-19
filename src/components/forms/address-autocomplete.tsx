@@ -19,6 +19,12 @@ interface Suggestion {
   // the point is fetched from /api/geocoding/place when one is picked.
   latitude?: number;
   longitude?: number;
+  // Our own Province/Ward rows for this address, when the suggest route
+  // could match them; picking the suggestion then fills the area selects.
+  provinceId?: string;
+  wardId?: string;
+  wardName?: string;
+  provinceName?: string;
 }
 
 interface AddressAutocompleteProps {
@@ -31,7 +37,11 @@ interface AddressAutocompleteProps {
   wardId: string;
   /** Ward/province names, stripped from a picked suggestion's label. */
   areaNames: string[];
+  error?: string;
+  requiredMark?: boolean;
   onChange: (address: string, point: AddressPoint | null) => void;
+  /** A picked suggestion sits in this province and ward: select them. */
+  onAreaPicked?: (area: { provinceId: string; wardId: string }) => void;
 }
 
 const MIN_QUERY_LENGTH = 3;
@@ -88,7 +98,10 @@ export function AddressAutocomplete({
   provinceId,
   wardId,
   areaNames,
+  error,
+  requiredMark,
   onChange,
+  onAreaPicked,
 }: AddressAutocompleteProps) {
   const t = useTranslations("dashboardSettings.profile.location");
   const listId = useId();
@@ -99,6 +112,8 @@ export function AddressAutocomplete({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [query, setQuery] = useState("");
   const [otherWard, setOtherWard] = useState<string | null>(null);
+  // "Phường X, Tỉnh Y" the last pick wrote into the area selects.
+  const [filledArea, setFilledArea] = useState<string | null>(null);
   const [resolveFailed, setResolveFailed] = useState(false);
   const blurTimer = useRef<number | null>(null);
 
@@ -136,20 +151,53 @@ export function AddressAutocomplete({
   }, [query, provinceId, wardId, unavailable]);
 
   const pick = async (suggestion: Suggestion) => {
-    // MapTiler can answer with a street in a different ward; the marker
-    // would then sit outside the ward the provider selected above.
-    const labelWard = suggestion.label.match(WARD_IN_LABEL)?.[0].trim();
-    const selectedWard = areaNames[1]?.trim().toLowerCase();
-    setOtherWard(
-      labelWard &&
-        selectedWard &&
-        !labelWard.toLowerCase().includes(selectedWard)
-        ? labelWard
-        : null,
+    const knownArea =
+      suggestion.provinceId && suggestion.wardId
+        ? { provinceId: suggestion.provinceId, wardId: suggestion.wardId }
+        : null;
+    if (knownArea) {
+      // The address names its own ward: select it (and its province)
+      // rather than leave the provider to find it in a 100-item list — or,
+      // worse, to save with both selects still empty.
+      const changed = knownArea.wardId !== wardId;
+      if (changed) onAreaPicked?.(knownArea);
+      setFilledArea(
+        changed
+          ? [suggestion.wardName, suggestion.provinceName]
+              .filter(Boolean)
+              .join(", ")
+          : null,
+      );
+      setOtherWard(null);
+    } else {
+      // MapTiler can answer with a street in a different ward; the marker
+      // would then sit outside the ward the provider selected above.
+      const labelWard = suggestion.label.match(WARD_IN_LABEL)?.[0].trim();
+      const selectedWard = areaNames[1]?.trim().toLowerCase();
+      setFilledArea(null);
+      setOtherWard(
+        labelWard &&
+          selectedWard &&
+          !labelWard.toLowerCase().includes(selectedWard)
+          ? labelWard
+          : null,
+      );
+    }
+    const address = streetPart(
+      suggestion.label,
+      [
+        ...areaNames,
+        suggestion.wardName ?? "",
+        suggestion.provinceName ?? "",
+      ].filter(Boolean),
+      value,
     );
-    const address = streetPart(suggestion.label, areaNames, value);
     setOpen(false);
     setSuggestions([]);
+    // The area selects may have just changed, which re-runs the lookup
+    // effect; with the typed text still as the query it would reopen the
+    // list right after a choice was made.
+    setQuery("");
     setResolveFailed(false);
 
     if (suggestion.latitude != null && suggestion.longitude != null) {
@@ -184,6 +232,8 @@ export function AddressAutocomplete({
         label={label}
         placeholder={placeholder}
         value={value}
+        error={error}
+        requiredMark={requiredMark}
         role="combobox"
         aria-expanded={showList}
         aria-controls={listId}
@@ -195,6 +245,7 @@ export function AddressAutocomplete({
         onChange={(event) => {
           // Any manual edit invalidates the picked point.
           setOtherWard(null);
+          setFilledArea(null);
           setResolveFailed(false);
           onChange(event.target.value, null);
           setQuery(event.target.value);
@@ -274,7 +325,9 @@ export function AddressAutocomplete({
           : point
             ? otherWard
               ? t("addressOtherWard", { ward: otherWard })
-              : t("addressPinned")
+              : filledArea
+                ? t("addressPinnedAreaFilled", { area: filledArea })
+                : t("addressPinned")
             : unavailable
               ? t("addressSuggestUnavailable")
               : t("addressSuggestHint")}

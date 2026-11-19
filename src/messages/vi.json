@@ -3030,7 +3030,13 @@
         "addressPinned": "Đã xác định vị trí chính xác trên bản đồ. Bấm Lưu để cập nhật.",
         "fmapNotVisible": "Hồ sơ của bạn chưa hiện trên Bản đồ F vì chưa xác định được vị trí. Hãy chọn địa chỉ trong danh sách gợi ý rồi bấm Lưu.",
         "addressOtherWard": "Đã ghim vị trí, nhưng địa chỉ này thuộc {ward}. Hãy kiểm tra lại ô Phường/Xã ở trên.",
-        "addressResolveFailed": "Không lấy được tọa độ của địa chỉ này. Hãy chọn gợi ý khác hoặc bấm Lưu để hệ thống tự tìm."
+        "addressResolveFailed": "Không lấy được tọa độ của địa chỉ này. Hãy chọn gợi ý khác hoặc bấm Lưu để hệ thống tự tìm.",
+        "provinceRequired": "Vui lòng chọn tỉnh/thành",
+        "wardRequired": "Vui lòng chọn phường/xã",
+        "addressRequired": "Vui lòng nhập địa chỉ chi tiết (ít nhất 5 ký tự)",
+        "saveFailedStatus": "Không thể lưu hồ sơ (lỗi {status}). Nội dung bạn nhập vẫn được giữ lại — vui lòng thử lại sau ít phút.",
+        "saveNetworkError": "Không kết nối được máy chủ. Nội dung bạn nhập vẫn được giữ lại — kiểm tra mạng rồi bấm Lưu lần nữa.",
+        "addressPinnedAreaFilled": "Đã xác định vị trí trên bản đồ và tự điền {area}. Bấm Lưu để cập nhật."
       },
       "editor": {
         "liveStatus": "Đang hoạt động — hiển thị trong tìm kiếm",
@@ -3091,7 +3097,9 @@
         "zaloUrlLabel": "Liên kết nhắn tin Zalo",
         "zaloUrlHelper": "Chỉ khách hàng đã gửi yêu cầu đặt lịch thành công mới thấy liên kết này. Dán liên kết Zalo của bạn: https://zalo.me/..., chat.zalo.me hoặc link từ mã QR (zaloapp.com/qr/...).",
         "saveChanges": "Lưu thay đổi",
-        "saved": "Đã lưu"
+        "saved": "Đã lưu",
+        "draftRestored": "Đã khôi phục nội dung bạn nhập dở lần trước. Nội dung này chưa được lưu — bấm Lưu thay đổi ở cuối trang.",
+        "draftDiscard": "Bỏ bản nháp"
       },
       "services": {
         "title": "Dịch vụ",

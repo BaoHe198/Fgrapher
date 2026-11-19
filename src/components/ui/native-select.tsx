@@ -6,6 +6,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { fieldControlClass } from "./field-control";
+import { RequiredMark } from "./input";
 
 type NativeSelectOption = string | { value: string; label: string };
 
@@ -15,6 +16,8 @@ interface NativeSelectProps extends Omit<
 > {
   label?: string;
   error?: string;
+  /** Asterisk on the label + aria-required; see Input's requiredMark. */
+  requiredMark?: boolean;
   options: NativeSelectOption[];
   value?: string;
   onChange?: (value: string) => void;
@@ -24,6 +27,7 @@ function NativeSelect({
   className,
   label,
   error,
+  requiredMark,
   options,
   value,
   onChange,
@@ -41,6 +45,7 @@ function NativeSelect({
         value={value}
         onChange={(event) => onChange?.(event.target.value)}
         aria-invalid={ariaInvalid ?? Boolean(error)}
+        aria-required={requiredMark || undefined}
         className={cn(
           fieldControlClass,
           "cursor-pointer appearance-none pr-10 hover:bg-bg-sunken",
@@ -74,6 +79,7 @@ function NativeSelect({
           className="text-body-sm font-semibold! text-text-primary"
         >
           {label}
+          {requiredMark ? <RequiredMark /> : null}
         </label>
       ) : null}
       {select}

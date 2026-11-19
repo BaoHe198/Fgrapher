@@ -16,6 +16,12 @@ import { fieldControlClass } from "./field-control";
 interface InputProps extends React.ComponentProps<"input"> {
   label?: string;
   error?: string;
+  /**
+   * Marks the label with an asterisk and sets aria-required. Not the native
+   * `required`: that would turn on the browser's own validation bubbles
+   * for forms that validate themselves.
+   */
+  requiredMark?: boolean;
 }
 
 function Input({
@@ -23,6 +29,7 @@ function Input({
   type,
   label,
   error,
+  requiredMark,
   id,
   "aria-invalid": ariaInvalid,
   ...props
@@ -42,6 +49,7 @@ function Input({
       type={isPassword && revealed ? "text" : type}
       data-slot="input"
       aria-invalid={ariaInvalid ?? Boolean(error)}
+      aria-required={requiredMark || undefined}
       className={cn(fieldControlClass, isPassword && "pr-11", className)}
       {...props}
     />
@@ -80,6 +88,7 @@ function Input({
           className="text-body-sm font-semibold! text-text-primary"
         >
           {label}
+          {requiredMark ? <RequiredMark /> : null}
         </label>
       ) : null}
       {input}
@@ -88,4 +97,13 @@ function Input({
   );
 }
 
-export { Input };
+/** The asterisk after a required field's label. */
+function RequiredMark() {
+  return (
+    <span aria-hidden className="ml-0.5 text-danger">
+      *
+    </span>
+  );
+}
+
+export { Input, RequiredMark };

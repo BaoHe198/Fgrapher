@@ -8,7 +8,13 @@ import { Tag } from "@/components/ui/tag";
 
 import { ProfileSettingsForm } from "./profile-settings-form";
 
-export function RoleProfileSwitcher({ roles }: { roles: Role[] }) {
+export function RoleProfileSwitcher({
+  roles,
+  userId,
+}: {
+  roles: Role[];
+  userId: string;
+}) {
   const roleT = useTranslations("role");
   const [active, setActive] = useState(roles[0]);
 
@@ -28,7 +34,7 @@ export function RoleProfileSwitcher({ roles }: { roles: Role[] }) {
         </div>
       ) : null}
 
-      <ProfileSettingsForm key={active} role={active} />
+      <ProfileSettingsForm key={active} role={active} userId={userId} />
     </div>
   );
 }
