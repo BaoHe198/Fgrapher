@@ -7,6 +7,7 @@ import type {
 import * as Sentry from "@sentry/nextjs";
 import { getTranslations } from "next-intl/server";
 
+import { resolvePartyName } from "@/lib/party-name";
 import { revalidatePublicProfile } from "@/lib/cache";
 import { generateKycSignedUrl } from "@/lib/media/cloudinary";
 import {
@@ -351,10 +352,72 @@ export async function listReports({
   });
   const reporterById = new Map(reporters.map((r) => [r.id, r]));
 
+  // What was reported, in words. `targetId` is a loose reference (the report
+  // can point at five kinds of thing), so the queue used to show the admin a
+  // bare id: "mã đối tượng cmw…" says nothing about who or what it is.
+  const idsOf = (type: string) =>
+    reports.filter((r) => r.targetType === type).map((r) => r.targetId);
+  const [users, products, posts, reviews, messages] = await Promise.all([
+    db.user.findMany({
+      where: { id: { in: idsOf("user") } },
+      select: {
+        id: true,
+        name: true,
+        firstName: true,
+        username: true,
+        profiles: { select: { displayName: true } },
+      },
+    }),
+    db.product.findMany({
+      where: { id: { in: idsOf("product") } },
+      select: { id: true, name: true },
+    }),
+    db.post.findMany({
+      where: { id: { in: idsOf("post") } },
+      select: { id: true, caption: true },
+    }),
+    db.review.findMany({
+      where: { id: { in: idsOf("review") } },
+      select: { id: true, content: true },
+    }),
+    db.message.findMany({
+      where: { id: { in: idsOf("message") } },
+      select: { id: true, content: true },
+    }),
+  ]);
+  const snippet = (text: string | null) =>
+    text ? (text.length > 120 ? `${text.slice(0, 120)}…` : text) : null;
+  const targetLabelByKey = new Map<string, string | null>([
+    ...users.map(
+      (u) =>
+        [
+          `user:${u.id}`,
+          [
+            resolvePartyName(u, ""),
+            u.name && u.name !== resolvePartyName(u, "") ? `(${u.name})` : "",
+          ]
+            .filter(Boolean)
+            .join(" ") || null,
+        ] as [string, string | null],
+    ),
+    ...products.map((p) => [`product:${p.id}`, p.name] as [string, string]),
+    ...posts.map(
+      (p) => [`post:${p.id}`, snippet(p.caption)] as [string, string | null],
+    ),
+    ...reviews.map(
+      (r) => [`review:${r.id}`, snippet(r.content)] as [string, string | null],
+    ),
+    ...messages.map(
+      (m) => [`message:${m.id}`, snippet(m.content)] as [string, string | null],
+    ),
+  ]);
+
   return {
     reports: reports.map((r) => ({
       ...r,
       reporter: reporterById.get(r.reporterId) ?? null,
+      targetLabel:
+        targetLabelByKey.get(`${r.targetType}:${r.targetId}`) ?? null,
     })),
     total,
     page,

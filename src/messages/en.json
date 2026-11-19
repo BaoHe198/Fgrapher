@@ -1113,7 +1113,9 @@
         "dismiss": "Dismiss",
         "reportUpdatedToast": "Report updated",
         "unknownReporter": "Unknown",
-        "actionFailed": "That did not go through, please try again"
+        "actionFailed": "That did not go through, please try again",
+        "reportedTarget": "Reported: {target}",
+        "targetGone": "(no longer exists)"
       },
       "verifications": {
         "title": "Identity verification",

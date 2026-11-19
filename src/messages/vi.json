@@ -1113,7 +1113,9 @@
         "dismiss": "Bỏ qua",
         "reportUpdatedToast": "Đã cập nhật báo cáo",
         "unknownReporter": "Không xác định",
-        "actionFailed": "Thao tác không thành công, vui lòng thử lại"
+        "actionFailed": "Thao tác không thành công, vui lòng thử lại",
+        "reportedTarget": "Bị báo cáo: {target}",
+        "targetGone": "(nội dung không còn tồn tại)"
       },
       "verifications": {
         "title": "Xác minh danh tính",
