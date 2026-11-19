@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 
 import type { BookingStatus, Prisma, ServiceKind } from "@prisma/client";
 
+import { ACTIVE_SERVICE_PRICES, startingPrice } from "@/lib/starting-price";
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { db } from "@/lib/db";
 import {
@@ -334,6 +335,7 @@ export async function findAvailableProvidersOnMap(
       displayName: true,
       categories: true,
       priceMin: true,
+      services: ACTIVE_SERVICE_PRICES,
       currency: true,
       hideExactLocation: true,
       latitude: true,
@@ -435,7 +437,7 @@ export async function findAvailableProvidersOnMap(
       thumbnailUrl: profile.media[0]?.url ?? null,
       role: profile.role as FmapMarker["role"],
       categories: profile.categories,
-      startingPrice: profile.priceMin,
+      startingPrice: startingPrice(profile),
       currency: profile.currency,
       ...profile.publicPoint,
       availableDates: datesByProvider.get(profile.userId) ?? [],
@@ -545,7 +547,7 @@ export async function getFmapProviderPreview(
     photoUrls: profile.media.map((media) => media.url),
     role: profile.role as FmapMarker["role"],
     categories: profile.categories,
-    startingPrice: profile.priceMin,
+    startingPrice: startingPrice(profile),
     currency: profile.currency,
     rating: reviewStats._avg.rating,
     reviewCount: reviewStats._count._all,
