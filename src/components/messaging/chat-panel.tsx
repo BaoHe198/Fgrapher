@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ReportModal } from "@/components/modals/report-modal";
+import { toast } from "@/components/ui/toast";
 import { formatDate, formatDayMonthLong, formatTime } from "@/lib/format";
 import { resolvePartyName } from "@/lib/party-name";
 import { compressImageFile } from "@/lib/media/image-compression";
@@ -176,6 +177,13 @@ export function ChatPanel({
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  // Whether I have blocked the person in this chat. Pressing "Chặn" used to
+  // give no sign at all: the menu still said "Chặn", every later message
+  // from either side was dropped without a word, and nothing could undo it.
+  const [blockedByMe, setBlockedByMe] = useState(false);
+  const [blockBusy, setBlockBusy] = useState(false);
+  // Why the last message did not go out (e.g. the other person blocked me).
+  const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -228,6 +236,50 @@ export function ChatPanel({
     scrollOnNextLoadRef.current = true;
   }, [conversationId]);
 
+  useEffect(() => {
+    let alive = true;
+    startTransition(() => {
+      setBlockedByMe(false);
+      setSendError(null);
+    });
+    fetch(`/api/blocks?userId=${encodeURIComponent(otherUser.id)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((body) => {
+        if (alive && body?.data?.blocked) setBlockedByMe(true);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [otherUser.id]);
+
+  const setBlock = async (block: boolean) => {
+    setBlockBusy(true);
+    const res = await fetch("/api/blocks", {
+      method: block ? "POST" : "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: otherUser.id }),
+    }).catch(() => null);
+    setBlockBusy(false);
+    if (!res?.ok) {
+      toast.add({
+        title: block ? t("blockFailed") : t("unblockFailed"),
+        type: "error",
+      });
+      return;
+    }
+    setBlockedByMe(block);
+    setSendError(null);
+    toast.add({
+      title: block
+        ? t("blockedToast", { name: resolvePartyName(otherUser, t("unknown")) })
+        : t("unblockedToast", {
+            name: resolvePartyName(otherUser, t("unknown")),
+          }),
+      type: "success",
+    });
+  };
+
   // No live transport (Pusher/Socket.io) in this environment — polling is the
   // pragmatic stand-in while a conversation is open. 2s so incoming messages
   // feel close to real-time; the sender's own messages don't wait on it at
@@ -263,7 +315,15 @@ export function ChatPanel({
         }),
       });
 
+      if (!res.ok) {
+        // The draft stays in the box. A refused message used to vanish from
+        // nowhere: the box kept the text, nothing appeared in the thread, and
+        // the sender could not tell it had not been delivered.
+        const body = await res.json().catch(() => null);
+        setSendError(body?.message ?? t("sendFailed"));
+      }
       if (res.ok) {
+        setSendError(null);
         const body = await res.json();
         setDraft("");
         if (textareaRef.current) textareaRef.current.style.height = "auto";
@@ -278,6 +338,8 @@ export function ChatPanel({
           );
         }
       }
+    } catch {
+      setSendError(t("sendFailed"));
     } finally {
       isSendingRef.current = false;
       setSending(false);
@@ -354,18 +416,22 @@ export function ChatPanel({
             <DropdownMenuItem onClick={() => setReportOpen(true)}>
               {t("report")}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() =>
-                fetch("/api/blocks", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ userId: otherUser.id }),
-                })
-              }
-            >
-              {t("block")}
-            </DropdownMenuItem>
+            {blockedByMe ? (
+              <DropdownMenuItem
+                disabled={blockBusy}
+                onClick={() => void setBlock(false)}
+              >
+                {t("unblock")}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={blockBusy}
+                onClick={() => void setBlock(true)}
+              >
+                {t("block")}
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
         <ReportModal
@@ -493,7 +559,37 @@ export function ChatPanel({
         <div ref={bottomRef} />
       </div>
 
-      <div className="flex items-end gap-2 border-t border-border-subtle p-4">
+      {sendError && !blockedByMe ? (
+        <p
+          role="alert"
+          className="border-t border-border-subtle bg-danger-bg px-4 py-2 text-body-sm text-danger"
+        >
+          {sendError}
+        </p>
+      ) : null}
+
+      {blockedByMe ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle p-4">
+          <p className="text-body-sm text-text-secondary">
+            {t("blockedNotice")}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={blockBusy}
+            onClick={() => void setBlock(false)}
+          >
+            {t("unblock")}
+          </Button>
+        </div>
+      ) : null}
+
+      <div
+        className={cn(
+          "flex items-end gap-2 border-t border-border-subtle p-4",
+          blockedByMe && "hidden",
+        )}
+      >
         <input
           ref={fileInputRef}
           type="file"

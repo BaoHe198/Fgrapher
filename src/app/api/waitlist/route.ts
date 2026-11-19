@@ -10,7 +10,7 @@ import { createWaitlistEntrySchema } from "@/lib/validations/waitlist";
 // notified.
 export async function POST(request: Request) {
   const t = await getTranslations("apiMessages.waitlist");
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
   const parsed = createWaitlistEntrySchema.safeParse(body);
 
   if (!parsed.success) {
@@ -35,13 +35,28 @@ export async function POST(request: Request) {
     );
   }
 
-  await db.waitlistEntry.create({
-    data: {
-      email: parsed.data.email,
+  // One entry per address, area and role. Pressing the button twice (or
+  // coming back a week later) used to add a second row, and each row is one
+  // more copy of the same "a provider has arrived" email. The answer is the
+  // same either way, so the form does not reveal who is already on the list.
+  const email = parsed.data.email.trim().toLowerCase();
+  const existing = await db.waitlistEntry.findFirst({
+    where: {
+      email: { equals: email, mode: "insensitive" },
       provinceId: parsed.data.provinceId,
       role: parsed.data.role,
     },
+    select: { id: true },
   });
+  if (!existing) {
+    await db.waitlistEntry.create({
+      data: {
+        email,
+        provinceId: parsed.data.provinceId,
+        role: parsed.data.role,
+      },
+    });
+  }
 
   return NextResponse.json(
     { data: null, error: null, message: t("added") },

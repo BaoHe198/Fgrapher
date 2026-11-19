@@ -1113,7 +1113,9 @@
         "dismiss": "Bỏ qua",
         "reportUpdatedToast": "Đã cập nhật báo cáo",
         "unknownReporter": "Không xác định",
-        "actionFailed": "Thao tác không thành công, vui lòng thử lại"
+        "actionFailed": "Thao tác không thành công, vui lòng thử lại",
+        "reportedTarget": "Bị báo cáo: {target}",
+        "targetGone": "(nội dung không còn tồn tại)"
       },
       "verifications": {
         "title": "Xác minh danh tính",
@@ -1564,7 +1566,8 @@
       "blocked": "Đã chặn người dùng",
       "unblocked": "Đã bỏ chặn người dùng",
       "blockFailed": "Không thể chặn người dùng",
-      "unblockFailed": "Không thể bỏ chặn người dùng"
+      "unblockFailed": "Không thể bỏ chặn người dùng",
+      "cannotMessage": "Không gửi được tin nhắn cho người này."
     },
     "bookings": {
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -5459,7 +5462,14 @@
       "viewBooking": "Xem chi tiết đặt lịch",
       "attachImage": "Đính kèm ảnh",
       "writeMessage": "Nhập tin nhắn...",
-      "sendMessage": "Gửi tin nhắn"
+      "sendMessage": "Gửi tin nhắn",
+      "unblock": "Bỏ chặn",
+      "blockedToast": "Đã chặn {name}. Hai bên sẽ không nhắn tin được cho nhau.",
+      "unblockedToast": "Đã bỏ chặn {name}.",
+      "blockFailed": "Không chặn được. Vui lòng thử lại.",
+      "unblockFailed": "Không bỏ chặn được. Vui lòng thử lại.",
+      "blockedNotice": "Bạn đã chặn người này. Bỏ chặn để tiếp tục nhắn tin.",
+      "sendFailed": "Tin nhắn chưa gửi được. Vui lòng thử lại."
     },
     "conversationList": {
       "title": "Tin nhắn",

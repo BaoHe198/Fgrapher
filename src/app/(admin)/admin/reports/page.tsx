@@ -23,6 +23,8 @@ type ReportRow = Report & {
     firstName: string | null;
     email: string;
   } | null;
+  /** The reported person, listing or text in words; null if it is gone. */
+  targetLabel: string | null;
 };
 
 const TARGET_TYPES = ["user", "post", "product", "review", "message"];
@@ -157,6 +159,11 @@ export default function AdminReportsPage() {
                 })}{" "}
                 {t("targetIdLabel")}{" "}
                 <code className="text-body-sm">{report.targetId}</code>
+              </p>
+              <p className="text-body-md font-semibold! [overflow-wrap:anywhere] text-text-primary">
+                {t("reportedTarget", {
+                  target: report.targetLabel ?? t("targetGone"),
+                })}
               </p>
               {targetHref(report.targetType, report.targetId) ? (
                 <Link

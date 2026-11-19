@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { WaitlistForm } from "@/components/browse/waitlist-form";
 import { ArtistCard } from "@/components/cards/artist-card";
 import { db } from "@/lib/db";
 import { DISCOVERABLE_ROLES, SLUG_TO_ROLE } from "@/lib/constants";
@@ -139,6 +140,13 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
             {t("empty.heading", values)}
           </p>
           <p className="text-body-md text-text-secondary">{t("empty.body")}</p>
+          {/* The sentence above invites the visitor to sign up for news of
+              this area. The form it refers to was only ever on /browse, so
+              here the invitation led nowhere. */}
+          <WaitlistForm
+            provinceId={resolved.province.id}
+            role={resolved.role}
+          />
           <Link href="/browse" className="text-text-link hover:underline">
             {t("empty.browseAll")}
           </Link>
