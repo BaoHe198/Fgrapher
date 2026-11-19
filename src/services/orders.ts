@@ -460,7 +460,13 @@ export async function placeOrdersFromCart(
 
   return createOrdersForCart(userId, {
     deliveryMethod: options.deliveryMethod,
-    shippingAddress: options.shippingAddress?.trim() || null,
+    // Only a shipped order has a delivery address. Checkout keeps whatever
+    // was typed before the customer switched to pickup, and the order page
+    // then showed "Địa chỉ giao hàng" on an order nobody is delivering.
+    shippingAddress:
+      options.deliveryMethod === "SHIP"
+        ? options.shippingAddress?.trim() || null
+        : null,
     stripePaymentId: null,
   });
 }
@@ -678,7 +684,17 @@ export async function updateOrderStatus({
       getTranslations("libServices.email"),
       getTranslations("libServices.notifications"),
     ]);
-    const statusLabel = nt(`order.statusLabel.${status}`);
+    // A collection order is never "shipped": the order page already calls
+    // these two steps "ready to collect" / "collected", while this message
+    // told the customer their pickup was "Đang giao".
+    const isPickupStep =
+      order.deliveryMethod === "PICKUP" &&
+      (status === "SHIPPED" || status === "DELIVERED");
+    const statusLabel = nt(
+      isPickupStep
+        ? `order.pickupStatusLabel.${status}`
+        : `order.statusLabel.${status}`,
+    );
     await notify({
       userId: recipient.id,
       type: notificationType,

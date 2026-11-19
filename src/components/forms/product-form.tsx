@@ -75,6 +75,10 @@ export function ProductForm({
   });
 
   const type = watch("type");
+  // A photo takes a few seconds to reach storage. Saving in that gap used to
+  // create the listing with no photo at all, and the upload that finished a
+  // moment later was thrown away (found 19/11/2026).
+  const [imagesUploading, setImagesUploading] = useState(false);
 
   const onSubmit = async (values: ProductInput) => {
     setServerError(null);
@@ -250,9 +254,15 @@ export function ProductForm({
             <ProductImageUploader
               images={field.value as ProductImage[]}
               onChange={field.onChange}
+              onUploadingChange={setImagesUploading}
             />
           )}
         />
+        {imagesUploading ? (
+          <p role="status" className="text-body-sm text-text-secondary">
+            {t("imagesUploading")}
+          </p>
+        ) : null}
       </div>
 
       <Controller
@@ -268,7 +278,11 @@ export function ProductForm({
       />
 
       <div className="flex gap-2.5">
-        <Button type="submit" variant="accent" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="accent"
+          disabled={isSubmitting || imagesUploading}
+        >
           {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
           {t("saveButton")}
         </Button>

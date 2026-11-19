@@ -145,6 +145,13 @@ export function UploadMediaModal({
   const t = useTranslations("sharedComponents.uploadMediaModal");
   const categoryT = useTranslations("profileCategory");
   const [files, setFiles] = useState<PendingFile[]>([]);
+  // Files the drop zone turned away, with why. The validator below already
+  // wrote the reasons ("Ảnh phải nhỏ hơn 10MB"), but nothing showed them: a
+  // photo straight off a camera is often over the limit, and choosing one
+  // simply did nothing (found 19/11/2026).
+  const [rejected, setRejected] = useState<{ name: string; reason: string }[]>(
+    [],
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
 
@@ -221,6 +228,8 @@ export function UploadMediaModal({
   };
 
   const onDrop = useCallback((accepted: File[]) => {
+    // A new pick replaces the last pick's refusals.
+    setRejected([]);
     setFiles((prev) => [
       ...prev,
       ...accepted.map((file) => ({
@@ -234,6 +243,18 @@ export function UploadMediaModal({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected: (rejections) =>
+      setRejected(
+        rejections.map(({ file, errors }) => ({
+          name: file.name,
+          // Our own validator's reasons are already in the app's language;
+          // the drop zone's built-in ones (wrong type) are English.
+          reason:
+            errors.find((e) =>
+              ["file-too-large", "video-not-allowed"].includes(e.code),
+            )?.message ?? t(imageOnly ? "imageOnly" : "unsupportedType"),
+        })),
+      ),
     accept: imageOnly ? IMAGE_ACCEPT : MEDIA_ACCEPT,
     multiple: true,
     validator: (file) => {
@@ -366,6 +387,7 @@ export function UploadMediaModal({
 
     onUploaded(uploaded);
     setFiles([]);
+    setRejected([]);
     onOpenChange(false);
   };
 
@@ -377,6 +399,7 @@ export function UploadMediaModal({
           onOpenChange(next);
           if (!next) {
             setFiles([]);
+            setRejected([]);
             setSelectedAlbumId("");
             setNewAlbumTitle("");
             setNewAlbumCategory("");
@@ -464,6 +487,21 @@ export function UploadMediaModal({
                 {t(imageOnly ? "sizeLimitsImageOnly" : "sizeLimits")}
               </p>
             </div>
+
+            {rejected.length > 0 ? (
+              <ul
+                role="alert"
+                className="flex flex-col gap-1 rounded-[var(--fg-radius-md)] bg-danger-bg px-3 py-2.5 text-body-sm text-danger"
+              >
+                {rejected.map((item, index) => (
+                  <li key={`${item.name}-${index}`} className="break-words">
+                    <span className="font-semibold">{item.name}</span>
+                    {" — "}
+                    {item.reason}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
 
             {files.length > 0 ? (
               <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">

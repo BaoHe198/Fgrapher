@@ -96,7 +96,6 @@ const PRODUCT_MESSAGES_EN: Record<string, string> = {
   nameRequired: "Enter a product name",
   salePriceRequired: "Enter a sale price",
   rentalPriceRequired: "Enter a rental price per day",
-  bothPricesRequired: "Enter both a sale price and a rental price",
   amountTooHigh: "That amount is too large",
 };
 
@@ -111,46 +110,49 @@ export type ProductInput = z.infer<typeof productSchema>;
 // currently hidden behind the CAMERA_SHOP feature flag (out of MVP scope
 // per CLAUDE.md), but kept translated for when it's re-enabled.
 export function getProductSchema(t: (key: string) => string) {
-  return z
-    .object({
-      name: z.string().min(2, t("nameRequired")),
-      description: z.string().optional(),
-      category: z.enum(PRODUCT_CATEGORIES),
-      type: z.enum(["SALE", "RENT", "BOTH"]),
-      price: z
-        .number()
-        .positive()
-        .max(MAX_VND_AMOUNT, t("amountTooHigh"))
-        .optional(),
-      rentalPrice: z
-        .number()
-        .positive()
-        .max(MAX_VND_AMOUNT, t("amountTooHigh"))
-        .optional(),
-      depositAmount: z
-        .number()
-        .min(0)
-        .max(MAX_VND_AMOUNT, t("amountTooHigh"))
-        .optional(),
-      condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR", "AVERAGE"]),
-      stock: z.number().int().min(0),
-      isActive: z.boolean(),
-      images: z.array(
-        z.object({ url: z.string().url(), publicId: z.string().min(1) }),
-      ),
-    })
-    .refine((data) => data.type !== "SALE" || data.price !== undefined, {
-      message: t("salePriceRequired"),
-      path: ["price"],
-    })
-    .refine((data) => data.type !== "RENT" || data.rentalPrice !== undefined, {
-      message: t("rentalPriceRequired"),
-      path: ["rentalPrice"],
-    })
-    .refine(
-      (data) =>
-        data.type !== "BOTH" ||
-        (data.price !== undefined && data.rentalPrice !== undefined),
-      { message: t("bothPricesRequired"), path: ["price"] },
-    );
+  return (
+    z
+      .object({
+        name: z.string().min(2, t("nameRequired")),
+        description: z.string().optional(),
+        category: z.enum(PRODUCT_CATEGORIES),
+        type: z.enum(["SALE", "RENT", "BOTH"]),
+        price: z
+          .number()
+          .positive()
+          .max(MAX_VND_AMOUNT, t("amountTooHigh"))
+          .optional(),
+        rentalPrice: z
+          .number()
+          .positive()
+          .max(MAX_VND_AMOUNT, t("amountTooHigh"))
+          .optional(),
+        depositAmount: z
+          .number()
+          .min(0)
+          .max(MAX_VND_AMOUNT, t("amountTooHigh"))
+          .optional(),
+        condition: z.enum(["NEW", "LIKE_NEW", "GOOD", "FAIR", "AVERAGE"]),
+        stock: z.number().int().min(0),
+        isActive: z.boolean(),
+        images: z.array(
+          z.object({ url: z.string().url(), publicId: z.string().min(1) }),
+        ),
+      })
+      // Each missing price is reported on its own field, so the message leaves
+      // the moment that field is filled. A single "enter both" message under
+      // the sale price stayed on screen after both prices were in, because the
+      // form re-checks only the field being typed in.
+      .refine((data) => data.type === "RENT" || data.price !== undefined, {
+        message: t("salePriceRequired"),
+        path: ["price"],
+      })
+      .refine(
+        (data) => data.type === "SALE" || data.rentalPrice !== undefined,
+        {
+          message: t("rentalPriceRequired"),
+          path: ["rentalPrice"],
+        },
+      )
+  );
 }

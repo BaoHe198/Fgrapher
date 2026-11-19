@@ -64,6 +64,7 @@ export function ProductPurchasePanel({
   product,
   shopId,
   shopLocation,
+  deliveryFee,
   isOwner,
   viewerId,
   initialAlert,
@@ -71,6 +72,12 @@ export function ProductPurchasePanel({
   product: Product;
   shopId: string;
   shopLocation: string | null;
+  /**
+   * The shop's own delivery setting: null means it does not deliver at all,
+   * 0 means it delivers free. Checkout already enforces this; the line under
+   * the buttons used to promise "delivery or pickup" for every shop.
+   */
+  deliveryFee: number | null;
   isOwner: boolean;
   /** null for a signed-out visitor. */
   viewerId: string | null;
@@ -512,9 +519,15 @@ export function ProductPurchasePanel({
         </span>
         <span className="flex items-center gap-2">
           <Truck className="size-4" />
-          {shopLocation
-            ? t("shipsFrom", { location: shopLocation })
-            : t("shippingOrPickup")}
+          {deliveryFee === null
+            ? shopLocation
+              ? t("pickupOnlyAt", { location: shopLocation })
+              : t("pickupOnly")
+            : deliveryFee === 0
+              ? t("freeDeliveryOrPickup")
+              : t("deliveryFeeOrPickup", {
+                  fee: formatCurrency(deliveryFee, product.currency),
+                })}
         </span>
         <span className="flex items-center gap-2">
           <RotateCcw className="size-4" /> {t("returnPolicyByShop")}

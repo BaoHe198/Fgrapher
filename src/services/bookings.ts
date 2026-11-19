@@ -33,6 +33,7 @@ import {
   bookingRescheduleProposedEmailHtml,
 } from "@/lib/email";
 import { formatDate } from "@/lib/format";
+import { resolvePartyName, type NamedParty } from "@/lib/party-name";
 import { normalizeZaloUrl } from "@/lib/zalo";
 import { isSlotBookable } from "@/services/availability";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
@@ -104,8 +105,13 @@ const BOOKING_INCLUDE = {
   service: { select: { name: true, duration: true } },
 } as const;
 
-function partyName(party: { firstName: string | null; name: string | null }) {
-  return party.firstName ?? party.name ?? "there";
+// The name used in notifications and emails. A provider goes by the name
+// they trade under (lib/party-name.ts) — "Minh Anh Photo đã xác nhận…", the
+// same name the customer saw on the profile they booked, not the account
+// holder's first name. `profiles` is only selected for the provider side
+// (BOOKING_INCLUDE), so a customer is still called by their own name.
+function partyName(party: NamedParty) {
+  return resolvePartyName({ ...party, username: null }, "there");
 }
 
 // Anti-spam/safety (Prompt B7, VIỆC 4) — same rule getBookingDetail applies:

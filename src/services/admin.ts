@@ -939,14 +939,19 @@ export async function moderateProductImages({
       notifyCritical({
         userId: row.product.userId,
         type: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
+        // Its own wording: the portfolio one told a seller that "1 ảnh
+        // trong portfolio" was approved for a photo that is on Chợ F.
         title:
           action === "approve"
-            ? t("mediaApproved.heading")
-            : t("mediaRejected.heading"),
+            ? t("mediaApprovedProduct.heading")
+            : t("mediaRejectedProduct.heading"),
         message:
           action === "approve"
-            ? t("mediaApproved.body", { count: 1 })
-            : t("mediaRejected.body", { reason: reason ?? "" }),
+            ? t("mediaApprovedProduct.body", { product: row.product.name })
+            : t("mediaRejectedProduct.body", {
+                product: row.product.name,
+                reason: reason ?? "",
+              }),
         data: { productId: row.product.id },
       }),
     ),
@@ -1069,12 +1074,12 @@ export async function moderatePostMedia({
         type: action === "approve" ? "MEDIA_APPROVED" : "MEDIA_REJECTED",
         title:
           action === "approve"
-            ? t("mediaApproved.heading")
-            : t("mediaRejected.heading"),
+            ? t("mediaApprovedPost.heading")
+            : t("mediaRejectedPost.heading"),
         message:
           action === "approve"
-            ? t("mediaApproved.body", { count: 1 })
-            : t("mediaRejected.body", { reason: reason ?? "" }),
+            ? t("mediaApprovedPost.body")
+            : t("mediaRejectedPost.body", { reason: reason ?? "" }),
         data: { postId: row.post.id },
       }),
     ),

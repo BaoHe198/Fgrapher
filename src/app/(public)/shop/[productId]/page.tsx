@@ -244,7 +244,20 @@ export default async function ProductDetailPage({
               stock: product.stock,
             }}
             shopId={product.user.id}
-            shopLocation={product.user.location}
+            // Ward + province from the seller's profile — the same area
+            // checkout names for pickup. `user.location` is the old
+            // free-text field and is empty for accounts made since.
+            shopLocation={
+              [
+                product.user.profiles[0]?.ward?.name,
+                product.user.profiles[0]?.province?.name,
+              ]
+                .filter(Boolean)
+                .join(", ") ||
+              product.user.location ||
+              null
+            }
+            deliveryFee={product.user.profiles[0]?.deliveryFee ?? null}
             isOwner={isOwner}
             viewerId={session?.user?.id ?? null}
             initialAlert={

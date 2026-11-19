@@ -438,6 +438,9 @@ function PostComposer({
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState<ProductImage[]>([]);
   const [showImages, setShowImages] = useState(false);
+  // Posting while a photo was still on its way up sent the caption alone and
+  // dropped the photo — same gap the product form had.
+  const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -503,7 +506,11 @@ function PostComposer({
         className="border-0 bg-bg-sunken"
       />
       {showImages ? (
-        <ProductImageUploader images={images} onChange={setImages} />
+        <ProductImageUploader
+          images={images}
+          onChange={setImages}
+          onUploadingChange={setUploading}
+        />
       ) : null}
       {notice ? <p className="text-body-sm text-info">{notice}</p> : null}
       {error ? <p className="text-body-sm text-danger">{error}</p> : null}
@@ -530,7 +537,9 @@ function PostComposer({
         <Button
           variant="accent"
           size="sm"
-          disabled={busy || (!caption.trim() && images.length === 0)}
+          disabled={
+            busy || uploading || (!caption.trim() && images.length === 0)
+          }
           onClick={submit}
         >
           {busy ? (
@@ -538,7 +547,11 @@ function PostComposer({
           ) : (
             <Send className="size-4" />
           )}
-          {busy ? t("publishing") : t("publish")}
+          {busy
+            ? t("publishing")
+            : uploading
+              ? t("photoUploading")
+              : t("publish")}
         </Button>
       </div>
     </Card>
