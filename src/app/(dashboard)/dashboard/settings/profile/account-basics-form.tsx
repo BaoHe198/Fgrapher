@@ -89,6 +89,27 @@ export function AccountBasicsForm({
     | "saveFailed"
   >("idle");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The field was left while the availability check was still running.
+  // Saving used to need the check to have finished by then, so typing a
+  // name and tabbing straight on saved nothing and said nothing (found
+  // 19/11/2026). The check now finishes the save itself.
+  const saveWhenChecked = useRef(false);
+
+  const persistUsername = async (value: string) => {
+    const res = await fetch("/api/users/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: value }),
+    }).catch(() => null);
+    startTransition(() => {
+      if (res?.ok) {
+        setSavedUsername(value);
+        setUsernameStatus("saved");
+      } else {
+        setUsernameStatus("saveFailed");
+      }
+    });
+  };
 
   useEffect(() => {
     // Same rules as the server (validations/user.ts). Checked here so a
@@ -126,6 +147,10 @@ export function AccountBasicsForm({
       startTransition(() => {
         setUsernameStatus(body.data?.available ? "available" : "taken");
       });
+      if (body.data?.available && saveWhenChecked.current) {
+        saveWhenChecked.current = false;
+        void persistUsername(username);
+      }
     }, 400);
 
     return () => {
@@ -134,20 +159,12 @@ export function AccountBasicsForm({
   }, [username, savedUsername]);
 
   const saveUsername = async () => {
+    if (usernameStatus === "checking") {
+      saveWhenChecked.current = true;
+      return;
+    }
     if (usernameStatus !== "available") return;
-    const res = await fetch("/api/users/me", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username }),
-    }).catch(() => null);
-    startTransition(() => {
-      if (res?.ok) {
-        setSavedUsername(username);
-        setUsernameStatus("saved");
-      } else {
-        setUsernameStatus("saveFailed");
-      }
-    });
+    await persistUsername(username);
   };
 
   const saveName = async (value: string) => {
@@ -188,7 +205,11 @@ export function AccountBasicsForm({
           <Input
             aria-label={t("usernameLabel")}
             value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            onChange={(e) => {
+              // Typing again: the pending save was for the previous text.
+              saveWhenChecked.current = false;
+              setUsername(e.target.value.toLowerCase());
+            }}
             onBlur={saveUsername}
             className="flex-1"
           />
