@@ -128,13 +128,27 @@ function SortableMediaTile({
         </Badge>
       ) : null}
 
-      <div className="absolute inset-0 flex flex-col justify-between bg-scrim opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+      {/* The reviewer's reason was loaded with the photo but never shown:
+          the tile said only "Bị từ chối", and the why had to be dug out of
+          the notifications (found 19/11/2026). */}
+      {item.moderationStatus === "REJECTED" && item.moderationNote ? (
+        <p
+          className="absolute inset-x-0 bottom-0 line-clamp-3 bg-danger px-2 py-1.5 text-meta text-white"
+          title={item.moderationNote}
+        >
+          {t("moderation.reason", { reason: item.moderationNote })}
+        </p>
+      ) : null}
+
+      {/* Shown on hover; always shown where there is no hover (phones),
+          or a photo could not be deleted or made the cover there. */}
+      <div className="absolute inset-0 flex flex-col justify-between bg-scrim opacity-0 transition-opacity duration-150 group-hover:opacity-100 [@media(hover:none)]:bg-transparent [@media(hover:none)]:opacity-100">
         <div className="flex justify-between p-2">
           <button
             type="button"
             {...attributes}
             {...listeners}
-            className="flex size-7 cursor-grab items-center justify-center rounded-full bg-white/20 text-white"
+            className="flex size-7 cursor-grab items-center justify-center rounded-full bg-white/20 text-white [@media(hover:none)]:bg-black/55"
             aria-label={t("reorder")}
           >
             <GripVertical className="size-4" />
@@ -144,7 +158,7 @@ function SortableMediaTile({
               <button
                 type="button"
                 onClick={() => onSetCover(item.id)}
-                className="flex size-7 items-center justify-center rounded-full bg-white/20 text-white"
+                className="flex size-7 items-center justify-center rounded-full bg-white/20 text-white [@media(hover:none)]:bg-black/55"
                 aria-label={t("setCover")}
               >
                 <Star className="size-4" />
@@ -153,7 +167,7 @@ function SortableMediaTile({
             <button
               type="button"
               onClick={() => onDelete(item.id)}
-              className="flex size-7 items-center justify-center rounded-full bg-white/20 text-white"
+              className="flex size-7 items-center justify-center rounded-full bg-white/20 text-white [@media(hover:none)]:bg-black/55"
               aria-label={t("delete")}
             >
               <X className="size-4" />

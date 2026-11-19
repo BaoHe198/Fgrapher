@@ -2131,7 +2131,8 @@
         "photoTrashedToast": "Đã chuyển ảnh vào thùng rác",
         "moderation": {
           "pending": "Đang chờ duyệt",
-          "rejected": "Bị từ chối"
+          "rejected": "Bị từ chối",
+          "reason": "Lý do: {reason}"
         },
         "cancel": "Hủy",
         "saveFailed": "Không thể lưu thay đổi, vui lòng thử lại"

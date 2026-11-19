@@ -2131,7 +2131,8 @@
         "photoTrashedToast": "Photo moved to trash",
         "moderation": {
           "pending": "Pending review",
-          "rejected": "Rejected"
+          "rejected": "Rejected",
+          "reason": "Reason: {reason}"
         },
         "cancel": "Cancel",
         "saveFailed": "Couldn't save changes, please try again"
