@@ -378,6 +378,21 @@ export function generateKycSignedUrl(publicId: string) {
   });
 }
 
+/**
+ * A delivery URL with Cloudinary's signature component (`/s--…--/`) taken
+ * out. For an `authenticated` asset the upload response's `secure_url`
+ * carries a signature that never expires — a working link to the document
+ * for as long as the file exists. The verification form sends that URL and
+ * it used to be stored as it came, so the database held a permanent key to
+ * every ID card, next to a viewer whose whole point is a 5-minute link and
+ * an audit entry per view. Nothing reads the stored URL back (documents are
+ * opened by public id through generateKycSignedUrl), so only the unsigned
+ * form is kept: it identifies the file and opens nothing.
+ */
+export function withoutDeliverySignature(url: string) {
+  return url.replace(/\/s--[A-Za-z0-9_-]+--\//, "/");
+}
+
 export async function deleteKycAsset(publicId: string) {
   await cloudinary.uploader.destroy(publicId, {
     resource_type: "image",

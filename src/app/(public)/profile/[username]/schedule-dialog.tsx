@@ -264,7 +264,9 @@ export function ScheduleDialog({
                   start: slot.time,
                   status: slot.available
                     ? ("available" as const)
-                    : ("booked" as const),
+                    : slot.tooSoon
+                      ? ("soon" as const)
+                      : ("booked" as const),
                   golden: sun ? isGoldenHourSlot(slot.time, sun) : false,
                 }));
                 const photo =

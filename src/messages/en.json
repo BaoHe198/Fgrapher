@@ -741,7 +741,8 @@
         "morning": "Morning",
         "afternoon": "Afternoon",
         "evening": "Evening"
-      }
+      },
+      "soon": "Too soon"
     },
     "bookingSummary": {
       "label": "Booking request summary",
@@ -1135,7 +1136,18 @@
         "failedToLoadDocument": "Failed to load document",
         "selectRejectionReason": "Select a rejection reason",
         "verificationUpdated": "Verification updated",
-        "verificationUpdateFailed": "Couldn't update the verification, please try again"
+        "verificationUpdateFailed": "Couldn't update the verification, please try again",
+        "imageBusiness": "business registration",
+        "legalEntityLine": "Declared legal form: {type}",
+        "legalEntity": {
+          "INDIVIDUAL": "Freelance individual (ID card only)",
+          "HOUSEHOLD_BUSINESS": "Household business (registration required)",
+          "COMPANY": "Company (registration required)"
+        },
+        "businessDocMissing": "Declared as a household business or company, but no registration certificate is on file.",
+        "sameIdWarning": "This ID number was also submitted for another account:",
+        "sameIdAccount": "{name} ({email}), role {role}",
+        "sameIdDeletedAccount": "A deleted account, role {role}"
       },
       "roleChangeRequests": {
         "title": "Role change requests",
@@ -1344,7 +1356,12 @@
       "invalidParent": "Invalid parent booking — it must be one of your confirmed bookings.",
       "outcomeTooEarly": "You can't record an outcome before the booking date.",
       "crewNeedsProviderRole": "A crew booking must use your provider role.",
-      "unknown": "Couldn't complete that, please try again."
+      "unknown": "Couldn't complete that, please try again.",
+      "noticeTooShort": "Bookings need at least {hours} hours' notice. Please pick a later time.",
+      "tooManyPending": "You already have {max} booking requests waiting for a reply. Wait for an answer or cancel one before sending another.",
+      "invalidTransition": "This booking's status has just changed, so that action is no longer possible. Please reload the page.",
+      "proposalInPast": "The proposed time has already passed. Please choose an upcoming one.",
+      "proposalEndBeforeStart": "The proposed end time must be after the start."
     },
     "uploads": {
       "documentsNotConfigured": "Document uploads aren't available right now. Please try again later or contact support.",
@@ -1523,7 +1540,8 @@
       "serviceRequestReviewed": "Request reviewed",
       "serviceRequestNotFound": "Request not found",
       "serviceRequestAlreadyReviewed": "This request has already been reviewed",
-      "serviceRequestReviewFailed": "Couldn't review the request"
+      "serviceRequestReviewFailed": "Couldn't review the request",
+      "documentNotOnFile": "This document is not on file: it was never submitted, or it was deleted when its retention period ended."
     },
     "auth": {
       "invalidInput": "Invalid input",

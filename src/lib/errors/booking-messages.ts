@@ -31,4 +31,22 @@ export const BOOKING_ERROR_KEYS: Record<string, string> = {
     "invalidParent",
   "Can't report an outcome before the booking date": "outcomeTooEarly",
   "A crew booking must use your provider role": "crewNeedsProviderRole",
+  "The proposed time has already passed": "proposalInPast",
+  "The proposed end time must be after the start": "proposalEndBeforeStart",
+  // Messages built with a number or a status in them, matched by their
+  // fixed opening (see bookingErrorKey). They are thrown as template
+  // literals, which the unit test used not to look at, so all three fell
+  // through to "unknown": a customer booking too close to the day, or with
+  // five requests already waiting, was told only "Không thực hiện được".
+  "Bookings need at least ": "noticeTooShort",
+  "You already have ": "tooManyPending",
+  "A ": "invalidTransition",
 };
+
+export function bookingErrorKey(message: string): string | null {
+  if (BOOKING_ERROR_KEYS[message]) return BOOKING_ERROR_KEYS[message];
+  const prefix = Object.keys(BOOKING_ERROR_KEYS).find(
+    (known) => known.endsWith(" ") && message.startsWith(known),
+  );
+  return prefix ? BOOKING_ERROR_KEYS[prefix] : null;
+}

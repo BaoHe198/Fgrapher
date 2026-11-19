@@ -8,6 +8,8 @@ import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { assignFreePlan } from "@/services/subscription";
 import { notifyCritical } from "@/services/notification";
+import { withdrawOffer } from "@/services/request-offers";
+import { purgeKycDocumentsNow } from "@/services/verification";
 
 // MVP scope decision (CLAUDE.md) — an account holds at most one active
 // provider role, and a VERIFIED role can't be self-removed (UserRole.
@@ -106,6 +108,33 @@ export async function reviewRoleChangeRequest({
   ]);
 
   if (approve) {
+    // The old role's row is deleted below, and with it the only reference
+    // to the identity documents it was verified with (kept for 90 days
+    // after approval). Delete the files first — see deleteKycFiles.
+    await purgeKycDocumentsNow(
+      { userId: request.userId, role: request.fromRole },
+      "role_removed",
+    );
+
+    // Offers made in the old role can never be honoured: accepting one
+    // books that role, which this account is about to stop holding, and the
+    // customer got "Nhà cung cấp hiện không nhận đặt lịch" for an offer
+    // still sitting on their request. Withdrawn here, through the function
+    // that owns that change (it reopens the request when no offer is left).
+    // Bookings already agreed are deliberately left alone — the same person
+    // can still turn up for them.
+    const staleOffers = await db.requestOffer.findMany({
+      where: {
+        providerId: request.userId,
+        status: "PENDING",
+        request: { role: request.fromRole },
+      },
+      select: { id: true },
+    });
+    for (const offer of staleOffers) {
+      await withdrawOffer(offer.id, request.userId);
+    }
+
     await db.$transaction([
       // Same operation DELETE /api/users/roles/[role] already performs
       // for an unverified role — reachable here for a verified one only

@@ -4,9 +4,13 @@ import { getTranslations } from "next-intl/server";
 import { requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
 import { getRequestIp } from "@/lib/request-meta";
-import { getKycImageUrl, type KycImageKind } from "@/services/admin";
+import {
+  getKycImageUrl,
+  KycDocumentUnavailableError,
+  type KycImageKind,
+} from "@/services/admin";
 
-const VALID_KINDS: KycImageKind[] = ["front", "back", "selfie"];
+const VALID_KINDS: KycImageKind[] = ["front", "back", "selfie", "business"];
 
 export async function GET(
   request: Request,
@@ -47,6 +51,19 @@ export async function GET(
       return NextResponse.json(
         { data: null, error: "unauthorized", message: err.message },
         { status: err.status },
+      );
+    }
+
+    // Not a failure: a household's certificate that was never needed, or a
+    // document the 90-day purge has already removed. Was a 500.
+    if (err instanceof KycDocumentUnavailableError) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "not_found",
+          message: t("documentNotOnFile"),
+        },
+        { status: 404 },
       );
     }
 

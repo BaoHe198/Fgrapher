@@ -7,7 +7,9 @@ import { cn } from "@/lib/utils";
 
 interface SunArcSlot {
   start: string;
-  status: "available" | "booked";
+  // "soon" (inside the minimum-notice window) draws like a booked slot:
+  // either way it cannot be chosen.
+  status: "available" | "booked" | "soon";
   golden: boolean;
 }
 
@@ -128,7 +130,7 @@ export function SunArc({ sun, slots, selected, onSelect }: SunArcProps) {
         {slots.map((slot) => {
           const m = timeToMinutes(slot.start);
           const on = slot.start === selected;
-          const booked = slot.status === "booked";
+          const booked = slot.status !== "available";
           return (
             <button
               key={slot.start}

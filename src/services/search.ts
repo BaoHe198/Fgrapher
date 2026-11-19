@@ -11,6 +11,11 @@ import { DISCOVERABLE_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { formatAdministrativeLocation } from "@/lib/location";
 import { sanitizeSearchParams } from "@/lib/search/params";
+import {
+  ACTIVE_SERVICE_PRICES,
+  priceFilterClauses,
+  startingPrice,
+} from "@/lib/starting-price";
 import { providersAvailableForInterval } from "@/services/fmap";
 import {
   escapeLike,
@@ -126,6 +131,9 @@ const PROVIDER_INCLUDE = {
     orderBy: { order: "asc" as const },
     take: 5,
   },
+  // For the card's "from" price when the provider typed no price range —
+  // see lib/starting-price.ts.
+  services: ACTIVE_SERVICE_PRICES,
 };
 
 type ProviderProfile = Prisma.ProfileGetPayload<{
@@ -166,13 +174,10 @@ function groupProfilesByUser(
       avg: 0,
       count: 0,
     };
-    const priceMin = userProfiles.reduce<number | null>(
-      (min, p) =>
-        p.priceMin != null && (min === null || p.priceMin < min)
-          ? p.priceMin
-          : min,
-      null,
-    );
+    const priceMin = userProfiles.reduce<number | null>((min, p) => {
+      const from = startingPrice(p);
+      return from != null && (min === null || from < min) ? from : min;
+    }, null);
     const createdAt = userProfiles.reduce(
       (latest, p) => (p.createdAt > latest ? p.createdAt : latest),
       userProfiles[0].createdAt,
@@ -261,6 +266,7 @@ function buildBaseWhere(
           (SEARCHABLE_ROLES as Role[]).includes(role),
         )
       : undefined;
+  const priceClauses = priceFilterClauses(params.minPrice, params.maxPrice);
   return {
     isPublished: true,
     user: PUBLIC_USER_FILTER,
@@ -273,12 +279,7 @@ function buildBaseWhere(
     ...(params.categories && params.categories.length > 0
       ? { categories: { hasSome: params.categories } }
       : {}),
-    ...(params.minPrice !== undefined
-      ? { priceMax: { gte: params.minPrice } }
-      : {}),
-    ...(params.maxPrice !== undefined
-      ? { priceMin: { lte: params.maxPrice } }
-      : {}),
+    ...(priceClauses.length > 0 ? { AND: priceClauses } : {}),
     ...(params.heightMin !== undefined || params.heightMax !== undefined
       ? {
           height: {

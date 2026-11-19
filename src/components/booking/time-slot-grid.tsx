@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
 // and a slot someone else took while this customer was deciding is drawn
 // as an error, not silently removed.
 
-export type TimeSlotStatus = "available" | "booked" | "taken";
+// "soon": free, but closer than the minimum notice allows.
+export type TimeSlotStatus = "available" | "booked" | "taken" | "soon";
 
 export interface TimeSlot {
   /** "HH:mm", Vietnam time. */
@@ -107,11 +108,13 @@ export function TimeSlotGrid({
                   const note =
                     slot.status === "booked"
                       ? t("booked")
-                      : slot.status === "taken"
-                        ? t("taken")
-                        : slot.golden
-                          ? t("golden")
-                          : null;
+                      : slot.status === "soon"
+                        ? t("soon")
+                        : slot.status === "taken"
+                          ? t("taken")
+                          : slot.golden
+                            ? t("golden")
+                            : null;
                   return (
                     <button
                       key={slot.start}
@@ -132,7 +135,7 @@ export function TimeSlotGrid({
                                   ? "border-gold-400"
                                   : "border-border-subtle",
                               )
-                            : slot.status === "booked"
+                            : slot.status === "booked" || slot.status === "soon"
                               ? "cursor-not-allowed border-dashed border-border-default text-text-tertiary"
                               : "cursor-not-allowed border-dashed border-danger bg-danger-bg text-danger",
                       )}

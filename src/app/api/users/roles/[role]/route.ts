@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { PAID_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { purgeKycDocumentsNow } from "@/services/verification";
 
 // MVP-stage self-service undo — a role self-activated via POST
 // /api/users/roles (no real billing gate yet) can be self-removed too,
@@ -48,6 +49,14 @@ export async function DELETE(
         { status: 400 },
       );
     }
+
+    // The row is about to go, and with it the only reference to any
+    // identity documents submitted for this role (a pending or rejected
+    // submission). Delete the files first — see deleteKycFiles.
+    await purgeKycDocumentsNow(
+      { userId: session.user.id, role: role as Role },
+      "role_removed",
+    );
 
     await db.$transaction([
       db.profile.deleteMany({

@@ -35,11 +35,12 @@ import {
 import { formatDate } from "@/lib/format";
 import { resolvePartyName, type NamedParty } from "@/lib/party-name";
 import { normalizeZaloUrl } from "@/lib/zalo";
-import { isSlotBookable } from "@/services/availability";
+import { isSlotBookable, timeToMinutes } from "@/services/availability";
+import { movedWindow, vietnamInstant } from "@/lib/booking-window";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
-import { BOOKING_ERROR_KEYS } from "@/lib/errors/booking-messages";
+import { bookingErrorKey } from "@/lib/errors/booking-messages";
 
 // Translation helper for the shared email templates in @/lib/email —
 // namespace "libServices.email". Request-triggered functions (called from a
@@ -450,8 +451,14 @@ export class BookingActionError extends Error {
 /** The user-facing, translated text for a BookingActionError. */
 export async function bookingErrorMessage(err: BookingActionError) {
   const t = await getTranslations("apiMessages.bookingErrors");
-  const key = BOOKING_ERROR_KEYS[err.message];
-  return key ? t(key) : t("unknown");
+  const key = bookingErrorKey(err.message);
+  // The two limits a message may quote; harmless for keys that use neither.
+  return key
+    ? t(key, {
+        hours: MIN_NOTICE_HOURS,
+        max: MAX_PENDING_BOOKINGS_PER_USER,
+      })
+    : t("unknown");
 }
 
 export async function createBooking(
@@ -475,7 +482,10 @@ export async function createBooking(
   // daylight saving, so this is a fixed offset — see
   // scripts/backfill-provider-architecture.ts, which uses the same rule.
   const startAt = new Date(slotInstant - 7 * 3_600_000);
-  if (slotInstant < Date.now() + MIN_NOTICE_HOURS * 60 * 60 * 1000) {
+  // Measured from the real start. This compared `slotInstant`, the slot
+  // read as if it were UTC — seven hours later than it really is — so the
+  // "24 hours" was 17: at 9 pm a customer could still book 3 pm tomorrow.
+  if (startAt.getTime() < Date.now() + MIN_NOTICE_HOURS * 60 * 60 * 1000) {
     throw new BookingActionError(
       `Bookings need at least ${MIN_NOTICE_HOURS} hours notice`,
       400,
@@ -1098,6 +1108,19 @@ export async function proposeReschedule({
       400,
     );
   }
+  // Nothing checked the proposal itself: a date last week was stored and
+  // sent to the other party as a real offer, and accepting it moved the
+  // booking into the past. (No 24-hour rule here — two people rearranging
+  // an existing booking may agree on tomorrow morning.)
+  if (vietnamInstant(date, startTime) <= Date.now()) {
+    throw new BookingActionError("The proposed time has already passed", 400);
+  }
+  if (endTime && timeToMinutes(endTime) <= timeToMinutes(startTime)) {
+    throw new BookingActionError(
+      "The proposed end time must be after the start",
+      400,
+    );
+  }
 
   const updated = await db.booking.update({
     where: { id: bookingId },
@@ -1209,7 +1232,13 @@ export async function sendBookingReminders() {
       email: {
         subject: reminderEmailT("bookingReminder.subject"),
         html: bookingReminderEmailHtml(args(false)),
-        dedupe: [booking.id, "REMINDER"],
+        // The day is part of the event: a booking moved to another day is
+        // owed a reminder for that day too.
+        dedupe: [
+          booking.id,
+          "REMINDER",
+          booking.date.toISOString().slice(0, 10),
+        ],
       },
     });
     await notify({
@@ -1221,7 +1250,13 @@ export async function sendBookingReminders() {
       email: {
         subject: reminderEmailT("bookingReminder.subject"),
         html: bookingReminderEmailHtml(args(true)),
-        dedupe: [booking.id, "REMINDER"],
+        // The day is part of the event: a booking moved to another day is
+        // owed a reminder for that day too.
+        dedupe: [
+          booking.id,
+          "REMINDER",
+          booking.date.toISOString().slice(0, 10),
+        ],
       },
     });
 
@@ -1289,59 +1324,72 @@ export async function respondToReschedule({
   // Accepting a reschedule moves the slot, so the hold has to move with it —
   // otherwise the database would still be protecting the old window and
   // leaving the new one open to a second booking.
-  const movedStartAt = accept
-    ? new Date(
-        Date.parse(
-          `${booking.rescheduleProposedDate!.toISOString().slice(0, 10)}T${booking.rescheduleProposedStartTime!}:00.000Z`,
-        ) -
-          7 * 3_600_000,
-      )
+  // The proposal carries a start and, rarely, an end. With no end the
+  // session keeps the length it had: the booking's own start-to-end, which
+  // is right for a package and for a negotiated F Booking offer alike. This
+  // used to keep the OLD end time as it was, so a 09:00–11:00 booking moved
+  // to 14:00 read "14:00 – 11:00" on both parties' pages.
+  const moved = accept
+    ? movedWindow({
+        date: booking.rescheduleProposedDate!.toISOString().slice(0, 10),
+        startTime: booking.rescheduleProposedStartTime!,
+        endTime: booking.rescheduleProposedEndTime,
+        previousStart: booking.startTime,
+        previousEnd: booking.endTime,
+        fallbackMinutes: booking.service?.duration ?? 60,
+      })
     : null;
-  const movedEndAt =
-    accept && movedStartAt
-      ? new Date(
-          movedStartAt.getTime() + (booking.service?.duration ?? 60) * 60_000,
-        )
-      : null;
+  // Checked again at the moment of saying yes: a proposal can sit unanswered
+  // until its time has gone by.
+  if (moved && moved.startAt.getTime() <= Date.now()) {
+    throw new BookingActionError("The proposed time has already passed", 400);
+  }
 
-  const updated = await db.booking.update({
-    where: { id: bookingId },
-    data: accept
-      ? {
-          date: booking.rescheduleProposedDate!,
-          startTime: booking.rescheduleProposedStartTime!,
-          endTime: booking.rescheduleProposedEndTime ?? booking.endTime,
-          startAt: movedStartAt,
-          endAt: movedEndAt,
-          rescheduleProposedDate: null,
-          rescheduleProposedStartTime: null,
-          rescheduleProposedEndTime: null,
-          rescheduleProposedBy: null,
-        }
-      : {
-          rescheduleProposedDate: null,
-          rescheduleProposedStartTime: null,
-          rescheduleProposedEndTime: null,
-          rescheduleProposedBy: null,
-        },
-    include: BOOKING_INCLUDE,
-  });
-
-  if (accept && movedStartAt && movedEndAt) {
-    try {
-      await db.bookingAllocation.updateMany({
-        where: { bookingId },
-        data: { startAt: movedStartAt, endAt: movedEndAt },
+  const clearedProposal = {
+    rescheduleProposedDate: null,
+    rescheduleProposedStartTime: null,
+    rescheduleProposedEndTime: null,
+    rescheduleProposedBy: null,
+  };
+  let updated;
+  try {
+    // One transaction: the booking row and its hold move together or not at
+    // all. They were two separate writes, booking first — when the new
+    // window clashed, the hold stayed put, the caller got "just taken", and
+    // the booking had already been rewritten to the time it could not have.
+    updated = await db.$transaction(async (tx) => {
+      const row = await tx.booking.update({
+        where: { id: bookingId },
+        data: moved
+          ? {
+              date: booking.rescheduleProposedDate!,
+              startTime: booking.rescheduleProposedStartTime!,
+              endTime: moved.endTime,
+              startAt: moved.startAt,
+              endAt: moved.endAt,
+              // A day-before reminder already sent was for the old day.
+              reminderSentAt: null,
+              ...clearedProposal,
+            }
+          : clearedProposal,
+        include: BOOKING_INCLUDE,
       });
-    } catch (error) {
-      if (isOverlapViolation(error)) {
-        throw new BookingActionError(
-          "That new time was just taken — propose another",
-          409,
-        );
+      if (moved) {
+        await tx.bookingAllocation.updateMany({
+          where: { bookingId },
+          data: { startAt: moved.startAt, endAt: moved.endAt },
+        });
       }
-      throw error;
+      return row;
+    });
+  } catch (error) {
+    if (isOverlapViolation(error)) {
+      throw new BookingActionError(
+        "That new time was just taken — propose another",
+        409,
+      );
     }
+    throw error;
   }
 
   const proposer =
@@ -1380,9 +1428,14 @@ export async function respondToReschedule({
       html: accept
         ? bookingRescheduleAcceptedEmailHtml(rescheduleArgs)
         : bookingRescheduleDeclinedEmailHtml(rescheduleArgs),
+      // The answered proposal is part of the event: a booking can be
+      // rescheduled more than once, and the second answer was swallowed
+      // as a duplicate of the first.
       dedupe: [
         updated.id,
         accept ? "RESCHEDULE_ACCEPTED" : "RESCHEDULE_DECLINED",
+        booking.rescheduleProposedDate!.toISOString().slice(0, 10),
+        booking.rescheduleProposedStartTime!,
       ],
     },
   });
