@@ -123,6 +123,10 @@ export default function AdminRoleChangeRequestsPage() {
                   {t("userReason", { reason: row.reason })}
                 </p>
               ) : null}
+              {/* The reviewer should know what pressing approve does. */}
+              <p className="rounded-[var(--fg-radius-md)] bg-warning-bg p-3 text-body-sm text-warning">
+                {t("approveWarning", { role: roleT(row.fromRole) })}
+              </p>
 
               <Textarea
                 placeholder={t("rejectionNotePlaceholder")}

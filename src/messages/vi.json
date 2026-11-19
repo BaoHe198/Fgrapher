@@ -1146,7 +1146,8 @@
         "approve": "Duyệt",
         "reject": "Từ chối",
         "requestUpdated": "Đã cập nhật yêu cầu",
-        "actionFailed": "Thao tác không thành công, vui lòng thử lại"
+        "actionFailed": "Thao tác không thành công, vui lòng thử lại",
+        "approveWarning": "Duyệt sẽ xóa hẳn hồ sơ {role} của người này (album, ảnh, gói dịch vụ) và không khôi phục được."
       },
       "moderation": {
         "title": "Kiểm duyệt nội dung",
@@ -2846,7 +2847,8 @@
       "pendingRequestBadge": "Đang chờ duyệt đổi sang {role}",
       "changeRequestSubmitted": "Đã gửi yêu cầu đổi vai trò",
       "changeRequestFailed": "Không thể gửi yêu cầu, vui lòng thử lại",
-      "oneProviderRoleNote": "Mỗi tài khoản có một vai trò nhà cung cấp tại một thời điểm. Bạn có thể đổi sau."
+      "oneProviderRoleNote": "Mỗi tài khoản có một vai trò nhà cung cấp tại một thời điểm. Bạn có thể đổi sau.",
+      "requestRoleChangeWarning": "Khi yêu cầu được duyệt, hồ sơ {role} của bạn sẽ bị xóa cùng toàn bộ album, ảnh và gói dịch vụ trong đó, và không khôi phục được. Vai trò mới bắt đầu bằng hồ sơ trống và cần xác minh lại."
     },
     "nav": {
       "profile": "Hồ sơ",

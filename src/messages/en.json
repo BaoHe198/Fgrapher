@@ -1146,7 +1146,8 @@
         "approve": "Approve",
         "reject": "Reject",
         "requestUpdated": "Request updated",
-        "actionFailed": "That did not go through, please try again"
+        "actionFailed": "That did not go through, please try again",
+        "approveWarning": "Approving deletes this person's {role} profile for good (albums, photos, service packages)."
       },
       "moderation": {
         "title": "Content moderation",
@@ -2846,7 +2847,8 @@
       "pendingRequestBadge": "Pending review — switching to {role}",
       "changeRequestSubmitted": "Role change request submitted",
       "changeRequestFailed": "Couldn't submit the request, please try again",
-      "oneProviderRoleNote": "An account holds one provider role at a time. You can change it later."
+      "oneProviderRoleNote": "An account holds one provider role at a time. You can change it later.",
+      "requestRoleChangeWarning": "When this is approved, your {role} profile is deleted together with every album, photo and service package in it, and cannot be restored. The new role starts with an empty profile and needs verifying again."
     },
     "nav": {
       "profile": "Profile",

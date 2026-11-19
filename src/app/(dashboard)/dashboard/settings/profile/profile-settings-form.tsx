@@ -1002,18 +1002,24 @@ export function ProfileSettingsForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Input
-          label={tEditor("zaloUrlLabel")}
-          type="url"
-          value={values.zaloUrl}
-          onChange={(e) => set("zaloUrl", e.target.value)}
-          placeholder="https://zalo.me/..."
-        />
-        <p className="text-body-sm text-text-tertiary">
-          {tEditor("zaloUrlHelper")}
-        </p>
-      </div>
+      {/* The Zalo link is handed to a customer only once they have sent a
+          booking request (services/bookings.ts). A role that takes no
+          bookings — the costume shop, the camera shop — would fill this in
+          for nobody to ever see. */}
+      {PROVIDER_ROLES.includes(role) ? (
+        <div className="flex flex-col gap-1.5">
+          <Input
+            label={tEditor("zaloUrlLabel")}
+            type="url"
+            value={values.zaloUrl}
+            onChange={(e) => set("zaloUrl", e.target.value)}
+            placeholder="https://zalo.me/..."
+          />
+          <p className="text-body-sm text-text-tertiary">
+            {tEditor("zaloUrlHelper")}
+          </p>
+        </div>
+      ) : null}
 
       <div className="flex items-center gap-3 border-t border-border-subtle pt-4">
         <Button variant="accent" disabled={isSaving} onClick={onSave}>
