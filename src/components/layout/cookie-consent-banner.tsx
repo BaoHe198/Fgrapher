@@ -67,10 +67,15 @@ export function CookieConsentBanner({
   };
 
   return (
+    // Bottom-right from tablet up. On the left it sat on top of the sign-in
+    // form: at 1366x768 a first-time visitor found the password field and
+    // the Đăng nhập button under this card (19/11/2026). The right half of
+    // those pages is a photo, and elsewhere forms and their buttons start
+    // from the left.
     <section
       role="region"
       aria-label={t("regionLabel")}
-      className="fixed inset-x-3 bottom-3 z-50 flex flex-col gap-2 rounded-[var(--fg-radius-lg)] border border-border-subtle bg-bg-surface p-3.5 shadow-[var(--shadow-md)] sm:right-auto sm:left-4 sm:max-w-[440px] sm:gap-3 sm:p-5"
+      className="fixed inset-x-3 bottom-3 z-50 flex flex-col gap-2 rounded-[var(--fg-radius-lg)] border border-border-subtle bg-bg-surface p-3.5 shadow-[var(--shadow-md)] sm:right-4 sm:left-auto sm:max-w-[440px] sm:gap-3 sm:p-5"
     >
       <h2 className="text-body-md font-semibold! text-text-primary">
         {t("title")}
