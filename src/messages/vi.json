@@ -3527,6 +3527,18 @@
         "body": "Yêu cầu “{requestTitle}” ({requestCode}) chưa nhận được đề nghị nào sau 48 giờ. Cân nhắc nới ngân sách, bổ sung mô tả hoặc đặt lịch trực tiếp.",
         "cta": "Chỉnh sửa yêu cầu",
         "subject": "Yêu cầu của bạn chưa có đề nghị — Fgrapher"
+      },
+      "verificationApproved": {
+        "heading": "Danh tính của bạn đã được xác minh",
+        "bodyPublished": "Fgrapher đã xác minh danh tính cho vai trò {role}. Hồ sơ của bạn đang hiển thị trong tìm kiếm và khách đã có thể đặt lịch.",
+        "bodyPending": "Fgrapher đã xác minh danh tính cho vai trò {role}. Hồ sơ sẽ tự hiển thị trong tìm kiếm khi có đủ địa chỉ, danh mục và ít nhất một ảnh được duyệt.",
+        "cta": "Mở bảng điều khiển"
+      },
+      "verificationRejected": {
+        "heading": "Giấy tờ xác minh chưa được chấp nhận",
+        "body": "Giấy tờ bạn gửi cho vai trò {role} chưa được chấp nhận. Bạn có thể gửi lại bất cứ lúc nào.",
+        "bodyWithReason": "Giấy tờ bạn gửi cho vai trò {role} chưa được chấp nhận. Lý do: {reason}. Bạn có thể gửi lại bất cứ lúc nào.",
+        "cta": "Gửi lại giấy tờ"
       }
     },
     "notifications": {
@@ -3686,6 +3698,18 @@
       "stock": {
         "title": "Có hàng trở lại",
         "message": "{product} đã có hàng trở lại trên Chợ F."
+      },
+      "verification": {
+        "approved": {
+          "title": "Danh tính của bạn đã được xác minh",
+          "messagePublished": "Vai trò {role} đã được xác minh và hồ sơ của bạn đang hiển thị trong tìm kiếm.",
+          "messagePending": "Vai trò {role} đã được xác minh. Hồ sơ sẽ tự hiển thị trong tìm kiếm khi có đủ địa chỉ, danh mục và ít nhất một ảnh được duyệt."
+        },
+        "rejected": {
+          "title": "Giấy tờ xác minh chưa được chấp nhận",
+          "message": "Giấy tờ bạn gửi cho vai trò {role} chưa được chấp nhận. Bạn có thể gửi lại.",
+          "messageWithReason": "Giấy tờ bạn gửi cho vai trò {role} chưa được chấp nhận. Lý do: {reason}. Bạn có thể gửi lại."
+        }
       }
     }
   },

@@ -3527,6 +3527,18 @@
         "body": "Your request “{requestTitle}” ({requestCode}) hasn't received any offers after 48 hours. Consider widening the budget, adding detail, or booking directly.",
         "cta": "Edit request",
         "subject": "Your request has no offers yet — Fgrapher"
+      },
+      "verificationApproved": {
+        "heading": "Your identity has been verified",
+        "bodyPublished": "Fgrapher has verified your identity for the {role} role. Your profile is showing in search and customers can now book you.",
+        "bodyPending": "Fgrapher has verified your identity for the {role} role. Your profile will appear in search once it has an address, a category and at least one approved photo.",
+        "cta": "Open your dashboard"
+      },
+      "verificationRejected": {
+        "heading": "Your verification documents were not accepted",
+        "body": "The documents you sent for the {role} role were not accepted. You can send them again at any time.",
+        "bodyWithReason": "The documents you sent for the {role} role were not accepted. Reason: {reason}. You can send them again at any time.",
+        "cta": "Send documents again"
       }
     },
     "notifications": {
@@ -3686,6 +3698,18 @@
       "stock": {
         "title": "Back in stock",
         "message": "{product} is back in stock on Fmarket."
+      },
+      "verification": {
+        "approved": {
+          "title": "Your identity has been verified",
+          "messagePublished": "Your {role} role is verified and your profile is now showing in search.",
+          "messagePending": "Your {role} role is verified. Your profile will appear in search once it has an address, a category and at least one approved photo."
+        },
+        "rejected": {
+          "title": "Your verification documents were not accepted",
+          "message": "The documents you sent for the {role} role were not accepted. You can send them again.",
+          "messageWithReason": "The documents you sent for the {role} role were not accepted. Reason: {reason}. You can send them again."
+        }
       }
     }
   },

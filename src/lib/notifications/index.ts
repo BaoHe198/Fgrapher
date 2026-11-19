@@ -236,6 +236,20 @@ export const NOTIFICATION_POLICY: Record<
     email: "critical",
     emailScope: "role-change",
   },
+  // The answer to an identity review. Critical, not a preference: until it
+  // arrives a provider cannot go public, and a rejection needs acting on.
+  VERIFICATION_APPROVED: {
+    feature: "core",
+    inApp: true,
+    email: "critical",
+    emailScope: "verification",
+  },
+  VERIFICATION_REJECTED: {
+    feature: "core",
+    inApp: true,
+    email: "critical",
+    emailScope: "verification",
+  },
   // --- Social feed (out of MVP scope — dormant) ---------------------
   NEW_FOLLOWER: {
     feature: "social",

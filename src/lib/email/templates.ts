@@ -710,6 +710,59 @@ export function mediaApprovedEmailHtml({
   });
 }
 
+// The outcome of an identity review (services/admin.ts reviewVerification).
+// `published` picks the sentence: a profile that just went live, or one that
+// still needs a photo, a category or an address before it can.
+export function verificationApprovedEmailHtml({
+  t,
+  role,
+  published,
+  ctaUrl,
+}: {
+  t: EmailT;
+  role: string;
+  published: boolean;
+  ctaUrl: string;
+}) {
+  return bookingEmailShell({
+    t,
+    heading: t("verificationApproved.heading"),
+    body: t(
+      published
+        ? "verificationApproved.bodyPublished"
+        : "verificationApproved.bodyPending",
+      { role: strong(role) },
+    ),
+    ctaLabel: t("verificationApproved.cta"),
+    ctaUrl,
+  });
+}
+
+export function verificationRejectedEmailHtml({
+  t,
+  role,
+  reason,
+  ctaUrl,
+}: {
+  t: EmailT;
+  role: string;
+  reason?: string;
+  ctaUrl: string;
+}) {
+  return bookingEmailShell({
+    t,
+    heading: t("verificationRejected.heading"),
+    body: reason
+      ? t("verificationRejected.bodyWithReason", {
+          role: strong(role),
+          reason: strong(reason),
+        })
+      : t("verificationRejected.body", { role: strong(role) }),
+    ctaLabel: t("verificationRejected.cta"),
+    ctaUrl,
+  });
+}
+
 export function mediaRejectedEmailHtml({
   t,
   reason,
