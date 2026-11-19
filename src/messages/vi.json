@@ -3202,7 +3202,7 @@
         "sizeLabel": "Size",
         "colorLabel": "Màu",
         "photoLabel": "Ảnh",
-        "photoNone": "Chưa gắn ảnh",
+        "photoNone": "Không ảnh",
         "photoNumbered": "Ảnh số {index}",
         "photoHelper": "Chọn ảnh trang phục đã tải lên. Ảnh mới phải qua kiểm duyệt trước khi hiện công khai.",
         "descriptionLabel": "Mô tả",
@@ -3211,8 +3211,9 @@
         "save": "Lưu",
         "saveFailed": "Không lưu được, vui lòng thử lại",
         "editAria": "Sửa {name}",
-        "deleteAria": "Xoá {name}",
-        "missingHint": "Nhập tên bộ đồ và giá thuê mỗi ngày để lưu."
+        "deleteAria": "Xóa {name}",
+        "missingHint": "Nhập tên bộ đồ và giá thuê mỗi ngày để lưu.",
+        "photoEmpty": "Chưa có ảnh nào. Đóng hộp này, bấm “Tải ảnh trang phục” trước rồi quay lại thêm bộ đồ."
       },
       "policy": {
         "title": "Kinh nghiệm & chính sách",

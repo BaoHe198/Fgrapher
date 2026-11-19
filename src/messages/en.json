@@ -3202,7 +3202,7 @@
         "sizeLabel": "Size",
         "colorLabel": "Colour",
         "photoLabel": "Photo",
-        "photoNone": "No photo yet",
+        "photoNone": "No photo",
         "photoNumbered": "Photo {index}",
         "photoHelper": "Pick an uploaded outfit photo. A new photo must clear moderation before it appears publicly.",
         "descriptionLabel": "Description",
@@ -3212,7 +3212,8 @@
         "saveFailed": "Could not save, please try again",
         "editAria": "Edit {name}",
         "deleteAria": "Delete {name}",
-        "missingHint": "Enter the outfit name and daily price to save."
+        "missingHint": "Enter the outfit name and daily price to save.",
+        "photoEmpty": "No photos yet. Close this, press “Upload outfit photos” first, then add the outfit."
       },
       "policy": {
         "title": "Experience & policies",

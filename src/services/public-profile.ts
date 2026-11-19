@@ -3,7 +3,12 @@ import { getTranslations } from "next-intl/server";
 
 import { isSubscriptionUsable } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { PAID_ROLES, PROVIDER_ROLES, SHOP_ROLES } from "@/lib/constants";
+import {
+  PAID_ROLES,
+  PROVIDER_ROLES,
+  SHOP_ROLES,
+  STOREFRONT_ROLES,
+} from "@/lib/constants";
 import { omitPrivateProfileFields } from "@/lib/privacy/profile-privacy";
 import {
   productCategoriesForRole,
@@ -70,8 +75,11 @@ export async function setProfilePublished(
   }
 
   if (isPublished) {
-    const isShop = SHOP_ROLES.includes(role);
-    const approvedMedia = isShop
+    // A storefront is judged on its product photos; everyone else —
+    // including the costume shop, whose outfits are profile photos — on
+    // approved profile media.
+    const isStorefront = STOREFRONT_ROLES.includes(role);
+    const approvedMedia = isStorefront
       ? await db.productImage.findFirst({
           where: {
             moderationStatus: "APPROVED",
@@ -87,7 +95,11 @@ export async function setProfilePublished(
           select: { id: true },
         })
       : await db.profileMedia.findFirst({
-          where: { profileId: profile.id, moderationStatus: "APPROVED" },
+          where: {
+            profileId: profile.id,
+            moderationStatus: "APPROVED",
+            deletedAt: null,
+          },
           select: { id: true },
         });
     if (!approvedMedia) {

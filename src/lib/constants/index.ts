@@ -159,6 +159,18 @@ export const SELLER_ROLES: Role[] = [
 // Roles that present themselves as a business rather than a person.
 export const SHOP_ROLES: Role[] = ["CAMERA_SHOP", "COSTUME_SHOP"];
 
+/**
+ * Shops whose public face is their Chợ F listings, so what must be approved
+ * before the profile goes public is a product photo. Only the camera shop:
+ * a costume shop is a shop too, but it may not list on Chợ F (owner,
+ * 22/09/2026) — its outfit photos are ProfileMedia, like a portfolio.
+ * Treating it as a storefront meant a verified costume shop with approved
+ * photos could never be published (found 19/11/2026).
+ */
+export const STOREFRONT_ROLES: Role[] = SHOP_ROLES.filter((role) =>
+  SELLER_ROLES.includes(role),
+);
+
 export const ROLE_LABELS: Record<Role, string> = {
   PHOTOGRAPHER: "Photographer",
   VIDEOGRAPHER: "Videographer",
