@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
 import { auth } from "@/lib/auth";
 import { formatDate } from "@/lib/format";
+import { offerDisplayStatus } from "@/lib/request-offer-status";
 import { formatCurrency } from "@/lib/utils";
 import { listProviderOffers } from "@/services/request-offers";
 
@@ -21,6 +22,8 @@ const STATUS_VARIANT: Record<
   ACCEPTED: "success",
   DECLINED: "destructive",
   WITHDRAWN: "neutral",
+  REQUEST_CANCELLED: "neutral",
+  REQUEST_EXPIRED: "neutral",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -50,33 +53,39 @@ export default async function MyOffersPage() {
         />
       ) : (
         <div className="flex flex-col gap-3">
-          {offers.map((offer) => (
-            <Link
-              key={offer.id}
-              href={`/dashboard/opportunities/${offer.request.id}?role=${offer.request.role}`}
-            >
-              <Card interactive className="flex flex-col gap-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="truncate text-body-md font-semibold! text-text-primary">
-                      {offer.request.title}
-                    </p>
-                    <p className="text-body-sm text-text-tertiary">
-                      {offer.request.code} · {offer.request.province.name}
-                    </p>
+          {offers.map((offer) => {
+            const shown = offerDisplayStatus(
+              offer.status,
+              offer.request.status,
+            );
+            return (
+              <Link
+                key={offer.id}
+                href={`/dashboard/opportunities/${offer.request.id}?role=${offer.request.role}`}
+              >
+                <Card interactive className="flex flex-col gap-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-body-md font-semibold! text-text-primary">
+                        {offer.request.title}
+                      </p>
+                      <p className="text-body-sm text-text-tertiary">
+                        {offer.request.code} · {offer.request.province.name}
+                      </p>
+                    </div>
+                    <Badge variant={STATUS_VARIANT[shown]}>
+                      {t(`status.${shown}`)}
+                    </Badge>
                   </div>
-                  <Badge variant={STATUS_VARIANT[offer.status]}>
-                    {t(`status.${offer.status}`)}
-                  </Badge>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-body-sm text-text-secondary">
-                  <span>{formatCurrency(offer.proposedPrice)}</span>
-                  <span>·</span>
-                  <span>{formatDate(offer.createdAt)}</span>
-                </div>
-              </Card>
-            </Link>
-          ))}
+                  <div className="flex flex-wrap items-center gap-3 text-body-sm text-text-secondary">
+                    <span>{formatCurrency(offer.proposedPrice)}</span>
+                    <span>·</span>
+                    <span>{formatDate(offer.createdAt)}</span>
+                  </div>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

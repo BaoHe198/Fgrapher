@@ -40,8 +40,12 @@ function defaultExpiryDate() {
   return d.toISOString().slice(0, 10);
 }
 
-type UserDetail = User & {
-  roles: (UserRole & { subscription: Subscription | null })[];
+// As served by /api/admin/users/[id]: no password hash, no identity
+// documents (see ADMIN_USER_OMIT / ADMIN_ROLE_OMIT in services/admin.ts).
+type UserDetail = Omit<User, "passwordHash"> & {
+  roles: (Pick<UserRole, "id" | "role" | "active"> & {
+    subscription: Subscription | null;
+  })[];
   bookingsAsCustomer: { id: string; status: BookingStatus }[];
   bookingsAsProvider: { id: string; status: BookingStatus }[];
 };

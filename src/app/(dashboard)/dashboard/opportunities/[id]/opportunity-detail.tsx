@@ -1,6 +1,11 @@
 "use client";
 
-import type { ProfileCategory, Role } from "@prisma/client";
+import type {
+  ProfileCategory,
+  RequestOfferStatus,
+  Role,
+  ServiceRequestStatus,
+} from "@prisma/client";
 import {
   ArrowLeft,
   CalendarDays,
@@ -22,11 +27,12 @@ import { DateField } from "@/components/ui/date-field";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/format";
+import { offerDisplayStatus } from "@/lib/request-offer-status";
 import { formatBudgetRange } from "@/lib/utils";
 
 interface OfferView {
   id: string;
-  status: string;
+  status: RequestOfferStatus;
   message: string | null;
   proposedPrice: number;
   proposedDate: string | null;
@@ -49,6 +55,7 @@ interface RequestView {
   budgetMax: number | null;
   references: { mediaUrl: string }[];
   customerName: string;
+  status: ServiceRequestStatus;
 }
 
 export function OpportunityDetail({
@@ -79,8 +86,22 @@ export function OpportunityDetail({
 
   // A withdrawn offer can be sent again (the server reopens the same row);
   // only an accepted or declined one is final.
+  // …and nothing can be sent to a request that has closed. The form used
+  // to stay open on a cancelled or expired request for anyone whose offer
+  // was withdrawn, and only the server said no.
+  const isOpen = request.status === "OPEN" || request.status === "HAS_OFFERS";
   const isPending = offer?.status === "PENDING";
-  const isEditable = !offer || isPending || offer.status === "WITHDRAWN";
+  const isEditable =
+    isOpen && (!offer || isPending || offer.status === "WITHDRAWN");
+  const shownStatus = offer
+    ? offerDisplayStatus(offer.status, request.status)
+    : null;
+  const closedNote =
+    request.status === "CANCELLED" ||
+    request.status === "EXPIRED" ||
+    request.status === "FULFILLED"
+      ? t(`closed.${request.status}`)
+      : null;
 
   const submitOffer = async () => {
     setError(null);
@@ -221,12 +242,24 @@ export function OpportunityDetail({
           {offer ? t("yourOfferTitle") : t("sendOfferTitle")}
         </p>
 
-        {offer && offer.status !== "PENDING" ? (
+        {closedNote && offer?.status !== "ACCEPTED" ? (
+          <p className="rounded-[var(--fg-radius-md)] bg-bg-sunken p-3 text-body-sm text-text-secondary">
+            {closedNote}
+          </p>
+        ) : null}
+
+        {offer && shownStatus && shownStatus !== "PENDING" ? (
           <Badge
-            variant={offer.status === "ACCEPTED" ? "success" : "destructive"}
+            variant={
+              shownStatus === "ACCEPTED"
+                ? "success"
+                : shownStatus === "DECLINED"
+                  ? "destructive"
+                  : "neutral"
+            }
             className="w-fit"
           >
-            {t(`offerStatus.${offer.status}`)}
+            {t(`offerStatus.${shownStatus}`)}
           </Badge>
         ) : null}
 

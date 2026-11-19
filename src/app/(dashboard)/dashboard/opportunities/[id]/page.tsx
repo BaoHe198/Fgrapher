@@ -69,6 +69,7 @@ export default async function OpportunityDetailPage({
         budgetMax: request.budgetMax,
         references: request.references,
         customerName: resolvePartyName(request.customer, ""),
+        status: request.status,
       }}
       myOffer={
         myOffer

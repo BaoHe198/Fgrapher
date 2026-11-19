@@ -389,6 +389,18 @@ export async function listOpportunitiesForProvider(userId: string, role: Role) {
       ...(profile.servesNationwide ? {} : { provinceId: { in: provinceIds } }),
     },
     orderBy: { createdAt: "desc" },
+    // The exact address belongs to the customer until they accept an offer
+    // (the detail page says so in words, and getOpportunityDetail leaves it
+    // out). This list returned the whole row, so /api/opportunities handed
+    // every matching provider the street address anyway. customerId and the
+    // moderation fields are nobody's business here either.
+    omit: {
+      detailedAddress: true,
+      customerId: true,
+      moderationReason: true,
+      moderatedAt: true,
+      noOffersNudgedAt: true,
+    },
     include: {
       province: { select: { name: true } },
       ward: { select: { name: true } },

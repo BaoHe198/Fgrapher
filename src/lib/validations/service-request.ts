@@ -1,6 +1,7 @@
 import { ProfileCategory } from "@prisma/client";
 import { z } from "zod";
 
+import { vietnamDateKey } from "@/lib/vietnam/date";
 import { locationTypeSchema } from "@/lib/validations/booking";
 import { MAX_VND_AMOUNT } from "@/lib/validations/money";
 import {
@@ -87,6 +88,32 @@ function dateRangeOrderValid(data: {
   return data.dateRangeStart <= data.dateRangeEnd;
 }
 
+/**
+ * What is wrong with the "when" of a request that is about to go to review:
+ * no date at all, or a date that has already passed. A draft is exempt (it
+ * may be saved half-filled, and one saved last week may by now hold a past
+ * date); the rule bites when the request is posted — on create and on
+ * publishing a draft, which has no request body and so never met the schema.
+ * Both are "YYYY-MM-DD", which compares correctly as text.
+ */
+export function requestDateProblem(
+  data: {
+    shootDate?: string | null;
+    isDateFlexible?: boolean;
+    dateRangeEnd?: string | null;
+  },
+  today = vietnamDateKey(),
+): "missing" | "past" | null {
+  if (!data.isDateFlexible && !data.shootDate) return "missing";
+  // A flexible request is about its window when it has one; the exact date
+  // is then only the middle of it ("± 3 ngày") and may already be behind.
+  const lastUsableDay = data.isDateFlexible
+    ? (data.dateRangeEnd ?? data.shootDate)
+    : data.shootDate;
+  if (lastUsableDay && lastUsableDay < today) return "past";
+  return null;
+}
+
 function budgetOrderIssue() {
   return {
     message: "Ngân sách tối thiểu không được lớn hơn ngân sách tối đa",
@@ -102,13 +129,16 @@ function dateRangeOrderIssue() {
 }
 
 export const createServiceRequestSchema = serviceRequestFields
-  .refine(
-    (data) => data.isDraft || data.isDateFlexible || Boolean(data.shootDate),
-    {
-      message: "Choose a shoot date, or mark the date as flexible",
-      path: ["shootDate"],
-    },
-  )
+  .refine((data) => data.isDraft || requestDateProblem(data) !== "missing", {
+    message: "Hãy chọn ngày chụp, hoặc đánh dấu ngày linh hoạt",
+    path: ["shootDate"],
+  })
+  // The wizard's date field has min=today, but that is only the browser: a
+  // request for last week went straight to the review queue.
+  .refine((data) => data.isDraft || requestDateProblem(data) !== "past", {
+    message: "Ngày chụp đã qua — hãy chọn một ngày từ hôm nay trở đi",
+    path: ["shootDate"],
+  })
   .refine(budgetOrderValid, budgetOrderIssue())
   .refine(dateRangeOrderValid, dateRangeOrderIssue());
 

@@ -1,6 +1,11 @@
 "use client";
 
-import type { ProfileCategory, RequestOfferStatus, Role } from "@prisma/client";
+import type {
+  ProfileCategory,
+  RequestOfferStatus,
+  Role,
+  ServiceRequestStatus,
+} from "@prisma/client";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -34,6 +39,10 @@ import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/format";
 import { buildMediaVariants } from "@/lib/media/variants";
 import {
+  offerDisplayStatus,
+  type OfferDisplayStatus,
+} from "@/lib/request-offer-status";
+import {
   avatarFallbackColor,
   cn,
   formatBudgetRange,
@@ -66,7 +75,7 @@ interface RequestView {
   description: string | null;
   role: Role;
   categories: ProfileCategory[];
-  status: string;
+  status: ServiceRequestStatus;
   shootDate: string | null;
   isDateFlexible: boolean;
   dateRangeStart: string | null;
@@ -83,13 +92,15 @@ interface RequestView {
 }
 
 const OFFER_STATUS_VARIANT: Record<
-  RequestOfferStatus,
+  OfferDisplayStatus,
   "warning" | "success" | "neutral" | "destructive"
 > = {
   PENDING: "warning",
   ACCEPTED: "success",
   DECLINED: "destructive",
   WITHDRAWN: "neutral",
+  REQUEST_CANCELLED: "neutral",
+  REQUEST_EXPIRED: "neutral",
 };
 
 const MAX_COMPARE = 3;
@@ -381,10 +392,18 @@ export function RequestDetail({
                             </span>
                           </div>
                           {offer.status !== "PENDING" ? (
-                            <Badge variant={OFFER_STATUS_VARIANT[offer.status]}>
+                            <Badge
+                              variant={
+                                OFFER_STATUS_VARIANT[
+                                  offerDisplayStatus(offer.status, status)
+                                ]
+                              }
+                            >
                               {chosen
                                 ? t("chosen")
-                                : t(`offerStatus.${offer.status}`)}
+                                : t(
+                                    `offerStatus.${offerDisplayStatus(offer.status, status)}`,
+                                  )}
                             </Badge>
                           ) : null}
                         </div>
@@ -542,13 +561,15 @@ export function RequestDetail({
             />
           ) : null}
           <div className="flex flex-wrap gap-2">
-            {expired || status === "CANCELLED" ? (
+            {/* A rejected request had no way forward at all: the reason was
+                shown, and the only link on the page led back to the list. */}
+            {expired || status === "CANCELLED" || status === "REJECTED" ? (
               <Button
                 variant="accent"
                 nativeButton={false}
                 render={<Link href={`/requests/new?copy=${request.id}`} />}
               >
-                {t("repost")}
+                {status === "REJECTED" ? t("editAndRepost") : t("repost")}
               </Button>
             ) : null}
             {canManage ? (

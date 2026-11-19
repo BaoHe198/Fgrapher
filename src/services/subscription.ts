@@ -15,6 +15,7 @@ import { db } from "@/lib/db";
 import { intervalForPriceId, ROLE_PLANS } from "@/lib/constants/plans";
 import { PAID_ROLES } from "@/lib/constants";
 import { notifyCritical } from "@/services/notification";
+import { tryAutoPublish } from "@/services/public-profile";
 import { stripe } from "@/lib/payments/stripe";
 
 const GRACE_PERIOD_DAYS = 7;
@@ -387,7 +388,7 @@ export async function assignManualPlan({
     update: { active: true },
   });
 
-  return db.subscription.upsert({
+  const subscription = await db.subscription.upsert({
     where: { userRoleId: userRole.id },
     create: {
       userRoleId: userRole.id,
@@ -404,6 +405,17 @@ export async function assignManualPlan({
       cancelAtPeriodEnd: false,
     },
   });
+
+  // A plan that ran out took the profile out of search with it (the expiry
+  // cron and handleSubscriptionDeleted both unpublish). Nothing put it back:
+  // a provider who reactivated the role, or was given a new plan by an
+  // admin, saw "Đang hoạt động" everywhere and stayed invisible until they
+  // happened to save their profile again. Publishing still goes through
+  // every gate (verified, approved photo, category, address), so for a
+  // brand-new role this is a no-op.
+  await tryAutoPublish(userId, role);
+
+  return subscription;
 }
 
 // Called from /api/auth/register when BILLING_ENABLED=false — every new

@@ -10,6 +10,9 @@ interface NotificationLike {
 const CUSTOMER_REQUEST_TYPES = new Set<NotificationType>([
   "REQUEST_NEW_OFFER",
   "REQUEST_NO_OFFERS_48H",
+  "REQUEST_APPROVED",
+  "REQUEST_REJECTED",
+  "REQUEST_EXPIRED",
 ]);
 // …and these to a provider, about a request they could answer or did.
 const PROVIDER_REQUEST_TYPES = new Set<NotificationType>([
