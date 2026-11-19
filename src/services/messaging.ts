@@ -1,5 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
+// MESSAGES_PAGE_SIZE is shared with the chat panel, which reads a full page
+// as the sign that older messages exist.
+import { MESSAGES_PAGE_SIZE } from "@/hooks/polling-policy";
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
 import {
@@ -11,7 +14,6 @@ import { messagePreview } from "@/lib/notifications";
 import { notify } from "@/services/notification";
 
 const PAGE_SIZE = 20;
-const MESSAGES_PAGE_SIZE = 30;
 
 const PARTY_SELECT = {
   id: true,

@@ -5535,7 +5535,9 @@
       "blockFailed": "Không chặn được. Vui lòng thử lại.",
       "unblockFailed": "Không bỏ chặn được. Vui lòng thử lại.",
       "blockedNotice": "Bạn đã chặn người này. Bỏ chặn để tiếp tục nhắn tin.",
-      "sendFailed": "Tin nhắn chưa gửi được. Vui lòng thử lại."
+      "sendFailed": "Tin nhắn chưa gửi được. Vui lòng thử lại.",
+      "loadOlder": "Xem tin nhắn cũ hơn",
+      "loadOlderFailed": "Không tải được tin nhắn cũ, vui lòng thử lại."
     },
     "conversationList": {
       "title": "Tin nhắn",

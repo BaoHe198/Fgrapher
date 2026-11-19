@@ -5535,7 +5535,9 @@
       "blockFailed": "Could not block. Please try again.",
       "unblockFailed": "Could not unblock. Please try again.",
       "blockedNotice": "You have blocked this person. Unblock to keep messaging.",
-      "sendFailed": "Your message was not sent. Please try again."
+      "sendFailed": "Your message was not sent. Please try again.",
+      "loadOlder": "Show earlier messages",
+      "loadOlderFailed": "Could not load earlier messages. Please try again."
     },
     "conversationList": {
       "title": "Messages",

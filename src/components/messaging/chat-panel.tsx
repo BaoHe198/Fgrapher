@@ -15,9 +15,20 @@ import {
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { startTransition, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
-import { isFreshResponse, shouldMarkRead } from "@/hooks/polling-policy";
+import {
+  isFreshResponse,
+  MESSAGES_PAGE_SIZE,
+  mergeMessages,
+  shouldMarkRead,
+} from "@/hooks/polling-policy";
 import { usePolling } from "@/hooks/use-polling";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -184,7 +195,24 @@ export function ChatPanel({
   const [blockBusy, setBlockBusy] = useState(false);
   // Why the last message did not go out (e.g. the other person blocked me).
   const [sendError, setSendError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  // Older pages: whether there are any, and whether one is being fetched.
+  const [hasOlder, setHasOlder] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  // Scrolling is decided where the data changes and carried out after the
+  // list has rendered (the layout effect below). It used to be a
+  // requestAnimationFrame right after setMessages — but that update runs in
+  // a transition, so the frame usually came first, found the spinner, and
+  // scrolled nothing: every conversation opened at its OLDEST message.
+  const pendingBottomRef = useRef(false);
+  // scrollHeight before older messages were added on top, so the view can
+  // be put back on the message the reader was looking at.
+  const anchorHeightRef = useRef<number | null>(null);
+  // Is the reader at (or near) the newest message? Only then does a new
+  // message, or a late-loading photo, pull the view down with it.
+  const nearBottomRef = useRef(true);
+  const newestIdRef = useRef<string | null>(null);
+  const olderKnownRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // A ref, not just the `sending` state, because two calls to onSend() in
@@ -209,16 +237,26 @@ export function ChatPanel({
     if (!isFreshResponse(seq, latestSeqRef.current)) return;
 
     const next: ChatMessage[] = body.data ?? [];
-    startTransition(() => {
-      setMessages(next);
-      setIsLoading(false);
-    });
+    if (!olderKnownRef.current) {
+      olderKnownRef.current = true;
+      // A full first page is the only sign there is that more lie behind it.
+      setHasOlder(next.length >= MESSAGES_PAGE_SIZE);
+    }
+    const newestId = next.at(-1)?.id ?? null;
+    const arrived = newestId !== null && newestId !== newestIdRef.current;
+    newestIdRef.current = newestId;
     if (scrollToBottom ?? scrollOnNextLoadRef.current) {
       scrollOnNextLoadRef.current = false;
-      requestAnimationFrame(() =>
-        bottomRef.current?.scrollIntoView({ block: "end" }),
-      );
+      pendingBottomRef.current = true;
+    } else if (arrived && nearBottomRef.current) {
+      // Someone reading the latest messages sees the next one arrive;
+      // someone reading back through the thread is left where they are.
+      pendingBottomRef.current = true;
     }
+    startTransition(() => {
+      setMessages((prev) => mergeMessages(prev, next));
+      setIsLoading(false);
+    });
 
     // Only when the other side has actually sent something unread. This used
     // to run after every single load — a two-row write every 2s for as long
@@ -226,6 +264,45 @@ export function ChatPanel({
     if (shouldMarkRead(next, currentUserId)) {
       fetch(`/api/conversations/${conversationId}/read`, { method: "PATCH" });
     }
+  };
+
+  const scrollToNewest = () => {
+    const list = listRef.current;
+    if (list) list.scrollTop = list.scrollHeight;
+  };
+
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list || isLoading) return;
+    if (anchorHeightRef.current !== null) {
+      list.scrollTop += list.scrollHeight - anchorHeightRef.current;
+      anchorHeightRef.current = null;
+      return;
+    }
+    if (pendingBottomRef.current) {
+      pendingBottomRef.current = false;
+      list.scrollTop = list.scrollHeight;
+      nearBottomRef.current = true;
+    }
+  }, [messages, isLoading]);
+
+  const loadOlder = async () => {
+    const oldest = messages[0];
+    if (!oldest || loadingOlder) return;
+    setLoadingOlder(true);
+    const res = await fetch(
+      `/api/conversations/${conversationId}/messages?cursor=${encodeURIComponent(oldest.id)}`,
+    ).catch(() => null);
+    const body = res?.ok ? await res.json().catch(() => null) : null;
+    setLoadingOlder(false);
+    if (!body) {
+      toast.add({ title: t("loadOlderFailed"), type: "error" });
+      return;
+    }
+    const page: ChatMessage[] = body.data ?? [];
+    anchorHeightRef.current = listRef.current?.scrollHeight ?? null;
+    setHasOlder(page.length >= MESSAGES_PAGE_SIZE);
+    setMessages((prev) => mergeMessages(prev, page));
   };
 
   useEffect(() => {
@@ -332,10 +409,9 @@ export function ChatPanel({
         // persisted row, so there's nothing left to fetch. The next poll
         // reconciles it against the server's list like any other message.
         if (body.data) {
-          setMessages((prev) => [...prev, body.data]);
-          requestAnimationFrame(() =>
-            bottomRef.current?.scrollIntoView({ block: "end" }),
-          );
+          pendingBottomRef.current = true;
+          newestIdRef.current = body.data.id;
+          setMessages((prev) => mergeMessages(prev, [body.data]));
         }
       }
     } catch {
@@ -446,7 +522,27 @@ export function ChatPanel({
           won't shrink below its content, so a full thread pushes the
           composer past the container edge (clipped by overflow-hidden on
           the page grid) instead of scrolling here. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-5">
+      <div
+        ref={listRef}
+        onScroll={(e) => {
+          const list = e.currentTarget;
+          nearBottomRef.current =
+            list.scrollHeight - list.scrollTop - list.clientHeight < 120;
+        }}
+        className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-5"
+      >
+        {!isLoading && hasOlder && messages.length > 0 ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="self-center"
+            disabled={loadingOlder}
+            onClick={loadOlder}
+          >
+            {loadingOlder ? <Loader2 className="size-4 animate-spin" /> : null}
+            {t("loadOlder")}
+          </Button>
+        ) : null}
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center">
             <Loader2 className="size-6 animate-spin text-text-tertiary" />
@@ -523,6 +619,11 @@ export function ChatPanel({
                         alt=""
                         width={280}
                         height={280}
+                        // A photo takes its height when it arrives, after
+                        // the scroll to the newest message was done.
+                        onLoad={() => {
+                          if (nearBottomRef.current) scrollToNewest();
+                        }}
                         className="max-w-[280px] rounded-[16px] object-cover"
                       />
                     </button>
@@ -556,7 +657,6 @@ export function ChatPanel({
             );
           })
         )}
-        <div ref={bottomRef} />
       </div>
 
       {sendError && !blockedByMe ? (

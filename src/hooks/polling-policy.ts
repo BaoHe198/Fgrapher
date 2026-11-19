@@ -57,6 +57,40 @@ export function isFreshResponse(seq: number, latestSeq: number): boolean {
   return seq >= latestSeq;
 }
 
+export interface OrderedMessage {
+  id: string;
+  createdAt: string | Date;
+}
+
+/** How many messages one request for a conversation returns. */
+export const MESSAGES_PAGE_SIZE = 30;
+
+/**
+ * What the chat shows after another batch arrives: everything already on
+ * screen plus the batch, each message once, oldest first.
+ *
+ * The panel used to replace its list with every poll's answer, which is only
+ * ever the newest page. That was fine while the newest page was all it could
+ * show — and it was: a conversation's thirty-first message back was simply
+ * unreachable. Now that older pages can be loaded, a poll must not throw
+ * them away, and a message that slides out of the newest page as replies
+ * come in must stay where it is. `incoming` wins on a shared id, so a
+ * message's read receipt still updates.
+ */
+export function mergeMessages<T extends OrderedMessage>(
+  known: readonly T[],
+  incoming: readonly T[],
+): T[] {
+  const byId = new Map<string, T>();
+  for (const message of known) byId.set(message.id, message);
+  for (const message of incoming) byId.set(message.id, message);
+  return [...byId.values()].sort((a, b) => {
+    const diff =
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    return diff !== 0 ? diff : a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+}
+
 export interface ReadStateMessage {
   senderId: string;
   readAt: string | Date | null;

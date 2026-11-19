@@ -7,7 +7,9 @@ export const startConversationSchema = z.object({
 export const sendMessageSchema = z
   .object({
     conversationId: z.string().min(1),
-    content: z.string().min(1).max(2000),
+    // Trimmed first: three spaces passed min(1) and arrived as an empty
+    // bubble and a notification reading "An: ".
+    content: z.string().trim().min(1).max(2000),
     // booking_link is reserved for the trusted booking service. Accepting it
     // from the public messages API would let a participant attach an
     // arbitrary booking ID and probe that booking through the chat response.
