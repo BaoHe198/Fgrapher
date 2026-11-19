@@ -1,3 +1,4 @@
+import { isReservedUsername } from "@/lib/account/username";
 import { z } from "zod";
 
 import { PAID_ROLE_VALUES } from "@/lib/validations/auth";
@@ -82,6 +83,7 @@ export const updateMeSchema = z.object({
     .min(3, "Username must be at least 3 characters")
     .max(30)
     .regex(/^[a-z0-9_]+$/, "Lowercase letters, numbers, and underscores only")
+    .refine((value) => !isReservedUsername(value), "That username is reserved")
     .optional(),
   // A display name, not a paragraph: 5,000 characters used to be accepted.
   name: z.string().trim().min(2).max(100).optional(),
@@ -91,7 +93,8 @@ export const updateMeSchema = z.object({
   // so a user can explicitly clear it; existence is checked server-side in
   // the route, not here, since Zod has no DB access.
   wardId: z.string().min(1).nullable().optional(),
-  email: z.string().email().optional(),
+  // Stored in lower case — see services/user-lookup.ts.
+  email: z.string().trim().toLowerCase().email().optional(),
   // Only required when `email` is actually changing from the account's
   // current value — enforced in the route handler (needs an async
   // bcrypt.compare against the DB, which a Zod refine can't cleanly do
@@ -145,6 +148,7 @@ export function getUpdateMeSchema(t: (key: string) => string) {
       .min(3, t("usernameTooShort"))
       .max(30)
       .regex(/^[a-z0-9_]+$/, t("usernameInvalidChars"))
+      .refine((value) => !isReservedUsername(value), t("usernameReserved"))
       .optional(),
     // A display name, not a paragraph: 5,000 characters used to be accepted.
     name: z.string().trim().min(2).max(100).optional(),
@@ -152,7 +156,7 @@ export function getUpdateMeSchema(t: (key: string) => string) {
     location: z.string().max(120).optional(),
     // See updateMeSchema: existence is checked in the route.
     wardId: z.string().min(1).nullable().optional(),
-    email: z.string().email().optional(),
+    email: z.string().trim().toLowerCase().email().optional(),
     currentPassword: z.string().min(1, t("currentPasswordRequired")).optional(),
   });
 }

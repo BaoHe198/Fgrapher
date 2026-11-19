@@ -1,3 +1,4 @@
+import { findUserIdByEmail } from "@/services/user-lookup";
 import type { Role } from "@prisma/client";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
@@ -121,7 +122,9 @@ const {
         if (
           !(
             await checkSharedRateLimit(
-              `login-email:${parsed.data.email}`,
+              // Lower-cased: the lookup below matches any capitalisation,
+              // so the limit must not be dodged by varying it.
+              `login-email:${parsed.data.email.trim().toLowerCase()}`,
               LOGIN_EMAIL_RATE_LIMIT,
             )
           ).allowed
@@ -129,9 +132,12 @@ const {
           return null;
         }
 
-        const user = await db.user.findUnique({
-          where: { email: parsed.data.email },
-        });
+        // Someone who signed up as "An@gmail.com" could not sign in as
+        // "an@gmail.com" — see services/user-lookup.ts.
+        const userId = await findUserIdByEmail(parsed.data.email);
+        const user = userId
+          ? await db.user.findUnique({ where: { id: userId } })
+          : null;
         if (!user?.passwordHash || user.deletedAt) return null;
 
         const isValid = await bcrypt.compare(

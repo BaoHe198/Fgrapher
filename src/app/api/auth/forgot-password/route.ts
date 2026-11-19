@@ -1,3 +1,4 @@
+import { findUserIdByEmail } from "@/services/user-lookup";
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -57,7 +58,10 @@ export async function POST(request: Request) {
   }
 
   const { email } = parsed.data;
-  const user = await db.user.findUnique({ where: { email } });
+  const userId = await findUserIdByEmail(email);
+  const user = userId
+    ? await db.user.findUnique({ where: { id: userId } })
+    : null;
 
   // Always report success, even if no account exists, so this endpoint
   // can't be used to enumerate registered emails. sendPasswordResetEmail

@@ -90,6 +90,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // No "X-Powered-By: Next.js" on every response: it tells a scanner which
+  // framework (and so which advisories) to try, and nobody else anything.
+  poweredByHeader: false,
   images: {
     // next/image refuses to optimize an external URL unless its host is
     // explicitly allow-listed here — without this, every Cloudinary-hosted
