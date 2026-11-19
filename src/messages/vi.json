@@ -2437,6 +2437,13 @@
             "policies": "Chính sách đặt cọc & hủy",
             "area": "Khu vực phục vụ",
             "calendar": "Lịch trống"
+          },
+          "pending": "Đang chờ duyệt",
+          "pendingHint": {
+            "verify": "Đã gửi giấy tờ — Fgrapher đang xét duyệt",
+            "album": "Đã có ảnh — đang chờ Fgrapher duyệt",
+            "albumEmpty": "Đã tạo album — hãy tải ảnh lên",
+            "verifyRejected": "Giấy tờ chưa đạt — vui lòng gửi lại"
           }
         },
         "week": {

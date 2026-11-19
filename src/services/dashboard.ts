@@ -383,7 +383,20 @@ export interface ProviderOverview {
     expiresAt: string | null;
   }[];
   sunPoint: { latitude: number; longitude: number } | null;
-  roll: { key: string; done: boolean; href: string }[];
+  /**
+   * `waiting` is a job the provider has done their part of and Fgrapher has
+   * not answered yet (documents sent, photos uploaded but not reviewed).
+   * Without it the tile stayed "not done" after they acted, which read as
+   * the upload having been lost (owner, 19/11/2026). `hint` names the next
+   * step in one line; it is a key under roll.pendingHint.
+   */
+  roll: {
+    key: string;
+    done: boolean;
+    waiting?: boolean;
+    hint?: string;
+    href: string;
+  }[];
   /**
    * What keeps this provider off Bản đồ F and out of booking, beyond
    * verification (which the roll already shows): no weekly hours means never
@@ -425,6 +438,16 @@ export async function getProviderOverview(
               select: {
                 services: { where: { isActive: true } },
                 serviceAreas: true,
+                // For the roll's "album" tile: has an album at all, and
+                // has photos in one that are still in the review queue.
+                albums: { where: { deletedAt: null } },
+                media: {
+                  where: {
+                    deletedAt: null,
+                    moderationStatus: "PENDING",
+                    albumId: { not: null },
+                  },
+                },
               },
             },
             albums: {
@@ -515,6 +538,20 @@ export async function getProviderOverview(
   const name = (c: { name: string | null; firstName: string | null }) =>
     c.firstName ?? c.name ?? "";
 
+  const verified =
+    providerRoles.length > 0 &&
+    providerRoles.every((r) => r.verificationStatus === "VERIFIED");
+  const verifyWaiting =
+    !verified && providerRoles.some((r) => r.verificationStatus === "PENDING");
+  const verifyRejected =
+    !verified &&
+    !verifyWaiting &&
+    providerRoles.some((r) => r.verificationStatus === "REJECTED");
+  const albumDone = profiles.some((p) => p.albums.length > 0);
+  const albumWaiting = !albumDone && profiles.some((p) => p._count.media > 0);
+  const albumEmpty =
+    !albumDone && !albumWaiting && profiles.some((p) => p._count.albums > 0);
+
   return {
     today: today.map((b) => ({
       id: b.id,
@@ -545,9 +582,13 @@ export async function getProviderOverview(
     roll: [
       {
         key: "verify",
-        done:
-          providerRoles.length > 0 &&
-          providerRoles.every((r) => r.verificationStatus === "VERIFIED"),
+        done: verified,
+        waiting: verifyWaiting,
+        hint: verifyWaiting
+          ? "verify"
+          : verifyRejected
+            ? "verifyRejected"
+            : undefined,
         href: "/dashboard/settings/roles",
       },
       {
@@ -567,7 +608,9 @@ export async function getProviderOverview(
       },
       {
         key: "album",
-        done: profiles.some((p) => p.albums.length > 0),
+        done: albumDone,
+        waiting: albumWaiting,
+        hint: albumWaiting ? "album" : albumEmpty ? "albumEmpty" : undefined,
         href: "/dashboard/portfolio",
       },
       {

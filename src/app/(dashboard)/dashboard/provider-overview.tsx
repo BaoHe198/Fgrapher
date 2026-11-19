@@ -1,4 +1,4 @@
-import { CalendarClock, Check, MapPinOff } from "lucide-react";
+import { CalendarClock, Check, Hourglass, MapPinOff } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -284,24 +284,46 @@ export async function ProviderOverview({
                     "grid size-6 shrink-0 place-items-center rounded-full border",
                     frame.done
                       ? "border-success bg-success text-text-on-brand"
-                      : "border-dashed border-border-strong",
+                      : frame.waiting
+                        ? "border-warning bg-warning-bg text-warning"
+                        : "border-dashed border-border-strong",
                   )}
                 >
-                  {frame.done ? <Check className="size-3.5" /> : null}
+                  {frame.done ? (
+                    <Check className="size-3.5" />
+                  ) : frame.waiting ? (
+                    <Hourglass className="size-3.5" />
+                  ) : null}
                 </span>
-                <span
-                  className={cn(
-                    "min-w-0 flex-1 text-body-sm group-hover:underline",
-                    frame.done
-                      ? "text-text-secondary"
-                      : "font-semibold text-text-primary",
-                  )}
-                >
-                  {t(`roll.items.${frame.key}`)}
-                  <span className="sr-only">
-                    {" · "}
-                    {frame.done ? t("roll.done") : t("roll.undeveloped")}
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span
+                    className={cn(
+                      "text-body-sm group-hover:underline",
+                      frame.done
+                        ? "text-text-secondary"
+                        : "font-semibold text-text-primary",
+                    )}
+                  >
+                    {t(`roll.items.${frame.key}`)}
+                    <span className="sr-only">
+                      {" · "}
+                      {frame.done
+                        ? t("roll.done")
+                        : frame.waiting
+                          ? t("roll.pending")
+                          : t("roll.undeveloped")}
+                    </span>
                   </span>
+                  {!frame.done && frame.hint ? (
+                    <span
+                      className={cn(
+                        "text-meta",
+                        frame.waiting ? "text-warning" : "text-text-tertiary",
+                      )}
+                    >
+                      {t(`roll.pendingHint.${frame.hint}`)}
+                    </span>
+                  ) : null}
                 </span>
               </Link>
             </li>
