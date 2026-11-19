@@ -19,7 +19,11 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 // middleware.ts) using next-auth's getToken, which decodes the session JWT
 // straight from the request cookie — no DB call, safe to run in this
 // runtime, unlike auth() which goes through the Prisma adapter.
-const PROTECTED_PREFIXES = ["/dashboard", "/admin"];
+// /saved and /moodboard live in the dashboard layout without the /dashboard
+// prefix. Left out of this list, a guest opening them was sent to a bare
+// /login and landed on the dashboard after signing in, not where they were
+// going.
+const PROTECTED_PREFIXES = ["/dashboard", "/admin", "/saved", "/moodboard"];
 const AUTH_ONLY_PREFIXES = ["/login", "/register"];
 
 // Read directly from process.env rather than lib/env.ts/lib/features.ts —

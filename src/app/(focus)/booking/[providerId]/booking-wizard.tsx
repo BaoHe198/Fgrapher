@@ -1186,6 +1186,14 @@ export function BookingWizard({
           Continue stays focusable (aria-disabled) and says why on its own
           label rather than greying out with no reason. */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border-subtle bg-bg-surface pb-[env(safe-area-inset-bottom)]">
+        {/* On a phone the reason does not fit on the button: it was cut
+            off at both ends ("VỤ, HOẶC MÔ TẢ NHU C"). There it sits on its
+            own line and the button keeps its short label. */}
+        {!canContinue && missingHint ? (
+          <p className="px-4 pt-2 text-center text-meta text-text-secondary sm:hidden">
+            {missingHint}
+          </p>
+        ) : null}
         <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between gap-3 px-4 sm:px-8">
           {step === 0 ? (
             <Button
@@ -1221,9 +1229,16 @@ export function BookingWizard({
                 if (canContinue) goTo(step + 1);
               }}
             >
-              {canContinue
-                ? t("continueBtn")
-                : (missingHint ?? t("continueBtn"))}
+              {canContinue ? (
+                t("continueBtn")
+              ) : (
+                <>
+                  <span className="sm:hidden">{t("continueBtn")}</span>
+                  <span className="hidden truncate sm:inline">
+                    {missingHint ?? t("continueBtn")}
+                  </span>
+                </>
+              )}
               {canContinue ? (
                 <ChevronRight aria-hidden className="size-4" />
               ) : null}
@@ -1242,7 +1257,16 @@ export function BookingWizard({
               {submitting ? (
                 <Loader2 aria-hidden className="size-4 animate-spin" />
               ) : null}
-              {canContinue ? t("submitBtn") : (missingHint ?? t("submitBtn"))}
+              {canContinue ? (
+                t("submitBtn")
+              ) : (
+                <>
+                  <span className="sm:hidden">{t("submitBtn")}</span>
+                  <span className="hidden truncate sm:inline">
+                    {missingHint ?? t("submitBtn")}
+                  </span>
+                </>
+              )}
             </Button>
           )}
         </div>

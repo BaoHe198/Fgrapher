@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+import { Tag } from "@/components/ui/tag";
 import { useUserRoles } from "@/hooks/use-user-roles";
 import { resolvePartyName } from "@/lib/party-name";
 import type { BookingTab, BookingTabCounts } from "@/services/bookings";
@@ -69,6 +70,13 @@ export function BookingsClient({
   // whether yesterday is over is fine.
   const [now] = useState(() => Date.now());
   const { isCustomerOnly } = useUserRoles();
+  // A provider can also be the one who asked: hiring a model, a make-up
+  // artist or a studio for a shoot. Those bookings were accepted by the API
+  // and then appeared in no list of theirs — this page only ever showed the
+  // ones made WITH them (found 19/11/2026). "sent" shows the other side,
+  // rendered exactly as a customer sees their own bookings.
+  const [side, setSide] = useState<"received" | "sent">("received");
+  const asCustomer = isCustomerOnly || side === "sent";
 
   function partyName(party: BookingParty) {
     return resolvePartyName(party, t("unknownParty"));
@@ -88,7 +96,9 @@ export function BookingsClient({
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch(`/api/bookings?status=${tab}&page=${page}`);
+      const res = await fetch(
+        `/api/bookings?status=${tab}&page=${page}${side === "sent" ? "&side=sent" : ""}`,
+      );
       if (!res.ok) throw new Error("load_failed");
       const body = await res.json();
       setBookings(body.data ?? []);
@@ -100,7 +110,7 @@ export function BookingsClient({
     } finally {
       setIsLoading(false);
     }
-  }, [tab, page]);
+  }, [tab, page, side]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -115,6 +125,14 @@ export function BookingsClient({
   const changeTab = (value: BookingTab) => {
     setIsLoading(true);
     setTab(value);
+    setPage(1);
+  };
+
+  const changeSide = (next: "received" | "sent") => {
+    if (next === side) return;
+    setIsLoading(true);
+    setSide(next);
+    setTab("ALL");
     setPage(1);
   };
 
@@ -167,15 +185,14 @@ export function BookingsClient({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-display-md text-text-primary">
-            {isCustomerOnly ? t("titleCustomer") : t("titleProvider")}
+            {asCustomer ? t("titleCustomer") : t("titleProvider")}
           </h1>
           {summary ? (
             <p className="text-body-sm text-text-secondary">{summary}</p>
           ) : null}
         </div>
         {/* Hidden while the empty state below shows the same link. */}
-        {isCustomerOnly &&
-        !(!isLoading && !loadFailed && bookings.length === 0) ? (
+        {asCustomer && !(!isLoading && !loadFailed && bookings.length === 0) ? (
           <Button
             variant="outline"
             nativeButton={false}
@@ -185,6 +202,24 @@ export function BookingsClient({
           </Button>
         ) : null}
       </div>
+
+      {!isCustomerOnly ? (
+        <div
+          role="group"
+          aria-label={t("side.label")}
+          className="flex flex-wrap gap-2"
+        >
+          <Tag
+            selected={side === "received"}
+            onClick={() => changeSide("received")}
+          >
+            {t("side.received")}
+          </Tag>
+          <Tag selected={side === "sent"} onClick={() => changeSide("sent")}>
+            {t("side.sent")}
+          </Tag>
+        </div>
+      ) : null}
 
       <Tabs
         value={tab}
@@ -235,11 +270,9 @@ export function BookingsClient({
         <EmptyState
           icon={<Calendar />}
           title={t(tab === "ALL" ? "empty.heading" : "empty.headingTab")}
-          description={
-            isCustomerOnly ? t("empty.bodyCustomer") : t("empty.body")
-          }
+          description={asCustomer ? t("empty.bodyCustomer") : t("empty.body")}
           primaryAction={
-            isCustomerOnly ? (
+            asCustomer ? (
               <Button
                 size="sm"
                 nativeButton={false}
@@ -262,13 +295,13 @@ export function BookingsClient({
       ) : (
         <div className="flex flex-col gap-3">
           {bookings.map((booking) => {
-            const party = isCustomerOnly ? booking.provider : booking.customer;
+            const party = asCustomer ? booking.provider : booking.customer;
             const isBusy = actionId === booking.id;
             // A confirmed shoot whose day is over stays "Confirmed" until the
             // provider says otherwise. Completing it is what lets the
             // customer leave a review.
             const isOverdue =
-              !isCustomerOnly &&
+              !asCustomer &&
               booking.status === "CONFIRMED" &&
               new Date(booking.date).getTime() + DAY_MS < now;
             const isFuture = new Date(booking.date).getTime() + DAY_MS > now;
@@ -292,7 +325,7 @@ export function BookingsClient({
               </Button>
             ) : null;
 
-            const actions = isCustomerOnly ? (
+            const actions = asCustomer ? (
               <>
                 {messageButton}
                 <Button
@@ -398,7 +431,7 @@ export function BookingsClient({
               <BookingListItem
                 key={booking.id}
                 now={now}
-                asProvider={!isCustomerOnly}
+                asProvider={!asCustomer}
                 overdue={isOverdue}
                 booking={{
                   id: booking.id,

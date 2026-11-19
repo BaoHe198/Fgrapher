@@ -42,6 +42,14 @@ export const DATA_REQUEST_SLA_DAYS = 30;
 // that carried the same number with no shared source.
 export const MIN_NOTICE_HOURS = 24;
 
+/**
+ * The week a new provider starts with (owner, 16/11/2026): every day,
+ * 08:00-20:00. Here rather than in services/resource-calendar.ts so the
+ * hours editor in the browser can show the same default the server writes
+ * — it used to carry its own 09:00-17:00.
+ */
+export const DEFAULT_WEEKLY_HOURS = { startTime: "08:00", endTime: "20:00" };
+
 // CLAUDE.md rule 7 — ID document images auto-delete after 90 days,
 // regardless of whether the verification was approved, rejected, or never
 // reviewed at all. Set on UserRole.purgeAfter at both submission time

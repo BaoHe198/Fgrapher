@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
-import { PROVIDER_ROLES } from "@/lib/constants";
+import { DEFAULT_WEEKLY_HOURS, PROVIDER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/db";
 
 /**
@@ -116,7 +116,7 @@ export async function replaceWeeklyRules(
  * /dashboard/calendar. The same week is backfilled for existing providers
  * by migration 20261116120000_default_provider_weekly_hours.
  */
-export const DEFAULT_WEEKLY_HOURS = { startTime: "08:00", endTime: "20:00" };
+export { DEFAULT_WEEKLY_HOURS };
 
 /**
  * Gives a provider the default week if their calendar has no weekly rule at
@@ -144,6 +144,14 @@ export interface CalendarBlock {
   id: string;
   /** Local calendar day, "YYYY-MM-DD". */
   dateKey: string;
+  /**
+   * The same day again, under the name the two screens that list blocks
+   * read (the calendar and the hours editor). The API handed them only
+   * `dateKey`; `new Date(undefined)` then threw and the calendar page went
+   * blank the moment a provider blocked a day, and so did the hours editor
+   * for anyone who had a block (found 19/11/2026).
+   */
+  date: string;
   /** null on both = the whole day is blocked. */
   startTime: string | null;
   endTime: string | null;
@@ -192,6 +200,7 @@ export async function listBlocks(
     return {
       id: block.id,
       dateKey: start.dateKey,
+      date: start.dateKey,
       startTime: whole ? null : start.time,
       endTime: whole ? null : end.time,
       reason: block.reason,

@@ -195,7 +195,14 @@ export function NotificationsClient({
               <span className="text-body-sm text-text-secondary">
                 {notification.message}
               </span>
-              <span className="text-body-sm text-text-tertiary">
+              {/* "13 phút trước" is worked out from the clock: rendered on
+                  the server a moment before the browser hydrates, it can
+                  be a minute apart, which React reported as a hydration
+                  failure and re-rendered the whole list for. */}
+              <span
+                className="text-body-sm text-text-tertiary"
+                suppressHydrationWarning
+              >
                 {relativeTime(notification.createdAt, t)}
               </span>
             </button>

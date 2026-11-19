@@ -2052,7 +2052,12 @@
         "retry": "Try again"
       },
       "placeOwnStudio": "At your studio",
-      "placeCustomer": "At the customer’s place"
+      "placeCustomer": "At the customer’s place",
+      "side": {
+        "label": "Which bookings",
+        "received": "Booked with me",
+        "sent": "Booked by me"
+      }
     },
     "portfolio": {
       "proOnly": {
@@ -2131,7 +2136,8 @@
         "photoTrashedToast": "Photo moved to trash",
         "moderation": {
           "pending": "Pending review",
-          "rejected": "Rejected"
+          "rejected": "Rejected",
+          "reason": "Reason: {reason}"
         },
         "cancel": "Cancel",
         "saveFailed": "Couldn't save changes, please try again"
@@ -3178,7 +3184,9 @@
         "saveFailed": "Couldn't save your schedule, please try again",
         "blockedDates": "Blocked dates",
         "removeAria": "Remove",
-        "blockDateButton": "Block date"
+        "blockDateButton": "Block date",
+        "loadFailed": "Couldn't load your working hours. Reload the page and try again.",
+        "blockFailed": "Couldn't block this day, please try again"
       },
       "sections": {
         "basics": "Basic information",

@@ -139,6 +139,11 @@ function bookingUrlFor(bookingId: string) {
   return `${process.env.NEXTAUTH_URL ?? ""}/dashboard/bookings/${bookingId}`;
 }
 
+/**
+ * `isProvider` picks the side of the booking the caller is on: true lists
+ * the bookings made WITH them, false the ones they made. A provider account
+ * can ask for either (see GET /api/bookings `side=sent`).
+ */
 export async function listBookings({
   userId,
   isProvider,

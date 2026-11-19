@@ -29,11 +29,18 @@ export function notificationHref(notification: NotificationLike): string {
     postId?: string;
     requestId?: string;
     productId?: string;
+    conversationId?: string;
     href?: string;
   } | null;
   if (data?.href?.startsWith("/dashboard/")) return data.href;
   if (data?.bookingId) return `/dashboard/bookings/${data.bookingId}`;
   if (data?.orderId) return `/dashboard/orders/${data.orderId}`;
+  // "Tin nhắn mới từ …" opens that conversation. It carried the
+  // conversation id all along and fell through to the list, so pressing it
+  // went nowhere (found 19/11/2026).
+  if (data?.conversationId) {
+    return `/dashboard/messages?c=${data.conversationId}`;
+  }
   // A like or a comment is only useful if it takes you to the post it is
   // about.
   if (data?.postId) return `/community/${data.postId}`;

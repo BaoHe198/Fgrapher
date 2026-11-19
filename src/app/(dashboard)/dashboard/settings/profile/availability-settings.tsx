@@ -8,7 +8,10 @@ import { startTransition, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { DEFAULT_WEEKLY_HOURS } from "@/lib/constants";
+import { formatDate } from "@/lib/format";
 
 const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 // Kept for the initial-state builder below — day labels themselves are
@@ -35,8 +38,7 @@ interface BlockedDate {
 const DEFAULT_SCHEDULE: DaySchedule[] = DAY_LABELS.map((_, dayOfWeek) => ({
   dayOfWeek,
   isActive: true,
-  startTime: "09:00",
-  endTime: "17:00",
+  ...DEFAULT_WEEKLY_HOURS,
 }));
 
 export function AvailabilitySettings() {
@@ -47,14 +49,26 @@ export function AvailabilitySettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [blockError, setBlockError] = useState<string | null>(null);
+  // Until the saved week has arrived the rows below hold only the default.
+  // They used to be shown, editable, with a live Save button: pressing it
+  // on a slow connection wrote that default over the provider's real hours
+  // (found 19/11/2026).
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "failed">(
+    "loading",
+  );
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/availability")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(String(res.status));
+        return res.json();
+      })
       .then((body) => {
         if (cancelled) return;
         startTransition(() => {
+          setLoadState("ready");
           if (body.data?.schedule?.length > 0) {
             const byDay = new Map(
               body.data.schedule.map((s: DaySchedule) => [s.dayOfWeek, s]),
@@ -79,6 +93,9 @@ export function AvailabilitySettings() {
             ),
           );
         });
+      })
+      .catch(() => {
+        if (!cancelled) startTransition(() => setLoadState("failed"));
       });
     return () => {
       cancelled = true;
@@ -121,18 +138,22 @@ export function AvailabilitySettings() {
 
   const addBlockedDate = async () => {
     if (!newBlockedDate) return;
+    setBlockError(null);
     const res = await fetch("/api/blocked-dates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ date: newBlockedDate }),
-    });
-    const body = await res.json();
-    if (res.ok) {
+    }).catch(() => null);
+    const body = await res?.json().catch(() => null);
+    if (res?.ok) {
       setBlockedDates((prev) => [
         ...prev,
         { ...body.data, date: newBlockedDate },
       ]);
       setNewBlockedDate("");
+    } else {
+      // A refusal (a past day, a day already blocked) used to do nothing.
+      setBlockError(body?.message ?? t("blockFailed"));
     }
   };
 
@@ -165,7 +186,19 @@ export function AvailabilitySettings() {
         <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("weeklySchedule")}
         </span>
-        {schedule.map((day) => (
+        {loadState === "loading" ? (
+          <div className="flex flex-col gap-2" aria-busy="true">
+            {DAY_KEYS.map((key) => (
+              <Skeleton key={key} className="h-11 w-full max-w-md" />
+            ))}
+          </div>
+        ) : null}
+        {loadState === "failed" ? (
+          <p className="text-body-sm text-danger" role="alert">
+            {t("loadFailed")}
+          </p>
+        ) : null}
+        {(loadState === "ready" ? schedule : []).map((day) => (
           <div
             key={day.dayOfWeek}
             className="flex flex-wrap items-center gap-3"
@@ -218,7 +251,7 @@ export function AvailabilitySettings() {
           variant="secondary"
           size="sm"
           className="self-start"
-          disabled={isSaving}
+          disabled={isSaving || loadState !== "ready"}
           onClick={save}
         >
           {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
@@ -245,7 +278,7 @@ export function AvailabilitySettings() {
               key={d.id}
               className="flex items-center gap-1.5 rounded-full bg-bg-sunken px-3 py-1.5 text-body-sm text-text-primary"
             >
-              {d.date}
+              {formatDate(d.date)}
               <button
                 type="button"
                 onClick={() => removeBlockedDate(d.id)}
@@ -267,6 +300,11 @@ export function AvailabilitySettings() {
             {t("blockDateButton")}
           </Button>
         </div>
+        {blockError ? (
+          <span className="text-body-sm text-danger" role="alert">
+            {blockError}
+          </span>
+        ) : null}
       </div>
     </div>
   );

@@ -223,7 +223,7 @@ export async function PATCH(
     // The three follow-ups below only need the profile row written above
     // and do not read each other's results, so they run together: one after
     // another they made a first save noticeably slow (owner, 19/11/2026).
-    await Promise.all([
+    const [, , published] = await Promise.all([
       syncPrimaryServiceArea(profile.id, profile.provinceId),
       // A provider's first profile save starts their week at the default
       // hours, so they can be found and booked before they ever open the
@@ -243,8 +243,15 @@ export async function PATCH(
     // live; an edit to an already-published profile still needs this.)
     await revalidatePublicProfile(session.user.id);
 
+    // `profile` was read before the publish attempt: without this the save
+    // that puts a profile live answered "isPublished: false", and the form
+    // went on saying "Bản nháp" until the page was reloaded.
     return NextResponse.json(
-      { data: profile, error: null, message: t("updated") },
+      {
+        data: { ...profile, isPublished: profile.isPublished || published },
+        error: null,
+        message: t("updated"),
+      },
       { status: 200 },
     );
   } catch (err) {

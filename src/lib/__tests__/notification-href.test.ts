@@ -41,6 +41,13 @@ describe("notificationHref", () => {
     );
   });
 
+  it("opens the conversation a new-message notification is about", () => {
+    assert.equal(
+      notificationHref({ type: "NEW_MESSAGE", data: { conversationId: "c1" } }),
+      "/dashboard/messages?c=c1",
+    );
+  });
+
   it("links posts, and falls back to the list", () => {
     assert.equal(
       notificationHref({ type: "NEW_COMMENT", data: { postId: "p1" } }),

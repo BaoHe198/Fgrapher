@@ -2052,7 +2052,12 @@
         "retry": "Thử lại"
       },
       "placeOwnStudio": "Tại studio của bạn",
-      "placeCustomer": "Tại địa điểm của khách"
+      "placeCustomer": "Tại địa điểm của khách",
+      "side": {
+        "label": "Lịch đặt nào",
+        "received": "Khách đặt tôi",
+        "sent": "Tôi đặt"
+      }
     },
     "portfolio": {
       "proOnly": {
@@ -2131,7 +2136,8 @@
         "photoTrashedToast": "Đã chuyển ảnh vào thùng rác",
         "moderation": {
           "pending": "Đang chờ duyệt",
-          "rejected": "Bị từ chối"
+          "rejected": "Bị từ chối",
+          "reason": "Lý do: {reason}"
         },
         "cancel": "Hủy",
         "saveFailed": "Không thể lưu thay đổi, vui lòng thử lại"
@@ -3178,7 +3184,9 @@
         "saveFailed": "Không lưu được lịch làm việc, vui lòng thử lại",
         "blockedDates": "Ngày không nhận lịch",
         "removeAria": "Xóa",
-        "blockDateButton": "Chặn ngày"
+        "blockDateButton": "Chặn ngày",
+        "loadFailed": "Chưa tải được lịch làm việc của bạn. Tải lại trang rồi thử lại — đừng lưu khi lịch chưa hiện.",
+        "blockFailed": "Không chặn được ngày này, vui lòng thử lại"
       },
       "sections": {
         "basics": "Thông tin cơ bản",
