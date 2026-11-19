@@ -34,7 +34,10 @@ export async function GET(request: Request) {
 
     const result = await listBookings({
       userId: session.user.id,
-      isProvider: isProviderRoleSet(session.user.roles),
+      // side=sent: a provider looking at the bookings they made themselves.
+      isProvider:
+        isProviderRoleSet(session.user.roles) &&
+        searchParams.get("side") !== "sent",
       tab,
       page,
     });

@@ -2052,7 +2052,12 @@
         "retry": "Try again"
       },
       "placeOwnStudio": "At your studio",
-      "placeCustomer": "At the customer’s place"
+      "placeCustomer": "At the customer’s place",
+      "side": {
+        "label": "Which bookings",
+        "received": "Booked with me",
+        "sent": "Booked by me"
+      }
     },
     "portfolio": {
       "proOnly": {

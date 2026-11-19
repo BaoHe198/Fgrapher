@@ -2052,7 +2052,12 @@
         "retry": "Thử lại"
       },
       "placeOwnStudio": "Tại studio của bạn",
-      "placeCustomer": "Tại địa điểm của khách"
+      "placeCustomer": "Tại địa điểm của khách",
+      "side": {
+        "label": "Lịch đặt nào",
+        "received": "Khách đặt tôi",
+        "sent": "Tôi đặt"
+      }
     },
     "portfolio": {
       "proOnly": {
