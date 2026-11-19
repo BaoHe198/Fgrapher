@@ -152,11 +152,14 @@ export async function setProfilePublished(
 // own categories/location saved. Silently no-ops via setProfilePublished's
 // own checks when something is still missing — this isn't a user-
 // initiated action, so there's no error to surface.
+/** Returns whether the profile is public after the attempt. */
 export async function tryAutoPublish(userId: string, role: Role) {
   try {
     await setProfilePublished(userId, role, true);
+    return true;
   } catch {
     // Not ready yet.
+    return false;
   }
 }
 
