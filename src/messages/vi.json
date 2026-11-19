@@ -5356,7 +5356,8 @@
       "albumTitleRequired": "Tên album phải có ít nhất 2 ký tự",
       "albumCategoryRequired": "Vui lòng chọn danh mục",
       "albumCreateFailed": "Không thể tạo album, vui lòng thử lại",
-      "albumTitlePlaceholder": "Không bắt buộc — để trống sẽ đặt theo thể loại"
+      "albumTitlePlaceholder": "Không bắt buộc — để trống sẽ đặt theo thể loại",
+      "unsupportedType": "Loại tệp này không tải lên được. Hãy chọn ảnh (JPG, PNG, WebP) hoặc video (MP4, MOV)."
     },
     "mediaLightbox": {
       "close": "Đóng",

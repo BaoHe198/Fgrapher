@@ -5356,7 +5356,8 @@
       "albumTitleRequired": "Album title must be at least 2 characters",
       "albumCategoryRequired": "Please choose a category",
       "albumCreateFailed": "Couldn't create the album, please try again",
-      "albumTitlePlaceholder": "Optional — left blank, it is named after the category"
+      "albumTitlePlaceholder": "Optional — left blank, it is named after the category",
+      "unsupportedType": "This file type can't be uploaded. Choose a photo (JPG, PNG, WebP) or a video (MP4, MOV)."
     },
     "mediaLightbox": {
       "close": "Close",
