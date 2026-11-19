@@ -96,7 +96,7 @@ export function ReviewsTab({
           <span className="text-display-lg text-text-primary tabular-nums">
             {averageVi}
           </span>
-          <StarRating rating={average} reviews={stats.count} />
+          <StarRating rating={averageVi} reviews={stats.count} />
           <span className="max-w-[220px] text-meta text-text-tertiary">
             {t("onlyCompleted")}
           </span>

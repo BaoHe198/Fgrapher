@@ -24,6 +24,14 @@ export function formatNumber(value: number) {
   return new Intl.NumberFormat("vi-VN").format(value);
 }
 
+// "4,8" — an average rating as people read it in Vietnamese, with a decimal
+// comma. Half the screens showed "4.8" and half "4,8" (walkthrough of
+// 19/11/2026: the browse card said 5,0, the provider's own reviews page
+// 5.0). Not for structured data: schema.org ratingValue needs the dot.
+export function formatRating(value: number) {
+  return value.toFixed(1).replace(".", ",");
+}
+
 // "2" / "1,5" — Service.duration is stored in MINUTES, but a shoot length is
 // always shown to the user in HOURS. Every screen used to decide for itself:
 // the profile's services tab showed "2 giờ" while the booking wizard's

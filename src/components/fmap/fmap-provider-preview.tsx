@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { FgImage } from "@/components/ui/fg-image";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatVND } from "@/lib/format";
+import { formatRating, formatVND } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { FmapProviderPreview } from "@/services/fmap";
 
@@ -149,7 +149,7 @@ export function FmapProviderPreviewCard({
                 <Star className="size-4 fill-gold-400 text-gold-500" />
                 {preview.reviewCount === 0 || preview.rating == null
                   ? t("preview.newProvider")
-                  : `${preview.rating.toFixed(1)} (${preview.reviewCount})`}
+                  : `${formatRating(preview.rating)} (${preview.reviewCount})`}
               </span>
               {preview.location ? (
                 <span className="flex items-center gap-1">
