@@ -741,7 +741,8 @@
         "morning": "Morning",
         "afternoon": "Afternoon",
         "evening": "Evening"
-      }
+      },
+      "soon": "Too soon"
     },
     "bookingSummary": {
       "label": "Booking request summary",
@@ -1344,7 +1345,12 @@
       "invalidParent": "Invalid parent booking — it must be one of your confirmed bookings.",
       "outcomeTooEarly": "You can't record an outcome before the booking date.",
       "crewNeedsProviderRole": "A crew booking must use your provider role.",
-      "unknown": "Couldn't complete that, please try again."
+      "unknown": "Couldn't complete that, please try again.",
+      "noticeTooShort": "Bookings need at least {hours} hours' notice. Please pick a later time.",
+      "tooManyPending": "You already have {max} booking requests waiting for a reply. Wait for an answer or cancel one before sending another.",
+      "invalidTransition": "This booking's status has just changed, so that action is no longer possible. Please reload the page.",
+      "proposalInPast": "The proposed time has already passed. Please choose an upcoming one.",
+      "proposalEndBeforeStart": "The proposed end time must be after the start."
     },
     "uploads": {
       "documentsNotConfigured": "Document uploads aren't available right now. Please try again later or contact support.",

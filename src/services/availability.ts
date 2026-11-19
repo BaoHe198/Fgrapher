@@ -37,7 +37,10 @@ const SLOT_MINUTES = 60;
 export interface DayAvailability {
   date: string;
   busy: boolean;
-  slots: { time: string; available: boolean }[];
+  // tooSoon: free, but inside the minimum-notice window. Told apart from a
+  // taken slot so the picker does not show a new provider's whole tomorrow
+  // as "Đã đặt".
+  slots: { time: string; available: boolean; tooSoon?: boolean }[];
 }
 
 export async function getProviderAvailability(
@@ -116,7 +119,7 @@ export async function getProviderAvailability(
         : null;
 
     const occupied = occupiedByDate.get(dateString) ?? [];
-    const slots: { time: string; available: boolean }[] = [];
+    const slots: { time: string; available: boolean; tooSoon?: boolean }[] = [];
 
     for (const window of windows) {
       const start = timeToMinutes(window.startTime);
@@ -134,13 +137,19 @@ export async function getProviderAvailability(
           blockedRange != null &&
           m < blockedRange.end &&
           slotEnd > blockedRange.start;
-        const slotInstant = Date.parse(
-          `${dateString}T${minutesToTime(m)}:00.000Z`,
-        );
+        // The slot's real instant: Vietnam is UTC+7 all year. Without the
+        // offset the notice window was seven hours short — the same slip
+        // createBooking() had, so the two agreed with each other and both
+        // let a booking in with 17 hours' notice.
+        const slotInstant =
+          Date.parse(`${dateString}T${minutesToTime(m)}:00.000Z`) -
+          7 * 3_600_000;
         const tooSoon = slotInstant < minNoticeInstant;
+        const taken = overlapsBooking || overlapsBlock;
         slots.push({
           time: minutesToTime(m),
-          available: !overlapsBooking && !overlapsBlock && !tooSoon,
+          available: !taken && !tooSoon,
+          ...(tooSoon && !taken ? { tooSoon: true } : {}),
         });
       }
     }

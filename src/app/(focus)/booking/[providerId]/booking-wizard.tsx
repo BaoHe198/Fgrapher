@@ -477,7 +477,11 @@ export function BookingWizard({
     if (!activeDay || !draft.date) return [];
     return activeDay.slots.map((slot) => ({
       start: slot.time,
-      status: slot.available ? ("available" as const) : ("booked" as const),
+      status: slot.available
+        ? ("available" as const)
+        : slot.tooSoon
+          ? ("soon" as const)
+          : ("booked" as const),
       golden: sun ? isGoldenHourSlot(slot.time, sun) : false,
     }));
   }, [activeDay, draft.date, sun]);

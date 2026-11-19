@@ -3,7 +3,10 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
-import { BOOKING_ERROR_KEYS } from "@/lib/errors/booking-messages";
+import {
+  BOOKING_ERROR_KEYS,
+  bookingErrorKey,
+} from "@/lib/errors/booking-messages";
 import vi from "@/messages/vi.json";
 import en from "@/messages/en.json";
 
@@ -22,14 +25,18 @@ describe("booking error messages", () => {
     const thrown = new Set<string>();
     for (const file of sources("src")) {
       const text = readFileSync(file, "utf8");
-      for (const m of text.matchAll(/new BookingActionError\(\s*"([^"]+)"/g)) {
+      // Plain strings and template literals alike: the three messages
+      // that carry a number or a status were invisible to this test.
+      for (const m of text.matchAll(
+        /new BookingActionError\(\s*["`]([^"`]+)["`]/g,
+      )) {
         thrown.add(m[1]);
       }
     }
     assert.ok(thrown.size > 10, "found the thrown messages");
     for (const message of thrown) {
       assert.ok(
-        BOOKING_ERROR_KEYS[message],
+        bookingErrorKey(message),
         `no translation key for "${message}"`,
       );
     }
