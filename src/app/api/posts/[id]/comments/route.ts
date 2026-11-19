@@ -18,11 +18,27 @@ export async function GET(
 ) {
   if (!features.socialFeedEnabled) return socialOff();
   const { id } = await params;
-  const comments = await listComments(id);
-  return NextResponse.json(
-    { data: comments, error: null, message: null },
-    { status: 200 },
-  );
+  try {
+    const comments = await listComments(id);
+    return NextResponse.json(
+      { data: comments, error: null, message: null },
+      { status: 200 },
+    );
+  } catch (err) {
+    // listComments refuses a post that does not exist or is not public. With
+    // no handler here that was an unhandled exception: a 500 for any wrong
+    // or stale post id.
+    if (err instanceof PostError) {
+      return NextResponse.json(
+        { data: null, error: "post_error", message: err.message },
+        { status: err.status },
+      );
+    }
+    return NextResponse.json(
+      { data: null, error: "server_error", message: "Failed to load comments" },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(
