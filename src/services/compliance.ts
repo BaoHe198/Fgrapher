@@ -104,6 +104,14 @@ export async function exportUserData(userId: string) {
     orders,
     stockAlerts,
     savedPhotos,
+    serviceRequests,
+    requestOffers,
+    posts,
+    comments,
+    products,
+    productReviews,
+    savedProfiles,
+    following,
   ] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
@@ -160,6 +168,42 @@ export async function exportUserData(userId: string) {
         },
       },
     }),
+    // Everything below is content this person wrote or a choice they made,
+    // and none of it was in the export: F Booking requests and offers,
+    // community posts and comments, Chợ F listings and product reviews, the
+    // artists they saved and the people they follow.
+    db.serviceRequest.findMany({
+      where: { customerId: userId },
+      include: { references: { select: { mediaUrl: true } } },
+    }),
+    db.requestOffer.findMany({
+      where: { providerId: userId },
+      include: { request: { select: { code: true, title: true } } },
+    }),
+    db.post.findMany({
+      where: { userId, deletedAt: null },
+      include: { media: { select: { url: true } } },
+    }),
+    db.comment.findMany({
+      where: { userId, deletedAt: null },
+      select: { postId: true, content: true, createdAt: true },
+    }),
+    db.product.findMany({
+      where: { userId, deletedAt: null },
+      include: { images: { select: { url: true } } },
+    }),
+    db.productReview.findMany({ where: { reviewerId: userId } }),
+    db.savedProfile.findMany({
+      where: { userId },
+      select: { profileId: true, createdAt: true },
+    }),
+    db.follow.findMany({
+      where: { followerId: userId },
+      select: {
+        createdAt: true,
+        following: { select: { username: true, name: true } },
+      },
+    }),
   ]);
 
   return {
@@ -175,6 +219,14 @@ export async function exportUserData(userId: string) {
     orders,
     stockAlerts,
     savedPhotos,
+    serviceRequests,
+    requestOffers,
+    posts,
+    comments,
+    products,
+    productReviews,
+    savedProfiles,
+    following,
   };
 }
 
@@ -198,13 +250,41 @@ const DELETED_USER_LABEL = "Người dùng đã xóa";
 // that reference it stay valid. Hard-deletes what's unambiguously this
 // user's own content: portfolio media (cascades from deleting Profile),
 // services (same cascade), and every message they sent or received.
+//
+// Anything added to this function that holds personal data must be added to
+// exportUserData() above as well, and the other way round.
 export async function processDeletion(userId: string, requestId?: string) {
   // Captured before the transaction nulls it — the reviver in
   // revalidatePublicProfile can't resolve a username that no longer exists.
   const before = await db.user.findUnique({
     where: { id: userId },
-    select: { username: true },
+    select: {
+      username: true,
+      email: true,
+      profiles: { select: { id: true } },
+    },
   });
+
+  // First, close whatever is still in motion with other people (upcoming
+  // bookings, open requests, pending offers) through the functions that own
+  // those changes, so the other side is told by name — see
+  // services/account-closure.ts. Imported here, not at the top: that module
+  // reaches bookings and offers, which import logAudit from this one.
+  const { windDownAccount } = await import("@/services/account-closure");
+  await windDownAccount(userId);
+
+  const now = new Date();
+  // Posts whose like/comment counters must be recounted afterwards.
+  const [likedPosts, commentedPosts] = await Promise.all([
+    db.like.findMany({ where: { userId }, select: { postId: true } }),
+    db.comment.findMany({
+      where: { userId, deletedAt: null },
+      select: { postId: true },
+    }),
+  ]);
+  const touchedPostIds = [
+    ...new Set([...likedPosts, ...commentedPosts].map((row) => row.postId)),
+  ];
 
   await db.$transaction([
     db.message.deleteMany({
@@ -236,6 +316,61 @@ export async function processDeletion(userId: string, requestId?: string) {
     db.serviceRequestReference.deleteMany({
       where: { request: { customerId: userId } },
     }),
+    // The same reasoning for the words of a request. One that became a
+    // booking keeps its text (the booking carries a copy the provider needs
+    // anyway); every other one loses the street address and the free text,
+    // and an unposted draft goes entirely.
+    db.serviceRequest.deleteMany({
+      where: { customerId: userId, isDraft: true },
+    }),
+    db.serviceRequest.updateMany({
+      where: { customerId: userId, bookingId: null },
+      data: { detailedAddress: null, areaNote: null, description: null },
+    }),
+    // Listings and posts are this person's own content, on public pages. A
+    // deleted seller's listing stayed for sale and their posts stayed in the
+    // feed under "Người dùng đã xóa". Soft-deleted like everywhere else, so
+    // an order that already bought the item keeps its line.
+    db.product.updateMany({
+      where: { userId, deletedAt: null },
+      data: { isActive: false, deletedAt: now },
+    }),
+    db.cartItem.deleteMany({ where: { userId } }),
+    db.post.updateMany({
+      where: { userId, deletedAt: null },
+      data: { deletedAt: now },
+    }),
+    db.comment.updateMany({
+      where: { userId, deletedAt: null },
+      data: { deletedAt: now },
+    }),
+    db.like.deleteMany({ where: { userId } }),
+    // Who they followed and saved says whose work this person liked; who
+    // followed them is a list pointing at an account that no longer exists.
+    db.follow.deleteMany({
+      where: { OR: [{ followerId: userId }, { followingId: userId }] },
+    }),
+    db.savedProfile.deleteMany({
+      where: {
+        OR: [
+          { userId },
+          { profileId: { in: (before?.profiles ?? []).map((p) => p.id) } },
+        ],
+      },
+    }),
+    // Their inbox of notifications (other people's names and what they
+    // did), the sign-in links to Google, and mail still queued for or
+    // recorded against the address being erased.
+    db.notification.deleteMany({ where: { userId } }),
+    db.account.deleteMany({ where: { userId } }),
+    ...(before?.email
+      ? [
+          db.emailOutbox.deleteMany({ where: { to: before.email } }),
+          db.waitlistEntry.deleteMany({
+            where: { email: { equals: before.email, mode: "insensitive" } },
+          }),
+        ]
+      : []),
     db.user.update({
       where: { id: userId },
       data: {
@@ -268,6 +403,19 @@ export async function processDeletion(userId: string, requestId?: string) {
         ]
       : []),
   ]);
+
+  // The counters on posts this person had liked or commented on are stored,
+  // not computed, so they are recounted rather than adjusted.
+  for (const postId of touchedPostIds) {
+    const [likeCount, commentCount] = await Promise.all([
+      db.like.count({ where: { postId } }),
+      db.comment.count({ where: { postId, deletedAt: null } }),
+    ]);
+    await db.post.update({
+      where: { id: postId },
+      data: { likeCount, commentCount },
+    });
+  }
 
   // Every Profile row is gone and the account is anonymized — evict it from
   // search / featured and its (now-404) public profile page.
