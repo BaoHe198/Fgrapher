@@ -3544,6 +3544,22 @@
         "cta": "Gửi lại giấy tờ"
       }
     },
+    "mediaApprovedProduct": {
+      "heading": "Ảnh sản phẩm đã được duyệt",
+      "body": "Ảnh của tin đăng \"{product}\" đã được duyệt và hiện hiển thị trên Chợ F."
+    },
+    "mediaRejectedProduct": {
+      "heading": "Một ảnh sản phẩm bị từ chối",
+      "body": "Ảnh của tin đăng \"{product}\" không được duyệt. Lý do: {reason}"
+    },
+    "mediaApprovedPost": {
+      "heading": "Ảnh bài đăng đã được duyệt",
+      "body": "Ảnh trong bài đăng của bạn đã được duyệt và hiện hiển thị trên Cộng đồng F."
+    },
+    "mediaRejectedPost": {
+      "heading": "Một ảnh bài đăng bị từ chối",
+      "body": "Ảnh trong bài đăng của bạn không được duyệt. Lý do: {reason}"
+    },
     "notifications": {
       "booking": {
         "request": {
@@ -5120,7 +5136,8 @@
       },
       "like": "Thích",
       "liked": "Đã thích",
-      "likesOwner": "{count} lượt thích · chỉ bạn thấy"
+      "likesOwner": "{count} lượt thích · chỉ bạn thấy",
+      "photoUploading": "Đang tải ảnh…"
     },
     "requestsF": {
       "metaTitle": "Đặt lịch F — Đăng yêu cầu chụp, nhận đề xuất",

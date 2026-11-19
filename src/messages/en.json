@@ -3544,6 +3544,22 @@
         "cta": "Send documents again"
       }
     },
+    "mediaApprovedProduct": {
+      "heading": "Your product photo was approved",
+      "body": "A photo of your listing \"{product}\" was approved and now shows on Chợ F."
+    },
+    "mediaRejectedProduct": {
+      "heading": "A product photo was rejected",
+      "body": "A photo of your listing \"{product}\" was not approved. Reason: {reason}"
+    },
+    "mediaApprovedPost": {
+      "heading": "Your post photo was approved",
+      "body": "A photo in your post was approved and now shows on Cộng đồng F."
+    },
+    "mediaRejectedPost": {
+      "heading": "A post photo was rejected",
+      "body": "A photo in your post was not approved. Reason: {reason}"
+    },
     "notifications": {
       "booking": {
         "request": {
@@ -5120,7 +5136,8 @@
       },
       "like": "Like",
       "liked": "Liked",
-      "likesOwner": "{count, plural, one {# like} other {# likes}} · only you see this"
+      "likesOwner": "{count, plural, one {# like} other {# likes}} · only you see this",
+      "photoUploading": "Uploading photo…"
     },
     "requestsF": {
       "metaTitle": "FBooking — Post a shoot request, get proposals",
