@@ -630,7 +630,8 @@
       "activeLabel": "Active",
       "saveButton": "Save product",
       "cancelButton": "Cancel",
-      "genericError": "Something went wrong. Please try again."
+      "genericError": "Something went wrong. Please try again.",
+      "imagesUploading": "Uploading photos — you can save in a moment…"
     },
     "productImageUploader": {
       "reorder": "Reorder",
@@ -2583,7 +2584,7 @@
       "dialogCancel": "Cancel",
       "cancelDialog": {
         "title": "Cancel this order?",
-        "body": "Payment will be refunded and stock restored.",
+        "body": "The other side is told and the stock goes back. Money is collected by the shop directly — if anything was paid up front, message to agree the refund.",
         "reasonPlaceholder": "Reason (optional)",
         "keepOrder": "Keep order"
       },
@@ -2606,7 +2607,8 @@
         "DELIVERED": "Collected"
       },
       "markReadyForPickup": "Ready for collection",
-      "markPickedUpByBuyer": "Buyer has collected"
+      "markPickedUpByBuyer": "Buyer has collected",
+      "actionFailed": "Could not update the order. Please try again."
     },
     "requestCompose": {
       "exit": "Exit",
@@ -3274,7 +3276,6 @@
         "nameRequired": "Enter a product name",
         "salePriceRequired": "Enter a sale price",
         "rentalPriceRequired": "Enter a rental price per day",
-        "bothPricesRequired": "Enter both a sale price and a rental price",
         "amountTooHigh": "That amount is too large — at most 10,000,000,000₫"
       },
       "profile": {
@@ -3542,23 +3543,23 @@
         "body": "The documents you sent for the {role} role were not accepted. You can send them again at any time.",
         "bodyWithReason": "The documents you sent for the {role} role were not accepted. Reason: {reason}. You can send them again at any time.",
         "cta": "Send documents again"
+      },
+      "mediaApprovedProduct": {
+        "heading": "Your product photo was approved",
+        "body": "A photo of your listing \"{product}\" was approved and now shows on Chợ F."
+      },
+      "mediaRejectedProduct": {
+        "heading": "A product photo was rejected",
+        "body": "A photo of your listing \"{product}\" was not approved. Reason: {reason}"
+      },
+      "mediaApprovedPost": {
+        "heading": "Your post photo was approved",
+        "body": "A photo in your post was approved and now shows on Cộng đồng F."
+      },
+      "mediaRejectedPost": {
+        "heading": "A post photo was rejected",
+        "body": "A photo in your post was not approved. Reason: {reason}"
       }
-    },
-    "mediaApprovedProduct": {
-      "heading": "Your product photo was approved",
-      "body": "A photo of your listing \"{product}\" was approved and now shows on Chợ F."
-    },
-    "mediaRejectedProduct": {
-      "heading": "A product photo was rejected",
-      "body": "A photo of your listing \"{product}\" was not approved. Reason: {reason}"
-    },
-    "mediaApprovedPost": {
-      "heading": "Your post photo was approved",
-      "body": "A photo in your post was approved and now shows on Cộng đồng F."
-    },
-    "mediaRejectedPost": {
-      "heading": "A post photo was rejected",
-      "body": "A photo in your post was not approved. Reason: {reason}"
     },
     "notifications": {
       "booking": {
@@ -3712,6 +3713,10 @@
         "rentalDueTomorrow": {
           "title": "Rental due back tomorrow",
           "message": "Order #{orderNumber} is due back tomorrow. Contact the shop to arrange the return."
+        },
+        "pickupStatusLabel": {
+          "SHIPPED": "Ready for you to collect",
+          "DELIVERED": "Collected"
         }
       },
       "stock": {
@@ -4978,8 +4983,6 @@
       "addedToCart": "Added to cart",
       "rentalDays": "{days} days ×",
       "depositNote": "Deposit (collected by the shop, returned when you bring the item back)",
-      "shipsFrom": "Ships from {location}",
-      "shippingOrPickup": "Shipping or pickup available",
       "paymentByShop": "The shop collects payment and handles delivery with you directly",
       "returnPolicyByShop": "Return terms are set by the shop",
       "conditionNew": "New",
@@ -5020,7 +5023,11 @@
         "alertOnToast": "You'll be notified when it's back in stock",
         "alertOffToast": "You've stopped following this product"
       },
-      "conditionAverage": "Average"
+      "conditionAverage": "Average",
+      "pickupOnly": "This shop does not deliver — pick up at the shop",
+      "pickupOnlyAt": "This shop does not deliver — pick up in {location}",
+      "freeDeliveryOrPickup": "Free delivery or pickup",
+      "deliveryFeeOrPickup": "Delivery {fee}, or pick up yourself"
     },
     "community": {
       "heading": "Community",

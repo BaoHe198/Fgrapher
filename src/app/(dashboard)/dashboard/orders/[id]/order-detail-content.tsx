@@ -75,6 +75,28 @@ export function OrderDetailContent() {
   const [trackingCarrier, setTrackingCarrier] = useState("");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  // Why the last button press did not go through. These calls used to ignore
+  // the response: a refused change just reloaded the order looking the same.
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const send = async (url: string, method: string, body: unknown) => {
+    setBusy(true);
+    setActionError(null);
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        setActionError(payload?.message ?? t("actionFailed"));
+      }
+    } catch {
+      setActionError(t("actionFailed"));
+    }
+    setBusy(false);
+  };
 
   const load = () => {
     fetch(`/api/orders/${params.id}`)
@@ -98,13 +120,10 @@ export function OrderDetailContent() {
     status: OrderStatus,
     extra?: Record<string, string>,
   ) => {
-    setBusy(true);
-    await fetch(`/api/orders/${params.id}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, ...extra }),
+    await send(`/api/orders/${params.id}/status`, "PATCH", {
+      status,
+      ...extra,
     });
-    setBusy(false);
     setTrackingOpen(false);
     setCancelOpen(false);
     setIsLoading(true);
@@ -112,13 +131,7 @@ export function OrderDetailContent() {
   };
 
   const returnRental = async (deductDeposit: boolean) => {
-    setBusy(true);
-    await fetch(`/api/orders/${params.id}/return`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deductDeposit }),
-    });
-    setBusy(false);
+    await send(`/api/orders/${params.id}/return`, "POST", { deductDeposit });
     setIsLoading(true);
     load();
   };
@@ -287,7 +300,7 @@ export function OrderDetailContent() {
             </Card>
           ) : null}
 
-          {order.shippingAddress ? (
+          {order.shippingAddress && !isPickup ? (
             <Card className="flex flex-col gap-1.5">
               <span className="text-body-sm text-text-tertiary">
                 {t("shippingAddress")}
@@ -331,6 +344,12 @@ export function OrderDetailContent() {
             >
               {isShop ? t("messageParty.customer") : t("messageParty.shop")}
             </Button>
+
+            {actionError ? (
+              <p role="alert" className="text-body-sm text-danger">
+                {actionError}
+              </p>
+            ) : null}
 
             {isShop && order.status === "PENDING" ? (
               <Button

@@ -630,7 +630,8 @@
       "activeLabel": "Đang hoạt động",
       "saveButton": "Lưu sản phẩm",
       "cancelButton": "Hủy",
-      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "imagesUploading": "Đang tải ảnh lên, chờ một chút rồi lưu…"
     },
     "productImageUploader": {
       "reorder": "Sắp xếp lại",
@@ -2583,7 +2584,7 @@
       "dialogCancel": "Hủy",
       "cancelDialog": {
         "title": "Hủy đơn hàng này?",
-        "body": "Khoản thanh toán sẽ được hoàn lại và tồn kho sẽ được khôi phục.",
+        "body": "Bên còn lại sẽ được báo và hàng được trả về kho. Tiền do cửa hàng thu trực tiếp — nếu bạn đã trả trước, hãy nhắn tin để thỏa thuận hoàn lại.",
         "reasonPlaceholder": "Lý do (không bắt buộc)",
         "keepOrder": "Giữ đơn hàng"
       },
@@ -2606,7 +2607,8 @@
         "DELIVERED": "Khách đã nhận"
       },
       "markReadyForPickup": "Báo khách đến nhận",
-      "markPickedUpByBuyer": "Khách đã nhận hàng"
+      "markPickedUpByBuyer": "Khách đã nhận hàng",
+      "actionFailed": "Không cập nhật được đơn hàng. Vui lòng thử lại."
     },
     "requestCompose": {
       "exit": "Thoát",
@@ -3274,7 +3276,6 @@
         "nameRequired": "Vui lòng nhập tên sản phẩm",
         "salePriceRequired": "Vui lòng nhập giá bán",
         "rentalPriceRequired": "Vui lòng nhập giá thuê mỗi ngày",
-        "bothPricesRequired": "Vui lòng nhập cả giá bán và giá thuê",
         "amountTooHigh": "Số tiền quá lớn — tối đa 10.000.000.000₫"
       },
       "profile": {
@@ -3542,23 +3543,23 @@
         "body": "Giấy tờ bạn gửi cho vai trò {role} chưa được chấp nhận. Bạn có thể gửi lại bất cứ lúc nào.",
         "bodyWithReason": "Giấy tờ bạn gửi cho vai trò {role} chưa được chấp nhận. Lý do: {reason}. Bạn có thể gửi lại bất cứ lúc nào.",
         "cta": "Gửi lại giấy tờ"
+      },
+      "mediaApprovedProduct": {
+        "heading": "Ảnh sản phẩm đã được duyệt",
+        "body": "Ảnh của tin đăng \"{product}\" đã được duyệt và hiện hiển thị trên Chợ F."
+      },
+      "mediaRejectedProduct": {
+        "heading": "Một ảnh sản phẩm bị từ chối",
+        "body": "Ảnh của tin đăng \"{product}\" không được duyệt. Lý do: {reason}"
+      },
+      "mediaApprovedPost": {
+        "heading": "Ảnh bài đăng đã được duyệt",
+        "body": "Ảnh trong bài đăng của bạn đã được duyệt và hiện hiển thị trên Cộng đồng F."
+      },
+      "mediaRejectedPost": {
+        "heading": "Một ảnh bài đăng bị từ chối",
+        "body": "Ảnh trong bài đăng của bạn không được duyệt. Lý do: {reason}"
       }
-    },
-    "mediaApprovedProduct": {
-      "heading": "Ảnh sản phẩm đã được duyệt",
-      "body": "Ảnh của tin đăng \"{product}\" đã được duyệt và hiện hiển thị trên Chợ F."
-    },
-    "mediaRejectedProduct": {
-      "heading": "Một ảnh sản phẩm bị từ chối",
-      "body": "Ảnh của tin đăng \"{product}\" không được duyệt. Lý do: {reason}"
-    },
-    "mediaApprovedPost": {
-      "heading": "Ảnh bài đăng đã được duyệt",
-      "body": "Ảnh trong bài đăng của bạn đã được duyệt và hiện hiển thị trên Cộng đồng F."
-    },
-    "mediaRejectedPost": {
-      "heading": "Một ảnh bài đăng bị từ chối",
-      "body": "Ảnh trong bài đăng của bạn không được duyệt. Lý do: {reason}"
     },
     "notifications": {
       "booking": {
@@ -3712,6 +3713,10 @@
         "rentalDueTomorrow": {
           "title": "Ngày mai đến hạn trả đồ thuê",
           "message": "Đơn #{orderNumber} đến hạn trả vào ngày mai. Hãy liên hệ cửa hàng để hẹn lịch trả."
+        },
+        "pickupStatusLabel": {
+          "SHIPPED": "Sẵn sàng để bạn đến nhận",
+          "DELIVERED": "Đã nhận hàng"
         }
       },
       "stock": {
@@ -4978,8 +4983,6 @@
       "addedToCart": "Đã thêm vào giỏ hàng",
       "rentalDays": "{days} ngày ×",
       "depositNote": "Tiền cọc (shop thu, hoàn lại khi trả đồ)",
-      "shipsFrom": "Giao từ {location}",
-      "shippingOrPickup": "Có giao hàng hoặc tự đến lấy",
       "paymentByShop": "Shop trực tiếp thu tiền và giao nhận với bạn",
       "returnPolicyByShop": "Điều kiện đổi trả do shop quy định",
       "conditionNew": "Mới",
@@ -5020,7 +5023,11 @@
         "alertOnToast": "Bạn sẽ nhận thông báo khi có hàng trở lại",
         "alertOffToast": "Đã bỏ theo dõi sản phẩm này"
       },
-      "conditionAverage": "Trung bình"
+      "conditionAverage": "Trung bình",
+      "pickupOnly": "Shop không giao hàng — bạn đến nhận tại shop",
+      "pickupOnlyAt": "Shop không giao hàng — nhận tại {location}",
+      "freeDeliveryOrPickup": "Giao hàng miễn phí hoặc tự đến lấy",
+      "deliveryFeeOrPickup": "Phí giao hàng {fee}, hoặc tự đến lấy"
     },
     "community": {
       "heading": "Cộng đồng F",

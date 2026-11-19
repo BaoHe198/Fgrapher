@@ -38,6 +38,8 @@ export interface ProductImage {
 interface ProductImageUploaderProps {
   images: ProductImage[];
   onChange: (images: ProductImage[]) => void;
+  // Lets the form hold its Save button until the photos have landed.
+  onUploadingChange?: (uploading: boolean) => void;
 }
 
 function SortableThumb({
@@ -101,9 +103,17 @@ function SortableThumb({
 export function ProductImageUploader({
   images,
   onChange,
+  onUploadingChange,
 }: ProductImageUploaderProps) {
   const t = useTranslations("uiKit.productImageUploader");
-  const [isUploading, setIsUploading] = useState(false);
+  const [isUploading, setIsUploadingState] = useState(false);
+  const setIsUploading = useCallback(
+    (uploading: boolean) => {
+      setIsUploadingState(uploading);
+      onUploadingChange?.(uploading);
+    },
+    [onUploadingChange],
+  );
   const [error, setError] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -148,17 +158,21 @@ export function ProductImageUploader({
               return { url: result.secure_url, publicId: result.public_id };
             }
           } catch {
-            setError(t("uploadFailed"));
+            // Reported below, together with a refusal from storage.
           }
           return null;
         }),
-      );
+      ).catch((): (ProductImage | null)[] => [null]);
+
+      // A photo storage refused used to vanish without a word; only a
+      // dropped connection was reported.
+      if (results.some((r) => r === null)) setError(t("uploadFailed"));
 
       const uploaded = results.filter((r): r is ProductImage => r !== null);
       onChange([...images, ...uploaded]);
       setIsUploading(false);
     },
-    [images, onChange, t],
+    [images, onChange, setIsUploading, t],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
