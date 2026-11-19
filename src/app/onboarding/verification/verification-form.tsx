@@ -109,7 +109,9 @@ function FileSlot({
   }, [file]);
 
   return (
-    <div className="flex flex-col gap-1.5">
+    // justify-end: a label that wraps to two lines ("Ảnh chân dung cầm giấy
+    // tờ") must not push its tile below the other two.
+    <div className="flex h-full flex-col justify-end gap-1.5">
       <span className="text-body-sm font-semibold! text-text-primary">
         {label}
       </span>
