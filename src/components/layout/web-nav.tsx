@@ -152,7 +152,10 @@ export function WebNav({
                   href={link.href}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "focus-ring rounded-full px-4 py-2.5 text-body-md whitespace-nowrap transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken",
+                    // Tighter below 1366px: with every section switched on
+                    // the row was wider than a 1180-1280px window and the
+                    // page scrolled sideways (measured 19/11/2026).
+                    "focus-ring rounded-full px-3 py-2.5 text-body-md whitespace-nowrap transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken min-[1366px]:px-4",
                     isActive
                       ? "font-semibold! text-text-primary"
                       : "text-text-secondary hover:text-text-primary",
@@ -168,14 +171,25 @@ export function WebNav({
             {isPaid ? (
               <Link
                 href="/dashboard"
-                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-md whitespace-nowrap text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken lg:inline-flex"
+                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-md whitespace-nowrap text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken min-[1366px]:inline-flex"
               >
                 {t("dashboard")}
               </Link>
             ) : (
               <Link
                 href="/pricing"
-                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-md whitespace-nowrap text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken lg:inline-flex"
+                className={cn(
+                  "focus-ring hidden rounded-full px-4 py-2.5 text-body-md whitespace-nowrap text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken",
+                  // This side also holds the icons and the account pill.
+                  // Shown from "lg" the row overflowed: by 36px at 1366px
+                  // for a signed-in customer (who has the messages, cart
+                  // and bell icons too), by up to 168px between 1180 and
+                  // 1280px for everyone (measured 19/11/2026). The account
+                  // menu carries the same link, so it waits for room.
+                  isAuthenticated
+                    ? "min-[1440px]:inline-flex"
+                    : "min-[1366px]:inline-flex",
+                )}
               >
                 {t("becomeProvider")}
               </Link>
