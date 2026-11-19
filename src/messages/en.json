@@ -2098,7 +2098,9 @@
         "cancel": "Cancel",
         "create": "Create album",
         "createFailed": "Couldn't create the album, please try again",
-        "createdToast": "Album created"
+        "createdToast": "Album created",
+        "titlePlaceholder": "Optional — left blank, it's named after the category",
+        "defaultTitle": "{category} album"
       },
       "detail": {
         "back": "Back to portfolio",
@@ -5301,7 +5303,8 @@
       "albumCreateButton": "Create album",
       "albumTitleRequired": "Album title must be at least 2 characters",
       "albumCategoryRequired": "Please choose a category",
-      "albumCreateFailed": "Couldn't create the album, please try again"
+      "albumCreateFailed": "Couldn't create the album, please try again",
+      "albumTitlePlaceholder": "Optional — left blank, it is named after the category"
     },
     "mediaLightbox": {
       "close": "Close",

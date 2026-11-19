@@ -184,12 +184,14 @@ export function UploadMediaModal({
 
   const createAlbumInline = async () => {
     setAlbumError(null);
-    if (newAlbumTitle.trim().length < 2) {
-      setAlbumError(t("albumTitleRequired"));
-      return;
-    }
     if (!newAlbumCategory) {
       setAlbumError(t("albumCategoryRequired"));
+      return;
+    }
+    // The title is optional (the API names the album after its category);
+    // a single character is more likely a slip than a title.
+    if (newAlbumTitle.trim().length === 1) {
+      setAlbumError(t("albumTitleRequired"));
       return;
     }
 
@@ -199,7 +201,7 @@ export function UploadMediaModal({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         profileId,
-        title: newAlbumTitle.trim(),
+        title: newAlbumTitle.trim() || undefined,
         category: newAlbumCategory,
       }),
     });
@@ -408,6 +410,7 @@ export function UploadMediaModal({
               <div className="flex flex-col gap-2.5">
                 <Input
                   label={t("albumTitleLabel")}
+                  placeholder={t("albumTitlePlaceholder")}
                   value={newAlbumTitle}
                   onChange={(e) => setNewAlbumTitle(e.target.value)}
                 />

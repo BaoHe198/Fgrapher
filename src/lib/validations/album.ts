@@ -3,7 +3,15 @@ import { z } from "zod";
 
 export const createAlbumSchema = z.object({
   profileId: z.string(),
-  title: z.string().min(2, "Enter an album title").max(120),
+  // Optional since 19/11/2026 (owner): left blank, POST /api/albums names
+  // the album after its category. A single character is still refused —
+  // that is a slip, not a title.
+  title: z
+    .string()
+    .trim()
+    .max(120)
+    .refine((value) => value.length !== 1, "Enter an album title")
+    .optional(),
   description: z.string().max(1000).optional(),
   // Required for every NEW album (Prompt G3, VIỆC 1's comment on
   // Album.category — only the one legacy migrated "Ảnh chưa phân loại"

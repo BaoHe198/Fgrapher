@@ -93,7 +93,16 @@ export async function POST(request: Request) {
     }
     await requireActiveSubscription(session.user.id, profile.role);
 
-    const album = await createAlbum(profile.id, parsed.data);
+    // No title given: name it after the category, in the provider's own
+    // language ("Album Chân dung").
+    const title =
+      parsed.data.title ||
+      (await getTranslations("dashboardCore.albums.form"))("defaultTitle", {
+        category: (await getTranslations("profileCategory"))(
+          parsed.data.category,
+        ),
+      });
+    const album = await createAlbum(profile.id, { ...parsed.data, title });
     return NextResponse.json(
       { data: album, error: null, message: t("albumCreated") },
       { status: 201 },

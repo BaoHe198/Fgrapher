@@ -35,10 +35,12 @@ interface AlbumFormDialogProps {
   onCreated: (album: CreatedAlbum) => void;
 }
 
-// Prompt G3, VIỆC 2 — "Form album: tiêu đề (bắt buộc), mô tả (tùy chọn),
-// thể loại (bắt buộc, lọc theo vai trò...), ngày chụp (tùy chọn)". Reused
-// as-is (not extended) by the upload modal's new "create album inline"
-// step — see upload-media-modal.tsx.
+// Prompt G3, VIỆC 2 — "Form album: tiêu đề, mô tả (tùy chọn), thể loại
+// (bắt buộc, lọc theo vai trò...), ngày chụp (tùy chọn)". The title was
+// required by that prompt; the owner made it optional on 19/11/2026 — left
+// blank, the album is named after its category ("Album Chân dung"), which
+// is what most providers typed anyway. Reused as-is (not extended) by the
+// upload modal's "create album inline" step — see upload-media-modal.tsx.
 export function AlbumFormDialog({
   open,
   onOpenChange,
@@ -67,12 +69,13 @@ export function AlbumFormDialog({
 
   const onSubmit = async () => {
     setError(null);
-    if (title.trim().length < 2) {
-      setError(t("titleRequired"));
-      return;
-    }
     if (!category) {
       setError(t("categoryRequired"));
+      return;
+    }
+    // A single character is more likely a slip than a title.
+    if (title.trim().length === 1) {
+      setError(t("titleRequired"));
       return;
     }
 
@@ -82,7 +85,8 @@ export function AlbumFormDialog({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         profileId,
-        title: title.trim(),
+        // Blank is fine: the API names the album after its category.
+        title: title.trim() || undefined,
         description: description.trim() || undefined,
         category,
         shootDate: shootDate || undefined,
@@ -118,6 +122,7 @@ export function AlbumFormDialog({
         <div className="flex flex-col gap-3.5">
           <Input
             label={t("titleLabel")}
+            placeholder={t("titlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -138,7 +143,11 @@ export function AlbumFormDialog({
           <NativeSelect
             label={t("categoryLabel")}
             value={category}
-            onChange={setCategory}
+            onChange={(value) => {
+              setCategory(value);
+              // "Choose a category" must not outlive the choice.
+              setError(null);
+            }}
             options={[
               { value: "", label: t("categoryPlaceholder") },
               ...categoryOptions.map((c) => ({

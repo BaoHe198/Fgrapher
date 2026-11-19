@@ -2098,7 +2098,9 @@
         "cancel": "Hủy",
         "create": "Tạo album",
         "createFailed": "Không thể tạo album, vui lòng thử lại",
-        "createdToast": "Đã tạo album mới"
+        "createdToast": "Đã tạo album mới",
+        "titlePlaceholder": "Không bắt buộc — để trống sẽ đặt theo thể loại",
+        "defaultTitle": "Album {category}"
       },
       "detail": {
         "back": "Quay lại portfolio",
@@ -5301,7 +5303,8 @@
       "albumCreateButton": "Tạo album",
       "albumTitleRequired": "Tên album phải có ít nhất 2 ký tự",
       "albumCategoryRequired": "Vui lòng chọn danh mục",
-      "albumCreateFailed": "Không thể tạo album, vui lòng thử lại"
+      "albumCreateFailed": "Không thể tạo album, vui lòng thử lại",
+      "albumTitlePlaceholder": "Không bắt buộc — để trống sẽ đặt theo thể loại"
     },
     "mediaLightbox": {
       "close": "Đóng",
