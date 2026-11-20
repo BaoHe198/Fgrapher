@@ -109,6 +109,47 @@ Khi kiểm tra thủ công trên production, luôn gửi header
 development cho phép bỏ secret để tiện thử và có thể tạo thông báo thật trong
 database dev.
 
+### Tóm tắt lịch làm việc cho provider (từ 20/11/2026)
+
+Hai cron, mỗi cái một lần mỗi ngày:
+
+| Route                                   | Lịch (UTC)    | Giờ Việt Nam | Nội dung                 |
+| --------------------------------------- | ------------- | ------------ | ------------------------ |
+| `GET /api/cron/schedule-digest/evening` | `0 13 * * *`  | khoảng 20:00 | "Ngày mai bạn có N việc" |
+| `GET /api/cron/schedule-digest/morning` | `30 23 * * *` | khoảng 06:30 | "Hôm nay bạn có N việc"  |
+
+Mỗi provider có việc trong ngày đó nhận **một** thông báo và **một** email liệt kê
+mọi việc theo thứ tự giờ: lịch đặt Fgrapher đã xác nhận và buổi làm việc tự ghi
+(`CalendarEntry`). Người không có việc thì không nhận gì. Chạy lại cùng ngày không
+gửi trùng (mã định danh theo loại + ngày + người nhận). Loại thông báo là
+`BOOKING_REMINDER`, nên provider tắt/bật bằng mục "Nhắc lịch sắp tới" trong Cài đặt
+thông báo. Logic nằm ở `sendScheduleDigests` (`src/services/work-calendar.ts`).
+
+Vì đã có bản tóm tắt này, cron `booking-reminders` (16:00 hôm trước) chỉ còn nhắc
+**khách hàng**; provider không nhận thêm thư riêng cho từng lịch đặt nữa.
+
+Giới hạn cần biết: gói Vercel Hobby chỉ chạy cron một lần mỗi ngày và có thể lệch
+tới một giờ, nên Fgrapher **không** nhắc được kiểu "trước buổi chụp 1 tiếng". Việc
+báo đúng giờ do điện thoại của provider đảm nhận, qua đồng bộ lịch (mục dưới).
+
+### Đồng bộ lịch sang điện thoại
+
+Provider bật trong trang Lịch làm việc → "Nhắc lịch". Hệ thống tạo một địa chỉ
+`/api/calendar/feed/<mã bí mật>` trả về toàn bộ lịch dạng iCalendar; ứng dụng lịch
+của điện thoại tự tải địa chỉ này, không có phiên đăng nhập, nên **mã trong địa chỉ
+chính là quyền truy cập** (`User.calendarFeedToken`).
+
+- Nội dung gồm tên, số điện thoại khách và địa chỉ buổi chụp. Khi provider đăng ký
+  vào Google Calendar hay iCloud, dữ liệu đó nằm cả ở bên thứ ba ấy.
+- "Đổi địa chỉ mới" thay mã và làm địa chỉ cũ trả 404 ngay; "Tắt đồng bộ" xoá mã.
+  Tài khoản bị khoá hoặc xoá thì địa chỉ cũng ngừng trả dữ liệu.
+- Google Calendar tự quyết định khi nào tải lại (có thể tới 24 giờ) và không bật
+  báo thức cho lịch đăng ký từ URL. Lịch của iPhone tải lại thường xuyên hơn và có
+  báo thức nếu người dùng tắt "Xóa cảnh báo" khi thêm. Nút "Thêm vào lịch điện
+  thoại" trên từng việc (`/api/calendar/ics`) chép một việc vào máy ngay lập tức.
+- Nếu một provider báo lộ lịch: bảo họ bấm "Đổi địa chỉ mới". Không có cách nào
+  thu hồi bản đã được tải về máy người khác.
+
 ## 5. Thanh toán
 
 Phần này chỉ áp dụng cho phương thức đã được bật.

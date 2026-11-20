@@ -164,11 +164,40 @@ hợp:
 - lịch làm việc thường lệ;
 - ngày bị chặn;
 - booking đang giữ chỗ;
+- buổi làm việc provider tự ghi (`CalendarEntry`, xem "Lịch làm việc" bên dưới);
 - thời gian báo trước;
 - múi giờ và ngày người dùng chọn.
 
 Server phải kiểm tra lại availability ngay trước khi tạo booking để hai khách không
 giành cùng một khung giờ.
+
+### Lịch làm việc của provider (20/11/2026)
+
+Trang `/dashboard/calendar` là sổ lịch của provider, không chỉ là nơi chặn ngày:
+
+- **Một danh sách cho cả ngày.** Lịch đặt Fgrapher, buổi tự ghi và giờ bận được gom
+  thành một danh sách theo thứ tự giờ (`getWorkAgenda`, `lib/calendar/agenda.ts`).
+  Trang lịch, bản tóm tắt nhắc lịch và nguồn lịch cho điện thoại đều đọc cùng một
+  hàm này nên không thể lệch nhau.
+- **Buổi tự ghi (`CalendarEntry`).** Việc provider nhận ngoài Fgrapher: tên việc,
+  ngày, giờ bắt đầu/kết thúc, địa điểm, tên và số điện thoại khách, giá đã thỏa
+  thuận, ghi chú. Chỉ chủ lịch đọc và sửa được. Giờ đã ghi tự đóng trên hồ sơ công
+  khai: hai bộ tính giờ trống (`services/availability.ts`, `services/fmap.ts`) đọc
+  thẳng các dòng này, chỉ lấy khung giờ, không lấy thông tin khách. Buổi tự ghi được
+  phép trùng giờ với việc khác (đó là sổ của provider); thẻ việc hiện cảnh báo
+  "Trùng giờ".
+- **Ghi chú riêng trên lịch đặt (`BookingNote`).** Mỗi bên giữ một ghi chú của riêng
+  mình trên một lịch đặt. Là bảng riêng chứ không phải cột của `Booking`, để không
+  truy vấn lịch đặt nào vô tình trả ghi chú cho bên kia.
+- **Dữ liệu của người ngoài.** Tên và số điện thoại trong buổi tự ghi thuộc về người
+  không dùng Fgrapher. Vì vậy buổi tự ghi bị xoá hẳn khi provider xoá (ngoại lệ của
+  quy ước xoá mềm), nằm trong "tải dữ liệu của tôi" và bị xoá khi xoá tài khoản.
+  Phần pháp lý của việc lưu này **chưa được luật sư xem** (xem checklist).
+- **Giao diện.** Điện thoại: dải 7 ngày vuốt ngang, thẻ việc lớn có nút Gọi và Chỉ
+  đường, nút "Thêm lịch" nổi, các bảng trượt lên từ đáy màn hình. Màn hình rộng: lưới
+  tháng bên trái, việc của ngày đang chọn bên phải.
+- **Nhắc lịch.** Tóm tắt tối hôm trước và sáng trong ngày; đồng bộ sang lịch điện
+  thoại. Chi tiết vận hành ở `docs/OPERATIONS.md`.
 
 Không có lịch làm việc thường lệ thì nhà cung cấp không bao giờ rảnh: không hiện trên
 Bản đồ F, không qua được bộ lọc ngày của /browse và không có khung giờ để đặt. Vì vậy
