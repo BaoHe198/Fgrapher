@@ -34,7 +34,11 @@ export default async function CalendarPage({
   ]);
 
   return (
+    // Keyed by the day asked for: a reminder pressed while the calendar is
+    // already open changes only ?date=, and without a new key the page kept
+    // its own state and stayed on the day it was showing.
     <CalendarClient
+      key={initialDate}
       initialItems={items}
       initialDate={initialDate}
       todayKey={todayKey}

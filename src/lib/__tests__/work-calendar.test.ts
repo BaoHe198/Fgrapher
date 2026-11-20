@@ -6,6 +6,7 @@ import {
   type AgendaItem,
   addDays,
   clashingKeys,
+  digestDateKey,
   groupByDay,
   instantToVietnam,
   isDateKey,
@@ -40,6 +41,7 @@ function item(over: Partial<AgendaItem>): AgendaItem {
     privateNote: null,
     price: null,
     href: null,
+    updatedAt: null,
     ...over,
   };
 }
@@ -340,5 +342,62 @@ describe("controls in the calendar's narrow panels", () => {
       assert.ok(source.includes("focus-visible:-outline-offset-2"), path);
       assert.doesNotMatch(source, /"focus-ring |focus-ring flex/, path);
     }
+  });
+});
+
+describe("which day a schedule summary is about", () => {
+  // vercel.json: evening "0 13 * * *", morning "30 23 * * *" (UTC). Hobby
+  // runs a job any time within its hour.
+  it("the evening run, early or late in its hour, is about tomorrow", () => {
+    for (const at of ["2026-11-20T13:00:00Z", "2026-11-20T13:59:59Z"]) {
+      assert.equal(digestDateKey("evening", new Date(at)), "2026-11-21", at);
+    }
+  });
+
+  it("the morning run, early or late in its hour, is about that same morning", () => {
+    // 23:30 UTC on the 20th is 06:30 on the 21st in Vietnam.
+    for (const at of ["2026-11-20T23:30:00Z", "2026-11-21T00:29:59Z"]) {
+      assert.equal(digestDateKey("morning", new Date(at)), "2026-11-21", at);
+    }
+  });
+
+  it("crosses month and year ends", () => {
+    assert.equal(
+      digestDateKey("evening", new Date("2026-12-31T13:00:00Z")),
+      "2027-01-01",
+    );
+    assert.equal(
+      digestDateKey("morning", new Date("2026-12-31T23:30:00Z")),
+      "2027-01-01",
+    );
+  });
+
+  it("matches the schedule written in vercel.json", () => {
+    const crons = JSON.parse(readFileSync("vercel.json", "utf8")).crons as {
+      path: string;
+      schedule: string;
+    }[];
+    const at = (path: string) => crons.find((c) => c.path === path)?.schedule;
+    assert.equal(at("/api/cron/schedule-digest/evening"), "0 13 * * *");
+    assert.equal(at("/api/cron/schedule-digest/morning"), "30 23 * * *");
+  });
+});
+
+describe("getting back to a job", () => {
+  const read = (path: string) => readFileSync(path, "utf8");
+
+  it("a reminder pressed while the calendar is open moves it to that day", () => {
+    // Only ?date= changes; without a key keyed to it the page kept its own
+    // state and stayed on the day it was showing.
+    const source = read("src/app/(dashboard)/dashboard/calendar/page.tsx");
+    assert.match(source, /<CalendarClient\s+key=\{initialDate\}/);
+  });
+
+  it("the provider's own note is on the booking page too, for the provider only", () => {
+    const source = read("src/app/(dashboard)/dashboard/bookings/[id]/page.tsx");
+    assert.match(
+      source,
+      /viewerIsProvider \? \(?\s*<BookingPrivateNote bookingId=\{booking\.id\} \/>/,
+    );
   });
 });

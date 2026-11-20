@@ -85,6 +85,11 @@ function eventLines(event: IcsEvent, now: Date) {
   if (event.status) lines.push(`STATUS:${event.status}`);
   if (event.lastModified) {
     lines.push(`LAST-MODIFIED:${stamp(event.lastModified)}`);
+    // Revision number: must grow with every change. Seconds since 2020
+    // does, and fits the 32-bit integer some calendar apps store it in.
+    lines.push(
+      `SEQUENCE:${Math.max(0, Math.floor((event.lastModified.getTime() - Date.UTC(2020, 0, 1)) / 1000))}`,
+    );
   }
   for (const minutes of event.alarmMinutes ?? []) {
     lines.push(
