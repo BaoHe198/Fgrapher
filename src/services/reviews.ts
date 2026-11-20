@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
+import { isUniqueViolation } from "@/lib/db-lock";
 import { newReviewEmailHtml, reviewResponseEmailHtml } from "@/lib/email";
 import { notify } from "@/services/notification";
 import { PAID_ROLES } from "@/lib/constants";
@@ -119,16 +120,27 @@ export async function createReview({
   }
 
   const booking = eligibility.booking;
-  const review = await db.review.create({
-    data: {
-      bookingId,
-      reviewerId,
-      reviewedId: booking.providerId,
-      rating,
-      content,
-    },
-    include: { reviewer: { select: { firstName: true, name: true } } },
-  });
+  // One review per booking is the database's rule (bookingId is unique), so
+  // a second submit that slipped past the eligibility read above — a double
+  // press on "Gửi đánh giá" — is refused there. Say so in the usual words
+  // instead of letting the constraint surface as a server error.
+  const review = await db.review
+    .create({
+      data: {
+        bookingId,
+        reviewerId,
+        reviewedId: booking.providerId,
+        rating,
+        content,
+      },
+      include: { reviewer: { select: { firstName: true, name: true } } },
+    })
+    .catch((error: unknown) => {
+      if (isUniqueViolation(error)) {
+        throw new ReviewError("You've already reviewed this booking", 400);
+      }
+      throw error;
+    });
 
   // A new review changes the provider's rating + review count — both feed
   // the browse cards, the featured strip and the public profile's reviews tab.

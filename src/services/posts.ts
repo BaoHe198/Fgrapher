@@ -3,6 +3,7 @@ import type { PostKind, Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
 import { db } from "@/lib/db";
+import { LOCKED_TRANSACTION, lockInTransaction } from "@/lib/db-lock";
 import { verifyPortfolioUpload } from "@/lib/media/cloudinary";
 import { runPostMediaModeration } from "@/services/moderation";
 import { notify } from "@/services/notification";
@@ -471,30 +472,36 @@ export async function toggleLike(postId: string, userId: string) {
   });
   if (!post || post.deletedAt) throw new PostError("Post not found", 404);
 
-  const existing = await db.like.findUnique({
-    where: { userId_postId: { userId, postId } },
-  });
+  // One person's presses on one post take turns. Read outside a lock, two
+  // quick presses both saw "not liked": one insert won and the other
+  // answered with a server error (and, the other way round, two deletes of
+  // the same row).
+  const result = await db.$transaction(async (tx) => {
+    await lockInTransaction(tx, `like:${userId}:${postId}`);
+    const existing = await tx.like.findUnique({
+      where: { userId_postId: { userId, postId } },
+    });
 
-  if (existing) {
-    const [, updated] = await db.$transaction([
-      db.like.delete({ where: { id: existing.id } }),
-      db.post.update({
+    if (existing) {
+      await tx.like.delete({ where: { id: existing.id } });
+      const updated = await tx.post.update({
         where: { id: postId },
         data: { likeCount: { decrement: 1 } },
         select: { likeCount: true },
-      }),
-    ]);
-    return { liked: false, likeCount: updated.likeCount };
-  }
+      });
+      return { liked: false, likeCount: updated.likeCount };
+    }
 
-  const [, updated] = await db.$transaction([
-    db.like.create({ data: { userId, postId } }),
-    db.post.update({
+    await tx.like.create({ data: { userId, postId } });
+    const updated = await tx.post.update({
       where: { id: postId },
       data: { likeCount: { increment: 1 } },
       select: { likeCount: true },
-    }),
-  ]);
+    });
+    return { liked: true, likeCount: updated.likeCount };
+  }, LOCKED_TRANSACTION);
+  if (!result.liked) return result;
+  const updated = result;
 
   if (post.userId !== userId) {
     const nt = await getTranslations("libServices.notifications");

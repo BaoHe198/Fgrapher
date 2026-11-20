@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { LOCKED_TRANSACTION, lockInTransaction } from "@/lib/db-lock";
 import { HIGH_PRIORITY_REPORT_REASONS } from "@/lib/constants";
 import { reportSchema } from "@/lib/validations/review";
 
@@ -33,27 +34,38 @@ export async function POST(request: Request) {
     // again used to add a duplicate row to the moderation queue; now it
     // updates the open one with the latest reason and details, and can only
     // raise its priority, never lower it.
-    const existing = await db.report.findFirst({
-      where: {
-        reporterId: session.user.id,
-        targetType: parsed.data.targetType,
-        targetId: parsed.data.targetId,
-        status: { in: ["PENDING", "REVIEWING"] },
-      },
-      select: { id: true, priority: true },
-    });
-    const report = existing
-      ? await db.report.update({
-          where: { id: existing.id },
-          data: {
-            reason: parsed.data.reason,
-            description: parsed.data.description,
-            priority: existing.priority === "HIGH" ? "HIGH" : priority,
-          },
-        })
-      : await db.report.create({
-          data: { reporterId: session.user.id, priority, ...parsed.data },
-        });
+    // Looked up and written under one lock — otherwise a double press on
+    // "Gửi báo cáo" finds nothing twice and files the duplicates this rule
+    // exists to prevent.
+    const reporterId = session.user.id;
+    const { existing, report } = await db.$transaction(async (tx) => {
+      await lockInTransaction(
+        tx,
+        `report:${reporterId}:${parsed.data.targetType}:${parsed.data.targetId}`,
+      );
+      const existing = await tx.report.findFirst({
+        where: {
+          reporterId,
+          targetType: parsed.data.targetType,
+          targetId: parsed.data.targetId,
+          status: { in: ["PENDING", "REVIEWING"] },
+        },
+        select: { id: true, priority: true },
+      });
+      const report = existing
+        ? await tx.report.update({
+            where: { id: existing.id },
+            data: {
+              reason: parsed.data.reason,
+              description: parsed.data.description,
+              priority: existing.priority === "HIGH" ? "HIGH" : priority,
+            },
+          })
+        : await tx.report.create({
+            data: { reporterId, priority, ...parsed.data },
+          });
+      return { existing, report };
+    }, LOCKED_TRANSACTION);
 
     return NextResponse.json(
       { data: report, error: null, message: "Report submitted" },

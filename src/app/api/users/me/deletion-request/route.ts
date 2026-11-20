@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
-import { db } from "@/lib/db";
 import { logAudit, requestDeletion } from "@/services/compliance";
 
 // Creates a DataRequest rather than deleting immediately — an admin
@@ -16,17 +15,13 @@ export async function POST() {
   try {
     const session = await requireAuth();
 
-    const pending = await db.dataRequest.findFirst({
-      where: {
-        userId: session.user.id,
-        type: "DELETION",
-        status: { in: ["PENDING", "PROCESSING"] },
-      },
-    });
-    if (pending) {
+    const { request: dataRequest, created } = await requestDeletion(
+      session.user.id,
+    );
+    if (!created) {
       return NextResponse.json(
         {
-          data: pending,
+          data: dataRequest,
           error: null,
           message: t("deletionAlreadyPending"),
         },
@@ -34,7 +29,6 @@ export async function POST() {
       );
     }
 
-    const dataRequest = await requestDeletion(session.user.id);
     await logAudit({
       actorId: session.user.id,
       action: "ACCOUNT_DELETION_REQUESTED",
