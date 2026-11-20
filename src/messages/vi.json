@@ -4471,6 +4471,7 @@
         "upgradeHintSupport": "Gói của bạn đã hết hạn nên chưa tạo được album mới. <link>Liên hệ Fgrapher</link> để được gia hạn.",
         "albumsHeading": "Album dự án",
         "allPhotos": "Tất cả ảnh",
+        "showMore": "Xem thêm · còn {remaining} ảnh",
         "filterByStyle": "Lọc theo phong cách",
         "albumFrame": "{count} ảnh"
       },

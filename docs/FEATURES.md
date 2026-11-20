@@ -110,6 +110,11 @@ Nhà cung cấp quản lý media theo album:
 Mỗi upload có trạng thái kiểm duyệt. Chỉ media `APPROVED` được trả cho trang công
 khai. Chủ hồ sơ vẫn thấy trạng thái pending/rejected để sửa.
 
+Trên trang hồ sơ công khai, khung "Tất cả ảnh" mở ra với 9 ảnh; nút "Xem thêm ·
+còn N ảnh" mở thêm 9 ảnh mỗi lần, để khách không phải cuộn qua cả portfolio mới
+tới phần đánh giá và thông tin bên dưới. Đổi bộ lọc phong cách thì quay về 9 ảnh;
+trình xem ảnh vẫn lướt được qua mọi ảnh và tự mở thêm khung phía sau cho khớp.
+
 Khi bộ quét tự động bật, nó chỉ phân loại/rút ngắn hàng chờ. Người kiểm duyệt mới
 quyết định xử lý tài khoản. Ảnh giấy tờ KYC không được gửi qua luồng quét portfolio.
 
