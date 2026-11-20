@@ -1024,7 +1024,8 @@
         "statusVerified": "Đã xác minh",
         "statusActive": "Đang hoạt động",
         "empty": "Không tìm thấy người dùng nào",
-        "scrollHint": "Vuốt ngang để xem thêm cột"
+        "scrollHint": "Vuốt ngang để xem thêm cột",
+        "roleFilterLabel": "Lọc theo vai trò"
       },
       "userDetail": {
         "manualPlan": {
@@ -1199,14 +1200,16 @@
           "typeFilter": {
             "all": "Tất cả loại",
             "export": "Xuất dữ liệu",
-            "deletion": "Xóa dữ liệu"
+            "deletion": "Xóa dữ liệu",
+            "label": "Lọc theo loại yêu cầu"
           },
           "statusFilter": {
             "all": "Tất cả trạng thái",
             "pending": "Đang chờ",
             "processing": "Đang xử lý",
             "completed": "Đã hoàn tất",
-            "rejected": "Đã từ chối"
+            "rejected": "Đã từ chối",
+            "label": "Lọc theo trạng thái"
           },
           "empty": "Không có yêu cầu dữ liệu nào",
           "unknownUser": "Người dùng không xác định",

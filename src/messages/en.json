@@ -1024,7 +1024,8 @@
         "statusVerified": "Verified",
         "statusActive": "Active",
         "empty": "No users found",
-        "scrollHint": "Swipe to see more columns"
+        "scrollHint": "Swipe to see more columns",
+        "roleFilterLabel": "Filter by role"
       },
       "userDetail": {
         "manualPlan": {
@@ -1199,14 +1200,16 @@
           "typeFilter": {
             "all": "All types",
             "export": "Export",
-            "deletion": "Deletion"
+            "deletion": "Deletion",
+            "label": "Filter by request type"
           },
           "statusFilter": {
             "all": "All statuses",
             "pending": "Pending",
             "processing": "Processing",
             "completed": "Completed",
-            "rejected": "Rejected"
+            "rejected": "Rejected",
+            "label": "Filter by status"
           },
           "empty": "No data requests",
           "unknownUser": "Unknown user",

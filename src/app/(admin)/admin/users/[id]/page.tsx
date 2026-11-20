@@ -264,6 +264,7 @@ export default function AdminUserDetailPage() {
               <Textarea
                 rows={2}
                 placeholder={t("violations.reasonPlaceholder")}
+                aria-label={t("violations.reasonPlaceholder")}
                 value={violationReason}
                 onChange={(e) => setViolationReason(e.target.value)}
               />
@@ -301,6 +302,7 @@ export default function AdminUserDetailPage() {
               </span>
               <Textarea
                 rows={3}
+                aria-label={t("adminNotesLabel")}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
@@ -348,6 +350,7 @@ export default function AdminUserDetailPage() {
             </div>
             <Textarea
               placeholder={t("manualPlan.notePlaceholder")}
+              aria-label={t("manualPlan.notePlaceholder")}
               rows={2}
               value={planNote}
               onChange={(e) => setPlanNote(e.target.value)}

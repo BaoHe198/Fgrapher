@@ -130,6 +130,7 @@ function DataRequestsPanel() {
             { value: "EXPORT", label: t("typeFilter.export") },
             { value: "DELETION", label: t("typeFilter.deletion") },
           ]}
+          aria-label={t("typeFilter.label")}
           className="w-44"
         />
         <NativeSelect
@@ -142,6 +143,7 @@ function DataRequestsPanel() {
             { value: "COMPLETED", label: t("statusFilter.completed") },
             { value: "REJECTED", label: t("statusFilter.rejected") },
           ]}
+          aria-label={t("statusFilter.label")}
           className="w-44"
         />
       </div>
