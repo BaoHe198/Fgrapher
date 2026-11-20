@@ -246,13 +246,13 @@ export function ShareClient({
             size="sm"
             variant="outline"
             nativeButton={false}
-            render={<Link href="/dashboard/settings/profile" />}
+            render={<Link href="/dashboard/my-page/info#anh" />}
           >
             {t("setUsername")}
           </Button>
         </div>
       ) : (
-        <div className="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[1fr_360px]">
           <div className="flex min-w-0 flex-col gap-6">
             <section
               aria-labelledby="share-link"

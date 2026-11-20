@@ -14,6 +14,9 @@ function Tag({ selected = false, className, render, ...props }: TagProps) {
     props: mergeProps<"button">(
       {
         type: "button",
+        // A toggle chip: say whether it is on. Only for the button form — a
+        // tag rendered as a link is navigation, not a toggle.
+        ...(render ? {} : { "aria-pressed": selected }),
         className: cn(
           "cursor-pointer rounded-full border px-3.5 py-2 text-body-sm font-semibold! transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-150 hover:-translate-y-px active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40",
           selected
