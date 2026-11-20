@@ -37,6 +37,8 @@ export interface AgendaItem {
   price: number | null;
   /** Bookings open their own page; entries and blocks are edited in place. */
   href: string | null;
+  /** When the row last changed (ISO), for the phone feed's change markers. */
+  updatedAt: string | null;
 }
 
 export const VIETNAM_OFFSET_MS = 7 * 60 * 60 * 1000;
@@ -101,6 +103,18 @@ export function monthWindow(dateKey: string) {
   nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
   const last = addDays(nextMonth.toISOString().slice(0, 10), -1);
   return { from: weekOf(first)[0], to: addDays(weekOf(last)[6], 1) };
+}
+
+/**
+ * The Vietnam day a schedule summary is about: today for the morning one,
+ * tomorrow for the evening one. Read from the moment the job actually runs,
+ * which on Vercel Hobby can be any time within the scheduled hour (evening
+ * 20:00-20:59, morning 06:30-07:29 Vietnam time) — both stay inside the
+ * intended day.
+ */
+export function digestDateKey(kind: "evening" | "morning", now = new Date()) {
+  const today = vietnamTodayKey(now);
+  return kind === "morning" ? today : addDays(today, 1);
 }
 
 /** Earliest first; a whole-day item leads its day. */

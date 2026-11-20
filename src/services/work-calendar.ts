@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import {
   addDays,
   type AgendaItem,
+  digestDateKey,
   instantToVietnam,
   sortAgenda,
   timeRangeLabel,
@@ -74,6 +75,7 @@ export async function getWorkAgenda(
       privateNote: noteByBooking.get(booking.id) ?? null,
       price: booking.totalPrice,
       href: `/dashboard/bookings/${booking.id}`,
+      updatedAt: booking.updatedAt.toISOString(),
     })),
     ...entries.map((entry): AgendaItem => {
       const start = instantToVietnam(entry.startAt);
@@ -93,6 +95,7 @@ export async function getWorkAgenda(
         privateNote: null,
         price: entry.price,
         href: null,
+        updatedAt: entry.updatedAt.toISOString(),
       };
     }),
     ...blocks.map((block): AgendaItem => ({
@@ -110,6 +113,7 @@ export async function getWorkAgenda(
       privateNote: null,
       price: null,
       href: null,
+      updatedAt: null,
     })),
   ];
 
@@ -121,6 +125,23 @@ export async function getWorkAgenda(
 // ---------------------------------------------------------------------------
 
 export class BookingNoteError extends Error {}
+
+/** The caller's own note on a booking they are part of, or "" if none. */
+export async function getBookingNote(bookingId: string, userId: string) {
+  const booking = await db.booking.findFirst({
+    where: {
+      id: bookingId,
+      OR: [{ providerId: userId }, { customerId: userId }],
+    },
+    select: { id: true },
+  });
+  if (!booking) throw new BookingNoteError("not_found");
+  const row = await db.bookingNote.findUnique({
+    where: { bookingId_userId: { bookingId, userId } },
+    select: { note: true },
+  });
+  return row?.note ?? "";
+}
 
 /**
  * Saves the caller's own note on a booking they are part of; an empty note
@@ -182,8 +203,7 @@ const DELIVERY_CONCURRENCY = 10;
  * day's run harmless.
  */
 export async function sendScheduleDigests(kind: DigestKind, now = new Date()) {
-  const today = vietnamTodayKey(now);
-  const dateKey = kind === "morning" ? today : addDays(today, 1);
+  const dateKey = digestDateKey(kind, now);
   const nextKey = addDays(dateKey, 1);
 
   const [bookings, entries] = await Promise.all([
@@ -357,6 +377,9 @@ async function toIcsEvents(items: AgendaItem[]): Promise<IcsEvent[]> {
         description: description || null,
         url: item.href ? appUrl(item.href) : null,
         status: pending ? "TENTATIVE" : "CONFIRMED",
+        // Lets a calendar app that kept an earlier copy (an imported .ics)
+        // see this one is newer and replace it rather than ignore it.
+        lastModified: item.updatedAt ? new Date(item.updatedAt) : null,
         alarmMinutes: ALARM_MINUTES,
       } satisfies IcsEvent;
     });

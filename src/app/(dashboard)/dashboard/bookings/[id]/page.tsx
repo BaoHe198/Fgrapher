@@ -25,6 +25,7 @@ import { startTransition, useEffect, useState } from "react";
 
 import { ReferenceMediaGallery } from "@/components/media/reference-media-gallery";
 import { BookingFilmStrip } from "@/components/booking/booking-film-strip";
+import { BookingPrivateNote } from "@/components/booking/booking-private-note";
 import { ReviewModal } from "@/components/modals/review-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -512,6 +513,11 @@ export default function BookingDetailPage() {
                 {booking.notes}
               </p>
             </Card>
+          ) : null}
+
+          {/* The provider's own note, the one kept in the work calendar. */}
+          {viewerIsProvider ? (
+            <BookingPrivateNote bookingId={booking.id} />
           ) : null}
 
           {/* The customer's reference photos/videos. Booking.referenceImages
