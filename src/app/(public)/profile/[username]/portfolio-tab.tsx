@@ -30,6 +30,7 @@ import {
 } from "react";
 
 import { FrameMark } from "@/components/brand/frame-mark";
+import { Button } from "@/components/ui/button";
 import { MasonryGrid } from "@/components/ui/masonry-grid";
 import { PinButton } from "@/components/media/pin-button";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
@@ -39,6 +40,11 @@ import { cn } from "@/lib/utils";
 
 import { AlbumEditDialog } from "./album-edit-dialog";
 import { AlbumFormDialog } from "@/app/(dashboard)/dashboard/portfolio/album-form-dialog";
+
+// "Tất cả ảnh" opens on this many photos and each "Xem thêm" adds as many
+// again (owner, 20/11/2026): with every photo shown at once, reaching the
+// reviews and details below meant scrolling past the whole portfolio.
+const PHOTOS_PER_PAGE = 9;
 
 interface MediaItem {
   id: string;
@@ -249,6 +255,7 @@ export function PortfolioTab({
   // Index into visiblePhotos; null = closed. Separate from openAlbumId,
   // which drives the owner grid's per-album preview.
   const [photoIndex, setPhotoIndex] = useState<number | null>(null);
+  const [shownCount, setShownCount] = useState(PHOTOS_PER_PAGE);
   const [localOwnerAlbums, setLocalOwnerAlbums] = useState(ownerAlbums ?? []);
   const [editingAlbum, setEditingAlbum] = useState<OwnerAlbum | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -310,6 +317,20 @@ export function PortfolioTab({
   const visibleImages = visiblePhotos.filter((photo) => photo.type === "IMAGE");
   const openPhoto =
     photoIndex === null ? null : (visibleImages[photoIndex] ?? null);
+  const shownImages = visibleImages.slice(0, shownCount);
+  const hiddenCount = visibleImages.length - shownImages.length;
+  const pickCategory = (category: ProfileCategory | null) => {
+    setActiveCategory(category);
+    setShownCount(PHOTOS_PER_PAGE);
+  };
+  // The lightbox still steps through every photo; stepping past the last
+  // one shown reveals up to it, so closing flies back to a tile that exists.
+  const showPhoto = (index: number) => {
+    setPhotoIndex(index);
+    if (index >= shownCount) {
+      setShownCount(Math.ceil((index + 1) / PHOTOS_PER_PAGE) * PHOTOS_PER_PAGE);
+    }
+  };
 
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -507,14 +528,14 @@ export function PortfolioTab({
                   <AlbumChip
                     label={t("allAlbums")}
                     active={activeCategory === null}
-                    onClick={() => setActiveCategory(null)}
+                    onClick={() => pickCategory(null)}
                   />
                   {photoCategories.map((category) => (
                     <AlbumChip
                       key={category}
                       label={categoryT(category)}
                       active={activeCategory === category}
-                      onClick={() => setActiveCategory(category)}
+                      onClick={() => pickCategory(category)}
                     />
                   ))}
                 </div>
@@ -523,18 +544,27 @@ export function PortfolioTab({
             {/* Every photo at its own ratio (MasonryGrid never crops). */}
             <div ref={gridRef}>
               <MasonryGrid
-                items={visiblePhotos
-                  .filter((photo) => photo.type === "IMAGE")
-                  .map((photo) => ({
-                    id: photo.id,
-                    src: buildMediaVariants(photo.url).medium,
-                    width: photo.width,
-                    height: photo.height,
-                    alt: photo.title ?? photo.album.title,
-                  }))}
+                items={shownImages.map((photo) => ({
+                  id: photo.id,
+                  src: buildMediaVariants(photo.url).medium,
+                  width: photo.width,
+                  height: photo.height,
+                  alt: photo.title ?? photo.album.title,
+                }))}
                 onOpen={setPhotoIndex}
               />
             </div>
+            {hiddenCount > 0 ? (
+              <Button
+                variant="outline"
+                className="self-center"
+                onClick={() =>
+                  setShownCount((count) => count + PHOTOS_PER_PAGE)
+                }
+              >
+                {t("showMore", { remaining: hiddenCount })}
+              </Button>
+            ) : null}
           </section>
         </>
       )}
@@ -570,7 +600,7 @@ export function PortfolioTab({
           originFor={originFor}
           index={photoIndex ?? 0}
           onClose={() => setPhotoIndex(null)}
-          onIndexChange={setPhotoIndex}
+          onIndexChange={showPhoto}
           actions={
             isOwnProfile ? undefined : <PinButton mediaId={openPhoto.id} />
           }

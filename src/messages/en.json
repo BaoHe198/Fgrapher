@@ -4471,6 +4471,7 @@
         "upgradeHintSupport": "Your plan has expired, so you can't create new albums yet. <link>Contact Fgrapher</link> to have it renewed.",
         "albumsHeading": "Project albums",
         "allPhotos": "All photos",
+        "showMore": "Show more · {remaining} left",
         "filterByStyle": "Filter by style",
         "albumFrame": "{count} photos"
       },
