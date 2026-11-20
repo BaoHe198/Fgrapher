@@ -53,6 +53,14 @@
     {
       "path": "/api/cron/rental-return-reminders",
       "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/schedule-digest/evening",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/schedule-digest/morning",
+      "schedule": "30 23 * * *"
     }
   ]
 }

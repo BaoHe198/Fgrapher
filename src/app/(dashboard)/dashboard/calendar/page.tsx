@@ -1,14 +1,18 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { isDateKey, monthWindow, vietnamTodayKey } from "@/lib/calendar/agenda";
 import { PROVIDER_ROLES } from "@/lib/constants";
-import { listBlockedDates } from "@/services/availability";
 import { listWeeklyRules } from "@/services/resource-calendar";
-import { listBookingsForRange } from "@/services/bookings";
+import { getWorkAgenda } from "@/services/work-calendar";
 
 import { CalendarClient } from "./calendar-client";
 
-export default async function CalendarPage() {
+export default async function CalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
@@ -17,27 +21,24 @@ export default async function CalendarPage() {
     redirect("/dashboard");
   }
 
-  const now = new Date();
-  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  // A reminder links to the day it is about (?date=2026-11-25); anything
+  // else opens on today, Vietnam time.
+  const todayKey = vietnamTodayKey();
+  const { date } = await searchParams;
+  const initialDate = isDateKey(date) ? date : todayKey;
+  const range = monthWindow(initialDate);
 
-  const [bookings, blockedDates, weeklySchedule] = await Promise.all([
-    listBookingsForRange({ providerId: session.user.id, from, to }),
-    listBlockedDates(session.user.id, from, to),
+  const [items, weeklySchedule] = await Promise.all([
+    getWorkAgenda(session.user.id, range.from, range.to),
     listWeeklyRules(session.user.id),
   ]);
 
   return (
     <CalendarClient
-      initialBookings={bookings}
-      initialBlockedDates={blockedDates.map((b) => ({
-        id: b.id,
-        date: b.dateKey,
-        reason: b.reason,
-        startTime: b.startTime,
-        endTime: b.endTime,
-      }))}
-      initialWeeklySchedule={weeklySchedule}
+      initialItems={items}
+      initialDate={initialDate}
+      todayKey={todayKey}
+      weeklySchedule={weeklySchedule}
     />
   );
 }

@@ -1,449 +1,485 @@
 "use client";
 
-import { ListSkeleton } from "@/components/ui/skeleton";
-import type { Booking, User } from "@prisma/client";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Ban,
+  Bell,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Plus,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
-
-import type { WeeklyRule } from "@/services/resource-calendar";
 import Link from "next/link";
 import {
   startTransition,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 
+import { AgendaCard } from "@/components/calendar/agenda-card";
+import { EntrySheet } from "@/components/calendar/entry-sheet";
+import { ItemSheet } from "@/components/calendar/item-sheet";
+import { MonthGrid } from "@/components/calendar/month-grid";
+import { SyncSheet } from "@/components/calendar/sync-sheet";
 import {
-  BOOKING_STATUS_TONE,
-  BookingStatusBadge,
-} from "@/components/booking/booking-status-badge";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { WEEKDAY_SHORT_LABELS_VI } from "@/lib/constants";
-import { formatMonthYear, formatWeekdayDayMonth } from "@/lib/format";
-import { cn, mondayFirstColumn } from "@/lib/utils";
+  type DaySummary,
+  KIND_DOT,
+  WeekStrip,
+} from "@/components/calendar/week-strip";
+import { Button } from "@/components/ui/button";
+import { DateField } from "@/components/ui/date-field";
+import { ListSkeleton } from "@/components/ui/skeleton";
+import {
+  type AgendaItem,
+  addDays,
+  agendaKey,
+  clashingKeys,
+  groupByDay,
+  monthWindow,
+  weekdayOf,
+  weekOf,
+} from "@/lib/calendar/agenda";
+import { formatDateLong, formatMonthYear } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import type { WeeklyRule } from "@/services/resource-calendar";
 
-import { BlockDayDialog, type BlockedDateRow } from "./block-day-dialog";
+import { BlockDayDialog } from "./block-day-dialog";
 
-type BookingParty = Pick<User, "firstName" | "name">;
-type BookingRow = Booking & {
-  customer: BookingParty;
-  provider: BookingParty;
-  service: { name: string } | null;
-};
-
-function monthKey(date: Date) {
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+interface CalendarClientProps {
+  initialItems: AgendaItem[];
+  /** The day to open on: today, or ?date= from a reminder's link. */
+  initialDate: string;
+  /** Vietnam's today, decided on the server so both renders agree. */
+  todayKey: string;
+  weeklySchedule: WeeklyRule[];
 }
 
-function dateKey(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
+type Panel =
+  | { type: "entry"; entry: AgendaItem | null }
+  | { type: "item"; item: AgendaItem }
+  | { type: "block" }
+  | { type: "sync" }
+  | null;
 
 export function CalendarClient({
-  initialBookings,
-  initialBlockedDates,
-  initialWeeklySchedule,
-}: {
-  initialBookings: BookingRow[];
-  initialBlockedDates: BlockedDateRow[];
-  // Only the four fields the editor renders — the rows come from
-  // AvailabilityRule now, not the retired userId-keyed Availability table.
-  initialWeeklySchedule: WeeklyRule[];
-}) {
+  initialItems,
+  initialDate,
+  todayKey,
+  weeklySchedule,
+}: CalendarClientProps) {
   const t = useTranslations("dashboardCore.calendar");
-  const tBookings = useTranslations("dashboardCore.bookings");
+  const v2 = useTranslations("dashboardCore.calendar.v2");
 
-  function partyName(party: BookingParty) {
-    return party.firstName ?? party.name ?? tBookings("unknownParty");
-  }
+  const [selected, setSelected] = useState(initialDate);
+  const [items, setItems] = useState(initialItems);
+  const [loadedMonth, setLoadedMonth] = useState(initialDate.slice(0, 7));
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [panel, setPanel] = useState<Panel>(null);
+  // Bumped to refetch the month that is already on screen (after a save).
+  const [revision, setRevision] = useState(0);
+  const lastRevision = useRef(0);
 
-  const [view, setView] = useState<"MONTH" | "AGENDA">("MONTH");
-  // QA: the month grid's day cells (min-h-[96px] in a 7-col grid) crammed
-  // a date number next to a "Chưa có giờ làm" pill badge — fine at
-  // desktop widths, genuinely too tight on a real phone. AGENDA (list)
-  // mode has no such cell — full-width rows instead — so default to it
-  // below the lg breakpoint, once, on mount; still just a default, the
-  // toggle above keeps working normally either direction from there.
+  const range = useMemo(() => monthWindow(selected), [selected]);
+  const selectedMonth = selected.slice(0, 7);
+
+  // Load a month when the chosen day leaves the one on screen, and again
+  // whenever something in it was changed. The first month came with the page.
   useEffect(() => {
-    if (window.innerWidth < 1024) startTransition(() => setView("AGENDA"));
-    // Intentionally mount-only — this sets the initial default, not a
-    // live resize listener that would fight a user's manual toggle.
-  }, []);
-  const [monthCursor, setMonthCursor] = useState(() => new Date());
-  const [bookings, setBookings] = useState<BookingRow[]>(initialBookings);
-  const [blockedDates, setBlockedDates] =
-    useState<BlockedDateRow[]>(initialBlockedDates);
-  const [weeklySchedule, setWeeklySchedule] = useState<WeeklyRule[]>(
-    initialWeeklySchedule,
-  );
-  const [isLoading, setIsLoading] = useState(false);
-  const [dialogDate, setDialogDate] = useState<Date | null>(null);
-  // The initial month's data already arrived via SSR (see page.tsx) —
-  // skip the redundant client refetch on mount; month navigation still
-  // triggers a normal client fetch.
-  const isFirstRender = useRef(true);
-
-  const load = useCallback(() => {
-    startTransition(() => setIsLoading(true));
-    const from = new Date(
-      Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth(), 1),
-    );
-    const to = new Date(
-      Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth() + 1, 1),
-    );
-    Promise.all([
-      fetch(`/api/bookings/calendar?month=${monthKey(monthCursor)}`).then(
-        (res) => res.json(),
-      ),
-      fetch(`/api/blocked-dates?from=${dateKey(from)}&to=${dateKey(to)}`).then(
-        (res) => res.json(),
-      ),
-      // The customer-facing booking engine (services/availability.ts)
-      // only ever treats a day as bookable if it falls inside a saved
-      // weekly working-hours window — without this, "no bookings and no
-      // explicit block" reads as "open" here even on a day nobody could
-      // actually book, which is exactly backwards.
-      fetch("/api/availability").then((res) => res.json()),
-    ]).then(([bookingsBody, blockedBody, availabilityBody]) => {
-      startTransition(() => {
-        setBookings(bookingsBody.data ?? []);
-        setBlockedDates(blockedBody.data ?? []);
-        setWeeklySchedule(availabilityBody.data?.schedule ?? []);
-        setIsLoading(false);
-      });
-    });
-  }, [monthCursor]);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    const changed = revision !== lastRevision.current;
+    if (selectedMonth === loadedMonth && !changed) return;
+    lastRevision.current = revision;
+    let cancelled = false;
+    // Keep what is on screen while re-reading the same month; only a new
+    // month shows the placeholder.
+    if (selectedMonth !== loadedMonth) {
+      startTransition(() => setStatus("loading"));
     }
-    load();
-  }, [load]);
+    fetch(`/api/calendar?from=${range.from}&to=${range.to}`)
+      .then(async (res) => {
+        const body = await res.json();
+        if (!res.ok) throw new Error(body?.message);
+        return body.data.items as AgendaItem[];
+      })
+      .then((next) => {
+        if (cancelled) return;
+        startTransition(() => {
+          setItems(next);
+          setLoadedMonth(selectedMonth);
+          setStatus("idle");
+        });
+      })
+      .catch(() => {
+        if (!cancelled) startTransition(() => setStatus("error"));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMonth, loadedMonth, revision, range.from, range.to]);
 
-  const byDate = new Map<string, BookingRow[]>();
-  for (const booking of bookings) {
-    const key = dateKey(new Date(booking.date));
-    if (!byDate.has(key)) byDate.set(key, []);
-    byDate.get(key)!.push(booking);
-  }
+  const reload = useCallback(() => setRevision((n) => n + 1), []);
 
-  const blockedByDate = new Map<string, BlockedDateRow>();
-  for (const b of blockedDates) {
-    blockedByDate.set(dateKey(new Date(b.date)), {
-      ...b,
-      date: dateKey(new Date(b.date)),
-    });
-  }
+  const byDay = useMemo(() => groupByDay(items), [items]);
+  const summaries = useMemo(() => {
+    const map = new Map<string, DaySummary>();
+    for (const [dateKey, dayItems] of byDay) {
+      map.set(dateKey, {
+        jobs: dayItems
+          .filter((item) => item.kind !== "BLOCK")
+          .map((item) => item.kind as "BOOKING" | "ENTRY"),
+        blocked: dayItems.some((item) => item.kind === "BLOCK"),
+      });
+    }
+    return map;
+  }, [byDay]);
 
-  const workingWeekdays = new Set(weeklySchedule.map((w) => w.dayOfWeek));
+  const dayItems = useMemo(() => byDay.get(selected) ?? [], [byDay, selected]);
+  const clashing = useMemo(() => clashingKeys(dayItems), [dayItems]);
+  const dayJobs = dayItems.filter((item) => item.kind !== "BLOCK").length;
+  const dayBlock = dayItems.find((item) => item.kind === "BLOCK") ?? null;
 
-  const firstOfMonth = new Date(
-    Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth(), 1),
+  const workingWeekdays = useMemo(
+    () =>
+      new Set(
+        weeklySchedule
+          .filter((rule) => rule.isActive)
+          .map((rule) => rule.dayOfWeek),
+      ),
+    [weeklySchedule],
   );
-  const startWeekday = mondayFirstColumn(firstOfMonth.getUTCDay());
-  const daysInMonth = new Date(
-    Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth() + 1, 0),
-  ).getUTCDate();
+  const dayHours = weeklySchedule
+    .filter((rule) => rule.isActive && rule.dayOfWeek === weekdayOf(selected))
+    .map((rule) => `${rule.startTime}–${rule.endTime}`)
+    .join(", ");
 
-  const cells: (Date | null)[] = [
-    ...Array.from({ length: startWeekday }, () => null),
-    ...Array.from(
-      { length: daysInMonth },
-      (_, i) =>
-        new Date(
-          Date.UTC(
-            monthCursor.getUTCFullYear(),
-            monthCursor.getUTCMonth(),
-            i + 1,
-          ),
-        ),
-    ),
-  ];
+  const describeDay = (dateKey: string, jobs: number) =>
+    v2("dayWithJobs", { day: formatDateLong(dateKey), count: jobs });
 
-  // Vietnam's today, not UTC's. dateKey() is toISOString-based, so from
-  // midnight to 07:00 in Vietnam the highlighted "today" was yesterday.
-  const todayKey = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Ho_Chi_Minh",
-  }).format(new Date());
-
-  const changeMonth = (delta: number) => {
-    setMonthCursor(
-      (prev) =>
-        new Date(
-          Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + delta, 1),
-        ),
+  const openItem = (item: AgendaItem) =>
+    setPanel(
+      item.kind === "BLOCK" ? { type: "block" } : { type: "item", item },
     );
-  };
+
+  const isLoadingMonth = status === "loading";
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4 pb-40 lg:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-display-md text-text-primary">{t("title")}</h1>
-        <div className="inline-flex overflow-hidden rounded-full border border-border-subtle">
-          {(["MONTH", "AGENDA"] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setView(v)}
-              className={cn(
-                "px-4 py-1.5 text-body-sm font-semibold!",
-                view === v
-                  ? "bg-brand-primary text-text-on-brand"
-                  : "text-text-secondary",
-              )}
-            >
-              {v === "MONTH" ? t("monthView") : t("agendaView")}
-            </button>
-          ))}
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setPanel({ type: "sync" })}
+          className="min-h-10"
+        >
+          <Bell className="size-4" />
+          {v2("sync")}
+        </Button>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-1">
+        {/* A week at a time on a phone (the strip below), a month at a time
+            beside the month grid. */}
+        <button
+          type="button"
+          aria-label={v2("prevWeek")}
+          onClick={() => setSelected((day) => addDays(day, -7))}
+          className="focus-ring flex size-10 items-center justify-center rounded-full hover:bg-bg-sunken lg:hidden"
+        >
+          <ChevronLeft className="size-5" />
+        </button>
         <button
           type="button"
           aria-label={t("prevMonth")}
-          onClick={() => changeMonth(-1)}
-          className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
+          onClick={() => setSelected((day) => shiftMonth(day, -1))}
+          className="focus-ring hidden size-10 items-center justify-center rounded-full hover:bg-bg-sunken lg:flex"
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft className="size-5" />
         </button>
-        <span className="text-heading-sm text-text-primary">
-          {formatMonthYear(monthCursor)}
+        <span className="min-w-0 flex-1 text-center text-heading-sm text-text-primary first-letter:uppercase lg:flex-none lg:px-2">
+          {formatMonthYear(selected)}
         </span>
         <button
           type="button"
-          aria-label={t("nextMonth")}
-          onClick={() => changeMonth(1)}
-          className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
+          aria-label={v2("nextWeek")}
+          onClick={() => setSelected((day) => addDays(day, 7))}
+          className="focus-ring flex size-10 items-center justify-center rounded-full hover:bg-bg-sunken lg:hidden"
         >
-          <ChevronRight className="size-4" />
+          <ChevronRight className="size-5" />
         </button>
+        <button
+          type="button"
+          aria-label={t("nextMonth")}
+          onClick={() => setSelected((day) => shiftMonth(day, 1))}
+          className="focus-ring hidden size-10 items-center justify-center rounded-full hover:bg-bg-sunken lg:flex"
+        >
+          <ChevronRight className="size-5" />
+        </button>
+        <div className="flex items-center gap-2 lg:ml-auto">
+          <DateField
+            value={selected}
+            onChange={(value) => value && setSelected(value)}
+            aria-label={v2("jumpToDate")}
+            className="hidden w-40 sm:block"
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={selected === todayKey}
+            onClick={() => setSelected(todayKey)}
+            className="min-h-10"
+          >
+            {v2("today")}
+          </Button>
+        </div>
       </div>
 
-      {/* The legend explains the month grid's markers; the agenda list
-          (the default below lg) draws none of them, so there it only
-          described things that weren't on screen. */}
-      <div
-        className={cn(
-          "flex flex-wrap items-center gap-4 text-body-sm text-text-secondary",
-          view === "AGENDA" && "hidden",
-        )}
-      >
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-success" />
-          {t("legend.booked")}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-text-tertiary" />
-          {t("legend.blocked")}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full border border-success" />
-          {t("legend.open")}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full border border-dashed border-warning" />
-          {t("legend.noWorkingHours")}
-        </span>
+      <div className="lg:hidden">
+        <WeekStrip
+          days={weekOf(selected)}
+          selected={selected}
+          todayKey={todayKey}
+          summaries={summaries}
+          onSelect={setSelected}
+          onSwipe={(direction) =>
+            setSelected((day) => addDays(day, direction * 7))
+          }
+          label={v2("weekStripLabel")}
+          describeDay={describeDay}
+        />
       </div>
-      {/* The only way to block a day is to tap it, and nothing said so — the
-          legend named "Đã chặn" without saying how to get there. */}
-      {view === "AGENDA" ? null : (
-        <p className="-mt-2 text-body-sm text-text-tertiary">
-          {t("blockHint")}
-        </p>
-      )}
+
       {workingWeekdays.size === 0 ? (
-        <p className="text-body-sm text-warning">{t("noScheduleWarning")}</p>
+        <p className="rounded-[var(--fg-radius-md)] bg-warning-bg p-3 text-body-sm text-text-primary">
+          {t("noScheduleWarning")}{" "}
+          <Link
+            href="/dashboard/settings/profile?section=availability"
+            className="font-semibold! text-text-link hover:underline"
+          >
+            {v2("editHours")}
+          </Link>
+        </p>
       ) : null}
 
-      {isLoading ? (
-        <ListSkeleton />
-      ) : view === "MONTH" ? (
-        <Card padding={false} className="overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-border-subtle text-caption-upper tracking-[0.12em] text-text-tertiary">
-            {WEEKDAY_SHORT_LABELS_VI.map((d) => (
-              <div key={d} className="px-2 py-2.5 text-center">
-                {d}
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7">
-            {cells.map((date, i) => {
-              if (!date)
-                return (
-                  <div
-                    key={`empty-${i}`}
-                    className="min-h-[96px] border-b border-r border-border-subtle"
-                  />
-                );
-              const key = dateKey(date);
-              const dayBookings = byDate.get(key) ?? [];
-              const blocked = blockedByDate.get(key);
-              const noWorkingHours = !workingWeekdays.has(date.getUTCDay());
-              const isPast = key < todayKey;
-              // The legend has always promised an "open" marker, but no cell
-              // ever drew one: a working day with nothing booked rendered as
-              // a blank square, so a quiet month looked like a calendar that
-              // had failed to load.
-              const isOpen =
-                !isPast &&
-                !blocked &&
-                !noWorkingHours &&
-                dayBookings.length === 0;
-              return (
-                <div
-                  key={key}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setDialogDate(date)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setDialogDate(date);
-                    }
-                  }}
-                  className={cn(
-                    "min-h-[96px] cursor-pointer border-b border-r border-border-subtle p-1.5 hover:bg-bg-sunken",
-                    key === todayKey && "bg-success-bg/40",
-                    blocked && "bg-bg-sunken",
-                    !blocked && noWorkingHours && "bg-warning-bg/30",
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span
-                      className={cn(
-                        "text-body-sm font-semibold!",
-                        // Past days recede so the eye lands on what is
-                        // still to come; they stay clickable for history.
-                        isPast ? "text-text-tertiary" : "text-text-primary",
-                      )}
-                    >
-                      {date.getUTCDate()}
-                    </span>
-                    {isOpen ? (
-                      <span
-                        aria-hidden
-                        className="size-2 shrink-0 rounded-full border border-success"
-                      />
-                    ) : null}
-                    {/* Text pills hidden below sm — a 7-col grid cell on a
-                        real phone has no room for a date number plus a
-                        multi-word pill (QA: "rất chật"). The cell's own
-                        background tint (bg-warning-bg/30 / bg-bg-sunken
-                        above) plus the legend already carry the same
-                        meaning at a glance; the full pill comes back once
-                        cells actually have room for it. */}
-                    {blocked ? (
-                      <span className="hidden rounded-full bg-text-tertiary px-1.5 py-0.5 text-sm font-bold text-text-on-brand sm:inline-block">
-                        {t("busyLabel")}
-                      </span>
-                    ) : noWorkingHours ? (
-                      <span className="hidden rounded-full bg-warning px-1.5 py-0.5 text-sm font-bold text-text-on-brand sm:inline-block">
-                        {t("noHoursLabel")}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-1 flex flex-col gap-0.5">
-                    {dayBookings.slice(0, 3).map((b) => (
-                      <Link
-                        key={b.id}
-                        href={`/dashboard/bookings/${b.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1 truncate rounded-[4px] bg-bg-surface px-1 py-0.5 text-body-sm text-text-secondary hover:bg-bg-sunken"
-                      >
-                        <span
-                          className={cn(
-                            "size-1.5 shrink-0 rounded-full",
-                            BOOKING_STATUS_TONE[b.status].dot,
-                          )}
-                        />
-                        <span className="truncate">
-                          {b.startTime} {partyName(b.customer)}
-                        </span>
-                      </Link>
-                    ))}
-                    {dayBookings.length > 3 ? (
-                      <span className="text-body-sm text-text-tertiary">
-                        {t("moreCount", { count: dayBookings.length - 3 })}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      ) : (
-        <Card padding={false}>
-          {bookings.length === 0 && blockedDates.length === 0 ? (
-            <p className="px-5 py-8 text-center text-body-sm text-text-secondary">
-              {t("emptyMonth")}
-            </p>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] lg:items-start">
+        <div className="hidden flex-col gap-3 lg:flex">
+          {isLoadingMonth ? (
+            <ListSkeleton />
           ) : (
-            <>
-              {blockedDates.map((b) => (
-                <button
-                  key={b.id}
-                  type="button"
-                  onClick={() =>
-                    setDialogDate(new Date(`${b.date}T00:00:00.000Z`))
-                  }
-                  className="flex w-full items-center justify-between border-b border-border-subtle px-5 py-3.5 text-left last:border-b-0 hover:bg-bg-sunken"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-body-md font-semibold! text-text-primary">
-                      {t("busyLabel")}
-                      {b.reason ? ` · ${b.reason}` : ""}
-                    </span>
-                    <span className="text-body-sm text-text-secondary">
-                      {formatWeekdayDayMonth(b.date)}
-                      {b.startTime && b.endTime
-                        ? ` · ${b.startTime}–${b.endTime}`
-                        : ""}
-                    </span>
-                  </div>
-                  <Badge variant="neutral">{t("legend.blocked")}</Badge>
-                </button>
-              ))}
-              {bookings.map((b) => (
-                <Link
-                  key={b.id}
-                  href={`/dashboard/bookings/${b.id}`}
-                  className="flex items-center justify-between border-b border-border-subtle px-5 py-3.5 last:border-b-0 hover:bg-bg-sunken"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-body-md font-semibold! text-text-primary">
-                      {partyName(b.customer)} ·{" "}
-                      {b.service?.name ?? t("customRequest")}
-                    </span>
-                    <span className="text-body-sm text-text-secondary">
-                      {formatWeekdayDayMonth(b.date)} · {b.startTime}
-                    </span>
-                  </div>
-                  <BookingStatusBadge status={b.status} />
-                </Link>
-              ))}
-            </>
+            <MonthGrid
+              monthOf={selected}
+              from={range.from}
+              to={range.to}
+              selected={selected}
+              todayKey={todayKey}
+              byDay={byDay}
+              workingWeekdays={workingWeekdays}
+              onSelect={setSelected}
+              describeDay={describeDay}
+              labels={{
+                allDayBusy: t("busyLabel"),
+                customJob: v2("customJob"),
+                more: (count) => t("moreCount", { count }),
+              }}
+            />
           )}
-        </Card>
-      )}
+          <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-text-secondary">
+            {(["BOOKING", "ENTRY", "BLOCK"] as const).map((kind) => (
+              <li key={kind} className="flex items-center gap-1.5">
+                <span
+                  aria-hidden
+                  className={cn("size-2 rounded-full", KIND_DOT[kind])}
+                />
+                {v2(`monthLegend.${kind}`)}
+              </li>
+            ))}
+            <li className="flex items-center gap-1.5">
+              <span
+                aria-hidden
+                className="size-3 rounded-[3px] bg-warning-bg ring-1 ring-border-subtle"
+              />
+              {v2("monthLegend.closed")}
+            </li>
+          </ul>
+        </div>
 
+        <section
+          aria-labelledby="calendar-day-heading"
+          className="flex flex-col gap-3 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-1"
+        >
+          <div className="flex flex-col gap-1">
+            <h2
+              id="calendar-day-heading"
+              className="text-heading-sm text-text-primary first-letter:uppercase"
+            >
+              {formatDateLong(selected)}
+            </h2>
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-body-sm text-text-secondary">
+              <span>{v2("jobCount", { count: dayJobs })}</span>
+              <span className="flex items-center gap-1.5">
+                <Clock aria-hidden className="size-4 text-text-tertiary" />
+                {dayHours
+                  ? v2("workingHours", { hours: dayHours })
+                  : v2("noWorkingHours")}
+              </span>
+              <Link
+                href="/dashboard/settings/profile?section=availability"
+                // Padding without height: a text link's 22px line is a poor
+                // target for a thumb; this makes it 42px tall in place.
+                className="focus-ring -my-2.5 rounded-[4px] py-2.5 font-semibold! text-text-link hover:underline"
+              >
+                {v2("editHours")}
+              </Link>
+            </p>
+          </div>
+
+          {status === "error" ? (
+            <div
+              role="alert"
+              className="flex flex-col items-start gap-2 rounded-[var(--fg-radius-md)] bg-danger-bg p-4 text-body-sm text-danger"
+            >
+              {v2("loadFailed")}
+              <Button variant="outline" size="sm" onClick={reload}>
+                {v2("retry")}
+              </Button>
+            </div>
+          ) : isLoadingMonth ? (
+            <ListSkeleton />
+          ) : dayItems.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 rounded-[var(--fg-radius-lg)] border border-dashed border-border-default px-4 py-8 text-center">
+              <CalendarDays aria-hidden className="size-8 text-text-tertiary" />
+              <p className="text-body-md font-semibold! text-text-primary">
+                {v2("emptyDay")}
+              </p>
+              <p className="text-body-sm text-text-secondary">
+                {v2("emptyDayHint")}
+              </p>
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {dayItems.map((item) => (
+                <li key={agendaKey(item)}>
+                  <AgendaCard
+                    item={item}
+                    clashing={clashing.has(agendaKey(item))}
+                    onOpen={openItem}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="flex gap-2">
+            {/* On a phone "add" is the floating button below; this row keeps
+                the quieter action within reach on both. */}
+            <Button
+              variant="accent"
+              onClick={() => setPanel({ type: "entry", entry: null })}
+              className="hidden min-h-11 flex-1 lg:inline-flex"
+            >
+              <Plus className="size-4" />
+              {v2("addEntryLong")}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setPanel({ type: "block" })}
+              className="min-h-11 flex-1"
+            >
+              <Ban className="size-4" />
+              {dayBlock ? v2("editBusy") : v2("markBusy")}
+            </Button>
+          </div>
+        </section>
+      </div>
+
+      {/* Sits a toast's height above the bottom edge: "Đã lưu vào lịch"
+          appears there (full width on a phone) and, placed any lower, this
+          button could not be pressed again until the toast had gone — which
+          is exactly when someone entering a week of jobs wants it. */}
+      <Button
+        variant="accent"
+        size="lg"
+        onClick={() => setPanel({ type: "entry", entry: null })}
+        className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 min-h-14 rounded-full px-5 shadow-[var(--shadow-lg)] lg:hidden"
+      >
+        <Plus className="size-5" />
+        {v2("addEntry")}
+      </Button>
+
+      {panel?.type === "entry" ? (
+        <EntrySheet
+          key={panel.entry?.id ?? `new-${selected}`}
+          entry={panel.entry}
+          defaultDate={selected}
+          existing={items}
+          onOpenChange={(open) => {
+            if (!open) setPanel(null);
+          }}
+          onSaved={(dateKey) => {
+            setPanel(null);
+            setSelected(dateKey);
+            reload();
+          }}
+        />
+      ) : null}
+      {panel?.type === "item" ? (
+        <ItemSheet
+          key={agendaKey(panel.item)}
+          item={panel.item}
+          onOpenChange={(open) => {
+            if (!open) setPanel(null);
+          }}
+          onEdit={(entry) => setPanel({ type: "entry", entry })}
+          onChanged={() => {
+            setPanel(null);
+            reload();
+          }}
+        />
+      ) : null}
+      {panel?.type === "sync" ? (
+        <SyncSheet
+          onOpenChange={(open) => {
+            if (!open) setPanel(null);
+          }}
+        />
+      ) : null}
       <BlockDayDialog
-        date={dialogDate}
+        date={
+          panel?.type === "block" ? new Date(`${selected}T00:00:00.000Z`) : null
+        }
         existingBlock={
-          dialogDate ? (blockedByDate.get(dateKey(dialogDate)) ?? null) : null
+          dayBlock
+            ? {
+                id: dayBlock.id,
+                date: dayBlock.dateKey,
+                reason: dayBlock.notes,
+                startTime: dayBlock.startTime,
+                endTime: dayBlock.endTime,
+              }
+            : null
         }
         onOpenChange={(open) => {
-          if (!open) setDialogDate(null);
+          if (!open) setPanel(null);
         }}
-        onChanged={load}
+        onChanged={() => {
+          setPanel(null);
+          reload();
+        }}
       />
     </div>
   );
+}
+
+/** The same day of the month before or after, clamped to that month's end. */
+function shiftMonth(dateKey: string, delta: number) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const target = new Date(Date.UTC(year, month - 1 + delta, 1));
+  const lastDay = new Date(
+    Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  target.setUTCDate(Math.min(day, lastDay));
+  return target.toISOString().slice(0, 10);
 }

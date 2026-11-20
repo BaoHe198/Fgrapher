@@ -313,6 +313,55 @@ export function availabilityReminderEmailHtml({
   });
 }
 
+/**
+ * The provider's day in one email: every confirmed job on it, in the order
+ * the day runs. `lines` carry text the provider or a customer typed, so
+ * each value is escaped here.
+ */
+export function scheduleDigestEmailHtml({
+  t,
+  kind,
+  dayLabel,
+  lines,
+  calendarUrl,
+}: {
+  t: EmailT;
+  kind: "evening" | "morning";
+  dayLabel: string;
+  lines: {
+    time: string;
+    title: string;
+    who: string | null;
+    where: string | null;
+  }[];
+  calendarUrl: string;
+}) {
+  const rows = lines
+    .map((line) => {
+      const detail = [line.who, line.where]
+        .filter((value): value is string => Boolean(value))
+        .map(escapeHtml)
+        .join(" · ");
+      return `<tr>
+        <td style="padding: 10px 14px 10px 0; vertical-align: top; white-space: nowrap; font-weight: 700; color: #211b16;">${escapeHtml(line.time)}</td>
+        <td style="padding: 10px 0; vertical-align: top;">
+          <div style="font-weight: 700; color: #211b16;">${escapeHtml(line.title)}</div>
+          ${detail ? `<div style="margin-top: 2px; color: #6f6860;">${detail}</div>` : ""}
+        </td>
+      </tr>`;
+    })
+    .join("");
+  return bookingEmailShell({
+    t,
+    heading: t(`scheduleDigest.${kind}Heading`, { day: dayLabel }),
+    body: `<p style="margin: 0 0 12px;">${escapeHtml(
+      t("scheduleDigest.intro", { count: lines.length }),
+    )}</p><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width: 100%; border-top: 1px solid #ece6dc;">${rows}</table>`,
+    ctaLabel: t("scheduleDigest.cta"),
+    ctaUrl: calendarUrl,
+  });
+}
+
 export function bookingRescheduleProposedEmailHtml(
   props: BookingEmailBase & { t: EmailT },
 ) {

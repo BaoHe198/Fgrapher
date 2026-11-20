@@ -1710,6 +1710,28 @@
       "notEnoughStock": "{stock, plural, =0 {Sản phẩm này đã hết hàng.} other {Shop chỉ còn # sản phẩm này.}}",
       "alreadyAtStock": "Giỏ hàng của bạn đã có {inCart} sản phẩm này — shop chỉ còn {stock}.",
       "itemNotFound": "Sản phẩm này không còn trong giỏ hàng."
+    },
+    "calendar": {
+      "invalidRange": "Khoảng ngày không hợp lệ",
+      "providerOnly": "Chỉ tài khoản nhà cung cấp mới có lịch làm việc",
+      "loadFailed": "Không tải được lịch, vui lòng thử lại",
+      "saveFailed": "Chưa lưu được, vui lòng thử lại",
+      "deleteFailed": "Chưa xóa được, vui lòng thử lại",
+      "entrySaved": "Đã lưu vào lịch",
+      "entryDeleted": "Đã xóa khỏi lịch",
+      "entryNotFound": "Không tìm thấy buổi làm việc này",
+      "invalidEntry": "Thông tin chưa hợp lệ, vui lòng kiểm tra lại",
+      "entryErrors": {
+        "titleRequired": "Hãy ghi tên việc",
+        "titleTooLong": "Tên việc quá dài (tối đa 120 ký tự)",
+        "endBeforeStart": "Giờ kết thúc phải sau giờ bắt đầu",
+        "phoneInvalid": "Số điện thoại chỉ gồm chữ số và các dấu + - ( )"
+      },
+      "noteSaved": "Đã lưu ghi chú",
+      "noteFailed": "Chưa lưu được ghi chú, vui lòng thử lại",
+      "noteTooLong": "Ghi chú quá dài (tối đa 2.000 ký tự)",
+      "bookingNotFound": "Không tìm thấy lịch đặt",
+      "feedFailed": "Chưa thực hiện được, vui lòng thử lại"
     }
   },
   "dashboardCore": {
@@ -2211,22 +2233,11 @@
     },
     "calendar": {
       "title": "Lịch làm việc",
-      "monthView": "Tháng",
-      "agendaView": "Danh sách",
       "prevMonth": "Tháng trước",
       "nextMonth": "Tháng sau",
       "moreCount": "+{count} nữa",
-      "emptyMonth": "Không có lịch đặt trong tháng này",
-      "customRequest": "Yêu cầu tùy chỉnh",
       "busyLabel": "Bận",
-      "noHoursLabel": "Chưa có giờ làm",
       "noScheduleWarning": "Bạn chưa lưu lịch làm việc hàng tuần nào — khách sẽ không đặt được lịch cho tới khi bạn cấu hình và lưu ở Cài đặt hồ sơ.",
-      "legend": {
-        "booked": "Có đơn",
-        "blocked": "Đã chặn",
-        "open": "Còn trống",
-        "noWorkingHours": "Chưa cấu hình giờ làm việc"
-      },
       "blockDialog": {
         "title": "Ngày {date}",
         "modeDay": "Chặn cả ngày",
@@ -2245,7 +2256,118 @@
         "unblockedToast": "Đã bỏ chặn",
         "genericError": "Không thể thực hiện, vui lòng thử lại"
       },
-      "blockHint": "Bấm vào một ngày để chặn nghỉ (cả ngày, khung giờ hoặc nhiều ngày) hoặc bỏ chặn."
+      "v2": {
+        "today": "Hôm nay",
+        "prevWeek": "Tuần trước",
+        "nextWeek": "Tuần sau",
+        "jumpToDate": "Chọn ngày",
+        "weekStripLabel": "Các ngày trong tuần",
+        "dayWithJobs": "{day}, {count} việc",
+        "jobCount": "{count, plural, =0 {Chưa có việc} other {# việc}}",
+        "workingHours": "Giờ nhận khách: {hours}",
+        "noWorkingHours": "Ngày này bạn chưa mở giờ nhận khách",
+        "editHours": "Sửa giờ làm việc",
+        "emptyDay": "Chưa có việc nào trong ngày này",
+        "emptyDayHint": "Ghi vào đây buổi bạn nhận bên ngoài để không bị đặt trùng giờ.",
+        "addEntry": "Thêm lịch",
+        "addEntryLong": "Thêm buổi làm việc",
+        "markBusy": "Đánh dấu bận",
+        "editBusy": "Sửa lịch bận",
+        "sync": "Nhắc lịch",
+        "kind": {
+          "BOOKING": "Fgrapher",
+          "ENTRY": "Tự ghi",
+          "BLOCK": "Bận"
+        },
+        "allDay": "Cả ngày",
+        "busyTitle": "Bạn đánh dấu bận",
+        "customJob": "Buổi làm việc",
+        "pending": "Chờ bạn xác nhận",
+        "clash": "Trùng giờ với việc khác",
+        "call": "Gọi",
+        "directions": "Chỉ đường",
+        "details": "Chi tiết",
+        "edit": "Sửa",
+        "openBooking": "Mở lịch đặt",
+        "contactHidden": "Số điện thoại và địa chỉ sẽ hiện sau khi bạn xác nhận lịch.",
+        "customerNote": "Khách nhắn",
+        "privateNote": "Ghi chú riêng",
+        "price": "Giá",
+        "loadFailed": "Không tải được lịch. Kiểm tra mạng rồi thử lại.",
+        "retry": "Thử lại",
+        "dayPanelTitle": "Việc trong ngày",
+        "monthLegend": {
+          "BOOKING": "Lịch đặt Fgrapher",
+          "ENTRY": "Tự ghi",
+          "BLOCK": "Bận",
+          "closed": "Không mở giờ nhận khách"
+        },
+        "itemSheet": {
+          "addToPhone": "Thêm vào lịch điện thoại",
+          "addToPhoneHint": "Điện thoại sẽ báo trước giờ hẹn 1 tiếng.",
+          "google": "Google Calendar",
+          "otherCalendar": "Lịch iPhone / ứng dụng khác",
+          "notePlaceholder": "Ví dụ: mang đèn, khách thích tông ấm…",
+          "noteHint": "Chỉ bạn thấy ghi chú này.",
+          "saveNote": "Lưu ghi chú",
+          "noteSaved": "Đã lưu ghi chú",
+          "close": "Đóng"
+        },
+        "entryForm": {
+          "createTitle": "Thêm buổi làm việc",
+          "editTitle": "Sửa buổi làm việc",
+          "title": "Việc gì",
+          "titlePlaceholder": "Ví dụ: Chụp cưới, Quay sự kiện",
+          "date": "Ngày",
+          "start": "Bắt đầu",
+          "end": "Kết thúc",
+          "address": "Địa điểm",
+          "addressPlaceholder": "Số nhà, đường, phường…",
+          "customerName": "Tên khách",
+          "customerPhone": "Số điện thoại khách",
+          "price": "Giá đã thỏa thuận",
+          "notes": "Ghi chú",
+          "notesPlaceholder": "Thiết bị cần mang, yêu cầu của khách…",
+          "privacy": "Chỉ bạn thấy những thông tin này. Giờ đã ghi sẽ tự đóng trên hồ sơ của bạn, khách Fgrapher không đặt trùng được.",
+          "thirdParty": "Chỉ ghi thông tin mà khách đã đồng ý cho bạn lưu.",
+          "save": "Lưu",
+          "delete": "Xóa buổi này",
+          "deleteConfirm": "Xóa buổi làm việc này? Không khôi phục được.",
+          "confirmDelete": "Xóa",
+          "cancel": "Hủy",
+          "saved": "Đã lưu vào lịch",
+          "deleted": "Đã xóa khỏi lịch",
+          "clashWarning": "Giờ này trùng với một việc khác trong ngày. Bạn vẫn lưu được.",
+          "titleRequired": "Hãy ghi tên việc",
+          "endBeforeStart": "Giờ kết thúc phải sau giờ bắt đầu",
+          "genericError": "Chưa lưu được, vui lòng thử lại"
+        },
+        "syncSheet": {
+          "title": "Nhắc lịch và đồng bộ điện thoại",
+          "digestTitle": "Fgrapher nhắc bạn hai lần",
+          "digestBody": "Khoảng 20:00 tối hôm trước và 6:30 sáng trong ngày, bạn nhận một bản tóm tắt các việc đã xác nhận qua email và thông báo trên web.",
+          "digestSettings": "Cài đặt thông báo",
+          "phoneTitle": "Xem lịch ngay trong điện thoại",
+          "phoneBody": "Đăng ký địa chỉ dưới đây vào Lịch của iPhone hoặc Google Calendar. Lịch Fgrapher sẽ hiện chung với lịch cá nhân của bạn và máy báo trước giờ hẹn.",
+          "enable": "Tạo địa chỉ đồng bộ",
+          "addressLabel": "Địa chỉ đồng bộ của bạn",
+          "copy": "Sao chép",
+          "copied": "Đã sao chép địa chỉ",
+          "openApple": "Thêm vào Lịch iPhone",
+          "appleNote": "iPhone: khi được hỏi, tắt mục “Xóa cảnh báo” để máy báo trước 1 tiếng.",
+          "googleSteps": "Google Calendar: mở calendar.google.com trên máy tính, chọn Lịch khác → dấu + → Từ URL, rồi dán địa chỉ.",
+          "googleNote": "Google Calendar có thể mất tới một ngày mới cập nhật thay đổi và không tự bật báo thức. Việc nào cần chắc chắn, hãy mở việc đó và bấm “Thêm vào lịch điện thoại”.",
+          "secret": "Ai có địa chỉ này đều xem được lịch của bạn, kể cả tên và số điện thoại khách. Đừng gửi cho người khác.",
+          "rotate": "Đổi địa chỉ mới",
+          "rotateConfirm": "Địa chỉ cũ sẽ ngừng hoạt động ngay; các máy đang đồng bộ phải đăng ký lại. Tiếp tục?",
+          "rotated": "Đã đổi địa chỉ mới",
+          "disable": "Tắt đồng bộ",
+          "disabled": "Đã tắt đồng bộ",
+          "failed": "Chưa thực hiện được, vui lòng thử lại",
+          "cancel": "Hủy",
+          "created": "Đã tạo địa chỉ đồng bộ"
+        }
+      }
     },
     "bookingDetail": {
       "notFound": "Không tìm thấy lịch đặt",
@@ -3632,6 +3754,14 @@
         "heading": "Gói của bạn sắp hết hạn",
         "body": "Gói {role} của bạn hết hạn vào {periodEndLabel}. Gói không tự gia hạn: hãy thanh toán trước ngày đó để hồ sơ tiếp tục hiển thị và nhận đặt lịch. Sau ngày đó hồ sơ sẽ tạm ẩn cho tới khi bạn gia hạn; dữ liệu của bạn vẫn được giữ nguyên.",
         "cta": "Gia hạn gói"
+      },
+      "scheduleDigest": {
+        "eveningSubject": "Ngày mai bạn có {count} việc ({day}) — Fgrapher",
+        "morningSubject": "Hôm nay bạn có {count} việc ({day}) — Fgrapher",
+        "eveningHeading": "Lịch làm việc ngày mai, {day}",
+        "morningHeading": "Lịch làm việc hôm nay, {day}",
+        "intro": "Bạn có {count} việc đã xác nhận:",
+        "cta": "Mở lịch làm việc"
       }
     },
     "notifications": {
@@ -3828,7 +3958,23 @@
           "message": "Giấy tờ bạn gửi cho vai trò {role} chưa được chấp nhận. Bạn có thể gửi lại.",
           "messageWithReason": "Giấy tờ bạn gửi cho vai trò {role} chưa được chấp nhận. Lý do: {reason}. Bạn có thể gửi lại."
         }
+      },
+      "scheduleDigest": {
+        "eveningTitle": "Ngày mai bạn có {count} việc",
+        "morningTitle": "Hôm nay bạn có {count} việc",
+        "messageMore": "{summary}; và {more} việc khác",
+        "customJob": "Buổi làm việc"
       }
+    },
+    "calendarFeed": {
+      "name": "Lịch làm việc Fgrapher",
+      "customJob": "Buổi làm việc",
+      "customer": "Khách: {name}",
+      "phone": "Điện thoại: {phone}",
+      "price": "Giá: {price}",
+      "notes": "Ghi chú: {notes}",
+      "privateNote": "Ghi chú riêng: {note}",
+      "pendingPrefix": "[Chờ xác nhận]"
     }
   },
   "publicPages": {

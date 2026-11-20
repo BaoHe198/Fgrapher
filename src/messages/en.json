@@ -1710,6 +1710,28 @@
       "notEnoughStock": "{stock, plural, =0 {This item is sold out.} other {The shop only has # of this item.}}",
       "alreadyAtStock": "Your cart already holds {inCart} of this item — the shop only has {stock}.",
       "itemNotFound": "This item is no longer in your cart."
+    },
+    "calendar": {
+      "invalidRange": "Invalid date range",
+      "providerOnly": "Only provider accounts have a work calendar",
+      "loadFailed": "Could not load the calendar, please try again",
+      "saveFailed": "Could not save, please try again",
+      "deleteFailed": "Could not delete, please try again",
+      "entrySaved": "Saved to your calendar",
+      "entryDeleted": "Removed from your calendar",
+      "entryNotFound": "That job was not found",
+      "invalidEntry": "Please check the form and try again",
+      "entryErrors": {
+        "titleRequired": "Give the job a name",
+        "titleTooLong": "The name is too long (120 characters at most)",
+        "endBeforeStart": "The end must be after the start",
+        "phoneInvalid": "A phone number may contain only digits and + - ( )"
+      },
+      "noteSaved": "Note saved",
+      "noteFailed": "Could not save the note, please try again",
+      "noteTooLong": "The note is too long (2,000 characters at most)",
+      "bookingNotFound": "Booking not found",
+      "feedFailed": "That did not work, please try again"
     }
   },
   "dashboardCore": {
@@ -2211,22 +2233,11 @@
     },
     "calendar": {
       "title": "Calendar",
-      "monthView": "Month",
-      "agendaView": "Agenda",
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
       "moreCount": "+{count} more",
-      "emptyMonth": "No bookings this month",
-      "customRequest": "Custom request",
       "busyLabel": "Busy",
-      "noHoursLabel": "No hours set",
       "noScheduleWarning": "You haven't saved any weekly working hours yet — customers won't be able to book until you set and save them in Profile settings.",
-      "legend": {
-        "booked": "Booked",
-        "blocked": "Blocked",
-        "open": "Open",
-        "noWorkingHours": "No working hours set"
-      },
       "blockDialog": {
         "title": "{date}",
         "modeDay": "Block the whole day",
@@ -2245,7 +2256,118 @@
         "unblockedToast": "Unblocked",
         "genericError": "Something went wrong, please try again"
       },
-      "blockHint": "Tap a day to block it (whole day, a time window or several days) or to unblock it."
+      "v2": {
+        "today": "Today",
+        "prevWeek": "Previous week",
+        "nextWeek": "Next week",
+        "jumpToDate": "Pick a date",
+        "weekStripLabel": "Days of the week",
+        "dayWithJobs": "{day}, {count} jobs",
+        "jobCount": "{count, plural, =0 {Nothing yet} one {# job} other {# jobs}}",
+        "workingHours": "Open for bookings: {hours}",
+        "noWorkingHours": "You take no bookings on this day",
+        "editHours": "Edit working hours",
+        "emptyDay": "Nothing on this day yet",
+        "emptyDayHint": "Add a job you took elsewhere so nobody books over it.",
+        "addEntry": "Add job",
+        "addEntryLong": "Add a job",
+        "markBusy": "Mark as busy",
+        "editBusy": "Edit busy time",
+        "sync": "Reminders",
+        "kind": {
+          "BOOKING": "Fgrapher",
+          "ENTRY": "My own",
+          "BLOCK": "Busy"
+        },
+        "allDay": "All day",
+        "busyTitle": "Marked as busy",
+        "customJob": "Job",
+        "pending": "Waiting for your answer",
+        "clash": "Overlaps another job",
+        "call": "Call",
+        "directions": "Directions",
+        "details": "Details",
+        "edit": "Edit",
+        "openBooking": "Open booking",
+        "contactHidden": "Phone and address appear once you confirm the booking.",
+        "customerNote": "From the customer",
+        "privateNote": "My note",
+        "price": "Price",
+        "loadFailed": "Could not load the calendar. Check your connection and try again.",
+        "retry": "Try again",
+        "dayPanelTitle": "This day",
+        "monthLegend": {
+          "BOOKING": "Fgrapher booking",
+          "ENTRY": "My own job",
+          "BLOCK": "Busy",
+          "closed": "Not open for bookings"
+        },
+        "itemSheet": {
+          "addToPhone": "Add to my phone's calendar",
+          "addToPhoneHint": "Your phone will alert you an hour before.",
+          "google": "Google Calendar",
+          "otherCalendar": "iPhone Calendar / other apps",
+          "notePlaceholder": "E.g. bring lights, client likes warm tones…",
+          "noteHint": "Only you can see this note.",
+          "saveNote": "Save note",
+          "noteSaved": "Note saved",
+          "close": "Close"
+        },
+        "entryForm": {
+          "createTitle": "Add a job",
+          "editTitle": "Edit job",
+          "title": "What",
+          "titlePlaceholder": "E.g. Wedding shoot, Event video",
+          "date": "Date",
+          "start": "Starts",
+          "end": "Ends",
+          "address": "Place",
+          "addressPlaceholder": "Street address…",
+          "customerName": "Client name",
+          "customerPhone": "Client phone",
+          "price": "Agreed price",
+          "notes": "Notes",
+          "notesPlaceholder": "Gear to bring, what the client asked for…",
+          "privacy": "Only you see this. The hours close on your profile, so Fgrapher customers cannot book over them.",
+          "thirdParty": "Record only what the client has agreed to let you keep.",
+          "save": "Save",
+          "delete": "Delete this job",
+          "deleteConfirm": "Delete this job? This cannot be undone.",
+          "confirmDelete": "Delete",
+          "cancel": "Cancel",
+          "saved": "Saved to your calendar",
+          "deleted": "Removed from your calendar",
+          "clashWarning": "This overlaps another job that day. You can still save it.",
+          "titleRequired": "Give the job a name",
+          "endBeforeStart": "The end must be after the start",
+          "genericError": "Could not save, please try again"
+        },
+        "syncSheet": {
+          "title": "Reminders and phone sync",
+          "digestTitle": "Fgrapher reminds you twice",
+          "digestBody": "Around 8 pm the evening before and 6:30 am on the day, you get a summary of your confirmed jobs by email and in-app notification.",
+          "digestSettings": "Notification settings",
+          "phoneTitle": "See it in your phone's calendar",
+          "phoneBody": "Subscribe to the address below in iPhone Calendar or Google Calendar. Your Fgrapher schedule appears next to your own events, and the phone alerts you ahead of time.",
+          "enable": "Create my sync address",
+          "addressLabel": "Your sync address",
+          "copy": "Copy",
+          "copied": "Address copied",
+          "openApple": "Add to iPhone Calendar",
+          "appleNote": "iPhone: when asked, turn off “Remove Alerts” so the phone alerts you an hour ahead.",
+          "googleSteps": "Google Calendar: open calendar.google.com on a computer, choose Other calendars → + → From URL, then paste the address.",
+          "googleNote": "Google Calendar can take up to a day to pick up changes and does not turn on alerts by itself. For a job that matters, open it and press “Add to my phone's calendar”.",
+          "secret": "Anyone with this address can read your schedule, client names and phone numbers included. Do not share it.",
+          "rotate": "Replace the address",
+          "rotateConfirm": "The old address stops working at once; devices using it must subscribe again. Continue?",
+          "rotated": "Address replaced",
+          "disable": "Turn sync off",
+          "disabled": "Sync turned off",
+          "failed": "That did not work, please try again",
+          "cancel": "Cancel",
+          "created": "Sync address created"
+        }
+      }
     },
     "bookingDetail": {
       "notFound": "Booking not found",
@@ -3632,6 +3754,14 @@
         "heading": "Your plan is about to end",
         "body": "Your {role} plan ends on {periodEndLabel}. It does not renew by itself: pay before then to keep your profile visible and bookable. After that date the profile is hidden until you renew; your data is kept.",
         "cta": "Renew plan"
+      },
+      "scheduleDigest": {
+        "eveningSubject": "{count} jobs tomorrow ({day}) — Fgrapher",
+        "morningSubject": "{count} jobs today ({day}) — Fgrapher",
+        "eveningHeading": "Tomorrow's schedule, {day}",
+        "morningHeading": "Today's schedule, {day}",
+        "intro": "You have {count} confirmed jobs:",
+        "cta": "Open my calendar"
       }
     },
     "notifications": {
@@ -3828,7 +3958,23 @@
           "message": "The documents you sent for the {role} role were not accepted. You can send them again.",
           "messageWithReason": "The documents you sent for the {role} role were not accepted. Reason: {reason}. You can send them again."
         }
+      },
+      "scheduleDigest": {
+        "eveningTitle": "{count} jobs tomorrow",
+        "morningTitle": "{count} jobs today",
+        "messageMore": "{summary}; and {more} more",
+        "customJob": "Job"
       }
+    },
+    "calendarFeed": {
+      "name": "Fgrapher work calendar",
+      "customJob": "Job",
+      "customer": "Client: {name}",
+      "phone": "Phone: {phone}",
+      "price": "Price: {price}",
+      "notes": "Notes: {notes}",
+      "privateNote": "My note: {note}",
+      "pendingPrefix": "[Pending]"
     }
   },
   "publicPages": {
