@@ -3,9 +3,7 @@ import type { Role } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
-
-/** Vietnam is UTC+7 all year — no daylight saving to account for. */
-const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
+import { vietnamMonthStart } from "@/lib/vietnam/date";
 
 /**
  * Bookings that have not started yet.
@@ -26,18 +24,9 @@ function notStartedYet(now: Date) {
   ];
 }
 
-/**
- * Midnight on the 1st of the current month in Vietnam, as an instant.
- * setDate(1)/setHours(0) used the server's clock — UTC on Vercel — so the
- * month started seven hours late and a job finished at 06:00 on the 1st
- * Vietnam time was counted in the previous month.
- */
-function startOfMonthInVietnam(now: Date) {
-  const vn = new Date(now.getTime() + VN_OFFSET_MS);
-  return new Date(
-    Date.UTC(vn.getUTCFullYear(), vn.getUTCMonth(), 1) - VN_OFFSET_MS,
-  );
-}
+// Midnight on the 1st of the current month in Vietnam — see
+// vietnamMonthStart for why the server's own clock is not used.
+const startOfMonthInVietnam = (now: Date) => vietnamMonthStart(now);
 
 export interface ProviderStats {
   pending: number;
