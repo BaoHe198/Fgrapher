@@ -1,12 +1,14 @@
 "use client";
 
 import { CheckCircle, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function ContactForm() {
+  const t = useTranslations("publicPages.contact.form");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -29,7 +31,7 @@ export function ContactForm() {
 
     if (!res.ok) {
       const body = await res.json();
-      setError(body.message ?? "Đã xảy ra lỗi. Vui lòng thử lại.");
+      setError(body.message ?? t("failed"));
       return;
     }
 
@@ -41,11 +43,9 @@ export function ContactForm() {
       <div className="flex flex-col items-center gap-3 py-8 text-center">
         <CheckCircle className="size-10 text-brand-primary" />
         <p className="text-body-lg font-semibold! text-text-primary">
-          Đã gửi tin nhắn
+          {t("sentTitle")}
         </p>
-        <p className="text-body-md text-text-secondary">
-          Chúng tôi sẽ phản hồi bạn sớm nhất có thể.
-        </p>
+        <p className="text-body-md text-text-secondary">{t("sentBody")}</p>
       </div>
     );
   }
@@ -58,13 +58,13 @@ export function ContactForm() {
         </div>
       ) : null}
       <Input
-        label="Họ và tên"
+        label={t("name")}
         value={name}
         onChange={(e) => setName(e.target.value)}
         required
       />
       <Input
-        label="Email"
+        label={t("email")}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -75,7 +75,7 @@ export function ContactForm() {
           htmlFor="contact-message"
           className="text-body-sm font-semibold! text-text-primary"
         >
-          Nội dung
+          {t("message")}
         </label>
         <textarea
           id="contact-message"
@@ -88,7 +88,7 @@ export function ContactForm() {
       </div>
       <Button type="submit" variant="accent" size="lg" disabled={isSubmitting}>
         {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-        Gửi tin nhắn
+        {t("submit")}
       </Button>
     </form>
   );

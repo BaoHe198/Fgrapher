@@ -1333,7 +1333,8 @@
       "tooManyOpen": "Bạn đã có 3 yêu cầu đang mở — vui lòng chờ một yêu cầu hoàn tất trước khi đăng thêm.",
       "unknown": "Không thực hiện được, vui lòng thử lại.",
       "dateMissing": "Hãy chọn ngày chụp, hoặc đánh dấu ngày linh hoạt.",
-      "datePast": "Ngày chụp đã qua — hãy chọn một ngày từ hôm nay trở đi."
+      "datePast": "Ngày chụp đã qua — hãy chọn một ngày từ hôm nay trở đi.",
+      "requestFilled": "Yêu cầu này đã chọn được nhà cung cấp hoặc đã đóng, nên không chọn thêm báo giá được nữa."
     },
     "bookingErrors": {
       "notFound": "Không tìm thấy lịch đặt.",
@@ -1545,7 +1546,8 @@
       "serviceRequestNotFound": "Không tìm thấy yêu cầu",
       "serviceRequestAlreadyReviewed": "Yêu cầu này đã được xử lý",
       "serviceRequestReviewFailed": "Không thể xử lý yêu cầu",
-      "documentNotOnFile": "Giấy tờ này không còn trên hệ thống: chưa được nộp, hoặc đã tự xóa khi hết thời hạn lưu."
+      "documentNotOnFile": "Giấy tờ này không còn trên hệ thống: chưa được nộp, hoặc đã tự xóa khi hết thời hạn lưu.",
+      "verificationNotPending": "Hồ sơ xác minh này không còn chờ duyệt — có thể một quản trị viên khác vừa xử lý. Tải lại trang để xem kết quả."
     },
     "auth": {
       "invalidInput": "Dữ liệu không hợp lệ",
@@ -4773,7 +4775,16 @@
       "metaTitle": "Liên hệ — Fgrapher",
       "metaDescription": "Có câu hỏi về đặt lịch, hồ sơ nhà cung cấp hoặc gặp lỗi trên Fgrapher? Gửi tin nhắn cho đội ngũ hỗ trợ, chúng tôi sẽ phản hồi sớm nhất có thể.",
       "title": "Liên hệ với chúng tôi",
-      "subtitle": "Có câu hỏi hoặc phát hiện lỗi? Gửi tin nhắn cho chúng tôi."
+      "subtitle": "Có câu hỏi hoặc phát hiện lỗi? Gửi tin nhắn cho chúng tôi.",
+      "form": {
+        "name": "Họ và tên",
+        "email": "Email",
+        "message": "Nội dung",
+        "submit": "Gửi tin nhắn",
+        "sentTitle": "Đã gửi tin nhắn",
+        "sentBody": "Chúng tôi sẽ phản hồi bạn sớm nhất có thể.",
+        "failed": "Đã xảy ra lỗi. Vui lòng thử lại."
+      }
     },
     "help": {
       "metaTitle": "Trung tâm hỗ trợ — Fgrapher",
