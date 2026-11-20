@@ -14,6 +14,7 @@ const ERROR_MESSAGE_KEY: Record<string, string> = {
   not_verified: "changeRequestNotVerified",
   same_role: "changeRequestSameRole",
   already_pending: "changeRequestAlreadyPending",
+  guidelines_required: "modelGuidelinesRequired",
 };
 
 export async function POST(request: Request) {
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
       session.user.id,
       parsed.data.toRole,
       parsed.data.reason,
+      parsed.data.acceptedContentGuidelines,
     );
 
     return NextResponse.json(

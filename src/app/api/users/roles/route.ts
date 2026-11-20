@@ -73,6 +73,31 @@ export async function POST(request: Request) {
     }
 
     // CUSTOMER is always active, regardless of what the client sends.
+    // A model accepts the content guidelines before the role exists —
+    // registration has always asked (registerSchema), this route never did,
+    // so registering as a customer and adding the role afterwards skipped
+    // it. Once recorded on the role it is not asked again.
+    let guidelinesAcceptedNow = false;
+    if (parsed.data.roles.includes("MODEL")) {
+      const existingModel = await db.userRole.findUnique({
+        where: { userId_role: { userId: session.user.id, role: "MODEL" } },
+        select: { contentGuidelinesAcceptedAt: true },
+      });
+      if (!existingModel?.contentGuidelinesAcceptedAt) {
+        if (parsed.data.acceptedContentGuidelines !== true) {
+          return NextResponse.json(
+            {
+              data: null,
+              error: "guidelines_required",
+              message: t("modelGuidelinesRequired"),
+            },
+            { status: 400 },
+          );
+        }
+        guidelinesAcceptedNow = true;
+      }
+    }
+
     const roles = Array.from(
       new Set([...parsed.data.roles, "CUSTOMER" as const]),
     );
@@ -88,8 +113,20 @@ export async function POST(request: Request) {
         const paid = (PAID_ROLES as string[]).includes(role);
         return db.userRole.upsert({
           where: { userId_role: { userId: session.user.id, role } },
-          create: { userId: session.user.id, role, active: !paid },
-          update: paid ? {} : { active: true },
+          create: {
+            userId: session.user.id,
+            role,
+            active: !paid,
+            ...(role === "MODEL" && guidelinesAcceptedNow
+              ? { contentGuidelinesAcceptedAt: new Date() }
+              : {}),
+          },
+          update: {
+            ...(paid ? {} : { active: true }),
+            ...(role === "MODEL" && guidelinesAcceptedNow
+              ? { contentGuidelinesAcceptedAt: new Date() }
+              : {}),
+          },
         });
       }),
     );

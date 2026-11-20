@@ -23,7 +23,15 @@ export async function createRoleChangeRequest(
   userId: string,
   toRole: Role,
   reason?: string,
+  acceptedContentGuidelines?: boolean,
 ) {
+  // Same gate as sign-up and as adding the role in settings: nobody becomes
+  // a model without accepting the content guidelines. The request can only
+  // exist with that acceptance, so its creation time is the acceptance time
+  // (recorded on the new role when an admin approves it).
+  if (toRole === "MODEL" && acceptedContentGuidelines !== true) {
+    throw new RoleChangeRequestError("guidelines_required");
+  }
   if (!features.marketplaceEnabled && toRole === "CAMERA_SHOP") {
     throw new RoleChangeRequestError("invalid_role");
   }
@@ -151,8 +159,20 @@ export async function reviewRoleChangeRequest({
         where: {
           userId_role: { userId: request.userId, role: request.toRole },
         },
-        create: { userId: request.userId, role: request.toRole, active: true },
-        update: { active: true },
+        create: {
+          userId: request.userId,
+          role: request.toRole,
+          active: true,
+          ...(request.toRole === "MODEL"
+            ? { contentGuidelinesAcceptedAt: request.createdAt }
+            : {}),
+        },
+        update: {
+          active: true,
+          ...(request.toRole === "MODEL"
+            ? { contentGuidelinesAcceptedAt: request.createdAt }
+            : {}),
+        },
       }),
       db.roleChangeRequest.update({
         where: { id: requestId },

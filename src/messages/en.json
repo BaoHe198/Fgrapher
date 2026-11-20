@@ -1412,7 +1412,8 @@
       "changeRequestNoActiveRole": "You don't have an active provider role",
       "changeRequestNotVerified": "This role isn't verified yet — you can remove and add a different role directly",
       "changeRequestSameRole": "The new role must be different from your current one",
-      "changeRequestAlreadyPending": "You already have a role change request pending review"
+      "changeRequestAlreadyPending": "You already have a role change request pending review",
+      "modelGuidelinesRequired": "You must confirm you are 18 or over and accept the content guidelines before taking the Model role."
     },
     "phone": {
       "notConfigured": "Phone verification isn't configured on this system",

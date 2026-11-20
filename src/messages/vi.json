@@ -1412,7 +1412,8 @@
       "changeRequestNoActiveRole": "Bạn chưa có vai trò nhà cung cấp nào đang hoạt động",
       "changeRequestNotVerified": "Vai trò này chưa được xác minh — bạn có thể tự xóa và thêm vai trò khác trực tiếp",
       "changeRequestSameRole": "Vai trò mới phải khác vai trò hiện tại",
-      "changeRequestAlreadyPending": "Bạn đã có một yêu cầu đổi vai trò đang chờ duyệt"
+      "changeRequestAlreadyPending": "Bạn đã có một yêu cầu đổi vai trò đang chờ duyệt",
+      "modelGuidelinesRequired": "Bạn cần xác nhận đã đủ 18 tuổi và đồng ý với quy tắc nội dung trước khi nhận vai trò Người mẫu."
     },
     "phone": {
       "notConfigured": "Xác minh số điện thoại chưa được cấu hình trên hệ thống",
