@@ -36,6 +36,13 @@ model User {
   // mistyped the new address. Not unique: uniqueness is checked when the
   // swap happens (services/email-verification.ts).
   pendingEmail            String?
+  // The secret part of this provider's calendar-subscription address
+  // (/api/calendar/feed/<token>), which a phone's calendar app polls with no
+  // session. Null until they switch the sync on; replaced when they ask for
+  // a new address, which is how the old one is revoked. Stored as it is,
+  // not hashed: it has to be shown again when they add a second device, and
+  // it guards nothing that this same database does not already hold.
+  calendarFeedToken       String?   @unique
   passwordHash            String?
   firstName               String?
   lastName                String?
@@ -125,6 +132,8 @@ model User {
   notifications            Notification[]
   savedProfiles            SavedProfile[]
   savedMedia               SavedMedia[]
+  calendarEntries          CalendarEntry[]
+  bookingNotes             BookingNote[]
   payments                 Payment[]
   conversationParticipants ConversationParticipant[]
   consentRecords           ConsentRecord[]
@@ -934,6 +943,60 @@ model AvailabilityBlock {
   @@map("availability_blocks")
 }
 
+/// A job the provider wrote into their own calendar: work taken outside
+/// Fgrapher (a returning client, a referral), with the time, the place, who
+/// it is for and their own notes (project owner, 20/11/2026).
+///
+/// Private to its owner — no page, API or email shows it to anyone else. It
+/// closes the same hours on the public profile: the availability engine
+/// reads these rows next to bookings (services/availability.ts, fmap.ts), so
+/// a Fgrapher customer cannot book over it.
+///
+/// `customerName` / `customerPhone` describe someone who is not a Fgrapher
+/// user and never agreed to anything here. That is why this row is the one
+/// exception to "soft delete, never hard delete": when the provider removes
+/// an entry, or their account is erased (processDeletion), it is gone. It is
+/// part of the owner's data export (exportUserData).
+model CalendarEntry {
+  id              String   @id @default(cuid())
+  userId          String
+  title           String
+  startAt         DateTime @db.Timestamptz(3)
+  endAt           DateTime @db.Timestamptz(3)
+  locationAddress String?
+  customerName    String?
+  customerPhone   String?
+  price           Float? // agreed fee in VND, the provider's own record
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startAt])
+  @@map("calendar_entries")
+}
+
+/// One participant's private note on a booking ("mang đèn, khách thích tông
+/// ấm"). Its own table rather than a column on Booking so that no booking
+/// query can hand it to the other side by including the row: only the
+/// calendar reads it, and only for its author.
+model BookingNote {
+  id        String   @id @default(cuid())
+  bookingId String
+  userId    String
+  note      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, userId])
+  @@index([userId])
+  @@map("booking_notes")
+}
+
 /// The slice of a resource's time a booking holds. Rows exist only while the
 /// booking is actually holding the slot (PENDING or CONFIRMED); once it is
 /// cancelled, declined, expired or completed the allocation is deleted. That
@@ -1268,6 +1331,7 @@ model Booking {
   parentBooking  Booking?               @relation("crewHire", fields: [parentBookingId], references: [id])
   childBookings  Booking[]              @relation("crewHire")
   statusHistory  BookingStatusHistory[]
+  privateNotes   BookingNote[]
   // A Booking created from an ACCEPTED RequestOffer points back to it here
   // — read-only history link, nothing about Booking's own lifecycle
   // (transitionBooking) changes because of it.
