@@ -76,7 +76,7 @@ export default async function PortfolioPage({
               variant="secondary"
               size="sm"
               nativeButton={false}
-              render={<Link href="/dashboard/settings/profile" />}
+              render={<Link href="/dashboard/my-page/info" />}
             >
               {t("noProfile.cta")}
             </Button>

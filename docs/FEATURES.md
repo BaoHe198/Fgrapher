@@ -171,6 +171,45 @@ hợp:
 Server phải kiểm tra lại availability ngay trước khi tạo booking để hai khách không
 giành cùng một khung giờ.
 
+### Bảng điều khiển theo vai trò (20/11/2026)
+
+Quyết định của chủ dự án: bảng điều khiển của nhà cung cấp chỉ bày những việc
+của nghề; các chức năng phụ gom vào một chỗ khác. Một mô hình duy nhất
+(`src/lib/dashboard-nav.ts`, có unit test) quyết định menu máy tính, thanh tab
+điện thoại và bảng "Thêm".
+
+| Vai trò                                          | Menu chính                                                                                          | Thanh tab điện thoại                            |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Nhiếp ảnh, quay phim, make-up, studio, người mẫu | Hôm nay · Lịch làm việc · Lịch đặt · Tin nhắn · Tìm việc · Trang của tôi                            | Hôm nay · Lịch · Tin nhắn · Hồ sơ · Thêm        |
+| Cửa hàng máy ảnh                                 | Hôm nay · Cửa hàng · Tin nhắn · Trang của tôi                                                       | Hôm nay · Cửa hàng · Tin nhắn · Hồ sơ · Thêm    |
+| Tiệm trang phục                                  | Hôm nay · Tin nhắn · Trang của tôi                                                                  | Hôm nay · Tin nhắn · Hồ sơ · Thêm               |
+| Khách hàng                                       | Tổng quan · Lịch đặt của tôi · Tin nhắn · Yêu cầu · Đăng yêu cầu · Đã lưu · Bảng ý tưởng · Đơn hàng | Tổng quan · Lịch đặt · Tin nhắn · Đã lưu · Thêm |
+
+Sau menu chính luôn có **Tiện ích khác** (trừ khách hàng) và **Cài đặt**.
+
+- **Trang của tôi** (`/dashboard/my-page`): mỗi phần khách nhìn thấy là một thẻ
+  ghi rõ "Xong / Còn thiếu / Đang chờ" và thiếu gì (`services/my-page.ts`);
+  đầu trang nói trang đã hiển thị với khách chưa và còn thiếu điều kiện nào
+  (khớp với `setProfilePublished`). Các trang con có thanh tab chung: Tổng quan
+  · Portfolio · Gói dịch vụ · Thông tin · Đánh giá · Link & QR.
+- **Thông tin** (`/dashboard/my-page/info`): ảnh, tên đường dẫn, giới thiệu,
+  khu vực, chính sách, liên kết — trước đây là mục "Hồ sơ theo vai trò" trong
+  Cài đặt → Hồ sơ. Có mốc `#anh`, `#gioi-thieu`, `#khu-vuc`, `#chinh-sach`,
+  `#lien-ket`, `#costumes`.
+- **Gói dịch vụ** có trang riêng (`/dashboard/services`); **giờ nhận khách** là
+  một bảng trong trang Lịch (`/dashboard/calendar?hours=1`).
+- **Tìm việc** gộp "Yêu cầu phù hợp" và "Đề nghị đã gửi" bằng hai tab.
+- **Tiện ích khác** (`/dashboard/more`): Chợ F (tin đăng, đơn bán, đơn mua),
+  thuê dịch vụ (lịch đặt mình đã gửi — `/dashboard/bookings?side=sent`, đăng
+  yêu cầu, yêu cầu của tôi), đã lưu, bảng ý tưởng, thông báo.
+- **Cài đặt** với người có vai trò nhà cung cấp/cửa hàng chỉ còn Tài khoản, Vai
+  trò, Thanh toán, Thông báo, Dữ liệu. Đường dẫn cũ `/dashboard/settings/profile`
+  (kể cả `?section=roleProfile|availability`) tự chuyển sang chỗ mới, nên link
+  trong email/thông báo cũ vẫn đúng. Khách hàng vẫn có tab Hồ sơ.
+- **Điện thoại**: thanh tab cố định dưới đáy thay cho nút "Menu bảng điều
+  khiển". Thứ gì cố định ở đáy màn hình (thông báo nổi, nút nổi của trang) cộng
+  thêm `--fg-bottom-bar` để không bị thanh tab che.
+
 ### Lịch làm việc của provider (20/11/2026)
 
 Trang `/dashboard/calendar` là sổ lịch của provider, không chỉ là nơi chặn ngày:

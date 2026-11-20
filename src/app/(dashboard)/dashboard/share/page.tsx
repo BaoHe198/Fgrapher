@@ -118,19 +118,19 @@ export default async function SharePage() {
     {
       key: "prices",
       done: paidPrices.length > 0,
-      href: "/dashboard/settings/profile?section=roleProfile",
+      href: "/dashboard/services",
     },
     {
       key: "hours",
       done: weeklyRules.length > 0,
-      href: "/dashboard/calendar",
+      href: "/dashboard/calendar?hours=1",
     },
     {
       key: "policies",
       done:
         (profile.depositPercent != null || Boolean(profile.depositPolicy)) &&
         Boolean(profile.cancellationPolicy),
-      href: "/dashboard/settings/profile?section=roleProfile",
+      href: "/dashboard/my-page/info#chinh-sach",
     },
     {
       key: "photos",
@@ -140,7 +140,7 @@ export default async function SharePage() {
     {
       key: "cover",
       done: Boolean(user.coverImage),
-      href: "/dashboard/settings/profile",
+      href: "/dashboard/my-page/info#anh",
     },
   ];
 

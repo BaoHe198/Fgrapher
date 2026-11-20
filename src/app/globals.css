@@ -540,6 +540,19 @@
   font-weight: var(--tw-font-weight, 500);
 }
 
+/* Height of the dashboard's phone tab bar (DashboardTabBar adds the class
+   while it is on screen, and it shows below lg only). Fixed things that sit
+   at the bottom edge — toasts, a page's floating button — add it to their
+   offset so the bar never covers them. */
+:root {
+  --fg-bottom-bar: 0px;
+}
+@media (max-width: 1023.98px) {
+  html.has-bottom-bar {
+    --fg-bottom-bar: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

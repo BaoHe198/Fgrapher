@@ -53,7 +53,7 @@ export default async function ListingsPage() {
                 <Link
                   href={
                     isCostumeShop
-                      ? "/dashboard/settings/profile?section=roleProfile#costumes"
+                      ? "/dashboard/my-page/info#costumes"
                       : "/dashboard/settings/roles"
                   }
                 />

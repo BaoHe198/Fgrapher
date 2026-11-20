@@ -2366,7 +2366,10 @@
           "failed": "That did not work, please try again",
           "cancel": "Cancel",
           "created": "Sync address created"
-        }
+        },
+        "hoursButton": "Working hours",
+        "hoursTitle": "Working hours",
+        "hoursDescription": "Customers can only book within these hours. For a day you are busy, mark it on the calendar."
       }
     },
     "bookingDetail": {
@@ -2990,6 +2993,131 @@
         "rating": "★ {rating} ({count} reviews)",
         "verified": "Identity verified",
         "cta": "See free dates and prices, and book on Fgrapher"
+      }
+    },
+    "myPage": {
+      "metaTitle": "My page — Fgrapher",
+      "title": "My page",
+      "lede": "Everything customers see on your page. {done} of {total} parts done.",
+      "published": "Customers can find your page in search and on Bản đồ F.",
+      "viewAsCustomer": "View as a customer",
+      "notPublished": "Your page is not visible to customers yet. Still needed:",
+      "notPublishedPlan": "Everything required is in place. If the page still does not show, check your plan in Settings → Billing.",
+      "blockers": {
+        "verify": "Verify your identity",
+        "photo": "At least one approved portfolio photo",
+        "categories": "Choose your specialities",
+        "address": "A full address (province, ward, street)",
+        "costumePhoto": "At least one approved outfit photo"
+      },
+      "state": {
+        "done": "Done",
+        "todo": "To do",
+        "waiting": "Waiting"
+      },
+      "cards": {
+        "verify": {
+          "title": "Identity verification",
+          "verified": "Verified — customers see the \"Verified\" badge on your page.",
+          "pending": "Fgrapher is reviewing your documents.",
+          "unverified": "Required before your page can be shown.",
+          "rejected": "Your documents were not accepted — see why and send them again."
+        },
+        "portfolio": {
+          "title": "Portfolio",
+          "ready": "{approved} approved photos.",
+          "someWaiting": "{approved} approved · {pending} waiting for review.",
+          "allWaiting": "{pending} photos waiting — your page shows once the first is approved.",
+          "empty": "No photos yet. Create your first album."
+        },
+        "services": {
+          "title": "Packages",
+          "count": "{count, plural, one {# package open for booking} other {# packages open for booking}}",
+          "empty": "No packages yet — customers book a package."
+        },
+        "info": {
+          "title": "Photos, name & introduction",
+          "complete": "Avatar, cover, name, specialities and introduction are all set.",
+          "displayName": "No display name yet.",
+          "avatar": "No avatar yet.",
+          "cover": "No cover photo yet.",
+          "categories": "No specialities chosen yet.",
+          "description": "No introduction yet."
+        },
+        "costumes": {
+          "title": "Outfits for rent",
+          "count": "{count, plural, one {# outfit} other {# outfits}}",
+          "empty": "No outfits yet."
+        },
+        "area": {
+          "title": "Area & address",
+          "ready": "Address set and shown on Bản đồ F.",
+          "notOnMap": "Address set but not on Bản đồ F yet — pick it from the suggestions.",
+          "missing": "Province, ward and street are not all set."
+        },
+        "policies": {
+          "title": "Deposit & cancellation",
+          "ready": "Customers can see how deposits and cancellations work.",
+          "missing": "No deposit and cancellation policy yet."
+        },
+        "hours": {
+          "title": "Working hours",
+          "ready": "Customers can book within your hours.",
+          "missing": "No hours open — customers cannot book yet."
+        },
+        "reviews": {
+          "title": "Reviews",
+          "count": "{count, plural, one {# review} other {# reviews}} · average {average}★",
+          "empty": "No reviews yet."
+        },
+        "share": {
+          "title": "Link & QR code",
+          "ready": "A short link and QR code for your social accounts."
+        }
+      },
+      "info": {
+        "metaTitle": "Page details — Fgrapher",
+        "title": "Page details",
+        "lede": "The photos, name, introduction, service area, policies and links customers see.",
+        "jumpLabel": "Jump to",
+        "jump": {
+          "photos": "Photos & link name",
+          "intro": "Introduction",
+          "costumes": "Outfits",
+          "area": "Area",
+          "policies": "Policies",
+          "links": "Links"
+        },
+        "photosHeading": "Photos & link name",
+        "profileHeading": "Introduction, area & policies"
+      },
+      "services": {
+        "metaTitle": "Packages — Fgrapher",
+        "title": "Packages",
+        "lede": "What customers choose when they book: length, price, photos delivered and when.",
+        "needProfile": "Save your page details once first (name, specialities, address), then come back to add packages.",
+        "needProfileCta": "Open page details"
+      }
+    },
+    "more": {
+      "metaTitle": "More tools — Fgrapher",
+      "title": "More tools",
+      "lede": "Things beyond your own work: buying and selling gear, hiring others, what you saved.",
+      "groups": {
+        "market": "Chợ F",
+        "hiring": "Hiring",
+        "personal": "Yours"
+      },
+      "hints": {
+        "listings": "Gear you are selling or renting out",
+        "shopOrders": "Orders customers placed with you",
+        "myOrders": "Gear you ordered",
+        "sentBookings": "Models, make-up artists, studios… you booked for your shoots",
+        "newRequest": "Describe a job and get offers",
+        "myRequests": "Requests you posted and the offers on them",
+        "saved": "Artists you saved",
+        "moodboard": "Photos you pinned for ideas",
+        "notifications": "All recent notifications"
       }
     }
   },
@@ -5775,37 +5903,10 @@
       "closeAria": "Close"
     },
     "dashboardSidebar": {
-      "overview": "Overview",
-      "myBookings": "My bookings",
-      "bookings": "Bookings",
-      "calendar": "Calendar",
-      "reviews": "Reviews",
-      "portfolio": "Portfolio",
-      "myRequests": "My requests",
-      "opportunities": "Matching bookings",
-      "myOffers": "Offers sent",
-      "costumes": "My outfits",
-      "listings": "Listings",
-      "shopOrders": "Shop orders",
-      "myOrders": "My orders",
-      "moodboard": "Mood board",
-      "saved": "Saved",
-      "messages": "Messages",
-      "settings": "Settings",
-      "admin": "Admin",
       "planPro": "Pro — {role}",
-      "planFree": "Free — Customer",
       "currentPlan": "Current plan",
       "managePlan": "Manage plan",
-      "openMenu": "Open dashboard menu",
-      "menuTitle": "Dashboard menu",
-      "menuDescription": "Dashboard navigation",
-      "createBooking": "Post a request",
-      "sectionWork": "Work",
-      "sectionProfile": "Profile",
-      "sectionMarket": "Chợ F",
-      "sectionHiring": "Hiring others",
-      "shareLink": "Link & QR code"
+      "menuTitle": "Dashboard menu"
     },
     "suspendedAccountNotice": {
       "title": "Your account has been suspended",
@@ -5903,6 +6004,56 @@
       "portfolio": "A few photos from the artist's portfolio.",
       "skyAt": "An illustration of the light at {time}. The sun's position is worked out for the chosen day in the artist's area.",
       "skyPick": "Sunrise {rise}, sunset {set}. Pick a time to see the light."
+    },
+    "dashboardNav": {
+      "tabBarLabel": "Dashboard navigation",
+      "unread": "unread",
+      "moreTab": "More",
+      "moreTitle": "More",
+      "moreDescription": "Other dashboard sections",
+      "items": {
+        "today": "Today",
+        "overview": "Overview",
+        "calendar": "Work calendar",
+        "calendarTab": "Calendar",
+        "bookings": "Bookings",
+        "myBookings": "My bookings",
+        "bookingsTab": "Bookings",
+        "messages": "Messages",
+        "jobs": "Find work",
+        "myPage": "My page",
+        "myPageTab": "Profile",
+        "shop": "Shop",
+        "more": "More tools",
+        "settings": "Settings",
+        "admin": "Admin",
+        "notifications": "Notifications",
+        "newRequest": "Post a request",
+        "myRequests": "My requests",
+        "saved": "Saved",
+        "moodboard": "Moodboard",
+        "myOrders": "My orders",
+        "listings": "Chợ F listings",
+        "shopOrders": "Shop orders",
+        "sentBookings": "Bookings I made"
+      },
+      "sections": {
+        "myPage": "Parts of my page",
+        "jobs": "Find work",
+        "shop": "Shop",
+        "tabs": {
+          "overview": "Overview",
+          "portfolio": "Portfolio",
+          "services": "Packages",
+          "info": "Details",
+          "reviews": "Reviews",
+          "share": "Link & QR",
+          "opportunities": "Matching requests",
+          "myOffers": "Offers sent",
+          "listings": "Listings",
+          "shopOrders": "Orders"
+        }
+      }
     }
   },
   "serviceKind": {

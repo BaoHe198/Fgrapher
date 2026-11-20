@@ -84,7 +84,7 @@ export async function ProviderOverview({
           {
             key: "hours",
             icon: CalendarClock,
-            href: "/dashboard/calendar",
+            href: "/dashboard/calendar?hours=1",
           },
         ]),
     ...(overview.findability.hasMapPoint
@@ -93,7 +93,7 @@ export async function ProviderOverview({
           {
             key: "mapPoint",
             icon: MapPinOff,
-            href: "/dashboard/settings/profile?section=roleProfile",
+            href: "/dashboard/my-page/info#khu-vuc",
           },
         ]),
   ] as const;

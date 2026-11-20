@@ -10,7 +10,6 @@ import {
   Plus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import {
   startTransition,
   useCallback,
@@ -23,6 +22,7 @@ import {
 import { AgendaCard } from "@/components/calendar/agenda-card";
 import { EntrySheet } from "@/components/calendar/entry-sheet";
 import { ItemSheet } from "@/components/calendar/item-sheet";
+import { ResponsiveSheet } from "@/components/calendar/responsive-sheet";
 import { MonthGrid } from "@/components/calendar/month-grid";
 import { SyncSheet } from "@/components/calendar/sync-sheet";
 import {
@@ -47,6 +47,8 @@ import { formatDateLong, formatMonthYear } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { WeeklyRule } from "@/services/resource-calendar";
 
+import { AvailabilitySettings } from "../settings/profile/availability-settings";
+
 import { BlockDayDialog } from "./block-day-dialog";
 
 interface CalendarClientProps {
@@ -56,9 +58,12 @@ interface CalendarClientProps {
   /** Vietnam's today, decided on the server so both renders agree. */
   todayKey: string;
   weeklySchedule: WeeklyRule[];
+  /** ?hours=1: open on the working-hours panel (links from "Trang của tôi"). */
+  openHours?: boolean;
 }
 
 type Panel =
+  | { type: "hours" }
   | { type: "entry"; entry: AgendaItem | null }
   | { type: "item"; item: AgendaItem }
   | { type: "block" }
@@ -69,7 +74,8 @@ export function CalendarClient({
   initialItems,
   initialDate,
   todayKey,
-  weeklySchedule,
+  weeklySchedule: initialWeeklySchedule,
+  openHours = false,
 }: CalendarClientProps) {
   const t = useTranslations("dashboardCore.calendar");
   const v2 = useTranslations("dashboardCore.calendar.v2");
@@ -78,7 +84,21 @@ export function CalendarClient({
   const [items, setItems] = useState(initialItems);
   const [loadedMonth, setLoadedMonth] = useState(initialDate.slice(0, 7));
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [panel, setPanel] = useState<Panel>(null);
+  const [panel, setPanel] = useState<Panel>(
+    openHours ? { type: "hours" } : null,
+  );
+  const [weeklySchedule, setWeeklySchedule] = useState(initialWeeklySchedule);
+  // After the hours are saved in the panel, read them back so the day's
+  // "Giờ nhận khách" line and the closed-day shading follow at once.
+  const reloadHours = useCallback(() => {
+    fetch("/api/availability")
+      .then((res) => res.json())
+      .then((body) => {
+        const schedule = body.data?.schedule as WeeklyRule[] | undefined;
+        if (schedule) startTransition(() => setWeeklySchedule(schedule));
+      })
+      .catch(() => {});
+  }, []);
   // Bumped to refetch the month that is already on screen (after a save).
   const [revision, setRevision] = useState(0);
   const lastRevision = useRef(0);
@@ -169,15 +189,26 @@ export function CalendarClient({
     <div className="flex flex-col gap-4 pb-40 xl:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-display-md text-text-primary">{t("title")}</h1>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPanel({ type: "sync" })}
-          className="min-h-10"
-        >
-          <Bell className="size-4" />
-          {v2("sync")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPanel({ type: "hours" })}
+            className="min-h-10"
+          >
+            <Clock className="size-4" />
+            {v2("hoursButton")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPanel({ type: "sync" })}
+            className="min-h-10"
+          >
+            <Bell className="size-4" />
+            {v2("sync")}
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-1">
@@ -257,12 +288,13 @@ export function CalendarClient({
       {workingWeekdays.size === 0 ? (
         <p className="rounded-[var(--fg-radius-md)] bg-warning-bg p-3 text-body-sm text-text-primary">
           {t("noScheduleWarning")}{" "}
-          <Link
-            href="/dashboard/settings/profile?section=availability"
+          <button
+            type="button"
+            onClick={() => setPanel({ type: "hours" })}
             className="font-semibold! text-text-link hover:underline"
           >
             {v2("editHours")}
-          </Link>
+          </button>
         </p>
       ) : null}
 
@@ -327,14 +359,15 @@ export function CalendarClient({
                   ? v2("workingHours", { hours: dayHours })
                   : v2("noWorkingHours")}
               </span>
-              <Link
-                href="/dashboard/settings/profile?section=availability"
-                // Padding without height: a text link's 22px line is a poor
+              <button
+                type="button"
+                onClick={() => setPanel({ type: "hours" })}
+                // Padding without height: a text line's 22px is a poor
                 // target for a thumb; this makes it 42px tall in place.
                 className="focus-ring -my-2.5 rounded-[4px] py-2.5 font-semibold! text-text-link hover:underline"
               >
                 {v2("editHours")}
-              </Link>
+              </button>
             </p>
           </div>
 
@@ -409,7 +442,7 @@ export function CalendarClient({
         variant="accent"
         size="lg"
         onClick={() => setPanel({ type: "entry", entry: null })}
-        className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 min-h-14 rounded-full px-5 shadow-[var(--shadow-lg)] xl:hidden"
+        className="fixed right-4 bottom-[calc(5rem+var(--fg-bottom-bar,0px))] z-30 min-h-14 rounded-full px-5 shadow-[var(--shadow-lg)] xl:hidden"
       >
         <Plus className="size-5" />
         {v2("addEntry")}
@@ -444,6 +477,18 @@ export function CalendarClient({
             reload();
           }}
         />
+      ) : null}
+      {panel?.type === "hours" ? (
+        <ResponsiveSheet
+          open
+          onOpenChange={(open) => {
+            if (!open) setPanel(null);
+          }}
+          title={v2("hoursTitle")}
+          description={v2("hoursDescription")}
+        >
+          <AvailabilitySettings embedded onSaved={reloadHours} />
+        </ResponsiveSheet>
       ) : null}
       {panel?.type === "sync" ? (
         <SyncSheet

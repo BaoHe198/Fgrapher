@@ -11,9 +11,11 @@ import { ProfileSettingsForm } from "./profile-settings-form";
 export function RoleProfileSwitcher({
   roles,
   userId,
+  showServices = true,
 }: {
   roles: Role[];
   userId: string;
+  showServices?: boolean;
 }) {
   const roleT = useTranslations("role");
   const [active, setActive] = useState(roles[0]);
@@ -34,7 +36,12 @@ export function RoleProfileSwitcher({
         </div>
       ) : null}
 
-      <ProfileSettingsForm key={active} role={active} userId={userId} />
+      <ProfileSettingsForm
+        key={active}
+        role={active}
+        userId={userId}
+        showServices={showServices}
+      />
     </div>
   );
 }

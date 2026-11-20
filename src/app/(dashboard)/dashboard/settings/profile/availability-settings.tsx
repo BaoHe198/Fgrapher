@@ -41,7 +41,18 @@ const DEFAULT_SCHEDULE: DaySchedule[] = DAY_LABELS.map((_, dayOfWeek) => ({
   ...DEFAULT_WEEKLY_HOURS,
 }));
 
-export function AvailabilitySettings() {
+export function AvailabilitySettings({
+  embedded = false,
+  onSaved,
+}: {
+  /**
+   * Inside the calendar's "Giờ nhận khách" panel: no reminder box (it
+   * pointed back to the calendar) and no blocked-days list (the calendar
+   * marks busy days itself).
+   */
+  embedded?: boolean;
+  onSaved?: () => void;
+} = {}) {
   const t = useTranslations("dashboardSettings.profile.availability");
   const [schedule, setSchedule] = useState<DaySchedule[]>(DEFAULT_SCHEDULE);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
@@ -130,6 +141,7 @@ export function AvailabilitySettings() {
     setIsSaving(false);
     if (res?.ok) {
       setSaved(true);
+      onSaved?.();
     } else {
       const body = await res?.json().catch(() => null);
       setSaveError(body?.message ?? t("saveFailed"));
@@ -164,23 +176,25 @@ export function AvailabilitySettings() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start gap-3 rounded-[var(--fg-radius-lg)] border border-info/25 bg-info-bg p-4">
-        <CalendarClock className="mt-0.5 size-5 shrink-0 text-info" />
-        <div className="flex flex-col gap-1">
-          <p className="text-body-sm font-medium text-text-primary">
-            {t("reminderTitle")}
-          </p>
-          <p className="text-body-sm text-text-secondary">
-            {t("reminderDescription")}
-          </p>
-          <Link
-            href="/dashboard/calendar"
-            className="mt-1 w-fit text-body-sm font-medium text-info underline-offset-4 hover:underline"
-          >
-            {t("openCalendar")}
-          </Link>
+      {embedded ? null : (
+        <div className="flex items-start gap-3 rounded-[var(--fg-radius-lg)] border border-info/25 bg-info-bg p-4">
+          <CalendarClock className="mt-0.5 size-5 shrink-0 text-info" />
+          <div className="flex flex-col gap-1">
+            <p className="text-body-sm font-medium text-text-primary">
+              {t("reminderTitle")}
+            </p>
+            <p className="text-body-sm text-text-secondary">
+              {t("reminderDescription")}
+            </p>
+            <Link
+              href="/dashboard/calendar"
+              className="mt-1 w-fit text-body-sm font-medium text-info underline-offset-4 hover:underline"
+            >
+              {t("openCalendar")}
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
@@ -268,44 +282,46 @@ export function AvailabilitySettings() {
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
-          {t("blockedDates")}
-        </span>
-        <div className="flex flex-wrap gap-2">
-          {blockedDates.map((d) => (
-            <span
-              key={d.id}
-              className="flex items-center gap-1.5 rounded-full bg-bg-sunken px-3 py-1.5 text-body-sm text-text-primary"
-            >
-              {formatDate(d.date)}
-              <button
-                type="button"
-                onClick={() => removeBlockedDate(d.id)}
-                aria-label={t("removeAria")}
-              >
-                <X className="size-3.5" />
-              </button>
-            </span>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <DateField
-            aria-label={t("blockedDateLabel")}
-            value={newBlockedDate}
-            onChange={setNewBlockedDate}
-            className="w-44"
-          />
-          <Button size="sm" variant="secondary" onClick={addBlockedDate}>
-            {t("blockDateButton")}
-          </Button>
-        </div>
-        {blockError ? (
-          <span className="text-body-sm text-danger" role="alert">
-            {blockError}
+      {embedded ? null : (
+        <div className="flex flex-col gap-2">
+          <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
+            {t("blockedDates")}
           </span>
-        ) : null}
-      </div>
+          <div className="flex flex-wrap gap-2">
+            {blockedDates.map((d) => (
+              <span
+                key={d.id}
+                className="flex items-center gap-1.5 rounded-full bg-bg-sunken px-3 py-1.5 text-body-sm text-text-primary"
+              >
+                {formatDate(d.date)}
+                <button
+                  type="button"
+                  onClick={() => removeBlockedDate(d.id)}
+                  aria-label={t("removeAria")}
+                >
+                  <X className="size-3.5" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <DateField
+              aria-label={t("blockedDateLabel")}
+              value={newBlockedDate}
+              onChange={setNewBlockedDate}
+              className="w-44"
+            />
+            <Button size="sm" variant="secondary" onClick={addBlockedDate}>
+              {t("blockDateButton")}
+            </Button>
+          </div>
+          {blockError ? (
+            <span className="text-body-sm text-danger" role="alert">
+              {blockError}
+            </span>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }

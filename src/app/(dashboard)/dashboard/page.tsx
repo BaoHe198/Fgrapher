@@ -127,8 +127,7 @@ function providerStatCards(stats: ProviderStats, t: Translator): StatCard[] {
 }
 
 // Where a costume shop's catalogue lives — see the sidebar entry.
-const COSTUMES_HREF =
-  "/dashboard/settings/profile?section=roleProfile#costumes";
+const COSTUMES_HREF = "/dashboard/my-page/info#costumes";
 
 function costumeShopStatCards(
   stats: CostumeShopStats,

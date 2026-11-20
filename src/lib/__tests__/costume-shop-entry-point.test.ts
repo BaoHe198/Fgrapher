@@ -19,8 +19,9 @@ import {
 // keep it that way while pinning the entry point that was added.
 
 const repoRoot = path.resolve(__dirname, "../../..");
-const CATALOGUE_HREF =
-  "/dashboard/settings/profile?section=roleProfile#costumes";
+// Since 20/11/2026 the catalogue lives in "Trang của tôi → Thông tin"
+// (was Settings → Profile, inside an accordion panel).
+const CATALOGUE_HREF = "/dashboard/my-page/info#costumes";
 
 function source(file: string): string {
   return readFileSync(path.join(repoRoot, file), "utf8");
@@ -42,24 +43,25 @@ describe("COSTUME_SHOP vẫn nằm ngoài Chợ F và luồng đặt lịch", ()
 });
 
 describe("lối vào danh mục trang phục", () => {
-  it("sidebar có mục riêng cho COSTUME_SHOP", () => {
-    const sidebar = source("src/components/layout/dashboard-sidebar.tsx");
-    assert.match(sidebar, /hasRole\("COSTUME_SHOP"\)/);
+  it("COSTUME_SHOP có lối vào: Trang của tôi → thẻ Trang phục cho thuê", () => {
+    // The menu gives a costume shop "Trang của tôi" (lib/dashboard-nav.ts);
+    // its hub has a card of its own for the outfits.
+    const nav = source("src/lib/dashboard-nav.ts");
+    assert.match(nav, /: \[ITEMS\.today, ITEMS\.messages, ITEMS\.myPage\]/);
+    const hub = source("src/services/my-page.ts");
+    assert.match(hub, /role === "COSTUME_SHOP"/);
     assert.ok(
-      sidebar.includes(CATALOGUE_HREF),
-      "the sidebar entry no longer points at the outfit catalogue",
+      hub.includes(`"${CATALOGUE_HREF}"`),
+      "the hub's outfits card no longer points at the outfit catalogue",
     );
   });
 
   it("mục đó mở đúng phần chứa CostumesManager", () => {
-    // The catalogue sits inside a collapsed accordion panel, so the link has
-    // to say which section to open — an anchor alone lands on a page where
-    // every panel is shut.
-    const settings = source(
-      "src/app/(dashboard)/dashboard/settings/profile/page.tsx",
-    );
-    assert.match(settings, /section === "roleProfile"/);
-    assert.match(settings, /<AccordionItem value="roleProfile">/);
+    // The details page renders the role profile form (which holds
+    // CostumesManager) open, with a jump link to #costumes for the shop.
+    const info = source("src/app/(dashboard)/dashboard/my-page/info/page.tsx");
+    assert.match(info, /<RoleProfileSwitcher/);
+    assert.match(info, /\["costumes", "costumes"\]/);
 
     const manager = source(
       "src/app/(dashboard)/dashboard/settings/profile/costumes-manager.tsx",

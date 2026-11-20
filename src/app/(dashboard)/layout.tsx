@@ -3,9 +3,10 @@ import { redirect } from "next/navigation";
 import { SuspendedAccountNotice } from "@/components/auth/suspended-account-notice";
 import {
   DashboardSidebar,
-  MobileDashboardSidebar,
+  DashboardTabBar,
 } from "@/components/layout/dashboard-sidebar";
 import { PastDueBanner } from "@/components/layout/past-due-banner";
+import { SectionNav } from "@/components/layout/section-nav";
 import { ReviewReminderBanner } from "@/components/layout/review-reminder-banner";
 import { WebNav } from "@/components/layout/web-nav";
 import { auth } from "@/lib/auth";
@@ -65,16 +66,12 @@ export default async function DashboardLayout({
       <PastDueBanner userId={session.user.id} />
       <ReviewReminderBanner userId={session.user.id} />
 
+      {/* Below lg the menu is the tab bar fixed to the bottom edge, so the
+          page keeps room for it under its last line. */}
       <main
         id="main-content"
-        className="mx-auto w-full max-w-[1440px] px-4 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-[72px]"
+        className="mx-auto w-full max-w-[1440px] px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-8 lg:pb-[72px]"
       >
-        <div className="mb-4 lg:hidden">
-          <MobileDashboardSidebar
-            marketplaceEnabled={features.marketplaceEnabled}
-          />
-        </div>
-
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[232px_1fr]">
           <aside className="sticky top-[104px] hidden lg:block">
             <DashboardSidebar
@@ -82,9 +79,13 @@ export default async function DashboardLayout({
             />
           </aside>
 
-          <div className="min-w-0">{children}</div>
+          <div className="min-w-0">
+            <SectionNav marketplaceEnabled={features.marketplaceEnabled} />
+            {children}
+          </div>
         </div>
       </main>
+      <DashboardTabBar marketplaceEnabled={features.marketplaceEnabled} />
     </div>
   );
 }

@@ -583,17 +583,17 @@ export async function getProviderOverview(
       {
         key: "avatar",
         done: Boolean(user.avatar),
-        href: "/dashboard/settings/profile",
+        href: "/dashboard/my-page/info#anh",
       },
       {
         key: "cover",
         done: Boolean(user.coverImage),
-        href: "/dashboard/settings/profile",
+        href: "/dashboard/my-page/info#anh",
       },
       {
         key: "services",
         done: profiles.some((p) => p._count.services > 0),
-        href: "/dashboard/settings/profile?section=roleProfile",
+        href: "/dashboard/services",
       },
       {
         key: "album",
@@ -605,17 +605,17 @@ export async function getProviderOverview(
       {
         key: "policies",
         done: profiles.some((p) => p.depositPolicy && p.cancellationPolicy),
-        href: "/dashboard/settings/profile?section=roleProfile",
+        href: "/dashboard/my-page/info#chinh-sach",
       },
       {
         key: "area",
         done: profiles.some((p) => p.provinceId || p._count.serviceAreas > 0),
-        href: "/dashboard/settings/profile?section=roleProfile",
+        href: "/dashboard/my-page/info#khu-vuc",
       },
       {
         key: "calendar",
         done: hasWeeklyHours,
-        href: "/dashboard/calendar",
+        href: "/dashboard/calendar?hours=1",
       },
     ],
     findability: {

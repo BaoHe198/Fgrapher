@@ -1,31 +1,13 @@
 "use client";
 
-import {
-  Bookmark,
-  Pin,
-  Calendar,
-  CalendarDays,
-  Handshake,
-  Image as ImageIcon,
-  LayoutDashboard,
-  MessageCircle,
-  Package,
-  PanelLeft,
-  Plus,
-  QrCode,
-  Send,
-  Settings,
-  Shield,
-  Shirt,
-  ShoppingBag,
-  Star,
-  type LucideIcon,
-} from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { NAV_ICON_COMPONENTS } from "@/components/layout/nav-icons";
+import { useMessaging } from "@/components/providers/messaging-provider";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -33,25 +15,64 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
-import { useMessaging } from "@/components/providers/messaging-provider";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import {
+  dashboardNav,
+  isNavItemActive,
+  type DashboardNavItem,
+} from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
 
-interface NavItem {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  badge?: number;
+const NAV_ICONS = NAV_ICON_COMPONENTS;
+
+function useNav(marketplaceEnabled: boolean) {
+  const { roles } = useUserRoles();
+  return dashboardNav({ roles, marketplaceEnabled });
 }
 
-interface NavSection {
-  /** Shown for provider roles only — see isProviderNav. */
-  heading?: string;
-  items: NavItem[];
+function NavLink({
+  item,
+  pathname,
+  unread,
+  onNavigate,
+}: {
+  item: DashboardNavItem;
+  pathname: string;
+  unread: number;
+  onNavigate?: () => void;
+}) {
+  const t = useTranslations("sharedComponents.dashboardNav.items");
+  const Icon = NAV_ICONS[item.icon];
+  const active = isNavItemActive(item, pathname);
+  const badge = item.badge === "messages" ? unread : 0;
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "flex min-h-11 items-center gap-2.5 rounded-[var(--fg-radius-sm)] px-3 py-2.5 text-body-md font-semibold! transition-colors duration-150",
+        active
+          ? "bg-success-bg text-brand-primary"
+          : "text-text-secondary hover:bg-bg-sunken",
+      )}
+    >
+      <Icon aria-hidden className="size-[18px] shrink-0" />
+      <span className="min-w-0 flex-1">{t(item.label)}</span>
+      {badge ? (
+        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-sm font-bold text-text-on-brand">
+          {badge > 99 ? "99+" : badge}
+        </span>
+      ) : null}
+    </Link>
+  );
 }
 
+/**
+ * The desktop menu: the job itself first, then one line for everything
+ * else and one for settings. See lib/dashboard-nav.ts for who sees what.
+ */
 export function DashboardSidebar({
   className,
   marketplaceEnabled,
@@ -62,152 +83,13 @@ export function DashboardSidebar({
   const t = useTranslations("sharedComponents.dashboardSidebar");
   const roleT = useTranslations("role");
   const pathname = usePathname();
-  const { roles, canUpload, canSell, canReceiveBookings, hasRole } =
-    useUserRoles();
-  const isAdmin = hasRole("ADMIN");
-  const unreadMessages = useMessaging().unreadCount;
+  const { roles } = useUserRoles();
+  const unread = useMessaging().unreadCount;
+  const nav = useNav(marketplaceEnabled);
 
-  // Grouped by what the person is doing, for provider roles. As one flat
-  // list a photographer got fifteen entries — their own work, their public
-  // profile, their Chợ F shop and the things they hire other people for,
-  // interleaved — and had to read every line to find one. A customer has
-  // about eight and no second hat to separate, so theirs stays one list
-  // without headings.
-  const isProviderNav =
-    canReceiveBookings || canUpload || canSell || hasRole("COSTUME_SHOP");
-
-  const bookingsItem: NavItem = {
-    href: "/dashboard/bookings",
-    label: canReceiveBookings ? t("bookings") : t("myBookings"),
-    icon: Calendar,
-  };
-  const myOrdersItem: NavItem[] = marketplaceEnabled
-    ? [{ href: "/dashboard/orders", label: t("myOrders"), icon: Package }]
-    : [];
-
-  const sections: NavSection[] = [
-    {
-      items: [
-        { href: "/dashboard", label: t("overview"), icon: LayoutDashboard },
-        {
-          href: "/dashboard/messages",
-          label: t("messages"),
-          icon: MessageCircle,
-          badge: unreadMessages,
-        },
-      ],
-    },
-    {
-      heading: t("sectionWork"),
-      items: canReceiveBookings
-        ? [
-            bookingsItem,
-            {
-              href: "/dashboard/calendar",
-              label: t("calendar"),
-              icon: CalendarDays,
-            },
-            {
-              href: "/dashboard/opportunities",
-              label: t("opportunities"),
-              icon: Handshake,
-            },
-            {
-              href: "/dashboard/my-offers",
-              label: t("myOffers"),
-              icon: Handshake,
-            },
-          ]
-        : [],
-    },
-    {
-      heading: t("sectionProfile"),
-      items: [
-        ...(canUpload
-          ? [
-              {
-                href: "/dashboard/portfolio",
-                label: t("portfolio"),
-                icon: ImageIcon,
-              },
-            ]
-          : []),
-        ...(canReceiveBookings
-          ? [
-              { href: "/dashboard/reviews", label: t("reviews"), icon: Star },
-              // The link and QR code a provider puts on their own social
-              // accounts (owner, 17/11/2026).
-              { href: "/dashboard/share", label: t("shareLink"), icon: QrCode },
-            ]
-          : []),
-        // A costume shop rents out outfits through chat, so it has no Chợ F
-        // listings page — its catalogue lives in Settings → Profile. That is
-        // the right architecture (CLAUDE.md, 22/09/2026) but it had no
-        // visible way in, and /dashboard/listings told the role it could not
-        // sell, so it read as "this role cannot post anything" (QA-06).
-        ...(hasRole("COSTUME_SHOP")
-          ? [
-              {
-                href: "/dashboard/settings/profile?section=roleProfile#costumes",
-                label: t("costumes"),
-                icon: Shirt,
-              },
-            ]
-          : []),
-      ],
-    },
-    {
-      heading: t("sectionMarket"),
-      items:
-        marketplaceEnabled && canSell
-          ? [
-              {
-                href: "/dashboard/listings",
-                label: t("listings"),
-                icon: ShoppingBag,
-              },
-              {
-                href: "/dashboard/shop-orders",
-                label: t("shopOrders"),
-                icon: Package,
-              },
-              ...myOrdersItem,
-            ]
-          : [],
-    },
-    {
-      heading: t("sectionHiring"),
-      items: [
-        // Someone who only books others: their bookings list is the heart
-        // of this section rather than of "Work".
-        ...(canReceiveBookings ? [] : [bookingsItem]),
-        { href: "/requests/new", label: t("createBooking"), icon: Plus },
-        { href: "/dashboard/requests", label: t("myRequests"), icon: Send },
-        ...(marketplaceEnabled && canSell ? [] : myOrdersItem),
-        { href: "/saved", label: t("saved"), icon: Bookmark },
-        { href: "/moodboard", label: t("moodboard"), icon: Pin },
-      ],
-    },
-    {
-      items: [
-        { href: "/dashboard/settings", label: t("settings"), icon: Settings },
-        ...(isAdmin
-          ? [{ href: "/admin", label: t("admin"), icon: Shield }]
-          : []),
-      ],
-    },
-  ].filter((section) => section.items.length > 0);
-
-  // ADMIN is never "the plan" — admins have no Subscription (see the
-  // schema comment on Role.ADMIN) and this card has nothing useful to
-  // show them, so it's hidden entirely rather than picking ADMIN as the
-  // displayed role.
-  const nonCustomerRole = roles.find(
+  const providerRole = roles.find(
     (role) => role !== "CUSTOMER" && role !== "ADMIN",
   );
-  const planName = nonCustomerRole
-    ? t("planPro", { role: roleT(nonCustomerRole) })
-    : t("planFree");
 
   return (
     // A nav landmark, so screen readers (and the route-crawl spec) find the
@@ -216,58 +98,35 @@ export function DashboardSidebar({
       aria-label={t("menuTitle")}
       className={cn("flex flex-col gap-1", className)}
     >
-      {sections.map((section, index) => (
-        <div
-          key={section.heading ?? `section-${index}`}
-          role={section.heading ? "group" : undefined}
-          aria-label={section.heading}
-          className={cn("flex flex-col gap-1", index > 0 && "mt-3")}
-        >
-          {isProviderNav && section.heading ? (
-            <span className="px-3 pb-1 text-caption-upper tracking-[0.12em] text-text-tertiary">
-              {section.heading}
-            </span>
-          ) : null}
-          {section.items.map(({ href, label, icon: Icon, badge }) => {
-            const isActive =
-              href === "/dashboard"
-                ? pathname === href
-                : pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] px-3 py-2.5 text-body-md font-semibold! transition-colors duration-150",
-                  isActive
-                    ? "bg-success-bg text-brand-primary"
-                    : "text-text-secondary hover:bg-bg-sunken",
-                )}
-              >
-                <Icon className="size-[18px]" />
-                {label}
-                {badge ? (
-                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1.5 text-sm font-bold text-text-on-brand">
-                    {badge}
-                  </span>
-                ) : null}
-              </Link>
-            );
-          })}
-        </div>
+      {nav.primary.map((item) => (
+        <NavLink
+          key={item.key}
+          item={item}
+          pathname={pathname}
+          unread={unread}
+        />
+      ))}
+      <div aria-hidden className="my-2 h-px bg-border-subtle" />
+      {nav.secondary.map((item) => (
+        <NavLink
+          key={item.key}
+          item={item}
+          pathname={pathname}
+          unread={unread}
+        />
       ))}
 
-      {/* Only for someone with a provider role. A customer has no plan —
-          CUSTOMER is free and stays free — so the card used to spend the
-          sidebar's most prominent slot on "Free — Customer" and a "Manage
-          plan" button leading to a billing page with nothing on it for
-          them. Admins are excluded for the reason given above. */}
-      {isAdmin || !nonCustomerRole ? null : (
+      {/* Only for someone with a provider role: a customer has no plan
+          (CUSTOMER is free and stays free) and an admin has no
+          Subscription. */}
+      {providerRole && !roles.includes("ADMIN") ? (
         <div className="mt-3.5 flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-green-900 p-3.5">
           <span className="text-body-sm text-green-200">
             {t("currentPlan")}
           </span>
-          <span className="text-heading-sm text-gold-50">{planName}</span>
+          <span className="text-heading-sm text-gold-50">
+            {t("planPro", { role: roleT(providerRole) })}
+          </span>
           <Button
             variant="accent"
             size="sm"
@@ -277,46 +136,123 @@ export function DashboardSidebar({
             {t("managePlan")}
           </Button>
         </div>
-      )}
+      ) : null}
     </nav>
   );
 }
 
-export function MobileDashboardSidebar({
+/**
+ * The phone menu: a bar along the bottom edge, where the thumb is, with the
+ * job's four main places one tap away and "Thêm" for the rest. It replaced
+ * a "Menu bảng điều khiển" button that opened a side panel — two taps for
+ * every move, and on an iPhone the panel's lower half could not be reached
+ * (owner's screenshot, 20/11/2026).
+ */
+export function DashboardTabBar({
   marketplaceEnabled,
 }: {
   marketplaceEnabled: boolean;
 }) {
-  const t = useTranslations("sharedComponents.dashboardSidebar");
+  const t = useTranslations("sharedComponents.dashboardNav");
+  const tItems = useTranslations("sharedComponents.dashboardNav.items");
+  const pathname = usePathname();
+  const unread = useMessaging().unreadCount;
+  const nav = useNav(marketplaceEnabled);
   const [open, setOpen] = useState(false);
 
+  // Lets fixed things elsewhere (toasts, a page's floating button) sit
+  // above the bar: see --fg-bottom-bar in globals.css.
+  useEffect(() => {
+    document.documentElement.classList.add("has-bottom-bar");
+    return () => document.documentElement.classList.remove("has-bottom-bar");
+  }, []);
+
+  const tabs = nav.tabs.slice(0, -1);
+  const moreActive =
+    open || nav.sheet.some((item) => isNavItemActive(item, pathname));
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      {/* QA: this trigger and WebNav's site-wide nav trigger both render
-          on every dashboard page and previously used the identical Menu
-          (≡) icon — indistinguishable at a glance, despite opening two
-          different navigation sets (this one: dashboard sections, left;
-          WebNav's: site-wide links, right). PanelLeft reads as "open the
-          side panel", matching what this one specifically does. */}
-      <SheetTrigger
-        render={
-          // Labelled, not icon-only: a bare panel icon under the site
-          // nav's ☰ read as a second, unexplained menu (24/09 audit).
-          <Button variant="secondary" size="sm" aria-label={t("openMenu")}>
-            <PanelLeft className="size-4" />
-            {t("menuTitle")}
-          </Button>
-        }
-      />
-      <SheetContent side="left" className="w-3/4 sm:max-w-xs">
-        <SheetHeader className="sr-only">
-          <SheetTitle>{t("menuTitle")}</SheetTitle>
-          <SheetDescription>{t("menuDescription")}</SheetDescription>
-        </SheetHeader>
-        <div className="p-4" onClick={() => setOpen(false)}>
-          <DashboardSidebar marketplaceEnabled={marketplaceEnabled} />
-        </div>
-      </SheetContent>
-    </Sheet>
+    <>
+      <nav
+        aria-label={t("tabBarLabel")}
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border-subtle bg-surface-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+      >
+        <ul className="mx-auto grid max-w-xl grid-cols-5">
+          {tabs.map((item) => {
+            const Icon = NAV_ICONS[item.icon];
+            const active = isNavItemActive(item, pathname);
+            const badge = item.badge === "messages" ? unread : 0;
+            return (
+              <li key={item.key} className="min-w-0">
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-border-focus relative flex h-16 flex-col items-center justify-center gap-1 px-1 text-[11px] leading-tight font-semibold",
+                    active ? "text-brand-primary" : "text-text-tertiary",
+                  )}
+                >
+                  <span className="relative">
+                    <Icon
+                      aria-hidden
+                      className="size-[22px]"
+                      strokeWidth={active ? 2.4 : 1.9}
+                    />
+                    {badge ? (
+                      <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
+                        <span className="sr-only">{t("unread")} </span>
+                        {badge > 9 ? "9+" : badge}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="w-full truncate text-center">
+                    {tItems(item.tabLabel ?? item.label)}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+          <li className="min-w-0">
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={open}
+              onClick={() => setOpen(true)}
+              className={cn(
+                "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-border-focus flex h-16 w-full flex-col items-center justify-center gap-1 px-1 text-[11px] leading-tight font-semibold",
+                moreActive ? "text-brand-primary" : "text-text-tertiary",
+              )}
+            >
+              <MoreHorizontal aria-hidden className="size-[22px]" />
+              <span>{t("moreTab")}</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="gap-0 lg:hidden">
+          <SheetHeader className="pr-14">
+            <SheetTitle>{t("moreTitle")}</SheetTitle>
+            <SheetDescription className="sr-only">
+              {t("moreDescription")}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="flex flex-col gap-1">
+              {nav.sheet.map((item) => (
+                <NavLink
+                  key={item.key}
+                  item={item}
+                  pathname={pathname}
+                  unread={unread}
+                  onNavigate={() => setOpen(false)}
+                />
+              ))}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

@@ -11,7 +11,7 @@ import { CalendarClient } from "./calendar-client";
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; hours?: string }>;
 }) {
   const session = await auth();
   if (!session?.user) {
@@ -24,7 +24,7 @@ export default async function CalendarPage({
   // A reminder links to the day it is about (?date=2026-11-25); anything
   // else opens on today, Vietnam time.
   const todayKey = vietnamTodayKey();
-  const { date } = await searchParams;
+  const { date, hours } = await searchParams;
   const initialDate = isDateKey(date) ? date : todayKey;
   const range = monthWindow(initialDate);
 
@@ -43,6 +43,7 @@ export default async function CalendarPage({
       initialDate={initialDate}
       todayKey={todayKey}
       weeklySchedule={weeklySchedule}
+      openHours={hours === "1"}
     />
   );
 }
