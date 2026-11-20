@@ -113,6 +113,8 @@ export async function exportUserData(userId: string) {
     productReviews,
     savedProfiles,
     following,
+    calendarEntries,
+    bookingNotes,
   ] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
@@ -205,6 +207,16 @@ export async function exportUserData(userId: string) {
         following: { select: { username: true, name: true } },
       },
     }),
+    // The provider's own calendar: jobs they wrote in (with whatever they
+    // recorded about the client) and their private notes on bookings.
+    db.calendarEntry.findMany({
+      where: { userId },
+      orderBy: { startAt: "asc" },
+    }),
+    db.bookingNote.findMany({
+      where: { userId },
+      select: { bookingId: true, note: true, updatedAt: true },
+    }),
   ]);
 
   return {
@@ -228,6 +240,8 @@ export async function exportUserData(userId: string) {
     productReviews,
     savedProfiles,
     following,
+    calendarEntries,
+    bookingNotes,
   };
 }
 
@@ -370,6 +384,12 @@ export async function processDeletion(userId: string, requestId?: string) {
       data: { deletedAt: now },
     }),
     db.like.deleteMany({ where: { userId } }),
+    // Their own calendar entries carry other people's names and phone
+    // numbers — people who never dealt with Fgrapher at all — and their
+    // private notes on bookings are theirs alone. Both go, along with the
+    // address a phone used to subscribe to the calendar.
+    db.calendarEntry.deleteMany({ where: { userId } }),
+    db.bookingNote.deleteMany({ where: { userId } }),
     // Who they followed and saved says whose work this person liked; who
     // followed them is a list pointing at an account that no longer exists.
     db.follow.deleteMany({
@@ -416,6 +436,7 @@ export async function processDeletion(userId: string, requestId?: string) {
         longitude: null,
         dateOfBirth: null,
         passwordHash: null,
+        calendarFeedToken: null,
         deletedAt: new Date(),
       },
     }),

@@ -9,6 +9,7 @@ import {
   blocksForProviders,
   weeklyWindowsForProviders,
 } from "@/services/resource-calendar";
+import { entryWindowsForProviders } from "@/services/calendar-entries";
 import type { FmapSearchInput } from "@/lib/validations/fmap";
 import { joinVietnameseName } from "@/lib/vietnam/name";
 import { timeToMinutes } from "@/services/availability";
@@ -238,23 +239,30 @@ export async function providersAvailableForInterval(
   const ids = [...new Set(providerIds)];
   if (ids.length === 0) return new Set();
   const date = new Date(`${dateKey}T00:00:00.000Z`);
-  const [weeklyWindows, blockedDates, bookings] = await Promise.all([
-    weeklyWindowsForProviders(ids, date.getUTCDay()),
-    blocksForProviders(ids, date),
-    db.booking.findMany({
-      where: {
-        providerId: { in: ids },
-        date,
-        status: { in: BLOCKING_BOOKING_STATUSES },
-      },
-      select: {
-        providerId: true,
-        startTime: true,
-        endTime: true,
-        service: { select: { duration: true } },
-      },
-    }),
-  ]);
+  const nextDateKey = new Date(date.getTime() + 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const [weeklyWindows, blockedDates, ownEntries, bookings] = await Promise.all(
+    [
+      weeklyWindowsForProviders(ids, date.getUTCDay()),
+      blocksForProviders(ids, date),
+      // A provider's own calendar entries take time like a booking does.
+      entryWindowsForProviders(ids, dateKey, nextDateKey),
+      db.booking.findMany({
+        where: {
+          providerId: { in: ids },
+          date,
+          status: { in: BLOCKING_BOOKING_STATUSES },
+        },
+        select: {
+          providerId: true,
+          startTime: true,
+          endTime: true,
+          service: { select: { duration: true } },
+        },
+      }),
+    ],
+  );
 
   const weeklyByProvider = new Map<string, TimeRange[]>();
   for (const window of weeklyWindows) {
@@ -270,6 +278,15 @@ export async function providersAvailableForInterval(
     const values = bookingsByProvider.get(booking.providerId) ?? [];
     values.push(booking);
     bookingsByProvider.set(booking.providerId, values);
+  }
+  for (const entry of ownEntries) {
+    const values = bookingsByProvider.get(entry.userId) ?? [];
+    values.push({
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+      service: null,
+    });
+    bookingsByProvider.set(entry.userId, values);
   }
 
   const intervals: [string, string][] =

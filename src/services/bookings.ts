@@ -1206,7 +1206,7 @@ export async function proposeReschedule({
   return updated;
 }
 
-// Called once a day by /api/cron/booking-reminders. Reminds both parties of
+// Called once a day by /api/cron/booking-reminders. Reminds the customer of
 // any CONFIRMED booking scheduled for tomorrow (UTC-anchored date match,
 // consistent with the rest of the app) that hasn't been reminded yet —
 // `reminderSentAt` makes re-running the cron for the same day a no-op.
@@ -1278,24 +1278,10 @@ export async function sendBookingReminders() {
         ],
       },
     });
-    await notify({
-      userId: booking.providerId,
-      type: "BOOKING_REMINDER",
-      title: nt("booking.reminder.title"),
-      message: message(true),
-      data: { bookingId: booking.id },
-      email: {
-        subject: reminderEmailT("bookingReminder.subject"),
-        html: bookingReminderEmailHtml(args(true)),
-        // The day is part of the event: a booking moved to another day is
-        // owed a reminder for that day too.
-        dedupe: [
-          booking.id,
-          "REMINDER",
-          booking.date.toISOString().slice(0, 10),
-        ],
-      },
-    });
+    // The provider is not told here any more: their whole day — this booking
+    // and anything else on it — arrives as one evening summary and one
+    // morning summary (sendScheduleDigests in services/work-calendar.ts).
+    // Sending this as well put the same booking in their inbox twice.
 
     await db.booking.update({
       where: { id: booking.id },

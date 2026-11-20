@@ -1,5 +1,6 @@
 import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { entryWindowsForProviders } from "@/services/calendar-entries";
 import { listBlocks, listWeeklyRules } from "@/services/resource-calendar";
 
 // This module treats every date as a UTC-anchored calendar date (matching
@@ -52,9 +53,12 @@ export async function getProviderAvailability(
   const to = new Date(from);
   to.setUTCDate(to.getUTCDate() + days);
 
-  const [weekly, blockedDates, bookings] = await Promise.all([
+  const [weekly, blockedDates, ownEntries, bookings] = await Promise.all([
     listWeeklyRules(providerId),
     listBlocks(providerId, from, to),
+    // Jobs the provider wrote into their own calendar (work taken outside
+    // Fgrapher) close their hours exactly as a booking does.
+    entryWindowsForProviders([providerId], toDateKey(from), toDateKey(to)),
     db.booking.findMany({
       where: {
         providerId,
@@ -88,6 +92,14 @@ export async function getProviderAvailability(
     const duration = booking.service?.duration ?? SLOT_MINUTES;
     if (!occupiedByDate.has(key)) occupiedByDate.set(key, []);
     occupiedByDate.get(key)!.push({ start, end: start + duration });
+  }
+  for (const entry of ownEntries) {
+    if (!occupiedByDate.has(entry.dateKey))
+      occupiedByDate.set(entry.dateKey, []);
+    occupiedByDate.get(entry.dateKey)!.push({
+      start: timeToMinutes(entry.startTime),
+      end: timeToMinutes(entry.endTime),
+    });
   }
 
   const now = Date.now();
