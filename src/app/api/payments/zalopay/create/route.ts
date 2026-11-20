@@ -6,7 +6,11 @@ import { features } from "@/lib/features";
 import { isZalopayConfigured } from "@/lib/payments/zalopay";
 import { checkSharedRateLimit } from "@/lib/rate-limit";
 import { createPaymentIntentSchema } from "@/lib/validations/payments";
-import { createZalopayPaymentIntent, PaymentError } from "@/services/payments";
+import {
+  createZalopayPaymentIntent,
+  PaymentError,
+  paymentErrorKey,
+} from "@/services/payments";
 
 const CREATE_RATE_LIMIT = { max: 10, windowMs: 60 * 60 * 1000 };
 
@@ -79,7 +83,11 @@ export async function POST(request: Request) {
     }
     if (err instanceof PaymentError) {
       return NextResponse.json(
-        { data: null, error: err.message, message: t("createFailed") },
+        {
+          data: null,
+          error: err.message,
+          message: t(paymentErrorKey(err.message)),
+        },
         { status: 502 },
       );
     }

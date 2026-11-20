@@ -1667,7 +1667,11 @@
       "invalidInput": "Invalid input.",
       "createFailed": "Couldn't start the payment. Please try again.",
       "loadFailed": "Couldn't load payment information.",
-      "bankTransferSubmitted": "Proof submitted — waiting for admin confirmation."
+      "bankTransferSubmitted": "Proof submitted — waiting for admin confirmation.",
+      "roleNotPayable": "You can only pay for the provider role your account has. Add the role in Settings → Roles first.",
+      "paymentNotFound": "That payment could not be found.",
+      "alreadySubmitted": "You have already sent proof for this payment. An admin is checking it.",
+      "invalidProof": "The proof image could not be verified. Please upload it again and resubmit."
     },
     "orders": {
       "notFound": "Not found",
@@ -2985,7 +2989,9 @@
       "transferReferenceHint": "Include this exact code in your transfer message for faster confirmation.",
       "uploadProof": "Upload transfer receipt",
       "awaitingReview": "Proof submitted — waiting for admin confirmation.",
-      "startBankTransfer": "Start bank transfer"
+      "startBankTransfer": "Start bank transfer",
+      "validUntil": "Valid until {date}",
+      "expiredOn": "Expired on {date}"
     },
     "data": {
       "summary": {
@@ -3614,6 +3620,12 @@
         "heading": "A change of sign-in email was requested",
         "body": "The Fgrapher account using this address has asked to change its sign-in email to {newEmail}. The change only takes effect once the new address is confirmed. If this was not you, change your password now: that keeps the account with you.",
         "cta": "Open account settings"
+      },
+      "subscriptionRenewalDue": {
+        "subject": "Your Fgrapher plan is about to end",
+        "heading": "Your plan is about to end",
+        "body": "Your {role} plan ends on {periodEndLabel}. It does not renew by itself: pay before then to keep your profile visible and bookable. After that date the profile is hidden until you renew; your data is kept.",
+        "cta": "Renew plan"
       }
     },
     "notifications": {

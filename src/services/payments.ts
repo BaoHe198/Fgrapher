@@ -27,15 +27,45 @@ import {
 } from "@/lib/payments/momo";
 import type { ZalopayCallbackData } from "@/lib/payments/zalopay";
 import { generateTransferReference } from "@/lib/payments/bank-transfer";
-import { formatCurrency } from "@/lib/utils";
+import { escapeHtml, formatCurrency } from "@/lib/utils";
 import { type BillingInterval, ROLE_PLANS } from "@/lib/constants/plans";
 import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
-import { FREE_PLAN, freePlanTermEnd } from "@/lib/payments/free-plan";
+import {
+  FREE_PLAN,
+  freePlanTermEnd,
+  renewsAutomatically,
+} from "@/lib/payments/free-plan";
 import { notifyCritical } from "@/services/notification";
 import { tryAutoPublish } from "@/services/public-profile";
 
 export class PaymentError extends Error {}
+
+/**
+ * The words for a PaymentError, as a key under apiMessages.payments. The
+ * payment routes answered every one of these with the same "Không thể khởi
+ * tạo thanh toán. Vui lòng thử lại." — to someone whose receipt photo could
+ * not be verified, to someone who had already sent it, and to someone
+ * paying for a role they do not have alike, none of whom could fix it by
+ * trying again.
+ */
+export function paymentErrorKey(code: string) {
+  switch (code) {
+    case "role_mismatch":
+    case "role_not_held":
+    case "invalid_role":
+    case "no_plan_for_role":
+      return "roleNotPayable";
+    case "payment_not_found":
+      return "paymentNotFound";
+    case "already_submitted":
+      return "alreadySubmitted";
+    case "invalid_proof":
+      return "invalidProof";
+    default:
+      return "createFailed";
+  }
+}
 
 function billingUrl() {
   return `${process.env.NEXTAUTH_URL ?? ""}/dashboard/settings/billing`;
@@ -92,6 +122,18 @@ async function assertPayableRole(userId: string, role: Role) {
   if (currentRole && currentRole.role !== role) {
     throw new PaymentError("role_mismatch");
   }
+
+  // A payment activates the role it names (activateRoleFromPayment upserts
+  // it). Without this, an account that had never taken a provider role
+  // could pay for any of them and be handed it on approval — skipping
+  // whatever adding that role asks for first (/api/users/roles), such as a
+  // model's acceptance of the content guidelines. Paying is for a role the
+  // account already has, active or lapsed.
+  const held = await db.userRole.findUnique({
+    where: { userId_role: { userId, role } },
+    select: { id: true },
+  });
+  if (!held) throw new PaymentError("role_not_held");
 }
 
 // Short, url-safe, unique enough for a per-payment order id — this is
@@ -283,7 +325,8 @@ async function notifyBankTransferRejected(
         heading: emailT("paymentRejected.heading"),
         body: reason
           ? emailT("paymentRejected.bodyWithReason", {
-              reason: `<strong>${reason}</strong>`,
+              // Escaped: the reviewer's note is free text, this is HTML.
+              reason: `<strong>${escapeHtml(reason)}</strong>`,
             })
           : emailT("paymentRejected.body"),
         ctaLabel: emailT("paymentRejected.cta"),
@@ -512,6 +555,25 @@ export async function createBankTransferIntent(
   const amount = amountForRole(role, interval);
   const roleT = await getTranslations("role");
 
+  // Pressing "Bắt đầu chuyển khoản" again gives back the same reference
+  // rather than a new one. Every press used to mint another PENDING row
+  // (nothing limited it, and nothing ever closed them), and a customer who
+  // had already written the first code in their transfer was shown a
+  // different one.
+  const open = await db.payment.findFirst({
+    where: {
+      userId,
+      role,
+      interval,
+      provider: "BANK_TRANSFER",
+      status: "PENDING",
+      amount,
+      createdAt: { gt: bankTransferIntentCutoff() },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  if (open) return open;
+
   return db.payment.create({
     data: {
       userId,
@@ -654,20 +716,52 @@ export async function sendSubscriptionRenewalReminders() {
     include: { userRole: true },
   });
 
-  const emailT = await getEmailT();
+  const [emailT, roleT] = await Promise.all([
+    getEmailT(),
+    getTranslations({ locale: "vi", namespace: "role" }),
+  ]);
 
   let sent = 0;
   for (const subscription of subscriptions) {
     if (!subscription.currentPeriodEnd) continue;
+    // A free plan renews itself while billing is off (lib/payments/
+    // free-plan.ts): telling its holder that it is about to end, three days
+    // before every anniversary, would be telling them something false.
+    if (renewsAutomatically(subscription, features.billingEnabled)) continue;
+
+    const periodEndLabel =
+      subscription.currentPeriodEnd.toLocaleDateString("vi-VN");
+    const role = roleT(subscription.userRole.role);
+    const periodKey = subscription.currentPeriodEnd.toISOString().slice(0, 10);
+    // This borrowed Stripe's "you cancelled" copy ("Rất tiếc phải chia tay
+    // bạn… Đổi ý rồi?") for someone who cancelled nothing, sent no email at
+    // all — the reminder lived only in the notification bell — and repeated
+    // itself whenever the cron ran twice in a day.
     await notifyCritical({
+      // One per subscription per period: a retried cron writes nothing new.
+      notificationId: `renewal-${subscription.id}-${periodKey}`,
       userId: subscription.userRole.userId,
       type: "SUBSCRIPTION_EXPIRING",
-      title: emailT("subscriptionCancelling.heading"),
-      message: emailT("subscriptionCancelling.body", {
-        periodEndLabel:
-          subscription.currentPeriodEnd.toLocaleDateString("vi-VN"),
-      }),
-      data: { role: subscription.userRole.role },
+      title: emailT("subscriptionRenewalDue.heading"),
+      message: emailT("subscriptionRenewalDue.body", { role, periodEndLabel }),
+      data: {
+        role: subscription.userRole.role,
+        href: "/dashboard/settings/billing",
+      },
+      email: {
+        subject: emailT("subscriptionRenewalDue.subject"),
+        html: bookingEmailShell({
+          t: emailT,
+          heading: emailT("subscriptionRenewalDue.heading"),
+          body: emailT("subscriptionRenewalDue.body", {
+            role: `<strong>${escapeHtml(role)}</strong>`,
+            periodEndLabel: `<strong>${periodEndLabel}</strong>`,
+          }),
+          ctaLabel: emailT("subscriptionRenewalDue.cta"),
+          ctaUrl: billingUrl(),
+        }),
+        dedupe: [subscription.id, "RENEWAL_DUE", periodKey],
+      },
     });
     sent++;
   }
@@ -770,6 +864,15 @@ export async function expireLocalSubscriptions() {
 }
 
 const PAYMENT_INTENT_EXPIRY_HOURS = 24;
+// A bank transfer is made by hand and may take a few days to be sent; an
+// intent nobody has attached a receipt to after a week is abandoned.
+const BANK_TRANSFER_INTENT_EXPIRY_DAYS = 7;
+
+function bankTransferIntentCutoff() {
+  return new Date(
+    Date.now() - BANK_TRANSFER_INTENT_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+  );
+}
 
 // MoMo/ZaloPay intents stuck at PENDING because their IPN/callback never
 // arrived (network blip, customer abandoned checkout, etc.) would
@@ -791,7 +894,19 @@ export async function expirePaymentIntents() {
     data: { status: "FAILED" },
   });
 
-  return result.count;
+  // Bank-transfer intents with no receipt were never closed at all. Only
+  // PENDING ones: a submitted receipt (AWAITING_REVIEW) waits for an admin
+  // however long that takes.
+  const abandoned = await db.payment.updateMany({
+    where: {
+      status: "PENDING",
+      provider: "BANK_TRANSFER",
+      createdAt: { lt: bankTransferIntentCutoff() },
+    },
+    data: { status: "FAILED" },
+  });
+
+  return result.count + abandoned.count;
 }
 
 // ---------------------------------------------------------------------

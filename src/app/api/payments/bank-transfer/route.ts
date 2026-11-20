@@ -16,6 +16,7 @@ import {
   createBankTransferIntent,
   submitBankTransferProof,
   PaymentError,
+  paymentErrorKey,
 } from "@/services/payments";
 
 // GET: static bank info + the caller's own submission history (so the
@@ -128,7 +129,11 @@ export async function POST(request: Request) {
     // rejection itself was already working correctly.
     if (err instanceof PaymentError) {
       return NextResponse.json(
-        { data: null, error: err.message, message: t("createFailed") },
+        {
+          data: null,
+          error: err.message,
+          message: t(paymentErrorKey(err.message)),
+        },
         { status: 400 },
       );
     }
@@ -185,7 +190,11 @@ export async function PATCH(request: Request) {
     }
     if (err instanceof PaymentError) {
       return NextResponse.json(
-        { data: null, error: err.message, message: t("createFailed") },
+        {
+          data: null,
+          error: err.message,
+          message: t(paymentErrorKey(err.message)),
+        },
         { status: 400 },
       );
     }

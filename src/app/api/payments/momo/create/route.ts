@@ -6,7 +6,11 @@ import { features } from "@/lib/features";
 import { isMomoConfigured } from "@/lib/payments/momo";
 import { checkSharedRateLimit } from "@/lib/rate-limit";
 import { createPaymentIntentSchema } from "@/lib/validations/payments";
-import { createMomoPaymentIntent, PaymentError } from "@/services/payments";
+import {
+  createMomoPaymentIntent,
+  PaymentError,
+  paymentErrorKey,
+} from "@/services/payments";
 
 // Authenticated but still rate-limited (per account, not per IP — same
 // reasoning as phone/send-code) to stop a compromised/malicious account
@@ -82,7 +86,11 @@ export async function POST(request: Request) {
     }
     if (err instanceof PaymentError) {
       return NextResponse.json(
-        { data: null, error: err.message, message: t("createFailed") },
+        {
+          data: null,
+          error: err.message,
+          message: t(paymentErrorKey(err.message)),
+        },
         { status: 502 },
       );
     }
