@@ -80,7 +80,9 @@ export function MonthGrid({
               aria-label={describeDay(dateKey, jobs.length)}
               onClick={() => onSelect(dateKey)}
               className={cn(
-                "focus-ring flex min-h-[104px] flex-col gap-1 border-r border-b border-border-subtle p-1.5 text-left hover:bg-bg-sunken",
+                // Inset focus outline: the grid's rounded frame clips anything
+                // drawn outside the edge cells.
+                "flex min-h-[104px] flex-col gap-1 border-r border-b border-border-subtle p-1.5 text-left hover:bg-bg-sunken focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-border-focus",
                 wholeDayBlock && "bg-bg-sunken",
                 !wholeDayBlock && closed && !outside && "bg-warning-bg/30",
                 outside && "opacity-50",

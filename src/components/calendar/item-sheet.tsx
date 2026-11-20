@@ -254,7 +254,10 @@ export function ItemSheet({
             <p className="text-body-sm text-text-tertiary">
               {tSheet("addToPhoneHint")}
             </p>
-            <div className="flex flex-col gap-2 sm:flex-row">
+            {/* Stacked at every width: side by side the two labels need more
+                than the panel has, even on a wide screen (it is 448px), and
+                the panel then scrolled sideways. */}
+            <div className="flex flex-col gap-2">
               <a
                 href={`/api/calendar/ics?kind=${item.kind}&id=${item.id}&date=${item.dateKey}`}
                 className={linkClass}

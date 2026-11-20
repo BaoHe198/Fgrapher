@@ -300,3 +300,45 @@ describe("who may see a provider's own entries", () => {
     assert.ok(!bookings.includes("bookingNote"));
   });
 });
+
+describe("controls in the calendar's narrow panels", () => {
+  const read = (path: string) => readFileSync(path, "utf8");
+
+  // The day panel is 320-380px and the details panel 448px, and button
+  // labels do not wrap. Two buttons in one fixed row overflowed both and,
+  // each being a scroll container, gave them a sideways scrollbar (owner's
+  // screenshot, 20/11/2026). Page-level overflow checks never saw it.
+  it("the day panel's action row wraps", () => {
+    const source = read(
+      "src/app/(dashboard)/dashboard/calendar/calendar-client.tsx",
+    );
+    const row = source.slice(source.indexOf('v2("addEntryLong")') - 700);
+    assert.match(row, /className="flex flex-wrap gap-2"/);
+  });
+
+  it("the details panel stacks its add-to-phone links at every width", () => {
+    const source = read("src/components/calendar/item-sheet.tsx");
+    assert.doesNotMatch(source, /sm:flex-row/);
+  });
+
+  it("the month grid only appears where its cells can be read", () => {
+    const source = read(
+      "src/app/(dashboard)/dashboard/calendar/calendar-client.tsx",
+    );
+    // Inside the dashboard's sidebar layout a 1024px window leaves the grid
+    // about 350px; it is an xl (1280px) layout, with the week strip below.
+    assert.doesNotMatch(source, /lg:/);
+    assert.match(source, /xl:grid-cols-\[/);
+  });
+
+  it("focus rings are drawn inside boxes that clip their edges", () => {
+    for (const path of [
+      "src/components/calendar/agenda-card.tsx",
+      "src/components/calendar/month-grid.tsx",
+    ]) {
+      const source = read(path);
+      assert.ok(source.includes("focus-visible:-outline-offset-2"), path);
+      assert.doesNotMatch(source, /"focus-ring |focus-ring flex/, path);
+    }
+  });
+});

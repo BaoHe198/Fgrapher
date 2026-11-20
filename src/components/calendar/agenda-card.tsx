@@ -60,10 +60,13 @@ export function AgendaCard({ item, clashing, onOpen }: AgendaCardProps) {
         KIND_EDGE[item.kind],
       )}
     >
+      {/* Focus rings here are drawn inside the control: the card clips its
+          corners (overflow-hidden), which also cut off an outline drawn
+          outside, leaving keyboard users with no sign of where they were. */}
       <button
         type="button"
         onClick={() => onOpen(item)}
-        className="focus-ring flex w-full flex-col gap-1.5 p-4 text-left hover:bg-bg-sunken"
+        className="focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-border-focus flex w-full flex-col gap-1.5 p-4 text-left hover:bg-bg-sunken"
       >
         <span className="flex flex-wrap items-center gap-2">
           <span className="text-heading-sm text-text-primary tabular-nums">
@@ -131,7 +134,7 @@ export function AgendaCard({ item, clashing, onOpen }: AgendaCardProps) {
           {tel ? (
             <a
               href={tel}
-              className="focus-ring flex min-h-11 flex-1 items-center justify-center gap-2 text-body-sm font-semibold! text-text-primary hover:bg-bg-sunken"
+              className="focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-border-focus flex min-h-11 flex-1 items-center justify-center gap-2 text-body-sm font-semibold! text-text-primary hover:bg-bg-sunken"
             >
               <Phone aria-hidden className="size-4" />
               {t("call")}
@@ -142,7 +145,7 @@ export function AgendaCard({ item, clashing, onOpen }: AgendaCardProps) {
               href={mapsUrl(item.address)}
               target="_blank"
               rel="noopener noreferrer"
-              className="focus-ring flex min-h-11 flex-1 items-center justify-center gap-2 text-body-sm font-semibold! text-text-primary hover:bg-bg-sunken"
+              className="focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-border-focus flex min-h-11 flex-1 items-center justify-center gap-2 text-body-sm font-semibold! text-text-primary hover:bg-bg-sunken"
             >
               <Navigation aria-hidden className="size-4" />
               {t("directions")}

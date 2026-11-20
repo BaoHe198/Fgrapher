@@ -76,6 +76,10 @@ export function EntrySheet({
     );
 
   const save = async () => {
+    // The footer buttons are disabled while a save runs, but Enter in a
+    // field submits the form regardless — and a second submit is a second,
+    // identical job on the calendar.
+    if (busy) return;
     setError(null);
     if (!title.trim()) {
       setTitleError(t("titleRequired"));
@@ -115,7 +119,7 @@ export function EntrySheet({
   };
 
   const remove = async () => {
-    if (!entry) return;
+    if (!entry || busy) return;
     setBusy("delete");
     const res = await fetch(`/api/calendar/entries/${entry.id}`, {
       method: "DELETE",
