@@ -19,6 +19,9 @@ export const updateRolesSchema = z.object({
     .array(z.enum(PAID_ROLE_VALUES))
     .min(1, "Select at least one role")
     .max(1, "Select only one role"),
+  // Required for MODEL, as it is at sign-up (registerSchema): the route
+  // refuses the role without it. See /api/users/roles.
+  acceptedContentGuidelines: z.boolean().optional(),
 });
 
 export type UpdateRolesInput = z.infer<typeof updateRolesSchema>;
@@ -29,6 +32,8 @@ export type UpdateRolesInput = z.infer<typeof updateRolesSchema>;
 export const createRoleChangeRequestSchema = z.object({
   toRole: z.enum(PAID_ROLE_VALUES),
   reason: z.string().max(500).optional(),
+  // Required when toRole is MODEL — see createRoleChangeRequest.
+  acceptedContentGuidelines: z.boolean().optional(),
 });
 
 export type CreateRoleChangeRequestInput = z.infer<

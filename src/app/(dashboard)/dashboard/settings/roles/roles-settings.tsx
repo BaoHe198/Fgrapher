@@ -22,6 +22,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -95,6 +96,7 @@ export function RolesSettings({
   const roleT = useTranslations("role");
   const t = useTranslations("dashboardSettings.roles");
   const roleSelectionT = useTranslations("uiKit.roleSelectionForm.roles");
+  const registerT = useTranslations("accountFlows.register");
   const router = useRouter();
   // The page reads roles from the session token, which only re-reads the
   // database once a minute (lib/auth.ts SESSION_SYNC_MS). Without forcing
@@ -128,6 +130,12 @@ export function RolesSettings({
   const [changeRequestTarget, setChangeRequestTarget] = useState<Role | "">("");
   const [changeRequestReason, setChangeRequestReason] = useState("");
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
+  // A model accepts the content guidelines before the role is theirs, here
+  // as at sign-up. Never pre-ticked; one tick each for the two ways in
+  // (adding the role, asking to change to it).
+  const [modelGuidelinesAccepted, setModelGuidelinesAccepted] = useState(false);
+  const [changeGuidelinesAccepted, setChangeGuidelinesAccepted] =
+    useState(false);
   const activeRoles = currentRoles.filter((r) => r !== "CUSTOMER");
   // MVP scope decision — one provider role per account (CLAUDE.md): once
   // an account already holds one, hide the option to add another entirely
@@ -150,7 +158,12 @@ export function RolesSettings({
       const res = await fetch("/api/users/roles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roles: [role] }),
+        body: JSON.stringify({
+          roles: [role],
+          ...(role === "MODEL"
+            ? { acceptedContentGuidelines: modelGuidelinesAccepted }
+            : {}),
+        }),
       });
       const body = await res.json();
       if (!res.ok) {
@@ -195,6 +208,7 @@ export function RolesSettings({
     setChangeRequestRole(role);
     setChangeRequestTarget("");
     setChangeRequestReason("");
+    setChangeGuidelinesAccepted(false);
   };
 
   const submitRoleChangeRequest = async () => {
@@ -207,6 +221,9 @@ export function RolesSettings({
         body: JSON.stringify({
           toRole: changeRequestTarget,
           reason: changeRequestReason.trim() || undefined,
+          ...(changeRequestTarget === "MODEL"
+            ? { acceptedContentGuidelines: changeGuidelinesAccepted }
+            : {}),
         }),
       });
       const body = await res.json();
@@ -390,7 +407,11 @@ export function RolesSettings({
                       size="sm"
                       variant="secondary"
                       className="shrink-0"
-                      disabled={activatingRole !== null || isRefreshing}
+                      disabled={
+                        activatingRole !== null ||
+                        isRefreshing ||
+                        (role === "MODEL" && !modelGuidelinesAccepted)
+                      }
                       onClick={() => activateRole(role)}
                     >
                       {isActivating ? (
@@ -404,6 +425,26 @@ export function RolesSettings({
                       `${ROLE_DESCRIPTION_KEY[role]}.description`,
                     )}
                   </p>
+                  {role === "MODEL" ? (
+                    <Checkbox
+                      checked={modelGuidelinesAccepted}
+                      onCheckedChange={(checked) =>
+                        setModelGuidelinesAccepted(checked === true)
+                      }
+                      label={
+                        <>
+                          {registerT("contentGuidelinesConfirm")}
+                          <Link
+                            href="/guidelines"
+                            target="_blank"
+                            className="text-text-link hover:underline"
+                          >
+                            {registerT("contentGuidelinesLink")}
+                          </Link>
+                        </>
+                      }
+                    />
+                  ) : null}
                 </div>
               </Card>
             );
@@ -458,6 +499,26 @@ export function RolesSettings({
               value={changeRequestReason}
               onChange={(e) => setChangeRequestReason(e.target.value)}
             />
+            {changeRequestTarget === "MODEL" ? (
+              <Checkbox
+                checked={changeGuidelinesAccepted}
+                onCheckedChange={(checked) =>
+                  setChangeGuidelinesAccepted(checked === true)
+                }
+                label={
+                  <>
+                    {registerT("contentGuidelinesConfirm")}
+                    <Link
+                      href="/guidelines"
+                      target="_blank"
+                      className="text-text-link hover:underline"
+                    >
+                      {registerT("contentGuidelinesLink")}
+                    </Link>
+                  </>
+                }
+              />
+            ) : null}
           </div>
           <DialogFooter>
             <Button
@@ -468,7 +529,11 @@ export function RolesSettings({
             </Button>
             <Button
               variant="accent"
-              disabled={!changeRequestTarget || isSubmittingRequest}
+              disabled={
+                !changeRequestTarget ||
+                isSubmittingRequest ||
+                (changeRequestTarget === "MODEL" && !changeGuidelinesAccepted)
+              }
               onClick={submitRoleChangeRequest}
             >
               {isSubmittingRequest ? (

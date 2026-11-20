@@ -71,10 +71,14 @@ export function ContactForm() {
         required
       />
       <div className="flex flex-col gap-1.5">
-        <label className="text-body-sm font-semibold! text-text-primary">
+        <label
+          htmlFor="contact-message"
+          className="text-body-sm font-semibold! text-text-primary"
+        >
           Nội dung
         </label>
         <textarea
+          id="contact-message"
           required
           minLength={10}
           value={message}

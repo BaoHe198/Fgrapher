@@ -1024,7 +1024,8 @@
         "statusVerified": "Đã xác minh",
         "statusActive": "Đang hoạt động",
         "empty": "Không tìm thấy người dùng nào",
-        "scrollHint": "Vuốt ngang để xem thêm cột"
+        "scrollHint": "Vuốt ngang để xem thêm cột",
+        "roleFilterLabel": "Lọc theo vai trò"
       },
       "userDetail": {
         "manualPlan": {
@@ -1199,14 +1200,16 @@
           "typeFilter": {
             "all": "Tất cả loại",
             "export": "Xuất dữ liệu",
-            "deletion": "Xóa dữ liệu"
+            "deletion": "Xóa dữ liệu",
+            "label": "Lọc theo loại yêu cầu"
           },
           "statusFilter": {
             "all": "Tất cả trạng thái",
             "pending": "Đang chờ",
             "processing": "Đang xử lý",
             "completed": "Đã hoàn tất",
-            "rejected": "Đã từ chối"
+            "rejected": "Đã từ chối",
+            "label": "Lọc theo trạng thái"
           },
           "empty": "Không có yêu cầu dữ liệu nào",
           "unknownUser": "Người dùng không xác định",
@@ -1412,7 +1415,8 @@
       "changeRequestNoActiveRole": "Bạn chưa có vai trò nhà cung cấp nào đang hoạt động",
       "changeRequestNotVerified": "Vai trò này chưa được xác minh — bạn có thể tự xóa và thêm vai trò khác trực tiếp",
       "changeRequestSameRole": "Vai trò mới phải khác vai trò hiện tại",
-      "changeRequestAlreadyPending": "Bạn đã có một yêu cầu đổi vai trò đang chờ duyệt"
+      "changeRequestAlreadyPending": "Bạn đã có một yêu cầu đổi vai trò đang chờ duyệt",
+      "modelGuidelinesRequired": "Bạn cần xác nhận đã đủ 18 tuổi và đồng ý với quy tắc nội dung trước khi nhận vai trò Người mẫu."
     },
     "phone": {
       "notConfigured": "Xác minh số điện thoại chưa được cấu hình trên hệ thống",
@@ -1667,7 +1671,11 @@
       "invalidInput": "Dữ liệu không hợp lệ.",
       "createFailed": "Không thể khởi tạo thanh toán. Vui lòng thử lại.",
       "loadFailed": "Không thể tải thông tin thanh toán.",
-      "bankTransferSubmitted": "Đã gửi minh chứng chuyển khoản, đang chờ quản trị viên xác nhận."
+      "bankTransferSubmitted": "Đã gửi minh chứng chuyển khoản, đang chờ quản trị viên xác nhận.",
+      "roleNotPayable": "Bạn chỉ thanh toán được cho vai trò nhà cung cấp mà tài khoản đang có. Hãy thêm vai trò trong Cài đặt → Vai trò trước.",
+      "paymentNotFound": "Không tìm thấy khoản thanh toán này.",
+      "alreadySubmitted": "Bạn đã gửi minh chứng cho khoản này rồi. Quản trị viên đang đối chiếu.",
+      "invalidProof": "Không xác minh được ảnh minh chứng. Hãy tải ảnh lên lại rồi gửi."
     },
     "orders": {
       "notFound": "Không tìm thấy",
@@ -2985,7 +2993,9 @@
       "transferReferenceHint": "Ghi đúng mã này vào nội dung chuyển khoản để được xác nhận nhanh hơn.",
       "uploadProof": "Tải lên minh chứng chuyển khoản",
       "awaitingReview": "Đã gửi minh chứng, đang chờ quản trị viên xác nhận.",
-      "startBankTransfer": "Bắt đầu chuyển khoản"
+      "startBankTransfer": "Bắt đầu chuyển khoản",
+      "validUntil": "Có hiệu lực đến {date}",
+      "expiredOn": "Đã hết hạn ngày {date}"
     },
     "data": {
       "summary": {
@@ -3614,6 +3624,12 @@
         "heading": "Có yêu cầu đổi email đăng nhập",
         "body": "Tài khoản Fgrapher dùng địa chỉ này vừa yêu cầu đổi email đăng nhập sang {newEmail}. Email đăng nhập chỉ đổi sau khi địa chỉ mới được xác nhận. Nếu không phải bạn yêu cầu, hãy đổi mật khẩu ngay: việc đó giữ tài khoản ở lại với bạn.",
         "cta": "Mở cài đặt tài khoản"
+      },
+      "subscriptionRenewalDue": {
+        "subject": "Gói Fgrapher của bạn sắp hết hạn",
+        "heading": "Gói của bạn sắp hết hạn",
+        "body": "Gói {role} của bạn hết hạn vào {periodEndLabel}. Gói không tự gia hạn: hãy thanh toán trước ngày đó để hồ sơ tiếp tục hiển thị và nhận đặt lịch. Sau ngày đó hồ sơ sẽ tạm ẩn cho tới khi bạn gia hạn; dữ liệu của bạn vẫn được giữ nguyên.",
+        "cta": "Gia hạn gói"
       }
     },
     "notifications": {

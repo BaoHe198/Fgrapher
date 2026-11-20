@@ -30,7 +30,8 @@ import {
   PAID_ROLES,
   SELLER_ROLES,
 } from "@/lib/constants";
-import { ROLE_PLANS } from "@/lib/constants/plans";
+import { growthPercent, monthlyRecurringRevenue } from "@/lib/admin-metrics";
+import { vietnamMonthStart } from "@/lib/vietnam/date";
 import { windDownAccount } from "@/services/account-closure";
 import { logAudit, processDeletion } from "@/services/compliance";
 import { notifyCritical } from "@/services/notification";
@@ -56,23 +57,14 @@ const MODERATION_PAGE_SIZE = 60;
 
 const PAGE_SIZE = 50;
 
-function startOfMonth() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), 1);
-}
-
-function startOfLastMonth() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() - 1, 1);
-}
-
 export async function getAdminStats() {
-  const monthStart = startOfMonth();
-  const lastMonthStart = startOfLastMonth();
+  // Vietnam months: the server's clock is UTC on Vercel, which put the first
+  // seven hours of every month into the one before.
+  const monthStart = vietnamMonthStart();
 
   const [
     totalUsers,
-    usersLastMonth,
+    usersBeforeThisMonth,
     activeSubscriptions,
     bookingsThisMonth,
     completedBookingsThisMonth,
@@ -84,14 +76,15 @@ export async function getAdminStats() {
   ] = await Promise.all([
     db.user.count({ where: { deletedAt: null } }),
     db.user.count({
-      where: {
-        deletedAt: null,
-        createdAt: { lt: monthStart, gte: lastMonthStart },
-      },
+      where: { deletedAt: null, createdAt: { lt: monthStart } },
     }),
     db.subscription.findMany({
       where: { status: { in: ["ACTIVE", "TRIALING"] } },
-      include: { userRole: { select: { role: true } } },
+      select: {
+        plan: true,
+        interval: true,
+        userRole: { select: { role: true } },
+      },
     }),
     db.booking.count({ where: { createdAt: { gte: monthStart } } }),
     db.booking.count({
@@ -126,19 +119,17 @@ export async function getAdminStats() {
     }),
   ]);
 
-  const mrr = activeSubscriptions.reduce(
-    (sum, sub) => sum + (ROLE_PLANS[sub.userRole.role]?.monthly ?? 0),
-    0,
-  );
-
   return {
     totalUsers,
-    userGrowthPercent:
-      usersLastMonth > 0
-        ? Math.round(((totalUsers - usersLastMonth) / usersLastMonth) * 100)
-        : 0,
+    userGrowthPercent: growthPercent(totalUsers, usersBeforeThisMonth),
     activeSubscriptions: activeSubscriptions.length,
-    mrr,
+    mrr: monthlyRecurringRevenue(
+      activeSubscriptions.map((sub) => ({
+        plan: sub.plan,
+        interval: sub.interval,
+        role: sub.userRole.role,
+      })),
+    ),
     bookingsThisMonth,
     completionRate:
       bookingsThisMonth > 0

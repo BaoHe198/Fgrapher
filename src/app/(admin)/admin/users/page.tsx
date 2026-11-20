@@ -68,6 +68,7 @@ export default function AdminUsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
             className="pl-9"
           />
         </div>
@@ -75,6 +76,7 @@ export default function AdminUsersPage() {
           value={role}
           onChange={setRole}
           options={ROLE_OPTIONS}
+          aria-label={t("roleFilterLabel")}
           className="w-48"
         />
       </div>

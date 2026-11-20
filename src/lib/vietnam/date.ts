@@ -22,3 +22,19 @@ export function vietnamDateKey(now = new Date()) {
 export function vietnamDateStart(now = new Date()) {
   return new Date(`${vietnamDateKey(now)}T00:00:00.000Z`);
 }
+
+const VIETNAM_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+/**
+ * Midnight on the 1st of a month in Vietnam, as an instant — the current
+ * month, or `monthsBack` months before it. Building it from the server's
+ * clock (UTC on Vercel) starts the month seven hours late, so whatever
+ * happened before 07:00 on the 1st Vietnam time lands in the month before.
+ */
+export function vietnamMonthStart(now = new Date(), monthsBack = 0) {
+  const vn = new Date(now.getTime() + VIETNAM_OFFSET_MS);
+  return new Date(
+    Date.UTC(vn.getUTCFullYear(), vn.getUTCMonth() - monthsBack, 1) -
+      VIETNAM_OFFSET_MS,
+  );
+}

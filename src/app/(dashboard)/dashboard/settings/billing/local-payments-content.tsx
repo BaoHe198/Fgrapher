@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
+import { formatDate } from "@/lib/format";
 import { compressImageFile } from "@/lib/media/image-compression";
 import { formatCurrency } from "@/lib/utils";
 
@@ -228,10 +229,11 @@ export function LocalPaymentsContent({
         </div>
         {roles[0].subscription?.currentPeriodEnd ? (
           <p className="text-body-sm text-text-secondary">
-            {t("renewsOn", {
-              date: new Date(
-                roles[0].subscription.currentPeriodEnd,
-              ).toLocaleDateString("vi-VN"),
+            {/* None of these rails renews by itself, so "Gia hạn vào…"
+                promised something that does not happen — and it was shown
+                next to "Đã hết hạn" too. */}
+            {t(roles[0].active ? "validUntil" : "expiredOn", {
+              date: formatDate(roles[0].subscription.currentPeriodEnd),
             })}
           </p>
         ) : null}

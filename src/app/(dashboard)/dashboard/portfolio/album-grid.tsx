@@ -74,6 +74,7 @@ function SortableAlbumCard({
       <Card padding={false} className="flex flex-col gap-0 overflow-hidden">
         <Link
           href={`/dashboard/portfolio/${album.id}`}
+          aria-label={album.title}
           className="relative block aspect-4/3 bg-bg-sunken"
         >
           {album.coverMedia ? (
