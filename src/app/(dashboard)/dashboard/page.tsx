@@ -38,6 +38,8 @@ import {
 
 import { AcceptingBookingsToggle } from "./accepting-bookings-toggle";
 import { CheckoutSuccessToast } from "./checkout-success-toast";
+import { getMyPageStatus } from "@/services/my-page";
+
 import { ProviderOverview } from "./provider-overview";
 
 type Translator = (
@@ -270,7 +272,7 @@ export default async function DashboardPage() {
     roles.includes("CAMERA_SHOP");
 
   const clock = vietnamNow();
-  const [activity, statCards, overview] = await Promise.all([
+  const [activity, statCards, overview, myPage] = await Promise.all([
     getRecentActivity(user.id, isProvider),
     isProvider
       ? getProviderStats(user.id).then((stats) => providerStatCards(stats, t))
@@ -286,6 +288,7 @@ export default async function DashboardPage() {
               customerStatCards(stats, t),
             ),
     isProvider ? getProviderOverview(user.id) : Promise.resolve(null),
+    isProvider ? getMyPageStatus(user.id) : Promise.resolve(null),
   ]);
 
   // Prompt G2, VIỆC 6 — "Nêu rõ còn thiếu gì thay vì chỉ hiện phần trăm":
@@ -366,6 +369,7 @@ export default async function DashboardPage() {
           </div>
           <ProviderOverview
             overview={overview}
+            myPage={myPage}
             dateKey={clock.dateKey}
             now={clock.at}
           />

@@ -2612,30 +2612,6 @@
             "action": "Update address"
           }
         },
-        "roll": {
-          "title": "Finish your profile",
-          "count": "{done}/{total} done",
-          "lede": "Each item is something clients look for before they book.",
-          "undeveloped": "Not done",
-          "done": "Done",
-          "items": {
-            "verify": "Identity verification",
-            "avatar": "Profile photo",
-            "cover": "Cover image",
-            "services": "Service packages",
-            "album": "First album",
-            "policies": "Deposit & cancellation policy",
-            "area": "Service area",
-            "calendar": "Availability"
-          },
-          "pending": "Waiting for review",
-          "pendingHint": {
-            "verify": "Documents sent — Fgrapher is reviewing them",
-            "album": "Photos uploaded — waiting for Fgrapher's review",
-            "albumEmpty": "Album created — now upload photos",
-            "verifyRejected": "Documents were not accepted — please resubmit"
-          }
-        },
         "week": {
           "title": "Last 7 days",
           "requests": "New requests",
@@ -2646,6 +2622,12 @@
           "completed": "Completed this month",
           "value": "package value {value}",
           "completedNote": "Counted from completed shoots. Fgrapher takes no payment."
+        },
+        "page": {
+          "title": "Your page",
+          "count": "{done} of {total} parts done",
+          "allDone": "Your page has everything customers look for.",
+          "open": "Open my page"
         }
       }
     },

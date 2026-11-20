@@ -373,22 +373,8 @@ export interface ProviderOverview {
   }[];
   sunPoint: { latitude: number; longitude: number } | null;
   /**
-   * `waiting` is a job the provider has done their part of and Fgrapher has
-   * not answered yet (documents sent, photos uploaded but not reviewed).
-   * Without it the tile stayed "not done" after they acted, which read as
-   * the upload having been lost (owner, 19/11/2026). `hint` names the next
-   * step in one line; it is a key under roll.pendingHint.
-   */
-  roll: {
-    key: string;
-    done: boolean;
-    waiting?: boolean;
-    hint?: string;
-    href: string;
-  }[];
-  /**
    * What keeps this provider off Bản đồ F and out of booking, beyond
-   * verification (which the roll already shows): no weekly hours means never
+   * verification (shown on "Trang của tôi"): no weekly hours means never
    * free; no map point means no marker.
    */
   findability: { hasHours: boolean; hasMapPoint: boolean };
@@ -509,9 +495,6 @@ export async function getProviderOverview(
   const located = profiles.find(
     (p) => p.latitude != null && p.longitude != null,
   );
-  const providerRoles = user.roles.filter((r) =>
-    PROVIDER_ROLES.includes(r.role),
-  );
 
   const dayKeys = Array.from({ length: 14 }, (_, i) =>
     vietnamDayKey(new Date(now.getTime() - (13 - i) * 86_400_000)),
@@ -526,20 +509,6 @@ export async function getProviderOverview(
 
   const name = (c: { name: string | null; firstName: string | null }) =>
     c.firstName ?? c.name ?? "";
-
-  const verified =
-    providerRoles.length > 0 &&
-    providerRoles.every((r) => r.verificationStatus === "VERIFIED");
-  const verifyWaiting =
-    !verified && providerRoles.some((r) => r.verificationStatus === "PENDING");
-  const verifyRejected =
-    !verified &&
-    !verifyWaiting &&
-    providerRoles.some((r) => r.verificationStatus === "REJECTED");
-  const albumDone = profiles.some((p) => p.albums.length > 0);
-  const albumWaiting = !albumDone && profiles.some((p) => p._count.media > 0);
-  const albumEmpty =
-    !albumDone && !albumWaiting && profiles.some((p) => p._count.albums > 0);
 
   return {
     today: today.map((b) => ({
@@ -568,56 +537,6 @@ export async function getProviderOverview(
           longitude: Math.round(located.longitude! * 10) / 10,
         }
       : null,
-    roll: [
-      {
-        key: "verify",
-        done: verified,
-        waiting: verifyWaiting,
-        hint: verifyWaiting
-          ? "verify"
-          : verifyRejected
-            ? "verifyRejected"
-            : undefined,
-        href: "/dashboard/settings/roles",
-      },
-      {
-        key: "avatar",
-        done: Boolean(user.avatar),
-        href: "/dashboard/my-page/info#anh",
-      },
-      {
-        key: "cover",
-        done: Boolean(user.coverImage),
-        href: "/dashboard/my-page/info#anh",
-      },
-      {
-        key: "services",
-        done: profiles.some((p) => p._count.services > 0),
-        href: "/dashboard/services",
-      },
-      {
-        key: "album",
-        done: albumDone,
-        waiting: albumWaiting,
-        hint: albumWaiting ? "album" : albumEmpty ? "albumEmpty" : undefined,
-        href: "/dashboard/portfolio",
-      },
-      {
-        key: "policies",
-        done: profiles.some((p) => p.depositPolicy && p.cancellationPolicy),
-        href: "/dashboard/my-page/info#chinh-sach",
-      },
-      {
-        key: "area",
-        done: profiles.some((p) => p.provinceId || p._count.serviceAreas > 0),
-        href: "/dashboard/my-page/info#khu-vuc",
-      },
-      {
-        key: "calendar",
-        done: hasWeeklyHours,
-        href: "/dashboard/calendar?hours=1",
-      },
-    ],
     findability: {
       hasHours: hasWeeklyHours,
       hasMapPoint: profiles.some(
