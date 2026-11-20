@@ -100,6 +100,8 @@ Việt Nam. Cron chỉ nhắc tài khoản provider đang hoạt động, đã x
 công khai và đang bật nhận lịch. Thông báo mở thẳng `/dashboard/calendar` để họ
 kiểm tra hôm nay và 7 ngày tới.
 
+Từ 20/11/2026 (quyết định của chủ dự án), provider **có việc đã xác nhận trong ngày** không nhận tin này nữa: lời nhắc đã nằm ở cuối bản tóm tắt 06:30 (mục dưới), và ba tin trong một buổi sáng là quá nhiều. Ngoại lệ: người đã tắt hẳn "Nhắc lịch sắp tới" (cả email lẫn trên web) thì không nhận tóm tắt, nên vẫn nhận tin 07:30. Cả hai cron cùng dùng một hàm để xác định "ai có việc hôm nay" (`providersGettingMorningDigest`, `src/services/work-calendar.ts`).
+
 Mỗi provider chỉ có một thông báo và một email cho mỗi ngày. Nếu Vercel chạy lại
 cron, mã định danh theo ngày ngăn gửi trùng. Provider có thể tắt riêng email hoặc
 thông báo trong web ở phần Cài đặt thông báo.
@@ -119,7 +121,8 @@ Hai cron, mỗi cái một lần mỗi ngày:
 | `GET /api/cron/schedule-digest/morning` | `30 23 * * *` | khoảng 06:30 | "Hôm nay bạn có N việc"  |
 
 Mỗi provider có việc trong ngày đó nhận **một** thông báo và **một** email liệt kê
-mọi việc theo thứ tự giờ: lịch đặt Fgrapher đã xác nhận và buổi làm việc tự ghi
+mọi việc theo thứ tự giờ (email buổi sáng có thêm lời nhắc cập nhật lịch bận, thay cho
+tin 07:30): lịch đặt Fgrapher đã xác nhận và buổi làm việc tự ghi
 (`CalendarEntry`). Người không có việc thì không nhận gì. Chạy lại cùng ngày không
 gửi trùng (mã định danh theo loại + ngày + người nhận). Loại thông báo là
 `BOOKING_REMINDER`, nên provider tắt/bật bằng mục "Nhắc lịch sắp tới" trong Cài đặt

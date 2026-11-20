@@ -401,3 +401,24 @@ describe("getting back to a job", () => {
     );
   });
 });
+
+describe("one morning message on a working day", () => {
+  const read = (path: string) => readFileSync(path, "utf8");
+
+  it("the 07:30 nudge skips providers who got the 06:30 summary", () => {
+    const source = read("src/services/availability-reminders.ts");
+    assert.match(
+      source,
+      /providersGettingMorningDigest\(\s*vietnamDateKey\(now\)/,
+    );
+    assert.match(
+      source,
+      /candidates\.filter\(\(p\) => !coveredByDigest\.has\(p\.id\)\)/,
+    );
+  });
+
+  it("the morning summary carries the nudge instead, the evening one does not", () => {
+    const source = read("src/services/work-calendar.ts");
+    assert.match(source, /availabilityNudge: kind === "morning"/);
+  });
+});

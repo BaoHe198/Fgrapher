@@ -3761,7 +3761,8 @@
         "eveningHeading": "Lịch làm việc ngày mai, {day}",
         "morningHeading": "Lịch làm việc hôm nay, {day}",
         "intro": "Bạn có {count} việc đã xác nhận:",
-        "cta": "Mở lịch làm việc"
+        "cta": "Mở lịch làm việc",
+        "availabilityNudge": "Có buổi mới nhận ngoài Fgrapher hay ngày nào sắp bận? Cập nhật lịch hôm nay và 7 ngày tới để khách không đặt nhầm giờ bạn đã có việc."
       }
     },
     "notifications": {
