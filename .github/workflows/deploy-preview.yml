@@ -42,22 +42,33 @@ jobs:
           # second name is tried if Vercel will not let the first be set by
           # hand. A failure here is reported, not fatal: the build is still
           # reachable at the URL above.
-          fixed=""
-          why=""
-          for name in fgrapher-git-preview-bao-he.vercel.app fgrapher-web-thu-bao-he.vercel.app; do
-            for scope in "--scope=$VERCEL_ORG_ID" ""; do
-              if out=$(npx vercel@latest alias set "$url" "$name" --token="$VERCEL_TOKEN" $scope 2>&1); then
-                fixed="https://$name"
-                break 2
-              fi
-              # Keep the reason: without it a failure here is unreadable to
-              # anyone who cannot open the job log.
-              why="$why [$name ${scope:+scoped}] $(echo "$out" | grep -i 'error' | tail -1 | cut -c1-160)"
-            done
-          done
-          if [ -n "$fixed" ]; then
-            echo "Fixed address: $fixed" >> "$GITHUB_STEP_SUMMARY"
-            echo "::notice title=Fixed address now serves this build::$fixed"
+          # The CLI's `alias` command needs to load the token's user, which
+          # this deploy token cannot do ("User not found"), so the REST API
+          # is used instead. First ask which addresses Vercel gave this build
+          # by itself; set the fixed one only if it is not among them.
+          api() { curl -sS -m 60 -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" "$@"; }
+          field() { python3 -c "import sys,json; d=json.load(sys.stdin); print($1)" 2>/dev/null; }
+          host="${url#https://}"
+          fixed="fgrapher-git-preview-bao-he.vercel.app"
+          q="?teamId=$VERCEL_ORG_ID"
+          dep=$(api "https://api.vercel.com/v13/deployments/$host$q")
+          if [ -z "$(echo "$dep" | field "d.get('id','')")" ]; then
+            q=""
+            dep=$(api "https://api.vercel.com/v13/deployments/$host")
+          fi
+          id=$(echo "$dep" | field "d.get('id','')")
+          auto=$(echo "$dep" | field "' '.join(d.get('alias') or [])")
+          echo "::notice title=Addresses Vercel gave this build::${auto:-none} (lookup: $(echo "$dep" | field "(d.get('error') or {}).get('message','ok')"))"
+          if echo " $auto " | grep -q " $fixed "; then
+            echo "::notice title=Fixed address now serves this build::https://$fixed (assigned by Vercel)"
+          elif [ -n "$id" ]; then
+            res=$(api -X POST -d "{\"alias\":\"$fixed\"}" "https://api.vercel.com/v2/deployments/$id/aliases$q")
+            if [ -n "$(echo "$res" | field "d.get('alias','')")" ]; then
+              echo "Fixed address: https://$fixed" >> "$GITHUB_STEP_SUMMARY"
+              echo "::notice title=Fixed address now serves this build::https://$fixed (set by this workflow)"
+            else
+              echo "::warning title=Fixed address not updated::Use $url directly. Vercel said: $(echo "$res" | field "(d.get('error') or {}).get('message','?')" | cut -c1-200)"
+            fi
           else
-            echo "::warning title=Fixed address not updated::Use $url directly. Reasons:$why"
+            echo "::warning title=Fixed address not updated::Use $url directly. The deployment could not be looked up."
           fi
