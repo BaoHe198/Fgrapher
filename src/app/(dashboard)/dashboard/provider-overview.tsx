@@ -1,4 +1,4 @@
-import { CalendarClock, Check, Hourglass, MapPinOff } from "lucide-react";
+import { CalendarClock, Hourglass, MapPinOff } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { ProviderOverview as Overview } from "@/services/dashboard";
+import type { MyPageStatus } from "@/services/my-page";
 
 import { PendingRequests } from "./pending-requests";
 
@@ -49,10 +50,13 @@ function spark(values: number[], max: number) {
 // data; a section with nothing true to show says so plainly.
 export async function ProviderOverview({
   overview,
+  myPage,
   dateKey,
   now,
 }: {
   overview: Overview;
+  /** "Trang của tôi" status — the set-up list shown here. */
+  myPage: MyPageStatus | null;
   dateKey: string;
   now: number;
 }) {
@@ -72,7 +76,13 @@ export async function ProviderOverview({
   const thisTotal = thisWeek.reduce((a, b) => a + b, 0);
   const lastTotal = lastWeek.reduce((a, b) => a + b, 0);
   const sparkMax = Math.max(1, ...overview.requestsByDay);
-  const developed = overview.roll.filter((frame) => frame.done).length;
+  const tPage = await getTranslations("dashboardCore.myPage");
+  const pageCountable = (myPage?.cards ?? []).filter(
+    (card) => card.state !== "info",
+  );
+  const pageDone = pageCountable.filter((card) => card.state === "done").length;
+  const pageTotal = pageCountable.length;
+  const pageOpen = pageCountable.filter((card) => card.state !== "done");
 
   // What keeps them off Bản đồ F and out of booking, said plainly at the
   // top (owner, 16/11/2026) - the roll's "Lịch trống" tile alone did not
@@ -259,77 +269,70 @@ export async function ProviderOverview({
         <PendingRequests requests={overview.pending} now={now} />
       </section>
 
-      <section aria-labelledby="db-roll" className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="db-roll" className="text-heading-lg text-text-primary">
-            {t("roll.title")}
-          </h2>
-          <span className="text-body-sm text-text-primary">
-            {t("roll.count", { done: developed, total: overview.roll.length })}
-          </span>
-        </div>
-        <p className="text-body-sm text-text-secondary">{t("roll.lede")}</p>
-        {/* A plain checklist (Core MVP pass, 02/10/2026): the film-roll
-            treatment belongs to the portfolio, not the dashboard. */}
-        <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {overview.roll.map((frame) => (
-            <li key={frame.key}>
-              <Link
-                href={frame.href}
-                className="focus-ring group flex min-h-14 items-center gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-surface px-4 py-3 hover:border-border-strong"
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "grid size-6 shrink-0 place-items-center rounded-full border",
-                    frame.done
-                      ? "border-success bg-success text-text-on-brand"
-                      : frame.waiting
-                        ? "border-warning bg-warning-bg text-warning"
-                        : "border-dashed border-border-strong",
-                  )}
-                >
-                  {frame.done ? (
-                    <Check className="size-3.5" />
-                  ) : frame.waiting ? (
-                    <Hourglass className="size-3.5" />
-                  ) : null}
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span
-                    className={cn(
-                      "text-body-sm group-hover:underline",
-                      frame.done
-                        ? "text-text-secondary"
-                        : "font-semibold text-text-primary",
-                    )}
+      {/* The page's set-up state, read from the same source as "Trang của
+          tôi" so the two always give the same count (they used to keep two
+          different lists: 6/8 here, 6/7 there). Only what is still to do
+          is listed; the hub has the full picture. */}
+      {myPage ? (
+        <section aria-labelledby="db-roll" className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="db-roll" className="text-heading-lg text-text-primary">
+              {t("page.title")}
+            </h2>
+            <span className="text-body-sm text-text-primary">
+              {t("page.count", { done: pageDone, total: pageTotal })}
+            </span>
+          </div>
+          {pageOpen.length === 0 ? (
+            <p className="text-body-sm text-text-secondary">
+              {t("page.allDone")}
+            </p>
+          ) : (
+            <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {pageOpen.map((card) => (
+                <li key={card.key}>
+                  <Link
+                    href={card.href}
+                    className="focus-ring group flex min-h-14 items-center gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-surface px-4 py-3 hover:border-border-strong"
                   >
-                    {t(`roll.items.${frame.key}`)}
-                    <span className="sr-only">
-                      {" · "}
-                      {frame.done
-                        ? t("roll.done")
-                        : frame.waiting
-                          ? t("roll.pending")
-                          : t("roll.undeveloped")}
-                    </span>
-                  </span>
-                  {!frame.done && frame.hint ? (
                     <span
+                      aria-hidden
                       className={cn(
-                        "text-meta",
-                        frame.waiting ? "text-warning" : "text-text-tertiary",
+                        "grid size-6 shrink-0 place-items-center rounded-full border",
+                        card.state === "waiting"
+                          ? "border-warning bg-warning-bg text-warning"
+                          : "border-dashed border-border-strong",
                       )}
                     >
-                      {t(`roll.pendingHint.${frame.hint}`)}
+                      {card.state === "waiting" ? (
+                        <Hourglass className="size-3.5" />
+                      ) : null}
                     </span>
-                  ) : null}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ol>
-      </section>
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="text-body-sm font-semibold text-text-primary group-hover:underline">
+                        {tPage(`cards.${card.key}.title`)}
+                        <span className="sr-only">
+                          {" · "}
+                          {tPage(`state.${card.state}`)}
+                        </span>
+                      </span>
+                      <span className="text-meta text-text-tertiary">
+                        {tPage(`cards.${card.key}.${card.detail}`, card.values)}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          )}
+          <Link
+            href="/dashboard/my-page"
+            className="focus-ring -my-2 w-fit rounded-[4px] py-2 text-body-sm font-semibold! text-text-link hover:underline"
+          >
+            {t("page.open")}
+          </Link>
+        </section>
+      ) : null}
 
       <section aria-labelledby="db-week" className="flex flex-col gap-3">
         <h2 id="db-week" className="text-heading-lg text-text-primary">

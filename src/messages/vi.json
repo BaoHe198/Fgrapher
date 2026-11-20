@@ -2612,30 +2612,6 @@
             "action": "Cập nhật địa chỉ"
           }
         },
-        "roll": {
-          "title": "Hoàn thiện hồ sơ",
-          "count": "{done}/{total} việc đã xong",
-          "lede": "Mỗi mục là một việc còn thiếu để khách tin và đặt lịch bạn.",
-          "undeveloped": "Chưa xong",
-          "done": "Đã xong",
-          "items": {
-            "verify": "Xác minh danh tính",
-            "avatar": "Ảnh đại diện",
-            "cover": "Ảnh đầu trang",
-            "services": "Gói dịch vụ",
-            "album": "Album đầu tiên",
-            "policies": "Chính sách đặt cọc & hủy",
-            "area": "Khu vực phục vụ",
-            "calendar": "Lịch trống"
-          },
-          "pending": "Đang chờ duyệt",
-          "pendingHint": {
-            "verify": "Đã gửi giấy tờ — Fgrapher đang xét duyệt",
-            "album": "Đã có ảnh — đang chờ Fgrapher duyệt",
-            "albumEmpty": "Đã tạo album — hãy tải ảnh lên",
-            "verifyRejected": "Giấy tờ chưa đạt — vui lòng gửi lại"
-          }
-        },
         "week": {
           "title": "7 ngày qua",
           "requests": "Yêu cầu mới",
@@ -2646,6 +2622,12 @@
           "completed": "Buổi hoàn thành tháng này",
           "value": "giá trị theo gói {value}",
           "completedNote": "Tính từ các buổi đã hoàn thành. Fgrapher không thu tiền."
+        },
+        "page": {
+          "title": "Trang của bạn",
+          "count": "{done}/{total} phần đã xong",
+          "allDone": "Trang của bạn đã đủ các phần khách cần xem.",
+          "open": "Mở Trang của tôi"
         }
       }
     },
