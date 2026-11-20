@@ -166,7 +166,7 @@ export function CalendarClient({
   const isLoadingMonth = status === "loading";
 
   return (
-    <div className="flex flex-col gap-4 pb-40 lg:pb-0">
+    <div className="flex flex-col gap-4 pb-40 xl:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-display-md text-text-primary">{t("title")}</h1>
         <Button
@@ -181,13 +181,15 @@ export function CalendarClient({
       </div>
 
       <div className="flex items-center gap-1">
-        {/* A week at a time on a phone (the strip below), a month at a time
-            beside the month grid. */}
+        {/* A week at a time with the strip below, a month at a time beside
+            the month grid. The grid appears from xl (1280px), not lg: inside
+            the dashboard's sidebar layout a 1024px window leaves the grid
+            about 350px, the same unreadable cells a phone would get. */}
         <button
           type="button"
           aria-label={v2("prevWeek")}
           onClick={() => setSelected((day) => addDays(day, -7))}
-          className="focus-ring flex size-10 items-center justify-center rounded-full hover:bg-bg-sunken lg:hidden"
+          className="focus-ring flex size-10 items-center justify-center rounded-full hover:bg-bg-sunken xl:hidden"
         >
           <ChevronLeft className="size-5" />
         </button>
@@ -195,18 +197,18 @@ export function CalendarClient({
           type="button"
           aria-label={t("prevMonth")}
           onClick={() => setSelected((day) => shiftMonth(day, -1))}
-          className="focus-ring hidden size-10 items-center justify-center rounded-full hover:bg-bg-sunken lg:flex"
+          className="focus-ring hidden size-10 items-center justify-center rounded-full hover:bg-bg-sunken xl:flex"
         >
           <ChevronLeft className="size-5" />
         </button>
-        <span className="min-w-0 flex-1 text-center text-heading-sm text-text-primary first-letter:uppercase lg:flex-none lg:px-2">
+        <span className="min-w-0 flex-1 text-center text-heading-sm text-text-primary first-letter:uppercase xl:flex-none xl:px-2">
           {formatMonthYear(selected)}
         </span>
         <button
           type="button"
           aria-label={v2("nextWeek")}
           onClick={() => setSelected((day) => addDays(day, 7))}
-          className="focus-ring flex size-10 items-center justify-center rounded-full hover:bg-bg-sunken lg:hidden"
+          className="focus-ring flex size-10 items-center justify-center rounded-full hover:bg-bg-sunken xl:hidden"
         >
           <ChevronRight className="size-5" />
         </button>
@@ -214,11 +216,11 @@ export function CalendarClient({
           type="button"
           aria-label={t("nextMonth")}
           onClick={() => setSelected((day) => shiftMonth(day, 1))}
-          className="focus-ring hidden size-10 items-center justify-center rounded-full hover:bg-bg-sunken lg:flex"
+          className="focus-ring hidden size-10 items-center justify-center rounded-full hover:bg-bg-sunken xl:flex"
         >
           <ChevronRight className="size-5" />
         </button>
-        <div className="flex items-center gap-2 lg:ml-auto">
+        <div className="flex items-center gap-2 xl:ml-auto">
           <DateField
             value={selected}
             onChange={(value) => value && setSelected(value)}
@@ -237,7 +239,7 @@ export function CalendarClient({
         </div>
       </div>
 
-      <div className="lg:hidden">
+      <div className="xl:hidden">
         <WeekStrip
           days={weekOf(selected)}
           selected={selected}
@@ -264,8 +266,8 @@ export function CalendarClient({
         </p>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] lg:items-start">
-        <div className="hidden flex-col gap-3 lg:flex">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] xl:items-start">
+        <div className="hidden flex-col gap-3 xl:flex">
           {isLoadingMonth ? (
             <ListSkeleton />
           ) : (
@@ -308,7 +310,7 @@ export function CalendarClient({
 
         <section
           aria-labelledby="calendar-day-heading"
-          className="flex flex-col gap-3 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-1"
+          className="flex min-w-0 flex-col gap-3 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:-mx-1 xl:overflow-x-hidden xl:overflow-y-auto xl:px-1"
         >
           <div className="flex flex-col gap-1">
             <h2
@@ -372,13 +374,17 @@ export function CalendarClient({
             </ul>
           )}
 
-          <div className="flex gap-2">
-            {/* On a phone "add" is the floating button below; this row keeps
-                the quieter action within reach on both. */}
+          {/* Wraps: the two labels side by side need about 400px and the
+              panel is 320-380, so in one row they overflowed it and, the
+              panel being a scroll container, gave it a sideways scrollbar
+              (owner's screenshot, 20/11/2026). On a phone "add" is the
+              floating button below; this row keeps the quieter action
+              within reach on both. */}
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="accent"
               onClick={() => setPanel({ type: "entry", entry: null })}
-              className="hidden min-h-11 flex-1 lg:inline-flex"
+              className="hidden min-h-11 flex-1 xl:inline-flex"
             >
               <Plus className="size-4" />
               {v2("addEntryLong")}
@@ -403,7 +409,7 @@ export function CalendarClient({
         variant="accent"
         size="lg"
         onClick={() => setPanel({ type: "entry", entry: null })}
-        className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 min-h-14 rounded-full px-5 shadow-[var(--shadow-lg)] lg:hidden"
+        className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 min-h-14 rounded-full px-5 shadow-[var(--shadow-lg)] xl:hidden"
       >
         <Plus className="size-5" />
         {v2("addEntry")}
