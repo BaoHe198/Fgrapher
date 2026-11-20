@@ -43,15 +43,21 @@ jobs:
           # hand. A failure here is reported, not fatal: the build is still
           # reachable at the URL above.
           fixed=""
+          why=""
           for name in fgrapher-git-preview-bao-he.vercel.app fgrapher-web-thu-bao-he.vercel.app; do
-            if npx vercel@latest alias set "$url" "$name" --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"; then
-              fixed="https://$name"
-              break
-            fi
+            for scope in "--scope=$VERCEL_ORG_ID" ""; do
+              if out=$(npx vercel@latest alias set "$url" "$name" --token="$VERCEL_TOKEN" $scope 2>&1); then
+                fixed="https://$name"
+                break 2
+              fi
+              # Keep the reason: without it a failure here is unreadable to
+              # anyone who cannot open the job log.
+              why="$why [$name ${scope:+scoped}] $(echo "$out" | grep -i 'error' | tail -1 | cut -c1-160)"
+            done
           done
           if [ -n "$fixed" ]; then
             echo "Fixed address: $fixed" >> "$GITHUB_STEP_SUMMARY"
             echo "::notice title=Fixed address now serves this build::$fixed"
           else
-            echo "::warning title=Fixed address not updated::Could not point a fixed address at $url; use that URL directly."
+            echo "::warning title=Fixed address not updated::Use $url directly. Reasons:$why"
           fi
