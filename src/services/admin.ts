@@ -376,34 +376,40 @@ export async function listReports({
   // bare id: "mã đối tượng cmw…" says nothing about who or what it is.
   const idsOf = (type: string) =>
     reports.filter((r) => r.targetType === type).map((r) => r.targetId);
-  const [users, products, posts, reviews, messages] = await Promise.all([
-    db.user.findMany({
-      where: { id: { in: idsOf("user") } },
-      select: {
-        id: true,
-        name: true,
-        firstName: true,
-        username: true,
-        profiles: { select: { displayName: true } },
-      },
-    }),
-    db.product.findMany({
-      where: { id: { in: idsOf("product") } },
-      select: { id: true, name: true },
-    }),
-    db.post.findMany({
-      where: { id: { in: idsOf("post") } },
-      select: { id: true, caption: true },
-    }),
-    db.review.findMany({
-      where: { id: { in: idsOf("review") } },
-      select: { id: true, content: true },
-    }),
-    db.message.findMany({
-      where: { id: { in: idsOf("message") } },
-      select: { id: true, content: true },
-    }),
-  ]);
+  const [users, products, posts, reviews, messages, places] = await Promise.all(
+    [
+      db.user.findMany({
+        where: { id: { in: idsOf("user") } },
+        select: {
+          id: true,
+          name: true,
+          firstName: true,
+          username: true,
+          profiles: { select: { displayName: true } },
+        },
+      }),
+      db.product.findMany({
+        where: { id: { in: idsOf("product") } },
+        select: { id: true, name: true },
+      }),
+      db.post.findMany({
+        where: { id: { in: idsOf("post") } },
+        select: { id: true, caption: true },
+      }),
+      db.review.findMany({
+        where: { id: { in: idsOf("review") } },
+        select: { id: true, content: true },
+      }),
+      db.message.findMany({
+        where: { id: { in: idsOf("message") } },
+        select: { id: true, content: true },
+      }),
+      db.place.findMany({
+        where: { id: { in: idsOf("place") } },
+        select: { id: true, name: true },
+      }),
+    ],
+  );
   const snippet = (text: string | null) =>
     text ? (text.length > 120 ? `${text.slice(0, 120)}…` : text) : null;
   const targetLabelByKey = new Map<string, string | null>([
@@ -429,6 +435,7 @@ export async function listReports({
     ...messages.map(
       (m) => [`message:${m.id}`, snippet(m.content)] as [string, string | null],
     ),
+    ...places.map((p) => [`place:${p.id}`, p.name] as [string, string]),
   ]);
 
   return {
@@ -1558,6 +1565,7 @@ export async function getAdminQueueCounts() {
     postMedia,
     productImages,
     serviceRequests,
+    places,
   ] = await Promise.all([
     db.report.count({ where: { status: "PENDING" } }),
     db.userRole.count({ where: { verificationStatus: "PENDING" } }),
@@ -1571,6 +1579,7 @@ export async function getAdminQueueCounts() {
     db.serviceRequest.count({
       where: { isDraft: false, status: "PENDING_REVIEW" },
     }),
+    db.place.count({ where: { reviewStatus: "PENDING", deletedAt: null } }),
   ]);
   return {
     reports,
@@ -1579,6 +1588,7 @@ export async function getAdminQueueCounts() {
     payments,
     moderation: portfolioMedia + postMedia + productImages,
     serviceRequests,
+    places,
   };
 }
 

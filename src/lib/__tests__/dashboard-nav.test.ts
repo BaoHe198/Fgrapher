@@ -139,8 +139,9 @@ describe("Tiện ích khác", () => {
     });
     assert.deepEqual(
       groups.map((g) => g.key),
-      ["market", "hiring", "personal"],
+      ["market", "hiring", "contribute", "personal"],
     );
+    assert.deepEqual(keys(groups[2].items), ["places"]);
     assert.deepEqual(keys(groups[0].items), [
       "listings",
       "shopOrders",
@@ -151,6 +152,14 @@ describe("Tiện ích khác", () => {
       "newRequest",
       "myRequests",
     ]);
+  });
+
+  it("a customer has no photo spots to propose", () => {
+    const groups = moreGroups({
+      roles: ["CUSTOMER"],
+      marketplaceEnabled: true,
+    });
+    assert.ok(!groups.some((g) => g.key === "contribute"));
   });
 
   it("with Chợ F off there is no Chợ F group", () => {
@@ -205,6 +214,8 @@ describe("which entry is lit", () => {
       "/dashboard/orders",
       "/saved",
       "/dashboard/listings",
+      "/dashboard/places",
+      "/dashboard/places/new",
     ]) {
       assert.ok(isNavItemActive(item("more"), path), path);
     }

@@ -115,6 +115,8 @@ export async function exportUserData(userId: string) {
     following,
     calendarEntries,
     bookingNotes,
+    placesProposed,
+    placePhotos,
   ] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
@@ -217,6 +219,31 @@ export async function exportUserData(userId: string) {
       where: { userId },
       select: { bookingId: true, note: true, updatedAt: true },
     }),
+    // Photo spots they proposed and the photos they uploaded for them.
+    db.place.findMany({
+      where: { submittedById: userId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        reviewStatus: true,
+        moderationNote: true,
+        createdAt: true,
+        deletedAt: true,
+      },
+    }),
+    db.placeMedia.findMany({
+      where: { uploaderId: userId },
+      select: {
+        placeId: true,
+        url: true,
+        caption: true,
+        moderationStatus: true,
+        rightsConfirmedAt: true,
+        createdAt: true,
+        deletedAt: true,
+      },
+    }),
   ]);
 
   return {
@@ -242,6 +269,8 @@ export async function exportUserData(userId: string) {
     following,
     calendarEntries,
     bookingNotes,
+    placesProposed,
+    placePhotos,
   };
 }
 
@@ -390,6 +419,32 @@ export async function processDeletion(userId: string, requestId?: string) {
     // address a phone used to subscribe to the calendar.
     db.calendarEntry.deleteMany({ where: { userId } }),
     db.bookingNote.deleteMany({ where: { userId } }),
+    // Photo spots. The photos they uploaded are their own work and leave
+    // the spot's page (a cover that was one of them falls back to the next
+    // photo — getPublicPlace reads coverMediaId only while it is approved
+    // and not deleted). A spot they proposed that is not public yet is
+    // their draft and goes; an approved spot is public information and
+    // stays, no longer linked to them.
+    db.placeMedia.updateMany({
+      where: { uploaderId: userId, deletedAt: null },
+      data: { deletedAt: now },
+    }),
+    db.place.updateMany({
+      where: { coverMedia: { uploaderId: userId } },
+      data: { coverMediaId: null },
+    }),
+    db.place.updateMany({
+      where: {
+        submittedById: userId,
+        deletedAt: null,
+        reviewStatus: { not: "APPROVED" },
+      },
+      data: { deletedAt: now },
+    }),
+    db.place.updateMany({
+      where: { submittedById: userId },
+      data: { submittedById: null },
+    }),
     // Who they followed and saved says whose work this person liked; who
     // followed them is a list pointing at an account that no longer exists.
     db.follow.deleteMany({

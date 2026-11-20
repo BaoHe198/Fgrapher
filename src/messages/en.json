@@ -984,7 +984,8 @@
         "payments": "Payments",
         "openMenu": "Open admin menu",
         "menuTitle": "Admin menu",
-        "menuDescription": "Admin navigation"
+        "menuDescription": "Admin navigation",
+        "places": "Photo spots"
       },
       "overview": {
         "metaTitle": "Admin overview — Fgrapher",
@@ -1108,7 +1109,8 @@
           "post": "Post",
           "product": "Product",
           "review": "Review",
-          "message": "Message"
+          "message": "Message",
+          "place": "Photo spot"
         },
         "resolutionNotePlaceholder": "Resolution note (optional)",
         "resolve": "Resolve",
@@ -1732,6 +1734,34 @@
       "noteTooLong": "The note is too long (2,000 characters at most)",
       "bookingNotFound": "Booking not found",
       "feedFailed": "That did not work, please try again"
+    },
+    "places": {
+      "notAllowed": "Proposing spots needs a verified provider identity.",
+      "invalidInput": "The spot details are not valid.",
+      "proposed": "Spot proposed",
+      "resubmitted": "Proposal resent",
+      "withdrawn": "Proposal withdrawn",
+      "created": "Spot added",
+      "updated": "Spot saved",
+      "deleted": "Spot deleted",
+      "approved": "Spot approved",
+      "rejected": "Spot rejected",
+      "photosUpdated": "Photos updated",
+      "merged": "Spots merged",
+      "saveFailed": "Could not save the spot, please try again.",
+      "loadFailed": "Could not load spots, please try again.",
+      "errors": {
+        "not_allowed": "Proposing spots needs a verified provider identity.",
+        "not_found": "Spot not found.",
+        "not_editable": "This spot is already approved and can no longer be edited. Use \"Report wrong information\" on its page.",
+        "too_many_pending": "You have too many spots waiting for review. Please wait for some to be reviewed.",
+        "duplicate": "Another spot is very close to this one.",
+        "bad_area": "The province or ward is not valid.",
+        "no_photo": "A spot needs 1 to 10 photos.",
+        "upload_unverified": "The uploaded photos could not be checked. Please upload them again.",
+        "already_reviewed": "This spot was already approved or rejected.",
+        "merge_self": "A spot cannot be merged into itself."
+      }
     }
   },
   "dashboardCore": {
@@ -3088,6 +3118,7 @@
       "groups": {
         "market": "Chợ F",
         "hiring": "Hiring",
+        "contribute": "Contribute",
         "personal": "Yours"
       },
       "hints": {
@@ -3099,7 +3130,8 @@
         "myRequests": "Requests you posted and the offers on them",
         "saved": "Artists you saved",
         "moodboard": "Photos you pinned for ideas",
-        "notifications": "All recent notifications"
+        "notifications": "All recent notifications",
+        "places": "Propose great photo spots for Fmap"
       }
     }
   },
@@ -4075,6 +4107,17 @@
         "morningTitle": "{count} jobs today",
         "messageMore": "{summary}; and {more} more",
         "customJob": "Job"
+      },
+      "place": {
+        "approved": {
+          "title": "Your spot was approved",
+          "message": "\"{name}\" is now on Fmap. Tag the albums you shot there so customers find you."
+        },
+        "rejected": {
+          "title": "Your spot was not approved",
+          "message": "\"{name}\" was not approved. You can edit it and send it again.",
+          "messageWithReason": "\"{name}\" was not approved. Reason: {reason}. You can edit it and send it again."
+        }
       }
     },
     "calendarFeed": {
@@ -5801,9 +5844,14 @@
         "Personal information": "Personal information",
         "Inappropriate content": "Inappropriate content",
         "Appears to be a minor": "Appears to be a minor",
-        "Other": "Other"
+        "Other": "Other",
+        "Wrong information": "Wrong information",
+        "Closed": "Closed or photography banned",
+        "Private property": "Private home, not a public place",
+        "Unsafe": "Unsafe"
       },
-      "targetPost": "this post"
+      "targetPost": "this post",
+      "targetPlace": "this spot"
     },
     "chatPanel": {
       "unknown": "Unknown",
@@ -6018,7 +6066,8 @@
         "myOrders": "My orders",
         "listings": "Chợ F listings",
         "shopOrders": "Shop orders",
-        "sentBookings": "Bookings I made"
+        "sentBookings": "Bookings I made",
+        "places": "Photo spots"
       },
       "sections": {
         "myPage": "Parts of my page",
@@ -6162,6 +6211,284 @@
       "timezone": "Vietnam time (GMT+7)",
       "noTimes": "No free times left for this package on this day.",
       "noCharge": "Sending a request costs nothing. {name} confirms within 48 hours."
+    }
+  },
+  "places": {
+    "kinds": {
+      "OLD_QUARTER": "Old quarter",
+      "STREET": "Street",
+      "CAFE": "Café",
+      "PARK": "Park",
+      "BEACH": "Beach",
+      "MOUNTAIN": "Hills and mountains",
+      "FIELD": "Fields and flower gardens",
+      "LAKE_RIVER": "River or lake",
+      "HERITAGE": "Heritage site, temple or church",
+      "ARCHITECTURE": "Architecture",
+      "COUNTRYSIDE": "Countryside village",
+      "TOURIST_AREA": "Tourist area",
+      "OTHER": "Other"
+    },
+    "status": {
+      "OPEN": "Open",
+      "TEMPORARILY_CLOSED": "Temporarily closed",
+      "NO_SHOOTING": "Photography not allowed"
+    },
+    "review": {
+      "PENDING": "Waiting for review",
+      "APPROVED": "Approved",
+      "REJECTED": "Not approved",
+      "AUTO_REJECTED": "Not approved"
+    },
+    "month": "Month {month}",
+    "monthRange": "Month {from} – Month {to}",
+    "allYear": "All year",
+    "card": {
+      "albums": "{count, plural, =0 {No albums yet} one {# album shot here} other {# albums shot here}}",
+      "noPhoto": "No photo yet"
+    },
+    "index": {
+      "metaTitle": "Photo spots — Fgrapher",
+      "metaDescription": "{count, plural, one {# photo spot} other {# photo spots}} in {provinces, plural, one {# province} other {# provinces}}: best times, best months, entry fees, shooting rules and who has shot there.",
+      "title": "Photo spots",
+      "lede": "Each spot has real photos, its best time and season, fees and shooting rules — and the photographers who have shot there, so you can book them.",
+      "count": "{count, plural, one {# spot} other {# spots}}",
+      "byProvince": "By province",
+      "latest": "Recently updated spots",
+      "allKinds": "All",
+      "filterKind": "Filter by kind of spot",
+      "seeMap": "See them on Fmap",
+      "propose": "Know a great spot? Propose it",
+      "emptyKind": "No spots of this kind yet.",
+      "breadcrumb": "Photo spots"
+    },
+    "province": {
+      "metaTitle": "Photo spots in {province} — Fgrapher",
+      "metaDescription": "{count, plural, one {# photo spot} other {# photo spots}} in {province}: best times, best months, entry fees, shooting rules and who has shot there.",
+      "title": "Photo spots in {province}",
+      "lede": "{count, plural, one {# spot} other {# spots}} in {province}, each with real photos, practical facts and the people who have shot there.",
+      "otherProvinces": "Other provinces"
+    },
+    "detail": {
+      "metaTitle": "{name} — photo spot in {province}",
+      "photos": "Photos of this spot",
+      "openPhoto": "Open photo {number}",
+      "suits": "Good for",
+      "facts": "Practical facts",
+      "bestTime": "Best time of day",
+      "bestMonths": "Best months",
+      "entryFee": "Entry fee",
+      "free": "Free",
+      "perPerson": "{price} per person",
+      "feeNote": "Photo shoot fee",
+      "permit": "Permission before shooting",
+      "permitYes": "Required",
+      "permitNo": "Not required",
+      "rules": "Rules",
+      "crowd": "When it is crowded",
+      "parking": "Parking",
+      "unknown": "Not known yet",
+      "address": "Address",
+      "directions": "Directions",
+      "onMap": "See it on Fmap",
+      "verifiedAt": "Facts checked on {date}.",
+      "updatedAt": "Updated on {date}.",
+      "factsNote": "Fees and rules change. Check with the venue before your shoot.",
+      "report": "Report wrong information",
+      "reportSignIn": "Sign in to report wrong information",
+      "closedTitle": {
+        "TEMPORARILY_CLOSED": "This spot is temporarily closed",
+        "NO_SHOOTING": "Photography is not allowed here right now"
+      },
+      "closedBody": "Do not plan a shoot here until it reopens.",
+      "shotHere": "Photographers who shot here",
+      "shotHereCount": "{count, plural, one {# album} other {# albums}}",
+      "shotHereEmpty": "No albums are tagged with this spot yet.",
+      "shotHereHint": "Providers pick \"Shot at\" when they create an album for it to appear here.",
+      "albumBy": "by {name}",
+      "photoCount": "{count, plural, one {# photo} other {# photos}}",
+      "from": "From {price}",
+      "contactPrice": "Ask for a price",
+      "viewProfile": "View profile",
+      "nearby": "Providers nearby",
+      "nearbyHint": "People whose working address is within about {km} km.",
+      "moreInProvince": "More spots in {province}",
+      "seeAllInProvince": "See every spot in {province}"
+    },
+    "fmap": {
+      "toggle": "Photo spots",
+      "toggleOn": "Showing photo spots",
+      "count": "{count, plural, =0 {No photo spots in this area} one {# photo spot in this area} other {# photo spots in this area}}",
+      "loadFailed": "Could not load photo spots.",
+      "open": "See this spot",
+      "close": "Close"
+    },
+    "mine": {
+      "metaTitle": "Photo spots",
+      "title": "Photo spots",
+      "lede": "Propose the great photo spots you know. Once an admin approves one, it appears on Fmap and the Photo spots pages, with the albums you shot there.",
+      "propose": "Propose a spot",
+      "empty": "You have not proposed any spots yet.",
+      "notAllowedTitle": "Identity verification needed",
+      "notAllowedBody": "Only providers with a verified identity can propose spots, so every spot has someone accountable for its facts.",
+      "verify": "Verify your identity",
+      "edit": "Edit and resubmit",
+      "editPending": "Edit",
+      "withdraw": "Withdraw",
+      "withdrawConfirm": "Withdraw \"{name}\"? It will be removed from the review queue.",
+      "view": "View page",
+      "rejectedNote": "Reason: {note}",
+      "albums": "{count, plural, =0 {No albums tagged} one {# album tagged} other {# albums tagged}}",
+      "approvedNotice": "Your spot was approved. Tag the albums you shot there (\"Shot at\") so customers find you.",
+      "pendingLimit": "You have {count} spots waiting for review — the limit is {max}."
+    },
+    "form": {
+      "newTitle": "Propose a photo spot",
+      "editTitle": "Edit proposal",
+      "adminNewTitle": "Add a spot",
+      "intro": "Public places or businesses open to visitors only. Never propose a private home.",
+      "rejectedBanner": "This spot was not approved. Reason: {note}",
+      "sectionPlace": "The spot",
+      "name": "Name",
+      "namePlaceholder": "e.g. Cau Dat tea hills",
+      "kind": "Kind of spot",
+      "kindPlaceholder": "Choose a kind",
+      "categories": "Good for",
+      "categoriesHint": "Pick the kinds of shoot that suit it.",
+      "description": "Description",
+      "descriptionHint": "What makes it beautiful, which angles work, what to know. At least 30 characters.",
+      "sectionLocation": "Location",
+      "mapHint": "Tap the map or drag the pin to the right place.",
+      "useMyLocation": "Use my location",
+      "locationFailed": "Could not get your location. Tap the map to place the pin.",
+      "pinMissing": "Place the pin on the map.",
+      "province": "Province",
+      "provincePlaceholder": "Choose a province",
+      "ward": "Ward",
+      "wardPlaceholder": "Choose a ward (optional)",
+      "address": "Address",
+      "addressPlaceholder": "House number, street, or how to get there",
+      "sectionFacts": "Practical facts",
+      "factsHint": "Leave blank if unsure — the page will say \"Not known yet\" rather than guess.",
+      "bestTime": "Best time of day",
+      "bestTimePlaceholder": "e.g. 6–8am, low sun across the hills",
+      "bestMonths": "Best months",
+      "bestMonthsHint": "Pick the best months.",
+      "entryFee": "Entry fee",
+      "feeFree": "Free",
+      "feePaid": "Paid",
+      "feeUnknown": "Not known",
+      "feeAmount": "Ticket price per person (₫)",
+      "feeNote": "Photo shoot fees and conditions",
+      "feeNotePlaceholder": "e.g. wedding shoots pay an extra 200.000₫ per session",
+      "permit": "Is permission needed before shooting?",
+      "permitYes": "Yes",
+      "permitNo": "No",
+      "permitUnknown": "Not known",
+      "rules": "Rules",
+      "rulesPlaceholder": "e.g. no drones, no shooting inside the temple grounds",
+      "crowd": "When it is crowded",
+      "crowdPlaceholder": "e.g. very busy after 9am at weekends",
+      "parking": "Parking",
+      "parkingPlaceholder": "e.g. lot at the main gate, 10.000₫ per motorbike",
+      "sectionPhotos": "Photos",
+      "photosHint": "1 to {max} photos you took at the spot yourself. Photos are reviewed before they are shown publicly.",
+      "photosRequired": "Add at least 1 photo.",
+      "addPhoto": "Add photos",
+      "removePhoto": "Remove photo",
+      "uploading": "Uploading {percent}%",
+      "uploadFailed": "Could not upload {name}.",
+      "uploadUnavailable": "Uploads are not available right now. Please try again.",
+      "notImage": "{name} is not an image.",
+      "photoRejected": "This photo was not approved",
+      "photoPending": "Waiting for review",
+      "rights": "I confirm I took these photos myself, and anyone recognisable in them agreed to be shown.",
+      "rightsRequired": "Please confirm your rights to the photos.",
+      "duplicateTitle": "There are spots nearby",
+      "duplicateBody": "The spots below are within {meters} m. If it is the same place, please do not send a duplicate.",
+      "duplicateDistance": "{meters} m away",
+      "duplicatePending": "waiting for review",
+      "notDuplicate": "This is a different spot",
+      "submit": "Send for review",
+      "resubmit": "Resend for review",
+      "adminSubmit": "Save spot",
+      "adminSave": "Save changes",
+      "submitting": "Sending…",
+      "fixErrors": "A few things above need fixing.",
+      "submitted": "Proposal sent. An admin will review it and let you know.",
+      "saved": "Saved",
+      "back": "Back",
+      "required": "Required",
+      "nameTooShort": "The name needs at least 3 characters.",
+      "descriptionTooShort": "The description needs at least 30 characters.",
+      "kindRequired": "Choose a kind of spot.",
+      "provinceRequired": "Choose a province.",
+      "feeRequired": "Enter the ticket price."
+    },
+    "albumPicker": {
+      "label": "Shot at",
+      "hint": "Optional. The album will appear on the spot's page.",
+      "placeholder": "Search spots by name",
+      "none": "No spot found. You can propose a new one.",
+      "clear": "Remove spot",
+      "loading": "Searching…",
+      "propose": "Propose a new spot"
+    },
+    "admin": {
+      "metaTitle": "Photo spots",
+      "title": "Photo spots",
+      "lede": "Review spots providers propose, add spots, and keep the facts true.",
+      "add": "Add a spot",
+      "tabs": {
+        "PENDING": "Waiting",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      },
+      "search": "Search by name",
+      "searchButton": "Search",
+      "empty": "No spots.",
+      "submittedBy": "Proposed by {name}",
+      "submittedByUnknown": "Proposer unknown",
+      "pendingPhotos": "{count, plural, =0 {} one {# photo waiting} other {# photos waiting}}",
+      "open": "Open",
+      "backToList": "All spots",
+      "viewPublic": "View public page",
+      "reviewTitle": "Review",
+      "approve": "Approve spot",
+      "approveHint": "Also approves photos still waiting. Reject bad photos first.",
+      "reject": "Reject",
+      "rejectReason": "Reason (the proposer will see it)",
+      "rejectReasonTooShort": "The reason needs at least 5 characters.",
+      "statusTitle": "Status",
+      "operatingStatus": "Operating status",
+      "statusNote": "Status note",
+      "statusNotePlaceholder": "e.g. closed for repairs until 01/2027",
+      "markVerified": "Facts checked today",
+      "lastVerified": "Last checked: {date}",
+      "neverVerified": "Never checked",
+      "saveStatus": "Save status",
+      "photosTitle": "Photos",
+      "approvePhoto": "Approve photo",
+      "rejectPhoto": "Reject photo",
+      "makeCover": "Make cover",
+      "isCover": "Cover",
+      "addPhotos": "Add photos (approved at once)",
+      "photoStatus": {
+        "PENDING": "Waiting",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "AUTO_REJECTED": "Rejected"
+      },
+      "factsTitle": "Spot details",
+      "duplicatesTitle": "Spots nearby (possible duplicates)",
+      "noDuplicates": "No spots within {meters} m.",
+      "mergeInto": "Merge into this spot",
+      "mergeConfirm": "Merge \"{from}\" into \"{into}\"? Albums and photos move across and the old address redirects.",
+      "delete": "Delete spot",
+      "deleteConfirm": "Delete \"{name}\"? It disappears from the map and public pages; albums tagged with it are untagged.",
+      "albums": "{count, plural, one {# album tagged} other {# albums tagged}}",
+      "done": "Saved",
+      "failed": "Could not save, please try again."
     }
   }
 }

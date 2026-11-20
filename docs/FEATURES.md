@@ -160,6 +160,44 @@ hồ sơ" và "Đặt lịch" (trang đặt lịch nhận sẵn ngày giờ đã
 đồ" (bật mặc định) tự tìm lại khi thôi kéo bản đồ. Vị trí
 provider mặc định được làm mờ. Chi tiết: `docs/ops/fmap.md`.
 
+### Địa điểm chụp (20/11/2026)
+
+Địa điểm chụp đẹp trên Bản đồ F, vừa là cẩm nang vừa dẫn khách tới người chụp ở đó
+(chủ dự án chọn hai mục tiêu ngang nhau). Bảng `Place` + `PlaceMedia`, thêm
+`Album.placeId`; logic ở `services/places.ts`.
+
+- **Ai thêm.** Nhà cung cấp đã xác minh danh tính (mọi vai trò trong
+  `PROVIDER_ROLES`) và admin. Đề xuất ở "Tiện ích khác → Địa điểm chụp"
+  (`/dashboard/places`): thả ghim trên bản đồ, tên, loại, kiểu chụp hợp, mô tả,
+  tỉnh/phường, giờ đẹp, tháng đẹp, vé vào cổng, phí chụp, cần xin phép không, quy
+  định, lúc đông, gửi xe, 1–10 ảnh tự chụp (bắt buộc tick xác nhận quyền với ảnh).
+  Tối đa 5 đề xuất chờ duyệt một lúc. Ghim cách địa điểm có sẵn dưới 200 m bị hỏi
+  "có phải địa điểm này?" trước khi gửi.
+- **Duyệt.** Không gì hiện công khai trước khi admin duyệt (`/admin/places`). Duyệt
+  địa điểm thì duyệt luôn ảnh còn chờ; admin từ chối ảnh xấu trước, từng ảnh. Từ
+  chối cần lý do; người đề xuất sửa và gửi lại. Admin còn: sửa mọi thông tin, đổi
+  tình trạng (đang mở / tạm đóng / cấm chụp, kèm ghi chú), đánh dấu "đã kiểm tra
+  hôm nay", thêm ảnh, chọn ảnh bìa, gộp địa điểm trùng (album và ảnh chuyển sang,
+  địa chỉ cũ chuyển hướng 308), xoá. Mọi thao tác ghi `AdminAction`. Người đề xuất
+  nhận thông báo `PLACE_APPROVED`/`PLACE_REJECTED`.
+- **Trang công khai.** `/dia-diem` (theo tỉnh, lọc theo loại), `/dia-diem/<tỉnh>`,
+  `/dia-diem/<tỉnh>/<slug>`: ảnh đã duyệt, thông tin thực tế (thiếu thì ghi "Chưa
+  rõ", không đoán), chỉ đường, "Nhiếp ảnh gia đã chụp ở đây" (album gắn địa điểm),
+  "Nhà cung cấp ở gần" (trong 15 km, không ghi khoảng cách tới địa chỉ riêng của
+  họ), "Báo thông tin sai" (lý do riêng cho địa điểm). Chưa có địa điểm công khai
+  nào thì các trang này là 404 và không có trong sitemap — tức tính năng tự ẩn tới
+  khi admin duyệt địa điểm đầu tiên. JSON-LD `TouristAttraction` + `BreadcrumbList`.
+- **Bản đồ F.** Nút "Địa điểm chụp" (góc dưới trái) bật lớp chấm vàng, tải theo
+  vùng đang xem; bấm chấm mở thẻ xem nhanh. `/fmap?layer=places&lat=&lng=&place=`
+  mở sẵn lớp và địa điểm (nút "Xem trên Bản đồ F" ở trang địa điểm).
+- **Album "Chụp tại".** Ô tìm địa điểm (gõ không dấu được) khi tạo album và trên
+  trang album; chỉ chọn được địa điểm đã duyệt.
+- **Xoá tài khoản / xuất dữ liệu.** Xuất dữ liệu có địa điểm đã đề xuất và ảnh địa
+  điểm. Xoá tài khoản: ảnh họ tải lên rời trang địa điểm, đề xuất chưa duyệt bị
+  xoá, địa điểm đã duyệt ở lại nhưng không còn gắn với họ.
+- **Dữ liệu khởi đầu.** Gợi ý 50 địa điểm cần người thật kiểm chứng:
+  `docs/ops/dia-diem-khoi-dau.md`.
+
 ## 7. Dịch vụ và lịch rảnh
 
 Nhà cung cấp có thể tạo dịch vụ với tên, mô tả, thời lượng và giá, và (từ 09/2026)
@@ -375,6 +413,7 @@ Admin có các khu vực cho:
 - yêu cầu dữ liệu/xoá tài khoản;
 - thanh toán thủ công;
 - role change request;
+- duyệt địa điểm chụp (`/admin/places`, xem "Địa điểm chụp" ở mục 6);
 - audit log.
 
 Mọi thao tác nhạy cảm phải gọi `requireAdmin()`, ghi `AdminAction` và không trả

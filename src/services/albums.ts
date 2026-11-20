@@ -1,5 +1,6 @@
 import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
+import { PUBLIC_PLACE } from "@/services/places";
 import {
   deleteCloudinaryAsset,
   isCloudinaryConfigured,
@@ -15,6 +16,17 @@ export const TRASH_TTL_DAYS = 7;
 
 export class AlbumNotFoundError extends Error {}
 export class AlbumNotOwnedError extends Error {}
+
+// Only a public spot can be named as where an album was shot: a spot still
+// waiting for review (or sent back) has no page for the album to appear on.
+async function assertPublicPlace(placeId: string | null | undefined) {
+  if (!placeId) return;
+  const place = await db.place.findFirst({
+    where: { id: placeId, ...PUBLIC_PLACE },
+    select: { id: true },
+  });
+  if (!place) throw new AlbumNotFoundError("Photo spot not found");
+}
 
 async function assertOwnsAlbum(albumId: string, userId: string) {
   const album = await db.album.findUnique({
@@ -84,8 +96,10 @@ export async function createAlbum(
     description?: string;
     category: string;
     shootDate?: string;
+    placeId?: string | null;
   },
 ) {
+  await assertPublicPlace(data.placeId);
   return db.$transaction(async (tx) => {
     const [profile, maxOrder] = await Promise.all([
       tx.profile.findUnique({
@@ -106,6 +120,7 @@ export async function createAlbum(
         description: data.description,
         category: data.category as never,
         shootDate: data.shootDate ? new Date(data.shootDate) : undefined,
+        placeId: data.placeId ?? null,
         sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,
       },
     });
@@ -150,9 +165,11 @@ export async function updateAlbum(
     shootDate?: string | null;
     coverMediaId?: string | null;
     isPublished?: boolean;
+    placeId?: string | null;
   },
 ) {
   await assertOwnsAlbum(albumId, userId);
+  await assertPublicPlace(data.placeId);
 
   // The cover must be a photo of this album. Any media id used to be
   // accepted, so an owner could set another user's photo — moderated or

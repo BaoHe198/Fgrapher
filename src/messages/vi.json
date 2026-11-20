@@ -984,7 +984,8 @@
         "payments": "Thanh toán",
         "openMenu": "Mở menu quản trị",
         "menuTitle": "Menu quản trị",
-        "menuDescription": "Điều hướng khu vực quản trị"
+        "menuDescription": "Điều hướng khu vực quản trị",
+        "places": "Địa điểm chụp"
       },
       "overview": {
         "metaTitle": "Tổng quan quản trị — Fgrapher",
@@ -1108,7 +1109,8 @@
           "post": "Bài đăng",
           "product": "Sản phẩm",
           "review": "Đánh giá",
-          "message": "Tin nhắn"
+          "message": "Tin nhắn",
+          "place": "Địa điểm chụp"
         },
         "resolutionNotePlaceholder": "Ghi chú xử lý (không bắt buộc)",
         "resolve": "Xử lý",
@@ -1732,6 +1734,34 @@
       "noteTooLong": "Ghi chú quá dài (tối đa 2.000 ký tự)",
       "bookingNotFound": "Không tìm thấy lịch đặt",
       "feedFailed": "Chưa thực hiện được, vui lòng thử lại"
+    },
+    "places": {
+      "notAllowed": "Cần xác minh danh tính nhà cung cấp để đề xuất địa điểm.",
+      "invalidInput": "Thông tin địa điểm chưa hợp lệ.",
+      "proposed": "Đã gửi đề xuất địa điểm",
+      "resubmitted": "Đã gửi lại đề xuất",
+      "withdrawn": "Đã rút lại đề xuất",
+      "created": "Đã thêm địa điểm",
+      "updated": "Đã lưu địa điểm",
+      "deleted": "Đã xóa địa điểm",
+      "approved": "Đã duyệt địa điểm",
+      "rejected": "Đã từ chối địa điểm",
+      "photosUpdated": "Đã cập nhật ảnh",
+      "merged": "Đã gộp địa điểm",
+      "saveFailed": "Không lưu được địa điểm, vui lòng thử lại.",
+      "loadFailed": "Không tải được địa điểm, vui lòng thử lại.",
+      "errors": {
+        "not_allowed": "Cần xác minh danh tính nhà cung cấp để đề xuất địa điểm.",
+        "not_found": "Không tìm thấy địa điểm.",
+        "not_editable": "Địa điểm đã được duyệt nên không sửa được nữa. Hãy dùng \"Báo thông tin sai\" trên trang địa điểm.",
+        "too_many_pending": "Bạn đang có quá nhiều địa điểm chờ duyệt. Hãy đợi admin duyệt bớt.",
+        "duplicate": "Có địa điểm khác rất gần vị trí này.",
+        "bad_area": "Tỉnh/thành hoặc phường/xã không hợp lệ.",
+        "no_photo": "Địa điểm cần từ 1 tới 10 ảnh.",
+        "upload_unverified": "Không kiểm tra được ảnh đã tải lên. Hãy tải lại ảnh.",
+        "already_reviewed": "Địa điểm đã được duyệt hoặc từ chối trước đó.",
+        "merge_self": "Không gộp một địa điểm vào chính nó."
+      }
     }
   },
   "dashboardCore": {
@@ -3088,6 +3118,7 @@
       "groups": {
         "market": "Chợ F",
         "hiring": "Thuê dịch vụ",
+        "contribute": "Đóng góp",
         "personal": "Của bạn"
       },
       "hints": {
@@ -3099,7 +3130,8 @@
         "myRequests": "Các yêu cầu bạn đã đăng và báo giá nhận được",
         "saved": "Nghệ sĩ bạn đã lưu",
         "moodboard": "Ảnh bạn ghim làm ý tưởng",
-        "notifications": "Mọi thông báo gần đây"
+        "notifications": "Mọi thông báo gần đây",
+        "places": "Đề xuất địa điểm chụp đẹp lên Bản đồ F"
       }
     }
   },
@@ -4075,6 +4107,17 @@
         "morningTitle": "Hôm nay bạn có {count} việc",
         "messageMore": "{summary}; và {more} việc khác",
         "customJob": "Buổi làm việc"
+      },
+      "place": {
+        "approved": {
+          "title": "Địa điểm của bạn đã được duyệt",
+          "message": "\"{name}\" đã hiện trên Bản đồ F. Gắn album bạn chụp ở đó để khách tìm thấy bạn."
+        },
+        "rejected": {
+          "title": "Địa điểm chưa được duyệt",
+          "message": "\"{name}\" chưa được duyệt. Bạn có thể sửa và gửi lại.",
+          "messageWithReason": "\"{name}\" chưa được duyệt. Lý do: {reason}. Bạn có thể sửa và gửi lại."
+        }
       }
     },
     "calendarFeed": {
@@ -5801,9 +5844,14 @@
         "Personal information": "Thông tin cá nhân",
         "Inappropriate content": "Nội dung không phù hợp",
         "Appears to be a minor": "Nghi ngờ dưới 18 tuổi",
-        "Other": "Khác"
+        "Other": "Khác",
+        "Wrong information": "Thông tin sai",
+        "Closed": "Đã đóng cửa hoặc cấm chụp",
+        "Private property": "Nhà riêng, không phải nơi công cộng",
+        "Unsafe": "Không an toàn"
       },
-      "targetPost": "bài đăng này"
+      "targetPost": "bài đăng này",
+      "targetPlace": "địa điểm này"
     },
     "chatPanel": {
       "unknown": "Người dùng ẩn danh",
@@ -6018,7 +6066,8 @@
         "myOrders": "Đơn hàng của tôi",
         "listings": "Tin đăng Chợ F",
         "shopOrders": "Đơn hàng cửa hàng",
-        "sentBookings": "Lịch đặt tôi đã gửi"
+        "sentBookings": "Lịch đặt tôi đã gửi",
+        "places": "Địa điểm chụp"
       },
       "sections": {
         "myPage": "Các phần của trang",
@@ -6162,6 +6211,284 @@
       "timezone": "Giờ Việt Nam (GMT+7)",
       "noTimes": "Ngày này không còn giờ trống cho gói này.",
       "noCharge": "Chưa mất tiền khi gửi yêu cầu. {name} xác nhận trong 48 giờ."
+    }
+  },
+  "places": {
+    "kinds": {
+      "OLD_QUARTER": "Phố cổ",
+      "STREET": "Đường phố",
+      "CAFE": "Quán cà phê",
+      "PARK": "Công viên",
+      "BEACH": "Biển",
+      "MOUNTAIN": "Đồi núi",
+      "FIELD": "Cánh đồng, vườn hoa",
+      "LAKE_RIVER": "Sông, hồ",
+      "HERITAGE": "Di tích, đình chùa, nhà thờ",
+      "ARCHITECTURE": "Công trình kiến trúc",
+      "COUNTRYSIDE": "Làng quê",
+      "TOURIST_AREA": "Khu du lịch",
+      "OTHER": "Khác"
+    },
+    "status": {
+      "OPEN": "Đang mở",
+      "TEMPORARILY_CLOSED": "Tạm đóng cửa",
+      "NO_SHOOTING": "Đang cấm chụp ảnh"
+    },
+    "review": {
+      "PENDING": "Đang chờ duyệt",
+      "APPROVED": "Đã duyệt",
+      "REJECTED": "Chưa được duyệt",
+      "AUTO_REJECTED": "Chưa được duyệt"
+    },
+    "month": "Tháng {month}",
+    "monthRange": "Tháng {from} – Tháng {to}",
+    "allYear": "Quanh năm",
+    "card": {
+      "albums": "{count, plural, =0 {Chưa có album} other {# album đã chụp}}",
+      "noPhoto": "Chưa có ảnh"
+    },
+    "index": {
+      "metaTitle": "Địa điểm chụp ảnh đẹp — Fgrapher",
+      "metaDescription": "{count, plural, other {# địa điểm chụp ảnh}} ở {provinces, plural, other {# tỉnh/thành}}: giờ đẹp, mùa đẹp, phí vào cổng, quy định chụp và những người đã chụp ở đó.",
+      "title": "Địa điểm chụp ảnh đẹp",
+      "lede": "Mỗi địa điểm có ảnh thật, giờ và mùa đẹp, phí và quy định chụp — cùng những nhiếp ảnh gia đã chụp ở đó để bạn đặt lịch.",
+      "count": "{count, plural, other {# địa điểm}}",
+      "byProvince": "Theo tỉnh/thành",
+      "latest": "Địa điểm mới cập nhật",
+      "allKinds": "Tất cả",
+      "filterKind": "Lọc theo loại địa điểm",
+      "seeMap": "Xem trên Bản đồ F",
+      "propose": "Bạn biết một địa điểm đẹp? Đề xuất địa điểm",
+      "emptyKind": "Chưa có địa điểm loại này.",
+      "breadcrumb": "Địa điểm chụp"
+    },
+    "province": {
+      "metaTitle": "Địa điểm chụp ảnh đẹp ở {province} — Fgrapher",
+      "metaDescription": "{count, plural, other {# địa điểm chụp ảnh}} ở {province}: giờ đẹp, mùa đẹp, phí vào cổng, quy định chụp và những người đã chụp ở đó.",
+      "title": "Địa điểm chụp ảnh đẹp ở {province}",
+      "lede": "{count, plural, other {# địa điểm}} ở {province}, mỗi nơi có ảnh thật, thông tin thực tế và những người đã chụp ở đó.",
+      "otherProvinces": "Tỉnh/thành khác"
+    },
+    "detail": {
+      "metaTitle": "{name} — địa điểm chụp ảnh ở {province}",
+      "photos": "Ảnh tại địa điểm",
+      "openPhoto": "Mở ảnh {number}",
+      "suits": "Hợp để chụp",
+      "facts": "Thông tin thực tế",
+      "bestTime": "Giờ đẹp",
+      "bestMonths": "Mùa đẹp",
+      "entryFee": "Vé vào cổng",
+      "free": "Miễn phí",
+      "perPerson": "{price}/người",
+      "feeNote": "Phí chụp ảnh",
+      "permit": "Xin phép trước khi chụp",
+      "permitYes": "Cần xin phép",
+      "permitNo": "Không cần",
+      "rules": "Quy định",
+      "crowd": "Lúc đông người",
+      "parking": "Gửi xe",
+      "unknown": "Chưa rõ",
+      "address": "Địa chỉ",
+      "directions": "Chỉ đường",
+      "onMap": "Xem trên Bản đồ F",
+      "verifiedAt": "Thông tin được kiểm tra ngày {date}.",
+      "updatedAt": "Cập nhật ngày {date}.",
+      "factsNote": "Phí và quy định có thể thay đổi. Hãy hỏi lại chủ địa điểm trước buổi chụp.",
+      "report": "Báo thông tin sai",
+      "reportSignIn": "Đăng nhập để báo thông tin sai",
+      "closedTitle": {
+        "TEMPORARILY_CLOSED": "Địa điểm đang tạm đóng cửa",
+        "NO_SHOOTING": "Địa điểm đang cấm chụp ảnh"
+      },
+      "closedBody": "Đừng lên lịch chụp ở đây cho tới khi địa điểm mở lại.",
+      "shotHere": "Nhiếp ảnh gia đã chụp ở đây",
+      "shotHereCount": "{count, plural, other {# album}}",
+      "shotHereEmpty": "Chưa có album nào gắn địa điểm này.",
+      "shotHereHint": "Nhà cung cấp chọn \"Chụp tại\" khi tạo album để album hiện ở đây.",
+      "albumBy": "của {name}",
+      "photoCount": "{count, plural, other {# ảnh}}",
+      "from": "Từ {price}",
+      "contactPrice": "Liên hệ báo giá",
+      "viewProfile": "Xem hồ sơ",
+      "nearby": "Nhà cung cấp ở gần",
+      "nearbyHint": "Những người có địa chỉ làm việc trong khoảng {km} km.",
+      "moreInProvince": "Địa điểm khác ở {province}",
+      "seeAllInProvince": "Xem tất cả địa điểm ở {province}"
+    },
+    "fmap": {
+      "toggle": "Địa điểm chụp",
+      "toggleOn": "Đang hiện địa điểm chụp",
+      "count": "{count, plural, =0 {Không có địa điểm chụp trong vùng này} other {# địa điểm chụp trong vùng này}}",
+      "loadFailed": "Không tải được địa điểm chụp.",
+      "open": "Xem địa điểm",
+      "close": "Đóng"
+    },
+    "mine": {
+      "metaTitle": "Địa điểm chụp",
+      "title": "Địa điểm chụp",
+      "lede": "Đề xuất những địa điểm chụp đẹp bạn biết. Admin duyệt xong, địa điểm hiện trên Bản đồ F và trang Địa điểm chụp, kèm album bạn đã chụp ở đó.",
+      "propose": "Đề xuất địa điểm",
+      "empty": "Bạn chưa đề xuất địa điểm nào.",
+      "notAllowedTitle": "Cần xác minh danh tính",
+      "notAllowedBody": "Chỉ nhà cung cấp đã xác minh danh tính mới đề xuất được địa điểm, để mỗi địa điểm đều có người chịu trách nhiệm về thông tin.",
+      "verify": "Xác minh danh tính",
+      "edit": "Sửa và gửi lại",
+      "editPending": "Sửa",
+      "withdraw": "Rút lại",
+      "withdrawConfirm": "Rút lại đề xuất \"{name}\"? Địa điểm sẽ bị xóa khỏi hàng chờ duyệt.",
+      "view": "Xem trang",
+      "rejectedNote": "Lý do: {note}",
+      "albums": "{count, plural, =0 {Chưa có album gắn địa điểm} other {# album gắn địa điểm}}",
+      "approvedNotice": "Địa điểm của bạn đã được duyệt. Hãy gắn album bạn chụp ở đó (\"Chụp tại\") để khách tìm thấy bạn.",
+      "pendingLimit": "Bạn đang có {count} địa điểm chờ duyệt — tối đa {max}."
+    },
+    "form": {
+      "newTitle": "Đề xuất địa điểm chụp",
+      "editTitle": "Sửa đề xuất",
+      "adminNewTitle": "Thêm địa điểm",
+      "intro": "Chỉ nhận nơi công cộng hoặc nơi kinh doanh mở cửa cho khách. Không đề xuất nhà riêng.",
+      "rejectedBanner": "Địa điểm chưa được duyệt. Lý do: {note}",
+      "sectionPlace": "Địa điểm",
+      "name": "Tên địa điểm",
+      "namePlaceholder": "Ví dụ: Đồi chè Cầu Đất",
+      "kind": "Loại địa điểm",
+      "kindPlaceholder": "Chọn loại",
+      "categories": "Hợp để chụp",
+      "categoriesHint": "Chọn những kiểu chụp hợp với nơi này.",
+      "description": "Mô tả",
+      "descriptionHint": "Nơi này đẹp ở đâu, chụp góc nào, có gì cần biết. Tối thiểu 30 ký tự.",
+      "sectionLocation": "Vị trí",
+      "mapHint": "Chạm vào bản đồ hoặc kéo ghim tới đúng chỗ.",
+      "useMyLocation": "Dùng vị trí của tôi",
+      "locationFailed": "Không lấy được vị trí. Hãy chạm vào bản đồ để đặt ghim.",
+      "pinMissing": "Đặt ghim trên bản đồ.",
+      "province": "Tỉnh/thành",
+      "provincePlaceholder": "Chọn tỉnh/thành",
+      "ward": "Phường/xã",
+      "wardPlaceholder": "Chọn phường/xã (không bắt buộc)",
+      "address": "Địa chỉ",
+      "addressPlaceholder": "Số nhà, tên đường hoặc mô tả đường đi",
+      "sectionFacts": "Thông tin thực tế",
+      "factsHint": "Bỏ trống nếu chưa chắc — trang sẽ ghi \"Chưa rõ\" thay vì đoán.",
+      "bestTime": "Giờ đẹp",
+      "bestTimePlaceholder": "Ví dụ: 6h–8h sáng, nắng xiên qua đồi",
+      "bestMonths": "Mùa đẹp",
+      "bestMonthsHint": "Chọn những tháng đẹp nhất.",
+      "entryFee": "Vé vào cổng",
+      "feeFree": "Miễn phí",
+      "feePaid": "Có phí",
+      "feeUnknown": "Chưa rõ",
+      "feeAmount": "Giá vé mỗi người (₫)",
+      "feeNote": "Phí chụp ảnh và điều kiện",
+      "feeNotePlaceholder": "Ví dụ: chụp ảnh cưới thu thêm 200.000₫/buổi",
+      "permit": "Có cần xin phép trước khi chụp?",
+      "permitYes": "Có",
+      "permitNo": "Không",
+      "permitUnknown": "Chưa rõ",
+      "rules": "Quy định",
+      "rulesPlaceholder": "Ví dụ: cấm flycam, không chụp trong khuôn viên chùa",
+      "crowd": "Lúc đông người",
+      "crowdPlaceholder": "Ví dụ: cuối tuần sau 9h rất đông",
+      "parking": "Gửi xe",
+      "parkingPlaceholder": "Ví dụ: bãi xe ở cổng chính, 10.000₫/xe máy",
+      "sectionPhotos": "Ảnh",
+      "photosHint": "Từ 1 tới {max} ảnh bạn tự chụp tại địa điểm. Ảnh được kiểm duyệt trước khi hiện công khai.",
+      "photosRequired": "Thêm ít nhất 1 ảnh.",
+      "addPhoto": "Thêm ảnh",
+      "removePhoto": "Bỏ ảnh",
+      "uploading": "Đang tải {percent}%",
+      "uploadFailed": "Không tải được {name}.",
+      "uploadUnavailable": "Chưa tải ảnh lên được lúc này. Vui lòng thử lại.",
+      "notImage": "{name} không phải ảnh.",
+      "photoRejected": "Ảnh này chưa được duyệt",
+      "photoPending": "Chờ duyệt",
+      "rights": "Tôi xác nhận đây là ảnh tôi tự chụp, và người có thể nhận ra trong ảnh đã đồng ý cho đăng.",
+      "rightsRequired": "Hãy xác nhận quyền với ảnh.",
+      "duplicateTitle": "Có địa điểm gần đây",
+      "duplicateBody": "Trong vòng {meters} m đã có những địa điểm dưới đây. Nếu là cùng một nơi, đừng gửi trùng.",
+      "duplicateDistance": "cách {meters} m",
+      "duplicatePending": "đang chờ duyệt",
+      "notDuplicate": "Đây là một địa điểm khác",
+      "submit": "Gửi để duyệt",
+      "resubmit": "Gửi lại để duyệt",
+      "adminSubmit": "Lưu địa điểm",
+      "adminSave": "Lưu thay đổi",
+      "submitting": "Đang gửi…",
+      "fixErrors": "Còn vài chỗ cần sửa ở trên.",
+      "submitted": "Đã gửi đề xuất. Admin sẽ duyệt và báo cho bạn.",
+      "saved": "Đã lưu",
+      "back": "Quay lại",
+      "required": "Bắt buộc",
+      "nameTooShort": "Tên cần ít nhất 3 ký tự.",
+      "descriptionTooShort": "Mô tả cần ít nhất 30 ký tự.",
+      "kindRequired": "Chọn loại địa điểm.",
+      "provinceRequired": "Chọn tỉnh/thành.",
+      "feeRequired": "Nhập giá vé."
+    },
+    "albumPicker": {
+      "label": "Chụp tại",
+      "hint": "Không bắt buộc. Album sẽ hiện trên trang của địa điểm.",
+      "placeholder": "Tìm địa điểm theo tên",
+      "none": "Không tìm thấy địa điểm. Bạn có thể đề xuất địa điểm mới.",
+      "clear": "Bỏ địa điểm",
+      "loading": "Đang tìm…",
+      "propose": "Đề xuất địa điểm mới"
+    },
+    "admin": {
+      "metaTitle": "Địa điểm chụp",
+      "title": "Địa điểm chụp",
+      "lede": "Duyệt địa điểm do nhà cung cấp đề xuất, thêm địa điểm, và giữ thông tin đúng với thực tế.",
+      "add": "Thêm địa điểm",
+      "tabs": {
+        "PENDING": "Chờ duyệt",
+        "APPROVED": "Đã duyệt",
+        "REJECTED": "Đã từ chối"
+      },
+      "search": "Tìm theo tên",
+      "searchButton": "Tìm",
+      "empty": "Không có địa điểm nào.",
+      "submittedBy": "Đề xuất bởi {name}",
+      "submittedByUnknown": "Không rõ người đề xuất",
+      "pendingPhotos": "{count, plural, =0 {} other {# ảnh chờ duyệt}}",
+      "open": "Mở",
+      "backToList": "Tất cả địa điểm",
+      "viewPublic": "Xem trang công khai",
+      "reviewTitle": "Duyệt địa điểm",
+      "approve": "Duyệt địa điểm",
+      "approveHint": "Duyệt cả những ảnh còn đang chờ. Từ chối ảnh xấu trước.",
+      "reject": "Từ chối",
+      "rejectReason": "Lý do từ chối (người đề xuất sẽ thấy)",
+      "rejectReasonTooShort": "Lý do cần ít nhất 5 ký tự.",
+      "statusTitle": "Tình trạng",
+      "operatingStatus": "Tình trạng hoạt động",
+      "statusNote": "Ghi chú tình trạng",
+      "statusNotePlaceholder": "Ví dụ: đóng cửa sửa chữa tới 01/2027",
+      "markVerified": "Đã kiểm tra thông tin hôm nay",
+      "lastVerified": "Kiểm tra lần cuối: {date}",
+      "neverVerified": "Chưa kiểm tra lần nào",
+      "saveStatus": "Lưu tình trạng",
+      "photosTitle": "Ảnh",
+      "approvePhoto": "Duyệt ảnh",
+      "rejectPhoto": "Từ chối ảnh",
+      "makeCover": "Đặt làm ảnh bìa",
+      "isCover": "Ảnh bìa",
+      "addPhotos": "Thêm ảnh (duyệt luôn)",
+      "photoStatus": {
+        "PENDING": "Chờ duyệt",
+        "APPROVED": "Đã duyệt",
+        "REJECTED": "Đã từ chối",
+        "AUTO_REJECTED": "Đã từ chối"
+      },
+      "factsTitle": "Thông tin địa điểm",
+      "duplicatesTitle": "Địa điểm ở gần (có thể trùng)",
+      "noDuplicates": "Không có địa điểm nào trong vòng {meters} m.",
+      "mergeInto": "Gộp vào địa điểm này",
+      "mergeConfirm": "Gộp \"{from}\" vào \"{into}\"? Album và ảnh sẽ chuyển sang, địa chỉ cũ sẽ chuyển hướng.",
+      "delete": "Xóa địa điểm",
+      "deleteConfirm": "Xóa \"{name}\"? Địa điểm sẽ biến khỏi bản đồ và trang công khai; album gắn địa điểm này sẽ được gỡ gắn.",
+      "albums": "{count, plural, other {# album gắn địa điểm}}",
+      "done": "Đã lưu",
+      "failed": "Không lưu được, vui lòng thử lại."
     }
   }
 }

@@ -273,6 +273,10 @@ export const NOTIFICATION_POLICY: Record<
     email: "critical",
     emailScope: "verification",
   },
+  // The answer to a photo-spot proposal (services/places.ts). In-app only:
+  // nothing waits on it the way a verification does.
+  PLACE_APPROVED: { feature: "core", inApp: true, email: "none" },
+  PLACE_REJECTED: { feature: "core", inApp: true, email: "none" },
   // --- Social feed (out of MVP scope — dormant) ---------------------
   NEW_FOLLOWER: {
     feature: "social",

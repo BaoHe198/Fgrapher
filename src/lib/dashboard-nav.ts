@@ -36,7 +36,8 @@ export type NavIcon =
   | "saved"
   | "moodboard"
   | "orders"
-  | "notifications";
+  | "notifications"
+  | "places";
 
 export interface DashboardNavItem {
   key: string;
@@ -267,6 +268,7 @@ export function dashboardNav({
       "/saved",
       "/moodboard",
       "/dashboard/notifications",
+      "/dashboard/places",
     ],
   };
 
@@ -281,7 +283,7 @@ export function dashboardNav({
 
 /** What "Tiện ích khác" lists, grouped. Empty groups are dropped. */
 export interface MoreGroup {
-  key: "market" | "hiring" | "personal";
+  key: "market" | "hiring" | "contribute" | "personal";
   items: DashboardNavItem[];
 }
 
@@ -332,6 +334,21 @@ export function moreGroups({
               },
               ITEMS.newRequest,
               ITEMS.myRequests,
+            ],
+    },
+    {
+      // Photo spots on Fmap (services/places.ts): providers propose them.
+      key: "contribute",
+      items:
+        persona === "customer"
+          ? []
+          : [
+              {
+                key: "places",
+                href: "/dashboard/places",
+                label: "places",
+                icon: "places",
+              },
             ],
     },
     {

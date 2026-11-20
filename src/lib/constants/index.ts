@@ -222,8 +222,46 @@ export const REPORT_REASONS = [
   "Personal information",
   "Inappropriate content",
   "Appears to be a minor",
+  // Photo spots (services/places.ts): what goes wrong with a place is
+  // rarely "offensive" — it is closed, private, unsafe, or the facts moved.
+  "Wrong information",
+  "Closed",
+  "Private property",
+  "Unsafe",
   "Other",
 ] as const;
+
+const GENERAL_REPORT_REASONS: readonly (typeof REPORT_REASONS)[number][] = [
+  "Spam",
+  "Fake",
+  "Offensive",
+  "Off-topic",
+  "Personal information",
+  "Inappropriate content",
+  "Appears to be a minor",
+  "Other",
+];
+
+/** The reasons offered for each kind of thing that can be reported. */
+export const REPORT_REASONS_BY_TARGET: Record<
+  "review" | "user" | "message" | "product" | "post" | "place",
+  readonly (typeof REPORT_REASONS)[number][]
+> = {
+  review: GENERAL_REPORT_REASONS,
+  user: GENERAL_REPORT_REASONS,
+  message: GENERAL_REPORT_REASONS,
+  product: GENERAL_REPORT_REASONS,
+  post: GENERAL_REPORT_REASONS,
+  place: [
+    "Wrong information",
+    "Closed",
+    "Private property",
+    "Unsafe",
+    "Inappropriate content",
+    "Spam",
+    "Other",
+  ],
+};
 
 export const HIGH_PRIORITY_REPORT_REASONS: (typeof REPORT_REASONS)[number][] = [
   "Inappropriate content",

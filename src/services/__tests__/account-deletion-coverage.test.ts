@@ -50,6 +50,10 @@ describe("account deletion", () => {
       "db.waitlistEntry.deleteMany(",
       "db.serviceRequest.deleteMany(",
       "db.serviceRequest.updateMany(",
+      // Photo spots: their photos leave the spot pages, their unapproved
+      // proposals go, and approved spots stop pointing at them.
+      "db.placeMedia.updateMany(",
+      "db.place.updateMany(",
     ]) {
       assert.ok(deletionBody.includes(write), write);
     }
@@ -75,6 +79,8 @@ describe("data export", () => {
       "db.productReview.findMany(",
       "db.savedProfile.findMany(",
       "db.follow.findMany(",
+      "db.place.findMany(",
+      "db.placeMedia.findMany(",
     ]) {
       assert.ok(exportBody.includes(read), read);
     }

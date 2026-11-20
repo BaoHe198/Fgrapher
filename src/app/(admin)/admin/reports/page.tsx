@@ -27,7 +27,7 @@ type ReportRow = Report & {
   targetLabel: string | null;
 };
 
-const TARGET_TYPES = ["user", "post", "product", "review", "message"];
+const TARGET_TYPES = ["user", "post", "product", "review", "message", "place"];
 
 // Where the reported thing can be looked at. Reviews and messages have no
 // page of their own; the queue used to show only a raw id for everything.
@@ -35,6 +35,7 @@ function targetHref(targetType: string, targetId: string): string | null {
   if (targetType === "user") return `/admin/users/${targetId}`;
   if (targetType === "post") return `/community/${targetId}`;
   if (targetType === "product") return `/shop/${targetId}`;
+  if (targetType === "place") return `/admin/places/${targetId}`;
   return null;
 }
 

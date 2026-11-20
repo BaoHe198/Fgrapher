@@ -39,7 +39,13 @@ const ALLOWED_UPLOAD_FORMATS = "jpg,jpeg,png,webp,gif,mp4,mov,webm";
 
 type PublicMediaType = "IMAGE" | "VIDEO";
 type PublicUploadPurpose =
-  "portfolio" | "account" | "request" | "booking" | "chat" | "payment";
+  | "portfolio"
+  | "account"
+  | "request"
+  | "booking"
+  | "chat"
+  | "payment"
+  | "place";
 type CloudinaryResource = {
   public_id?: unknown;
   secure_url?: unknown;
@@ -98,6 +104,8 @@ function uploadPolicyFor(purpose: PublicUploadPurpose, type: PublicMediaType) {
     return ACCOUNT_IMAGE_UPLOAD_POLICY;
   }
   if (purpose === "chat") return CHAT_IMAGE_UPLOAD_POLICY;
+  // A photo spot's photos are shown as large as a portfolio's.
+  if (purpose === "place") return PORTFOLIO_UPLOAD_POLICY.IMAGE;
   if (purpose === "request" || purpose === "booking") {
     return REFERENCE_MEDIA_UPLOAD_POLICY[type];
   }
@@ -229,6 +237,15 @@ export async function verifyReferenceMediaUpload(input: {
   purpose: "request" | "booking";
 }) {
   return verifyPublicUpload(input);
+}
+
+/** A photo of a photo spot (services/places.ts) — images only. */
+export async function verifyPlacePhotoUpload(input: {
+  publicId: string;
+  url: string;
+  userId: string;
+}) {
+  return verifyPublicUpload({ ...input, type: "IMAGE", purpose: "place" });
 }
 
 export async function verifyPurposeImageUpload(input: {
