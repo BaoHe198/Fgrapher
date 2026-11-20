@@ -25,6 +25,33 @@ const CLUSTERS_LAYER = "fmap-clusters";
 const CLUSTER_COUNT_LAYER = "fmap-cluster-count";
 const UNCLUSTERED_LAYER = "fmap-unclustered";
 const MAX_ZOOM = 18;
+// The "Địa điểm chụp" layer (services/places.ts): gold dots with a name at
+// street zoom, drawn under the providers' photo-frame markers.
+const PLACES_SOURCE = "fmap-places";
+const PLACES_LAYER = "fmap-places-dot";
+const PLACES_SELECTED_LAYER = "fmap-places-selected";
+const PLACES_LABEL_LAYER = "fmap-places-label";
+
+export interface FmapPlacePin {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+}
+
+function placeFeatures(places: FmapPlacePin[]) {
+  return {
+    type: "FeatureCollection" as const,
+    features: places.map((place) => ({
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [place.longitude, place.latitude],
+      },
+      properties: { placeId: place.id, name: place.name },
+    })),
+  };
+}
 const CLUSTER_LIST_LIMIT = 50;
 
 // Keyless fallback when NEXT_PUBLIC_MAP_STYLE_URL is unset. OpenFreeMap
@@ -154,7 +181,14 @@ export function FmapMap({
   labels,
   zoomRequest,
   bottomInset = 0,
+  places = [],
+  selectedPlaceId = null,
+  onSelectPlace,
 }: {
+  /** Photo spots to draw; empty when the layer is off. */
+  places?: FmapPlacePin[];
+  selectedPlaceId?: string | null;
+  onSelectPlace?: (placeId: string) => void;
   markers: FmapMarker[];
   selectedProfileId: string | null;
   centreRequest: { latitude: number; longitude: number; nonce: number } | null;
@@ -181,6 +215,14 @@ export function FmapMap({
   const clusterCallbackRef = useRef(onSelectCluster);
   const labelsRef = useRef(labels);
   const selectedRef = useRef(selectedProfileId);
+  const placesRef = useRef(places);
+  const selectPlaceRef = useRef(onSelectPlace);
+  const selectedPlaceRef = useRef(selectedPlaceId);
+  useEffect(() => {
+    placesRef.current = places;
+    selectPlaceRef.current = onSelectPlace;
+    selectedPlaceRef.current = selectedPlaceId;
+  }, [places, onSelectPlace, selectedPlaceId]);
 
   useEffect(() => {
     dataRef.current = markers;
@@ -282,6 +324,52 @@ export function FmapMap({
         clusterMaxZoom: MAX_ZOOM - 1,
         clusterRadius: 64,
       });
+      map.addSource(PLACES_SOURCE, {
+        type: "geojson",
+        data: placeFeatures(placesRef.current),
+      });
+      map.addLayer({
+        id: PLACES_LAYER,
+        type: "circle",
+        source: PLACES_SOURCE,
+        paint: {
+          "circle-color": "#c8a36a",
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 6, 14, 10],
+          "circle-stroke-width": 3,
+          "circle-stroke-color": "#ffffff",
+        },
+      });
+      map.addLayer({
+        id: PLACES_SELECTED_LAYER,
+        type: "circle",
+        source: PLACES_SOURCE,
+        filter: ["==", ["get", "placeId"], selectedPlaceRef.current ?? ""],
+        paint: {
+          "circle-color": "rgba(0,0,0,0)",
+          "circle-radius": 16,
+          "circle-stroke-width": 3,
+          "circle-stroke-color": "#0b2d27",
+        },
+      });
+      map.addLayer({
+        id: PLACES_LABEL_LAYER,
+        type: "symbol",
+        source: PLACES_SOURCE,
+        minzoom: 12,
+        layout: {
+          "text-field": ["get", "name"],
+          "text-font": ["Noto Sans Bold"],
+          "text-size": 12,
+          "text-offset": [0, 1.3],
+          "text-anchor": "top",
+          "text-max-width": 10,
+        },
+        paint: {
+          "text-color": "#0b2d27",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1.5,
+        },
+      });
       map.addLayer({
         id: CLUSTERS_LAYER,
         type: "circle",
@@ -352,6 +440,19 @@ export function FmapMap({
         );
       }
     });
+    map.on("click", PLACES_LAYER, (event: MapMouseEvent) => {
+      const feature = map.queryRenderedFeatures(event.point, {
+        layers: [PLACES_LAYER],
+      })[0];
+      const placeId = feature?.properties?.placeId as string | undefined;
+      if (placeId) selectPlaceRef.current?.(placeId);
+    });
+    map.on("mouseenter", PLACES_LAYER, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", PLACES_LAYER, () => {
+      map.getCanvas().style.cursor = "";
+    });
     map.on("mouseenter", CLUSTERS_LAYER, () => {
       map.getCanvas().style.cursor = "pointer";
     });
@@ -410,6 +511,22 @@ export function FmapMap({
     domMarkersRef.current.clear();
     map.triggerRepaint();
   }, [markers]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource(PLACES_SOURCE) as GeoJSONSource | undefined;
+    source?.setData(placeFeatures(places));
+  }, [places]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map?.getLayer(PLACES_SELECTED_LAYER)) return;
+    map.setFilter(PLACES_SELECTED_LAYER, [
+      "==",
+      ["get", "placeId"],
+      selectedPlaceId ?? "",
+    ]);
+  }, [selectedPlaceId]);
 
   useEffect(() => {
     if (!zoomRequest || !mapRef.current) return;

@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
+import { VIETNAM_BOUNDS } from "@/lib/places";
 import { FMAP_PROVIDER_ROLES } from "@/lib/validations/fmap";
+import { hasPublicPlaces } from "@/services/places";
 
 import { FmapClient } from "./fmap-client";
 
@@ -34,5 +36,27 @@ export default async function FmapPage({
     ? (params.category as ProfileCategory)
     : "";
 
-  return <FmapClient initialRole={role} initialCategory={category} />;
+  // A spot's "Xem trên Bản đồ F" link: ?layer=places&lat=&lng=&place=.
+  const lat = Number(params.lat);
+  const lng = Number(params.lng);
+  const centre =
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= VIETNAM_BOUNDS.south &&
+    lat <= VIETNAM_BOUNDS.north &&
+    lng >= VIETNAM_BOUNDS.west &&
+    lng <= VIETNAM_BOUNDS.east
+      ? { latitude: lat, longitude: lng }
+      : null;
+
+  return (
+    <FmapClient
+      initialRole={role}
+      initialCategory={category}
+      placesAvailable={await hasPublicPlaces()}
+      initialPlacesOn={params.layer === "places"}
+      initialCentre={centre}
+      initialPlaceId={typeof params.place === "string" ? params.place : null}
+    />
+  );
 }

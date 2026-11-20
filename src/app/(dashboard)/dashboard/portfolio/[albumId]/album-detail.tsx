@@ -31,6 +31,10 @@ import { useState } from "react";
 
 import { UploadMediaModal } from "@/components/modals/upload-media-modal";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlbumPlacePicker,
+  type PickedPlace,
+} from "@/components/places/album-place-picker";
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
@@ -57,6 +61,8 @@ interface AlbumMeta {
   category: ProfileCategory | null;
   shootDate: string | null;
   coverMediaId: string | null;
+  /** "Chụp tại" — the photo spot, if any. */
+  place: PickedPlace | null;
 }
 
 const MODERATION_BADGE_VARIANT: Record<
@@ -216,6 +222,7 @@ export function AlbumDetail({
         description: meta.description || null,
         category: meta.category ?? undefined,
         shootDate: meta.shootDate || null,
+        placeId: meta.place?.id ?? null,
       }),
     });
     setIsSaving(false);
@@ -310,6 +317,13 @@ export function AlbumDetail({
             onChange={(value) => setMeta((p) => ({ ...p, shootDate: value }))}
           />
         </div>
+        <AlbumPlacePicker
+          value={meta.place}
+          onChange={(place) => {
+            setMeta((p) => ({ ...p, place }));
+            setSaved(false);
+          }}
+        />
         <div className="flex items-center gap-3">
           <Button
             variant="secondary"

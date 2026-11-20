@@ -5,6 +5,10 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import {
+  AlbumPlacePicker,
+  type PickedPlace,
+} from "@/components/places/album-place-picker";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -54,6 +58,7 @@ export function AlbumFormDialog({
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [shootDate, setShootDate] = useState("");
+  const [place, setPlace] = useState<PickedPlace | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -64,6 +69,7 @@ export function AlbumFormDialog({
     setDescription("");
     setCategory("");
     setShootDate("");
+    setPlace(null);
     setError(null);
   };
 
@@ -90,6 +96,7 @@ export function AlbumFormDialog({
         description: description.trim() || undefined,
         category,
         shootDate: shootDate || undefined,
+        placeId: place?.id,
       }),
     });
     const body = await res.json();
@@ -161,6 +168,7 @@ export function AlbumFormDialog({
             value={shootDate}
             onChange={setShootDate}
           />
+          <AlbumPlacePicker value={place} onChange={setPlace} />
           {error ? <p className="text-body-sm text-danger">{error}</p> : null}
         </div>
 

@@ -7,6 +7,7 @@ import {
   Handshake,
   Image as ImageIcon,
   LayoutDashboard,
+  MapPin,
   Menu,
   ShieldCheck,
   Users,
@@ -47,6 +48,7 @@ const ITEMS = [
     key: "serviceRequests",
     icon: Handshake,
   },
+  { href: "/admin/places", key: "places", icon: MapPin },
 ] as const;
 
 type QueueKey = keyof AdminQueueCounts;

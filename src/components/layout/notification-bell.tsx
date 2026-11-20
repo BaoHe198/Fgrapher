@@ -11,6 +11,7 @@ import {
   Handshake,
   Heart,
   Image as ImageIcon,
+  MapPin,
   MessageCircle,
   Package,
   ShieldAlert,
@@ -73,6 +74,8 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   ROLE_CHANGE_REJECTED: ArrowLeftRight,
   VERIFICATION_APPROVED: ShieldCheck,
   VERIFICATION_REJECTED: ShieldAlert,
+  PLACE_APPROVED: MapPin,
+  PLACE_REJECTED: MapPin,
 };
 
 function relativeTime(

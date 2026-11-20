@@ -8,6 +8,7 @@ import {
   Home,
   LayoutGrid,
   type LucideIcon,
+  MapPin,
   MessageCircle,
   Package,
   Pin,
@@ -42,4 +43,5 @@ export const NAV_ICON_COMPONENTS: Record<NavIcon, LucideIcon> = {
   moodboard: Pin,
   orders: Package,
   notifications: Bell,
+  places: MapPin,
 };

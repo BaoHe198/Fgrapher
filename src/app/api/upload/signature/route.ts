@@ -6,6 +6,7 @@ import {
   generateUploadSignature,
   isCloudinaryConfigured,
 } from "@/lib/media/cloudinary";
+import { canProposePlaces } from "@/services/places";
 
 export async function POST(request: Request) {
   try {
@@ -35,10 +36,27 @@ export async function POST(request: Request) {
       "account",
       "payment",
     ]);
-    const purpose = openPurposes.has(body?.purpose)
-      ? body.purpose
-      : "portfolio";
-    if (!openPurposes.has(purpose)) {
+    // "place" = photos of a photo spot someone proposes (services/
+    // places.ts): the same people who may propose one — an admin or a
+    // provider whose identity is verified.
+    const purpose =
+      openPurposes.has(body?.purpose) || body?.purpose === "place"
+        ? body.purpose
+        : "portfolio";
+    if (purpose === "place") {
+      if (!(await canProposePlaces(session.user.id))) {
+        return NextResponse.json(
+          {
+            data: null,
+            error: "forbidden",
+            message: (await getTranslations("apiMessages.places"))(
+              "notAllowed",
+            ),
+          },
+          { status: 403 },
+        );
+      }
+    } else if (!openPurposes.has(purpose)) {
       await requirePaidRole(session.user.id);
     }
 

@@ -44,6 +44,14 @@ export default async function AlbumDetailPage({
         category: album.category,
         shootDate: album.shootDate ? album.shootDate.toISOString() : null,
         coverMediaId: album.coverMediaId,
+        place: album.placeId
+          ? await db.place
+              .findFirst({
+                where: { id: album.placeId, deletedAt: null },
+                select: { id: true, name: true },
+              })
+              .then((place) => place ?? null)
+          : null,
       }}
       initialMedia={album.media.map((m) => ({
         id: m.id,

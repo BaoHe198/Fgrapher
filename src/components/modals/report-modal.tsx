@@ -15,14 +15,12 @@ import {
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { REPORT_REASONS } from "@/lib/constants";
-
-const REASONS: string[] = [...REPORT_REASONS];
+import { REPORT_REASONS_BY_TARGET } from "@/lib/constants";
 
 interface ReportModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetType: "review" | "user" | "message" | "product" | "post";
+  targetType: "review" | "user" | "message" | "product" | "post" | "place";
   targetId: string;
 }
 
@@ -32,6 +30,7 @@ const TARGET_KEY = {
   message: "targetMessage",
   product: "targetProduct",
   post: "targetPost",
+  place: "targetPlace",
 } as const;
 
 export function ReportModal({
@@ -90,7 +89,7 @@ export function ReportModal({
             onChange={setReason}
             options={[
               { value: "", label: t("reasonPlaceholder") },
-              ...REASONS.map((r) => ({
+              ...REPORT_REASONS_BY_TARGET[targetType].map((r) => ({
                 value: r,
                 label: t(`reasons.${r}`),
               })),

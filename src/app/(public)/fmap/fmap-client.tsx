@@ -1,6 +1,6 @@
 "use client";
 
-import { LocateFixed, Minus, Plus, Sunset, X } from "lucide-react";
+import { Camera, LocateFixed, Minus, Plus, Sunset, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
@@ -18,6 +18,7 @@ import {
   fmapRolesParam,
 } from "@/components/fmap/fmap-filter-bar";
 import type { FmapBounds, MarkerLabels } from "@/components/fmap/fmap-map";
+import { FmapPlacePreview } from "@/components/fmap/fmap-place-preview";
 import { FmapProviderPreviewCard } from "@/components/fmap/fmap-provider-preview";
 import { Button } from "@/components/ui/button";
 import { FgImage } from "@/components/ui/fg-image";
@@ -26,6 +27,7 @@ import { formatDate, formatVND, vietnamDateKey } from "@/lib/format";
 import { minutesToTime, sunTimes } from "@/lib/sun";
 import { cn } from "@/lib/utils";
 import type { FmapMarker, FmapProviderPreview } from "@/services/fmap";
+import type { PlaceCard } from "@/services/places";
 
 const FmapMap = dynamic(
   () => import("@/components/fmap/fmap-map").then((module) => module.FmapMap),
@@ -81,6 +83,14 @@ function areaTooLarge(area: FmapBounds) {
 interface FmapClientProps {
   initialRole: FmapFilterValue["role"];
   initialCategory: FmapFilterValue["category"];
+  /** At least one photo spot is public: offer the "Địa điểm chụp" layer. */
+  placesAvailable?: boolean;
+  /** ?layer=places — open with the layer on. */
+  initialPlacesOn?: boolean;
+  /** ?lat=&lng= — open centred here (a spot's "Xem trên Bản đồ F"). */
+  initialCentre?: { latitude: number; longitude: number } | null;
+  /** ?place= — open with this spot chosen. */
+  initialPlaceId?: string | null;
 }
 
 /** Share of the searched area treated as "the edge" on each side. */
@@ -203,8 +213,16 @@ function MapControl({
   );
 }
 
-export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
+export function FmapClient({
+  initialRole,
+  initialCategory,
+  placesAvailable = false,
+  initialPlacesOn = false,
+  initialCentre = null,
+  initialPlaceId = null,
+}: FmapClientProps) {
   const t = useTranslations("fmap");
+  const placesT = useTranslations("places.fmap");
   const v2 = useTranslations("fmap.v2");
   const railT = useTranslations("publicPages.browse.v3.railRoles");
   // The page heading is the same name the site nav uses — "Bản đồ F" in
@@ -221,11 +239,12 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   const [hasSearched, setHasSearched] = useState(false);
   const [truncated, setTruncated] = useState(false);
   const [mapMoved, setMapMoved] = useState(false);
+  // Arriving from a spot's page ("Xem trên Bản đồ F") opens centred on it.
   const [centreRequest, setCentreRequest] = useState<{
     latitude: number;
     longitude: number;
     nonce: number;
-  } | null>(null);
+  } | null>(() => (initialCentre ? { ...initialCentre, nonce: 1 } : null));
   const [fitRequest, setFitRequest] = useState<{
     bounds: FmapBounds;
     nonce: number;
@@ -259,6 +278,15 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
     delta: number;
     nonce: number;
   } | null>(null);
+  // The "Địa điểm chụp" layer: photo spots in view, loaded on their own as
+  // the map moves (no search button — they do not depend on a date).
+  const [placesOn, setPlacesOn] = useState(placesAvailable && initialPlacesOn);
+  const [places, setPlaces] = useState<PlaceCard[]>([]);
+  const [placesError, setPlacesError] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(
+    placesAvailable ? initialPlaceId : null,
+  );
+  const placesRequestRef = useRef<AbortController | null>(null);
 
   const filtersRef = useRef(filters);
   const boundsRef = useRef(bounds);
@@ -273,6 +301,34 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   }, [filters, bounds]);
 
   const invalidReason = filtersProblem(filters, t);
+
+  useEffect(() => {
+    if (!placesOn || !bounds) return;
+    const timer = window.setTimeout(() => {
+      placesRequestRef.current?.abort();
+      const controller = new AbortController();
+      placesRequestRef.current = controller;
+      const params = new URLSearchParams({
+        north: String(Math.min(bounds.north, bounds.south + 20)),
+        south: String(bounds.south),
+        east: String(Math.min(bounds.east, bounds.west + 20)),
+        west: String(bounds.west),
+      });
+      fetch(`/api/places/map?${params}`, { signal: controller.signal })
+        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+        .then((body: { data: PlaceCard[] }) => {
+          setPlaces(body.data ?? []);
+          setPlacesError(false);
+        })
+        .catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            return;
+          }
+          setPlacesError(true);
+        });
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [placesOn, bounds]);
 
   const search = useCallback(
     async (nextBounds?: FmapBounds) => {
@@ -418,6 +474,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
   );
 
   const selectProvider = useCallback(async (profileId: string) => {
+    setSelectedPlaceId(null);
     ignoreNextMoveRef.current = true;
     window.setTimeout(() => {
       ignoreNextMoveRef.current = false;
@@ -652,6 +709,19 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
       </div>
     ) : null;
 
+  const selectedPlace =
+    placesOn && selectedPlaceId
+      ? (places.find((place) => place.id === selectedPlaceId) ?? null)
+      : null;
+  const closePlace = () => setSelectedPlaceId(null);
+  const placeCard = selectedPlace ? (
+    <FmapPlacePreview
+      place={selectedPlace}
+      onClose={closePlace}
+      inline={isMobile}
+    />
+  ) : null;
+
   const previewCard = selectedProfileId ? (
     <FmapProviderPreviewCard
       preview={preview}
@@ -751,6 +821,15 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
               setMapMoved(true);
             }}
             onSelectProvider={(profileId) => void selectProvider(profileId)}
+            places={placesOn ? places : []}
+            selectedPlaceId={selectedPlace ? selectedPlace.id : null}
+            onSelectPlace={(placeId) => {
+              setSelectedProfileId(null);
+              setPreview(null);
+              setClusterIds(null);
+              setSheetExpanded(false);
+              setSelectedPlaceId(placeId);
+            }}
             onSelectCluster={(profileIds) => {
               setSelectedProfileId(null);
               setPreview(null);
@@ -820,6 +899,41 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
             </div>
           ) : null}
 
+          {placesAvailable && !(isMobile && sheetExpanded) ? (
+            <div
+              style={{ bottom: controlsBottom }}
+              className="absolute left-3 z-15 flex max-w-[calc(100%-5rem)] flex-col items-start gap-1.5 transition-[bottom] duration-[var(--fg-dur-260)] ease-fg-out motion-reduce:transition-none"
+            >
+              {placesOn ? (
+                <p
+                  role="status"
+                  className="rounded-full bg-bg-surface/95 px-3 py-1 text-body-sm text-text-secondary shadow-[var(--shadow-sm)]"
+                >
+                  {placesError
+                    ? placesT("loadFailed")
+                    : placesT("count", { count: places.length })}
+                </p>
+              ) : null}
+              <button
+                type="button"
+                aria-pressed={placesOn}
+                onClick={() => {
+                  setPlacesOn((on) => !on);
+                  setSelectedPlaceId(null);
+                }}
+                className={cn(
+                  "focus-ring flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-body-md font-semibold shadow-[var(--shadow-md)] transition-colors",
+                  placesOn
+                    ? "border-transparent bg-gold-400 text-white"
+                    : "border-border-default bg-bg-surface text-text-primary hover:bg-bg-sunken",
+                )}
+              >
+                <Camera aria-hidden className="size-5" />
+                {placesT("toggle")}
+              </button>
+            </div>
+          ) : null}
+
           {/* Locate, zoom in, zoom out: 44px, 8px apart, always above the
               sheet's edge; hidden while the list covers the map. */}
           {!(isMobile && sheetExpanded) ? (
@@ -857,7 +971,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
                   {clusterList}
                 </aside>
               ) : null}
-              {previewCard}
+              {placeCard ?? previewCard}
             </>
           ) : (
             <section
@@ -867,7 +981,7 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
                 "absolute inset-x-0 bottom-0 z-25 flex flex-col rounded-t-[var(--fg-radius-xl)] bg-bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_hsl(30_14%_5%/0.14)]",
                 sheetExpanded
                   ? "h-[78%]"
-                  : selectedProfileId || clusterList
+                  : selectedProfileId || clusterList || placeCard
                     ? "max-h-[75%]"
                     : "min-h-[100px]",
               )}
@@ -912,9 +1026,9 @@ export function FmapClient({ initialRole, initialCategory }: FmapClientProps) {
                 <div className="min-h-0 overflow-y-auto px-4 pb-4">
                   {clusterList}
                 </div>
-              ) : previewCard ? (
+              ) : (placeCard ?? previewCard) ? (
                 <div className="min-h-0 overflow-y-auto border-t border-border-subtle">
-                  {previewCard}
+                  {placeCard ?? previewCard}
                 </div>
               ) : null}
             </section>

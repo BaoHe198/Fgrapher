@@ -8,7 +8,8 @@ Tài liệu này dành cho người quản trị website. Hướng dẫn deploy/
 
 1. Xem Sentry/Vercel Logs có lỗi mới hoặc lỗi tăng đột biến.
 2. Kiểm tra uptime và health endpoint.
-3. Duyệt hàng chờ media, báo cáo vi phạm và hồ sơ KYC.
+3. Duyệt hàng chờ media, báo cáo vi phạm, hồ sơ KYC và địa điểm chụp
+   (`/admin/places`).
 4. Xem email outbox có dòng pending/retry/dead bất thường.
 5. Kiểm tra payment intent/webhook lỗi nếu cổng thanh toán đang bật.
 6. Đọc hộp thư hỗ trợ và phản hồi sự cố người dùng.
@@ -76,6 +77,28 @@ Hàng chờ ở `/admin/moderation`. Người duyệt:
 
 Máy quét chỉ hỗ trợ sàng lọc. Ảnh KYC không đi qua luồng này. Chi tiết ở
 `docs/ops/content-moderation.md`.
+
+### Địa điểm chụp
+
+Hàng chờ ở `/admin/places`. Với mỗi đề xuất:
+
+1. Xem ghim trên bản đồ và mục "Địa điểm ở gần": trùng thì gộp vào địa điểm có
+   sẵn, đừng duyệt thêm một bản nữa.
+2. Chỉ nhận nơi công cộng hoặc nơi kinh doanh mở cửa cho khách. Nhà riêng, khu
+   quân sự, nơi nguy hiểm: từ chối, ghi lý do.
+3. Từ chối từng ảnh xấu, ảnh có vẻ lấy trên mạng, ảnh có người nhận diện được mà
+   không hợp ngữ cảnh — trước khi bấm "Duyệt địa điểm" (nút này duyệt luôn ảnh
+   còn chờ).
+4. Phí, giờ, quy định: nếu không chắc thì để trống — trang sẽ ghi "Chưa rõ".
+   Khi đã gọi điện hoặc tới tận nơi kiểm tra, tick "Đã kiểm tra thông tin hôm
+   nay" để trang ghi ngày kiểm tra.
+5. Báo cáo "Thông tin sai / Đã đóng cửa" của khách hiện trong `/admin/reports`
+   với liên kết sang trang admin của địa điểm. Đóng cửa thì đổi tình trạng (kèm
+   ghi chú) chứ đừng xoá: khách vẫn tìm nó và cần biết nó đang đóng.
+
+Nhập bộ địa điểm khởi đầu: `/admin/places` → "Thêm địa điểm". Địa điểm admin
+thêm vẫn ở trạng thái chờ duyệt, để việc công khai là một bước có chủ ý. Danh
+sách gợi ý cần kiểm chứng: `docs/ops/dia-diem-khoi-dau.md`.
 
 ## 4. Email và thông báo
 

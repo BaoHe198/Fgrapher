@@ -142,6 +142,8 @@ model User {
   serviceRequests          ServiceRequest[]          @relation("requestCustomer")
   requestOffers            RequestOffer[]            @relation("offerProvider")
   roleChangeRequests       RoleChangeRequest[]
+  submittedPlaces          Place[]                   @relation("placeSubmitter")
+  placeMedia               PlaceMedia[]              @relation("placeMediaUploader")
 
   @@index([wardId])
   // Both filtered on every admin dashboard load (getAdminOverview) and by
@@ -176,6 +178,7 @@ model Province {
   bookings        Booking[]
   waitlistEntries WaitlistEntry[]
   serviceRequests ServiceRequest[]
+  places          Place[]
 
   @@map("provinces")
 }
@@ -195,6 +198,7 @@ model Ward {
   profiles        Profile[]
   venues          Venue[]
   serviceRequests ServiceRequest[]
+  places          Place[]
 
   @@unique([provinceId, code])
   @@index([provinceId])
@@ -1171,6 +1175,10 @@ model Album {
   sortOrder    Int              @default(0)
   isPublished  Boolean          @default(true)
   shootDate    DateTime?
+  // "Chụp tại" - the photo spot this album was shot at (Place, 20/11/2026).
+  // Optional; only an APPROVED place can be chosen. The album then appears
+  // on that place's public page under "Nhiếp ảnh gia đã chụp ở đây".
+  placeId      String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
@@ -1180,6 +1188,7 @@ model Album {
   // purges together, never half of one.
   deletedAt DateTime?
 
+  place      Place?         @relation(fields: [placeId], references: [id], onDelete: SetNull)
   profile    Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
   media      ProfileMedia[] @relation("AlbumMedia")
   coverMedia ProfileMedia?  @relation("AlbumCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
@@ -1188,6 +1197,7 @@ model Album {
   @@index([profileId, sortOrder])
   @@index([deletedAt])
   @@index([coverMediaId])
+  @@index([placeId])
   @@map("albums")
 }
 
@@ -2057,6 +2067,9 @@ enum NotificationType {
   VERIFICATION_REJECTED
   // Wave 2 Chợ F — a product someone asked about is in stock again.
   PRODUCT_BACK_IN_STOCK
+  // The outcome of an admin's review of a photo spot someone proposed.
+  PLACE_APPROVED
+  PLACE_REJECTED
 }
 
 model Notification {
@@ -2189,4 +2202,147 @@ model SavedProfile {
 
   @@unique([userId, profileId])
   @@map("saved_profiles")
+}
+
+// ============================================================================
+// PHOTO SPOTS (Place) — "địa điểm chụp đẹp" on Fmap (project owner,
+// 20/11/2026). A public spot (an old quarter, a park, a field of flowers…)
+// with the practical facts a customer needs, and — the reason it lives in
+// Fgrapher — the albums shot there, so a spot leads to the people who
+// photograph it. Guide and booking weigh the same (owner's choice).
+//
+// Who adds them: identity-verified providers and admins propose; nothing is
+// public until an admin approves it (reviewStatus), and every photo goes
+// through moderation too (CLAUDE.md rule 8). Public spots only: never a
+// private home. Province/ward come from the geography tables (rule 9).
+// ============================================================================
+
+enum PlaceKind {
+  OLD_QUARTER // phố cổ
+  STREET // đường phố
+  CAFE // quán cà phê
+  PARK // công viên
+  BEACH // biển
+  MOUNTAIN // đồi núi
+  FIELD // cánh đồng, vườn hoa
+  LAKE_RIVER // sông, hồ
+  HERITAGE // di tích, đình chùa, nhà thờ
+  ARCHITECTURE // công trình kiến trúc
+  COUNTRYSIDE // làng quê
+  TOURIST_AREA // khu du lịch
+  OTHER
+}
+
+// Whether a spot can be shot at today. Not a review state: an approved spot
+// that the authorities closed stays listed, saying so, rather than vanishing
+// while people still search for it.
+enum PlaceOperatingStatus {
+  OPEN
+  TEMPORARILY_CLOSED
+  NO_SHOOTING
+}
+
+model Place {
+  id          String            @id @default(cuid())
+  name        String
+  // URL part, unique within its province: /dia-diem/<province.code>/<slug>.
+  slug        String
+  description String            @db.Text
+  kind        PlaceKind
+  // Which shoot styles it suits - the platform's own categories.
+  categories  ProfileCategory[]
+
+  provinceId String
+  wardId     String?
+  address    String?
+  latitude   Float
+  longitude  Float
+
+  // Practical facts. Free text where the truth is a sentence; null means
+  // "not known yet", which the page says instead of guessing.
+  bestTimeNote   String?
+  // 1-12. Months the spot is at its best (flowers, weather).
+  bestMonths     Int[]
+  // Entry fee per person in VND; 0 = free, null = unknown.
+  entryFeeVnd    Int?
+  // Photo-shoot fees, permits, what is and is not allowed.
+  feeNote        String?
+  permitRequired Boolean?
+  rulesNote      String?
+  crowdNote      String?
+  parkingNote    String?
+
+  operatingStatus PlaceOperatingStatus @default(OPEN)
+  statusNote      String?
+  // When an admin last confirmed the facts are still true.
+  lastVerifiedAt  DateTime?
+
+  reviewStatus   ModerationStatus @default(PENDING)
+  moderationNote String?
+  moderatedBy    String? // admin userId
+  moderatedAt    DateTime?
+
+  // Null once the proposer's account is deleted; the spot stays.
+  submittedById String?
+  coverMediaId  String? @unique
+  // Set when an admin merges a duplicate into another spot: the duplicate
+  // is soft-deleted and its address redirects there.
+  mergedIntoId  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  province    Province     @relation(fields: [provinceId], references: [id])
+  ward        Ward?        @relation(fields: [wardId], references: [id], onDelete: SetNull)
+  submittedBy User?        @relation("placeSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
+  coverMedia  PlaceMedia?  @relation("placeCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  mergedInto  Place?       @relation("placeMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
+  mergedFrom  Place[]      @relation("placeMerge")
+  media       PlaceMedia[] @relation("placeMedia")
+  albums      Album[]
+
+  @@unique([provinceId, slug])
+  @@index([reviewStatus, createdAt])
+  @@index([provinceId, reviewStatus])
+  @@index([latitude, longitude])
+  @@index([submittedById])
+  @@index([deletedAt])
+  @@map("places")
+}
+
+/// A photo of a spot, uploaded with a proposal or by an admin. Its own table
+/// rather than a ProfileMedia row because an admin seeding a spot has no
+/// provider profile to hang it on; the moderation columns mirror
+/// ProfileMedia's so the rules are the same (PENDING until a human approves,
+/// rights confirmed before upload - Điều 32 BLDS).
+model PlaceMedia {
+  id         String  @id @default(cuid())
+  placeId    String
+  uploaderId String?
+  url        String
+  publicId   String?
+  width      Int?
+  height     Int?
+  caption    String?
+  order      Int     @default(0)
+
+  moderationStatus  ModerationStatus @default(PENDING)
+  moderationNote    String?
+  moderatedBy       String?
+  moderatedAt       DateTime?
+  rightsConfirmedAt DateTime
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  place    Place  @relation("placeMedia", fields: [placeId], references: [id], onDelete: Cascade)
+  uploader User?  @relation("placeMediaUploader", fields: [uploaderId], references: [id], onDelete: SetNull)
+  coverOf  Place? @relation("placeCover")
+
+  @@index([placeId, order])
+  @@index([moderationStatus, createdAt])
+  @@index([uploaderId])
+  @@map("place_media")
 }
