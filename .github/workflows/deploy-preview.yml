@@ -34,3 +34,24 @@ jobs:
           echo "## Preview deployed" >> "$GITHUB_STEP_SUMMARY"
           echo "$url" >> "$GITHUB_STEP_SUMMARY"
           echo "::notice title=Preview URL::$url"
+
+          # Point the one fixed test address at THIS build. `vercel deploy`
+          # only returns a new per-deployment URL each time; nothing moved
+          # the address people bookmark, so it could keep serving an older
+          # build while every run here reported success (20/11/2026). The
+          # second name is tried if Vercel will not let the first be set by
+          # hand. A failure here is reported, not fatal: the build is still
+          # reachable at the URL above.
+          fixed=""
+          for name in fgrapher-git-preview-bao-he.vercel.app fgrapher-web-thu-bao-he.vercel.app; do
+            if npx vercel@latest alias set "$url" "$name" --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"; then
+              fixed="https://$name"
+              break
+            fi
+          done
+          if [ -n "$fixed" ]; then
+            echo "Fixed address: $fixed" >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice title=Fixed address now serves this build::$fixed"
+          else
+            echo "::warning title=Fixed address not updated::Could not point a fixed address at $url; use that URL directly."
+          fi
