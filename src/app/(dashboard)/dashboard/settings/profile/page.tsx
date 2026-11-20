@@ -54,7 +54,11 @@ export default async function ProfileSettingsPage({
   // the others are one click away, never hidden.
   return (
     <Accordion
-      defaultValue={section === "roleProfile" ? ["roleProfile"] : ["basics"]}
+      defaultValue={
+        section === "roleProfile" || section === "availability"
+          ? [section]
+          : ["basics"]
+      }
       className="flex flex-col"
     >
       <AccordionItem value="basics">
