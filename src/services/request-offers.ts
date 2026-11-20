@@ -9,6 +9,7 @@ import { getTranslations } from "next-intl/server";
 
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
+import { isUniqueViolation } from "@/lib/db-lock";
 import { wholeDayBlockedProviders } from "@/services/resource-calendar";
 import {
   requestNewOfferEmailHtml,
@@ -534,17 +535,30 @@ export async function createOffer(
           status: "PENDING",
         },
       })
-    : await db.requestOffer.create({
-        data: {
-          requestId,
-          providerId,
-          message: input.message,
-          proposedPrice: input.proposedPrice,
-          proposedDate: input.proposedDate
-            ? new Date(input.proposedDate)
-            : undefined,
-        },
-      });
+    : await db.requestOffer
+        .create({
+          data: {
+            requestId,
+            providerId,
+            message: input.message,
+            proposedPrice: input.proposedPrice,
+            proposedDate: input.proposedDate
+              ? new Date(input.proposedDate)
+              : undefined,
+          },
+        })
+        // A double press: both read "no offer yet", the database lets one
+        // in (one offer per provider per request). The other is the
+        // ordinary "already sent", not a server error.
+        .catch((error: unknown) => {
+          if (isUniqueViolation(error)) {
+            throw new OfferError(
+              "You've already sent an offer for this request",
+              400,
+            );
+          }
+          throw error;
+        });
 
   if (request.status === "OPEN") {
     await db.serviceRequest.update({
@@ -690,6 +704,56 @@ export async function acceptOffer(
     );
   }
 
+  // A request is filled by one offer. Nothing enforced that: this function
+  // only looked at the offer it was given, so choosing two offers at the
+  // same moment (two tabs, or two quick presses down the list) accepted
+  // both — two bookings with two providers, and each acceptance then marked
+  // the other offer "declined", so both providers were told they had lost a
+  // job they had also just been booked for.
+  //
+  // So the request is taken first, conditionally, and only whoever takes it
+  // goes on; then the offer itself, which also settles accept-vs-withdraw.
+  // Both are handed back if the booking cannot be made (slot just taken,
+  // too little notice…), so the customer can pick another time or offer.
+  const previousStatus = offer.request.status;
+  const requestClaim = await db.serviceRequest.updateMany({
+    where: { id: offer.requestId, status: { in: ["OPEN", "HAS_OFFERS"] } },
+    data: { status: "FULFILLED", fulfilledByOfferId: offerId },
+  });
+  if (requestClaim.count === 0) {
+    throw new OfferError("This request has already been filled or closed", 400);
+  }
+  const releaseClaims = async () => {
+    await db.requestOffer.updateMany({
+      where: { id: offerId, status: "ACCEPTED" },
+      data: { status: "PENDING" },
+    });
+    await db.serviceRequest.updateMany({
+      where: {
+        id: offer.requestId,
+        status: "FULFILLED",
+        fulfilledByOfferId: offerId,
+        bookingId: null,
+      },
+      data: { status: previousStatus, fulfilledByOfferId: null },
+    });
+    // The offer may have been withdrawn or declined while the request was
+    // held (that is why the claim failed); nothing reopened the request
+    // then, because it did not look open.
+    await reopenIfNoPendingOffers(offer.requestId);
+  };
+  const offerClaim = await db.requestOffer.updateMany({
+    where: { id: offerId, status: "PENDING" },
+    data: { status: "ACCEPTED" },
+  });
+  if (offerClaim.count === 0) {
+    await releaseClaims();
+    throw new OfferError(
+      "This offer is no longer available — it may have just been withdrawn or expired",
+      400,
+    );
+  }
+
   let booking;
   try {
     booking = await createBooking(customerId, {
@@ -713,6 +777,7 @@ export async function acceptOffer(
       trustedRecipientRole: offer.request.role,
     });
   } catch (err) {
+    await releaseClaims();
     if (err instanceof BookingActionError) {
       // Already translated: the booking's own reason (e.g. the slot was just
       // taken) is what the customer needs to read.
@@ -732,33 +797,25 @@ export async function acceptOffer(
     data: { totalPrice: offer.proposedPrice, currency: offer.currency },
   });
 
-  const [, declinedOffers] = await db.$transaction([
-    db.requestOffer.update({
-      where: { id: offerId },
-      data: { status: "ACCEPTED" },
-    }),
-    db.requestOffer.findMany({
-      where: {
-        requestId: offer.requestId,
-        status: "PENDING",
-        id: { not: offerId },
-      },
-      select: { id: true, providerId: true },
-    }),
-  ]);
+  const declinedOffers = await db.requestOffer.findMany({
+    where: {
+      requestId: offer.requestId,
+      status: "PENDING",
+      id: { not: offerId },
+    },
+    select: { id: true, providerId: true },
+  });
 
   await db.$transaction([
     db.requestOffer.updateMany({
-      where: { id: { in: declinedOffers.map((o) => o.id) } },
+      where: { id: { in: declinedOffers.map((o) => o.id) }, status: "PENDING" },
       data: { status: "DECLINED" },
     }),
-    db.serviceRequest.update({
-      where: { id: offer.requestId },
-      data: {
-        status: "FULFILLED",
-        fulfilledByOfferId: offerId,
-        bookingId: booking.id,
-      },
+    // Status and offer were set by the claim above; this only attaches the
+    // booking, and only to a request this acceptance still holds.
+    db.serviceRequest.updateMany({
+      where: { id: offer.requestId, fulfilledByOfferId: offerId },
+      data: { bookingId: booking.id },
     }),
   ]);
 

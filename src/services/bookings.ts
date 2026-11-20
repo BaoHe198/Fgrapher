@@ -41,6 +41,7 @@ import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
 import { bookingErrorKey } from "@/lib/errors/booking-messages";
+import { LOCKED_TRANSACTION, lockInTransaction } from "@/lib/db-lock";
 
 // Translation helper for the shared email templates in @/lib/email —
 // namespace "libServices.email". Request-triggered functions (called from a
@@ -667,6 +668,21 @@ export async function createBooking(
   }
 
   const booking = await db.$transaction(async (tx) => {
+    // The cap again, this time where it cannot be raced: the count above
+    // runs before anything is written, so eight requests sent together all
+    // read "none pending" and all eight went through (cap is five). One
+    // customer's creations now queue behind each other here.
+    await lockInTransaction(tx, `booking-cap:${customerId}`);
+    const pendingNow = await tx.booking.count({
+      where: { customerId, status: "PENDING" },
+    });
+    if (pendingNow >= MAX_PENDING_BOOKINGS_PER_USER) {
+      throw new BookingActionError(
+        `You already have ${MAX_PENDING_BOOKINGS_PER_USER} pending requests — wait for a response before sending more`,
+        400,
+      );
+    }
+
     // Race-condition guard: re-check for an overlapping PENDING/CONFIRMED
     // booking for this provider inside the transaction, right before
     // insert, so two customers racing for the same slot can't both win.
@@ -744,7 +760,7 @@ export async function createBooking(
     }
 
     return created;
-  });
+  }, LOCKED_TRANSACTION);
 
   const createEmailT = await getEmailT();
   const createNotifyT = await getNotifyT();
@@ -906,8 +922,16 @@ export async function transitionBooking({
   // the status change, so the hold and the status can never disagree.
   const releasesHold = toStatus !== "CONFIRMED";
   const updated = await db.$transaction(async (tx) => {
-    const row = await tx.booking.update({
-      where: { id: bookingId },
+    // Conditional on the status read above. Everything so far was decided
+    // from that read, and an unconditional update let two people both be
+    // right: the provider confirming and the customer cancelling in the
+    // same moment each got "OK", the history recorded PENDING→CANCELLED and
+    // PENDING→CONFIRMED, and the booking ended up confirmed with its slot
+    // released; three presses on "Xác nhận" told the customer three times.
+    // Whoever writes first wins; the other is refused like any other move
+    // the current status does not allow.
+    const claimed = await tx.booking.updateMany({
+      where: { id: bookingId, status: fromStatus },
       data: {
         status: toStatus,
         ...(toStatus === "CANCELLED"
@@ -916,6 +940,19 @@ export async function transitionBooking({
         ...(toStatus === "DECLINED" ? { cancelReason: note } : {}),
         ...(toStatus === "COMPLETED" ? { completedAt: new Date() } : {}),
       },
+    });
+    if (claimed.count === 0) {
+      const now = await tx.booking.findUnique({
+        where: { id: bookingId },
+        select: { status: true },
+      });
+      throw new BookingActionError(
+        `A ${now?.status ?? fromStatus} booking can't move to ${toStatus}`,
+        409,
+      );
+    }
+    const row = await tx.booking.findUniqueOrThrow({
+      where: { id: bookingId },
       include: BOOKING_INCLUDE,
     });
     await tx.bookingStatusHistory.create({
@@ -1358,8 +1395,19 @@ export async function respondToReschedule({
     // window clashed, the hold stayed put, the caller got "just taken", and
     // the booking had already been rewritten to the time it could not have.
     updated = await db.$transaction(async (tx) => {
-      const row = await tx.booking.update({
-        where: { id: bookingId },
+      // Answers the proposal that was read above, and only if it is still
+      // the one on the table. Unconditional, three presses on "Đồng ý" told
+      // the proposer three times; "Đồng ý" and "Từ chối" together moved the
+      // booking and reported it declined; and an answer to a proposal the
+      // other side had just replaced moved the booking to the old time.
+      const answered = await tx.booking.updateMany({
+        where: {
+          id: bookingId,
+          status: booking.status,
+          rescheduleProposedBy: booking.rescheduleProposedBy,
+          rescheduleProposedDate: booking.rescheduleProposedDate,
+          rescheduleProposedStartTime: booking.rescheduleProposedStartTime,
+        },
         data: moved
           ? {
               date: booking.rescheduleProposedDate!,
@@ -1372,6 +1420,12 @@ export async function respondToReschedule({
               ...clearedProposal,
             }
           : clearedProposal,
+      });
+      if (answered.count === 0) {
+        throw new BookingActionError("No pending reschedule proposal", 400);
+      }
+      const row = await tx.booking.findUniqueOrThrow({
+        where: { id: bookingId },
         include: BOOKING_INCLUDE,
       });
       if (moved) {
