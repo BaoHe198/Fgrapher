@@ -53,10 +53,15 @@ function DialogContent({
   return (
     <DialogPortal>
       <DialogOverlay />
+      {/* Never taller than the screen: a dialog whose content outgrows a
+          short phone (the album form once its "Chụp tại" field was added,
+          20/11/2026) scrolls inside instead of losing its top and its
+          buttons off the edges. A dialog that sets its own max-h or
+          overflow keeps it (tailwind-merge). */}
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card p-5 text-body-sm text-text-primary shadow-[var(--shadow-lg)] duration-[var(--fg-dur-260)] ease-fg-out outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-[0.98] data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-[0.98] data-closed:duration-[var(--fg-dur-200)] data-closed:ease-fg-in",
+          "fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] overflow-y-auto overscroll-contain -translate-x-1/2 -translate-y-1/2 gap-4 rounded-[var(--fg-radius-xl)] border border-border-subtle bg-surface-card p-5 text-body-sm text-text-primary shadow-[var(--shadow-lg)] duration-[var(--fg-dur-260)] ease-fg-out outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-[0.98] data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-[0.98] data-closed:duration-[var(--fg-dur-200)] data-closed:ease-fg-in",
           className,
         )}
         {...props}
