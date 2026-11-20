@@ -2272,7 +2272,7 @@
         "addEntry": "Add job",
         "addEntryLong": "Add a job",
         "markBusy": "Mark as busy",
-        "editBusy": "Edit busy time",
+        "editBusy": "View busy time",
         "sync": "Reminders",
         "kind": {
           "BOOKING": "Fgrapher",
