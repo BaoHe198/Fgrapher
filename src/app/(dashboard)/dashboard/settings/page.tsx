@@ -1,9 +1,17 @@
 import { redirect } from "next/navigation";
 
-// No index content of its own — the shared settings layout (layout.tsx)
-// already renders SettingsNav's full tab list on every settings page, so
-// a distinct landing page here would just duplicate that. Redirects to
-// the first tab, matching how tab-based settings UIs elsewhere land.
-export default function DashboardSettingsIndex() {
-  redirect("/dashboard/settings/profile");
+import { auth } from "@/lib/auth";
+
+// No index content of its own — the settings layout already shows every
+// tab. Lands on the first tab this account has: Account for anyone with a
+// provider or shop role (their profile lives in "Trang của tôi"), Profile
+// for a customer.
+export default async function DashboardSettingsIndex() {
+  const session = await auth();
+  const hasPlan = session?.user.roles.some(
+    (role) => role !== "CUSTOMER" && role !== "ADMIN",
+  );
+  redirect(
+    hasPlan ? "/dashboard/settings/account" : "/dashboard/settings/profile",
+  );
 }

@@ -79,10 +79,8 @@ test("provider registers, activates a role, builds a profile, and appears in sea
   expect(userRole.verificationStatus).not.toBe("VERIFIED");
 
   // --- Profile ---
-  await page.goto("/dashboard/settings/profile");
-  // Accordion: only "Basic information" starts open, and the collapsed
-  // "Role profile" panel's fields are not in the DOM until it opens.
-  await page.getByRole("button", { name: "Role profile" }).click();
+  // "My page → Details" (was Settings → Profile, behind an accordion).
+  await page.goto("/dashboard/my-page/info");
   await page.getByLabel("Display name").fill("Provider Persona Photography");
   await page
     .getByText("Description", { exact: true })
@@ -101,8 +99,8 @@ test("provider registers, activates a role, builds a profile, and appears in sea
   const ward = province.wards[0];
   expect(ward).toBeTruthy();
   await page.getByLabel("Main province").selectOption({ label: province.name });
-  // The open "Basic information" panel has its own Ward field; the role
-  // profile's comes after it.
+  // The account's own location fields come first on the page; the role
+  // profile's Ward comes after them.
   const wardSelect = page.getByLabel("Ward", { exact: true }).last();
   await expect(wardSelect.locator("option")).not.toHaveCount(1);
   await wardSelect.selectOption({ label: ward.name });
@@ -212,8 +210,7 @@ test("provider registers, activates a role, builds a profile, and appears in sea
   });
 
   // --- Goes live on its own: saving re-runs the real publish gate ---
-  await page.goto("/dashboard/settings/profile");
-  await page.getByRole("button", { name: "Role profile" }).click();
+  await page.goto("/dashboard/my-page/info");
   await expect(page.getByLabel("Display name")).toHaveValue(
     "Provider Persona Photography",
   );

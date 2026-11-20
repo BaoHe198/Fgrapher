@@ -167,9 +167,15 @@ interface ProfileDraft {
 export function ProfileSettingsForm({
   role,
   userId,
+  showServices = true,
 }: {
   role: Role;
   userId: string;
+  /**
+   * Off on "Trang của tôi → Thông tin", where service packages have a page
+   * of their own (/dashboard/services).
+   */
+  showServices?: boolean;
 }) {
   const t = useTranslations("dashboardSettings.profile.location");
   const tEditor = useTranslations("dashboardSettings.profile.editor");
@@ -477,6 +483,18 @@ export function ProfileSettingsForm({
     );
   };
 
+  useEffect(() => {
+    if (isLoading) return;
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    // Next frame: the sections render in the same commit that clears
+    // isLoading.
+    const frame = requestAnimationFrame(() =>
+      document.getElementById(id)?.scrollIntoView({ block: "start" }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [isLoading]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-10">
@@ -528,6 +546,10 @@ export function ProfileSettingsForm({
         </div>
       ) : null}
 
+      {/* Anchors for "Trang của tôi": #gioi-thieu, #khu-vuc, #chinh-sach,
+          #lien-ket. scroll-mt keeps each heading clear of the sticky site
+          header when a link lands on it. */}
+      <span id="gioi-thieu" aria-hidden className="block scroll-mt-28" />
       <Input
         label={tEditor("displayNameLabel")}
         value={values.displayName}
@@ -595,7 +617,10 @@ export function ProfileSettingsForm({
         />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5">
+      <div
+        id="khu-vuc"
+        className="flex scroll-mt-28 flex-col gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle p-3.5"
+      >
         <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
           {t("title")}
         </span>
@@ -736,7 +761,10 @@ export function ProfileSettingsForm({
       </div>
 
       {PROVIDER_ROLES.includes(role) ? (
-        <section className="flex flex-col gap-4 rounded-[var(--fg-radius-lg)] border border-border-subtle p-5">
+        <section
+          id="chinh-sach"
+          className="flex scroll-mt-28 flex-col gap-4 rounded-[var(--fg-radius-lg)] border border-border-subtle p-5"
+        >
           <div className="flex flex-col gap-1">
             <h3 className="text-heading-sm text-text-primary">
               {tPolicy("title")}
@@ -959,7 +987,7 @@ export function ProfileSettingsForm({
         />
       ) : null}
 
-      {PROVIDER_ROLES.includes(role) ? (
+      {showServices && PROVIDER_ROLES.includes(role) ? (
         profileId ? (
           <ServicesManager
             profileId={profileId}
@@ -979,7 +1007,10 @@ export function ProfileSettingsForm({
         )
       ) : null}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div
+        id="lien-ket"
+        className="grid scroll-mt-28 grid-cols-1 gap-3 sm:grid-cols-2"
+      >
         <Input
           label={tEditor("websiteLabel")}
           value={values.website}

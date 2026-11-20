@@ -23,7 +23,13 @@ export function SettingsNav() {
   // page about provider plans. Same rule as the sidebar's plan card.
   const { roles } = useUserRoles();
   const hasPlan = roles.some((role) => role !== "CUSTOMER" && role !== "ADMIN");
-  const tabs = TABS.filter((tab) => tab.key !== "billing" || hasPlan);
+  // Someone with a provider or shop role edits what customers see in
+  // "Trang của tôi"; Settings is about the account (project owner,
+  // 20/11/2026). A customer has no such page, so keeps the Profile tab.
+  const tabs = TABS.filter(
+    (tab) =>
+      (tab.key !== "billing" || hasPlan) && (tab.key !== "profile" || !hasPlan),
+  );
 
   return (
     // Scrollbar hidden like TabsList: on a phone these five tabs scroll by

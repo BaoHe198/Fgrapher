@@ -32,6 +32,21 @@ export default async function ProfileSettingsPage({
   // shop's outfit catalogue lives inside "roleProfile" and had no way in
   // other than knowing to expand it (QA-06).
   const { section } = await searchParams;
+
+  // A provider's or shop's profile moved to "Trang của tôi" (20/11/2026),
+  // and its working hours to the calendar. Old links, bookmarks and the
+  // hrefs stored in past notifications land in the right place; the
+  // browser carries a #fragment (e.g. #costumes) across the redirect.
+  if (
+    session.user.roles.some((role) => (PAID_ROLES as string[]).includes(role))
+  ) {
+    redirect(
+      section === "availability"
+        ? "/dashboard/calendar?hours=1"
+        : "/dashboard/my-page/info",
+    );
+  }
+
   const user = await db.user.findUniqueOrThrow({
     where: { id: session.user.id },
     include: { ward: { select: { provinceId: true } } },
