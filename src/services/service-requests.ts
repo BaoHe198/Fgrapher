@@ -1,4 +1,5 @@
 import type {
+  Prisma,
   ProfileCategory,
   Role,
   ServiceRequestStatus,
@@ -11,6 +12,7 @@ import { verifyReferenceMediaUpload } from "@/lib/media/cloudinary";
 import { features } from "@/lib/features";
 import { mediaKindFromUrl } from "@/lib/media/kind";
 import { db } from "@/lib/db";
+import { LOCKED_TRANSACTION, lockInTransaction } from "@/lib/db-lock";
 import {
   requestApprovedEmailHtml,
   requestNoOffersEmailHtml,
@@ -66,21 +68,42 @@ export class ServiceRequestReviewError extends Error {
   }
 }
 
-async function generateRequestCode() {
+// Callers hold the "service-request-code" lock (see createServiceRequest),
+// so the count read here cannot be someone else's count too. It used to be
+// "best effort, the caller retries on a collision" — and no caller did: two
+// customers posting in the same second were both handed the same number,
+// and the second one got a server error.
+async function generateRequestCode(tx: Prisma.TransactionClient) {
   const year = new Date().getFullYear();
-  // Best-effort sequential number, not a hard guarantee under concurrent
-  // creates — `code` is @unique, so a collision throws P2002 and the
-  // caller retries with the next count rather than silently duplicating.
   for (let attempt = 0; attempt < 5; attempt++) {
-    const count = await db.serviceRequest.count({
+    const count = await tx.serviceRequest.count({
       where: { code: { startsWith: `YC-${year}-` } },
     });
     const code = `YC-${year}-${String(count + 1 + attempt).padStart(5, "0")}`;
-    const existing = await db.serviceRequest.findUnique({ where: { code } });
+    const existing = await tx.serviceRequest.findUnique({ where: { code } });
     if (!existing) return code;
   }
   // Astronomically unlikely at this app's scale, but never loop forever.
   return `YC-${year}-${Date.now()}`;
+}
+
+async function assertUnderOpenRequestCap(
+  client: Prisma.TransactionClient | typeof db,
+  customerId: string,
+) {
+  const openCount = await client.serviceRequest.count({
+    where: {
+      customerId,
+      status: { in: ACTIVE_REQUEST_STATUSES },
+      isDraft: false,
+    },
+  });
+  if (openCount >= MAX_OPEN_REQUESTS_PER_CUSTOMER) {
+    throw new ServiceRequestError(
+      `You already have ${MAX_OPEN_REQUESTS_PER_CUSTOMER} open requests — wait for one to resolve before posting another`,
+      400,
+    );
+  }
 }
 
 export interface CreateServiceRequestInput {
@@ -123,19 +146,7 @@ export async function createServiceRequest(
       }
     }
 
-    const openCount = await db.serviceRequest.count({
-      where: {
-        customerId,
-        status: { in: ACTIVE_REQUEST_STATUSES },
-        isDraft: false,
-      },
-    });
-    if (openCount >= MAX_OPEN_REQUESTS_PER_CUSTOMER) {
-      throw new ServiceRequestError(
-        `You already have ${MAX_OPEN_REQUESTS_PER_CUSTOMER} open requests — wait for one to resolve before posting another`,
-        400,
-      );
-    }
+    await assertUnderOpenRequestCap(db, customerId);
   }
 
   for (const reference of input.references ?? []) {
@@ -148,47 +159,56 @@ export async function createServiceRequest(
     });
   }
 
-  const code = await generateRequestCode();
   const expiresAt = new Date(
     Date.now() + REQUEST_TTL_DAYS * 24 * 60 * 60 * 1000,
   );
 
-  const request = await db.serviceRequest.create({
-    data: {
-      code,
-      customerId,
-      title: input.title,
-      description: input.description,
-      role: input.role,
-      categories: input.categories,
-      shootDate: input.shootDate ? new Date(input.shootDate) : undefined,
-      isDateFlexible: input.isDateFlexible,
-      dateRangeStart: input.dateRangeStart
-        ? new Date(input.dateRangeStart)
-        : undefined,
-      dateRangeEnd: input.dateRangeEnd
-        ? new Date(input.dateRangeEnd)
-        : undefined,
-      provinceId: input.provinceId,
-      wardId: input.wardId,
-      areaNote: input.areaNote,
-      detailedAddress: input.detailedAddress,
-      budgetMin: input.budgetMin,
-      budgetMax: input.budgetMax,
-      status: input.isDraft ? "OPEN" : "PENDING_REVIEW",
-      isDraft: input.isDraft,
-      expiresAt,
-      references: input.references?.length
-        ? {
-            create: input.references.map((r) => ({
-              mediaUrl: r.mediaUrl,
-              publicId: r.publicId,
-            })),
-          }
-        : undefined,
-    },
-    include: { references: true },
-  });
+  const request = await db.$transaction(async (tx) => {
+    // The cap once more, behind a per-customer lock: checked only before
+    // the insert, a burst of requests all read "under the cap" together.
+    if (!input.isDraft) {
+      await lockInTransaction(tx, `request-cap:${customerId}`);
+      await assertUnderOpenRequestCap(tx, customerId);
+    }
+    await lockInTransaction(tx, "service-request-code");
+    const code = await generateRequestCode(tx);
+    return tx.serviceRequest.create({
+      data: {
+        code,
+        customerId,
+        title: input.title,
+        description: input.description,
+        role: input.role,
+        categories: input.categories,
+        shootDate: input.shootDate ? new Date(input.shootDate) : undefined,
+        isDateFlexible: input.isDateFlexible,
+        dateRangeStart: input.dateRangeStart
+          ? new Date(input.dateRangeStart)
+          : undefined,
+        dateRangeEnd: input.dateRangeEnd
+          ? new Date(input.dateRangeEnd)
+          : undefined,
+        provinceId: input.provinceId,
+        wardId: input.wardId,
+        areaNote: input.areaNote,
+        detailedAddress: input.detailedAddress,
+        budgetMin: input.budgetMin,
+        budgetMax: input.budgetMax,
+        status: input.isDraft ? "OPEN" : "PENDING_REVIEW",
+        isDraft: input.isDraft,
+        expiresAt,
+        references: input.references?.length
+          ? {
+              create: input.references.map((r) => ({
+                mediaUrl: r.mediaUrl,
+                publicId: r.publicId,
+              })),
+            }
+          : undefined,
+      },
+      include: { references: true },
+    });
+  }, LOCKED_TRANSACTION);
 
   // A submitted request stays private until reviewServiceRequest approves
   // it. Matching providers are notified at approval time, never here.
@@ -313,30 +333,22 @@ export async function publishDraftServiceRequest(
     }
   }
 
-  const openCount = await db.serviceRequest.count({
-    where: {
-      customerId,
-      status: { in: ACTIVE_REQUEST_STATUSES },
-      isDraft: false,
-    },
-  });
-  if (openCount >= MAX_OPEN_REQUESTS_PER_CUSTOMER) {
-    throw new ServiceRequestError(
-      `You already have ${MAX_OPEN_REQUESTS_PER_CUSTOMER} open requests — wait for one to resolve before posting another`,
-      400,
-    );
-  }
-
-  const published = await db.serviceRequest.update({
-    where: { id: requestId },
-    data: {
-      isDraft: false,
-      status: "PENDING_REVIEW",
-      moderationReason: null,
-      moderatedAt: null,
-    },
-    include: { references: true },
-  });
+  // Same cap, same lock as createServiceRequest: publishing several drafts
+  // at once is the other way past it.
+  const published = await db.$transaction(async (tx) => {
+    await lockInTransaction(tx, `request-cap:${customerId}`);
+    await assertUnderOpenRequestCap(tx, customerId);
+    return tx.serviceRequest.update({
+      where: { id: requestId },
+      data: {
+        isDraft: false,
+        status: "PENDING_REVIEW",
+        moderationReason: null,
+        moderatedAt: null,
+      },
+      include: { references: true },
+    });
+  }, LOCKED_TRANSACTION);
 
   return published;
 }
@@ -620,16 +632,24 @@ export async function cancelServiceRequest(
     select: { providerId: true },
   });
 
-  await db.$transaction([
-    db.serviceRequest.update({
-      where: { id: requestId },
+  // Cancelled only if it is still open at this instant. The customer
+  // choosing an offer in another tab takes the request first (acceptOffer);
+  // an unconditional write here then answered "đã hủy", told the providers
+  // the request was withdrawn, and was overwritten a moment later by the
+  // acceptance — a cancelled request with a live booking.
+  await db.$transaction(async (tx) => {
+    const cancelled = await tx.serviceRequest.updateMany({
+      where: { id: requestId, status: { in: ACTIVE_REQUEST_STATUSES } },
       data: { status: "CANCELLED" },
-    }),
-    db.requestOffer.updateMany({
+    });
+    if (cancelled.count === 0) {
+      throw new ServiceRequestError("This request can't be cancelled", 400);
+    }
+    await tx.requestOffer.updateMany({
       where: { requestId, status: "PENDING" },
       data: { status: "DECLINED" },
-    }),
-  ]);
+    });
+  });
 
   await notifyOfferersOfClosure(
     request,

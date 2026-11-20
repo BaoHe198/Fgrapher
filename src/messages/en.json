@@ -1333,7 +1333,8 @@
       "tooManyOpen": "You already have 3 open requests — wait for one to finish before posting another.",
       "unknown": "Couldn't complete that, please try again.",
       "dateMissing": "Choose a shoot date, or mark the date as flexible.",
-      "datePast": "The shoot date has already passed — choose today or a later day."
+      "datePast": "The shoot date has already passed — choose today or a later day.",
+      "requestFilled": "This request has already been filled or closed, so no other offer can be chosen."
     },
     "bookingErrors": {
       "notFound": "Booking not found.",
@@ -1545,7 +1546,8 @@
       "serviceRequestNotFound": "Request not found",
       "serviceRequestAlreadyReviewed": "This request has already been reviewed",
       "serviceRequestReviewFailed": "Couldn't review the request",
-      "documentNotOnFile": "This document is not on file: it was never submitted, or it was deleted when its retention period ended."
+      "documentNotOnFile": "This document is not on file: it was never submitted, or it was deleted when its retention period ended.",
+      "verificationNotPending": "This verification is no longer waiting for a decision — another admin may have just handled it. Reload to see the outcome."
     },
     "auth": {
       "invalidInput": "Invalid input",
@@ -4773,7 +4775,16 @@
       "metaTitle": "Contact — Fgrapher",
       "metaDescription": "Questions about booking, provider profiles, or a bug on Fgrapher? Message our support team and we'll get back to you as soon as possible.",
       "title": "Contact us",
-      "subtitle": "Have a question or found a bug? Send us a message."
+      "subtitle": "Have a question or found a bug? Send us a message.",
+      "form": {
+        "name": "Full name",
+        "email": "Email",
+        "message": "Message",
+        "submit": "Send message",
+        "sentTitle": "Message sent",
+        "sentBody": "We will get back to you as soon as we can.",
+        "failed": "Something went wrong. Please try again."
+      }
     },
     "help": {
       "metaTitle": "Help center — Fgrapher",

@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { isUniqueViolation } from "@/lib/db-lock";
 import { publicPhotoWhere } from "@/services/search";
 
 // "Bảng ý tưởng" (owner, 16/11/2026): single photos a signed-in visitor
@@ -32,10 +33,20 @@ export async function pinPhoto(userId: string, mediaId: string) {
   if (count >= MOODBOARD_LIMIT) {
     throw new MoodboardFullError("Board is full");
   }
-  return db.savedMedia.create({
-    data: { userId, mediaId },
-    select: { id: true },
-  });
+  return db.savedMedia
+    .create({
+      data: { userId, mediaId },
+      select: { id: true },
+    })
+    .catch(async (error: unknown) => {
+      // Pinned twice at once: the other request got there first, so the pin
+      // exists — return it as the look-up above would have.
+      if (!isUniqueViolation(error)) throw error;
+      return db.savedMedia.findUniqueOrThrow({
+        where: { userId_mediaId: { userId, mediaId } },
+        select: { id: true },
+      });
+    });
 }
 
 export async function unpinPhoto(userId: string, mediaId: string) {

@@ -12,7 +12,7 @@ export async function ClosingCta() {
     <section className="mx-auto max-w-[1440px] px-8 py-20 max-md:px-5 max-md:py-10">
       <div className="flex items-end justify-between gap-8 rounded-[var(--fg-radius-xl)] bg-green-900 p-10 text-gold-50 max-md:hidden max-lg:flex-col max-lg:items-start">
         <div className="flex max-w-xl flex-col gap-3">
-          <span className="font-mono text-meta tracking-[0.12em] text-gold-400 uppercase">
+          <span className="font-mono text-meta tracking-[0.12em] text-gold-300 uppercase">
             {t("provider.eyebrow")}
           </span>
           <h2 className="text-display-md">{t("ctaTitle")}</h2>
@@ -30,7 +30,7 @@ export async function ClosingCta() {
       </div>
 
       <div className="flex flex-col gap-3 rounded-[var(--fg-radius-lg)] bg-green-900 p-5 text-gold-50 md:hidden">
-        <span className="font-mono text-meta tracking-[0.12em] text-gold-400 uppercase">
+        <span className="font-mono text-meta tracking-[0.12em] text-gold-300 uppercase">
           {t("request.eyebrow")}
         </span>
         <h2 className="text-heading-lg">{t("request.title")}</h2>

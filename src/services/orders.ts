@@ -268,12 +268,35 @@ async function createOrdersForCart(
         },
       });
 
+      // The cart lines become this order here, in the same transaction: a
+      // second "Đặt hàng" arriving meanwhile (a double press, two tabs) read
+      // the same cart and used to place the same order again. Whoever
+      // removes the lines owns them; the other finds them gone and stops.
+      const taken = await tx.cartItem.deleteMany({
+        where: { id: { in: items.map((item) => item.id) }, userId },
+      });
+      if (taken.count !== items.length) {
+        throw new OrderError("Your cart is empty", 400, "cartEmpty");
+      }
+
+      // Stock is taken only if it is still there. The check before this
+      // transaction is a courtesy for the common case; decided on that read
+      // alone, two buyers of the last item both got an order and the stock
+      // went to -1.
       for (const item of items) {
         if (item.type === "SALE") {
-          await tx.product.update({
-            where: { id: item.productId },
+          const sold = await tx.product.updateMany({
+            where: { id: item.productId, stock: { gte: item.quantity } },
             data: { stock: { decrement: item.quantity } },
           });
+          if (sold.count === 0) {
+            throw new OrderError(
+              `${item.product.name} is out of stock`,
+              409,
+              "outOfStock",
+              { name: item.product.name },
+            );
+          }
         }
       }
 
@@ -343,8 +366,9 @@ async function createOrdersForCart(
     }
   }
 
-  await db.cartItem.deleteMany({ where: { userId } });
-
+  // Nothing to clear here: each order removed its own cart lines in its
+  // transaction. Emptying the whole cart at this point also threw away
+  // anything added in another tab while the order was being placed.
   return orders;
 }
 

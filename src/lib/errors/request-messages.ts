@@ -16,6 +16,7 @@ export const REQUEST_ERROR_KEYS: Record<string, string> = {
   "You've already sent an offer for this request": "alreadyOffered",
   "You must be a verified provider to send offers": "mustBeVerified",
   "This request is no longer accepting offers": "noLongerAccepting",
+  "This request has already been filled or closed": "requestFilled",
   "This request can't be cancelled": "cannotCancel",
   "This offer is no longer available — it may have just been withdrawn or expired":
     "offerGone",

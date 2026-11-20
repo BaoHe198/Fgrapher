@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { isUniqueViolation } from "@/lib/db-lock";
 import { features } from "@/lib/features";
 
 const followSchema = z.object({ userId: z.string().min(1) });
@@ -39,16 +40,25 @@ export async function POST(request: Request) {
       );
     }
 
-    await db.follow.upsert({
-      where: {
-        followerId_followingId: {
+    await db.follow
+      .upsert({
+        where: {
+          followerId_followingId: {
+            followerId: session.user.id,
+            followingId: parsed.data.userId,
+          },
+        },
+        create: {
           followerId: session.user.id,
           followingId: parsed.data.userId,
         },
-      },
-      create: { followerId: session.user.id, followingId: parsed.data.userId },
-      update: {},
-    });
+        update: {},
+      })
+      // Two presses at once: both saw no row, one insert won. The row the
+      // loser wanted is there, which is all this call promises.
+      .catch((error: unknown) => {
+        if (!isUniqueViolation(error)) throw error;
+      });
 
     return NextResponse.json(
       { data: null, error: null, message: t("followed") },

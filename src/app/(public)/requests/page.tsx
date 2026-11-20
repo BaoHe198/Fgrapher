@@ -137,7 +137,7 @@ export default async function RequestsPage() {
                 key={n}
                 className="flex flex-col gap-2 border-t border-border-default pt-4"
               >
-                <span className="text-body-sm font-semibold text-gold-700 dark:text-gold-400">
+                <span className="text-body-sm font-semibold text-gold-700 dark:text-gold-300">
                   {n} · {t(`steps.s${n}tag`)}
                 </span>
                 <strong className="text-heading-sm text-text-primary">

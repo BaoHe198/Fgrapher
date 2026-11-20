@@ -303,7 +303,7 @@ export function ShareClient({
                     key={step}
                     className="flex gap-2 rounded-[var(--fg-radius-md)] bg-bg-sunken px-3 py-2.5"
                   >
-                    <span className="font-semibold! text-gold-700 tabular-nums dark:text-gold-400">
+                    <span className="font-semibold! text-gold-700 tabular-nums dark:text-gold-300">
                       {index + 1}
                     </span>
                     {t(`link.flow.${step}`)}
@@ -461,13 +461,13 @@ export function ShareClient({
                 {t("qr.title")}
               </h2>
               <div className="w-full rounded-[var(--fg-radius-lg)] bg-green-900 p-5 text-center">
-                <p className="text-meta font-semibold! tracking-[0.14em] text-gold-400 uppercase">
+                <p className="text-meta font-semibold! tracking-[0.14em] text-gold-300 uppercase">
                   Fgrapher
                 </p>
                 <p className="mt-1 truncate font-display text-heading-lg text-gold-50">
                   {displayName}
                 </p>
-                <p className="truncate text-meta text-gold-400">
+                <p className="truncate text-meta text-gold-300">
                   {[roleLabel, place].filter(Boolean).join(" · ")}
                 </p>
                 <div className="mx-auto mt-4 aspect-square w-full max-w-[220px] rounded-[var(--fg-radius-md)] bg-white p-3">

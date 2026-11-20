@@ -1,9 +1,10 @@
-import type { Role } from "@prisma/client";
+import type { Role, RoleChangeRequest } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
 import { revalidatePublicProfile } from "@/lib/cache";
 import { bookingEmailShell } from "@/lib/email";
 import { db } from "@/lib/db";
+import { LOCKED_TRANSACTION, lockInTransaction } from "@/lib/db-lock";
 import { PAID_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { assignFreePlan } from "@/services/subscription";
@@ -54,17 +55,22 @@ export async function createRoleChangeRequest(
     throw new RoleChangeRequestError("same_role");
   }
 
-  const existingPending = await db.roleChangeRequest.findFirst({
-    where: { userId, status: "PENDING" },
-    select: { id: true },
-  });
-  if (existingPending) {
-    throw new RoleChangeRequestError("already_pending");
-  }
+  // "One pending request per account" checked and written as one step — a
+  // double press on "Gửi yêu cầu" otherwise left two for the admin queue.
+  return db.$transaction(async (tx) => {
+    await lockInTransaction(tx, `role-change:${userId}`);
+    const existingPending = await tx.roleChangeRequest.findFirst({
+      where: { userId, status: "PENDING" },
+      select: { id: true },
+    });
+    if (existingPending) {
+      throw new RoleChangeRequestError("already_pending");
+    }
 
-  return db.roleChangeRequest.create({
-    data: { userId, fromRole: currentRole.role, toRole, reason },
-  });
+    return tx.roleChangeRequest.create({
+      data: { userId, fromRole: currentRole.role, toRole, reason },
+    });
+  }, LOCKED_TRANSACTION);
 }
 
 export function getPendingRoleChangeRequest(userId: string) {
@@ -110,6 +116,54 @@ export async function reviewRoleChangeRequest({
     throw new RoleChangeRequestError("already_reviewed");
   }
 
+  // Take the request before doing anything with it. Approving is several
+  // steps (identity documents, stale offers, the role swap), and two admins
+  // on the queue at once both passed the check above: the second approval
+  // died half-way with a server error, and an approval racing a rejection
+  // would have deleted documents and withdrawn offers for a request that
+  // ended up rejected. The claim is the reviewer's name on a still-pending
+  // row; it is given back if the work fails, and one left behind by a
+  // crashed request stops counting after two minutes.
+  const claim = await db.roleChangeRequest.updateMany({
+    where: {
+      id: requestId,
+      status: "PENDING",
+      OR: [
+        { reviewedBy: null },
+        { reviewedAt: { lt: new Date(Date.now() - REVIEW_CLAIM_MS) } },
+      ],
+    },
+    data: { reviewedBy: adminId, reviewedAt: new Date() },
+  });
+  if (claim.count === 0) {
+    throw new RoleChangeRequestError("already_reviewed");
+  }
+
+  try {
+    return await applyRoleChangeReview({ request, adminId, approve, reason });
+  } catch (error) {
+    await db.roleChangeRequest.updateMany({
+      where: { id: requestId, status: "PENDING", reviewedBy: adminId },
+      data: { reviewedBy: null, reviewedAt: null },
+    });
+    throw error;
+  }
+}
+
+const REVIEW_CLAIM_MS = 2 * 60 * 1000;
+
+async function applyRoleChangeReview({
+  request,
+  adminId,
+  approve,
+  reason,
+}: {
+  request: RoleChangeRequest;
+  adminId: string;
+  approve: boolean;
+  reason?: string;
+}) {
+  const requestId = request.id;
   const [roleT, emailT] = await Promise.all([
     getTranslations("role"),
     getTranslations("libServices.email"),

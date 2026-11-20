@@ -5,6 +5,7 @@ import {
   revalidateProfileUsername,
 } from "@/lib/cache";
 import { db } from "@/lib/db";
+import { LOCKED_TRANSACTION, lockInTransaction } from "@/lib/db-lock";
 
 interface RequestMeta {
   ipAddress?: string;
@@ -236,10 +237,28 @@ export async function requestDataExport(userId: string) {
   });
 }
 
+/**
+ * The account's open deletion request, creating it if there is none.
+ * `created` says which. Look-up and insert are one step: the route used to
+ * look first and insert after, and two presses on "Yêu cầu xóa tài khoản"
+ * filed two requests for an admin to process.
+ */
 export async function requestDeletion(userId: string) {
-  return db.dataRequest.create({
-    data: { userId, type: "DELETION", status: "PENDING" },
-  });
+  return db.$transaction(async (tx) => {
+    await lockInTransaction(tx, `deletion-request:${userId}`);
+    const pending = await tx.dataRequest.findFirst({
+      where: {
+        userId,
+        type: "DELETION",
+        status: { in: ["PENDING", "PROCESSING"] },
+      },
+    });
+    if (pending) return { request: pending, created: false };
+    const request = await tx.dataRequest.create({
+      data: { userId, type: "DELETION", status: "PENDING" },
+    });
+    return { request, created: true };
+  }, LOCKED_TRANSACTION);
 }
 
 const DELETED_USER_LABEL = "Người dùng đã xóa";

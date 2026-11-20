@@ -76,7 +76,7 @@ export function TimeSlotGrid({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-meta text-text-tertiary">{timezoneLabel}</span>
         {anyGolden ? (
-          <span className="flex items-center gap-1.5 text-meta text-gold-700 dark:text-gold-400">
+          <span className="flex items-center gap-1.5 text-meta text-gold-700 dark:text-gold-300">
             <SunIcon aria-hidden className="size-3.5" />
             {t("goldenLegend")}
           </span>
@@ -155,7 +155,7 @@ export function TimeSlotGrid({
                             isSelected
                               ? "text-text-on-brand"
                               : slot.status === "available" && slot.golden
-                                ? "text-gold-700 dark:text-gold-400"
+                                ? "text-gold-700 dark:text-gold-300"
                                 : undefined,
                           )}
                         >

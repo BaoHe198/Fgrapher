@@ -6,6 +6,11 @@ import { MESSAGES_PAGE_SIZE } from "@/hooks/polling-policy";
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
 import {
+  isUniqueViolation,
+  LOCKED_TRANSACTION,
+  lockInTransaction,
+} from "@/lib/db-lock";
+import {
   UploadVerificationError,
   verifyPurposeImageUpload,
 } from "@/lib/media/cloudinary";
@@ -160,15 +165,33 @@ export async function getOrCreateConversation(
 
   if (existing) return existing.conversationId;
 
-  const conversation = await db.conversation.create({
-    data: {
-      participants: {
-        createMany: { data: [{ userId }, { userId: otherUserId }] },
+  // Nothing in the schema says "one conversation per pair", so the look-up
+  // and the insert have to happen as one step: both people pressing "Nhắn
+  // tin" on each other at the same moment (or one person pressing twice)
+  // each found nothing and each created one, and the two halves of the chat
+  // then lived in different threads. The pair's key is the same whichever
+  // side asks.
+  const pairKey = [userId, otherUserId].sort().join(":");
+  return db.$transaction(async (tx) => {
+    await lockInTransaction(tx, `conversation:${pairKey}`);
+    const again = await tx.conversationParticipant.findFirst({
+      where: {
+        userId,
+        conversation: { participants: { some: { userId: otherUserId } } },
       },
-    },
-  });
+      select: { conversationId: true },
+    });
+    if (again) return again.conversationId;
 
-  return conversation.id;
+    const conversation = await tx.conversation.create({
+      data: {
+        participants: {
+          createMany: { data: [{ userId }, { userId: otherUserId }] },
+        },
+      },
+    });
+    return conversation.id;
+  }, LOCKED_TRANSACTION);
 }
 
 async function requireParticipant(conversationId: string, userId: string) {
@@ -393,11 +416,17 @@ export async function blockUser(
 ) {
   if (blockerId === blockedId)
     throw new MessagingError("You can't block yourself", 400);
-  await db.blockedUser.upsert({
-    where: { blockerId_blockedId: { blockerId, blockedId } },
-    create: { blockerId, blockedId, reason },
-    update: { reason },
-  });
+  await db.blockedUser
+    .upsert({
+      where: { blockerId_blockedId: { blockerId, blockedId } },
+      create: { blockerId, blockedId, reason },
+      update: { reason },
+    })
+    // A double press: the other request inserted the row first. The person
+    // is blocked, which is what was asked for.
+    .catch((error: unknown) => {
+      if (!isUniqueViolation(error)) throw error;
+    });
 }
 
 export async function unblockUser(blockerId: string, blockedId: string) {

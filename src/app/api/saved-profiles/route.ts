@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { isUniqueViolation } from "@/lib/db-lock";
 import { omitPrivateProfileFields } from "@/lib/privacy/profile-privacy";
 
 const saveSchema = z.object({ profileId: z.string().min(1) });
@@ -79,16 +80,22 @@ export async function POST(request: Request) {
       );
     }
 
-    await db.savedProfile.upsert({
-      where: {
-        userId_profileId: {
-          userId: session.user.id,
-          profileId: parsed.data.profileId,
+    await db.savedProfile
+      .upsert({
+        where: {
+          userId_profileId: {
+            userId: session.user.id,
+            profileId: parsed.data.profileId,
+          },
         },
-      },
-      create: { userId: session.user.id, profileId: parsed.data.profileId },
-      update: {},
-    });
+        create: { userId: session.user.id, profileId: parsed.data.profileId },
+        update: {},
+      })
+      // Two presses at once: both saw no row, one insert won. The row the
+      // loser wanted is there, which is all this call promises.
+      .catch((error: unknown) => {
+        if (!isUniqueViolation(error)) throw error;
+      });
 
     return NextResponse.json(
       { data: null, error: null, message: "Saved" },

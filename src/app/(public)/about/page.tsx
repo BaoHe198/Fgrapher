@@ -343,7 +343,7 @@ function PathCard({
       <ol className="flex flex-col gap-5">
         {steps.map((step) => (
           <li key={step.label} className="grid grid-cols-[3rem_1fr] gap-x-3">
-            <span className="pt-0.5 font-mono text-meta tracking-[0.12em] text-gold-600 dark:text-gold-400">
+            <span className="pt-0.5 font-mono text-meta tracking-[0.12em] text-gold-600 dark:text-gold-300">
               {step.label}
             </span>
             <div className="flex flex-col gap-1">
