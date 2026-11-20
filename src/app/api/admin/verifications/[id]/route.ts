@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { logAdminAction, requireAdmin } from "@/lib/admin";
 import { AuthError } from "@/lib/auth-helpers";
 import { reviewVerificationSchema } from "@/lib/validations/admin";
-import { reviewVerification } from "@/services/admin";
+import { reviewVerification, VerificationReviewError } from "@/services/admin";
 
 export async function PATCH(
   request: Request,
@@ -47,6 +47,16 @@ export async function PATCH(
       return NextResponse.json(
         { data: null, error: "unauthorized", message: err.message },
         { status: err.status },
+      );
+    }
+    if (err instanceof VerificationReviewError) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "not_pending",
+          message: t("verificationNotPending"),
+        },
+        { status: 409 },
       );
     }
 

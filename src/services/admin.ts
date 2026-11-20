@@ -521,6 +521,9 @@ export async function listPendingVerifications() {
   );
 }
 
+/** The submission is not (or no longer) waiting for a decision. */
+export class VerificationReviewError extends Error {}
+
 export async function reviewVerification({
   userRoleId,
   adminId,
@@ -532,8 +535,14 @@ export async function reviewVerification({
   approve: boolean;
   reason?: string;
 }) {
-  const userRole = await db.userRole.update({
-    where: { id: userRoleId },
+  // Only a submission that is waiting can be decided, and only once. This
+  // was an unconditional update: two admins on the queue, one approving and
+  // one rejecting, were both told "đã cập nhật" and the provider received
+  // "Giấy tờ chưa được chấp nhận" and "Danh tính đã được xác minh" a second
+  // apart. It also let a decision land on a role that had never submitted
+  // anything, or overturn one already made, with no trace of the first.
+  const decided = await db.userRole.updateMany({
+    where: { id: userRoleId, verificationStatus: "PENDING" },
     data: approve
       ? {
           verificationStatus: "VERIFIED",
@@ -553,6 +562,12 @@ export async function reviewVerification({
           // auto-delete after 90 days regardless of outcome).
           purgeAfter: new Date(Date.now() + KYC_PURGE_AFTER_DAYS * 86_400_000),
         },
+  });
+  if (decided.count === 0) {
+    throw new VerificationReviewError("not_pending");
+  }
+  const userRole = await db.userRole.findUniqueOrThrow({
+    where: { id: userRoleId },
   });
 
   // Verification is one of several gates a profile needs to auto-publish
@@ -1343,7 +1358,7 @@ export async function moderateMedia({
   // Fetched before the update so the owning provider (and, for grouping
   // the approve notification below, the album + role) is known —
   // updateMany itself returns no rows.
-  const rows = await db.profileMedia.findMany({
+  const requested = await db.profileMedia.findMany({
     where: { id: { in: mediaIds } },
     select: {
       id: true,
@@ -1352,15 +1367,34 @@ export async function moderateMedia({
     },
   });
 
-  await db.profileMedia.updateMany({
-    where: { id: { in: mediaIds } },
-    data: {
-      moderationStatus: status,
-      moderationNote: action === "reject" ? reason : null,
-      moderatedBy: adminId,
-      moderatedAt: new Date(),
-    },
-  });
+  // Only photos this decision actually changes. Two admins working the same
+  // queue both approved the same batch, and the provider was told twice
+  // (and the audit log recorded two approvals of one photo). A photo
+  // already in the requested state is left alone and nobody is notified
+  // about it again; moving an approved photo to rejected, or back, still
+  // works as before.
+  // One conditional UPDATE per photo, so the database decides which request
+  // changed it (a batch update cannot say which rows it touched, and reading
+  // them back afterwards is the same race again).
+  const moderatedAt = new Date();
+  const changedIds = new Set<string>();
+  await Promise.all(
+    requested.map(async (row) => {
+      const result = await db.profileMedia.updateMany({
+        where: { id: row.id, moderationStatus: { not: status } },
+        data: {
+          moderationStatus: status,
+          moderationNote: action === "reject" ? reason : null,
+          moderatedBy: adminId,
+          moderatedAt,
+        },
+      });
+      if (result.count > 0) changedIds.add(row.id);
+    }),
+  );
+  const rows = requested.filter((row) => changedIds.has(row.id));
+  mediaIds = rows.map((row) => row.id);
+  if (mediaIds.length === 0) return 0;
 
   await Promise.all(
     mediaIds.map((mediaId) =>
