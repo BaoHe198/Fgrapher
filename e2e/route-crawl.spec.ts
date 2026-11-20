@@ -85,13 +85,31 @@ test("PHOTOGRAPHER: every sidebar/header/footer link resolves, including provide
 
   await page.goto("/dashboard");
   const dashboardLinks = await collectInternalLinks(page);
-  // Calendar and reviews only render for canReceiveBookings roles — assert
-  // they're actually present, not just that whatever's there is valid.
+  // The provider menu (lib/dashboard-nav.ts): the job first, then "More
+  // tools" — assert they're actually present, not just that whatever's
+  // there is valid.
   expect(dashboardLinks).toContain("/dashboard/calendar");
-  expect(dashboardLinks).toContain("/dashboard/reviews");
-  expect(dashboardLinks).toContain("/dashboard/portfolio");
-
+  expect(dashboardLinks).toContain("/dashboard/opportunities");
+  expect(dashboardLinks).toContain("/dashboard/my-page");
+  expect(dashboardLinks).toContain("/dashboard/more");
   await assertNoBrokenLinks(page, dashboardLinks);
+
+  // "My page" is where portfolio, packages, reviews and the share link
+  // now live.
+  await page.goto("/dashboard/my-page");
+  const myPageLinks = await collectInternalLinks(page);
+  for (const href of [
+    "/dashboard/portfolio",
+    "/dashboard/services",
+    "/dashboard/reviews",
+    "/dashboard/share",
+  ]) {
+    expect(myPageLinks).toContain(href);
+  }
+  await assertNoBrokenLinks(page, myPageLinks);
+
+  await page.goto("/dashboard/more");
+  await assertNoBrokenLinks(page, await collectInternalLinks(page));
 });
 
 test("MODEL: every sidebar/header/footer link resolves", async ({ page }) => {

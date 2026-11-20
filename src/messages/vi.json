@@ -2366,7 +2366,10 @@
           "failed": "Chưa thực hiện được, vui lòng thử lại",
           "cancel": "Hủy",
           "created": "Đã tạo địa chỉ đồng bộ"
-        }
+        },
+        "hoursButton": "Giờ nhận khách",
+        "hoursTitle": "Giờ nhận khách",
+        "hoursDescription": "Khách chỉ đặt được trong những giờ này. Ngày nào bận việc riêng, đánh dấu bận ngay trên lịch."
       }
     },
     "bookingDetail": {
@@ -2990,6 +2993,131 @@
         "rating": "★ {rating} ({count} đánh giá)",
         "verified": "Đã xác minh danh tính",
         "cta": "Xem lịch trống, bảng giá và đặt lịch trên Fgrapher"
+      }
+    },
+    "myPage": {
+      "metaTitle": "Trang của tôi — Fgrapher",
+      "title": "Trang của tôi",
+      "lede": "Mọi thứ khách thấy khi mở trang của bạn. Đã xong {done}/{total} phần.",
+      "published": "Khách đang thấy trang của bạn trong tìm kiếm và trên Bản đồ F.",
+      "viewAsCustomer": "Xem như khách thấy",
+      "notPublished": "Trang của bạn chưa hiển thị với khách. Còn thiếu:",
+      "notPublishedPlan": "Mọi phần cần thiết đã đủ. Nếu trang vẫn chưa hiện, kiểm tra gói của bạn trong Cài đặt → Thanh toán.",
+      "blockers": {
+        "verify": "Xác minh danh tính",
+        "photo": "Ít nhất 1 ảnh portfolio được duyệt",
+        "categories": "Chọn danh mục sở trường",
+        "address": "Địa chỉ đầy đủ (tỉnh/thành, phường/xã, địa chỉ chi tiết)",
+        "costumePhoto": "Ít nhất 1 ảnh trang phục được duyệt"
+      },
+      "state": {
+        "done": "Xong",
+        "todo": "Còn thiếu",
+        "waiting": "Đang chờ"
+      },
+      "cards": {
+        "verify": {
+          "title": "Xác minh danh tính",
+          "verified": "Đã xác minh — khách thấy dấu \"Đã xác minh\" trên trang của bạn.",
+          "pending": "Fgrapher đang duyệt giấy tờ của bạn.",
+          "unverified": "Bắt buộc trước khi trang được hiển thị.",
+          "rejected": "Giấy tờ chưa được chấp nhận — xem lý do và gửi lại."
+        },
+        "portfolio": {
+          "title": "Portfolio",
+          "ready": "{approved} ảnh đã duyệt.",
+          "someWaiting": "{approved} ảnh đã duyệt · {pending} ảnh đang chờ duyệt.",
+          "allWaiting": "{pending} ảnh đang chờ duyệt — trang hiện khi có ảnh đầu tiên được duyệt.",
+          "empty": "Chưa có ảnh nào. Tạo album đầu tiên."
+        },
+        "services": {
+          "title": "Gói dịch vụ",
+          "count": "{count, plural, other {# gói đang nhận đặt}}",
+          "empty": "Chưa có gói nào — khách cần một gói để đặt lịch."
+        },
+        "info": {
+          "title": "Ảnh, tên & giới thiệu",
+          "complete": "Đủ ảnh đại diện, ảnh bìa, tên, danh mục và giới thiệu.",
+          "displayName": "Chưa có tên hiển thị.",
+          "avatar": "Chưa có ảnh đại diện.",
+          "cover": "Chưa có ảnh bìa.",
+          "categories": "Chưa chọn danh mục sở trường.",
+          "description": "Chưa có lời giới thiệu."
+        },
+        "costumes": {
+          "title": "Trang phục cho thuê",
+          "count": "{count, plural, other {# bộ đang cho thuê}}",
+          "empty": "Chưa có bộ nào."
+        },
+        "area": {
+          "title": "Khu vực & địa chỉ",
+          "ready": "Đã có địa chỉ và vị trí trên Bản đồ F.",
+          "notOnMap": "Có địa chỉ nhưng chưa có vị trí trên Bản đồ F — chọn địa chỉ từ gợi ý.",
+          "missing": "Chưa đủ tỉnh/thành, phường/xã và địa chỉ chi tiết."
+        },
+        "policies": {
+          "title": "Chính sách cọc & hủy",
+          "ready": "Khách thấy rõ đặt cọc và hủy lịch thế nào.",
+          "missing": "Chưa ghi chính sách đặt cọc và hủy lịch."
+        },
+        "hours": {
+          "title": "Giờ nhận khách",
+          "ready": "Khách đặt được trong giờ bạn đã mở.",
+          "missing": "Chưa mở giờ nào — khách chưa đặt lịch được."
+        },
+        "reviews": {
+          "title": "Đánh giá",
+          "count": "{count, plural, other {# đánh giá}} · trung bình {average}★",
+          "empty": "Chưa có đánh giá nào."
+        },
+        "share": {
+          "title": "Link & mã QR",
+          "ready": "Đường dẫn ngắn và mã QR để gắn lên mạng xã hội."
+        }
+      },
+      "info": {
+        "metaTitle": "Thông tin trang — Fgrapher",
+        "title": "Thông tin trang",
+        "lede": "Ảnh, tên, giới thiệu, khu vực phục vụ, chính sách và liên kết mà khách thấy.",
+        "jumpLabel": "Đi tới phần",
+        "jump": {
+          "photos": "Ảnh & tên đường dẫn",
+          "intro": "Giới thiệu",
+          "costumes": "Trang phục",
+          "area": "Khu vực",
+          "policies": "Chính sách",
+          "links": "Liên kết"
+        },
+        "photosHeading": "Ảnh & tên đường dẫn",
+        "profileHeading": "Giới thiệu, khu vực & chính sách"
+      },
+      "services": {
+        "metaTitle": "Gói dịch vụ — Fgrapher",
+        "title": "Gói dịch vụ",
+        "lede": "Những gói khách chọn khi đặt lịch: thời lượng, giá, số ảnh giao và thời gian giao.",
+        "needProfile": "Lưu thông tin trang một lần trước (tên, danh mục, địa chỉ), rồi quay lại thêm gói.",
+        "needProfileCta": "Mở thông tin trang"
+      }
+    },
+    "more": {
+      "metaTitle": "Tiện ích khác — Fgrapher",
+      "title": "Tiện ích khác",
+      "lede": "Những việc ngoài công việc chính: mua bán thiết bị, thuê người khác, những gì bạn đã lưu.",
+      "groups": {
+        "market": "Chợ F",
+        "hiring": "Thuê dịch vụ",
+        "personal": "Của bạn"
+      },
+      "hints": {
+        "listings": "Thiết bị bạn đang bán hoặc cho thuê",
+        "shopOrders": "Đơn khách đặt mua thiết bị của bạn",
+        "myOrders": "Thiết bị bạn đã đặt mua",
+        "sentBookings": "Người mẫu, make-up, studio… bạn đã đặt cho buổi chụp của mình",
+        "newRequest": "Mô tả việc cần làm, nhà cung cấp gửi báo giá",
+        "myRequests": "Các yêu cầu bạn đã đăng và báo giá nhận được",
+        "saved": "Nghệ sĩ bạn đã lưu",
+        "moodboard": "Ảnh bạn ghim làm ý tưởng",
+        "notifications": "Mọi thông báo gần đây"
       }
     }
   },
@@ -5775,37 +5903,10 @@
       "closeAria": "Đóng"
     },
     "dashboardSidebar": {
-      "overview": "Tổng quan",
-      "myBookings": "Lịch đặt của tôi",
-      "bookings": "Lịch đặt",
-      "calendar": "Lịch làm việc",
-      "reviews": "Đánh giá",
-      "portfolio": "Portfolio",
-      "myRequests": "Yêu cầu của tôi",
-      "opportunities": "Yêu cầu phù hợp",
-      "myOffers": "Đề nghị đã gửi",
-      "costumes": "Trang phục của tôi",
-      "listings": "Tin đăng",
-      "shopOrders": "Đơn hàng cửa hàng",
-      "myOrders": "Đơn hàng của tôi",
-      "moodboard": "Bảng ý tưởng",
-      "saved": "Đã lưu",
-      "messages": "Tin nhắn",
-      "settings": "Cài đặt",
-      "admin": "Quản trị",
       "planPro": "Pro — {role}",
-      "planFree": "Miễn phí — Khách hàng",
       "currentPlan": "Gói hiện tại",
       "managePlan": "Quản lý gói",
-      "openMenu": "Mở menu bảng điều khiển",
-      "menuTitle": "Menu bảng điều khiển",
-      "menuDescription": "Điều hướng bảng điều khiển",
-      "createBooking": "Đăng yêu cầu",
-      "sectionWork": "Công việc",
-      "sectionProfile": "Hồ sơ",
-      "sectionMarket": "Chợ F",
-      "sectionHiring": "Thuê dịch vụ",
-      "shareLink": "Link & mã QR"
+      "menuTitle": "Menu bảng điều khiển"
     },
     "suspendedAccountNotice": {
       "title": "Tài khoản của bạn đã bị tạm khóa",
@@ -5903,6 +6004,56 @@
       "portfolio": "Vài ảnh từ portfolio của nghệ sĩ.",
       "skyAt": "Minh hoạ ánh sáng lúc {time}. Vị trí mặt trời tính theo ngày đã chọn tại khu vực của nghệ sĩ.",
       "skyPick": "Mặt trời mọc {rise}, lặn {set}. Chọn một khung giờ để xem ánh sáng."
+    },
+    "dashboardNav": {
+      "tabBarLabel": "Điều hướng bảng điều khiển",
+      "unread": "chưa đọc",
+      "moreTab": "Thêm",
+      "moreTitle": "Thêm",
+      "moreDescription": "Các mục khác của bảng điều khiển",
+      "items": {
+        "today": "Hôm nay",
+        "overview": "Tổng quan",
+        "calendar": "Lịch làm việc",
+        "calendarTab": "Lịch",
+        "bookings": "Lịch đặt",
+        "myBookings": "Lịch đặt của tôi",
+        "bookingsTab": "Lịch đặt",
+        "messages": "Tin nhắn",
+        "jobs": "Tìm việc",
+        "myPage": "Trang của tôi",
+        "myPageTab": "Hồ sơ",
+        "shop": "Cửa hàng",
+        "more": "Tiện ích khác",
+        "settings": "Cài đặt",
+        "admin": "Quản trị",
+        "notifications": "Thông báo",
+        "newRequest": "Đăng yêu cầu",
+        "myRequests": "Yêu cầu của tôi",
+        "saved": "Đã lưu",
+        "moodboard": "Bảng ý tưởng",
+        "myOrders": "Đơn hàng của tôi",
+        "listings": "Tin đăng Chợ F",
+        "shopOrders": "Đơn hàng cửa hàng",
+        "sentBookings": "Lịch đặt tôi đã gửi"
+      },
+      "sections": {
+        "myPage": "Các phần của trang",
+        "jobs": "Tìm việc",
+        "shop": "Cửa hàng",
+        "tabs": {
+          "overview": "Tổng quan",
+          "portfolio": "Portfolio",
+          "services": "Gói dịch vụ",
+          "info": "Thông tin",
+          "reviews": "Đánh giá",
+          "share": "Link & QR",
+          "opportunities": "Yêu cầu phù hợp",
+          "myOffers": "Đề nghị đã gửi",
+          "listings": "Tin đăng",
+          "shopOrders": "Đơn hàng"
+        }
+      }
     }
   },
   "serviceKind": {

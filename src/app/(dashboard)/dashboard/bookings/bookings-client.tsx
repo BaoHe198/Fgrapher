@@ -58,10 +58,12 @@ export function BookingsClient({
   initialBookings,
   initialTotalPages,
   initialCounts,
+  initialSide = "received",
 }: {
   initialBookings: BookingRow[];
   initialTotalPages: number;
   initialCounts: BookingTabCounts;
+  initialSide?: "received" | "sent";
 }) {
   const t = useTranslations("dashboardCore.bookings");
   const messaging = useMessaging();
@@ -75,7 +77,7 @@ export function BookingsClient({
   // and then appeared in no list of theirs — this page only ever showed the
   // ones made WITH them (found 19/11/2026). "sent" shows the other side,
   // rendered exactly as a customer sees their own bookings.
-  const [side, setSide] = useState<"received" | "sent">("received");
+  const [side, setSide] = useState<"received" | "sent">(initialSide);
   const asCustomer = isCustomerOnly || side === "sent";
 
   function partyName(party: BookingParty) {
@@ -285,7 +287,7 @@ export function BookingsClient({
                 size="sm"
                 variant="outline"
                 nativeButton={false}
-                render={<Link href="/dashboard/settings/profile" />}
+                render={<Link href="/dashboard/share" />}
               >
                 {t("shareProfile")}
               </Button>
