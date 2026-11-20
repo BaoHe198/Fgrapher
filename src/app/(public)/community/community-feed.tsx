@@ -1013,7 +1013,7 @@ function RequestPostPanel({
           className={cn(
             "shrink-0 -rotate-3 rounded-[var(--fg-radius-sm)] border-2 px-2 py-1 font-mono text-meta font-semibold tracking-[0.12em] uppercase",
             open
-              ? "border-gold-600 text-gold-700 dark:border-gold-400 dark:text-gold-400"
+              ? "border-gold-600 text-gold-700 dark:border-gold-400 dark:text-gold-300"
               : "border-danger text-danger",
           )}
         >
@@ -1152,7 +1152,7 @@ function RequestPostPanel({
                       <BadgeCheck className="size-4 text-info" />
                     ) : null}
                   </span>
-                  <span className="font-semibold! text-gold-700 dark:text-gold-400">
+                  <span className="font-semibold! text-gold-700 dark:text-gold-300">
                     {formatCurrency(offer.proposedPrice, offer.currency)}
                   </span>
                 </div>

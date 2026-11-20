@@ -75,7 +75,7 @@ export function CallSheet({
             "shrink-0 -rotate-3 rounded-[var(--fg-radius-sm)] border-2 px-2 py-1 font-mono text-meta font-semibold tracking-[0.12em] uppercase",
             stampTone === "danger" && "border-danger text-danger",
             stampTone === "accent" &&
-              "border-gold-500 text-gold-700 dark:text-gold-400",
+              "border-gold-500 text-gold-700 dark:text-gold-300",
             stampTone === "neutral" &&
               "border-border-strong text-text-secondary",
           )}

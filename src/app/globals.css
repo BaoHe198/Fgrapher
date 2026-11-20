@@ -454,7 +454,9 @@
   --on-photo-line: hsl(0 0% 100% / 0.22);
 }
 .dark {
-  --dr-accent: var(--gold-400);
+  /* gold-300, not 400: as small text on the dark page 400 measures 3.3:1,
+     under the 4.5:1 that body-size text needs. */
+  --dr-accent: var(--gold-300);
 }
 
 /*

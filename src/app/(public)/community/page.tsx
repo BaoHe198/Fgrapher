@@ -114,7 +114,7 @@ export default async function CommunityPage() {
           </ul>
           <Link
             href="/requests"
-            className="focus-ring w-fit rounded-[4px] text-body-sm font-semibold text-gold-600 dark:text-gold-400"
+            className="focus-ring w-fit rounded-[4px] text-body-sm font-semibold text-gold-600 dark:text-gold-300"
           >
             {t("rail.allRequests")}
           </Link>

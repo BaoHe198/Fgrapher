@@ -150,7 +150,7 @@ export function AboutStory({ frames, chapters }: AboutStoryProps) {
                 data-chapter={index}
                 className="flex flex-col gap-4"
               >
-                <span className="font-mono text-meta tracking-[0.12em] text-gold-600 uppercase dark:text-gold-400">
+                <span className="font-mono text-meta tracking-[0.12em] text-gold-600 uppercase dark:text-gold-300">
                   {chapter.eyebrow}
                 </span>
                 <div className="grid aspect-square place-items-center border border-border-subtle bg-bg-sunken p-3">
@@ -189,7 +189,7 @@ function ChapterText({
   return (
     <>
       {hideEyebrow ? null : (
-        <span className="font-mono text-meta tracking-[0.12em] text-gold-600 uppercase dark:text-gold-400">
+        <span className="font-mono text-meta tracking-[0.12em] text-gold-600 uppercase dark:text-gold-300">
           {chapter.eyebrow}
         </span>
       )}

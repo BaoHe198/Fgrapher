@@ -100,11 +100,14 @@ export function BookingFilmStrip({
               aria-current={state === "current" ? "step" : undefined}
               className={cn(
                 "relative flex min-h-[76px] flex-col justify-between rounded-[4px] p-2.5 transition-colors duration-[var(--fg-dur-260)] sm:min-h-[88px] sm:p-3",
-                state === "exposed" && "bg-gold-100 text-neutral-900",
+                // Fixed ink, not text-neutral-900: the strip is the same dark film
+                // in both themes, and the neutral scale inverts in dark mode,
+                // which put near-white type on this pale frame (1.1:1).
+                state === "exposed" && "bg-gold-100 text-[#141210]",
                 state === "current" &&
                   "bg-gold-400 text-white ring-2 ring-gold-200",
                 state === "stopped" && "bg-[#5a2420] text-white",
-                state === "dark" && "bg-[#26221e] text-white/45",
+                state === "dark" && "bg-[#26221e] text-white/60",
               )}
             >
               <span className="flex items-center justify-between font-mono text-meta tracking-[0.08em]">
@@ -116,7 +119,7 @@ export function BookingFilmStrip({
                 ) : state === "current" ? (
                   <span
                     aria-hidden
-                    className="size-2 animate-fg-pulse rounded-full bg-neutral-900"
+                    className="size-2 animate-fg-pulse rounded-full bg-[#141210]"
                   />
                 ) : null}
               </span>

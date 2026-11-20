@@ -60,7 +60,7 @@ export default async function AdminLayout({
       {/* bg-inverse, not neutral-900: the neutral scale flips in dark mode,
           which turned this bar light grey under white text. */}
       <div className="flex h-11 items-center gap-2 border-b border-white/5 bg-bg-inverse px-4 text-body-sm font-semibold! text-gold-50">
-        <span className="rounded-[4px] bg-danger px-1.5 py-0.5 text-meta font-bold! tracking-[0.12em] text-white uppercase">
+        <span className="rounded-[4px] bg-[hsl(6_70%_46%)] px-1.5 py-0.5 text-meta font-bold! tracking-[0.12em] text-white uppercase">
           {t("badge")}
         </span>
         <span className="hidden truncate text-green-200 sm:inline">
