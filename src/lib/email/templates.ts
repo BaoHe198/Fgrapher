@@ -324,9 +324,12 @@ export function scheduleDigestEmailHtml({
   dayLabel,
   lines,
   calendarUrl,
+  availabilityNudge = false,
 }: {
   t: EmailT;
   kind: "evening" | "morning";
+  /** Adds the "check your busy days" line the 07:30 reminder used to carry. */
+  availabilityNudge?: boolean;
   dayLabel: string;
   lines: {
     time: string;
@@ -359,6 +362,11 @@ export function scheduleDigestEmailHtml({
     )}</p><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width: 100%; border-top: 1px solid #ece6dc;">${rows}</table>`,
     ctaLabel: t("scheduleDigest.cta"),
     ctaUrl: calendarUrl,
+    postscript: availabilityNudge
+      ? `<p style="margin: 20px 0 0; color: #6f6860; font-size: 14px; line-height: 22px;">${escapeHtml(
+          t("scheduleDigest.availabilityNudge"),
+        )}</p>`
+      : undefined,
   });
 }
 

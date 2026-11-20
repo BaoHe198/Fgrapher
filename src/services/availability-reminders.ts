@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { availabilityReminderEmailHtml } from "@/lib/email";
 import { vietnamDateKey } from "@/lib/vietnam/date";
 import { notify } from "@/services/notification";
+import { providersGettingMorningDigest } from "@/services/work-calendar";
 
 const DELIVERY_CONCURRENCY = 10;
 
@@ -15,7 +16,7 @@ const DELIVERY_CONCURRENCY = 10;
  * a retry of the same day's cron harmless.
  */
 export async function sendAvailabilityUpdateReminders(now = new Date()) {
-  const providers = await db.user.findMany({
+  const candidates = await db.user.findMany({
     where: {
       deletedAt: null,
       isSuspended: false,
@@ -33,6 +34,13 @@ export async function sendAvailabilityUpdateReminders(now = new Date()) {
     },
     select: { id: true },
   });
+
+  // A provider with confirmed work today already had the same nudge in the
+  // 06:30 summary of their day; a third message that morning was noise.
+  const coveredByDigest = await providersGettingMorningDigest(
+    vietnamDateKey(now),
+  );
+  const providers = candidates.filter((p) => !coveredByDigest.has(p.id));
 
   const [emailT, notificationT] = await Promise.all([
     getTranslations({ locale: "vi", namespace: "libServices.email" }),

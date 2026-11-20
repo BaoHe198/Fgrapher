@@ -202,10 +202,17 @@ const DELIVERY_CONCURRENCY = 10;
  * Deterministic notification ids and email keys make a retry of the same
  * day's run harmless.
  */
-export async function sendScheduleDigests(kind: DigestKind, now = new Date()) {
-  const dateKey = digestDateKey(kind, now);
+/**
+ * Confirmed work on one Vietnam day — Fgrapher bookings and the provider's
+ * own entries — as the lines of each provider's summary, unsorted. Shared by
+ * the digest and by the 07:30 availability nudge, which must agree on who
+ * "has work today".
+ */
+async function confirmedWorkOn(
+  dateKey: string,
+  notificationT: (key: string) => string,
+) {
   const nextKey = addDays(dateKey, 1);
-
   const [bookings, entries] = await Promise.all([
     db.booking.findMany({
       where: {
@@ -241,20 +248,8 @@ export async function sendScheduleDigests(kind: DigestKind, now = new Date()) {
     }),
   ]);
 
-  const [emailT, notificationT] = await Promise.all([
-    getTranslations({ locale: "vi", namespace: "libServices.email" }),
-    getTranslations({ locale: "vi", namespace: "libServices.notifications" }),
-  ]);
-
-  interface Line {
-    startTime: string;
-    time: string;
-    title: string;
-    who: string | null;
-    where: string | null;
-  }
-  const byUser = new Map<string, Line[]>();
-  const add = (userId: string, line: Line) => {
+  const byUser = new Map<string, DigestLine[]>();
+  const add = (userId: string, line: DigestLine) => {
     const lines = byUser.get(userId);
     if (lines) lines.push(line);
     else byUser.set(userId, [line]);
@@ -279,6 +274,59 @@ export async function sendScheduleDigests(kind: DigestKind, now = new Date()) {
       where: entry.locationAddress,
     });
   }
+  return byUser;
+}
+
+interface DigestLine {
+  startTime: string;
+  time: string;
+  title: string;
+  who: string | null;
+  where: string | null;
+}
+
+/**
+ * Providers who get a morning summary for this Vietnam day: confirmed work
+ * on it, and the schedule reminder ("Nhắc lịch sắp tới") not switched off
+ * on both channels. The 07:30 availability nudge skips them — the summary
+ * already carries it (project owner, 20/11/2026: three messages a day on a
+ * working day was too many).
+ */
+export async function providersGettingMorningDigest(dateKey: string) {
+  const notificationT = await getTranslations({
+    locale: "vi",
+    namespace: "libServices.notifications",
+  });
+  const withWork = [...(await confirmedWorkOn(dateKey, notificationT)).keys()];
+  if (withWork.length === 0) return new Set<string>();
+  const users = await db.user.findMany({
+    where: { id: { in: withWork } },
+    select: { id: true, notificationPreferences: true },
+  });
+  return new Set(
+    users
+      .filter((user) => {
+        const prefs = user.notificationPreferences as
+          | (Record<string, { email?: boolean; inApp?: boolean }> | null)
+          | undefined;
+        const reminder = prefs?.bookingReminder;
+        return !(
+          reminder &&
+          reminder.email === false &&
+          reminder.inApp === false
+        );
+      })
+      .map((user) => user.id),
+  );
+}
+
+export async function sendScheduleDigests(kind: DigestKind, now = new Date()) {
+  const dateKey = digestDateKey(kind, now);
+  const [emailT, notificationT] = await Promise.all([
+    getTranslations({ locale: "vi", namespace: "libServices.email" }),
+    getTranslations({ locale: "vi", namespace: "libServices.notifications" }),
+  ]);
+  const byUser = await confirmedWorkOn(dateKey, notificationT);
 
   const dayLabel = formatWeekdayDayMonth(`${dateKey}T00:00:00.000Z`);
   const calendarPath = `/dashboard/calendar?date=${dateKey}`;
@@ -318,6 +366,9 @@ export async function sendScheduleDigests(kind: DigestKind, now = new Date()) {
               dayLabel,
               lines,
               calendarUrl: appUrl(calendarPath),
+              // The morning one also carries the "check your busy days"
+              // nudge, which these providers no longer get at 07:30.
+              availabilityNudge: kind === "morning",
             }),
             dedupe: ["schedule-digest", kind, dateKey],
           },

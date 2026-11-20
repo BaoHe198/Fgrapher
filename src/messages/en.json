@@ -3761,7 +3761,8 @@
         "eveningHeading": "Tomorrow's schedule, {day}",
         "morningHeading": "Today's schedule, {day}",
         "intro": "You have {count} confirmed jobs:",
-        "cta": "Open my calendar"
+        "cta": "Open my calendar",
+        "availabilityNudge": "Taken a job elsewhere, or busy soon? Update today and the next 7 days so nobody books a time you are already working."
       }
     },
     "notifications": {
