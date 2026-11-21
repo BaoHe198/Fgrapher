@@ -66,7 +66,9 @@ export function FmapPlacePreview({
           />
         </div>
         <div className={cn("flex min-w-0 flex-col gap-1", !inline && "pr-8")}>
-          <p className="text-heading-sm text-text-primary">{place.name}</p>
+          <p className="text-heading-sm [overflow-wrap:anywhere] text-text-primary">
+            {place.name}
+          </p>
           <p className="flex items-center gap-1 text-body-sm text-text-secondary">
             <MapPin aria-hidden className="size-3.5 shrink-0" />
             <span className="truncate">

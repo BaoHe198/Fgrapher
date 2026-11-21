@@ -112,7 +112,7 @@ export default async function AdminPlacesPage({
                   />
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5">
-                  <span className="text-body-md font-semibold text-text-primary">
+                  <span className="text-body-md font-semibold [overflow-wrap:anywhere] text-text-primary">
                     {place.name}
                   </span>
                   <span className="text-body-sm text-text-secondary">

@@ -172,7 +172,7 @@ export default async function PlacePage({ params }: PageProps) {
       </nav>
 
       <header className="flex flex-col gap-2">
-        <h1 className="text-heading-xl text-balance text-text-primary">
+        <h1 className="text-heading-xl text-balance [overflow-wrap:anywhere] text-text-primary">
           {place.name}
         </h1>
         <p className="flex flex-wrap items-center gap-x-1.5 text-body-md text-text-secondary">
@@ -424,7 +424,7 @@ export default async function PlacePage({ params }: PageProps) {
           </div>
           <ul className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
             {otherPlaces.map((other) => (
-              <li key={other.id}>
+              <li key={other.id} className="min-w-0">
                 <PlaceCard place={other} showProvince={false} />
               </li>
             ))}
