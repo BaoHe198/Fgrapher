@@ -851,7 +851,14 @@ export function FmapClient({
             </Button>
           ) : null}
 
-          {hasSearched && !loading && !searchError && markers.length === 0 ? (
+          {/* With the spot layer on, the box would sit over the very spot
+              the visitor came to see (a spot's "Xem trên Bản đồ F" centres
+              the map on it); the count line still says no one is free. */}
+          {hasSearched &&
+          !loading &&
+          !searchError &&
+          markers.length === 0 &&
+          !placesOn ? (
             <div
               className={cn(
                 "absolute left-1/2 z-10 w-[min(92%,440px)] -translate-x-1/2 rounded-[var(--fg-radius-lg)] border border-border-default bg-bg-surface/95 p-4 text-center shadow-[var(--shadow-md)] backdrop-blur",
