@@ -54,7 +54,9 @@ export default async function AdminPlacePage({
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-display-md text-text-primary">{place.name}</h1>
+          <h1 className="text-display-md [overflow-wrap:anywhere] text-text-primary">
+            {place.name}
+          </h1>
           <Badge
             variant={
               place.reviewStatus === "APPROVED"

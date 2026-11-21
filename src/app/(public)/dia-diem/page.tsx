@@ -152,7 +152,7 @@ export default async function PlacesIndexPage({ searchParams }: PageProps) {
         ) : (
           <ul className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
             {places.data.map((place, index) => (
-              <li key={place.id}>
+              <li key={place.id} className="min-w-0">
                 <PlaceCard place={place} priority={index < 3} />
               </li>
             ))}

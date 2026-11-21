@@ -30,7 +30,7 @@ export function PlaceCard({
   return (
     <Link
       href={place.href}
-      className="group/place focus-ring flex flex-col gap-2.5 rounded-[var(--fg-radius-md)]"
+      className="group/place focus-ring flex min-w-0 flex-col gap-2.5 rounded-[var(--fg-radius-md)]"
     >
       <FgImage
         src={place.coverUrl}
@@ -48,7 +48,7 @@ export function PlaceCard({
         ) : null}
       </FgImage>
       <span className="flex flex-col gap-1">
-        <span className="text-heading-sm text-text-primary group-hover/place:underline group-hover/place:underline-offset-4">
+        <span className="text-heading-sm [overflow-wrap:anywhere] text-text-primary group-hover/place:underline group-hover/place:underline-offset-4">
           {place.name}
         </span>
         <span className="text-body-sm text-text-secondary">
