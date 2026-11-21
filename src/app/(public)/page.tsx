@@ -8,6 +8,7 @@ import { HomeFilter, HomeRows } from "@/components/home/home-filter";
 import { HomeSearch } from "@/components/home/home-search";
 import { MapTeaser } from "@/components/home/map-teaser";
 import { MoreFromFgrapher } from "@/components/home/more-from-fgrapher";
+import { PlacesTeaser } from "@/components/home/places-teaser";
 import { StyleGrid } from "@/components/home/style-grid";
 import { TrustSection } from "@/components/home/trust-section";
 import { features } from "@/lib/features";
@@ -15,6 +16,7 @@ import { shortPlace } from "@/lib/location";
 import { formatCurrency } from "@/lib/utils";
 import { getHomeShowcase, HOME_ROLES } from "@/services/home";
 import { listProvinces } from "@/services/geography";
+import { listPublicPlaces } from "@/services/places";
 import {
   getFeaturedProfiles,
   SEARCHABLE_ROLES,
@@ -65,11 +67,12 @@ export default async function LandingPage({
   // switch to that service, Airbnb-style, instead of jumping to Tìm kiếm F.
   const activeRole = rowRoles.find((role) => role === roleParam) ?? null;
 
-  const [provinces, showcase, featuredProfiles, ...roleResults] =
+  const [provinces, showcase, featuredProfiles, homePlaces, ...roleResults] =
     await Promise.all([
       listProvinces(),
       getHomeShowcase(),
       getFeaturedProfiles(4),
+      listPublicPlaces({ limit: 3 }),
       ...(activeRole
         ? [searchProfiles({ roles: [activeRole], sort: "rating", limit: 50 })]
         : rowRoles.map((role) =>
@@ -205,6 +208,10 @@ export default async function LandingPage({
           roleLabel: roleT(profile.roles[0]),
         }))}
       />
+
+      {homePlaces.data.length > 0 ? (
+        <PlacesTeaser places={homePlaces.data} />
+      ) : null}
 
       <TrustSection review={showcase.review} />
 

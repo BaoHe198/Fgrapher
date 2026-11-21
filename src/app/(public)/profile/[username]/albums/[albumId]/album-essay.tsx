@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,6 +28,8 @@ interface AlbumEssayProps {
     /** Place, date, style - whichever exist. */
     meta: string[];
     style: string | null;
+    /** "Chụp tại" — links to the photo spot's page. */
+    place: { name: string; href: string } | null;
   };
   photos: EssayPhoto[];
   artist: { name: string; href: string; bookingHref: string | null };
@@ -169,6 +171,15 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
         <span className="text-[15px] text-dr-text-2">
           {[...album.meta, t("count", { count: photos.length })].join(" · ")}
         </span>
+        {album.place ? (
+          <Link
+            href={album.place.href}
+            className="focus-ring inline-flex w-fit items-center gap-1.5 rounded-[var(--fg-radius-sm)] text-[15px] font-semibold text-dr-text underline-offset-4 hover:underline"
+          >
+            <MapPin aria-hidden className="size-4 shrink-0" />
+            {t("shotAt", { place: album.place.name })}
+          </Link>
+        ) : null}
         {album.description ? (
           <p className="max-w-[640px] text-[clamp(17px,1.4vw,20px)] leading-[1.6] text-pretty whitespace-pre-line">
             {album.description}

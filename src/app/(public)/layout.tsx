@@ -2,8 +2,9 @@ import { Footer } from "@/components/layout/footer";
 import { WebNav } from "@/components/layout/web-nav";
 import { ShutterTransition } from "@/components/ui/shutter-transition";
 import { features } from "@/lib/features";
+import { hasPublicPlaces } from "@/services/places";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ export default function PublicLayout({
       <WebNav
         marketplaceEnabled={features.marketplaceEnabled}
         socialFeedEnabled={features.socialFeedEnabled}
+        placesEnabled={await hasPublicPlaces()}
       />
       <main id="main-content" className="flex-1">
         {children}

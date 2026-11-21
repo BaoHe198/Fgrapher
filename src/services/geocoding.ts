@@ -285,6 +285,78 @@ export async function suggestAddresses(
     : suggestMapTilerAddresses(query, context, options);
 }
 
+export type ReverseAreaResult =
+  | { success: true; province?: string; ward?: string }
+  | {
+      success: false;
+      reason: "not_configured" | "not_found" | "upstream_error" | "timeout";
+    };
+
+/**
+ * The province and ward a point lies in, as the geocoder names them — for
+ * filling a form's area selects from a map pin (photo spots). The names are
+ * matched to our own rows by lib/vietnam/area-match.ts.
+ */
+export async function reverseGeocodeArea(
+  point: { latitude: number; longitude: number },
+  options: ForwardGeocodeOptions = {},
+): Promise<ReverseAreaResult> {
+  const goongKey = process.env.GOONG_API_KEY;
+  const provider = activeProvider();
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+  );
+  try {
+    if (provider === "goong" && goongKey) {
+      const url = new URL("https://rsapi.goong.io/Geocode");
+      url.searchParams.set("latlng", `${point.latitude},${point.longitude}`);
+      url.searchParams.set("api_key", goongKey);
+      const response = await (options.fetchImpl ?? fetch)(url, {
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) return { success: false, reason: "upstream_error" };
+      const data = (await response.json()) as {
+        results?: { compound?: { province?: string; commune?: string } }[];
+      };
+      const compound = data.results?.[0]?.compound;
+      if (!compound) return { success: false, reason: "not_found" };
+      return {
+        success: true,
+        province: compound.province,
+        ward: compound.commune,
+      };
+    }
+    const apiKey = options.apiKey ?? process.env.MAPTILER_API_KEY;
+    if (!apiKey) return { success: false, reason: "not_configured" };
+    const url = new URL(
+      `${MAPTILER_GEOCODING_URL}/${point.longitude},${point.latitude}.json`,
+    );
+    url.searchParams.set("key", apiKey);
+    url.searchParams.set("language", "vi");
+    const response = await (options.fetchImpl ?? fetch)(url, {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) return { success: false, reason: "upstream_error" };
+    const data = (await response.json()) as {
+      features?: { context?: unknown }[];
+    };
+    const area = mapTilerArea(data.features?.[0]?.context);
+    if (!area) return { success: false, reason: "not_found" };
+    return { success: true, province: area.province, ward: area.ward };
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      return { success: false, reason: "timeout" };
+    }
+    return { success: false, reason: "upstream_error" };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 /**
  * Coordinates for a suggestion whose autocomplete entry had none (Goong).
  * MapTiler suggestions already carry their point, so there is nothing to

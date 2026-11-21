@@ -85,6 +85,8 @@ interface ProfileInteractiveProps {
       commentCount: number;
       likedByViewer: boolean;
     } | null;
+    /** "Chụp tại" — the public photo spot the album was shot at. */
+    place?: { name: string; href: string } | null;
   }[];
   // Only present (non-null) when isOwnProfile — everything the owner has,
   // unfiltered by isPublished/moderation (unlike `albums` above).

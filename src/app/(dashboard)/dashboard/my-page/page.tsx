@@ -10,6 +10,7 @@ import {
   Image as ImageIcon,
   type LucideIcon,
   MapPin,
+  MapPinned,
   Package,
   QrCode,
   ScrollText,
@@ -40,6 +41,7 @@ const CARD_ICONS: Record<MyPageCard["key"], LucideIcon> = {
   policies: ScrollText,
   hours: CalendarClock,
   reviews: Star,
+  places: MapPinned,
   share: QrCode,
 };
 

@@ -63,7 +63,8 @@
       "vi": "Tiếng Việt",
       "en": "English"
     },
-    "skipToContent": "Bỏ qua, tới nội dung chính"
+    "skipToContent": "Bỏ qua, tới nội dung chính",
+    "places": "Địa điểm chụp"
   },
   "fmap": {
     "title": "Bản đồ F — tìm nhà cung cấp theo khu vực và lịch trống",
@@ -1008,7 +1009,8 @@
           "madeBooking": "{name} vừa đặt lịch",
           "someone": "Một người dùng",
           "newReport": "Báo cáo {targetType} mới — {reason}"
-        }
+        },
+        "pendingPlaces": "Địa điểm chụp chờ duyệt"
       },
       "users": {
         "title": "Người dùng",
@@ -3085,6 +3087,11 @@
         "share": {
           "title": "Link & mã QR",
           "ready": "Đường dẫn ngắn và mã QR để gắn lên mạng xã hội."
+        },
+        "places": {
+          "title": "Địa điểm chụp",
+          "tagged": "{tagged}/{total} album đã gắn \"Chụp tại\" — hiện trên trang của địa điểm.",
+          "none": "Gắn \"Chụp tại\" cho album để album hiện trên trang của địa điểm, nơi khách tìm người chụp."
         }
       },
       "info": {
@@ -4516,7 +4523,9 @@
         "allPhotos": "Tất cả ảnh",
         "showMore": "Xem thêm · còn {remaining} ảnh",
         "filterByStyle": "Lọc theo phong cách",
-        "albumFrame": "{count} ảnh"
+        "albumFrame": "{count} ảnh",
+        "shotAt": "Chụp tại {place}",
+        "spotsShot": "Địa điểm đã chụp"
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
@@ -5655,7 +5664,8 @@
       "book": "Đặt lịch",
       "end": "Hết album",
       "by": "Album của {name}",
-      "viewProfile": "Xem hồ sơ"
+      "viewProfile": "Xem hồ sơ",
+      "shotAt": "Chụp tại {place}"
     }
   },
   "sharedComponents": {
@@ -6258,9 +6268,10 @@
       "allKinds": "Tất cả",
       "filterKind": "Lọc theo loại địa điểm",
       "seeMap": "Xem trên Bản đồ F",
-      "propose": "Bạn biết một địa điểm đẹp? Đề xuất địa điểm",
       "emptyKind": "Chưa có địa điểm loại này.",
-      "breadcrumb": "Địa điểm chụp"
+      "breadcrumb": "Địa điểm chụp",
+      "proposeQuestion": "Bạn biết một địa điểm đẹp?",
+      "proposeLink": "Đề xuất địa điểm"
     },
     "province": {
       "metaTitle": "Địa điểm chụp ảnh đẹp ở {province} — Fgrapher",
@@ -6313,7 +6324,12 @@
       "nearby": "Nhà cung cấp ở gần",
       "nearbyHint": "Những người có địa chỉ làm việc trong khoảng {km} km.",
       "moreInProvince": "Địa điểm khác ở {province}",
-      "seeAllInProvince": "Xem tất cả địa điểm ở {province}"
+      "seeAllInProvince": "Xem tất cả địa điểm ở {province}",
+      "mapAlt": "Bản đồ vị trí {name}",
+      "unknownFacts": "Chưa có thông tin về: {list}.",
+      "unknownInvite": "Bạn biết? Bấm \"Báo thông tin sai\" để bổ sung.",
+      "book": "Đặt lịch",
+      "message": "Nhắn tin"
     },
     "fmap": {
       "toggle": "Địa điểm chụp",
@@ -6321,7 +6337,9 @@
       "count": "{count, plural, =0 {Không có địa điểm chụp trong vùng này} other {# địa điểm chụp trong vùng này}}",
       "loadFailed": "Không tải được địa điểm chụp.",
       "open": "Xem địa điểm",
-      "close": "Đóng"
+      "close": "Đóng",
+      "loading": "Đang tải địa điểm chụp…",
+      "cluster": "{count} địa điểm chụp — bấm để phóng to"
     },
     "mine": {
       "metaTitle": "Địa điểm chụp",
@@ -6423,7 +6441,13 @@
       "descriptionTooShort": "Mô tả cần ít nhất 30 ký tự.",
       "kindRequired": "Chọn loại địa điểm.",
       "provinceRequired": "Chọn tỉnh/thành.",
-      "feeRequired": "Nhập giá vé."
+      "feeRequired": "Nhập giá vé.",
+      "pinProvinceMismatch": "Ghim đang nằm ở {province}, khác tỉnh/thành bạn chọn.",
+      "useProvince": "Chuyển sang {province}",
+      "areaFilled": "Đã điền tỉnh/thành và phường/xã theo vị trí ghim — kiểm tra lại giúp nhé.",
+      "mapTwoFingers": "Dùng hai ngón tay để kéo bản đồ",
+      "mapCtrlScroll": "Giữ Ctrl và cuộn để phóng to bản đồ",
+      "mapCmdScroll": "Giữ ⌘ và cuộn để phóng to bản đồ"
     },
     "albumPicker": {
       "label": "Chụp tại",
@@ -6442,7 +6466,8 @@
       "tabs": {
         "PENDING": "Chờ duyệt",
         "APPROVED": "Đã duyệt",
-        "REJECTED": "Đã từ chối"
+        "REJECTED": "Đã từ chối",
+        "ATTENTION": "Cần xem lại"
       },
       "search": "Tìm theo tên",
       "searchButton": "Tìm",
@@ -6488,7 +6513,30 @@
       "deleteConfirm": "Xóa \"{name}\"? Địa điểm sẽ biến khỏi bản đồ và trang công khai; album gắn địa điểm này sẽ được gỡ gắn.",
       "albums": "{count, plural, other {# album gắn địa điểm}}",
       "done": "Đã lưu",
-      "failed": "Không lưu được, vui lòng thử lại."
+      "failed": "Không lưu được, vui lòng thử lại.",
+      "attentionHint": "Địa điểm đang công khai có báo cáo của khách hoặc đang đóng cửa, cấm chụp.",
+      "province": "Tỉnh/thành",
+      "allProvinces": "Tất cả tỉnh/thành",
+      "emptyPending": "Không có địa điểm nào chờ duyệt.",
+      "reportsBadge": "{count, plural, other {# báo cáo}}",
+      "rejectedBecause": "Đã từ chối: {note}",
+      "checklist": {
+        "place": "Vị trí trên bản đồ đúng chỗ, là nơi công cộng hoặc nơi kinh doanh mở cửa — không phải nhà riêng.",
+        "duplicate": "Không trùng với địa điểm ở gần (xem cột bên phải).",
+        "photos": "Ảnh rõ, đúng địa điểm, không giống ảnh lấy trên mạng. Từ chối ảnh xấu trước khi duyệt."
+      },
+      "reportsTitle": "{count, plural, other {# báo cáo của khách}}",
+      "reportsOpen": "Xử lý trong mục Báo cáo",
+      "summaryTitle": "Tóm tắt",
+      "openGoogleMaps": "Mở Google Maps",
+      "editTitle": "Sửa thông tin",
+      "editOpen": "Mở form sửa",
+      "addPhotosHint": "Ảnh admin thêm được duyệt luôn. Chỉ dùng ảnh tự chụp hoặc đã xin phép."
+    },
+    "home": {
+      "title": "Địa điểm chụp đẹp",
+      "lede": "Nơi chụp đẹp kèm giờ đẹp, phí, quy định — và những người đã chụp ở đó.",
+      "seeAll": "Xem tất cả địa điểm"
     }
   }
 }

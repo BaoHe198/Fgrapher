@@ -12,6 +12,7 @@ import { WebNav } from "@/components/layout/web-nav";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
+import { hasPublicPlaces } from "@/services/places";
 
 export default async function DashboardLayout({
   children,
@@ -62,6 +63,7 @@ export default async function DashboardLayout({
       <WebNav
         marketplaceEnabled={features.marketplaceEnabled}
         socialFeedEnabled={features.socialFeedEnabled}
+        placesEnabled={await hasPublicPlaces()}
       />
       <PastDueBanner userId={session.user.id} />
       <ReviewReminderBanner userId={session.user.id} />

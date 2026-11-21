@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
 import { PLACE_KINDS } from "@/lib/places";
 import { jsonLdScriptProps } from "@/lib/utils";
-import { listPublicPlaces, placeProvinces } from "@/services/places";
+import {
+  listPublicPlaces,
+  placeKindsInUse,
+  placeProvinces,
+} from "@/services/places";
 
 interface PageProps {
   searchParams: Promise<{ loai?: string }>;
@@ -44,9 +48,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PlacesIndexPage({ searchParams }: PageProps) {
   const { loai } = await searchParams;
   const kind = kindFrom(loai);
-  const [provinces, places, t, kindT] = await Promise.all([
+  const [provinces, places, kindsInUse, t, kindT] = await Promise.all([
     placeProvinces(),
     listPublicPlaces({ kind, limit: 24 }),
+    placeKindsInUse(),
     getTranslations("places.index"),
     getTranslations("places.kinds"),
   ]);
@@ -81,7 +86,7 @@ export default async function PlacesIndexPage({ searchParams }: PageProps) {
         <p className="text-body-sm text-text-tertiary">
           {t("count", { count: total })}
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col items-start gap-3">
           <Button
             variant="primary"
             nativeButton={false}
@@ -89,13 +94,17 @@ export default async function PlacesIndexPage({ searchParams }: PageProps) {
           >
             {t("seeMap")}
           </Button>
-          <Button
-            variant="ghost"
-            nativeButton={false}
-            render={<Link href="/dashboard/places/new" />}
-          >
-            {t("propose")}
-          </Button>
+          {/* A sentence with a link: as a button the question ran off a
+              phone's edge (21/11 walk-through). */}
+          <p className="text-body-sm text-text-secondary">
+            {t("proposeQuestion")}{" "}
+            <Link
+              href="/dashboard/places/new"
+              className="font-semibold text-text-link hover:underline"
+            >
+              {t("proposeLink")}
+            </Link>
+          </p>
         </div>
       </header>
 
@@ -122,29 +131,38 @@ export default async function PlacesIndexPage({ searchParams }: PageProps) {
           <h2 id="latest" className="text-heading-md text-text-primary">
             {t("latest")}
           </h2>
-          <nav aria-label={t("filterKind")} className="flex flex-wrap gap-2">
+          {/* Only kinds that have a spot, in one swipeable row on a phone:
+              all fourteen chips filled two screens before the first spot. */}
+          <nav
+            aria-label={t("filterKind")}
+            className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+          >
             <Tag
+              className="shrink-0"
               selected={!kind}
               aria-current={!kind ? "page" : undefined}
               render={<Link href="/dia-diem" scroll={false} />}
             >
               {t("allKinds")}
             </Tag>
-            {PLACE_KINDS.map((value) => (
-              <Tag
-                key={value}
-                selected={kind === value}
-                aria-current={kind === value ? "page" : undefined}
-                render={
-                  <Link
-                    href={`/dia-diem?loai=${value.toLowerCase()}`}
-                    scroll={false}
-                  />
-                }
-              >
-                {kindT(value)}
-              </Tag>
-            ))}
+            {PLACE_KINDS.filter((value) => kindsInUse.has(value)).map(
+              (value) => (
+                <Tag
+                  className="shrink-0"
+                  key={value}
+                  selected={kind === value}
+                  aria-current={kind === value ? "page" : undefined}
+                  render={
+                    <Link
+                      href={`/dia-diem?loai=${value.toLowerCase()}`}
+                      scroll={false}
+                    />
+                  }
+                >
+                  {kindT(value)}
+                </Tag>
+              ),
+            )}
           </nav>
         </div>
         {places.data.length === 0 ? (

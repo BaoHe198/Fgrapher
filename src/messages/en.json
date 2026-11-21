@@ -63,7 +63,8 @@
       "vi": "Tiếng Việt",
       "en": "English"
     },
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "places": "Photo spots"
   },
   "fmap": {
     "title": "Fmap — find providers by area and availability",
@@ -1008,7 +1009,8 @@
           "madeBooking": "{name} made a booking",
           "someone": "Someone",
           "newReport": "New {targetType} report — {reason}"
-        }
+        },
+        "pendingPlaces": "Photo spots waiting for review"
       },
       "users": {
         "title": "Users",
@@ -3085,6 +3087,11 @@
         "share": {
           "title": "Link & QR code",
           "ready": "A short link and QR code for your social accounts."
+        },
+        "places": {
+          "title": "Photo spots",
+          "tagged": "{tagged}/{total} albums tagged \"Shot at\" — they appear on the spot's page.",
+          "none": "Tag albums with \"Shot at\" so they appear on the spot's page, where customers look for photographers."
         }
       },
       "info": {
@@ -4516,7 +4523,9 @@
         "allPhotos": "All photos",
         "showMore": "Show more · {remaining} left",
         "filterByStyle": "Filter by style",
-        "albumFrame": "{count} photos"
+        "albumFrame": "{count} photos",
+        "shotAt": "Shot at {place}",
+        "spotsShot": "Spots shot at"
       },
       "servicesTab": {
         "empty": "No service packages listed",
@@ -5655,7 +5664,8 @@
       "book": "Book",
       "end": "End of album",
       "by": "An album by {name}",
-      "viewProfile": "View profile"
+      "viewProfile": "View profile",
+      "shotAt": "Shot at {place}"
     }
   },
   "sharedComponents": {
@@ -6258,9 +6268,10 @@
       "allKinds": "All",
       "filterKind": "Filter by kind of spot",
       "seeMap": "See them on Fmap",
-      "propose": "Know a great spot? Propose it",
       "emptyKind": "No spots of this kind yet.",
-      "breadcrumb": "Photo spots"
+      "breadcrumb": "Photo spots",
+      "proposeQuestion": "Know a great spot?",
+      "proposeLink": "Propose it"
     },
     "province": {
       "metaTitle": "Photo spots in {province} — Fgrapher",
@@ -6313,7 +6324,12 @@
       "nearby": "Providers nearby",
       "nearbyHint": "People whose working address is within about {km} km.",
       "moreInProvince": "More spots in {province}",
-      "seeAllInProvince": "See every spot in {province}"
+      "seeAllInProvince": "See every spot in {province}",
+      "mapAlt": "Map showing {name}",
+      "unknownFacts": "Not known yet: {list}.",
+      "unknownInvite": "Know it? Use \"Report wrong information\" to add it.",
+      "book": "Book",
+      "message": "Message"
     },
     "fmap": {
       "toggle": "Photo spots",
@@ -6321,7 +6337,9 @@
       "count": "{count, plural, =0 {No photo spots in this area} one {# photo spot in this area} other {# photo spots in this area}}",
       "loadFailed": "Could not load photo spots.",
       "open": "See this spot",
-      "close": "Close"
+      "close": "Close",
+      "loading": "Loading photo spots…",
+      "cluster": "{count} photo spots — press to zoom in"
     },
     "mine": {
       "metaTitle": "Photo spots",
@@ -6423,7 +6441,13 @@
       "descriptionTooShort": "The description needs at least 30 characters.",
       "kindRequired": "Choose a kind of spot.",
       "provinceRequired": "Choose a province.",
-      "feeRequired": "Enter the ticket price."
+      "feeRequired": "Enter the ticket price.",
+      "pinProvinceMismatch": "The pin is in {province}, not the province you chose.",
+      "useProvince": "Switch to {province}",
+      "areaFilled": "Province and ward filled in from the pin — please check them.",
+      "mapTwoFingers": "Use two fingers to move the map",
+      "mapCtrlScroll": "Hold Ctrl and scroll to zoom the map",
+      "mapCmdScroll": "Hold ⌘ and scroll to zoom the map"
     },
     "albumPicker": {
       "label": "Shot at",
@@ -6442,7 +6466,8 @@
       "tabs": {
         "PENDING": "Waiting",
         "APPROVED": "Approved",
-        "REJECTED": "Rejected"
+        "REJECTED": "Rejected",
+        "ATTENTION": "Needs a look"
       },
       "search": "Search by name",
       "searchButton": "Search",
@@ -6488,7 +6513,30 @@
       "deleteConfirm": "Delete \"{name}\"? It disappears from the map and public pages; albums tagged with it are untagged.",
       "albums": "{count, plural, one {# album tagged} other {# albums tagged}}",
       "done": "Saved",
-      "failed": "Could not save, please try again."
+      "failed": "Could not save, please try again.",
+      "attentionHint": "Public spots a customer reported, or that are closed or ban photography.",
+      "province": "Province",
+      "allProvinces": "All provinces",
+      "emptyPending": "Nothing is waiting for review.",
+      "reportsBadge": "{count, plural, one {# report} other {# reports}}",
+      "rejectedBecause": "Rejected: {note}",
+      "checklist": {
+        "place": "The pin is in the right place, and it is public or a business open to visitors — not a private home.",
+        "duplicate": "It is not a duplicate of a spot nearby (see the right-hand column).",
+        "photos": "Photos are clear, of this spot, and do not look taken from the internet. Reject bad ones before approving."
+      },
+      "reportsTitle": "{count, plural, one {# customer report} other {# customer reports}}",
+      "reportsOpen": "Handle them in Reports",
+      "summaryTitle": "Summary",
+      "openGoogleMaps": "Open Google Maps",
+      "editTitle": "Edit details",
+      "editOpen": "Open the form",
+      "addPhotosHint": "Photos an admin adds are approved at once. Only use your own photos or ones you have permission for."
+    },
+    "home": {
+      "title": "Photo spots",
+      "lede": "Great places to shoot, with their best times, fees and rules — and the people who have shot there.",
+      "seeAll": "See every spot"
     }
   }
 }

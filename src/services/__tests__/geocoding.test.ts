@@ -5,6 +5,7 @@ import {
   buildGeocodeAddressHash,
   forwardGeocode,
   normalizeAddressPart,
+  reverseGeocodeArea,
   suggestAddresses,
 } from "@/services/geocoding";
 
@@ -269,5 +270,55 @@ describe("suggestAddresses", () => {
         },
       ],
     });
+  });
+});
+
+// Photo spots: a map pin fills the form's province and ward.
+describe("reverse geocoding a pin", () => {
+  it("reads the province and ward from MapTiler's context chain", async () => {
+    let asked = "";
+    const result = await reverseGeocodeArea(
+      { latitude: 10.7799, longitude: 106.6999 },
+      {
+        apiKey: "test",
+        fetchImpl: async (url) => {
+          asked = String(url);
+          return response({
+            features: [
+              {
+                context: [
+                  { id: "municipality.1", text: "Phường Sài Gòn" },
+                  { id: "region.2", text: "Thành phố Hồ Chí Minh" },
+                ],
+              },
+            ],
+          });
+        },
+      },
+    );
+    assert.deepEqual(result, {
+      success: true,
+      province: "Thành phố Hồ Chí Minh",
+      ward: "Phường Sài Gòn",
+    });
+    // longitude first, as MapTiler expects, and Vietnamese names
+    assert.match(asked, /106\.6999,10\.7799\.json/);
+    assert.match(asked, /language=vi/);
+  });
+
+  it("says not_found rather than guessing when there is no area", async () => {
+    const result = await reverseGeocodeArea(
+      { latitude: 10, longitude: 106 },
+      { apiKey: "test", fetchImpl: async () => response({ features: [] }) },
+    );
+    assert.deepEqual(result, { success: false, reason: "not_found" });
+  });
+
+  it("reports an upstream failure", async () => {
+    const result = await reverseGeocodeArea(
+      { latitude: 10, longitude: 106 },
+      { apiKey: "test", fetchImpl: async () => response({}, false) },
+    );
+    assert.deepEqual(result, { success: false, reason: "upstream_error" });
   });
 });

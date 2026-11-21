@@ -454,18 +454,33 @@ export async function countPendingPlaces() {
 export async function listPlacesForAdmin({
   status,
   q,
+  provinceCode,
+  attention = false,
   page = 1,
 }: {
   status: ModerationStatus;
   q?: string;
+  provinceCode?: string;
+  /** Only spots with an open report or not shooting-ready. */
+  attention?: boolean;
   page?: number;
 }) {
   const PAGE = 30;
   const ids = q ? await placeIdsMatching(q, { includeUnapproved: true }) : null;
+  const reported = await openPlaceReports();
   const where: Prisma.PlaceWhereInput = {
     reviewStatus: status,
     deletedAt: null,
     ...(ids ? { id: { in: ids } } : {}),
+    ...(provinceCode ? { province: { code: provinceCode } } : {}),
+    ...(attention
+      ? {
+          OR: [
+            { id: { in: [...reported.keys()] } },
+            { operatingStatus: { not: "OPEN" } },
+          ],
+        }
+      : {}),
   };
   const [total, rows] = await Promise.all([
     db.place.count({ where }),
@@ -503,12 +518,61 @@ export async function listPlacesForAdmin({
       submittedBy: row.submittedBy,
       thumbnailUrl: row.media[0]?.url ?? null,
       pendingPhotos: row._count.media,
+      openReports: reported.get(row.id) ?? 0,
+      lastVerifiedAt: row.lastVerifiedAt,
       createdAt: row.createdAt,
       href: row.reviewStatus === "APPROVED" ? placeHref(row) : null,
     })),
     total,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE)),
+  };
+}
+
+/** Open reports per spot, from the shared report queue. */
+async function openPlaceReports() {
+  const groups = await db.report.groupBy({
+    by: ["targetId"],
+    where: { targetType: "place", status: { in: ["PENDING", "REVIEWING"] } },
+    _count: { _all: true },
+  });
+  return new Map(groups.map((g) => [g.targetId, g._count._all]));
+}
+
+/** How many spots sit in each review state, and how many need a look. */
+export async function placeAdminCounts() {
+  const reportedIds = [...(await openPlaceReports()).keys()];
+  const [byStatus, reported, notOpen, attention] = await Promise.all([
+    db.place.groupBy({
+      by: ["reviewStatus"],
+      where: { deletedAt: null },
+      _count: { _all: true },
+    }),
+    openPlaceReports(),
+    db.place.count({
+      where: {
+        deletedAt: null,
+        reviewStatus: "APPROVED",
+        operatingStatus: { not: "OPEN" },
+      },
+    }),
+    // "Cần xem lại": public spots a customer reported or that are closed.
+    db.place.count({
+      where: {
+        deletedAt: null,
+        reviewStatus: "APPROVED",
+        OR: [{ id: { in: reportedIds } }, { operatingStatus: { not: "OPEN" } }],
+      },
+    }),
+  ]);
+  const count = new Map(byStatus.map((g) => [g.reviewStatus, g._count._all]));
+  return {
+    PENDING: count.get("PENDING") ?? 0,
+    APPROVED: count.get("APPROVED") ?? 0,
+    REJECTED: count.get("REJECTED") ?? 0,
+    reported: reported.size,
+    notOpen,
+    attention,
   };
 }
 
@@ -529,8 +593,19 @@ export async function getPlaceForAdmin(placeId: string) {
     },
   });
   if (!place) return null;
-  const nearby = await nearbyPlaces(place, place.id);
-  return { place, nearby, href: placeHref(place) };
+  const [nearby, reports] = await Promise.all([
+    nearbyPlaces(place, place.id),
+    db.report.findMany({
+      where: {
+        targetType: "place",
+        targetId: place.id,
+        status: { in: ["PENDING", "REVIEWING"] },
+      },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, reason: true, description: true, createdAt: true },
+    }),
+  ]);
+  return { place, nearby, reports, href: placeHref(place) };
 }
 
 /**
@@ -1057,6 +1132,19 @@ export async function listPublicPlaces({
   };
 }
 
+/** Kinds that have at least one public spot (in a province, if given). */
+export async function placeKindsInUse(provinceCode?: string) {
+  const groups = await db.place.groupBy({
+    by: ["kind"],
+    where: {
+      ...PUBLIC_PLACE,
+      ...(provinceCode ? { province: { code: provinceCode } } : {}),
+    },
+    _count: { _all: true },
+  });
+  return new Map(groups.map((g) => [g.kind, g._count._all]));
+}
+
 /** Provinces that have at least one public spot, with how many. */
 export async function placeProvinces() {
   const groups = await db.place.groupBy({
@@ -1243,7 +1331,15 @@ export async function albumsShotAt(placeId: string, limit = 12) {
             displayName: true,
             priceMin: true,
             services: ACTIVE_SERVICE_PRICES,
-            user: { select: { name: true, username: true, image: true } },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                image: true,
+                acceptingBookings: true,
+              },
+            },
           },
         },
       },
@@ -1268,6 +1364,14 @@ export async function albumsShotAt(placeId: string, limit = 12) {
       providerRole: album.profile.role,
       startingPrice: startingPrice(album.profile),
       href: `/profile/${album.profile.user.username}/albums/${album.id}`,
+      // Straight to booking or a chat from the spot's page — the point of
+      // listing who shot here.
+      bookingHref:
+        PROVIDER_ROLES.includes(album.profile.role) &&
+        album.profile.user.acceptingBookings
+          ? `/booking/${album.profile.user.id}`
+          : null,
+      messageHref: `/dashboard/messages?to=${album.profile.user.id}&consult=1`,
     })),
   };
 }

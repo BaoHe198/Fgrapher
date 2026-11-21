@@ -74,7 +74,11 @@ export function PlacePhotoField({
   onChange,
   max,
   error,
+  hint,
 }: {
+  /** Replaces the default "reviewed before shown" line (an admin's own
+   * photos go in approved). */
+  hint?: string;
   existing: ExistingPlacePhoto[];
   onExistingChange: (next: ExistingPlacePhoto[]) => void;
   value: NewPlacePhoto[];
@@ -181,7 +185,7 @@ export function PlacePhotoField({
   return (
     <div className="flex flex-col gap-2">
       <p id={hintId} className="text-body-sm text-text-secondary">
-        {t("photosHint", { max })}
+        {hint ?? t("photosHint", { max })}
       </p>
       <div className="flex flex-wrap gap-2.5">
         {existing.map((photo) => (

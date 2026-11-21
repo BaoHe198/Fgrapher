@@ -63,6 +63,14 @@ const WIDE_BREAKPOINT = 1180;
 const NAV_LINKS = [
   { href: "/browse", labelKey: "browse" as const, alwaysVisible: true },
   { href: "/fmap", labelKey: "fmap" as const, alwaysVisible: true },
+  // Photo spots (services/places.ts): listed only once one is public, the
+  // same rule as the pages themselves.
+  {
+    href: "/dia-diem",
+    labelKey: "places" as const,
+    alwaysVisible: false,
+    placesOnly: true,
+  },
   {
     href: "/requests",
     labelKey: "booking" as const,
@@ -96,9 +104,12 @@ function useIsWide() {
 export function WebNav({
   marketplaceEnabled,
   socialFeedEnabled,
+  placesEnabled = false,
 }: {
   marketplaceEnabled: boolean;
   socialFeedEnabled: boolean;
+  /** At least one photo spot is public. */
+  placesEnabled?: boolean;
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
@@ -111,7 +122,8 @@ export function WebNav({
     (link) =>
       (marketplaceEnabled || link.href !== "/shop") &&
       (socialFeedEnabled || link.href !== "/community") &&
-      (!link.authOnly || isAuthenticated),
+      (placesEnabled || !("placesOnly" in link)) &&
+      (!("authOnly" in link) || isAuthenticated),
   );
   const links = isWide
     ? navLinks
@@ -255,6 +267,7 @@ export function WebNav({
               isAuthenticated={isAuthenticated}
               marketplaceEnabled={marketplaceEnabled}
               socialFeedEnabled={socialFeedEnabled}
+              placesEnabled={placesEnabled}
             />
           </div>
         </div>
@@ -432,11 +445,13 @@ function MobileNavSheet({
   isAuthenticated,
   marketplaceEnabled,
   socialFeedEnabled,
+  placesEnabled,
 }: {
   session: ReturnType<typeof useSession>["data"];
   isAuthenticated: boolean;
   marketplaceEnabled: boolean;
   socialFeedEnabled: boolean;
+  placesEnabled: boolean;
 }) {
   const t = useTranslations("nav");
   const ts = useTranslations("sharedComponents.webNav");
@@ -451,7 +466,8 @@ function MobileNavSheet({
     (link) =>
       (marketplaceEnabled || link.href !== "/shop") &&
       (socialFeedEnabled || link.href !== "/community") &&
-      (!link.authOnly || isAuthenticated),
+      (placesEnabled || !("placesOnly" in link)) &&
+      (!("authOnly" in link) || isAuthenticated),
   );
 
   return (

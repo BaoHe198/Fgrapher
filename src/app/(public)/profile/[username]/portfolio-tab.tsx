@@ -16,7 +16,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Pencil, Plus } from "lucide-react";
+import { GripVertical, MapPin, Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
@@ -72,6 +72,7 @@ interface AlbumItem {
     commentCount: number;
     likedByViewer: boolean;
   } | null;
+  place?: { name: string; href: string } | null;
 }
 
 interface OwnerAlbum {
@@ -296,6 +297,16 @@ export function PortfolioTab({
   }
 
   const openAlbum = albums.find((a) => a.id === openAlbumId) ?? null;
+  const spotsShot = [
+    ...new Map(
+      albums
+        .map((album) => album.place)
+        .filter((place): place is { name: string; href: string } =>
+          Boolean(place),
+        )
+        .map((place) => [place.href, place]),
+    ).values(),
+  ];
 
   // Every approved photo, flattened across albums, each carrying the album
   // it came from so the lightbox can still show that context.
@@ -480,6 +491,12 @@ export function PortfolioTab({
                       <span className="text-heading-md text-text-primary group-hover/album:underline group-hover/album:underline-offset-4">
                         {album.title}
                       </span>
+                      {album.place ? (
+                        <span className="flex items-center gap-1 text-body-sm text-text-secondary">
+                          <MapPin aria-hidden className="size-3.5 shrink-0" />
+                          {t("shotAt", { place: album.place.name })}
+                        </span>
+                      ) : null}
                       {album.category || album.description ? (
                         <span className="line-clamp-2 text-body-sm text-text-secondary">
                           {[
@@ -507,6 +524,28 @@ export function PortfolioTab({
                 );
               })}
             </ul>
+            {/* Where this artist has shot — each spot's page lists them
+                back (services/places.ts albumsShotAt). */}
+            {spotsShot.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <h4 className="text-body-sm font-semibold text-text-secondary">
+                  {t("spotsShot")}
+                </h4>
+                <ul className="flex flex-wrap gap-2">
+                  {spotsShot.map((spot) => (
+                    <li key={spot.href}>
+                      <Link
+                        href={spot.href}
+                        className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-border-default px-3 py-1.5 text-body-sm text-text-primary hover:border-border-strong hover:bg-bg-sunken"
+                      >
+                        <MapPin aria-hidden className="size-3.5 shrink-0" />
+                        {spot.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </section>
 
           <section className="mt-10 flex flex-col gap-4">

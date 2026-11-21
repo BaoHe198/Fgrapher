@@ -172,26 +172,41 @@ provider mặc định được làm mờ. Chi tiết: `docs/ops/fmap.md`.
   tỉnh/phường, giờ đẹp, tháng đẹp, vé vào cổng, phí chụp, cần xin phép không, quy
   định, lúc đông, gửi xe, 1–10 ảnh tự chụp (bắt buộc tick xác nhận quyền với ảnh).
   Tối đa 5 đề xuất chờ duyệt một lúc. Ghim cách địa điểm có sẵn dưới 200 m bị hỏi
-  "có phải địa điểm này?" trước khi gửi.
+  "có phải địa điểm này?" trước khi gửi. Thả ghim thì tỉnh/phường tự điền theo vị
+  trí (tra ngược qua MapTiler/Goong, `/api/places/area`); chọn tỉnh khác chỗ ghim
+  thì form cảnh báo và có nút chuyển. Bản đồ trong form dùng hai ngón để kéo (một
+  ngón cuộn trang).
 - **Duyệt.** Không gì hiện công khai trước khi admin duyệt (`/admin/places`). Duyệt
   địa điểm thì duyệt luôn ảnh còn chờ; admin từ chối ảnh xấu trước, từng ảnh. Từ
   chối cần lý do; người đề xuất sửa và gửi lại. Admin còn: sửa mọi thông tin, đổi
   tình trạng (đang mở / tạm đóng / cấm chụp, kèm ghi chú), đánh dấu "đã kiểm tra
   hôm nay", thêm ảnh, chọn ảnh bìa, gộp địa điểm trùng (album và ảnh chuyển sang,
   địa chỉ cũ chuyển hướng 308), xoá. Mọi thao tác ghi `AdminAction`. Người đề xuất
-  nhận thông báo `PLACE_APPROVED`/`PLACE_REJECTED`.
+  nhận thông báo `PLACE_APPROVED`/`PLACE_REJECTED`. Trang quản lý (21/11/2026):
+  tab có số đếm — Chờ duyệt, **Cần xem lại** (địa điểm công khai có báo cáo của
+  khách hoặc đang đóng/cấm chụp), Đã duyệt, Đã từ chối — lọc theo tỉnh; trang
+  duyệt đặt quyết định và danh sách cần kiểm lên đầu, rồi báo cáo của khách, tóm
+  tắt kèm bản đồ + Google Maps, ảnh, và form sửa thu gọn. Tổng quan admin có ô
+  "Địa điểm chụp chờ duyệt".
 - **Trang công khai.** `/dia-diem` (theo tỉnh, lọc theo loại), `/dia-diem/<tỉnh>`,
-  `/dia-diem/<tỉnh>/<slug>`: ảnh đã duyệt, thông tin thực tế (thiếu thì ghi "Chưa
-  rõ", không đoán), chỉ đường, "Nhiếp ảnh gia đã chụp ở đây" (album gắn địa điểm),
+  `/dia-diem/<tỉnh>/<slug>`: ảnh bìa lớn rồi các ảnh khác, bản đồ nhỏ, thông tin
+  thực tế (mục chưa biết gom thành một dòng "Chưa có thông tin về: …", không đoán),
+  chỉ đường, "Nhiếp ảnh gia đã chụp ở đây" (album gắn địa điểm, kèm nút Đặt lịch /
+  Nhắn tin),
   "Nhà cung cấp ở gần" (trong 15 km, không ghi khoảng cách tới địa chỉ riêng của
   họ), "Báo thông tin sai" (lý do riêng cho địa điểm). Chưa có địa điểm công khai
   nào thì các trang này là 404 và không có trong sitemap — tức tính năng tự ẩn tới
   khi admin duyệt địa điểm đầu tiên. JSON-LD `TouristAttraction` + `BreadcrumbList`.
+- **Lối vào.** Menu chung có "Địa điểm chụp"; trang chủ có khối "Địa điểm chụp
+  đẹp" (3 địa điểm) — cả hai chỉ hiện khi đã có địa điểm công khai.
 - **Bản đồ F.** Nút "Địa điểm chụp" (góc dưới trái) bật lớp chấm vàng, tải theo
-  vùng đang xem; bấm chấm mở thẻ xem nhanh. `/fmap?layer=places&lat=&lng=&place=`
+  vùng đang xem ("Đang tải…" trong lúc chờ); mỗi chấm là một nút nằm trên ảnh nhà
+  cung cấp; bấm chấm mở thẻ xem nhanh và đưa chấm lên phần bản đồ còn thấy. `/fmap?layer=places&lat=&lng=&place=`
   mở sẵn lớp và địa điểm (nút "Xem trên Bản đồ F" ở trang địa điểm).
 - **Album "Chụp tại".** Ô tìm địa điểm (gõ không dấu được) khi tạo album và trên
-  trang album; chỉ chọn được địa điểm đã duyệt.
+  trang album; chỉ chọn được địa điểm đã duyệt. Trang album ghi "Chụp tại …" (link
+  sang địa điểm); hồ sơ nhiếp ảnh gia ghi nơi chụp trên từng album và danh sách
+  "Địa điểm đã chụp"; "Trang của tôi" có thẻ đếm album đã gắn địa điểm.
 - **Xoá tài khoản / xuất dữ liệu.** Xuất dữ liệu có địa điểm đã đề xuất và ảnh địa
   điểm. Xoá tài khoản: ảnh họ tải lên rời trang địa điểm, đề xuất chưa duyệt bị
   xoá, địa điểm đã duyệt ở lại nhưng không còn gắn với họ.
