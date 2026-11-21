@@ -323,6 +323,7 @@ export function PlacePhotosPanel({
           value={adding}
           onChange={setAdding}
           max={30}
+          hint={t("addPhotosHint")}
         />
         {adding.length > 0 ? (
           <>
