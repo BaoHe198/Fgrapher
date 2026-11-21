@@ -1,4 +1,10 @@
-import { AlertTriangle, CreditCard, Flag, TrendingUp } from "lucide-react";
+import {
+  AlertTriangle,
+  CreditCard,
+  Flag,
+  MapPin,
+  TrendingUp,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -7,6 +13,7 @@ import { Card } from "@/components/ui/card";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
 import { getAdminStats, getRecentActivity } from "@/services/admin";
+import { countPendingPlaces } from "@/services/places";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("accountFlows.admin.overview");
@@ -14,10 +21,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AdminOverviewPage() {
-  const [stats, t, activityT] = await Promise.all([
+  const [stats, t, activityT, pendingPlaces] = await Promise.all([
     getAdminStats(),
     getTranslations("accountFlows.admin.overview"),
     getTranslations("accountFlows.admin.overview.activity"),
+    countPendingPlaces(),
   ]);
   const activity = await getRecentActivity(activityT);
 
@@ -71,6 +79,12 @@ export default async function AdminOverviewPage() {
       icon: AlertTriangle,
       href: "/admin/users",
     },
+    {
+      label: t("pendingPlaces"),
+      value: pendingPlaces,
+      icon: MapPin,
+      href: "/admin/places",
+    },
   ];
 
   return (
@@ -98,7 +112,7 @@ export default async function AdminOverviewPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {health.map((h) => (
           <Link key={h.label} href={h.href}>
             <Card interactive className="flex flex-row items-center gap-3">

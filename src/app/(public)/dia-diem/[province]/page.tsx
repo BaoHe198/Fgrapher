@@ -114,8 +114,12 @@ export default async function ProvincePlacesPage({
       </header>
 
       {kindsHere.size > 1 ? (
-        <nav aria-label={indexT("filterKind")} className="flex flex-wrap gap-2">
+        <nav
+          aria-label={indexT("filterKind")}
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+        >
           <Tag
+            className="shrink-0"
             selected={!kind}
             aria-current={!kind ? "page" : undefined}
             render={<Link href={`/dia-diem/${province.code}`} scroll={false} />}
@@ -124,6 +128,7 @@ export default async function ProvincePlacesPage({
           </Tag>
           {PLACE_KINDS.filter((value) => kindsHere.has(value)).map((value) => (
             <Tag
+              className="shrink-0"
               key={value}
               selected={kind === value}
               aria-current={kind === value ? "page" : undefined}

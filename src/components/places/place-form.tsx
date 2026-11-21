@@ -135,6 +135,14 @@ export function PlaceForm({
     null,
   );
   const [locating, setLocating] = useState(false);
+  // The province/ward the pin lies in, from /api/places/area: fills empty
+  // selects and warns when the chosen province is elsewhere.
+  const [pinArea, setPinArea] = useState<{
+    provinceId: string | null;
+    wardId: string | null;
+  } | null>(null);
+  const [areaFilled, setAreaFilled] = useState(false);
+  const areaTimer = useRef<number | null>(null);
   const nearbyRef = useRef<HTMLDivElement>(null);
   const withPhotos = mode !== "adminEdit";
   const photosRequired = mode === "propose" || mode === "edit";
@@ -160,6 +168,48 @@ export function PlaceForm({
       .catch(() => {});
     return () => controller.abort();
   }, [provinceCode]);
+
+  const lookUpArea = (point: PinPoint) => {
+    if (areaTimer.current) window.clearTimeout(areaTimer.current);
+    areaTimer.current = window.setTimeout(async () => {
+      const res = await fetch(
+        `/api/places/area?lat=${point.latitude}&lng=${point.longitude}`,
+      ).catch(() => null);
+      const body = await res?.json().catch(() => null);
+      const area = body?.data as
+        { provinceId: string | null; wardId: string | null } | undefined;
+      if (!area?.provinceId) {
+        setPinArea(null);
+        return;
+      }
+      setPinArea(area);
+      setValues((prev) => {
+        if (!prev.provinceId) {
+          setAreaFilled(true);
+          return {
+            ...prev,
+            provinceId: area.provinceId!,
+            wardId: area.wardId ?? "",
+          };
+        }
+        if (
+          prev.provinceId === area.provinceId &&
+          !prev.wardId &&
+          area.wardId
+        ) {
+          setAreaFilled(true);
+          return { ...prev, wardId: area.wardId };
+        }
+        return prev;
+      });
+    }, 400);
+  };
+  const pinProvince =
+    pinArea?.provinceId &&
+    values.provinceId &&
+    pinArea.provinceId !== values.provinceId
+      ? (provinces.find((p) => p.id === pinArea.provinceId) ?? null)
+      : null;
 
   const toggle = <T,>(list: T[], item: T) =>
     list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
@@ -294,6 +344,7 @@ export function PlaceForm({
         };
         set("pin", point);
         setCentre({ ...point, nonce: Date.now() });
+        lookUpArea(point);
       },
       () => {
         setLocating(false);
@@ -407,9 +458,15 @@ export function PlaceForm({
                 set("pin", point);
                 setErrors((prev) => ({ ...prev, pin: undefined }));
                 setNearby(null);
+                lookUpArea(point);
               }}
               centreRequest={centre}
               label={t("mapHint")}
+              gestureHelp={{
+                mobile: t("mapTwoFingers"),
+                windows: t("mapCtrlScroll"),
+                mac: t("mapCmdScroll"),
+              }}
             />
           </div>
           {values.pin ? (
@@ -421,6 +478,34 @@ export function PlaceForm({
           {errors.pin ? (
             <p className="text-body-sm text-danger" role="alert">
               {errors.pin}
+            </p>
+          ) : null}
+          {pinProvince ? (
+            <div
+              role="alert"
+              className="flex flex-wrap items-center gap-2 rounded-[var(--fg-radius-md)] bg-warning-bg p-3 text-body-sm text-warning"
+            >
+              <span>
+                {t("pinProvinceMismatch", { province: pinProvince.name })}
+              </span>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() =>
+                  setValues((prev) => ({
+                    ...prev,
+                    provinceId: pinProvince.id,
+                    wardId: pinArea?.wardId ?? "",
+                  }))
+                }
+              >
+                {t("useProvince", { province: pinProvince.name })}
+              </Button>
+            </div>
+          ) : areaFilled && values.provinceId ? (
+            <p role="status" className="text-body-sm text-text-secondary">
+              {t("areaFilled")}
             </p>
           ) : null}
         </div>

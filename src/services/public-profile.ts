@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { isSubscriptionUsable } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { placeHref } from "@/lib/places";
 import {
   PAID_ROLES,
   PROVIDER_ROLES,
@@ -243,6 +244,18 @@ async function getPublicProfileUserUncached(username: string) {
             },
             orderBy: { sortOrder: "asc" },
             include: {
+              // "Chụp tại" (services/places.ts) — shown only while the
+              // spot is public; see the mapping below.
+              place: {
+                select: {
+                  name: true,
+                  slug: true,
+                  reviewStatus: true,
+                  deletedAt: true,
+                  mergedIntoId: true,
+                  province: { select: { code: true } },
+                },
+              },
               media: {
                 where: { moderationStatus: "APPROVED", deletedAt: null },
                 orderBy: { order: "asc" },
@@ -296,8 +309,16 @@ async function getPublicProfileUserUncached(username: string) {
             !album.coverMedia.deletedAt
               ? album.coverMedia
               : (album.media[0] ?? null);
+          const place =
+            album.place &&
+            album.place.reviewStatus === "APPROVED" &&
+            !album.place.deletedAt &&
+            !album.place.mergedIntoId
+              ? { name: album.place.name, href: placeHref(album.place) }
+              : null;
           return {
             ...album,
+            place,
             coverMedia: cover
               ? { id: cover.id, url: cover.url, type: cover.type }
               : null,

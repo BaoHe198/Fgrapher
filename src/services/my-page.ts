@@ -25,6 +25,7 @@ export interface MyPageCard {
     | "policies"
     | "hours"
     | "reviews"
+    | "places"
     | "share";
   state: CardState;
   href: string;
@@ -90,6 +91,11 @@ export async function getMyPageStatus(
           costumes: true,
           albums: { where: { deletedAt: null } },
         },
+      },
+      // "Chụp tại": albums tied to a public photo spot appear on its page.
+      albums: {
+        where: { deletedAt: null, placeId: { not: null } },
+        select: { id: true },
       },
       resources: {
         select: {
@@ -256,6 +262,19 @@ export async function getMyPageStatus(
       },
       detail: (reviews?._count ?? 0) > 0 ? "count" : "empty",
     });
+    // Photo spots (services/places.ts): a nudge to say where albums were
+    // shot, which lists them on that spot's page. Info, not a to-do: it
+    // never blocks the page.
+    const albumTotal = profile?._count.albums ?? 0;
+    if (albumTotal > 0) {
+      cards.push({
+        key: "places",
+        state: "info",
+        href: "/dashboard/portfolio",
+        values: { tagged: profile?.albums.length ?? 0, total: albumTotal },
+        detail: (profile?.albums.length ?? 0) > 0 ? "tagged" : "none",
+      });
+    }
     cards.push({
       key: "share",
       state: "info",

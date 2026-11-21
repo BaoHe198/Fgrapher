@@ -96,6 +96,10 @@ Hàng chờ ở `/admin/places`. Với mỗi đề xuất:
    với liên kết sang trang admin của địa điểm. Đóng cửa thì đổi tình trạng (kèm
    ghi chú) chứ đừng xoá: khách vẫn tìm nó và cần biết nó đang đóng.
 
+Hằng ngày xem thêm tab **Cần xem lại**: địa điểm đang công khai có báo cáo của
+khách hoặc đang đóng/cấm chụp — mở từng cái, đọc báo cáo ngay trên trang, sửa
+thông tin hoặc đổi tình trạng, rồi đóng báo cáo ở `/admin/reports`.
+
 Nhập bộ địa điểm khởi đầu: `/admin/places` → "Thêm địa điểm". Địa điểm admin
 thêm vẫn ở trạng thái chờ duyệt, để việc công khai là một bước có chủ ý. Danh
 sách gợi ý cần kiểm chứng: `docs/ops/dia-diem-khoi-dau.md`.

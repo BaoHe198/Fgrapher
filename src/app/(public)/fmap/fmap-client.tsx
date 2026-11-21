@@ -93,6 +93,12 @@ interface FmapClientProps {
   initialPlaceId?: string | null;
 }
 
+function boundsKey(bounds: FmapBounds) {
+  return [bounds.north, bounds.south, bounds.east, bounds.west]
+    .map((value) => value.toFixed(4))
+    .join(",");
+}
+
 /** Share of the searched area treated as "the edge" on each side. */
 const EDGE_MARGIN = 0.12;
 
@@ -283,6 +289,10 @@ export function FmapClient({
   const [placesOn, setPlacesOn] = useState(placesAvailable && initialPlacesOn);
   const [places, setPlaces] = useState<PlaceCard[]>([]);
   const [placesError, setPlacesError] = useState(false);
+  // The map area the spots on screen were loaded for. Until it matches the
+  // area in view, the count says "loading" — from the very press of the
+  // switch, not 300 ms later (it briefly said "none in this area").
+  const [placesLoadedFor, setPlacesLoadedFor] = useState<string | null>(null);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(
     placesAvailable ? initialPlaceId : null,
   );
@@ -301,6 +311,11 @@ export function FmapClient({
   }, [filters, bounds]);
 
   const invalidReason = filtersProblem(filters, t);
+  const placesLoading =
+    placesOn &&
+    bounds !== null &&
+    placesLoadedFor !== boundsKey(bounds) &&
+    places.length === 0;
 
   useEffect(() => {
     if (!placesOn || !bounds) return;
@@ -308,6 +323,7 @@ export function FmapClient({
       placesRequestRef.current?.abort();
       const controller = new AbortController();
       placesRequestRef.current = controller;
+      const key = boundsKey(bounds);
       const params = new URLSearchParams({
         north: String(Math.min(bounds.north, bounds.south + 20)),
         south: String(bounds.south),
@@ -319,12 +335,14 @@ export function FmapClient({
         .then((body: { data: PlaceCard[] }) => {
           setPlaces(body.data ?? []);
           setPlacesError(false);
+          setPlacesLoadedFor(key);
         })
         .catch((error: unknown) => {
           if (error instanceof DOMException && error.name === "AbortError") {
             return;
           }
           setPlacesError(true);
+          setPlacesLoadedFor(key);
         });
     }, 300);
     return () => window.clearTimeout(timer);
@@ -539,6 +557,11 @@ export function FmapClient({
     if (searchedFor.category) params.set("category", searchedFor.category);
     return `/booking/${preview.providerId}?${params}`;
   }, [searchedFor, preview, markers]);
+
+  const placeClusterLabel = useCallback(
+    (count: number) => placesT("cluster", { count }),
+    [placesT],
+  );
 
   const markerLabels = useMemo<MarkerLabels>(
     () => ({
@@ -822,6 +845,7 @@ export function FmapClient({
             }}
             onSelectProvider={(profileId) => void selectProvider(profileId)}
             places={placesOn ? places : []}
+            placeClusterLabel={placeClusterLabel}
             selectedPlaceId={selectedPlace ? selectedPlace.id : null}
             onSelectPlace={(placeId) => {
               setSelectedProfileId(null);
@@ -918,7 +942,9 @@ export function FmapClient({
                 >
                   {placesError
                     ? placesT("loadFailed")
-                    : placesT("count", { count: places.length })}
+                    : placesLoading
+                      ? placesT("loading")
+                      : placesT("count", { count: places.length })}
                 </p>
               ) : null}
               <button

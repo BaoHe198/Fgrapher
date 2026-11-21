@@ -5,14 +5,17 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import {
   AlertTriangle,
+  CalendarDays,
   ExternalLink,
   Map as MapIcon,
   MapPin,
+  MessageCircle,
 } from "lucide-react";
 
 import { monthsLabel } from "@/components/places/months-label";
 import { PlaceCard } from "@/components/places/place-card";
 import { PlaceGallery } from "@/components/places/place-gallery";
+import { PlaceMiniMapLazy as PlaceMiniMap } from "@/components/places/place-mini-map-lazy";
 import { PlaceReportButton } from "@/components/places/place-report-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -77,29 +80,34 @@ export default async function PlacePage({ params }: PageProps) {
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
   const area = [place.wardName, place.provinceName].filter(Boolean).join(", ");
   const months = monthsLabel(place.bestMonths, placesT);
-  const unknown = <span className="text-text-tertiary">{t("unknown")}</span>;
   const fee =
     place.entryFeeVnd == null
-      ? unknown
+      ? null
       : place.entryFeeVnd === 0
         ? t("free")
         : t("perPerson", { price: formatVND(place.entryFeeVnd) });
   const permit =
     place.permitRequired == null
-      ? unknown
+      ? null
       : place.permitRequired
         ? t("permitYes")
         : t("permitNo");
-  const facts: { label: string; value: React.ReactNode }[] = [
-    { label: t("bestTime"), value: place.bestTimeNote ?? unknown },
-    { label: t("bestMonths"), value: months || unknown },
+  const allFacts: { label: string; value: string | null }[] = [
+    { label: t("bestTime"), value: place.bestTimeNote },
+    { label: t("bestMonths"), value: months || null },
     { label: t("entryFee"), value: fee },
-    { label: t("feeNote"), value: place.feeNote ?? unknown },
+    { label: t("feeNote"), value: place.feeNote },
     { label: t("permit"), value: permit },
-    { label: t("rules"), value: place.rulesNote ?? unknown },
-    { label: t("crowd"), value: place.crowdNote ?? unknown },
-    { label: t("parking"), value: place.parkingNote ?? unknown },
+    { label: t("rules"), value: place.rulesNote },
+    { label: t("crowd"), value: place.crowdNote },
+    { label: t("parking"), value: place.parkingNote },
   ];
+  // What nobody has told us yet reads as one line, not a column of "Chưa
+  // rõ" that made a young spot look empty (21/11 walk-through).
+  const facts = allFacts.filter((fact) => fact.value);
+  const unknownFacts = allFacts
+    .filter((fact) => !fact.value)
+    .map((fact) => fact.label.toLowerCase());
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`;
 
   return (
@@ -178,8 +186,10 @@ export default async function PlacePage({ params }: PageProps) {
         <p className="flex flex-wrap items-center gap-x-1.5 text-body-md text-text-secondary">
           <span>{placesT(`kinds.${place.kind}`)}</span>
           <span aria-hidden>·</span>
-          <MapPin aria-hidden className="size-4" />
-          <span>{area}</span>
+          <span className="inline-flex items-center gap-1">
+            <MapPin aria-hidden className="size-4 shrink-0" />
+            {area}
+          </span>
         </p>
       </header>
 
@@ -249,6 +259,11 @@ export default async function PlacePage({ params }: PageProps) {
                   <span>
                     {[place.address, area].filter(Boolean).join(", ")}
                   </span>
+                  <PlaceMiniMap
+                    latitude={place.latitude}
+                    longitude={place.longitude}
+                    label={t("mapAlt", { name: place.name })}
+                  />
                   <span className="flex flex-wrap gap-2">
                     <Button
                       variant="secondary"
@@ -282,6 +297,12 @@ export default async function PlacePage({ params }: PageProps) {
                 </dd>
               </div>
             </dl>
+            {unknownFacts.length > 0 ? (
+              <p className="text-body-sm text-text-secondary">
+                {t("unknownFacts", { list: unknownFacts.join(", ") })}{" "}
+                {t("unknownInvite")}
+              </p>
+            ) : null}
             <p className="text-body-sm text-text-tertiary">
               {place.lastVerifiedAt
                 ? t("verifiedAt", { date: formatDate(place.lastVerifiedAt) })
@@ -353,6 +374,28 @@ export default async function PlacePage({ params }: PageProps) {
                         {album.startingPrice != null
                           ? t("from", { price: formatVND(album.startingPrice) })
                           : t("contactPrice")}
+                      </span>
+                      <span className="mt-1.5 flex flex-wrap gap-2">
+                        {album.bookingHref ? (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            nativeButton={false}
+                            render={<Link href={album.bookingHref} />}
+                          >
+                            <CalendarDays aria-hidden />
+                            {t("book")}
+                          </Button>
+                        ) : null}
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          nativeButton={false}
+                          render={<Link href={album.messageHref} />}
+                        >
+                          <MessageCircle aria-hidden />
+                          {t("message")}
+                        </Button>
                       </span>
                     </div>
                   </li>

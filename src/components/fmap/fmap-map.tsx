@@ -28,15 +28,65 @@ const MAX_ZOOM = 18;
 // The "Địa điểm chụp" layer (services/places.ts): gold dots with a name at
 // street zoom, drawn under the providers' photo-frame markers.
 const PLACES_SOURCE = "fmap-places";
-const PLACES_LAYER = "fmap-places-dot";
-const PLACES_SELECTED_LAYER = "fmap-places-selected";
 const PLACES_LABEL_LAYER = "fmap-places-label";
+// Invisible: only there to ask the map which spots and spot clusters are
+// on screen, so each gets a DOM marker (above the providers' photos).
+const PLACES_HIT_LAYER = "fmap-places-hit";
 
 export interface FmapPlacePin {
   id: string;
   name: string;
   latitude: number;
   longitude: number;
+}
+
+// A spot is a DOM marker, not a map-layer circle: drawn on the canvas it
+// sat under the providers' photo markers and could not be tapped at city
+// zoom (found in the 21/11/2026 walk-through). As a button it is also
+// reachable by keyboard and named for screen readers.
+function placeMarkerElement(
+  place: FmapPlacePin,
+  onSelect: (placeId: string) => void,
+) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.setAttribute("aria-label", place.name);
+  button.className =
+    "group block size-11 cursor-pointer rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus";
+  const dot = document.createElement("span");
+  dot.className =
+    "m-auto block size-5 rounded-full border-[3px] border-white bg-[#c8a36a] shadow-[0_1px_4px_rgb(0_0_0/0.35)] transition-transform duration-[var(--fg-dur-200)] group-hover:scale-110 group-data-[selected=true]:scale-125 group-data-[selected=true]:border-[#0b2d27]";
+  button.appendChild(dot);
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onSelect(place.id);
+  });
+  return button;
+}
+
+// Spots closer than a marker's width at the current zoom become one gold
+// bubble with a count: two dots 100 m apart at city zoom sat on top of each
+// other and the lower one could not be tapped (21/11 walk-through).
+function placeClusterElement(
+  count: number,
+  label: string,
+  onSelect: () => void,
+) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.setAttribute("aria-label", label);
+  button.className =
+    "group grid size-11 cursor-pointer place-items-center rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus";
+  const bubble = document.createElement("span");
+  bubble.className =
+    "grid size-8 place-items-center rounded-full border-[3px] border-white bg-[#c8a36a] text-[13px] font-bold text-white shadow-[0_1px_4px_rgb(0_0_0/0.35)] transition-transform duration-[var(--fg-dur-200)] group-hover:scale-110";
+  bubble.textContent = String(count);
+  button.appendChild(bubble);
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onSelect();
+  });
+  return button;
 }
 
 function placeFeatures(places: FmapPlacePin[]) {
@@ -184,7 +234,10 @@ export function FmapMap({
   places = [],
   selectedPlaceId = null,
   onSelectPlace,
+  placeClusterLabel = (count) => String(count),
 }: {
+  /** Accessible name of a bubble of `count` spots. */
+  placeClusterLabel?: (count: number) => string;
   /** Photo spots to draw; empty when the layer is off. */
   places?: FmapPlacePin[];
   selectedPlaceId?: string | null;
@@ -218,6 +271,16 @@ export function FmapMap({
   const placesRef = useRef(places);
   const selectPlaceRef = useRef(onSelectPlace);
   const selectedPlaceRef = useRef(selectedPlaceId);
+  const placeMarkersRef = useRef(new Map<string, maplibregl.Marker>());
+  const refreshPlaceMarkersRef = useRef<() => void>(() => {});
+  const placeClusterLabelRef = useRef(placeClusterLabel);
+  useEffect(() => {
+    placeClusterLabelRef.current = placeClusterLabel;
+  }, [placeClusterLabel]);
+  const bottomInsetRef = useRef(bottomInset);
+  useEffect(() => {
+    bottomInsetRef.current = bottomInset;
+  }, [bottomInset]);
   useEffect(() => {
     placesRef.current = places;
     selectPlaceRef.current = onSelectPlace;
@@ -268,7 +331,69 @@ export function FmapMap({
         ?.classList.remove("maplibregl-compact-show"),
     );
 
+    const refreshPlaceMarkers = () => {
+      if (!map.getLayer(PLACES_HIT_LAYER)) return;
+      const markers = placeMarkersRef.current;
+      const seen = new Set<string>();
+      for (const feature of map.queryRenderedFeatures({
+        layers: [PLACES_HIT_LAYER],
+      })) {
+        const props = feature.properties ?? {};
+        const isCluster = props.point_count != null;
+        const key = isCluster ? `c:${props.cluster_id}` : String(props.placeId);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        if (markers.has(key)) continue;
+        let element: HTMLElement;
+        let at: [number, number];
+        if (isCluster) {
+          if (feature.geometry.type !== "Point") continue;
+          at = feature.geometry.coordinates as [number, number];
+          const clusterId = props.cluster_id as number;
+          element = placeClusterElement(
+            props.point_count as number,
+            placeClusterLabelRef.current(props.point_count as number),
+            async () => {
+              const source = map.getSource(PLACES_SOURCE) as GeoJSONSource;
+              const zoom = await source.getClusterExpansionZoom(clusterId);
+              map.easeTo({ center: at, zoom }, { fgUser: true });
+            },
+          );
+        } else {
+          const place = placesRef.current.find((p) => p.id === props.placeId);
+          if (!place) continue;
+          at = [place.longitude, place.latitude];
+          element = placeMarkerElement(place, (id) =>
+            selectPlaceRef.current?.(id),
+          );
+          if (place.id === selectedPlaceRef.current) {
+            element.dataset.selected = "true";
+          }
+        }
+        const marker = new maplibregl.Marker({ element, anchor: "center" })
+          .setLngLat(at)
+          .addTo(map);
+        marker.getElement().style.zIndex = "5";
+        markers.set(key, marker);
+      }
+      for (const [key, marker] of markers) {
+        if (!seen.has(key)) {
+          marker.remove();
+          markers.delete(key);
+        }
+      }
+    };
+    refreshPlaceMarkersRef.current = refreshPlaceMarkers;
+    // Draw spot markers as soon as their data is in, not once every map
+    // tile has loaded ("idle" could take seconds on a phone).
+    map.on("sourcedata", (event) => {
+      if (event.sourceId === PLACES_SOURCE && event.isSourceLoaded) {
+        refreshPlaceMarkers();
+      }
+    });
+
     const refreshDomMarkers = () => {
+      refreshPlaceMarkers();
       if (!map.getLayer(UNCLUSTERED_LAYER)) return;
       const visibleIds = new Set<string>();
       for (const feature of map.queryRenderedFeatures({
@@ -327,34 +452,21 @@ export function FmapMap({
       map.addSource(PLACES_SOURCE, {
         type: "geojson",
         data: placeFeatures(placesRef.current),
+        cluster: true,
+        clusterMaxZoom: MAX_ZOOM - 1,
+        clusterRadius: 40,
       });
       map.addLayer({
-        id: PLACES_LAYER,
+        id: PLACES_HIT_LAYER,
         type: "circle",
         source: PLACES_SOURCE,
-        paint: {
-          "circle-color": "#c8a36a",
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 6, 14, 10],
-          "circle-stroke-width": 3,
-          "circle-stroke-color": "#ffffff",
-        },
-      });
-      map.addLayer({
-        id: PLACES_SELECTED_LAYER,
-        type: "circle",
-        source: PLACES_SOURCE,
-        filter: ["==", ["get", "placeId"], selectedPlaceRef.current ?? ""],
-        paint: {
-          "circle-color": "rgba(0,0,0,0)",
-          "circle-radius": 16,
-          "circle-stroke-width": 3,
-          "circle-stroke-color": "#0b2d27",
-        },
+        paint: { "circle-radius": 1, "circle-opacity": 0 },
       });
       map.addLayer({
         id: PLACES_LABEL_LAYER,
         type: "symbol",
         source: PLACES_SOURCE,
+        filter: ["!", ["has", "point_count"]],
         minzoom: 12,
         layout: {
           "text-field": ["get", "name"],
@@ -440,19 +552,6 @@ export function FmapMap({
         );
       }
     });
-    map.on("click", PLACES_LAYER, (event: MapMouseEvent) => {
-      const feature = map.queryRenderedFeatures(event.point, {
-        layers: [PLACES_LAYER],
-      })[0];
-      const placeId = feature?.properties?.placeId as string | undefined;
-      if (placeId) selectPlaceRef.current?.(placeId);
-    });
-    map.on("mouseenter", PLACES_LAYER, () => {
-      map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", PLACES_LAYER, () => {
-      map.getCanvas().style.cursor = "";
-    });
     map.on("mouseenter", CLUSTERS_LAYER, () => {
       map.getCanvas().style.cursor = "pointer";
     });
@@ -512,21 +611,47 @@ export function FmapMap({
     map.triggerRepaint();
   }, [markers]);
 
+  // Spots: names on the map layer, the dots as markers above everything.
   useEffect(() => {
     const map = mapRef.current;
-    const source = map?.getSource(PLACES_SOURCE) as GeoJSONSource | undefined;
-    source?.setData(placeFeatures(places));
+    if (!map) return;
+    const source = map.getSource(PLACES_SOURCE) as GeoJSONSource | undefined;
+    if (!source) return;
+    // New data, new clusters: rebuild the markers once the map has drawn it.
+    for (const marker of placeMarkersRef.current.values()) marker.remove();
+    placeMarkersRef.current.clear();
+    void source.setData(placeFeatures(places));
+    map.once("idle", () => refreshPlaceMarkersRef.current());
+    map.triggerRepaint();
   }, [places]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map?.getLayer(PLACES_SELECTED_LAYER)) return;
-    map.setFilter(PLACES_SELECTED_LAYER, [
-      "==",
-      ["get", "placeId"],
-      selectedPlaceId ?? "",
-    ]);
-  }, [selectedPlaceId]);
+    for (const [id, marker] of placeMarkersRef.current) {
+      const element = marker.getElement();
+      if (id === selectedPlaceId) element.dataset.selected = "true";
+      else delete element.dataset.selected;
+    }
+    // Centre the chosen spot in the part of the map the phone's sheet
+    // leaves visible; it used to sit under the card that describes it.
+    const place = places.find((item) => item.id === selectedPlaceId);
+    if (place) {
+      mapRef.current?.easeTo({
+        center: [place.longitude, place.latitude],
+        offset: [0, -bottomInsetRef.current / 2],
+        duration: 500,
+      });
+    }
+    // Only when the choice changes, not on every reload of the spots.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPlaceId, places.length > 0]);
+
+  useEffect(() => {
+    const markers = placeMarkersRef.current;
+    return () => {
+      for (const marker of markers.values()) marker.remove();
+      markers.clear();
+    };
+  }, []);
 
   useEffect(() => {
     if (!zoomRequest || !mapRef.current) return;
@@ -539,16 +664,13 @@ export function FmapMap({
     else map.zoomOut(options, { fgUser: true });
   }, [zoomRequest]);
 
-  const bottomInsetRef = useRef(bottomInset);
-  useEffect(() => {
-    bottomInsetRef.current = bottomInset;
-  }, [bottomInset]);
-
   useEffect(() => {
     if (!centreRequest || !mapRef.current) return;
     mapRef.current.flyTo({
       center: [centreRequest.longitude, centreRequest.latitude],
       zoom: 13,
+      // Above the phone's results sheet, not under it.
+      offset: [0, -bottomInsetRef.current / 2],
       duration: 900,
     });
   }, [centreRequest]);

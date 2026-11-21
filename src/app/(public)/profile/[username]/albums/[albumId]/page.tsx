@@ -60,6 +60,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
           album.category ? categoryT(album.category) : null,
         ].filter((part): part is string => Boolean(part)),
         style: album.category ? categoryT(album.category) : null,
+        place: album.place ?? null,
       }}
       photos={photos.map((media) => ({
         id: media.id,

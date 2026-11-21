@@ -23,7 +23,10 @@ export function PlacePinMap({
   onChange,
   centreRequest,
   label,
+  gestureHelp,
 }: {
+  /** "Use two fingers…" — the map is inside a long form on a phone. */
+  gestureHelp: { mobile: string; windows: string; mac: string };
   value: PinPoint | null;
   onChange: (point: PinPoint) => void;
   /** Fly here (e.g. the visitor's own location). */
@@ -35,6 +38,8 @@ export function PlacePinMap({
   const markerRef = useRef<Marker | null>(null);
   const onChangeRef = useRef(onChange);
   const initialRef = useRef(value);
+  // Read once when the map is made; the words do not change after.
+  const gestureRef = useRef(gestureHelp);
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
@@ -51,6 +56,16 @@ export function PlacePinMap({
       minZoom: 4,
       maxZoom: 19,
       attributionControl: false,
+      // One finger scrolls the form, two move the map (and Ctrl/⌘ + wheel
+      // zooms on a computer). Without this a phone user swiping down the
+      // form over the map moved the map instead and got stuck.
+      cooperativeGestures: true,
+      locale: {
+        "CooperativeGesturesHandler.MobileHelpText": gestureRef.current.mobile,
+        "CooperativeGesturesHandler.WindowsHelpText":
+          gestureRef.current.windows,
+        "CooperativeGesturesHandler.MacHelpText": gestureRef.current.mac,
+      },
     });
     map.addControl(
       new maplibregl.AttributionControl({ compact: true }),
@@ -61,6 +76,13 @@ export function PlacePinMap({
       "bottom-right",
     );
     mapRef.current = map;
+    // Folded to its (i) button, as on Fmap: opened, the credit line
+    // covered the top of this small map.
+    map.once("load", () =>
+      containerRef.current
+        ?.querySelector(".maplibregl-ctrl-attrib")
+        ?.classList.remove("maplibregl-compact-show"),
+    );
 
     const place = (lngLat: maplibregl.LngLat) => {
       if (!markerRef.current) {
