@@ -29,6 +29,37 @@ describe("splitVietnameseName", () => {
     });
   });
 
+  it("splits a name typed without accents", () => {
+    assert.deepEqual(splitVietnameseName("Nguyen Thi Lan"), {
+      firstName: "Lan",
+      lastName: "Nguyen Thi",
+    });
+  });
+
+  it("keeps a trade name whole", () => {
+    // Not a family name first: "Lan Anh Studio" was called "Anh Studio".
+    assert.deepEqual(splitVietnameseName("Lan Anh Studio"), {
+      firstName: "Lan Anh Studio",
+      lastName: null,
+    });
+    // A family name first, but a trade word in it.
+    assert.deepEqual(splitVietnameseName("Mai Anh Wedding"), {
+      firstName: "Mai Anh Wedding",
+      lastName: null,
+    });
+    assert.deepEqual(splitVietnameseName("Phạm Media"), {
+      firstName: "Phạm Media",
+      lastName: null,
+    });
+  });
+
+  it("keeps a name in another order whole", () => {
+    assert.deepEqual(splitVietnameseName("John Smith"), {
+      firstName: "John Smith",
+      lastName: null,
+    });
+  });
+
   it("handles a single word and stray spaces", () => {
     assert.deepEqual(splitVietnameseName("  Bảo  "), {
       firstName: "Bảo",

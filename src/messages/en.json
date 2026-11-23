@@ -2468,7 +2468,16 @@
         "requestCreated": "Request created",
         "cancelled": "Cancelled",
         "declined": "Declined",
-        "markedComplete": "Marked complete"
+        "markedComplete": "Marked complete",
+        "to": {
+          "PENDING": "Back to awaiting confirmation",
+          "CONFIRMED": "Confirmed",
+          "DECLINED": "Declined",
+          "COMPLETED": "Completed",
+          "CANCELLED": "Cancelled",
+          "NO_SHOW": "Marked as no-show",
+          "EXPIRED": "Expired, cancelled automatically"
+        }
       },
       "actions": {
         "accept": "Accept",
@@ -4183,6 +4192,7 @@
       "back": "Back",
       "continueBtn": "Continue",
       "submitBtn": "Send booking request",
+      "submittingBtn": "Sending…",
       "genericError": "Something went wrong. Please try again.",
       "success": {
         "heading": "Booking request sent!",

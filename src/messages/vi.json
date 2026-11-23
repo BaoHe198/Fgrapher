@@ -2468,7 +2468,16 @@
         "requestCreated": "Đã tạo yêu cầu",
         "cancelled": "Đã hủy",
         "declined": "Đã từ chối",
-        "markedComplete": "Đã đánh dấu hoàn tất"
+        "markedComplete": "Đã đánh dấu hoàn tất",
+        "to": {
+          "PENDING": "Chờ xác nhận lại",
+          "CONFIRMED": "Đã xác nhận",
+          "DECLINED": "Đã từ chối",
+          "COMPLETED": "Đã hoàn tất",
+          "CANCELLED": "Đã hủy",
+          "NO_SHOW": "Báo vắng mặt",
+          "EXPIRED": "Hết hạn, tự hủy"
+        }
       },
       "actions": {
         "accept": "Chấp nhận",
@@ -4183,6 +4192,7 @@
       "back": "Quay lại",
       "continueBtn": "Tiếp tục",
       "submitBtn": "Gửi yêu cầu đặt lịch",
+      "submittingBtn": "Đang gửi…",
       "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
       "success": {
         "heading": "Đã gửi yêu cầu đặt lịch!",

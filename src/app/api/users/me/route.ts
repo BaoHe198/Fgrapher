@@ -13,6 +13,7 @@ import {
 } from "@/lib/media/cloudinary";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { splitVietnameseName } from "@/lib/vietnam/name";
 import { toE164VN } from "@/lib/vietnam/phone";
 import { getUpdateMeSchema } from "@/lib/validations/user";
 import { contentScanner } from "@/services/moderation";
@@ -330,6 +331,10 @@ export async function PATCH(request: Request) {
         wardId,
         ...locationUpdate,
         ...phoneVerifiedUpdate,
+        // Renaming kept the first/last name split at sign-up, so chats,
+        // reviews and notifications went on using the old name.
+        ...(parsed.data.name !== undefined &&
+          splitVietnameseName(parsed.data.name)),
       },
       select: ME_SELECT,
     });

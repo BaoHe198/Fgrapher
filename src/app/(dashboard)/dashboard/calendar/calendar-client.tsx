@@ -422,10 +422,14 @@ export function CalendarClient({
               <Plus className="size-4" />
               {v2("addEntryLong")}
             </Button>
+            {/* Its own width below xl, not the row's: full width, the
+                floating "Thêm lịch" button covered its label on a phone
+                with a short day (23/11/2026 walk-through). Left-aligned,
+                it ends before the floating button starts. */}
             <Button
               variant="outline"
               onClick={() => setPanel({ type: "block" })}
-              className="min-h-11 flex-1"
+              className="min-h-11 xl:flex-1"
             >
               <Ban className="size-4" />
               {dayBlock ? v2("editBusy") : v2("markBusy")}

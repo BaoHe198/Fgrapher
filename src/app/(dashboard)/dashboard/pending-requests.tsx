@@ -27,7 +27,9 @@ const VN_TIME = new Intl.DateTimeFormat("vi-VN", {
   minute: "2-digit",
   hour12: false,
 });
-const VN_DAY = new Intl.DateTimeFormat("vi-VN", {
+// en-GB for the separator: vi-VN writes a day and month without a year as
+// "25-11", next to "27/11/2026" on the same card (23/11/2026 walk-through).
+const VN_DAY = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Asia/Ho_Chi_Minh",
   day: "2-digit",
   month: "2-digit",
