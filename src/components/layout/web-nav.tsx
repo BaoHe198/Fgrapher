@@ -85,7 +85,16 @@ const NAV_LINKS = [
   },
   // Not always visible: on a 768px tablet, signed in, it pushed the header
   // 6px past the screen edge (25/09 audit). The footer links it anyway.
-  { href: "/about", labelKey: "introduce" as const, alwaysVisible: false },
+  // Guests only in the desktop row: once Địa điểm chụp joined, a signed-in
+  // visitor's row (which also has Đặt lịch F and three icons) ran up to
+  // 114px off the screen at 1180, 1440 and 1536px (23/11/2026). It is for
+  // people deciding whether to join; the phone menu and footer keep it.
+  {
+    href: "/about",
+    labelKey: "introduce" as const,
+    alwaysVisible: false,
+    desktopGuestOnly: true,
+  },
 ];
 
 function subscribeResize(callback: () => void) {
@@ -123,7 +132,8 @@ export function WebNav({
       (marketplaceEnabled || link.href !== "/shop") &&
       (socialFeedEnabled || link.href !== "/community") &&
       (placesEnabled || !("placesOnly" in link)) &&
-      (!("authOnly" in link) || isAuthenticated),
+      (!("authOnly" in link) || isAuthenticated) &&
+      (!("desktopGuestOnly" in link) || !isAuthenticated),
   );
   const links = isWide
     ? navLinks
@@ -183,7 +193,12 @@ export function WebNav({
             {isPaid ? (
               <Link
                 href="/dashboard"
-                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-md whitespace-nowrap text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken min-[1366px]:inline-flex"
+                // From 1440px, like "become a provider" for a signed-in
+                // visitor: once the Địa điểm chụp tab joined the row, a
+                // provider at 1366px had the search and account buttons
+                // pushed 126px off the screen (23/11/2026). The account menu
+                // carries the same link.
+                className="focus-ring hidden rounded-full px-4 py-2.5 text-body-md whitespace-nowrap text-text-primary transition-colors duration-[var(--fg-dur-150)] hover:bg-bg-sunken min-[1440px]:inline-flex"
               >
                 {t("dashboard")}
               </Link>
