@@ -65,6 +65,7 @@ type BookingDetail = Booking & {
   provider: Party;
   service: Pick<Service, "name" | "description" | "duration"> | null;
   review: { id: string } | null;
+  statusHistory?: { toStatus: BookingStatus; createdAt: string }[];
   // Crew-hire (Prompt B7, VIỆC 1).
   parentBooking: {
     id: string;
@@ -555,7 +556,24 @@ export default function BookingDetailPage() {
               label={t("timeline.requestCreated")}
               date={booking.createdAt}
             />
-            {booking.status === "CANCELLED" || booking.status === "DECLINED" ? (
+            {booking.statusHistory?.length ? (
+              // Every recorded step, in order. The rows below are for a
+              // booking older than its history.
+              booking.statusHistory.map((entry) => (
+                <TimelineRow
+                  key={`${entry.toStatus}-${entry.createdAt}`}
+                  label={t(`timeline.to.${entry.toStatus}`)}
+                  date={entry.createdAt}
+                  detail={
+                    entry.toStatus === "CANCELLED" ||
+                    entry.toStatus === "DECLINED"
+                      ? booking.cancelReason
+                      : null
+                  }
+                />
+              ))
+            ) : booking.status === "CANCELLED" ||
+              booking.status === "DECLINED" ? (
               <TimelineRow
                 label={
                   booking.status === "CANCELLED"
@@ -566,7 +584,9 @@ export default function BookingDetailPage() {
                 detail={booking.cancelReason}
               />
             ) : null}
-            {booking.status === "COMPLETED" && booking.completedAt ? (
+            {!booking.statusHistory?.length &&
+            booking.status === "COMPLETED" &&
+            booking.completedAt ? (
               <TimelineRow
                 label={t("timeline.markedComplete")}
                 date={booking.completedAt}
@@ -671,8 +691,11 @@ export default function BookingDetailPage() {
             ) : null}
           </Card>
 
+          {/* Beside the actions on a wide screen only: below "lg" this
+              column stacks under the details, which already list the total,
+              and a phone showed it twice (23/11/2026 walk-through). */}
           {booking.totalPrice ? (
-            <Card className="flex flex-row justify-between">
+            <Card className="hidden flex-row justify-between lg:flex">
               <span className="text-body-sm text-text-tertiary">
                 {t("fields.total")}
               </span>

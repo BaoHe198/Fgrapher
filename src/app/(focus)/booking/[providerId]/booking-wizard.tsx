@@ -1258,10 +1258,15 @@ export function BookingWizard({
                 if (canContinue && !submitting) void onSubmit();
               }}
             >
+              {/* A shorter label while sending: with the spinner in front,
+                  "Gửi yêu cầu đặt lịch" ran past the button's edge on a
+                  390px phone (23/11/2026 walk-through). */}
               {submitting ? (
-                <Loader2 aria-hidden className="size-4 animate-spin" />
-              ) : null}
-              {canContinue ? (
+                <>
+                  <Loader2 aria-hidden className="size-4 animate-spin" />
+                  {t("submittingBtn")}
+                </>
+              ) : canContinue ? (
                 t("submitBtn")
               ) : (
                 <>

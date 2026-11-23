@@ -349,6 +349,14 @@ export async function getBookingDetail(bookingId: string, userId: string) {
       },
       service: { select: { name: true, description: true, duration: true } },
       review: { select: { id: true } },
+      // The detail page's timeline. It used to be rebuilt from the current
+      // status alone, so a confirmed booking showed only "request created"
+      // (23/11/2026 walk-through). `note` is left out: it is the actor's
+      // own text and the page already shows cancelReason.
+      statusHistory: {
+        select: { toStatus: true, createdAt: true },
+        orderBy: { createdAt: "asc" },
+      },
       // Crew-hire (Prompt B7, VIỆC 1) — shown on the detail page so
       // either side can see the relationship. parentBooking's own
       // customer (the end client) is deliberately not exposed here to
