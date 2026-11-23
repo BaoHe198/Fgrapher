@@ -27,6 +27,7 @@ import {
   getPublicProfileUser,
   getShopProducts,
 } from "@/services/public-profile";
+import { splitVietnameseName } from "@/lib/vietnam/name";
 import { listPublicCostumes } from "@/services/costumes";
 import { getProfileStats } from "@/services/profile-stats";
 import { listAlbumSocialState, listUserPosts } from "@/services/posts";
@@ -244,7 +245,10 @@ export default async function PublicProfilePage({
       ? undefined
       : { ward: user.ward },
   );
-  const firstName = user.firstName ?? displayName.split(" ")[0];
+  // From the public name, not the account's stored first name: that was
+  // split at sign-up, and a trade name registered as "Lan Anh Studio" was
+  // stored as first name "Anh Studio" (23/11/2026 walk-through).
+  const firstName = splitVietnameseName(displayName).firstName;
   const isVerified =
     user.roles.find((r) => r.role === activeProfile.role)
       ?.verificationStatus === "VERIFIED";

@@ -21,6 +21,7 @@ import { db } from "@/lib/db";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
+import { splitVietnameseName } from "@/lib/vietnam/name";
 import {
   getCameraShopStats,
   getCostumeShopStats,
@@ -339,8 +340,14 @@ export default async function DashboardPage() {
 
   const hasIncompleteProfile = missingItems.length > 0;
 
+  // From the current full name, not the stored first name: that one was
+  // split once at sign-up, so renaming in settings never reached the
+  // greeting, and a trade name ("Lan Anh Studio") was greeted as "Anh
+  // Studio" (23/11/2026 walk-through).
   const firstName =
-    user.firstName ?? user.name?.split(" ")[0] ?? t("fallbackName");
+    (user.name ? splitVietnameseName(user.name).firstName : "") ||
+    user.firstName ||
+    t("fallbackName");
 
   return (
     <div className="flex flex-col gap-6">
