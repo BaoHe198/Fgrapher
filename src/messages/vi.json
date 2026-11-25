@@ -2644,15 +2644,7 @@
           "message": "Nhắn tin"
         },
         "findability": {
-          "title": "Khách chưa tìm thấy bạn",
-          "hours": {
-            "body": "Bạn chưa khai giờ làm việc, nên bạn không hiện trên Bản đồ F và khách không đặt lịch được với bạn.",
-            "action": "Khai giờ làm việc"
-          },
-          "mapPoint": {
-            "body": "Địa chỉ của bạn chưa có vị trí trên bản đồ, nên bạn chưa hiện trên Bản đồ F. Hãy chọn địa chỉ từ danh sách gợi ý trong hồ sơ.",
-            "action": "Cập nhật địa chỉ"
-          }
+          "title": "Khách chưa tìm thấy bạn"
         },
         "week": {
           "title": "7 ngày qua",
@@ -2669,7 +2661,9 @@
           "title": "Trang của bạn",
           "count": "{done}/{total} phần đã xong",
           "allDone": "Trang của bạn đã đủ các phần khách cần xem.",
-          "open": "Mở Trang của tôi"
+          "open": "Mở Trang của tôi",
+          "titleHidden": "Trang của bạn chưa hiển thị với khách",
+          "required": "Bắt buộc"
         }
       }
     },

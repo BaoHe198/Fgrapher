@@ -372,7 +372,11 @@ export default async function DashboardPage() {
                 })}
               </p>
             </div>
-            <AcceptingBookingsToggle initialValue={user.acceptingBookings} />
+            {/* Nothing to switch while the page is hidden: nobody can book
+                it. The switch sat "on" over a page no customer could see. */}
+            {myPage && !myPage.published ? null : (
+              <AcceptingBookingsToggle initialValue={user.acceptingBookings} />
+            )}
           </div>
           <ProviderOverview
             overview={overview}
