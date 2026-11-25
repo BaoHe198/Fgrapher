@@ -255,6 +255,7 @@ const {
               name: true,
               firstName: true,
               username: true,
+              avatar: true,
               roles: { where: { active: true }, select: { role: true } },
               profiles: {
                 where: { role: { in: PAID_ROLES } },
@@ -263,6 +264,10 @@ const {
             },
           });
           token.roles = account?.roles.map((r) => r.role) ?? [];
+          // The photo was only ever copied at sign-in, so one uploaded
+          // afterwards — which is every new account's — stayed an initial in
+          // the top bar until the next sign-in (found 25/11/2026).
+          if (account) token.avatar = account.avatar ?? null;
           token.displayName = account
             ? resolvePartyName(account, (token.name as string) ?? "")
             : ((token.name as string) ?? "");

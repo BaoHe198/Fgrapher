@@ -3122,7 +3122,7 @@
       "services": {
         "metaTitle": "Packages — Fgrapher",
         "title": "Packages",
-        "lede": "What customers choose when they book: length, price, photos delivered and when.",
+        "lede": "What customers choose when they book: the package, what it includes, its price and delivery time.",
         "needProfile": "Save your page details once first (name, specialities, address), then come back to add packages.",
         "needProfileCta": "Open page details"
       }
@@ -3478,7 +3478,8 @@
         "save": "Save",
         "kindLabel": "Service type",
         "editedPhotosLabel": "Edited photos",
-        "deliveryDaysLabel": "Delivery (days)"
+        "deliveryDaysLabel": "Delivery (days)",
+        "deliveryDaysVideoLabel": "Film delivery (days)"
       },
       "media": {
         "coverButton": "Cover",

@@ -722,6 +722,9 @@ export function ChatPanel({
           }}
           onKeyDown={onKeyDown}
           placeholder={t("writeMessage")}
+          // A placeholder is not a name: a screen reader announced this box
+          // as an unlabelled edit field.
+          aria-label={t("writeMessage")}
           className="max-h-[120px] min-h-10 flex-1 resize-none rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3.5 py-2.5 text-body-md text-text-primary outline-none focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-gold-500/20"
         />
         <Button

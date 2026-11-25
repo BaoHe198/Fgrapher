@@ -37,7 +37,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { StepProgress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { formatDate, formatDateLong, formatDayMonth } from "@/lib/format";
+import { formatDate, formatDateLong } from "@/lib/format";
 import { isGoldenHourSlot, sunTimes } from "@/lib/sun";
 import { cn, formatCurrency } from "@/lib/utils";
 import { MAX_REFERENCE_MEDIA } from "@/lib/validations/reference-media";
@@ -98,6 +98,7 @@ interface ParentBookingOption {
   date: string;
   startTime: string;
   service: { name: string } | null;
+  customer?: { name: string | null } | null;
 }
 
 type LocationType = "PROVIDER" | "CUSTOMER" | "OUTDOOR";
@@ -1022,7 +1023,16 @@ export function BookingWizard({
                           onChange={(v) => setParentBookingId(v)}
                           options={parentBookingOptions.map((option) => ({
                             value: option.id,
-                            label: `${formatDayMonth(option.date)} ${option.startTime} — ${option.service?.name ?? t("stepDetails.customRequestOption")}`,
+                            // Full date and the customer's name: two jobs
+                            // on one day read the same without them.
+                            label: [
+                              `${formatDate(option.date)} ${option.startTime}`,
+                              option.customer?.name,
+                              option.service?.name ??
+                                t("stepDetails.customRequestOption"),
+                            ]
+                              .filter(Boolean)
+                              .join(" — "),
                           }))}
                         />
                       ) : null}

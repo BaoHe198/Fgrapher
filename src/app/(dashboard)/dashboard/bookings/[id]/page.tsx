@@ -268,16 +268,29 @@ export default function BookingDetailPage() {
         <Card className="flex flex-row items-center justify-between gap-2">
           <span className="text-body-sm text-text-secondary">
             {t("crewHire.partOf")}{" "}
-            <Link
-              href={`/dashboard/bookings/${booking.parentBooking.id}`}
-              className="font-semibold text-text-link hover:underline"
-            >
-              {booking.parentBooking.service?.name ??
-                t("crewHire.unnamedClientBooking")}{" "}
-              {t("crewHire.onDate", {
-                date: formatDate(booking.parentBooking.date),
-              })}
-            </Link>
+            {/* The client's job belongs to whoever hired the crew. To the
+                crew member it is not theirs to open — the link answered
+                "Không tìm thấy lịch đặt" — so they get the name only. */}
+            {viewerIsProvider ? (
+              <span className="font-semibold text-text-primary">
+                {booking.parentBooking.service?.name ??
+                  t("crewHire.unnamedClientBooking")}{" "}
+                {t("crewHire.onDate", {
+                  date: formatDate(booking.parentBooking.date),
+                })}
+              </span>
+            ) : (
+              <Link
+                href={`/dashboard/bookings/${booking.parentBooking.id}`}
+                className="font-semibold text-text-link hover:underline"
+              >
+                {booking.parentBooking.service?.name ??
+                  t("crewHire.unnamedClientBooking")}{" "}
+                {t("crewHire.onDate", {
+                  date: formatDate(booking.parentBooking.date),
+                })}
+              </Link>
+            )}
           </span>
           <Badge variant="neutral">
             {tBookings(`status.${booking.parentBooking.status}`)}
