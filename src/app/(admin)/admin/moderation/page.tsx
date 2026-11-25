@@ -111,6 +111,17 @@ export default function AdminModerationPage() {
     });
   };
 
+  // A decided photo leaves the list at once, before the reload answers.
+  // The list used to stay as it was until then, with the focus still on the
+  // photo just rejected, so pressing A in that gap approved it: the provider
+  // was told "rejected", then "approved", for one photo (found 25/11/2026).
+  const dropFromQueue = useCallback((ids: string[]) => {
+    const decided = new Set(ids);
+    setMedia((prev) => prev.filter((item) => !decided.has(item.id)));
+    setSelected(new Set());
+    setFocusedIndex(0);
+  }, []);
+
   const approve = useCallback(
     async (ids: string[]) => {
       if (ids.length === 0 || busy) return;
@@ -133,11 +144,12 @@ export default function AdminModerationPage() {
         title: t("approvedToast", { count: ids.length }),
         type: "success",
       });
+      dropFromQueue(ids);
       load();
       // The sidebar's waiting count is rendered by the server layout.
       router.refresh();
     },
-    [busy, load, router, t],
+    [busy, dropFromQueue, load, router, t],
   );
 
   const reject = async () => {
@@ -164,6 +176,7 @@ export default function AdminModerationPage() {
       title: t("rejectedToast", { count: activeIds.length }),
       type: "success",
     });
+    dropFromQueue(activeIds);
     load();
     router.refresh();
   };

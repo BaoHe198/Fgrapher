@@ -1900,6 +1900,7 @@
         "proposedDate": "Proposed date: {date}",
         "proposedDateNone": "Your chosen date",
         "chosen": "Chosen",
+        "viewBooking": "View booking",
         "verified": "Identity verified",
         "sentOn": "Sent {date}",
         "compare": "Compare",

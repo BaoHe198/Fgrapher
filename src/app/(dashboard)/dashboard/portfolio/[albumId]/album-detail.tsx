@@ -95,6 +95,7 @@ function SortableMediaTile({
     transition,
     isDragging,
   } = useSortable({ id: item.id });
+  const [reasonOpen, setReasonOpen] = useState(false);
 
   return (
     <div
@@ -121,7 +122,9 @@ function SortableMediaTile({
       {MODERATION_BADGE_VARIANT[item.moderationStatus] ? (
         <Badge
           variant={MODERATION_BADGE_VARIANT[item.moderationStatus]!}
-          className="absolute top-2 left-2"
+          // Below the always-visible buttons on a phone: at top-2 the drag
+          // handle sat on the badge and hid its first letter.
+          className="absolute top-2 left-2 [@media(hover:none)]:top-11"
         >
           {item.moderationStatus === "PENDING"
             ? t("moderation.pending")
@@ -129,7 +132,10 @@ function SortableMediaTile({
         </Badge>
       ) : null}
       {isCover ? (
-        <Badge variant="accent" className="absolute top-2 right-2">
+        <Badge
+          variant="accent"
+          className="absolute top-2 right-2 [@media(hover:none)]:top-11"
+        >
           {t("coverBadge")}
         </Badge>
       ) : null}
@@ -138,12 +144,22 @@ function SortableMediaTile({
           the tile said only "Bị từ chối", and the why had to be dug out of
           the notifications (found 19/11/2026). */}
       {item.moderationStatus === "REJECTED" && item.moderationNote ? (
-        <p
-          className="absolute inset-x-0 bottom-0 line-clamp-3 bg-danger px-2 py-1.5 text-meta text-white"
-          title={item.moderationNote}
+        // A button, above the action layer: three lines cut a real reason
+        // short, and `title` never shows on a phone. A tap opens it over the
+        // whole tile, another tap closes it.
+        <button
+          type="button"
+          onClick={() => setReasonOpen((open) => !open)}
+          aria-expanded={reasonOpen}
+          className={cn(
+            "absolute inset-x-0 bottom-0 z-10 bg-danger px-2 py-1.5 text-left text-meta text-white",
+            reasonOpen && "top-0 overflow-y-auto",
+          )}
         >
-          {t("moderation.reason", { reason: item.moderationNote })}
-        </p>
+          <span className={cn("block", !reasonOpen && "line-clamp-3")}>
+            {t("moderation.reason", { reason: item.moderationNote })}
+          </span>
+        </button>
       ) : null}
 
       {/* Shown on hover; always shown where there is no hover (phones),

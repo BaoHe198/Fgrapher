@@ -76,6 +76,8 @@ interface RequestView {
   role: Role;
   categories: ProfileCategory[];
   status: ServiceRequestStatus;
+  /** The booking a chosen proposal produced, once there is one. */
+  bookingId: string | null;
   shootDate: string | null;
   isDateFlexible: boolean;
   dateRangeStart: string | null;
@@ -474,6 +476,22 @@ export function RequestDetail({
                                 {t("decline")}
                               </Button>
                             </>
+                          ) : null}
+                          {/* Choosing a proposal opens its booking once; on
+                              any later visit this page had no way back to
+                              it (found 25/11/2026). */}
+                          {chosen && request.bookingId ? (
+                            <Button
+                              size="sm"
+                              nativeButton={false}
+                              render={
+                                <Link
+                                  href={`/dashboard/bookings/${request.bookingId}`}
+                                />
+                              }
+                            >
+                              {t("viewBooking")}
+                            </Button>
                           ) : null}
                           <Button
                             variant="secondary"

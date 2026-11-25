@@ -102,59 +102,112 @@ export function ShopOrdersContent() {
       {isLoading ? null : orders.length === 0 ? (
         <EmptyState icon={<Package />} title={t("empty")} />
       ) : (
-        <Card padding={false}>
-          <div className="grid grid-cols-[1.2fr_1.6fr_0.9fr_0.9fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.12em] text-text-tertiary">
-            <span>{t("columns.customer")}</span>
-            <span>{t("columns.items")}</span>
-            <span>{t("columns.total")}</span>
-            <span>{t("columns.date")}</span>
-            <span>{t("columns.status")}</span>
-            <span />
-          </div>
-          {orders.map((order) => {
-            const variant = STATUS_VARIANT[order.status];
-            return (
-              <div
-                key={order.id}
-                className="grid grid-cols-[1.2fr_1.6fr_0.9fr_0.9fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-4 text-body-md last:border-b-0"
-              >
-                <div className="flex items-center gap-2">
-                  <Avatar className="size-7">
-                    {order.customer.avatar ? (
-                      <AvatarImage src={order.customer.avatar} alt="" />
-                    ) : null}
-                    <AvatarFallback>
-                      {partyName(order.customer, t)[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-semibold text-text-primary">
-                    {partyName(order.customer, t)}
-                  </span>
+        <>
+          {/* Below lg the six-column table does not fit: on a phone the product
+            column collapsed to nothing, the total ran into the date and the
+            status sat under the button (found 25/11/2026). One card per
+            order there, the table from lg up. */}
+          <div className="flex flex-col gap-4 lg:hidden">
+            {orders.map((order) => (
+              <Card key={order.id} className="flex flex-col gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Avatar className="size-7">
+                      {order.customer.avatar ? (
+                        <AvatarImage src={order.customer.avatar} alt="" />
+                      ) : null}
+                      <AvatarFallback>
+                        {partyName(order.customer, t)[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="truncate text-body-md font-semibold! text-text-primary">
+                      {partyName(order.customer, t)}
+                    </span>
+                  </div>
+                  <Badge variant={STATUS_VARIANT[order.status]}>
+                    {t(`status.${order.status}`)}
+                  </Badge>
                 </div>
-                <span className="truncate text-text-secondary">
+                <p className="text-body-sm text-text-secondary">
                   {order.items
                     .map((i) => `${i.product.name} x${i.quantity}`)
                     .join(", ")}
-                </span>
-                <span className="font-semibold text-text-primary">
-                  {formatCurrency(order.totalPrice, order.currency)}
-                </span>
-                <span className="text-text-secondary">
-                  {formatDate(order.createdAt)}
-                </span>
-                <Badge variant={variant}>{t(`status.${order.status}`)}</Badge>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  nativeButton={false}
-                  render={<Link href={`/dashboard/orders/${order.id}`} />}
+                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col">
+                    <span className="text-body-md font-semibold! text-text-primary">
+                      {formatCurrency(order.totalPrice, order.currency)}
+                    </span>
+                    <span className="text-body-sm text-text-tertiary">
+                      {formatDate(order.createdAt)}
+                    </span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    nativeButton={false}
+                    render={<Link href={`/dashboard/orders/${order.id}`} />}
+                  >
+                    {t("view")}
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <Card padding={false} className="hidden lg:block">
+            <div className="grid grid-cols-[1.2fr_1.6fr_0.9fr_0.9fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-3.5 text-caption-upper tracking-[0.12em] text-text-tertiary">
+              <span>{t("columns.customer")}</span>
+              <span>{t("columns.items")}</span>
+              <span>{t("columns.total")}</span>
+              <span>{t("columns.date")}</span>
+              <span>{t("columns.status")}</span>
+              <span />
+            </div>
+            {orders.map((order) => {
+              const variant = STATUS_VARIANT[order.status];
+              return (
+                <div
+                  key={order.id}
+                  className="grid grid-cols-[1.2fr_1.6fr_0.9fr_0.9fr_0.9fr_auto] items-center border-b border-border-subtle px-5 py-4 text-body-md last:border-b-0"
                 >
-                  {t("view")}
-                </Button>
-              </div>
-            );
-          })}
-        </Card>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="size-7">
+                      {order.customer.avatar ? (
+                        <AvatarImage src={order.customer.avatar} alt="" />
+                      ) : null}
+                      <AvatarFallback>
+                        {partyName(order.customer, t)[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-semibold text-text-primary">
+                      {partyName(order.customer, t)}
+                    </span>
+                  </div>
+                  <span className="truncate text-text-secondary">
+                    {order.items
+                      .map((i) => `${i.product.name} x${i.quantity}`)
+                      .join(", ")}
+                  </span>
+                  <span className="font-semibold text-text-primary">
+                    {formatCurrency(order.totalPrice, order.currency)}
+                  </span>
+                  <span className="text-text-secondary">
+                    {formatDate(order.createdAt)}
+                  </span>
+                  <Badge variant={variant}>{t(`status.${order.status}`)}</Badge>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    nativeButton={false}
+                    render={<Link href={`/dashboard/orders/${order.id}`} />}
+                  >
+                    {t("view")}
+                  </Button>
+                </div>
+              );
+            })}
+          </Card>
+        </>
       )}
     </div>
   );
