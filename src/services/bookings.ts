@@ -625,7 +625,11 @@ export async function createBooking(
   const startMinutes =
     Number(input.startTime.slice(0, 2)) * 60 + Number(input.startTime.slice(3));
   const endMinutes = startMinutes + duration;
-  const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+  // The shown end stays inside the day: a full-day package taken late in
+  // the afternoon would otherwise print "25:00". `endAt` below is the real
+  // instant and is what the calendar hold uses.
+  const shownEnd = Math.min(endMinutes, 23 * 60 + 59);
+  const endTime = `${String(Math.floor(shownEnd / 60)).padStart(2, "0")}:${String(shownEnd % 60).padStart(2, "0")}`;
   // Same fixed UTC+7 conversion as startAt above.
   const endInstant = new Date(startAt.getTime() + duration * 60_000);
 

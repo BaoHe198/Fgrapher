@@ -3473,6 +3473,18 @@
         "nameLabel": "Name",
         "descriptionLabel": "Description",
         "durationLabel": "Duration (min)",
+        "holdLabel": "Each booking holds your calendar for",
+        "holdHelper": "Counted from the time the customer picks. Nobody else can book an overlapping time.",
+        "hold": {
+          "HOUR": "1 hour",
+          "HALF_DAY": "Half a day (4 hours)",
+          "FULL_DAY": "A full day (8 hours)"
+        },
+        "holdShort": {
+          "HOUR": "holds 1 hour",
+          "HALF_DAY": "holds half a day",
+          "FULL_DAY": "holds a full day"
+        },
         "priceLabel": "Price",
         "activeLabel": "Active",
         "cancel": "Cancel",

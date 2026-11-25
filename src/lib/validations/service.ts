@@ -10,9 +10,9 @@ export const createServiceSchema = z.object({
   kind: z.enum(SERVICE_KINDS),
   name: z.string().min(2, "Enter a service name"),
   description: z.string().max(500).optional(),
-  // Kept server-side only: one booking occupies this many minutes of the
-  // provider's calendar. Providers no longer set it (project owner,
-  // 21/09/2026) — they state the timing in the description instead.
+  // One booking holds this many minutes of the provider's calendar. The
+  // form offers three lengths (SERVICE_HOLD_MINUTES in service-matrix.ts);
+  // any positive value is still accepted, because older packages have others.
   duration: z.number().int().positive().default(60),
   price: z
     .number()
@@ -41,9 +41,7 @@ function getCreateServiceSchema(t: (key: string) => string) {
     kind: z.enum(SERVICE_KINDS),
     name: z.string().min(2, t("nameRequired")),
     description: z.string().max(500).optional(),
-    // Kept server-side only: one booking occupies this many minutes of the
-    // provider's calendar. Providers no longer set it (project owner,
-    // 21/09/2026) — they state the timing in the description instead.
+    // See createServiceSchema above: the form offers three hold lengths.
     duration: z.number().int().positive().default(60),
     price: z
       .number()

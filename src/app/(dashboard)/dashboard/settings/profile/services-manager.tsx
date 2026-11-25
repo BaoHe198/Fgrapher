@@ -17,7 +17,13 @@ import {
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { serviceKindsForRole } from "@/lib/constants/service-matrix";
+import {
+  SERVICE_HOLD_MINUTES,
+  SERVICE_HOLDS,
+  serviceHoldFor,
+  serviceKindsForRole,
+  type ServiceHold,
+} from "@/lib/constants/service-matrix";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/utils";
@@ -39,6 +45,7 @@ interface ServiceDraft {
   kind: string;
   name: string;
   description: string;
+  hold: ServiceHold;
   price: string;
   isActive: boolean;
   editedPhotoCount: string;
@@ -49,6 +56,7 @@ const EMPTY_DRAFT: ServiceDraft = {
   kind: "",
   name: "",
   description: "",
+  hold: "HOUR",
   price: "",
   isActive: true,
   editedPhotoCount: "",
@@ -87,6 +95,7 @@ export function ServicesManager({
       kind: service.kind,
       name: service.name,
       description: service.description ?? "",
+      hold: serviceHoldFor(service.duration),
       price: String(service.price),
       isActive: service.isActive,
       editedPhotoCount:
@@ -114,6 +123,9 @@ export function ServicesManager({
       kind: draft.kind,
       name: draft.name,
       description: draft.description || undefined,
+      // Always sent: the API's schema defaults a missing duration to one
+      // hour, on an edit as well as on a create.
+      duration: SERVICE_HOLD_MINUTES[draft.hold],
       price: Number(draft.price),
       isActive: draft.isActive,
       // Blank clears: the package card then simply leaves that line out.
@@ -185,7 +197,8 @@ export function ServicesManager({
                 </p>
                 <p className="text-body-sm text-text-secondary">
                   {serviceKindT(service.kind)} ·{" "}
-                  {formatCurrency(service.price, service.currency)}
+                  {formatCurrency(service.price, service.currency)} ·{" "}
+                  {t(`holdShort.${serviceHoldFor(service.duration)}`)}
                 </p>
               </div>
               <div className="flex gap-1">
@@ -250,6 +263,20 @@ export function ServicesManager({
                   setDraft({ ...draft, description: e.target.value })
                 }
               />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <NativeSelect
+                label={t("holdLabel")}
+                options={SERVICE_HOLDS.map((hold) => ({
+                  value: hold,
+                  label: t(`hold.${hold}`),
+                }))}
+                value={draft.hold}
+                onChange={(value) =>
+                  setDraft({ ...draft, hold: value as ServiceHold })
+                }
+              />
+              <p className="text-meta text-text-tertiary">{t("holdHelper")}</p>
             </div>
             {delivers.anything ? (
               <div className="grid grid-cols-2 gap-3">

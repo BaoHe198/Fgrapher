@@ -215,9 +215,19 @@ provider mặc định được làm mờ. Chi tiết: `docs/ops/fmap.md`.
 
 ## 7. Dịch vụ và lịch rảnh
 
-Nhà cung cấp có thể tạo dịch vụ với tên, mô tả, thời lượng và giá, và (từ 09/2026)
-số ảnh chỉnh sửa giao kèm và số ngày giao ảnh. Availability kết
-hợp:
+Nhà cung cấp có thể tạo dịch vụ với tên, mô tả, mức giữ lịch và giá, và (từ 09/2026)
+số ảnh chỉnh sửa giao kèm và số ngày giao ảnh.
+
+**Mức giữ lịch (25/11/2026).** Mỗi gói chọn một trong ba mức: 1 giờ, nửa ngày
+(4 giờ), cả ngày (8 giờ) — `SERVICE_HOLD_MINUTES` trong
+`src/lib/constants/service-matrix.ts`, lưu vào `Service.duration` (phút). Một
+lịch đặt giữ lịch của nhà cung cấp đúng khoảng đó kể từ giờ khách chọn. Quyết
+định này thay cho quyết định 21/09/2026 (ẩn hẳn ô thời lượng, mọi gói giữ 1
+giờ). Gói có thời lượng khác từ trước được làm tròn lên mức gần nhất khi mở
+form sửa. Gói dài hơn giờ làm việc trong ngày vẫn có một khung giờ: đầu giờ làm
+việc.
+
+Availability kết hợp:
 
 - lịch làm việc thường lệ;
 - ngày bị chặn;
