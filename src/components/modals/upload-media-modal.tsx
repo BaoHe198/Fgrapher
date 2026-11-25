@@ -1,7 +1,7 @@
 "use client";
 
 import type { Role } from "@prisma/client";
-import { Loader2, UploadCloud, X } from "lucide-react";
+import { Film, Loader2, UploadCloud, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Progress } from "@/components/ui/progress";
 import { compressImageFile } from "@/lib/media/image-compression";
+import { youtubeVideoId, youtubeWatchUrl } from "@/lib/media/video-link";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 
 const NEW_ALBUM_VALUE = "__new__";
@@ -48,6 +49,15 @@ interface PendingFile {
   title: string;
   progress: number;
   status: "pending" | "uploading" | "done" | "error";
+  error?: string;
+}
+
+// A YouTube link waiting to be added: a video too long for the 100MB
+// upload, already published there (lib/media/video-link.ts).
+interface PendingLink {
+  url: string;
+  title: string;
+  status: "pending" | "saving" | "done" | "error";
   error?: string;
 }
 
@@ -154,6 +164,25 @@ export function UploadMediaModal({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
+  const [links, setLinks] = useState<PendingLink[]>([]);
+  const [linkDraft, setLinkDraft] = useState("");
+  const [linkError, setLinkError] = useState<string | null>(null);
+
+  const addLink = () => {
+    const id = youtubeVideoId(linkDraft);
+    if (!id) {
+      setLinkError(t("linkInvalid"));
+      return;
+    }
+    const url = youtubeWatchUrl(id);
+    if (links.some((link) => link.url === url)) {
+      setLinkError(t("linkDuplicate"));
+      return;
+    }
+    setLinks((prev) => [...prev, { url, title: "", status: "pending" }]);
+    setLinkDraft("");
+    setLinkError(null);
+  };
 
   const needsAlbumPicker = !albumId && !allowStandalone;
   const [albums, setAlbums] = useState<AlbumOption[]>([]);
@@ -285,6 +314,60 @@ export function UploadMediaModal({
     if (!rightsConfirmed || (!resolvedAlbumId && !allowStandalone)) return;
     setIsSubmitting(true);
 
+    // Links first, and without Cloudinary: there is no file to send, so a
+    // link can still be added where uploads are unavailable.
+    const linked = await Promise.all(
+      links.map(async (link, i): Promise<UploadedMedia | null> => {
+        if (link.status === "done") return null;
+        const mark = (next: Partial<PendingLink>) =>
+          setLinks((prev) =>
+            prev.map((cur, idx) => (idx === i ? { ...cur, ...next } : cur)),
+          );
+        mark({ status: "saving" });
+        try {
+          const res = await fetch("/api/portfolio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              profileId,
+              albumId: resolvedAlbumId ?? undefined,
+              url: link.url,
+              type: "VIDEO",
+              title: link.title || undefined,
+              rightsConfirmed,
+            }),
+          });
+          const body = await res.json();
+          if (!res.ok) {
+            mark({ status: "error", error: body.message ?? t("uploadFailed") });
+            return null;
+          }
+          mark({ status: "done" });
+          return {
+            id: body.data.id,
+            url: body.data.url,
+            type: "VIDEO",
+            title: link.title || null,
+            moderationStatus: body.data.moderationStatus,
+            moderationNote: body.data.moderationNote,
+          };
+        } catch {
+          mark({ status: "error", error: t("uploadFailed") });
+          return null;
+        }
+      }),
+    );
+    const linkedMedia = linked.filter((r): r is UploadedMedia => r !== null);
+
+    if (files.length === 0) {
+      setIsSubmitting(false);
+      if (linkedMedia.length === 0) return;
+      onUploaded(linkedMedia);
+      setLinks([]);
+      onOpenChange(false);
+      return;
+    }
+
     const sigRes = await fetch("/api/upload/signature", { method: "POST" });
     const sigBody = await sigRes.json();
 
@@ -297,6 +380,8 @@ export function UploadMediaModal({
         })),
       );
       setIsSubmitting(false);
+      // The links that went in are in the album; show them.
+      if (linkedMedia.length > 0) onUploaded(linkedMedia);
       return;
     }
 
@@ -380,13 +465,17 @@ export function UploadMediaModal({
       }),
     );
 
-    const uploaded = results.filter((r): r is UploadedMedia => r !== null);
+    const uploaded = [
+      ...linkedMedia,
+      ...results.filter((r): r is UploadedMedia => r !== null),
+    ];
 
     setIsSubmitting(false);
     if (uploaded.length === 0) return;
 
     onUploaded(uploaded);
     setFiles([]);
+    setLinks([]);
     setRejected([]);
     onOpenChange(false);
   };
@@ -399,6 +488,9 @@ export function UploadMediaModal({
           onOpenChange(next);
           if (!next) {
             setFiles([]);
+            setLinks([]);
+            setLinkDraft("");
+            setLinkError(null);
             setRejected([]);
             setSelectedAlbumId("");
             setNewAlbumTitle("");
@@ -549,6 +641,100 @@ export function UploadMediaModal({
               </div>
             ) : null}
 
+            {imageOnly ? null : (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-end gap-2">
+                  <Input
+                    label={t("linkLabel")}
+                    placeholder={t("linkPlaceholder")}
+                    inputMode="url"
+                    value={linkDraft}
+                    error={linkError ?? undefined}
+                    onChange={(e) => {
+                      setLinkDraft(e.target.value);
+                      setLinkError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addLink();
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    className={linkError ? "mb-6" : undefined}
+                    disabled={!linkDraft.trim() || isSubmitting}
+                    onClick={addLink}
+                  >
+                    {t("linkAdd")}
+                  </Button>
+                </div>
+                <p className="text-meta text-text-tertiary">
+                  {t("linkHelper")}
+                </p>
+                {links.map((link, index) => (
+                  <div
+                    key={link.url}
+                    className="flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] border border-border-default p-2.5"
+                  >
+                    <Film
+                      aria-hidden
+                      className="size-5 shrink-0 text-text-tertiary"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-body-sm font-semibold! text-text-primary">
+                          {t("linkItem")} · {link.url.split("v=")[1]}
+                        </span>
+                        {link.status === "pending" ||
+                        link.status === "error" ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLinks((prev) =>
+                                prev.filter((_, i) => i !== index),
+                              )
+                            }
+                            aria-label={t("removeLink")}
+                          >
+                            <X className="size-3.5 text-text-tertiary" />
+                          </button>
+                        ) : null}
+                      </div>
+                      {link.status === "pending" ? (
+                        <Input
+                          placeholder={t("titlePlaceholder")}
+                          aria-label={t("titlePlaceholder")}
+                          value={link.title}
+                          onChange={(e) =>
+                            setLinks((prev) =>
+                              prev.map((cur, i) =>
+                                i === index
+                                  ? { ...cur, title: e.target.value }
+                                  : cur,
+                              ),
+                            )
+                          }
+                          className="mt-1.5"
+                        />
+                      ) : link.status === "saving" ? (
+                        <Loader2 className="mt-1.5 size-4 animate-spin text-text-tertiary" />
+                      ) : link.status === "error" ? (
+                        <p className="mt-1 text-body-sm text-danger">
+                          {link.error}
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-body-sm text-success">
+                          {t("uploaded")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <Checkbox
               checked={rightsConfirmed}
               onCheckedChange={(checked) =>
@@ -561,7 +747,11 @@ export function UploadMediaModal({
               variant="accent"
               size="lg"
               className="w-full"
-              disabled={files.length === 0 || isSubmitting || !rightsConfirmed}
+              disabled={
+                files.length + links.length === 0 ||
+                isSubmitting ||
+                !rightsConfirmed
+              }
               onClick={uploadAll}
             >
               {isSubmitting ? (
@@ -570,7 +760,7 @@ export function UploadMediaModal({
                   {t("uploading")}
                 </>
               ) : (
-                t("upload", { count: files.length || "" })
+                t("upload", { count: files.length + links.length || "" })
               )}
             </Button>
           </>

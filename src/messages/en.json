@@ -1477,7 +1477,9 @@
       "restoreFailed": "Failed to restore",
       "notOwned": "You don't own some of these photos",
       "orderUpdated": "Order updated",
-      "reorderFailed": "Failed to update order"
+      "reorderFailed": "Failed to update order",
+      "videoLinkInvalid": "That link is not a YouTube video. Paste one like youtube.com/watch?v=… or youtu.be/…",
+      "videoLinkDuplicate": "This video is already in your portfolio."
     },
     "darkroom": {
       "loadFailed": "Couldn't load a photo",
@@ -4565,7 +4567,11 @@
         "filterByStyle": "Filter by style",
         "albumFrame": "{count} photos",
         "shotAt": "Shot at {place}",
-        "spotsShot": "Spots shot at"
+        "spotsShot": "Spots shot at",
+        "allMedia": "All photos and videos",
+        "mediaCount": "{photos, plural, =0 {} one {# photo} other {# photos}}{both, select, yes { · } other {}}{videos, plural, =0 {} one {# video} other {# videos}}",
+        "showMoreMedia": "Show more · {remaining} left",
+        "videoAria": "Play video"
       },
       "servicesTab": {
         "empty": "No service packages listed",
@@ -5842,7 +5848,15 @@
       "albumCategoryRequired": "Please choose a category",
       "albumCreateFailed": "Couldn't create the album, please try again",
       "albumTitlePlaceholder": "Optional — left blank, it is named after the category",
-      "unsupportedType": "This file type can't be uploaded. Choose a photo (JPG, PNG, WebP) or a video (MP4, MOV)."
+      "unsupportedType": "This file type can't be uploaded. Choose a photo (JPG, PNG, WebP) or a video (MP4, MOV).",
+      "linkLabel": "Or paste a YouTube video link",
+      "linkPlaceholder": "https://youtu.be/…",
+      "linkHelper": "For films over 100MB. The video is still reviewed by Fgrapher before it shows on your page.",
+      "linkAdd": "Add",
+      "linkInvalid": "That does not look like a YouTube link. Paste one like youtube.com/watch?v=… or youtu.be/…",
+      "linkDuplicate": "This link is already in the list.",
+      "linkItem": "YouTube video",
+      "removeLink": "Remove link"
     },
     "mediaLightbox": {
       "close": "Close",

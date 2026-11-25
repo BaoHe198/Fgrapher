@@ -13,6 +13,7 @@ import {
   UploadVerificationError,
   verifyPortfolioUpload,
 } from "@/lib/media/cloudinary";
+import { youtubeVideoId, youtubeWatchUrl } from "@/lib/media/video-link";
 import { getCreatePortfolioMediaSchema } from "@/lib/validations/portfolio";
 import { runModeration } from "@/services/moderation";
 
@@ -103,23 +104,57 @@ export async function POST(request: Request) {
       }
     }
 
-    await verifyPortfolioUpload({
-      publicId: parsed.data.publicId,
-      url: parsed.data.url,
-      userId: session.user.id,
-      type: parsed.data.type,
-    });
+    // Two ways in: a file this user uploaded to Cloudinary, checked there,
+    // or a YouTube link, which is stored in one canonical form whatever was
+    // pasted. Anything else without a publicId is refused. A linked video
+    // goes through the same review queue as an upload (it starts PENDING
+    // below), and plays only from the address that was reviewed.
+    const youtubeId = parsed.data.publicId
+      ? null
+      : youtubeVideoId(parsed.data.url);
+    if (!parsed.data.publicId && !youtubeId) {
+      return NextResponse.json(
+        { data: null, error: "invalid_link", message: t("videoLinkInvalid") },
+        { status: 400 },
+      );
+    }
+    const url = youtubeId ? youtubeWatchUrl(youtubeId) : parsed.data.url;
+
+    if (youtubeId) {
+      const already = await db.profileMedia.findFirst({
+        where: { profileId: profile.id, url, deletedAt: null },
+        select: { id: true },
+      });
+      if (already) {
+        return NextResponse.json(
+          {
+            data: null,
+            error: "duplicate",
+            message: t("videoLinkDuplicate"),
+          },
+          { status: 409 },
+        );
+      }
+    } else {
+      await verifyPortfolioUpload({
+        publicId: parsed.data.publicId!,
+        url: parsed.data.url,
+        userId: session.user.id,
+        type: parsed.data.type,
+      });
+    }
 
     const media = await db.profileMedia.create({
       data: {
         profileId: profile.id,
         albumId: parsed.data.albumId,
-        url: parsed.data.url,
-        publicId: parsed.data.publicId,
-        type: parsed.data.type,
+        url,
+        publicId: youtubeId ? null : parsed.data.publicId,
+        type: youtubeId ? "VIDEO" : parsed.data.type,
         title: parsed.data.title,
-        width: parsed.data.width,
-        height: parsed.data.height,
+        // A linked video is laid out at YouTube's own 16:9.
+        width: youtubeId ? 1280 : parsed.data.width,
+        height: youtubeId ? 720 : parsed.data.height,
         order: (maxOrder._max.order ?? -1) + 1,
         // Server-set, never trusted from the client — the request having
         // passed createPortfolioMediaSchema's rightsConfirmed refine is

@@ -116,8 +116,31 @@ Nhà cung cấp quản lý media theo album:
 Mỗi upload có trạng thái kiểm duyệt. Chỉ media `APPROVED` được trả cho trang công
 khai. Chủ hồ sơ vẫn thấy trạng thái pending/rejected để sửa.
 
-Trên trang hồ sơ công khai, khung "Tất cả ảnh" mở ra với 9 ảnh; nút "Xem thêm ·
-còn N ảnh" mở thêm 9 ảnh mỗi lần, để khách không phải cuộn qua cả portfolio mới
+**Video bằng liên kết YouTube (25/11/2026).** Ngoài tệp video tải lên (tối đa
+100MB), hộp tải lên nhận liên kết YouTube — cho phim cưới, phim sự kiện vượt giới
+hạn tệp. Đó vẫn là một dòng `ProfileMedia` loại `VIDEO`, không có `publicId`,
+`url` lưu ở một dạng chuẩn (`https://www.youtube.com/watch?v=<id>`); nhận diện
+và dựng địa chỉ trình phát, ảnh đại diện nằm cả ở `lib/media/video-link.ts`.
+Video liên kết **đi qua hàng chờ kiểm duyệt y như tệp tải lên** (mặc định
+`PENDING`, cần ô xác nhận quyền hình ảnh), và admin xem bằng chính trình phát
+YouTube trong hàng chờ. Trình phát dùng `youtube-nocookie.com` và chỉ tải khi
+người xem mở video; trên lưới chỉ có ảnh đại diện. CSP (`next.config.ts`) cho
+phép đúng hai nguồn đó: `frame-src https://www.youtube-nocookie.com` và
+`img-src https://i.ytimg.com`.
+
+Chỉ YouTube, có chủ đích: một video YouTube không thể bị thay bằng video khác
+dưới cùng địa chỉ, nên thứ đã duyệt là thứ còn hiển thị. Vimeo cho chủ video
+thay tệp phía sau liên kết, tức nội dung có thể đổi sau khi đã duyệt — chưa hỗ
+trợ, chờ chủ dự án quyết định.
+
+Mọi nơi vẽ video dùng chung `components/media/portfolio-video.tsx`: `VideoTile`
+(ảnh đại diện + dấu phát, cho lưới và ảnh bìa) và `PortfolioVideoPlayer` (trình
+phát, cho trình xem ảnh và hàng chờ của admin).
+
+Trên trang hồ sơ công khai, khung "Tất cả ảnh" hiện cả video đã duyệt (từ
+25/11/2026; ô video có dấu phát, tiêu đề thành "Tất cả ảnh và video", đếm riêng
+"3 ảnh · 1 video") và mở ra với 9 mục; nút "Xem thêm ·
+còn N ảnh" mở thêm 9 mục mỗi lần, để khách không phải cuộn qua cả portfolio mới
 tới phần đánh giá và thông tin bên dưới. Đổi bộ lọc phong cách thì quay về 9 ảnh;
 trình xem ảnh vẫn lướt được qua mọi ảnh và tự mở thêm khung phía sau cho khớp.
 

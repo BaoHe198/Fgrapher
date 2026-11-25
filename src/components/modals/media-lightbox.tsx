@@ -12,6 +12,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
+import { PortfolioVideoPlayer } from "@/components/media/portfolio-video";
 import { type MediaKind, mediaKindFromUrl } from "@/lib/media/kind";
 import { buildMediaVariants } from "@/lib/media/variants";
 
@@ -285,17 +286,16 @@ export function MediaLightbox({
         >
           {(current.type ?? mediaKindFromUrl(current.url)) === "VIDEO" ? (
             // The raw URL, not buildMediaVariants(): those variants append
-            // f_webp, which turns a video into a failed image request.
-            // key={url} remounts the element when navigating between two
-            // videos, so the previous one doesn't keep playing underneath.
-            <video
-              key={current.url}
-              src={current.url}
-              controls
+            // f_webp, which turns a video into a failed image request. A
+            // YouTube link gets YouTube's player, as wide as the screen or
+            // as tall as the space allows, whichever is reached first.
+            <PortfolioVideoPlayer
+              url={current.url}
+              title={current.title ?? title ?? t("label")}
               autoPlay
-              playsInline
-              onLoadedData={revealSlide}
+              onReady={revealSlide}
               className="max-h-[calc(100dvh-11rem)] max-w-full bg-dr-bg"
+              frameClassName="w-[min(calc(100vw-1.5rem),calc((100dvh-11rem)*16/9),1280px)] sm:w-[min(calc(100vw-8rem),calc((100dvh-11rem)*16/9),1280px)]"
             />
           ) : (
             <Image

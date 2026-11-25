@@ -26,6 +26,10 @@ import {
   MEDIA_MODERATION_SLA_HOURS,
   MEDIA_REJECTION_REASONS,
 } from "@/lib/constants";
+import {
+  PortfolioVideoPlayer,
+  VideoTile,
+} from "@/components/media/portfolio-video";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
@@ -290,11 +294,7 @@ export default function AdminModerationPage() {
                   >
                     <div className="relative aspect-square bg-bg-sunken">
                       {item.type === "VIDEO" ? (
-                        <video
-                          src={item.url}
-                          className="size-full object-cover"
-                          muted
-                        />
+                        <VideoTile url={item.url} />
                       ) : (
                         <Image
                           src={buildMediaVariants(item.url).thumbnail}
@@ -446,11 +446,14 @@ export default function AdminModerationPage() {
         <DialogContent className="max-w-3xl bg-transparent p-0 ring-0">
           {lightboxItem ? (
             lightboxItem.type === "VIDEO" ? (
-              <video
-                src={lightboxItem.url}
-                controls
+              // The reviewer watches exactly what a visitor would: the
+              // uploaded file, or the linked YouTube video in its player.
+              <PortfolioVideoPlayer
+                url={lightboxItem.url}
+                title={lightboxItem.album?.title ?? "Video"}
                 autoPlay
                 className="max-h-[80vh] w-full rounded-[var(--fg-radius-lg)]"
+                frameClassName="w-full rounded-[var(--fg-radius-lg)]"
               />
             ) : (
               <Image

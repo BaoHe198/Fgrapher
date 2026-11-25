@@ -53,12 +53,17 @@ const isLocalHttp = process.env.NEXTAUTH_URL?.startsWith("http://localhost");
 // failure, confirmed by a securitypolicyviolation event ("media-src blocked
 // https://res.cloudinary.com/...") before this line was added. blob: covers
 // previewing a picked video file locally before it's uploaded.
+//
+// A portfolio video can also be a YouTube link (lib/media/video-link.ts):
+// frame-src allows YouTube's no-cookie player and nothing else, and img-src
+// allows its thumbnail host for the poster frame.
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com https://api.maptiler.com https://tiles.openfreemap.org;
+  img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com https://i.ytimg.com https://api.maptiler.com https://tiles.openfreemap.org;
   media-src 'self' blob: https://res.cloudinary.com;
+  frame-src https://www.youtube-nocookie.com;
   font-src 'self' data:;
   connect-src 'self' https://api.cloudinary.com https://api.maptiler.com https://tiles.openfreemap.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io;
   worker-src 'self' blob:;
@@ -103,6 +108,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" }, // Google OAuth avatars
       { protocol: "https", hostname: "images.unsplash.com" }, // landing-page hero + seeded portfolio photos
+      { protocol: "https", hostname: "i.ytimg.com" }, // poster frame of a linked YouTube video
     ],
   },
   async headers() {

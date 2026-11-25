@@ -1477,7 +1477,9 @@
       "restoreFailed": "Không thể khôi phục",
       "notOwned": "Bạn không sở hữu một số ảnh trong danh sách này",
       "orderUpdated": "Đã cập nhật thứ tự",
-      "reorderFailed": "Không thể cập nhật thứ tự"
+      "reorderFailed": "Không thể cập nhật thứ tự",
+      "videoLinkInvalid": "Liên kết này không phải một video YouTube. Hãy dán liên kết dạng youtube.com/watch?v=… hoặc youtu.be/…",
+      "videoLinkDuplicate": "Video này đã có trong portfolio của bạn."
     },
     "darkroom": {
       "loadFailed": "Không thể tải ảnh",
@@ -4565,7 +4567,11 @@
         "filterByStyle": "Lọc theo phong cách",
         "albumFrame": "{count} ảnh",
         "shotAt": "Chụp tại {place}",
-        "spotsShot": "Địa điểm đã chụp"
+        "spotsShot": "Địa điểm đã chụp",
+        "allMedia": "Tất cả ảnh và video",
+        "mediaCount": "{photos, plural, =0 {} other {# ảnh}}{both, select, yes { · } other {}}{videos, plural, =0 {} other {# video}}",
+        "showMoreMedia": "Xem thêm · còn {remaining}",
+        "videoAria": "Phát video"
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
@@ -5842,7 +5848,15 @@
       "albumCategoryRequired": "Vui lòng chọn danh mục",
       "albumCreateFailed": "Không thể tạo album, vui lòng thử lại",
       "albumTitlePlaceholder": "Không bắt buộc — để trống sẽ đặt theo thể loại",
-      "unsupportedType": "Loại tệp này không tải lên được. Hãy chọn ảnh (JPG, PNG, WebP) hoặc video (MP4, MOV)."
+      "unsupportedType": "Loại tệp này không tải lên được. Hãy chọn ảnh (JPG, PNG, WebP) hoặc video (MP4, MOV).",
+      "linkLabel": "Hoặc dán liên kết video YouTube",
+      "linkPlaceholder": "https://youtu.be/…",
+      "linkHelper": "Dành cho phim dài hơn 100MB. Video vẫn được Fgrapher duyệt trước khi hiện trên trang của bạn.",
+      "linkAdd": "Thêm",
+      "linkInvalid": "Không nhận ra liên kết YouTube. Hãy dán liên kết dạng youtube.com/watch?v=… hoặc youtu.be/…",
+      "linkDuplicate": "Liên kết này đã có trong danh sách.",
+      "linkItem": "Video YouTube",
+      "removeLink": "Bỏ liên kết"
     },
     "mediaLightbox": {
       "close": "Đóng",

@@ -33,9 +33,11 @@ import { FrameMark } from "@/components/brand/frame-mark";
 import { Button } from "@/components/ui/button";
 import { MasonryGrid } from "@/components/ui/masonry-grid";
 import { PinButton } from "@/components/media/pin-button";
+import { PlayMark, VideoTile } from "@/components/media/portfolio-video";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { PostEngagement } from "@/components/social/post-engagement";
 import { buildMediaVariants } from "@/lib/media/variants";
+import { videoPosterUrl } from "@/lib/media/video-link";
 import { cn } from "@/lib/utils";
 
 import { AlbumEditDialog } from "./album-edit-dialog";
@@ -128,10 +130,9 @@ function AlbumTile({
       >
         {album.coverMedia ? (
           album.coverMedia.type === "VIDEO" ? (
-            <video
-              src={album.coverMedia.url}
-              className="absolute inset-0 size-full object-cover"
-              muted
+            <VideoTile
+              url={album.coverMedia.url}
+              className="absolute inset-0"
             />
           ) : (
             <Image
@@ -324,8 +325,17 @@ export function PortfolioTab({
     activeCategory === null
       ? allPhotos
       : allPhotos.filter((photo) => photo.album.category === activeCategory);
-  // The grid shows photos; videos stay reachable inside their album.
-  const visibleImages = visiblePhotos.filter((photo) => photo.type === "IMAGE");
+  // Photos and videos together, in the artist's order (25/11/2026). The
+  // grid used to show photos only, so a videographer's page had films that
+  // could be reached only by opening an album. A video needs a still frame
+  // to stand in the grid; one without (an unknown host) stays in its album.
+  const visibleImages = visiblePhotos.filter(
+    (item) => item.type === "IMAGE" || videoPosterUrl(item.url) !== null,
+  );
+  const photoTotal = visibleImages.filter(
+    (item) => item.type === "IMAGE",
+  ).length;
+  const videoTotal = visibleImages.length - photoTotal;
   const openPhoto =
     photoIndex === null ? null : (visibleImages[photoIndex] ?? null);
   const shownImages = visibleImages.slice(0, shownCount);
@@ -457,7 +467,13 @@ export function PortfolioTab({
                             : "aspect-[3/2]",
                         )}
                       >
-                        {cover && cover.type === "IMAGE" ? (
+                        {cover && cover.type === "VIDEO" ? (
+                          <VideoTile
+                            url={cover.url}
+                            className="absolute inset-0"
+                            markClassName="size-14"
+                          />
+                        ) : cover ? (
                           <ViewTransition
                             name={`album-${album.id}`}
                             share="morph"
@@ -551,15 +567,17 @@ export function PortfolioTab({
           <section className="mt-10 flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="flex items-baseline gap-2 text-heading-md text-text-primary">
-                {t("allPhotos")}
+                {videoTotal > 0 ? t("allMedia") : t("allPhotos")}
                 <span className="font-mono text-meta tabular-nums text-text-tertiary">
-                  {/* Photos only, like the grid under it: a video was
-                      counted here and never shown, so "4 ảnh" sat above
-                      three tiles. */}
-                  {t("photoCount", {
-                    count: allPhotos.filter((item) => item.type === "IMAGE")
-                      .length,
-                  })}
+                  {/* Counts what the grid under it shows, by kind:
+                      "3 ảnh · 1 video". */}
+                  {videoTotal > 0
+                    ? t("mediaCount", {
+                        photos: photoTotal,
+                        videos: videoTotal,
+                        both: photoTotal > 0 ? "yes" : "no",
+                      })
+                    : t("photoCount", { count: photoTotal })}
                 </span>
               </h3>
               {/* Styles, not folder names: "Cưới / Kỷ yếu" is how a
@@ -589,14 +607,22 @@ export function PortfolioTab({
             {/* Every photo at its own ratio (MasonryGrid never crops). */}
             <div ref={gridRef}>
               <MasonryGrid
-                items={shownImages.map((photo) => ({
-                  id: photo.id,
-                  src: buildMediaVariants(photo.url).medium,
-                  width: photo.width,
-                  height: photo.height,
-                  alt: photo.title ?? photo.album.title,
-                }))}
+                items={shownImages.map((photo) => {
+                  const poster =
+                    photo.type === "VIDEO" ? videoPosterUrl(photo.url) : null;
+                  return {
+                    id: photo.id,
+                    src: poster ?? buildMediaVariants(photo.url).medium,
+                    // A poster is a 16:9 frame whatever the row says.
+                    width: poster ? (photo.width ?? 1280) : photo.width,
+                    height: poster ? (photo.height ?? 720) : photo.height,
+                    alt: photo.title ?? photo.album.title,
+                  };
+                })}
                 onOpen={setPhotoIndex}
+                renderOverlay={(_, index) =>
+                  shownImages[index]?.type === "VIDEO" ? <PlayMark /> : null
+                }
               />
             </div>
             {hiddenCount > 0 ? (
@@ -607,7 +633,9 @@ export function PortfolioTab({
                   setShownCount((count) => count + PHOTOS_PER_PAGE)
                 }
               >
-                {t("showMore", { remaining: hiddenCount })}
+                {videoTotal > 0
+                  ? t("showMoreMedia", { remaining: hiddenCount })
+                  : t("showMore", { remaining: hiddenCount })}
               </Button>
             ) : null}
           </section>
@@ -647,7 +675,10 @@ export function PortfolioTab({
           onClose={() => setPhotoIndex(null)}
           onIndexChange={showPhoto}
           actions={
-            isOwnProfile ? undefined : <PinButton mediaId={openPhoto.id} />
+            // Pins are a board of photos; a video has no still to pin.
+            isOwnProfile || openPhoto.type === "VIDEO" ? undefined : (
+              <PinButton mediaId={openPhoto.id} />
+            )
           }
           title={openPhoto.album.title}
           description={openPhoto.album.description}

@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 
+import { VideoTile } from "@/components/media/portfolio-video";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -125,7 +126,7 @@ export function ArtistCard({ artist, onClick, priority }: ArtistCardProps) {
     }
 
     if (photo.type === "VIDEO") {
-      return <video src={photo.url} className="size-full object-cover" muted />;
+      return <VideoTile url={photo.url} />;
     }
 
     return (

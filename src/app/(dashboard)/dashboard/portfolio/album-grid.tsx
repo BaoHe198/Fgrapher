@@ -29,6 +29,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
+import { VideoTile } from "@/components/media/portfolio-video";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { FrameMark } from "@/components/brand/frame-mark";
 import { cn } from "@/lib/utils";
@@ -79,11 +80,7 @@ function SortableAlbumCard({
         >
           {album.coverMedia ? (
             album.coverMedia.type === "VIDEO" ? (
-              <video
-                src={album.coverMedia.url}
-                className="size-full object-cover"
-                muted
-              />
+              <VideoTile url={album.coverMedia.url} />
             ) : (
               <Image
                 src={buildMediaVariants(album.coverMedia.url).thumbnail}

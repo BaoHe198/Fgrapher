@@ -12,6 +12,7 @@ import { auth } from "@/lib/auth";
 import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { getAgeRangeLabel } from "@/lib/account/age-gate";
 import { formatAdministrativeLocation, shortPlace } from "@/lib/location";
+import { videoPosterUrl } from "@/lib/media/video-link";
 import {
   MIN_NOTICE_HOURS,
   PROVIDER_ROLES,
@@ -133,7 +134,10 @@ export async function generateMetadata({
   // generated branded fallback (would need next/og wired up, deferred).
   // A profile with neither still gets title/description in the share
   // preview, just no image.
-  const ogImage = user.coverImage ?? activeProfile.media[0]?.url;
+  const firstMedia = activeProfile.media[0]?.url;
+  const ogImage =
+    user.coverImage ??
+    (firstMedia ? (videoPosterUrl(firstMedia) ?? firstMedia) : undefined);
 
   return {
     title,

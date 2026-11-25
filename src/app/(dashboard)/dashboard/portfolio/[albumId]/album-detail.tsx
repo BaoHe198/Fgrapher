@@ -42,6 +42,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
+import { VideoTile } from "@/components/media/portfolio-video";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
@@ -108,7 +109,7 @@ function SortableMediaTile({
       )}
     >
       {item.type === "VIDEO" ? (
-        <video src={item.url} className="size-full object-cover" muted />
+        <VideoTile url={item.url} />
       ) : (
         <Image
           src={buildMediaVariants(item.url).thumbnail}
