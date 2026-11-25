@@ -4345,6 +4345,12 @@
         "availabilityError": "Không tải được lịch trống. Lựa chọn của bạn vẫn được giữ — hãy thử lại.",
         "changeDate": "Đổi ngày",
         "timezone": "Giờ Việt Nam (GMT+7)",
+        "venue": {
+          "heading": "Thuê tại studio",
+          "sub": "Bạn đang thuê không gian của {providerName}. Cho studio biết số người để chuẩn bị.",
+          "summary": "Tại {providerName}",
+          "addressNote": "Địa chỉ chi tiết: nhắn tin với studio sau khi gửi yêu cầu."
+        },
         "locationHints": {
           "PROVIDER": "Studio hoặc địa điểm quen của nghệ sĩ",
           "CUSTOMER": "Nhà riêng, văn phòng, nhà hàng… bạn chọn",
@@ -4707,7 +4713,11 @@
       "studio": {
         "area": "Diện tích",
         "squareMeters": "{area} m²",
-        "amenities": "Tiện nghi"
+        "amenities": "Tiện nghi",
+        "address": "Địa chỉ",
+        "addressNote": "Địa chỉ chi tiết: nhắn tin với studio để nhận.",
+        "hours": "Giờ mở cửa",
+        "closed": "Nghỉ"
       },
       "roleIn": "{role} ở {place}"
     },
@@ -6172,7 +6182,10 @@
       "reviews": "Đánh giá",
       "about": "Về {name}",
       "area": "Khu vực làm việc",
-      "know": "Những điều cần biết"
+      "know": "Những điều cần biết",
+      "portfolioStudio": "Ảnh chụp tại studio",
+      "portfolioFilm": "Phim đã quay",
+      "areaStudio": "Địa chỉ và giờ mở cửa"
     },
     "packages": {
       "tfpBadge": "Nhận hợp tác TFP",
@@ -6208,7 +6221,11 @@
         "days": "Thường trả lời trong {count} ngày"
       },
       "tfp": "Nhận hợp tác TFP",
-      "joined": "Tham gia Fgrapher từ {date}"
+      "joined": "Tham gia Fgrapher từ {date}",
+      "yearsStudio": "{count} năm hoạt động",
+      "shootsStudio": "{count} lượt thuê qua Fgrapher",
+      "shootsBodyStudio": "Chỉ tính các lượt thuê đã hoàn thành.",
+      "shootsFilm": "{count} buổi đã quay qua Fgrapher"
     },
     "know": {
       "askInChat": "Chưa ghi. Hỏi {name} trong tin nhắn.",

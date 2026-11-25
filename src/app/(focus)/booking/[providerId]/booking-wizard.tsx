@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  MapPin,
   MessageCircle,
   X,
 } from "lucide-react";
@@ -62,6 +63,8 @@ const SHOOT_TYPE_OPTION_KEYS = [
 
 interface ServiceOption {
   id: string;
+  /** ServiceKind. VENUE_RENTAL fixes the place: see `atVenue` below. */
+  kind: string;
   name: string;
   description: string | null;
   price: number;
@@ -88,6 +91,8 @@ interface BookingWizardProps {
   services: ServiceOption[];
   contactPhoneDefault: string;
   isModel?: boolean;
+  /** A studio's ward and province, shown when the booking is for its room. */
+  venuePlace?: string | null;
   // Crew-hire (Prompt B7, VIỆC 1) — non-null only when the viewer holds
   // PHOTOGRAPHER/VIDEOGRAPHER and this provider offers MUA/Model/Studio.
   requesterCrewRole?: string | null;
@@ -234,6 +239,7 @@ export function BookingWizard({
   services,
   contactPhoneDefault,
   isModel,
+  venuePlace,
   requesterCrewRole,
 }: BookingWizardProps) {
   const t = useTranslations("publicPages.booking");
@@ -405,6 +411,11 @@ export function BookingWizard({
   const selectedService =
     services.find((s) => s.id === draft.serviceId) ?? null;
   const isCustom = draft.custom || services.length === 0;
+  // Hiring the room itself happens at the room. The wizard used to ask a
+  // customer renting a studio "Chụp ở đâu?" and offer "Ngoài trời"
+  // (25/11/2026). A studio's other packages (its crew shooting, make-up)
+  // can still be anywhere, so those keep the question.
+  const atVenue = !isCustom && selectedService?.kind === "VENUE_RENTAL";
 
   // One month of availability, shared by the day and time steps.
   const [monthCursor, setMonthCursor] = useState(() => {
@@ -499,9 +510,10 @@ export function BookingWizard({
         return !!draft.time;
       case "location":
         return (
-          draft.locationType !== null &&
-          (draft.locationType === "PROVIDER" ||
-            draft.locationAddress.trim().length > 0)
+          atVenue ||
+          (draft.locationType !== null &&
+            (draft.locationType === "PROVIDER" ||
+              draft.locationAddress.trim().length > 0))
         );
       case "notes":
         return draft.contactPhone.trim().length > 0;
@@ -567,8 +579,10 @@ export function BookingWizard({
           serviceId: isCustom ? undefined : (draft.serviceId ?? undefined),
           date: draft.date,
           startTime: draft.time,
-          locationType: draft.locationType,
-          locationAddress: draft.locationAddress || undefined,
+          locationType: atVenue ? "PROVIDER" : draft.locationType,
+          locationAddress: atVenue
+            ? undefined
+            : draft.locationAddress || undefined,
           numberOfPeople: draft.numberOfPeople
             ? Number(draft.numberOfPeople)
             : undefined,
@@ -697,11 +711,13 @@ export function BookingWizard({
     },
     {
       label: t("flow.rows.location"),
-      value: draft.locationType
-        ? draft.locationType !== "PROVIDER" && draft.locationAddress
-          ? draft.locationAddress
-          : locationLabel[draft.locationType]
-        : null,
+      value: atVenue
+        ? t("flow.venue.summary", { providerName })
+        : draft.locationType
+          ? draft.locationType !== "PROVIDER" && draft.locationAddress
+            ? draft.locationAddress
+            : locationLabel[draft.locationType]
+          : null,
       onEdit: () => goTo(3),
     },
     {
@@ -813,10 +829,14 @@ export function BookingWizard({
                   tabIndex={-1}
                   className="text-heading-xl text-text-primary outline-none"
                 >
-                  {t(`flow.headings.${current}`)}
+                  {current === "location" && atVenue
+                    ? t("flow.venue.heading")
+                    : t(`flow.headings.${current}`)}
                 </h1>
                 <p className="text-body-md text-text-secondary">
-                  {t(`flow.subs.${current}`, { providerName })}
+                  {current === "location" && atVenue
+                    ? t("flow.venue.sub", { providerName })
+                    : t(`flow.subs.${current}`, { providerName })}
                 </p>
               </div>
 
@@ -965,26 +985,49 @@ export function BookingWizard({
               {current === "location" ? (
                 <div className="flex flex-col gap-5">
                   {isModel ? <ModelSafetyNotice /> : null}
-                  <ChoiceCardGroup
-                    legend={t("stepDetails.locationLabel")}
-                    hideLegend
-                  >
-                    {(["PROVIDER", "CUSTOMER", "OUTDOOR"] as const).map(
-                      (type) => (
-                        <ChoiceCard
-                          key={type}
-                          name="locationType"
-                          value={type}
-                          selected={draft.locationType === type}
-                          onSelect={() => update("locationType", type)}
-                          title={locationLabel[type]}
-                          description={t(`flow.locationHints.${type}`)}
-                        />
-                      ),
-                    )}
-                  </ChoiceCardGroup>
-                  {draft.locationType === "CUSTOMER" ||
-                  draft.locationType === "OUTDOOR" ? (
+                  {atVenue ? (
+                    <div className="flex items-start gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-sunken p-4">
+                      <MapPin
+                        aria-hidden
+                        className="mt-0.5 size-5 shrink-0 text-text-primary"
+                      />
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <span className="text-body-md font-semibold! text-text-primary">
+                          {t("flow.venue.summary", { providerName })}
+                        </span>
+                        {venuePlace ? (
+                          <span className="text-body-sm text-text-secondary">
+                            {venuePlace}
+                          </span>
+                        ) : null}
+                        <span className="text-body-sm text-text-secondary">
+                          {t("flow.venue.addressNote")}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <ChoiceCardGroup
+                      legend={t("stepDetails.locationLabel")}
+                      hideLegend
+                    >
+                      {(["PROVIDER", "CUSTOMER", "OUTDOOR"] as const).map(
+                        (type) => (
+                          <ChoiceCard
+                            key={type}
+                            name="locationType"
+                            value={type}
+                            selected={draft.locationType === type}
+                            onSelect={() => update("locationType", type)}
+                            title={locationLabel[type]}
+                            description={t(`flow.locationHints.${type}`)}
+                          />
+                        ),
+                      )}
+                    </ChoiceCardGroup>
+                  )}
+                  {!atVenue &&
+                  (draft.locationType === "CUSTOMER" ||
+                    draft.locationType === "OUTDOOR") ? (
                     <Input
                       label={t("stepDetails.addressLabel")}
                       value={draft.locationAddress}

@@ -4345,6 +4345,12 @@
         "availabilityError": "Couldn't load availability. Your choices are kept — try again.",
         "changeDate": "Change date",
         "timezone": "Vietnam time (GMT+7)",
+        "venue": {
+          "heading": "At the studio",
+          "sub": "You are hiring {providerName}'s space. Tell the studio how many people to expect.",
+          "summary": "At {providerName}",
+          "addressNote": "Street address: message the studio after sending the request."
+        },
         "locationHints": {
           "PROVIDER": "The artist's studio or usual place",
           "CUSTOMER": "A home, office, restaurant… of your choice",
@@ -4707,7 +4713,11 @@
       "studio": {
         "area": "Floor area",
         "squareMeters": "{area} m²",
-        "amenities": "Amenities"
+        "amenities": "Amenities",
+        "address": "Address",
+        "addressNote": "Street address: message the studio to get it.",
+        "hours": "Opening hours",
+        "closed": "Closed"
       },
       "roleIn": "{role} in {place}"
     },
@@ -6172,7 +6182,10 @@
       "reviews": "Reviews",
       "about": "About {name}",
       "area": "Where they work",
-      "know": "Things to know"
+      "know": "Things to know",
+      "portfolioStudio": "Shot at the studio",
+      "portfolioFilm": "Films",
+      "areaStudio": "Address and opening hours"
     },
     "packages": {
       "tfpBadge": "Open to TFP collaborations",
@@ -6208,7 +6221,11 @@
         "days": "Usually replies within {count} days"
       },
       "tfp": "Open to TFP collaborations",
-      "joined": "On Fgrapher since {date}"
+      "joined": "On Fgrapher since {date}",
+      "yearsStudio": "{count} years in business",
+      "shootsStudio": "{count} rentals through Fgrapher",
+      "shootsBodyStudio": "Completed rentals only.",
+      "shootsFilm": "{count} shoots filmed through Fgrapher"
     },
     "know": {
       "askInChat": "Not stated. Ask {name} in a message.",

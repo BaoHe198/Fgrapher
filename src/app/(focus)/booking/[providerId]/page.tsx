@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { formatAdministrativeLocation } from "@/lib/location";
 import { responseBucket } from "@/lib/response-time";
 import { getProfileStats } from "@/services/profile-stats";
 import {
@@ -78,6 +79,7 @@ export default async function BookingFlowPage({
   const services = provider.profiles.flatMap((profile) =>
     profile.services.map((service) => ({
       id: service.id,
+      kind: service.kind,
       name: service.name,
       description: service.description,
       price: service.price,
@@ -157,6 +159,12 @@ export default async function BookingFlowPage({
       services={services}
       contactPhoneDefault={customer?.phone ?? ""}
       isModel={isModel}
+      venuePlace={
+        provider.profiles
+          .filter((profile) => profile.role === "STUDIO")
+          .map((profile) => formatAdministrativeLocation(profile))
+          .find(Boolean) ?? null
+      }
       requesterCrewRole={canCrewHire ? (requesterCrewRole ?? null) : null}
     />
   );
