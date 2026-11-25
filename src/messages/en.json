@@ -1369,7 +1369,9 @@
       "tooManyPending": "You already have {max} booking requests waiting for a reply. Wait for an answer or cancel one before sending another.",
       "invalidTransition": "This booking's status has just changed, so that action is no longer possible. Please reload the page.",
       "proposalInPast": "The proposed time has already passed. Please choose an upcoming one.",
-      "proposalEndBeforeStart": "The proposed end time must be after the start."
+      "proposalEndBeforeStart": "The proposed end time must be after the start.",
+      "areaRequired": "Choose the province where the shoot takes place.",
+      "wardNotInProvince": "That ward is not in the chosen province."
     },
     "uploads": {
       "documentsNotConfigured": "Document uploads aren't available right now. Please try again later or contact support.",
@@ -2445,7 +2447,8 @@
         "people": "People",
         "total": "Total",
         "customRequest": "Custom request",
-        "contactPhone": "Contact phone"
+        "contactPhone": "Contact phone",
+        "area": "Area"
       },
       "locationLabel": {
         "PROVIDER": "At provider's studio",
@@ -2530,6 +2533,11 @@
           "nextWeek": "Next week",
           "failed": "Couldn't send the proposal. Please try again."
         }
+      },
+      "contactAfterAccept": "The customer's street address and phone number appear once you accept.",
+      "answerBy": {
+        "provider": "Answer before {time} on {date} ({hours} hours left). After that the request expires on its own.",
+        "customer": "{name} has until {time} on {date} to answer ({hours} hours left). After that the request expires and you can book someone else."
       }
     },
     "listings": {
@@ -4254,7 +4262,12 @@
         "numberOfPeoplePlaceholder": "e.g. 2",
         "notesLabel": "Notes",
         "notesPlaceholder": "Describe your vision, style references, special requirements...",
-        "contactPhoneLabel": "Contact phone (required)"
+        "contactPhoneLabel": "Contact phone (required)",
+        "provinceLabel": "Province (required)",
+        "wardLabel": "Ward",
+        "pickOne": "Choose a province",
+        "wardAny": "Not sure",
+        "areaHelper": "{providerName} sees the province and ward right away, to know whether they can take the job. The street address appears only after they accept."
       },
       "stepReview": {
         "heading": "Review your booking",
@@ -4320,7 +4333,8 @@
           "date": "Pick a free day to continue.",
           "time": "Pick a time to continue.",
           "location": "Choose a place to continue.",
-          "phone": "Enter a contact phone to continue."
+          "phone": "Enter a contact phone to continue.",
+          "area": "Choose the province of the shoot to continue."
         },
         "keptNote": "What you entered is kept if you go back",
         "rows": {

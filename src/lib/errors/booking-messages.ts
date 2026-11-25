@@ -21,6 +21,8 @@ export const BOOKING_ERROR_KEYS: Record<string, string> = {
   "The system actor can only expire bookings": "systemOnlyExpires",
   "That date or time isn't available for this provider": "timeUnavailable",
   "Service not found": "serviceNotFound",
+  "Choose the province of the shoot": "areaRequired",
+  "That ward is not in the chosen province": "wardNotInProvince",
   "Provider-role bookings must be linked to a confirmed customer booking":
     "crewNeedsParent",
   "Provider is not accepting bookings": "notAccepting",

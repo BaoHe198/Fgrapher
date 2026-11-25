@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatAdministrativeLocation } from "@/lib/location";
 import { responseBucket } from "@/lib/response-time";
+import { listProvinces } from "@/services/geography";
 import { getProfileStats } from "@/services/profile-stats";
 import {
   getProfileReviewStats,
@@ -65,12 +66,13 @@ export default async function BookingFlowPage({
     redirect("/dashboard");
   }
 
-  const [provider, customer] = await Promise.all([
+  const [provider, customer, provinces] = await Promise.all([
     getProviderForBooking(providerId),
     db.user.findUnique({
       where: { id: session.user.id },
       select: { phone: true },
     }),
+    listProvinces(),
   ]);
   if (!provider) {
     notFound();
@@ -159,6 +161,7 @@ export default async function BookingFlowPage({
       services={services}
       contactPhoneDefault={customer?.phone ?? ""}
       isModel={isModel}
+      provinces={provinces}
       venuePlace={
         provider.profiles
           .filter((profile) => profile.role === "STUDIO")

@@ -93,6 +93,8 @@ interface BookingWizardProps {
   isModel?: boolean;
   /** A studio's ward and province, shown when the booking is for its room. */
   venuePlace?: string | null;
+  /** Every province, for the area of a shoot away from the provider's place. */
+  provinces: { id: string; code: string; name: string }[];
   // Crew-hire (Prompt B7, VIỆC 1) — non-null only when the viewer holds
   // PHOTOGRAPHER/VIDEOGRAPHER and this provider offers MUA/Model/Studio.
   requesterCrewRole?: string | null;
@@ -121,6 +123,10 @@ interface Draft {
   // sending a booking with the wrong place on it. Nothing is chosen for them.
   locationType: LocationType | null;
   locationAddress: string;
+  // The area of a shoot at the customer's place or outdoors. The provider
+  // sees these two before accepting; the address only after.
+  locationProvinceId: string;
+  locationWardId: string;
   numberOfPeople: string;
   notes: string;
   // Uploaded reference photo/video URLs — sent as Booking.referenceImages.
@@ -168,6 +174,8 @@ function emptyDraft(contactPhoneDefault: string): Draft {
     time: null,
     locationType: null,
     locationAddress: "",
+    locationProvinceId: "",
+    locationWardId: "",
     numberOfPeople: "",
     notes: "",
     referenceMedia: [],
@@ -240,6 +248,7 @@ export function BookingWizard({
   contactPhoneDefault,
   isModel,
   venuePlace,
+  provinces,
   requesterCrewRole,
 }: BookingWizardProps) {
   const t = useTranslations("publicPages.booking");
@@ -416,6 +425,40 @@ export function BookingWizard({
   // (25/11/2026). A studio's other packages (its crew shooting, make-up)
   // can still be anywhere, so those keep the question.
   const atVenue = !isCustom && selectedService?.kind === "VENUE_RENTAL";
+  // At the customer's place or outdoors: the only cases with an area and
+  // an address to give.
+  const elsewhere =
+    !atVenue &&
+    (draft.locationType === "CUSTOMER" || draft.locationType === "OUTDOOR");
+
+  // The chosen province's wards. Kept with the province they belong to, so
+  // a list still arriving for the previous province is never shown.
+  const provinceCode =
+    provinces.find((p) => p.id === draft.locationProvinceId)?.code ?? null;
+  const [wardList, setWardList] = useState<{
+    code: string;
+    wards: { id: string; name: string }[];
+  } | null>(null);
+  useEffect(() => {
+    if (!provinceCode) return;
+    const controller = new AbortController();
+    fetch(`/api/geography/wards?provinceCode=${provinceCode}`, {
+      signal: controller.signal,
+    })
+      .then((res) => res.json())
+      .then((body) =>
+        setWardList({ code: provinceCode, wards: body.data ?? [] }),
+      )
+      .catch(() => {});
+    return () => controller.abort();
+  }, [provinceCode]);
+  const wards = wardList?.code === provinceCode ? wardList.wards : [];
+  const areaLabel = [
+    wards.find((ward) => ward.id === draft.locationWardId)?.name,
+    provinces.find((p) => p.id === draft.locationProvinceId)?.name,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   // One month of availability, shared by the day and time steps.
   const [monthCursor, setMonthCursor] = useState(() => {
@@ -513,7 +556,8 @@ export function BookingWizard({
           atVenue ||
           (draft.locationType !== null &&
             (draft.locationType === "PROVIDER" ||
-              draft.locationAddress.trim().length > 0))
+              (draft.locationProvinceId !== "" &&
+                draft.locationAddress.trim().length > 0)))
         );
       case "notes":
         return draft.contactPhone.trim().length > 0;
@@ -534,7 +578,9 @@ export function BookingWizard({
           time: t("flow.missing.time"),
           location:
             draft.locationType !== null && draft.locationType !== "PROVIDER"
-              ? t("missingHint.address")
+              ? draft.locationProvinceId === ""
+                ? t("flow.missing.area")
+                : t("missingHint.address")
               : t("flow.missing.location"),
           notes: t("flow.missing.phone"),
           review: t("missingHint.agree"),
@@ -583,6 +629,12 @@ export function BookingWizard({
           locationAddress: atVenue
             ? undefined
             : draft.locationAddress || undefined,
+          locationProvinceId: elsewhere
+            ? draft.locationProvinceId || undefined
+            : undefined,
+          locationWardId: elsewhere
+            ? draft.locationWardId || undefined
+            : undefined,
           numberOfPeople: draft.numberOfPeople
             ? Number(draft.numberOfPeople)
             : undefined,
@@ -715,7 +767,7 @@ export function BookingWizard({
         ? t("flow.venue.summary", { providerName })
         : draft.locationType
           ? draft.locationType !== "PROVIDER" && draft.locationAddress
-            ? draft.locationAddress
+            ? [draft.locationAddress, areaLabel].filter(Boolean).join(", ")
             : locationLabel[draft.locationType]
           : null,
       onEdit: () => goTo(3),
@@ -1025,17 +1077,57 @@ export function BookingWizard({
                       )}
                     </ChoiceCardGroup>
                   )}
-                  {!atVenue &&
-                  (draft.locationType === "CUSTOMER" ||
-                    draft.locationType === "OUTDOOR") ? (
-                    <Input
-                      label={t("stepDetails.addressLabel")}
-                      value={draft.locationAddress}
-                      onChange={(e) =>
-                        update("locationAddress", e.target.value)
-                      }
-                      placeholder={t("stepDetails.addressPlaceholder")}
-                    />
+                  {elsewhere ? (
+                    <>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <NativeSelect
+                            label={t("stepDetails.provinceLabel")}
+                            value={draft.locationProvinceId}
+                            onChange={(value) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                locationProvinceId: value,
+                                locationWardId: "",
+                              }))
+                            }
+                            options={[
+                              { value: "", label: t("stepDetails.pickOne") },
+                              ...provinces.map((province) => ({
+                                value: province.id,
+                                label: province.name,
+                              })),
+                            ]}
+                          />
+                          <NativeSelect
+                            label={t("stepDetails.wardLabel")}
+                            value={draft.locationWardId}
+                            disabled={!draft.locationProvinceId}
+                            onChange={(value) =>
+                              update("locationWardId", value)
+                            }
+                            options={[
+                              { value: "", label: t("stepDetails.wardAny") },
+                              ...wards.map((ward) => ({
+                                value: ward.id,
+                                label: ward.name,
+                              })),
+                            ]}
+                          />
+                        </div>
+                        <p className="text-meta text-text-tertiary">
+                          {t("stepDetails.areaHelper", { providerName })}
+                        </p>
+                      </div>
+                      <Input
+                        label={t("stepDetails.addressLabel")}
+                        value={draft.locationAddress}
+                        onChange={(e) =>
+                          update("locationAddress", e.target.value)
+                        }
+                        placeholder={t("stepDetails.addressPlaceholder")}
+                      />
+                    </>
                   ) : null}
                   <Input
                     label={t("stepDetails.numberOfPeopleLabel")}

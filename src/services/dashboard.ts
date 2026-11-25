@@ -3,6 +3,7 @@ import type { Role } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
+import { formatAdministrativeLocation } from "@/lib/location";
 import { vietnamMonthStart } from "@/lib/vietnam/date";
 
 /**
@@ -369,6 +370,8 @@ export interface ProviderOverview {
     service: string | null;
     totalPrice: number | null;
     notes: string | null;
+    /** "Phường X, Tỉnh Y", or "" at the provider's own place. */
+    area: string;
     expiresAt: string | null;
   }[];
   sunPoint: { latitude: number; longitude: number } | null;
@@ -461,6 +464,8 @@ export async function getProviderOverview(
         totalPrice: true,
         notes: true,
         expiresAt: true,
+        locationProvince: { select: { name: true } },
+        locationWard: { select: { name: true } },
         service: { select: { name: true } },
         customer: { select: { name: true, firstName: true } },
       },
@@ -512,6 +517,10 @@ export async function getProviderOverview(
       service: b.service?.name ?? null,
       totalPrice: b.totalPrice,
       notes: b.notes,
+      area: formatAdministrativeLocation({
+        ward: b.locationWard,
+        province: b.locationProvince,
+      }),
       expiresAt: b.expiresAt?.toISOString() ?? null,
     })),
     // ~10 km rounding, as on the public booking page.

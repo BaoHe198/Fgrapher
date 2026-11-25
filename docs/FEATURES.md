@@ -95,6 +95,12 @@ lại; không dựa vào component ẩn.
 
 Người xem có thể chia sẻ URL hoặc tạo mã QR trỏ tới hồ sơ.
 
+**Câu chữ theo vai trò (25/11/2026).** Hồ sơ studio có khối "Địa chỉ và giờ mở
+cửa" thay cho "Khu vực làm việc": phường, tỉnh và giờ mở cửa lấy từ chính lịch
+làm việc hàng tuần mà trang đặt lịch đọc. Địa chỉ chi tiết vẫn riêng tư như mọi
+nhà cung cấp. Studio ghi "năm hoạt động" và "lượt thuê"; quay phim ghi "Phim đã
+quay" và "buổi đã quay".
+
 ## 5. Portfolio, album và media
 
 Nhà cung cấp quản lý media theo album:
@@ -345,8 +351,24 @@ Giao diện gửi yêu cầu (từ 09/2026) có 6 bước: Gói (hoặc "Tùy ch
 giá), Ngày, Giờ (có gợi ý **giờ vàng** gần lúc mặt trời mọc/lặn, tính trên trình
 duyệt từ toạ độ đã làm tròn ~10 km của nghệ sĩ — `lib/sun.ts`), Địa điểm, Ghi chú,
 Xem lại. Cột tóm tắt bên cạnh có nút "Sửa" cho từng dòng. "Lưu nháp & thoát" giữ
-bản nháp trên thiết bị 7 ngày, không lưu số điện thoại. Dữ liệu gửi lên
-`POST /api/bookings` không đổi.
+bản nháp trên thiết bị 7 ngày, không lưu số điện thoại.
+
+**Khu vực buổi chụp (25/11/2026).** Khi chụp tại chỗ của khách hoặc ngoài trời,
+khách chọn tỉnh/thành (bắt buộc) và phường/xã (không bắt buộc) cùng địa chỉ —
+`Booking.locationProvinceId` / `locationWardId`, kiểm tra ở `createBooking()`.
+Nhà cung cấp thấy hai mục này **trước khi chấp nhận** (trang chi tiết, danh sách
+lịch đặt và khung "Yêu cầu chờ phản hồi" trên tổng quan); địa chỉ chi tiết và số
+điện thoại vẫn chỉ hiện sau khi họ chấp nhận, như trước. Lịch tạo từ một báo giá
+lấy khu vực của chính yêu cầu. Lịch ở chỗ của nhà cung cấp để trống cả hai.
+
+**Thuê studio (25/11/2026).** Gói loại `VENUE_RENTAL` cố định địa điểm là studio:
+bước Địa điểm không hỏi "Chụp ở đâu?" mà hiện tên studio cùng phường, tỉnh, và
+vẫn hỏi số người. Các gói khác của studio (chụp, quay, trang điểm) hỏi như
+thường.
+
+**Hạn trả lời.** Trang chi tiết của một yêu cầu `PENDING` ghi rõ hạn 48 giờ
+(`Booking.expiresAt`) cho cả hai bên. Trên điện thoại, hai nút Chấp nhận / Từ
+chối của nhà cung cấp ghim ở cuối màn hình, phía trên thanh điều hướng.
 
 ## 9. Yêu cầu dịch vụ và đề nghị
 

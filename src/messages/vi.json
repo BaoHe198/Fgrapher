@@ -1369,7 +1369,9 @@
       "tooManyPending": "Bạn đang có {max} yêu cầu đặt lịch chờ phản hồi. Hãy chờ nghệ sĩ trả lời hoặc hủy bớt một yêu cầu trước khi gửi thêm.",
       "invalidTransition": "Lịch đặt này vừa đổi trạng thái nên không thực hiện được thao tác. Hãy tải lại trang.",
       "proposalInPast": "Thời gian đề xuất đã qua. Hãy chọn một thời điểm sắp tới.",
-      "proposalEndBeforeStart": "Giờ kết thúc đề xuất phải sau giờ bắt đầu."
+      "proposalEndBeforeStart": "Giờ kết thúc đề xuất phải sau giờ bắt đầu.",
+      "areaRequired": "Hãy chọn tỉnh/thành nơi diễn ra buổi chụp.",
+      "wardNotInProvince": "Phường/xã không thuộc tỉnh/thành đã chọn."
     },
     "uploads": {
       "documentsNotConfigured": "Hiện chưa thể tải ảnh giấy tờ lên. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
@@ -2445,7 +2447,8 @@
         "people": "Số người",
         "total": "Tổng tiền",
         "customRequest": "Yêu cầu tùy chỉnh",
-        "contactPhone": "Số điện thoại liên hệ"
+        "contactPhone": "Số điện thoại liên hệ",
+        "area": "Khu vực"
       },
       "locationLabel": {
         "PROVIDER": "Tại studio nhà cung cấp",
@@ -2530,6 +2533,11 @@
           "nextWeek": "Tuần sau",
           "failed": "Không gửi được đề xuất. Vui lòng thử lại."
         }
+      },
+      "contactAfterAccept": "Địa chỉ chi tiết và số điện thoại của khách hiện ra sau khi bạn chấp nhận.",
+      "answerBy": {
+        "provider": "Cần trả lời trước {time} ngày {date} (còn {hours} giờ). Quá hạn, yêu cầu tự hết hiệu lực.",
+        "customer": "{name} có đến {time} ngày {date} để trả lời (còn {hours} giờ). Quá hạn, yêu cầu tự hết hiệu lực và bạn có thể đặt người khác."
       }
     },
     "listings": {
@@ -4254,7 +4262,12 @@
         "numberOfPeoplePlaceholder": "VD: 2",
         "notesLabel": "Ghi chú",
         "notesPlaceholder": "Mô tả concept, phong cách tham khảo, yêu cầu đặc biệt...",
-        "contactPhoneLabel": "Số điện thoại liên hệ (bắt buộc)"
+        "contactPhoneLabel": "Số điện thoại liên hệ (bắt buộc)",
+        "provinceLabel": "Tỉnh/thành (bắt buộc)",
+        "wardLabel": "Phường/xã",
+        "pickOne": "Chọn tỉnh/thành",
+        "wardAny": "Chưa rõ",
+        "areaHelper": "{providerName} thấy tỉnh/thành và phường/xã ngay để biết có nhận được không. Địa chỉ chi tiết chỉ hiện sau khi họ chấp nhận."
       },
       "stepReview": {
         "heading": "Xem lại yêu cầu đặt lịch",
@@ -4320,7 +4333,8 @@
           "date": "Chọn một ngày còn trống để tiếp tục.",
           "time": "Chọn một khung giờ để tiếp tục.",
           "location": "Chọn nơi chụp để tiếp tục.",
-          "phone": "Nhập số điện thoại liên hệ để tiếp tục."
+          "phone": "Nhập số điện thoại liên hệ để tiếp tục.",
+          "area": "Chọn tỉnh/thành nơi chụp để tiếp tục."
         },
         "keptNote": "Thông tin đã nhập được giữ khi quay lại",
         "rows": {

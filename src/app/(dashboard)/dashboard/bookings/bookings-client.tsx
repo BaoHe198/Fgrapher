@@ -26,6 +26,7 @@ import {
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Tag } from "@/components/ui/tag";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import { formatAdministrativeLocation } from "@/lib/location";
 import { resolvePartyName } from "@/lib/party-name";
 import type { BookingTab, BookingTabCounts } from "@/services/bookings";
 
@@ -34,6 +35,8 @@ type BookingParty = Pick<User, "id" | "name" | "firstName" | "avatar"> & {
   profiles?: { displayName: string | null; role?: string }[];
 };
 type BookingRow = Booking & {
+  locationProvince: { name: string } | null;
+  locationWard: { name: string } | null;
   customer: BookingParty;
   provider: BookingParty;
   service: { name: string } | null;
@@ -445,6 +448,10 @@ export function BookingsClient({
                   currency: booking.currency,
                   locationType: booking.locationType,
                   locationAddress: booking.locationAddress,
+                  locationArea: formatAdministrativeLocation({
+                    ward: booking.locationWard,
+                    province: booking.locationProvince,
+                  }),
                   expiresAt: booking.expiresAt,
                   serviceName: booking.service?.name ?? null,
                   party: { name: partyName(party), avatar: party.avatar },

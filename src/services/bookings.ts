@@ -105,6 +105,11 @@ const BOOKING_INCLUDE = {
     },
   },
   service: { select: { name: true, duration: true } },
+  // The area of the shoot. Not contact information: the provider reads it
+  // while the request is still PENDING (see redactContactInfo below, which
+  // leaves it alone on purpose).
+  locationProvince: { select: { name: true } },
+  locationWard: { select: { name: true } },
 } as const;
 
 // The name used in notifications and emails. A provider goes by the name
@@ -348,6 +353,8 @@ export async function getBookingDetail(bookingId: string, userId: string) {
         },
       },
       service: { select: { name: true, description: true, duration: true } },
+      locationProvince: { select: { name: true } },
+      locationWard: { select: { name: true } },
       review: { select: { id: true } },
       // The detail page's timeline. It used to be rebuilt from the current
       // status alone, so a confirmed booking showed only "request created"
@@ -621,6 +628,38 @@ export async function createBooking(
   const providerProvinceId =
     providerProfile.provinceId ?? provider.ward?.provinceId ?? undefined;
 
+  // Where the shoot is, as an area. Required whenever it is not at the
+  // provider's own place: it is the one thing about the location a
+  // provider is shown before accepting (the address is withheld until
+  // then), and without it they were deciding on "Ngoài trời / khác" alone.
+  let locationProvinceId: string | null = null;
+  let locationWardId: string | null = null;
+  if (input.locationType !== "PROVIDER") {
+    const province = input.locationProvinceId
+      ? await db.province.findUnique({
+          where: { id: input.locationProvinceId },
+          select: { id: true },
+        })
+      : null;
+    if (!province) {
+      throw new BookingActionError("Choose the province of the shoot", 400);
+    }
+    locationProvinceId = province.id;
+    if (input.locationWardId) {
+      const ward = await db.ward.findFirst({
+        where: { id: input.locationWardId, provinceId: province.id },
+        select: { id: true },
+      });
+      if (!ward) {
+        throw new BookingActionError(
+          "That ward is not in the chosen province",
+          400,
+        );
+      }
+      locationWardId = ward.id;
+    }
+  }
+
   const duration = service?.duration ?? 60;
   const startMinutes =
     Number(input.startTime.slice(0, 2)) * 60 + Number(input.startTime.slice(3));
@@ -733,6 +772,8 @@ export async function createBooking(
         endTime,
         locationType: input.locationType,
         locationAddress: input.locationAddress,
+        locationProvinceId,
+        locationWardId,
         numberOfPeople: input.numberOfPeople,
         notes: input.notes,
         contactPhone: input.contactPhone,

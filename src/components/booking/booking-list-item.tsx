@@ -21,6 +21,8 @@ export interface BookingListItemData {
   currency: string;
   locationType: string | null;
   locationAddress: string | null;
+  /** "Phường X, Tỉnh Y" when the shoot is not at the provider's place. */
+  locationArea?: string | null;
   expiresAt: string | Date | null;
   serviceName: string | null;
   party: { name: string; avatar: string | null };
@@ -75,9 +77,15 @@ export function BookingListItem({
     CUSTOMER: asProvider ? t("placeCustomer") : placeT("locationCustomer"),
     OUTDOOR: placeT("locationOutdoor"),
   };
+  // The address is hidden from a provider until they accept; the area is
+  // not, so a waiting request reads "Tại địa điểm của khách · Phường X, …".
   const where =
     booking.locationAddress ??
-    (booking.locationType ? placeLabel[booking.locationType] : null);
+    (booking.locationType
+      ? [placeLabel[booking.locationType], booking.locationArea]
+          .filter(Boolean)
+          .join(" · ")
+      : null);
 
   const expires =
     booking.status === "PENDING" && booking.expiresAt
