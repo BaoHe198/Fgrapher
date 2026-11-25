@@ -443,7 +443,7 @@ export default function AdminModerationPage() {
           if (!open) setLightboxItem(null);
         }}
       >
-        <DialogContent className="max-w-3xl bg-transparent p-0 ring-0">
+        <DialogContent className="max-w-3xl bg-transparent p-0 ring-0 sm:max-w-3xl">
           {lightboxItem ? (
             lightboxItem.type === "VIDEO" ? (
               // The reviewer watches exactly what a visitor would: the

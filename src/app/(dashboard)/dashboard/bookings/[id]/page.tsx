@@ -537,10 +537,14 @@ export default function BookingDetailPage() {
             ].map(([label, value]) => (
               <div
                 key={label}
-                className="flex items-center justify-between px-5 py-3.5"
+                className="flex items-baseline justify-between gap-4 px-5 py-3.5"
               >
-                <span className="text-body-sm text-text-tertiary">{label}</span>
-                <span className="text-body-md font-semibold! text-text-primary">
+                {/* The label keeps its line: beside a long value (a package
+                    name, a ward and province) it broke into "Khu / vực". */}
+                <span className="shrink-0 text-body-sm text-text-tertiary">
+                  {label}
+                </span>
+                <span className="min-w-0 text-right text-body-md font-semibold! [overflow-wrap:anywhere] text-text-primary">
                   {value}
                 </span>
               </div>

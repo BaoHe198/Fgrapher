@@ -2248,7 +2248,8 @@
           "reason": "Lý do: {reason}"
         },
         "cancel": "Hủy",
-        "saveFailed": "Không thể lưu thay đổi, vui lòng thử lại"
+        "saveFailed": "Không thể lưu thay đổi, vui lòng thử lại",
+        "mediaCount": "{photos, plural, =0 {} other {# ảnh}}{both, select, yes { · } other {}}{videos, plural, =0 {} other {# video}}"
       }
     },
     "reviews": {
@@ -5865,7 +5866,8 @@
       "previous": "Ảnh trước",
       "next": "Ảnh sau",
       "label": "Xem ảnh",
-      "frame": "Ảnh {current}/{total}"
+      "frame": "Ảnh {current}/{total}",
+      "frameVideo": "Video {current}/{total}"
     },
     "reviewModal": {
       "editTitle": "Chỉnh sửa đánh giá",

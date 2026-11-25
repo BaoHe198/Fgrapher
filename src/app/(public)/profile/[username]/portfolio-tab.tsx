@@ -43,6 +43,9 @@ import { cn } from "@/lib/utils";
 import { AlbumEditDialog } from "./album-edit-dialog";
 import { AlbumFormDialog } from "@/app/(dashboard)/dashboard/portfolio/album-form-dialog";
 
+const albumVideos = (album: { media: { type: MediaType }[] }) =>
+  album.media.filter((item) => item.type === "VIDEO").length;
+
 // "Tất cả ảnh" opens on this many photos and each "Xem thêm" adds as many
 // again (owner, 20/11/2026): with every photo shown at once, reaching the
 // reviews and details below meant scrolling past the whole portfolio.
@@ -502,7 +505,16 @@ export function PortfolioTab({
                         )}
                       </span>
                       <span className="font-mono text-meta tracking-[0.12em] text-text-tertiary uppercase">
-                        {t("albumFrame", { count: album.media.length })}
+                        {albumVideos(album) > 0
+                          ? t("mediaCount", {
+                              photos: album.media.length - albumVideos(album),
+                              videos: albumVideos(album),
+                              both:
+                                album.media.length > albumVideos(album)
+                                  ? "yes"
+                                  : "no",
+                            })
+                          : t("albumFrame", { count: album.media.length })}
                       </span>
                       <span className="text-heading-md text-text-primary group-hover/album:underline group-hover/album:underline-offset-4">
                         {album.title}

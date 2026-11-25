@@ -2248,7 +2248,8 @@
           "reason": "Reason: {reason}"
         },
         "cancel": "Cancel",
-        "saveFailed": "Couldn't save changes, please try again"
+        "saveFailed": "Couldn't save changes, please try again",
+        "mediaCount": "{photos, plural, =0 {} one {# photo} other {# photos}}{both, select, yes { · } other {}}{videos, plural, =0 {} one {# video} other {# videos}}"
       }
     },
     "reviews": {
@@ -5865,7 +5866,8 @@
       "previous": "Previous",
       "next": "Next",
       "label": "Photo viewer",
-      "frame": "Photo {current}/{total}"
+      "frame": "Photo {current}/{total}",
+      "frameVideo": "Video {current}/{total}"
     },
     "reviewModal": {
       "editTitle": "Edit your review",

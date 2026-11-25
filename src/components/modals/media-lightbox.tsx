@@ -241,7 +241,12 @@ export function MediaLightbox({
   if (!current || !isClient) return null;
 
   const caption = [
-    t("frame", { current: index + 1, total: items.length }),
+    t(
+      (current.type ?? mediaKindFromUrl(current.url)) === "VIDEO"
+        ? "frameVideo"
+        : "frame",
+      { current: index + 1, total: items.length },
+    ),
     title,
     categoryLabel,
   ]

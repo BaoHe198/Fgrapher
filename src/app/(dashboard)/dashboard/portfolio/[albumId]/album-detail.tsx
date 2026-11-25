@@ -218,6 +218,7 @@ export function AlbumDetail({
   const t = useTranslations("dashboardCore.albums.detail");
   const categoryT = useTranslations("profileCategory");
   const [media, setMedia] = useState(initialMedia);
+  const videoCount = media.filter((item) => item.type === "VIDEO").length;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [meta, setMeta] = useState(album);
   const [isSaving, setIsSaving] = useState(false);
@@ -359,7 +360,15 @@ export function AlbumDetail({
       </div>
 
       <p className="text-body-sm text-text-secondary">
-        {t("photoCount", { count: media.length })} · {t("dragToReorder")}
+        {/* By kind: an album of three photos and two films read "5 ảnh". */}
+        {videoCount > 0
+          ? t("mediaCount", {
+              photos: media.length - videoCount,
+              videos: videoCount,
+              both: media.length > videoCount ? "yes" : "no",
+            })
+          : t("photoCount", { count: media.length })}{" "}
+        · {t("dragToReorder")}
       </p>
 
       <DndContext
