@@ -134,9 +134,15 @@ export function AddressAutocomplete({
             data: Suggestion[] | null;
             error: string | null;
           };
+          // The geocoder can return one place twice. The rows are keyed by
+          // id, and React drops or repeats a row whose key is not unique.
+          const rows = response.ok ? (body.data ?? []) : [];
+          const unique = rows.filter(
+            (row, i) => rows.findIndex((other) => other.id === row.id) === i,
+          );
           startTransition(() => {
             if (response.status === 503) setUnavailable(true);
-            setSuggestions(response.ok ? (body.data ?? []) : []);
+            setSuggestions(unique);
             setActiveIndex(-1);
             setOpen(true);
           });

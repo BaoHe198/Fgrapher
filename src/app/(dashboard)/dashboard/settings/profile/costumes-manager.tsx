@@ -229,7 +229,7 @@ export function CostumesManager({
                 </div>
               ) : null}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-body-md font-semibold! text-text-primary">
+                <p className="line-clamp-2 text-body-md font-semibold! text-text-primary">
                   {item.name} {!item.isActive ? t("inactive") : ""}
                 </p>
                 <p className="text-body-sm text-text-secondary">

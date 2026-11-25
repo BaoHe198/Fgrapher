@@ -99,6 +99,15 @@ export function ServicesManager({
     setModalOpen(true);
   };
 
+  // "Edited photos" and "photos delivered after" were asked of every kind,
+  // so a makeup artist, a model and a studio were asked how many photos
+  // they would retouch (found 25/11/2026). Only a photo package has a photo
+  // count; a video package still has a delivery time, worded for film.
+  const delivers = {
+    photos: draft.kind === "PHOTOGRAPHY",
+    anything: draft.kind === "PHOTOGRAPHY" || draft.kind === "VIDEOGRAPHY",
+  };
+
   const save = async () => {
     setIsSaving(true);
     const payload = {
@@ -108,10 +117,15 @@ export function ServicesManager({
       price: Number(draft.price),
       isActive: draft.isActive,
       // Blank clears: the package card then simply leaves that line out.
-      editedPhotoCount: draft.editedPhotoCount
-        ? Number(draft.editedPhotoCount)
-        : null,
-      deliveryDays: draft.deliveryDays ? Number(draft.deliveryDays) : null,
+      // So does a kind the field does not apply to (see `delivers` below).
+      editedPhotoCount:
+        delivers.photos && draft.editedPhotoCount
+          ? Number(draft.editedPhotoCount)
+          : null,
+      deliveryDays:
+        delivers.anything && draft.deliveryDays
+          ? Number(draft.deliveryDays)
+          : null,
     };
 
     const res = editingId
@@ -237,28 +251,36 @@ export function ServicesManager({
                 }
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label={t("editedPhotosLabel")}
-                type="number"
-                inputMode="numeric"
-                min={0}
-                value={draft.editedPhotoCount}
-                onChange={(e) =>
-                  setDraft({ ...draft, editedPhotoCount: e.target.value })
-                }
-              />
-              <Input
-                label={t("deliveryDaysLabel")}
-                type="number"
-                inputMode="numeric"
-                min={0}
-                value={draft.deliveryDays}
-                onChange={(e) =>
-                  setDraft({ ...draft, deliveryDays: e.target.value })
-                }
-              />
-            </div>
+            {delivers.anything ? (
+              <div className="grid grid-cols-2 gap-3">
+                {delivers.photos ? (
+                  <Input
+                    label={t("editedPhotosLabel")}
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    value={draft.editedPhotoCount}
+                    onChange={(e) =>
+                      setDraft({ ...draft, editedPhotoCount: e.target.value })
+                    }
+                  />
+                ) : null}
+                <Input
+                  label={
+                    delivers.photos
+                      ? t("deliveryDaysLabel")
+                      : t("deliveryDaysVideoLabel")
+                  }
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  value={draft.deliveryDays}
+                  onChange={(e) =>
+                    setDraft({ ...draft, deliveryDays: e.target.value })
+                  }
+                />
+              </div>
+            ) : null}
             <div className="grid grid-cols-2 gap-3">
               <CurrencyInput
                 label={t("priceLabel")}

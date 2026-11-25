@@ -3122,7 +3122,7 @@
       "services": {
         "metaTitle": "Gói dịch vụ — Fgrapher",
         "title": "Gói dịch vụ",
-        "lede": "Những gói khách chọn khi đặt lịch: thời lượng, giá, số ảnh giao và thời gian giao.",
+        "lede": "Những gói khách chọn khi đặt lịch: tên gói, mô tả, giá và thời gian giao.",
         "needProfile": "Lưu thông tin trang một lần trước (tên, danh mục, địa chỉ), rồi quay lại thêm gói.",
         "needProfileCta": "Mở thông tin trang"
       }
@@ -3478,7 +3478,8 @@
         "save": "Lưu",
         "kindLabel": "Loại dịch vụ",
         "editedPhotosLabel": "Số ảnh chỉnh sửa",
-        "deliveryDaysLabel": "Giao ảnh sau (ngày)"
+        "deliveryDaysLabel": "Giao ảnh sau (ngày)",
+        "deliveryDaysVideoLabel": "Giao phim sau (ngày)"
       },
       "media": {
         "coverButton": "Ảnh bìa",
