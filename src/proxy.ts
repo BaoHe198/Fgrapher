@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+import { detectLocale } from "@/i18n/detect-locale";
 import { LOCALE_COOKIE_NAME, routing } from "@/i18n/routing";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -205,12 +206,13 @@ function withLocaleCookie(request: NextRequest, response: NextResponse) {
     return response;
   }
 
-  const acceptLanguage = request.headers.get("accept-language") ?? "";
-  const detected = routing.locales.find((locale) =>
-    acceptLanguage.toLowerCase().includes(locale),
+  const detected = detectLocale(
+    request.headers.get("accept-language"),
+    routing.locales,
+    routing.defaultLocale,
   );
 
-  response.cookies.set(LOCALE_COOKIE_NAME, detected ?? routing.defaultLocale, {
+  response.cookies.set(LOCALE_COOKIE_NAME, detected, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",

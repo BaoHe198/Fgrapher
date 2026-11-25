@@ -473,11 +473,13 @@ export function ProfileInteractive({
               <Button
                 variant="secondary"
                 size="lg"
-                className="w-full"
+                // Wraps: it carries the provider's whole name, and a trade
+                // name ran past an iPhone SE's edge on one line (25/11/2026).
+                className="h-auto min-h-12 w-full py-3 text-center whitespace-normal"
                 nativeButton={false}
                 render={<Link href={messageHref} />}
               >
-                <MessageCircle className="size-4" />
+                <MessageCircle className="size-4 shrink-0" />
                 {t("messageCta", { name: callName })}
               </Button>
             </div>
