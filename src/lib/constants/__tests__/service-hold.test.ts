@@ -16,8 +16,8 @@ describe("serviceHoldFor", () => {
 
   it("rounds an older package up, never cutting its hold short", () => {
     assert.equal(serviceHoldFor(30), "HOUR");
-    assert.equal(serviceHoldFor(90), "HALF_DAY");
-    assert.equal(serviceHoldFor(120), "HALF_DAY");
+    assert.equal(serviceHoldFor(90), "TWO_HOURS");
+    assert.equal(serviceHoldFor(180), "HALF_DAY");
     assert.equal(serviceHoldFor(300), "FULL_DAY");
     assert.equal(serviceHoldFor(720), "FULL_DAY");
   });

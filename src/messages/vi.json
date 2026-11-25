@@ -3483,11 +3483,13 @@
         "holdHelper": "Tính từ giờ khách chọn. Trong khoảng này khách khác không đặt được giờ trùng.",
         "hold": {
           "HOUR": "1 giờ",
+          "TWO_HOURS": "2 giờ",
           "HALF_DAY": "Nửa ngày (4 giờ)",
           "FULL_DAY": "Cả ngày (8 giờ)"
         },
         "holdShort": {
           "HOUR": "giữ lịch 1 giờ",
+          "TWO_HOURS": "giữ lịch 2 giờ",
           "HALF_DAY": "giữ lịch nửa ngày",
           "FULL_DAY": "giữ lịch cả ngày"
         },
