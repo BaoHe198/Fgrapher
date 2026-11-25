@@ -1372,6 +1372,11 @@ model Booking {
 // services/bookings.ts's transitionBooking() (the ONLY place Booking.
 // status is ever written) appends one row here. actorId is nullable for
 // system-triggered transitions (the expire-bookings cron).
+//
+// One other kind of row (25/11/2026): an agreed reschedule, written by
+// respondToReschedule() with fromStatus === toStatus and the two slots in
+// `note` (lib/booking-window.ts, rescheduleNote). It changes no status; it
+// is here so the booking's timeline can say the time was moved.
 model BookingStatusHistory {
   id         String        @id @default(cuid())
   bookingId  String

@@ -2481,7 +2481,9 @@
           "CANCELLED": "Đã hủy",
           "NO_SHOW": "Báo vắng mặt",
           "EXPIRED": "Hết hạn, tự hủy"
-        }
+        },
+        "rescheduled": "Đổi giờ",
+        "rescheduledDetail": "Từ {fromTime} ngày {fromDate} sang {toTime} ngày {toDate}"
       },
       "actions": {
         "accept": "Chấp nhận",

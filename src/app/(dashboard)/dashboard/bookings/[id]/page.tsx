@@ -70,7 +70,15 @@ type BookingDetail = Booking & {
   locationProvince: { name: string } | null;
   locationWard: { name: string } | null;
   review: { id: string } | null;
-  statusHistory?: { toStatus: BookingStatus; createdAt: string }[];
+  statusHistory?: {
+    toStatus: BookingStatus;
+    createdAt: string;
+    /** Set on the row of an agreed reschedule; its status did not change. */
+    reschedule: {
+      from: { date: string; startTime: string };
+      to: { date: string; startTime: string };
+    } | null;
+  }[];
   // Crew-hire (Prompt B7, VIỆC 1).
   parentBooking: {
     id: string;
@@ -630,13 +638,28 @@ export default function BookingDetailPage() {
               booking.statusHistory.map((entry) => (
                 <TimelineRow
                   key={`${entry.toStatus}-${entry.createdAt}`}
-                  label={t(`timeline.to.${entry.toStatus}`)}
+                  label={
+                    entry.reschedule
+                      ? t("timeline.rescheduled")
+                      : t(`timeline.to.${entry.toStatus}`)
+                  }
                   date={entry.createdAt}
                   detail={
-                    entry.toStatus === "CANCELLED" ||
-                    entry.toStatus === "DECLINED"
-                      ? booking.cancelReason
-                      : null
+                    entry.reschedule
+                      ? t("timeline.rescheduledDetail", {
+                          fromTime: entry.reschedule.from.startTime,
+                          fromDate: formatDate(
+                            `${entry.reschedule.from.date}T00:00:00+07:00`,
+                          ),
+                          toTime: entry.reschedule.to.startTime,
+                          toDate: formatDate(
+                            `${entry.reschedule.to.date}T00:00:00+07:00`,
+                          ),
+                        })
+                      : entry.toStatus === "CANCELLED" ||
+                          entry.toStatus === "DECLINED"
+                        ? booking.cancelReason
+                        : null
                   }
                 />
               ))

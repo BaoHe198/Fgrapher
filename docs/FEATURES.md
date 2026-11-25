@@ -344,6 +344,17 @@ Hệ thống hỗ trợ đề xuất đổi lịch và bên còn lại chấp nh
 thái phải tuân state machine; request lặp hoặc đến muộn không được đưa booking từ
 trạng thái cuối quay lại trạng thái đang hoạt động.
 
+**Đổi giờ đã thống nhất (25/11/2026).** Khi một đề xuất đổi giờ được đồng ý,
+`respondToReschedule()` ghi thêm một dòng vào `BookingStatusHistory` với
+`fromStatus === toStatus` và hai mốc giờ trong `note` (`rescheduleNote` trong
+`lib/booking-window.ts`); dòng thời gian của lịch đặt hiện "Đổi giờ: từ … sang …".
+Nếu lịch còn `PENDING` và **chính nhà cung cấp** là người đề xuất giờ, việc khách
+đồng ý chuyển lịch sang `CONFIRMED` luôn (qua `transitionBooking()`, ghi nhận là
+xác nhận của nhà cung cấp) — trước đây lịch vẫn chờ nhà cung cấp bấm Chấp nhận
+thêm lần nữa và tự hết hạn sau 48 giờ. Khách đề xuất giờ, hoặc lịch tạo từ một
+báo giá (ngày giờ do khách chọn lúc nhận báo giá), thì vẫn chờ nhà cung cấp trả
+lời như cũ.
+
 Booking tạo hội thoại/liên kết để hai bên trao đổi. Cron gửi nhắc lịch và có cờ
 chống gửi lặp.
 

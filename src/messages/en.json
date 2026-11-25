@@ -2481,7 +2481,9 @@
           "CANCELLED": "Cancelled",
           "NO_SHOW": "Marked as no-show",
           "EXPIRED": "Expired, cancelled automatically"
-        }
+        },
+        "rescheduled": "Rescheduled",
+        "rescheduledDetail": "From {fromTime} on {fromDate} to {toTime} on {toDate}"
       },
       "actions": {
         "accept": "Accept",

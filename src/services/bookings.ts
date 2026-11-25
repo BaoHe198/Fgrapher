@@ -36,7 +36,12 @@ import { formatDate } from "@/lib/format";
 import { resolvePartyName, type NamedParty } from "@/lib/party-name";
 import { normalizeZaloUrl } from "@/lib/zalo";
 import { isSlotBookable, timeToMinutes } from "@/services/availability";
-import { movedWindow, vietnamInstant } from "@/lib/booking-window";
+import {
+  movedWindow,
+  parseRescheduleNote,
+  rescheduleNote,
+  vietnamInstant,
+} from "@/lib/booking-window";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
@@ -360,8 +365,15 @@ export async function getBookingDetail(bookingId: string, userId: string) {
       // status alone, so a confirmed booking showed only "request created"
       // (23/11/2026 walk-through). `note` is left out: it is the actor's
       // own text and the page already shows cancelReason.
+      // `fromStatus` and `note` are read only to recognise an agreed
+      // reschedule (see parseRescheduleNote); neither leaves this function.
       statusHistory: {
-        select: { toStatus: true, createdAt: true },
+        select: {
+          fromStatus: true,
+          toStatus: true,
+          createdAt: true,
+          note: true,
+        },
         orderBy: { createdAt: "asc" },
       },
       // Crew-hire (Prompt B7, VIỆC 1) — shown on the detail page so
@@ -445,6 +457,14 @@ export async function getBookingDetail(bookingId: string, userId: string) {
 
   return {
     ...booking,
+    statusHistory: booking.statusHistory.map((entry) => ({
+      toStatus: entry.toStatus,
+      createdAt: entry.createdAt,
+      reschedule:
+        entry.fromStatus === entry.toStatus
+          ? parseRescheduleNote(entry.note)
+          : null,
+    })),
     contactPhone: contactInfoVisible ? booking.contactPhone : null,
     locationAddress: contactInfoVisible ? booking.locationAddress : null,
     isFirstBookingBetweenParties: priorBookingCount === 0,
@@ -1472,6 +1492,28 @@ export async function respondToReschedule({
           where: { bookingId },
           data: { startAt: moved.startAt, endAt: moved.endAt },
         });
+        // The move itself, for the timeline. Not a status change: the
+        // status on both sides of the row is the one the booking has.
+        await tx.bookingStatusHistory.create({
+          data: {
+            bookingId,
+            fromStatus: booking.status,
+            toStatus: booking.status,
+            actorId: userId,
+            note: rescheduleNote(
+              {
+                date: booking.date.toISOString().slice(0, 10),
+                startTime: booking.startTime,
+              },
+              {
+                date: booking
+                  .rescheduleProposedDate!.toISOString()
+                  .slice(0, 10),
+                startTime: booking.rescheduleProposedStartTime!,
+              },
+            ),
+          },
+        });
       }
       return row;
     });
@@ -1532,6 +1574,31 @@ export async function respondToReschedule({
       ],
     },
   });
+
+  // The provider named this time and the customer has now said yes: there
+  // is nothing left for the provider to decide. The booking used to stay
+  // PENDING all the same, waiting for the provider to press "Chấp nhận" on
+  // a time they had proposed themselves, and it expired after 48 hours if
+  // they did not (found 25/11/2026). Recorded as the provider's own
+  // confirmation, which is what proposing the time was.
+  if (
+    accept &&
+    booking.status === "PENDING" &&
+    booking.rescheduleProposedBy === booking.providerId
+  ) {
+    try {
+      return await transitionBooking({
+        bookingId,
+        toStatus: "CONFIRMED",
+        actorId: booking.providerId,
+        note: "Confirmed when the customer agreed to the time the provider proposed",
+      });
+    } catch (error) {
+      // Lost a race with a cancel or an expiry: the move above stands and
+      // the status is whatever won. Anything else is a real failure.
+      if (!(error instanceof BookingActionError)) throw error;
+    }
+  }
 
   return updated;
 }
