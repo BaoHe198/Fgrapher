@@ -553,7 +553,13 @@ export function PortfolioTab({
               <h3 className="flex items-baseline gap-2 text-heading-md text-text-primary">
                 {t("allPhotos")}
                 <span className="font-mono text-meta tabular-nums text-text-tertiary">
-                  {t("photoCount", { count: allPhotos.length })}
+                  {/* Photos only, like the grid under it: a video was
+                      counted here and never shown, so "4 ảnh" sat above
+                      three tiles. */}
+                  {t("photoCount", {
+                    count: allPhotos.filter((item) => item.type === "IMAGE")
+                      .length,
+                  })}
                 </span>
               </h3>
               {/* Styles, not folder names: "Cưới / Kỷ yếu" is how a
