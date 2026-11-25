@@ -61,6 +61,7 @@ export default async function ServiceRequestDetailPage({
         role: request.role,
         categories: request.categories,
         status: request.status,
+        bookingId: request.bookingId,
         shootDate: request.shootDate?.toISOString() ?? null,
         isDateFlexible: request.isDateFlexible,
         dateRangeStart: request.dateRangeStart?.toISOString() ?? null,
