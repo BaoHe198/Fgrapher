@@ -30,6 +30,7 @@ import {
 import { splitVietnameseName } from "@/lib/vietnam/name";
 import { listPublicCostumes } from "@/services/costumes";
 import { getProfileStats } from "@/services/profile-stats";
+import { listWeeklyRules } from "@/services/resource-calendar";
 import { listAlbumSocialState, listUserPosts } from "@/services/posts";
 
 import { ProfileAvatar, ProfileCover } from "./profile-hero";
@@ -237,6 +238,11 @@ export default async function PublicProfilePage({
           .then(() => true)
           .catch(() => false)
       : false;
+
+  // A studio's opening hours are its weekly calendar, the same rows the
+  // booking page reads, so the two cannot say different things.
+  const studioHours =
+    activeProfile.role === "STUDIO" ? await listWeeklyRules(user.id) : [];
 
   const displayName = activeProfile.displayName ?? user.name ?? username;
   const profileLocation = formatAdministrativeLocation(
@@ -580,6 +586,11 @@ export default async function PublicProfilePage({
               ? {
                   area: activeProfile.area,
                   amenities: activeProfile.amenities,
+                  hours: studioHours.map((rule) => ({
+                    dayOfWeek: rule.dayOfWeek,
+                    startTime: rule.startTime,
+                    endTime: rule.endTime,
+                  })),
                 }
               : null
           }
