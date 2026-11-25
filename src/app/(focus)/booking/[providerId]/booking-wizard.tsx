@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  MapPin,
   MessageCircle,
   X,
 } from "lucide-react";
@@ -62,6 +63,8 @@ const SHOOT_TYPE_OPTION_KEYS = [
 
 interface ServiceOption {
   id: string;
+  /** ServiceKind. VENUE_RENTAL fixes the place: see `atVenue` below. */
+  kind: string;
   name: string;
   description: string | null;
   price: number;
@@ -88,6 +91,10 @@ interface BookingWizardProps {
   services: ServiceOption[];
   contactPhoneDefault: string;
   isModel?: boolean;
+  /** A studio's ward and province, shown when the booking is for its room. */
+  venuePlace?: string | null;
+  /** Every province, for the area of a shoot away from the provider's place. */
+  provinces: { id: string; code: string; name: string }[];
   // Crew-hire (Prompt B7, VIỆC 1) — non-null only when the viewer holds
   // PHOTOGRAPHER/VIDEOGRAPHER and this provider offers MUA/Model/Studio.
   requesterCrewRole?: string | null;
@@ -116,6 +123,10 @@ interface Draft {
   // sending a booking with the wrong place on it. Nothing is chosen for them.
   locationType: LocationType | null;
   locationAddress: string;
+  // The area of a shoot at the customer's place or outdoors. The provider
+  // sees these two before accepting; the address only after.
+  locationProvinceId: string;
+  locationWardId: string;
   numberOfPeople: string;
   notes: string;
   // Uploaded reference photo/video URLs — sent as Booking.referenceImages.
@@ -163,6 +174,8 @@ function emptyDraft(contactPhoneDefault: string): Draft {
     time: null,
     locationType: null,
     locationAddress: "",
+    locationProvinceId: "",
+    locationWardId: "",
     numberOfPeople: "",
     notes: "",
     referenceMedia: [],
@@ -234,6 +247,8 @@ export function BookingWizard({
   services,
   contactPhoneDefault,
   isModel,
+  venuePlace,
+  provinces,
   requesterCrewRole,
 }: BookingWizardProps) {
   const t = useTranslations("publicPages.booking");
@@ -405,6 +420,45 @@ export function BookingWizard({
   const selectedService =
     services.find((s) => s.id === draft.serviceId) ?? null;
   const isCustom = draft.custom || services.length === 0;
+  // Hiring the room itself happens at the room. The wizard used to ask a
+  // customer renting a studio "Chụp ở đâu?" and offer "Ngoài trời"
+  // (25/11/2026). A studio's other packages (its crew shooting, make-up)
+  // can still be anywhere, so those keep the question.
+  const atVenue = !isCustom && selectedService?.kind === "VENUE_RENTAL";
+  // At the customer's place or outdoors: the only cases with an area and
+  // an address to give.
+  const elsewhere =
+    !atVenue &&
+    (draft.locationType === "CUSTOMER" || draft.locationType === "OUTDOOR");
+
+  // The chosen province's wards. Kept with the province they belong to, so
+  // a list still arriving for the previous province is never shown.
+  const provinceCode =
+    provinces.find((p) => p.id === draft.locationProvinceId)?.code ?? null;
+  const [wardList, setWardList] = useState<{
+    code: string;
+    wards: { id: string; name: string }[];
+  } | null>(null);
+  useEffect(() => {
+    if (!provinceCode) return;
+    const controller = new AbortController();
+    fetch(`/api/geography/wards?provinceCode=${provinceCode}`, {
+      signal: controller.signal,
+    })
+      .then((res) => res.json())
+      .then((body) =>
+        setWardList({ code: provinceCode, wards: body.data ?? [] }),
+      )
+      .catch(() => {});
+    return () => controller.abort();
+  }, [provinceCode]);
+  const wards = wardList?.code === provinceCode ? wardList.wards : [];
+  const areaLabel = [
+    wards.find((ward) => ward.id === draft.locationWardId)?.name,
+    provinces.find((p) => p.id === draft.locationProvinceId)?.name,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   // One month of availability, shared by the day and time steps.
   const [monthCursor, setMonthCursor] = useState(() => {
@@ -499,9 +553,11 @@ export function BookingWizard({
         return !!draft.time;
       case "location":
         return (
-          draft.locationType !== null &&
-          (draft.locationType === "PROVIDER" ||
-            draft.locationAddress.trim().length > 0)
+          atVenue ||
+          (draft.locationType !== null &&
+            (draft.locationType === "PROVIDER" ||
+              (draft.locationProvinceId !== "" &&
+                draft.locationAddress.trim().length > 0)))
         );
       case "notes":
         return draft.contactPhone.trim().length > 0;
@@ -522,7 +578,9 @@ export function BookingWizard({
           time: t("flow.missing.time"),
           location:
             draft.locationType !== null && draft.locationType !== "PROVIDER"
-              ? t("missingHint.address")
+              ? draft.locationProvinceId === ""
+                ? t("flow.missing.area")
+                : t("missingHint.address")
               : t("flow.missing.location"),
           notes: t("flow.missing.phone"),
           review: t("missingHint.agree"),
@@ -567,8 +625,16 @@ export function BookingWizard({
           serviceId: isCustom ? undefined : (draft.serviceId ?? undefined),
           date: draft.date,
           startTime: draft.time,
-          locationType: draft.locationType,
-          locationAddress: draft.locationAddress || undefined,
+          locationType: atVenue ? "PROVIDER" : draft.locationType,
+          locationAddress: atVenue
+            ? undefined
+            : draft.locationAddress || undefined,
+          locationProvinceId: elsewhere
+            ? draft.locationProvinceId || undefined
+            : undefined,
+          locationWardId: elsewhere
+            ? draft.locationWardId || undefined
+            : undefined,
           numberOfPeople: draft.numberOfPeople
             ? Number(draft.numberOfPeople)
             : undefined,
@@ -697,11 +763,13 @@ export function BookingWizard({
     },
     {
       label: t("flow.rows.location"),
-      value: draft.locationType
-        ? draft.locationType !== "PROVIDER" && draft.locationAddress
-          ? draft.locationAddress
-          : locationLabel[draft.locationType]
-        : null,
+      value: atVenue
+        ? t("flow.venue.summary", { providerName })
+        : draft.locationType
+          ? draft.locationType !== "PROVIDER" && draft.locationAddress
+            ? [draft.locationAddress, areaLabel].filter(Boolean).join(", ")
+            : locationLabel[draft.locationType]
+          : null,
       onEdit: () => goTo(3),
     },
     {
@@ -813,10 +881,14 @@ export function BookingWizard({
                   tabIndex={-1}
                   className="text-heading-xl text-text-primary outline-none"
                 >
-                  {t(`flow.headings.${current}`)}
+                  {current === "location" && atVenue
+                    ? t("flow.venue.heading")
+                    : t(`flow.headings.${current}`)}
                 </h1>
                 <p className="text-body-md text-text-secondary">
-                  {t(`flow.subs.${current}`, { providerName })}
+                  {current === "location" && atVenue
+                    ? t("flow.venue.sub", { providerName })
+                    : t(`flow.subs.${current}`, { providerName })}
                 </p>
               </div>
 
@@ -965,34 +1037,97 @@ export function BookingWizard({
               {current === "location" ? (
                 <div className="flex flex-col gap-5">
                   {isModel ? <ModelSafetyNotice /> : null}
-                  <ChoiceCardGroup
-                    legend={t("stepDetails.locationLabel")}
-                    hideLegend
-                  >
-                    {(["PROVIDER", "CUSTOMER", "OUTDOOR"] as const).map(
-                      (type) => (
-                        <ChoiceCard
-                          key={type}
-                          name="locationType"
-                          value={type}
-                          selected={draft.locationType === type}
-                          onSelect={() => update("locationType", type)}
-                          title={locationLabel[type]}
-                          description={t(`flow.locationHints.${type}`)}
-                        />
-                      ),
-                    )}
-                  </ChoiceCardGroup>
-                  {draft.locationType === "CUSTOMER" ||
-                  draft.locationType === "OUTDOOR" ? (
-                    <Input
-                      label={t("stepDetails.addressLabel")}
-                      value={draft.locationAddress}
-                      onChange={(e) =>
-                        update("locationAddress", e.target.value)
-                      }
-                      placeholder={t("stepDetails.addressPlaceholder")}
-                    />
+                  {atVenue ? (
+                    <div className="flex items-start gap-3 rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-sunken p-4">
+                      <MapPin
+                        aria-hidden
+                        className="mt-0.5 size-5 shrink-0 text-text-primary"
+                      />
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <span className="text-body-md font-semibold! text-text-primary">
+                          {t("flow.venue.summary", { providerName })}
+                        </span>
+                        {venuePlace ? (
+                          <span className="text-body-sm text-text-secondary">
+                            {venuePlace}
+                          </span>
+                        ) : null}
+                        <span className="text-body-sm text-text-secondary">
+                          {t("flow.venue.addressNote")}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <ChoiceCardGroup
+                      legend={t("stepDetails.locationLabel")}
+                      hideLegend
+                    >
+                      {(["PROVIDER", "CUSTOMER", "OUTDOOR"] as const).map(
+                        (type) => (
+                          <ChoiceCard
+                            key={type}
+                            name="locationType"
+                            value={type}
+                            selected={draft.locationType === type}
+                            onSelect={() => update("locationType", type)}
+                            title={locationLabel[type]}
+                            description={t(`flow.locationHints.${type}`)}
+                          />
+                        ),
+                      )}
+                    </ChoiceCardGroup>
+                  )}
+                  {elsewhere ? (
+                    <>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <NativeSelect
+                            label={t("stepDetails.provinceLabel")}
+                            value={draft.locationProvinceId}
+                            onChange={(value) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                locationProvinceId: value,
+                                locationWardId: "",
+                              }))
+                            }
+                            options={[
+                              { value: "", label: t("stepDetails.pickOne") },
+                              ...provinces.map((province) => ({
+                                value: province.id,
+                                label: province.name,
+                              })),
+                            ]}
+                          />
+                          <NativeSelect
+                            label={t("stepDetails.wardLabel")}
+                            value={draft.locationWardId}
+                            disabled={!draft.locationProvinceId}
+                            onChange={(value) =>
+                              update("locationWardId", value)
+                            }
+                            options={[
+                              { value: "", label: t("stepDetails.wardAny") },
+                              ...wards.map((ward) => ({
+                                value: ward.id,
+                                label: ward.name,
+                              })),
+                            ]}
+                          />
+                        </div>
+                        <p className="text-meta text-text-tertiary">
+                          {t("stepDetails.areaHelper", { providerName })}
+                        </p>
+                      </div>
+                      <Input
+                        label={t("stepDetails.addressLabel")}
+                        value={draft.locationAddress}
+                        onChange={(e) =>
+                          update("locationAddress", e.target.value)
+                        }
+                        placeholder={t("stepDetails.addressPlaceholder")}
+                      />
+                    </>
                   ) : null}
                   <Input
                     label={t("stepDetails.numberOfPeopleLabel")}

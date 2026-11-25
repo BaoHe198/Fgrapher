@@ -95,6 +95,12 @@ lại; không dựa vào component ẩn.
 
 Người xem có thể chia sẻ URL hoặc tạo mã QR trỏ tới hồ sơ.
 
+**Câu chữ theo vai trò (25/11/2026).** Hồ sơ studio có khối "Địa chỉ và giờ mở
+cửa" thay cho "Khu vực làm việc": phường, tỉnh và giờ mở cửa lấy từ chính lịch
+làm việc hàng tuần mà trang đặt lịch đọc. Địa chỉ chi tiết vẫn riêng tư như mọi
+nhà cung cấp. Studio ghi "năm hoạt động" và "lượt thuê"; quay phim ghi "Phim đã
+quay" và "buổi đã quay".
+
 ## 5. Portfolio, album và media
 
 Nhà cung cấp quản lý media theo album:
@@ -110,8 +116,31 @@ Nhà cung cấp quản lý media theo album:
 Mỗi upload có trạng thái kiểm duyệt. Chỉ media `APPROVED` được trả cho trang công
 khai. Chủ hồ sơ vẫn thấy trạng thái pending/rejected để sửa.
 
-Trên trang hồ sơ công khai, khung "Tất cả ảnh" mở ra với 9 ảnh; nút "Xem thêm ·
-còn N ảnh" mở thêm 9 ảnh mỗi lần, để khách không phải cuộn qua cả portfolio mới
+**Video bằng liên kết YouTube (25/11/2026).** Ngoài tệp video tải lên (tối đa
+100MB), hộp tải lên nhận liên kết YouTube — cho phim cưới, phim sự kiện vượt giới
+hạn tệp. Đó vẫn là một dòng `ProfileMedia` loại `VIDEO`, không có `publicId`,
+`url` lưu ở một dạng chuẩn (`https://www.youtube.com/watch?v=<id>`); nhận diện
+và dựng địa chỉ trình phát, ảnh đại diện nằm cả ở `lib/media/video-link.ts`.
+Video liên kết **đi qua hàng chờ kiểm duyệt y như tệp tải lên** (mặc định
+`PENDING`, cần ô xác nhận quyền hình ảnh), và admin xem bằng chính trình phát
+YouTube trong hàng chờ. Trình phát dùng `youtube-nocookie.com` và chỉ tải khi
+người xem mở video; trên lưới chỉ có ảnh đại diện. CSP (`next.config.ts`) cho
+phép đúng hai nguồn đó: `frame-src https://www.youtube-nocookie.com` và
+`img-src https://i.ytimg.com`.
+
+Chỉ YouTube, có chủ đích: một video YouTube không thể bị thay bằng video khác
+dưới cùng địa chỉ, nên thứ đã duyệt là thứ còn hiển thị. Vimeo cho chủ video
+thay tệp phía sau liên kết, tức nội dung có thể đổi sau khi đã duyệt — chưa hỗ
+trợ, chờ chủ dự án quyết định.
+
+Mọi nơi vẽ video dùng chung `components/media/portfolio-video.tsx`: `VideoTile`
+(ảnh đại diện + dấu phát, cho lưới và ảnh bìa) và `PortfolioVideoPlayer` (trình
+phát, cho trình xem ảnh và hàng chờ của admin).
+
+Trên trang hồ sơ công khai, khung "Tất cả ảnh" hiện cả video đã duyệt (từ
+25/11/2026; ô video có dấu phát, tiêu đề thành "Tất cả ảnh và video", đếm riêng
+"3 ảnh · 1 video") và mở ra với 9 mục; nút "Xem thêm ·
+còn N ảnh" mở thêm 9 mục mỗi lần, để khách không phải cuộn qua cả portfolio mới
 tới phần đánh giá và thông tin bên dưới. Đổi bộ lọc phong cách thì quay về 9 ảnh;
 trình xem ảnh vẫn lướt được qua mọi ảnh và tự mở thêm khung phía sau cho khớp.
 
@@ -215,9 +244,19 @@ provider mặc định được làm mờ. Chi tiết: `docs/ops/fmap.md`.
 
 ## 7. Dịch vụ và lịch rảnh
 
-Nhà cung cấp có thể tạo dịch vụ với tên, mô tả, thời lượng và giá, và (từ 09/2026)
-số ảnh chỉnh sửa giao kèm và số ngày giao ảnh. Availability kết
-hợp:
+Nhà cung cấp có thể tạo dịch vụ với tên, mô tả, mức giữ lịch và giá, và (từ 09/2026)
+số ảnh chỉnh sửa giao kèm và số ngày giao ảnh.
+
+**Mức giữ lịch (25/11/2026).** Mỗi gói chọn một trong bốn mức: 1 giờ, 2 giờ, nửa
+ngày (4 giờ), cả ngày (8 giờ) — `SERVICE_HOLD_MINUTES` trong
+`src/lib/constants/service-matrix.ts`, lưu vào `Service.duration` (phút). Một
+lịch đặt giữ lịch của nhà cung cấp đúng khoảng đó kể từ giờ khách chọn. Quyết
+định này thay cho quyết định 21/09/2026 (ẩn hẳn ô thời lượng, mọi gói giữ 1
+giờ). Gói có thời lượng khác từ trước được làm tròn lên mức gần nhất khi mở
+form sửa. Gói dài hơn giờ làm việc trong ngày vẫn có một khung giờ: đầu giờ làm
+việc.
+
+Availability kết hợp:
 
 - lịch làm việc thường lệ;
 - ngày bị chặn;
@@ -328,6 +367,17 @@ Hệ thống hỗ trợ đề xuất đổi lịch và bên còn lại chấp nh
 thái phải tuân state machine; request lặp hoặc đến muộn không được đưa booking từ
 trạng thái cuối quay lại trạng thái đang hoạt động.
 
+**Đổi giờ đã thống nhất (25/11/2026).** Khi một đề xuất đổi giờ được đồng ý,
+`respondToReschedule()` ghi thêm một dòng vào `BookingStatusHistory` với
+`fromStatus === toStatus` và hai mốc giờ trong `note` (`rescheduleNote` trong
+`lib/booking-window.ts`); dòng thời gian của lịch đặt hiện "Đổi giờ: từ … sang …".
+Nếu lịch còn `PENDING` và **chính nhà cung cấp** là người đề xuất giờ, việc khách
+đồng ý chuyển lịch sang `CONFIRMED` luôn (qua `transitionBooking()`, ghi nhận là
+xác nhận của nhà cung cấp) — trước đây lịch vẫn chờ nhà cung cấp bấm Chấp nhận
+thêm lần nữa và tự hết hạn sau 48 giờ. Khách đề xuất giờ, hoặc lịch tạo từ một
+báo giá (ngày giờ do khách chọn lúc nhận báo giá), thì vẫn chờ nhà cung cấp trả
+lời như cũ.
+
 Booking tạo hội thoại/liên kết để hai bên trao đổi. Cron gửi nhắc lịch và có cờ
 chống gửi lặp.
 
@@ -335,8 +385,24 @@ Giao diện gửi yêu cầu (từ 09/2026) có 6 bước: Gói (hoặc "Tùy ch
 giá), Ngày, Giờ (có gợi ý **giờ vàng** gần lúc mặt trời mọc/lặn, tính trên trình
 duyệt từ toạ độ đã làm tròn ~10 km của nghệ sĩ — `lib/sun.ts`), Địa điểm, Ghi chú,
 Xem lại. Cột tóm tắt bên cạnh có nút "Sửa" cho từng dòng. "Lưu nháp & thoát" giữ
-bản nháp trên thiết bị 7 ngày, không lưu số điện thoại. Dữ liệu gửi lên
-`POST /api/bookings` không đổi.
+bản nháp trên thiết bị 7 ngày, không lưu số điện thoại.
+
+**Khu vực buổi chụp (25/11/2026).** Khi chụp tại chỗ của khách hoặc ngoài trời,
+khách chọn tỉnh/thành (bắt buộc) và phường/xã (không bắt buộc) cùng địa chỉ —
+`Booking.locationProvinceId` / `locationWardId`, kiểm tra ở `createBooking()`.
+Nhà cung cấp thấy hai mục này **trước khi chấp nhận** (trang chi tiết, danh sách
+lịch đặt và khung "Yêu cầu chờ phản hồi" trên tổng quan); địa chỉ chi tiết và số
+điện thoại vẫn chỉ hiện sau khi họ chấp nhận, như trước. Lịch tạo từ một báo giá
+lấy khu vực của chính yêu cầu. Lịch ở chỗ của nhà cung cấp để trống cả hai.
+
+**Thuê studio (25/11/2026).** Gói loại `VENUE_RENTAL` cố định địa điểm là studio:
+bước Địa điểm không hỏi "Chụp ở đâu?" mà hiện tên studio cùng phường, tỉnh, và
+vẫn hỏi số người. Các gói khác của studio (chụp, quay, trang điểm) hỏi như
+thường.
+
+**Hạn trả lời.** Trang chi tiết của một yêu cầu `PENDING` ghi rõ hạn 48 giờ
+(`Booking.expiresAt`) cho cả hai bên. Trên điện thoại, hai nút Chấp nhận / Từ
+chối của nhà cung cấp ghim ở cuối màn hình, phía trên thanh điều hướng.
 
 ## 9. Yêu cầu dịch vụ và đề nghị
 

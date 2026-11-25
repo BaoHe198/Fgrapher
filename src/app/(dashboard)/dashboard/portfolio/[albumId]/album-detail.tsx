@@ -42,6 +42,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
+import { VideoTile } from "@/components/media/portfolio-video";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
@@ -108,7 +109,7 @@ function SortableMediaTile({
       )}
     >
       {item.type === "VIDEO" ? (
-        <video src={item.url} className="size-full object-cover" muted />
+        <VideoTile url={item.url} />
       ) : (
         <Image
           src={buildMediaVariants(item.url).thumbnail}
@@ -217,6 +218,7 @@ export function AlbumDetail({
   const t = useTranslations("dashboardCore.albums.detail");
   const categoryT = useTranslations("profileCategory");
   const [media, setMedia] = useState(initialMedia);
+  const videoCount = media.filter((item) => item.type === "VIDEO").length;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [meta, setMeta] = useState(album);
   const [isSaving, setIsSaving] = useState(false);
@@ -358,7 +360,15 @@ export function AlbumDetail({
       </div>
 
       <p className="text-body-sm text-text-secondary">
-        {t("photoCount", { count: media.length })} · {t("dragToReorder")}
+        {/* By kind: an album of three photos and two films read "5 ảnh". */}
+        {videoCount > 0
+          ? t("mediaCount", {
+              photos: media.length - videoCount,
+              videos: videoCount,
+              both: media.length > videoCount ? "yes" : "no",
+            })
+          : t("photoCount", { count: media.length })}{" "}
+        · {t("dragToReorder")}
       </p>
 
       <DndContext

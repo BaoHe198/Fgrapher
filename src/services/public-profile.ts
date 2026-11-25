@@ -394,6 +394,10 @@ export async function getProviderForBooking(providerId: string) {
           // golden-hour hints before anything reaches the browser.
           latitude: true,
           longitude: true,
+          // Ward and province only, the same as the public profile shows.
+          // The street address stays private (see Profile.address).
+          ward: { select: { name: true } },
+          province: { select: { name: true } },
           services: { where: { isActive: true }, orderBy: { price: "asc" } },
           // The booking flow's picture pane (wave 2): a few of the
           // artist's own approved photos, never stock imagery.

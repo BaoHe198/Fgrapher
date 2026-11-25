@@ -5,6 +5,7 @@ import { cache } from "react";
 
 import { formatDate } from "@/lib/format";
 import { formatAdministrativeLocation } from "@/lib/location";
+import { videoPosterUrl } from "@/lib/media/video-link";
 import { findPublicAlbum } from "@/services/public-profile";
 
 import { AlbumEssay } from "./album-essay";
@@ -26,7 +27,9 @@ export async function generateMetadata({
   const { user, profile, album } = found;
   const name = profile.displayName ?? user.name ?? username;
   const t = await getTranslations("publicPages.album");
-  const image = album.coverMedia?.url ?? album.media[0]?.url;
+  const first = album.coverMedia?.url ?? album.media[0]?.url;
+  // A share preview needs a picture: a video stands in as its poster frame.
+  const image = first ? (videoPosterUrl(first) ?? first) : undefined;
   return {
     title: t("metaTitle", { title: album.title, name }),
     description: (album.description ?? t("metaDescription", { name })).slice(

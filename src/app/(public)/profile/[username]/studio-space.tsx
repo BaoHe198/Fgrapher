@@ -73,3 +73,86 @@ export function StudioSpace({
     </div>
   );
 }
+
+export interface StudioHours {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
+// Monday first, the way the calendar is drawn everywhere else in the app.
+const WEEK = [
+  { dayOfWeek: 1, key: "mon" },
+  { dayOfWeek: 2, key: "tue" },
+  { dayOfWeek: 3, key: "wed" },
+  { dayOfWeek: 4, key: "thu" },
+  { dayOfWeek: 5, key: "fri" },
+  { dayOfWeek: 6, key: "sat" },
+  { dayOfWeek: 0, key: "sun" },
+] as const;
+
+// Where a studio is and when it is open (25/11/2026). Ward and province
+// only: the street address is private for every provider (Profile.address),
+// so the customer is told how to get it rather than shown it.
+export function StudioPlace({
+  location,
+  hours,
+}: {
+  location: string | null;
+  hours: StudioHours[];
+}) {
+  const t = useTranslations("publicPages.profile.studio");
+  const dayT = useTranslations("dashboardSettings.profile.availability.days");
+  return (
+    <dl className="flex flex-col gap-5 rounded-[var(--fg-radius-lg)] border border-border-subtle bg-bg-surface p-5">
+      <div className="flex flex-col gap-1 text-body-sm">
+        <dt className="text-text-secondary">{t("address")}</dt>
+        <dd className="flex flex-col gap-0.5">
+          {location ? (
+            <span className="text-body-md font-semibold! text-text-primary">
+              {location}
+            </span>
+          ) : null}
+          <span className="text-text-secondary">{t("addressNote")}</span>
+        </dd>
+      </div>
+      {hours.length > 0 ? (
+        <div className="flex flex-col gap-2 text-body-sm">
+          <dt className="text-text-secondary">{t("hours")}</dt>
+          <dd>
+            <ul className="flex flex-col gap-1.5">
+              {WEEK.map(({ dayOfWeek, key }) => {
+                const windows = hours
+                  .filter((rule) => rule.dayOfWeek === dayOfWeek)
+                  .sort((a, b) => a.startTime.localeCompare(b.startTime));
+                return (
+                  <li
+                    key={key}
+                    className="flex items-baseline justify-between gap-4"
+                  >
+                    <span className="text-text-primary">{dayT(key)}</span>
+                    <span
+                      className={
+                        windows.length > 0
+                          ? "font-mono font-semibold! tabular-nums text-text-primary"
+                          : "text-text-tertiary"
+                      }
+                    >
+                      {windows.length > 0
+                        ? windows
+                            .map(
+                              (rule) => `${rule.startTime} – ${rule.endTime}`,
+                            )
+                            .join(", ")
+                        : t("closed")}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </dd>
+        </div>
+      ) : null}
+    </dl>
+  );
+}

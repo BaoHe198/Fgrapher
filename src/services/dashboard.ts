@@ -3,6 +3,7 @@ import type { Role } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
+import { formatAdministrativeLocation } from "@/lib/location";
 import { vietnamMonthStart } from "@/lib/vietnam/date";
 
 /**
@@ -369,15 +370,11 @@ export interface ProviderOverview {
     service: string | null;
     totalPrice: number | null;
     notes: string | null;
+    /** "Phường X, Tỉnh Y", or "" at the provider's own place. */
+    area: string;
     expiresAt: string | null;
   }[];
   sunPoint: { latitude: number; longitude: number } | null;
-  /**
-   * What keeps this provider off Bản đồ F and out of booking, beyond
-   * verification (shown on "Trang của tôi"): no weekly hours means never
-   * free; no map point means no marker.
-   */
-  findability: { hasHours: boolean; hasMapPoint: boolean };
   /** Requests received per Vietnam day: index 0 = 13 days ago. */
   requestsByDay: number[];
   completedThisMonth: { count: number; value: number };
@@ -404,7 +401,6 @@ export async function getProviderOverview(
           select: {
             latitude: true,
             longitude: true,
-            geocodingStatus: true,
             provinceId: true,
             viewCount: true,
             depositPolicy: true,
@@ -435,11 +431,6 @@ export async function getProviderOverview(
               },
               select: { id: true },
               take: 1,
-            },
-            resources: {
-              select: {
-                _count: { select: { rules: { where: { isActive: true } } } },
-              },
             },
           },
         },
@@ -473,6 +464,8 @@ export async function getProviderOverview(
         totalPrice: true,
         notes: true,
         expiresAt: true,
+        locationProvince: { select: { name: true } },
+        locationWard: { select: { name: true } },
         service: { select: { name: true } },
         customer: { select: { name: true, firstName: true } },
       },
@@ -503,10 +496,6 @@ export async function getProviderOverview(
     (key) => recent.filter((b) => vietnamDayKey(b.createdAt) === key).length,
   );
 
-  const hasWeeklyHours = profiles.some((p) =>
-    p.resources.some((r) => r._count.rules > 0),
-  );
-
   const name = (c: { name: string | null; firstName: string | null }) =>
     c.firstName ?? c.name ?? "";
 
@@ -528,6 +517,10 @@ export async function getProviderOverview(
       service: b.service?.name ?? null,
       totalPrice: b.totalPrice,
       notes: b.notes,
+      area: formatAdministrativeLocation({
+        ward: b.locationWard,
+        province: b.locationProvince,
+      }),
       expiresAt: b.expiresAt?.toISOString() ?? null,
     })),
     // ~10 km rounding, as on the public booking page.
@@ -537,15 +530,6 @@ export async function getProviderOverview(
           longitude: Math.round(located.longitude! * 10) / 10,
         }
       : null,
-    findability: {
-      hasHours: hasWeeklyHours,
-      hasMapPoint: profiles.some(
-        (p) =>
-          p.geocodingStatus === "READY" &&
-          p.latitude != null &&
-          p.longitude != null,
-      ),
-    },
     requestsByDay,
     completedThisMonth: {
       count: completed.length,

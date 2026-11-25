@@ -1,5 +1,6 @@
 "use client";
 
+import type { Role } from "@prisma/client";
 import {
   BadgeCheck,
   Briefcase,
@@ -325,12 +326,14 @@ export function ReviewsSummary({
 export function AboutProvider({
   displayName,
   roleLabel,
+  role,
   avatar,
   facts,
   modelDetails,
 }: {
   displayName: string;
   roleLabel: string;
+  role: Role;
   avatar: string | null;
   facts: {
     yearsExperience: number | null;
@@ -344,12 +347,22 @@ export function AboutProvider({
   modelDetails: { label: string; value: string }[];
 }) {
   const t = useTranslations("profilePage.about");
+  // A studio has years in business and rentals, a videographer has films:
+  // "năm kinh nghiệm" and "buổi đã chụp" are a photographer's words.
+  const shootsKey =
+    role === "STUDIO"
+      ? "shootsStudio"
+      : role === "VIDEOGRAPHER"
+        ? "shootsFilm"
+        : "shoots";
   const rows: { icon: LucideIcon; title: string; body?: string }[] = [
     ...(facts.yearsExperience
       ? [
           {
             icon: Briefcase,
-            title: t("years", { count: facts.yearsExperience }),
+            title: t(role === "STUDIO" ? "yearsStudio" : "years", {
+              count: facts.yearsExperience,
+            }),
           },
         ]
       : []),
@@ -357,8 +370,8 @@ export function AboutProvider({
       ? [
           {
             icon: Camera,
-            title: t("shoots", { count: facts.completedShoots }),
-            body: t("shootsBody"),
+            title: t(shootsKey, { count: facts.completedShoots }),
+            body: t(role === "STUDIO" ? "shootsBodyStudio" : "shootsBody"),
           },
         ]
       : []),

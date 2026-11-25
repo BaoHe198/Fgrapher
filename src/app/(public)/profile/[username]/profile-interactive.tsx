@@ -26,7 +26,7 @@ import {
 } from "./profile-sections";
 import { ScheduleDialog } from "./schedule-dialog";
 import { ServiceArea } from "./service-area";
-import { StudioSpace } from "./studio-space";
+import { StudioPlace, StudioSpace, type StudioHours } from "./studio-space";
 
 interface OwnerAlbum {
   id: string;
@@ -146,8 +146,12 @@ interface ProfileInteractiveProps {
   /** "Phản hồi trong 2 giờ · 312 buổi đã chụp". */
   trustLine: string | null;
   sunPoint: { latitude: number; longitude: number } | null;
-  /** STUDIO only: the room's size and amenities. */
-  studio: { area: number | null; amenities: string[] } | null;
+  /** STUDIO only: the room's size, amenities and opening hours. */
+  studio: {
+    area: number | null;
+    amenities: string[];
+    hours: StudioHours[];
+  } | null;
   minNoticeHours: number;
 }
 
@@ -362,7 +366,18 @@ export function ProfileInteractive({
                 )}
               </ProfileSection>
 
-              <ProfileSection id="portfolio" title={t("sections.portfolio")}>
+              <ProfileSection
+                id="portfolio"
+                // "Ảnh đã chụp" is a photographer's heading: a studio shows
+                // its rooms and a videographer shows films (25/11/2026).
+                title={
+                  role === "STUDIO"
+                    ? t("sections.portfolioStudio")
+                    : role === "VIDEOGRAPHER"
+                      ? t("sections.portfolioFilm")
+                      : t("sections.portfolio")
+                }
+              >
                 <PortfolioTab
                   username={username}
                   albums={albums}
@@ -406,6 +421,7 @@ export function ProfileInteractive({
                 <AboutProvider
                   displayName={displayName}
                   roleLabel={roleLabel}
+                  role={role}
                   avatar={avatar}
                   facts={{
                     yearsExperience,
@@ -420,13 +436,22 @@ export function ProfileInteractive({
                 />
               </ProfileSection>
 
-              <ProfileSection id="area" title={t("sections.area")}>
-                <ServiceArea
-                  location={area.location}
-                  radiusKm={area.radiusKm}
-                  nationwide={area.nationwide}
-                />
-              </ProfileSection>
+              {studio ? (
+                // A studio does not travel: "Khu vực làm việc" with a
+                // travel radius said nothing a customer needs. Where it is
+                // and when it is open does.
+                <ProfileSection id="area" title={t("sections.areaStudio")}>
+                  <StudioPlace location={area.location} hours={studio.hours} />
+                </ProfileSection>
+              ) : (
+                <ProfileSection id="area" title={t("sections.area")}>
+                  <ServiceArea
+                    location={area.location}
+                    radiusKm={area.radiusKm}
+                    nationwide={area.nationwide}
+                  />
+                </ProfileSection>
+              )}
 
               {facts ? (
                 <ProfileSection id="know" title={t("sections.know")}>

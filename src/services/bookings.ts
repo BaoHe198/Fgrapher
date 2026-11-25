@@ -36,7 +36,12 @@ import { formatDate } from "@/lib/format";
 import { resolvePartyName, type NamedParty } from "@/lib/party-name";
 import { normalizeZaloUrl } from "@/lib/zalo";
 import { isSlotBookable, timeToMinutes } from "@/services/availability";
-import { movedWindow, vietnamInstant } from "@/lib/booking-window";
+import {
+  movedWindow,
+  parseRescheduleNote,
+  rescheduleNote,
+  vietnamInstant,
+} from "@/lib/booking-window";
 import { getOrCreateConversation, sendMessage } from "@/services/messaging";
 import { notify } from "@/services/notification";
 import type { CreateBookingInput } from "@/lib/validations/booking";
@@ -105,6 +110,11 @@ const BOOKING_INCLUDE = {
     },
   },
   service: { select: { name: true, duration: true } },
+  // The area of the shoot. Not contact information: the provider reads it
+  // while the request is still PENDING (see redactContactInfo below, which
+  // leaves it alone on purpose).
+  locationProvince: { select: { name: true } },
+  locationWard: { select: { name: true } },
 } as const;
 
 // The name used in notifications and emails. A provider goes by the name
@@ -348,13 +358,22 @@ export async function getBookingDetail(bookingId: string, userId: string) {
         },
       },
       service: { select: { name: true, description: true, duration: true } },
+      locationProvince: { select: { name: true } },
+      locationWard: { select: { name: true } },
       review: { select: { id: true } },
       // The detail page's timeline. It used to be rebuilt from the current
       // status alone, so a confirmed booking showed only "request created"
       // (23/11/2026 walk-through). `note` is left out: it is the actor's
       // own text and the page already shows cancelReason.
+      // `fromStatus` and `note` are read only to recognise an agreed
+      // reschedule (see parseRescheduleNote); neither leaves this function.
       statusHistory: {
-        select: { toStatus: true, createdAt: true },
+        select: {
+          fromStatus: true,
+          toStatus: true,
+          createdAt: true,
+          note: true,
+        },
         orderBy: { createdAt: "asc" },
       },
       // Crew-hire (Prompt B7, VIỆC 1) — shown on the detail page so
@@ -438,6 +457,14 @@ export async function getBookingDetail(bookingId: string, userId: string) {
 
   return {
     ...booking,
+    statusHistory: booking.statusHistory.map((entry) => ({
+      toStatus: entry.toStatus,
+      createdAt: entry.createdAt,
+      reschedule:
+        entry.fromStatus === entry.toStatus
+          ? parseRescheduleNote(entry.note)
+          : null,
+    })),
     contactPhone: contactInfoVisible ? booking.contactPhone : null,
     locationAddress: contactInfoVisible ? booking.locationAddress : null,
     isFirstBookingBetweenParties: priorBookingCount === 0,
@@ -621,11 +648,47 @@ export async function createBooking(
   const providerProvinceId =
     providerProfile.provinceId ?? provider.ward?.provinceId ?? undefined;
 
+  // Where the shoot is, as an area. Required whenever it is not at the
+  // provider's own place: it is the one thing about the location a
+  // provider is shown before accepting (the address is withheld until
+  // then), and without it they were deciding on "Ngoài trời / khác" alone.
+  let locationProvinceId: string | null = null;
+  let locationWardId: string | null = null;
+  if (input.locationType !== "PROVIDER") {
+    const province = input.locationProvinceId
+      ? await db.province.findUnique({
+          where: { id: input.locationProvinceId },
+          select: { id: true },
+        })
+      : null;
+    if (!province) {
+      throw new BookingActionError("Choose the province of the shoot", 400);
+    }
+    locationProvinceId = province.id;
+    if (input.locationWardId) {
+      const ward = await db.ward.findFirst({
+        where: { id: input.locationWardId, provinceId: province.id },
+        select: { id: true },
+      });
+      if (!ward) {
+        throw new BookingActionError(
+          "That ward is not in the chosen province",
+          400,
+        );
+      }
+      locationWardId = ward.id;
+    }
+  }
+
   const duration = service?.duration ?? 60;
   const startMinutes =
     Number(input.startTime.slice(0, 2)) * 60 + Number(input.startTime.slice(3));
   const endMinutes = startMinutes + duration;
-  const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+  // The shown end stays inside the day: a full-day package taken late in
+  // the afternoon would otherwise print "25:00". `endAt` below is the real
+  // instant and is what the calendar hold uses.
+  const shownEnd = Math.min(endMinutes, 23 * 60 + 59);
+  const endTime = `${String(Math.floor(shownEnd / 60)).padStart(2, "0")}:${String(shownEnd % 60).padStart(2, "0")}`;
   // Same fixed UTC+7 conversion as startAt above.
   const endInstant = new Date(startAt.getTime() + duration * 60_000);
 
@@ -729,6 +792,8 @@ export async function createBooking(
         endTime,
         locationType: input.locationType,
         locationAddress: input.locationAddress,
+        locationProvinceId,
+        locationWardId,
         numberOfPeople: input.numberOfPeople,
         notes: input.notes,
         contactPhone: input.contactPhone,
@@ -1427,6 +1492,28 @@ export async function respondToReschedule({
           where: { bookingId },
           data: { startAt: moved.startAt, endAt: moved.endAt },
         });
+        // The move itself, for the timeline. Not a status change: the
+        // status on both sides of the row is the one the booking has.
+        await tx.bookingStatusHistory.create({
+          data: {
+            bookingId,
+            fromStatus: booking.status,
+            toStatus: booking.status,
+            actorId: userId,
+            note: rescheduleNote(
+              {
+                date: booking.date.toISOString().slice(0, 10),
+                startTime: booking.startTime,
+              },
+              {
+                date: booking
+                  .rescheduleProposedDate!.toISOString()
+                  .slice(0, 10),
+                startTime: booking.rescheduleProposedStartTime!,
+              },
+            ),
+          },
+        });
       }
       return row;
     });
@@ -1487,6 +1574,31 @@ export async function respondToReschedule({
       ],
     },
   });
+
+  // The provider named this time and the customer has now said yes: there
+  // is nothing left for the provider to decide. The booking used to stay
+  // PENDING all the same, waiting for the provider to press "Chấp nhận" on
+  // a time they had proposed themselves, and it expired after 48 hours if
+  // they did not (found 25/11/2026). Recorded as the provider's own
+  // confirmation, which is what proposing the time was.
+  if (
+    accept &&
+    booking.status === "PENDING" &&
+    booking.rescheduleProposedBy === booking.providerId
+  ) {
+    try {
+      return await transitionBooking({
+        bookingId,
+        toStatus: "CONFIRMED",
+        actorId: booking.providerId,
+        note: "Confirmed when the customer agreed to the time the provider proposed",
+      });
+    } catch (error) {
+      // Lost a race with a cancel or an expiry: the move above stands and
+      // the status is whatever won. Anything else is a real failure.
+      if (!(error instanceof BookingActionError)) throw error;
+    }
+  }
 
   return updated;
 }

@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Loader2,
   MapPin,
   Phone,
@@ -48,10 +49,12 @@ import { MIN_NOTICE_HOURS } from "@/lib/constants";
 import {
   formatDate,
   formatDateTime,
+  formatTime,
   formatWeekdayShort,
   vietnamDateKey,
 } from "@/lib/format";
-import { formatCurrency } from "@/lib/utils";
+import { formatAdministrativeLocation } from "@/lib/location";
+import { cn, formatCurrency } from "@/lib/utils";
 import { resolvePartyName } from "@/lib/party-name";
 import type { DayAvailability } from "@/services/availability";
 
@@ -64,8 +67,18 @@ type BookingDetail = Booking & {
   customer: Party;
   provider: Party;
   service: Pick<Service, "name" | "description" | "duration"> | null;
+  locationProvince: { name: string } | null;
+  locationWard: { name: string } | null;
   review: { id: string } | null;
-  statusHistory?: { toStatus: BookingStatus; createdAt: string }[];
+  statusHistory?: {
+    toStatus: BookingStatus;
+    createdAt: string;
+    /** Set on the row of an agreed reschedule; its status did not change. */
+    reschedule: {
+      from: { date: string; startTime: string };
+      to: { date: string; startTime: string };
+    } | null;
+  }[];
   // Crew-hire (Prompt B7, VIỆC 1).
   parentBooking: {
     id: string;
@@ -230,6 +243,22 @@ export default function BookingDetailPage() {
     new Date(booking.date).getTime() - now < MIN_NOTICE_HOURS * 60 * 60 * 1000;
   const hasReschedulePending = Boolean(booking.rescheduleProposedBy);
   const proposedByMe = booking.rescheduleProposedBy === session?.user?.id;
+  // "Phường X, Tỉnh Y": the part of the location a provider may read
+  // before accepting. Empty at the provider's own place.
+  const locationArea = formatAdministrativeLocation({
+    ward: booking.locationWard,
+    province: booking.locationProvince,
+  });
+  // The 48 hours a request waits for an answer, shown to both sides. The
+  // page never said when it ran out (found 25/11/2026).
+  const answerBy =
+    booking.status === "PENDING" && booking.expiresAt
+      ? new Date(booking.expiresAt)
+      : null;
+  const hoursToAnswer = answerBy
+    ? Math.max(0, Math.ceil((answerBy.getTime() - now) / 3_600_000))
+    : null;
+  const awaitingMyAnswer = booking.status === "PENDING" && viewerIsProvider;
 
   return (
     <div className="flex flex-col gap-5">
@@ -251,6 +280,32 @@ export default function BookingDetailPage() {
           })}
         </span>
       </div>
+
+      {answerBy && hoursToAnswer !== null ? (
+        <Card
+          className={cn(
+            "flex flex-row items-start gap-2 border",
+            hoursToAnswer <= 6
+              ? "border-danger bg-danger-bg"
+              : "border-border-subtle",
+          )}
+        >
+          <Clock
+            className={cn(
+              "mt-0.5 size-4 shrink-0",
+              hoursToAnswer <= 6 ? "text-danger" : "text-text-tertiary",
+            )}
+          />
+          <span className="text-body-sm text-text-primary">
+            {t(viewerIsProvider ? "answerBy.provider" : "answerBy.customer", {
+              name: partyName(otherParty),
+              time: formatTime(answerBy),
+              date: formatDate(answerBy),
+              hours: hoursToAnswer,
+            })}
+          </span>
+        </Card>
+      ) : null}
 
       {booking.isFirstBookingBetweenParties && booking.status === "PENDING" ? (
         <Card className="flex flex-col gap-1.5 border border-warning bg-warning-bg">
@@ -468,6 +523,7 @@ export default function BookingDetailPage() {
                   ? LOCATION_LABEL[booking.locationType]
                   : "—",
               ],
+              ...(locationArea ? [[t("fields.area"), locationArea]] : []),
               [
                 t("fields.people"),
                 booking.numberOfPeople ? String(booking.numberOfPeople) : "—",
@@ -481,10 +537,14 @@ export default function BookingDetailPage() {
             ].map(([label, value]) => (
               <div
                 key={label}
-                className="flex items-center justify-between px-5 py-3.5"
+                className="flex items-baseline justify-between gap-4 px-5 py-3.5"
               >
-                <span className="text-body-sm text-text-tertiary">{label}</span>
-                <span className="text-body-md font-semibold! text-text-primary">
+                {/* The label keeps its line: beside a long value (a package
+                    name, a ward and province) it broke into "Khu / vực". */}
+                <span className="shrink-0 text-body-sm text-text-tertiary">
+                  {label}
+                </span>
+                <span className="min-w-0 text-right text-body-md font-semibold! [overflow-wrap:anywhere] text-text-primary">
                   {value}
                 </span>
               </div>
@@ -498,6 +558,13 @@ export default function BookingDetailPage() {
                 {booking.locationAddress}
               </span>
             </Card>
+          ) : awaitingMyAnswer ? (
+            // Said outright: the address and phone number are withheld, not
+            // missing, and accepting is what releases them.
+            <p className="flex items-start gap-2 px-1 text-body-sm text-text-secondary">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
+              {t("contactAfterAccept")}
+            </p>
           ) : null}
 
           {/* The wizard requires this number "so the artist can reach you",
@@ -575,13 +642,28 @@ export default function BookingDetailPage() {
               booking.statusHistory.map((entry) => (
                 <TimelineRow
                   key={`${entry.toStatus}-${entry.createdAt}`}
-                  label={t(`timeline.to.${entry.toStatus}`)}
+                  label={
+                    entry.reschedule
+                      ? t("timeline.rescheduled")
+                      : t(`timeline.to.${entry.toStatus}`)
+                  }
                   date={entry.createdAt}
                   detail={
-                    entry.toStatus === "CANCELLED" ||
-                    entry.toStatus === "DECLINED"
-                      ? booking.cancelReason
-                      : null
+                    entry.reschedule
+                      ? t("timeline.rescheduledDetail", {
+                          fromTime: entry.reschedule.from.startTime,
+                          fromDate: formatDate(
+                            `${entry.reschedule.from.date}T00:00:00+07:00`,
+                          ),
+                          toTime: entry.reschedule.to.startTime,
+                          toDate: formatDate(
+                            `${entry.reschedule.to.date}T00:00:00+07:00`,
+                          ),
+                        })
+                      : entry.toStatus === "CANCELLED" ||
+                          entry.toStatus === "DECLINED"
+                        ? booking.cancelReason
+                        : null
                   }
                 />
               ))
@@ -730,6 +812,35 @@ export default function BookingDetailPage() {
           ) : null}
         </div>
       </div>
+
+      {/* Phones: the two answers stay in reach. They sat two screens
+          down, under the details and the timeline. Above the tab bar
+          (4rem), and the spacer keeps the page's last lines clear of it. */}
+      {awaitingMyAnswer ? (
+        <>
+          <div aria-hidden className="h-16 lg:hidden" />
+          <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-border-subtle bg-bg-surface px-4 py-3 lg:hidden">
+            <div className="mx-auto flex max-w-xl gap-2">
+              <Button
+                variant="ghost"
+                className="flex-1"
+                disabled={busy}
+                onClick={() => setDeclineOpen(true)}
+              >
+                {t("actions.decline")}
+              </Button>
+              <Button
+                variant="accent"
+                className="flex-[2]"
+                disabled={busy}
+                onClick={() => setAcceptOpen(true)}
+              >
+                {t("actions.accept")}
+              </Button>
+            </div>
+          </div>
+        </>
+      ) : null}
 
       <Dialog open={acceptOpen} onOpenChange={setAcceptOpen}>
         <DialogContent>

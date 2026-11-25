@@ -1,5 +1,6 @@
 "use client";
 
+import { MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +18,7 @@ interface PendingRequest {
   service: string | null;
   totalPrice: number | null;
   notes: string | null;
+  area: string;
   expiresAt: string | null;
 }
 
@@ -159,6 +161,14 @@ export function PendingRequests({
                     : t("quoteLater"),
                 ].join(" · ")}
               </span>
+              {/* Where, as an area: the address stays hidden until they
+                  accept, and this list is where many of them do. */}
+              {request.area ? (
+                <span className="flex items-center gap-1 text-body-sm text-text-secondary">
+                  <MapPin aria-hidden className="size-3.5 shrink-0" />
+                  {request.area}
+                </span>
+              ) : null}
               {request.notes ? (
                 <span className="line-clamp-2 text-body-sm text-text-primary">
                   “{request.notes}”

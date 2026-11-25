@@ -1369,7 +1369,9 @@
       "tooManyPending": "Bạn đang có {max} yêu cầu đặt lịch chờ phản hồi. Hãy chờ nghệ sĩ trả lời hoặc hủy bớt một yêu cầu trước khi gửi thêm.",
       "invalidTransition": "Lịch đặt này vừa đổi trạng thái nên không thực hiện được thao tác. Hãy tải lại trang.",
       "proposalInPast": "Thời gian đề xuất đã qua. Hãy chọn một thời điểm sắp tới.",
-      "proposalEndBeforeStart": "Giờ kết thúc đề xuất phải sau giờ bắt đầu."
+      "proposalEndBeforeStart": "Giờ kết thúc đề xuất phải sau giờ bắt đầu.",
+      "areaRequired": "Hãy chọn tỉnh/thành nơi diễn ra buổi chụp.",
+      "wardNotInProvince": "Phường/xã không thuộc tỉnh/thành đã chọn."
     },
     "uploads": {
       "documentsNotConfigured": "Hiện chưa thể tải ảnh giấy tờ lên. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
@@ -1475,7 +1477,9 @@
       "restoreFailed": "Không thể khôi phục",
       "notOwned": "Bạn không sở hữu một số ảnh trong danh sách này",
       "orderUpdated": "Đã cập nhật thứ tự",
-      "reorderFailed": "Không thể cập nhật thứ tự"
+      "reorderFailed": "Không thể cập nhật thứ tự",
+      "videoLinkInvalid": "Liên kết này không phải một video YouTube. Hãy dán liên kết dạng youtube.com/watch?v=… hoặc youtu.be/…",
+      "videoLinkDuplicate": "Video này đã có trong portfolio của bạn."
     },
     "darkroom": {
       "loadFailed": "Không thể tải ảnh",
@@ -2244,7 +2248,8 @@
           "reason": "Lý do: {reason}"
         },
         "cancel": "Hủy",
-        "saveFailed": "Không thể lưu thay đổi, vui lòng thử lại"
+        "saveFailed": "Không thể lưu thay đổi, vui lòng thử lại",
+        "mediaCount": "{photos, plural, =0 {} other {# ảnh}}{both, select, yes { · } other {}}{videos, plural, =0 {} other {# video}}"
       }
     },
     "reviews": {
@@ -2445,7 +2450,8 @@
         "people": "Số người",
         "total": "Tổng tiền",
         "customRequest": "Yêu cầu tùy chỉnh",
-        "contactPhone": "Số điện thoại liên hệ"
+        "contactPhone": "Số điện thoại liên hệ",
+        "area": "Khu vực"
       },
       "locationLabel": {
         "PROVIDER": "Tại studio nhà cung cấp",
@@ -2478,7 +2484,9 @@
           "CANCELLED": "Đã hủy",
           "NO_SHOW": "Báo vắng mặt",
           "EXPIRED": "Hết hạn, tự hủy"
-        }
+        },
+        "rescheduled": "Đổi giờ",
+        "rescheduledDetail": "Từ {fromTime} ngày {fromDate} sang {toTime} ngày {toDate}"
       },
       "actions": {
         "accept": "Chấp nhận",
@@ -2530,6 +2538,11 @@
           "nextWeek": "Tuần sau",
           "failed": "Không gửi được đề xuất. Vui lòng thử lại."
         }
+      },
+      "contactAfterAccept": "Địa chỉ chi tiết và số điện thoại của khách hiện ra sau khi bạn chấp nhận.",
+      "answerBy": {
+        "provider": "Cần trả lời trước {time} ngày {date} (còn {hours} giờ). Quá hạn, yêu cầu tự hết hiệu lực.",
+        "customer": "{name} có đến {time} ngày {date} để trả lời (còn {hours} giờ). Quá hạn, yêu cầu tự hết hiệu lực và bạn có thể đặt người khác."
       }
     },
     "listings": {
@@ -2644,15 +2657,7 @@
           "message": "Nhắn tin"
         },
         "findability": {
-          "title": "Khách chưa tìm thấy bạn",
-          "hours": {
-            "body": "Bạn chưa khai giờ làm việc, nên bạn không hiện trên Bản đồ F và khách không đặt lịch được với bạn.",
-            "action": "Khai giờ làm việc"
-          },
-          "mapPoint": {
-            "body": "Địa chỉ của bạn chưa có vị trí trên bản đồ, nên bạn chưa hiện trên Bản đồ F. Hãy chọn địa chỉ từ danh sách gợi ý trong hồ sơ.",
-            "action": "Cập nhật địa chỉ"
-          }
+          "title": "Khách chưa tìm thấy bạn"
         },
         "week": {
           "title": "7 ngày qua",
@@ -2669,7 +2674,9 @@
           "title": "Trang của bạn",
           "count": "{done}/{total} phần đã xong",
           "allDone": "Trang của bạn đã đủ các phần khách cần xem.",
-          "open": "Mở Trang của tôi"
+          "open": "Mở Trang của tôi",
+          "titleHidden": "Trang của bạn chưa hiển thị với khách",
+          "required": "Bắt buộc"
         }
       }
     },
@@ -3473,6 +3480,20 @@
         "nameLabel": "Tên",
         "descriptionLabel": "Mô tả",
         "durationLabel": "Thời lượng (phút)",
+        "holdLabel": "Mỗi lịch đặt giữ lịch của bạn trong",
+        "holdHelper": "Tính từ giờ khách chọn. Trong khoảng này khách khác không đặt được giờ trùng.",
+        "hold": {
+          "HOUR": "1 giờ",
+          "TWO_HOURS": "2 giờ",
+          "HALF_DAY": "Nửa ngày (4 giờ)",
+          "FULL_DAY": "Cả ngày (8 giờ)"
+        },
+        "holdShort": {
+          "HOUR": "giữ lịch 1 giờ",
+          "TWO_HOURS": "giữ lịch 2 giờ",
+          "HALF_DAY": "giữ lịch nửa ngày",
+          "FULL_DAY": "giữ lịch cả ngày"
+        },
         "priceLabel": "Giá",
         "activeLabel": "Đang hoạt động",
         "cancel": "Hủy",
@@ -4248,7 +4269,12 @@
         "numberOfPeoplePlaceholder": "VD: 2",
         "notesLabel": "Ghi chú",
         "notesPlaceholder": "Mô tả concept, phong cách tham khảo, yêu cầu đặc biệt...",
-        "contactPhoneLabel": "Số điện thoại liên hệ (bắt buộc)"
+        "contactPhoneLabel": "Số điện thoại liên hệ (bắt buộc)",
+        "provinceLabel": "Tỉnh/thành (bắt buộc)",
+        "wardLabel": "Phường/xã",
+        "pickOne": "Chọn tỉnh/thành",
+        "wardAny": "Chưa rõ",
+        "areaHelper": "{providerName} thấy tỉnh/thành và phường/xã ngay để biết có nhận được không. Địa chỉ chi tiết chỉ hiện sau khi họ chấp nhận."
       },
       "stepReview": {
         "heading": "Xem lại yêu cầu đặt lịch",
@@ -4314,7 +4340,8 @@
           "date": "Chọn một ngày còn trống để tiếp tục.",
           "time": "Chọn một khung giờ để tiếp tục.",
           "location": "Chọn nơi chụp để tiếp tục.",
-          "phone": "Nhập số điện thoại liên hệ để tiếp tục."
+          "phone": "Nhập số điện thoại liên hệ để tiếp tục.",
+          "area": "Chọn tỉnh/thành nơi chụp để tiếp tục."
         },
         "keptNote": "Thông tin đã nhập được giữ khi quay lại",
         "rows": {
@@ -4333,6 +4360,12 @@
         "availabilityError": "Không tải được lịch trống. Lựa chọn của bạn vẫn được giữ — hãy thử lại.",
         "changeDate": "Đổi ngày",
         "timezone": "Giờ Việt Nam (GMT+7)",
+        "venue": {
+          "heading": "Thuê tại studio",
+          "sub": "Bạn đang thuê không gian của {providerName}. Cho studio biết số người để chuẩn bị.",
+          "summary": "Tại {providerName}",
+          "addressNote": "Địa chỉ chi tiết: nhắn tin với studio sau khi gửi yêu cầu."
+        },
         "locationHints": {
           "PROVIDER": "Studio hoặc địa điểm quen của nghệ sĩ",
           "CUSTOMER": "Nhà riêng, văn phòng, nhà hàng… bạn chọn",
@@ -4537,7 +4570,11 @@
         "filterByStyle": "Lọc theo phong cách",
         "albumFrame": "{count} ảnh",
         "shotAt": "Chụp tại {place}",
-        "spotsShot": "Địa điểm đã chụp"
+        "spotsShot": "Địa điểm đã chụp",
+        "allMedia": "Tất cả ảnh và video",
+        "mediaCount": "{photos, plural, =0 {} other {# ảnh}}{both, select, yes { · } other {}}{videos, plural, =0 {} other {# video}}",
+        "showMoreMedia": "Xem thêm · còn {remaining}",
+        "videoAria": "Phát video"
       },
       "servicesTab": {
         "empty": "Chưa có gói dịch vụ nào",
@@ -4695,7 +4732,11 @@
       "studio": {
         "area": "Diện tích",
         "squareMeters": "{area} m²",
-        "amenities": "Tiện nghi"
+        "amenities": "Tiện nghi",
+        "address": "Địa chỉ",
+        "addressNote": "Địa chỉ chi tiết: nhắn tin với studio để nhận.",
+        "hours": "Giờ mở cửa",
+        "closed": "Nghỉ"
       },
       "roleIn": "{role} ở {place}"
     },
@@ -5810,14 +5851,23 @@
       "albumCategoryRequired": "Vui lòng chọn danh mục",
       "albumCreateFailed": "Không thể tạo album, vui lòng thử lại",
       "albumTitlePlaceholder": "Không bắt buộc — để trống sẽ đặt theo thể loại",
-      "unsupportedType": "Loại tệp này không tải lên được. Hãy chọn ảnh (JPG, PNG, WebP) hoặc video (MP4, MOV)."
+      "unsupportedType": "Loại tệp này không tải lên được. Hãy chọn ảnh (JPG, PNG, WebP) hoặc video (MP4, MOV).",
+      "linkLabel": "Hoặc dán liên kết video YouTube",
+      "linkPlaceholder": "https://youtu.be/…",
+      "linkHelper": "Dành cho phim dài hơn 100MB. Video vẫn được Fgrapher duyệt trước khi hiện trên trang của bạn.",
+      "linkAdd": "Thêm",
+      "linkInvalid": "Không nhận ra liên kết YouTube. Hãy dán liên kết dạng youtube.com/watch?v=… hoặc youtu.be/…",
+      "linkDuplicate": "Liên kết này đã có trong danh sách.",
+      "linkItem": "Video YouTube",
+      "removeLink": "Bỏ liên kết"
     },
     "mediaLightbox": {
       "close": "Đóng",
       "previous": "Ảnh trước",
       "next": "Ảnh sau",
       "label": "Xem ảnh",
-      "frame": "Ảnh {current}/{total}"
+      "frame": "Ảnh {current}/{total}",
+      "frameVideo": "Video {current}/{total}"
     },
     "reviewModal": {
       "editTitle": "Chỉnh sửa đánh giá",
@@ -6160,7 +6210,10 @@
       "reviews": "Đánh giá",
       "about": "Về {name}",
       "area": "Khu vực làm việc",
-      "know": "Những điều cần biết"
+      "know": "Những điều cần biết",
+      "portfolioStudio": "Ảnh chụp tại studio",
+      "portfolioFilm": "Phim đã quay",
+      "areaStudio": "Địa chỉ và giờ mở cửa"
     },
     "packages": {
       "tfpBadge": "Nhận hợp tác TFP",
@@ -6196,7 +6249,11 @@
         "days": "Thường trả lời trong {count} ngày"
       },
       "tfp": "Nhận hợp tác TFP",
-      "joined": "Tham gia Fgrapher từ {date}"
+      "joined": "Tham gia Fgrapher từ {date}",
+      "yearsStudio": "{count} năm hoạt động",
+      "shootsStudio": "{count} lượt thuê qua Fgrapher",
+      "shootsBodyStudio": "Chỉ tính các lượt thuê đã hoàn thành.",
+      "shootsFilm": "{count} buổi đã quay qua Fgrapher"
     },
     "know": {
       "askInChat": "Chưa ghi. Hỏi {name} trong tin nhắn.",

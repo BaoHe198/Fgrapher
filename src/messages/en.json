@@ -1369,7 +1369,9 @@
       "tooManyPending": "You already have {max} booking requests waiting for a reply. Wait for an answer or cancel one before sending another.",
       "invalidTransition": "This booking's status has just changed, so that action is no longer possible. Please reload the page.",
       "proposalInPast": "The proposed time has already passed. Please choose an upcoming one.",
-      "proposalEndBeforeStart": "The proposed end time must be after the start."
+      "proposalEndBeforeStart": "The proposed end time must be after the start.",
+      "areaRequired": "Choose the province where the shoot takes place.",
+      "wardNotInProvince": "That ward is not in the chosen province."
     },
     "uploads": {
       "documentsNotConfigured": "Document uploads aren't available right now. Please try again later or contact support.",
@@ -1475,7 +1477,9 @@
       "restoreFailed": "Failed to restore",
       "notOwned": "You don't own some of these photos",
       "orderUpdated": "Order updated",
-      "reorderFailed": "Failed to update order"
+      "reorderFailed": "Failed to update order",
+      "videoLinkInvalid": "That link is not a YouTube video. Paste one like youtube.com/watch?v=… or youtu.be/…",
+      "videoLinkDuplicate": "This video is already in your portfolio."
     },
     "darkroom": {
       "loadFailed": "Couldn't load a photo",
@@ -2244,7 +2248,8 @@
           "reason": "Reason: {reason}"
         },
         "cancel": "Cancel",
-        "saveFailed": "Couldn't save changes, please try again"
+        "saveFailed": "Couldn't save changes, please try again",
+        "mediaCount": "{photos, plural, =0 {} one {# photo} other {# photos}}{both, select, yes { · } other {}}{videos, plural, =0 {} one {# video} other {# videos}}"
       }
     },
     "reviews": {
@@ -2445,7 +2450,8 @@
         "people": "People",
         "total": "Total",
         "customRequest": "Custom request",
-        "contactPhone": "Contact phone"
+        "contactPhone": "Contact phone",
+        "area": "Area"
       },
       "locationLabel": {
         "PROVIDER": "At provider's studio",
@@ -2478,7 +2484,9 @@
           "CANCELLED": "Cancelled",
           "NO_SHOW": "Marked as no-show",
           "EXPIRED": "Expired, cancelled automatically"
-        }
+        },
+        "rescheduled": "Rescheduled",
+        "rescheduledDetail": "From {fromTime} on {fromDate} to {toTime} on {toDate}"
       },
       "actions": {
         "accept": "Accept",
@@ -2530,6 +2538,11 @@
           "nextWeek": "Next week",
           "failed": "Couldn't send the proposal. Please try again."
         }
+      },
+      "contactAfterAccept": "The customer's street address and phone number appear once you accept.",
+      "answerBy": {
+        "provider": "Answer before {time} on {date} ({hours} hours left). After that the request expires on its own.",
+        "customer": "{name} has until {time} on {date} to answer ({hours} hours left). After that the request expires and you can book someone else."
       }
     },
     "listings": {
@@ -2644,15 +2657,7 @@
           "message": "Message"
         },
         "findability": {
-          "title": "Customers can't find you yet",
-          "hours": {
-            "body": "You haven't set your working hours, so you don't appear on Bản đồ F and customers can't book you.",
-            "action": "Set working hours"
-          },
-          "mapPoint": {
-            "body": "Your address has no point on the map yet, so you don't appear on Bản đồ F. Pick your address from the suggestions in your profile.",
-            "action": "Update address"
-          }
+          "title": "Customers can't find you yet"
         },
         "week": {
           "title": "Last 7 days",
@@ -2669,7 +2674,9 @@
           "title": "Your page",
           "count": "{done} of {total} parts done",
           "allDone": "Your page has everything customers look for.",
-          "open": "Open my page"
+          "open": "Open my page",
+          "titleHidden": "Customers cannot see your page yet",
+          "required": "Required"
         }
       }
     },
@@ -3473,6 +3480,20 @@
         "nameLabel": "Name",
         "descriptionLabel": "Description",
         "durationLabel": "Duration (min)",
+        "holdLabel": "Each booking holds your calendar for",
+        "holdHelper": "Counted from the time the customer picks. Nobody else can book an overlapping time.",
+        "hold": {
+          "HOUR": "1 hour",
+          "TWO_HOURS": "2 hours",
+          "HALF_DAY": "Half a day (4 hours)",
+          "FULL_DAY": "A full day (8 hours)"
+        },
+        "holdShort": {
+          "HOUR": "holds 1 hour",
+          "TWO_HOURS": "holds 2 hours",
+          "HALF_DAY": "holds half a day",
+          "FULL_DAY": "holds a full day"
+        },
         "priceLabel": "Price",
         "activeLabel": "Active",
         "cancel": "Cancel",
@@ -4248,7 +4269,12 @@
         "numberOfPeoplePlaceholder": "e.g. 2",
         "notesLabel": "Notes",
         "notesPlaceholder": "Describe your vision, style references, special requirements...",
-        "contactPhoneLabel": "Contact phone (required)"
+        "contactPhoneLabel": "Contact phone (required)",
+        "provinceLabel": "Province (required)",
+        "wardLabel": "Ward",
+        "pickOne": "Choose a province",
+        "wardAny": "Not sure",
+        "areaHelper": "{providerName} sees the province and ward right away, to know whether they can take the job. The street address appears only after they accept."
       },
       "stepReview": {
         "heading": "Review your booking",
@@ -4314,7 +4340,8 @@
           "date": "Pick a free day to continue.",
           "time": "Pick a time to continue.",
           "location": "Choose a place to continue.",
-          "phone": "Enter a contact phone to continue."
+          "phone": "Enter a contact phone to continue.",
+          "area": "Choose the province of the shoot to continue."
         },
         "keptNote": "What you entered is kept if you go back",
         "rows": {
@@ -4333,6 +4360,12 @@
         "availabilityError": "Couldn't load availability. Your choices are kept — try again.",
         "changeDate": "Change date",
         "timezone": "Vietnam time (GMT+7)",
+        "venue": {
+          "heading": "At the studio",
+          "sub": "You are hiring {providerName}'s space. Tell the studio how many people to expect.",
+          "summary": "At {providerName}",
+          "addressNote": "Street address: message the studio after sending the request."
+        },
         "locationHints": {
           "PROVIDER": "The artist's studio or usual place",
           "CUSTOMER": "A home, office, restaurant… of your choice",
@@ -4537,7 +4570,11 @@
         "filterByStyle": "Filter by style",
         "albumFrame": "{count} photos",
         "shotAt": "Shot at {place}",
-        "spotsShot": "Spots shot at"
+        "spotsShot": "Spots shot at",
+        "allMedia": "All photos and videos",
+        "mediaCount": "{photos, plural, =0 {} one {# photo} other {# photos}}{both, select, yes { · } other {}}{videos, plural, =0 {} one {# video} other {# videos}}",
+        "showMoreMedia": "Show more · {remaining} left",
+        "videoAria": "Play video"
       },
       "servicesTab": {
         "empty": "No service packages listed",
@@ -4695,7 +4732,11 @@
       "studio": {
         "area": "Floor area",
         "squareMeters": "{area} m²",
-        "amenities": "Amenities"
+        "amenities": "Amenities",
+        "address": "Address",
+        "addressNote": "Street address: message the studio to get it.",
+        "hours": "Opening hours",
+        "closed": "Closed"
       },
       "roleIn": "{role} in {place}"
     },
@@ -5810,14 +5851,23 @@
       "albumCategoryRequired": "Please choose a category",
       "albumCreateFailed": "Couldn't create the album, please try again",
       "albumTitlePlaceholder": "Optional — left blank, it is named after the category",
-      "unsupportedType": "This file type can't be uploaded. Choose a photo (JPG, PNG, WebP) or a video (MP4, MOV)."
+      "unsupportedType": "This file type can't be uploaded. Choose a photo (JPG, PNG, WebP) or a video (MP4, MOV).",
+      "linkLabel": "Or paste a YouTube video link",
+      "linkPlaceholder": "https://youtu.be/…",
+      "linkHelper": "For films over 100MB. The video is still reviewed by Fgrapher before it shows on your page.",
+      "linkAdd": "Add",
+      "linkInvalid": "That does not look like a YouTube link. Paste one like youtube.com/watch?v=… or youtu.be/…",
+      "linkDuplicate": "This link is already in the list.",
+      "linkItem": "YouTube video",
+      "removeLink": "Remove link"
     },
     "mediaLightbox": {
       "close": "Close",
       "previous": "Previous",
       "next": "Next",
       "label": "Photo viewer",
-      "frame": "Photo {current}/{total}"
+      "frame": "Photo {current}/{total}",
+      "frameVideo": "Video {current}/{total}"
     },
     "reviewModal": {
       "editTitle": "Edit your review",
@@ -6160,7 +6210,10 @@
       "reviews": "Reviews",
       "about": "About {name}",
       "area": "Where they work",
-      "know": "Things to know"
+      "know": "Things to know",
+      "portfolioStudio": "Shot at the studio",
+      "portfolioFilm": "Films",
+      "areaStudio": "Address and opening hours"
     },
     "packages": {
       "tfpBadge": "Open to TFP collaborations",
@@ -6196,7 +6249,11 @@
         "days": "Usually replies within {count} days"
       },
       "tfp": "Open to TFP collaborations",
-      "joined": "On Fgrapher since {date}"
+      "joined": "On Fgrapher since {date}",
+      "yearsStudio": "{count} years in business",
+      "shootsStudio": "{count} rentals through Fgrapher",
+      "shootsBodyStudio": "Completed rentals only.",
+      "shootsFilm": "{count} shoots filmed through Fgrapher"
     },
     "know": {
       "askInChat": "Not stated. Ask {name} in a message.",

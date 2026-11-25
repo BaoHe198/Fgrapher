@@ -136,11 +136,12 @@ export async function getProviderAvailability(
     for (const window of windows) {
       const start = timeToMinutes(window.startTime);
       const end = timeToMinutes(window.endTime);
-      for (
-        let m = start;
-        m + serviceDurationMinutes <= end;
-        m += SLOT_MINUTES
-      ) {
+      // A package longer than the provider's working day (a full-day hold
+      // against 09:00-16:00 hours) would otherwise have no slot on any day
+      // and no message saying why. It gets one: the start of the day, and
+      // it still holds its full length against other bookings below.
+      const mustFit = Math.min(serviceDurationMinutes, end - start);
+      for (let m = start; m + mustFit <= end; m += SLOT_MINUTES) {
         const slotEnd = m + serviceDurationMinutes;
         const overlapsBooking = occupied.some(
           (o) => m < o.end && slotEnd > o.start,

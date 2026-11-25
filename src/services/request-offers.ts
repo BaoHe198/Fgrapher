@@ -762,6 +762,10 @@ export async function acceptOffer(
       startTime: input.startTime,
       locationType: input.locationType,
       locationAddress: offer.request.detailedAddress ?? undefined,
+      // The request's own area; createBooking() drops it when the customer
+      // chose to come to the provider instead.
+      locationProvinceId: offer.request.provinceId,
+      locationWardId: offer.request.wardId ?? undefined,
       notes: offer.request.description ?? undefined,
       // Carried over with the description and address. Was hardcoded to
       // `undefined`, so a customer who attached reference photos/videos to

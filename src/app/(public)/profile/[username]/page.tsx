@@ -12,6 +12,7 @@ import { auth } from "@/lib/auth";
 import { requireActiveSubscription } from "@/lib/auth-helpers";
 import { getAgeRangeLabel } from "@/lib/account/age-gate";
 import { formatAdministrativeLocation, shortPlace } from "@/lib/location";
+import { videoPosterUrl } from "@/lib/media/video-link";
 import {
   MIN_NOTICE_HOURS,
   PROVIDER_ROLES,
@@ -30,6 +31,7 @@ import {
 import { splitVietnameseName } from "@/lib/vietnam/name";
 import { listPublicCostumes } from "@/services/costumes";
 import { getProfileStats } from "@/services/profile-stats";
+import { listWeeklyRules } from "@/services/resource-calendar";
 import { listAlbumSocialState, listUserPosts } from "@/services/posts";
 
 import { ProfileAvatar, ProfileCover } from "./profile-hero";
@@ -132,7 +134,10 @@ export async function generateMetadata({
   // generated branded fallback (would need next/og wired up, deferred).
   // A profile with neither still gets title/description in the share
   // preview, just no image.
-  const ogImage = user.coverImage ?? activeProfile.media[0]?.url;
+  const firstMedia = activeProfile.media[0]?.url;
+  const ogImage =
+    user.coverImage ??
+    (firstMedia ? (videoPosterUrl(firstMedia) ?? firstMedia) : undefined);
 
   return {
     title,
@@ -237,6 +242,11 @@ export default async function PublicProfilePage({
           .then(() => true)
           .catch(() => false)
       : false;
+
+  // A studio's opening hours are its weekly calendar, the same rows the
+  // booking page reads, so the two cannot say different things.
+  const studioHours =
+    activeProfile.role === "STUDIO" ? await listWeeklyRules(user.id) : [];
 
   const displayName = activeProfile.displayName ?? user.name ?? username;
   const profileLocation = formatAdministrativeLocation(
@@ -580,6 +590,11 @@ export default async function PublicProfilePage({
               ? {
                   area: activeProfile.area,
                   amenities: activeProfile.amenities,
+                  hours: studioHours.map((rule) => ({
+                    dayOfWeek: rule.dayOfWeek,
+                    startTime: rule.startTime,
+                    endTime: rule.endTime,
+                  })),
                 }
               : null
           }

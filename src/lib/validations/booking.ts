@@ -33,6 +33,11 @@ export const createBookingSchema = z.object({
   startTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time"),
   locationType: locationTypeSchema,
   locationAddress: z.string().max(300).optional(),
+  // The area of the shoot when it is not at the provider's own place.
+  // createBooking() requires the province then, and checks the ward
+  // belongs to it; the provider sees these two before accepting.
+  locationProvinceId: z.string().min(1).optional(),
+  locationWardId: z.string().min(1).optional(),
   numberOfPeople: z.coerce.number().int().min(1).max(999).optional(),
   notes: z.string().max(1000).optional(),
   contactPhone: z.string().max(30).optional(),
@@ -85,6 +90,8 @@ export function getCreateBookingSchema(t: (key: string) => string) {
     startTime: z.string().regex(/^\d{2}:\d{2}$/, t("invalidTime")),
     locationType: locationTypeSchema,
     locationAddress: z.string().max(300).optional(),
+    locationProvinceId: z.string().min(1).optional(),
+    locationWardId: z.string().min(1).optional(),
     numberOfPeople: z.coerce.number().int().min(1).max(999).optional(),
     notes: z.string().max(1000).optional(),
     contactPhone: z.string().max(30).optional(),

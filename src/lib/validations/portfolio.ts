@@ -4,7 +4,9 @@ export const createPortfolioMediaSchema = z.object({
   profileId: z.string().min(1),
   albumId: z.string().min(1).optional(),
   url: z.string().url(),
-  publicId: z.string().min(1),
+  // Absent for a YouTube link, which is not an upload. The route accepts a
+  // row without it only when `url` is one (lib/media/video-link.ts).
+  publicId: z.string().min(1).optional(),
   type: z.enum(["IMAGE", "VIDEO"]),
   title: z.string().max(120).optional(),
   width: z.number().int().positive().optional(),
@@ -35,7 +37,7 @@ export function getCreatePortfolioMediaSchema(t: (key: string) => string) {
     profileId: z.string().min(1),
     albumId: z.string().min(1).optional(),
     url: z.string().url(),
-    publicId: z.string().min(1),
+    publicId: z.string().min(1).optional(),
     type: z.enum(["IMAGE", "VIDEO"]),
     title: z.string().max(120).optional(),
     width: z.number().int().positive().optional(),
