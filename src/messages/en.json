@@ -2722,12 +2722,13 @@
       "pageTitle": "Messages",
       "boardDraft": "Hi, I pinned {count} of your photos on Fgrapher and would like a shoot in that style. I'm planning for … — are you available?",
       "boardDraftAlbums": "Hi, I pinned {count} of your photos on Fgrapher (from {albums}) and would like a shoot in that style. I'm planning for … — are you available?",
-      "costumeDraft": "Hi, I'd like to rent “{costume}”. I need it on … — is it available?",
+      "costumeDraft": "Hi, I'd like to rent “{costume}”{info, select, yes { ({detail})} other {}}. Which days is it free, and what is the deposit?",
       "rentalDraftDates": "Hi, I'd like to rent {product} from {from} for {days, plural, one {# day} other {# days}}. Product: {url}",
       "consultDraft": "Hi, I just saw your page on Fgrapher and would like to ask a few questions. Are you taking bookings?",
       "consultDraftPackage": "Hi, I just saw your page on Fgrapher and I'm interested in the “{pkg}” package. Could you tell me more?",
       "consultDraftDay": "Hi, I just saw your page on Fgrapher. Are you available on {day}?",
-      "consultDraftPackageDay": "Hi, I just saw your page on Fgrapher and I'm interested in the “{pkg}” package on {day}. Are you available that day?"
+      "consultDraftPackageDay": "Hi, I just saw your page on Fgrapher and I'm interested in the “{pkg}” package on {day}. Are you available that day?",
+      "costumeDraftDates": "Hi, I'd like to rent “{costume}”{info, select, yes { ({detail})} other {}} from {from}, for {days, plural, one {# day} other {# days}}. Is it available?"
     },
     "shopOrders": {
       "title": "Shop orders",
@@ -3617,7 +3618,8 @@
         "editAria": "Edit {name}",
         "deleteAria": "Delete {name}",
         "missingHint": "Enter the outfit name and daily price to save.",
-        "photoEmpty": "No photos yet. Close this, press “Upload outfit photos” first, then add the outfit."
+        "photoEmpty": "No photos yet. Close this, press “Upload outfit photos” first, then add the outfit.",
+        "photoUploadShort": "Upload"
       },
       "policy": {
         "title": "Experience & policies",
@@ -4715,7 +4717,18 @@
         "perDay": "{price}/day",
         "deposit": "Deposit {amount}",
         "messageToRent": "Message to rent",
-        "noPhoto": "No photo yet"
+        "noPhoto": "No photo yet",
+        "ask": {
+          "title": "Which days do you need it?",
+          "description": "Pick the dates so the message to the shop already has them. You still read and edit the message before sending.",
+          "from": "Pick-up date",
+          "days": "Days",
+          "estimate": "Estimate for {days, plural, one {# day} other {# days}}: {total}.",
+          "estimateDeposit": "Deposit {amount}.",
+          "estimateNote": "The shop confirms the final price in the chat.",
+          "noDate": "Not sure yet, ask first",
+          "compose": "Write the message"
+        }
       },
       "postsTab": {
         "empty": "No posts yet",
@@ -4824,7 +4837,8 @@
         "addressLabel": "Delivery address",
         "addressPlaceholder": "Street, ward, province",
         "pickupArea": "Collect in: {area}",
-        "noDelivery": "{shops}: this shop does not deliver. Please choose collection at the shop."
+        "noDelivery": "{shops}: this shop does not deliver. Please choose collection at the shop.",
+        "shipUnavailable": "{shops} does not deliver. Pick up at the shop."
       },
       "reviewOrder": "Review your order",
       "agreeTerms": "I agree to the <terms>terms of sale/rental</terms>",

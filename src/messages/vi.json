@@ -2722,12 +2722,13 @@
       "pageTitle": "Tin nhắn",
       "boardDraft": "Chào bạn, mình đã ghim {count} tấm ảnh của bạn trên Fgrapher và muốn chụp theo phong cách đó. Mình dự định chụp vào ngày … — bạn còn lịch không ạ?",
       "boardDraftAlbums": "Chào bạn, mình đã ghim {count} tấm ảnh của bạn trên Fgrapher (trong album {albums}) và muốn chụp theo phong cách đó. Mình dự định chụp vào ngày … — bạn còn lịch không ạ?",
-      "costumeDraft": "Chào shop, mình muốn thuê “{costume}”. Mình cần thuê vào ngày … — shop còn trống không ạ?",
+      "costumeDraft": "Chào shop, mình muốn thuê “{costume}”{info, select, yes { ({detail})} other {}}. Shop cho mình hỏi những ngày còn trống và mức cọc ạ.",
       "rentalDraftDates": "Chào shop, tôi muốn thuê {product} từ ngày {from}, trong {days} ngày. Sản phẩm: {url}",
       "consultDraft": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher và muốn được tư vấn thêm. Bạn còn nhận lịch không ạ?",
       "consultDraftPackage": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher và quan tâm gói “{pkg}”. Bạn tư vấn thêm giúp mình nhé?",
       "consultDraftDay": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher. Ngày {day} bạn còn nhận chụp không ạ?",
-      "consultDraftPackageDay": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher và quan tâm gói “{pkg}” vào ngày {day}. Bạn còn nhận lịch ngày đó không ạ?"
+      "consultDraftPackageDay": "Chào bạn, mình vừa xem trang của bạn trên Fgrapher và quan tâm gói “{pkg}” vào ngày {day}. Bạn còn nhận lịch ngày đó không ạ?",
+      "costumeDraftDates": "Chào shop, mình muốn thuê “{costume}”{info, select, yes { ({detail})} other {}} từ ngày {from}, trong {days} ngày. Shop còn trống không ạ?"
     },
     "shopOrders": {
       "title": "Đơn hàng cửa hàng",
@@ -3617,7 +3618,8 @@
         "editAria": "Sửa {name}",
         "deleteAria": "Xóa {name}",
         "missingHint": "Nhập tên bộ đồ và giá thuê mỗi ngày để lưu.",
-        "photoEmpty": "Chưa có ảnh nào. Đóng hộp này, bấm “Tải ảnh trang phục” trước rồi quay lại thêm bộ đồ."
+        "photoEmpty": "Chưa có ảnh nào. Đóng hộp này, bấm “Tải ảnh trang phục” trước rồi quay lại thêm bộ đồ.",
+        "photoUploadShort": "Tải ảnh"
       },
       "policy": {
         "title": "Kinh nghiệm & chính sách",
@@ -4715,7 +4717,18 @@
         "perDay": "{price}/ngày",
         "deposit": "Cọc {amount}",
         "messageToRent": "Nhắn tin để thuê",
-        "noPhoto": "Chưa có ảnh"
+        "noPhoto": "Chưa có ảnh",
+        "ask": {
+          "title": "Bạn cần thuê ngày nào?",
+          "description": "Chọn ngày để tin nhắn gửi shop có sẵn thông tin. Bạn vẫn xem và sửa tin nhắn trước khi gửi.",
+          "from": "Ngày nhận đồ",
+          "days": "Số ngày thuê",
+          "estimate": "Tạm tính {days} ngày: {total}.",
+          "estimateDeposit": "Cọc {amount}.",
+          "estimateNote": "Giá cuối cùng do shop xác nhận trong tin nhắn.",
+          "noDate": "Chưa biết ngày, hỏi trước",
+          "compose": "Soạn tin nhắn"
+        }
       },
       "postsTab": {
         "empty": "Chưa có bài đăng nào",
@@ -4824,7 +4837,8 @@
         "addressLabel": "Địa chỉ nhận hàng",
         "addressPlaceholder": "Số nhà, đường, phường/xã, tỉnh/thành",
         "pickupArea": "Nhận tại: {area}",
-        "noDelivery": "{shops}: cửa hàng không giao hàng. Vui lòng chọn nhận tại cửa hàng."
+        "noDelivery": "{shops}: cửa hàng không giao hàng. Vui lòng chọn nhận tại cửa hàng.",
+        "shipUnavailable": "{shops} không giao hàng. Bạn nhận tại cửa hàng."
       },
       "reviewOrder": "Xem lại đơn hàng",
       "agreeTerms": "Tôi đồng ý với <terms>điều khoản mua/thuê</terms>",

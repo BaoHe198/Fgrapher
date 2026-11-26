@@ -35,13 +35,14 @@ interface ProductRow {
 
 const FILTER_VALUES: ListingFilter[] = ["ALL", "SALE", "RENT", "OUT_OF_STOCK"];
 
-function typeBadge(
+function typeBadges(
   type: ProductRow["type"],
   t: ReturnType<typeof useTranslations>,
 ) {
-  if (type === "RENT")
-    return { label: t("badge.rental"), variant: "accent" as const };
-  return { label: t("badge.forSale"), variant: "neutral" as const };
+  const sale = { label: t("badge.forSale"), variant: "neutral" as const };
+  const rental = { label: t("badge.rental"), variant: "accent" as const };
+  // BOTH carried only "Đang bán", so a rentable listing did not look it.
+  return type === "RENT" ? [rental] : type === "BOTH" ? [sale, rental] : [sale];
 }
 
 function priceLabel(
@@ -157,7 +158,7 @@ export function ListingsList() {
       ) : (
         <Card padding={false}>
           {products.map((product) => {
-            const badge = typeBadge(product.type, t);
+            const badges = typeBadges(product.type, t);
             return (
               <div
                 key={product.id}
@@ -196,7 +197,11 @@ export function ListingsList() {
                       : t("outOfStock")}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 sm:hidden">
-                    <Badge variant={badge.variant}>{badge.label}</Badge>
+                    {badges.map((badge) => (
+                      <Badge key={badge.label} variant={badge.variant}>
+                        {badge.label}
+                      </Badge>
+                    ))}
                     {priceParts(product, t).map((part) => (
                       <span
                         key={part}
@@ -208,12 +213,13 @@ export function ListingsList() {
                   </div>
                 </div>
 
-                <Badge
-                  variant={badge.variant}
-                  className="hidden sm:inline-flex"
-                >
-                  {badge.label}
-                </Badge>
+                <span className="hidden flex-wrap justify-end gap-1 sm:flex">
+                  {badges.map((badge) => (
+                    <Badge key={badge.label} variant={badge.variant}>
+                      {badge.label}
+                    </Badge>
+                  ))}
+                </span>
                 <span className="hidden text-body-md font-semibold! whitespace-nowrap text-text-primary sm:block">
                   {priceLabel(product, t)}
                 </span>

@@ -38,6 +38,7 @@ export function MessagesClient({
   // (project owner, 22/09/2026), so the draft asks for it.
   const costumeId = searchParams.get("costume");
   const costumeName = searchParams.get("costumeName");
+  const costumeInfo = (searchParams.get("costumeInfo") ?? "").slice(0, 160);
   // Chợ F's rental calculator (wave 2) sends the chosen pickup day and
   // length, so the draft already says what the customer wants.
   const rentFrom = searchParams.get("rentFrom");
@@ -72,7 +73,19 @@ export function MessagesClient({
           url: `/shop/${productId}`,
         })
     : costumeId
-      ? t("costumeDraft", { costume: costumeName || costumeId })
+      ? rentFrom && rentDays > 0
+        ? t("costumeDraftDates", {
+            costume: costumeName || costumeId,
+            info: costumeInfo ? "yes" : "no",
+            detail: costumeInfo,
+            from: rentFrom,
+            days: rentDays,
+          })
+        : t("costumeDraft", {
+            costume: costumeName || costumeId,
+            info: costumeInfo ? "yes" : "no",
+            detail: costumeInfo,
+          })
       : boardCount > 0
         ? boardAlbums
           ? t("boardDraftAlbums", { count: boardCount, albums: boardAlbums })
@@ -128,6 +141,7 @@ export function MessagesClient({
             if (rentDays > 0) nextParams.set("rentDays", String(rentDays));
             if (costumeId) nextParams.set("costume", costumeId);
             if (costumeName) nextParams.set("costumeName", costumeName);
+            if (costumeInfo) nextParams.set("costumeInfo", costumeInfo);
             if (boardCount > 0) nextParams.set("board", String(boardCount));
             if (boardAlbums) nextParams.set("boardAlbums", boardAlbums);
             if (consult) nextParams.set("consult", "1");

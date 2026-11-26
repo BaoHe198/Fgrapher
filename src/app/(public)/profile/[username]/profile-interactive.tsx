@@ -517,16 +517,22 @@ export function ProfileInteractive({
           label={t("sticky.label")}
           title={isProvider ? (priceLabel ?? t("price.ask")) : displayName}
           subtitle={trustLine}
+          // The icon button is the way to message a provider whose main
+          // button books a date. Where messaging IS the main button (a
+          // costume shop, a provider not taking bookings) it was the same
+          // link twice, side by side.
           secondary={
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label={t("price.message")}
-              nativeButton={false}
-              render={<Link href={messageHref} />}
-            >
-              <MessageCircle className="size-4" />
-            </Button>
+            canBook ? (
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={t("price.message")}
+                nativeButton={false}
+                render={<Link href={messageHref} />}
+              >
+                <MessageCircle className="size-4" />
+              </Button>
+            ) : undefined
           }
           primary={
             canBook ? (

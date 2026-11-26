@@ -329,7 +329,17 @@ export function CostumesManager({
                 {t("photoLabel")}
               </span>
               {media.length === 0 ? (
-                <p className="text-body-sm text-warning">{t("photoEmpty")}</p>
+                <div className="flex flex-col items-start gap-2">
+                  <p className="text-body-sm text-warning">{t("photoEmpty")}</p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setUploadOpen(true)}
+                  >
+                    <ImagePlus className="size-4" />
+                    {t("uploadPhoto")}
+                  </Button>
+                </div>
               ) : (
                 <div
                   role="radiogroup"
@@ -375,6 +385,18 @@ export function CostumesManager({
                     )}
                   >
                     {t("photoNone")}
+                  </button>
+                  {/* Upload without leaving the outfit: it used to mean
+                      closing this box, uploading in another, and coming
+                      back to pick the photo. The new photo is selected. */}
+                  <button
+                    type="button"
+                    onClick={() => setUploadOpen(true)}
+                    aria-label={t("uploadPhoto")}
+                    className="focus-ring flex size-16 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-[var(--fg-radius-md)] border-2 border-dashed border-border-default text-meta text-text-secondary hover:border-brand-primary"
+                  >
+                    <ImagePlus aria-hidden className="size-4" />
+                    {t("photoUploadShort")}
                   </button>
                 </div>
               )}
@@ -435,7 +457,7 @@ export function CostumesManager({
         role="COSTUME_SHOP"
         allowStandalone
         imageOnly
-        onUploaded={(uploaded) =>
+        onUploaded={(uploaded) => {
           setMedia((current) => [
             ...current,
             ...uploaded.map((item) => ({
@@ -445,8 +467,13 @@ export function CostumesManager({
               title: item.title,
               moderationStatus: item.moderationStatus,
             })),
-          ])
-        }
+          ]);
+          // Uploaded from inside the outfit box: that photo is the one
+          // meant for this outfit.
+          if (modalOpen && uploaded[0]) {
+            setDraft((current) => ({ ...current, mediaId: uploaded[0].id }));
+          }
+        }}
       />
     </div>
   );
