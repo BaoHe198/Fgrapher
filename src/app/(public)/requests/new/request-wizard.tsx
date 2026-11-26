@@ -775,6 +775,20 @@ export function RequestWizard({
 
               {step === 0 ? (
                 <div className="flex flex-col gap-6">
+                  {!isVerifiedNow ? (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--fg-radius-md)] bg-warning-bg p-3">
+                      <p className="min-w-0 flex-1 text-body-sm text-warning">
+                        {tw("phoneVerifyFirst")}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setVerifyOpen(true)}
+                        className="focus-ring min-h-11 rounded-[4px] px-1 text-body-sm font-semibold! text-text-primary underline underline-offset-4"
+                      >
+                        {tw("phoneVerifyNow")}
+                      </button>
+                    </div>
+                  ) : null}
                   <div
                     role="group"
                     aria-label={t("q.need.title")}

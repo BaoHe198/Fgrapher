@@ -178,7 +178,7 @@ export function BookingSummary({
             <strong className="font-semibold text-text-primary">
               {t("noOnlinePayment")}
             </strong>{" "}
-            {t("noOnlinePaymentDetail")}
+            {t("noOnlinePaymentDetail", { name: provider.name })}
           </span>
         </li>
         {responseNote ? (

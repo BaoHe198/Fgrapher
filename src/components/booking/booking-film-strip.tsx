@@ -23,6 +23,8 @@ type FrameState = "exposed" | "current" | "stopped" | "dark";
 interface BookingFilmStripProps {
   status: Status;
   hasReview: boolean;
+  /** Cancelled after it was confirmed: it stopped at the shoot. */
+  stoppedAfterConfirming?: boolean;
   labels: {
     /** Accessible name of the whole strip. */
     title: string;
@@ -40,7 +42,14 @@ interface BookingFilmStripProps {
   className?: string;
 }
 
-function framesFor(status: Status, hasReview: boolean): FrameState[] {
+function framesFor(
+  status: Status,
+  hasReview: boolean,
+  stoppedAfterConfirming: boolean,
+): FrameState[] {
+  // The confirmation happened, so its frame stays exposed. Stopping there
+  // read "Nghệ sĩ xác nhận ✕ Đã hủy", as if the artist had cancelled.
+  if (stoppedAfterConfirming) return ["exposed", "exposed", "stopped", "dark"];
   switch (status) {
     case "PENDING":
       return ["exposed", "current", "dark", "dark"];
@@ -55,9 +64,8 @@ function framesFor(status: Status, hasReview: boolean): FrameState[] {
       ];
     case "NO_SHOW":
       return ["exposed", "exposed", "stopped", "dark"];
-    // Declined, expired, or cancelled: it stopped at the confirmation
-    // frame. (A booking cancelled after confirmation still reads as
-    // stopped; which side of confirmation it was is in the timeline.)
+    // Declined, expired, or cancelled before an answer: it stopped at the
+    // confirmation frame.
     default:
       return ["exposed", "stopped", "dark", "dark"];
   }
@@ -69,10 +77,11 @@ const SPROCKETS =
 export function BookingFilmStrip({
   status,
   hasReview,
+  stoppedAfterConfirming = false,
   labels,
   className,
 }: BookingFilmStripProps) {
-  const states = framesFor(status, hasReview);
+  const states = framesFor(status, hasReview, stoppedAfterConfirming);
   const names = [
     labels.requested,
     labels.confirmed,
