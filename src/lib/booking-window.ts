@@ -81,3 +81,32 @@ export function parseRescheduleNote(
     to: { date: match[3], startTime: match[4] },
   };
 }
+
+/**
+ * "Lịch sắp tới": confirmed, and not started yet. The one definition behind
+ * every screen that shows that number.
+ *
+ * Three screens counted three different things under the same words: the
+ * provider's home counted confirmed bookings that had not started, the
+ * customer's home added requests still waiting for an answer, and the
+ * bookings page counted confirmed bookings dated today or later, including
+ * one that ended this morning. A customer could read "3" on one screen and
+ * "1" on the next.
+ *
+ * startAt, not date: `date` is the calendar day at 00:00, so `date >= now`
+ * dropped a booking for later today from midnight onwards. Rows older than
+ * startAt fall back to the calendar day in Vietnam time (a @db.Date compares
+ * as UTC midnight).
+ */
+export function upcomingBookingFilter(now: Date) {
+  const todayInVietnam = new Date(now.getTime() + 7 * 3_600_000)
+    .toISOString()
+    .slice(0, 10);
+  return {
+    status: "CONFIRMED" as const,
+    OR: [
+      { startAt: { gte: now } },
+      { startAt: null, date: { gte: new Date(todayInVietnam) } },
+    ],
+  };
+}

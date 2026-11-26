@@ -54,9 +54,10 @@ const isLocalHttp = process.env.NEXTAUTH_URL?.startsWith("http://localhost");
 // https://res.cloudinary.com/...") before this line was added. blob: covers
 // previewing a picked video file locally before it's uploaded.
 //
-// A portfolio video can also be a YouTube link (lib/media/video-link.ts):
-// frame-src allows YouTube's no-cookie player and nothing else, and img-src
-// allows its thumbnail host for the poster frame.
+// A portfolio video can also be a link to YouTube or Vimeo
+// (lib/media/video-link.ts): frame-src allows YouTube's no-cookie player and
+// Vimeo's player and nothing else, and img-src allows their thumbnail hosts
+// for the poster frame.
 //
 // api.cloudinary.com in img-src: an identity document is not served from the
 // public delivery host. Its short-lived signed link is a private-download
@@ -66,9 +67,9 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://res.cloudinary.com https://api.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com https://i.ytimg.com https://api.maptiler.com https://tiles.openfreemap.org;
+  img-src 'self' data: blob: https://res.cloudinary.com https://api.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com https://i.ytimg.com https://i.vimeocdn.com https://api.maptiler.com https://tiles.openfreemap.org;
   media-src 'self' blob: https://res.cloudinary.com;
-  frame-src https://www.youtube-nocookie.com;
+  frame-src https://www.youtube-nocookie.com https://player.vimeo.com;
   font-src 'self' data:;
   connect-src 'self' https://api.cloudinary.com https://api.maptiler.com https://tiles.openfreemap.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io;
   worker-src 'self' blob:;

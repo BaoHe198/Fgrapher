@@ -10,6 +10,11 @@ import { cn } from "@/lib/utils";
 export interface PickedPlace {
   id: string;
   name: string;
+  /** Present on a spot just picked from the search; absent on a saved one. */
+  provinceName?: string;
+  provinceId?: string;
+  wardId?: string | null;
+  address?: string | null;
 }
 
 interface Option extends PickedPlace {
@@ -17,16 +22,23 @@ interface Option extends PickedPlace {
 }
 
 /**
- * "Chụp tại" on an album: search approved photo spots by name (accents
- * optional) and pick one. A combobox: the list follows the typing, arrow
- * keys move through it, Enter picks.
+ * Search approved photo spots by name (accents optional) and pick one. A
+ * combobox: the list follows the typing, arrow keys move through it, Enter
+ * picks. Written for "Chụp tại" on an album; the booking form uses it too,
+ * with its own wording, to name the spot a shoot will be at.
  */
 export function AlbumPlacePicker({
   value,
   onChange,
+  labels,
+  offerProposal = true,
 }: {
   value: PickedPlace | null;
   onChange: (place: PickedPlace | null) => void;
+  /** Other words for the label, the hint and the empty result. */
+  labels?: { label: string; hint: string; none: string };
+  /** The "propose a new spot" link: for providers, not for a customer. */
+  offerProposal?: boolean;
 }) {
   const t = useTranslations("places.albumPicker");
   const inputId = useId();
@@ -62,7 +74,7 @@ export function AlbumPlacePicker({
   }, [query]);
 
   const pick = (option: Option) => {
-    onChange({ id: option.id, name: option.name });
+    onChange(option);
     setQuery("");
     setOpen(false);
   };
@@ -73,10 +85,10 @@ export function AlbumPlacePicker({
         htmlFor={inputId}
         className="text-body-sm font-semibold! text-text-primary"
       >
-        {t("label")}
+        {labels?.label ?? t("label")}
       </label>
       <p id={hintId} className="text-body-sm text-text-tertiary">
-        {t("hint")}
+        {labels?.hint ?? t("hint")}
       </p>
       {value ? (
         <div className="flex items-center gap-2 rounded-[var(--fg-radius-md)] border border-border-default bg-bg-surface px-3 py-2">
@@ -142,14 +154,16 @@ export function AlbumPlacePicker({
               ) : options.length === 0 ? (
                 <div className="flex flex-col gap-1 px-3 py-2.5">
                   <p className="text-body-sm text-text-secondary">
-                    {t("none")}
+                    {labels?.none ?? t("none")}
                   </p>
-                  <Link
-                    href="/dashboard/places/new"
-                    className="text-body-sm font-semibold text-text-link hover:underline"
-                  >
-                    {t("propose")}
-                  </Link>
+                  {offerProposal ? (
+                    <Link
+                      href="/dashboard/places/new"
+                      className="text-body-sm font-semibold text-text-link hover:underline"
+                    >
+                      {t("propose")}
+                    </Link>
+                  ) : null}
                 </div>
               ) : null}
               <ul

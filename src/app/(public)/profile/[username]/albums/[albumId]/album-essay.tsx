@@ -10,7 +10,7 @@ import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { Button } from "@/components/ui/button";
 import { VideoTile } from "@/components/media/portfolio-video";
 import { buildMediaVariants } from "@/lib/media/variants";
-import { youtubeVideoId } from "@/lib/media/video-link";
+import { linkedVideo } from "@/lib/media/video-link";
 import { cn } from "@/lib/utils";
 
 interface EssayPhoto {
@@ -79,10 +79,10 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
   const photo = (index: number, sizes: string, eager = false) => {
     const item = photos[index];
     const image =
-      item.type === "VIDEO" && youtubeVideoId(item.url) ? (
-        // A linked film: its poster here, YouTube's player in the lightbox
-        // this opens. Nothing but the thumbnail is asked of YouTube until
-        // the visitor opens it.
+      item.type === "VIDEO" && linkedVideo(item.url) ? (
+        // A linked film: its poster here, the site's player in the lightbox
+        // this opens. Nothing but the thumbnail is asked of YouTube or
+        // Vimeo until the visitor opens it.
         <span className="block aspect-video w-full">
           <VideoTile url={item.url} markClassName="size-16" />
         </span>

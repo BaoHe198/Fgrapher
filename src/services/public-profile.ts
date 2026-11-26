@@ -10,7 +10,10 @@ import {
   SHOP_ROLES,
   STOREFRONT_ROLES,
 } from "@/lib/constants";
-import { omitPrivateProfileFields } from "@/lib/privacy/profile-privacy";
+import {
+  omitPrivateProfileFields,
+  publicStudioAddress,
+} from "@/lib/privacy/profile-privacy";
 import {
   productCategoriesForRole,
   productCategoryQueryValues,
@@ -317,6 +320,9 @@ async function getPublicProfileUserUncached(username: string) {
 
       return {
         ...publicProfile,
+        // The one address that may be public, under its own name: a studio
+        // that chose to show where it is. Null for everyone else.
+        studioAddress: publicStudioAddress(profile),
         albums: profile.albums.map((album) => {
           const cover =
             album.coverMedia &&
@@ -413,6 +419,10 @@ export async function getProviderForBooking(providerId: string) {
           // The street address stays private (see Profile.address).
           ward: { select: { name: true } },
           province: { select: { name: true } },
+          // For a studio that shows where it is: see publicStudioAddress().
+          // Read here, decided on the server, never sent on as it is.
+          address: true,
+          hideExactLocation: true,
           // The provider's own terms, shown on the review step in place of
           // a platform-wide cancellation rule.
           depositPercent: true,

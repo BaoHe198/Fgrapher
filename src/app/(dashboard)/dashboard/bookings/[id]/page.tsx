@@ -70,6 +70,8 @@ type BookingDetail = Booking & {
   service: Pick<Service, "name" | "description" | "duration"> | null;
   locationProvince: { name: string } | null;
   locationWard: { name: string } | null;
+  /** The photo spot the shoot is at, once the address may be seen. */
+  locationPlace: { name: string; href: string } | null;
   review: { id: string } | null;
   statusHistory?: {
     toStatus: BookingStatus;
@@ -643,8 +645,18 @@ export default function BookingDetailPage() {
           {booking.locationAddress ? (
             <Card className="flex flex-row items-start gap-2">
               <MapPin className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
-              <span className="text-body-md text-text-primary">
-                {booking.locationAddress}
+              <span className="flex min-w-0 flex-col gap-1">
+                <span className="text-body-md [overflow-wrap:anywhere] text-text-primary">
+                  {booking.locationAddress}
+                </span>
+                {booking.locationPlace ? (
+                  <Link
+                    href={booking.locationPlace.href}
+                    className="w-fit text-body-sm font-semibold! text-text-link hover:underline"
+                  >
+                    {t("placeLink", { name: booking.locationPlace.name })}
+                  </Link>
+                ) : null}
               </span>
             </Card>
           ) : awaitingMyAnswer ? (

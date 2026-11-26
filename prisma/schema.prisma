@@ -1328,6 +1328,12 @@ model Booking {
   /// they accept. Null at the provider's own place, and on older bookings.
   locationProvinceId String?
   locationWardId     String?
+  // The photo spot the customer chose for an outdoor shoot, if they picked
+  // one from the list (26/11/2026). Part of where the shoot is, so it is
+  // treated like locationAddress: the provider sees it only once they have
+  // accepted (services/bookings.ts). Null for every other booking, and if
+  // the spot is later removed.
+  locationPlaceId    String?
   numberOfPeople     Int?
   contactPhone       String?
   referenceImages    String[] @default([])
@@ -1373,6 +1379,7 @@ model Booking {
   province         Province?              @relation("bookingProviderProvince", fields: [provinceId], references: [id])
   locationProvince Province?              @relation("bookingLocationProvince", fields: [locationProvinceId], references: [id])
   locationWard     Ward?                  @relation(fields: [locationWardId], references: [id])
+  locationPlace    Place?                 @relation(fields: [locationPlaceId], references: [id], onDelete: SetNull)
   review           Review?
   parentBooking    Booking?               @relation("crewHire", fields: [parentBookingId], references: [id])
   childBookings    Booking[]              @relation("crewHire")
@@ -1391,6 +1398,7 @@ model Booking {
   @@index([status, expiresAt])
   @@index([serviceId])
   @@index([provinceId])
+  @@index([locationPlaceId])
   @@map("bookings")
 }
 
@@ -2342,6 +2350,7 @@ model Place {
   mergedFrom  Place[]      @relation("placeMerge")
   media       PlaceMedia[] @relation("placeMedia")
   albums      Album[]
+  bookings    Booking[]
 
   @@unique([provinceId, slug])
   @@index([reviewStatus, createdAt])

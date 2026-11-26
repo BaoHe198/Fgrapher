@@ -177,6 +177,16 @@ function cameraShopStatCards(
 
 function customerStatCards(stats: CustomerStats, t: Translator): StatCard[] {
   return [
+    // Only while something is waiting: most days a customer has none.
+    ...(stats.pendingRequests > 0
+      ? [
+          {
+            label: t("stats.awaitingReply"),
+            value: String(stats.pendingRequests),
+            href: "/dashboard/bookings",
+          },
+        ]
+      : []),
     {
       label: t("stats.upcomingBookings"),
       value: String(stats.upcomingBookings),

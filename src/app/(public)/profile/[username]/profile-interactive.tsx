@@ -142,6 +142,11 @@ interface ProfileInteractiveProps {
     location: string | null;
     radiusKm: number | null;
     nationwide: boolean;
+    /**
+     * Where the small map is centred. A neighbourhood unless `exact`, which
+     * only a studio showing its position has (services/profile-area.ts).
+     */
+    point: { latitude: number; longitude: number; exact: boolean } | null;
   };
   /** "Từ 2.000.000₫". */
   priceLabel: string | null;
@@ -155,6 +160,8 @@ interface ProfileInteractiveProps {
     capacity: number | null;
     amenities: string[];
     hours: StudioHours[];
+    /** Number and street, when the studio chose to show it. */
+    address: string | null;
   } | null;
   minNoticeHours: number;
 }
@@ -447,7 +454,12 @@ export function ProfileInteractive({
                 // travel radius said nothing a customer needs. Where it is
                 // and when it is open does.
                 <ProfileSection id="area" title={t("sections.areaStudio")}>
-                  <StudioPlace location={area.location} hours={studio.hours} />
+                  <StudioPlace
+                    location={area.location}
+                    address={studio.address}
+                    point={area.point}
+                    hours={studio.hours}
+                  />
                 </ProfileSection>
               ) : (
                 <ProfileSection id="area" title={t("sections.area")}>
@@ -455,6 +467,7 @@ export function ProfileInteractive({
                     location={area.location}
                     radiusKm={area.radiusKm}
                     nationwide={area.nationwide}
+                    point={area.point}
                   />
                 </ProfileSection>
               )}

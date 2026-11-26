@@ -11,6 +11,7 @@ import { db } from "@/lib/db";
 import { formatAdministrativeLocation } from "@/lib/location";
 import { responseBucket } from "@/lib/response-time";
 import { listProvinces } from "@/services/geography";
+import { publicStudioAddress } from "@/lib/privacy/profile-privacy";
 import { getProfileStats } from "@/services/profile-stats";
 import {
   getProfileReviewStats,
@@ -182,9 +183,19 @@ export default async function BookingFlowPage({
       venuePlace={
         provider.profiles
           .filter((profile) => profile.role === "STUDIO")
-          .map((profile) => formatAdministrativeLocation(profile))
+          .map((profile) =>
+            [
+              publicStudioAddress(profile),
+              formatAdministrativeLocation(profile),
+            ]
+              .filter(Boolean)
+              .join(", "),
+          )
           .find(Boolean) ?? null
       }
+      venueAddressShown={provider.profiles.some(
+        (profile) => publicStudioAddress(profile) !== null,
+      )}
       requesterCrewRole={canCrewHire ? (requesterCrewRole ?? null) : null}
     />
   );

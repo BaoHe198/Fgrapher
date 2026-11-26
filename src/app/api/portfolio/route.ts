@@ -13,7 +13,8 @@ import {
   UploadVerificationError,
   verifyPortfolioUpload,
 } from "@/lib/media/cloudinary";
-import { youtubeVideoId, youtubeWatchUrl } from "@/lib/media/video-link";
+import { linkedVideo, linkedVideoUrl } from "@/lib/media/video-link";
+import { lookUpVimeo } from "@/lib/media/vimeo";
 import { getCreatePortfolioMediaSchema } from "@/lib/validations/portfolio";
 import { runModeration } from "@/services/moderation";
 
@@ -105,22 +106,38 @@ export async function POST(request: Request) {
     }
 
     // Two ways in: a file this user uploaded to Cloudinary, checked there,
-    // or a YouTube link, which is stored in one canonical form whatever was
-    // pasted. Anything else without a publicId is refused. A linked video
-    // goes through the same review queue as an upload (it starts PENDING
-    // below), and plays only from the address that was reviewed.
-    const youtubeId = parsed.data.publicId
-      ? null
-      : youtubeVideoId(parsed.data.url);
-    if (!parsed.data.publicId && !youtubeId) {
+    // or a link to YouTube or Vimeo, which is stored in one canonical form
+    // whatever was pasted. Anything else without a publicId is refused. A
+    // linked video goes through the same review queue as an upload (it
+    // starts PENDING below), and plays only from the address reviewed.
+    const link = parsed.data.publicId ? null : linkedVideo(parsed.data.url);
+    if (!parsed.data.publicId && !link) {
       return NextResponse.json(
         { data: null, error: "invalid_link", message: t("videoLinkInvalid") },
         { status: 400 },
       );
     }
-    const url = youtubeId ? youtubeWatchUrl(youtubeId) : parsed.data.url;
+    const url = link ? linkedVideoUrl(link) : parsed.data.url;
 
-    if (youtubeId) {
+    // A Vimeo video that is gone, private, or not allowed to be embedded
+    // would be a dead tile on the provider's page: said now instead. When
+    // Vimeo cannot be reached the link is taken on trust, like a YouTube
+    // one; the reviewer opens it either way.
+    if (link?.provider === "vimeo") {
+      const found = await lookUpVimeo(link.id, link.hash);
+      if (found.status === "missing") {
+        return NextResponse.json(
+          {
+            data: null,
+            error: "invalid_link",
+            message: t("videoLinkUnavailable"),
+          },
+          { status: 400 },
+        );
+      }
+    }
+
+    if (link) {
       const already = await db.profileMedia.findFirst({
         where: { profileId: profile.id, url, deletedAt: null },
         select: { id: true },
@@ -149,12 +166,12 @@ export async function POST(request: Request) {
         profileId: profile.id,
         albumId: parsed.data.albumId,
         url,
-        publicId: youtubeId ? null : parsed.data.publicId,
-        type: youtubeId ? "VIDEO" : parsed.data.type,
+        publicId: link ? null : parsed.data.publicId,
+        type: link ? "VIDEO" : parsed.data.type,
         title: parsed.data.title,
-        // A linked video is laid out at YouTube's own 16:9.
-        width: youtubeId ? 1280 : parsed.data.width,
-        height: youtubeId ? 720 : parsed.data.height,
+        // A linked video is laid out at the players' own 16:9.
+        width: link ? 1280 : parsed.data.width,
+        height: link ? 720 : parsed.data.height,
         order: (maxOrder._max.order ?? -1) + 1,
         // Server-set, never trusted from the client — the request having
         // passed createPortfolioMediaSchema's rightsConfirmed refine is

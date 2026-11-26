@@ -30,6 +30,7 @@ import {
   PortfolioVideoPlayer,
   VideoTile,
 } from "@/components/media/portfolio-video";
+import { linkedVideo } from "@/lib/media/video-link";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
@@ -371,6 +372,16 @@ export default function AdminModerationPage() {
                           time: formatRelativeTime(new Date(item.createdAt)),
                         })}
                       </span>
+                      {item.type === "VIDEO" &&
+                      linkedVideo(item.url)?.provider === "vimeo" ? (
+                        // Approving a Vimeo link approves an address, not a
+                        // file: its owner can replace the video later
+                        // (lib/media/video-link.ts). The reviewer should
+                        // know that when deciding.
+                        <span className="text-body-sm text-warning">
+                          {t("vimeoWarning")}
+                        </span>
+                      ) : null}
                       {item.autoFlagReason ? (
                         // A hint about where to look first, not a verdict —
                         // the photo is as PENDING as everything else here.

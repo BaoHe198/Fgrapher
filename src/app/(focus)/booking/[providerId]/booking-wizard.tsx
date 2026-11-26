@@ -43,6 +43,7 @@ import { isGoldenHourSlot, sunTimes } from "@/lib/sun";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { BookingWording } from "@/lib/constants/booking-wording";
 import { MAX_REFERENCE_MEDIA } from "@/lib/validations/reference-media";
+import { AlbumPlacePicker } from "@/components/places/album-place-picker";
 import { vietnamDateKey } from "@/lib/vietnam/date";
 import type { DayAvailability } from "@/services/availability";
 
@@ -94,6 +95,8 @@ interface BookingWizardProps {
   isModel?: boolean;
   /** A studio's ward and province, shown when the booking is for its room. */
   venuePlace?: string | null;
+  /** Whether `venuePlace` already carries the studio's street address. */
+  venueAddressShown?: boolean;
   /** Every province, for the area of a shoot away from the provider's place. */
   provinces: { id: string; code: string; name: string }[];
   /** Which words fit this provider's work: see booking-wording.ts. */
@@ -137,6 +140,10 @@ interface Draft {
   // sees these two before accepting; the address only after.
   locationProvinceId: string;
   locationWardId: string;
+  // A photo spot picked for an outdoor shoot: its name and address fill the
+  // address above, its province and ward the area.
+  locationPlaceId: string;
+  locationPlaceName: string;
   numberOfPeople: string;
   notes: string;
   // Uploaded reference photo/video URLs — sent as Booking.referenceImages.
@@ -186,6 +193,8 @@ function emptyDraft(contactPhoneDefault: string): Draft {
     locationAddress: "",
     locationProvinceId: "",
     locationWardId: "",
+    locationPlaceId: "",
+    locationPlaceName: "",
     numberOfPeople: "",
     notes: "",
     referenceMedia: [],
@@ -258,6 +267,7 @@ export function BookingWizard({
   contactPhoneDefault,
   isModel,
   venuePlace,
+  venueAddressShown = false,
   provinces,
   kind,
   policies,
@@ -648,6 +658,10 @@ export function BookingWizard({
           locationWardId: elsewhere
             ? draft.locationWardId || undefined
             : undefined,
+          locationPlaceId:
+            !atVenue && draft.locationType === "OUTDOOR"
+              ? draft.locationPlaceId || undefined
+              : undefined,
           numberOfPeople: draft.numberOfPeople
             ? Number(draft.numberOfPeople)
             : undefined,
@@ -1104,9 +1118,11 @@ export function BookingWizard({
                             {venuePlace}
                           </span>
                         ) : null}
-                        <span className="text-body-sm text-text-secondary">
-                          {t("flow.venue.addressNote")}
-                        </span>
+                        {venueAddressShown ? null : (
+                          <span className="text-body-sm text-text-secondary">
+                            {t("flow.venue.addressNote")}
+                          </span>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -1133,6 +1149,48 @@ export function BookingWizard({
                   )}
                   {elsewhere ? (
                     <>
+                      {/* A spot from "Địa điểm chụp": picking one fills the
+                          area and the address below, which stay editable. */}
+                      {draft.locationType === "OUTDOOR" ? (
+                        <AlbumPlacePicker
+                          value={
+                            draft.locationPlaceId
+                              ? {
+                                  id: draft.locationPlaceId,
+                                  name: draft.locationPlaceName,
+                                }
+                              : null
+                          }
+                          offerProposal={false}
+                          labels={{
+                            label: t("stepDetails.placeLabel"),
+                            hint: t("stepDetails.placeHint"),
+                            none: t("stepDetails.placeNone"),
+                          }}
+                          onChange={(place) =>
+                            setDraft((prev) =>
+                              place
+                                ? {
+                                    ...prev,
+                                    locationPlaceId: place.id,
+                                    locationPlaceName: place.name,
+                                    locationProvinceId:
+                                      place.provinceId ??
+                                      prev.locationProvinceId,
+                                    locationWardId: place.wardId ?? "",
+                                    locationAddress: [place.name, place.address]
+                                      .filter(Boolean)
+                                      .join(", "),
+                                  }
+                                : {
+                                    ...prev,
+                                    locationPlaceId: "",
+                                    locationPlaceName: "",
+                                  },
+                            )
+                          }
+                        />
+                      ) : null}
                       <div className="flex flex-col gap-1.5">
                         <div className="grid gap-3 sm:grid-cols-2">
                           <NativeSelect
@@ -1143,6 +1201,9 @@ export function BookingWizard({
                                 ...prev,
                                 locationProvinceId: value,
                                 locationWardId: "",
+                                // Another province is another place.
+                                locationPlaceId: "",
+                                locationPlaceName: "",
                               }))
                             }
                             options={[
