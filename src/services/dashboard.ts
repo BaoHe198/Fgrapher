@@ -5,27 +5,9 @@ import { PROVIDER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
 import { usesDaylight } from "@/lib/constants/booking-wording";
 import { formatAdministrativeLocation } from "@/lib/location";
+import { upcomingBookingFilter } from "@/lib/booking-window";
 import { resolvePartyName } from "@/lib/party-name";
 import { vietnamMonthStart } from "@/lib/vietnam/date";
-
-/**
- * Bookings that have not started yet.
- *
- * startAt, not date: `date` is the calendar day at 00:00, so `date >= now`
- * dropped a booking for later today out of "upcoming" from midnight onwards
- * — on exactly the day it matters most. startAt is nullable on rows that
- * predate it, so those fall back to the calendar day in Vietnam time (a
- * @db.Date compares as UTC midnight).
- */
-function notStartedYet(now: Date) {
-  const todayInVietnam = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Ho_Chi_Minh",
-  }).format(now);
-  return [
-    { startAt: { gte: now } },
-    { startAt: null, date: { gte: new Date(todayInVietnam) } },
-  ];
-}
 
 // Midnight on the 1st of the current month in Vietnam — see
 // vietnamMonthStart for why the server's own clock is not used.
@@ -41,6 +23,9 @@ export interface ProviderStats {
 }
 
 export interface CustomerStats {
+  /** Requests still waiting for the provider's answer. */
+  pendingRequests: number;
+  /** Confirmed and not yet started: the same count the bookings page shows. */
   upcomingBookings: number;
   savedArtists: number;
   messages: number;
@@ -137,11 +122,7 @@ export async function getProviderStats(userId: string): Promise<ProviderStats> {
     // done earlier in the month and none from next month — a number that
     // answered no question a provider asks. "What have I got coming up?"
     db.booking.count({
-      where: {
-        providerId: userId,
-        status: "CONFIRMED",
-        OR: notStartedYet(now),
-      },
+      where: { providerId: userId, ...upcomingBookingFilter(now) },
     }),
     db.booking.findMany({
       where: {
@@ -166,24 +147,25 @@ export async function getProviderStats(userId: string): Promise<ProviderStats> {
 }
 
 export async function getCustomerStats(userId: string): Promise<CustomerStats> {
-  const [upcoming, savedArtists, unreadMessages, orders] = await Promise.all([
-    db.booking.count({
-      where: {
-        customerId: userId,
-        status: { in: ["PENDING", "CONFIRMED"] },
-        OR: notStartedYet(new Date()),
-      },
-    }),
-    db.savedProfile.count({ where: { userId } }),
-    db.message.count({ where: { receiverId: userId, readAt: null } }),
-    // Skipped while MARKETPLACE_ENABLED=false — the dashboard doesn't show
-    // this card at all in that case (see dashboard/page.tsx).
-    features.marketplaceEnabled
-      ? db.order.count({ where: { customerId: userId } })
-      : Promise.resolve(0),
-  ]);
+  const [pending, upcoming, savedArtists, unreadMessages, orders] =
+    await Promise.all([
+      // Counted apart from "upcoming": a request nobody has accepted is not a
+      // booking yet. The two used to be added together here and nowhere else.
+      db.booking.count({ where: { customerId: userId, status: "PENDING" } }),
+      db.booking.count({
+        where: { customerId: userId, ...upcomingBookingFilter(new Date()) },
+      }),
+      db.savedProfile.count({ where: { userId } }),
+      db.message.count({ where: { receiverId: userId, readAt: null } }),
+      // Skipped while MARKETPLACE_ENABLED=false — the dashboard doesn't show
+      // this card at all in that case (see dashboard/page.tsx).
+      features.marketplaceEnabled
+        ? db.order.count({ where: { customerId: userId } })
+        : Promise.resolve(0),
+    ]);
 
   return {
+    pendingRequests: pending,
     upcomingBookings: upcoming,
     savedArtists,
     messages: unreadMessages,

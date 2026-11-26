@@ -1209,7 +1209,8 @@
         "autoFlaggedReason": "Flagged by the automated scan: {reason}. A hint about where to look first — the photo is still pending like any other.",
         "actionFailed": "That did not go through, please try again",
         "productLabel": "Product: {name}",
-        "postLabel": "Post photo"
+        "postLabel": "Post photo",
+        "vimeoWarning": "Vimeo link: its owner can replace the video after approval. Needs a periodic re-check."
       },
       "compliance": {
         "title": "Compliance",
@@ -1389,7 +1390,8 @@
       "proposalInPast": "The proposed time has already passed. Please choose an upcoming one.",
       "proposalEndBeforeStart": "The proposed end time must be after the start.",
       "areaRequired": "Choose the province where it takes place.",
-      "wardNotInProvince": "That ward is not in the chosen province."
+      "wardNotInProvince": "That ward is not in the chosen province.",
+      "placeUnavailable": "That photo spot is no longer listed. Pick another or enter the address."
     },
     "uploads": {
       "documentsNotConfigured": "Document uploads aren't available right now. Please try again later or contact support.",
@@ -1496,8 +1498,9 @@
       "notOwned": "You don't own some of these photos",
       "orderUpdated": "Order updated",
       "reorderFailed": "Failed to update order",
-      "videoLinkInvalid": "That link is not a YouTube video. Paste one like youtube.com/watch?v=… or youtu.be/…",
-      "videoLinkDuplicate": "This video is already in your portfolio."
+      "videoLinkInvalid": "That link is not a YouTube or Vimeo video. Paste one like youtube.com/watch?v=…, youtu.be/… or vimeo.com/…",
+      "videoLinkDuplicate": "This video is already in your portfolio.",
+      "videoLinkUnavailable": "This Vimeo video cannot be opened. It may have been removed, be private, or have embedding turned off."
     },
     "darkroom": {
       "loadFailed": "Couldn't load a photo",
@@ -2578,7 +2581,8 @@
       "fromRequest": {
         "title": "From request {code}",
         "offer": "{name}'s quote: {price}"
-      }
+      },
+      "placeLink": "See the photo spot: {name}"
     },
     "listings": {
       "filters": {
@@ -2640,7 +2644,8 @@
         "orders": "Orders",
         "activeCostumes": "Outfits listed",
         "ordersToHandle": "Orders to handle",
-        "activeListings": "Active listings"
+        "activeListings": "Active listings",
+        "awaitingReply": "Requests awaiting a reply"
       },
       "completeProfile": {
         "title": "Complete your profile",
@@ -3440,7 +3445,9 @@
         "saveNetworkError": "Couldn't reach the server. What you typed is kept — check your connection and press Save again.",
         "addressPinnedAreaFilled": "Location pinned on the map and {area} filled in. Press Save to update.",
         "extraAreasAdd": "Add a province…",
-        "extraAreasRemove": "Remove {name}"
+        "extraAreasRemove": "Remove {name}",
+        "addressPrivacyStudioHidden": "The street address is kept private: your studio page shows only the ward and province. To let customers see the number and street, turn on “Show the studio's address” under Location below.",
+        "addressPrivacyStudioShown": "This address is shown publicly on your studio page, with its position on the map."
       },
       "editor": {
         "liveStatus": "Live — visible in search",
@@ -3493,7 +3500,9 @@
         "privacySettings": {
           "title": "Position on Fmap",
           "hideExactLocationLabel": "Blur my position on Fmap (recommended)",
-          "hideExactLocationHelper": "When on, the map shows an approximate point a few hundred metres away instead of your exact address. Only turn off for a studio or shop open to the public."
+          "hideExactLocationHelper": "When on, the map shows an approximate point a few hundred metres away instead of your exact address. Only turn off for a studio or shop open to the public.",
+          "showStudioAddressLabel": "Show the studio's address (number and street) and exact position on the public page",
+          "showStudioAddressHelper": "Turn on if customers come to the studio: your page gets the full address, a pinned map and a directions link, and Fmap pins the exact spot too. Leave off for a studio at a private home: then only the ward, province and an approximate area are shown."
         },
         "shopNameLabel": "Shop name",
         "deliveryFeeLabel": "Delivery fee (₫ per order)",
@@ -4333,7 +4342,10 @@
         "wardAny": "Not sure",
         "areaHelper": "{providerName} sees the province and ward right away, to know whether they can take the job. The street address appears only after they accept.",
         "contactPhoneHelper": "{providerName} only sees this number after accepting your request.",
-        "notesOptionalLabel": "Notes for {providerName} (optional)"
+        "notesOptionalLabel": "Notes for {providerName} (optional)",
+        "placeLabel": "Pick a listed photo spot (optional)",
+        "placeHint": "Type a place name. Picking one fills in the area and address below.",
+        "placeNone": "No photo spot by that name. Enter the area and address below instead."
       },
       "stepReview": {
         "heading": "Review your booking",
@@ -4782,7 +4794,9 @@
         "nationwide": "Takes work nationwide. Travel and lodging agreed directly.",
         "nationwideWithRadius": "Takes work nationwide. Beyond {km} km, travel and lodging are agreed directly.",
         "local": "Works in this area. Message to ask about other locations.",
-        "localWithRadius": "Works within {km} km. Further away, message to agree a travel fee."
+        "localWithRadius": "Works within {km} km. Further away, message to agree a travel fee.",
+        "mapLabel": "Map of the working area around {place}",
+        "approximate": "The map shows an approximate area, not the provider's address."
       },
       "sections": {
         "navLabel": "Profile sections",
@@ -4814,7 +4828,10 @@
         "closed": "Closed",
         "rooms": "Rooms / sets",
         "capacity": "Capacity",
-        "people": "{count, plural, one {# person} other {# people}}"
+        "people": "{count, plural, one {# person} other {# people}}",
+        "mapLabel": "Map of the studio's location: {place}",
+        "directions": "Directions to the studio",
+        "approximate": "The map shows an approximate area. Message the studio for its address."
       },
       "roleIn": "{role} in {place}"
     },
@@ -5931,13 +5948,13 @@
       "albumCreateFailed": "Couldn't create the album, please try again",
       "albumTitlePlaceholder": "Optional — left blank, it is named after the category",
       "unsupportedType": "This file type can't be uploaded. Choose a photo (JPG, PNG, WebP) or a video (MP4, MOV).",
-      "linkLabel": "Or paste a YouTube video link",
-      "linkPlaceholder": "https://youtu.be/…",
+      "linkLabel": "Or paste a YouTube / Vimeo video link",
+      "linkPlaceholder": "https://youtu.be/… or https://vimeo.com/…",
       "linkHelper": "For films over 100MB. The video is still reviewed by Fgrapher before it shows on your page.",
       "linkAdd": "Add",
-      "linkInvalid": "That does not look like a YouTube link. Paste one like youtube.com/watch?v=… or youtu.be/…",
+      "linkInvalid": "That link was not recognised. Paste one like youtube.com/watch?v=…, youtu.be/… or vimeo.com/…",
       "linkDuplicate": "This link is already in the list.",
-      "linkItem": "YouTube video",
+      "linkItem": "{provider} video",
       "removeLink": "Remove link",
       "orderNote": "Photos keep the order shown below. Change the cover and rearrange them in the album at any time."
     },

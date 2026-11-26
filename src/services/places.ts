@@ -1004,6 +1004,11 @@ export async function searchApprovedPlaces(q: string, limit = 8) {
       id: true,
       name: true,
       slug: true,
+      // Public facts of the spot, as on its page. The booking form fills
+      // the shoot's area and address from them.
+      address: true,
+      provinceId: true,
+      wardId: true,
       province: { select: { code: true, name: true } },
     },
   });
@@ -1011,6 +1016,9 @@ export async function searchApprovedPlaces(q: string, limit = 8) {
     id: row.id,
     name: row.name,
     provinceName: row.province.name,
+    provinceId: row.provinceId,
+    wardId: row.wardId,
+    address: row.address,
     href: placeHref(row),
   }));
 }

@@ -1209,7 +1209,8 @@
         "autoFlaggedReason": "Hệ thống tự động đánh dấu: {reason}. Đây chỉ là gợi ý để bạn xem trước — ảnh vẫn đang chờ duyệt như mọi ảnh khác.",
         "actionFailed": "Thao tác không thành công, vui lòng thử lại",
         "productLabel": "Sản phẩm: {name}",
-        "postLabel": "Ảnh bài đăng"
+        "postLabel": "Ảnh bài đăng",
+        "vimeoWarning": "Liên kết Vimeo: chủ video có thể thay nội dung sau khi duyệt. Cần xem lại định kỳ."
       },
       "compliance": {
         "title": "Tuân thủ dữ liệu",
@@ -1389,7 +1390,8 @@
       "proposalInPast": "Thời gian đề xuất đã qua. Hãy chọn một thời điểm sắp tới.",
       "proposalEndBeforeStart": "Giờ kết thúc đề xuất phải sau giờ bắt đầu.",
       "areaRequired": "Hãy chọn tỉnh/thành nơi diễn ra buổi hẹn.",
-      "wardNotInProvince": "Phường/xã không thuộc tỉnh/thành đã chọn."
+      "wardNotInProvince": "Phường/xã không thuộc tỉnh/thành đã chọn.",
+      "placeUnavailable": "Điểm chụp này không còn trong danh sách. Hãy chọn điểm khác hoặc nhập địa chỉ."
     },
     "uploads": {
       "documentsNotConfigured": "Hiện chưa thể tải ảnh giấy tờ lên. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
@@ -1496,8 +1498,9 @@
       "notOwned": "Bạn không sở hữu một số ảnh trong danh sách này",
       "orderUpdated": "Đã cập nhật thứ tự",
       "reorderFailed": "Không thể cập nhật thứ tự",
-      "videoLinkInvalid": "Liên kết này không phải một video YouTube. Hãy dán liên kết dạng youtube.com/watch?v=… hoặc youtu.be/…",
-      "videoLinkDuplicate": "Video này đã có trong portfolio của bạn."
+      "videoLinkInvalid": "Liên kết này không phải một video YouTube hoặc Vimeo. Hãy dán liên kết dạng youtube.com/watch?v=…, youtu.be/… hoặc vimeo.com/…",
+      "videoLinkDuplicate": "Video này đã có trong portfolio của bạn.",
+      "videoLinkUnavailable": "Không mở được video Vimeo này. Có thể video đã bị xóa, đang để riêng tư, hoặc chủ video tắt quyền nhúng vào trang khác."
     },
     "darkroom": {
       "loadFailed": "Không thể tải ảnh",
@@ -2578,7 +2581,8 @@
       "fromRequest": {
         "title": "Từ yêu cầu {code}",
         "offer": "Báo giá của {name}: {price}"
-      }
+      },
+      "placeLink": "Xem điểm chụp: {name}"
     },
     "listings": {
       "filters": {
@@ -2640,7 +2644,8 @@
         "orders": "Đơn hàng",
         "activeCostumes": "Trang phục cho thuê",
         "ordersToHandle": "Đơn cần xử lý",
-        "activeListings": "Tin đăng đang bán"
+        "activeListings": "Tin đăng đang bán",
+        "awaitingReply": "Yêu cầu chờ trả lời"
       },
       "completeProfile": {
         "title": "Hoàn thiện hồ sơ của bạn",
@@ -3440,7 +3445,9 @@
         "saveNetworkError": "Không kết nối được máy chủ. Nội dung bạn nhập vẫn được giữ lại — kiểm tra mạng rồi bấm Lưu lần nữa.",
         "addressPinnedAreaFilled": "Đã xác định vị trí trên bản đồ và tự điền {area}. Bấm Lưu để cập nhật.",
         "extraAreasAdd": "Thêm một tỉnh/thành…",
-        "extraAreasRemove": "Bỏ {name}"
+        "extraAreasRemove": "Bỏ {name}",
+        "addressPrivacyStudioHidden": "Địa chỉ chi tiết đang được giữ riêng tư: trang studio chỉ hiện phường/xã và tỉnh/thành. Muốn khách thấy số nhà, tên đường, hãy bật lựa chọn “Hiện địa chỉ studio” ở phần Vị trí bên dưới.",
+        "addressPrivacyStudioShown": "Địa chỉ này đang hiện công khai trên trang studio của bạn, kèm vị trí trên bản đồ."
       },
       "editor": {
         "liveStatus": "Đang hoạt động — hiển thị trong tìm kiếm",
@@ -3493,7 +3500,9 @@
         "privacySettings": {
           "title": "Vị trí trên Bản đồ F",
           "hideExactLocationLabel": "Làm mờ vị trí của tôi trên Bản đồ F (khuyến nghị)",
-          "hideExactLocationHelper": "Khi bật, bản đồ chỉ hiện vị trí gần đúng (lệch vài trăm mét) thay vì đúng địa chỉ của bạn. Chỉ nên tắt nếu đây là studio/cửa hàng mở cửa công khai."
+          "hideExactLocationHelper": "Khi bật, bản đồ chỉ hiện vị trí gần đúng (lệch vài trăm mét) thay vì đúng địa chỉ của bạn. Chỉ nên tắt nếu đây là studio/cửa hàng mở cửa công khai.",
+          "showStudioAddressLabel": "Hiện địa chỉ studio (số nhà, tên đường) và vị trí chính xác trên trang công khai",
+          "showStudioAddressHelper": "Bật nếu studio là nơi khách tìm tới: trang của bạn sẽ có địa chỉ đầy đủ, bản đồ có ghim và nút chỉ đường; Bản đồ F cũng ghim đúng vị trí. Để tắt nếu studio đặt tại nhà riêng: khi đó chỉ hiện phường/xã, tỉnh/thành và một khu vực gần đúng."
         },
         "shopNameLabel": "Tên cửa hàng",
         "deliveryFeeLabel": "Phí giao hàng (₫/đơn)",
@@ -4333,7 +4342,10 @@
         "wardAny": "Chưa rõ",
         "areaHelper": "{providerName} thấy tỉnh/thành và phường/xã ngay để biết có nhận được không. Địa chỉ chi tiết chỉ hiện sau khi họ chấp nhận.",
         "contactPhoneHelper": "{providerName} chỉ thấy số này sau khi chấp nhận yêu cầu của bạn.",
-        "notesOptionalLabel": "Ghi chú cho {providerName} (không bắt buộc)"
+        "notesOptionalLabel": "Ghi chú cho {providerName} (không bắt buộc)",
+        "placeLabel": "Chọn một điểm chụp có sẵn (không bắt buộc)",
+        "placeHint": "Gõ tên địa điểm, ví dụ “hồ”, “phố đi bộ”. Chọn xong, khu vực và địa chỉ bên dưới được điền sẵn.",
+        "placeNone": "Không tìm thấy điểm chụp nào tên như vậy. Bạn cứ nhập khu vực và địa chỉ bên dưới."
       },
       "stepReview": {
         "heading": "Xem lại yêu cầu đặt lịch",
@@ -4782,7 +4794,9 @@
         "nationwide": "Nhận việc toàn quốc. Phí di chuyển và lưu trú thỏa thuận trực tiếp.",
         "nationwideWithRadius": "Nhận việc toàn quốc. Ngoài bán kính {km} km, phí di chuyển và lưu trú thỏa thuận trực tiếp.",
         "local": "Nhận việc trong khu vực này. Nơi chụp khác hãy nhắn tin để hỏi.",
-        "localWithRadius": "Nhận việc trong bán kính {km} km. Xa hơn, hãy nhắn tin để thỏa thuận phí di chuyển."
+        "localWithRadius": "Nhận việc trong bán kính {km} km. Xa hơn, hãy nhắn tin để thỏa thuận phí di chuyển.",
+        "mapLabel": "Bản đồ khu vực làm việc quanh {place}",
+        "approximate": "Bản đồ chỉ khu vực gần đúng, không phải địa chỉ của nhà cung cấp."
       },
       "sections": {
         "navLabel": "Các mục trong hồ sơ",
@@ -4814,7 +4828,10 @@
         "closed": "Nghỉ",
         "rooms": "Số phòng / góc chụp",
         "capacity": "Sức chứa",
-        "people": "{count} người"
+        "people": "{count} người",
+        "mapLabel": "Bản đồ vị trí studio: {place}",
+        "directions": "Chỉ đường tới studio",
+        "approximate": "Bản đồ chỉ khu vực gần đúng. Nhắn tin với studio để nhận địa chỉ."
       },
       "roleIn": "{role} ở {place}"
     },
@@ -5931,13 +5948,13 @@
       "albumCreateFailed": "Không thể tạo album, vui lòng thử lại",
       "albumTitlePlaceholder": "Không bắt buộc — để trống sẽ đặt theo thể loại",
       "unsupportedType": "Loại tệp này không tải lên được. Hãy chọn ảnh (JPG, PNG, WebP) hoặc video (MP4, MOV).",
-      "linkLabel": "Hoặc dán liên kết video YouTube",
-      "linkPlaceholder": "https://youtu.be/…",
+      "linkLabel": "Hoặc dán liên kết video YouTube / Vimeo",
+      "linkPlaceholder": "https://youtu.be/… hoặc https://vimeo.com/…",
       "linkHelper": "Dành cho phim dài hơn 100MB. Video vẫn được Fgrapher duyệt trước khi hiện trên trang của bạn.",
       "linkAdd": "Thêm",
-      "linkInvalid": "Không nhận ra liên kết YouTube. Hãy dán liên kết dạng youtube.com/watch?v=… hoặc youtu.be/…",
+      "linkInvalid": "Không nhận ra liên kết. Hãy dán liên kết dạng youtube.com/watch?v=…, youtu.be/… hoặc vimeo.com/…",
       "linkDuplicate": "Liên kết này đã có trong danh sách.",
-      "linkItem": "Video YouTube",
+      "linkItem": "Video {provider}",
       "removeLink": "Bỏ liên kết",
       "orderNote": "Ảnh giữ đúng thứ tự như dưới đây. Đổi ảnh bìa và sắp xếp lại trong album bất cứ lúc nào."
     },

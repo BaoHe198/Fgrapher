@@ -8,7 +8,6 @@ import {
   PROVIDER_ROLES,
 } from "@/lib/constants";
 import { db } from "@/lib/db";
-import { vietnamDateKey } from "@/lib/vietnam/date";
 import {
   UploadVerificationError,
   verifyReferenceMediaUpload,
@@ -34,10 +33,14 @@ import {
 } from "@/lib/email";
 import { formatDate } from "@/lib/format";
 import { resolvePartyName, type NamedParty } from "@/lib/party-name";
+import { placeHref } from "@/lib/places";
+import { providerMaySeeContact } from "@/lib/privacy/booking-contact";
+import { PUBLIC_PLACE } from "@/services/places";
 import { normalizeZaloUrl } from "@/lib/zalo";
 import { isSlotBookable, timeToMinutes } from "@/services/availability";
 import {
   movedWindow,
+  upcomingBookingFilter,
   parseRescheduleNote,
   rescheduleNote,
   vietnamInstant,
@@ -141,12 +144,22 @@ function redactContactInfo<
     status: BookingStatus;
     contactPhone: string | null;
     locationAddress: string | null;
+    locationPlaceId: string | null;
   },
 >(booking: T, viewerId: string): T {
   const viewerIsProvider = booking.providerId === viewerId;
-  const contactInfoVisible = !viewerIsProvider || booking.status !== "PENDING";
+  // A list does not load the status history, so a cancelled booking is
+  // treated as never confirmed here; its own page knows better.
+  const contactInfoVisible =
+    !viewerIsProvider || providerMaySeeContact(booking.status);
   if (contactInfoVisible) return booking;
-  return { ...booking, contactPhone: null, locationAddress: null };
+  // The spot is where the customer will be: it goes with the address.
+  return {
+    ...booking,
+    contactPhone: null,
+    locationAddress: null,
+    locationPlaceId: null,
+  };
 }
 
 function dateLabel(date: Date) {
@@ -234,6 +247,7 @@ export function bookingForViewer<
     status: BookingStatus;
     contactPhone: string | null;
     locationAddress: string | null;
+    locationPlaceId: string | null;
     customer: { email?: unknown };
     provider: { email?: unknown };
   },
@@ -264,11 +278,11 @@ function withoutEmail<T extends { email?: unknown }>(
 async function countBookingTabs(
   where: { providerId: string } | { customerId: string },
 ) {
-  const today = new Date(`${vietnamDateKey()}T00:00:00.000Z`);
   const [byStatus, upcoming] = await Promise.all([
     db.booking.groupBy({ by: ["status"], where, _count: true }),
+    // The same count the home screen shows (lib/booking-window.ts).
     db.booking.count({
-      where: { ...where, status: "CONFIRMED", date: { gte: today } },
+      where: { ...where, ...upcomingBookingFilter(new Date()) },
     }),
   ]);
   const of = (status: BookingStatus) =>
@@ -360,6 +374,16 @@ export async function getBookingDetail(bookingId: string, userId: string) {
       service: { select: { name: true, description: true, duration: true } },
       locationProvince: { select: { name: true } },
       locationWard: { select: { name: true } },
+      // The photo spot, for a link to its page. Withheld with the address.
+      locationPlace: {
+        select: {
+          name: true,
+          slug: true,
+          deletedAt: true,
+          reviewStatus: true,
+          province: { select: { code: true } },
+        },
+      },
       review: { select: { id: true } },
       // A booking made by accepting an offer: which request it came from
       // and what was offered. Without it the provider saw only "Yêu cầu tùy
@@ -438,7 +462,12 @@ export async function getBookingDetail(bookingId: string, userId: string) {
   // payment flow behind bookings, so requireDepositBeforeContact never
   // had a real trigger; this replaces that with the booking's own status.
   const viewerIsProvider = booking.providerId === userId;
-  const contactInfoVisible = !viewerIsProvider || booking.status !== "PENDING";
+  // Accepted is the test, not "no longer pending": see booking-contact.ts.
+  const wasConfirmed = booking.statusHistory.some(
+    (entry) => entry.toStatus === "CONFIRMED",
+  );
+  const contactInfoVisible =
+    !viewerIsProvider || providerMaySeeContact(booking.status, wasConfirmed);
 
   // First-time-pair safety notice (Prompt B7, VIỆC 4) — checked
   // regardless of who was customer/provider in the prior booking(s), so
@@ -509,6 +538,18 @@ export async function getBookingDetail(bookingId: string, userId: string) {
     })),
     contactPhone: contactInfoVisible ? booking.contactPhone : null,
     locationAddress: contactInfoVisible ? booking.locationAddress : null,
+    locationPlaceId: contactInfoVisible ? booking.locationPlaceId : null,
+    // Name and link only, and only for a spot that is still public.
+    locationPlace:
+      contactInfoVisible &&
+      booking.locationPlace &&
+      !booking.locationPlace.deletedAt &&
+      booking.locationPlace.reviewStatus === "APPROVED"
+        ? {
+            name: booking.locationPlace.name,
+            href: placeHref(booking.locationPlace),
+          }
+        : null,
     isFirstBookingBetweenParties: priorBookingCount === 0,
     requester: hiredAs
       ? { role: hiredAs, pageName: requesterPage?.displayName ?? null }
@@ -523,9 +564,7 @@ export async function getBookingDetail(bookingId: string, userId: string) {
       : null,
     // A booking cancelled after it was confirmed stopped at the shoot, not
     // at the confirmation.
-    wasConfirmed: booking.statusHistory.some(
-      (entry) => entry.toStatus === "CONFIRMED",
-    ),
+    wasConfirmed,
     providerZaloUrl: providerContact?.zaloUrl
       ? normalizeZaloUrl(providerContact.zaloUrl)
       : null,
@@ -712,7 +751,22 @@ export async function createBooking(
   // then), and without it they were deciding on "Ngoài trời / khác" alone.
   let locationProvinceId: string | null = null;
   let locationWardId: string | null = null;
-  if (input.locationType !== "PROVIDER") {
+  // A photo spot picked for an outdoor shoot: it must be a public one, and
+  // the area is the spot's own, whatever the form sent beside it.
+  const place =
+    input.locationType === "OUTDOOR" && input.locationPlaceId
+      ? await db.place.findFirst({
+          where: { id: input.locationPlaceId, ...PUBLIC_PLACE },
+          select: { id: true, provinceId: true, wardId: true },
+        })
+      : null;
+  if (input.locationType === "OUTDOOR" && input.locationPlaceId && !place) {
+    throw new BookingActionError("That photo spot is no longer available", 400);
+  }
+  if (place) {
+    locationProvinceId = place.provinceId;
+    locationWardId = place.wardId;
+  } else if (input.locationType !== "PROVIDER") {
     const province = input.locationProvinceId
       ? await db.province.findUnique({
           where: { id: input.locationProvinceId },
@@ -852,6 +906,7 @@ export async function createBooking(
         locationAddress: input.locationAddress,
         locationProvinceId,
         locationWardId,
+        locationPlaceId: place?.id ?? null,
         numberOfPeople: input.numberOfPeople,
         notes: input.notes,
         contactPhone: input.contactPhone,

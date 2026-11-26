@@ -23,6 +23,7 @@ export const BOOKING_ERROR_KEYS: Record<string, string> = {
   "Service not found": "serviceNotFound",
   "Choose the province of the shoot": "areaRequired",
   "That ward is not in the chosen province": "wardNotInProvince",
+  "That photo spot is no longer available": "placeUnavailable",
   "Provider-role bookings must be linked to a confirmed customer booking":
     "crewNeedsParent",
   "Provider is not accepting bookings": "notAccepting",
