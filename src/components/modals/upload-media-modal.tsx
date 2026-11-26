@@ -18,7 +18,11 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Progress } from "@/components/ui/progress";
 import { compressImageFile } from "@/lib/media/image-compression";
-import { youtubeVideoId, youtubeWatchUrl } from "@/lib/media/video-link";
+import {
+  linkedVideo,
+  linkedVideoProvider,
+  linkedVideoUrl,
+} from "@/lib/media/video-link";
 import { CATEGORIES_BY_ROLE } from "@/lib/constants";
 
 const NEW_ALBUM_VALUE = "__new__";
@@ -171,12 +175,12 @@ export function UploadMediaModal({
   const [linkError, setLinkError] = useState<string | null>(null);
 
   const addLink = () => {
-    const id = youtubeVideoId(linkDraft);
-    if (!id) {
+    const video = linkedVideo(linkDraft);
+    if (!video) {
       setLinkError(t("linkInvalid"));
       return;
     }
-    const url = youtubeWatchUrl(id);
+    const url = linkedVideoUrl(video);
     if (links.some((link) => link.url === url)) {
       setLinkError(t("linkDuplicate"));
       return;
@@ -184,6 +188,14 @@ export function UploadMediaModal({
     setLinks((prev) => [...prev, { url, title: "", status: "pending" }]);
     setLinkDraft("");
     setLinkError(null);
+  };
+
+  // "Video Vimeo · 76979871": which site, and which video.
+  const linkLabel = (url: string) => {
+    const video = linkedVideo(url);
+    return video
+      ? `${t("linkItem", { provider: linkedVideoProvider(video) })} · ${video.id}`
+      : url;
   };
 
   const needsAlbumPicker = !albumId && !allowStandalone;
@@ -716,7 +728,7 @@ export function UploadMediaModal({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-body-sm font-semibold! text-text-primary">
-                          {t("linkItem")} · {link.url.split("v=")[1]}
+                          {linkLabel(link.url)}
                         </span>
                         {link.status === "pending" ||
                         link.status === "error" ? (

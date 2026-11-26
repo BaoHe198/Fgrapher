@@ -629,6 +629,10 @@ export function PortfolioTab({
                     width: poster ? (photo.width ?? 1280) : photo.width,
                     height: poster ? (photo.height ?? 720) : photo.height,
                     alt: photo.title ?? photo.album.title,
+                    // This app's own poster address redirects to Vimeo's
+                    // image host; the browser follows it, the optimiser
+                    // would not.
+                    unoptimized: poster?.startsWith("/api/") ?? false,
                   };
                 })}
                 onOpen={setPhotoIndex}

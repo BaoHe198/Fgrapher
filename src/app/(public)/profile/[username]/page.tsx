@@ -31,6 +31,7 @@ import {
 import { packagePhotoUrl } from "@/lib/media/package-photo";
 import { splitVietnameseName } from "@/lib/vietnam/name";
 import { listPublicCostumes } from "@/services/costumes";
+import { profileMapPoint } from "@/services/profile-area";
 import { getProfileStats } from "@/services/profile-stats";
 import { listWeeklyRules } from "@/services/resource-calendar";
 import { listAlbumSocialState, listUserPosts } from "@/services/posts";
@@ -589,6 +590,9 @@ export default async function PublicProfilePage({
             location: profileLocation || null,
             radiusKm: activeProfile.serviceRadiusKm,
             nationwide: activeProfile.servesNationwide,
+            // Blurred and rounded here, on the server, unless this is a
+            // studio that shows where it is.
+            point: profileMapPoint(activeProfile),
           }}
           priceLabel={priceLabel}
           trustLine={trustLine}
@@ -600,6 +604,7 @@ export default async function PublicProfilePage({
                   roomCount: activeProfile.roomCount,
                   capacity: activeProfile.capacity,
                   amenities: activeProfile.amenities,
+                  address: activeProfile.studioAddress,
                   hours: studioHours.map((rule) => ({
                     dayOfWeek: rule.dayOfWeek,
                     startTime: rule.startTime,

@@ -758,7 +758,13 @@ export function ProfileSettingsForm({
             {t("fmapNotVisible")}
           </p>
         ) : null}
-        <p className="text-body-sm text-text-tertiary">{t("addressPrivacy")}</p>
+        <p className="text-body-sm text-text-tertiary">
+          {role === "STUDIO"
+            ? values.hideExactLocation
+              ? t("addressPrivacyStudioHidden")
+              : t("addressPrivacyStudioShown")
+            : t("addressPrivacy")}
+        </p>
 
         {PROVIDER_ROLES.includes(role) ? (
           <>
@@ -1043,14 +1049,34 @@ export function ProfileSettingsForm({
           <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
             {tEditor("privacySettings.title")}
           </span>
-          <Checkbox
-            checked={values.hideExactLocation}
-            onCheckedChange={(checked) => set("hideExactLocation", checked)}
-            label={tEditor("privacySettings.hideExactLocationLabel")}
-          />
-          <p className="text-body-sm text-text-tertiary">
-            {tEditor("privacySettings.hideExactLocationHelper")}
-          </p>
+          {role === "STUDIO" ? (
+            // The same stored setting, asked the way it matters to a
+            // studio: its address and exact position go on its public page
+            // only if it ticks this. Off by default, as for everyone.
+            <>
+              <Checkbox
+                checked={!values.hideExactLocation}
+                onCheckedChange={(checked) =>
+                  set("hideExactLocation", !checked)
+                }
+                label={tEditor("privacySettings.showStudioAddressLabel")}
+              />
+              <p className="text-body-sm text-text-tertiary">
+                {tEditor("privacySettings.showStudioAddressHelper")}
+              </p>
+            </>
+          ) : (
+            <>
+              <Checkbox
+                checked={values.hideExactLocation}
+                onCheckedChange={(checked) => set("hideExactLocation", checked)}
+                label={tEditor("privacySettings.hideExactLocationLabel")}
+              />
+              <p className="text-body-sm text-text-tertiary">
+                {tEditor("privacySettings.hideExactLocationHelper")}
+              </p>
+            </>
+          )}
         </div>
       ) : null}
 

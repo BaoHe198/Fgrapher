@@ -19,6 +19,12 @@ export interface MasonryItem {
   width?: number | null;
   height?: number | null;
   alt: string;
+  /**
+   * Loads `src` as it is, without the image optimiser. For an address that
+   * answers with a redirect (a linked Vimeo video's poster): the optimiser
+   * does not follow one to another host.
+   */
+  unoptimized?: boolean;
 }
 
 interface MasonryGridProps {
@@ -110,6 +116,7 @@ export function MasonryGrid({
         width={item.width ?? 800}
         height={item.height ?? 1000}
         sizes={sizes}
+        unoptimized={item.unoptimized}
         className={cn(
           "h-auto w-full transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/tile:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover/tile:scale-100",
           index < 6 && ["animate-develop", DEVELOP_DELAY[index]],

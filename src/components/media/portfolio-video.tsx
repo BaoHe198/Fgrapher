@@ -4,15 +4,16 @@ import { Play } from "lucide-react";
 import { useState } from "react";
 
 import {
+  linkedVideo,
+  linkedVideoEmbedUrl,
+  linkedVideoProvider,
   videoPosterUrl,
-  youtubeEmbedUrl,
-  youtubeVideoId,
 } from "@/lib/media/video-link";
 import { cn } from "@/lib/utils";
 
 // One place that knows a portfolio video is either an uploaded file or a
-// YouTube link (lib/media/video-link.ts). Every screen used to write its own
-// <video src>, which a link cannot go into.
+// link to YouTube or Vimeo (lib/media/video-link.ts). Every screen used to
+// write its own <video src>, which a link cannot go into.
 
 /**
  * A video standing still in a grid: its poster frame under a play mark.
@@ -34,7 +35,10 @@ export function VideoTile({
   // sends a 120px placeholder rather than an error, and the small one that
   // always exists takes its place.
   const [sharp, setSharp] = useState(true);
-  const poster = videoPosterUrl(url, { sharp });
+  // A poster that will not load: a Vimeo video that is private or gone.
+  const [posterFailed, setPosterFailed] = useState(false);
+  const linked = linkedVideo(url);
+  const poster = posterFailed ? null : videoPosterUrl(url, { sharp });
   return (
     <span className={cn("relative block size-full bg-bg-sunken", className)}>
       {poster ? (
@@ -50,9 +54,15 @@ export function VideoTile({
               setSharp(false);
             }
           }}
-          onError={() => setSharp(false)}
+          onError={() => (sharp ? setSharp(false) : setPosterFailed(true))}
           className="absolute inset-0 size-full object-cover"
         />
+      ) : linked ? (
+        // A link has no file to draw a frame from: a plain dark tile that
+        // names the site, under the play mark.
+        <span className="absolute inset-0 flex items-end justify-center bg-[#141210] pb-3 text-meta font-semibold tracking-[0.08em] text-white/70 uppercase">
+          {linkedVideoProvider(linked)}
+        </span>
       ) : (
         <video
           src={url}
@@ -105,14 +115,14 @@ export function PortfolioVideoPlayer({
   /** Applied to a YouTube player, which needs a width of its own. */
   frameClassName?: string;
 }) {
-  const youtubeId = youtubeVideoId(url);
-  if (youtubeId) {
+  const linked = linkedVideo(url);
+  if (linked) {
     return (
       <iframe
         // Remounts when moving between two videos, so the previous one does
         // not keep playing underneath.
         key={url}
-        src={youtubeEmbedUrl(youtubeId, autoPlay)}
+        src={linkedVideoEmbedUrl(linked, autoPlay)}
         title={title}
         allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
         allowFullScreen

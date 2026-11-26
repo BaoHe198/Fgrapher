@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { ServiceAreaMapLazy } from "@/components/profile/service-area-map-lazy";
 import { FgImage } from "@/components/ui/fg-image";
 import { buildMediaVariants } from "@/lib/media/variants";
 
@@ -111,14 +112,23 @@ const WEEK = [
   { dayOfWeek: 0, key: "sun" },
 ] as const;
 
-// Where a studio is and when it is open (25/11/2026). Ward and province
-// only: the street address is private for every provider (Profile.address),
-// so the customer is told how to get it rather than shown it.
+// Where a studio is and when it is open (25/11/2026).
+//
+// A studio that chose to show where it is (project owner, 26/11/2026) gets
+// its street address, a map with a pin and a directions link: `address` and
+// `point.exact` are only ever set for such a studio (profile-area.ts).
+// Any other studio keeps ward and province only, an area on the map, and
+// the line telling the customer how to get the address.
 export function StudioPlace({
   location,
+  address,
+  point,
   hours,
 }: {
   location: string | null;
+  /** Number and street, when the studio shows it; else null. */
+  address: string | null;
+  point: { latitude: number; longitude: number; exact: boolean } | null;
   hours: StudioHours[];
 }) {
   const t = useTranslations("publicPages.profile.studio");
@@ -128,14 +138,52 @@ export function StudioPlace({
       <div className="flex flex-col gap-1 text-body-sm">
         <dt className="text-text-secondary">{t("address")}</dt>
         <dd className="flex flex-col gap-0.5">
+          {address ? (
+            <span className="text-body-md font-semibold! [overflow-wrap:anywhere] text-text-primary">
+              {address}
+            </span>
+          ) : null}
           {location ? (
-            <span className="text-body-md font-semibold! text-text-primary">
+            <span
+              className={
+                address
+                  ? "text-text-secondary"
+                  : "text-body-md font-semibold! text-text-primary"
+              }
+            >
               {location}
             </span>
           ) : null}
-          <span className="text-text-secondary">{t("addressNote")}</span>
+          {address ? null : (
+            <span className="text-text-secondary">{t("addressNote")}</span>
+          )}
         </dd>
       </div>
+      {point ? (
+        <div className="flex flex-col gap-2">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-sunken">
+            <ServiceAreaMapLazy
+              latitude={point.latitude}
+              longitude={point.longitude}
+              radiusKm={null}
+              pin={point.exact}
+              label={t("mapLabel", { place: address ?? location ?? "" })}
+            />
+          </div>
+          {point.exact ? (
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${point.latitude},${point.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-fit text-body-sm font-semibold! text-text-link underline underline-offset-4"
+            >
+              {t("directions")}
+            </a>
+          ) : (
+            <p className="text-meta text-text-tertiary">{t("approximate")}</p>
+          )}
+        </div>
+      ) : null}
       {hours.length > 0 ? (
         <div className="flex flex-col gap-2 text-body-sm">
           <dt className="text-text-secondary">{t("hours")}</dt>
