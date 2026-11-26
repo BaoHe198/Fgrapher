@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { vietnamDateKey } from "@/lib/vietnam/date";
 
 export interface PublicCostume {
@@ -32,6 +32,8 @@ export interface PublicCostume {
   size: string | null;
   color: string | null;
   media: { url: string } | null;
+  /** Further approved photos of the outfit, after the main one. */
+  gallery?: { id: string; url: string }[];
 }
 
 export function CostumesTab({
@@ -50,6 +52,9 @@ export function CostumesTab({
   // The message used to be written with a blank in it ("vào ngày …") that
   // people sent as it was (role walk-through, 25/11/2026).
   const [asking, setAsking] = useState<PublicCostume | null>(null);
+  // Which of an outfit's photos its card is showing, by outfit id. Absent
+  // means the main photo.
+  const [shown, setShown] = useState<Record<string, string>>({});
   const [from, setFrom] = useState("");
   const [days, setDays] = useState("1");
   const today = vietnamDateKey();
@@ -106,7 +111,7 @@ export function CostumesTab({
             <div className="relative aspect-[3/4] overflow-hidden rounded-[var(--fg-radius-md)]">
               {costume.media ? (
                 <Image
-                  src={costume.media.url}
+                  src={shown[costume.id] ?? costume.media.url}
                   alt={costume.name}
                   fill
                   sizes="(min-width: 640px) 33vw, 50vw"
@@ -127,6 +132,51 @@ export function CostumesTab({
                 </div>
               ) : null}
             </div>
+            {/* The other photos of the same outfit: tap one to see it in
+                the frame above. */}
+            {costume.media && costume.gallery && costume.gallery.length > 0 ? (
+              <div
+                role="group"
+                aria-label={t("morePhotos", { name: costume.name })}
+                className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {[
+                  { id: "main", url: costume.media.url },
+                  ...costume.gallery,
+                ].map((photo, index) => {
+                  const current =
+                    (shown[costume.id] ?? costume.media!.url) === photo.url;
+                  return (
+                    <button
+                      key={photo.id}
+                      type="button"
+                      aria-pressed={current}
+                      aria-label={t("photoNumbered", { index: index + 1 })}
+                      onClick={() =>
+                        setShown((prev) => ({
+                          ...prev,
+                          [costume.id]: photo.url,
+                        }))
+                      }
+                      className={cn(
+                        "focus-ring relative size-11 shrink-0 overflow-hidden rounded-[var(--fg-radius-sm)] border-2",
+                        current
+                          ? "border-brand-primary"
+                          : "border-transparent opacity-70",
+                      )}
+                    >
+                      <Image
+                        src={photo.url}
+                        alt=""
+                        fill
+                        sizes="44px"
+                        className="object-cover"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
             <div className="flex flex-1 flex-col gap-0.5">
               <p className="text-body-md font-semibold! text-text-primary">
                 {costume.name}

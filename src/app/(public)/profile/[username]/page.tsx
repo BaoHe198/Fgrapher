@@ -28,6 +28,7 @@ import {
   getPublicProfileUser,
   getShopProducts,
 } from "@/services/public-profile";
+import { packagePhotoUrl } from "@/lib/media/package-photo";
 import { splitVietnameseName } from "@/lib/vietnam/name";
 import { listPublicCostumes } from "@/services/costumes";
 import { getProfileStats } from "@/services/profile-stats";
@@ -545,7 +546,14 @@ export default async function PublicProfilePage({
               isPublished: a.isPublished,
             })) ?? null
           }
-          services={activeProfile.services}
+          // Only what the page shows crosses to the browser: the chosen
+          // picture becomes a URL here, or nothing if it is not approved.
+          services={activeProfile.services.map(
+            ({ coverMedia, ...service }) => ({
+              ...service,
+              photoUrl: packagePhotoUrl(coverMedia),
+            }),
+          )}
           reviews={reviews.map((r) => ({
             ...r,
             createdAt: r.createdAt.toISOString(),
@@ -589,6 +597,8 @@ export default async function PublicProfilePage({
             activeProfile.role === "STUDIO"
               ? {
                   area: activeProfile.area,
+                  roomCount: activeProfile.roomCount,
+                  capacity: activeProfile.capacity,
                   amenities: activeProfile.amenities,
                   hours: studioHours.map((rule) => ({
                     dayOfWeek: rule.dayOfWeek,

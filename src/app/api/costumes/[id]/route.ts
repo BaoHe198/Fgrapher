@@ -4,7 +4,12 @@ import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { updateCostumeSchema } from "@/lib/validations/costume";
-import { findOwnedCostume, softDeleteCostume } from "@/services/costumes";
+import {
+  findOwnedCostume,
+  setCostumeGallery,
+  softDeleteCostume,
+} from "@/services/costumes";
+import { ownPhotoIds } from "@/services/own-media";
 
 export async function PATCH(
   request: Request,
@@ -35,22 +40,30 @@ export async function PATCH(
       );
     }
 
-    if (parsed.data.mediaId) {
-      const media = await db.profileMedia.findUnique({
-        where: { id: parsed.data.mediaId },
-        select: { profileId: true, deletedAt: true },
-      });
-      if (!media || media.deletedAt || media.profileId !== owned.profileId) {
-        return NextResponse.json(
-          { data: null, error: "not_found", message: "Photo not found" },
-          { status: 404 },
-        );
-      }
+    const { galleryMediaIds, ...data } = parsed.data;
+    const photoIds = [data.mediaId, ...(galleryMediaIds ?? [])].filter(
+      (photoId): photoId is string => Boolean(photoId),
+    );
+    const own = await ownPhotoIds(owned.profileId, photoIds);
+    if (photoIds.some((photoId) => !own.has(photoId))) {
+      return NextResponse.json(
+        { data: null, error: "not_found", message: "Photo not found" },
+        { status: 404 },
+      );
     }
 
-    const item = await db.costumeItem.update({
-      where: { id },
-      data: parsed.data,
+    const item = await db.$transaction(async (tx) => {
+      const updated = await tx.costumeItem.update({ where: { id }, data });
+      // Left out of the request, the further photos stay as they are.
+      if (galleryMediaIds !== undefined) {
+        await setCostumeGallery(
+          tx,
+          id,
+          owned.profileId,
+          galleryMediaIds.filter((photoId) => photoId !== updated.mediaId),
+        );
+      }
+      return updated;
     });
 
     await revalidatePublicProfile(session.user.id);

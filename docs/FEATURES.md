@@ -101,6 +101,22 @@ làm việc hàng tuần mà trang đặt lịch đọc. Địa chỉ chi tiết
 nhà cung cấp. Studio ghi "năm hoạt động" và "lượt thuê"; quay phim ghi "Phim đã
 quay" và "buổi đã quay".
 
+**Thông tin riêng của studio (26/11/2026).** Ngoài diện tích, studio khai số
+phòng / góc chụp (`Profile.roomCount`) và sức chứa (`Profile.capacity`); ô nào
+để trống thì không hiện trên trang. Danh sách tiện nghi (`AMENITY_OPTIONS` trong
+`validations/profile.ts`) thêm phông nền, đèn studio, ánh sáng tự nhiên, bàn
+trang điểm, thang máy. Tiện nghi là mảng chuỗi nên không cần migration; chỗ đậu
+xe đã có sẵn trong danh sách này từ trước.
+
+**Trang phục có nhiều ảnh (26/11/2026).** Mỗi bộ đồ của shop trang phục có một
+ảnh chính (`CostumeItem.mediaId`, như cũ) và tối đa bốn ảnh thêm
+(`ProfileMedia.costumeItemId`, `MAX_COSTUME_EXTRA_PHOTOS`). Mỗi ảnh thêm là một
+dòng `ProfileMedia` bình thường nên vẫn qua hàng chờ kiểm duyệt; danh mục công
+khai chỉ lấy ảnh `APPROVED`. Ảnh tải lên ngay trong hộp sửa bộ đồ: nếu bộ đồ
+chưa có ảnh chính thì ảnh đầu tiên thành ảnh chính, còn lại thành ảnh thêm; nếu
+đã có ảnh chính đã duyệt thì giữ nguyên, vì đổi sang ảnh mới (đang chờ duyệt) sẽ
+làm bộ đồ biến mất khỏi trang công khai cho tới khi ảnh được duyệt.
+
 ## 5. Portfolio, album và media
 
 Nhà cung cấp quản lý media theo album:
@@ -255,6 +271,14 @@ lịch đặt giữ lịch của nhà cung cấp đúng khoảng đó kể từ 
 giờ). Gói có thời lượng khác từ trước được làm tròn lên mức gần nhất khi mở
 form sửa. Gói dài hơn giờ làm việc trong ngày vẫn có một khung giờ: đầu giờ làm
 việc.
+
+**Ảnh minh họa của gói (26/11/2026).** Nhà cung cấp chọn một ảnh trong portfolio
+của mình cho từng gói (`Service.coverMediaId`). Không chọn thì thẻ gói lấy ảnh
+portfolio theo thứ tự như trước. Trang công khai chỉ dùng ảnh đã chọn khi ảnh
+đó `APPROVED` và chưa bị xóa (`lib/media/package-photo.ts`, quyết định ở phía
+server nên URL của ảnh chưa duyệt không tới trình duyệt). API từ chối id ảnh
+không thuộc hồ sơ của chính người gọi (`services/own-media.ts`, dùng chung cho
+ảnh gói và ảnh trang phục).
 
 Availability kết hợp:
 

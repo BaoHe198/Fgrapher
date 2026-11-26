@@ -23,6 +23,9 @@ export const createServiceSchema = z.object({
   // card ("30 ảnh chỉnh sửa · giao sau 5 ngày"). null clears it.
   editedPhotoCount: z.number().int().min(0).max(5000).nullable().optional(),
   deliveryDays: z.number().int().min(0).max(365).nullable().optional(),
+  // The photo on the package card: one of the profile's own photos (the
+  // route checks). null goes back to a portfolio photo picked by position.
+  coverMediaId: z.string().min(1).nullable().optional(),
 });
 
 export type CreateServiceInput = z.infer<typeof createServiceSchema>;
@@ -52,6 +55,9 @@ function getCreateServiceSchema(t: (key: string) => string) {
     // card ("30 ảnh chỉnh sửa · giao sau 5 ngày"). null clears it.
     editedPhotoCount: z.number().int().min(0).max(5000).nullable().optional(),
     deliveryDays: z.number().int().min(0).max(365).nullable().optional(),
+    // The photo on the package card: one of the profile's own photos (the
+    // route checks). null goes back to a portfolio photo picked by position.
+    coverMediaId: z.string().min(1).nullable().optional(),
   });
 }
 

@@ -27,6 +27,8 @@ export interface ScheduleService {
   currency: string;
   editedPhotoCount?: number | null;
   deliveryDays?: number | null;
+  /** The provider's own choice of picture for this package. */
+  photoUrl?: string | null;
 }
 
 interface ScheduleDialogProps {
@@ -286,7 +288,8 @@ export function ScheduleDialog({
                   golden: sun ? isGoldenHourSlot(slot.time, sun) : false,
                 }));
                 const photo =
-                  photos.length > 0 ? photos[index % photos.length] : null;
+                  service?.photoUrl ??
+                  (photos.length > 0 ? photos[index % photos.length] : null);
                 const free = slots.filter(
                   (slot) => slot.status === "available",
                 ).length;

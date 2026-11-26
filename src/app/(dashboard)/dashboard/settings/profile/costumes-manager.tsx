@@ -1,6 +1,6 @@
 "use client";
 
-import { ImagePlus, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, ImagePlus, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
@@ -19,7 +19,10 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { COSTUME_CATEGORIES } from "@/lib/validations/costume";
+import {
+  COSTUME_CATEGORIES,
+  MAX_COSTUME_EXTRA_PHOTOS,
+} from "@/lib/validations/costume";
 import { cn, formatCurrency } from "@/lib/utils";
 
 export interface CostumeMedia {
@@ -41,6 +44,8 @@ export interface CostumeItem {
   color: string | null;
   isActive: boolean;
   media: { id: string; url: string; moderationStatus: string } | null;
+  /** Further photos of the outfit, after the main one. */
+  gallery?: { id: string; url: string; moderationStatus: string }[];
 }
 
 interface CostumeDraft {
@@ -52,6 +57,7 @@ interface CostumeDraft {
   size: string;
   color: string;
   mediaId: string;
+  galleryIds: string[];
   isActive: boolean;
 }
 
@@ -64,6 +70,7 @@ const EMPTY_DRAFT: CostumeDraft = {
   size: "",
   color: "",
   mediaId: "",
+  galleryIds: [],
   isActive: true,
 };
 
@@ -115,11 +122,27 @@ export function CostumesManager({
       size: item.size ?? "",
       color: item.color ?? "",
       mediaId: item.media?.id ?? "",
+      galleryIds: (item.gallery ?? []).map((photo) => photo.id),
       isActive: item.isActive,
     });
     setError(null);
     setModalOpen(true);
   };
+
+  // Further photos: never the main one, and none without a main photo.
+  const extraIds = draft.mediaId
+    ? draft.galleryIds.filter((id) => id !== draft.mediaId)
+    : [];
+  const toggleExtra = (id: string) =>
+    setDraft((current) => ({
+      ...current,
+      galleryIds: current.galleryIds.includes(id)
+        ? current.galleryIds.filter((other) => other !== id)
+        : current.galleryIds.filter((other) => other !== current.mediaId)
+              .length >= MAX_COSTUME_EXTRA_PHOTOS
+          ? current.galleryIds
+          : [...current.galleryIds, id],
+    }));
 
   const save = async () => {
     setIsSaving(true);
@@ -133,6 +156,7 @@ export function CostumesManager({
       size: draft.size || undefined,
       color: draft.color || undefined,
       mediaId: draft.mediaId || null,
+      galleryMediaIds: extraIds,
       isActive: draft.isActive,
     };
 
@@ -166,6 +190,13 @@ export function CostumesManager({
             moderationStatus: selectedMedia.moderationStatus,
           }
         : null,
+      gallery: media
+        .filter((m) => extraIds.includes(m.id))
+        .map((m) => ({
+          id: m.id,
+          url: m.url,
+          moderationStatus: m.moderationStatus,
+        })),
     };
     setItems((prev) =>
       editingId
@@ -240,6 +271,11 @@ export function CostumesManager({
                     ? ` · ${t("deposit", { amount: formatCurrency(item.depositAmount) })}`
                     : ""}
                 </p>
+                {item.gallery && item.gallery.length > 0 ? (
+                  <p className="text-body-sm text-text-tertiary">
+                    {t("extraCount", { count: item.gallery.length })}
+                  </p>
+                ) : null}
                 {item.media && item.media.moderationStatus !== "APPROVED" ? (
                   <p className="text-body-sm text-text-tertiary">
                     {t("photoPending")}
@@ -404,6 +440,68 @@ export function CostumesManager({
                 {t("photoHelper")}
               </p>
             </div>
+            {/* Back, detail, another angle: what a customer asks to see
+                before renting. One photo per outfit was all there was. */}
+            {draft.mediaId && media.length > 1 ? (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-body-sm font-semibold! text-text-primary">
+                  {t("extraLabel", {
+                    count: extraIds.length,
+                    max: MAX_COSTUME_EXTRA_PHOTOS,
+                  })}
+                </span>
+                <div
+                  role="group"
+                  aria-label={t("extraLabel", {
+                    count: extraIds.length,
+                    max: MAX_COSTUME_EXTRA_PHOTOS,
+                  })}
+                  className="flex flex-wrap gap-2"
+                >
+                  {media
+                    .filter((m) => m.id !== draft.mediaId)
+                    .map((m, index) => {
+                      const chosen = extraIds.includes(m.id);
+                      const full =
+                        !chosen && extraIds.length >= MAX_COSTUME_EXTRA_PHOTOS;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          aria-pressed={chosen}
+                          disabled={full}
+                          aria-label={
+                            m.title ?? t("photoNumbered", { index: index + 1 })
+                          }
+                          onClick={() => toggleExtra(m.id)}
+                          className={cn(
+                            "focus-ring relative size-16 cursor-pointer overflow-hidden rounded-[var(--fg-radius-md)] border-2 bg-bg-sunken disabled:cursor-not-allowed disabled:opacity-30",
+                            chosen
+                              ? "border-brand-primary"
+                              : "border-transparent opacity-70 hover:opacity-100",
+                          )}
+                        >
+                          <Image
+                            src={m.url}
+                            alt=""
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                          />
+                          {chosen ? (
+                            <span className="absolute top-0.5 right-0.5 flex size-5 items-center justify-center rounded-full bg-brand-primary text-text-on-brand">
+                              <Check aria-hidden className="size-3.5" />
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                </div>
+                <p className="text-body-sm text-text-tertiary">
+                  {t("extraHelper")}
+                </p>
+              </div>
+            ) : null}
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="costumes-manager-field-1"
@@ -468,10 +566,26 @@ export function CostumesManager({
               moderationStatus: item.moderationStatus,
             })),
           ]);
-          // Uploaded from inside the outfit box: that photo is the one
-          // meant for this outfit.
-          if (modalOpen && uploaded[0]) {
-            setDraft((current) => ({ ...current, mediaId: uploaded[0].id }));
+          // Uploaded from inside the outfit box: these photos are meant for
+          // this outfit. The first becomes the main photo only if there is
+          // none yet; an outfit that already has an approved main photo
+          // keeps it (a new upload waits for review, and swapping it in
+          // would take the outfit off the public page until then). The
+          // rest are added as further photos, up to the limit.
+          if (modalOpen && uploaded.length > 0) {
+            setDraft((current) => {
+              const ids = uploaded.map((item) => item.id);
+              const mediaId = current.mediaId || ids[0];
+              const extras = [
+                ...current.galleryIds,
+                ...ids.filter((id) => id !== mediaId),
+              ].filter((id) => id !== mediaId);
+              return {
+                ...current,
+                mediaId,
+                galleryIds: extras.slice(0, MAX_COSTUME_EXTRA_PHOTOS),
+              };
+            });
           }
         }}
       />

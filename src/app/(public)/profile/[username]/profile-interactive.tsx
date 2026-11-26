@@ -102,6 +102,8 @@ interface ProfileInteractiveProps {
     currency: string;
     editedPhotoCount?: number | null;
     deliveryDays?: number | null;
+    /** The picture the provider chose for this package, if approved. */
+    photoUrl?: string | null;
   }[];
   reviews: {
     id: string;
@@ -149,6 +151,8 @@ interface ProfileInteractiveProps {
   /** STUDIO only: the room's size, amenities and opening hours. */
   studio: {
     area: number | null;
+    roomCount: number | null;
+    capacity: number | null;
     amenities: string[];
     hours: StudioHours[];
   } | null;
@@ -310,6 +314,8 @@ export function ProfileInteractive({
               <StudioSpace
                 photos={photos}
                 area={studio.area}
+                roomCount={studio.roomCount}
+                capacity={studio.capacity}
                 amenities={studio.amenities}
               />
             </ProfileSection>

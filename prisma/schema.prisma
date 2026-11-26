@@ -751,6 +751,12 @@ model Profile {
   address                     String?
   area                        Float? // square meters
   amenities                   String[] // e.g., ["wifi", "ac", "parking", "changing_room"]
+  // What a customer asks a studio before renting it (role walk-through,
+  // 25/11/2026): how many rooms or sets there are, and how many people fit.
+  // Shown on the studio's public profile; blank hides the line. Parking and
+  // the like are amenities above, not columns.
+  roomCount                   Int?
+  capacity                    Int?
   // Camera Shop / Costume Shop specific
   shopName                    String?
   // Flat delivery fee this shop charges per order when the customer picks
@@ -1105,16 +1111,25 @@ model ProfileMedia {
   // "Thùng rác" screen until then.
   deletedAt DateTime?
 
-  profile       Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  album         Album?        @relation("AlbumMedia", fields: [albumId], references: [id], onDelete: SetNull)
-  coverOfAlbums Album[]       @relation("AlbumCover")
-  savedBy       SavedMedia[]
-  costumeItems  CostumeItem[]
+  // A further photo of one costume (back, detail), after its main photo
+  // (CostumeItem.mediaId). Each is an ordinary ProfileMedia row, so it goes
+  // through the moderation queue like any other; the public catalogue shows
+  // only approved ones. A photo belongs to at most one outfit this way.
+  costumeItemId String?
+
+  profile         Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  album           Album?        @relation("AlbumMedia", fields: [albumId], references: [id], onDelete: SetNull)
+  coverOfAlbums   Album[]       @relation("AlbumCover")
+  savedBy         SavedMedia[]
+  costumeItems    CostumeItem[] @relation("CostumeCover")
+  costumeItem     CostumeItem?  @relation("CostumeGallery", fields: [costumeItemId], references: [id], onDelete: SetNull)
+  coverOfServices Service[]     @relation("ServiceCover")
 
   @@index([profileId, order])
   @@index([moderationStatus, createdAt])
   @@index([albumId])
   @@index([deletedAt])
+  @@index([costumeItemId])
   @@map("profile_media")
 }
 
@@ -1151,8 +1166,11 @@ model CostumeItem {
   /// Soft delete, same contract as ProfileMedia.deletedAt.
   deletedAt         DateTime?
 
-  profile Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  media   ProfileMedia? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  profile Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  /// The main photo, shown on the card.
+  media   ProfileMedia?  @relation("CostumeCover", fields: [mediaId], references: [id], onDelete: SetNull)
+  /// Further photos of the same outfit: see ProfileMedia.costumeItemId.
+  gallery ProfileMedia[] @relation("CostumeGallery")
 
   @@index([profileId, sortOrder])
   @@index([deletedAt])
@@ -1241,15 +1259,23 @@ model Service {
   // ("30 ảnh chỉnh sửa · giao sau 5 ngày"). Optional; blank hides the row.
   editedPhotoCount Int?
   deliveryDays     Int?
+  // The photo on this package's card, chosen by the provider from their own
+  // portfolio. Without one the card takes a portfolio photo by position, as
+  // it always did, so a wedding package could show a product shot. The
+  // public profile uses it only while that photo is APPROVED and not deleted
+  // (CLAUDE.md rule 8); otherwise it falls back to the old behaviour.
+  coverMediaId     String?
   currency         String      @default("VND")
   isActive         Boolean     @default(true)
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
-  profile  Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  bookings Booking[]
+  profile    Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  coverMedia ProfileMedia? @relation("ServiceCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  bookings   Booking[]
 
   @@index([profileId])
+  @@index([coverMediaId])
   @@map("services")
 }
 

@@ -151,14 +151,15 @@ type ActivityT = (
   values?: Record<string, string | number>,
 ) => string;
 
-export async function getRecentActivity(
-  t: ActivityT,
-  limit = 15,
-  words?: {
-    targetType: (code: string) => string;
-    reason: (code: string) => string;
-  },
-) {
+export async function getRecentActivity(t: ActivityT, limit = 15) {
+  // A report stores codes ("place", "Wrong information"); these are the
+  // words for them. Loaded here so every caller gets the same line.
+  const [targetT, reasonT] = await Promise.all([
+    getTranslations("accountFlows.admin.reports.targetTypes"),
+    getTranslations("sharedComponents.reportModal.reasons"),
+  ]);
+  const word = (dict: typeof targetT, code: string) =>
+    dict.has(code as never) ? dict(code as never) : code;
   const [signups, bookings, reports] = await Promise.all([
     db.user.findMany({
       where: { deletedAt: null },
@@ -208,11 +209,9 @@ export async function getRecentActivity(
     ...reports.map((r) => ({
       type: "report" as const,
       id: r.id,
-      // Both are stored as codes ("place", "Wrong information"); the page
-      // passes the words for them.
       label: t("newReport", {
-        targetType: words?.targetType(r.targetType) ?? r.targetType,
-        reason: words?.reason(r.reason) ?? r.reason,
+        targetType: word(targetT, r.targetType),
+        reason: word(reasonT, r.reason),
       }),
       timestamp: r.createdAt,
     })),

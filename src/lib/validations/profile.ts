@@ -11,6 +11,13 @@ export const AMENITY_OPTIONS = [
   "changing_room",
   "kitchen",
   "restroom",
+  // What people ask a studio about before renting (role walk-through,
+  // 25/11/2026). Amenities are a string list, so these need no migration.
+  "backdrops",
+  "lighting",
+  "natural_light",
+  "makeup_table",
+  "elevator",
 ] as const;
 
 function zaloUrlSchema(message: string) {
@@ -47,6 +54,9 @@ export const updateProfileSchema = z.object({
   address: z.string().trim().min(5).max(200),
   addressPoint: addressPointSchema,
   area: z.number().positive().optional(),
+  // STUDIO only. null clears a figure that was saved before.
+  roomCount: z.number().int().min(1).max(50).nullable().optional(),
+  capacity: z.number().int().min(1).max(1000).nullable().optional(),
   amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
   shopName: z.string().max(120).optional(),
   deliveryFee: z.number().nonnegative().max(100_000_000).optional(),
@@ -110,6 +120,9 @@ export function getUpdateProfileSchema(t: (key: string) => string) {
     address: z.string().trim().min(5, t("addressRequired")).max(200),
     addressPoint: addressPointSchema,
     area: z.number().positive().optional(),
+    // STUDIO only. null clears a figure that was saved before.
+    roomCount: z.number().int().min(1).max(50).nullable().optional(),
+    capacity: z.number().int().min(1).max(1000).nullable().optional(),
     amenities: z.array(z.enum(AMENITY_OPTIONS)).optional(),
     shopName: z.string().max(120).optional(),
     deliveryFee: z.number().nonnegative().max(100_000_000).optional(),

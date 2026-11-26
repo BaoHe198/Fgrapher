@@ -29,18 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AdminOverviewPage() {
-  const [stats, t, activityT, queues, targetT, reasonT] = await Promise.all([
+  const [stats, t, activityT, queues] = await Promise.all([
     getAdminStats(),
     getTranslations("accountFlows.admin.overview"),
     getTranslations("accountFlows.admin.overview.activity"),
     getAdminQueueCounts(),
-    getTranslations("accountFlows.admin.reports.targetTypes"),
-    getTranslations("sharedComponents.reportModal.reasons"),
   ]);
-  const activity = await getRecentActivity(activityT, 15, {
-    targetType: (code) => (targetT.has(code) ? targetT(code) : code),
-    reason: (code) => (reasonT.has(code) ? reasonT(code) : code),
-  });
+  const activity = await getRecentActivity(activityT);
 
   const metrics = [
     {

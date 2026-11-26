@@ -43,7 +43,15 @@ export default async function ServicesPage() {
           isActive: true,
           editedPhotoCount: true,
           deliveryDays: true,
+          coverMediaId: true,
         },
+      },
+      // The photos a package card can show: the provider's own, whatever
+      // their review status (an unapproved one is marked in the picker).
+      media: {
+        where: { type: "IMAGE", deletedAt: null },
+        orderBy: { order: "asc" },
+        select: { id: true, url: true, moderationStatus: true },
       },
     },
   });
@@ -59,6 +67,7 @@ export default async function ServicesPage() {
           profileId={profile.id}
           role={role}
           initialServices={profile.services}
+          availableMedia={profile.media}
         />
       ) : (
         // Profile rows are created on the first save of the profile form.

@@ -3466,7 +3466,12 @@
           "parking": "Parking",
           "changing_room": "Changing room",
           "kitchen": "Kitchen",
-          "restroom": "Restroom"
+          "restroom": "Restroom",
+          "backdrops": "Backdrops included",
+          "lighting": "Studio lights included",
+          "natural_light": "Natural light",
+          "makeup_table": "Make-up table",
+          "elevator": "Lift"
         },
         "modelDetails": {
           "title": "Model details",
@@ -3504,7 +3509,10 @@
         "saved": "Saved",
         "draftRestored": "Restored what you typed last time. It isn't saved yet — press Save changes at the bottom.",
         "draftDiscard": "Discard draft",
-        "unsavedChanges": "You have unsaved changes"
+        "unsavedChanges": "You have unsaved changes",
+        "roomCountLabel": "Rooms / sets",
+        "capacityLabel": "Capacity (people)",
+        "studioFactsHelper": "The three figures customers ask for before renting. A blank one is not shown on your page."
       },
       "services": {
         "title": "Services",
@@ -3540,7 +3548,13 @@
         "kindLabel": "Service type",
         "editedPhotosLabel": "Edited photos",
         "deliveryDaysLabel": "Delivery (days)",
-        "deliveryDaysVideoLabel": "Film delivery (days)"
+        "deliveryDaysVideoLabel": "Film delivery (days)",
+        "coverLabel": "Package photo",
+        "coverAuto": "Automatic",
+        "coverNumbered": "Photo {index}",
+        "coverEmpty": "Your portfolio has no photos yet. Upload some, then come back to choose one for this package.",
+        "coverHelper": "Shown on the package card on your page. Choose “Automatic” to let the page take a photo from your portfolio.",
+        "coverPending": "This photo is waiting for review. Your public page uses another one until it is approved."
       },
       "media": {
         "coverButton": "Cover",
@@ -3606,7 +3620,7 @@
         "depositLabel": "Deposit (leave empty if none)",
         "sizeLabel": "Size",
         "colorLabel": "Colour",
-        "photoLabel": "Photo",
+        "photoLabel": "Main photo",
         "photoNone": "No photo",
         "photoNumbered": "Photo {index}",
         "photoHelper": "Pick an uploaded outfit photo. A new photo must clear moderation before it appears publicly.",
@@ -3619,7 +3633,10 @@
         "deleteAria": "Delete {name}",
         "missingHint": "Enter the outfit name and daily price to save.",
         "photoEmpty": "No photos yet. Close this, press “Upload outfit photos” first, then add the outfit.",
-        "photoUploadShort": "Upload"
+        "photoUploadShort": "Upload",
+        "extraLabel": "More photos ({count}/{max})",
+        "extraHelper": "The back, a detail, another angle. Each is shown publicly once approved.",
+        "extraCount": "+{count} more {count, plural, one {photo} other {photos}}"
       },
       "policy": {
         "title": "Experience & policies",
@@ -4728,7 +4745,9 @@
           "estimateNote": "The shop confirms the final price in the chat.",
           "noDate": "Not sure yet, ask first",
           "compose": "Write the message"
-        }
+        },
+        "morePhotos": "Photos of {name}",
+        "photoNumbered": "Photo {index}"
       },
       "postsTab": {
         "empty": "No posts yet",
@@ -4792,7 +4811,10 @@
         "address": "Address",
         "addressNote": "Street address: message the studio to get it.",
         "hours": "Opening hours",
-        "closed": "Closed"
+        "closed": "Closed",
+        "rooms": "Rooms / sets",
+        "capacity": "Capacity",
+        "people": "{count, plural, one {# person} other {# people}}"
       },
       "roleIn": "{role} in {place}"
     },

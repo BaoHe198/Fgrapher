@@ -3466,7 +3466,12 @@
           "parking": "Bãi đỗ xe",
           "changing_room": "Phòng thay đồ",
           "kitchen": "Bếp",
-          "restroom": "Nhà vệ sinh"
+          "restroom": "Nhà vệ sinh",
+          "backdrops": "Phông nền có sẵn",
+          "lighting": "Đèn studio có sẵn",
+          "natural_light": "Ánh sáng tự nhiên",
+          "makeup_table": "Bàn trang điểm",
+          "elevator": "Thang máy"
         },
         "modelDetails": {
           "title": "Thông tin người mẫu",
@@ -3504,7 +3509,10 @@
         "saved": "Đã lưu",
         "draftRestored": "Đã khôi phục nội dung bạn nhập dở lần trước. Nội dung này chưa được lưu — bấm Lưu thay đổi ở cuối trang.",
         "draftDiscard": "Bỏ bản nháp",
-        "unsavedChanges": "Có thay đổi chưa lưu"
+        "unsavedChanges": "Có thay đổi chưa lưu",
+        "roomCountLabel": "Số phòng / góc chụp",
+        "capacityLabel": "Sức chứa (người)",
+        "studioFactsHelper": "Ba con số khách hay hỏi trước khi thuê. Ô nào để trống sẽ không hiện trên trang."
       },
       "services": {
         "title": "Dịch vụ",
@@ -3540,7 +3548,13 @@
         "kindLabel": "Loại dịch vụ",
         "editedPhotosLabel": "Số ảnh chỉnh sửa",
         "deliveryDaysLabel": "Giao ảnh sau (ngày)",
-        "deliveryDaysVideoLabel": "Giao phim sau (ngày)"
+        "deliveryDaysVideoLabel": "Giao phim sau (ngày)",
+        "coverLabel": "Ảnh minh họa của gói",
+        "coverAuto": "Tự chọn",
+        "coverNumbered": "Ảnh số {index}",
+        "coverEmpty": "Bạn chưa có ảnh nào trong portfolio. Tải ảnh lên rồi quay lại chọn ảnh cho gói.",
+        "coverHelper": "Ảnh này hiện trên thẻ gói ở trang của bạn. Chọn “Tự chọn” để trang tự lấy một ảnh trong portfolio.",
+        "coverPending": "Ảnh này đang chờ duyệt. Trang công khai dùng một ảnh khác cho tới khi ảnh được duyệt."
       },
       "media": {
         "coverButton": "Ảnh bìa",
@@ -3606,7 +3620,7 @@
         "depositLabel": "Tiền cọc (để trống nếu không thu)",
         "sizeLabel": "Size",
         "colorLabel": "Màu",
-        "photoLabel": "Ảnh",
+        "photoLabel": "Ảnh chính",
         "photoNone": "Không ảnh",
         "photoNumbered": "Ảnh số {index}",
         "photoHelper": "Chọn ảnh trang phục đã tải lên. Ảnh mới phải qua kiểm duyệt trước khi hiện công khai.",
@@ -3619,7 +3633,10 @@
         "deleteAria": "Xóa {name}",
         "missingHint": "Nhập tên bộ đồ và giá thuê mỗi ngày để lưu.",
         "photoEmpty": "Chưa có ảnh nào. Đóng hộp này, bấm “Tải ảnh trang phục” trước rồi quay lại thêm bộ đồ.",
-        "photoUploadShort": "Tải ảnh"
+        "photoUploadShort": "Tải ảnh",
+        "extraLabel": "Ảnh thêm ({count}/{max})",
+        "extraHelper": "Mặt sau, chi tiết, góc khác. Mỗi ảnh hiện công khai sau khi được duyệt.",
+        "extraCount": "+{count} ảnh thêm"
       },
       "policy": {
         "title": "Kinh nghiệm & chính sách",
@@ -4728,7 +4745,9 @@
           "estimateNote": "Giá cuối cùng do shop xác nhận trong tin nhắn.",
           "noDate": "Chưa biết ngày, hỏi trước",
           "compose": "Soạn tin nhắn"
-        }
+        },
+        "morePhotos": "Các ảnh của {name}",
+        "photoNumbered": "Ảnh {index}"
       },
       "postsTab": {
         "empty": "Chưa có bài đăng nào",
@@ -4792,7 +4811,10 @@
         "address": "Địa chỉ",
         "addressNote": "Địa chỉ chi tiết: nhắn tin với studio để nhận.",
         "hours": "Giờ mở cửa",
-        "closed": "Nghỉ"
+        "closed": "Nghỉ",
+        "rooms": "Số phòng / góc chụp",
+        "capacity": "Sức chứa",
+        "people": "{count} người"
       },
       "roleIn": "{role} ở {place}"
     },
