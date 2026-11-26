@@ -101,6 +101,25 @@ làm việc hàng tuần mà trang đặt lịch đọc. Địa chỉ chi tiết
 nhà cung cấp. Studio ghi "năm hoạt động" và "lượt thuê"; quay phim ghi "Phim đã
 quay" và "buổi đã quay".
 
+**Địa chỉ studio và bản đồ thu nhỏ (26/11/2026, chủ dự án duyệt).** Địa chỉ
+chi tiết (`Profile.address`) vẫn riêng tư với mọi nhà cung cấp, trừ **một**
+trường hợp: studio tự bật "Hiện địa chỉ studio" trong Thông tin trang. Đó là
+chính cột `Profile.hideExactLocation` (mặc định `true`) hỏi theo chiều ngược
+lại, nên không studio nào bị lộ địa chỉ khi chưa tự chọn; một studio đặt tại
+nhà riêng cứ để nguyên. Quy tắc nằm ở `publicStudioAddress()`
+(`lib/privacy/profile-privacy.ts`): ranh giới công khai gọi hàm này trước khi bỏ
+`address` và chuyển kết quả đi dưới tên riêng `studioAddress`. Studio đã bật có
+địa chỉ đầy đủ, bản đồ có ghim và nút chỉ đường trên hồ sơ, và địa chỉ trong
+bước Địa điểm khi khách thuê phòng.
+
+Mục "Khu vực làm việc" của các vai trò khác có bản đồ thật thay cho hình vẽ.
+Điểm giữa bản đồ do `profileMapPoint()` (`services/profile-area.ts`) quyết định
+trên server: áp độ lệch có khóa của Bản đồ F nếu người đó làm mờ vị trí, rồi
+làm tròn hai chữ số thập phân (ô khoảng 1 km). Bản đồ vẽ một vùng (bán kính
+nhận việc, hoặc 2 km nếu chưa khai), **không bao giờ có ghim**; tọa độ chính
+xác không tới trình duyệt. Cố ý thô hơn Bản đồ F, nơi một nhà cung cấp không
+làm mờ được ghim đúng địa chỉ.
+
 **Thông tin riêng của studio (26/11/2026).** Ngoài diện tích, studio khai số
 phòng / góc chụp (`Profile.roomCount`) và sức chứa (`Profile.capacity`); ô nào
 để trống thì không hiện trên trang. Danh sách tiện nghi (`AMENITY_OPTIONS` trong
@@ -144,10 +163,26 @@ người xem mở video; trên lưới chỉ có ảnh đại diện. CSP (`next
 phép đúng hai nguồn đó: `frame-src https://www.youtube-nocookie.com` và
 `img-src https://i.ytimg.com`.
 
-Chỉ YouTube, có chủ đích: một video YouTube không thể bị thay bằng video khác
-dưới cùng địa chỉ, nên thứ đã duyệt là thứ còn hiển thị. Vimeo cho chủ video
-thay tệp phía sau liên kết, tức nội dung có thể đổi sau khi đã duyệt — chưa hỗ
-trợ, chờ chủ dự án quyết định.
+**Liên kết Vimeo (26/11/2026, chủ dự án duyệt).** Hộp tải lên nhận cả liên kết
+Vimeo, lưu ở dạng `https://vimeo.com/<id>` (thêm `/<khóa>` với video không công
+khai trong danh sách). Hai nền tảng **không ngang nhau về kiểm duyệt**: một
+video YouTube không thể bị thay bằng video khác dưới cùng địa chỉ, còn Vimeo
+cho chủ video thay tệp phía sau liên kết, tức nội dung **có thể đổi sau khi
+admin đã duyệt**. Chủ dự án chấp nhận rủi ro này. Thứ đang đứng chắn: dòng cảnh
+báo trên thẻ duyệt của admin, nút báo cáo công khai, và việc xem lại định kỳ
+còn làm tay (xem checklist ở `docs/ops`). Đừng coi một liên kết Vimeo là "đã
+duyệt một lần, an toàn mãi".
+
+- Khi thêm liên kết, server hỏi oEmbed công khai của Vimeo
+  (`lib/media/vimeo.ts`): video đã xóa, riêng tư hoặc tắt quyền nhúng bị từ chối
+  ngay. Không gửi gì về người dùng, chỉ địa chỉ công khai của video. Không gọi
+  được Vimeo thì nhận liên kết như với YouTube.
+- Vimeo không có địa chỉ ảnh đại diện suy ra được từ id, nên lưới hỏi
+  `/api/media/vimeo-poster/<id>`, route này tra oEmbed (nhớ một ngày) rồi chuyển
+  hướng tới `*.vimeocdn.com` và chỉ tới đó. Lưới tải ảnh này trực tiếp
+  (`unoptimized`), vì bộ tối ưu ảnh không đi theo chuyển hướng sang host khác.
+- Trình phát là `player.vimeo.com` với `dnt=1`. CSP thêm
+  `frame-src https://player.vimeo.com` và `img-src https://i.vimeocdn.com`.
 
 Mọi nơi vẽ video dùng chung `components/media/portfolio-video.tsx`: `VideoTile`
 (ảnh đại diện + dấu phát, cho lưới và ảnh bìa) và `PortfolioVideoPlayer` (trình
@@ -410,6 +445,22 @@ giá), Ngày, Giờ (có gợi ý **giờ vàng** gần lúc mặt trời mọc/
 duyệt từ toạ độ đã làm tròn ~10 km của nghệ sĩ — `lib/sun.ts`), Địa điểm, Ghi chú,
 Xem lại. Cột tóm tắt bên cạnh có nút "Sửa" cho từng dòng. "Lưu nháp & thoát" giữ
 bản nháp trên thiết bị 7 ngày, không lưu số điện thoại.
+
+**Điểm chụp làm địa điểm (26/11/2026).** Khi chọn "Ngoài trời", khách có thể
+tìm và chọn một điểm chụp đã duyệt (`components/places/album-place-picker.tsx`,
+dùng chung với ô "Chụp tại" của album). Tên và địa chỉ của điểm chụp điền vào ô
+địa chỉ, tỉnh và phường điền vào khu vực; `createBooking()` kiểm tra điểm chụp
+còn công khai và lấy khu vực từ chính nó. `Booking.locationPlaceId` giữ liên
+kết. Điểm chụp là nơi khách sẽ có mặt nên đi cùng địa chỉ: nhà cung cấp chỉ
+thấy tên và đường dẫn tới trang điểm chụp **sau khi chấp nhận**
+(`getBookingDetail()` và `redactContactInfo()` cùng che), trước đó chỉ thấy
+phường và tỉnh.
+
+**Một nghĩa cho "lịch sắp tới" (26/11/2026).** Đã xác nhận và chưa bắt đầu:
+`upcomingBookingFilter()` trong `lib/booking-window.ts`, dùng cho màn hình đầu
+của nhà cung cấp, của khách và dòng tóm tắt ở trang Lịch đặt. Trước đó ba nơi
+đếm ba kiểu (khách còn cộng cả yêu cầu chưa ai trả lời). Yêu cầu đang chờ của
+khách giờ là một ô riêng "Yêu cầu chờ trả lời", chỉ hiện khi có.
 
 **Khu vực buổi chụp (25/11/2026).** Khi chụp tại chỗ của khách hoặc ngoài trời,
 khách chọn tỉnh/thành (bắt buộc) và phường/xã (không bắt buộc) cùng địa chỉ —
