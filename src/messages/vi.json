@@ -3398,7 +3398,7 @@
       "basics": {
         "displayNameLabel": "Tên hiển thị",
         "usernameLabel": "Tên người dùng",
-        "usernameHint": "Dùng cho đường dẫn hồ sơ của bạn (vd: fgrapher.vn/profile/tenban) — chỉ chữ không dấu, số và dấu gạch dưới. Muốn hiển thị tên có dấu, hãy dùng mục \"Tên hiển thị\".",
+        "usernameHint": "Dùng cho đường dẫn hồ sơ của bạn (vd: fgrapher.vn/profile/tenban) — chỉ chữ không dấu, số và dấu gạch dưới. Tên có dấu mà khách nhìn thấy đặt ở ô tên, không phải ở đây.",
         "usernameTaken": "Tên người dùng này đã được sử dụng",
         "usernameTooShort": "Tên người dùng cần ít nhất 3 ký tự",
         "usernameTooLong": "Tên người dùng tối đa 30 ký tự",

@@ -319,6 +319,21 @@ export function ScheduleDialog({
                             : t("tfp")
                           : t("priceInChat", { name: callName })}
                       </span>
+                      {/* Under the price, not beside the name: at the side it
+                          took a third of a phone's width and cut package
+                          names short ("Chân dung cá nhân 2…"). */}
+                      {single || loading ? null : (
+                        <span
+                          className={cn(
+                            "text-meta tabular-nums",
+                            free > 0 ? "text-gold-600" : "text-text-tertiary",
+                          )}
+                        >
+                          {free > 0
+                            ? t("freeCount", { count: free })
+                            : t("full")}
+                        </span>
+                      )}
                     </span>
                   </>
                 );
@@ -349,24 +364,13 @@ export function ScheduleDialog({
                         className="focus-ring flex min-h-14 items-center gap-3 rounded-[var(--fg-radius-lg)] p-3"
                       >
                         {heading}
-                        <span className="flex shrink-0 items-center gap-1.5 text-meta text-text-secondary">
-                          {loading ? null : free > 0 ? (
-                            <span className="tabular-nums">
-                              {t("freeCount", { count: free })}
-                            </span>
-                          ) : (
-                            <span className="text-text-tertiary">
-                              {t("full")}
-                            </span>
+                        <ChevronDown
+                          aria-hidden
+                          className={cn(
+                            "size-4 shrink-0 text-text-secondary transition-transform duration-[var(--fg-dur-150)]",
+                            isOpen ? "rotate-180" : null,
                           )}
-                          <ChevronDown
-                            aria-hidden
-                            className={cn(
-                              "size-4 transition-transform duration-[var(--fg-dur-150)]",
-                              isOpen ? "rotate-180" : null,
-                            )}
-                          />
-                        </span>
+                        />
                       </button>
                     )}
                     {isOpen ? (

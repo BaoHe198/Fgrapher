@@ -3398,7 +3398,7 @@
       "basics": {
         "displayNameLabel": "Display name",
         "usernameLabel": "Username",
-        "usernameHint": "Used for your profile URL (e.g. fgrapher.vn/profile/yourname) — unaccented letters, numbers, and underscores only. For a name with diacritics, use \"Display name\".",
+        "usernameHint": "Used for your profile link (e.g. fgrapher.vn/profile/yourname) — unaccented letters, numbers and underscores only. The name customers see, accents and all, goes in the name field, not here.",
         "usernameTaken": "That username is taken",
         "usernameTooShort": "Usernames need at least 3 characters",
         "usernameTooLong": "Usernames can be at most 30 characters",
