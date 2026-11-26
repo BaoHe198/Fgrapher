@@ -12,10 +12,14 @@ export function RoleProfileSwitcher({
   roles,
   userId,
   showServices = true,
+  accountName = null,
+  hasListings = false,
 }: {
   roles: Role[];
   userId: string;
   showServices?: boolean;
+  accountName?: string | null;
+  hasListings?: boolean;
 }) {
   const roleT = useTranslations("role");
   const [active, setActive] = useState(roles[0]);
@@ -41,6 +45,8 @@ export function RoleProfileSwitcher({
         role={active}
         userId={userId}
         showServices={showServices}
+        accountName={accountName}
+        hasListings={hasListings}
       />
     </div>
   );

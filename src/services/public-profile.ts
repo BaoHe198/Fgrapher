@@ -398,6 +398,12 @@ export async function getProviderForBooking(providerId: string) {
           // The street address stays private (see Profile.address).
           ward: { select: { name: true } },
           province: { select: { name: true } },
+          // The provider's own terms, shown on the review step in place of
+          // a platform-wide cancellation rule.
+          depositPercent: true,
+          depositPolicy: true,
+          cancellationPolicy: true,
+          reschedulePolicy: true,
           services: { where: { isActive: true }, orderBy: { price: "asc" } },
           // The booking flow's picture pane (wave 2): a few of the
           // artist's own approved photos, never stock imagery.

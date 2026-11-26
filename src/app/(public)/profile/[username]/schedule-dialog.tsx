@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useMemo, useState } from "react";
@@ -50,12 +50,17 @@ const addDays = (dateKey: string, days: number) => {
 };
 
 // "Đặt lịch chụp" (Airbnb's "Schedule your photo shoot", owner 17/11/2026):
-// one week of days across the top, then every package with its own grid of
-// free start times for the chosen day. A start time is the choice that
-// matters, so picking one goes straight to the request form with package,
-// day and time filled in; nothing is sent from here.
+// one week of days across the top, then the packages. A start time is the
+// choice that matters, so picking one goes straight to the request form with
+// package, day and time filled in; nothing is sent from here.
 //
-// A provider with no packages gets one grid, for a request priced in chat.
+// Every package used to show its own grid of start times, one under the
+// other: four packages times twenty start times was a very long scroll on a
+// phone (role walk-through, 25/11/2026). Now each package is one row saying
+// how many start times are free that day, and only the chosen one opens.
+//
+// A provider with one package, or none (a request priced in chat), gets the
+// grid straight away: there is nothing to choose between.
 export function ScheduleDialog({
   open,
   onOpenChange,
@@ -78,6 +83,16 @@ export function ScheduleDialog({
   );
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  // The package whose start times are open. Until the visitor picks one it
+  // is the package whose card they clicked, or the only package there is.
+  const [pickedByHand, setPickedByHand] = useState<string | null>(null);
+  const single = services.length <= 1;
+  const picked =
+    pickedByHand ?? focusServiceId ?? (single ? (services[0]?.id ?? "") : null);
+  const close = (next: boolean) => {
+    if (!next) setPickedByHand(null);
+    onOpenChange(next);
+  };
 
   const rows = useMemo(
     () => (services.length > 0 ? services : [null]),
@@ -163,12 +178,12 @@ export function ScheduleDialog({
   const book = (serviceId: string | null, time: string) => {
     const params = new URLSearchParams({ date: day, time });
     if (serviceId) params.set("service", serviceId);
-    onOpenChange(false);
+    close(false);
     router.push(`/booking/${providerId}?${params.toString()}`);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={close}>
       <DialogContent className="flex max-h-[min(88vh,820px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[560px]">
         <DialogHeader className="gap-1 px-6 pt-6 pb-4">
           <DialogTitle className="text-display-sm text-text-primary">
@@ -256,9 +271,10 @@ export function ScheduleDialog({
           {failed ? (
             <p className="text-body-sm text-danger">{t("loadFailed")}</p>
           ) : (
-            <ul className="flex flex-col gap-7">
+            <ul className={cn("flex flex-col", single ? "gap-7" : "gap-2")}>
               {rows.map((service, index) => {
                 const key = service?.id ?? "";
+                const isOpen = single || picked === key;
                 const dayInfo = byService[key]?.find((d) => d.date === day);
                 const slots = (dayInfo?.slots ?? []).map((slot) => ({
                   start: slot.time,
@@ -271,55 +287,107 @@ export function ScheduleDialog({
                 }));
                 const photo =
                   photos.length > 0 ? photos[index % photos.length] : null;
+                const free = slots.filter(
+                  (slot) => slot.status === "available",
+                ).length;
+                const heading = (
+                  <>
+                    {photo ? (
+                      <FgImage
+                        src={photo}
+                        alt=""
+                        ratio="1/1"
+                        rounded="md"
+                        reveal={false}
+                        sizes="56px"
+                        className="size-14 shrink-0"
+                      />
+                    ) : null}
+                    <span className="flex min-w-0 flex-1 flex-col text-left">
+                      <span className="line-clamp-2 text-body-md font-semibold! text-text-primary">
+                        {service?.name ?? t("anyPackage")}
+                      </span>
+                      <span className="text-body-sm text-text-secondary">
+                        {service
+                          ? service.price > 0
+                            ? t("price", {
+                                price: formatCurrency(
+                                  service.price,
+                                  service.currency,
+                                ),
+                              })
+                            : t("tfp")
+                          : t("priceInChat", { name: callName })}
+                      </span>
+                      {/* Under the price, not beside the name: at the side it
+                          took a third of a phone's width and cut package
+                          names short ("Chân dung cá nhân 2…"). */}
+                      {single || loading ? null : (
+                        <span
+                          className={cn(
+                            "text-meta tabular-nums",
+                            free > 0 ? "text-gold-600" : "text-text-tertiary",
+                          )}
+                        >
+                          {free > 0
+                            ? t("freeCount", { count: free })
+                            : t("full")}
+                        </span>
+                      )}
+                    </span>
+                  </>
+                );
                 return (
                   <li
                     key={key || "none"}
                     id={service ? `schedule-${service.id}` : undefined}
                     className={cn(
-                      "flex scroll-mt-4 flex-col gap-3",
-                      service && service.id === focusServiceId
-                        ? "rounded-[var(--fg-radius-lg)] bg-bg-sunken p-3 -m-3"
-                        : null,
+                      "flex scroll-mt-4 flex-col",
+                      single
+                        ? "gap-3"
+                        : cn(
+                            "rounded-[var(--fg-radius-lg)] border",
+                            isOpen
+                              ? "border-border-strong bg-bg-sunken"
+                              : "border-border-subtle",
+                          ),
                     )}
                   >
-                    <div className="flex items-center gap-3">
-                      {photo ? (
-                        <FgImage
-                          src={photo}
-                          alt=""
-                          ratio="1/1"
-                          rounded="md"
-                          reveal={false}
-                          sizes="56px"
-                          className="size-14 shrink-0"
+                    {single ? (
+                      <div className="flex items-center gap-3">{heading}</div>
+                    ) : (
+                      <button
+                        type="button"
+                        aria-expanded={isOpen}
+                        aria-controls={`schedule-times-${key}`}
+                        onClick={() => setPickedByHand(isOpen ? "" : key)}
+                        className="focus-ring flex min-h-14 items-center gap-3 rounded-[var(--fg-radius-lg)] p-3"
+                      >
+                        {heading}
+                        <ChevronDown
+                          aria-hidden
+                          className={cn(
+                            "size-4 shrink-0 text-text-secondary transition-transform duration-[var(--fg-dur-150)]",
+                            isOpen ? "rotate-180" : null,
+                          )}
                         />
-                      ) : null}
-                      <div className="flex min-w-0 flex-col">
-                        <span className="truncate text-body-md font-semibold! text-text-primary">
-                          {service?.name ?? t("anyPackage")}
-                        </span>
-                        <span className="text-body-sm text-text-secondary">
-                          {service
-                            ? service.price > 0
-                              ? t("price", {
-                                  price: formatCurrency(
-                                    service.price,
-                                    service.currency,
-                                  ),
-                                })
-                              : t("tfp")
-                            : t("priceInChat", { name: callName })}
-                        </span>
+                      </button>
+                    )}
+                    {isOpen ? (
+                      <div
+                        id={`schedule-times-${key}`}
+                        className={single ? undefined : "px-3 pb-3"}
+                      >
+                        <TimeSlotGrid
+                          slots={slots}
+                          selected={null}
+                          onSelect={(time) => book(service?.id ?? null, time)}
+                          timezoneLabel={t("timezone")}
+                          loading={loading}
+                          emptyMessage={t("noTimes")}
+                        />
                       </div>
-                    </div>
-                    <TimeSlotGrid
-                      slots={slots}
-                      selected={null}
-                      onSelect={(time) => book(service?.id ?? null, time)}
-                      timezoneLabel={t("timezone")}
-                      loading={loading}
-                      emptyMessage={t("noTimes")}
-                    />
+                    ) : null}
                   </li>
                 );
               })}

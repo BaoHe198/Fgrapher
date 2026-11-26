@@ -48,6 +48,9 @@ interface MediaRow {
     user: { name: string | null; firstName: string | null; email: string };
   };
   album: { id: string; title: string } | null;
+  /** Which table the row came from; a product photo carries its listing. */
+  kind?: "profile" | "product" | "post";
+  productName?: string;
 }
 
 function isOverdue(createdAt: string) {
@@ -273,7 +276,7 @@ export default function AdminModerationPage() {
           {filteredMedia.length === 0 ? (
             <EmptyState icon={<ImageOff />} title={t("emptyFiltered")} />
           ) : (
-            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3.5 pb-28 sm:grid-cols-3 sm:pb-6 lg:grid-cols-5">
               {filteredMedia.map((item, index) => {
                 const overdue = isOverdue(item.createdAt);
                 const isSelected = selected.has(item.id);
@@ -340,16 +343,27 @@ export default function AdminModerationPage() {
                     </div>
                     <div className="flex flex-col gap-0.5 p-2">
                       <span className="truncate text-body-sm font-semibold! text-text-primary">
-                        {item.profile.user.name ??
+                        {item.profile.displayName ??
+                          item.profile.user.name ??
                           item.profile.user.firstName ??
                           item.profile.user.email}
                       </span>
                       <span className="text-body-sm text-text-tertiary">
                         {roleT(item.profile.role as Role)}
                       </span>
-                      {item.album ? (
-                        <span className="truncate text-body-sm text-text-tertiary">
+                      {/* What the photo is of: the listing or the album.
+                          A product photo showed only the seller's name. */}
+                      {item.kind === "product" && item.productName ? (
+                        <span className="line-clamp-2 text-body-sm text-text-secondary">
+                          {t("productLabel", { name: item.productName })}
+                        </span>
+                      ) : item.album ? (
+                        <span className="line-clamp-2 text-body-sm text-text-secondary">
                           {t("albumLabel", { title: item.album.title })}
+                        </span>
+                      ) : item.kind === "post" ? (
+                        <span className="text-body-sm text-text-secondary">
+                          {t("postLabel")}
                         </span>
                       ) : null}
                       <span className="text-body-sm text-text-tertiary">

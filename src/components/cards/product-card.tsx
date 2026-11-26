@@ -60,7 +60,7 @@ export async function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             fill
             sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
-            className="object-contain p-4 transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover:scale-[1.03] motion-reduce:transition-none"
+            className="object-cover transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover:scale-[1.03] motion-reduce:transition-none"
           />
         ) : (
           <span className="absolute inset-3 flex flex-col items-center justify-center gap-2 rounded-[var(--fg-radius-sm)] border border-dashed border-border-strong text-text-tertiary">

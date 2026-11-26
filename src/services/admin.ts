@@ -5,6 +5,7 @@ import type {
   Role,
 } from "@prisma/client";
 import * as Sentry from "@sentry/nextjs";
+import { cache } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { resolvePartyName } from "@/lib/party-name";
@@ -150,7 +151,14 @@ type ActivityT = (
   values?: Record<string, string | number>,
 ) => string;
 
-export async function getRecentActivity(t: ActivityT, limit = 15) {
+export async function getRecentActivity(
+  t: ActivityT,
+  limit = 15,
+  words?: {
+    targetType: (code: string) => string;
+    reason: (code: string) => string;
+  },
+) {
   const [signups, bookings, reports] = await Promise.all([
     db.user.findMany({
       where: { deletedAt: null },
@@ -200,7 +208,12 @@ export async function getRecentActivity(t: ActivityT, limit = 15) {
     ...reports.map((r) => ({
       type: "report" as const,
       id: r.id,
-      label: t("newReport", { targetType: r.targetType, reason: r.reason }),
+      // Both are stored as codes ("place", "Wrong information"); the page
+      // passes the words for them.
+      label: t("newReport", {
+        targetType: words?.targetType(r.targetType) ?? r.targetType,
+        reason: words?.reason(r.reason) ?? r.reason,
+      }),
       timestamp: r.createdAt,
     })),
   ];
@@ -1555,7 +1568,9 @@ export async function moderateMedia({
  * payments still pending are shown on the payments page for monitoring
  * only, so they are not counted.
  */
-export async function getAdminQueueCounts() {
+// Per request: the admin layout (sidebar badges) and the overview page both
+// read these, and nine counts should run once, not twice.
+export const getAdminQueueCounts = cache(async function getAdminQueueCounts() {
   const [
     reports,
     verifications,
@@ -1590,6 +1605,6 @@ export async function getAdminQueueCounts() {
     serviceRequests,
     places,
   };
-}
+});
 
 export type AdminQueueCounts = Awaited<ReturnType<typeof getAdminQueueCounts>>;

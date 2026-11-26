@@ -34,7 +34,7 @@ interface SocialRowProps {
   callbackUrl?: string;
 }
 
-function SocialRow({ callbackUrl = "/dashboard" }: SocialRowProps) {
+function SocialRow({ callbackUrl = "/signed-in" }: SocialRowProps) {
   const t = useTranslations("uiKit.socialRow");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 

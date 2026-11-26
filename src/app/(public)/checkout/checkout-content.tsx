@@ -95,11 +95,24 @@ export function CheckoutContent() {
             <h2 className="text-heading-md text-text-primary">
               {t("deliveryMethod.heading")}
             </h2>
+            {/* Greyed out with the reason beside it when a shop in the
+                cart does not deliver. It used to be selectable, and choosing
+                it answered with a red error. */}
             <Radio
               label={t("deliveryMethod.shipToMe")}
               checked={deliveryMethod === "SHIP"}
+              disabled={shipImpossible}
               onChange={() => setDeliveryMethod("SHIP")}
             />
+            {shipImpossible ? (
+              <p className="-mt-1 pl-7 text-body-sm text-text-tertiary">
+                {t("deliveryMethod.shipUnavailable", {
+                  shops: deliveryTotals(groups, "SHIP").undeliverable.join(
+                    ", ",
+                  ),
+                })}
+              </p>
+            ) : null}
             <Radio
               label={t("deliveryMethod.pickupAtShop")}
               checked={deliveryMethod === "PICKUP"}

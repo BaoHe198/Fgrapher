@@ -3,6 +3,10 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import {
+  bookingWordingFor,
+  usesDaylight,
+} from "@/lib/constants/booking-wording";
 import { db } from "@/lib/db";
 import { formatAdministrativeLocation } from "@/lib/location";
 import { responseBucket } from "@/lib/response-time";
@@ -100,9 +104,15 @@ export default async function BookingFlowPage({
     getProfileReviewStats(provider.id),
     getProfileStats(provider.id),
   ]);
+  // Golden-hour hints only where daylight matters: not for a make-up
+  // appointment or a studio room.
   const located = provider.profiles.find(
-    (profile) => profile.latitude != null && profile.longitude != null,
+    (profile) =>
+      usesDaylight(profile.role) &&
+      profile.latitude != null &&
+      profile.longitude != null,
   );
+  const mainProfile = provider.profiles[0];
   const sunPoint = located
     ? {
         latitude: Math.round(located.latitude! * 10) / 10,
@@ -162,6 +172,13 @@ export default async function BookingFlowPage({
       contactPhoneDefault={customer?.phone ?? ""}
       isModel={isModel}
       provinces={provinces}
+      kind={bookingWordingFor(mainProfile?.role)}
+      policies={{
+        depositPercent: mainProfile?.depositPercent ?? null,
+        depositPolicy: mainProfile?.depositPolicy ?? null,
+        cancellationPolicy: mainProfile?.cancellationPolicy ?? null,
+        reschedulePolicy: mainProfile?.reschedulePolicy ?? null,
+      }}
       venuePlace={
         provider.profiles
           .filter((profile) => profile.role === "STUDIO")

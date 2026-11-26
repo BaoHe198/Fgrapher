@@ -41,6 +41,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatDate, formatDateLong } from "@/lib/format";
 import { isGoldenHourSlot, sunTimes } from "@/lib/sun";
 import { cn, formatCurrency } from "@/lib/utils";
+import type { BookingWording } from "@/lib/constants/booking-wording";
 import { MAX_REFERENCE_MEDIA } from "@/lib/validations/reference-media";
 import { vietnamDateKey } from "@/lib/vietnam/date";
 import type { DayAvailability } from "@/services/availability";
@@ -95,6 +96,15 @@ interface BookingWizardProps {
   venuePlace?: string | null;
   /** Every province, for the area of a shoot away from the provider's place. */
   provinces: { id: string; code: string; name: string }[];
+  /** Which words fit this provider's work: see booking-wording.ts. */
+  kind: BookingWording;
+  /** The provider's own terms, in their words; null where they wrote none. */
+  policies: {
+    depositPercent: number | null;
+    depositPolicy: string | null;
+    cancellationPolicy: string | null;
+    reschedulePolicy: string | null;
+  };
   // Crew-hire (Prompt B7, VIỆC 1) — non-null only when the viewer holds
   // PHOTOGRAPHER/VIDEOGRAPHER and this provider offers MUA/Model/Studio.
   requesterCrewRole?: string | null;
@@ -249,9 +259,12 @@ export function BookingWizard({
   isModel,
   venuePlace,
   provinces,
+  kind,
+  policies,
   requesterCrewRole,
 }: BookingWizardProps) {
   const t = useTranslations("publicPages.booking");
+  const know = useTranslations("profilePage.know");
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryT = useTranslations("profileCategory");
@@ -773,15 +786,45 @@ export function BookingWizard({
       onEdit: () => goTo(3),
     },
     {
-      label: t("flow.rows.references"),
-      value:
-        draft.referenceMedia.length > 0
-          ? t("flow.referenceCount", { count: draft.referenceMedia.length })
-          : draft.notes
-            ? t("flow.hasNotes")
-            : null,
+      label: t("flow.rows.phone"),
+      value: draft.contactPhone.trim() || null,
       onEdit: () => goTo(4),
     },
+    {
+      label: t("flow.rows.notes"),
+      // Optional, so an empty one reads "Không có", not "Chưa chọn".
+      value:
+        [
+          draft.notes.trim() ? t("flow.hasNotes") : null,
+          draft.referenceMedia.length > 0
+            ? t("flow.referenceCount", { count: draft.referenceMedia.length })
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · ") || t("flow.noNotes"),
+      onEdit: () => goTo(4),
+    },
+  ];
+  // The provider's own terms, composed the way their profile shows them.
+  const askInChat = know("askInChat", { name: providerName });
+  const policyRows = [
+    {
+      title: know("deposit"),
+      body:
+        policies.depositPercent != null || policies.depositPolicy
+          ? [
+              policies.depositPercent != null
+                ? know("depositPercent", { percent: policies.depositPercent })
+                : null,
+              policies.depositPolicy,
+              know("depositDirect", { name: providerName }),
+            ]
+              .filter(Boolean)
+              .join(" ")
+          : know("depositAsk", { name: providerName }),
+    },
+    { title: know("cancel"), body: policies.cancellationPolicy ?? askInChat },
+    { title: know("reschedule"), body: policies.reschedulePolicy ?? askInChat },
   ];
   const total =
     !isCustom && selectedService
@@ -883,17 +926,24 @@ export function BookingWizard({
                 >
                   {current === "location" && atVenue
                     ? t("flow.venue.heading")
-                    : t(`flow.headings.${current}`)}
+                    : t(`flow.headings.${current}`, { kind })}
                 </h1>
                 <p className="text-body-md text-text-secondary">
                   {current === "location" && atVenue
                     ? t("flow.venue.sub", { providerName })
-                    : t(`flow.subs.${current}`, { providerName })}
+                    : t(`flow.subs.${current}`, {
+                        providerName,
+                        kind,
+                        sun: sunPoint ? "yes" : "no",
+                      })}
                 </p>
               </div>
 
               {current === "package" ? (
-                <ChoiceCardGroup legend={t("flow.headings.package")} hideLegend>
+                <ChoiceCardGroup
+                  legend={t("flow.headings.package", { kind })}
+                  hideLegend
+                >
                   {services.map((service) => (
                     <ChoiceCard
                       key={service.id}
@@ -944,7 +994,9 @@ export function BookingWizard({
                       }))
                     }
                     title={t("flow.custom.title")}
-                    description={t("flow.custom.description")}
+                    description={t("flow.custom.description", {
+                      providerName,
+                    })}
                     price={t("flow.custom.price")}
                   />
                   {isCustom ? (
@@ -986,7 +1038,7 @@ export function BookingWizard({
                         time: prev.date === date ? prev.time : null,
                       }))
                     }
-                    emptyMessage={t("flow.noDaysThisMonth")}
+                    emptyMessage={t("flow.noDaysThisMonth", { providerName })}
                   />
                   {daysError ? (
                     <p role="alert" className="text-body-sm text-danger">
@@ -1071,7 +1123,9 @@ export function BookingWizard({
                             selected={draft.locationType === type}
                             onSelect={() => update("locationType", type)}
                             title={locationLabel[type]}
-                            description={t(`flow.locationHints.${type}`)}
+                            description={t(`flow.locationHints.${type}`, {
+                              providerName,
+                            })}
                           />
                         ),
                       )}
@@ -1216,8 +1270,24 @@ export function BookingWizard({
 
               {current === "notes" ? (
                 <div className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-1.5">
+                    <Input
+                      label={t("stepDetails.contactPhoneLabel")}
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      required
+                      value={draft.contactPhone}
+                      onChange={(e) => update("contactPhone", e.target.value)}
+                    />
+                    <p className="text-meta text-text-tertiary">
+                      {t("stepDetails.contactPhoneHelper", { providerName })}
+                    </p>
+                  </div>
                   <Textarea
-                    label={t("stepDetails.notesLabel")}
+                    label={t("stepDetails.notesOptionalLabel", {
+                      providerName,
+                    })}
                     rows={4}
                     maxLength={1000}
                     showCount
@@ -1232,14 +1302,6 @@ export function BookingWizard({
                     max={MAX_REFERENCE_MEDIA}
                     value={draft.referenceMedia}
                     onChange={(next) => update("referenceMedia", next)}
-                  />
-                  <Input
-                    label={t("stepDetails.contactPhoneLabel")}
-                    type="tel"
-                    autoComplete="tel"
-                    required
-                    value={draft.contactPhone}
-                    onChange={(e) => update("contactPhone", e.target.value)}
                   />
                 </div>
               ) : null}
@@ -1259,7 +1321,7 @@ export function BookingWizard({
                       }}
                       rows={summaryRows}
                       total={total}
-                      totalNote={t("flow.totalNote")}
+                      totalNote={t("flow.totalNote", { providerName })}
                       responseNote={responseNote}
                     />
                   </div>
@@ -1273,8 +1335,20 @@ export function BookingWizard({
                       </p>
                     </div>
                   ) : null}
-                  <div className="rounded-[var(--fg-radius-md)] bg-bg-sunken p-4 text-body-sm text-text-secondary">
-                    {t("stepReview.cancellationNotice")}
+                  <div className="flex flex-col gap-3 rounded-[var(--fg-radius-md)] bg-bg-sunken p-4">
+                    <span className="text-body-sm font-semibold! text-text-primary">
+                      {t("stepReview.policiesTitle", { providerName })}
+                    </span>
+                    <dl className="flex flex-col gap-2.5 text-body-sm">
+                      {policyRows.map((row) => (
+                        <div key={row.title} className="flex flex-col gap-0.5">
+                          <dt className="text-text-tertiary">{row.title}</dt>
+                          <dd className="whitespace-pre-line text-text-secondary [overflow-wrap:anywhere]">
+                            {row.body}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
                   </div>
                   <Checkbox
                     checked={draft.agreed}
@@ -1285,15 +1359,6 @@ export function BookingWizard({
                       terms: termsChunk,
                     })}
                   />
-                </div>
-              ) : null}
-
-              {submitError ? (
-                <div
-                  role="alert"
-                  className="rounded-[var(--fg-radius-md)] bg-danger-bg p-3 text-body-sm text-danger"
-                >
-                  {submitError}
                 </div>
               ) : null}
             </div>
@@ -1314,7 +1379,7 @@ export function BookingWizard({
               }}
               rows={summaryRows}
               total={total}
-              totalNote={t("flow.totalNote")}
+              totalNote={t("flow.totalNote", { providerName })}
               responseNote={responseNote}
             />
             {current === "time" ? (
@@ -1338,6 +1403,14 @@ export function BookingWizard({
         {/* On a phone the reason does not fit on the button: it was cut
             off at both ends ("VỤ, HOẶC MÔ TẢ NHU C"). There it sits on its
             own line and the button keeps its short label. */}
+        {submitError ? (
+          <p
+            role="alert"
+            className="border-b border-danger/20 bg-danger-bg px-4 py-2 text-center text-body-sm text-danger"
+          >
+            {submitError}
+          </p>
+        ) : null}
         {!canContinue && missingHint ? (
           <p className="px-4 pt-2 text-center text-meta text-text-secondary sm:hidden">
             {missingHint}
@@ -1412,10 +1485,13 @@ export function BookingWizard({
                   {t("submittingBtn")}
                 </>
               ) : canContinue ? (
-                t("submitBtn")
+                <>
+                  <span className="sm:hidden">{t("submitBtnShort")}</span>
+                  <span className="hidden sm:inline">{t("submitBtn")}</span>
+                </>
               ) : (
                 <>
-                  <span className="sm:hidden">{t("submitBtn")}</span>
+                  <span className="sm:hidden">{t("submitBtnShort")}</span>
                   <span className="hidden truncate sm:inline">
                     {missingHint ?? t("submitBtn")}
                   </span>

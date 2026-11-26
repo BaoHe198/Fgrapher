@@ -271,6 +271,7 @@ export function ProfileAvatar({
           }}
           imageSrc={cropImageSrc}
           aspect={1}
+          round
           fileName={pendingFileMeta?.name ?? "avatar.jpg"}
           mimeType={pendingFileMeta?.type ?? "image/jpeg"}
           onCropped={onCropped}

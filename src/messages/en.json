@@ -754,7 +754,7 @@
       "total": "Estimated total",
       "quoteLater": "Quote later",
       "noOnlinePayment": "No online payment",
-      "noOnlinePaymentDetail": "— agree the deposit directly with the artist."
+      "noOnlinePaymentDetail": "— agree the deposit directly with {name}."
     },
     "stepProgress": {
       "label": "Booking progress"
@@ -922,15 +922,15 @@
         "chooseRoleTitle": "Verify your identity",
         "chooseRoleSubtitle": "Choose which role to verify.",
         "form": {
-          "underReviewTitle": "Your submission is under review",
-          "underReviewDesc": "We're reviewing the ID documents you submitted for {role}. This usually takes 1-2 business days.",
+          "underReviewTitle": "Sent, waiting for review",
+          "underReviewDesc": "Fgrapher has your documents for the {role} role. A review usually takes 1–2 working days; you will get a notification with the result. You do not need to stay on this page.",
           "verifiedTitle": "You're verified",
           "verifiedDesc": "Your identity has been verified for {role}.",
-          "submittedTitle": "Submitted for review",
+          "submittedTitle": "Sent, waiting for review",
           "tapToSelectPhoto": "Tap to select a photo",
           "title": "Verify your identity",
           "subtitle": "Required to activate your {role} profile — this is a one-time check.",
-          "rejectedNotice": "Your previous submission was rejected: {reason}. You can resubmit below.",
+          "rejectedNotice": "Your earlier submission was rejected: {reason}. You can send it again below. The document number must be typed again because Fgrapher does not store it, and the photos must be chosen again.",
           "whyWeAskLabel": "Why we ask:",
           "whyWeAskBody": "Vietnamese e-commerce law (Luật Thương mại điện tử 122/2025) requires marketplaces to verify every seller's identity before they can list services.",
           "whoCanSeeLabel": "Who can see it:",
@@ -963,6 +963,13 @@
             "photos": "Add the front and back of the ID and a selfie holding it.",
             "businessDoc": "Add the business registration document.",
             "consent": "Tick the agreement above to submit."
+          },
+          "photoTips": "Get all four corners of the document in the photo, with the text readable and no glare. Portrait: hold the document beside your face so both are clear.",
+          "meanwhile": {
+            "title": "While you wait, you can:",
+            "photos": "Add photos to your portfolio",
+            "services": "Add service packages",
+            "info": "Complete your page details"
           }
         }
       }
@@ -1008,9 +1015,14 @@
           "signedUp": "{name} signed up",
           "madeBooking": "{name} made a booking",
           "someone": "Someone",
-          "newReport": "New {targetType} report — {reason}"
+          "newReport": "New report about {targetType} — {reason}"
         },
-        "pendingPlaces": "Photo spots waiting for review"
+        "pendingPlaces": "Photo spots waiting for review",
+        "waitingTitle": "Waiting on you",
+        "pendingVerifications": "Identity checks to review",
+        "pendingMedia": "Photos and videos to review",
+        "pendingServiceRequests": "Customer requests to review",
+        "pendingRoleChanges": "Role change requests"
       },
       "users": {
         "title": "Users",
@@ -1152,7 +1164,11 @@
         "businessDocMissing": "Declared as a household business or company, but no registration certificate is on file.",
         "sameIdWarning": "This ID number was also submitted for another account:",
         "sameIdAccount": "{name} ({email}), role {role}",
-        "sameIdDeletedAccount": "A deleted account, role {role}"
+        "sameIdDeletedAccount": "A deleted account, role {role}",
+        "dateOfBirthLine": "Declared date of birth: {date} (age {age})",
+        "dateOfBirthMissing": "This account has not given a date of birth.",
+        "viewAllDocuments": "View the documents side by side",
+        "hideDocuments": "Hide documents"
       },
       "roleChangeRequests": {
         "title": "Role change requests",
@@ -1171,7 +1187,7 @@
       },
       "moderation": {
         "title": "Content moderation",
-        "description": "Every portfolio photo needs approval before it appears publicly. Shortcuts: A approve, R reject, arrow keys navigate. Target: reviewed within {hours}h.",
+        "description": "Portfolio photos and videos, Chợ F product photos and post photos must all be approved before they are shown publicly. Shortcuts: A to approve, R to reject, arrow keys to move. Target: handled within {hours} hours.",
         "empty": "Nothing pending",
         "selectAll": "Select all ({count})",
         "clearSelection": "Clear selection",
@@ -1186,12 +1202,14 @@
         "rejectedToast": "Rejected {count}",
         "allRoles": "All roles",
         "emptyFiltered": "Nothing pending for this role",
-        "viewLarge": "View full size",
+        "viewLarge": "View large",
         "waitingSince": "Sent {time}",
         "albumLabel": "Album: {title}",
         "autoFlaggedBadge": "Flagged by scan",
         "autoFlaggedReason": "Flagged by the automated scan: {reason}. A hint about where to look first — the photo is still pending like any other.",
-        "actionFailed": "That did not go through, please try again"
+        "actionFailed": "That did not go through, please try again",
+        "productLabel": "Product: {name}",
+        "postLabel": "Post photo"
       },
       "compliance": {
         "title": "Compliance",
@@ -1370,7 +1388,7 @@
       "invalidTransition": "This booking's status has just changed, so that action is no longer possible. Please reload the page.",
       "proposalInPast": "The proposed time has already passed. Please choose an upcoming one.",
       "proposalEndBeforeStart": "The proposed end time must be after the start.",
-      "areaRequired": "Choose the province where the shoot takes place.",
+      "areaRequired": "Choose the province where it takes place.",
       "wardNotInProvince": "That ward is not in the chosen province."
     },
     "uploads": {
@@ -1829,7 +1847,9 @@
         "budget": "The minimum budget must be below the maximum.",
         "title": "Enter a title (at least 3 characters) to continue."
       },
-      "phoneVerifyHeadsUp": "Before posting you'll verify your phone with an SMS code — it tells providers the request is genuine."
+      "phoneVerifyHeadsUp": "Before posting you'll verify your phone with an SMS code — it tells providers the request is genuine.",
+      "phoneVerifyFirst": "Posting a request needs a verified phone number. Do it now, or at the last step.",
+      "phoneVerifyNow": "Verify now"
     },
     "serviceRequests": {
       "title": "My requests",
@@ -1846,7 +1866,7 @@
         "PENDING_REVIEW": "Awaiting review",
         "OPEN": "Open",
         "HAS_OFFERS": "Has offers",
-        "FULFILLED": "Fulfilled",
+        "FULFILLED": "Provider chosen",
         "EXPIRED": "Expired",
         "CANCELLED": "Cancelled",
         "REJECTED": "Rejected"
@@ -2145,9 +2165,9 @@
       "card": {
         "when": "When",
         "where": "Where",
-        "respondByCustomer": "The artist replies by {time}, {date} · {hours} h left",
+        "respondByCustomer": "Awaiting a reply by {time}, {date} · {hours}h left",
         "respondByProvider": "Reply by {time}, {date} · {hours} h left",
-        "reviewPrompt": "How was the shoot? A review helps other customers choose.",
+        "reviewPrompt": "How did it go? A review helps the next customer choose.",
         "writeReview": "Write a review",
         "message": "Message",
         "cancelRequest": "Cancel request",
@@ -2407,7 +2427,8 @@
         },
         "hoursButton": "Working hours",
         "hoursTitle": "Working hours",
-        "hoursDescription": "Customers can only book within these hours. For a day you are busy, mark it on the calendar."
+        "hoursDescription": "Customers can only book within these hours. For a day you are busy, mark it on the calendar.",
+        "hoursSaved": "Working hours saved"
       }
     },
     "bookingDetail": {
@@ -2439,19 +2460,21 @@
         "provider": "Provider",
         "viewProfile": "View profile",
         "message": "Message",
-        "openZalo": "Open Zalo"
+        "openZalo": "Open Zalo",
+        "hirer": "{role} hiring crew"
       },
       "fields": {
         "service": "Service",
         "date": "Date",
         "time": "Time",
-        "duration": "Session length",
+        "duration": "Length",
         "location": "Location",
         "people": "People",
         "total": "Total",
         "customRequest": "Custom request",
         "contactPhone": "Contact phone",
-        "area": "Area"
+        "area": "Area",
+        "fromRequest": "From request {code}"
       },
       "locationLabel": {
         "PROVIDER": "At provider's studio",
@@ -2463,8 +2486,8 @@
       "film": {
         "title": "Booking journey",
         "requested": "Request sent",
-        "confirmed": "Artist confirms",
-        "shoot": "The shoot",
+        "confirmed": "{kind, select, studio {Studio confirms} makeup {Artist confirms} model {Model confirms} other {Artist confirms}}",
+        "shoot": "{kind, select, studio {The rental} makeup {The appointment} film {The filming} other {The shoot}}",
         "review": "Review",
         "done": "done",
         "current": "waiting",
@@ -2523,10 +2546,13 @@
         },
         "cancel": {
           "title": "Cancel this booking?",
-          "withinWindowWarning": "This is within 24 hours of the booking — the cancellation policy may apply once payments are enabled.",
-          "reasonPlaceholder": "Reason for cancelling (optional)",
+          "withinWindowWarning": "This is less than 24 hours before the booking. A late cancellation costs the other side; message them first if you can.",
+          "reasonPlaceholder": "{name} will be able to read this.",
           "keepBooking": "Keep booking",
-          "confirm": "Cancel booking"
+          "confirm": "Cancel booking",
+          "reasonLabel": "Reason for cancelling (optional)",
+          "termsTitle": "{name}'s terms",
+          "termsNote": "Any deposit is between you and {name}; Fgrapher does not hold money."
         },
         "reschedule": {
           "title": "Propose a new time",
@@ -2543,6 +2569,15 @@
       "answerBy": {
         "provider": "Answer before {time} on {date} ({hours} hours left). After that the request expires on its own.",
         "customer": "{name} has until {time} on {date} to answer ({hours} hours left). After that the request expires and you can book someone else."
+      },
+      "cancelledBy": {
+        "me": "You cancelled",
+        "customer": "Client cancelled",
+        "provider": "{kind, select, studio {Studio cancelled} model {Model cancelled} other {Artist cancelled}}"
+      },
+      "fromRequest": {
+        "title": "From request {code}",
+        "offer": "{name}'s quote: {price}"
       }
     },
     "listings": {
@@ -2625,11 +2660,11 @@
       "buildPortfolio": "Build your portfolio",
       "browseArtists": "Browse artists",
       "activityItems": {
-        "booking": "Booking {status} — {name}",
+        "booking": "Booking with {name} — {status}",
         "message": "New message from {name}",
         "review": "New {rating}★ review from {name}",
         "album": "New album added — \"{title}\"",
-        "order": "Order {status} — {name}",
+        "order": "Order from {name} — {status}",
         "fallbackPerson": "a user",
         "fallbackSender": "Someone"
       },
@@ -2687,12 +2722,13 @@
       "pageTitle": "Messages",
       "boardDraft": "Hi, I pinned {count} of your photos on Fgrapher and would like a shoot in that style. I'm planning for … — are you available?",
       "boardDraftAlbums": "Hi, I pinned {count} of your photos on Fgrapher (from {albums}) and would like a shoot in that style. I'm planning for … — are you available?",
-      "costumeDraft": "Hi, I'd like to rent “{costume}”. I need it on … — is it available?",
+      "costumeDraft": "Hi, I'd like to rent “{costume}”{info, select, yes { ({detail})} other {}}. Which days is it free, and what is the deposit?",
       "rentalDraftDates": "Hi, I'd like to rent {product} from {from} for {days, plural, one {# day} other {# days}}. Product: {url}",
       "consultDraft": "Hi, I just saw your page on Fgrapher and would like to ask a few questions. Are you taking bookings?",
       "consultDraftPackage": "Hi, I just saw your page on Fgrapher and I'm interested in the “{pkg}” package. Could you tell me more?",
       "consultDraftDay": "Hi, I just saw your page on Fgrapher. Are you available on {day}?",
-      "consultDraftPackageDay": "Hi, I just saw your page on Fgrapher and I'm interested in the “{pkg}” package on {day}. Are you available that day?"
+      "consultDraftPackageDay": "Hi, I just saw your page on Fgrapher and I'm interested in the “{pkg}” package on {day}. Are you available that day?",
+      "costumeDraftDates": "Hi, I'd like to rent “{costume}”{info, select, yes { ({detail})} other {}} from {from}, for {days, plural, one {# day} other {# days}}. Is it available?"
     },
     "shopOrders": {
       "title": "Shop orders",
@@ -3362,7 +3398,7 @@
       "basics": {
         "displayNameLabel": "Display name",
         "usernameLabel": "Username",
-        "usernameHint": "Used for your profile URL (e.g. fgrapher.vn/profile/yourname) — unaccented letters, numbers, and underscores only. For a name with diacritics, use \"Display name\".",
+        "usernameHint": "Used for your profile link (e.g. fgrapher.vn/profile/yourname) — unaccented letters, numbers and underscores only. The name customers see, accents and all, goes in the name field, not here.",
         "usernameTaken": "That username is taken",
         "usernameTooShort": "Usernames need at least 3 characters",
         "usernameTooLong": "Usernames can be at most 30 characters",
@@ -3402,7 +3438,9 @@
         "addressRequired": "Enter a detailed address (at least 5 characters)",
         "saveFailedStatus": "Couldn't save the profile (error {status}). What you typed is kept — please try again in a few minutes.",
         "saveNetworkError": "Couldn't reach the server. What you typed is kept — check your connection and press Save again.",
-        "addressPinnedAreaFilled": "Location pinned on the map and {area} filled in. Press Save to update."
+        "addressPinnedAreaFilled": "Location pinned on the map and {area} filled in. Press Save to update.",
+        "extraAreasAdd": "Add a province…",
+        "extraAreasRemove": "Remove {name}"
       },
       "editor": {
         "liveStatus": "Live — visible in search",
@@ -3465,7 +3503,8 @@
         "saveChanges": "Save changes",
         "saved": "Saved",
         "draftRestored": "Restored what you typed last time. It isn't saved yet — press Save changes at the bottom.",
-        "draftDiscard": "Discard draft"
+        "draftDiscard": "Discard draft",
+        "unsavedChanges": "You have unsaved changes"
       },
       "services": {
         "title": "Services",
@@ -3579,7 +3618,8 @@
         "editAria": "Edit {name}",
         "deleteAria": "Delete {name}",
         "missingHint": "Enter the outfit name and daily price to save.",
-        "photoEmpty": "No photos yet. Close this, press “Upload outfit photos” first, then add the outfit."
+        "photoEmpty": "No photos yet. Close this, press “Upload outfit photos” first, then add the outfit.",
+        "photoUploadShort": "Upload"
       },
       "policy": {
         "title": "Experience & policies",
@@ -3963,7 +4003,7 @@
         },
         "cancelled": {
           "title": "Booking cancelled",
-          "message": "{otherPartyName} cancelled {serviceName} on {dateLabel}"
+          "message": "{otherPartyName} cancelled {serviceName} on {dateLabel}{hasReason, select, yes {. Reason: {reason}} other {}}"
         },
         "reminder": {
           "title": "Booking tomorrow",
@@ -4274,7 +4314,9 @@
         "wardLabel": "Ward",
         "pickOne": "Choose a province",
         "wardAny": "Not sure",
-        "areaHelper": "{providerName} sees the province and ward right away, to know whether they can take the job. The street address appears only after they accept."
+        "areaHelper": "{providerName} sees the province and ward right away, to know whether they can take the job. The street address appears only after they accept.",
+        "contactPhoneHelper": "{providerName} only sees this number after accepting your request.",
+        "notesOptionalLabel": "Notes for {providerName} (optional)"
       },
       "stepReview": {
         "heading": "Review your booking",
@@ -4287,15 +4329,15 @@
         "servicePrice": "Service price",
         "total": "Total",
         "notesLabel": "Notes",
-        "cancellationNotice": "Free cancellation up to 48 hours before your session. Cancelling within 24 hours may be subject to a fee once payments are enabled.",
         "agreeTerms": "I agree to the <terms>booking terms</terms>",
-        "durationValue": "{hours} h"
+        "durationValue": "{hours} h",
+        "policiesTitle": "{providerName}'s terms"
       },
       "missingHint": {
         "service": "Pick a service, or describe what you need, to continue.",
         "dateTime": "Pick a date and time to continue.",
         "details": "Choose a location and enter a contact phone to continue.",
-        "address": "Enter the shoot address to continue.",
+        "address": "Enter the address to continue.",
         "agree": "Tick the agreement above to send the request."
       },
       "flow": {
@@ -4310,28 +4352,28 @@
           "date": "Date",
           "time": "Time",
           "location": "Place",
-          "notes": "Notes",
+          "notes": "Contact",
           "review": "Review"
         },
         "headings": {
           "package": "Choose a package",
-          "date": "Pick a shoot date",
+          "date": "{kind, select, film {Pick a filming date} makeup {Pick an appointment date} studio {Pick a rental date} other {Pick a shoot date}}",
           "time": "Pick a time",
-          "location": "Where is the shoot?",
-          "notes": "Notes for the artist",
+          "location": "{kind, select, film {Where is the filming?} makeup {Where is the make-up?} studio {Where is it?} other {Where is the shoot?}}",
+          "notes": "Phone number and notes",
           "review": "Review your request"
         },
         "subs": {
-          "package": "Pick a ready package or describe what you need for a quote.",
+          "package": "Pick a ready package or describe what you need so {providerName} can quote.",
           "date": "Days with a green dot are when {providerName} is free.",
-          "time": "Slots marked golden hour have the day's best light.",
-          "location": "Choose the place so the artist can prepare.",
-          "notes": "Style, reference photos and a phone number the artist can reach.",
+          "time": "{sun, select, yes {Slots marked golden hour have the day's best light.} other {Pick a start time, in Vietnam time.}}",
+          "location": "Choose the place so {providerName} can prepare.",
+          "notes": "The phone number is required. Notes and reference photos are up to you.",
           "review": "Check everything before sending. Nothing is charged here."
         },
         "custom": {
           "title": "Custom",
-          "description": "Describe what you need; the artist sends a quote",
+          "description": "Describe what you need; {providerName} sends a quote",
           "price": "Quote later"
         },
         "editedPhotos": "{count} edited photos",
@@ -4341,7 +4383,7 @@
           "time": "Pick a time to continue.",
           "location": "Choose a place to continue.",
           "phone": "Enter a contact phone to continue.",
-          "area": "Choose the province of the shoot to continue."
+          "area": "Choose the province to continue."
         },
         "keptNote": "What you entered is kept if you go back",
         "rows": {
@@ -4349,14 +4391,15 @@
           "date": "Date",
           "time": "Time",
           "location": "Place",
-          "references": "References"
+          "phone": "Phone",
+          "notes": "Notes"
         },
         "goldenHour": "Golden hour",
         "referenceCount": "{count} reference photos",
-        "hasNotes": "Notes added",
-        "totalNote": "The final price is set when the artist confirms",
-        "confirmWithin48h": "The artist replies within 48 hours",
-        "noDaysThisMonth": "No free days left this month. Try next month or message the artist.",
+        "hasNotes": "Notes written",
+        "totalNote": "The final price is set when {providerName} confirms",
+        "confirmWithin48h": "Replies within 48 hours",
+        "noDaysThisMonth": "No free days left this month. Try next month or message {providerName}.",
         "availabilityError": "Couldn't load availability. Your choices are kept — try again.",
         "changeDate": "Change date",
         "timezone": "Vietnam time (GMT+7)",
@@ -4367,7 +4410,7 @@
           "addressNote": "Street address: message the studio after sending the request."
         },
         "locationHints": {
-          "PROVIDER": "The artist's studio or usual place",
+          "PROVIDER": "{providerName}'s studio or usual place",
           "CUSTOMER": "A home, office, restaurant… of your choice",
           "OUTDOOR": "A park, street, beach… give the address or name"
         },
@@ -4377,8 +4420,10 @@
         "autosaves": "Draft saves itself",
         "stepDone": "done",
         "stepCurrent": "current step",
-        "stepTodo": "to do"
-      }
+        "stepTodo": "to do",
+        "noNotes": "None"
+      },
+      "submitBtnShort": "Send request"
     },
     "browse": {
       "pageTitle": "Browse artists — Fgrapher",
@@ -4672,7 +4717,18 @@
         "perDay": "{price}/day",
         "deposit": "Deposit {amount}",
         "messageToRent": "Message to rent",
-        "noPhoto": "No photo yet"
+        "noPhoto": "No photo yet",
+        "ask": {
+          "title": "Which days do you need it?",
+          "description": "Pick the dates so the message to the shop already has them. You still read and edit the message before sending.",
+          "from": "Pick-up date",
+          "days": "Days",
+          "estimate": "Estimate for {days, plural, one {# day} other {# days}}: {total}.",
+          "estimateDeposit": "Deposit {amount}.",
+          "estimateNote": "The shop confirms the final price in the chat.",
+          "noDate": "Not sure yet, ask first",
+          "compose": "Write the message"
+        }
       },
       "postsTab": {
         "empty": "No posts yet",
@@ -4781,7 +4837,8 @@
         "addressLabel": "Delivery address",
         "addressPlaceholder": "Street, ward, province",
         "pickupArea": "Collect in: {area}",
-        "noDelivery": "{shops}: this shop does not deliver. Please choose collection at the shop."
+        "noDelivery": "{shops}: this shop does not deliver. Please choose collection at the shop.",
+        "shipUnavailable": "{shops} does not deliver. Pick up at the shop."
       },
       "reviewOrder": "Review your order",
       "agreeTerms": "I agree to the <terms>terms of sale/rental</terms>",
@@ -5859,7 +5916,8 @@
       "linkInvalid": "That does not look like a YouTube link. Paste one like youtube.com/watch?v=… or youtu.be/…",
       "linkDuplicate": "This link is already in the list.",
       "linkItem": "YouTube video",
-      "removeLink": "Remove link"
+      "removeLink": "Remove link",
+      "orderNote": "Photos keep the order shown below. Change the cover and rearrange them in the album at any time."
     },
     "mediaLightbox": {
       "close": "Close",
@@ -6277,7 +6335,7 @@
     },
     "schedule": {
       "title": "Schedule your shoot",
-      "subtitle": "Pick a day, then a start time for the package you want. You'll review everything before the request goes to {name}.",
+      "subtitle": "Pick a day, pick a package, then pick a start time. You review everything before the request goes to {name}.",
       "week": "{from} – {to}",
       "prevWeek": "Previous week",
       "nextWeek": "Next week",
@@ -6289,7 +6347,9 @@
       "priceInChat": "Price agreed with {name} in chat",
       "timezone": "Vietnam time (GMT+7)",
       "noTimes": "No free times left for this package on this day.",
-      "noCharge": "Sending a request costs nothing. {name} confirms within 48 hours."
+      "noCharge": "Sending a request costs nothing. {name} confirms within 48 hours.",
+      "freeCount": "{count, plural, one {# time free} other {# times free}}",
+      "full": "Full"
     }
   },
   "places": {

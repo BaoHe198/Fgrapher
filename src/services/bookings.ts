@@ -361,6 +361,19 @@ export async function getBookingDetail(bookingId: string, userId: string) {
       locationProvince: { select: { name: true } },
       locationWard: { select: { name: true } },
       review: { select: { id: true } },
+      // A booking made by accepting an offer: which request it came from
+      // and what was offered. Without it the provider saw only "Yêu cầu tùy
+      // chỉnh" and had to guess which quote this was (25/11/2026).
+      serviceRequest: {
+        select: {
+          id: true,
+          code: true,
+          title: true,
+          fulfilledOffer: {
+            select: { proposedPrice: true, currency: true, message: true },
+          },
+        },
+      },
       // The detail page's timeline. It used to be rebuilt from the current
       // status alone, so a confirmed booking showed only "request created"
       // (23/11/2026 walk-through). `note` is left out: it is the actor's
@@ -431,29 +444,58 @@ export async function getBookingDetail(bookingId: string, userId: string) {
   // regardless of who was customer/provider in the prior booking(s), so
   // two people who've worked together before (in either direction) don't
   // see the notice again.
-  const [priorBookingCount, providerContact] = await Promise.all([
-    db.booking.count({
-      where: {
-        id: { not: booking.id },
-        OR: [
-          { customerId: booking.customerId, providerId: booking.providerId },
-          { customerId: booking.providerId, providerId: booking.customerId },
-        ],
-      },
-    }),
-    viewerIsProvider
-      ? Promise.resolve(null)
-      : db.profile.findFirst({
-          where: {
-            userId: booking.providerId,
-            isPublished: true,
-            ...(booking.recipientRole ? { role: booking.recipientRole } : {}),
-            zaloUrl: { not: null },
-          },
-          select: { zaloUrl: true },
-          orderBy: { createdAt: "asc" },
-        }),
-  ]);
+  // Crew hire: the "customer" is a provider hiring for a client's job, and
+  // is named by the page they hire under, not as a customer.
+  const hiredAs =
+    booking.requesterRole && booking.requesterRole !== "CUSTOMER"
+      ? booking.requesterRole
+      : null;
+  const [priorBookingCount, providerContact, requesterPage, providerPage] =
+    await Promise.all([
+      db.booking.count({
+        where: {
+          id: { not: booking.id },
+          OR: [
+            { customerId: booking.customerId, providerId: booking.providerId },
+            { customerId: booking.providerId, providerId: booking.customerId },
+          ],
+        },
+      }),
+      viewerIsProvider
+        ? Promise.resolve(null)
+        : db.profile.findFirst({
+            where: {
+              userId: booking.providerId,
+              isPublished: true,
+              ...(booking.recipientRole ? { role: booking.recipientRole } : {}),
+              zaloUrl: { not: null },
+            },
+            select: { zaloUrl: true },
+            orderBy: { createdAt: "asc" },
+          }),
+      hiredAs
+        ? db.profile.findFirst({
+            where: { userId: booking.customerId, role: hiredAs },
+            select: { displayName: true },
+          })
+        : Promise.resolve(null),
+      // The page this booking is with: its role picks the page's words, and
+      // its terms are shown to a customer who is about to cancel. All of it
+      // is already public on the provider's profile.
+      db.profile.findFirst({
+        where: {
+          userId: booking.providerId,
+          role: booking.recipientRole ?? { in: PROVIDER_ROLES },
+        },
+        select: {
+          role: true,
+          depositPercent: true,
+          depositPolicy: true,
+          cancellationPolicy: true,
+        },
+        orderBy: { createdAt: "asc" },
+      }),
+    ]);
 
   return {
     ...booking,
@@ -468,6 +510,22 @@ export async function getBookingDetail(bookingId: string, userId: string) {
     contactPhone: contactInfoVisible ? booking.contactPhone : null,
     locationAddress: contactInfoVisible ? booking.locationAddress : null,
     isFirstBookingBetweenParties: priorBookingCount === 0,
+    requester: hiredAs
+      ? { role: hiredAs, pageName: requesterPage?.displayName ?? null }
+      : null,
+    providerRole: booking.recipientRole ?? providerPage?.role ?? null,
+    providerTerms: providerPage
+      ? {
+          depositPercent: providerPage.depositPercent,
+          depositPolicy: providerPage.depositPolicy,
+          cancellationPolicy: providerPage.cancellationPolicy,
+        }
+      : null,
+    // A booking cancelled after it was confirmed stopped at the shoot, not
+    // at the confirmation.
+    wasConfirmed: booking.statusHistory.some(
+      (entry) => entry.toStatus === "CONFIRMED",
+    ),
     providerZaloUrl: providerContact?.zaloUrl
       ? normalizeZaloUrl(providerContact.zaloUrl)
       : null,
@@ -1087,7 +1145,13 @@ export async function transitionBooking({
         userId: recipient.id,
         type: "BOOKING_CANCELLED",
         title: nt("booking.cancelled.title"),
-        message: nt("booking.cancelled.message", notifyValues),
+        // The reason travels with the notice: the other side should not
+        // have to open the booking to learn why.
+        message: nt("booking.cancelled.message", {
+          ...notifyValues,
+          hasReason: note?.trim() ? "yes" : "no",
+          reason: (note ?? "").trim().slice(0, 200),
+        }),
         data: { bookingId: updated.id },
         email: {
           subject: emailT("bookingCancelled.subject"),

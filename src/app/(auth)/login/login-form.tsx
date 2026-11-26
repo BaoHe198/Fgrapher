@@ -117,7 +117,7 @@ export function LoginForm({
     await signIn("credentials", {
       email: values.email,
       password: values.password,
-      callbackUrl: callbackUrl || "/dashboard",
+      callbackUrl: callbackUrl || "/signed-in",
     });
   };
 

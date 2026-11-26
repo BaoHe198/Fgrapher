@@ -33,6 +33,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/components/ui/date-field";
 import { ListSkeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/toast";
 import {
   type AgendaItem,
   addDays,
@@ -491,7 +492,16 @@ export function CalendarClient({
           title={v2("hoursTitle")}
           description={v2("hoursDescription")}
         >
-          <AvailabilitySettings embedded onSaved={reloadHours} />
+          {/* Saved means done: the sheet stayed open over the calendar,
+              which left people unsure the hours had been kept. */}
+          <AvailabilitySettings
+            embedded
+            onSaved={() => {
+              reloadHours();
+              setPanel(null);
+              toast.add({ title: v2("hoursSaved"), type: "success" });
+            }}
+          />
         </ResponsiveSheet>
       ) : null}
       {panel?.type === "sync" ? (

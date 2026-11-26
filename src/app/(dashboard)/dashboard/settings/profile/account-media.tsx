@@ -134,6 +134,7 @@ export function AccountMedia({
         }}
         imageSrc={cropImageSrc}
         aspect={cropTarget === "avatar" ? 1 : 3}
+        round={cropTarget === "avatar"}
         fileName={pendingFileMeta?.name ?? "image"}
         mimeType={pendingFileMeta?.type ?? "image/jpeg"}
         onCropped={onCropped}

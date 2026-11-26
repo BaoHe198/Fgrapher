@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, Loader2 } from "lucide-react";
+import { BadgeCheck, EyeOff, Images, Loader2 } from "lucide-react";
 import type { Role } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -16,6 +16,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { KYC_REJECTION_REASONS } from "@/lib/constants";
+import { formatDate } from "@/lib/format";
 
 interface VerificationRow {
   id: string;
@@ -46,6 +47,19 @@ interface VerificationRow {
 type ImageKind = "front" | "back" | "selfie" | "business";
 
 const IMAGE_KIND_VALUES: ImageKind[] = ["front", "back", "selfie", "business"];
+
+// Whole years between a date of birth and today, by calendar date (the
+// stored value is a date, so UTC parts are the date as entered).
+function ageOn(dateOfBirth: string, today: Date) {
+  const born = new Date(dateOfBirth);
+  let age = today.getFullYear() - born.getUTCFullYear();
+  const beforeBirthday =
+    today.getMonth() < born.getUTCMonth() ||
+    (today.getMonth() === born.getUTCMonth() &&
+      today.getDate() < born.getUTCDate());
+  if (beforeBirthday) age -= 1;
+  return age;
+}
 
 export default function AdminVerificationsPage() {
   const t = useTranslations("accountFlows.admin.verifications");
@@ -81,6 +95,11 @@ export default function AdminVerificationsPage() {
   const [reasonNote, setReasonNote] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
   const [loadingImage, setLoadingImage] = useState<string | null>(null);
+  // The documents an admin asked to see side by side, per request. Kept in
+  // memory only: the links are short-lived and nothing is stored here.
+  const [documents, setDocuments] = useState<
+    Record<string, { kind: ImageKind; label: string; url: string }[]>
+  >({});
 
   const load = () => {
     startTransition(() => setIsLoading(true));
@@ -113,6 +132,33 @@ export default function AdminVerificationsPage() {
       return;
     }
     window.open(body.data.url, "_blank", "noopener,noreferrer");
+  };
+
+  // Front, back and portrait on one screen, to compare with each other and
+  // with the declared date of birth. Each one is fetched through the same
+  // endpoint as the single buttons, so every view is still written to the
+  // audit log (CLAUDE.md rule 7).
+  const viewAll = async (row: VerificationRow) => {
+    setLoadingImage(`${row.id}-all`);
+    const kinds = IMAGE_KINDS.filter(
+      ({ kind }) => kind !== "business" || row.hasBusinessDoc,
+    );
+    const loaded: { kind: ImageKind; label: string; url: string }[] = [];
+    for (const { kind, label } of kinds) {
+      const res = await fetch(
+        `/api/admin/verifications/${row.id}/image?kind=${kind}`,
+      );
+      const body = await res.json().catch(() => null);
+      if (res.ok && body?.data?.url) {
+        loaded.push({ kind, label, url: body.data.url });
+      }
+    }
+    setLoadingImage(null);
+    if (loaded.length === 0) {
+      toast.add({ title: t("failedToLoadDocument"), type: "error" });
+      return;
+    }
+    setDocuments((prev) => ({ ...prev, [row.id]: loaded }));
   };
 
   const review = async (id: string, action: "approve" | "reject") => {
@@ -182,6 +228,16 @@ export default function AdminVerificationsPage() {
               <p className="text-body-sm text-text-secondary">
                 {row.user.email}
               </p>
+              {/* What the documents are checked against: the account must
+                  be 18 or over, and the birth date must match the card. */}
+              <p className="text-body-sm text-text-primary">
+                {row.user.dateOfBirth
+                  ? t("dateOfBirthLine", {
+                      date: formatDate(row.user.dateOfBirth),
+                      age: ageOn(row.user.dateOfBirth, new Date(now)),
+                    })
+                  : t("dateOfBirthMissing")}
+              </p>
               <p className="text-body-sm text-text-secondary">
                 {t("legalEntityLine", {
                   type: t(`legalEntity.${row.legalEntityType}`),
@@ -227,6 +283,36 @@ export default function AdminVerificationsPage() {
               ) : null}
 
               <div className="flex flex-wrap gap-2">
+                {documents[row.id] ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() =>
+                      setDocuments((prev) => {
+                        const next = { ...prev };
+                        delete next[row.id];
+                        return next;
+                      })
+                    }
+                  >
+                    <EyeOff className="size-4" />
+                    {t("hideDocuments")}
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="accent"
+                    disabled={loadingImage === `${row.id}-all`}
+                    onClick={() => viewAll(row)}
+                  >
+                    {loadingImage === `${row.id}-all` ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Images className="size-4" />
+                    )}
+                    {t("viewAllDocuments")}
+                  </Button>
+                )}
                 {IMAGE_KINDS.filter(
                   ({ kind }) => kind !== "business" || row.hasBusinessDoc,
                 ).map(({ kind, label }) => (
@@ -244,6 +330,34 @@ export default function AdminVerificationsPage() {
                   </Button>
                 ))}
               </div>
+
+              {documents[row.id] ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {documents[row.id].map((doc) => (
+                    <a
+                      key={doc.kind}
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="focus-ring flex flex-col gap-1.5 rounded-[var(--fg-radius-md)]"
+                    >
+                      {/* A plain <img>, on purpose: next/image would route an
+                          identity document through the image optimiser and
+                          its cache. This loads the signed link directly. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={doc.url}
+                        alt={doc.label}
+                        referrerPolicy="no-referrer"
+                        className="max-h-[420px] w-full rounded-[var(--fg-radius-md)] border border-border-subtle bg-bg-sunken object-contain"
+                      />
+                      <span className="text-body-sm text-text-secondary">
+                        {doc.label}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              ) : null}
 
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <NativeSelect

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Role, VerificationStatus } from "@prisma/client";
-import { Loader2, ShieldCheck, UploadCloud } from "lucide-react";
+import { Clock, Loader2, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { PROVIDER_ROLES } from "@/lib/constants";
 import { compressImageFile } from "@/lib/media/image-compression";
 import { cn } from "@/lib/utils";
 
@@ -82,16 +83,69 @@ function compressKycFile(file: File): Promise<File> {
   });
 }
 
+type SlotKind = "front" | "back" | "selfie" | "paper";
+
 interface SlotProps {
   label: string;
   file: File | null;
   onSelect: (file: File | null) => void;
+  /** Which outline to draw in the empty tile, as an example of the photo. */
+  kind: SlotKind;
+}
+
+// What the photo should look like, drawn rather than described: the whole
+// card inside the frame, or a face with the card held beside it.
+function SlotExample({ kind }: { kind: SlotKind }) {
+  const stroke = {
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+  return (
+    <svg
+      viewBox="0 0 96 64"
+      aria-hidden
+      className="h-14 w-auto text-text-tertiary"
+    >
+      {kind === "selfie" ? (
+        <>
+          <circle cx="36" cy="22" r="11" {...stroke} />
+          <path d="M14 60c2-14 10-21 22-21s20 7 22 21" {...stroke} />
+          <rect x="58" y="30" width="30" height="20" rx="3" {...stroke} />
+          <path d="M63 37h8M63 43h18" {...stroke} />
+        </>
+      ) : kind === "paper" ? (
+        <>
+          <rect x="24" y="4" width="48" height="56" rx="3" {...stroke} />
+          <path d="M33 16h30M33 26h30M33 36h30M33 46h18" {...stroke} />
+        </>
+      ) : (
+        <>
+          <rect x="6" y="6" width="84" height="52" rx="5" {...stroke} />
+          {kind === "front" ? (
+            <>
+              <rect x="14" y="18" width="22" height="28" rx="2" {...stroke} />
+              <path d="M44 22h36M44 32h36M44 42h24" {...stroke} />
+            </>
+          ) : (
+            <>
+              <rect x="14" y="16" width="16" height="12" rx="2" {...stroke} />
+              <path d="M14 38h68M14 48h68M40 22h42" {...stroke} />
+            </>
+          )}
+        </>
+      )}
+    </svg>
+  );
 }
 
 function FileSlot({
   label,
   file,
   onSelect,
+  kind,
   tapToSelectPhoto,
 }: SlotProps & { tapToSelectPhoto: string }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -117,7 +171,7 @@ function FileSlot({
       </span>
       <label
         className={cn(
-          "relative flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[var(--fg-radius-md)] border-2 border-dashed p-5 text-center transition-colors duration-150 hover:border-brand-primary",
+          "relative flex aspect-[3/2] cursor-pointer flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[var(--fg-radius-md)] border-2 border-dashed bg-bg-sunken p-3 text-center transition-colors duration-150 hover:border-brand-primary",
           file ? "border-success" : "border-border-default",
         )}
       >
@@ -136,11 +190,11 @@ function FileSlot({
           <img
             src={previewUrl}
             alt=""
-            className="absolute inset-0 size-full object-cover"
+            className="absolute inset-0 size-full object-contain"
           />
         ) : (
           <>
-            <UploadCloud className="size-5 text-text-tertiary" />
+            <SlotExample kind={kind} />
             <span className="text-body-sm text-text-tertiary">
               {tapToSelectPhoto}
             </span>
@@ -155,15 +209,18 @@ export function VerificationForm({
   role,
   status,
   rejectedReason,
+  accountName,
 }: {
   role: Role;
   status: VerificationStatus;
   rejectedReason: string | null;
+  /** The account holder's name, offered as the name on the document. */
+  accountName: string | null;
 }) {
   const router = useRouter();
   const roleT = useTranslations("role");
   const t = useTranslations("accountFlows.onboarding.verification.form");
-  const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] = useState(accountName ?? "");
   const [idNumber, setIdNumber] = useState("");
   const [idFront, setIdFront] = useState<File | null>(null);
   const [idBack, setIdBack] = useState<File | null>(null);
@@ -179,13 +236,31 @@ export function VerificationForm({
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  // A still clock, not a spinner: a spinner says "loading, wait here", and
+  // people did wait (role walk-through, 25/11/2026). A review takes a day
+  // or two; the screen says so and offers what can be done meanwhile.
+  const waitingIcon = (
+    <span className="flex size-14 items-center justify-center rounded-full bg-gold-100">
+      <Clock aria-hidden className="size-7 text-gold-700" />
+    </span>
+  );
+  const meanwhile = [
+    { href: "/dashboard/portfolio", label: t("meanwhile.photos") },
+    ...((PROVIDER_ROLES as readonly string[]).includes(role)
+      ? [{ href: "/dashboard/services", label: t("meanwhile.services") }]
+      : []),
+    { href: "/dashboard/my-page/info", label: t("meanwhile.info") },
+  ];
+
   if (status === "PENDING" && !submitted) {
     return (
       <StatusScreen
-        icon={<Loader2 className="size-8 animate-spin text-brand-primary" />}
+        icon={waitingIcon}
         title={t("underReviewTitle")}
         description={t("underReviewDesc", { role: roleT(role) })}
         backToDashboard={t("backToDashboard")}
+        meanwhileTitle={t("meanwhile.title")}
+        meanwhile={meanwhile}
       />
     );
   }
@@ -204,10 +279,12 @@ export function VerificationForm({
   if (submitted) {
     return (
       <StatusScreen
-        icon={<Loader2 className="size-8 animate-spin text-brand-primary" />}
+        icon={waitingIcon}
         title={t("submittedTitle")}
         description={t("underReviewDesc", { role: roleT(role) })}
         backToDashboard={t("backToDashboard")}
+        meanwhileTitle={t("meanwhile.title")}
+        meanwhile={meanwhile}
       />
     );
   }
@@ -362,6 +439,7 @@ export function VerificationForm({
           <div className="flex flex-col gap-2">
             <FileSlot
               label={t("businessDocLabel")}
+              kind="paper"
               file={businessDoc}
               onSelect={setBusinessDoc}
               tapToSelectPhoto={t("tapToSelectPhoto")}
@@ -374,23 +452,27 @@ export function VerificationForm({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <FileSlot
             label={t("idFrontLabel")}
+            kind="front"
             file={idFront}
             onSelect={setIdFront}
             tapToSelectPhoto={t("tapToSelectPhoto")}
           />
           <FileSlot
             label={t("idBackLabel")}
+            kind="back"
             file={idBack}
             onSelect={setIdBack}
             tapToSelectPhoto={t("tapToSelectPhoto")}
           />
           <FileSlot
             label={t("selfieLabel")}
+            kind="selfie"
             file={selfie}
             onSelect={setSelfie}
             tapToSelectPhoto={t("tapToSelectPhoto")}
           />
         </div>
+        <p className="text-body-sm text-text-tertiary">{t("photoTips")}</p>
 
         <Checkbox
           checked={consent}
@@ -436,17 +518,40 @@ function StatusScreen({
   title,
   description,
   backToDashboard,
+  meanwhileTitle,
+  meanwhile = [],
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
   backToDashboard: string;
+  meanwhileTitle?: string;
+  meanwhile?: { href: string; label: string }[];
 }) {
   return (
     <div className="mx-auto flex min-h-full max-w-lg flex-col items-center justify-center gap-3 px-6 py-16 text-center">
       {icon}
       <h1 className="text-display-md text-text-primary">{title}</h1>
       <p className="text-body-md text-text-secondary">{description}</p>
+      {meanwhile.length > 0 ? (
+        <div className="mt-2 flex w-full flex-col gap-2 text-left">
+          <span className="text-body-sm font-semibold! text-text-primary">
+            {meanwhileTitle}
+          </span>
+          {meanwhile.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="focus-ring flex min-h-12 items-center justify-between gap-3 rounded-[var(--fg-radius-md)] border border-border-default px-4 text-body-md text-text-primary hover:bg-bg-sunken"
+            >
+              {item.label}
+              <span aria-hidden className="text-text-tertiary">
+                →
+              </span>
+            </Link>
+          ))}
+        </div>
+      ) : null}
       <Link href="/dashboard" className="text-text-link hover:underline">
         {backToDashboard}
       </Link>

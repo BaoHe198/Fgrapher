@@ -3,7 +3,9 @@ import type { Role } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
 import { features } from "@/lib/features";
+import { usesDaylight } from "@/lib/constants/booking-wording";
 import { formatAdministrativeLocation } from "@/lib/location";
+import { resolvePartyName } from "@/lib/party-name";
 import { vietnamMonthStart } from "@/lib/vietnam/date";
 
 /**
@@ -252,7 +254,15 @@ export async function getRecentActivity(
       take: 5,
       include: {
         customer: { select: { name: true, firstName: true } },
-        provider: { select: { name: true, firstName: true } },
+        // The page name, as on the profile the customer booked from: the
+        // feed said "Hoàng Nam" for "Nam Đặng Photography" (25/11/2026).
+        provider: {
+          select: {
+            name: true,
+            firstName: true,
+            profiles: { select: { displayName: true, role: true } },
+          },
+        },
       },
     }),
     db.message.findMany({
@@ -297,9 +307,11 @@ export async function getRecentActivity(
       type: "booking" as const,
       href: `/dashboard/bookings/${b.id}`,
       status: b.status,
-      personName: isProvider
-        ? (b.customer.firstName ?? b.customer.name)
-        : (b.provider.firstName ?? b.provider.name),
+      // "" would print as a line ending in a dash, so it becomes null and
+      // the page's own fallback word is used.
+      personName:
+        resolvePartyName(isProvider ? b.customer : b.provider, "").trim() ||
+        null,
       timestamp: b.updatedAt,
     })),
     ...messages.map((m) => ({
@@ -399,6 +411,7 @@ export async function getProviderOverview(
         profiles: {
           where: { role: { in: PROVIDER_ROLES } },
           select: {
+            role: true,
             latitude: true,
             longitude: true,
             provinceId: true,
@@ -485,8 +498,10 @@ export async function getProviderOverview(
   ]);
 
   const profiles = user.profiles;
+  // Sunrise and golden hour on "today" only where daylight matters: a
+  // make-up artist and a studio were shown them too.
   const located = profiles.find(
-    (p) => p.latitude != null && p.longitude != null,
+    (p) => usesDaylight(p.role) && p.latitude != null && p.longitude != null,
   );
 
   const dayKeys = Array.from({ length: 14 }, (_, i) =>

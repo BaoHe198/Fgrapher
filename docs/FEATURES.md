@@ -404,6 +404,29 @@ thường.
 (`Booking.expiresAt`) cho cả hai bên. Trên điện thoại, hai nút Chấp nhận / Từ
 chối của nhà cung cấp ghim ở cuối màn hình, phía trên thanh điều hướng.
 
+**Câu chữ theo vai trò (26/11/2026).** `lib/constants/booking-wording.ts` đổi
+vai trò của nhà cung cấp thành một trong `photo | film | makeup | studio |
+model`; catalog dùng ICU `select` trên giá trị đó ("ngày chụp / quay / hẹn /
+thuê", "Nghệ sĩ / Chuyên viên / Studio / Người mẫu xác nhận"). Nhánh `other` là
+câu của nhiếp ảnh gia, nên vai trò lạ vẫn đọc như cũ. Gợi ý mặt trời mọc và giờ
+vàng chỉ dành cho `PHOTOGRAPHER`, `VIDEOGRAPHER`, `MODEL` (`usesDaylight`), cả
+trong form đặt lịch lẫn màn hình "hôm nay" của nhà cung cấp.
+
+**Form đặt lịch (26/11/2026).** Số điện thoại là ô đầu tiên của bước "Liên hệ",
+ghi rõ bắt buộc và ai thấy nó; ghi chú và ảnh tham khảo ghi rõ không bắt buộc.
+Bước xem lại hiện đặt cọc, hủy lịch, dời lịch **của chính nhà cung cấp**
+(`Profile.depositPercent/depositPolicy/cancellationPolicy/reschedulePolicy`),
+không còn câu quy định chung nhắc tới thanh toán chưa bật. Lỗi khi gửi hiện trên
+thanh nút cố định. Hộp chọn ngày giờ trên hồ sơ mở từng gói một, mỗi dòng ghi số
+giờ còn trống trong ngày.
+
+**Trang chi tiết (26/11/2026).** `getBookingDetail()` trả thêm: `requester` (vai
+trò và tên trang của người thuê ê-kíp), `providerRole`, `providerTerms`,
+`wasConfirmed` và `serviceRequest` (mã, tiêu đề, báo giá đã chọn) cho lịch tạo từ
+một báo giá. Thanh tiến trình và dòng thời gian ghi ai hủy (`Booking.cancelledBy`);
+lịch hủy sau khi đã xác nhận dừng ở khung "Buổi chụp", không ở khung xác nhận.
+Hộp hủy của khách hiện điều khoản của nhà cung cấp; lý do hủy đi kèm thông báo.
+
 ## 9. Yêu cầu dịch vụ và đề nghị
 
 Customer có thể đăng nhu cầu để nhà cung cấp chủ động gửi đề nghị:
@@ -499,6 +522,19 @@ Admin có các khu vực cho:
 
 Mọi thao tác nhạy cảm phải gọi `requireAdmin()`, ghi `AdminAction` và không trả
 password hash, token hoặc ảnh KYC ngoài endpoint chuyên dụng.
+
+**Bổ sung 26/11/2026.**
+
+- Trang tổng quan mở đầu bằng "Việc đang chờ bạn": sáu hàng chờ, mỗi ô là đường
+  dẫn tới hàng chờ đó. `getAdminQueueCounts()` được `cache()` theo request vì
+  layout (thanh bên) và trang cùng đọc.
+- Thẻ xác minh hiện ngày sinh khai báo kèm tuổi, và nút "Xem các giấy tờ cạnh
+  nhau". Mỗi ảnh vẫn đi qua `/api/admin/verifications/[id]/image` nên vẫn một
+  dòng `AuditLog` cho mỗi lượt xem. Ảnh vẽ bằng `<img>` thường, **không** dùng
+  `next/image`, để giấy tờ không đi qua bộ tối ưu ảnh và bộ nhớ đệm của nó. Liên
+  kết ký là URL tải riêng trên `api.cloudinary.com`, nên CSP `img-src` có host đó.
+- Đăng nhập không kèm `callbackUrl` đi qua `/signed-in`, nơi chọn đích theo vai
+  trò: admin vào `/admin`, còn lại vào `/dashboard`.
 
 ## 16. Quyền riêng tư và tuân thủ
 
