@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { PROVIDER_ROLES } from "@/lib/constants";
 import { serviceKindAllowedForRole } from "@/lib/constants/service-matrix";
 import { createServiceSchema } from "@/lib/validations/service";
+import { ownPhotoIds } from "@/services/own-media";
 import { syncProfileServiceKinds } from "@/services/profile-service-kinds";
 
 export async function POST(request: Request) {
@@ -70,6 +71,18 @@ export async function POST(request: Request) {
     }
 
     await requireActiveSubscription(session.user.id, profile.role);
+
+    if (
+      parsed.data.coverMediaId &&
+      !(await ownPhotoIds(profile.id, [parsed.data.coverMediaId])).has(
+        parsed.data.coverMediaId,
+      )
+    ) {
+      return NextResponse.json(
+        { data: null, error: "not_found", message: "Photo not found" },
+        { status: 404 },
+      );
+    }
 
     const service = await db.service.create({ data: parsed.data });
 

@@ -8,7 +8,8 @@ import {
 import { revalidatePublicProfile } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { createCostumeSchema } from "@/lib/validations/costume";
-import { listCostumesForOwner } from "@/services/costumes";
+import { listCostumesForOwner, setCostumeGallery } from "@/services/costumes";
+import { ownPhotoIds } from "@/services/own-media";
 
 // The catalogue belongs to the costume rental role and nothing else. It is
 // NOT behind MARKETPLACE_ENABLED: outfits live on the shop's own profile,
@@ -100,22 +101,31 @@ export async function POST(request: Request) {
 
     await requireActiveSubscription(session.user.id, profile.role);
 
-    // A photo must be one of this profile's own media rows, or someone could
+    // Every photo must be one of this profile's own, or someone could
     // attach another provider's photo to their own listing by id.
-    if (parsed.data.mediaId) {
-      const media = await db.profileMedia.findUnique({
-        where: { id: parsed.data.mediaId },
-        select: { profileId: true, deletedAt: true },
-      });
-      if (!media || media.deletedAt || media.profileId !== profile.id) {
-        return NextResponse.json(
-          { data: null, error: "not_found", message: "Photo not found" },
-          { status: 404 },
-        );
-      }
+    const { galleryMediaIds = [], ...data } = parsed.data;
+    const photoIds = [data.mediaId, ...galleryMediaIds].filter(
+      (id): id is string => Boolean(id),
+    );
+    const own = await ownPhotoIds(profile.id, photoIds);
+    if (photoIds.some((id) => !own.has(id))) {
+      return NextResponse.json(
+        { data: null, error: "not_found", message: "Photo not found" },
+        { status: 404 },
+      );
     }
 
-    const item = await db.costumeItem.create({ data: parsed.data });
+    const item = await db.$transaction(async (tx) => {
+      const created = await tx.costumeItem.create({ data });
+      await setCostumeGallery(
+        tx,
+        created.id,
+        profile.id,
+        // The main photo is not also listed as a further one.
+        galleryMediaIds.filter((id) => id !== data.mediaId),
+      );
+      return created;
+    });
 
     await revalidatePublicProfile(session.user.id);
 

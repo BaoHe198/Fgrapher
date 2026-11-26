@@ -94,16 +94,21 @@ export function ImageCropDialog({
           ) : null}
         </div>
 
-        <input
-          type="range"
-          min={1}
-          max={3}
-          step={0.05}
-          value={zoom}
-          onChange={(e) => setZoom(Number(e.target.value))}
-          aria-label={t("zoomAria")}
-          className="h-11 w-full accent-gold-500"
-        />
+        {/* The row is tall enough to grab with a thumb; the slider itself
+            keeps its own height, so its focus ring hugs the track and is
+            not a large empty box. */}
+        <div className="flex h-11 items-center px-1">
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.05}
+            value={zoom}
+            onChange={(e) => setZoom(Number(e.target.value))}
+            aria-label={t("zoomAria")}
+            className="w-full cursor-pointer accent-gold-500"
+          />
+        </div>
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>

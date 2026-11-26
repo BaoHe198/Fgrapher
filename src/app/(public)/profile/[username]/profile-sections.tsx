@@ -82,6 +82,8 @@ export interface PackageItem {
   currency: string;
   editedPhotoCount?: number | null;
   deliveryDays?: number | null;
+  /** The provider's own choice of picture; else one is taken by position. */
+  photoUrl?: string | null;
 }
 
 // The packages as Airbnb lists a host's offerings: a photo, the name, two
@@ -102,7 +104,9 @@ export function PackageList({
   return (
     <ul className="flex flex-col gap-4">
       {services.map((service, index) => {
-        const photo = photos.length > 0 ? photos[index % photos.length] : null;
+        const photo =
+          service.photoUrl ??
+          (photos.length > 0 ? photos[index % photos.length] : null);
         const facts = [
           service.price === 0
             ? t("tfp")

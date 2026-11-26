@@ -277,7 +277,22 @@ async function getPublicProfileUserUncached(username: string) {
               },
             },
           },
-          services: { where: { isActive: true } },
+          services: {
+            where: { isActive: true },
+            // The package's own picture. Its status comes along so the page
+            // can drop a photo that is not approved (or was deleted) before
+            // anything reaches the browser: see lib/media/package-photo.ts.
+            include: {
+              coverMedia: {
+                select: {
+                  url: true,
+                  type: true,
+                  moderationStatus: true,
+                  deletedAt: true,
+                },
+              },
+            },
+          },
         },
       },
       // Only verificationStatus is actually used publicly (the Verified

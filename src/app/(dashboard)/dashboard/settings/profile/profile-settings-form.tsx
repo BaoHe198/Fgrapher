@@ -83,6 +83,8 @@ interface ProfileFormValues {
   categories: ProfileCategory[];
   address: string;
   area: string;
+  roomCount: string;
+  capacity: string;
   amenities: string[];
   shopName: string;
   deliveryFee: string;
@@ -124,6 +126,8 @@ function toFormValues(
     categories: (profile?.categories as ProfileCategory[]) ?? [],
     address: (profile?.address as string) ?? "",
     area: profile?.area != null ? String(profile.area) : "",
+    roomCount: profile?.roomCount != null ? String(profile.roomCount) : "",
+    capacity: profile?.capacity != null ? String(profile.capacity) : "",
     amenities: (profile?.amenities as string[]) ?? [],
     shopName: (profile?.shopName as string) ?? "",
     deliveryFee:
@@ -411,6 +415,12 @@ export function ProfileSettingsForm({
           address: values.address.trim(),
           addressPoint: addressPoint ?? undefined,
           area: values.area ? Number(values.area) : undefined,
+          ...(role === "STUDIO"
+            ? {
+                roomCount: values.roomCount ? Number(values.roomCount) : null,
+                capacity: values.capacity ? Number(values.capacity) : null,
+              }
+            : {}),
           amenities: values.amenities,
           shopName: values.shopName || undefined,
           // Empty means "this shop does not deliver", which is not the same
@@ -892,12 +902,37 @@ export function ProfileSettingsForm({
 
       {role === "STUDIO" ? (
         <>
-          <Input
-            label={tEditor("areaLabel")}
-            type="number"
-            value={values.area}
-            onChange={(e) => set("area", e.target.value)}
-          />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Input
+              label={tEditor("areaLabel")}
+              type="number"
+              inputMode="decimal"
+              min={0}
+              value={values.area}
+              onChange={(e) => set("area", e.target.value)}
+            />
+            <Input
+              label={tEditor("roomCountLabel")}
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={50}
+              value={values.roomCount}
+              onChange={(e) => set("roomCount", e.target.value)}
+            />
+            <Input
+              label={tEditor("capacityLabel")}
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={1000}
+              value={values.capacity}
+              onChange={(e) => set("capacity", e.target.value)}
+            />
+          </div>
+          <p className="-mt-2 text-body-sm text-text-tertiary">
+            {tEditor("studioFactsHelper")}
+          </p>
           <div className="flex flex-col gap-2">
             <span className="text-caption-upper tracking-[0.12em] text-text-tertiary">
               {tEditor("amenitiesLabel")}
@@ -1055,6 +1090,7 @@ export function ProfileSettingsForm({
             profileId={profileId}
             role={role}
             initialServices={services}
+            availableMedia={profileMedia.filter((m) => m.type !== "VIDEO")}
           />
         ) : (
           // Profile rows are created lazily on first save — a role that

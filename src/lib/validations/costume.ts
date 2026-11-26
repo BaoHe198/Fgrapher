@@ -16,9 +16,19 @@ export const COSTUME_CATEGORIES = [
   "ACCESSORIES",
 ] as const;
 
+/** Further photos of one outfit, after its main photo. */
+export const MAX_COSTUME_EXTRA_PHOTOS = 4;
+
 export const createCostumeSchema = z.object({
   profileId: z.string().min(1),
   mediaId: z.string().min(1).nullish(),
+  // Not a column: the ids of the outfit's further photos (back, detail).
+  // The route links each ProfileMedia row to the outfit. Left out of an
+  // update, the photos already linked stay as they are.
+  galleryMediaIds: z
+    .array(z.string().min(1))
+    .max(MAX_COSTUME_EXTRA_PHOTOS)
+    .optional(),
   name: z.string().min(2, "Enter an outfit name"),
   description: z.string().max(1000).optional(),
   category: z.enum(COSTUME_CATEGORIES).nullish(),

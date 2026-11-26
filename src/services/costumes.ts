@@ -32,12 +32,47 @@ const COSTUME_SELECT = {
   },
 } as const;
 
+/** The outfit's further photos, in portfolio order. */
+const GALLERY_ORDER = { order: "asc" } as const;
+
+/**
+ * Sets an outfit's further photos to exactly `mediaIds`: links those,
+ * unlinks any other photo that was linked to it. The caller has already
+ * checked the ids are the profile's own photos; `profileId` is repeated in
+ * the write so a wrong id can never touch another profile's row.
+ */
+export async function setCostumeGallery(
+  tx: Pick<typeof db, "profileMedia">,
+  costumeItemId: string,
+  profileId: string,
+  mediaIds: string[],
+) {
+  await tx.profileMedia.updateMany({
+    where: { costumeItemId, id: { notIn: mediaIds } },
+    data: { costumeItemId: null },
+  });
+  if (mediaIds.length > 0) {
+    await tx.profileMedia.updateMany({
+      where: { id: { in: mediaIds }, profileId },
+      data: { costumeItemId },
+    });
+  }
+}
+
 /** Everything the shop itself sees, approved photo or not. */
 export async function listCostumesForOwner(profileId: string) {
   return db.costumeItem.findMany({
     where: { profileId, deletedAt: null },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    select: COSTUME_SELECT,
+    select: {
+      ...COSTUME_SELECT,
+      // The shop sees every further photo with its review status.
+      gallery: {
+        where: { deletedAt: null },
+        orderBy: GALLERY_ORDER,
+        select: { id: true, url: true, moderationStatus: true },
+      },
+    },
   });
 }
 
@@ -58,7 +93,16 @@ export async function listPublicCostumes(profileId: string) {
       ],
     },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    select: COSTUME_SELECT,
+    select: {
+      ...COSTUME_SELECT,
+      // Further photos reach a visitor one by one as each is approved; an
+      // unapproved one is simply not in the list (CLAUDE.md rule 8).
+      gallery: {
+        where: { deletedAt: null, moderationStatus: PUBLIC_MEDIA_STATUS },
+        orderBy: GALLERY_ORDER,
+        select: { id: true, url: true },
+      },
+    },
   });
   return items;
 }

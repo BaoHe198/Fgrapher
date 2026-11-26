@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { revalidatePublicProfile } from "@/lib/cache";
+import { ownPhotoIds } from "@/services/own-media";
 import { syncProfileServiceKinds } from "@/services/profile-service-kinds";
 import { AuthError, requireAuth } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
@@ -48,6 +49,18 @@ export async function PATCH(
       );
     }
 
+    if (
+      parsed.data.coverMediaId &&
+      !(await ownPhotoIds(owned.profileId, [parsed.data.coverMediaId])).has(
+        parsed.data.coverMediaId,
+      )
+    ) {
+      return NextResponse.json(
+        { data: null, error: "not_found", message: "Photo not found" },
+        { status: 404 },
+      );
+    }
+
     const service = await db.service.update({
       where: { id },
       data: parsed.data,
@@ -55,7 +68,6 @@ export async function PATCH(
 
     // Deactivating or retyping a package changes what the profile offers,
     // and search filters on the copy held on Profile.serviceKinds.
-    await syncProfileServiceKinds(owned.profileId);
     await syncProfileServiceKinds(owned.profileId);
     await revalidatePublicProfile(session.user.id);
 

@@ -2,6 +2,7 @@
 
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { useState } from "react";
 
 import type { Role } from "@prisma/client";
@@ -26,7 +27,15 @@ import {
 } from "@/lib/constants/service-matrix";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency } from "@/lib/utils";
+import { buildMediaVariants } from "@/lib/media/variants";
+import { cn, formatCurrency } from "@/lib/utils";
+
+/** One of the provider's own photos, offered as a package's picture. */
+export interface ServicePhoto {
+  id: string;
+  url: string;
+  moderationStatus: string;
+}
 
 interface ServiceItem {
   id: string;
@@ -39,6 +48,7 @@ interface ServiceItem {
   isActive: boolean;
   editedPhotoCount?: number | null;
   deliveryDays?: number | null;
+  coverMediaId?: string | null;
 }
 
 interface ServiceDraft {
@@ -50,6 +60,8 @@ interface ServiceDraft {
   isActive: boolean;
   editedPhotoCount: string;
   deliveryDays: string;
+  /** "" lets the page pick a portfolio photo, as it did before. */
+  coverMediaId: string;
 }
 
 const EMPTY_DRAFT: ServiceDraft = {
@@ -61,16 +73,20 @@ const EMPTY_DRAFT: ServiceDraft = {
   isActive: true,
   editedPhotoCount: "",
   deliveryDays: "",
+  coverMediaId: "",
 };
 
 export function ServicesManager({
   profileId,
   role,
   initialServices,
+  availableMedia = [],
 }: {
   profileId: string;
   role: Role;
   initialServices: ServiceItem[];
+  /** The provider's portfolio photos, to choose a package's picture from. */
+  availableMedia?: ServicePhoto[];
 }) {
   const t = useTranslations("dashboardSettings.profile.services");
   const serviceKindT = useTranslations("serviceKind");
@@ -104,6 +120,10 @@ export function ServicesManager({
           : "",
       deliveryDays:
         service.deliveryDays != null ? String(service.deliveryDays) : "",
+      // A photo deleted since it was chosen is simply no longer offered.
+      coverMediaId: availableMedia.some((m) => m.id === service.coverMediaId)
+        ? (service.coverMediaId ?? "")
+        : "",
     });
     setModalOpen(true);
   };
@@ -138,6 +158,7 @@ export function ServicesManager({
         delivers.anything && draft.deliveryDays
           ? Number(draft.deliveryDays)
           : null,
+      coverMediaId: draft.coverMediaId || null,
     };
 
     const res = editingId
@@ -165,6 +186,11 @@ export function ServicesManager({
     }
   };
 
+  const photoOf = (service: ServiceItem) =>
+    availableMedia.find((m) => m.id === service.coverMediaId) ?? null;
+  const chosenPhoto =
+    availableMedia.find((m) => m.id === draft.coverMediaId) ?? null;
+
   const remove = async (id: string) => {
     setServices((prev) => prev.filter((s) => s.id !== id));
     await fetch(`/api/services/${id}`, { method: "DELETE" });
@@ -189,9 +215,20 @@ export function ServicesManager({
           {services.map((service) => (
             <div
               key={service.id}
-              className="flex items-center justify-between rounded-[var(--fg-radius-sm)] border border-border-default p-3"
+              className="flex items-center justify-between gap-3 rounded-[var(--fg-radius-sm)] border border-border-default p-3"
             >
-              <div>
+              {photoOf(service) ? (
+                <div className="relative size-14 shrink-0 overflow-hidden rounded-[var(--fg-radius-sm)] bg-bg-sunken">
+                  <Image
+                    src={buildMediaVariants(photoOf(service)!.url).thumbnail}
+                    alt=""
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
+                </div>
+              ) : null}
+              <div className="min-w-0 flex-1">
                 <p className="text-body-md font-semibold! text-text-primary">
                   {service.name} {!service.isActive ? t("inactive") : ""}
                 </p>
@@ -308,6 +345,69 @@ export function ServicesManager({
                 />
               </div>
             ) : null}
+            {/* The picture on this package's card. It used to be taken
+                from the portfolio by position, so a wedding package could
+                show a product shot (role walk-through, 25/11/2026). */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-body-sm font-semibold! text-text-primary">
+                {t("coverLabel")}
+              </span>
+              {availableMedia.length === 0 ? (
+                <p className="text-body-sm text-text-tertiary">
+                  {t("coverEmpty")}
+                </p>
+              ) : (
+                <div
+                  role="radiogroup"
+                  aria-label={t("coverLabel")}
+                  className="flex max-h-44 flex-wrap gap-2 overflow-y-auto p-0.5"
+                >
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={draft.coverMediaId === ""}
+                    onClick={() => setDraft({ ...draft, coverMediaId: "" })}
+                    className={cn(
+                      "focus-ring flex size-16 cursor-pointer items-center justify-center rounded-[var(--fg-radius-md)] border-2 px-1 text-center text-meta text-text-secondary",
+                      draft.coverMediaId === ""
+                        ? "border-brand-primary"
+                        : "border-dashed border-border-default",
+                    )}
+                  >
+                    {t("coverAuto")}
+                  </button>
+                  {availableMedia.map((m, index) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={draft.coverMediaId === m.id}
+                      aria-label={t("coverNumbered", { index: index + 1 })}
+                      onClick={() => setDraft({ ...draft, coverMediaId: m.id })}
+                      className={cn(
+                        "focus-ring relative size-16 cursor-pointer overflow-hidden rounded-[var(--fg-radius-md)] border-2 bg-bg-sunken",
+                        draft.coverMediaId === m.id
+                          ? "border-brand-primary"
+                          : "border-transparent opacity-70 hover:opacity-100",
+                      )}
+                    >
+                      <Image
+                        src={buildMediaVariants(m.url).thumbnail}
+                        alt=""
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+              <p className="text-meta text-text-tertiary">
+                {chosenPhoto && chosenPhoto.moderationStatus !== "APPROVED"
+                  ? t("coverPending")
+                  : t("coverHelper")}
+              </p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <CurrencyInput
                 label={t("priceLabel")}

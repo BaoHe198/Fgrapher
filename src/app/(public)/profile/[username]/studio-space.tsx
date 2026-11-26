@@ -12,10 +12,14 @@ import { buildMediaVariants } from "@/lib/media/variants";
 export function StudioSpace({
   photos,
   area,
+  roomCount,
+  capacity,
   amenities,
 }: {
   photos: string[];
   area: number | null;
+  roomCount: number | null;
+  capacity: number | null;
   amenities: string[];
 }) {
   const t = useTranslations("publicPages.profile.studio");
@@ -43,13 +47,29 @@ export function StudioSpace({
           ))}
         </ol>
       ) : null}
-      {area || amenities.length > 0 ? (
+      {area || roomCount || capacity || amenities.length > 0 ? (
         <dl className="flex flex-col gap-3 rounded-[var(--fg-radius-lg)] border border-border-subtle bg-bg-surface p-5">
           {area ? (
             <div className="flex items-baseline justify-between gap-4 text-body-sm">
               <dt className="text-text-secondary">{t("area")}</dt>
               <dd className="font-mono font-semibold! text-text-primary">
                 {t("squareMeters", { area })}
+              </dd>
+            </div>
+          ) : null}
+          {roomCount ? (
+            <div className="flex items-baseline justify-between gap-4 text-body-sm">
+              <dt className="text-text-secondary">{t("rooms")}</dt>
+              <dd className="font-mono font-semibold! text-text-primary">
+                {roomCount}
+              </dd>
+            </div>
+          ) : null}
+          {capacity ? (
+            <div className="flex items-baseline justify-between gap-4 text-body-sm">
+              <dt className="text-text-secondary">{t("capacity")}</dt>
+              <dd className="font-mono font-semibold! text-text-primary">
+                {t("people", { count: capacity })}
               </dd>
             </div>
           ) : null}

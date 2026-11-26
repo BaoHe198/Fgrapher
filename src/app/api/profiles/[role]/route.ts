@@ -45,6 +45,11 @@ export async function GET(
               media: {
                 select: { id: true, url: true, moderationStatus: true },
               },
+              gallery: {
+                where: { deletedAt: null },
+                orderBy: { order: "asc" },
+                select: { id: true, url: true, moderationStatus: true },
+              },
             },
           },
           media: {
