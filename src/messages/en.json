@@ -1008,9 +1008,14 @@
           "signedUp": "{name} signed up",
           "madeBooking": "{name} made a booking",
           "someone": "Someone",
-          "newReport": "New {targetType} report — {reason}"
+          "newReport": "New report about {targetType} — {reason}"
         },
-        "pendingPlaces": "Photo spots waiting for review"
+        "pendingPlaces": "Photo spots waiting for review",
+        "waitingTitle": "Waiting on you",
+        "pendingVerifications": "Identity checks to review",
+        "pendingMedia": "Photos and videos to review",
+        "pendingServiceRequests": "Customer requests to review",
+        "pendingRoleChanges": "Role change requests"
       },
       "users": {
         "title": "Users",
@@ -1152,7 +1157,11 @@
         "businessDocMissing": "Declared as a household business or company, but no registration certificate is on file.",
         "sameIdWarning": "This ID number was also submitted for another account:",
         "sameIdAccount": "{name} ({email}), role {role}",
-        "sameIdDeletedAccount": "A deleted account, role {role}"
+        "sameIdDeletedAccount": "A deleted account, role {role}",
+        "dateOfBirthLine": "Declared date of birth: {date} (age {age})",
+        "dateOfBirthMissing": "This account has not given a date of birth.",
+        "viewAllDocuments": "View the documents side by side",
+        "hideDocuments": "Hide documents"
       },
       "roleChangeRequests": {
         "title": "Role change requests",
@@ -1171,7 +1180,7 @@
       },
       "moderation": {
         "title": "Content moderation",
-        "description": "Every portfolio photo needs approval before it appears publicly. Shortcuts: A approve, R reject, arrow keys navigate. Target: reviewed within {hours}h.",
+        "description": "Portfolio photos and videos, Chợ F product photos and post photos must all be approved before they are shown publicly. Shortcuts: A to approve, R to reject, arrow keys to move. Target: handled within {hours} hours.",
         "empty": "Nothing pending",
         "selectAll": "Select all ({count})",
         "clearSelection": "Clear selection",
@@ -1186,12 +1195,14 @@
         "rejectedToast": "Rejected {count}",
         "allRoles": "All roles",
         "emptyFiltered": "Nothing pending for this role",
-        "viewLarge": "View full size",
+        "viewLarge": "View large",
         "waitingSince": "Sent {time}",
         "albumLabel": "Album: {title}",
         "autoFlaggedBadge": "Flagged by scan",
         "autoFlaggedReason": "Flagged by the automated scan: {reason}. A hint about where to look first — the photo is still pending like any other.",
-        "actionFailed": "That did not go through, please try again"
+        "actionFailed": "That did not go through, please try again",
+        "productLabel": "Product: {name}",
+        "postLabel": "Post photo"
       },
       "compliance": {
         "title": "Compliance",

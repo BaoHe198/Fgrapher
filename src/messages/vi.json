@@ -1008,9 +1008,14 @@
           "signedUp": "{name} vừa đăng ký",
           "madeBooking": "{name} vừa đặt lịch",
           "someone": "Một người dùng",
-          "newReport": "Báo cáo {targetType} mới — {reason}"
+          "newReport": "Báo cáo mới về {targetType} — {reason}"
         },
-        "pendingPlaces": "Địa điểm chụp chờ duyệt"
+        "pendingPlaces": "Địa điểm chụp chờ duyệt",
+        "waitingTitle": "Việc đang chờ bạn",
+        "pendingVerifications": "Xác minh danh tính chờ duyệt",
+        "pendingMedia": "Ảnh và video chờ duyệt",
+        "pendingServiceRequests": "Yêu cầu của khách chờ duyệt",
+        "pendingRoleChanges": "Yêu cầu đổi vai trò"
       },
       "users": {
         "title": "Người dùng",
@@ -1152,7 +1157,11 @@
         "businessDocMissing": "Người này khai là hộ kinh doanh hoặc doanh nghiệp nhưng hồ sơ không có giấy đăng ký kinh doanh.",
         "sameIdWarning": "Số giấy tờ này đã được nộp cho tài khoản khác:",
         "sameIdAccount": "{name} ({email}), vai trò {role}",
-        "sameIdDeletedAccount": "Một tài khoản đã xóa, vai trò {role}"
+        "sameIdDeletedAccount": "Một tài khoản đã xóa, vai trò {role}",
+        "dateOfBirthLine": "Ngày sinh khai báo: {date} ({age} tuổi)",
+        "dateOfBirthMissing": "Tài khoản này chưa khai ngày sinh.",
+        "viewAllDocuments": "Xem các giấy tờ cạnh nhau",
+        "hideDocuments": "Ẩn giấy tờ"
       },
       "roleChangeRequests": {
         "title": "Yêu cầu đổi vai trò",
@@ -1171,7 +1180,7 @@
       },
       "moderation": {
         "title": "Kiểm duyệt nội dung",
-        "description": "Mọi ảnh portfolio cần được duyệt trước khi hiển thị công khai. Phím tắt: A để duyệt, R để từ chối, phím mũi tên để di chuyển. Mục tiêu: xử lý trong vòng {hours} giờ.",
+        "description": "Ảnh và video portfolio, ảnh sản phẩm Chợ F và ảnh bài đăng đều phải được duyệt trước khi hiển thị công khai. Phím tắt: A để duyệt, R để từ chối, phím mũi tên để di chuyển. Mục tiêu: xử lý trong vòng {hours} giờ.",
         "empty": "Không có nội dung nào đang chờ",
         "selectAll": "Chọn tất cả ({count})",
         "clearSelection": "Bỏ chọn",
@@ -1186,12 +1195,14 @@
         "rejectedToast": "Đã từ chối {count}",
         "allRoles": "Tất cả vai trò",
         "emptyFiltered": "Không có nội dung nào đang chờ với vai trò này",
-        "viewLarge": "Xem ảnh lớn",
+        "viewLarge": "Xem lớn",
         "waitingSince": "Gửi {time}",
         "albumLabel": "Album: {title}",
         "autoFlaggedBadge": "Máy đánh dấu",
         "autoFlaggedReason": "Hệ thống tự động đánh dấu: {reason}. Đây chỉ là gợi ý để bạn xem trước — ảnh vẫn đang chờ duyệt như mọi ảnh khác.",
-        "actionFailed": "Thao tác không thành công, vui lòng thử lại"
+        "actionFailed": "Thao tác không thành công, vui lòng thử lại",
+        "productLabel": "Sản phẩm: {name}",
+        "postLabel": "Ảnh bài đăng"
       },
       "compliance": {
         "title": "Tuân thủ dữ liệu",

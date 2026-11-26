@@ -1,8 +1,12 @@
 import {
   AlertTriangle,
+  BadgeCheck,
+  ClipboardList,
   CreditCard,
   Flag,
+  ImageIcon,
   MapPin,
+  Repeat,
   TrendingUp,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -12,8 +16,12 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import { formatCurrency } from "@/lib/utils";
-import { getAdminStats, getRecentActivity } from "@/services/admin";
-import { countPendingPlaces } from "@/services/places";
+import {
+  getAdminQueueCounts,
+  getAdminStats,
+  getRecentActivity,
+} from "@/services/admin";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("accountFlows.admin.overview");
@@ -21,13 +29,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AdminOverviewPage() {
-  const [stats, t, activityT, pendingPlaces] = await Promise.all([
+  const [stats, t, activityT, queues, targetT, reasonT] = await Promise.all([
     getAdminStats(),
     getTranslations("accountFlows.admin.overview"),
     getTranslations("accountFlows.admin.overview.activity"),
-    countPendingPlaces(),
+    getAdminQueueCounts(),
+    getTranslations("accountFlows.admin.reports.targetTypes"),
+    getTranslations("sharedComponents.reportModal.reasons"),
   ]);
-  const activity = await getRecentActivity(activityT);
+  const activity = await getRecentActivity(activityT, 15, {
+    targetType: (code) => (targetT.has(code) ? targetT(code) : code),
+    reason: (code) => (reasonT.has(code) ? reasonT(code) : code),
+  });
 
   const metrics = [
     {
@@ -60,6 +73,47 @@ export default async function AdminOverviewPage() {
     },
   ];
 
+  // The work waiting on an admin, first: a provider cannot go public until
+  // the first two are done. They were only numbers in the sidebar, which a
+  // phone keeps closed (role walk-through, 25/11/2026).
+  const waiting = [
+    {
+      label: t("pendingVerifications"),
+      value: queues.verifications,
+      icon: BadgeCheck,
+      href: "/admin/verifications",
+    },
+    {
+      label: t("pendingMedia"),
+      value: queues.moderation,
+      icon: ImageIcon,
+      href: "/admin/moderation",
+    },
+    {
+      label: t("pendingReports"),
+      value: queues.reports,
+      icon: Flag,
+      href: "/admin/reports",
+    },
+    {
+      label: t("pendingServiceRequests"),
+      value: queues.serviceRequests,
+      icon: ClipboardList,
+      href: "/admin/service-requests",
+    },
+    {
+      label: t("pendingPlaces"),
+      value: queues.places,
+      icon: MapPin,
+      href: "/admin/places",
+    },
+    {
+      label: t("pendingRoleChanges"),
+      value: queues.roleChangeRequests,
+      icon: Repeat,
+      href: "/admin/role-change-requests",
+    },
+  ];
   const health = [
     {
       label: t("failedPayments"),
@@ -68,28 +122,50 @@ export default async function AdminOverviewPage() {
       href: "/admin/users",
     },
     {
-      label: t("pendingReports"),
-      value: stats.pendingReports,
-      icon: Flag,
-      href: "/admin/reports",
-    },
-    {
       label: t("expiringSoon"),
       value: stats.expiringSoon,
       icon: AlertTriangle,
       href: "/admin/users",
-    },
-    {
-      label: t("pendingPlaces"),
-      value: pendingPlaces,
-      icon: MapPin,
-      href: "/admin/places",
     },
   ];
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+
+      <div className="flex flex-col gap-3">
+        <span className="text-heading-md text-text-primary">
+          {t("waitingTitle")}
+        </span>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+          {waiting.map((w) => (
+            <Link key={w.label} href={w.href}>
+              <Card
+                interactive
+                className={cn(
+                  "flex h-full flex-row items-center gap-3 [--card-spacing:--spacing(4)] sm:[--card-spacing:--spacing(5)]",
+                  w.value > 0 && "border border-gold-400",
+                )}
+              >
+                <w.icon
+                  className={cn(
+                    "size-5 shrink-0",
+                    w.value > 0 ? "text-gold-600" : "text-text-tertiary",
+                  )}
+                />
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-heading-md text-text-primary tabular-nums">
+                    {w.value}
+                  </span>
+                  <span className="text-body-sm text-text-secondary">
+                    {w.label}
+                  </span>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {/* Two columns even on phones: one card per row made the overview
           four screens long. The value steps down a size there so an
@@ -112,7 +188,7 @@ export default async function AdminOverviewPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {health.map((h) => (
           <Link key={h.label} href={h.href}>
             <Card interactive className="flex flex-row items-center gap-3">
