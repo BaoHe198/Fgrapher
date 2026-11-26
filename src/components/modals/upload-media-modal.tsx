@@ -46,6 +46,8 @@ const MEDIA_ACCEPT = {
 
 interface PendingFile {
   file: File;
+  /** A local preview of a photo; null for a video. Revoked when dropped. */
+  preview: string | null;
   title: string;
   progress: number;
   status: "pending" | "uploading" | "done" | "error";
@@ -263,6 +265,11 @@ export function UploadMediaModal({
       ...prev,
       ...accepted.map((file) => ({
         file,
+        // The list used to show file names only ("p1.jpg"), so a title was
+        // typed against a name, not a picture (role walk-through, 25/11).
+        preview: file.type.startsWith("image/")
+          ? URL.createObjectURL(file)
+          : null,
         title: "",
         progress: 0,
         status: "pending" as const,
@@ -302,8 +309,17 @@ export function UploadMediaModal({
     },
   });
 
+  const releasePreviews = (list: PendingFile[]) => {
+    for (const item of list) {
+      if (item.preview) URL.revokeObjectURL(item.preview);
+    }
+  };
+
   const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setFiles((prev) => {
+      releasePreviews(prev.filter((_, i) => i === index));
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const setTitle = (index: number, title: string) => {
@@ -385,17 +401,14 @@ export function UploadMediaModal({
       return;
     }
 
-    // Uploaded in parallel rather than one-at-a-time — each file's progress
-    // is tracked independently via its own index, so concurrent XHRs don't
-    // interfere with each other's state updates.
-    const results = await Promise.all(
-      files.map(async (f, i) => {
-        setFiles((prev) =>
-          prev.map((cur, idx) =>
-            idx === i ? { ...cur, status: "uploading" } : cur,
-          ),
-        );
+    const markFile = (index: number, next: Partial<PendingFile>) =>
+      setFiles((prev) =>
+        prev.map((cur, idx) => (idx === index ? { ...cur, ...next } : cur)),
+      );
 
+    const sent = await Promise.all(
+      files.map(async (f, i) => {
+        markFile(i, { status: "uploading" });
         try {
           const uploadFile = f.file.type.startsWith("image/")
             ? await compressImageFile(f.file, {
@@ -403,67 +416,62 @@ export function UploadMediaModal({
                 maxDimension: UPLOAD_IMAGE_MAX_DIMENSION,
               })
             : f.file;
-
-          const result = await uploadToCloudinary(
-            uploadFile,
-            sigBody.data,
-            (percent) => {
-              setFiles((prev) =>
-                prev.map((cur, idx) =>
-                  idx === i ? { ...cur, progress: percent } : cur,
-                ),
-              );
-            },
+          return await uploadToCloudinary(uploadFile, sigBody.data, (percent) =>
+            markFile(i, { progress: percent }),
           );
-
-          const type = result.resource_type === "video" ? "VIDEO" : "IMAGE";
-          const saveRes = await fetch("/api/portfolio", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              profileId,
-              albumId: resolvedAlbumId ?? undefined,
-              url: result.secure_url,
-              publicId: result.public_id,
-              type,
-              title: f.title || undefined,
-              width: result.width,
-              height: result.height,
-              rightsConfirmed,
-            }),
-          });
-          const saveBody = await saveRes.json();
-
-          if (!saveRes.ok) {
-            throw new Error(saveBody.message ?? t("uploadFailed"));
-          }
-
-          setFiles((prev) =>
-            prev.map((cur, idx) =>
-              idx === i ? { ...cur, status: "done" } : cur,
-            ),
-          );
-
-          return {
-            id: saveBody.data.id,
-            url: result.secure_url,
-            type,
-            title: f.title || null,
-            moderationStatus: saveBody.data.moderationStatus,
-            moderationNote: saveBody.data.moderationNote,
-          } satisfies UploadedMedia;
         } catch {
-          setFiles((prev) =>
-            prev.map((cur, idx) =>
-              idx === i
-                ? { ...cur, status: "error", error: t("uploadFailed") }
-                : cur,
-            ),
-          );
+          markFile(i, { status: "error", error: t("uploadFailed") });
           return null;
         }
       }),
     );
+
+    const results: (UploadedMedia | null)[] = [];
+    for (const [i, f] of files.entries()) {
+      const result = sent[i];
+      if (!result) continue;
+      results.push(
+        await (async () => {
+          try {
+            const type = result.resource_type === "video" ? "VIDEO" : "IMAGE";
+            const saveRes = await fetch("/api/portfolio", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                profileId,
+                albumId: resolvedAlbumId ?? undefined,
+                url: result.secure_url,
+                publicId: result.public_id,
+                type,
+                title: f.title || undefined,
+                width: result.width,
+                height: result.height,
+                rightsConfirmed,
+              }),
+            });
+            const saveBody = await saveRes.json();
+
+            if (!saveRes.ok) {
+              throw new Error(saveBody.message ?? t("uploadFailed"));
+            }
+
+            markFile(i, { status: "done" });
+
+            return {
+              id: saveBody.data.id,
+              url: result.secure_url,
+              type,
+              title: f.title || null,
+              moderationStatus: saveBody.data.moderationStatus,
+              moderationNote: saveBody.data.moderationNote,
+            } satisfies UploadedMedia;
+          } catch {
+            markFile(i, { status: "error", error: t("uploadFailed") });
+            return null;
+          }
+        })(),
+      );
+    }
 
     const uploaded = [
       ...linkedMedia,
@@ -474,6 +482,7 @@ export function UploadMediaModal({
     if (uploaded.length === 0) return;
 
     onUploaded(uploaded);
+    releasePreviews(files);
     setFiles([]);
     setLinks([]);
     setRejected([]);
@@ -487,6 +496,7 @@ export function UploadMediaModal({
         if (!isSubmitting) {
           onOpenChange(next);
           if (!next) {
+            releasePreviews(files);
             setFiles([]);
             setLinks([]);
             setLinkDraft("");
@@ -595,14 +605,33 @@ export function UploadMediaModal({
               </ul>
             ) : null}
 
+            {files.length > 1 ? (
+              <p className="text-meta text-text-tertiary">{t("orderNote")}</p>
+            ) : null}
             {files.length > 0 ? (
-              <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
+              <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
                 {files.map((f, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-2.5 rounded-[var(--fg-radius-sm)] border border-border-default p-2.5"
                   >
-                    <div className="flex-1">
+                    {f.preview ? (
+                      // A local object URL: nothing to optimise or cache.
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={f.preview}
+                        alt=""
+                        className="size-14 shrink-0 rounded-[var(--fg-radius-sm)] bg-bg-sunken object-cover"
+                      />
+                    ) : (
+                      <span className="flex size-14 shrink-0 items-center justify-center rounded-[var(--fg-radius-sm)] bg-bg-sunken">
+                        <Film
+                          aria-hidden
+                          className="size-5 text-text-tertiary"
+                        />
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-body-sm font-semibold! text-text-primary">
                           {f.file.name}
@@ -612,6 +641,7 @@ export function UploadMediaModal({
                             type="button"
                             onClick={() => removeFile(index)}
                             aria-label={t("removeFile")}
+                            className="focus-ring -m-2 shrink-0 rounded-full p-2"
                           >
                             <X className="size-3.5 text-text-tertiary" />
                           </button>
@@ -620,6 +650,7 @@ export function UploadMediaModal({
                       {f.status === "pending" ? (
                         <Input
                           placeholder={t("titlePlaceholder")}
+                          aria-label={t("titlePlaceholder")}
                           value={f.title}
                           onChange={(e) => setTitle(index, e.target.value)}
                           className="mt-1.5"

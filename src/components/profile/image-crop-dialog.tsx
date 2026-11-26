@@ -19,6 +19,12 @@ interface ImageCropDialogProps {
   onOpenChange: (open: boolean) => void;
   imageSrc: string | null;
   aspect: number;
+  /**
+   * A round guide for a picture that is shown round (the avatar). The saved
+   * file is still the square around it; only the guide changes, so what is
+   * outside the circle is visibly what the avatar will not show.
+   */
+  round?: boolean;
   fileName: string;
   mimeType: string;
   onCropped: (file: File) => void;
@@ -33,6 +39,7 @@ export function ImageCropDialog({
   onOpenChange,
   imageSrc,
   aspect,
+  round = false,
   fileName,
   mimeType,
   onCropped,
@@ -76,6 +83,8 @@ export function ImageCropDialog({
               crop={crop}
               zoom={zoom}
               aspect={aspect}
+              cropShape={round ? "round" : "rect"}
+              showGrid={!round}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={(_area, areaPixels) =>
@@ -93,7 +102,7 @@ export function ImageCropDialog({
           value={zoom}
           onChange={(e) => setZoom(Number(e.target.value))}
           aria-label={t("zoomAria")}
-          className="w-full"
+          className="h-11 w-full accent-gold-500"
         />
 
         <DialogFooter>

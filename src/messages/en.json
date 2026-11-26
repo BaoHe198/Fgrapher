@@ -922,15 +922,15 @@
         "chooseRoleTitle": "Verify your identity",
         "chooseRoleSubtitle": "Choose which role to verify.",
         "form": {
-          "underReviewTitle": "Your submission is under review",
-          "underReviewDesc": "We're reviewing the ID documents you submitted for {role}. This usually takes 1-2 business days.",
+          "underReviewTitle": "Sent, waiting for review",
+          "underReviewDesc": "Fgrapher has your documents for the {role} role. A review usually takes 1–2 working days; you will get a notification with the result. You do not need to stay on this page.",
           "verifiedTitle": "You're verified",
           "verifiedDesc": "Your identity has been verified for {role}.",
-          "submittedTitle": "Submitted for review",
+          "submittedTitle": "Sent, waiting for review",
           "tapToSelectPhoto": "Tap to select a photo",
           "title": "Verify your identity",
           "subtitle": "Required to activate your {role} profile — this is a one-time check.",
-          "rejectedNotice": "Your previous submission was rejected: {reason}. You can resubmit below.",
+          "rejectedNotice": "Your earlier submission was rejected: {reason}. You can send it again below. The document number must be typed again because Fgrapher does not store it, and the photos must be chosen again.",
           "whyWeAskLabel": "Why we ask:",
           "whyWeAskBody": "Vietnamese e-commerce law (Luật Thương mại điện tử 122/2025) requires marketplaces to verify every seller's identity before they can list services.",
           "whoCanSeeLabel": "Who can see it:",
@@ -963,6 +963,13 @@
             "photos": "Add the front and back of the ID and a selfie holding it.",
             "businessDoc": "Add the business registration document.",
             "consent": "Tick the agreement above to submit."
+          },
+          "photoTips": "Get all four corners of the document in the photo, with the text readable and no glare. Portrait: hold the document beside your face so both are clear.",
+          "meanwhile": {
+            "title": "While you wait, you can:",
+            "photos": "Add photos to your portfolio",
+            "services": "Add service packages",
+            "info": "Complete your page details"
           }
         }
       }
@@ -2420,7 +2427,8 @@
         },
         "hoursButton": "Working hours",
         "hoursTitle": "Working hours",
-        "hoursDescription": "Customers can only book within these hours. For a day you are busy, mark it on the calendar."
+        "hoursDescription": "Customers can only book within these hours. For a day you are busy, mark it on the calendar.",
+        "hoursSaved": "Working hours saved"
       }
     },
     "bookingDetail": {
@@ -3429,7 +3437,9 @@
         "addressRequired": "Enter a detailed address (at least 5 characters)",
         "saveFailedStatus": "Couldn't save the profile (error {status}). What you typed is kept — please try again in a few minutes.",
         "saveNetworkError": "Couldn't reach the server. What you typed is kept — check your connection and press Save again.",
-        "addressPinnedAreaFilled": "Location pinned on the map and {area} filled in. Press Save to update."
+        "addressPinnedAreaFilled": "Location pinned on the map and {area} filled in. Press Save to update.",
+        "extraAreasAdd": "Add a province…",
+        "extraAreasRemove": "Remove {name}"
       },
       "editor": {
         "liveStatus": "Live — visible in search",
@@ -3492,7 +3502,8 @@
         "saveChanges": "Save changes",
         "saved": "Saved",
         "draftRestored": "Restored what you typed last time. It isn't saved yet — press Save changes at the bottom.",
-        "draftDiscard": "Discard draft"
+        "draftDiscard": "Discard draft",
+        "unsavedChanges": "You have unsaved changes"
       },
       "services": {
         "title": "Services",
@@ -5891,7 +5902,8 @@
       "linkInvalid": "That does not look like a YouTube link. Paste one like youtube.com/watch?v=… or youtu.be/…",
       "linkDuplicate": "This link is already in the list.",
       "linkItem": "YouTube video",
-      "removeLink": "Remove link"
+      "removeLink": "Remove link",
+      "orderNote": "Photos keep the order shown below. Change the cover and rearrange them in the album at any time."
     },
     "mediaLightbox": {
       "close": "Close",

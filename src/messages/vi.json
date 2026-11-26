@@ -922,15 +922,15 @@
         "chooseRoleTitle": "Xác minh danh tính",
         "chooseRoleSubtitle": "Chọn vai trò bạn muốn xác minh.",
         "form": {
-          "underReviewTitle": "Hồ sơ của bạn đang được xem xét",
-          "underReviewDesc": "Chúng tôi đang xem xét giấy tờ bạn đã gửi cho vai trò {role}. Quá trình này thường mất 1-2 ngày làm việc.",
+          "underReviewTitle": "Đã gửi, đang chờ duyệt",
+          "underReviewDesc": "Fgrapher đã nhận giấy tờ của bạn cho vai trò {role}. Việc duyệt thường mất 1–2 ngày làm việc; bạn sẽ nhận thông báo khi có kết quả. Bạn không cần ở lại trang này.",
           "verifiedTitle": "Bạn đã được xác minh",
           "verifiedDesc": "Danh tính của bạn đã được xác minh cho vai trò {role}.",
-          "submittedTitle": "Đã gửi để xem xét",
+          "submittedTitle": "Đã gửi, đang chờ duyệt",
           "tapToSelectPhoto": "Chạm để chọn ảnh",
           "title": "Xác minh danh tính",
           "subtitle": "Bắt buộc để kích hoạt hồ sơ {role} — đây là bước kiểm tra một lần duy nhất.",
-          "rejectedNotice": "Hồ sơ trước đó của bạn đã bị từ chối: {reason}. Bạn có thể gửi lại bên dưới.",
+          "rejectedNotice": "Hồ sơ trước đó của bạn đã bị từ chối: {reason}. Bạn có thể gửi lại bên dưới. Số giấy tờ cần nhập lại vì Fgrapher không lưu số này, và ảnh cần chọn lại.",
           "whyWeAskLabel": "Vì sao chúng tôi yêu cầu:",
           "whyWeAskBody": "Luật Thương mại điện tử Việt Nam (122/2025) yêu cầu các nền tảng thương mại điện tử xác minh danh tính của mọi người bán trước khi họ có thể đăng dịch vụ.",
           "whoCanSeeLabel": "Ai có thể xem:",
@@ -963,6 +963,13 @@
             "photos": "Tải đủ ảnh mặt trước, mặt sau giấy tờ và ảnh chân dung cầm giấy tờ.",
             "businessDoc": "Tải giấy đăng ký kinh doanh.",
             "consent": "Đánh dấu đồng ý bên trên để gửi."
+          },
+          "photoTips": "Chụp đủ bốn góc giấy tờ, chữ đọc rõ, không lóa sáng. Ảnh chân dung: cầm giấy tờ cạnh mặt, thấy rõ cả hai.",
+          "meanwhile": {
+            "title": "Trong lúc chờ, bạn có thể:",
+            "photos": "Thêm ảnh vào portfolio",
+            "services": "Thêm gói dịch vụ",
+            "info": "Hoàn thiện thông tin trang"
           }
         }
       }
@@ -2420,7 +2427,8 @@
         },
         "hoursButton": "Giờ nhận khách",
         "hoursTitle": "Giờ nhận khách",
-        "hoursDescription": "Khách chỉ đặt được trong những giờ này. Ngày nào bận việc riêng, đánh dấu bận ngay trên lịch."
+        "hoursDescription": "Khách chỉ đặt được trong những giờ này. Ngày nào bận việc riêng, đánh dấu bận ngay trên lịch.",
+        "hoursSaved": "Đã lưu giờ nhận khách"
       }
     },
     "bookingDetail": {
@@ -3429,7 +3437,9 @@
         "addressRequired": "Vui lòng nhập địa chỉ chi tiết (ít nhất 5 ký tự)",
         "saveFailedStatus": "Không thể lưu hồ sơ (lỗi {status}). Nội dung bạn nhập vẫn được giữ lại — vui lòng thử lại sau ít phút.",
         "saveNetworkError": "Không kết nối được máy chủ. Nội dung bạn nhập vẫn được giữ lại — kiểm tra mạng rồi bấm Lưu lần nữa.",
-        "addressPinnedAreaFilled": "Đã xác định vị trí trên bản đồ và tự điền {area}. Bấm Lưu để cập nhật."
+        "addressPinnedAreaFilled": "Đã xác định vị trí trên bản đồ và tự điền {area}. Bấm Lưu để cập nhật.",
+        "extraAreasAdd": "Thêm một tỉnh/thành…",
+        "extraAreasRemove": "Bỏ {name}"
       },
       "editor": {
         "liveStatus": "Đang hoạt động — hiển thị trong tìm kiếm",
@@ -3492,7 +3502,8 @@
         "saveChanges": "Lưu thay đổi",
         "saved": "Đã lưu",
         "draftRestored": "Đã khôi phục nội dung bạn nhập dở lần trước. Nội dung này chưa được lưu — bấm Lưu thay đổi ở cuối trang.",
-        "draftDiscard": "Bỏ bản nháp"
+        "draftDiscard": "Bỏ bản nháp",
+        "unsavedChanges": "Có thay đổi chưa lưu"
       },
       "services": {
         "title": "Dịch vụ",
@@ -5891,7 +5902,8 @@
       "linkInvalid": "Không nhận ra liên kết YouTube. Hãy dán liên kết dạng youtube.com/watch?v=… hoặc youtu.be/…",
       "linkDuplicate": "Liên kết này đã có trong danh sách.",
       "linkItem": "Video YouTube",
-      "removeLink": "Bỏ liên kết"
+      "removeLink": "Bỏ liên kết",
+      "orderNote": "Ảnh giữ đúng thứ tự như dưới đây. Đổi ảnh bìa và sắp xếp lại trong album bất cứ lúc nào."
     },
     "mediaLightbox": {
       "close": "Đóng",

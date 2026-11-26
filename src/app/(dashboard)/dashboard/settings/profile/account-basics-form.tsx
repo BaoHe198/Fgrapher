@@ -25,12 +25,15 @@ export function AccountBasicsForm({
   initialWardId,
   initialProvinceId,
   showDisplayName,
+  showLocation = true,
 }: {
   initialName: string | null;
   initialUsername: string | null;
   initialWardId: string | null;
   initialProvinceId: string | null;
   showDisplayName: boolean;
+  /** Off where the page below asks for its own province and ward. */
+  showLocation?: boolean;
 }) {
   const t = useTranslations("dashboardSettings.profile.basics");
   const [name, setName] = useState(initialName ?? "");
@@ -243,38 +246,40 @@ export function AccountBasicsForm({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <NativeSelect
-          label={t("provinceLabel")}
-          value={provinceId}
-          onChange={(value) => {
-            setProvinceId(value);
-            void saveWard("");
-          }}
-          options={[
-            { value: "", label: t("provinceNotSelected") },
-            ...provinces.map((province) => ({
-              value: province.id,
-              label: province.name,
-            })),
-          ]}
-        />
-        <NativeSelect
-          label={t("wardLabel")}
-          value={wardId}
-          onChange={saveWard}
-          disabled={!provinceId}
-          options={[
-            {
-              value: "",
-              label: provinceId
-                ? t("wardNotSelected")
-                : t("wardHelperNoProvince"),
-            },
-            ...wards.map((ward) => ({ value: ward.id, label: ward.name })),
-          ]}
-        />
-      </div>
+      {showLocation ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <NativeSelect
+            label={t("provinceLabel")}
+            value={provinceId}
+            onChange={(value) => {
+              setProvinceId(value);
+              void saveWard("");
+            }}
+            options={[
+              { value: "", label: t("provinceNotSelected") },
+              ...provinces.map((province) => ({
+                value: province.id,
+                label: province.name,
+              })),
+            ]}
+          />
+          <NativeSelect
+            label={t("wardLabel")}
+            value={wardId}
+            onChange={saveWard}
+            disabled={!provinceId}
+            options={[
+              {
+                value: "",
+                label: provinceId
+                  ? t("wardNotSelected")
+                  : t("wardHelperNoProvince"),
+              },
+              ...wards.map((ward) => ({ value: ward.id, label: ward.name })),
+            ]}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

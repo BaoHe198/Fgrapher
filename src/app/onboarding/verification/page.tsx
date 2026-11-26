@@ -25,6 +25,10 @@ export default async function OnboardingVerificationPage({
   );
   const { role: roleParam } = await searchParams;
 
+  const account = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true },
+  });
   const roles = await db.userRole.findMany({
     where: { userId: session.user.id, role: { in: PAID_ROLES } },
     select: {
@@ -86,6 +90,7 @@ export default async function OnboardingVerificationPage({
       role={selected.role}
       status={selected.verificationStatus}
       rejectedReason={selected.verificationRejectedReason}
+      accountName={account?.name ?? null}
     />
   );
 }

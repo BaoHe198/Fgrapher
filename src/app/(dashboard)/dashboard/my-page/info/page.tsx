@@ -30,10 +30,13 @@ export default async function MyPageInfo() {
   if (roles.length === 0) redirect("/dashboard/settings/profile");
 
   const t = await getTranslations("dashboardCore.myPage.info");
-  const user = await db.user.findUniqueOrThrow({
-    where: { id: session.user.id },
-    include: { ward: { select: { provinceId: true } } },
-  });
+  const [user, listingCount] = await Promise.all([
+    db.user.findUniqueOrThrow({
+      where: { id: session.user.id },
+      include: { ward: { select: { provinceId: true } } },
+    }),
+    db.product.count({ where: { userId: session.user.id, deletedAt: null } }),
+  ]);
   const isProvider = roles.some((role) => PROVIDER_ROLES.includes(role));
   const jumps = [
     ["anh", "photos"],
@@ -81,6 +84,10 @@ export default async function MyPageInfo() {
           initialWardId={user.wardId}
           initialProvinceId={user.ward?.provinceId ?? null}
           showDisplayName={false}
+          // The page has its own province and ward below, and those are
+          // the ones customers search by. Asking twice left people filling
+          // in the wrong pair.
+          showLocation={false}
         />
       </section>
 
@@ -95,6 +102,8 @@ export default async function MyPageInfo() {
           roles={roles}
           userId={session.user.id}
           showServices={false}
+          accountName={user.name}
+          hasListings={listingCount > 0}
         />
       </section>
     </div>

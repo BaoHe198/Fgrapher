@@ -212,7 +212,13 @@ export function AvailabilitySettings({
             {t("loadFailed")}
           </p>
         ) : null}
-        {(loadState === "ready" ? schedule : []).map((day) => (
+        {/* Monday first, as the calendar this opens from is drawn. */}
+        {(loadState === "ready"
+          ? [...schedule].sort(
+              (a, b) => ((a.dayOfWeek + 6) % 7) - ((b.dayOfWeek + 6) % 7),
+            )
+          : []
+        ).map((day) => (
           <div
             key={day.dayOfWeek}
             className="flex flex-wrap items-center gap-3"

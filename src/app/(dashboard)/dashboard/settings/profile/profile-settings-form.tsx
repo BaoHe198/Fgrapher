@@ -6,7 +6,7 @@ import type {
   Role,
   VerificationStatus,
 } from "@prisma/client";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { startTransition, useEffect, useRef, useState } from "react";
@@ -168,9 +168,15 @@ export function ProfileSettingsForm({
   role,
   userId,
   showServices = true,
+  accountName = null,
+  hasListings = false,
 }: {
   role: Role;
   userId: string;
+  /** The account holder's name: what the page is called until it is named. */
+  accountName?: string | null;
+  /** Whether this account has anything listed on Chợ F. */
+  hasListings?: boolean;
   /**
    * Off on "Trang của tôi → Thông tin", where service packages have a page
    * of their own (/dashboard/services).
@@ -205,6 +211,11 @@ export function ProfileSettingsForm({
     Partial<Record<RequiredField, string>>
   >({});
   const [draftRestored, setDraftRestored] = useState(false);
+  // Whether the form differs from what is saved: the save bar says so.
+  const [dirty, setDirty] = useState(false);
+  // A shop has one name. It used to be asked for twice ("Tên hiển thị" and
+  // "Tên cửa hàng"), and the two could disagree.
+  const isShop = (SHOP_ROLES as readonly string[]).includes(role);
   // The form as the server last had it, serialized: the draft is whatever
   // differs from this, and the extra-areas request is skipped when its part
   // is unchanged.
@@ -218,7 +229,21 @@ export function ProfileSettingsForm({
       .then((res) => res.json())
       .then((body) => {
         if (!cancelled) {
-          const serverValues = toFormValues(body.data);
+          const loaded = toFormValues(body.data);
+          // An unnamed page already goes by the account holder's name in
+          // public (lib/party-name.ts); the field shows that name instead
+          // of sitting empty. It is part of the baseline, so opening the
+          // page does not count as an unsaved change.
+          const serverValues: ProfileFormValues = isShop
+            ? {
+                ...loaded,
+                shopName:
+                  loaded.shopName || loaded.displayName || accountName || "",
+              }
+            : {
+                ...loaded,
+                displayName: loaded.displayName || accountName || "",
+              };
           // The profile's own province is stored as a service area too
           // (isPrimary); it is not one of the "extra" choices.
           const serverAreas = (
@@ -252,7 +277,7 @@ export function ProfileSettingsForm({
     return () => {
       cancelled = true;
     };
-  }, [role, storageKey]);
+  }, [role, storageKey, isShop, accountName]);
 
   // Keep the draft in step with the form. Once the form matches what the
   // server has (nothing typed, or just saved) there is no draft to keep.
@@ -263,6 +288,7 @@ export function ProfileSettingsForm({
         JSON.stringify(values) === savedSnapshot.current?.form &&
         JSON.stringify([...extraProvinceIds].sort()) ===
           savedSnapshot.current?.areas;
+      setDirty(!unchanged);
       if (unchanged) clearSessionDraft(storageKey);
       else {
         writeSessionDraft(storageKey, {
@@ -367,7 +393,10 @@ export function ProfileSettingsForm({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          displayName: values.displayName || undefined,
+          // A shop's one name is saved as both, so every screen that
+          // reads displayName (chat, bookings, search) calls it the same.
+          displayName:
+            (isShop ? values.shopName : values.displayName) || undefined,
           description: values.description || undefined,
           website: values.website || undefined,
           instagram: values.instagram || undefined,
@@ -464,6 +493,7 @@ export function ProfileSettingsForm({
         setAddressPoint(null);
       }
       savedSnapshot.current = { form: JSON.stringify(values), areas };
+      setDirty(false);
       clearSessionDraft(storageKey);
       setDraftRestored(false);
       setSaved(true);
@@ -475,12 +505,14 @@ export function ProfileSettingsForm({
     }
   };
 
-  const toggleExtraProvince = (provinceId: string) => {
+  const addExtraProvince = (provinceId: string) => {
+    if (!provinceId) return;
     setExtraProvinceIds((prev) =>
-      prev.includes(provinceId)
-        ? prev.filter((id) => id !== provinceId)
-        : [...prev, provinceId],
+      prev.includes(provinceId) ? prev : [...prev, provinceId],
     );
+  };
+  const removeExtraProvince = (provinceId: string) => {
+    setExtraProvinceIds((prev) => prev.filter((id) => id !== provinceId));
   };
 
   useEffect(() => {
@@ -550,11 +582,19 @@ export function ProfileSettingsForm({
           #lien-ket. scroll-mt keeps each heading clear of the sticky site
           header when a link lands on it. */}
       <span id="gioi-thieu" aria-hidden className="block scroll-mt-28" />
-      <Input
-        label={tEditor("displayNameLabel")}
-        value={values.displayName}
-        onChange={(e) => set("displayName", e.target.value)}
-      />
+      {isShop ? (
+        <Input
+          label={tEditor("shopNameLabel")}
+          value={values.shopName}
+          onChange={(e) => set("shopName", e.target.value)}
+        />
+      ) : (
+        <Input
+          label={tEditor("displayNameLabel")}
+          value={values.displayName}
+          onChange={(e) => set("displayName", e.target.value)}
+        />
+      )}
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
@@ -741,19 +781,46 @@ export function ProfileSettingsForm({
                 <p className="text-body-sm text-text-tertiary">
                   {t("extraAreasHelper")}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {provinces
-                    .filter((p) => p.id !== values.provinceId)
-                    .map((p) => (
-                      <Tag
-                        key={p.id}
-                        selected={extraProvinceIds.includes(p.id)}
-                        onClick={() => toggleExtraProvince(p.id)}
-                      >
-                        {p.name}
-                      </Tag>
-                    ))}
-                </div>
+                {extraProvinceIds.length > 0 ? (
+                  <ul className="flex flex-wrap gap-2">
+                    {provinces
+                      .filter(
+                        (p) =>
+                          p.id !== values.provinceId &&
+                          extraProvinceIds.includes(p.id),
+                      )
+                      .map((p) => (
+                        <li key={p.id}>
+                          <button
+                            type="button"
+                            onClick={() => removeExtraProvince(p.id)}
+                            aria-label={t("extraAreasRemove", {
+                              name: p.name,
+                            })}
+                            className="focus-ring inline-flex min-h-10 items-center gap-1.5 rounded-full border border-border-strong bg-bg-sunken pr-2.5 pl-3.5 text-body-sm font-semibold! text-text-primary"
+                          >
+                            {p.name}
+                            <X aria-hidden className="size-3.5" />
+                          </button>
+                        </li>
+                      ))}
+                  </ul>
+                ) : null}
+                <NativeSelect
+                  aria-label={t("extraAreasAdd")}
+                  value=""
+                  onChange={addExtraProvince}
+                  options={[
+                    { value: "", label: t("extraAreasAdd") },
+                    ...provinces
+                      .filter(
+                        (p) =>
+                          p.id !== values.provinceId &&
+                          !extraProvinceIds.includes(p.id),
+                      )
+                      .map((p) => ({ value: p.id, label: p.name })),
+                  ]}
+                />
               </div>
             ) : null}
           </>
@@ -952,17 +1019,12 @@ export function ProfileSettingsForm({
         </div>
       ) : null}
 
-      {/* Product shops trade under a business name and configure pickup or
-          delivery details here; their inventory lives under Listings. */}
-      {(SHOP_ROLES as readonly string[]).includes(role) ? (
-        <Input
-          label={tEditor("shopNameLabel")}
-          value={values.shopName}
-          onChange={(e) => set("shopName", e.target.value)}
-        />
-      ) : null}
-
-      {(SELLER_ROLES as readonly string[]).includes(role) ? (
+      {/* The delivery fee belongs to selling on Chợ F. A photographer or a
+          studio may list gear there, but most do not: they were asked about
+          shipping on a page about their services. A camera shop always
+          sees it; the others once they have a listing. */}
+      {role === "CAMERA_SHOP" ||
+      (hasListings && (SELLER_ROLES as readonly string[]).includes(role)) ? (
         <div className="flex flex-col gap-2">
           <Input
             type="number"
@@ -1052,16 +1114,23 @@ export function ProfileSettingsForm({
         </div>
       ) : null}
 
-      <div className="flex items-center gap-3 border-t border-border-subtle pt-4">
+      <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 -mx-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border-subtle bg-bg-page px-4 py-3 lg:bottom-0">
         <Button variant="accent" disabled={isSaving} onClick={onSave}>
           {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
           {tEditor("saveChanges")}
         </Button>
-        {saved ? (
-          <span className="text-body-sm text-success">{tEditor("saved")}</span>
-        ) : null}
         {saveError ? (
-          <span className="text-body-sm text-danger">{saveError}</span>
+          <span role="alert" className="text-body-sm text-danger">
+            {saveError}
+          </span>
+        ) : dirty ? (
+          <span className="text-body-sm text-text-secondary">
+            {tEditor("unsavedChanges")}
+          </span>
+        ) : saved ? (
+          <span role="status" className="text-body-sm text-success">
+            {tEditor("saved")}
+          </span>
         ) : null}
       </div>
     </div>
