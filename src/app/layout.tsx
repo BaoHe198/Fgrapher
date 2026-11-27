@@ -4,11 +4,14 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Bricolage_Grotesque, IBM_Plex_Mono, Lexend } from "next/font/google";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { BadgesProvider } from "@/components/providers/badges-provider";
 import { MessagingProvider } from "@/components/providers/messaging-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { CookieConsentBanner } from "@/components/layout/cookie-consent-banner";
 import { EnvironmentBanner } from "@/components/layout/environment-banner";
 import { Toaster } from "@/components/ui/toast";
+import { CLIENT_MESSAGE_SCOPES } from "@/i18n/client-message-scopes.generated";
+import { pickMessages, type MessageTree } from "@/i18n/pick-messages";
 import { auth } from "@/lib/auth";
 import { features } from "@/lib/features";
 import { readCookieConsent } from "@/lib/privacy/cookie-consent-server";
@@ -24,10 +27,16 @@ const fontDisplay = Bricolage_Grotesque({
   subsets: ["latin", "vietnamese"],
 });
 
+// Not preloaded (27/11/2026). A font declared here is preloaded on every
+// route, and this one is three files (one per weight) used only for small
+// labels and codes. On a slow connection those files competed with the page
+// itself for the line before anything was painted. They still load where the
+// font is used; until then the label shows in the system monospace font.
 const fontMono = IBM_Plex_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+  preload: false,
 });
 
 // No `template` here: every page in the app already appends "— Fgrapher"
@@ -65,7 +74,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
-  const messages = await getMessages();
+  // Not the whole catalogue (27/11/2026). That was 343 KB inside every
+  // page's HTML, three quarters of the page. The browser gets the few
+  // namespaces every page uses here, and each area's layout adds its own
+  // through <ScopedMessages>. Server Components read the full catalogue
+  // regardless. See scripts/gen-client-message-scopes.mjs.
+  const messages = pickMessages(
+    (await getMessages()) as MessageTree,
+    CLIENT_MESSAGE_SCOPES.root,
+  );
   const session = await auth();
   // auth() already reads the request's cookies, so reading one more keeps
   // no page static that was static before — and deciding here means the
@@ -90,9 +107,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <AuthProvider session={session}>
-              <MessagingProvider>
-                <Toaster>{children}</Toaster>
-              </MessagingProvider>
+              <BadgesProvider>
+                <MessagingProvider>
+                  <Toaster>{children}</Toaster>
+                </MessagingProvider>
+              </BadgesProvider>
               <CookieConsentBanner
                 initialAnalytics={cookieConsent?.analytics ?? null}
               />

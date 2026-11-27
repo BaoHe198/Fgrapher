@@ -153,7 +153,9 @@ describe("no component keeps its own polling loop", () => {
   const polled = [
     "src/components/messaging/chat-panel.tsx",
     "src/components/messaging/messaging-popup.tsx",
-    "src/components/providers/messaging-provider.tsx",
+    // The header's three numbers (unread messages, unread notifications,
+    // cart) are polled here, in one request — not by each icon on its own.
+    "src/components/providers/badges-provider.tsx",
     "src/components/layout/notification-bell.tsx",
     "src/app/(dashboard)/dashboard/messages/messages-client.tsx",
   ];
@@ -169,6 +171,34 @@ describe("no component keeps its own polling loop", () => {
       );
     });
   }
+});
+
+describe("the header badges come from one request", () => {
+  it("the messaging provider takes its unread count from the badges, and fetches nothing itself", () => {
+    const src = codeOnly(
+      read("src/components/providers/messaging-provider.tsx"),
+    );
+    assert.match(src, /useBadges\(\)/);
+    assert.doesNotMatch(src, /fetch\(/);
+    assert.doesNotMatch(src, /usePolling\(|setInterval\(/);
+  });
+
+  it("the cart drawer shows the badge number and loads the cart only when opened", () => {
+    const src = codeOnly(read("src/components/cart/cart-drawer.tsx"));
+    assert.match(src, /useBadges\(\)/);
+    assert.match(src, /useCart\(\{\s*enabled:\s*open,?\s*\}\)/);
+  });
+
+  it("the endpoint checks the session once and runs the three counts together", () => {
+    const route = codeOnly(read("src/app/api/users/me/badges/route.ts"));
+    assert.equal((route.match(/requireAuth\(\)/g) ?? []).length, 1);
+    assert.match(
+      route,
+      /Promise\.all\(\s*\[[\s\S]*getUnreadConversationCount[\s\S]*countUnreadNotifications[\s\S]*countCartItems/,
+    );
+    // The cart is not read at all while the marketplace is switched off.
+    assert.match(route, /features\.marketplaceEnabled \? countCartItems/);
+  });
 });
 
 describe("the messaging popup mounts exactly one body", () => {
@@ -213,9 +243,12 @@ describe("chat panel read-marking and freshness", () => {
 describe("the notification bell stays cheap while closed", () => {
   const bell = codeOnly(read("src/components/layout/notification-bell.tsx"));
 
-  it("polls a count-only read when the dropdown is shut", () => {
-    assert.match(bell, /countOnly=true/);
-    assert.match(bell, /usePolling\(isOpen \? load : loadCount/);
+  it("fetches nothing of its own when the dropdown is shut", () => {
+    // The badge number arrives with the header's other badges (one request
+    // for all three); the bell's own poller runs only while it is open.
+    assert.match(bell, /useBadges\(\)/);
+    assert.match(bell, /usePolling\(load, \{[\s\S]{0,80}enabled:\s*isOpen/);
+    assert.doesNotMatch(bell, /countOnly/);
   });
 
   it("has a count-only server path that is one query, not three", () => {
@@ -240,11 +273,11 @@ describe("the notification bell stays cheap while closed", () => {
 describe("the notification bell fetches full rows exactly once on open", () => {
   const bell = codeOnly(read("src/components/layout/notification-bell.tsx"));
 
-  // The bug: onOpenChange called load() directly on open, AND usePolling's
-  // resetKey switch (isOpen ? "open" : "closed", right above onOpenChange)
-  // already fetches load() immediately the moment isOpen flips — see
-  // usePolling's own docstring on resetKey. That was two full
-  // `/api/notifications?page=1` requests for one click.
+  // The bug: onOpenChange called load() directly on open, AND usePolling
+  // already fetches load() immediately the moment it is switched on (it used
+  // to be a resetKey flip, now it is `enabled: isOpen` — see usePolling's own
+  // docstring). That was two full `/api/notifications?page=1` requests for
+  // one click.
   it("onOpenChange only flips state — it must not call load() itself", () => {
     const start = bell.indexOf("const onOpenChange");
     assert.ok(start !== -1, "onOpenChange not found");
@@ -253,14 +286,19 @@ describe("the notification bell fetches full rows exactly once on open", () => {
     assert.doesNotMatch(
       body,
       /\bload\(\)/,
-      "onOpenChange calls load() directly — usePolling's resetKey change " +
-        "already fetches on open, so this duplicates the request",
+      "onOpenChange calls load() directly — usePolling already fetches " +
+        "as it is enabled on open, so this duplicates the request",
     );
   });
 
-  it("still relies on the resetKey switch to fetch immediately on open", () => {
+  it("still relies on the poller being enabled to fetch immediately on open", () => {
     // The mechanism onOpenChange leans on instead of calling load() itself.
-    assert.match(bell, /usePolling\(isOpen \? load : loadCount, \{/);
-    assert.match(bell, /resetKey:\s*isOpen \? "open" : "closed"/);
+    assert.match(bell, /usePolling\(load, \{[\s\S]{0,80}enabled:\s*isOpen/);
+  });
+
+  it("asks for the badges again when the dropdown closes", () => {
+    const start = bell.indexOf("const onOpenChange");
+    const body = bell.slice(start, bell.indexOf("\n  };", start));
+    assert.match(body, /if \(!open\) refreshBadges\(\)/);
   });
 });

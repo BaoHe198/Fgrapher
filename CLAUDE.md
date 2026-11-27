@@ -243,6 +243,15 @@ the roles that trade under a business name and so get a shop-name field.
 - Form state with `react-hook-form` + `zodResolver`
 - Loading states: use `Skeleton` component from shadcn/ui
 - Error states: show inline error message, never silent failure
+- Translations in a Client Component: name the namespace as a plain string,
+  `useTranslations("publicPages.browse")` — never with no argument or a
+  computed one. The browser is sent only the namespaces client code asks for,
+  per area of the app (`src/i18n/client-message-scopes.generated.ts`, written
+  by `scripts/gen-client-message-scopes.mjs` from the source; each area's
+  `layout.tsx` wraps its pages in `<ScopedMessages>`). After adding or moving
+  such a call run `pnpm i18n:scopes` and commit the file. `pnpm dev` and
+  `pnpm build` run it too, and `pnpm test` fails while it is stale — a stale
+  file shows the raw key on screen instead of the text.
 - File naming: `kebab-case.tsx` for components, `camelCase.ts` for utilities
 
 ### TypeScript conventions
@@ -271,6 +280,7 @@ pnpm dev                          # start dev server (port 3000)
 pnpm build                        # production build
 pnpm lint                         # ESLint
 pnpm format                       # Prettier
+pnpm i18n:scopes                  # regenerate which translations each area sends to the browser
 
 # Database
 pnpm db:generate                  # prisma generate

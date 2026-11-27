@@ -2,6 +2,8 @@
 // marketing header or footer - nothing to wander off to mid-request. The
 // flow draws its own slim header (Thoát, who you are booking, draft state)
 // and a fixed bottom bar.
+import { ScopedMessages } from "@/components/providers/scoped-messages";
+
 export default function FocusLayout({
   children,
 }: {
@@ -9,7 +11,7 @@ export default function FocusLayout({
 }) {
   return (
     <main id="main-content" className="flex min-h-full flex-col bg-bg-page">
-      {children}
+      <ScopedMessages scope="focus">{children}</ScopedMessages>
     </main>
   );
 }

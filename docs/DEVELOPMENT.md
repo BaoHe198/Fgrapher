@@ -147,6 +147,31 @@ role ở giao diện.
 3. Không để tiếng Anh làm placeholder trong file tiếng Việt.
 4. Kiểm tra biến nội suy, số nhiều, ngày và tiền.
 5. Với nội dung vận hành production, ưu tiên tiếng Việt rõ và trực tiếp.
+6. Trong Client Component, ghi tên nhóm câu chữ bằng chuỗi cố định:
+   `useTranslations("publicPages.browse")`. Không gọi `useTranslations()` trống
+   hay với tên tính toán.
+
+### Câu chữ gửi cho trình duyệt theo từng khu vực
+
+Trình duyệt không nhận cả bảng câu chữ. Layout gốc gửi vài nhóm mọi trang đều
+dùng; layout của từng khu vực (`(public)`, `(dashboard)`, `(admin)`, `(auth)`,
+`(focus)`, `onboarding`) bọc trang trong `<ScopedMessages scope="…">` để gửi
+thêm phần của khu vực đó. Server Component không bị ảnh hưởng: nó luôn đọc cả
+bảng trên máy chủ.
+
+Danh sách nhóm của mỗi khu vực nằm ở
+`src/i18n/client-message-scopes.generated.ts` và do
+`scripts/gen-client-message-scopes.mjs` tự sinh: script đi theo các lệnh import
+từ mọi tệp của khu vực, giữ những tệp rơi vào gói chạy trên trình duyệt, rồi gom
+tên nhóm trong các lời gọi `useTranslations("…")` của chúng.
+
+- Sau khi thêm hoặc chuyển một lời gọi như vậy: chạy `pnpm i18n:scopes` và commit
+  tệp sinh ra. `pnpm dev` và `pnpm build` cũng tự chạy script này.
+- `pnpm test` báo lỗi khi tệp sinh ra cũ hơn mã nguồn. Nếu bỏ qua, trang sẽ hiện
+  tên khóa (ví dụ `publicPages.browse.title`) thay cho câu chữ.
+- Thêm một nhóm route mới có layout riêng: khai báo trong `SCOPE_DIRS` của script
+  và bọc layout bằng `<ScopedMessages>`. Không khai báo thì khu vực đó được tính
+  vào phần gốc: vẫn đúng, nhưng mọi trang phải tải thêm câu chữ của nó.
 
 Các file `docs/i18n-batches/*.json` là dữ liệu trung gian của hệ thống dịch, không
 phải tài liệu hướng dẫn.

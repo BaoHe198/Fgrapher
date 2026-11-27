@@ -26,6 +26,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useState } from "react";
 
+import { useBadges } from "@/components/providers/badges-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -101,8 +102,15 @@ export function NotificationBell() {
   const t = useTranslations("sharedComponents.notificationBell");
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  // The badge number lives with the header's other badges (one request for
+  // all three — see BadgesProvider). While the dropdown is shut this
+  // component fetches nothing at all; it used to poll a count of its own.
+  const {
+    unreadNotifications: unreadCount,
+    setUnreadNotifications,
+    refresh: refreshBadges,
+  } = useBadges();
 
   // Full page: the rows the dropdown renders, plus the badge count.
   const load = () => {
@@ -111,43 +119,25 @@ export function NotificationBell() {
       .then((body) => {
         startTransition(() => {
           setNotifications((body.data ?? []).slice(0, 8));
-          setUnreadCount(body.unreadCount ?? 0);
         });
+        setUnreadNotifications(body.unreadCount ?? 0);
       })
       .catch(() => {});
   };
 
-  // Badge only. While the dropdown is shut, its rows are not on screen and
-  // nothing reads them — fetching a whole page (findMany + two counts) to
-  // render one integer was three queries for nothing.
-  const loadCount = () => {
-    return fetch("/api/notifications?countOnly=true")
-      .then((res) => res.json())
-      .then((body) => {
-        startTransition(() => setUnreadCount(body.unreadCount ?? 0));
-      })
-      .catch(() => {});
-  };
+  // Poll every 30s while the dropdown is open, until real-time delivery lands
+  // (see CLAUDE.md). Paused while the tab is hidden. Turning `enabled` on
+  // fetches immediately on its own — see usePolling's docstring — which is
+  // what puts the rows on screen the moment the dropdown opens.
+  usePolling(load, { intervalMs: 30_000, enabled: isOpen });
 
-  // Poll every 30s until real-time delivery lands (see CLAUDE.md). Paused
-  // while the tab is hidden, and cheap while the dropdown is closed.
-  // Switching `resetKey` (open <-> closed) restarts the schedule AND fetches
-  // immediately on its own — see usePolling's docstring — which is what
-  // gives both directions their immediate refresh below: `load` (full rows)
-  // the moment it opens, `loadCount` (badge only) the moment it closes.
-  usePolling(isOpen ? load : loadCount, {
-    intervalMs: 30_000,
-    resetKey: isOpen ? "open" : "closed",
-  });
-
-  // Deliberately just the state flip. This used to also call load() here on
-  // open, "so the rows show up straight away instead of waiting for the next
-  // tick" — but the resetKey switch above already does exactly that the
-  // moment `isOpen` flips, so the explicit call fired a second, redundant
-  // `/api/notifications?page=1` for every single open. Don't add it back;
-  // the close path never needed one for loadCount, and open doesn't either.
+  // Opening needs no explicit load() (the poller above fires as it is
+  // enabled; a second call here used to send a redundant
+  // `/api/notifications?page=1` on every open). Closing asks for the badges
+  // again, which is what the count-only fetch used to do at this moment.
   const onOpenChange = (open: boolean) => {
     setIsOpen(open);
+    if (!open) refreshBadges();
   };
 
   const onClickNotification = async (notification: Notification) => {
@@ -156,17 +146,15 @@ export function NotificationBell() {
       await fetch(`/api/notifications/${notification.id}/read`, {
         method: "PATCH",
       });
-      startTransition(() => {
-        setUnreadCount((c) => Math.max(0, c - 1));
-      });
+      setUnreadNotifications((c) => c - 1);
     }
     router.push(notificationHref(notification));
   };
 
   const onMarkAllRead = async () => {
     await fetch("/api/notifications/read-all", { method: "POST" });
+    setUnreadNotifications(0);
     startTransition(() => {
-      setUnreadCount(0);
       setNotifications((prev) =>
         prev.map((n) => ({ ...n, readAt: n.readAt ?? new Date() })),
       );

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { LogoFull } from "@/components/brand/logo-full";
+import { ScopedMessages } from "@/components/providers/scoped-messages";
 import { ROLE_PHOTOS } from "@/lib/constants/showcase-images";
 
 // The second photo of each role, so the auth pages don't repeat the home
@@ -33,7 +34,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
           className="flex items-center justify-center px-5 py-10 sm:px-8 sm:py-14"
         >
           <div className="flex w-full max-w-[400px] flex-col gap-[22px]">
-            {children}
+            <ScopedMessages scope="auth">{children}</ScopedMessages>
           </div>
         </main>
 

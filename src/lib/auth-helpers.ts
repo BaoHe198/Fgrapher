@@ -1,6 +1,7 @@
 import type { Role } from "@prisma/client";
 import type { Session } from "next-auth";
 import { getTranslations } from "next-intl/server";
+import { cache } from "react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -38,6 +39,25 @@ export class AuthError extends Error {
 // — pages outside that group that call auth() directly for optional/
 // contextual display (not a protected action) are not covered here, since
 // every actual mutation still routes through an API handler that is.
+//
+// One lookup per page render (27/11/2026). A signed-in page used to ask this
+// same question several times in a row before it could start on its own
+// data: the layout asked, then the page's requireAuth()/requireAdmin() asked
+// again, each a separate trip to the database. React's cache() answers the
+// repeats from the first one — within a single render only. It never carries
+// an answer from one request to the next, and in a Route Handler (no render)
+// it does not memoize at all, so every API call still checks afresh.
+export const loadAccountStatus = cache(async function loadAccountStatus(
+  userId: string,
+) {
+  return db.user.findUnique({
+    where: { id: userId },
+    // dateOfBirth is here for (dashboard)/layout.tsx's "finish your profile"
+    // redirect, so that layout shares this lookup instead of running its own.
+    select: { isSuspended: true, deletedAt: true, dateOfBirth: true },
+  });
+});
+
 export async function requireAuth() {
   const session = await auth();
   if (!session?.user) {
@@ -45,10 +65,7 @@ export async function requireAuth() {
     throw new AuthError(t("unauthorized"), 401);
   }
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { isSuspended: true, deletedAt: true },
-  });
+  const user = await loadAccountStatus(session.user.id);
   if (!user || user.isSuspended || user.deletedAt) {
     const t = await getTranslations("libServices.auth");
     throw new AuthError(t("unauthorized"), 401);

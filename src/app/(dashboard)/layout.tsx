@@ -6,11 +6,12 @@ import {
   DashboardTabBar,
 } from "@/components/layout/dashboard-sidebar";
 import { PastDueBanner } from "@/components/layout/past-due-banner";
+import { ScopedMessages } from "@/components/providers/scoped-messages";
 import { SectionNav } from "@/components/layout/section-nav";
 import { ReviewReminderBanner } from "@/components/layout/review-reminder-banner";
 import { WebNav } from "@/components/layout/web-nav";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { loadAccountStatus } from "@/lib/auth-helpers";
 import { features } from "@/lib/features";
 import { hasPublicPlaces } from "@/services/places";
 
@@ -29,10 +30,14 @@ export default async function DashboardLayout({
   // (rule 6) — a credentials account always has dateOfBirth set at
   // registration, so its absence here is specifically the OAuth gap, not
   // a false positive. See src/app/onboarding/complete-profile/.
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { dateOfBirth: true, isSuspended: true, deletedAt: true },
-  });
+  //
+  // The photo-spot question for the menu is asked alongside it, not after it
+  // (27/11/2026): the two do not depend on each other, and the page below
+  // cannot start reading its own data until this layout has returned.
+  const [user, placesEnabled] = await Promise.all([
+    loadAccountStatus(session.user.id),
+    hasPublicPlaces(),
+  ]);
 
   // Same live-status check as requireAuth() (src/lib/auth-helpers.ts) —
   // that one covers every protected API route, this one covers page
@@ -51,7 +56,11 @@ export default async function DashboardLayout({
   // navigating anywhere, so there's no token left for the middleware to
   // act on by the time it reaches /login.
   if (!user || user.isSuspended || user.deletedAt) {
-    return <SuspendedAccountNotice />;
+    return (
+      <ScopedMessages scope="dashboard">
+        <SuspendedAccountNotice />
+      </ScopedMessages>
+    );
   }
 
   if (!user.dateOfBirth) {
@@ -59,14 +68,34 @@ export default async function DashboardLayout({
   }
 
   return (
+    <ScopedMessages scope="dashboard">
+      <DashboardShell placesEnabled={placesEnabled} userId={session.user.id}>
+        {children}
+      </DashboardShell>
+    </ScopedMessages>
+  );
+}
+
+// The page frame, split out only so the layout above can wrap it in one
+// place; nothing about it changed.
+function DashboardShell({
+  placesEnabled,
+  userId,
+  children,
+}: {
+  placesEnabled: boolean;
+  userId: string;
+  children: React.ReactNode;
+}) {
+  return (
     <div className="flex min-h-dvh flex-col">
       <WebNav
         marketplaceEnabled={features.marketplaceEnabled}
         socialFeedEnabled={features.socialFeedEnabled}
-        placesEnabled={await hasPublicPlaces()}
+        placesEnabled={placesEnabled}
       />
-      <PastDueBanner userId={session.user.id} />
-      <ReviewReminderBanner userId={session.user.id} />
+      <PastDueBanner userId={userId} />
+      <ReviewReminderBanner userId={userId} />
 
       {/* Below lg the menu is the tab bar fixed to the bottom edge, so the
           page keeps room for it under its last line. */}

@@ -30,13 +30,21 @@ export interface CartItemWithProduct {
 // on its own, so adding a product left the header's count stale until the
 // icon was clicked (25/09 report). Anything that changes the cart announces
 // it, and every instance reloads.
-const CART_CHANGED = "fgrapher:cart-changed";
+// The header's number listens to the same announcement — see
+// components/providers/badges-provider.tsx.
+export const CART_CHANGED_EVENT = "fgrapher:cart-changed";
 
 export function notifyCartChanged() {
-  window.dispatchEvent(new Event(CART_CHANGED));
+  window.dispatchEvent(new Event(CART_CHANGED_EVENT));
 }
 
-export function useCart() {
+/**
+ * `enabled: false` holds the cart back until it is wanted. The header's cart
+ * drawer passes `enabled: open`: its icon gets the number from useBadges(),
+ * so the rows (products, photos, shop details) are only fetched once the
+ * drawer is actually opened, not on every page that has a header.
+ */
+export function useCart({ enabled = true }: { enabled?: boolean } = {}) {
   const [items, setItems] = useState<CartItemWithProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,11 +58,12 @@ export function useCart() {
   }, []);
 
   useEffect(() => {
+    if (!enabled) return;
     load();
     const onChanged = () => load();
-    window.addEventListener(CART_CHANGED, onChanged);
-    return () => window.removeEventListener(CART_CHANGED, onChanged);
-  }, [load]);
+    window.addEventListener(CART_CHANGED_EVENT, onChanged);
+    return () => window.removeEventListener(CART_CHANGED_EVENT, onChanged);
+  }, [load, enabled]);
 
   const updateQuantity = async (id: string, quantity: number) => {
     setItems((prev) =>
