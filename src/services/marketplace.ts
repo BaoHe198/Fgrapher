@@ -262,6 +262,18 @@ export async function getCart(userId: string) {
   return items;
 }
 
+// The number on the header's cart icon: every unit in the cart, the same sum
+// useCart() makes from getCart()'s rows. The icon is on every signed-in page,
+// and loading whole products, photos and shop details there to print one
+// integer was the heaviest thing a page asked for after it had rendered.
+export async function countCartItems(userId: string) {
+  const result = await db.cartItem.aggregate({
+    where: { userId },
+    _sum: { quantity: true },
+  });
+  return result._sum.quantity ?? 0;
+}
+
 export type CartErrorCode =
   | "productNotFound"
   | "rentalByMessage"

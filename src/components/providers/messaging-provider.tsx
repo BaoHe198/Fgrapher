@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import {
   createContext,
-  startTransition,
   useCallback,
   useContext,
   useMemo,
@@ -11,7 +10,7 @@ import {
 } from "react";
 
 import { MessagingPopup } from "@/components/messaging/messaging-popup";
-import { usePolling } from "@/hooks/use-polling";
+import { useBadges } from "@/components/providers/badges-provider";
 
 interface MessagingContextValue {
   isOpen: boolean;
@@ -37,10 +36,11 @@ export function useMessaging() {
 
 // Prompt F4 — a floating popup reachable from every page, not just
 // /dashboard/messages. This provider owns the open/minimized/selected
-// state and the shared unread-count poll (previously duplicated per-hook
-// in use-unread-messages.ts) so the header badge and the popup itself
-// never disagree. Only mounted for authenticated sessions (VIỆC "Panel
-// chỉ render khi người dùng đã đăng nhập").
+// state. The unread count it hands out comes from BadgesProvider, which
+// fetches it together with the bell's and the cart's numbers in one request
+// (it used to poll /api/conversations/unread-count here, on its own). Only
+// mounted for authenticated sessions (VIỆC "Panel chỉ render khi người dùng
+// đã đăng nhập").
 export function MessagingProvider({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
@@ -48,24 +48,7 @@ export function MessagingProvider({ children }: { children: React.ReactNode }) {
   const [selectedConversationId, setSelectedConversationId] = useState<
     string | null
   >(null);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const loadUnreadCount = useCallback(() => {
-    if (status !== "authenticated") return;
-    return fetch("/api/conversations/unread-count")
-      .then((res) => res.json())
-      .then((body) => {
-        startTransition(() => setUnreadCount(body.data?.count ?? 0));
-      })
-      .catch(() => {});
-  }, [status]);
-
-  // A header badge nobody is looking at does not need refreshing; this used
-  // to keep counting every 20s in backgrounded tabs.
-  usePolling(loadUnreadCount, {
-    intervalMs: 20_000,
-    enabled: status === "authenticated",
-  });
+  const { unreadMessages: unreadCount } = useBadges();
 
   const open = useCallback((conversationId?: string) => {
     setIsOpen(true);

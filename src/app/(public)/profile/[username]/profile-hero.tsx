@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AVATAR_DELIVERY_WIDTH_LARGE } from "@/lib/media/variants";
 import { useAccountMediaUpload } from "@/hooks/use-account-media-upload";
 
 // The owner-editing counterpart to page.tsx's cover/avatar markup — kept
@@ -222,7 +223,11 @@ export function ProfileAvatar({
         }
       >
         {displayAvatar ? (
-          <AvatarImage src={displayAvatar} alt={displayName} />
+          <AvatarImage
+            src={displayAvatar}
+            alt={displayName}
+            deliveryWidth={compact ? undefined : AVATAR_DELIVERY_WIDTH_LARGE}
+          />
         ) : null}
         <AvatarFallback
           className={

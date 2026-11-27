@@ -21,6 +21,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AVATAR_DELIVERY_WIDTH_LARGE } from "@/lib/media/variants";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -412,7 +413,13 @@ export function AboutProvider({
     <div className="grid items-start gap-8 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
       <div className="flex flex-col items-center gap-2 rounded-[var(--fg-radius-xl)] bg-bg-surface p-6 text-center shadow-[var(--shadow-md)]">
         <Avatar className="size-24">
-          {avatar ? <AvatarImage src={avatar} alt="" /> : null}
+          {avatar ? (
+            <AvatarImage
+              src={avatar}
+              alt=""
+              deliveryWidth={AVATAR_DELIVERY_WIDTH_LARGE}
+            />
+          ) : null}
           <AvatarFallback className="text-display-sm">
             {displayName.charAt(0).toUpperCase()}
           </AvatarFallback>

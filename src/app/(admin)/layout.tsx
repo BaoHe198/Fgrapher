@@ -3,10 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 
 import { SuspendedAccountNotice } from "@/components/auth/suspended-account-notice";
+import { ScopedMessages } from "@/components/providers/scoped-messages";
 import { requireAdmin } from "@/lib/admin";
 import { auth } from "@/lib/auth";
-import { AuthError } from "@/lib/auth-helpers";
-import { db } from "@/lib/db";
+import { AuthError, loadAccountStatus } from "@/lib/auth-helpers";
 import { getAdminQueueCounts } from "@/services/admin";
 
 import { AdminSidebar, MobileAdminSidebar } from "./admin-sidebar";
@@ -29,12 +29,15 @@ export default async function AdminLayout({
   // dashboard's identical case; same root cause here).
   const session = await auth();
   if (session?.user) {
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
-      select: { isSuspended: true, deletedAt: true },
-    });
+    // loadAccountStatus is the lookup requireAdmin() below would make
+    // anyway; asking through it means the question goes to the database once.
+    const user = await loadAccountStatus(session.user.id);
     if (!user || user.isSuspended || user.deletedAt) {
-      return <SuspendedAccountNotice />;
+      return (
+        <ScopedMessages scope="admin">
+          <SuspendedAccountNotice />
+        </ScopedMessages>
+      );
     }
   }
 
@@ -56,40 +59,42 @@ export default async function AdminLayout({
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg-sunken">
-      {/* bg-inverse, not neutral-900: the neutral scale flips in dark mode,
+    <ScopedMessages scope="admin">
+      <div className="flex min-h-dvh flex-col bg-bg-sunken">
+        {/* bg-inverse, not neutral-900: the neutral scale flips in dark mode,
           which turned this bar light grey under white text. */}
-      <div className="flex h-11 items-center gap-2 border-b border-white/5 bg-bg-inverse px-4 text-body-sm font-semibold! text-gold-50">
-        <span className="rounded-[4px] bg-[hsl(6_70%_46%)] px-1.5 py-0.5 text-meta font-bold! tracking-[0.12em] text-white uppercase">
-          {t("badge")}
-        </span>
-        <span className="hidden truncate text-green-200 sm:inline">
-          {t("subtitle")}
-        </span>
-        <Link
-          href="/dashboard"
-          className="ml-auto whitespace-nowrap text-green-200 hover:text-gold-50"
-        >
-          {t("exitAdmin")}
-        </Link>
-      </div>
-
-      <div className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-8">
-        <div className="mb-4 lg:hidden">
-          <MobileAdminSidebar counts={queueCounts} />
+        <div className="flex h-11 items-center gap-2 border-b border-white/5 bg-bg-inverse px-4 text-body-sm font-semibold! text-gold-50">
+          <span className="rounded-[4px] bg-[hsl(6_70%_46%)] px-1.5 py-0.5 text-meta font-bold! tracking-[0.12em] text-white uppercase">
+            {t("badge")}
+          </span>
+          <span className="hidden truncate text-green-200 sm:inline">
+            {t("subtitle")}
+          </span>
+          <Link
+            href="/dashboard"
+            className="ml-auto whitespace-nowrap text-green-200 hover:text-gold-50"
+          >
+            {t("exitAdmin")}
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_1fr]">
-          <aside className="hidden lg:block">
-            <AdminSidebar counts={queueCounts} />
-          </aside>
-          {/* The one main landmark of the admin pages — there was none, so
+        <div className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-8">
+          <div className="mb-4 lg:hidden">
+            <MobileAdminSidebar counts={queueCounts} />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_1fr]">
+            <aside className="hidden lg:block">
+              <AdminSidebar counts={queueCounts} />
+            </aside>
+            {/* The one main landmark of the admin pages — there was none, so
               screen readers had no "skip to content" target here. */}
-          <main id="main-content" className="min-w-0">
-            {children}
-          </main>
+            <main id="main-content" className="min-w-0">
+              {children}
+            </main>
+          </div>
         </div>
       </div>
-    </div>
+    </ScopedMessages>
   );
 }
