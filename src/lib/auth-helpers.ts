@@ -74,6 +74,35 @@ export async function requireAuth() {
   return session;
 }
 
+/**
+ * requireAuth() for a Server Component page that reads private data itself:
+ * the session, or null where requireAuth() would refuse.
+ *
+ * A page must not read someone's data for an account the layout is turning
+ * away, and must not depend on the layout having run first. On null the page
+ * renders nothing; the layout around it is what shows the sign-in redirect
+ * or the suspended-account notice. Within one render this adds no query —
+ * the layout's own check already loaded the account status.
+ */
+export async function sessionForPage() {
+  try {
+    return await requireAuth();
+  } catch (err) {
+    if (err instanceof AuthError) return null;
+    throw err;
+  }
+}
+
+/**
+ * What a Route Handler's JSON body would hand the browser. A Server
+ * Component uses it to pass a service's result to a Client Component as
+ * initial data in exactly the shape that component gets from the API later
+ * (dates as strings, undefined dropped).
+ */
+export function asApiJson<T>(value: unknown): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
 // Every /api/cron/** route calls this first. The three call sites used to
 // each inline `if (process.env.CRON_SECRET && authHeader !== ...)` — which
 // fails OPEN (skips the check entirely) whenever CRON_SECRET is unset, so

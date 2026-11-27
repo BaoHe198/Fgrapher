@@ -27,6 +27,21 @@ export async function requireAdmin() {
   return session;
 }
 
+/**
+ * requireAdmin() for a Server Component page under /admin that reads data
+ * itself: the session, or null where requireAdmin() would refuse (the admin
+ * layout is what renders the redirect or the 404). See sessionForPage in
+ * lib/auth-helpers.ts for why a page checks for itself.
+ */
+export async function adminSessionForPage() {
+  try {
+    return await requireAdmin();
+  } catch (err) {
+    if (err instanceof AuthError) return null;
+    throw err;
+  }
+}
+
 export async function logAdminAction({
   adminId,
   action,
