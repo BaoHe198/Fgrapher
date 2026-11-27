@@ -11,6 +11,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
 
 import { compactVnd, MAP_MARKER_CLASSES } from "@/components/fmap/map-marker";
+import { applyBaseMapStyle } from "@/lib/map-style";
 import type { FmapMarker } from "@/services/fmap";
 
 export type FmapBounds = {
@@ -103,13 +104,6 @@ function placeFeatures(places: FmapPlacePin[]) {
   };
 }
 const CLUSTER_LIST_LIMIT = 50;
-
-// Keyless fallback when NEXT_PUBLIC_MAP_STYLE_URL is unset. OpenFreeMap
-// serves vector tiles with no API key or request quota, unlike the public
-// tile.openstreetmap.org servers — whose usage policy forbids app traffic and
-// whose hostname some Vietnamese ISP resolvers return NXDOMAIN for, which
-// left the map blank during local testing.
-const FALLBACK_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 
 // Served from public/ by scripts/copy-maplibre-worker.mjs — MapLibre's own
 // import.meta.url-based lookup breaks under Turbopack (see that script).
@@ -305,16 +299,17 @@ export function FmapMap({
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const configuredStyle = process.env.NEXT_PUBLIC_MAP_STYLE_URL?.trim();
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: configuredStyle || FALLBACK_STYLE_URL,
       center: [106.7009, 10.7769],
       zoom: 11,
       minZoom: 5,
       maxZoom: MAX_ZOOM,
       attributionControl: false,
     });
+    // The base style is set here, not in the constructor: see
+    // lib/map-style.ts for which style and what is trimmed from it.
+    applyBaseMapStyle(map);
     mapRef.current = map;
     // Zoom buttons are the page's own (44px, stacked above the results
     // sheet); MapLibre's 29px ones are too small to tap. Attribution sits

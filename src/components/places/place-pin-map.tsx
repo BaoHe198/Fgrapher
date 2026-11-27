@@ -5,8 +5,9 @@ import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
 
+import { applyBaseMapStyle } from "@/lib/map-style";
+
 // Same keyless style and worker as Fmap (components/fmap/fmap-map.tsx).
-const FALLBACK_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 maplibregl.setWorkerUrl("/vendor/maplibre-gl/maplibre-gl-worker.mjs");
 
 export interface PinPoint {
@@ -49,8 +50,6 @@ export function PlacePinMap({
     const start = initialRef.current;
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style:
-        process.env.NEXT_PUBLIC_MAP_STYLE_URL?.trim() || FALLBACK_STYLE_URL,
       center: start ? [start.longitude, start.latitude] : [106.7009, 10.7769],
       zoom: start ? 15 : 11,
       minZoom: 4,
@@ -67,6 +66,7 @@ export function PlacePinMap({
         "CooperativeGesturesHandler.MacHelpText": gestureRef.current.mac,
       },
     });
+    applyBaseMapStyle(map);
     map.addControl(
       new maplibregl.AttributionControl({ compact: true }),
       "top-right",
