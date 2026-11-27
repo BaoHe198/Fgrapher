@@ -202,6 +202,12 @@ Những điều dưới đây được đo ngày 27/11/2026
 - **Khung cookie đứng trước nội dung trang** trong layout gốc: trên điện thoại
   nó là thứ lớn nhất của màn hình đầu, nên phải nằm trong những byte đầu tiên.
 
+- **Mọi bản đồ lấy kiểu nền từ một chỗ**, `applyBaseMapStyle(map)` trong
+  `lib/map-style.ts` (tạo bản đồ không kèm `style`, rồi gọi hàm này). Kiểu dự
+  phòng của OpenFreeMap được lược bớt ở đó: không tải bộ biểu tượng, chỉ một
+  phông nhãn. Nếu đặt `NEXT_PUBLIC_MAP_STYLE_URL` thì kiểu của nhà cung cấp được
+  dùng nguyên vẹn.
+
 Muốn biết một trang đang tải những thư viện nào: `pnpm next analyze`.
 
 ## 9. Các lệnh kiểm tra

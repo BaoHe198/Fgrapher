@@ -5,7 +5,8 @@ import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
 
-const FALLBACK_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+import { applyBaseMapStyle } from "@/lib/map-style";
+
 maplibregl.setWorkerUrl("/vendor/maplibre-gl/maplibre-gl-worker.mjs");
 
 /** With no travel radius given, the area drawn around a blurred point. */
@@ -61,13 +62,12 @@ export function ServiceAreaMap({
     if (!containerRef.current || mapRef.current) return;
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style:
-        process.env.NEXT_PUBLIC_MAP_STYLE_URL?.trim() || FALLBACK_STYLE_URL,
       center: [longitude, latitude],
       zoom: pin ? 15 : 11,
       interactive: false,
       attributionControl: false,
     });
+    applyBaseMapStyle(map);
     map.addControl(
       new maplibregl.AttributionControl({ compact: true }),
       "bottom-right",
