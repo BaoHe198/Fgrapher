@@ -7,6 +7,10 @@ import { useRef } from "react";
 
 import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
 import { useAccountMediaUpload } from "@/hooks/use-account-media-upload";
+import {
+  AVATAR_DELIVERY_WIDTH_LARGE,
+  buildAvatarUrl,
+} from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 export function AccountMedia({
@@ -76,7 +80,9 @@ export function AccountMedia({
         <div className="relative size-[104px] shrink-0 overflow-hidden rounded-full border-4 border-bg-surface bg-bg-sunken">
           {avatar ? (
             <Image
-              src={avatar}
+              // The stored URL is the original upload; a 104px circle does
+              // not need it. A blob: preview passes through untouched.
+              src={buildAvatarUrl(avatar, AVATAR_DELIVERY_WIDTH_LARGE)}
               alt=""
               fill
               className="object-cover"

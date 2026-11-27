@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar";
 
+import { buildAvatarUrl } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 function Avatar({
@@ -25,7 +26,19 @@ function Avatar({
   );
 }
 
-function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
+function AvatarImage({
+  className,
+  src,
+  deliveryWidth,
+  ...props
+}: AvatarPrimitive.Image.Props & {
+  /**
+   * Pixel width to ask the image host for. Leave it out for anything up to
+   * 64px on screen; pass AVATAR_DELIVERY_WIDTH_LARGE where the avatar is
+   * drawn larger than that.
+   */
+  deliveryWidth?: number;
+}) {
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
@@ -33,6 +46,9 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
         "aspect-square size-full rounded-full object-cover",
         className,
       )}
+      // Every avatar goes through here, so this is the one place that keeps
+      // an original-size upload from being downloaded for a small circle.
+      src={typeof src === "string" ? buildAvatarUrl(src, deliveryWidth) : src}
       {...props}
     />
   );
