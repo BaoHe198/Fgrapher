@@ -181,8 +181,8 @@ thức: 0,35–0,55 giây cho màn hình sau đăng nhập, 0,4–0,6 giây cho 
 
 ## 6. Nên sửa, theo thứ tự
 
-Mục 1–4 đã được sửa trong ngày 27/11; số đo trước và sau nằm ở mục 8. Mục 5–7 còn
-nguyên.
+Mục 1–4 đã được sửa trong ngày 27/11; số đo trước và sau nằm ở mục 8. Mục 5–7 được
+sửa sau đó cùng ngày; số đo ở mục 9.
 
 1. **Ảnh đại diện tải ở kích thước gốc.** `AvatarImage` (23 chỗ dùng) đưa thẳng địa chỉ
    ảnh đã lưu, không qua hàm thu nhỏ có sẵn trong `lib/media/variants.ts`. Trên hồ sơ
@@ -316,6 +316,116 @@ giây trong điều kiện mô phỏng**; phần còn lại là mã JavaScript (
   tra đều đạt. Số của `/api/users/me/badges` khớp ba endpoint cũ; chưa đăng nhập thì
   nhận 401.
 - `pnpm typecheck` sạch, `pnpm lint` 0 lỗi, `pnpm test` 840/840.
+
+## 9. Sau khi sửa mục 5–7 (đo lại 27/11)
+
+Cùng cách với mục 8: hai bản build chạy cạnh nhau, "trước" là commit `3ae6402` (đã
+có bốn sửa đổi của mục 8), "sau" là mã đã sửa thêm. Chưa bản nào ở trên trang chính
+thức.
+
+### Đã sửa gì
+
+5. **Dữ liệu đến cùng trang.** Chi tiết lịch đặt và ba trang quản trị (Người dùng,
+   Báo cáo, Tuân thủ) đọc dữ liệu cho lần hiện đầu ngay trên máy chủ, bằng đúng cổng
+   kiểm tra và đúng hàm đọc của API tương ứng. Trang Đơn của shop không đổi: Chợ F
+   đang tắt ngoài phạm vi MVP. Trang Tin đăng vốn đã dựng trên máy chủ.
+6. **Bản đồ F** khởi động bộ máy bản đồ sau khi phần còn lại của trang đã hiện và
+   trình duyệt rảnh.
+7. **Mã tải với trang.** Phân tích bằng `next analyze` cho trang chủ: khung Next và
+   React 205 KB (nén), thư viện giao diện base-ui 97 KB, bộ báo lỗi Sentry 76 KB,
+   mã của ứng dụng khoảng 45 KB. Đã tách khỏi lượt tải đầu: Sentry (nạp khi trang
+   rảnh, không nạp nếu không có DSN), hộp tin nhắn, chuông và ngăn giỏ hàng (chỉ
+   người đã đăng nhập mới tải).
+
+Thêm hai sửa đổi nhằm đúng vào con số "nội dung lớn nhất hiện chậm" của mục 8:
+ảnh chính của trang được tải với mức ưu tiên cao (`priority` của next/image từ Next
+16 chỉ còn thêm thẻ preload, không còn đặt mức ưu tiên), và khung cookie được đặt
+trước nội dung trang trong tệp HTML.
+
+### Mã JavaScript trình duyệt tải về (KB đã nén, bộ nhớ đệm trống)
+
+| Trang                      | Trước khi trang tải xong: trước → sau | Tải thêm sau đó: trước → sau |
+| -------------------------- | ------------------------------------- | ---------------------------- |
+| Trang chủ                  | 416 → 319                             | 0 → 77                       |
+| Tìm kiếm F                 | 400 → 306                             | 0 → 77                       |
+| Hồ sơ nhiếp ảnh gia        | 453 → 365                             | 274 → 351                    |
+| Đăng nhập                  | 428 → 288                             | 0 → 77                       |
+| Bản đồ F                   | 456 → 359                             | 277 → 354                    |
+| Bảng điều khiển khách hàng | 394 → 304                             | 0 → 111                      |
+| Quản trị, Người dùng       | 373 → 241                             | 29 → 175                     |
+
+77 KB tải thêm là Sentry, vì máy đo có đặt DSN; không có DSN thì không tải. Với
+người đã đăng nhập, tổng lượng mã tải về tăng khoảng 20–35 KB do chia thành nhiều
+tệp hơn, nhưng phần tải trước khi trang dùng được giảm 90–130 KB.
+
+### Màn hình có dữ liệu ngay
+
+| Màn hình                      | Nội dung hiện sau: trước → sau | Yêu cầu sau khi tải |
+| ----------------------------- | ------------------------------ | ------------------- |
+| Khách hàng, Chi tiết lịch đặt | 3140 → 2022 ms                 | 2 → 1               |
+| Quản trị, Người dùng          | 2845 → 1443 ms                 | 2 → 1               |
+| Quản trị, Báo cáo             | 3948 → 2268 ms (theo LCP)      | 2 → 1               |
+
+Thời gian chờ máy chủ của trang Báo cáo tăng (1426 → 2065 ms) vì máy chủ giờ đọc
+danh sách trước khi trả trang; tổng thời gian đến lúc thấy danh sách vẫn ngắn hơn.
+
+### Điện thoại chậm, đo bằng trình duyệt bị ép chậm thật
+
+Trình duyệt bị giới hạn ở mạng 4G chậm và bộ xử lý chậm gấp bốn (không phải mô
+phỏng của Lighthouse), hai lượt xen kẽ mỗi bản, màn hình 390×844.
+
+| Trang     | Nội dung đầu tiên | Nội dung lớn nhất | Thời gian bị treo sau đó | Trang tải xong |
+| --------- | ----------------- | ----------------- | ------------------------ | -------------- |
+| Trang chủ | 2,4 → 2,5 s       | 2,8 → 2,6 s       | 4,9 → 4,6 s              | 9,9 → 7,7 s    |
+| Đăng nhập | 1,5 → 1,5 s       | 1,5 → 1,5 s       | 3,7 → 1,6 s              | 6,0 → 2,8 s    |
+| Hồ sơ     | 1,8 → 1,7 s       | 2,1 → 1,7 s       | 8,3 → 7,2 s              | 7,0 → 5,1 s    |
+| Bản đồ F  | 1,6 → 1,6 s       | 1,8 → 1,7 s       | 9,4 → 6,5 s              | 7,1 → 3,3 s    |
+
+Thời gian bị treo là phần vượt quá 50 ms của mỗi lần luồng chính bận, cộng lại
+trong khoảng 12 giây sau lần vẽ đầu. Nó vẫn lớn: chạy mã JavaScript của trang trên
+máy chậm là phần nặng nhất còn lại, và máy đo thiếu bộ nhớ làm con số này xấu thêm.
+
+### Lighthouse (mô phỏng), ba lượt xen kẽ mỗi bản
+
+| Trang     | Nội dung lớn nhất | Nội dung đầu tiên | Thời gian bị treo | Mã tải về    |
+| --------- | ----------------- | ----------------- | ----------------- | ------------ |
+| Trang chủ | 6,8 → 5,5 s       | 1,7 → 1,7 s       | 618 → 769 ms      | 416 → 396 KB |
+| Đăng nhập | 5,3 → 4,2 s       | 1,2 → 1,2 s       | 1018 → 167 ms     | 428 → 366 KB |
+| Hồ sơ     | 6,7 → 5,8 s       | 1,7 → 2,2 s       | 4633 → 5332 ms    | 874 → 864 KB |
+| Bản đồ F  | 5,8 → 4,9 s       | 1,4 → 1,4 s       | 4399 → 5832 ms    | 880 → 860 KB |
+
+**Hai cách đo không khớp nhau, và nên tin cách đo thật hơn.** Mô phỏng của
+Lighthouse tính mọi tệp mã đã tải xong trước lần vẽ, trong một lượt tải nhanh
+không ép, là thứ chặn lần vẽ đó; vì vậy nó báo nội dung lớn nhất sau 5–7 giây trong
+khi trình duyệt bị ép chậm thật vẽ nó sau 1,5–2,8 giây. Cũng vì cách tính đó, việc
+dời Sentry và bản đồ ra sau lần vẽ đầu làm "thời gian bị treo" mô phỏng tăng ở hai
+trang có bản đồ, trong khi đo thật thì giảm. Con số Lighthouse vẫn đáng ghi lại vì
+đó là thứ các công cụ bên ngoài sẽ báo.
+
+### Kiểm tra không làm hỏng gì
+
+- Mở lại 254 màn hình bằng 10 loại tài khoản: không có tên khóa thay cho câu chữ,
+  không có báo lỗi hydrat hóa hay thiếu tệp mã, không có lỗi 5xx; nhật ký máy chủ
+  sạch.
+- 37 kiểm tra chức năng đều đạt: chi tiết lịch đặt có sẵn trong HTML và trình duyệt
+  không gọi lại API; ba trang quản trị có sẵn danh sách, bộ lọc vẫn gọi máy chủ;
+  chuông, giỏ hàng, hộp tin nhắn vẫn mở được; khung cookie hiện, trả lời được, nhớ
+  câu trả lời, và nút của nó nằm trên thanh điều hướng của điện thoại.
+- Quyền riêng tư của chi tiết lịch đặt: với một lịch đang chờ và một lịch đã bị từ
+  chối, trang gửi cho nhà cung cấp không chứa số điện thoại hay địa chỉ của khách
+  (API cũ cũng vậy); khách vẫn thấy số của mình; sau khi nhận lời thì nhà cung cấp
+  thấy. Tài khoản không liên quan nhận màn hình "không tìm thấy" và HTML không có
+  chi tiết nào; người chưa đăng nhập bị chuyển hướng; tài khoản thường mở trang
+  quản trị nhận 404 và không có danh sách.
+- `pnpm typecheck` sạch, `pnpm lint` 0 lỗi, `pnpm test` đạt toàn bộ.
+
+### Còn lại
+
+- Thời gian luồng chính bị treo trên máy chậm (4,6–7,2 giây ở các phép đo trên).
+  Muốn giảm nữa phải bớt mã chạy khi mở trang: base-ui 97 KB và khung Next, React
+  205 KB là hai phần lớn nhất; ô tìm kiếm ở trang chủ kéo theo combobox và select.
+- Kiểu bản đồ của Bản đồ F (OpenFreeMap "liberty") nhiều lớp; đổi sang kiểu nhẹ hơn
+  là quyết định về giao diện, chưa làm.
 
 ## Đo lại
 

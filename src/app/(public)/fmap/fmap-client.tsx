@@ -22,6 +22,7 @@ import { FmapPlacePreview } from "@/components/fmap/fmap-place-preview";
 import { FmapProviderPreviewCard } from "@/components/fmap/fmap-provider-preview";
 import { Button } from "@/components/ui/button";
 import { FgImage } from "@/components/ui/fg-image";
+import { useIdleReady } from "@/hooks/use-idle-ready";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { formatDate, formatVND, vietnamDateKey } from "@/lib/format";
 import { minutesToTime, sunTimes } from "@/lib/sun";
@@ -235,6 +236,7 @@ export function FmapClient({
   // Vietnamese — rather than a hardcoded "Fmap" the nav never called it.
   const navT = useTranslations("nav");
   const isMobile = useIsMobile();
+  const mapWanted = useIdleReady();
   const [filters, setFilters] = useState<FmapFilterValue>(() =>
     defaultFilters(initialRole, initialCategory),
   );
@@ -822,46 +824,55 @@ export function FmapClient({
           aria-label={navT("fmap")}
           className="relative min-w-0 flex-1 overflow-hidden bg-bg-sunken"
         >
-          <FmapMap
-            markers={markers}
-            selectedProfileId={selectedProfileId}
-            centreRequest={centreRequest}
-            fitRequest={fitRequest}
-            zoomRequest={zoomRequest}
-            bottomInset={isMobile ? sheetHeight : 0}
-            onBoundsChange={(nextBounds, byUser) => {
-              setBounds(nextBounds);
-              if (ignoreNextMoveRef.current) {
-                ignoreNextMoveRef.current = false;
-                return;
-              }
-              if (searchAfterMoveRef.current) {
-                searchAfterMoveRef.current = false;
-                void search(nextBounds);
-                return;
-              }
-              if (!hasSearched || !byUser) return;
-              setMapMoved(true);
-            }}
-            onSelectProvider={(profileId) => void selectProvider(profileId)}
-            places={placesOn ? places : []}
-            placeClusterLabel={placeClusterLabel}
-            selectedPlaceId={selectedPlace ? selectedPlace.id : null}
-            onSelectPlace={(placeId) => {
-              setSelectedProfileId(null);
-              setPreview(null);
-              setClusterIds(null);
-              setSheetExpanded(false);
-              setSelectedPlaceId(placeId);
-            }}
-            onSelectCluster={(profileIds) => {
-              setSelectedProfileId(null);
-              setPreview(null);
-              setSheetExpanded(false);
-              setClusterIds(profileIds);
-            }}
-            labels={markerLabels}
-          />
+          {/* The map engine is the heaviest thing on this page: about 420 KB
+              of script and several seconds of work on a slow phone. It
+              starts once the filters and the header are painted and the
+              browser is idle, instead of competing with them. Until then
+              the same placeholder the map's own loading state shows. */}
+          {mapWanted ? (
+            <FmapMap
+              markers={markers}
+              selectedProfileId={selectedProfileId}
+              centreRequest={centreRequest}
+              fitRequest={fitRequest}
+              zoomRequest={zoomRequest}
+              bottomInset={isMobile ? sheetHeight : 0}
+              onBoundsChange={(nextBounds, byUser) => {
+                setBounds(nextBounds);
+                if (ignoreNextMoveRef.current) {
+                  ignoreNextMoveRef.current = false;
+                  return;
+                }
+                if (searchAfterMoveRef.current) {
+                  searchAfterMoveRef.current = false;
+                  void search(nextBounds);
+                  return;
+                }
+                if (!hasSearched || !byUser) return;
+                setMapMoved(true);
+              }}
+              onSelectProvider={(profileId) => void selectProvider(profileId)}
+              places={placesOn ? places : []}
+              placeClusterLabel={placeClusterLabel}
+              selectedPlaceId={selectedPlace ? selectedPlace.id : null}
+              onSelectPlace={(placeId) => {
+                setSelectedProfileId(null);
+                setPreview(null);
+                setClusterIds(null);
+                setSheetExpanded(false);
+                setSelectedPlaceId(placeId);
+              }}
+              onSelectCluster={(profileIds) => {
+                setSelectedProfileId(null);
+                setPreview(null);
+                setSheetExpanded(false);
+                setClusterIds(profileIds);
+              }}
+              labels={markerLabels}
+            />
+          ) : (
+            <div className="absolute inset-0 animate-pulse bg-bg-sunken" />
+          )}
 
           {mapMoved ? (
             <Button

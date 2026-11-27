@@ -218,6 +218,7 @@ the roles that trade under a business name and so get a shop-name field.
 - Validate input with Zod before processing
 - Return consistent JSON shape: `{ data, error, message }`
 - Auth check with `requireAuth()` (from `src/lib/auth-helpers.ts`) at top of every protected route — wraps NextAuth v5's `auth()`
+- A Server Component page that reads private data for its first render (instead of a Client Component fetching after load) checks for itself first: `sessionForPage()`, or `adminSessionForPage()` under `/admin`, and renders nothing on `null` — it must not rely on the layout's check. It reads through the same service function the API route uses and hands the result to the client as `asApiJson(...)`, so both paths show a viewer the same thing
 - Role check with `requireRole(userId, 'PHOTOGRAPHER')` helper; paid-role checks via `requireActiveSubscription(userId, role)` / `requirePaidRole(userId)`
 - Paginate lists: `?page=1&limit=20`, return `{ data, total, page, totalPages }`
 - HTTP status: 200 success, 201 created, 400 bad request, 401 unauth, 403 forbidden, 404 not found, 500 server error
@@ -243,6 +244,16 @@ the roles that trade under a business name and so get a shop-name field.
 - Form state with `react-hook-form` + `zodResolver`
 - Loading states: use `Skeleton` component from shadcn/ui
 - Error states: show inline error message, never silent failure
+- The page's main image (the largest thing on its first screen): `<FgImage
+priority>`, or `loading="eager" fetchPriority="high"` on a bare
+  `next/image`. Not next/image's own `priority` — since Next 16 that only adds
+  a preload link with no fetch priority, and the photo queued behind scripts.
+- Code that only a signed-in visitor can reach (chat popup, bell, cart
+  drawer) is loaded with `next/dynamic` where it is rendered, not imported at
+  the top of a component every visitor downloads. Browser code never imports
+  `@sentry/nextjs` directly; it calls `reportError()` from
+  `lib/sentry-client.ts`, which loads the SDK after the page is idle.
+  `src/lib/__tests__/first-load.test.ts` holds both lines.
 - Translations in a Client Component: name the namespace as a plain string,
   `useTranslations("publicPages.browse")` — never with no argument or a
   computed one. The browser is sent only the namespaces client code asks for,

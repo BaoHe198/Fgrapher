@@ -1,12 +1,12 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
+import { reportError } from "@/lib/sentry-client";
 
 export default function GlobalError({
   error,
@@ -18,7 +18,7 @@ export default function GlobalError({
   const t = useTranslations("rootError");
 
   useEffect(() => {
-    Sentry.captureException(error);
+    reportError(error);
   }, [error]);
 
   return (

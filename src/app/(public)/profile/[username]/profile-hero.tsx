@@ -87,7 +87,10 @@ export function ProfileCover({
             src={displayCover}
             alt=""
             fill
-            priority
+            // The largest thing on a profile's first screen: fetch it ahead
+            // of scripts and fonts (see the note in components/ui/fg-image).
+            loading="eager"
+            fetchPriority="high"
             sizes="100vw"
             className={
               hero ? "animate-cover-settle object-cover" : "object-cover"

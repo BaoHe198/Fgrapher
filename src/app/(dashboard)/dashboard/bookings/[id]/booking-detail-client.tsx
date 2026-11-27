@@ -1,0 +1,1348 @@
+"use client";
+
+import type {
+  Booking,
+  BookingStatus,
+  Role,
+  Service,
+  User,
+} from "@prisma/client";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Loader2,
+  MapPin,
+  Phone,
+  MessageCircle,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
+import { startTransition, useEffect, useState } from "react";
+
+import { ReferenceMediaGallery } from "@/components/media/reference-media-gallery";
+import { BookingFilmStrip } from "@/components/booking/booking-film-strip";
+import { BookingPrivateNote } from "@/components/booking/booking-private-note";
+import { ReviewModal } from "@/components/modals/review-modal";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { BookingStatusBadge } from "@/components/booking/booking-status-badge";
+import { DetailSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { NativeSelect } from "@/components/ui/native-select";
+import { StarInput } from "@/components/ui/star-input";
+import { Textarea } from "@/components/ui/textarea";
+import { MIN_NOTICE_HOURS } from "@/lib/constants";
+import { bookingWordingFor } from "@/lib/constants/booking-wording";
+import {
+  formatDate,
+  formatDateTime,
+  formatTime,
+  formatWeekdayShort,
+  vietnamDateKey,
+} from "@/lib/format";
+import { formatAdministrativeLocation } from "@/lib/location";
+import { cn, formatCurrency } from "@/lib/utils";
+import { resolvePartyName } from "@/lib/party-name";
+import type { DayAvailability } from "@/services/availability";
+
+type Party = Pick<User, "id" | "name" | "firstName" | "avatar" | "username"> & {
+  roles?: { role: string }[];
+  // Selected for the provider only; a customer goes by their own name.
+  profiles?: { displayName: string | null; role?: string }[];
+};
+export type BookingDetail = Booking & {
+  customer: Party;
+  provider: Party;
+  service: Pick<Service, "name" | "description" | "duration"> | null;
+  locationProvince: { name: string } | null;
+  locationWard: { name: string } | null;
+  /** The photo spot the shoot is at, once the address may be seen. */
+  locationPlace: { name: string; href: string } | null;
+  review: { id: string } | null;
+  statusHistory?: {
+    toStatus: BookingStatus;
+    createdAt: string;
+    /** Set on the row of an agreed reschedule; its status did not change. */
+    reschedule: {
+      from: { date: string; startTime: string };
+      to: { date: string; startTime: string };
+    } | null;
+  }[];
+  // Crew-hire (Prompt B7, VIỆC 1).
+  parentBooking: {
+    id: string;
+    status: BookingStatus;
+    date: string;
+    service: { name: string } | null;
+  } | null;
+  childBookings: {
+    id: string;
+    status: BookingStatus;
+    date: string;
+    providerId: string;
+    recipientRole: string | null;
+    provider: {
+      firstName: string | null;
+      name: string | null;
+      username: string | null;
+      profiles: { displayName: string | null; role: string }[];
+    };
+  }[];
+  // Anti-spam/safety (Prompt B7, VIỆC 4).
+  isFirstBookingBetweenParties: boolean;
+  providerZaloUrl: string | null;
+  /** Crew hire: the provider who hired, and the page they hire under. */
+  requester: { role: string; pageName: string | null } | null;
+  providerRole: string | null;
+  providerTerms: {
+    depositPercent: number | null;
+    depositPolicy: string | null;
+    cancellationPolicy: string | null;
+  } | null;
+  wasConfirmed: boolean;
+  /** Set when the booking came from an accepted offer on a request. */
+  serviceRequest: {
+    id: string;
+    code: string;
+    title: string;
+    fulfilledOffer: {
+      proposedPrice: number;
+      currency: string;
+      message: string | null;
+    } | null;
+  } | null;
+};
+
+const DECLINE_REASON_VALUES = [
+  "unavailable",
+  "outsideArea",
+  "notSpecialty",
+  "other",
+] as const;
+
+interface BookingDetailClientProps {
+  /**
+   * The booking as the server read it for this viewer, in exactly the shape
+   * GET /api/bookings/[id] returns (page.tsx passes it through JSON first).
+   * null when there is no such booking for them.
+   */
+  initialBooking: BookingDetail | null;
+}
+
+export function BookingDetailClient({
+  initialBooking,
+}: BookingDetailClientProps) {
+  const t = useTranslations("dashboardCore.bookingDetail");
+  const tBookings = useTranslations("dashboardCore.bookings");
+  const tRole = useTranslations("role");
+  const params = useParams<{ id: string }>();
+  const { data: session } = useSession();
+
+  function partyName(party: Party) {
+    // Without the handle: this is a name in a sentence, and the provider's
+    // display name comes first anyway.
+    return resolvePartyName(
+      { ...party, username: null },
+      tBookings("unknownParty"),
+    );
+  }
+
+  const LOCATION_LABEL: Record<string, string> = {
+    PROVIDER: t("locationLabel.PROVIDER"),
+    CUSTOMER: t("locationLabel.CUSTOMER"),
+    OUTDOOR: t("locationLabel.OUTDOOR"),
+  };
+
+  const DECLINE_REASONS = DECLINE_REASON_VALUES.map((value) => ({
+    value,
+    label: t(`dialogs.decline.reasons.${value}`),
+  }));
+
+  // The first render already has the booking: page.tsx reads it on the
+  // server. This screen used to open on a skeleton and fetch it afterwards,
+  // a second trip to the server before anything useful was on screen.
+  const [booking, setBooking] = useState<BookingDetail | null>(initialBooking);
+  const [isLoading, setIsLoading] = useState(false);
+  const [notFoundError, setNotFoundError] = useState(initialBooking === null);
+  const [busy, setBusy] = useState(false);
+
+  const [declineOpen, setDeclineOpen] = useState(false);
+  const [declineReason, setDeclineReason] = useState<string>(
+    DECLINE_REASONS[0].value,
+  );
+  const [declineMessage, setDeclineMessage] = useState("");
+
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const tKnow = useTranslations("profilePage.know");
+
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [acceptOpen, setAcceptOpen] = useState(false);
+  const [now] = useState(() => Date.now());
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+
+  // Re-reads the booking after an action changed it (accept, decline,
+  // cancel, reschedule). Not called on mount; another booking's page is a
+  // fresh mount with its own server-read data (page.tsx keys this by id).
+  const load = () => {
+    fetch(`/api/bookings/${params.id}`)
+      .then((res) => {
+        if (res.status === 404) {
+          setNotFoundError(true);
+          return null;
+        }
+        return res.json();
+      })
+      .then((body) => {
+        startTransition(() => {
+          if (body?.data) setBooking(body.data);
+          setIsLoading(false);
+        });
+      });
+  };
+
+  const updateStatus = async (
+    status: "CONFIRMED" | "DECLINED" | "CANCELLED" | "COMPLETED" | "NO_SHOW",
+    reason?: string,
+  ) => {
+    setBusy(true);
+    await fetch(`/api/bookings/${params.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, cancelReason: reason }),
+    });
+    setBusy(false);
+    setAcceptOpen(false);
+    setDeclineOpen(false);
+    setCancelOpen(false);
+    setIsLoading(true);
+    load();
+  };
+
+  const respondReschedule = async (accept: boolean) => {
+    setBusy(true);
+    await fetch(`/api/bookings/${params.id}/reschedule`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accept }),
+    });
+    setBusy(false);
+    setIsLoading(true);
+    load();
+  };
+
+  if (notFoundError) {
+    return (
+      <EmptyState
+        title={t("notFound")}
+        primaryAction={
+          <>
+            <Button
+              variant="secondary"
+              nativeButton={false}
+              render={<Link href="/dashboard/bookings" />}
+            >
+              {t("backToBookings")}
+            </Button>
+          </>
+        }
+      />
+    );
+  }
+
+  if (isLoading || !booking) {
+    return <DetailSkeleton />;
+  }
+
+  const viewerIsProvider = session?.user?.id === booking.provider.id;
+  const otherParty = viewerIsProvider ? booking.customer : booking.provider;
+  // A provider who hired crew goes by the page they hired under.
+  const otherName =
+    viewerIsProvider && booking.requester?.pageName
+      ? booking.requester.pageName
+      : partyName(otherParty);
+  const kind = bookingWordingFor(booking.providerRole);
+  // Who ended it, in the reader's terms. Null for an older booking that
+  // did not record it.
+  const cancelledByLabel =
+    booking.status !== "CANCELLED" || !booking.cancelledBy
+      ? null
+      : booking.cancelledBy === session?.user?.id
+        ? t("cancelledBy.me")
+        : booking.cancelledBy === booking.customer.id
+          ? t("cancelledBy.customer")
+          : t("cancelledBy.provider", { kind });
+  const providerName = partyName(booking.provider);
+  const isPast = new Date(booking.date).getTime() < now;
+  const withinCancellationWindow =
+    new Date(booking.date).getTime() - now < MIN_NOTICE_HOURS * 60 * 60 * 1000;
+  const hasReschedulePending = Boolean(booking.rescheduleProposedBy);
+  const proposedByMe = booking.rescheduleProposedBy === session?.user?.id;
+  // "Phường X, Tỉnh Y": the part of the location a provider may read
+  // before accepting. Empty at the provider's own place.
+  const locationArea = formatAdministrativeLocation({
+    ward: booking.locationWard,
+    province: booking.locationProvince,
+  });
+  // The 48 hours a request waits for an answer, shown to both sides. The
+  // page never said when it ran out (found 25/11/2026).
+  const answerBy =
+    booking.status === "PENDING" && booking.expiresAt
+      ? new Date(booking.expiresAt)
+      : null;
+  const hoursToAnswer = answerBy
+    ? Math.max(0, Math.ceil((answerBy.getTime() - now) / 3_600_000))
+    : null;
+  const awaitingMyAnswer = booking.status === "PENDING" && viewerIsProvider;
+
+  return (
+    <div className="flex flex-col gap-5">
+      <Link
+        href="/dashboard/bookings"
+        className="flex w-fit items-center gap-1.5 text-body-sm font-semibold! text-text-secondary"
+      >
+        <ArrowLeft className="size-4" />
+        {t("backToBookings")}
+      </Link>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-display-md text-text-primary">{t("title")}</h1>
+        <BookingStatusBadge status={booking.status} />
+        <span className="text-body-sm text-text-tertiary">
+          {t("idRequested", {
+            id: booking.id.slice(-8),
+            date: formatDate(booking.createdAt),
+          })}
+        </span>
+      </div>
+
+      {answerBy && hoursToAnswer !== null ? (
+        <Card
+          className={cn(
+            "flex flex-row items-start gap-2 border",
+            hoursToAnswer <= 6
+              ? "border-danger bg-danger-bg"
+              : "border-border-subtle",
+          )}
+        >
+          <Clock
+            className={cn(
+              "mt-0.5 size-4 shrink-0",
+              hoursToAnswer <= 6 ? "text-danger" : "text-text-tertiary",
+            )}
+          />
+          <span className="text-body-sm text-text-primary">
+            {t(viewerIsProvider ? "answerBy.provider" : "answerBy.customer", {
+              name: otherName,
+              time: formatTime(answerBy),
+              date: formatDate(answerBy),
+              hours: hoursToAnswer,
+            })}
+          </span>
+        </Card>
+      ) : null}
+
+      {booking.isFirstBookingBetweenParties && booking.status === "PENDING" ? (
+        <Card className="flex flex-col gap-1.5 border border-warning bg-warning-bg">
+          <span className="flex items-center gap-1.5 text-body-md font-semibold! text-text-primary">
+            <AlertTriangle className="size-4" />
+            {t("firstTimeWarning.title", { name: otherName })}
+          </span>
+          <p className="text-body-sm text-text-secondary">
+            {t("firstTimeWarning.body")}
+          </p>
+        </Card>
+      ) : null}
+
+      {booking.parentBooking ? (
+        <Card className="flex flex-row items-center justify-between gap-2">
+          <span className="text-body-sm text-text-secondary">
+            {t("crewHire.partOf")}{" "}
+            {/* The client's job belongs to whoever hired the crew. To the
+                crew member it is not theirs to open — the link answered
+                "Không tìm thấy lịch đặt" — so they get the name only. */}
+            {viewerIsProvider ? (
+              <span className="font-semibold text-text-primary">
+                {booking.parentBooking.service?.name ??
+                  t("crewHire.unnamedClientBooking")}{" "}
+                {t("crewHire.onDate", {
+                  date: formatDate(booking.parentBooking.date),
+                })}
+              </span>
+            ) : (
+              <Link
+                href={`/dashboard/bookings/${booking.parentBooking.id}`}
+                className="font-semibold text-text-link hover:underline"
+              >
+                {booking.parentBooking.service?.name ??
+                  t("crewHire.unnamedClientBooking")}{" "}
+                {t("crewHire.onDate", {
+                  date: formatDate(booking.parentBooking.date),
+                })}
+              </Link>
+            )}
+          </span>
+          <Badge variant="neutral">
+            {tBookings(`status.${booking.parentBooking.status}`)}
+          </Badge>
+        </Card>
+      ) : null}
+
+      {booking.childBookings.length > 0 ? (
+        <Card className="flex flex-col gap-2">
+          <span className="text-body-sm font-semibold! text-text-primary">
+            {t("crewHire.crewBookedTitle")}
+          </span>
+          {booking.childBookings.map((child) => (
+            <div
+              key={child.id}
+              className="flex items-center justify-between gap-2"
+            >
+              <Link
+                href={`/dashboard/bookings/${child.id}`}
+                className="text-body-sm text-text-link hover:underline"
+              >
+                {resolvePartyName(child.provider, t("crewHire.unknown"))}
+                {/* The role's name, not its code: this read
+                    "Thái Thị Phấn — MAKEUP_ARTIST". */}
+                {child.recipientRole
+                  ? ` — ${tRole(child.recipientRole as Role)}`
+                  : ""}
+              </Link>
+              <Badge variant="neutral">
+                {tBookings(`status.${child.status}`)}
+              </Badge>
+            </div>
+          ))}
+        </Card>
+      ) : null}
+
+      {hasReschedulePending ? (
+        <Card className="flex flex-col gap-2 border border-brand-primary bg-success-bg">
+          <span className="text-body-md font-semibold! text-text-primary">
+            {proposedByMe
+              ? t("reschedule.waitingForResponse")
+              : t("reschedule.newTimeProposed")}
+          </span>
+          <span className="text-body-sm text-text-secondary">
+            {formatDate(booking.rescheduleProposedDate!)} {t("reschedule.at")}{" "}
+            {booking.rescheduleProposedStartTime}
+          </span>
+          {!proposedByMe ? (
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                size="sm"
+                variant="accent"
+                disabled={busy}
+                onClick={() => respondReschedule(true)}
+              >
+                {t("reschedule.acceptNewTime")}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={busy}
+                onClick={() => respondReschedule(false)}
+              >
+                {t("reschedule.keepOriginalTime")}
+              </Button>
+            </div>
+          ) : null}
+        </Card>
+      ) : null}
+
+      <BookingFilmStrip
+        status={booking.status}
+        hasReview={Boolean(booking.review)}
+        stoppedAfterConfirming={
+          booking.status === "CANCELLED" && booking.wasConfirmed
+        }
+        labels={{
+          title: t("film.title"),
+          requested: t("film.requested"),
+          confirmed: t("film.confirmed", { kind }),
+          shoot: t("film.shoot", { kind }),
+          review: t("film.review"),
+          done: t("film.done"),
+          current: t("film.current"),
+          upcoming: t("film.upcoming"),
+          stopped: cancelledByLabel ?? tBookings(`status.${booking.status}`),
+        }}
+      />
+
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="flex flex-col gap-4">
+          {/* Phones: the buttons go on their own row under the name. Side
+              by side, "Nhắn tin" ran off the screen and the name wrapped. */}
+          <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <Avatar className="size-11">
+                {otherParty.avatar ? (
+                  <AvatarImage src={otherParty.avatar} alt="" />
+                ) : null}
+                <AvatarFallback>{otherName[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex min-w-0 flex-col">
+                <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-body-md font-semibold! text-text-primary">
+                  {otherName}
+                  {(otherParty.roles?.length ?? 0) > 0 ? (
+                    <Badge variant="accent">{t("otherParty.verified")}</Badge>
+                  ) : null}
+                </span>
+                <span className="text-body-sm text-text-secondary">
+                  {viewerIsProvider
+                    ? booking.requester
+                      ? t("otherParty.hirer", {
+                          role: tRole(booking.requester.role as Role),
+                        })
+                      : t("otherParty.client")
+                    : booking.providerRole
+                      ? tRole(booking.providerRole as Role)
+                      : t("otherParty.provider")}
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-2 max-sm:[&>*]:flex-1">
+              {otherParty.username ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  nativeButton={false}
+                  render={<Link href={`/profile/${otherParty.username}`} />}
+                >
+                  {t("otherParty.viewProfile")}
+                </Button>
+              ) : null}
+              <Button
+                size="sm"
+                variant="secondary"
+                nativeButton={false}
+                render={
+                  <Link href={`/dashboard/messages?to=${otherParty.id}`} />
+                }
+              >
+                {t("otherParty.message")}
+              </Button>
+              {!viewerIsProvider && booking.providerZaloUrl ? (
+                <Button
+                  size="sm"
+                  variant="accent"
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={booking.providerZaloUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    />
+                  }
+                >
+                  <MessageCircle className="size-4" />
+                  {t("otherParty.openZalo")}
+                </Button>
+              ) : null}
+            </div>
+          </Card>
+
+          <Card
+            className="flex flex-col divide-y divide-border-subtle"
+            padding={false}
+          >
+            {[
+              [
+                t("fields.service"),
+                booking.service?.name ??
+                  (booking.serviceRequest
+                    ? t("fields.fromRequest", {
+                        code: booking.serviceRequest.code,
+                      })
+                    : t("fields.customRequest")),
+              ],
+              [t("fields.date"), formatDate(booking.date)],
+              [
+                t("fields.time"),
+                booking.endTime
+                  ? `${booking.startTime} – ${booking.endTime}`
+                  : booking.startTime,
+              ],
+              [
+                t("fields.location"),
+                booking.locationType
+                  ? LOCATION_LABEL[booking.locationType]
+                  : "—",
+              ],
+              ...(locationArea ? [[t("fields.area"), locationArea]] : []),
+              [
+                t("fields.people"),
+                booking.numberOfPeople ? String(booking.numberOfPeople) : "—",
+              ],
+              [
+                t("fields.total"),
+                booking.totalPrice
+                  ? formatCurrency(booking.totalPrice, booking.currency)
+                  : "—",
+              ],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="flex items-baseline justify-between gap-4 px-5 py-3.5"
+              >
+                {/* The label keeps its line: beside a long value (a package
+                    name, a ward and province) it broke into "Khu / vực". */}
+                <span className="shrink-0 text-body-sm text-text-tertiary">
+                  {label}
+                </span>
+                <span className="min-w-0 text-right text-body-md font-semibold! [overflow-wrap:anywhere] text-text-primary">
+                  {value}
+                </span>
+              </div>
+            ))}
+          </Card>
+
+          {booking.serviceRequest ? (
+            <Card className="flex flex-col gap-2">
+              <span className="text-body-sm text-text-tertiary">
+                {t("fromRequest.title", { code: booking.serviceRequest.code })}
+              </span>
+              {viewerIsProvider ? (
+                <span className="text-body-md font-semibold! [overflow-wrap:anywhere] text-text-primary">
+                  {booking.serviceRequest.title}
+                </span>
+              ) : (
+                <Link
+                  href={`/dashboard/requests/${booking.serviceRequest.id}`}
+                  className="w-fit text-body-md font-semibold! [overflow-wrap:anywhere] text-text-link hover:underline"
+                >
+                  {booking.serviceRequest.title}
+                </Link>
+              )}
+              {booking.serviceRequest.fulfilledOffer ? (
+                <>
+                  <span className="text-body-sm text-text-secondary">
+                    {t("fromRequest.offer", {
+                      name: providerName,
+                      price: formatCurrency(
+                        booking.serviceRequest.fulfilledOffer.proposedPrice,
+                        booking.serviceRequest.fulfilledOffer.currency,
+                      ),
+                    })}
+                  </span>
+                  {booking.serviceRequest.fulfilledOffer.message ? (
+                    <p className="border-l-2 border-border-strong pl-3 text-body-sm whitespace-pre-line [overflow-wrap:anywhere] text-text-secondary">
+                      {booking.serviceRequest.fulfilledOffer.message}
+                    </p>
+                  ) : null}
+                </>
+              ) : null}
+            </Card>
+          ) : null}
+
+          {booking.locationAddress ? (
+            <Card className="flex flex-row items-start gap-2">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
+              <span className="flex min-w-0 flex-col gap-1">
+                <span className="text-body-md [overflow-wrap:anywhere] text-text-primary">
+                  {booking.locationAddress}
+                </span>
+                {booking.locationPlace ? (
+                  <Link
+                    href={booking.locationPlace.href}
+                    className="w-fit text-body-sm font-semibold! text-text-link hover:underline"
+                  >
+                    {t("placeLink", { name: booking.locationPlace.name })}
+                  </Link>
+                ) : null}
+              </span>
+            </Card>
+          ) : awaitingMyAnswer ? (
+            // Said outright: the address and phone number are withheld, not
+            // missing, and accepting is what releases them.
+            <p className="flex items-start gap-2 px-1 text-body-sm text-text-secondary">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
+              {t("contactAfterAccept")}
+            </p>
+          ) : null}
+
+          {/* The wizard requires this number "so the artist can reach you",
+              and the API releases it to the provider once they accept — but
+              no screen showed it (found 19/11/2026). */}
+          {booking.contactPhone ? (
+            <Card className="flex flex-row items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-body-sm text-text-tertiary">
+                <Phone className="size-4 shrink-0" />
+                {t("fields.contactPhone")}
+              </span>
+              <a
+                href={`tel:${booking.contactPhone}`}
+                className="text-body-md font-semibold! text-text-link hover:underline"
+              >
+                {booking.contactPhone}
+              </a>
+            </Card>
+          ) : null}
+
+          {booking.notes ? (
+            <Card className="flex flex-col gap-1.5">
+              <span className="text-body-sm text-text-tertiary">
+                {t("notes")}
+              </span>
+              <p className="whitespace-pre-line [overflow-wrap:anywhere] text-body-md text-text-primary">
+                {booking.notes}
+              </p>
+            </Card>
+          ) : null}
+
+          {/* The provider's own note, the one kept in the work calendar. */}
+          {viewerIsProvider ? (
+            <BookingPrivateNote bookingId={booking.id} />
+          ) : null}
+
+          {/* The customer's reference photos/videos. Booking.referenceImages
+              has been accepted by the API and stored since before this page
+              existed, but nothing ever displayed it — a provider could never
+              have seen what someone attached. Shown to both parties. */}
+          {booking.referenceImages.length > 0 ? (
+            <Card>
+              <ReferenceMediaGallery urls={booking.referenceImages} />
+            </Card>
+          ) : null}
+
+          {booking.status === "COMPLETED" &&
+          !viewerIsProvider &&
+          !booking.review ? (
+            <Card className="flex flex-col items-center gap-3 text-center">
+              <span className="text-body-lg font-semibold! text-text-primary">
+                {t("reviewPrompt", { name: otherName })}
+              </span>
+              <StarInput
+                value={reviewRating}
+                onChange={(value) => {
+                  setReviewRating(value);
+                  setReviewOpen(true);
+                }}
+              />
+            </Card>
+          ) : null}
+
+          <Card className="flex flex-col gap-2.5">
+            <span className="text-body-sm text-text-tertiary">
+              {t("timeline.title")}
+            </span>
+            <TimelineRow
+              label={t("timeline.requestCreated")}
+              date={booking.createdAt}
+            />
+            {booking.statusHistory?.length ? (
+              // Every recorded step, in order. The rows below are for a
+              // booking older than its history.
+              booking.statusHistory.map((entry) => (
+                <TimelineRow
+                  key={`${entry.toStatus}-${entry.createdAt}`}
+                  label={
+                    entry.reschedule
+                      ? t("timeline.rescheduled")
+                      : entry.toStatus === "CANCELLED" && cancelledByLabel
+                        ? cancelledByLabel
+                        : t(`timeline.to.${entry.toStatus}`)
+                  }
+                  date={entry.createdAt}
+                  detail={
+                    entry.reschedule
+                      ? t("timeline.rescheduledDetail", {
+                          fromTime: entry.reschedule.from.startTime,
+                          fromDate: formatDate(
+                            `${entry.reschedule.from.date}T00:00:00+07:00`,
+                          ),
+                          toTime: entry.reschedule.to.startTime,
+                          toDate: formatDate(
+                            `${entry.reschedule.to.date}T00:00:00+07:00`,
+                          ),
+                        })
+                      : entry.toStatus === "CANCELLED" ||
+                          entry.toStatus === "DECLINED"
+                        ? booking.cancelReason
+                        : null
+                  }
+                />
+              ))
+            ) : booking.status === "CANCELLED" ||
+              booking.status === "DECLINED" ? (
+              <TimelineRow
+                label={
+                  booking.status === "CANCELLED"
+                    ? (cancelledByLabel ?? t("timeline.cancelled"))
+                    : t("timeline.declined")
+                }
+                date={booking.updatedAt}
+                detail={booking.cancelReason}
+              />
+            ) : null}
+            {!booking.statusHistory?.length &&
+            booking.status === "COMPLETED" &&
+            booking.completedAt ? (
+              <TimelineRow
+                label={t("timeline.markedComplete")}
+                date={booking.completedAt}
+              />
+            ) : null}
+          </Card>
+        </div>
+
+        <div className="sticky top-[104px] flex flex-col gap-3">
+          <Card className="flex flex-col gap-2.5">
+            {booking.status === "PENDING" && viewerIsProvider ? (
+              <>
+                <Button
+                  variant="accent"
+                  disabled={busy}
+                  onClick={() => setAcceptOpen(true)}
+                >
+                  {t("actions.accept")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => setDeclineOpen(true)}
+                >
+                  {t("actions.decline")}
+                </Button>
+                <Button
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => setRescheduleOpen(true)}
+                >
+                  {t("actions.proposeNewTime")}
+                </Button>
+              </>
+            ) : null}
+
+            {booking.status === "PENDING" && !viewerIsProvider ? (
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={() => setCancelOpen(true)}
+              >
+                {t("actions.cancelRequest")}
+              </Button>
+            ) : null}
+
+            {booking.status === "CONFIRMED" ? (
+              <>
+                <Button
+                  variant="secondary"
+                  nativeButton={false}
+                  render={
+                    <Link href={`/dashboard/messages?to=${otherParty.id}`} />
+                  }
+                >
+                  {t("actions.message")}
+                </Button>
+                <Button
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => setRescheduleOpen(true)}
+                >
+                  {t("actions.reschedule")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => setCancelOpen(true)}
+                >
+                  {t("actions.cancel")}
+                </Button>
+                {viewerIsProvider && isPast ? (
+                  <>
+                    <Button
+                      variant="accent"
+                      disabled={busy}
+                      onClick={() => updateStatus("COMPLETED")}
+                    >
+                      {t("actions.markCompleted")}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() => updateStatus("NO_SHOW")}
+                    >
+                      {t("actions.reportNoShow")}
+                    </Button>
+                  </>
+                ) : null}
+              </>
+            ) : null}
+
+            {booking.status === "COMPLETED" ||
+            booking.status === "CANCELLED" ||
+            booking.status === "DECLINED" ||
+            booking.status === "NO_SHOW" ? (
+              <p className="text-body-sm text-text-secondary">
+                {t("actions.doneStatusNote", {
+                  status: tBookings(`status.${booking.status}`),
+                })}
+              </p>
+            ) : null}
+          </Card>
+
+          {/* Beside the actions on a wide screen only: below "lg" this
+              column stacks under the details, which already list the total,
+              and a phone showed it twice (23/11/2026 walk-through). */}
+          {booking.totalPrice ? (
+            <Card className="hidden flex-row justify-between lg:flex">
+              <span className="text-body-sm text-text-tertiary">
+                {t("fields.total")}
+              </span>
+              <span className="text-heading-sm font-bold! text-text-primary">
+                {formatCurrency(booking.totalPrice, booking.currency)}
+              </span>
+            </Card>
+          ) : null}
+
+          {withinCancellationWindow &&
+          !isPast &&
+          (booking.status === "PENDING" || booking.status === "CONFIRMED") ? (
+            <Card className="flex flex-row items-start gap-2 border border-warning/40 bg-warning-bg">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+              <span className="text-body-sm text-text-primary">
+                {t("cancellationWarning")}
+              </span>
+            </Card>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Phones: the two answers stay in reach. They sat two screens
+          down, under the details and the timeline. Above the tab bar
+          (4rem), and the spacer keeps the page's last lines clear of it. */}
+      {awaitingMyAnswer ? (
+        <>
+          <div aria-hidden className="h-16 lg:hidden" />
+          <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-border-subtle bg-bg-surface px-4 py-3 lg:hidden">
+            <div className="mx-auto flex max-w-xl gap-2">
+              <Button
+                variant="ghost"
+                className="flex-1"
+                disabled={busy}
+                onClick={() => setDeclineOpen(true)}
+              >
+                {t("actions.decline")}
+              </Button>
+              <Button
+                variant="accent"
+                className="flex-[2]"
+                disabled={busy}
+                onClick={() => setAcceptOpen(true)}
+              >
+                {t("actions.accept")}
+              </Button>
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      <Dialog open={acceptOpen} onOpenChange={setAcceptOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("dialogs.accept.title")}</DialogTitle>
+          </DialogHeader>
+          <p className="text-body-md text-text-secondary">
+            {t("dialogs.accept.body", {
+              name: partyName(booking.customer),
+              date: formatDate(booking.date),
+              time: booking.startTime,
+            })}
+          </p>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAcceptOpen(false)}>
+              {t("dialogs.accept.cancel")}
+            </Button>
+            <Button
+              variant="accent"
+              disabled={busy}
+              onClick={() => updateStatus("CONFIRMED")}
+            >
+              {busy ? <Loader2 className="size-4 animate-spin" /> : null}
+              {t("dialogs.accept.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={declineOpen} onOpenChange={setDeclineOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("dialogs.decline.title")}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <NativeSelect
+              label={t("dialogs.decline.reasonLabel")}
+              value={declineReason}
+              onChange={setDeclineReason}
+              options={DECLINE_REASONS}
+            />
+            <Textarea
+              placeholder={t("dialogs.decline.messagePlaceholder")}
+              value={declineMessage}
+              onChange={(e) => setDeclineMessage(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDeclineOpen(false)}>
+              {t("dialogs.decline.back")}
+            </Button>
+            <Button
+              variant="accent"
+              disabled={busy}
+              onClick={() => {
+                const reasonLabel = t(
+                  `dialogs.decline.reasons.${declineReason}`,
+                );
+                updateStatus(
+                  "DECLINED",
+                  declineMessage
+                    ? `${reasonLabel} — ${declineMessage}`
+                    : reasonLabel,
+                );
+              }}
+            >
+              {busy ? <Loader2 className="size-4 animate-spin" /> : null}
+              {t("dialogs.decline.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("dialogs.cancel.title")}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            {withinCancellationWindow ? (
+              <div className="flex items-start gap-2 rounded-[var(--fg-radius-md)] bg-warning-bg p-3">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                <span className="text-body-sm text-text-primary">
+                  {t("dialogs.cancel.withinWindowWarning")}
+                </span>
+              </div>
+            ) : null}
+            {!viewerIsProvider && booking.status === "CONFIRMED" ? (
+              <div className="flex flex-col gap-2 rounded-[var(--fg-radius-md)] bg-bg-sunken p-3 text-body-sm">
+                <span className="font-semibold text-text-primary">
+                  {t("dialogs.cancel.termsTitle", { name: providerName })}
+                </span>
+                <span className="whitespace-pre-line [overflow-wrap:anywhere] text-text-secondary">
+                  <span className="text-text-tertiary">
+                    {tKnow("cancel")}:{" "}
+                  </span>
+                  {booking.providerTerms?.cancellationPolicy ??
+                    tKnow("askInChat", { name: providerName })}
+                </span>
+                {booking.providerTerms?.depositPercent != null ||
+                booking.providerTerms?.depositPolicy ? (
+                  <span className="whitespace-pre-line [overflow-wrap:anywhere] text-text-secondary">
+                    <span className="text-text-tertiary">
+                      {tKnow("deposit")}:{" "}
+                    </span>
+                    {[
+                      booking.providerTerms.depositPercent != null
+                        ? tKnow("depositPercent", {
+                            percent: booking.providerTerms.depositPercent,
+                          })
+                        : null,
+                      booking.providerTerms.depositPolicy,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  </span>
+                ) : null}
+                <span className="text-text-tertiary">
+                  {t("dialogs.cancel.termsNote", { name: providerName })}
+                </span>
+              </div>
+            ) : null}
+            <Textarea
+              label={t("dialogs.cancel.reasonLabel")}
+              placeholder={t("dialogs.cancel.reasonPlaceholder", {
+                name: otherName,
+              })}
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+              maxLength={500}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCancelOpen(false)}>
+              {t("dialogs.cancel.keepBooking")}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={busy}
+              onClick={() =>
+                updateStatus("CANCELLED", cancelReason || undefined)
+              }
+            >
+              {busy ? <Loader2 className="size-4 animate-spin" /> : null}
+              {t("dialogs.cancel.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <RescheduleDialog
+        open={rescheduleOpen}
+        onOpenChange={setRescheduleOpen}
+        providerId={booking.provider.id}
+        serviceDuration={booking.service?.duration}
+        onProposed={() => {
+          setRescheduleOpen(false);
+          setIsLoading(true);
+          load();
+        }}
+      />
+
+      {booking.status === "COMPLETED" && !viewerIsProvider ? (
+        <ReviewModal
+          open={reviewOpen}
+          onOpenChange={(open) => {
+            setReviewOpen(open);
+            if (!open) setReviewRating(0);
+          }}
+          bookingId={booking.id}
+          providerName={otherName}
+          serviceName={booking.service?.name}
+          initialRating={reviewRating}
+          onSuccess={() => {
+            setIsLoading(true);
+            load();
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function TimelineRow({
+  label,
+  date,
+  detail,
+}: {
+  label: string;
+  date: string | Date;
+  detail?: string | null;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5 border-l-2 border-border-subtle pl-3">
+      <span className="text-body-sm font-semibold! text-text-primary">
+        {label}
+      </span>
+      <span className="text-body-sm text-text-tertiary">
+        {formatDateTime(date)}
+      </span>
+      {detail ? (
+        <span className="text-body-sm text-text-secondary">{detail}</span>
+      ) : null}
+    </div>
+  );
+}
+
+function RescheduleDialog({
+  open,
+  onOpenChange,
+  providerId,
+  serviceDuration,
+  onProposed,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  providerId: string;
+  serviceDuration: number | undefined;
+  onProposed: () => void;
+}) {
+  const t = useTranslations("dashboardCore.bookingDetail");
+  const params = useParams<{ id: string }>();
+  const [days, setDays] = useState<DayAvailability[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [date, setDate] = useState<string | null>(null);
+  const [time, setTime] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  // Weeks ahead of this one. The dialog used to show only the next seven
+  // days, so a shoot could never be moved further than a week out.
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    startTransition(() => {
+      setIsLoading(true);
+      setDate(null);
+      setTime(null);
+    });
+    // Vietnamese "today" — toISOString() is UTC, a day behind after 17:00.
+    const from = vietnamDateKey(weekOffset * 7);
+    fetch(`/api/availability/${providerId}?from=${from}`)
+      .then((res) => res.json())
+      .then((body) => {
+        startTransition(() => {
+          setDays(body.data?.dates ?? []);
+          setIsLoading(false);
+        });
+      })
+      .catch(() => startTransition(() => setIsLoading(false)));
+  }, [open, providerId, weekOffset]);
+
+  const activeDay = days.find((d) => d.date === date);
+
+  const onSubmit = async () => {
+    if (!date || !time) return;
+    setBusy(true);
+    const endMinutes =
+      Number(time.slice(0, 2)) * 60 +
+      Number(time.slice(3)) +
+      (serviceDuration ?? 60);
+    const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+    const res = await fetch(`/api/bookings/${params.id}/reschedule`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date, startTime: time, endTime }),
+    });
+    setBusy(false);
+    // A failed proposal used to close the dialog exactly like a sent one.
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      setError(body?.message ?? t("dialogs.reschedule.failed"));
+      return;
+    }
+    onProposed();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("dialogs.reschedule.title")}</DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="size-5 animate-spin text-text-tertiary" />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <p className="text-body-sm text-text-secondary">
+              {t("dialogs.reschedule.hint")}
+            </p>
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                disabled={weekOffset === 0}
+                onClick={() => setWeekOffset((w) => Math.max(0, w - 1))}
+                aria-label={t("dialogs.reschedule.prevWeek")}
+                className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken disabled:opacity-30"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="text-body-sm font-semibold! text-text-primary">
+                {days.length
+                  ? `${formatDate(days[0].date)} – ${formatDate(days[days.length - 1].date)}`
+                  : null}
+              </span>
+              <button
+                type="button"
+                onClick={() => setWeekOffset((w) => w + 1)}
+                aria-label={t("dialogs.reschedule.nextWeek")}
+                className="flex size-8 items-center justify-center rounded-full hover:bg-bg-sunken"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-7 gap-1.5">
+              {days.map((day) => {
+                const d = new Date(day.date);
+                return (
+                  <button
+                    key={day.date}
+                    type="button"
+                    disabled={day.busy}
+                    onClick={() => {
+                      setDate(day.date);
+                      setTime(null);
+                    }}
+                    className={`flex flex-col items-center gap-0.5 rounded-[var(--fg-radius-sm)] py-2 text-body-sm ${
+                      date === day.date
+                        ? "bg-brand-primary text-text-on-brand"
+                        : day.busy
+                          ? "cursor-not-allowed text-text-tertiary opacity-40"
+                          : "cursor-pointer hover:bg-bg-sunken"
+                    }`}
+                  >
+                    <span className="text-text-tertiary">
+                      {formatWeekdayShort(d)}
+                    </span>
+                    <span className="font-semibold">{d.getUTCDate()}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+            {activeDay &&
+            activeDay.slots.filter((s) => s.available).length === 0 ? (
+              <p className="text-body-sm text-text-tertiary">
+                {t("dialogs.reschedule.noSlots")}
+              </p>
+            ) : null}
+            {activeDay ? (
+              <div className="grid grid-cols-3 gap-2">
+                {activeDay.slots
+                  .filter((s) => s.available)
+                  .map((slot) => (
+                    <button
+                      key={slot.time}
+                      type="button"
+                      onClick={() => setTime(slot.time)}
+                      className={`rounded-[var(--fg-radius-sm)] border py-2 text-body-sm font-semibold ${
+                        time === slot.time
+                          ? "border-transparent bg-brand-primary text-text-on-brand"
+                          : "border-border-default bg-bg-surface text-text-primary"
+                      }`}
+                    >
+                      {slot.time}
+                    </button>
+                  ))}
+              </div>
+            ) : null}
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            {t("dialogs.reschedule.cancel")}
+          </Button>
+          <Button
+            variant="accent"
+            disabled={!date || !time || busy}
+            onClick={onSubmit}
+          >
+            {busy ? <Loader2 className="size-4 animate-spin" /> : null}
+            {t("dialogs.reschedule.sendProposal")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -394,7 +394,9 @@ describe("getting back to a job", () => {
   });
 
   it("the provider's own note is on the booking page too, for the provider only", () => {
-    const source = read("src/app/(dashboard)/dashboard/bookings/[id]/page.tsx");
+    const source = read(
+      "src/app/(dashboard)/dashboard/bookings/[id]/booking-detail-client.tsx",
+    );
     assert.match(
       source,
       /viewerIsProvider \? \(?\s*<BookingPrivateNote bookingId=\{booking\.id\} \/>/,

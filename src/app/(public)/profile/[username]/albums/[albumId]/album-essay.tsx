@@ -100,7 +100,8 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
           width={item.width ?? 1600}
           height={item.height ?? 1067}
           unoptimized
-          priority={eager}
+          loading={eager ? "eager" : "lazy"}
+          fetchPriority={eager ? "high" : "auto"}
           sizes={sizes}
           className={cn(
             "block h-auto max-h-[92vh] w-full object-contain",

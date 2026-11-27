@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -20,13 +21,11 @@ import { useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { useTheme } from "next-themes";
 
 import { LogoFull } from "@/components/brand/logo-full";
-import { CartDrawer } from "@/components/cart/cart-drawer";
 import {
   CommandPalette,
   CommandPaletteTrigger,
   useCommandPalette,
 } from "@/components/layout/command-palette";
-import { NotificationBell } from "@/components/layout/notification-bell";
 import { useMessaging } from "@/components/providers/messaging-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -52,6 +51,21 @@ import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 const WIDE_BREAKPOINT = 1180;
+
+// The bell and the cart drawer are only ever rendered for a signed-in
+// visitor (see the conditions below), but as plain imports their code — and
+// the menu and sheet machinery they bring — was in every visitor's first
+// download. As separate files they are fetched only by a page that actually
+// renders them. Server rendering is unchanged, so a signed-in visitor's
+// header still arrives complete in the HTML.
+const NotificationBell = dynamic(() =>
+  import("@/components/layout/notification-bell").then(
+    (module) => module.NotificationBell,
+  ),
+);
+const CartDrawer = dynamic(() =>
+  import("@/components/cart/cart-drawer").then((module) => module.CartDrawer),
+);
 
 // Keys are relative to the "nav" namespace — both WebNav and MobileNavSheet
 // scope their t() with useTranslations("nav"). The "shop" entry is spliced
