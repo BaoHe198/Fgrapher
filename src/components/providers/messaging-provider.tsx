@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import {
   createContext,
@@ -9,8 +10,19 @@ import {
   useState,
 } from "react";
 
-import { MessagingPopup } from "@/components/messaging/messaging-popup";
 import { useBadges } from "@/components/providers/badges-provider";
+import { useIdleReady } from "@/hooks/use-idle-ready";
+
+// Only a signed-in visitor can open the chat popup, but as a plain import its
+// code (the chat panel, the photo viewer, the report form) was part of every
+// visitor's first download. Now it is a separate file, fetched for signed-in
+// visitors once the page is idle — so it is there by the time they reach for
+// it — or at once if they open the popup sooner.
+const MessagingPopup = dynamic(() =>
+  import("@/components/messaging/messaging-popup").then(
+    (module) => module.MessagingPopup,
+  ),
+);
 
 interface MessagingContextValue {
   isOpen: boolean;
@@ -49,6 +61,7 @@ export function MessagingProvider({ children }: { children: React.ReactNode }) {
     string | null
   >(null);
   const { unreadMessages: unreadCount } = useBadges();
+  const idle = useIdleReady(4000);
 
   const open = useCallback((conversationId?: string) => {
     setIsOpen(true);
@@ -100,7 +113,7 @@ export function MessagingProvider({ children }: { children: React.ReactNode }) {
   return (
     <MessagingContext.Provider value={value}>
       {children}
-      {status === "authenticated" ? (
+      {status === "authenticated" && (isOpen || idle) ? (
         <MessagingPopup
           isOpen={isOpen}
           isMinimized={isMinimized}

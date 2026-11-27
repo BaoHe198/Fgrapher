@@ -134,7 +134,13 @@ function FgImage({
           alt={alt}
           fill
           sizes={sizes}
-          priority={priority}
+          // Not next/image's own `priority`: since Next 16 that only adds a
+          // preload link, with no fetch priority, so the browser still
+          // queued the page's main photo behind scripts and fonts (measured
+          // 27/11/2026: 2.3s before the request even started on a slow
+          // phone). These two attributes are what put it first.
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           onLoad={() => setLoaded(true)}
           onError={() => setFailedSrc(src)}
           className={cn(

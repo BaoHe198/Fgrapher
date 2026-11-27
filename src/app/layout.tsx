@@ -107,14 +107,22 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <AuthProvider session={session}>
+              {/* Before the page, not after it (27/11/2026). On a phone this
+                  notice is the largest thing on a first-time visitor's
+                  screen, and at the end of the document it was the last
+                  thing to arrive and be painted — 2 seconds after the header
+                  on a slow connection. It is position: fixed, so where it
+                  sits in the document does not move it on screen; in-page
+                  bars are on lower layers and dialogs are portalled to the
+                  end of <body>, so what covers what is unchanged. */}
+              <CookieConsentBanner
+                initialAnalytics={cookieConsent?.analytics ?? null}
+              />
               <BadgesProvider>
                 <MessagingProvider>
                   <Toaster>{children}</Toaster>
                 </MessagingProvider>
               </BadgesProvider>
-              <CookieConsentBanner
-                initialAnalytics={cookieConsent?.analytics ?? null}
-              />
             </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

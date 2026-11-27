@@ -1,7 +1,8 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
+
+import { reportError } from "@/lib/sentry-client";
 
 // Catches errors thrown by the root layout itself (rare — the regular
 // error.tsx above can't catch those since it renders inside that layout).
@@ -20,7 +21,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    reportError(error);
   }, [error]);
 
   return (

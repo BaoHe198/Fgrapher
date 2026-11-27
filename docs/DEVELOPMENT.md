@@ -176,6 +176,34 @@ tên nhóm trong các lời gọi `useTranslations("…")` của chúng.
 Các file `docs/i18n-batches/*.json` là dữ liệu trung gian của hệ thống dịch, không
 phải tài liệu hướng dẫn.
 
+## 8b. Giữ cho lượt tải đầu của trang nhẹ
+
+Những điều dưới đây được đo ngày 27/11/2026
+(`docs/reviews/performance-test-2026-11-27.md`) và có kiểm thử giữ
+(`src/lib/__tests__/first-load.test.ts`).
+
+- **Dữ liệu cho lần hiện đầu đọc ngay trên máy chủ.** Một màn hình mở ra khung
+  chờ rồi mới gọi API là hai lượt hỏi máy chủ. Trang (Server Component) tự kiểm
+  tra quyền bằng `sessionForPage()` hoặc `adminSessionForPage()`, đọc bằng đúng
+  hàm service mà API route dùng, rồi truyền `asApiJson(...)` cho Client Component
+  làm dữ liệu ban đầu. Không dựa vào layout để chặn: trang phải tự trả về `null`
+  khi không có quyền. Các lần tải lại sau thao tác vẫn đi qua API như cũ.
+- **Mã chỉ dành cho người đã đăng nhập thì tách tệp.** Hộp tin nhắn, chuông,
+  ngăn giỏ hàng được nạp bằng `next/dynamic` ở nơi chúng được hiện, nên khách
+  vãng lai không tải chúng.
+- **Bộ báo lỗi không nằm trong lượt tải đầu.** Mã chạy trên trình duyệt không
+  import `@sentry/nextjs`; gọi `reportError()` trong `lib/sentry-client.ts`. SDK
+  được nạp khi trang đã rảnh, và không nạp nếu không có DSN; lỗi xảy ra trước
+  đó được giữ lại rồi gửi sau.
+- **Ảnh chính của trang** dùng `<FgImage priority>` hoặc
+  `loading="eager" fetchPriority="high"`, không dùng `priority` của next/image.
+- **Việc nặng không cần cho lần vẽ đầu** (bộ máy bản đồ) khởi động bằng
+  `useIdleReady()` sau khi phần còn lại của trang đã hiện.
+- **Khung cookie đứng trước nội dung trang** trong layout gốc: trên điện thoại
+  nó là thứ lớn nhất của màn hình đầu, nên phải nằm trong những byte đầu tiên.
+
+Muốn biết một trang đang tải những thư viện nào: `pnpm next analyze`.
+
 ## 9. Các lệnh kiểm tra
 
 ```bash

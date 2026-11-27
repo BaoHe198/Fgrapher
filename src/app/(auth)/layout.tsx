@@ -54,7 +54,8 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
                   className="object-cover"
                   // The largest element on every auth page, so the first
                   // should not wait for lazy-loading to notice it.
-                  priority={index === 0}
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
                 />
               </div>
             ))}
