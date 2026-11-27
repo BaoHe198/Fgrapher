@@ -424,8 +424,74 @@ trang có bản đồ, trong khi đo thật thì giảm. Con số Lighthouse v�
 - Thời gian luồng chính bị treo trên máy chậm (4,6–7,2 giây ở các phép đo trên).
   Muốn giảm nữa phải bớt mã chạy khi mở trang: base-ui 97 KB và khung Next, React
   205 KB là hai phần lớn nhất; ô tìm kiếm ở trang chủ kéo theo combobox và select.
-- Kiểu bản đồ của Bản đồ F (OpenFreeMap "liberty") nhiều lớp; đổi sang kiểu nhẹ hơn
-  là quyết định về giao diện, chưa làm.
+- Kiểu bản đồ của Bản đồ F: đã thử và đo, xem mục 10.
+
+## 10. Bản đồ nền: đổi kiểu không giúp gì, lược bớt thì có (27/11)
+
+Mục 9 đoán rằng kiểu bản đồ "liberty" nặng vì nhiều lớp và một kiểu ít lớp hơn sẽ
+nhẹ hẳn. Đo thì không phải vậy.
+
+Cách đo: một trang thử chỉ có bản đồ, cùng bộ máy MapLibre 6.10 và cùng khung nhìn
+điện thoại (390×700, TP. Hồ Chí Minh, mức phóng 11) như Bản đồ F, các lượt xen kẽ.
+Trang thử gửi bộ máy bản đồ không nén nên con số tuyệt đối cao hơn trong ứng dụng;
+mức chênh giữa các phương án thì dùng được.
+
+### Đổi sang kiểu khác
+
+| Kiểu của OpenFreeMap  | Số lớp | Bản đồ sẵn sàng (mạng và máy đều chậm) | Máy bị treo |
+| --------------------- | ------ | -------------------------------------- | ----------- |
+| liberty (đang dùng)   | 111    | 10,2 s                                 | 5,1 s       |
+| positron              | 55     | 9,6 s                                  | 4,8 s       |
+| liberty bỏ bớt 17 lớp | 94     | 10,0 s                                 | 4,8 s       |
+
+Một nửa số lớp chỉ nhanh hơn 5–7%, trong mức dao động giữa các lượt. Tắt kiểm tra
+kiểu (`validateStyle`), hiệu ứng mờ dần và bản sao thế giới cũng không tạo khác biệt
+đo được. Tách riêng từng yếu tố: chỉ ép chậm bộ xử lý thì positron sẵn sàng sau 1,4
+giây so với 2,0 giây; chỉ ép chậm mạng thì hai kiểu như nhau (6,9 và 7,0 giây). Trên
+mạng chậm, kiểu bản đồ không phải là thứ quyết định.
+
+### Thứ thật sự nặng
+
+Ngoài các ô bản đồ, mỗi lần mở bản đồ tải 436 KB trong 11 yêu cầu, giống nhau ở mọi
+kiểu: **308 KB phông chữ nhãn** (hai bộ phông Noto Sans thường và nghiêng, mỗi bộ ba
+hay bốn dải ký tự vì tiếng Việt cần các dải Latin mở rộng) và **120 KB bộ biểu
+tượng**. Kiểu "liberty" còn làm bộ máy báo lỗi trong console (một tệp 404 và các
+cảnh báo ở lớp biển số đường).
+
+### Đã làm
+
+Giữ kiểu "liberty", lược bớt ngay trong trình duyệt trước khi bộ máy dùng nó
+(`slimMapStyle` trong `lib/map-style.ts`):
+
+- bỏ bộ biểu tượng; lớp chỉ vẽ biểu tượng thì bỏ (mũi tên một chiều, biển số
+  đường), nhãn có kèm biểu tượng thì giữ chữ (sân bay, các địa danh lớn);
+- bỏ nhãn quán xá, cửa hàng và trạm xe (điểm quan tâm hạng thấp);
+- mọi nhãn dùng một phông: tên quận, phường và sông nước trước in nghiêng, nay in
+  thẳng;
+- hai vùng vẽ bằng họa tiết (khu đi bộ, đất ngập nước) được tô màu phẳng.
+
+Màu sắc, đường sá, nhà cửa (cả khối 3D), địa hình ở mức nhìn xa và tên địa danh
+không đổi. Cả bốn nơi vẽ bản đồ (Bản đồ F, khu vực làm việc trên hồ sơ, bản đồ nhỏ
+và ô ghim của địa điểm chụp) dùng chung hàm `applyBaseMapStyle`. Kiểu của nhà cung
+cấp đặt qua `NEXT_PUBLIC_MAP_STYLE_URL` thì không bị đụng tới.
+
+| Đo gì                                  | Trước  | Sau    |
+| -------------------------------------- | ------ | ------ |
+| Dữ liệu ngoài các ô bản đồ             | 436 KB | 166 KB |
+| Số yêu cầu cho phần đó                 | 11     | 6      |
+| Số lớp                                 | 111    | 103    |
+| Bản đồ sẵn sàng, mạng và máy đều chậm  | 7,8 s  | 6,3 s  |
+| Bản đồ sẵn sàng, chỉ mạng chậm         | 7,0 s  | 5,5 s  |
+| Bản đồ sẵn sàng, chỉ máy chậm          | 1,37 s | 1,15 s |
+| Máy bị treo, mạng và máy đều chậm      | 1,7 s  | 1,0 s  |
+| Cảnh báo, lỗi của bộ máy trong console | 14     | 0      |
+
+Trên bản build của ứng dụng: cả sáu màn hình có bản đồ vẽ đúng, không yêu cầu nào
+tới bộ biểu tượng, phông tải về chỉ còn Noto Sans Regular (Bản đồ F thêm Noto Sans
+Bold cho con số trên cụm điểm, là lớp của chính ứng dụng), không có lỗi console.
+
+Ảnh so sánh trước và sau ở ba mức phóng nằm ngoài repo, trong
+`reports/so-sanh-ban-do-27-11-2026/` trên máy làm việc của chủ dự án.
 
 ## Đo lại
 
