@@ -181,6 +181,9 @@ thức: 0,35–0,55 giây cho màn hình sau đăng nhập, 0,4–0,6 giây cho 
 
 ## 6. Nên sửa, theo thứ tự
 
+Mục 1–4 đã được sửa trong ngày 27/11; số đo trước và sau nằm ở mục 8. Mục 5–7 còn
+nguyên.
+
 1. **Ảnh đại diện tải ở kích thước gốc.** `AvatarImage` (23 chỗ dùng) đưa thẳng địa chỉ
    ảnh đã lưu, không qua hàm thu nhỏ có sẵn trong `lib/media/variants.ts`. Trên hồ sơ
    thật đang có, một ảnh PNG 1,18 MB được tải về để hiện trong vòng tròn nhỏ; đó là hơn
@@ -214,6 +217,105 @@ thức: 0,35–0,55 giây cho màn hình sau đăng nhập, 0,4–0,6 giây cho 
   bị treo khi ép chậm thật) vì thế xấu hơn thực tế; các con số phụ thuộc đường truyền
   và dung lượng thì không bị ảnh hưởng.
 - Chưa kiểm tra cài đặt pool kết nối của Supabase cho dev và production.
+
+## 8. Sau khi sửa mục 1–4 (đo lại 27/11)
+
+Hai bản build production chạy cạnh nhau trên máy văn phòng, cùng nối `fgrapher-dev`:
+"trước" là commit `03e6528` trong một thư mục tạm, "sau" là mã đã sửa. Các lượt đo
+xen kẽ nhau. Chưa bản nào trong hai bản này ở trên trang chính thức.
+
+### Đã sửa gì
+
+1. **Ảnh đại diện**: `AvatarImage` xin ảnh rộng 256 px (400 px ở hai chỗ hiện lớn)
+   qua `buildAvatarUrl`. Ảnh trên hồ sơ thật đang có: 1.208 KB còn 5 KB và 9 KB.
+2. **Bảng câu chữ**: trình duyệt chỉ nhận các nhóm mà mã chạy trên trình duyệt của
+   khu vực đó dùng. Layout gốc gửi 4 KB; từng khu vực gửi thêm phần của mình: công
+   khai 80 KB, sau đăng nhập 85 KB, quản trị 23 KB, đăng nhập và đăng ký 9 KB, luồng
+   đặt lịch 14 KB, onboarding 7 KB (trước: 285 KB ở mọi trang). Danh sách do
+   `scripts/gen-client-message-scopes.mjs` sinh từ mã nguồn; xem `docs/DEVELOPMENT.md`
+   mục 8.
+3. **Phông chữ**: phông mono không còn được tải trước; số tệp phông tải trước ở mỗi
+   trang từ 7 còn 4.
+4. **Màn hình sau đăng nhập**: layout hỏi hai câu cùng lúc; lần tra cứu tài khoản và
+   quyền quản trị chỉ chạy một lần cho mỗi trang (trước đây layout và trang mỗi bên
+   hỏi một lần); ba số trên thanh đầu trang đến từ một yêu cầu
+   `/api/users/me/badges`, và giỏ hàng chỉ được tải khi mở ngăn giỏ hàng.
+
+### Dung lượng tệp HTML (chưa nén / đã nén, KB)
+
+| Trang               | Trước     | Sau      |
+| ------------------- | --------- | -------- |
+| Trang chủ           | 523 / 107 | 309 / 56 |
+| Tìm kiếm F          | 424 / 98  | 210 / 46 |
+| Hồ sơ nhiếp ảnh gia | 444 / 101 | 230 / 50 |
+| Hồ sơ studio        | 438 / 100 | 223 / 48 |
+| Bản đồ F            | 356 / 89  | 142 / 38 |
+| Đặt lịch F          | 356 / 90  | 142 / 38 |
+| Trang theo tỉnh     | 386 / 93  | 171 / 41 |
+| Chợ F               | 384 / 94  | 169 / 42 |
+| Đăng nhập           | 356 / 90  | 63 / 14  |
+
+Màn hình sau đăng nhập (đã nén): 90–96 KB còn 39–46 KB; trang quản trị 88–92 KB còn
+18–23 KB.
+
+### Công máy chủ cho mỗi trang
+
+Trang đăng nhập (không đọc database), từng yêu cầu một, ba lượt xen kẽ mỗi bản:
+**47 ms còn 24 ms**. Ở các trang công khai có đọc database, thời gian chờ máy chủ
+không đổi (chênh trong khoảng 10–25 ms, cùng cỡ với mức chênh 11 ms giữa hai tiến
+trình khi chạy một đoạn mã giống hệt nhau): ở đó thời gian chờ database lấn át.
+
+Chịu tải, 12 giây × 2 lượt xen kẽ, trang/giây trước → sau: Trang chủ 12 → 16 (10
+người) và 11 → 10 (50 người); Tìm kiếm F 17 → 13 và 15 → 20; Hồ sơ 12 → 15 và 11 →
+12; Bản đồ F 19 → 23 và 15 → 23. Bản sau cao hơn ở 6 trên 8 cặp, không có lỗi; các
+lượt vẫn dao động mạnh vì máy thiếu bộ nhớ, nên chỉ nên đọc hướng, không đọc độ lớn.
+
+### Màn hình sau đăng nhập
+
+Trung vị ba lượt xen kẽ mỗi bản, màn hình 390×844. Thời gian chờ máy chủ ở đây vẫn bị
+khoảng cách tới Singapore thổi lên như ở mục 5; trên trang chính thức mức giảm tuyệt
+đối sẽ nhỏ hơn nhiều.
+
+| Vai trò, màn hình              | Chờ máy chủ trước → sau | Yêu cầu nền sau khi tải |
+| ------------------------------ | ----------------------- | ----------------------- |
+| Khách hàng, Bảng điều khiển    | 991 → 749 ms            | 3 → 1                   |
+| Khách hàng, Lịch đặt           | 1023 → 675 ms           | 3 → 1                   |
+| Khách hàng, Chi tiết lịch đặt  | 1303 → 968 ms           | 4 → 2                   |
+| Khách hàng, Tin nhắn           | 1326 → 1076 ms          | 3 → 1                   |
+| Nhiếp ảnh gia, Bảng điều khiển | 1036 → 888 ms           | 3 → 1                   |
+| Nhiếp ảnh gia, Gói dịch vụ     | 955 → 650 ms            | 3 → 1                   |
+| Nhiếp ảnh gia, Đánh giá        | 1254 → 1033 ms          | 3 → 1                   |
+| Nhiếp ảnh gia, Portfolio       | 1526 → 1004 ms          | 3 → 1                   |
+| Quản trị, Tổng quan            | 1272 → 921 ms           | 1 → 1                   |
+| Quản trị, Người dùng           | 1391 → 1108 ms          | 2 → 2                   |
+| Quản trị, Duyệt giấy tờ        | 1646 → 1409 ms          | 2 → 2                   |
+| Quản trị, Thanh toán           | 1628 → 1384 ms          | 2 → 2                   |
+
+### Lighthouse trên điện thoại (bản chạy tại máy)
+
+Ba lượt mỗi trang mỗi bản, thêm hai lượt xen kẽ cho trang chủ. Các con số tuyệt đối
+cao hơn mục 1 vì máy chủ tại máy phải chờ database ở xa.
+
+| Trang     | Nội dung đầu tiên | Nội dung lớn nhất | Tổng tải về    |
+| --------- | ----------------- | ----------------- | -------------- |
+| Trang chủ | 2,0 → 1,7 s       | 7,1 → 6,4–6,7 s   | 1561 → 1479 KB |
+| Hồ sơ     | 2,5 → 2,4 s       | 7,1 → 6,6 s       | 2267 → 2141 KB |
+| Đăng nhập | 1,5 → 1,2 s       | 5,7 → 5,2 s       | 711 → 606 KB   |
+
+Điểm tổng và thời gian bị treo không so được: cùng một bản, cùng một trang, thời gian
+bị treo đo được từ 124 đến 1218 ms tùy lượt. **Nội dung lớn nhất vẫn hiện sau hơn 4
+giây trong điều kiện mô phỏng**; phần còn lại là mã JavaScript (mục 7), chưa động tới.
+
+### Kiểm tra không làm hỏng gì
+
+- Mở 254 màn hình trên bản build bằng 10 loại tài khoản (khách chưa đăng nhập, khách
+  hàng, bốn loại nhà cung cấp, studio, shop trang phục, shop thiết bị, quản trị), mở
+  cả chuông, giỏ hàng, hộp tin nhắn và menu: không màn hình nào hiện tên khóa thay cho
+  câu chữ, không có báo thiếu câu chữ ở trình duyệt hay ở máy chủ, không có lỗi 5xx.
+- Chuông thông báo, ngăn giỏ hàng (thêm một món rồi lấy ra) và ảnh đại diện: 16 kiểm
+  tra đều đạt. Số của `/api/users/me/badges` khớp ba endpoint cũ; chưa đăng nhập thì
+  nhận 401.
+- `pnpm typecheck` sạch, `pnpm lint` 0 lỗi, `pnpm test` 840/840.
 
 ## Đo lại
 
