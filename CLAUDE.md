@@ -248,6 +248,17 @@ the roles that trade under a business name and so get a shop-name field.
 priority>`, or `loading="eager" fetchPriority="high"` on a bare
   `next/image`. Not next/image's own `priority` — since Next 16 that only adds
   a preload link with no fetch priority, and the photo queued behind scripts.
+- An uploaded photo is stored at the size it was uploaded, so it is never
+  drawn from its stored URL. Through `<FgImage>` the optimiser resizes it.
+  Outside the optimiser use `<CloudinaryImage src={url} sizes="…">`
+  (`components/ui/cloudinary-image.tsx`): the browser picks one of four stock
+  widths, and `sizes` must state the slot's real width or the photo arrives
+  soft or oversized. A plain `<img>` only with a sized address
+  (`buildMediaVariants(url).thumbnail`, `buildSquareThumbUrl` for a map
+  marker). `src/lib/__tests__/image-delivery.test.ts` holds all of this.
+- A map, or anything as heavy, that sits far down a page starts when the
+  visitor scrolls near it (`useNearViewport()` in `hooks/`), not with the
+  page: see the two `*-map-lazy.tsx` wrappers.
 - Code that only a signed-in visitor can reach (chat popup, bell, cart
   drawer) is loaded with `next/dynamic` where it is rendered, not imported at
   the top of a component every visitor downloads. Browser code never imports

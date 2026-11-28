@@ -1,9 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
-import { buildMediaVariants } from "@/lib/media/variants";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 import { minutesToTime, type SunTimes, timeToMinutes } from "@/lib/sun";
 import { cn } from "@/lib/utils";
 
@@ -97,11 +96,10 @@ export function BookingVisual({
       >
         {sheet.map((src) => (
           <span key={src} className="relative block bg-dr-surface">
-            <Image
-              src={buildMediaVariants(src).medium}
+            <CloudinaryImage
+              src={src}
               alt=""
               fill
-              unoptimized
               sizes="200px"
               className="object-contain p-1.5"
             />

@@ -36,6 +36,7 @@ import { PinButton } from "@/components/media/pin-button";
 import { PlayMark, VideoTile } from "@/components/media/portfolio-video";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { PostEngagement } from "@/components/social/post-engagement";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { videoPosterUrl } from "@/lib/media/video-link";
 import { cn } from "@/lib/utils";
@@ -482,15 +483,17 @@ export function PortfolioTab({
                             share="morph"
                             default="none"
                           >
-                            <Image
-                              src={buildMediaVariants(cover.url).medium}
+                            <CloudinaryImage
+                              src={cover.url}
                               alt=""
                               fill
-                              unoptimized
+                              // The slot's real width: the profile's main
+                              // column is about 700px from lg up, and a
+                              // cover that is not the first takes half.
                               sizes={
                                 wide
-                                  ? "(min-width: 1024px) 66vw, 100vw"
-                                  : "(min-width: 640px) 33vw, 100vw"
+                                  ? "(min-width: 1024px) 700px, 100vw"
+                                  : "(min-width: 1024px) 340px, (min-width: 640px) 50vw, 100vw"
                               }
                               className="object-cover transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover/album:scale-[1.02] motion-reduce:transition-none"
                             />

@@ -1,3 +1,7 @@
+import {
+  MAP_MARKER_DELIVERY_SIZE,
+  buildSquareThumbUrl,
+} from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 // Bản đồ F marker (system audit 09/2026 §05/§06): a photo frame, not a
@@ -77,7 +81,13 @@ export function MapMarker({
         >
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- a 44px map thumbnail; next/image's wrapper breaks MapLibre's marker sizing.
-            <img src={photoUrl} alt="" className={MAP_MARKER_CLASSES.image} />
+            <img
+              src={buildSquareThumbUrl(photoUrl, MAP_MARKER_DELIVERY_SIZE)}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className={MAP_MARKER_CLASSES.image}
+            />
           ) : (
             <span className={MAP_MARKER_CLASSES.initial}>
               {label.slice(0, 1).toUpperCase()}

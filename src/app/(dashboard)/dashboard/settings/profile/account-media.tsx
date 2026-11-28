@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRef } from "react";
 
 import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 import { useAccountMediaUpload } from "@/hooks/use-account-media-upload";
 import {
   AVATAR_DELIVERY_WIDTH_LARGE,
@@ -41,12 +42,12 @@ export function AccountMedia({
     <div className="flex flex-col gap-3">
       <div className="relative aspect-3/1 w-full overflow-hidden rounded-[var(--fg-radius-md)] bg-bg-sunken">
         {coverImage ? (
-          <Image
+          <CloudinaryImage
             src={coverImage}
             alt=""
             fill
+            sizes="(min-width: 768px) 672px, 100vw"
             className="object-cover"
-            unoptimized
           />
         ) : null}
         <button

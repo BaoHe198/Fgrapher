@@ -136,10 +136,12 @@ export function ArtistCard({ artist, onClick, priority }: ArtistCardProps) {
         fill
         sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
         className="object-cover"
-        // Set by the grid for the first row only: one of those images is the
-        // LCP on /browse, and lazy-loading it costs the page its headline
-        // metric for nothing.
-        priority={priority}
+        // Set by the grid for the first cards only: one of those photos is
+        // the largest thing on the screen, and lazy-loading it makes it wait
+        // behind the page's scripts. Not next/image's own `priority`, which
+        // since Next 16 only adds a preload link with no fetch priority.
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
         onError={() => setFailedUrls((prev) => new Set(prev).add(photo.url))}
       />
     );

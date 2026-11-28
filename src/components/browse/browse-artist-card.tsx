@@ -1,8 +1,7 @@
 import { ImageIcon, Star } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
-import { buildMediaVariants } from "@/lib/media/variants";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 
 export interface BrowseArtist {
   id: string;
@@ -59,14 +58,22 @@ export function BrowseArtistCard({
     >
       <span className="relative block aspect-square overflow-hidden rounded-[var(--fg-radius-lg)] bg-bg-sunken">
         {artist.cover ? (
-          <Image
-            src={buildMediaVariants(artist.cover).medium}
+          <CloudinaryImage
+            src={artist.cover}
             alt=""
             fill
-            unoptimized
-            priority={eager}
+            // Not next/image's own `priority`: since Next 16 that only adds
+            // a preload link with no fetch priority, and on the live site the
+            // first card's photo (the largest thing on Tìm kiếm F) queued
+            // behind the page's scripts for 1.7 s on a slow connection.
             loading={eager ? "eager" : "lazy"}
-            sizes="(max-width: 767px) 50vw, (max-width: 1439px) 33vw, 320px"
+            fetchPriority={eager ? "high" : "auto"}
+            // What the grid really gives a card: one column below 430px,
+            // two up to md, then columns of 240 to about 340px. The browser
+            // picks the photo's width from this, so it has to be true: the
+            // old "50vw" for every phone sent a narrow phone a copy too
+            // small for its single full-width column.
+            sizes="(max-width: 429px) 100vw, (max-width: 767px) 50vw, 340px"
             className="object-cover transition-transform duration-[var(--fg-dur-400)] ease-fg-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         ) : (

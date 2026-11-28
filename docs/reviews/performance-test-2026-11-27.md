@@ -493,6 +493,163 @@ Bold cho con số trên cụm điểm, là lớp của chính ứng dụng), kh�
 Ảnh so sánh trước và sau ở ba mức phóng nằm ngoài repo, trong
 `reports/so-sanh-ban-do-27-11-2026/` trên máy làm việc của chủ dự án.
 
+## 11. Vòng ba: đo lại trang chính thức, rồi sửa ảnh và bản đồ nhỏ (28/11)
+
+Bản `b2eb75f` (mục 8–10) lên trang chính thức chiều 27/11. Phần này gồm hai việc: đo
+lại trang chính thức để biết các sửa đổi trước có tác dụng thật không, và sửa tiếp
+những gì lần đo đó chỉ ra.
+
+### Trang chính thức, trước và sau bản `b2eb75f`
+
+Cùng cách đo với mục 1 (tám lượt mỗi trang; Lighthouse điện thoại, ba lượt, trung vị).
+
+| Trang           | Máy chủ trả lời | HTML sau nén | Điểm    | Nội dung lớn nhất | Tổng tải về    |
+| --------------- | --------------- | ------------ | ------- | ----------------- | -------------- |
+| Trang chủ       | 278 → 289 ms    | 101 → 48 KB  | 68 → 76 | 5,6 → 5,0 s       | 1105 → 1004 KB |
+| Tìm kiếm F      | 243 → 235 ms    | 96 → 43 KB   | 75 → 73 | 5,0 → 4,3 s       | 761 → 664 KB   |
+| Hồ sơ           | 287 → 269 ms    | 101 → 47 KB  | 64 → 68 | 5,5 → 4,9 s       | 2140 → 876 KB  |
+| Bản đồ F        | 221 → 214 ms    | 91 → 37 KB   | 48 → 52 | 4,8 → 3,9 s       | 1822 → 1452 KB |
+| Đặt lịch F      | 219 → 214 ms    | 91 → 37 KB   | 76 → 82 | 4,3 → 3,4 s       | 670 → 571 KB   |
+| Trang theo tỉnh | 223 → 206 ms    | 92 → 39 KB   | 69 → 83 | 4,3 → 3,4 s       | 1875 → 601 KB  |
+| Đăng nhập       | 200 → 199 ms    | 90 → 14 KB   | 67 → 81 | 4,3 → 3,1 s       | 676 → 513 KB   |
+
+Các sửa đổi có tác dụng trên trang thật: tệp HTML nhỏ đi hơn một nửa, trang hồ sơ và
+trang theo tỉnh nhẹ đi 60–70%, điểm tăng ở sáu trên bảy trang. Bản đồ F trên trang
+chính thức không còn tải bộ biểu tượng (2 → 0 tệp) và phông nhãn giảm từ 7 xuống 4
+tệp. "Thời gian bị treo" mô phỏng của Bản đồ F tăng (3458 → 5866 ms) vì lý do đã nêu
+ở mục 9: mô phỏng phạt việc dời bản đồ ra sau lần vẽ đầu, đo thật thì giảm.
+
+Hai điều lần đo này cho thấy về chính máy chủ:
+
+- **Mọi trang đều được dựng lại cho từng lượt xem, kể cả trang nội dung tĩnh như
+  Điều khoản.** Máy chủ trả `Cache-Control: private, no-store` cho mọi trang, vì
+  layout gốc đọc cookie (ngôn ngữ, phiên đăng nhập, lựa chọn cookie). Một tệp đã
+  nằm trong bộ nhớ đệm của Vercel được trả sau khoảng 60 ms; một trang mất 200–290
+  ms. Trang đăng nhập, không đọc database, cũng mất 199 ms: phần lớn thời gian đó
+  là quãng đường tới máy chủ dựng trang (điểm vào ở Hồng Kông, máy chủ ở
+  Singapore), không phải công dựng trang.
+- **Lượt đầu tiên sau một lúc không ai vào mất khoảng 3 giây** (3,6 giây sáng 27/11,
+  3,0 giây chiều 27/11), vì máy chủ phải khởi động lại. Khi chưa có nhiều người
+  dùng, phần lớn khách mới sẽ rơi đúng vào lượt đó.
+
+Cả hai cùng một gốc và cùng một cách chữa (phục vụ trang công khai từ bộ nhớ đệm),
+nhưng cách chữa đó đổi cách hoạt động của trang nên chưa làm; xem "Còn lại".
+
+### Tìm thấy gì
+
+1. **Ô ảnh 44px trên bản đồ tải ảnh portfolio ở kích thước gốc.** Trên trang chủ
+   chính thức, một ô ảnh như vậy là 294 KB, gần 30% dung lượng trang; cùng ảnh đó ở
+   132 điểm ảnh là 1,9 KB. Khung bản đồ minh họa chứa các ô này bị ẩn trên điện
+   thoại, nhưng điện thoại vẫn tải đủ. Mỗi điểm trên Bản đồ F cũng vậy.
+2. **Bản đồ nhỏ trên hồ sơ khởi động cùng trang**, dù nằm tận phía dưới: mọi lượt
+   xem hồ sơ có điểm trên bản đồ đều tải bộ máy bản đồ (274 KB mã, thêm 187 KB cho
+   phần chạy nền, kiểu và phông, rồi các ô bản đồ) và chạy nó.
+3. **Ảnh lớn nhất trên màn hình đầu của trang theo tỉnh được tải lười**, nên nó
+   chờ sau mã của trang. Thẻ ở Tìm kiếm F dùng `priority` cũ của next/image.
+4. **Ảnh nằm ngoài bộ tối ưu luôn được tải ở một cỡ cố định**, 1200 hay 2000 điểm
+   ảnh, cho mọi màn hình. Trên Tìm kiếm F chính thức, thẻ nghệ sĩ nhận bản 69 KB
+   trong khi một điện thoại thông thường chỉ cần bản 21–30 KB, và laptop chỉ cần
+   bản 10 KB. Trang album gửi bản 2000 điểm ảnh (137 KB mỗi ảnh) cho điện thoại.
+5. **Năm chỗ dùng thẻ `<img>` thường với địa chỉ ảnh gốc**: ảnh tham khảo của yêu
+   cầu và lịch đặt (hai chỗ), ảnh địa điểm chụp khi sửa và khi quản trị duyệt, ảnh
+   bìa mà chủ tài khoản tự xem.
+6. **Bản đồ F tải một tệp phông đậm 45 KB** chỉ để vẽ con số trên cụm điểm.
+
+### Đã sửa gì
+
+- Ô ảnh trên bản đồ xin ảnh vuông 132 điểm ảnh (`buildSquareThumbUrl`) và tải lười.
+- Bản đồ nhỏ trên hồ sơ và trên trang địa điểm chụp chỉ khởi động khi người xem
+  cuộn tới cách nó một màn hình (`useNearViewport`). Khung giữ chỗ cùng kích thước
+  nên trang không xô lệch.
+- Hai thẻ đầu ở Tìm kiếm F và trang theo tỉnh tải ảnh với mức ưu tiên cao.
+- Ảnh ngoài bộ tối ưu đi qua `CloudinaryImage`: trình duyệt nhận một `srcset` gồm
+  bốn độ rộng 400, 800, 1200, 2000 và tự chọn theo màn hình. Áp dụng cho thẻ Tìm
+  kiếm F, ảnh bìa album trên hồ sơ, trang album, ảnh bìa bài ở Cộng đồng F, khung
+  xem ảnh lớn, ảnh in ở trang chủ, bảng ảnh ở màn hình đặt lịch, bảng ý tưởng, và
+  ảnh bìa trong cài đặt. Một bản hẹp hơn ô ảnh dưới 10% vẫn được coi là đủ, để
+  điện thoại 412px ở 2x (cỡ Android phổ biến nhất) nhận bản 800 thay vì 1200.
+- Các thẻ `<img>` thường ở mục 5 xin bản 400 hoặc 1200 điểm ảnh.
+- Con số trên cụm điểm dùng phông thường (đã tải sẵn) với viền mảnh cùng màu; nhìn
+  không khác bản cũ.
+
+Máy chủ ảnh phải tạo thêm cho mỗi ảnh nhiều nhất hai bản mới (800 điểm ảnh, và ô
+vuông 132 nếu ảnh xuất hiện trên bản đồ); đổi lại lượng dữ liệu nó phải gửi giảm.
+
+### Số đo
+
+Hai bản build production cạnh nhau trên máy văn phòng, cùng nối `fgrapher-dev`:
+"trước" là `b2eb75f` (bản đang chạy chính thức), "sau" là mã đã sửa; các lượt xen kẽ.
+
+Điện thoại 390px ở 3x, mạng 4G chậm và bộ xử lý chậm gấp bốn (ép thật), không cuộn:
+
+| Trang               | Tổng tải về    | Mã JavaScript | Máy bị treo | Ghi chú                                     |
+| ------------------- | -------------- | ------------- | ----------- | ------------------------------------------- |
+| Hồ sơ nhiếp ảnh gia | 1634 → 1172 KB | 717 → 443 KB  | 7,6 → 2,5 s | không còn yêu cầu nào của bản đồ (7 → 0)    |
+| Hồ sơ studio        | 1493 → 1018 KB | 717 → 443 KB  | 6,6 → 1,2 s | như trên (6 → 0)                            |
+| Trang chủ           | 1551 → 984 KB  | 396 → 396 KB  | không đổi   | ảnh 872 → 305 KB; tải xong 7,8 → 5,9 s      |
+| Trang album         | 1840 → 1462 KB | 368 → 368 KB  | không đổi   | ảnh 1229 → 848 KB; tải xong 10,1 → 8,3 s    |
+| Trang theo tỉnh     | 743 → 732 KB   | 370 → 370 KB  | không đổi   | nội dung lớn nhất 5,2 và 4,3 → 2,6 và 2,5 s |
+| Tìm kiếm F          | 1276 → 1285 KB | 383 → 384 KB  | không đổi   | ở cỡ màn hình này thẻ cần đúng bản 1200     |
+
+Thời điểm vẽ nội dung lớn nhất dao động nhiều giữa hai lượt của cùng một bản (ví
+dụ hồ sơ: 4,1 và 3,1 giây), nên bảng chỉ ghi nó ở trang theo tỉnh, nơi cả hai lượt
+của bản mới đều nhanh hơn cả hai lượt của bản cũ khoảng 2 giây. Ở trang chủ nó cũng
+sớm hơn (3,3 và 3,0 → 2,1 và 2,2 giây), nhiều khả năng vì 568 KB ảnh ẩn không còn
+tranh đường truyền.
+
+Dung lượng ảnh của cả trang (cuộn hết trang, mạng không ép), trước → sau:
+
+| Trang               | Điện thoại 412px ở 2x | Laptop 1366px |
+| ------------------- | --------------------- | ------------- |
+| Tìm kiếm F (8 thẻ)  | 653 → 373 KB          | 653 → 111 KB  |
+| Trang album         | 1228 → 475 KB         | 1229 → 631 KB |
+| Cộng đồng F         | 896 → 580 KB          | 890 → 580 KB  |
+| Hồ sơ nhiếp ảnh gia | 377 → 344 KB          | 300 → 266 KB  |
+
+Ô ảnh trên bản đồ: bốn ô ở trang chủ 568 → 10 KB trên máy tính và 568 → 0 KB trên
+điện thoại (khung bị ẩn nên không tải nữa); ba điểm trên Bản đồ F 465 → 14 KB. Tệp
+phông đậm 45 KB không còn được tải khi có cụm điểm.
+
+### Kiểm tra không làm hỏng gì
+
+- **Độ nét.** Với ảnh do trình duyệt tự chọn cỡ, khai sai bề rộng ô ảnh (`sizes`)
+  làm ảnh mờ, nên mỗi ảnh được đo ở năm cỡ màn hình (390px ở 3x, 412px ở 2x, 820px
+  ở 2x, 1366px, 1920px): bề rộng ô ảnh tính bằng điểm ảnh thật so với bản được
+  tải. Lượt đầu bắt được một lỗi đúng kiểu đó: thẻ Tìm kiếm F khai "nửa màn hình"
+  cho mọi điện thoại, trong khi dưới 430px lưới chỉ có một cột, nên điện thoại
+  hẹp nhận bản 800 cho ô cần 1117 điểm ảnh; đó là 8 ảnh bị mờ trong 115 ảnh của
+  lượt đo đủ năm cỡ. Sau khi sửa, bản cuối được đo lại ở ba cỡ (390px ở 3x, 412px
+  ở 2x, 1366px): không ảnh nào mờ. Hai cỡ còn lại (820px ở 2x và 1920px) không có
+  ảnh mờ ở lượt đo trước khi sửa và chưa được đo lại sau đó.
+  Lưu ý khi đo: `naturalWidth` của ảnh có `srcset` đã được chia theo mật độ, nên
+  bề rộng thật của bản tải về phải đọc từ địa chỉ ảnh.
+- **50 màn hình với năm loại tài khoản** (khách vãng lai, khách hàng, nhiếp ảnh
+  gia, studio, quản trị) trên bản cuối: không lỗi console, không tên khóa thay cho
+  câu chữ, không ảnh hỏng, không lỗi máy chủ.
+- **Chức năng:** hồ sơ nhiếp ảnh gia và studio không tải gì của bản đồ khi chưa
+  cuộn, cuộn tới thì bản đồ hiện đúng; trang địa điểm chụp vẫn có bản đồ và ghim; ô
+  ảnh trên bản đồ tải được và nét; con số trên cụm điểm nhìn như cũ; khung xem ảnh
+  lớn mở được và nhận bản 1200 trên điện thoại.
+- `pnpm typecheck` sạch, `pnpm lint` 0 lỗi, `pnpm test` đạt toàn bộ (thêm 20 kiểm
+  thử trong `image-delivery.test.ts`, trong đó có ba lượt quét mã nguồn: không thẻ
+  `<img>` nào nhận địa chỉ ảnh gốc, không ảnh nào bỏ qua bộ tối ưu mà xin cỡ lớn cố
+  định, không thẻ next/image nào dùng `priority` cũ).
+- **Chưa mở bằng trình duyệt:** bảng ảnh ở bước chọn giờ của màn hình đặt lịch,
+  bảng ý tưởng có ảnh (tài khoản thử chưa lưu ảnh nào), và ảnh ở trang quản trị một
+  địa điểm chụp. Ba chỗ này cùng một kiểu sửa với các chỗ đã kiểm.
+
+### Còn lại
+
+- **Trang công khai được dựng lại cho từng lượt xem** (xem trên). Phục vụ chúng từ
+  bộ nhớ đệm sẽ bớt khoảng 150–230 ms cho mỗi lượt và bỏ hẳn lượt chờ 3 giây,
+  nhưng phải đổi cách trang biết ngôn ngữ, người đang đăng nhập và lựa chọn cookie
+  (ba thứ đó hiện được quyết định trên máy chủ cho từng lượt). Đây là quyết định
+  về hướng làm, chưa thực hiện.
+- **Máy bị treo khi chạy mã của trang trên điện thoại chậm**: 1,2–3,0 giây ở các
+  trang không có bản đồ, 8–9 giây ở Bản đồ F (phần lớn là chính bộ máy bản đồ vẽ).
+- **Tên địa điểm chụp trên Bản đồ F dùng phông đậm**: tới 138 KB khi các tên đó
+  hiện (từ mức phóng 12). Đổi sang phông thường thì bỏ được, nhưng tên sẽ mảnh hơn.
+
 ## Đo lại
 
 - Dựng: `pnpm build`, chạy `AUTH_TRUST_HOST=true pnpm start`. Thiếu biến này thì đăng

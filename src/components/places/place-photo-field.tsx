@@ -6,6 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { compressImageFile } from "@/lib/media/image-compression";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 export interface NewPlacePhoto {
@@ -191,7 +192,12 @@ export function PlacePhotoField({
         {existing.map((photo) => (
           <div key={photo.id} className={tile}>
             {/* eslint-disable-next-line @next/next/no-img-element -- small thumbnail */}
-            <img src={photo.url} alt="" className="size-full object-cover" />
+            <img
+              src={buildMediaVariants(photo.url).thumbnail}
+              alt=""
+              decoding="async"
+              className="size-full object-cover"
+            />
             {photo.moderationStatus !== "APPROVED" ? (
               <Badge
                 variant={
@@ -221,7 +227,12 @@ export function PlacePhotoField({
         {value.map((photo, index) => (
           <div key={photo.publicId} className={tile}>
             {/* eslint-disable-next-line @next/next/no-img-element -- small thumbnail */}
-            <img src={photo.url} alt="" className="size-full object-cover" />
+            <img
+              src={buildMediaVariants(photo.url).thumbnail}
+              alt=""
+              decoding="async"
+              className="size-full object-cover"
+            />
             <button
               type="button"
               aria-label={t("removePhoto")}

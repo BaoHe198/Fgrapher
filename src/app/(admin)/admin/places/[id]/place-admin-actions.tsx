@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { buildMediaVariants } from "@/lib/media/variants";
 
 // The admin's controls on a spot's review page. Each posts to one admin
 // route and refreshes the page, which re-reads everything from the server.
@@ -220,10 +221,14 @@ export function PlacePhotosPanel({
               rel="noreferrer"
               className="block"
             >
+              {/* The link opens the photo as uploaded; the tile shows the
+                  1200px copy, enough to judge it in the grid. */}
               {/* eslint-disable-next-line @next/next/no-img-element -- admin review thumbnail */}
               <img
-                src={photo.url}
+                src={buildMediaVariants(photo.url).medium}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="aspect-[4/3] w-full rounded-[var(--fg-radius-sm)] object-cover"
               />
             </a>

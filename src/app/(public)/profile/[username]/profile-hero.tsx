@@ -8,7 +8,10 @@ import { useRef, useState } from "react";
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { ImageCropDialog } from "@/components/profile/image-crop-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AVATAR_DELIVERY_WIDTH_LARGE } from "@/lib/media/variants";
+import {
+  AVATAR_DELIVERY_WIDTH_LARGE,
+  buildMediaVariants,
+} from "@/lib/media/variants";
 import { useAccountMediaUpload } from "@/hooks/use-account-media-upload";
 
 // The owner-editing counterpart to page.tsx's cover/avatar markup — kept
@@ -84,7 +87,14 @@ export function ProfileCover({
       {displayCover ? (
         <>
           <Image
-            src={displayCover}
+            // The owner's copy skips the image optimiser (a cover they have
+            // just changed must show at once), so it asks the image host
+            // for a 2000px copy itself instead of the photo as uploaded.
+            src={
+              isOwnProfile
+                ? buildMediaVariants(displayCover).large
+                : displayCover
+            }
             alt=""
             fill
             // The largest thing on a profile's first screen: fetch it ahead

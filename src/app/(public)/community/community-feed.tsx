@@ -53,6 +53,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 import { buildMediaVariants } from "@/lib/media/variants";
 import { formatDate } from "@/lib/format";
 import {
@@ -697,12 +698,12 @@ function AlbumPostMedia({ post }: { post: FeedPost }) {
     ? `/profile/${post.user.username}`
     : null;
   const cover = (
-    <Image
-      src={buildMediaVariants(first.url).large}
+    <CloudinaryImage
+      src={first.url}
+      maxWidth={2000}
       alt={album.title}
       width={first.width ?? 1200}
       height={first.height ?? 900}
-      unoptimized
       sizes="(min-width: 768px) 680px, 100vw"
       className="block h-auto max-h-[78vh] w-full object-contain"
     />
