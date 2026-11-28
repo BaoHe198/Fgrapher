@@ -6,6 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { compressImageFile } from "@/lib/media/image-compression";
 import { type MediaKind, mediaKindFromUrl } from "@/lib/media/kind";
+import { buildMediaVariants } from "@/lib/media/variants";
 import { cn } from "@/lib/utils";
 
 export interface ReferenceMedia {
@@ -267,7 +268,12 @@ export function ReferenceMediaField({
                 </>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element -- small reference thumbnail, not worth next/image config
-                <img src={item.url} alt="" className="size-full object-cover" />
+                <img
+                  src={buildMediaVariants(item.url).thumbnail}
+                  alt=""
+                  decoding="async"
+                  className="size-full object-cover"
+                />
               )}
               <button
                 type="button"

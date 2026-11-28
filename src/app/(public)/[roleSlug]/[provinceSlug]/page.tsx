@@ -153,9 +153,12 @@ export default async function RoleProvinceLandingPage({ params }: PageProps) {
         </div>
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {result.data.map((profile) => (
+          {result.data.map((profile, index) => (
             <ArtistCard
               key={profile.userId}
+              // The first card's photo is the largest thing on this page's
+              // first screen (two cards across from the sm breakpoint).
+              priority={index < 2}
               artist={{
                 id: profile.userId,
                 name:

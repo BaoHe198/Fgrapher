@@ -2,7 +2,6 @@
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import {
   useCallback,
   useEffect,
@@ -14,7 +13,7 @@ import { createPortal } from "react-dom";
 
 import { PortfolioVideoPlayer } from "@/components/media/portfolio-video";
 import { type MediaKind, mediaKindFromUrl } from "@/lib/media/kind";
-import { buildMediaVariants } from "@/lib/media/variants";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 
 interface MediaLightboxProps {
   // `type` is optional: portfolio media carries its own, while reference
@@ -303,13 +302,16 @@ export function MediaLightbox({
               frameClassName="w-[min(calc(100vw-1.5rem),calc((100dvh-11rem)*16/9),1280px)] sm:w-[min(calc(100vw-8rem),calc((100dvh-11rem)*16/9),1280px)]"
             />
           ) : (
-            <Image
+            <CloudinaryImage
               key={current.url}
-              src={buildMediaVariants(current.url).large}
+              src={current.url}
+              maxWidth={2000}
               alt={current.title ?? ""}
               width={1200}
               height={800}
-              unoptimized
+              // As wide as the screen at most: a phone takes the 1200px
+              // copy, a large monitor the 2000px one.
+              sizes="100vw"
               onLoad={revealSlide}
               className="max-h-[calc(100dvh-11rem)] w-auto max-w-full object-contain shadow-[0_0_0_1px_var(--dr-line)]"
             />

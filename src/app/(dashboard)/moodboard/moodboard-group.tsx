@@ -2,14 +2,13 @@
 
 import { MessageCircle, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { buildMediaVariants } from "@/lib/media/variants";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 
 interface GroupPhoto {
   id: string;
@@ -114,11 +113,10 @@ export function MoodboardGroup({
             className="group/pin relative overflow-hidden rounded-[var(--fg-radius-md)] bg-bg-sunken"
           >
             <div className="relative aspect-[4/5]">
-              <Image
-                src={buildMediaVariants(photo.url).medium}
+              <CloudinaryImage
+                src={photo.url}
                 alt={photo.albumTitle ?? name}
                 fill
-                unoptimized
                 sizes="(min-width: 1024px) 22vw, (min-width: 640px) 30vw, 46vw"
                 className="object-cover"
               />

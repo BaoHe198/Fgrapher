@@ -12,6 +12,10 @@ import { useEffect, useRef } from "react";
 
 import { compactVnd, MAP_MARKER_CLASSES } from "@/components/fmap/map-marker";
 import { applyBaseMapStyle } from "@/lib/map-style";
+import {
+  MAP_MARKER_DELIVERY_SIZE,
+  buildSquareThumbUrl,
+} from "@/lib/media/variants";
 import type { FmapMarker } from "@/services/fmap";
 
 export type FmapBounds = {
@@ -188,7 +192,8 @@ function markerElement(
   const photo = marker.thumbnailUrl ?? marker.avatar;
   if (photo) {
     const image = document.createElement("img");
-    image.src = photo;
+    // The frame is 44px: never the photo as uploaded (see variants.ts).
+    image.src = buildSquareThumbUrl(photo, MAP_MARKER_DELIVERY_SIZE);
     image.alt = "";
     image.loading = "lazy";
     image.className = MAP_MARKER_CLASSES.image;
@@ -501,10 +506,19 @@ export function FmapMap({
           "text-field": ["get", "point_count_abbreviated"],
           // Both OpenFreeMap and MapTiler serve Noto Sans; MapLibre's
           // default (Open Sans / Arial Unicode) 404s on OpenFreeMap.
-          "text-font": ["Noto Sans Bold"],
+          //
+          // The regular face, which the base map has already fetched, with
+          // a hairline halo in the text's own colour to give the digits
+          // their weight. The bold face was a 45 KB download for one or two
+          // digits on a bubble.
+          "text-font": ["Noto Sans Regular"],
           "text-size": 13,
         },
-        paint: { "text-color": "#ffffff" },
+        paint: {
+          "text-color": "#ffffff",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 0.5,
+        },
       });
       map.addLayer({
         id: UNCLUSTERED_LAYER,

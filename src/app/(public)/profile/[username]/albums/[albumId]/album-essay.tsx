@@ -2,14 +2,13 @@
 
 import { ChevronLeft, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState, ViewTransition } from "react";
 
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { Button } from "@/components/ui/button";
 import { VideoTile } from "@/components/media/portfolio-video";
-import { buildMediaVariants } from "@/lib/media/variants";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 import { linkedVideo } from "@/lib/media/video-link";
 import { cn } from "@/lib/utils";
 
@@ -94,12 +93,12 @@ export function AlbumEssay({ album, photos, artist }: AlbumEssayProps) {
           className="block h-auto max-h-[92vh] w-full bg-dr-bg object-contain"
         />
       ) : (
-        <Image
-          src={buildMediaVariants(item.url).large}
+        <CloudinaryImage
+          src={item.url}
+          maxWidth={2000}
           alt={item.caption ?? t("photoAlt", { frame: index + 1 })}
           width={item.width ?? 1600}
           height={item.height ?? 1067}
-          unoptimized
           loading={eager ? "eager" : "lazy"}
           fetchPriority={eager ? "high" : "auto"}
           sizes={sizes}

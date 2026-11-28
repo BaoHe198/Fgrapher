@@ -207,6 +207,26 @@ Những điều dưới đây được đo ngày 27/11/2026
   phòng của OpenFreeMap được lược bớt ở đó: không tải bộ biểu tượng, chỉ một
   phông nhãn. Nếu đặt `NEXT_PUBLIC_MAP_STYLE_URL` thì kiểu của nhà cung cấp được
   dùng nguyên vẹn.
+- **Bản đồ nằm sâu dưới trang chỉ khởi động khi người xem cuộn tới gần.** Bản
+  đồ nhỏ trên hồ sơ và trên trang địa điểm chụp đi qua `useNearViewport()`
+  (`hooks/use-near-viewport.ts`, xem hai tệp `*-map-lazy.tsx`). Trước đó mọi lượt
+  xem hồ sơ đều tải bộ máy bản đồ, khoảng 460 KB, dù không cuộn tới.
+
+Ảnh người dùng tải lên (đo ngày 28/11/2026, mục 11 của báo cáo trên; kiểm thử giữ
+là `src/lib/__tests__/image-delivery.test.ts`):
+
+- **Không bao giờ vẽ ảnh từ địa chỉ đã lưu.** Địa chỉ đó là ảnh ở kích thước gốc.
+  Qua `<FgImage>` thì bộ tối ưu thu nhỏ giúp. Ngoài bộ tối ưu, dùng
+  `<CloudinaryImage src={url} sizes="…">` (`components/ui/cloudinary-image.tsx`):
+  trình duyệt tự chọn một trong bốn độ rộng 400, 800, 1200, 2000 theo màn hình.
+- **`sizes` phải đúng với bề rộng thật của ô ảnh.** Khai nhỏ hơn thật thì ảnh bị
+  mờ, khai lớn hơn thì tải thừa. Sau khi thêm hay đổi bố cục một chỗ dùng
+  `CloudinaryImage`, mở trang ở điện thoại hẹp (390px) và ở laptop rồi so bề rộng
+  ô ảnh với số `w_…` trong địa chỉ ảnh được tải.
+- **Thẻ `<img>` thường chỉ nhận địa chỉ đã thu nhỏ:**
+  `buildMediaVariants(url).thumbnail` cho ô ảnh nhỏ, `buildSquareThumbUrl` cho ô
+  ảnh trên bản đồ. Ngoại lệ (ảnh xem trước của tệp vừa chọn, mã QR, giấy tờ tùy
+  thân) được liệt kê kèm lý do trong tệp kiểm thử.
 
 Muốn biết một trang đang tải những thư viện nào: `pnpm next analyze`.
 

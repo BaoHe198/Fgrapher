@@ -2,14 +2,13 @@
 
 import { RefreshCw, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 
 import { PinButton } from "@/components/media/pin-button";
 import { Button } from "@/components/ui/button";
 import { shortPlace } from "@/lib/location";
-import { buildMediaVariants } from "@/lib/media/variants";
+import { CloudinaryImage } from "@/components/ui/cloudinary-image";
 import { cn, formatCurrency } from "@/lib/utils";
 
 // "Phòng tối" (owner, 16/11/2026): the visitor who does not know who to
@@ -141,13 +140,12 @@ export function Darkroom() {
             <div className={cn(PAPER, "flex flex-col p-3 pb-12")}>
               <div className="relative flex-1 overflow-hidden bg-[#e9e2d3]">
                 {print ? (
-                  <Image
+                  <CloudinaryImage
                     // A new key restarts the developing animation.
                     key={print.id}
-                    src={buildMediaVariants(print.url).medium}
+                    src={print.url}
                     alt={t("photoAlt", { name })}
                     fill
-                    unoptimized
                     sizes="380px"
                     onLoad={() => setImageLoaded(true)}
                     onError={() => {

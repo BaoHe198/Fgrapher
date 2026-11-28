@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { MediaLightbox } from "@/components/modals/media-lightbox";
 import { mediaKindFromUrl } from "@/lib/media/kind";
+import { buildMediaVariants } from "@/lib/media/variants";
 
 /**
  * Read-only view of a customer's reference photos/videos, for whoever is on
@@ -61,8 +62,16 @@ export function ReferenceMediaGallery({
                 </span>
               </>
             ) : (
+              // The 400px copy, not the upload itself: the tile is 96px, and
+              // the lightbox loads its own larger copy when one is opened.
               // eslint-disable-next-line @next/next/no-img-element -- small reference thumbnail, not worth next/image config
-              <img src={item.url} alt="" className="size-full object-cover" />
+              <img
+                src={buildMediaVariants(item.url).thumbnail}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="size-full object-cover"
+              />
             )}
           </button>
         ))}
